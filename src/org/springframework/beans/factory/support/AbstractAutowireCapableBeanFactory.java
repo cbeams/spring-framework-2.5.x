@@ -253,37 +253,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return initializeBean(beanName, existingBean, null);
 	}
 
-	/**
-	 * Apply InstantiationAwareBeanPostProcessors to the specified bean definition
-	 * (by class and name), invoking their <code>postProcessBeforeInstantiation</code> methods.
-	 * <p>Any returned object will be used as the bean instead of actually instantiating
-	 * the target bean. A <code>null</code> return value from the post-processor will
-	 * result in the target bean being instantiated.
-	 * @param beanClass the class of the bean to be instantiated
-	 * @param beanName the name of the bean
-	 * @return the bean object to use instead of a default instance of the target bean, or <code>null</code>
-	 * @throws BeansException if any post-processing failed
-	 * @see InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation
-	 */
-	protected Object applyBeanPostProcessorsBeforeInstantiation(Class beanClass, String beanName)
-			throws BeansException {
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking BeanPostProcessors before instantiation of bean '" + beanName + "'");
-		}
-		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
-			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
-			if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
-				Object result = ((InstantiationAwareBeanPostProcessor) beanProcessor).postProcessBeforeInstantiation(
-						beanClass, beanName);
-				if (result != null) {
-					return result;
-				}
-			}
-		}
-		return null;
-	}
-
 	public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
 			throws BeansException {
 
@@ -406,8 +375,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext(); ) {
 				BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
 				if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
-					if (!((InstantiationAwareBeanPostProcessor) beanProcessor).postProcessAfterInstantiation(
-							bean, beanName)) {
+					InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) beanProcessor;
+					if (!ibp.postProcessAfterInstantiation(bean, beanName)) {
 						continueWithPropertyPopulation = false;
 						break;
 					}
@@ -488,6 +457,37 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	//---------------------------------------------------------------------
 
 	/**
+	 * Apply InstantiationAwareBeanPostProcessors to the specified bean definition
+	 * (by class and name), invoking their <code>postProcessBeforeInstantiation</code> methods.
+	 * <p>Any returned object will be used as the bean instead of actually instantiating
+	 * the target bean. A <code>null</code> return value from the post-processor will
+	 * result in the target bean being instantiated.
+	 * @param beanClass the class of the bean to be instantiated
+	 * @param beanName the name of the bean
+	 * @return the bean object to use instead of a default instance of the target bean, or <code>null</code>
+	 * @throws BeansException if any post-processing failed
+	 * @see InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation
+	 */
+	protected Object applyBeanPostProcessorsBeforeInstantiation(Class beanClass, String beanName)
+			throws BeansException {
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Invoking BeanPostProcessors before instantiation of bean '" + beanName + "'");
+		}
+		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
+			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
+			if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
+				InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) beanProcessor;
+				Object result = ibp.postProcessBeforeInstantiation(beanClass, beanName);
+				if (result != null) {
+					return result;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Instantiate the given bean using its default constructor.
 	 * @param beanName name of the bean
 	 * @param mergedBeanDefinition the bean definition for the bean
@@ -557,19 +557,30 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_NAME ||
 				mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
-			MutablePropertyValues mpvs = new MutablePropertyValues(pvs);
+			MutablePropertyValues newPvs = new MutablePropertyValues(pvs);
 
 			// Add property values based on autowire by name if applicable.
 			if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_NAME) {
-				autowireByName(beanName, mergedBeanDefinition, bw, mpvs);
+				autowireByName(beanName, mergedBeanDefinition, bw, newPvs);
 			}
 
 			// Add property values based on autowire by type if applicable.
 			if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
-				autowireByType(beanName, mergedBeanDefinition, bw, mpvs);
+				autowireByType(beanName, mergedBeanDefinition, bw, newPvs);
 			}
 
-			pvs = mpvs;
+			pvs = newPvs;
+		}
+
+		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext(); ) {
+			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
+			if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
+				InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) beanProcessor;
+				pvs = ibp.postProcessPropertyValues(pvs, bw.getWrappedInstance(), beanName);
+				if (pvs == null) {
+					return;
+				}
+			}
 		}
 
 		checkDependencies(beanName, mergedBeanDefinition, bw, pvs);

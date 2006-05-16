@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyValues;
 
 /**
  * Subinterface of BeanPostProcessor that adds a before-instantiation callback,
@@ -31,6 +32,7 @@ import org.springframework.beans.BeansException;
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since 1.2
+ * @see InstantiationAwareBeanPostProcessorAdapter
  * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#setCustomTargetSourceCreators
  * @see org.springframework.aop.framework.autoproxy.target.LazyInitTargetSourceCreator
  */
@@ -65,8 +67,27 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * if property population should be skipped. Normal implementations should return <code>true</code>.
 	 * Returning <code>false</code> will also prevent any subsequent InstantiationAwareBeanPostProcessor
 	 * instances being invoked on this bean instance.
-	 * @throws BeansException in the case of errors
+	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
 	boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException;
+
+	/**
+	 * Post-process the given property values before the factory applies them
+	 * to the given bean. Allows for checking whether all dependencies have been
+	 * satisfied, for example based on a "Required" annotation on bean property setters.
+	 * <p>Also allows for replacing the property values to apply, typically through
+	 * creating a new MutablePropertyValues instance based on the original PropertyValues,
+	 * adding or removing specific values.
+	 * @param pvs the property values that the factory is about to apply (never <code>null</code>)
+	 * @param bean instantiated bean whose properties have not yet been set
+	 * @param beanName the name of the bean
+	 * @return the actual property values to apply to to the given bean
+	 * (can be the passed-in PropertyValues instance), or <code>null</code>
+	 * to skip property population.
+	 * @throws org.springframework.beans.BeansException in case of errors
+	 * @see org.springframework.beans.MutablePropertyValues
+	 */
+	PropertyValues postProcessPropertyValues(PropertyValues pvs, Object bean, String beanName)
+			throws BeansException;
 
 }

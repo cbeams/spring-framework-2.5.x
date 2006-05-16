@@ -31,6 +31,7 @@ import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
@@ -217,9 +218,12 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		return null;
 	}
 	
-	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
-		// Do nothing, but continue with other post processors and to set properties
+	public boolean postProcessAfterInstantiation(Object bean, String beanName) {
 		return true;
+	}
+
+	public PropertyValues postProcessPropertyValues(PropertyValues pvs, Object bean, String beanName) {
+		return pvs;
 	}
 
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {
