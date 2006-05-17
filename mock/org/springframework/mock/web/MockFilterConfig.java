@@ -25,7 +25,7 @@ import javax.servlet.ServletContext;
 import org.springframework.util.Assert;
 
 /**
- * Mock implementation of the FilterConfig interface.
+ * Mock implementation of the {@link FilterConfig} interface.
  *
  * <p>Used for testing the web framework; typically not
  * necessary for testing application controllers.
@@ -43,7 +43,14 @@ public class MockFilterConfig implements FilterConfig {
 
 
 	/**
-	 * Create new MockServletConfig with empty String as name.
+	 * Create a new {@link MockFilterConfig} with a default {@link MockServletContext}.
+	 */
+	public MockFilterConfig() {
+		this(new MockServletContext());
+	}
+
+    /**
+	 * Create a new {@link MockFilterConfig} with empty String as name.
 	 * @param servletContext the ServletContext that the servlet runs in
 	 */
 	public MockFilterConfig(ServletContext servletContext) {
@@ -51,28 +58,21 @@ public class MockFilterConfig implements FilterConfig {
 	}
 
 	/**
-	 * Create new MockServletConfig.
+	 * Create a new {@link MockFilterConfig} with a default {@link MockServletContext}.
+	 * @param filterName the name of the filter
+	 */
+	public MockFilterConfig(String filterName) {
+		this(new MockServletContext(), filterName);
+	}
+
+	/**
+	 * Create a new {@link MockFilterConfig}.
 	 * @param servletContext the ServletContext that the servlet runs in
 	 * @param filterName the name of the filter
 	 */
 	public MockFilterConfig(ServletContext servletContext, String filterName) {
 		this.servletContext = servletContext;
 		this.filterName = filterName;
-	}
-
-	/**
-	 * Create new MockServletConfig with a MockServletContext.
-	 */
-	public MockFilterConfig() {
-		this(new MockServletContext());
-	}
-
-	/**
-	 * Create new MockServletConfig with a MockServletContext.
-	 * @param filterName the name of the filter
-	 */
-	public MockFilterConfig(String filterName) {
-		this(new MockServletContext(), filterName);
 	}
 
 
