@@ -9,6 +9,7 @@ Changes in version 2.0 RC1 (18.5.2006)
 Package org.springframework.aop
 * reworked support for scoped proxies to build on scoping support in core BeanFactory
 * removed incomplete support for ScopedObject handles and persistent scopes
+* removed unused Class argument from ParameterNameDiscoverer's "getParameterNames(Method)"
 
 Package org.springframework.beans
 * introduced lazy loading (and lazy validation) of bean classes in standard bean factories and bean definition readers
@@ -17,14 +18,22 @@ Package org.springframework.beans
 * added support for PropertyEditorRegistrars to ConfigurableBeanFactory, for non-synchronized usage of custom editors
 * CustomEditorConfigurer supports PropertyEditorRegistrars, to be applied to its containing BeanFactory
 * reworked ConfigurableBeanFactoryUtils into ResourceEditorRegistrar
+* added "postProcessPropertyValues" callback method to InstantiationAwareBeanPostProcessor interface
+* reworked RequiredBeanFactoryPostProcessor into RequiredAnnotationBeanPostProcessor, properly handling bean inheritance
 * added scoping support to core BeanFactory, for creating raw target beans in arbitrary scopes
 * added "scope" attribute at bean level to XML bean definition format, superseding singleton="true"/"false"
 
 Package org.springframework.context
 * synchronized AbstractApplicationContext's "refresh()" method, for hot refreshing in concurrent environments
 
+Package org.springframework.core
+* renamed GenericsHelper to GenericCollectionTypeResolver, more clearly reflecting its actual role
+* AnnotationUtils discovers annotations inherited via bridge methods now, through the new BridgeMethodResolver
+
 Package org.springframework.jdbc
 * refined default SQL error codes for DB2 and HSQLDB
+* removed deprecated special check for DB2 error codes - always use "DB2*" as database product name for DB2
+* reworked SimpleJdbcDaoSupport/NamedParameterJdbcDaoSupport initialization to work without afterPropertiesSet as well
 
 Package org.springframework.orm
 * Hibernate3 LocalSessionFactoryBean explicitly calls "buildMappings()" to prepare Configuration metadata for subclasses
@@ -37,15 +46,18 @@ Package org.springframework.transaction
 
 Package org.springframework.util
 * "ClassUtils.isPresent" logs exception message only instead of full stacktrace for classes that haven't been found
+* introduced PatternMatchUtils, for unified matching of Spring's typical "xxx*", "*xxx" and "*xxx*" pattern styles
 
 Package org.springframework.validation
 * reworked ValidationUtils to not accept a null Validator for "invokeValidator" anymore
+* added "setDisallowedFields" method to DataBinder, for specifying disallowed fields instead of allowed fields
 
 Package org.springframework.web
 * dropped "getCause()" method from NestedServletException, to avoid conflicts with JDK-1.4-based ServletException class
 * added support for request and session scopes to all WebApplicationContexts
 * moved StaticPortletApplicationContext from test tree over to main source tree
 * fixed SimpleMappingExceptionResolver to use local "exceptionMappings" reference
+* factored out reusable "prepareBinder" method in BaseCommandController, for easier overriding of "createBinder"
 
 
 Changes in version 2.0 M4 (23.4.2006)
