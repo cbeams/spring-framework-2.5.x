@@ -1259,7 +1259,7 @@ public final class Boot {
         "-Didea.launcher.bin.path=C:\Program Files\JetBrains\IntelliJ IDEA 5.0\bin"
         -Dfile.encoding=windows-1252
         -classpath "*" com.intellij.rt.execution.application.AppMain Boot
-[XmlBeanDefinitionReader] - Loading XML bean definitions from class path resource [x/y/beans.xml]
+[XmlBeanDefinitionReader] - Loading XML bean definitions from class path resource [context.xml]
 
 ]]><lineannotation>&lt;!-- we're using Load-Time Weaving to weave the transactional aspect into our classes --&gt;</lineannotation><![CDATA[
 
