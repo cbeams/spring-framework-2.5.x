@@ -122,9 +122,9 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	int getBeanPostProcessorCount();
 
 	/**
-	 * Register the given scope, backed by the given Scope.
+	 * Register the given scope, backed by the given Scope implementation.
 	 * @param scopeName the scope identifier
-	 * @param scopeMap the backing Scope
+	 * @param scope the backing Scope implementation
 	 */
 	void registerScope(String scopeName, Scope scope);
 
