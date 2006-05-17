@@ -16,6 +16,8 @@
 
 package org.springframework.orm.jpa.spi;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -209,7 +211,7 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 	 */
 	protected DefaultPersistenceUnitInfo parse() {
 		DefaultPersistenceUnitInfo[] infos = persistenceUnitReader.readPersistenceUnitInfo(location);
-		DefaultPersistenceUnitInfo pui = null;
+		DefaultPersistenceUnitInfo pui = null;				
 
 		if (infos.length == 0) {
 			throw new IllegalArgumentException("No persistence units parsed from location: " + location);
@@ -236,6 +238,19 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 
 		// loadTimeWeaver.setExplicitInclusions(pui.getManagedClassNames());
 
+		
+		// TODO this is not the right approach if we have JARs,
+		// maybe we need an expanded flag. 
+		try {
+			Resource res = resourceLoader.getResource("");
+			URL puRootUrl = res.getURL();
+			
+			pui.setPersistenceUnitRootUrl(puRootUrl);
+		}
+		catch (IOException ex) {
+			throw new RuntimeException(ex);
+		}
+		
 		return pui;
 	}
 
