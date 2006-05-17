@@ -763,11 +763,6 @@
       DataSource that the transactions are supposed to be exposed for can also
       be specified explicitly, through HibernateTransactionManager's
       "dataSource" property.</para>
-
-      <para>Note, for an alternative approach to using
-      <classname>TransactionProxyFactoryBean</classname> to declaratively
-      demarcate transactions, please see <xref
-      linkend="beannameautoproxycreator-for-transactions" />.</para>
     </sect2>
 
     <sect2>
