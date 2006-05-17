@@ -20,6 +20,7 @@
 	<property file="project.properties"/>
 	<property name="test.fork.mode" value="perBatch"/>
 
+
 	<!--
 		Set up properties that indicate whether we're building on JDK 1.5.
 		Currently simply checks whether the Java version is not 1.3 or 1.4,
@@ -63,6 +64,7 @@
 		</fileset>
 
 	</path>
+
 
 	<target name="usage">
 
@@ -111,7 +113,7 @@
 			<classpath refid="attribute-compiler-classpath"/>
 		</taskdef>
 
-		<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
+		<!-- Compile to a temp directory: Commons Attributes will place Java sources here -->
 		<attribute-compiler destdir="${commons.attributes.tempdir.src}">
 		<!--
 	 	 	Only the PathMap attribute in the org.springframework.web.servlet.handler.metadata
@@ -128,7 +130,7 @@
 		This task depends on the Commons Attributes compile step,
 		as some classes must ship with attributes.
 	-->
-	<target name="buildmain" depends="compileattr" description="Compile main source tree java files into class files">
+	<target name="buildmain" depends="compileattr" description="Compile main source files into class files">
 
 		<mkdir dir="${target.classes.dir}"/>
 		<mkdir dir="${target.classes.dir}/META-INF"/>
@@ -177,7 +179,7 @@
 	<!--
 		Compile the JDK 1.5 source tree.
 	-->
-	<target name="buildtiger" depends="buildmain" description="Compile JDK 1.5 source tree java files into class files">
+	<target name="buildtiger" depends="buildmain" description="Compile JDK 1.5 source files into class files">
 
 		<javac destdir="${target.classes.dir}" source="1.5" target="1.5" debug="${debug}"
 					 deprecation="false" optimize="false" failonerror="true">
@@ -191,8 +193,7 @@
 	<!--
 		Compile the AspectJ source tree.
 	-->
-	<target name="buildaspects" depends="buildmain" if="aspectj.available"
-					description="Compile AspectJ source tree java and aj files into class files">
+	<target name="buildaspects" depends="buildmain" if="aspectj.available" description="Compile AspectJ source files into class files">
 
 	  <taskdef resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties">
 	    <classpath>
@@ -218,10 +219,9 @@
 
 
 	<!--
-		Compile the main, JDK 1.5, and AspectJ sources.
+		Compile the main, JDK 1.5, and AspectJ source trees.
 	-->
-	<target name="build" depends="buildmain,buildtiger,buildaspects"
-					description="Compile main, JDK 1.5, and AspectJ sources"/>
+	<target name="build" depends="buildmain,buildtiger,buildaspects" description="Compile all Spring source files"/>
 
 
 	<target name="initdist" description="Initialize the distribution directory">
@@ -497,9 +497,7 @@
 	</target>
 
 
-	<target name="buildmock" depends="buildmainmock,buildtigermock" description="Compile all mock source files."/>
-
-	<target name="buildmainmock" depends="build" description="Compile mock source tree Java files">
+	<target name="buildmainmock" depends="build" description="Compile mock source files">
 
 		<mkdir dir="${target.mockclasses.dir}"/>
 
@@ -520,7 +518,8 @@
 
 	</target>
 
-	<target name="buildtigermock" depends="build" description="Compile tiger mock source tree Java files">
+
+	<target name="buildtigermock" depends="buildmainmock" description="Compile tiger mock source files">
 
 		<mkdir dir="${target.mockclasses.dir}"/>
 
@@ -533,13 +532,17 @@
 
 		<!-- Pick up logging config from test directory -->
 		<copy todir="${target.mockclasses.dir}" preservelastmodified="true">
-			<fileset dir="${mock.dir}">
+			<fileset dir="${tiger.mock.dir}">
 				<include name="**/*.properties"/>
 				<include name="**/*.xml"/>
 			</fileset>
 		</copy>
 
 	</target>
+
+
+	<target name="buildmock" depends="buildmainmock,buildtigermock" description="Compile all mock source files"/>
+
 
 	<target name="mockjar" depends="buildmock,initdist" description="Create JAR file with Spring mock classes">
 
@@ -730,7 +733,7 @@
 			<classpath refid="attribute-compiler-classpath"/>
 		</taskdef>
 
-		<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
+		<!-- Compile to a temp directory: Commons Attributes will place Java sources here -->
 		<attribute-compiler destdir="${commons.attributes.tempdir.test}">
 			<fileset dir="${test.dir}" includes="org/springframework/aop/**/*.java"/>
 			<fileset dir="${test.dir}" includes="org/springframework/jmx/**/*.java"/>
@@ -747,8 +750,7 @@
 		This task depends on the Commons Attributes compile step,
 		as some tests require source-level attribute support.
 	-->
-	<target name="buildmaintests" depends="buildmock,compiletestattr"
-					description="Compile test source tree java files into class files">
+	<target name="buildmaintests" depends="buildmock,compiletestattr" description="Compile test source files into class files">
 
 		<mkdir dir="${target.testclasses.dir}"/>
 
@@ -774,8 +776,7 @@
 	</target>
 
 
-	<target name="buildtigertests" depends="buildmaintests"
-					description="Compile JDK 1.5 test java files into class files">
+	<target name="buildtigertests" depends="buildmaintests" description="Compile JDK 1.5 test source files into class files">
 
 		<mkdir dir="${target.tigertestclasses.dir}"/>
 
@@ -965,7 +966,7 @@
 	<target name="clean_tests" depends="clean,tests"/>
 
 
-	<target name="clover.build" description="Compile main source tree java files WITH CLOVER into class files">
+	<target name="clover.build" description="Compile main source files WITH CLOVER into class files">
 
 		<!-- switch on Clover by specifying it as the compiler to use -->
 		<property name="build.compiler" value="org.apache.tools.ant.taskdefs.CloverCompilerAdapter"/>
@@ -995,7 +996,7 @@
 	</target>
 
 
-	<target name="clover.buildtiger" description="Compile the tiger source tree java files WITH CLOVER into class files">
+	<target name="clover.buildtiger" description="Compile the tiger source files WITH CLOVER into class files">
 
 		<!-- switch on Clover by specifying it as the compiler to use -->
 		<property name="build.compiler" value="org.apache.tools.ant.taskdefs.CloverCompilerAdapter"/>
@@ -1167,61 +1168,80 @@
 	<target name="tld.to.docbook" depends="original.tld.to.docbook,forms.tld.to.docbook"/>
 
 	<target name="forms.tld.to.docbook">
-			<antcall target="hack.DOCTYPE">
-					<param name="doctype.input.file" value="src/org/springframework/web/servlet/tags/form/spring-form.tld"/>
-					<param name="doctype.scrubbed.file" value="${doc.dir}/spring-form.tld"/>
-			</antcall>
-			<antcall target="private.tld.to.docbook">
-					<param name="input.tld" value="spring-form.tld"/>
-					<param name="input.tld.file" value="${doc.dir}/spring-form.tld"/>
-			</antcall>
+
+		<antcall target="hack.DOCTYPE">
+			<param name="doctype.input.file" value="src/org/springframework/web/servlet/tags/form/spring-form.tld"/>
+			<param name="doctype.scrubbed.file" value="${doc.dir}/spring-form.tld"/>
+		</antcall>
+
+		<antcall target="private.tld.to.docbook">
+			<param name="input.tld" value="spring-form.tld"/>
+			<param name="input.tld.file" value="${doc.dir}/spring-form.tld"/>
+		</antcall>
+
 	</target>
+
 
 	<target name="original.tld.to.docbook">
-			<antcall target="hack.DOCTYPE">
-					<param name="doctype.input.file" value="src/org/springframework/web/servlet/tags/spring.tld"/>
-					<param name="doctype.scrubbed.file" value="${doc.dir}/spring.tld"/>
-			</antcall>
-			<antcall target="private.tld.to.docbook">
-					<param name="input.tld" value="spring.tld"/>
-					<param name="input.tld.file" value="${doc.dir}/spring.tld"/>
-			</antcall>
+
+		<antcall target="hack.DOCTYPE">
+			<param name="doctype.input.file" value="src/org/springframework/web/servlet/tags/spring.tld"/>
+			<param name="doctype.scrubbed.file" value="${doc.dir}/spring.tld"/>
+		</antcall>
+
+		<antcall target="private.tld.to.docbook">
+			<param name="input.tld" value="spring.tld"/>
+			<param name="input.tld.file" value="${doc.dir}/spring.tld"/>
+		</antcall>
+
 	</target>
+
 
 	<target name="private.tld.to.docbook" if="input.tld">
-			<property name="out.file" value="${doc.ref.dir}/src/${input.tld}.xml"/>
-			<xslt processor="trax"
-						in="${input.tld.file}"
-						style="${doc.ref.dir}/styles/tld.to.docbook.xsl"
-						out="${out.file}">
-					<param name="title" expression="${input.tld}"/>
-			</xslt>
-			<antcall target="hack.CDATA">
-					<param name="target.file" value="${out.file}"/>
-			</antcall>
-			<delete file="${input.tld.file}"/>
+
+		<property name="out.file" value="${doc.ref.dir}/src/${input.tld}.xml"/>
+
+		<xslt processor="trax" in="${input.tld.file}" out="${out.file}"
+					style="${doc.ref.dir}/styles/tld.to.docbook.xsl">
+			<param name="title" expression="${input.tld}"/>
+		</xslt>
+
+		<antcall target="hack.CDATA">
+			<param name="target.file" value="${out.file}"/>
+		</antcall>
+
+		<delete file="${input.tld.file}"/>
+
 	</target>
+
 
 	<target name="hack.CDATA" if="target.file">
-			<replace file="${target.file}">
-					<replacetoken><![CDATA[&lt;]]></replacetoken>
-					<replacevalue><![CDATA[<]]></replacevalue>
-			</replace>
-			<replace file="${target.file}">
-					<replacetoken><![CDATA[&gt;]]></replacetoken>
-					<replacevalue><![CDATA[>]]></replacevalue>
-			</replace>
+
+		<replace file="${target.file}">
+			<replacetoken><![CDATA[&lt;]]></replacetoken>
+			<replacevalue><![CDATA[<]]></replacevalue>
+		</replace>
+
+		<replace file="${target.file}">
+			<replacetoken><![CDATA[&gt;]]></replacetoken>
+			<replacevalue><![CDATA[>]]></replacevalue>
+		</replace>
+
 	</target>
 
+
 	<target name="hack.DOCTYPE" if="doctype.input.file">
-			<!--
-					removes the TLD DTD decl. from the TLD files as this messes
-					up the transform (feel free to fix this more elegantly)
-			-->
-			<copy file="${doctype.input.file}" tofile="${doctype.scrubbed.file}" overwrite="true"/>
-			<replace file="${doctype.scrubbed.file}" value="">
-					<replacetoken><![CDATA[<!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN" "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">]]></replacetoken>
-			</replace>
+
+		<!--
+		Removes the TLD DTD decl. from the TLD files as this messes
+		up the transform (feel free to fix this more elegantly)
+		-->
+		<copy file="${doctype.input.file}" tofile="${doctype.scrubbed.file}" overwrite="true"/>
+
+		<replace file="${doctype.scrubbed.file}" value="">
+			<replacetoken><![CDATA[<!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN" "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">]]></replacetoken>
+		</replace>
+
 	</target>
 
 	<!-- End of TLD => DocBook targets -->
@@ -1231,26 +1251,33 @@
 
 	<target name="xsd.to.docbook" depends="beans.xsd.to.docbook"/>
 
+
 	<target name="beans.xsd.to.docbook">
+
 		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans.xsd"
 					tofile="${doc.dir}/spring-beans.xsd"/>
+
 		<antcall target="private.xsd.to.docbook">
 			<param name="input.xsd" value="spring-beans.xsd"/>
 			<param name="input.xsd.file" value="${doc.dir}/spring-beans.xsd"/>
 		</antcall>
+
 	</target>
 
+
 	<target name="private.xsd.to.docbook" if="input.xsd">
+
 		<property name="out.file" value="${doc.ref.dir}/src/${input.xsd}.xml"/>
-		<xslt processor="trax"
-					in="${input.xsd.file}"
-					style="${doc.ref.dir}/styles/xsd.to.docbook.xsl"
-					out="${out.file}">
+
+		<xslt processor="trax" in="${input.xsd.file}" out="${out.file}"
+					style="${doc.ref.dir}/styles/xsd.to.docbook.xsl">
 			<param name="title" expression="${input.xsd}"/>
 		</xslt>
+
 		<antcall target="hack.CDATA">
 			<param name="target.file" value="${out.file}"/>
 		</antcall>
+
 	</target>
     
 	<!-- End of Schema => DocBook targets -->
@@ -1427,7 +1454,7 @@
 	</target>
 
 
-	<target name="sandbox.build" description="Compile sandbox source tree java files into class files">
+	<target name="sandbox.build" description="Compile sandbox source files into class files">
 
 		<echo message="WARNING: To keep things speedy, there's no Ant dependency on the build target"/>
 
@@ -1502,8 +1529,7 @@
 	</target>
 
 
-	<target name="sandbox.buildtests" depends="sandbox.compiletestattr"
-					description="Compile test source tree Java files into class files">
+	<target name="sandbox.buildtests" depends="sandbox.compiletestattr" description="Compile test source files into class files">
 
 		<mkdir dir="${sandbox.target.testclasses.dir}"/>
 
