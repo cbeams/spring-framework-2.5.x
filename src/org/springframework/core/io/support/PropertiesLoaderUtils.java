@@ -24,6 +24,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -78,7 +79,7 @@ public abstract class PropertiesLoaderUtils {
 	 * @throws IOException if loading failed
 	 */
 	public static Properties loadAllProperties(String resourceName) throws IOException {
-		return loadAllProperties(resourceName, ClassUtils.getDefaultClassLoader());
+		return loadAllProperties(resourceName, null);
 	}
 
 	/**
@@ -88,12 +89,18 @@ public abstract class PropertiesLoaderUtils {
 	 * found in the class path.
 	 * @param resourceName the name of the class path resource
 	 * @param classLoader the ClassLoader to use for loading
+	 * (or <code>null</code> to use the default class loader)
 	 * @return the populated Properties instance
 	 * @throws IOException if loading failed
 	 */
 	public static Properties loadAllProperties(String resourceName, ClassLoader classLoader) throws IOException {
+		Assert.notNull(resourceName, "Resource name must not be null");
+		ClassLoader clToUse = classLoader;
+		if (clToUse == null) {
+			clToUse = ClassUtils.getDefaultClassLoader();
+		}
 		Properties properties = new Properties();
-		Enumeration urls = classLoader.getResources(resourceName);
+		Enumeration urls = clToUse.getResources(resourceName);
 		while (urls.hasMoreElements()) {
 			URL url = (URL) urls.nextElement();
 			InputStream is = null;
