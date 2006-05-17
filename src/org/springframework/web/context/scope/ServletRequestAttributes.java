@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.util.Assert;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Servlet-based implementation of the RequestAttributes interface.
@@ -93,6 +94,10 @@ public class ServletRequestAttributes implements RequestAttributes {
 				this.sessionAttributesToUpdate.remove(name);
 			}
 		}
+	}
+
+	public Object getSessionMutex() {
+		return WebUtils.getSessionMutex(this.request.getSession());
 	}
 
 

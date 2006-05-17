@@ -25,6 +25,7 @@ import javax.portlet.PortletSession;
 
 import org.springframework.util.Assert;
 import org.springframework.web.context.scope.RequestAttributes;
+import org.springframework.web.portlet.util.PortletUtils;
 
 /**
  * Portlet-based implementation of the RequestAttributes interface.
@@ -123,6 +124,10 @@ public class PortletRequestAttributes implements RequestAttributes {
 				}
 			}
 		}
+	}
+
+	public Object getSessionMutex() {
+		return PortletUtils.getSessionMutex(this.request.getPortletSession());
 	}
 
 

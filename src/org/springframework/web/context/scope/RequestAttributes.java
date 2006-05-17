@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,5 +73,11 @@ public interface RequestAttributes {
 	 * @param name the name of the attribute
 	 */
 	void removeAttribute(String name, int scope);
+
+	/**
+	 * Expose the best available mutex for the underlying session:
+	 * that is, an object to synchronize on for the underlying session.
+	 */
+	Object getSessionMutex();
 
 }

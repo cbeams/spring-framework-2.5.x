@@ -16,8 +16,8 @@
 
 package org.springframework.web.context.scope;
 
-import org.springframework.beans.factory.config.Scope;
 import org.springframework.beans.factory.ObjectFactory;
+
 
 /**
  * Session-backed Scope implementation. Relies on a thread-bound
@@ -68,7 +68,23 @@ public class SessionScope extends AbstractRequestAttributesScope {
 		this.scope = (globalSession ? RequestAttributes.SCOPE_GLOBAL_SESSION : RequestAttributes.SCOPE_SESSION);
 	}
 
+
 	protected int getScope() {
 		return this.scope;
 	}
+
+	public Object get(String name, ObjectFactory objectFactory) {
+		Object mutex = RequestContextHolder.currentRequestAttributes().getSessionMutex();
+		synchronized (mutex) {
+			return super.get(name, objectFactory);
+		}
+	}
+
+	public Object remove(String name) {
+		Object mutex = RequestContextHolder.currentRequestAttributes().getSessionMutex();
+		synchronized (mutex) {
+			return super.remove(name);
+		}
+	}
+
 }
