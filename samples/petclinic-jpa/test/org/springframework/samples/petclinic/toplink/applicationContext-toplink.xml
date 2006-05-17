@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+		<property name="url" value="jdbc:hsqldb:hsql://localhost:9001" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
+
+	<!-- Will only work on TopLink 10.1.3 or higher, due to the use of -->
+	<!-- HSQLPlatformWithNativeSequence and CommonsLoggingSessionLog. -->
+	<bean id="sessionFactory" class="org.springframework.orm.toplink.LocalSessionFactoryBean">
+		<property name="configLocation" value="toplink-sessions.xml" />
+		<property name="dataSource" ref="dataSource"/>
+		<property name="databasePlatform">
+			<bean class="org.springframework.samples.petclinic.toplink.HSQLPlatformWithNativeSequence"/>
+		</property>
+		<property name="sessionLog">
+			<bean class="org.springframework.orm.toplink.support.CommonsLoggingSessionLog"/>
+		</property>
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.orm.toplink.TopLinkTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+
+	<!--
+		Note use of "inner bean" for target property.
+		This ensures that there is only one instance of this bean in the
+		factory, allowing us to use autowire by type if necessary.
+	-->
+	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.springframework.samples.petclinic.toplink.TopLinkClinic">
+				<property name="sessionFactory" ref="sessionFactory"/>
+			</bean>
+		</property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+
+</beans>
