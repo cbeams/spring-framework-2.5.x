@@ -6,7 +6,7 @@
         <para>This section of the reference documentation details the XML Schema based
     configuration introduced in Spring 2.0.</para>
         <sidebar>
-            <title>DTD suppport?</title>
+            <title>DTD support?</title>
             <para>Authoring Spring configuration files using the older DTD style
             is still fully supported.</para>
             <para>Nothing will break if you forego the use of the new XML Schema-based
@@ -66,7 +66,8 @@
 <![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
@@ -105,8 +106,9 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:util="http://www.springframework.org/schema/util"</emphasis><![CDATA[
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       ]]><emphasis role="bold">http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"</emphasis><![CDATA[>
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
@@ -275,36 +277,37 @@
 </util:set>]]></programlisting>
             </section>
         </section>
-        <section id="xsd-config-body-schemas-jndi">
-            <title>The <literal>jndi</literal> schema</title>
-            <para>The <literal>jndi</literal> tags deal with JNDI-related configuration issues,
-            such as looking up a JNDI object.
+        <section id="xsd-config-body-schemas-jee">
+            <title>The <literal>jee</literal> schema</title>
+            <para>The <literal>jee</literal> tags deal with JEE (Java Enterprise Edition)-related
+            configuration issues, such as looking up a JNDI object and defining EJB references.
             </para>
-            <para>To use the tags in the <literal>jndi</literal> schema, you need to have
+            <para>To use the tags in the <literal>jee</literal> schema, you need to have
             the following preamble at the top of your Spring XML configuration file;
             the emboldened text in the following snippet references the correct schema so that
-            the tags in the <literal>jndi</literal> namespace are available to you.</para>
+            the tags in the <literal>jee</literal> namespace are available to you.</para>
             <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       ]]><emphasis role="bold">xmlns:jndi="http://www.springframework.org/schema/jndi"</emphasis><![CDATA[
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       ]]><emphasis role="bold">http://www.springframework.org/schema/jndi http://www.springframework.org/schema/jndi/spring-jndi.xsd"</emphasis><![CDATA[>
+       ]]><emphasis role="bold">xmlns:jee="http://www.springframework.org/schema/jee"</emphasis><![CDATA[
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
             <section>
-                <title><literal>&lt;jndi:lookup/&gt;</literal> (simple)</title>
+                <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (simple)</title>
                 <para>Before...</para>
                 <programlisting><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
     <property name="jndiName" value="jdbc/MyDataSource"/>
 </bean>]]></programlisting>
                 <para>After...</para>
-                <programlisting><![CDATA[<jndi:lookup id="simple" jndi-name="jdbc/MyDataSource"/>]]></programlisting>
+                <programlisting><![CDATA[<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource"/>]]></programlisting>
             </section>
             <section>
-                <title><literal>&lt;jndi:lookup/&gt;</literal> (with JNDI environment setting)</title>
+                <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (with JNDI environment setting)</title>
                 <para>Before...</para>
                 <programlisting><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
     <property name="jndiName" value="jdbc/MyDataSource"/>
@@ -315,12 +318,12 @@
     </property>
 </bean>]]></programlisting>
                 <para>After...</para>
-                <programlisting><![CDATA[<jndi:lookup id="simple" jndi-name="jdbc/MyDataSource">
-    <jndi:environment>foo=bar</jndi:environment>
-</jndi:lookup>]]></programlisting>
+                <programlisting><![CDATA[<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource">
+    <jee:environment>foo=bar</jee:environment>
+</jee:jndi-lookup>]]></programlisting>
             </section>
             <section>
-                <title><literal>&lt;jndi:lookup/&gt;</literal> (with JNDI environment settings)</title>
+                <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (with JNDI environment settings)</title>
                 <para>Before...</para>
                 <programlisting><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
     <property name="jndiName" value="jdbc/MyDataSource"/>
@@ -332,10 +335,10 @@
     </property>
 </bean>]]></programlisting>
                 <para>After...</para>
-                <programlisting><![CDATA[<jndi:lookup id="simple" jndi-name="jdbc/MyDataSource">
-    <jndi:environment>foo=bar</jndi:environment>
-    <jndi:environment>ping=pong</jndi:environment>
-</jndi:lookup>]]></programlisting>
+                <programlisting><![CDATA[<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource">
+    <jee:environment>foo=bar</jee:environment>
+    <jee:environment>ping=pong</jee:environment>
+</jee:jndi-lookup>]]></programlisting>
             </section>
             <section>
                 <title><literal>&lt;jndi:lookup/&gt;</literal> (complex)</title>
@@ -349,7 +352,7 @@
     <property name="proxyInterface" value="com.myapp.Foo"/>
 </bean>]]></programlisting>
                 <para>After...</para>
-                <programlisting><![CDATA[<jndi:lookup id="simple"
+                <programlisting><![CDATA[<jee:jndi-lookup id="simple"
              jndi-name="jdbc/MyDataSource"
              cache="true"
              resource-ref="true"
@@ -376,8 +379,9 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:lang="http://www.springframework.org/schema/lang"</emphasis><![CDATA[
-       ]]><emphasis role="bold">xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-                           http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd"</emphasis><![CDATA[>
+       ]]><emphasis role="bold">xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
@@ -398,9 +402,10 @@
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xmlns:aop="http://www.springframework.org/schema/aop"
 	   ]]><emphasis role="bold">xmlns:tx="http://www.springframework.org/schema/tx"</emphasis><![CDATA[
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-                           ]]><emphasis role="bold">http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd</emphasis><![CDATA[
-                           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+	   xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd</emphasis><![CDATA[
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
@@ -427,12 +432,27 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   ]]><emphasis role="bold">xmlns:aop="http://www.springframework.org/schema/aop"</emphasis><![CDATA[
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-                           ]]><emphasis role="bold">http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"</emphasis><![CDATA[>
+	   xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
+        </section>
+        <section id="xsd-config-body-schemas-tool">
+            <title>The <literal>tool</literal> schema</title>
+            <para>The <literal>tool</literal> tags are for use when you want to add
+            tooling-specific metadata to your custom configuration elements. This metadata
+            can then be consumed by tools that are aware of this metadata, and the tools can
+            then do pretty much whatever they want with it (validation, etc.).</para>
+            <para>The <literal>tool</literal> tags are not documented in this release of
+            Spring as they are currently undergoing review. If you are a third party tool
+            vendor and you would like to contribute to this review process, then do mail
+            the Spring mailing list. The currently supported <literal>tool</literal>
+            tags can be found in the file <literal>'spring-tool.xsd'</literal> in the
+            <literal>'src/org/springframework/beans/factory/xml'</literal> directory of the
+            Spring source distribution.</para>
         </section>
     </section>
     <section id="xsd-config-setup">
@@ -466,8 +486,8 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
-       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
 </beans>]]></programlisting>
 		        <para>

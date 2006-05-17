@@ -268,9 +268,9 @@
        xmlns:jndi="http://www.springframework.org/schema/jndi"
 xsi:schemaLocation="
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/jndi http://www.springframework.org/schema/jndi/spring-jndi.xsd">
+       http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd">
 
-  <jndi:lookup id="dataSource" jndi-name="jdbc/jpetstore"/> 
+  <jee:jndi-lookup id="dataSource" jndi-name="jdbc/jpetstore"/> 
 
   <bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager" />
   
@@ -279,10 +279,10 @@ xsi:schemaLocation="
 </beans>]]></programlisting>
         <note>
             <para>The above definition of the <literal>'dataSource'</literal> bean uses the
-            <literal>'lookup'</literal> tag from the <literal>'jndi'</literal> namespace.
+            <literal>'jndi-lookup'</literal> tag from the <literal>'jee'</literal> namespace.
             For more information on schema-based configuration, see <xref linkend="xsd-config"/>,
-            and for more information on the <literal>&lt;jndi/&gt;</literal> tags
-            see the section entitled <xref linkend="xsd-config-body-schemas-jndi"/>.</para>
+            and for more information on the <literal>&lt;jee/&gt;</literal> tags
+            see the section entitled <xref linkend="xsd-config-body-schemas-jee"/>.</para>
         </note>
         <para>We can use Hibernate local transactions easily, as shown in the
         following examples from the Spring <emphasis role="bold">PetClinic</emphasis>
