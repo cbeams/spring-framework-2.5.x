@@ -112,7 +112,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		}
 
 		// Add any property definitions that need adding.
-		MutablePropertyValues mutablePropertyValues = parserContext.getHelper().parsePropertyElements(element);
+		MutablePropertyValues mutablePropertyValues = parserContext.getDelegate().parsePropertyElements(element);
 		beanDefinition.setPropertyValues(mutablePropertyValues);
 
 		return beanDefinition;

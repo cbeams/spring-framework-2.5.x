@@ -19,11 +19,9 @@ package org.springframework.beans.factory.xml;
 import org.w3c.dom.Document;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.support.BeanDefinitionReader;
-import org.springframework.core.io.Resource;
 
 /**
- * Strategy interface for parsing XML bean definitions.
+ * SPI for parsing an XML document that contains Spring bean definitions.
  * Used by XmlBeanDefinitionReader for actually parsing a DOM document.
  *
  * <p>Instantiated per document to parse: Implementations can hold
@@ -32,26 +30,20 @@ import org.springframework.core.io.Resource;
  * settings that are defined for all bean definitions in the document.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 18.12.2003
- * @deprecated as of Spring 2.0: superseded by BeanDefinitionDocumentReader
- * @see BeanDefinitionDocumentReader
- * @see XmlBeanDefinitionReader#setParserClass
+ * @see XmlBeanDefinitionReader#setDocumentReaderClass
  */
-public interface XmlBeanDefinitionParser {
+public interface BeanDefinitionDocumentReader {
 
 	/**
-	 * Parse bean definitions from the given DOM document,
+	 * Read bean definitions from the given DOM document,
 	 * and register them with the given bean factory.
-	 * @param reader the bean definition reader, containing the bean factory
-	 * to work on and the bean class loader to use. Can also be used to load
-	 * further bean definition files referenced by the given document.
 	 * @param doc the DOM document
-	 * @param resource descriptor of the original XML resource
-	 * (useful for displaying parse errors)
-	 * @return the number of bean definitions found
+	 * @param readerContext the current context of the reader. Includes the resource being parsed
 	 * @throws BeanDefinitionStoreException in case of parsing errors
 	 */
-	int registerBeanDefinitions(BeanDefinitionReader reader, Document doc, Resource resource)
+	void registerBeanDefinitions(Document doc, XmlReaderContext readerContext)
 			throws BeanDefinitionStoreException;
 
 }

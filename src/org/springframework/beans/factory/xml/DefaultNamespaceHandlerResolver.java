@@ -41,37 +41,30 @@ import org.springframework.util.ClassUtils;
  *
  * @author Rob Harrop
  * @see NamespaceHandler
- * @see DefaultXmlBeanDefinitionParser
+ * @see DefaultBeanDefinitionDocumentReader
  * @since 2.0
  */
 public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver {
 
 	/**
-	 * The location to look for the mapping files. Can be present in multiple
-	 * JAR files.
+	 * The location to look for the mapping files. Can be present in multiple JAR files.
 	 */
 	private static final String SPRING_HANDLER_MAPPINGS_LOCATION = "META-INF/spring.handlers";
 
 
-	/**
-	 * <code>Log</code> instance of this class.
-	 */
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/**
-	 * The currently configured mapping file location.
-	 */
-	private String handlerMappingsLocation = SPRING_HANDLER_MAPPINGS_LOCATION;
+	/** The currently configured mapping file location */
+	private final String handlerMappingsLocation;
+
+	/** ClassLoader instance used to load mapping resources */
+	private final ClassLoader classLoader;
 
 	/**
-	 * Stores the mapping of namespace URI -> NamespaceHandler instances.
+	 * Stores the mappings from namespace URI Strings to NamespaceHandler instances.
 	 */
 	private Map handlerMappings;
-
-	/**
-	 * {@link ClassLoader} instance used to load mapping resources.
-	 */
-	private ClassLoader classLoader;
 
 
 	/**
@@ -80,8 +73,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * @see #SPRING_HANDLER_MAPPINGS_LOCATION
 	 */
 	public DefaultNamespaceHandlerResolver(ClassLoader classLoader) {
-		this.classLoader = classLoader;
-		initHandlerMappings();
+		this(SPRING_HANDLER_MAPPINGS_LOCATION, classLoader);
 	}
 
 	/**
@@ -89,9 +81,9 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * supplied mapping file location.
 	 */
 	public DefaultNamespaceHandlerResolver(String handlerMappingsLocation, ClassLoader classLoader) {
-		Assert.notNull(handlerMappingsLocation, "'handlerMappingsLocation' cannot be null");
+		Assert.notNull(handlerMappingsLocation, "Handler mappings location must not be null");
 		this.handlerMappingsLocation = handlerMappingsLocation;
-		this.classLoader = classLoader;
+		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 		initHandlerMappings();
 	}
 

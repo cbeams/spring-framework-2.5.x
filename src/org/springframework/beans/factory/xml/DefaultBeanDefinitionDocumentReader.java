@@ -16,28 +16,29 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.io.IOException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.ReaderContext;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.support.BeanComponentDefinition;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.util.SystemPropertyUtils;
-import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.io.IOException;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.BeanComponentDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
+import org.springframework.beans.factory.support.ReaderContext;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.util.SystemPropertyUtils;
+import org.springframework.util.xml.DomUtils;
 
 /**
- * Default implementation of the XmlBeanDefinitionParser interface.
- * Parses bean definitions according to the "spring-beans" DTD,
+ * Default implementation of the BeanDefinitionDocumentReader interface.
+ * Reads bean definitions according to the "spring-beans" DTD,
  * that is, Spring's default XML bean definition format.
- * <p/>
+ *
  * <p>The structure, elements and attribute names of the required XML document
  * are hard-coded in this class. (Of course a transform could be run if necessary
  * to produce this format). <code>&lt;beans&gt;</code> doesn't need to be the root
@@ -50,17 +51,22 @@ import java.io.IOException;
  * @author Erik Wiersma
  * @since 18.12.2003
  */
-public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
+public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocumentReader {
 
 	public static final String BEANS_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
 
 	public static final String BEAN_NAME_DELIMITERS = ",; ";
 
 	public static final String IMPORT_ELEMENT = "import";
+
 	public static final String RESOURCE_ATTRIBUTE = "resource";
+
 	public static final String ALIAS_ELEMENT = "alias";
+
 	public static final String NAME_ATTRIBUTE = "name";
+
 	public static final String ALIAS_ATTRIBUTE = "alias";
+
 	public static final String BEAN_ELEMENT = "bean";
 
 
@@ -81,17 +87,17 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 		logger.debug("Loading bean definitions");
 		Element root = doc.getDocumentElement();
 
-		XmlBeanDefinitionParserHelper helper = createHelper(readerContext, root);
+		BeanDefinitionParserDelegate delegate = createHelper(readerContext, root);
 
 		preProcessXml(root);
-		parseBeanDefinitions(root, helper);
+		parseBeanDefinitions(root, delegate);
 		postProcessXml(root);
 	}
 
-	protected XmlBeanDefinitionParserHelper createHelper(XmlReaderContext readerContext, Element root) {
-		XmlBeanDefinitionParserHelper helper = new XmlBeanDefinitionParserHelper(readerContext);
-		helper.initDefaults(root);
-		return helper;
+	protected BeanDefinitionParserDelegate createHelper(XmlReaderContext readerContext, Element root) {
+		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext);
+		delegate.initDefaults(root);
+		return delegate;
 	}
 
 	/**
@@ -119,7 +125,7 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 	 * "import", "alias", "bean".
 	 * @param root the DOM root element of the document
 	 */
-	protected void parseBeanDefinitions(Element root, XmlBeanDefinitionParserHelper helper) {
+	protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate delegate) {
 		NodeList nl = root.getChildNodes();
 
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -127,17 +133,17 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			if (node instanceof Element) {
 				Element ele = (Element) node;
 				String namespaceUri = ele.getNamespaceURI();
-				if (helper.isDefaultNamespace(namespaceUri)) {
-					parseDefaultElement(ele, helper);
+				if (delegate.isDefaultNamespace(namespaceUri)) {
+					parseDefaultElement(ele, delegate);
 				}
 				else {
-					helper.parseCustomElement(ele, false);
+					delegate.parseCustomElement(ele, false);
 				}
 			}
 		}
 	}
 
-	private void parseDefaultElement(Element ele, XmlBeanDefinitionParserHelper helper) {
+	private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
 		if (DomUtils.nodeNameEquals(ele, IMPORT_ELEMENT)) {
 			importBeanDefinitionResource(ele);
 		}
@@ -148,9 +154,9 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 			getReaderContext().fireAliasRegistered(name, alias);
 		}
 		else if (DomUtils.nodeNameEquals(ele, BEAN_ELEMENT)) {
-			BeanDefinitionHolder bdHolder = helper.parseBeanDefinitionElement(ele, false);
+			BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele, false);
 			if (bdHolder != null) {
-				bdHolder = helper.decorateBeanDefinitionIfRequired(ele, bdHolder);
+				bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 				// Register the final decorated instance.
 				BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getReader().getBeanFactory());
 
@@ -185,7 +191,8 @@ public class DefaultXmlBeanDefinitionParser implements XmlBeanDefinitionParser {
 				}
 			}
 			catch (IOException ex) {
-				getReaderContext().error("Invalid relative resource location [" + location + "] to import bean definitions from", ele, null, ex);
+				getReaderContext().error(
+						"Invalid relative resource location [" + location + "] to import bean definitions from", ele, null, ex);
 			}
 		}
 

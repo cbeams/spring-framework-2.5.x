@@ -33,13 +33,13 @@ public final class XmlBeanDefinitionReaderTests extends TestCase {
 
 	public void testSetParserClassSunnyDay() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(factory).setParserClass(DefaultXmlBeanDefinitionParser.class);
+		new XmlBeanDefinitionReader(factory).setDocumentReaderClass(DefaultBeanDefinitionDocumentReader.class);
 	}
 
 	public void testSetParserClassToNull() {
 		try {
 			DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-			new XmlBeanDefinitionReader(factory).setParserClass(null);
+			new XmlBeanDefinitionReader(factory).setDocumentReaderClass(null);
 			fail("Should have thrown IllegalArgumentException (null parserClass)");
 		}
 		catch (IllegalArgumentException expected) {
@@ -49,7 +49,7 @@ public final class XmlBeanDefinitionReaderTests extends TestCase {
 	public void testSetParserClassToUnsupportedParserType() throws Exception {
 		try {
 			DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-			new XmlBeanDefinitionReader(factory).setParserClass(String.class);
+			new XmlBeanDefinitionReader(factory).setDocumentReaderClass(String.class);
 			fail("Should have thrown IllegalArgumentException (unsupported parserClass)");
 		}
 		catch (IllegalArgumentException expected) {

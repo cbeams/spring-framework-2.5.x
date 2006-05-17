@@ -17,18 +17,16 @@
 package org.springframework.aop.aspectj.autoproxy;
 
 import junit.framework.TestCase;
+
 import org.springframework.aop.config.NamespaceHandlerUtils;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MapBasedReaderEventListener;
-import org.springframework.beans.factory.support.ReaderContext;
 import org.springframework.beans.factory.support.SourceExtractor;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.factory.xml.XmlReaderContext;
 
 /**
  * @author Rob Harrop
@@ -47,8 +45,10 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 				return sourceCandidate;
 			}
 		};
-		BeanDefinitionReader reader = new DummyBeanDefinitionReader();
-		ReaderContext readerContext = new ReaderContext(reader, null, null, this.readerEventListener, sourceExtractor);
+
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.registry);
+		XmlReaderContext readerContext =
+				new XmlReaderContext(reader, null, null, this.readerEventListener, sourceExtractor, null);
 
 		this.parserContext = new ParserContext(readerContext, null, false);
 	}
@@ -94,37 +94,4 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 		assertEquals("Incorrect APC class", AspectJInvocationContextExposingAdvisorAutoProxyCreator.class, definition.getBeanClass());
 	}
 
-	private class DummyBeanDefinitionReader implements BeanDefinitionReader {
-
-		public BeanDefinitionRegistry getBeanFactory() {
-			return registry;
-		}
-
-		public ResourceLoader getResourceLoader() {
-			return null;
-		}
-
-		public ClassLoader getBeanClassLoader() {
-			return null;
-		}
-
-		public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException {
-			return 0;
-		}
-
-		public int loadBeanDefinitions(Resource[] resources) throws BeanDefinitionStoreException {
-			return 0;
-
-		}
-
-		public int loadBeanDefinitions(String location) throws BeanDefinitionStoreException {
-			return 0;
-
-		}
-
-		public int loadBeanDefinitions(String[] locations) throws BeanDefinitionStoreException {
-			return 0;
-
-		}
-	}
 }

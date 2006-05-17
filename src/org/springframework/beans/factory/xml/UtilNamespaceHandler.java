@@ -79,7 +79,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			String id = element.getAttribute("id");
 			String mapClass = element.getAttribute("map-class");
 
-			Map parsedMap = parserContext.getHelper().parseMapElement(element);
+			Map parsedMap = parserContext.getDelegate().parseMapElement(element);
 			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(MapFactoryBean.class);
 			builder.addPropertyValue("sourceMap", parsedMap);
 			if (StringUtils.hasText(mapClass)) {
@@ -96,7 +96,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			String id = element.getAttribute("id");
 			String listClass = element.getAttribute("list-class");
 
-			List parsedList = parserContext.getHelper().parseListElement(element);
+			List parsedList = parserContext.getDelegate().parseListElement(element);
 			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ListFactoryBean.class);
 			builder.addPropertyValue("sourceList", parsedList);
 			if (StringUtils.hasText(listClass)) {
@@ -113,7 +113,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			String id = element.getAttribute("id");
 			String setClass = element.getAttribute("set-class");
 
-			Set parsedSet = parserContext.getHelper().parseSetElement(element);
+			Set parsedSet = parserContext.getDelegate().parseSetElement(element);
 			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(SetFactoryBean.class);
 			builder.addPropertyValue("sourceSet", parsedSet);
 			if (StringUtils.hasText(setClass)) {

@@ -20,7 +20,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.w3c.dom.Node;
 
 /**
- * Interface used by the {@link org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser}
+ * Interface used by the {@link org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader}
  * to handle custom, nested (directly under a <code>&lt;bean&gt;</code>) tags.
  * 
  * <p>Decoration may also occur based on custom attributes applied to the

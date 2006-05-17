@@ -4,7 +4,7 @@
 
 	This defines a simple and consistent way of creating a namespace
 	of JavaBeans objects, managed by a Spring BeanFactory, read by
-	XmlBeanDefinitionReader (with DefaultXmlBeanDefinitionParser).
+	XmlBeanDefinitionReader (with DefaultBeanDefinitionDocumentReader).
 
 	This document type is used by most Spring functionality, including
 	web application contexts, which are based on bean factories.
@@ -507,7 +507,7 @@
 	bean in this factory or an external factory (parent or included factory).
 	While a regular 'value' element could instead be used for the same effect,
 	using idref in this case allows validation of local bean ids by the xml
-	parser, and name completion by helper tools.
+	parser, and name completion by delegatetetetete tools.
 -->
 <!ELEMENT idref EMPTY>
 

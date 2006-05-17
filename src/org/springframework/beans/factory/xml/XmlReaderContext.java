@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.ProblemReporter;
 import org.springframework.beans.factory.support.ReaderContext;
 import org.springframework.beans.factory.support.ReaderEventListener;
@@ -24,8 +23,10 @@ import org.springframework.beans.factory.support.SourceExtractor;
 import org.springframework.core.io.Resource;
 
 /**
- * Extension of {@link ReaderContext} specific to use with an {@link XmlBeanDefinitionReader}. Provides
- * access to the {@link NamespaceHandlerResolver} configured in the {@link XmlBeanDefinitionReader}.
+ * Extension of {@link ReaderContext} specific to use with an {@link XmlBeanDefinitionReader}.
+ * Provides access to the {@link NamespaceHandlerResolver} configured in the
+ * {@link XmlBeanDefinitionReader}.
+ *
  * @author Rob Harrop
  * @since 2.0
  */
@@ -33,9 +34,11 @@ public class XmlReaderContext extends ReaderContext {
 
 	private final NamespaceHandlerResolver namespaceHandlerResolver;
 
-	public XmlReaderContext(XmlBeanDefinitionReader reader, Resource resource,
-													ProblemReporter problemReporter, ReaderEventListener eventListener,
-													SourceExtractor sourceExtractor, NamespaceHandlerResolver namespaceHandlerResolver) {
+	public XmlReaderContext(
+			XmlBeanDefinitionReader reader, Resource resource, ProblemReporter problemReporter,
+			ReaderEventListener eventListener, SourceExtractor sourceExtractor,
+			NamespaceHandlerResolver namespaceHandlerResolver) {
+
 		super(reader, resource, problemReporter, eventListener, sourceExtractor);
 		this.namespaceHandlerResolver = namespaceHandlerResolver;
 	}
@@ -43,4 +46,5 @@ public class XmlReaderContext extends ReaderContext {
 	public NamespaceHandlerResolver getNamespaceHandlerResolver() {
 		return this.namespaceHandlerResolver;
 	}
+
 }

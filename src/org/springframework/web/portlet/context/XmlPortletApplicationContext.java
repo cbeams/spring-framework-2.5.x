@@ -100,7 +100,7 @@ public class XmlPortletApplicationContext extends AbstractRefreshablePortletAppl
 	 * or using a different XmlBeanDefinitionParser implementation.
 	 * @param beanDefinitionReader the bean definition reader used by this context
 	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader#setValidationMode
-	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader#setParserClass
+	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader#setDocumentReaderClass
 	 */
 	protected void initBeanDefinitionReader(XmlBeanDefinitionReader beanDefinitionReader) {
 	}

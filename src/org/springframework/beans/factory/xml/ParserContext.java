@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.springframework.beans.factory.support.ReaderContext;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 
 /**
@@ -25,24 +24,30 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  */
 public final class ParserContext {
 
-	private final ReaderContext readerContext;
+	private final XmlReaderContext readerContext;
 
-	private final XmlBeanDefinitionParserHelper helper;
+	private final BeanDefinitionParserDelegate delegate;
 
 	private final boolean nested;
 
-	public ParserContext(ReaderContext readerContext, XmlBeanDefinitionParserHelper helper, boolean nested) {
+
+	public ParserContext(XmlReaderContext readerContext, BeanDefinitionParserDelegate delegate, boolean nested) {
 		this.readerContext = readerContext;
-		this.helper = helper;
+		this.delegate = delegate;
 		this.nested = nested;
 	}
 
-	public ReaderContext getReaderContext() {
+
+	public XmlReaderContext getReaderContext() {
 		return this.readerContext;
 	}
 
-	public XmlBeanDefinitionParserHelper getHelper() {
-		return this.helper;
+	public BeanDefinitionRegistry getRegistry() {
+		return getReaderContext().getReader().getBeanFactory();
+	}
+
+	public BeanDefinitionParserDelegate getDelegate() {
+		return this.delegate;
 	}
 
 	/**
@@ -53,10 +58,6 @@ public final class ParserContext {
 	 */
 	public boolean isNested() {
 		return this.nested;
-	}
-
-	public BeanDefinitionRegistry getRegistry() {
-		return getReaderContext().getReader().getBeanFactory();
 	}
 
 }

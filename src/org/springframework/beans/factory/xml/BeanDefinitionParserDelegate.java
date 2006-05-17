@@ -27,9 +27,9 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.NamedNodeMap;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
@@ -59,16 +59,19 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
- * Stateful helper class used to parse XML bean definitions. Intended for use
- * by both the main parser and any extension {@link BeanDefinitionParser BeanDefinitionParsers}
+ * Stateful delegate class used to parse XML bean definitions.
+ * Intended for use by both the main parser and any extension
+ * {@link BeanDefinitionParser BeanDefinitionParsers}
  * or {@link BeanDefinitionDecorator BeanDefinitionDecorators}.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since 2.0
+ * @see ParserContext
+ * @see DefaultBeanDefinitionDocumentReader
  */
-public class XmlBeanDefinitionParserHelper {
+public class BeanDefinitionParserDelegate {
 
 	public static final String BEANS_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
 
@@ -197,23 +200,26 @@ public class XmlBeanDefinitionParserHelper {
 	public static final String MERGE_ATTRIBUTE = "merge";
 
 	public static final String DEFAULT_LAZY_INIT_ATTRIBUTE = "default-lazy-init";
+
 	public static final String DEFAULT_AUTOWIRE_ATTRIBUTE = "default-autowire";
+
 	public static final String DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE = "default-dependency-check";
+
 	public static final String DEFAULT_INIT_METHOD_ATTRIBUTE = "default-init-method";
+
 	public static final String DEFAULT_DESTROY_METHOD_ATTRIBUTE = "default-destroy-method";
+
 	public static final String DEFAULT_MERGE_ATTRIBUTE = "default-merge";
-	
+
+
     /**
 	 * {@link Log} instance for this class.
 	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private ParseState parseState = new ParseState();
-
-	/**
-	 * The {@link XmlReaderContext} used.
-	 */
 	private final XmlReaderContext readerContext;
+
+	private ParseState parseState = new ParseState();
 
 	private String defaultLazyInit;
 
@@ -229,19 +235,19 @@ public class XmlBeanDefinitionParserHelper {
 
 
 	/**
-	 * Creates a new <code>XmlBeanDefinitionParserHelper</code> associated with the
+	 * Create a new <code>XmlBeanDefinitionParserHelper</code> associated with the
 	 * supplied {@link ReaderContext}.
 	 */
-	public XmlBeanDefinitionParserHelper(XmlReaderContext readerContext) {
+	public BeanDefinitionParserDelegate(XmlReaderContext readerContext) {
 		Assert.notNull(readerContext, "'readerContext' cannot be null.");
 		this.readerContext = readerContext;
 	}
 
 
 	/**
-	 * Gets the {@link ReaderContext} associated with this helper instance.
+	 * Get the {@link ReaderContext} associated with this helper instance.
 	 */
-	public ReaderContext getReaderContext() {
+	public XmlReaderContext getReaderContext() {
 		return this.readerContext;
 	}
 
@@ -353,7 +359,6 @@ public class XmlBeanDefinitionParserHelper {
 	 * {@link org.springframework.beans.factory.support.ProblemReporter}.
 	 */
 	public BeanDefinitionHolder parseBeanDefinitionElement(Element ele, boolean isInnerBean) {
-
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 
@@ -395,7 +400,6 @@ public class XmlBeanDefinitionParserHelper {
 	 * <code>null</code> if problems occured during the parse of the bean definition.
 	 */
 	public BeanDefinition parseBeanDefinitionElement(Element ele, String beanName) {
-
 		String className = null;
 		if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
 			className = ele.getAttribute(CLASS_ATTRIBUTE);
@@ -601,7 +605,6 @@ public class XmlBeanDefinitionParserHelper {
 	 * Parse lookup-override sub-elements of the given bean element.
 	 */
 	public void parseLookupOverrideSubElements(Element beanEle, MethodOverrides overrides) {
-
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
@@ -620,7 +623,6 @@ public class XmlBeanDefinitionParserHelper {
 	 * Parse replaced-method sub-elements of the given bean element.
 	 */
 	public void parseReplacedMethodSubElements(Element beanEle, MethodOverrides overrides) {
-
 		NodeList nl = beanEle.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
@@ -645,7 +647,6 @@ public class XmlBeanDefinitionParserHelper {
 	 * Parse a constructor-arg element.
 	 */
 	public void parseConstructorArgElement(Element ele, ConstructorArgumentValues cargs) {
-
 		String indexAttr = ele.getAttribute(INDEX_ATTRIBUTE);
 		String typeAttr = ele.getAttribute(TYPE_ATTRIBUTE);
 		if (StringUtils.hasLength(indexAttr)) {
@@ -724,7 +725,6 @@ public class XmlBeanDefinitionParserHelper {
 	 * Also used for constructor arguments, "propertyName" being null in this case.
 	 */
 	public Object parsePropertyValue(Element ele, String propertyName) {
-
 		String elementName = (propertyName != null) ?
 						"<property> element for property '" + propertyName + "'" :
 						"<constructor-arg> element";
@@ -783,8 +783,8 @@ public class XmlBeanDefinitionParserHelper {
 	 * Parse a value, ref or collection sub-element of a property or
 	 * constructor-arg element.
 	 * @param ele subelement of property element; we don't know which yet
-	 * @param defaultTypeClassName the default type (class name) for any <code>&lt;value&gt;</code> tag that might
-	 * be created.
+	 * @param defaultTypeClassName the default type (class name) for any
+	 * <code>&lt;value&gt;</code> tag that might be created
 	 */
 	public Object parsePropertySubElement(Element ele, String defaultTypeClassName) {
 		if (!isDefaultNamespace(ele.getNamespaceURI())) {
@@ -835,7 +835,8 @@ public class XmlBeanDefinitionParserHelper {
 			}
 			if (StringUtils.hasText(typeClassName)) {
 				try {
-					Class typeClass = ClassUtils.forName(typeClassName, getReaderContext().getReader().getBeanClassLoader());
+					Class typeClass = ClassUtils.forName(
+							typeClassName, getReaderContext().getReader().getBeanClassLoader());
 					return new TypedStringValue(value, typeClass);
 				}
 				catch (ClassNotFoundException ex) {
@@ -949,7 +950,8 @@ public class XmlBeanDefinitionParserHelper {
 								"a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element", entryEle);
 			}
 			if (hasKeyAttribute) {
-				key = extractTypedStringValueIfNecessary(mapEle, entryEle.getAttribute(KEY_ATTRIBUTE), defaultKeyTypeClassName);
+				key = extractTypedStringValueIfNecessary(
+						mapEle, entryEle.getAttribute(KEY_ATTRIBUTE), defaultKeyTypeClassName);
 			}
 			else if (hasKeyRefAttribute) {
 				String refName = entryEle.getAttribute(KEY_REF_ATTRIBUTE);
@@ -975,7 +977,8 @@ public class XmlBeanDefinitionParserHelper {
 								"'value' attribute OR 'value-ref' attribute OR <value> sub-element", entryEle);
 			}
 			if (hasValueAttribute) {
-				value = extractTypedStringValueIfNecessary(mapEle, entryEle.getAttribute(VALUE_ATTRIBUTE), defaultValueTypeClassName);
+				value = extractTypedStringValueIfNecessary(
+						mapEle, entryEle.getAttribute(VALUE_ATTRIBUTE), defaultValueTypeClassName);
 			}
 			else if (hasValueRefAttribute) {
 				String refName = entryEle.getAttribute(VALUE_REF_ATTRIBUTE);
@@ -999,13 +1002,16 @@ public class XmlBeanDefinitionParserHelper {
 	}
 
 	/**
-	 * if the supplied <code>defaultTypeClassName</code> argument is <code>null</code> or zero-length then
-	 * the value of the <code>attributeValue</code> is returned. Otherwise, if the <code>Class</code> named
-	 * by the <code>defaultTypeClassName</code> can be loaded, a {@link TypedStringValue} instance wrapping
-	 * this <code>Class</code> and the <code>attributeValue</code> is returned. Otherwise, <code>null</code>
+	 * If the supplied <code>defaultTypeClassName</code> argument is <code>null</code>
+	 * or zero-length, then the value of the <code>attributeValue</code> is returned.
+	 * Otherwise, if the <code>Class</code> named by the <code>defaultTypeClassName</code>
+	 * can be loaded, a {@link TypedStringValue} instance wrapping this <code>Class</code>
+	 * and the <code>attributeValue</code> is returned. Otherwise, <code>null</code>
 	 * is returned.
 	 */
-	private Object extractTypedStringValueIfNecessary(Element mapElement, String attributeValue, String defaultTypeClassName) {
+	private Object extractTypedStringValueIfNecessary(
+			Element mapElement, String attributeValue, String defaultTypeClassName) {
+
 		if (!StringUtils.hasText(defaultTypeClassName)) {
 			return attributeValue;
 		}
@@ -1132,4 +1138,5 @@ public class XmlBeanDefinitionParserHelper {
 	private void error(String message, Object source, Throwable cause) {
 		getReaderContext().error(message, source, this.parseState.snapshot(), cause);
 	}
+
 }

@@ -22,7 +22,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
- * Base interface used by the {@link DefaultXmlBeanDefinitionParser} handling custom namespaces
+ * Base interface used by the {@link DefaultBeanDefinitionDocumentReader} handling custom namespaces
  * in a Spring XML configuration file. Implementations are expected to return implementations
  * of the {@link BeanDefinitionParser} interface for custom top-level
  * tags and implementations of the {@link BeanDefinitionDecorator} interface for custom nested tags.
@@ -33,14 +33,14 @@ import org.w3c.dom.Node;
  *
  * @author Rob Harrop
  * @author Erik Wiersma
- * @see DefaultXmlBeanDefinitionParser
+ * @see DefaultBeanDefinitionDocumentReader
  * @see NamespaceHandlerResolver
  * @since 2.0
  */
 public interface NamespaceHandler {
 
 	/**
-	 * Invoked by the {@link DefaultXmlBeanDefinitionParser} after construction but before
+	 * Invoked by the {@link DefaultBeanDefinitionDocumentReader} after construction but before
 	 * any custom elements are parsed.
 	 */
 	void init();

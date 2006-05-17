@@ -21,7 +21,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 
 /**
  * Interface used by the
- * {@link org.springframework.beans.factory.xml.DefaultXmlBeanDefinitionParser} to
+ * {@link org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader} to
  * handle custom, top-level (directly under <code>&lt;beans&gt;</code>) tags.
  * 
  * <p>Implementations are free to turn the metadata in the custom tag into as many
