@@ -37,6 +37,7 @@ import org.springframework.beans.PropertyAccessor;
  * @see #setNestedPath
  * @see BindException
  * @see DataBinder
+ * @see ValidationUtils
  */
 public interface Errors {
 
