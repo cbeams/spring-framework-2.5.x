@@ -20,20 +20,21 @@ package org.springframework.web.context.scope;
  * Request-backed Scope implementation. Relies on a thread-bound
  * RequestAttributes instance, which can be exported through
  * RequestContextListener, RequestContextFilter or DispatcherServlet.
- * <p/>
+ *
  * <p>This Scope will also work for Portlet environments,
  * through an alternate RequestAttributes implementation
  * (as exposed out-of-the-box by Spring's DispatcherPortlet).
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @since 2.0
  * @see RequestContextHolder#currentRequestAttributes()
  * @see RequestAttributes#SCOPE_REQUEST
  * @see RequestContextListener
  * @see org.springframework.web.filter.RequestContextFilter
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.portlet.DispatcherPortlet
- * @since 2.0
  */
 public class RequestScope extends AbstractRequestAttributesScope {
 

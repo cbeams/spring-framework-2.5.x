@@ -20,13 +20,14 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
 
 /**
- * Abstract {@link Scope} implementation that reads from a particular scope in
- * the current thread bound {@link RequestAttributes} object. Subclasses simply
- * need to implement {@link #getScope()} to instruct this class which {@link RequestAttributes}
- * scope to read attributes from.
- * <p/>
- * Subclass may wish to override {@link #get} and {@link #remove} to add synchronization around the
- * call back into this super class.
+ * Abstract {@link Scope} implementation that reads from a particular scope
+ * in the current thread-bound {@link RequestAttributes} object.
+ *
+ * <p>Subclasses simply need to implement {@link #getScope()} to instruct
+ * this class which {@link RequestAttributes} scope to read attributes from.
+ *
+ * <p>Subclass may wish to override {@link #get} and {@link #remove}
+ * to add synchronization around the call back into this super class.
  * 
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -57,5 +58,12 @@ public abstract class AbstractRequestAttributesScope implements Scope {
 		}
 	}
 
+	/**
+	 * Template method that determines the actual target scope.
+	 * To be implemented by subclasses.
+	 * @return the target scope, in the form of an appropriate
+	 * {@link RequestAttributes} constant
+	 */
 	protected abstract int getScope();
+
 }

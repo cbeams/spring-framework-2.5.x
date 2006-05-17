@@ -33,8 +33,8 @@ import org.springframework.beans.factory.ObjectFactory;
  * <p>Can be implemented on top of a session API such as the
  * Servlet API's HttpSession interface.
  *
- * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 2.0
  * @see ConfigurableBeanFactory#registerScope
  * @see org.springframework.aop.scope.ScopedProxyFactoryBean
@@ -45,17 +45,17 @@ public interface Scope {
 	/**
 	 * Return the object from the underlying scope, creating it if not found.
 	 * @param name the name to bind with
-	 * @param  objectFactory the {@link ObjectFactory} used to create the scoped object if not present
-	 * @return object the associated value, or <code>null</code>
+	 * @param objectFactory the {@link ObjectFactory} used to create the scoped object if not present
+	 * @return the desired object
 	 */
 	Object get(String name, ObjectFactory objectFactory);
 
-
 	/**
 	 * Remove the object with the given name from the underlying scope. Returns
-	 * '<code>null</code>' if no object was found otherwise returns the removed
+	 * '<code>null</code>' if no object was found; otherwise returns the removed
 	 * <code>Object</code>.
 	 * @param name the name of the object to remove
+	 * @return the removed object, if any
 	 */
 	Object remove(String name);
 
