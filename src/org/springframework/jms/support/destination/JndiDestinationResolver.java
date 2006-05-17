@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,18 +27,20 @@ import javax.naming.NamingException;
 import org.springframework.jndi.JndiLocatorSupport;
 
 /**
- * Implementation of the DestinationResolver interface which interprets
- * destination names as JNDI locations, falling back to dynamic destinations else.
+ * {@link DestinationResolver} implementation which interprets destination names
+ * as JNDI locations (with a configurable fallback strategy).
  *
  * <p>Allows for customizing the JNDI environment if necessary,
  * for example specifying appropriate JNDI environment properties.
  *
  * <p>Dynamic queues and topics get cached by destination name.
  * Thus, use unique destination names across both queues and topics.
- * Caching can be turned off by specifying "cache" as "false", if desired.
+ * Caching can be turned off by specifying {@link #cache} as <code>false</code>.
  *
- * <b>Automatic creation of dynamic destinations is turned off by default.
- * Specify "fallbackToDynamicDestination" as "true" to enable this functionality.
+ * <b>Please note that the fallback to resolution of dynamic destinations is turned
+ * off by default. Specify
+ * {@link #fallbackToDynamicDestination fallbackToDynamicDestination} as
+ * <code>true</code> to enable this functionality.
  *
  * @author Mark Pollack
  * @author Juergen Hoeller
@@ -60,26 +62,34 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Desti
 
 
 	/**
-	 * Set whether to cache resolved destinations. Default is "true".
+	 * Set whether to cache resolved destinations. Default is <code>true</code> .
 	 * <p>Can be turned off to re-lookup a destination for each operation,
 	 * which allows for hot restarting of destinations. This is mainly
 	 * useful during development.
+     * <p>Please note that dynamic queues and topics get cached by destination name.
+     * Thus, use unique destination names across both queues and topics.
+     * @param cache <code>true</code> if resolved destinations are to be cached 
 	 */
 	public void setCache(boolean cache) {
 		this.cache = cache;
 	}
 
 	/**
-	 * Set the ability of JmsTemplate to create dynamic destinations
-	 * if the destination name is not found in JNDI. Default is "false".
+	 * Set the ability of {@link JndiDestinationResolver} to create dynamic destinations
+	 * if the destination name is not found in JNDI. Default is <code>false</code>.
+     * @param fallbackToDynamicDestination <code>true</code> if this {@link JndiDestinationResolver} instance is to
+     * fallback to resolving destinations dynamically
+     * @see #setDynamicDestinationResolver(DestinationResolver)  
 	 */
 	public void setFallbackToDynamicDestination(boolean fallbackToDynamicDestination) {
 		this.fallbackToDynamicDestination = fallbackToDynamicDestination;
 	}
 
 	/**
-	 * Set the DestinationResolver to use when falling back to dynamic destinations.
-	 * Default is a DynamicDestinationResolver.
+	 * Set the {@link DestinationResolver} to use when falling back to dynamic
+     * destinations.
+	 * <p>The default is a {@link DynamicDestinationResolver}.
+     * @param dynamicDestinationResolver the {@link DestinationResolver} to use when falling back to dynamic destinations
 	 * @see #setFallbackToDynamicDestination
 	 * @see DynamicDestinationResolver
 	 */

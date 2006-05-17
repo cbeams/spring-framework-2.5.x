@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,53 +16,80 @@
 
 package org.springframework.jms.support.destination;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.QueueSession;
-import javax.jms.Session;
-import javax.jms.TopicSession;
+import javax.jms.*;
 
 /**
- * Simple implementation of the DestinationResolver interface,
- * resolving destination names as dynamic destinations.
- *
+ * Simple {@link DestinationResolver} implementation resolving destination names
+ * as dynamic destinations.
+ * 
  * <p>This implementation will work on both JMS 1.1 and JMS 1.0.2,
- * because it uses the QueueSession or TopicSession methods if possible,
- * falling back to JMS 1.1's generic Session methods.
+ * because it uses the {@link javax.jms.QueueSession} or {@link javax.jms.TopicSession}
+ * methods if possible, falling back to JMS 1.1's generic {@link javax.jms.Session}
+ * methods.
  *
  * @author Juergen Hoeller
- * @since 1.1
  * @see javax.jms.QueueSession#createQueue
  * @see javax.jms.TopicSession#createTopic
  * @see javax.jms.Session#createQueue
  * @see javax.jms.Session#createTopic
+ * @since 1.1
  */
 public class DynamicDestinationResolver implements DestinationResolver {
 
-	public Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
-			throws JMSException {
+    /**
+     * Resolve the specified destination name as a dynamic destination.
+     * @param session the current JMS Session
+     * @param destinationName the name of the destination
+     * @param pubSubDomain <code>true</code> if the domain is pub-sub, <code>false</code> if P2P
+     * @return the JMS destination (either a topic or a queue)
+     * @throws javax.jms.JMSException if resolution failed
+     * @see #resolveTopic(javax.jms.Session, String) 
+     * @see #resolveQueue(javax.jms.Session, String) 
+     */
+    public Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
+            throws JMSException {
+        if (pubSubDomain) {
+            return resolveTopic(session, destinationName);
+        } else {
+            return resolveQueue(session, destinationName);
+        }
+    }
 
-		if (pubSubDomain) {
-			if (session instanceof TopicSession) {
-				// Cast to TopicSession: will work on both JMS 1.1 and 1.0.2
-				return ((TopicSession) session).createTopic(destinationName);
-			}
-			else {
-				// Fall back to generic JMS Session: will only work on JMS 1.1
-				return session.createTopic(destinationName);
-			}
-		}
 
-		else {
-			if (session instanceof QueueSession) {
-				// Cast to QueueSession: will work on both JMS 1.1 and 1.0.2
-				return ((QueueSession) session).createQueue(destinationName);
-			}
-			else {
-				// Fall back to generic JMS Session: will only work on JMS 1.1
-				return session.createQueue(destinationName);
-			}
-		}
-	}
+    /**
+     * Resolve the given destination name to a {@link Topic}.
+     * @param session the current JMS Session
+     * @param topicName the name of the desired {@link Topic}
+     * @return the JMS {@link Topic}
+     * @throws javax.jms.JMSException if resolution failed
+     * @see Session#createTopic(String)
+     */
+    protected Topic resolveTopic(Session session, String topicName) throws JMSException {
+        if (session instanceof TopicSession) {
+            // Cast to TopicSession: will work on both JMS 1.1 and 1.0.2
+            return ((TopicSession) session).createTopic(topicName);
+        } else {
+            // Fall back to generic JMS Session: will only work on JMS 1.1
+            return session.createTopic(topicName);
+        }
+    }
+
+    /**
+     * Resolve the given destination name to a {@link Queue}.
+     * @param session the current JMS Session
+     * @param queueName the name of the desired {@link Queue}
+     * @return the JMS {@link Queue}
+     * @throws javax.jms.JMSException if resolution failed
+     * @see Session#createQueue(String)
+     */
+    protected Queue resolveQueue(Session session, String queueName) throws JMSException {
+        if (session instanceof QueueSession) {
+            // Cast to QueueSession: will work on both JMS 1.1 and 1.0.2
+            return ((QueueSession) session).createQueue(queueName);
+        } else {
+            // Fall back to generic JMS Session: will only work on JMS 1.1
+            return session.createQueue(queueName);
+        }
+    }
 
 }

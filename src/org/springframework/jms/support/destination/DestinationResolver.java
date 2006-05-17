@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,16 @@ import javax.jms.JMSException;
 import javax.jms.Session;
 
 /**
- * Strategy interface for managing JMS destinations.
- * Used by JmsTemplate for resolving destination names.
+ * Strategy interface for resolving JMS destinations.
+ * 
+ * <p>Used by {@link org.springframework.jms.core.JmsTemplate} for resolving
+ * destination names from simple {@link String Strings} to actual
+ * {@link Destination} implementation instances.
  *
- * <p>Default implementations are DynamicDestinationResolver
- * and JndiDestinationResolver.
+ * <p>The default {@link DestinationResolver} implementation used by
+ * {@link org.springframework.jms.core.JmsTemplate} instances is the
+ * {@link DynamicDestinationResolver} class. Consider using the
+ * {@link JndiDestinationResolver} for more advanced scenarios.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -40,7 +45,7 @@ public interface DestinationResolver {
 	 * or as dynamic destination.
 	 * @param session the current JMS Session
 	 * @param destinationName the name of the destination
-	 * @param pubSubDomain whether the domain is pub-sub, else P2P
+	 * @param pubSubDomain <code>true</code> if the domain is pub-sub, <code>false</code> if P2P
 	 * @return the JMS destination (either a topic or a queue)
 	 * @throws javax.jms.JMSException if resolution failed
 	 */
