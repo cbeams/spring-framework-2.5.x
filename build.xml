@@ -1035,8 +1035,12 @@
 		<junit forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
 			<jvmarg line="-Djava.awt.headless=true"/>
+			<jvmarg line="-Dprovider=toplink"/>
+			<jvmarg line="-Xmx128m"/>
+			<jvmarg line="-XX:MaxPermSize=128m"/>
+            <jvmarg line="-javaagent:${lib.dir}/spring/jpa-test-agent.jar"/>
 
-			<!-- Must go first to ensure the jndi.properties takes precedence  -->
+            <!-- Must go first to ensure the jndi.properties takes precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
 			<classpath location="${target.tigertestclasses.dir}"/>
 			<classpath location="${target.mockclasses.dir}"/>
