@@ -456,9 +456,9 @@
 <!ATTLIST replaced-method name CDATA #IMPLIED>
 
 <!--
-	Bean name of an implementation of the MethodReplacer interface
-	in the current or ancestor factories. This may be a singleton or prototype
-	bean. If it's a prototype, a new instance will be used for each method replacement.
+	Bean name of an implementation of the MethodReplacer interface in the current
+	or ancestor factories. This may be a singleton or prototype bean. If it's
+	a prototype, a new instance will be used for each method replacement.
 	Singleton usage is the norm.
 -->
 <!ATTLIST replaced-method replacer CDATA #IMPLIED>
@@ -506,8 +506,8 @@
 	Defines a string property value, which must also be the id of another
 	bean in this factory or an external factory (parent or included factory).
 	While a regular 'value' element could instead be used for the same effect,
-	using idref in this case allows validation of local bean ids by the xml
-	parser, and name completion by delegatetetetete tools.
+	using idref in this case allows validation of local bean ids by the XML
+	parser, and name completion by supporting tools.
 -->
 <!ELEMENT idref EMPTY>
 
@@ -525,11 +525,10 @@
 
 <!--
 	Contains a string representation of a property value.
-	The property may be a string, or may be converted to the
-	required type using the JavaBeans PropertyEditor
-	machinery. This makes it possible for application developers
-	to write custom PropertyEditor implementations that can
-	convert strings to objects.
+	The property may be a string, or may be converted to the required
+	type using the JavaBeans PropertyEditor machinery. This makes it
+	possible for application developers to write custom PropertyEditor
+	implementations that can convert strings to arbitrary target objects.
 
 	Note that this is recommended for simple objects only.
 	Configure more complex objects by populating JavaBean
@@ -564,11 +563,16 @@
 	(bean | ref | idref | value | null | list | set | map | props)*
 )>
 
-<!-- Enable/disable merging for collections when using parent/child beans -->
+<!--
+	Enable/disable merging for collections when using parent/child beans.
+-->
 <!ATTLIST list merge (true | false | default) "default">
 
-<!-- Specify the default Java type for nested values -->
+<!--
+	Specify the default Java type for nested values.
+-->
 <!ATTLIST list value-type CDATA #IMPLIED>
+
 
 <!--
 	A set can contain multiple inner bean, ref, collection, or value elements.
@@ -579,11 +583,16 @@
 	(bean | ref | idref | value | null | list | set | map | props)*
 )>
 
-<!-- Enable/disable merging for collections when using parent/child beans -->
+<!--
+	Enable/disable merging for collections when using parent/child beans.
+-->
 <!ATTLIST set merge (true | false | default) "default">
 
-<!-- Specify the default Java type for nested values -->
+<!--
+	Specify the default Java type for nested values.
+-->
 <!ATTLIST set value-type CDATA #IMPLIED>
+
 
 <!--
 	A Spring map is a mapping from a string key to object.
@@ -593,13 +602,19 @@
 	(entry)*
 )>
 
-<!-- Enable/disable merging for collections when using parent/child beans -->
+<!--
+	Enable/disable merging for collections when using parent/child beans.
+-->
 <!ATTLIST map merge (true | false | default) "default">
 
-<!-- Specify the default Java type for nested entry keys -->
+<!--
+	Specify the default Java type for nested entry keys.
+-->
 <!ATTLIST map key-type CDATA #IMPLIED>
 
-<!-- Specify the default Java type for nested entry values -->
+<!--
+	Specify the default Java type for nested entry values.
+-->
 <!ATTLIST map value-type CDATA #IMPLIED>
 
 <!--
@@ -648,7 +663,9 @@
 	(prop)*
 )>
 
-<!-- Enable/disable merging for collections when using parent/child beans -->
+<!--
+	Enable/disable merging for collections when using parent/child beans.
+-->
 <!ATTLIST props merge (true | false | default) "default">
 
 <!--
