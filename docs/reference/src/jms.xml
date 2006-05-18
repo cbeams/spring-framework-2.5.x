@@ -469,7 +469,7 @@ public class ExampleListener implements MessageListener {
       }
     } else {
       throw new IllegalArgumentException(
-        "Message must be of type TestMessage");
+        "Message must be of type TextMessage");
     }
   }
 }]]></programlisting>
