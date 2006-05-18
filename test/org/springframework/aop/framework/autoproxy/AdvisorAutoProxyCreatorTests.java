@@ -127,17 +127,6 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 		assertEquals("Kerry", test.getSpouse().getName());
 	}
 
-	public void testCustomPoolingTargetSource() throws Exception {
-		BeanFactory bf = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/customTargetSource.xml");
-		ITestBean test = (ITestBean) bf.getBean("poolingTest");
-		assertTrue(AopUtils.isAopProxy(test));
-		Advised advised = (Advised) test;
-		assertTrue(advised.getTargetSource() instanceof CommonsPoolTargetSource);
-		assertEquals("Rod", test.getName());
-		// Check that references survived pooling
-		assertEquals("Kerry", test.getSpouse().getName());
-	}
-
 	public void testCustomPrototypeTargetSource() throws Exception {
 		CountingTestBean.count = 0;
 		BeanFactory bf = new ClassPathXmlApplicationContext("/org/springframework/aop/framework/autoproxy/customTargetSource.xml");

@@ -6,7 +6,6 @@
 	<bean id="autoproxy" class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
 		<property name="customTargetSourceCreators">
 			<list>
-				<bean class="org.springframework.aop.framework.autoproxy.TestPoolingTargetSourceCreator"/>
 				<bean class="org.springframework.aop.framework.autoproxy.SelectivePrototypeTargetSourceCreator"/>
 				<bean class="org.springframework.aop.framework.autoproxy.target.LazyInitTargetSourceCreator"/>
 			</list>
@@ -14,11 +13,6 @@
 	</bean>
 	
 	<bean id="test" singleton="false" class="org.springframework.beans.TestBean">
-		<property name="name"><value>Rod</value></property>
-		<property name="spouse"><ref local="wife"/></property>
-	</bean>
-	
-	<bean id="poolingTest" singleton="false" class="org.springframework.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
 		<property name="spouse"><ref local="wife"/></property>
 	</bean>

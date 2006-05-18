@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,6 @@ import java.util.List;
 import javax.servlet.ServletException;
 
 import junit.framework.TestCase;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -34,13 +33,13 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.Lockable;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.framework.autoproxy.metadata.Modifiable;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
