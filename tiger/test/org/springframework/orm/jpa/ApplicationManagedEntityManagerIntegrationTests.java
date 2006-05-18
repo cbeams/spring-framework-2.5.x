@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.jpa.spi;
+package org.springframework.orm.jpa;
 
 import java.util.List;
 
@@ -24,32 +24,24 @@ import javax.persistence.TransactionRequiredException;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.orm.jpa.domain.Person;
-import org.springframework.test.NotTransactional;
+import org.springframework.orm.jpa.AbstractEntityManagerFactoryIntegrationTests;
+import org.springframework.test.annotation.NotTransactional;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * An application-managed entity manager can join an
- * existing transaction, but such joining must be made programmatically,
- * not transactionally.
- * 
- * 
+ * An application-managed entity manager can join an existing transaction,
+ * but such joining must be made programmatically, not transactionally.
+ *
  * @author Rod Johnson
  * @since 2.0
  */
-public class ApplicationManagedEntityManagerFactoryBeanIntegrationTests extends AbstractContainerEntityManagerFactoryBeanIntegrationTests {
+public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEntityManagerFactoryIntegrationTests {
 	
 	@NotTransactional
 	public void testEntityManagerIsProxy() {
 		assertTrue("EntityManagerFactory is proxied", AopUtils.isAopProxy(entityManagerFactory));
 	}
-	
-	@NotTransactional
-	public void testApplicationManagedEntityManagerProxyImplementsSpringInterface() {
-		EntityManager applicationManagedEm = entityManagerFactory.createEntityManager();
-		ContainerEntityManagerFactoryBeanIntegrationTests.verifyImplementsPortableEntityManagerPlus(applicationManagedEm);
-	}
 
-	
 	@Transactional(readOnly=true)
 	public void testEntityManagerProxyIsProxy() {
 		EntityManager em = entityManagerFactory.createEntityManager();
@@ -77,17 +69,17 @@ public class ApplicationManagedEntityManagerFactoryBeanIntegrationTests extends 
 		EntityManager em = entityManagerFactory.createEntityManager();		
 		try {
 			doInstantiateAndSave(em);
-			fail();
+			fail("Should have thrown TransactionRequiredException");
 		}
 		catch (TransactionRequiredException ex) {
-			
+			// expected
 		}
 		
 		// TODO following lines are a workaround for Hibernate bug
 		// If Hibernate throws an exception due to flush(),
 		// it actually HAS flushed, meaning that the database
 		// was updated outside the transaction
-		deleteAllPeopleUsingEntityManager(sharedEntityManagerProxy);
+		deleteAllPeopleUsingEntityManager(sharedEntityManager);
 		setComplete();
 	}
 	
@@ -169,5 +161,4 @@ public class ApplicationManagedEntityManagerFactoryBeanIntegrationTests extends 
 		deleteFromTables(new String[] { "person" });
 	}
 	
-
 }

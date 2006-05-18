@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.jpa.spi;
+package org.springframework.orm.jpa;
 
 import java.util.List;
 
@@ -24,14 +24,14 @@ import javax.persistence.TransactionRequiredException;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.orm.jpa.domain.Person;
-import org.springframework.test.ExpectedException;
-import org.springframework.test.NotTransactional;
+import org.springframework.orm.jpa.AbstractEntityManagerFactoryIntegrationTests;
+import org.springframework.test.annotation.ExpectedException;
+import org.springframework.test.annotation.NotTransactional;
 
 /**
  * @author Rod Johnson
- *
  */
-public class ContainerManagedExtendedEntityManagerFactoryBeanIntegrationTests extends AbstractContainerEntityManagerFactoryBeanIntegrationTests {
+public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntityManagerFactoryIntegrationTests {
 	
 	public void testEntityManagerProxyIsProxy() {
 		EntityManager em = createContainerManagedEntityManager();
@@ -51,19 +51,12 @@ public class ContainerManagedExtendedEntityManagerFactoryBeanIntegrationTests ex
 		assertTrue(em.isOpen());
 	}
 	
-	@NotTransactional
-	public void testContainerManagedEntityManagerProxyImplementsSpringInterface() {
-		EntityManager applicationManagedEm = createContainerManagedEntityManager();
-		ContainerEntityManagerFactoryBeanIntegrationTests.verifyImplementsPortableEntityManagerPlus(applicationManagedEm);
-	}
-	
 	// This would be legal, at least if not actually _starting_ a tx
 	@ExpectedException(IllegalStateException.class)
 	public void testEntityManagerProxyRejectsProgrammaticTxManagement() {
 		createContainerManagedEntityManager().getTransaction();
 	}
-	
-	
+
 	/*
 	 * See comments in spec on EntityManager.joinTransaction().
 	 * We take the view that this is a valid no op.

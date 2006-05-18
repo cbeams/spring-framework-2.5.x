@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.jpa.spi;
+package org.springframework.orm.jpa;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,14 +29,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.util.StringUtils;
-import org.springframework.util.xml.DomUtils;
-import org.springframework.util.xml.SimpleSaxErrorHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -44,19 +36,23 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.jdbc.datasource.lookup.DataSourceLookup;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import org.springframework.util.xml.DomUtils;
+import org.springframework.util.xml.SimpleSaxErrorHandler;
+
 /**
- * DOM based PersistenceUnitReader.
- * 
+ * Helper class for reading <code>persistence.xml</code> files.
+ *
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 2.0
  */
-public class DomPersistenceUnitReader implements PersistenceUnitReader, ResourceLoaderAware {
-
-	private static final Log logger = LogFactory.getLog(DomPersistenceUnitReader.class);
-
-	private ResourceLoader resourceLoader = new DefaultResourceLoader();
-
-	private JpaDataSourceLookup dataSourceLookup = new JndiDataSourceLookup();
+class PersistenceUnitReader {
 
 	private static final String MAPPING_FILE_NAME = "mapping-file";
 
@@ -86,83 +82,52 @@ public class DomPersistenceUnitReader implements PersistenceUnitReader, Resource
 
 	private static final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
 
-	private static final String XERCES_SCHEMA = "http://apache.org/xml/features/validation/schema";
 
-	private static final String XERCES_DYNAMIC = "http://apache.org/xml/features/validation/dynamic";
+	private final Log logger = LogFactory.getLog(getClass());
 
-	private static final String XERCES_NAMESPACE = "http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation";
+	private final ResourceLoader resourceLoader;
 
-	private static final String XERCES_SCHEMA_LOCATION = "http://apache.org/xml/properties/schema/external-schemaLocation";
+	private final DataSourceLookup dataSourceLookup;
 
-	private static final String XML_VALIDATION = "http://xml.org/sax/features/validation";
 
-	private static final String XML_SCHEMA_VALIDATION = "http://apache.org/xml/features/validation/schema";
-
-	private boolean validation = true;
-
-	/**
-	 * Should we validate the persistence.xml?
-	 * 
-	 * @param validate
-	 *            whether to validate persistence.xml
-	 */
-	public void setValidation(boolean validate) {
-		this.validation = validate;
+	public PersistenceUnitReader(ResourceLoader resourceLoader, DataSourceLookup dataSourceLookup) {
+		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
+		Assert.notNull(dataSourceLookup, "DataSourceLookup must not be null");
+		this.resourceLoader = resourceLoader;
+		this.dataSourceLookup = dataSourceLookup;
 	}
 
-	public boolean getValidation() {
-		throw new UnsupportedOperationException();
-	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.orm.jpa.PersistenceUnitReader#readPersistenceUnitInfo(org.springframework.core.io.Resource)
-	 */
-	public DefaultPersistenceUnitInfo[] readPersistenceUnitInfo(Resource resource) {
-		InputStream stream = null;
+	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String persistenceXmlLocation) {
+		ErrorHandler handler = new SimpleSaxErrorHandler(logger);
+		List<SpringPersistenceUnitInfo> infos = new ArrayList<SpringPersistenceUnitInfo>();
+		Resource resource = this.resourceLoader.getResource(persistenceXmlLocation);
 		try {
-			ErrorHandler handler = new SimpleSaxErrorHandler(logger);
-
-			List<DefaultPersistenceUnitInfo> infos = new ArrayList<DefaultPersistenceUnitInfo>();
-
-			stream = resource.getInputStream();
-			Document document = validateResource(handler, stream);
-			parseDocument(document, infos);
-
-			return infos.toArray(new DefaultPersistenceUnitInfo[] {});
+			InputStream stream = resource.getInputStream();
+			try {
+				Document document = validateResource(handler, stream);
+				parseDocument(document, infos);
+				return infos.toArray(new SpringPersistenceUnitInfo[] {});
+			}
+			finally {
+				stream.close();
+			}
 		}
 		catch (IOException ex) {
-			throw new IllegalArgumentException("Cannot parse persistence unit from resource " + resource, ex);
+			throw new IllegalArgumentException("Cannot parse persistence unit from " + resource, ex);
 		}
 		catch (SAXException ex) {
-			throw new IllegalArgumentException("Invalid XML in persistence unit from resource " + resource, ex);
+			throw new IllegalArgumentException("Invalid XML in persistence unit from " + resource, ex);
 		}
 		catch (ParserConfigurationException ex) {
-			throw new IllegalArgumentException("Internal error parsing persistence unit from resource " + resource);
-		}
-		finally {
-			if (stream != null) {
-				try {
-					stream.close();
-				}
-				catch (IOException ex) {
-					throw new IllegalArgumentException(
-							"Error trying to close stream from persistence unit from resource " + resource, ex);
-				}
-			}
+			throw new IllegalArgumentException("Internal error parsing persistence unit from " + resource);
 		}
 	}
 
 	/**
 	 * Parse the validated document and populates the given unit info list.
-	 * 
-	 * @param document
-	 * @param infos
-	 * @return
-	 * @throws IOException
 	 */
-	protected List<DefaultPersistenceUnitInfo> parseDocument(Document document, List<DefaultPersistenceUnitInfo> infos)
+	protected List<SpringPersistenceUnitInfo> parseDocument(Document document, List<SpringPersistenceUnitInfo> infos)
 			throws IOException {
 		Element persistence = document.getDocumentElement();
 		List<Element> units = (List<Element>) DomUtils.getChildElementsByTagName(persistence, PERSISTENCE_UNIT);
@@ -174,12 +139,7 @@ public class DomPersistenceUnitReader implements PersistenceUnitReader, Resource
 	}
 
 	/**
-	 * Utility method that returns the first child element identified by its
-	 * name.
-	 * 
-	 * @param rootElement
-	 * @param childName
-	 * @return
+	 * Utility method that returns the first child element identified by its name.
 	 */
 	protected Element getChildElementByName(Element rootElement, String childName) {
 		NodeList nl = rootElement.getChildNodes();
@@ -193,12 +153,7 @@ public class DomPersistenceUnitReader implements PersistenceUnitReader, Resource
 	}
 
 	/**
-	 * Utility method that returns the first child element value identified by
-	 * its name.
-	 * 
-	 * @param rootElement
-	 * @param childName
-	 * @return
+	 * Utility method that returns the first child element value identified by its name.
 	 */
 	protected String getChildElementValueByName(Element rootElement, String childName) {
 		Element child = getChildElementByName(rootElement, childName);
@@ -211,13 +166,9 @@ public class DomPersistenceUnitReader implements PersistenceUnitReader, Resource
 
 	/**
 	 * Parse the unit info DOM element.
-	 * 
-	 * @param persistenceUnit
-	 * @return
-	 * @throws IOException
 	 */
-	protected DefaultPersistenceUnitInfo parsePersistenceUnitInfo(Element persistenceUnit) throws IOException {
-		DefaultPersistenceUnitInfo unitInfo = new DefaultPersistenceUnitInfo();
+	protected SpringPersistenceUnitInfo parsePersistenceUnitInfo(Element persistenceUnit) throws IOException {
+		SpringPersistenceUnitInfo unitInfo = new SpringPersistenceUnitInfo();
 		// set name
 		unitInfo.setPersistenceUnitName(persistenceUnit.getAttribute(UNIT_NAME));
 		// set transaction type
@@ -229,12 +180,12 @@ public class DomPersistenceUnitReader implements PersistenceUnitReader, Resource
 		// datasource
 		String jtaDataSource = getChildElementValueByName(persistenceUnit, JTA_DATA_SOURCE);
 		if (jtaDataSource != null) {
-			unitInfo.setJtaDataSource(dataSourceLookup.lookupDataSource(jtaDataSource));
+			unitInfo.setJtaDataSource(this.dataSourceLookup.getDataSource(jtaDataSource));
 		}
 
 		String nonJtaDataSource = getChildElementValueByName(persistenceUnit, NON_JTA_DATA_SOURCE);
 		if (nonJtaDataSource != null) {
-			unitInfo.setNonJtaDataSource(dataSourceLookup.lookupDataSource(nonJtaDataSource));
+			unitInfo.setNonJtaDataSource(this.dataSourceLookup.getDataSource(nonJtaDataSource));
 		}
 
 		// provider
@@ -257,12 +208,9 @@ public class DomPersistenceUnitReader implements PersistenceUnitReader, Resource
 
 	/**
 	 * Parse the <code>property</code> XML elements.
-	 * 
-	 * @param persistenceUnit
-	 * @param unitInfo
 	 */
 	@SuppressWarnings("unchecked")
-	protected void parseProperty(Element persistenceUnit, DefaultPersistenceUnitInfo unitInfo) {
+	protected void parseProperty(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
 		Element propRoot = getChildElementByName(persistenceUnit, PROPERTIES);
 		if (propRoot == null)
 			return;
@@ -277,12 +225,9 @@ public class DomPersistenceUnitReader implements PersistenceUnitReader, Resource
 
 	/**
 	 * Parse the <code>class</code> XML elements.
-	 * 
-	 * @param persistenceUnit
-	 * @param unitInfo
 	 */
 	@SuppressWarnings("unchecked")
-	protected void parseClass(Element persistenceUnit, DefaultPersistenceUnitInfo unitInfo) {
+	protected void parseClass(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
 		List<Element> classes = DomUtils.getChildElementsByTagName(persistenceUnit, MANAGED_CLASS_NAME);
 		for (Element element : classes) {
 			String value = DomUtils.getTextValue(element);
@@ -293,18 +238,14 @@ public class DomPersistenceUnitReader implements PersistenceUnitReader, Resource
 
 	/**
 	 * Parse the <code>jar-file</code> XML elements.
-	 * 
-	 * @param persistenceUnit
-	 * @param unitInfo
-	 * @throws IOException
 	 */
 	@SuppressWarnings("unchecked")
-	protected void parseJarFiles(Element persistenceUnit, DefaultPersistenceUnitInfo unitInfo) throws IOException {
+	protected void parseJarFiles(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) throws IOException {
 		List<Element> jars = DomUtils.getChildElementsByTagName(persistenceUnit, JAR_FILE_URL);
 		for (Element element : jars) {
 			String value = DomUtils.getTextValue(element);
 			if (StringUtils.hasText(value)) {
-				Resource resource = resourceLoader.getResource(value);
+				Resource resource = this.resourceLoader.getResource(value);
 				unitInfo.addJarFileUrl(resource.getURL());
 			}
 		}
@@ -312,12 +253,9 @@ public class DomPersistenceUnitReader implements PersistenceUnitReader, Resource
 
 	/**
 	 * Parse the <code>mapping-file</code> XML elements.
-	 * 
-	 * @param persistenceUnit
-	 * @param unitInfo
 	 */
 	@SuppressWarnings("unchecked")
-	protected void parseMappingFiles(Element persistenceUnit, DefaultPersistenceUnitInfo unitInfo) {
+	protected void parseMappingFiles(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
 		List<Element> files = DomUtils.getChildElementsByTagName(persistenceUnit, MAPPING_FILE_NAME);
 		for (Element element : files) {
 			String value = DomUtils.getTextValue(element);
@@ -328,22 +266,15 @@ public class DomPersistenceUnitReader implements PersistenceUnitReader, Resource
 
 	/**
 	 * Validate the given stream and return a valid DOM document for parsing.
-	 * 
-	 * @param handler
-	 * @param stream
-	 * @return
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
-	 * @throws IOException
 	 */
-	protected Document validateResource(ErrorHandler handler, InputStream stream) throws ParserConfigurationException,
-			SAXException, IOException {
+	protected Document validateResource(ErrorHandler handler, InputStream stream)
+			throws ParserConfigurationException, SAXException, IOException {
+
 		Resource schemaLocation = new ClassPathResource(SCHEMA_NAME);
 
 		// InputSource source = new InputSource(stream);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-
-		dbf.setValidating(validation);
+		dbf.setValidating(true);
 		dbf.setNamespaceAware(true);
 
 		dbf.setAttribute(JAXP_SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
@@ -364,30 +295,6 @@ public class DomPersistenceUnitReader implements PersistenceUnitReader, Resource
 		DocumentBuilder parser = dbf.newDocumentBuilder();
 		parser.setErrorHandler(handler);
 		return parser.parse(stream);
-	}
-
-	/**
-	 * @return Returns the dataSourceLookup.
-	 */
-	public JpaDataSourceLookup getDataSourceLookup() {
-		return dataSourceLookup;
-	}
-
-	/**
-	 * @param dataSourceLookup
-	 *            The dataSourceLookup to set.
-	 */
-	public void setDataSourceLookup(JpaDataSourceLookup dataSourceLookup) {
-		this.dataSourceLookup = dataSourceLookup;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.context.ResourceLoaderAware#setResourceLoader(org.springframework.core.io.ResourceLoader)
-	 */
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
 	}
 
 }

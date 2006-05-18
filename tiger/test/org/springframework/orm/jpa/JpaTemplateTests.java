@@ -199,7 +199,7 @@ public class JpaTemplateTests extends TestCase {
 
 	/*
 	 * Test method for
-	 * 'org.springframework.orm.jpa.JpaTemplate.createEntityManagerProxy(EntityManager)'
+	 * 'org.springframework.orm.jpa.JpaTemplate.createSharedEntityManager(EntityManager)'
 	 */
 	public void testCreateEntityManagerProxy() {
 		manager.clear();

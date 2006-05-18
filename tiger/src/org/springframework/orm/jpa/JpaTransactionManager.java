@@ -40,7 +40,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /**
  * PlatformTransactionManager implementation for a single JPA EntityManagerFactory.
  * Binds a JPA EntityManager from the specified factory to the thread, potentially
- * allowing for one thread EntityManager per factory. SharedEntityManagerFactory
+ * allowing for one thread EntityManager per factory. SharedEntityManagerCreator
  * and JpaTemplate are aware of thread-bound entity managers and participate in such
  * transactions automatically. Using either is required for JPA access code supporting
  * this transaction management mechanism.
@@ -80,7 +80,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see #setDataSource
  * @see LocalEntityManagerFactoryBean
  * @see JpaTemplate#execute
- * @see org.springframework.orm.jpa.support.SharedEntityManagerFactory
+ * @see org.springframework.orm.jpa.support.SharedEntityManagerBean
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
  * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
  * @see org.springframework.jdbc.core.JdbcTemplate
@@ -312,7 +312,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 		// unwrap it. Otherwise the returned EntityManager
 		// created from calls to createEntityManager() would
 		// try to synchronize with the transaction itself.
-		EntityManagerFactory emfToUse  = getEntityManagerFactory();
+		EntityManagerFactory emfToUse = getEntityManagerFactory();
 		if (emfToUse instanceof EntityManagerFactoryInfo) {
 			emfToUse = ((EntityManagerFactoryInfo) emfToUse).getNativeEntityManagerFactory();
 		}

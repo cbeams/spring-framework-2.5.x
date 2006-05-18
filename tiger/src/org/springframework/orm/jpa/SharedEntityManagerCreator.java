@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.jpa.support;
+package org.springframework.orm.jpa;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -26,11 +26,8 @@ import javax.persistence.EntityManagerFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.orm.jpa.EntityManagerFactoryInfo;
+
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
-import org.springframework.orm.jpa.PortableEntityManagerFactoryPlus;
-import org.springframework.orm.jpa.PortableEntityManagerPlus;
-import org.springframework.orm.jpa.PortableEntityManagerPlusOperations;
 
 /**
  * FactoryBean that exposes a shared JPA EntityManager reference for a
@@ -58,40 +55,26 @@ import org.springframework.orm.jpa.PortableEntityManagerPlusOperations;
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since 2.0
- * @see #setEntityManagerFactory
- * @see #setEntityManagerInterface
  * @see org.springframework.orm.jpa.LocalEntityManagerFactoryBean
  * @see org.springframework.orm.jpa.JpaTransactionManager
  */
-public class SharedEntityManagerFactory extends AbstractEntityManagerProxyFactoryBean {
+public abstract class SharedEntityManagerCreator {
 	
 	/**
 	 * Return a shared transactional EntityManager proxy,
 	 * given this EntityManagerFactory
-	 * @param classLoader class loader to use to create the dynamic proxy
 	 * @param entityManagerInterfaces interfaces to be implemented by the
 	 * EntityManager. Allows the addition or specification of proprietary interfaces.
 	 * @param emf EntityManagerFactory to obtain EntityManagers from as needed
 	 * @return a shareable transaction EntityManager proxy
 	 */
-	public static EntityManager createEntityManagerProxy(ClassLoader classLoader, 
+	public static EntityManager createSharedEntityManager(
 			EntityManagerFactory emf, Class...entityManagerInterfaces) {
-		if (entityManagerInterfaces.length == 0) {
-			entityManagerInterfaces = new Class[] { PortableEntityManagerPlus.class };
-		}
+
 		return (EntityManager) Proxy.newProxyInstance(
-				classLoader,
+				SharedEntityManagerCreator.class.getClassLoader(),
 				entityManagerInterfaces,
 				new SharedEntityManagerInvocationHandler(emf));
-	}
-	
-
-	@Override
-	protected EntityManager createEntityManagerProxy() {
-		return createEntityManagerProxy(
-				getClass().getClassLoader(),
-				getEntityManagerFactory(),
-				getEntityManagerInterface());
 	}
 
 
@@ -149,19 +132,10 @@ public class SharedEntityManagerFactory extends AbstractEntityManagerProxyFactor
 				target = this.targetFactory.createEntityManager();
 				isNewEm = true;
 			}
-			
-			PortableEntityManagerPlusOperations portableEntityManagerPlusOperations = null;
-			if (PortableEntityManagerPlusOperations.class.equals(method.getDeclaringClass())) {
-				portableEntityManagerPlusOperations = 
-					getPortableEntityManagerPlusOperationTargetIfPossible(targetFactory, target);
-			}
 
 			// Invoke method on current EntityManager.
 			try {
-				return method.invoke(portableEntityManagerPlusOperations != null ?
-								portableEntityManagerPlusOperations :
-								target, 
-						args);
+				return method.invoke(target, args);
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
@@ -172,22 +146,6 @@ public class SharedEntityManagerFactory extends AbstractEntityManagerProxyFactor
 				}
 			}
 		}
-		
-		private PortableEntityManagerPlusOperations getPortableEntityManagerPlusOperationTargetIfPossible(
-				EntityManagerFactory emf, EntityManager em) {
-			if (!(emf instanceof PortableEntityManagerFactoryPlus)) {
-				throw new UnsupportedOperationException();
-			}
-			EntityManagerFactoryInfo emfi = ((PortableEntityManagerFactoryPlus) emf).getEntityManagerFactoryInfo();
-			if (emfi.getVendorProperties() == null) {
-				throw new UnsupportedOperationException("No vendor properties available");
-			}
-			
-			PortableEntityManagerPlusOperations pempo = emfi.getVendorProperties().
-				getJpaDialect().
-				getPortableEntityManagerPlusOperations(em);
-			return pempo;
-		}
-
 	}
+
 }

@@ -21,7 +21,6 @@ import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceUnitInfo;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
 
 /**
@@ -46,22 +45,21 @@ public abstract class AbstractEntityManagerFactoryBeanTests extends TestCase {
 //		mockEmf.close();
 //		emfMc.setVoidCallable(1);
 	}
-		
-	
+
 	protected void checkInvariants(AbstractEntityManagerFactoryBean demf) {
 		assertTrue(EntityManagerFactory.class.isAssignableFrom(demf.getObjectType()));
 		Object gotObject = demf.getObject();
-		assertTrue("Object created by factory implements PortableEntityManagerPlus", 
-				gotObject instanceof PortableEntityManagerFactoryPlus);
-		PortableEntityManagerFactoryPlus pemp = (PortableEntityManagerFactoryPlus) demf.getObject();
-		assertSame("Successive invocations of getObject() return same object", pemp, demf.getObject());
-		assertSame(pemp, demf.getObject());
-		assertSame(pemp.getEntityManagerFactoryInfo().getNativeEntityManagerFactory(), 
-				mockEmf);
+		assertTrue("Object created by factory implements EntityManagerFactoryInfo",
+				gotObject instanceof EntityManagerFactoryInfo);
+		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) demf.getObject();
+		assertSame("Successive invocations of getObject() return same object", emfi, demf.getObject());
+		assertSame(emfi, demf.getObject());
+		assertSame(emfi.getNativeEntityManagerFactory(), mockEmf);
 	}
 
 
 	protected static class DummyEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean {
+
 		private final EntityManagerFactory emf;
 		
 		public DummyEntityManagerFactoryBean(EntityManagerFactory emf) {
@@ -81,50 +79,5 @@ public abstract class AbstractEntityManagerFactoryBeanTests extends TestCase {
 			throw new UnsupportedOperationException();
 		}
 	}
-	
-	protected static class DummyVendorProperties extends VendorProperties {
 
-		@Override
-		public void applyBeforeProviderCreation(AbstractEntityManagerFactoryBean fb) {
-		}
-
-		@Override
-		public JpaDialect getJpaDialect() {
-			return new DefaultJpaDialect() {
-				@Override
-				public PortableEntityManagerFactoryPlusOperations getPortableEntityManagerFactoryPlusOperations(EntityManagerFactory emf, EntityManagerFactoryInfo emfi) {
-					return new PortableEntityManagerFactoryPlusOperations() {
-
-						public void evict(Class clazz) {
-							throw new UnsupportedOperationException();
-						}
-
-						public EntityManagerFactoryInfo getEntityManagerFactoryInfo() {
-							return new EntityManagerFactoryInfo() {
-
-								public EntityManagerFactory getNativeEntityManagerFactory() {
-									return mockEmf;
-								}
-
-								public PersistenceUnitInfo getPersistenceUnitInfo() {
-									throw new UnsupportedOperationException();
-								}
-
-								public String getPersistenceUnitName() {
-									throw new UnsupportedOperationException();
-								}
-
-								public VendorProperties getVendorProperties() {
-									return DummyVendorProperties.this;
-								}
-								
-							};
-						}
-						
-					};
-				}
-			};
-		}
-		
-	}
 }

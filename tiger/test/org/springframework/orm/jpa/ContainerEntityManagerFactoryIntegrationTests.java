@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.jpa.spi;
+package org.springframework.orm.jpa;
 
 import java.lang.reflect.Proxy;
 import java.util.List;
@@ -22,63 +22,37 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import junit.framework.Assert;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
-import org.springframework.orm.jpa.PortableEntityManagerFactoryPlus;
-import org.springframework.orm.jpa.PortableEntityManagerPlus;
+import org.springframework.orm.jpa.AbstractEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.domain.DriversLicense;
 import org.springframework.orm.jpa.domain.Person;
-import org.springframework.test.ExpectedException;
-import org.springframework.test.NotTransactional;
-import org.springframework.test.Repeat;
-import org.springframework.test.Timed;
+import org.springframework.test.annotation.ExpectedException;
+import org.springframework.test.annotation.NotTransactional;
+import org.springframework.test.annotation.Repeat;
+import org.springframework.test.annotation.Timed;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Integration tests for ContainerEntityManagerFactoryBean.
- * Uses an in-memory database. Subclasses should only override the getLocation method.
- * 
- * 
+ * Uses an in-memory database.
+ *
  * @author Rod Johnson
  * @since 2.0
  */
-public class ContainerEntityManagerFactoryBeanIntegrationTests extends AbstractContainerEntityManagerFactoryBeanIntegrationTests {
+public class ContainerEntityManagerFactoryIntegrationTests extends AbstractEntityManagerFactoryIntegrationTests {
 	
 	@NotTransactional
 	public void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
 		assertTrue(Proxy.isProxyClass(entityManagerFactory.getClass()));
 		assertTrue("Must have introduced config interface", 
-				entityManagerFactory instanceof PortableEntityManagerFactoryPlus);
-		EntityManagerFactoryInfo pemf = ((PortableEntityManagerFactoryPlus) entityManagerFactory).getEntityManagerFactoryInfo();
-		assertEquals("Person", pemf.getPersistenceUnitName());
-		assertNotNull("PersistenceUnitInfo must be available", pemf.getPersistenceUnitInfo());
-		assertNotNull("Raw EntityManagerFactory must be available", pemf.getNativeEntityManagerFactory());
-		assertNotNull("VendorProperties will be available in this test", pemf.getVendorProperties());
+				entityManagerFactory instanceof EntityManagerFactoryInfo);
+		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
+		assertEquals("Person", emfi.getPersistenceUnitName());
+		assertNotNull("PersistenceUnitInfo must be available", emfi.getPersistenceUnitInfo());
+		assertNotNull("Raw EntityManagerFactory must be available", emfi.getNativeEntityManagerFactory());
 	}
-	
-	@NotTransactional
-	public void testSharedEntityManagerProxyImplementsPortableEntityManagerPlus() {
-		verifyImplementsPortableEntityManagerPlus(sharedEntityManagerProxy);
-	}
-	
-	
-	public static void verifyImplementsPortableEntityManagerPlus(EntityManager em) {
-		Assert.assertTrue("Spring shared entity managers must implement value add interface", 
-				em instanceof PortableEntityManagerPlus);
-		PortableEntityManagerPlus pemp = (PortableEntityManagerPlus) em;
-		Assert.assertNotNull(pemp.getNativeEntityManager());
-	}
-	
-	@NotTransactional
-	public void testEntityManagerFactoryImplementsPortableEntityManagerFactoryPlus() {
-		assertTrue("EntityManager implements Spring subinterface",
-				entityManagerFactory instanceof PortableEntityManagerFactoryPlus);
-		PortableEntityManagerFactoryPlus pemf = (PortableEntityManagerFactoryPlus) entityManagerFactory;
-		pemf.evict(Person.class);
-	}
-	
+
 	public void testStateClean() {
 		assertEquals("Should be no people from previous transactions",
 				0, countRowsInTable("person"));
@@ -99,19 +73,18 @@ public class ContainerEntityManagerFactoryBeanIntegrationTests extends AbstractC
 	
 	@Transactional(readOnly=true)
 	public void testEntityManagerProxyIsProxy() {
-		assertTrue(AopUtils.isAopProxy(sharedEntityManagerProxy));
-		Query q = sharedEntityManagerProxy.createQuery("select p from Person as p");
+		assertTrue(AopUtils.isAopProxy(sharedEntityManager));
+		Query q = sharedEntityManager.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
 		
-		assertTrue("Should be open to start with", sharedEntityManagerProxy.isOpen());
-		sharedEntityManagerProxy.close();
-		assertTrue("Close should have been silently ignored", sharedEntityManagerProxy.isOpen());
+		assertTrue("Should be open to start with", sharedEntityManager.isOpen());
+		sharedEntityManager.close();
+		assertTrue("Close should have been silently ignored", sharedEntityManager.isOpen());
 	}
-	
-	
-	@ExpectedException(IllegalArgumentException.class)
+
+	@ExpectedException(RuntimeException.class)
 	public void testBogusQuery() {
-		sharedEntityManagerProxy.createQuery("It's raining toads");
+		sharedEntityManager.createQuery("It's raining toads");
 	}
 
 	public void testLazyLoading() {
@@ -120,12 +93,12 @@ public class ContainerEntityManagerFactoryBeanIntegrationTests extends AbstractC
 			tony.setFirstName("Tony");
 			tony.setLastName("Blair");
 			tony.setDriversLicense(new DriversLicense("8439DK"));
-			sharedEntityManagerProxy.persist(tony);
+			sharedEntityManager.persist(tony);
 			setComplete();
 			endTransaction();
 			
 			startNewTransaction();
-			sharedEntityManagerProxy.clear();
+			sharedEntityManager.clear();
 			Person newTony = entityManagerFactory.createEntityManager().getReference(Person.class, tony.getId());
 			assertNotSame(newTony, tony);
 			endTransaction();
@@ -145,8 +118,8 @@ public class ContainerEntityManagerFactoryBeanIntegrationTests extends AbstractC
 		String firstName = "Tony";
 		insertPerson(firstName);
 		
-		assertTrue(AopUtils.isAopProxy(sharedEntityManagerProxy));
-		Query q = sharedEntityManagerProxy.createQuery("select p from Person as p");
+		assertTrue(AopUtils.isAopProxy(sharedEntityManager));
+		Query q = sharedEntityManager.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
 		
 		assertEquals(1, people.size());
@@ -160,7 +133,7 @@ public class ContainerEntityManagerFactoryBeanIntegrationTests extends AbstractC
 	
 	public void testEntityManagerProxyRejectsProgrammaticTxManagement() {
 		try {
-			sharedEntityManagerProxy.getTransaction();
+			sharedEntityManager.getTransaction();
 			fail("Should not be able to create transactions on container managed EntityManager");
 		}
 		catch (IllegalStateException ex) {			
@@ -169,7 +142,7 @@ public class ContainerEntityManagerFactoryBeanIntegrationTests extends AbstractC
 	
 	public void testSharedEntityManagerProxyRejectsProgrammaticTxJoining() {
 		try {
-			sharedEntityManagerProxy.joinTransaction();
+			sharedEntityManager.joinTransaction();
 			fail("Should not be able to join transactions with container managed EntityManager");
 		}
 		catch (IllegalStateException ex) {		
@@ -184,10 +157,9 @@ public class ContainerEntityManagerFactoryBeanIntegrationTests extends AbstractC
 //	}
 	
 	public void testInstantiateAndSaveWithSharedEmProxy() {
-		testInstantiateAndSave(sharedEntityManagerProxy);
+		testInstantiateAndSave(sharedEntityManager);
 	}
-	
-	
+
 	protected void testInstantiateAndSave(EntityManager em) {
 		assertEquals("Should be no people from previous transactions",
 				0, countRowsInTable("person"));
@@ -199,12 +171,9 @@ public class ContainerEntityManagerFactoryBeanIntegrationTests extends AbstractC
 		em.persist(p);
 		
 		em.flush();
-		assertEquals("1 row must have been inserted",
-				1, countRowsInTable("person"));
+		assertEquals("1 row must have been inserted", 1, countRowsInTable("person"));
 	}
-	
-	
-	
+
 //	public void testEntityManagerProxyException() {
 //		try {
 //			entityManagerProxy.createQuery("select p from Person p where p.o=0").getResultList();
@@ -224,4 +193,5 @@ public class ContainerEntityManagerFactoryBeanIntegrationTests extends AbstractC
 //			System.out.println(p);
 //		}
 	}
+
 }

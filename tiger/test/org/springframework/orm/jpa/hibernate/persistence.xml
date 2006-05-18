@@ -1,10 +1,10 @@
 <persistence xmlns="http://java.sun.com/xml/ns/persistence"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
-          http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
 	version="1.0">
 
 	<persistence-unit name="Person" transaction-type="RESOURCE_LOCAL">
+
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
 
 		<class>org.springframework.orm.jpa.domain.Person</class>
@@ -13,12 +13,10 @@
 		<exclude-unlisted-classes />
 
 		<properties>
-			<property name="hibernate.dialect"
-				value="org.hibernate.dialect.HSQLDialect" />
-			<property name="hibernate.hbm2ddl.auto" value="create-drop" />
-			<!-- 
-            <property name="hibernate.ejb.cfgfile" value="/org/springframework/orm/jpa/hibernate/hibernate.cfg.xml"/>
-             -->
+			<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect"/>
+			<property name="hibernate.hbm2ddl.auto" value="create-drop"/>
 		</properties>
+
 	</persistence-unit>
+
 </persistence>

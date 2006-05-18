@@ -19,7 +19,6 @@ package org.springframework.orm.jpa;
 import java.sql.SQLException;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 
 import org.springframework.dao.DataAccessException;
@@ -172,28 +171,5 @@ public interface JpaDialect {
 	 * @see org.springframework.jdbc.support.SQLExceptionTranslator
 	 */
 	DataAccessException translateException(PersistenceException ex);
-	
-	/**
-	 * Return a more capable, yet portable, EntityManager subinterface, given a native
-	 * EntityManager
-	 * @param em native EntityManager of this provider's type
-	 * @return a more capable EntityManager. It is valid to return null if these
-	 * operations are not implementable for a particular provider. However,
-	 * the operations chosen are likely to be supported by all providers.
-	 */
-	PortableEntityManagerPlusOperations getPortableEntityManagerPlusOperations(EntityManager em);
-	
-	
-	/**
-	 * Return a more capable, yet portable, EntityManagerFactory subinterface, given a native
-	 * EntityManagerFactory
-	 * @param nativeEmf native EntityManagerFactory of this provider's type
-	 * @return a more capable EntityManagerFactory. It is valid to return null if these
-	 * operations are not implementable for a particular provider. However,
-	 * the operations chosen are likely to be supported by all providers.
-	 */
-	PortableEntityManagerFactoryPlusOperations getPortableEntityManagerFactoryPlusOperations(
-			EntityManagerFactory nativeEmf, EntityManagerFactoryInfo emfi);
-	
 
 }

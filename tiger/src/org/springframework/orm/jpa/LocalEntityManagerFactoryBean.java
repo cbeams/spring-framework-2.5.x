@@ -21,7 +21,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceProvider;
-import javax.persistence.spi.PersistenceUnitInfo;
+
+import org.springframework.beans.BeanUtils;
 
 
 /**
@@ -59,30 +60,21 @@ public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryB
 	 * @throws javax.persistence.PersistenceException in case of JPA initialization errors
 	 */
 	protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {
-		if (this.persistenceProviderClass != null) {
+		if (getPersistenceProviderClass() != null) {
 			// Create EntityManagerFactory directly through PersistenceProvider.
-			PersistenceProvider pp =
-					instantiatePersistenceProvider();
-			EntityManagerFactory emf = pp.createEntityManagerFactory(this.entityManagerName, getJpaPropertyMap());
+			PersistenceProvider pp = (PersistenceProvider) BeanUtils.instantiateClass(getPersistenceProviderClass());
+			EntityManagerFactory emf = pp.createEntityManagerFactory(getPersistenceUnitName(), getJpaPropertyMap());
 			if (emf == null) {
 				throw new IllegalStateException(
-						"PersistenceProvider [" + this.persistenceProviderClass.getName() +
-						"] did not return an EntityManagerFactory for name '" + this.entityManagerName + "'");
+						"PersistenceProvider [" + pp + "] did not return an EntityManagerFactory for name '" +
+						getPersistenceUnitName() + "'");
 			}
 			return emf;
 		}
 		else {
 			// Let JPA perform its PersistenceProvider autodetection.
-			return Persistence.createEntityManagerFactory(this.entityManagerName, getJpaPropertyMap());
+			return Persistence.createEntityManagerFactory(getPersistenceUnitName(), getJpaPropertyMap());
 		}
-	}
-
-	public PersistenceUnitInfo getPersistenceUnitInfo() {
-		return null;
-	}
-
-	public String getPersistenceUnitName() {
-		return getEntityManagerName();
 	}
 
 }

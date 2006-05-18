@@ -21,11 +21,11 @@ import javax.persistence.EntityManagerFactory;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.Assert;
 
 /**
- * Abstract base class for FactoryBeans that expose a 
- * JPA EntityManager reference for a
+ * FactoryBeans that exposes a shared JPA EntityManager reference for a
  * given EntityManagerFactory. Typically used for an EntityManagerFactory
  * created by LocalEntityManagerFactoryBean, as direct alternative to a
  * JndiObjectFactoryBean definition for a Java EE 5 server's EntityManager.
@@ -41,21 +41,31 @@ import org.springframework.util.Assert;
  * JpaTransactionManager always needs an EntityManagerFactory reference,
  * to be able to create new transactional EntityManager instances.
  *
- * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  * @see #setEntityManagerFactory
  * @see #setEntityManagerInterface
  * @see org.springframework.orm.jpa.LocalEntityManagerFactoryBean
  * @see org.springframework.orm.jpa.JpaTransactionManager
  */
-public abstract class AbstractEntityManagerProxyFactoryBean implements FactoryBean, InitializingBean {
+public class SharedEntityManagerBean implements FactoryBean, InitializingBean {
 
 	private EntityManagerFactory target;
 
-	private EntityManager shared;
-	
 	private Class entityManagerInterface = EntityManager.class;
 
+	private EntityManager shared;
+
+
+	/**
+	 * Set the EntityManagerFactory that this adapter is supposed to
+	 * expose a shared JPA EntityManager for. This should be the raw
+	 * EntityManagerFactory, as accessed by JpaTransactionManager.
+	 * @see org.springframework.orm.jpa.JpaTransactionManager
+	 */
+	public void setEntityManagerFactory(EntityManagerFactory target) {
+		this.target = target;
+	}
 
 	/**
 	 * Specify the EntityManager interface to expose.
@@ -70,46 +80,22 @@ public abstract class AbstractEntityManagerProxyFactoryBean implements FactoryBe
 		this.entityManagerInterface = entityManagerInterface;
 	}
 	
-	public Class getEntityManagerInterface() {
-		return entityManagerInterface;
-	}
-
-
-	/**
-	 * Set the EntityManagerFactory that this adapter is supposed to
-	 * expose a shared JPA EntityManager for. This should be the raw
-	 * EntityManagerFactory, as accessed by JpaTransactionManager.
-	 * @see org.springframework.orm.jpa.JpaTransactionManager
-	 */
-	public void setEntityManagerFactory(EntityManagerFactory target) {
-		this.target = target;
-	}
-	
-	public EntityManagerFactory getEntityManagerFactory() {
-		return target;
-	}
-
 
 	public final void afterPropertiesSet() {
 		if (this.target == null) {
 			throw new IllegalArgumentException("entityManagerFactory is required");
 		}
-		this.shared = createEntityManagerProxy();
+		this.shared = SharedEntityManagerCreator.createSharedEntityManager(
+				this.target, this.entityManagerInterface);
 	}
 
-
-	/**
-	 * Subclasses must implement this
-	 * @return a shared entity manager proxy
-	 */
-	protected abstract EntityManager createEntityManagerProxy();
 
 	public EntityManager getObject() {
 		return this.shared;
 	}
 
 	public Class getObjectType() {
-		return EntityManager.class;
+		return this.entityManagerInterface;
 	}
 
 	public boolean isSingleton() {

@@ -44,7 +44,6 @@ public class Person {
 	
 	private transient TestBean testBean;
 	
-	
 	// Lazy relationship to force use of instrumentation in JPA implementation.
 	// TopLink, at least, will not instrument classes unless absolutely necessary.
 	@OneToOne(fetch=FetchType.LAZY, cascade=CascadeType.PERSIST)
@@ -54,12 +53,9 @@ public class Person {
 
 	private String first_name;
 
-    @Basic(fetch=FetchType.LAZY)
+	@Basic(fetch=FetchType.LAZY)
 	private String last_name;
 
-	
-    public Person() {		
-    }
 	
 	public Integer getId() {
 		return id;
@@ -72,7 +68,6 @@ public class Person {
 	public TestBean getTestBean() {
 		return testBean;
 	}
-	
 
 	public String getFirstName() {
 		return this.first_name;

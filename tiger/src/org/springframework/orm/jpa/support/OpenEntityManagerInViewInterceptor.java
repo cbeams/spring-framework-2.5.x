@@ -54,7 +54,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  * @see org.springframework.orm.jpa.JpaInterceptor
  * @see org.springframework.orm.jpa.JpaTransactionManager
  * @see org.springframework.orm.jpa.JpaTemplate#execute
- * @see SharedEntityManagerFactory
+ * @see org.springframework.orm.jpa.SharedEntityManagerCreator
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class OpenEntityManagerInViewInterceptor extends HandlerInterceptorAdapter {
