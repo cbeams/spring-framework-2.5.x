@@ -92,16 +92,16 @@
 				<surname>Hale</surname>
 			</author>
 			<author>
-				<firstname>Rick</firstname>
-				<surname>Evans</surname>
-			</author>
-			<author>
 				<firstname>Adrian</firstname>
 				<surname>Colyer</surname>
 			</author>
 			<author>
 				<firstname>John</firstname>
 				<surname>Lewis</surname>
+			</author>
+			<author>
+				<firstname>Rick</firstname>
+				<surname>Evans</surname>
 			</author>
 		</authorgroup>
 		<legalnotice>
@@ -147,12 +147,12 @@
 			<para>
 			    Finally, the adoption of the test-driven-development (TDD)
 			    approach to software development is certainly advocated by
-			    the Spring team, and so coverage of Spring's sipport for
+			    the Spring team, and so coverage of Spring's support for
 			    integration testing is covered (alongside best practices for
-			    unit testing). The Spring team have certainly found that the
-			    correct use of IoC certainly does make both unit and
-			    integration testing easier (in that the presence of setter
-			    methods and appropriate constructors on classes makes them
+			    unit testing). The Spring team have found that the correct
+			    use of IoC certainly does make both unit and integration
+			    testing easier (in that the presence of setter methods and
+			    appropriate constructors on classes makes them
 			    easier to wire together on a test without having to set up
 			    service locator registries and suchlike)... the chapter
 			    dedicated solely to testing will hopefully convince you of this
