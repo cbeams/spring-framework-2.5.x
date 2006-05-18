@@ -1,0 +1,63 @@
+/*
+ * Copyright 2002-2006 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.jdbc.datasource.lookup;
+
+import javax.sql.DataSource;
+
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.util.Assert;
+
+/**
+ * DataSourceLookup implementation base don a Spring BeanFactory.
+ * Will lookup for Spring managed beans identified by bean name.
+ *
+ * @author Costin Leau
+ * @author Juergen Hoeller
+ * @since 2.0
+ */
+public class BeanFactoryDataSourceLookup implements DataSourceLookup, BeanFactoryAware {
+
+	private BeanFactory beanFactory;
+
+
+	public BeanFactoryDataSourceLookup() {
+	}
+
+	public BeanFactoryDataSourceLookup(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
+
+	public void setBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
+
+
+	public DataSource getDataSource(String dataSourceName) throws DataAccessResourceFailureException {
+		Assert.notNull(this.beanFactory, "BeanFactory is required");
+		try {
+			return (DataSource) this.beanFactory.getBean(dataSourceName, DataSource.class);
+		}
+		catch (BeansException ex) {
+			throw new DataAccessResourceFailureException(
+					"Failed to look up DataSource bean with name '" + dataSourceName + "'", ex);
+		}
+	}
+
+}
