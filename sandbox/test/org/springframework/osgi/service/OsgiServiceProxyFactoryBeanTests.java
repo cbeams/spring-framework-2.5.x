@@ -25,6 +25,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.springframework.aop.framework.Advised;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 
 /**
  * @author Adrian Colyer
@@ -39,6 +40,7 @@ public class OsgiServiceProxyFactoryBeanTests extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		this.serviceFactoryBean = new OsgiServiceProxyFactoryBean();
+		this.serviceFactoryBean.setApplicationContext(new GenericApplicationContext());
 		this.mockControl = MockControl.createControl(BundleContext.class);
 		this.bundleContext = (BundleContext) this.mockControl.getMock();
 	}

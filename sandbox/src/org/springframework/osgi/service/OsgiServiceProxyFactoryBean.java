@@ -25,9 +25,13 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.HotSwappableTargetSource;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.osgi.context.BundleContextAware;
 import org.springframework.util.StringUtils;
 
@@ -41,7 +45,7 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  */
 public class OsgiServiceProxyFactoryBean implements FactoryBean,
-		InitializingBean, DisposableBean, BundleContextAware {
+		InitializingBean, DisposableBean, BundleContextAware, ApplicationContextAware {
 
 	public static final long DEFAULT_MILLIS_BETWEEN_RETRIES = 1000;
 	public static final int DEFAULT_MAX_RETRIES = 3;
@@ -64,6 +68,9 @@ public class OsgiServiceProxyFactoryBean implements FactoryBean,
 
 	// if looking for a bean published as a service, this is the name we're after
 	private String beanName;
+	
+	// reference to our app context (we need the classloader for proxying...)
+	private ApplicationContext applicationContext;
 	
 	/* (non-Javadoc)
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
@@ -112,6 +119,15 @@ public class OsgiServiceProxyFactoryBean implements FactoryBean,
 						"' set on OsgiServiceProxyFactoryBean has invalid syntax: " + 
 						ex.getMessage(),ex);
 			}
+		}
+		if (this.applicationContext == null) {
+			throw new IllegalArgumentException("Required applicationContext property was not set");			
+		}
+		if (! (this.applicationContext instanceof DefaultResourceLoader)) {
+			throw new IllegalArgumentException(
+					"ApplicationContext does not provide access to classloader, " +
+					"provided type was : '" + this.applicationContext.getClass().getName() + 
+					"' which does not extend DefaultResourceLoader");
 		}
 	}
 
@@ -167,6 +183,13 @@ public class OsgiServiceProxyFactoryBean implements FactoryBean,
 	 */
 	public void setBundleContext(BundleContext context) {
 		this.bundleContext = context;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext(org.springframework.context.ApplicationContext)
+	 */
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
 	}
 	
 	/**
@@ -264,7 +287,8 @@ public class OsgiServiceProxyFactoryBean implements FactoryBean,
 		interceptor.setMaxRetries(this.retryOnUnregisteredService ? this.maxRetries : 0);
 		interceptor.setRetryIntervalMillis(this.millisBetweenRetries);
 		pf.addAdvice(interceptor);
-		return pf.getProxy();
+		ClassLoader classLoader = ((DefaultResourceLoader)this.applicationContext).getClassLoader();
+		return pf.getProxy(classLoader);
 	}
 
 }
