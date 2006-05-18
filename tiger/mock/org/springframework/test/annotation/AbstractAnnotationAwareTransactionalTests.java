@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test;
+package org.springframework.test.annotation;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -22,8 +22,10 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.springframework.test.AbstractTransactionalDataSourceSpringContextTests;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
@@ -31,58 +33,49 @@ import org.springframework.transaction.interceptor.TransactionAttributeSource;
 /**
  * Java 5 specific subclass of AbstractTransactionalDataSourceSpringContextTests,
  * exposing a SimpleJdbcTemplate and obeying annotations for transaction control.
- * Test methods can be annotated with the regular Spring Transactional annotation--
- * for example, to force execution in a read-only transaction--or with the
+ *
+ * <p>Test methods can be annotated with the regular Spring Transactional annotation
+ * (for example, to force execution in a read-only transaction) or with the
  * NotTransactional annotation to prevent any transaction being created at all.
- * 
+ *
  * @author Rod Johnson
  * @since 2.0
  */
-public abstract class AbstractAnnotationAwareTransactionalTests extends AbstractTransactionalDataSourceSpringContextTests {
+public abstract class AbstractAnnotationAwareTransactionalTests
+		extends AbstractTransactionalDataSourceSpringContextTests {
 	
 	protected SimpleJdbcTemplate simpleJdbcTemplate;
 	
 	private TransactionAttributeSource transactionAttributeSource = new AnnotationTransactionAttributeSource();
 	
 	protected ProfileValueSource profileValueSource = SystemProfileValueSource.getInstance();
-	
+
+
+	@Override
+	public void setDataSource(DataSource dataSource) {
+		super.setDataSource(dataSource);
+		// JdbcTemplate will be identically configured
+		this.simpleJdbcTemplate = new SimpleJdbcTemplate(this.jdbcTemplate);
+	}
+
 	// TODO code to try to load (and cache!) ProfileValueSource
-	// from a given URL? It's easy enough to do, of course
-	
-	protected void findUniqueProfileValueSourceFromContext(ApplicationContext ac) throws Exception {
+	// from a given URL? It's easy enough to do, of course.
+	protected void findUniqueProfileValueSourceFromContext(ApplicationContext ac) {
 		Map beans = ac.getBeansOfType(ProfileValueSource.class);
 		if (beans.size() == 1) {
 			this.profileValueSource = (ProfileValueSource) beans.values().iterator().next();
 		}
 	}
-	
 
-	protected boolean isDisabledInThisEnvironment(Method testMethod) {
-		IfProfileValue inProfile = testMethod.getAnnotation(IfProfileValue.class);
-		if (inProfile == null) {
-			inProfile = getClass().getAnnotation(IfProfileValue.class);
-		}
-		
-		if (inProfile != null) {
-			// May be true
-			return !profileValueSource.get(inProfile.name()).equals(inProfile.value());
-		}
-		else {
-			return false;
-		}
-		
-		// TODO IfNotProfileValue
-	}
-	
+
 	/**
-	 * Overridden to populate transaction definition from annotations
-	 * @throws Throwable 
+	 * Overridden to populate transaction definition from annotations.
 	 */
 	@Override
 	public void runBare() throws Throwable {
 		// getName will return the name of the method being run
 		if (isDisabledInThisEnvironment(getName())) {
-			// Let superclass log that we didn't run the test
+			// Let superclass log that we didn't run the test.
 			super.runBare();
 			return;
 		}
@@ -99,7 +92,8 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends Abstract
 			return;
 		} 
 		
-		TransactionDefinition explicitTransactionDefinition = transactionAttributeSource.getTransactionAttribute(testMethod, getClass());
+		TransactionDefinition explicitTransactionDefinition =
+				this.transactionAttributeSource.getTransactionAttribute(testMethod, getClass());
 		if (explicitTransactionDefinition != null) {
 			logger.info("Custom transaction definition [" + explicitTransactionDefinition + " for test method " + getName());
 			setTransactionDefinition(explicitTransactionDefinition);
@@ -111,17 +105,36 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends Abstract
 		
 		// Let JUnit handle execution. We're just changing the state of the
 		// test class first.
-		runTestTimed(new TestExecutionCallback() {
+		runTestTimed(
+				new TestExecutionCallback() {
 					public void run() throws Throwable {
 						AbstractAnnotationAwareTransactionalTests.super.runBare();
 					}
-			}, 
-			testMethod,
-			logger);
+				},
+				testMethod,
+				logger);
 	}
-	
-	public static void runTestTimed(TestExecutionCallback tec, Method testMethod, Log logger) throws Throwable {
-		Timed timed = testMethod.getAnnotation(Timed.class); 
+
+	protected boolean isDisabledInThisEnvironment(Method testMethod) {
+		IfProfileValue inProfile = testMethod.getAnnotation(IfProfileValue.class);
+		if (inProfile == null) {
+			inProfile = getClass().getAnnotation(IfProfileValue.class);
+		}
+
+		if (inProfile != null) {
+			// May be true
+			return !this.profileValueSource.get(inProfile.name()).equals(inProfile.value());
+		}
+		else {
+			return false;
+		}
+
+		// TODO IfNotProfileValue
+	}
+
+
+	private static void runTestTimed(TestExecutionCallback tec, Method testMethod, Log logger) throws Throwable {
+		Timed timed = testMethod.getAnnotation(Timed.class);
 		
 		if (timed == null) {
 			runTest(tec, testMethod, logger);
@@ -140,8 +153,8 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends Abstract
 		}
 	}
 	
-	public static void runTest(TestExecutionCallback tec, Method testMethod, Log logger) throws Throwable {
-		ExpectedException ee = testMethod.getAnnotation(ExpectedException.class); 
+	private static void runTest(TestExecutionCallback tec, Method testMethod, Log logger) throws Throwable {
+		ExpectedException ee = testMethod.getAnnotation(ExpectedException.class);
 		Repeat repeat = testMethod.getAnnotation(Repeat.class);
 		
 		int runs = (repeat != null) ? repeat.value() : 1;
@@ -160,26 +173,20 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends Abstract
 				if (ee == null) {
 					throw t;
 				}
-				
 				if (ee.value().isAssignableFrom(t.getClass())) {
 					// Ok
 				}
 				else {
-					throw new RuntimeException("Expected throwable of class " + ee.value() + "; got " + t, t);
+					fail("Expected throwable of class " + ee.value() + "; got " + t);
 				}
 			}
 		}
 	}
-	
-	public static interface TestExecutionCallback {
+
+
+	private static interface TestExecutionCallback {
+
 		void run() throws Throwable;
 	}
-	
-	@Override
-	public void setDataSource(DataSource dataSource) {
-		super.setDataSource(dataSource);
-		// JdbcTemplate will be identically configured
-		simpleJdbcTemplate = new SimpleJdbcTemplate(jdbcTemplate);
-	}
-	
+
 }

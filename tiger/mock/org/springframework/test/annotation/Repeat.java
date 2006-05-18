@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test;
+package org.springframework.test.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -24,7 +24,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
-* Test annotation to indicate that a method is not transactional
+* Test annotation to indicate that a test
+* method should be invoked repeatedly.
 * 
 * @author Rod Johnson
 * @since 2.0
@@ -33,6 +34,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-public @interface NotTransactional {
+public @interface Repeat {
+	
+	int value() default 1;
 
 }
