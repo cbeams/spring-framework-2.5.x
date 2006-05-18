@@ -6,8 +6,7 @@
 	<persistence-unit name="Person" transaction-type="RESOURCE_LOCAL">
 		<class>org.springframework.orm.jpa.domain.Person</class>
 		<class>org.springframework.orm.jpa.domain.DriversLicense</class>
-		<exclude-unlisted-classes />
+		<exclude-unlisted-classes/>
 	</persistence-unit>
 
-</persistence
->
+</persistence>
