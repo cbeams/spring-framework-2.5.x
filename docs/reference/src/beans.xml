@@ -1234,6 +1234,52 @@ support=support@somecompany.co.uk]]></programlisting>
                 (lastly), please note that this merging feature is only available in Spring 2.0 (and later versions).
             </para>
             </section>
+            <section>
+                <title>Strongly-typed collection (Java5+ only)</title>
+                <para>If you are one of the lucky few to be using Java5 (Tiger), you will be aware
+                that it is possible (and I daresay recommended) to have strongly typed collections.
+                That is, it is possible to declare a <interfacename>Collection</interfacename> type
+                such that it can only contain <classname>String</classname> elements.</para>
+                <para>If you are using Spring to dependency inject a strongly-typed
+                <interfacename>Collection</interfacename> into a bean, you can take advantage
+                of Spring's type-conversion support such that the elements of your strongly-typed
+                <interfacename>Collection</interfacename> instances will be converted to the
+                appropriate strong type prior to being added to the
+                <interfacename>Collection</interfacename>.</para>
+                <para>An example will make this clear; consider the following class definition, and
+                it's attendant  (XML) definition...</para>
+                <programlisting><![CDATA[public class Foo {
+                
+    private Map<String, Float> accounts;
+    
+    public void setAccounts(Map<String, Float> accounts) {
+        this.accounts = accounts;
+    }
+
+}]]></programlisting>
+                <programlisting><![CDATA[<beans>
+    
+    <bean id="foo" class="x.y.Foo">
+        
+        <property name="accounts">
+            <map>
+                <entry key="one" value="9.99"/>
+                <entry key="two" value="2.75"/>
+                <entry key="six" value="3.99"/>
+            </map>
+        </property>
+
+    </bean>
+
+</beans>]]></programlisting>
+                <para>When the <literal>'accounts'</literal> property of the <literal>'foo'</literal>
+                bean is being prepared for injection, the generics information about the element
+                type of the strongly-typed <classname>Map&lt;String, Float&gt;</classname> is
+                actually available via reflection, and so Spring's type conversion infrastructure
+                will actually recognize the various value elements as being of type <classname>Float</classname>
+                and so the string values <literal>'9.99', '2.75'</literal>, and <literal>'3.99'</literal>
+                will be converted into an actual <classname>Float</classname> type.</para>
+            </section>
             </section>
             <section id="beans-idref-element">
                 <title>The <literal>idref</literal> element</title>
@@ -1985,36 +2031,36 @@ public class AnotherExampleBean implements DisposableBean {
                 <section id="beans-factory-lifecycle-default-init-destroy-methods">
                     <title>Default initialization &amp; destroy methods</title>
                     <para>
-                When one is writing initialization and destroy method callbacks that do not
-                use the Spring-specific <interfacename>InitializingBean</interfacename>
-                and <interfacename>DisposableBean</interfacename> callback interfaces,
-                one (in the experience of this author) typically finds oneself writing
-                methods with names such as <literal>init()</literal>,
-                <literal>initialize()</literal>, <literal>dispose()</literal>,
-                <literal>destroy()</literal>, etc. The names of such lifecycle callback
-                methods are (hopefully!) standardized across a project so that developers
-                on a team all use the same method names and thus ensure some level of
-                consistency.
-            </para>
+                        When one is writing initialization and destroy method callbacks that do not
+                        use the Spring-specific <interfacename>InitializingBean</interfacename>
+                        and <interfacename>DisposableBean</interfacename> callback interfaces,
+                        one (in the experience of this author) typically finds oneself writing
+                        methods with names such as <literal>init()</literal>,
+                        <literal>initialize()</literal>, <literal>dispose()</literal>,
+                        <literal>destroy()</literal>, etc. The names of such lifecycle callback
+                        methods are (hopefully!) standardized across a project so that developers
+                        on a team all use the same method names and thus ensure some level of
+                        consistency.
+                    </para>
                     <para>
-                The Spring container can now be configured to <literal>'look'</literal>
-                for named initialization and destroy callback method names on
-                <emphasis>every</emphasis> bean. This means that you as an application developer
-                can simply write your application classes, use a convention of having an
-                initialization callback called <literal>init()</literal>, and then
-                (without having to configure each and every bean with, in the case of XML-based
-                configuration, an <literal>'init-method="init"'</literal> attribute)
-                be safe in the knowledge that the Spring IoC container <emphasis>will</emphasis>
-                call that method when the bean is being created (and in accordance with the
-                standard lifecyle callback contract described previously).
-            </para>
+                        The Spring container can now be configured to <literal>'look'</literal>
+                        for named initialization and destroy callback method names on
+                        <emphasis>every</emphasis> bean. This means that you as an application developer
+                        can simply write your application classes, use a convention of having an
+                        initialization callback called <literal>init()</literal>, and then
+                        (without having to configure each and every bean with, in the case of XML-based
+                        configuration, an <literal>'init-method="init"'</literal> attribute)
+                        be safe in the knowledge that the Spring IoC container <emphasis>will</emphasis>
+                        call that method when the bean is being created (and in accordance with the
+                        standard lifecyle callback contract described previously).
+                    </para>
                     <para>
-                Let's look at an example to make the use of this feature completely clear.
-                For the sake of the example, let us say that one of the coding conventions on a
-                project is that all initialization callback methods are to be named
-                <literal>init()</literal> and that destroy callback methods are to be called
-                <literal>destroy()</literal>. This leads to classes like so...
-            </para>
+                        Let's look at an example to make the use of this feature completely clear.
+                        For the sake of the example, let us say that one of the coding conventions on a
+                        project is that all initialization callback methods are to be named
+                        <literal>init()</literal> and that destroy callback methods are to be called
+                        <literal>destroy()</literal>. This leads to classes like so...
+                    </para>
                     <programlisting><![CDATA[public class DefaultBlogService implements BlogService {
 
     private BlogDao blogDao;
@@ -2042,34 +2088,34 @@ public class AnotherExampleBean implements DisposableBean {
     </bean>
 
 </beans>]]></programlisting>
-            <para>
-                Notice the use of the <literal>'default-init-method'</literal> attribute on the
-                top-level <literal>&lt;beans/&gt;</literal> element. The presence of this
-                attribute means that the Spring IoC container will recognize a method called
-                <literal>'init'</literal> on beans as being the initialization method callback,
-                and when a bean is being created and assembled, if the bean's class has such
-                a method, it will be invoked at the appropriate time.
-            </para>
                     <para>
-                Destroy method callbacks are configured similarly (in XML that is) using the
-                <literal>'default-destroy-method'</literal> attribute on the top-level
-                <literal>&lt;beans/&gt;</literal> element.
-            </para>
+                        Notice the use of the <literal>'default-init-method'</literal> attribute on the
+                        top-level <literal>&lt;beans/&gt;</literal> element. The presence of this
+                        attribute means that the Spring IoC container will recognize a method called
+                        <literal>'init'</literal> on beans as being the initialization method callback,
+                        and when a bean is being created and assembled, if the bean's class has such
+                        a method, it will be invoked at the appropriate time.
+                    </para>
                     <para>
-                The use of this feature can save one the (small) housekeping chore of specifying
-                an initialization and destroy method callback on each and every bean, and it is
-                great for enforcing a consistent naming convention for initialization and destroy
-                method callbacks (and consistency is something that should always be aimed for).
-            </para>
+                        Destroy method callbacks are configured similarly (in XML that is) using the
+                        <literal>'default-destroy-method'</literal> attribute on the top-level
+                        <literal>&lt;beans/&gt;</literal> element.
+                    </para>
                     <para>
-                One final word... let's say you want to use this feature, but you have some
-                existing beans where the underlying classes already have for example initialization
-                callback methods that are named at variance with the convention. You can
-                <emphasis>always</emphasis> override the default by specifying (in XML that is)
-                the method name using the <literal>'init-method'</literal> and
-                <literal>'destroy-method'</literal> attributes on the <literal>&lt;bean/&gt;</literal>
-                element itself.
-            </para>
+                        The use of this feature can save one the (small) housekeping chore of specifying
+                        an initialization and destroy method callback on each and every bean, and it is
+                        great for enforcing a consistent naming convention for initialization and destroy
+                        method callbacks (and consistency is something that should always be aimed for).
+                    </para>
+                    <para>
+                        One final word... let's say you want to use this feature, but you have some
+                        existing beans where the underlying classes already have for example initialization
+                        callback methods that are named at variance with the convention. You can
+                        <emphasis>always</emphasis> override the default by specifying (in XML that is)
+                        the method name using the <literal>'init-method'</literal> and
+                        <literal>'destroy-method'</literal> attributes on the <literal>&lt;bean/&gt;</literal>
+                        element itself.
+                    </para>
                 </section>
             </section>
         </section>
@@ -2419,14 +2465,15 @@ XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
     done other than deploying the post-processor in a similar fashion to any
     other bean. On the other hand, when using plain BeanFactories, bean
     post-processors have to manually be <emphasis>explicitly</emphasis>
-    registered, with a code sequence such as the following:<programlisting>ConfigurableBeanFactory bf = new .....;     // create BeanFactory
-   ...                       // now register some beans
+    registered, with a code sequence such as the following:</para>
+        <programlisting><![CDATA[ConfigurableBeanFactory bf = new .....;     // create BeanFactory
+   // now register some beans...
 // now register any needed BeanPostProcessors
 MyBeanPostProcessor pp = new MyBeanPostProcessor();
 bf.addBeanPostProcessor(pp);
 
 // now start using the factory
-  ...</programlisting></para>
+  ...]]></programlisting>
         <para>Since this manual registration step is not convenient, and
     ApplicationContexts are functionally supersets of BeanFactories, it is
     generally recommended that <interfacename>ApplicationContext</interfacename> implementations are used when bean
