@@ -883,7 +883,7 @@
 
 		<junit forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
-			<jvmarg line="-javaagent:${lib.dir}/spring/jpa-test-agent.jar -Dprovider=toplink -Djava.awt.headless=true -Xmx128m -XX:MaxPermSize=128m"/>
+			<jvmarg line="-Djava.awt.headless=true -Xmx128m -XX:MaxPermSize=128m"/>
 
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 			<classpath location="${target.tigertestclasses.dir}"/>
@@ -1034,13 +1034,9 @@
 
 		<junit forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
-			<jvmarg line="-Djava.awt.headless=true"/>
-			<jvmarg line="-Dprovider=toplink"/>
-			<jvmarg line="-Xmx128m"/>
-			<jvmarg line="-XX:MaxPermSize=128m"/>
-            <jvmarg line="-javaagent:${lib.dir}/spring/jpa-test-agent.jar"/>
+			<jvmarg line="-Djava.awt.headless=true -Xmx128m -XX:MaxPermSize=128m"/>
 
-            <!-- Must go first to ensure the jndi.properties takes precedence  -->
+			<!-- Must go first to ensure the jndi.properties takes precedence  -->
 			<classpath location="${target.testclasses.dir}"/>
 			<classpath location="${target.tigertestclasses.dir}"/>
 			<classpath location="${target.mockclasses.dir}"/>
@@ -1069,15 +1065,14 @@
 		Clover's Swing browser to display the results.
 	-->
 	<target name="clover.swing" description="Run Clover tests and launch Swing coverage viewer">
-        
-        <available classname="com.cortexeb.tools.clover.reporters.jfc.Viewer"
-                   property="clover.swing.available"/>
-        <fail unless="clover.swing.available" message="The main class for the Clover coverage viewer is not on the CLASSPATH."/>
-        <antcall target="clover.tests"/>
-        
-        <echo>Launching Clover coverage viewer</echo>
-		
-        <java classname="com.cortexeb.tools.clover.reporters.jfc.Viewer" fork="yes">
+
+		<available classname="com.cortexeb.tools.clover.reporters.jfc.Viewer" property="clover.swing.available"/>
+		<fail unless="clover.swing.available" message="The main class for the Clover coverage viewer is not on the CLASSPATH."/>
+
+		<antcall target="clover.tests"/>
+		<echo>Launching Clover coverage viewer</echo>
+
+		<java classname="com.cortexeb.tools.clover.reporters.jfc.Viewer" fork="yes">
 			<arg value="${clover.initstring}"/>
 			<classpath refid="all-libs"/>
 		</java>
