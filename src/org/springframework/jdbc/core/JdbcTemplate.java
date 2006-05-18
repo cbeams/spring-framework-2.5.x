@@ -747,10 +747,16 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				try {
 					int batchSize = pss.getBatchSize();
+					boolean interruptible = pss instanceof InterruptibleBatchPreparedStatementSetter;
 					if (JdbcUtils.supportsBatchUpdates(ps.getConnection())) {
 						for (int i = 0; i < batchSize; i++) {
 							pss.setValues(ps, i);
-							ps.addBatch();
+							if (interruptible && ((InterruptibleBatchPreparedStatementSetter)pss).isBatchComplete(i)) {
+								break;
+							}
+							else {
+								ps.addBatch();
+							}
 						}
 						return ps.executeBatch();
 					}
