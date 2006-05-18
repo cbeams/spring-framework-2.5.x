@@ -21,7 +21,7 @@ package org.springframework.jdbc.core;
  * The JdbcTemplate class will catch and handle SQLExceptions appropriately.
  *
  * @author Thomas Risberg
- * @since May 18, 2006
+ * @since 2.0
  * @see org.springframework.jdbc.core.JdbcTemplate#batchUpdate(String, org.springframework.jdbc.core.BatchPreparedStatementSetter)
  */
 public interface InterruptibleBatchPreparedStatementSetter extends BatchPreparedStatementSetter {
