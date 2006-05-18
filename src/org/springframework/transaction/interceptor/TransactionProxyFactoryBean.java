@@ -22,7 +22,6 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopProxy;
-import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.AbstractSingletonProxyFactoryBean;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
@@ -41,47 +40,50 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Proxy factory bean for simplified declarative transaction handling.
- * Alternative to a standard AOP ProxyFactoryBean with a separate
- * TransactionInterceptor definition.
+ * 
+ * <p>This class is a convenient alternative to a standard AOP
+ * {@link org.springframework.aop.framework.ProxyFactoryBean} with a separate
+ * {@link TransactionInterceptor} definition.
  *
  * <p>This class is intended to cover the <i>typical</i> case of declarative
  * transaction demarcation: namely, wrapping a singleton target object with a
  * transactional proxy, proxying all the interfaces that the target implements.
  *
- * <p>There are three main properties to be specified:
+ * <p>There are three main properties that need to be specified:
  *
  * <ul>
- * <li>"transactionManager": the PlatformTransactionManager implementation to use
- * (for example, a JtaTransactionManager instance)
+ * <li>"transactionManager": the {@link PlatformTransactionManager} implementation to use
+ * (for example, a {@link org.springframework.transaction.jta.JtaTransactionManager} instance)
  * <li>"target": the target object that a transactional proxy should be created for
  * <li>"transactionAttributes": the transaction attributes (for example, propagation
  * behavior and "readOnly" flag) per target method name (or method name pattern)
  * </ul>
  *
- * <p>If the "transactionManager" property is not set explicitly and this FactoryBean
- * is running in a ListableBeanFactory, a single matching bean of type
- * PlatformTransactionManager will be fetched from the BeanFactory.
+ * <p>If the "transactionManager" property is not set explicitly and this {@link FactoryBean}
+ * is running in a {@link ListableBeanFactory}, a single matching bean of type
+ * {@link PlatformTransactionManager} will be fetched from the {@link BeanFactory}.
  *
- * <p>In contrast to TransactionInterceptor, the transaction attributes are
+ * <p>In contrast to {@link TransactionInterceptor}, the transaction attributes are
  * specified as properties, with method names as keys and transaction attribute
  * descriptors as values. Method names are always applied to the target class.
  *
- * <p>Internally, a TransactionInterceptor instance is used, but the user of this
- * class does not have to care. Optionally, a MethodPointcut can be specified
- * to cause conditional invocation of the underlying TransactionInterceptor.
+ * <p>Internally, a {@link TransactionInterceptor} instance is used, but the user of this
+ * class does not have to care. Optionally, a method pointcut can be specified
+ * to cause conditional invocation of the underlying {@link TransactionInterceptor}.
  *
  * <p>The "preInterceptors" and "postInterceptors" properties can be set to add
- * additional interceptors to the mix, like PerformanceMonitorInterceptor or
- * HibernateInterceptor/JdoInterceptor.
+ * additional interceptors to the mix, like
+ * {@link org.springframework.aop.interceptor.PerformanceMonitorInterceptor} or
+ * {@link org.springframework.orm.hibernate3.HibernateInterceptor} /
+ * {@link org.springframework.orm.jdo.JdoInterceptor}.
  *
- * <p><b>HINT:</b> This class is often used with parent/child bean definitions.
+ * <p><b>HINT:</b> This class is often used with parent / child bean definitions.
  * Typically, you will define the transaction manager and default transaction
  * attributes (for method name patterns) in an abstract parent bean definition,
  * deriving concrete child bean definitions for specific target objects.
  * This reduces the per-bean definition effort to a minimum.
  *
- * <pre>
- * &lt;bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+ * <pre code="class">&lt;bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
  *     abstract="true"&gt;
  *   &lt;property name="transactionManager" ref="transactionManager"/&gt;
  *   &lt;property name="transactionAttributes"&gt;
@@ -361,4 +363,5 @@ public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBe
 			return null;
 		}
 	}
+
 }

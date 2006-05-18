@@ -20,10 +20,12 @@ import org.springframework.beans.factory.FactoryBean;
 
 /**
  * Convenient proxy factory bean superclass for proxy factory
- * beans that create only singletons. Manages pre and post
- * interceptors--references, rather than interceptorNames,
- * as in ProxyFactoryBean--and provides consistent interface management.
- * TODO make this the parent of TransactionProxyFactoryBean
+ * beans that create only singletons.
+ * 
+ * <p>Manages pre- and post-interceptors (references, rather than
+ * interceptor names, as in {@link ProxyFactoryBean}) and provides
+ * consistent interface management.
+ *
  * @since 2.0
  * @author Rod Johnson
  */
