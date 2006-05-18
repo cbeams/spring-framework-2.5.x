@@ -31,7 +31,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 public class JpaOptimisticLockingFailureException extends ObjectOptimisticLockingFailureException {
 
 	public JpaOptimisticLockingFailureException(OptimisticLockException ex) {
-		super(ex.getEntity() != null ? ex.getEntity().getClass() : null, null, ex.getMessage(), ex);
+		super(ex.getMessage(), ex);
 	}
 
 }
