@@ -64,9 +64,8 @@ import org.springframework.util.StringUtils;
  * potentially script interfaces, while bean property values include
  * references and config values to inject into the scripted object itself.
  *
- * <p>The following excerpt from a Spring XML bean definition file shows
- * an example for a {@link ScriptFactoryPostProcessor} that will
- * automatically be applied to the two
+ * <p>The followin {@link ScriptFactoryPostProcessor} will automatically be
+ * applied to the two
  * {@link org.springframework.scripting.ScriptFactory} definitions below.
  * At runtime, the actual scripted objects will be exposed for
  * "bshMessenger" and "groovyMessenger", rather than the
@@ -86,6 +85,36 @@ import org.springframework.util.StringUtils;
  *   &lt;constructor-arg value="classpath:mypackage/Messenger.groovy"/&gt;
  *   &lt;property name="message" value="Hello World!"/&gt;
  * &lt;/bean&gt;</pre>
+ * 
+ * <p><b>NOTE:</b> Please note that the above excerpt from a Spring
+ * XML bean definition file uses just the &lt;bean/&gt;-style syntax
+ * (in an effort to illustrate using the {@link ScriptFactoryPostProcessor} itself).
+ * In reality, you would never create a &lt;bean/&gt; definition for a
+ * {@link ScriptFactoryPostProcessor} explicitly; rather you would import the
+ * tags from the <code>'lang'</code> namespace and simply create scripted
+ * beans using the tags in that namespace... as part of doing so, a
+ * {@link ScriptFactoryPostProcessor} will implicitly be created for you.
+ * 
+ * <p>The Spring reference documentation contains numerous examples of using
+ * tags in the <code>'lang'</code> namespace; by way of an example, find below
+ * a Groovy-backed bean defined using the <code>'lang:groovy'</code> tag.
+ * 
+ * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+ *&lt;beans xmlns="http://www.springframework.org/schema/beans"
+ *       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ *       xmlns:lang="http://www.springframework.org/schema/lang"&gt;
+ *
+ *    &lt;!-- this is the bean definition for the Groovy-backed Messenger implementation --&gt;
+ *    &lt;lang:groovy id="messenger" script-source="classpath:Messenger.groovy"&gt;
+ *        &lt;lang:property name="message" value="I Can Do The Frug" /&gt;
+ *    &lt;/lang:groovy&gt;
+ *
+ *    &lt;!-- an otherwise normal bean that will be injected by the Groovy-backed Messenger --&gt;
+ *    &lt;bean id="bookingService" class="x.y.DefaultBookingService"&gt;
+ *        &lt;property name="messenger" ref="messenger" /&gt;
+ *    &lt;/bean&gt;
+ *
+ *&lt;/beans&gt;</pre>
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
