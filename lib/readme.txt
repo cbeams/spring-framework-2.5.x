@@ -7,8 +7,8 @@ distribution/website before using any of them in your own applications.
 - Ant 1.6.5 (http://ant.apache.org)
 - used to build the framework and the sample apps
 
-* antlr/antlr-2.7.6rc1.jar
-- ANTLR 2.7.6 RC1 (http://www.antlr.org)
+* antlr/antlr-2.7.6.jar
+- ANTLR 2.7.6 (http://www.antlr.org)
 - required for running PetClinic (by Hibernate3)
 
 * aopalliance/aopalliance.jar
@@ -75,8 +75,8 @@ distribution/website before using any of them in your own applications.
 - EasyMock 1.2 (JDK 1.3 version) (http://www.easymock.org)
 - required for building and running the framework test suite
 
-* ehcache/ehcache-1.1.jar
-- EHCache 1.1 (http://ehcache.sourceforge.net)
+* ehcache/ehcache-1.2.jar
+- EHCache 1.2 (http://ehcache.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's EHCache support
 - required for running PetClinic (by Hibernate)
@@ -97,14 +97,19 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's Hibernate 2.1 support
 
 * hibernate/hibernate3.jar
-- Hibernate 3.1.3 (http://www.hibernate.org)
+- Hibernate 3.2.0 CR2 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate 3.x support
 
 * hibernate/hibernate-annotation.jar
-- Hibernate Annotations 3.1 beta 8 (http://www.hibernate.org)
+- Hibernate Annotations 3.2.0 CR1 (http://www.hibernate.org)
 - required for building the "tiger" part of the framework
 - required at runtime when using Spring's Hibernate Annotations support
+
+* hibernate/hibernate-entitymanager.jar
+- Hibernate EntityManager 3.2.0 CR1 (http://www.hibernate.org)
+- required for building the "tiger" part of the framework
+- required at runtime when using Spring's Hibernate-specific JPA support
 
 * hsqldb/hsqldb.jar
 - HSQLDB 1.8.0.1 (http://hsqldb.sourceforge.net)
