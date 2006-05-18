@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 
 import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StringUtils;
 
@@ -128,7 +129,10 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 	 * and continueOnError was false
 	 */
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
-		logger.info("Executing SQL script '" + sqlResourcePath + "'");
+		if (logger.isInfoEnabled()) {
+			logger.info("Executing SQL script '" + sqlResourcePath + "'");
+		}
+
 		long startTime = System.currentTimeMillis();
 		List statements = new LinkedList();
 		Resource res = applicationContext.getResource(sqlResourcePath);
@@ -145,11 +149,15 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 				String statement = (String) itr.next();
 				try {
 					int rowsAffected = jdbcTemplate.update(statement);
-					logger.info(rowsAffected + " rows affected by SQL: " + statement);
+					if (logger.isDebugEnabled()) {
+						logger.debug(rowsAffected + " rows affected by SQL: " + statement);
+					}
 				}
 				catch (DataAccessException ex) {
 					if (continueOnError) {
-						logger.info("SQL: " + statement + " failed", ex);
+						if (logger.isWarnEnabled()) {
+							logger.warn("SQL: " + statement + " failed", ex);
+						}
 					}
 					else {
 						throw ex;
@@ -160,7 +168,7 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 			logger.info("Done executing SQL script '" + sqlResourcePath + "' in " + elapsedTime + " ms");
 		}
 		catch (IOException ex) {
-			throw new RuntimeException("Failed to open SQL script '" + sqlResourcePath + "'", ex);
+			throw new DataAccessResourceFailureException("Failed to open SQL script '" + sqlResourcePath + "'", ex);
 		}
 	}
 

@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,17 +38,17 @@ public interface LoadTimeWeaver {
 	ClassLoader getInstrumentableClassLoader();
 	
 	/**
-	 * Add the given ClassFileTransformer to the current environment
+	 * Add the given ClassFileTransformer to the current environment.
 	 * @param classFileTransformer ClassFileTransformer to add. The change
 	 * will affect the behaviour of the class loader returned by
-	 * getInstrumentableClassLoader()
+	 * <code>getInstrumentableClassLoader()</code>
 	 */
 	void addClassFileTransformer(ClassFileTransformer classFileTransformer);
 
 	/**
 	 * Return a throwaway class loader, enabling classes to be loaded and inspected
 	 * without affecting the parent class loader. Most <i>not</i> return the same as
-	 * getInstrumentableClassLoader().
+	 * <code>getInstrumentableClassLoader()</code>.
 	 * @return a temporary throwaway class loader. Should return a new
 	 * instance for each call, with no existing state.
 	 */

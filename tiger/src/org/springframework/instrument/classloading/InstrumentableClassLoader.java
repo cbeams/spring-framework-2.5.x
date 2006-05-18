@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aspectj.weaver.loadtime.ClassPreProcessorAgentAdapter;
+
 import org.springframework.util.ClassUtils;
 
 /**
@@ -36,6 +37,7 @@ public class InstrumentableClassLoader extends AbstractOverridingClassLoader imp
 
 	private boolean enableAspectJ;
 
+
 	public InstrumentableClassLoader(ClassLoader parent) {
 		super(parent);
 	}
@@ -44,16 +46,14 @@ public class InstrumentableClassLoader extends AbstractOverridingClassLoader imp
 		super(ClassUtils.getDefaultClassLoader());
 	}
 
+
 	public void setAspectJWeavingEnabled(boolean flag) {
-		if (flag && !enableAspectJ) {
-			enableAspectJ = true;
-			transformers.add(new ClassPreProcessorAgentAdapter());
+		if (flag && !this.enableAspectJ) {
+			this.enableAspectJ = true;
+			this.transformers.add(new ClassPreProcessorAgentAdapter());
 		}
 	}
 
-	/**
-	 * @return the enableAspectJ
-	 */
 	public boolean isAspectJWeavingEnabled() {
 		return this.enableAspectJ;
 	}
@@ -71,11 +71,11 @@ public class InstrumentableClassLoader extends AbstractOverridingClassLoader imp
 				byte[] transformed = cft.transform(this, internalName, null, null, bytes);
 				if (transformed == null) {
 					if (debug)
-						log.debug(name + " is already weaved by transformer " + cft);
+						logger.debug(name + " is already weaved by transformer " + cft);
 				}
 				else {
 					if (debug)
-						log.debug("Weaving: " + name + " with transformer " + cft);
+						logger.debug("Weaving: " + name + " with transformer " + cft);
 					bytes = transformed;
 				}
 			}
@@ -85,4 +85,5 @@ public class InstrumentableClassLoader extends AbstractOverridingClassLoader imp
 		}
 		return bytes;
 	}
+
 }
