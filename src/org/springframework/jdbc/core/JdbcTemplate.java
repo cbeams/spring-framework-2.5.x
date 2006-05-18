@@ -751,7 +751,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 					if (JdbcUtils.supportsBatchUpdates(ps.getConnection())) {
 						for (int i = 0; i < batchSize; i++) {
 							pss.setValues(ps, i);
-							if (interruptible && ((InterruptibleBatchPreparedStatementSetter)pss).isBatchComplete(i)) {
+							if (interruptible && ((InterruptibleBatchPreparedStatementSetter)pss).isBatchExhausted(i)) {
 								break;
 							}
 							else {

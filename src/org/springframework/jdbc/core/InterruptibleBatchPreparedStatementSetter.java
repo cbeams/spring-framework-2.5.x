@@ -12,7 +12,7 @@ package org.springframework.jdbc.core;
  * having to determine the exact batch size upfront.  Batch size is still being
  * honored but it is now the maximum size of the batch.
  *
- * <p>The isBatchComplete method is called after each call to setValues to determine whether
+ * <p>The isBatchExhausted method is called after each call to setValues to determine whether
  * there were some values added or if the batch was determined to be complete and no additional
  * values were provided during the last call to setValues.
  *
@@ -30,6 +30,6 @@ public interface InterruptibleBatchPreparedStatementSetter extends BatchPrepared
 	 * Return the whether batch is complete, there were no additional values to be added.
 	 * @param i index of the statement we're issuing in the batch, starting from 0
 	 */
-	boolean isBatchComplete(int i);
+	boolean isBatchExhausted(int i);
 
 }

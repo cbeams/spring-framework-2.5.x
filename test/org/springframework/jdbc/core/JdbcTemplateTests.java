@@ -814,7 +814,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			public int getBatchSize() {
 				return 1000;
 			}
-			public boolean isBatchComplete(int i) {
+			public boolean isBatchExhausted(int i) {
 				if (i < ids.length)
 				    return false;
 				else
