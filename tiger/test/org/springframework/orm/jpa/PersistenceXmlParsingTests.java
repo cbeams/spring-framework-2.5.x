@@ -63,7 +63,7 @@ public class PersistenceXmlParsingTests extends TestCase {
 		assertEquals(0, info[0].getProperties().keySet().size());
 	}
 
-	public void XtestExample3() throws Exception {
+	public void testExample3() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(), new JndiDataSourceLookup());
 		String resource = "/org/springframework/orm/jpa/persistence-example3.xml";
 		PersistenceUnitInfo[] info = reader.readPersistenceUnitInfos(resource);
@@ -116,7 +116,7 @@ public class PersistenceXmlParsingTests extends TestCase {
 		builder.clear();
 	}
 
-	public void XtestExample5() throws Exception {
+	public void testExample5() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(), new JndiDataSourceLookup());
 		String resource = "/org/springframework/orm/jpa/persistence-example5.xml";
 		PersistenceUnitInfo[] info = reader.readPersistenceUnitInfos(resource);
@@ -137,7 +137,7 @@ public class PersistenceXmlParsingTests extends TestCase {
 		assertEquals(0, info[0].getProperties().keySet().size());
 	}
 
-	public void XtestExampleComplex() throws Exception {
+	public void testExampleComplex() throws Exception {
 		DataSource ds = new DriverManagerDataSource();
 
 		String resource = "/org/springframework/orm/jpa/persistence-complex.xml";
