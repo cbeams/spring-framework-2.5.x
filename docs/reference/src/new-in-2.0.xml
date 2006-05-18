@@ -98,39 +98,16 @@
       <para>Both the new and the original scopes are detailed in the section
       entitled <xref linkend="beans-factory-scopes" />.</para>
     </section>
-
-    <section id="new-in-2-ioc-everything-else">
-      <title>Other IoC features</title>
-
-      <para>A number of other IoC features (some totally new, others
-      improvements) are also present in Spring 2.0; pointers to detailed
-      descriptions of these features can be found below.</para>
-
-      <itemizedlist>
-        <listitem>
-          <para><xref linkend="beans-collection-elements-merging" /></para>
-        </listitem>
-
-        <listitem>
-          <para><xref
-          linkend="beans-factory-lifecycle-default-init-destroy-methods" /></para>
-        </listitem>
-
-        <listitem>
-          <para><xref linkend="beans-factory-autowire-candidate" /></para>
-        </listitem>
-      </itemizedlist>
-    </section>
   </section>
 
   <section id="new-in-2-aop">
     <title>AOP</title>
 
-    <para>Spring 2.0 has a much improved AOP offering. The Spring AOP
-    framework itself is markedly easier to configure in XML (and markedly less
-    verbose as a result); and Spring 2.0 integrates with the AspectJ pointcut language
-    and @AspectJ aspect declaration style. <xref linkend="aop" /> is
-    dedicated to describing this new support.</para>
+    <para>Spring 2.0 has a much improved AOP offering. The Spring AOP framework
+    itself is markedly easier to configure in XML (and significantly less verbose
+    as a result); and Spring 2.0 integrates with the AspectJ pointcut language
+    and @AspectJ aspect declaration style. The chapter entitled <xref linkend="aop" />
+    is dedicated to describing this new support.</para>
 
     <section id="new-in-2-aop-configuration">
       <title>Easier AOP XML configuration</title>
@@ -158,7 +135,13 @@
     <section id="new-in-2-middle-tier-transaction-configuration">
       <title>Easier configuration of declarative transactions in XML</title>
 
-      <para>[TODO : coverage of the new XML transaction configuration]</para>
+      <para>The way that transactions are configured in Spring 2.0 has been changed
+      significantly. The previous 1.2.x style of configuration continues to be valid
+      (and supported), but the new style is markedly less verbose and is the
+      recommended style. Spring 2.0 also ships with an AspectJ aspects library that
+      you can use to make pretty much any object - even objects not created by the
+      Spring container - transactional.</para>
+      <para>The chapter entitled <xref linkend="transaction"/> contains all of the details.</para>
     </section>
 
     <section id="new-in-2-middle-tier-jpa">
@@ -185,8 +168,8 @@
 
       <para>This missing piece of the JMS stack has been added, and
       Spring 2.0 now ships with full support for the consumption of messages
-      in an asynchronous fashion, as detailed in the section entitled <xref
-      linkend="jms-asynchronousMessageReception" />.</para>
+      in an asynchronous fashion, as detailed in the section entitled
+      <xref linkend="jms-asynchronousMessageReception" />.</para>
     </section>
 
     <section id="new-in-2-middle-tier-jdbc">
@@ -209,7 +192,6 @@
         <listitem>
           <para><xref linkend="jdbc-NamedParameterJdbcTemplate" /></para>
         </listitem>
-
         <listitem>
           <para><xref linkend="jdbc-SimpleJdbcTemplate" /></para>
         </listitem>
@@ -274,8 +256,8 @@
 
       <para>Spring 2.0 ships with a Portlet framework that is similar in
       spirit to the Spring MVC framework. Detailed coverage of the Spring
-      Portlet framework can be found in the section entitled <xref
-      linkend="portlet" />.</para>
+      Portlet framework can be found in the section entitled
+      <xref linkend="portlet" />.</para>
     </section>
   </section>
 
@@ -292,8 +274,8 @@
       <para>Spring 2.0 now has support for beans that have been written in a
       language other than Java. The dynamic languages that are supported
       currently include JRuby, Groovy and BeanShell. This dynamic language
-      support is comprehensively detailed in the section entitled <xref
-      linkend="dynamic-language" />.</para>
+      support is comprehensively detailed in the section entitled
+      <xref linkend="dynamic-language" />.</para>
     </section>
 
     <section id="new-in-2-other-jmx">
@@ -322,12 +304,6 @@
       <xref linkend="taskexecutor"/> contains all of the details.</para>
     </section>
 
-    <section id="new-in-2-other-tooling-spi">
-      <title>Tooling SPI</title>
-
-      <para>[TODO : document the new tooling SPI]</para>
-    </section>
-
     <section id="new-in-2-other-java5">
       <title>Java 5 (Tiger) support</title>
 
@@ -350,6 +326,9 @@
 		</listitem>
 		<listitem>
 			<xref linkend="aop-ataspectj"/>
+		</listitem>
+		<listitem>
+			<xref linkend="transaction-declarative-aspectj"/>
 		</listitem>
       </itemizedlist>
     </section>
