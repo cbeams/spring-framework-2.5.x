@@ -1,7 +1,5 @@
 package org.springframework.jdbc.core;
 
-import java.sql.SQLException;
-
 /**
  * Callback interface used by the JdbcTemplate class.
  *
@@ -22,9 +20,9 @@ import java.sql.SQLException;
  * SQLExceptions that may be thrown from operations they attempt.
  * The JdbcTemplate class will catch and handle SQLExceptions appropriately.
  *
- * @author Rod Johnson
- * @since March 2, 2003
- * @see org.springframework.jdbc.core.JdbcTemplate#batchUpdate(String, org.springframework.jdbc.core.InterruptibleBatchPreparedStatementSetter)
+ * @author Thomas Risberg
+ * @since May 18, 2006
+ * @see org.springframework.jdbc.core.JdbcTemplate#batchUpdate(String, org.springframework.jdbc.core.BatchPreparedStatementSetter)
  */
 public interface InterruptibleBatchPreparedStatementSetter extends BatchPreparedStatementSetter {
 
