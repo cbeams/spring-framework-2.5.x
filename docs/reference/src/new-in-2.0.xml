@@ -19,29 +19,24 @@
     </sidebar>
 
     <para>This revision includes a host of new features, and a lot of the
-    existing functionality has been review and improved... in fact, so much of
+    existing functionality has been reviewed and improved. In fact, so much of
     Spring is shiny and improved that the Spring development team decided that
     the next release of Spring merited an increment of the version number; and
     so Spring 2.0 was announced in December 2005 at the Spring Experience
     conference in Florida.</para>
 
-    <para>This chapter serves as a guide to the aforementioned new and
-    improved features of Spring 2.0. It exists in the main so that seasoned
-    Spring architects and developers can become immediately familiar with
-    Spring 2.0 functionality without having to wade through the always
-    informative, but decidedly copious, reference documentation.</para>
-
-    <para>This chapter is divided into a number of sections, all of which have
-    some <emphasis>small</emphasis> leader text that describes (briefly) a new
-    or improved feature, and then provides links to the specific place where
-    said feature is actually described in detail.</para>
+    <para>This chapter is a guide to the new and improved features of Spring 
+    2.0. It is intended to provide an high-level summary so that seasoned Spring 
+    architects and developers can become immediately familiar with the new Spring 2.0 
+    functionality. For more in-depth information on the features, please refer to the
+    corresponding sections hyperlinked from within this chapter.</para>
   </section>
 
   <section id="new-in-2-ioc">
     <title>IoC</title>
 
-    <para>The Spring IoC container (arguably) exhibits the most changes in
-    Spring 2.0.</para>
+    <para>One of the areas that contains a considerable number of 2.0 improvements
+    is Spring IoC.</para>
 
     <section id="new-in-2-ioc-configuration">
       <title>Easier XML configuration</title>
@@ -49,15 +44,15 @@
       <para>Spring XML configuration is now even easier, thanks to the advent
       of the new XML configuration syntax. If you want to take advantage of
       the new tags that Spring provides (and the Spring team certainly suggest
-      that you do because they make one's configuration much less verbose and
-      just plain easier to read), then do read the section entitled
+      that you do because they make configuration much less verbose and
+      much easier to read), then do read the section entitled
       <xref linkend="xsd-config"/>.</para>
     </section>
 
     <section id="new-in-2-ioc-custom-configuration">
       <title>Extensible XML support</title>
 
-      <para>The aforementioned new XML configuration is also
+      <para>Not only is XML configuration easier to specify, it is now also
       extensible.</para>
 
       <para>What 'extensible' means in this context is that you, as an
@@ -65,16 +60,14 @@
       product vendor, can write your own tags that other developers can then
       plug into their own Spring configuration files. This allows you to have
       your own domain specific language (the term is used loosely here) of
-      sorts for the specific configuration of your own components.</para>
+      sorts be reflected in the specific configuration of your own components.</para>
 
-      <para>This feature may not be of interest to every single application
+      <para>Since this feature may not be of interest to every single application
       developer or enterprise architect using Spring in their own projects,
-      and so it is not (as yet) detailed in this reference documentation. If
-      you are interested in writing your own Spring configuration tags, then
-      having a look at the source code for the current Spring tags is your
-      starting point (it would be wrong to say that the process is trivial,
-      but it isn't exactly hard either... one Java class and one XSD schema
-      document is what you're looking at having to write).</para>
+      it has not (as yet) been detailed in this reference documentation. If
+      you are interested in writing your own Spring configuration tags,
+      begin by looking at the existing Spring tags. To create your own tag is
+      straightforward, simply create one Java class and a corresponding XSD schema.</para>
     </section>
 
     <section id="new-in-2-ioc-scopes">
