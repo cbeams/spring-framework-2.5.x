@@ -36,7 +36,7 @@
     <title>IoC</title>
 
     <para>One of the areas that contains a considerable number of 2.0 improvements
-    is Spring IoC.</para>
+    is Spring's IoC container.</para>
 
     <section id="new-in-2-ioc-configuration">
       <title>Easier XML configuration</title>
