@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,15 @@ package org.springframework.context;
 import java.util.Locale;
 
 /**
- * Interface to be implemented by objects that can resolve messages.
- * This enables parameterization and internationalization of messages.
+ * Strategy interface for resolving messages, with support for the parameterization
+ * and internationalization of such messages.
  *
  * <p>Spring provides two out-of-the-box implementations for production:
  * <ul>
- * <li><b>ResourceBundleMessageSource</b>, built on standard java.util.ResourceBundle
- * <li><b>ReloadableResourceBundleMessageSource</b>, being able to reload message
- * definitions without restarting the VM
+ * <li>{@link org.springframework.context.support.ResourceBundleMessageSource},
+ * built on top of the standard {@link java.util.ResourceBundle}
+ * <li>{@link org.springframework.context.support.ReloadableResourceBundleMessageSource},
+ * being able to reload message definitions without restarting the VM
  * </ul>
  *
  * @author Rod Johnson
@@ -48,7 +49,7 @@ public interface MessageSource {
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the resolved message if the lookup was successful;
 	 * otherwise the default message passed as a parameter
-	 * @see <a href="http://java.sun.com/j2se/1.3/docs/api/java/text/MessageFormat.html">java.text.MessageFormat</a>
+	 * @see java.text.MessageFormat
 	 */
 	String getMessage(String code, Object[] args, String defaultMessage, Locale locale);
 
@@ -61,7 +62,7 @@ public interface MessageSource {
 	 * @param locale the Locale in which to do the lookup
 	 * @return the resolved message
 	 * @throws NoSuchMessageException if the message wasn't found
-	 * @see <a href="http://java.sun.com/j2se/1.3/docs/api/java/text/MessageFormat.html">java.text.MessageFormat</a>
+	 * @see java.text.MessageFormat
 	 */
 	String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException;
 
@@ -75,7 +76,7 @@ public interface MessageSource {
 	 * @param locale the Locale in which to do the lookup
 	 * @return the resolved message
 	 * @throws NoSuchMessageException if the message wasn't found
-	 * @see <a href="http://java.sun.com/j2se/1.3/docs/api/java/text/MessageFormat.html">java.text.MessageFormat</a>
+	 * @see java.text.MessageFormat
 	 */
 	String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException;
 

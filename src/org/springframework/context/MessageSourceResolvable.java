@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,9 @@ package org.springframework.context;
 
 /**
  * Interface for objects that are suitable for message resolution in a
- * MessageSource. Spring's own validation error classes implement this
- * interface.
+ * {@link MessageSource}.
+ * 
+ * <p>Spring's own validation error classes implement this interface.
  *
  * @author Juergen Hoeller
  * @see MessageSource#getMessage(MessageSourceResolvable, java.util.Locale)
@@ -39,7 +40,7 @@ public interface MessageSourceResolvable {
 	 * Return the array of arguments to be used to resolve this message.
 	 * @return an array of objects to be used as parameters to replace
 	 * placeholders within the message text
-	 * @see <a href="http://java.sun.com/j2se/1.3/docs/api/java/text/MessageFormat.html">java.text.MessageFormat</a>
+	 * @see java.text.MessageFormat
 	 */
 	public Object[] getArguments();
 
