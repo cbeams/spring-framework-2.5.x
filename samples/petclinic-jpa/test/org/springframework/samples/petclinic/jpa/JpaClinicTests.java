@@ -1,22 +1,23 @@
-package org.springframework.samples.petclinic;
+package org.springframework.samples.petclinic.jpa;
 
 import java.util.Collection;
 import java.util.Date;
 
 import javax.persistence.EntityManager;
 
+import org.springframework.samples.petclinic.Clinic;
+import org.springframework.samples.petclinic.Owner;
+import org.springframework.samples.petclinic.Pet;
+import org.springframework.samples.petclinic.PetType;
+import org.springframework.samples.petclinic.Specialty;
+import org.springframework.samples.petclinic.Vet;
+import org.springframework.samples.petclinic.Visit;
 import org.springframework.samples.petclinic.util.EntityUtils;
-import org.springframework.test.AbstractTransactionalDataSourceSpringContextTests;
-import org.springframework.test.ExpectedException;
-import org.springframework.test.NotTransactional;
+import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.jpa.AbstractJpaTests;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Base class for Clinic tests.
- * Allows subclasses to specify context locations.
- *
- * <p>This class extends AbstractTransactionalDataSourceSpringContextTests,
+ * <p>This class extends AbstractJpaTests,
  * one of the valuable test superclasses provided in the org.springframework.test
  * package. This represents best practice for integration tests with Spring. 
  * The AbstractTransactionalDataSourceSpringContextTests superclass provides the
@@ -34,18 +35,22 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>The AbstractTransactionalDataSourceSpringContextTests and related classes are shipped
  * in the spring-mock.jar.
  * 
- * @see org.springframework.test.AbstractTransactionalDataSourceSpringContextTests
- * @author Ken Krebs
+ * @see AbstractJpaTests
  * @author Rod Johnson
- * @author Juergen Hoeller
  */
-public abstract class AbstractJpaClinicTests extends AbstractJpaTests {
+public class JpaClinicTests extends AbstractJpaTests {
 
 	protected Clinic clinic;
 	
+	protected String[] getConfigLocations() {
+		return new String[] { 
+				"/org/springframework/samples/petclinic/jpa/container-applicationContext-jpa.xml" 
+		};
+	}
+	
 	@ExpectedException(IllegalArgumentException.class)
 	public void testBogusJpql() {
-		sharedEntityManagerProxy.createQuery("SELECT RUBBISH FROM RUBBISH HEAP").executeUpdate();
+		sharedEntityManager.createQuery("SELECT RUBBISH FROM RUBBISH HEAP").executeUpdate();
 	}
 	
 	public void testApplicationManaged() {

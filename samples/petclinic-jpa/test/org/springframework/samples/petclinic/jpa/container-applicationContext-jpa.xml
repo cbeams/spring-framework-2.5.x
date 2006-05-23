@@ -4,7 +4,7 @@
 <beans>
 	
 	<bean 
-		class="org.springframework.orm.jpa.spi.PersistenceAnnotationBeanPostProcessor" /> 
+		class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" /> 
 
 
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
