@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:jndi="http://www.springframework.org/schema/jndi"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/jndi http://www.springframework.org/schema/jndi/spring-jndi.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<aop:config>
+		<aop:aspect id="countAgeCalls" ref="countingAdvice">
+			<aop:pointcut id="pc" expression="execution(* getAge())"/>
+			<aop:before pointcut-ref="pc" method="myBeforeAdvice" />
+			<aop:after pointcut-ref="pc" method="myAfterAdvice" />
+			<aop:after-returning pointcut-ref="pc" method="myAfterReturningAdvice" returning="age"/>
+			<aop:after-throwing pointcut-ref="pc" method="myAfterThrowingAdvice" throwing="ex"/>
+			<aop:around pointcut-ref="pc" method="myAroundAdvice"/>
+		</aop:aspect>
+	</aop:config>
+
+	<bean id="getNameCounter" class="org.springframework.aop.framework.CountingBeforeAdvice"/>
+	<bean id="getAgeCounter" class="org.springframework.aop.framework.CountingBeforeAdvice"/>
+
+	<bean id="testBean" class="org.springframework.beans.TestBean"/>
+
+	<bean id="countingAdvice" class="org.springframework.aop.config.CountingAspectJAdvice"/>
+</beans>

@@ -16,9 +16,15 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.beans.PropertyValue;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.util.Assert;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Rob Harrop
@@ -32,12 +38,28 @@ public class BeanComponentDefinition extends AbstractComponentDefinition {
 
 	private String description;
 
+	private RuntimeBeanReference[] beanReferences;
+
 	public BeanComponentDefinition(BeanDefinition beanDefinition, String beanName) {
 		Assert.notNull(beanDefinition, "'beanDefinition' cannot be null.");
 		Assert.notNull(beanName, "'beanName' cannot be null.");
 		this.beanDefinition = beanDefinition;
 		this.beanName = beanName;
 		createDescription();
+		findBeanReferences();
+	}
+
+	private void findBeanReferences() {
+		List references = new ArrayList();
+		PropertyValues propertyValues = this.beanDefinition.getPropertyValues();
+		for (int i = 0; i < propertyValues.getPropertyValues().length; i++) {
+			PropertyValue propertyValue = propertyValues.getPropertyValues()[i];
+			Object value = propertyValue.getValue();
+			if (value instanceof RuntimeBeanReference) {
+				references.add(value);
+			}
+		}
+		this.beanReferences = (RuntimeBeanReference[]) references.toArray(new RuntimeBeanReference[references.size()]);
 	}
 
 	public BeanComponentDefinition(BeanDefinitionHolder holder) {
@@ -62,6 +84,10 @@ public class BeanComponentDefinition extends AbstractComponentDefinition {
 
 	public BeanDefinition[] getBeanDefinitions() {
 		return new BeanDefinition[]{this.beanDefinition};
+	}
+
+	public RuntimeBeanReference[] getBeanReferences() {
+		return this.beanReferences;
 	}
 
 	public Object getSource() {

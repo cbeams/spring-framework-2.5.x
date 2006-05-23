@@ -21,7 +21,12 @@ import org.springframework.beans.factory.support.ComponentDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MapBasedReaderEventListener;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.io.ClassPathResource;
+
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * @author Rob Harrop
@@ -87,7 +92,21 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 	}
 
 	public void testAspectEvent() throws Exception {
-		//throw new UnsupportedOperationException("Test 'testAspectEvent' not implemented");
+		loadBeansFrom("aopNamespaceHandlerAspectEventTests.xml");
+		ComponentDefinition componentDefinition = this.eventListener.getComponentDefinition("countAgeCalls");
+		assertNotNull(componentDefinition);
+		BeanDefinition[] beanDefinitions = componentDefinition.getBeanDefinitions();
+		assertEquals(6, beanDefinitions.length);
+		RuntimeBeanReference[] beanReferences = componentDefinition.getBeanReferences();
+		assertEquals(6, beanReferences.length);
+		Set expectedReferences = new HashSet();
+		expectedReferences.add("pc");
+		expectedReferences.add("countingAdvice");
+		for (int i = 0; i < beanReferences.length; i++) {
+			RuntimeBeanReference beanReference = beanReferences[i];
+			expectedReferences.remove(beanReference.getBeanName());
+		}
+		assertEquals("Incorrect references found", 0, expectedReferences.size());
 	}
 
 	private void loadBeansFrom(String path) {

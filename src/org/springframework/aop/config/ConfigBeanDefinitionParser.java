@@ -34,7 +34,6 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryBuilder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -45,6 +44,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -139,7 +139,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
 		NodeList childNodes = element.getChildNodes();
-		for (int i = METHOD_INDEX; i < childNodes.getLength(); i++) {
+		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node node = childNodes.item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
 				String localName = node.getLocalName();
@@ -158,6 +158,12 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		return null;
 	}
 
+	/**
+	 * Configures the auto proxy creator needed to support the {@link BeanDefinition BeanDefinitions}
+	 * created by the '<code>&lt;aop:config/&gt;</code>' tag. Will force class proxying if the
+	 * '<code>proxy-target-class</code>' attribute is set to '<code>true</code>'.
+	 * @see NamespaceHandlerUtils
+	 */
 	private void configureAutoProxyCreator(ParserContext parserContext, Element element) {
 		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(parserContext);
 
@@ -175,7 +181,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private void parseAdvisor(Element advisorElement, ParserContext parserContext) {
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
 
-		RootBeanDefinition advisorDefinition = createAdvisorBeanDefinition(advisorElement);
+		AbstractBeanDefinition advisorDefinition = createAdvisorBeanDefinition(advisorElement);
 		String pointcutBeanName = parsePointcutProperty(advisorElement, advisorDefinition.getPropertyValues(), registry);
 
 		String advisorBeanName = advisorElement.getAttribute(ID);
@@ -194,7 +200,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * Creates the {@link AdvisorComponentDefinition} appropriate to the supplied {@link RootBeanDefinition advisor definition}
 	 * and fires it through the {@link ParserContext}.
 	 */
-	private void fireAdvisorEvent(String advisorBeanName, String pointcutBeanName, RootBeanDefinition advisorDefinition,
+	private void fireAdvisorEvent(String advisorBeanName, String pointcutBeanName, AbstractBeanDefinition advisorDefinition,
 																ParserContext parserContext, boolean pointcutRef) {
 		AdvisorComponentDefinition componentDefinition;
 		if (pointcutRef) {
@@ -211,7 +217,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * Creates a {@link RootBeanDefinition} for the advisor described in the supplied. Does <strong>not</strong>
 	 * parse any associated '<code>pointcut</code>' or '<code>pointcut-ref</code>' attributes.
 	 */
-	private RootBeanDefinition createAdvisorBeanDefinition(Element advisorElement) {
+	private AbstractBeanDefinition createAdvisorBeanDefinition(Element advisorElement) {
 		RootBeanDefinition advisorDefinition = new RootBeanDefinition(AspectJPointcutAdvisor.class);
 		advisorDefinition.setSource(advisorElement);
 
@@ -228,17 +234,22 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private void parseAspect(Element aspectElement, ParserContext parserContext) {
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
 		String aspectName = aspectElement.getAttribute(REF);
+		String aspectId = aspectElement.getAttribute(ID);
+
+		List beanDefinitions = new ArrayList();
+		List beanReferences = new ArrayList();
+		beanReferences.add(new RuntimeBeanReference(aspectName));
 
 		List pointcuts = DomUtils.getChildElementsByTagName(aspectElement, POINTCUT);
 		for (int i = 0; i < pointcuts.size(); i++) {
 			Element pointcutElement = (Element) pointcuts.get(i);
-			parsePointcut(pointcutElement, parserContext);
+			beanDefinitions.add(parsePointcut(pointcutElement, parserContext));
 		}
 
 		List declareParents = DomUtils.getChildElementsByTagName(aspectElement, DECLARE_PARENTS);
 		for (int i = METHOD_INDEX; i < declareParents.size(); i++) {
 			Element declareParentsElement = (Element) declareParents.get(i);
-			parseDeclareParents(aspectName, declareParentsElement, parserContext);
+			beanDefinitions.add(parseDeclareParents(aspectName, declareParentsElement, parserContext));
 		}
 
 		// we have to parse "advice" and all the advice kinds in one loop, to get the
@@ -247,9 +258,23 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node node = nodeList.item(i);
 			if (isAdviceNode(node)) {
-				parseAdvice(aspectName, i, (Element) node, registry);
+				AbstractBeanDefinition adviceDefinition = parseAdvice(aspectName, i, (Element) node, registry);
+				Object pointcut = adviceDefinition.getPropertyValues().getPropertyValue(POINTCUT).getValue();
+				if (pointcut instanceof RuntimeBeanReference) {
+					beanReferences.add(pointcut);
+				}
+				beanDefinitions.add(adviceDefinition);
 			}
 		}
+		fireAspectEvent(aspectElement, aspectId, beanDefinitions, beanReferences, parserContext);
+	}
+
+	private void fireAspectEvent(Element aspectElement, String aspectId, List beanDefinitions, List beanReferences, ParserContext parserContext) {
+		BeanDefinition[] finalBeanDefinitions = (BeanDefinition[]) beanDefinitions.toArray(new BeanDefinition[beanDefinitions.size()]);
+		RuntimeBeanReference[] finalBeanReferences = (RuntimeBeanReference[]) beanReferences.toArray(new RuntimeBeanReference[beanReferences.size()]);
+
+		AspectComponentDefinition acd = new AspectComponentDefinition(aspectElement, aspectId, finalBeanDefinitions, finalBeanReferences);
+		parserContext.getReaderContext().fireComponentRegistered(acd);
 	}
 
 	/**
@@ -275,17 +300,16 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * Parse a '<code>declare-parents</code>' element and register the appropriate {@link DeclareParentsAdvisor} with
 	 * the {@link BeanDefinitionRegistry} encapsulated in the supplied {@link ParserContext}.
 	 */
-	private void parseDeclareParents(String aspectName, Element declareParentsElement,
-																	 ParserContext parserContext) {
-		BeanDefinitionRegistryBuilder registryBuilder = new BeanDefinitionRegistryBuilder(parserContext.getRegistry());
-		registryBuilder.register(
-						BeanDefinitionBuilder.rootBeanDefinition(DeclareParentsAdvisor.class).
-										addConstructorArg(declareParentsElement.getAttribute(IMPLEMENT_INTERFACE)).
-										addConstructorArg(declareParentsElement.getAttribute(TYPE_PATTERN)).
-										addConstructorArg(declareParentsElement.getAttribute(DEFAULT_IMPL)).
-										setSource(declareParentsElement)
-		);
-
+	private AbstractBeanDefinition parseDeclareParents(String aspectName, Element declareParentsElement,
+																										 ParserContext parserContext) {
+		AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(DeclareParentsAdvisor.class).
+						addConstructorArg(declareParentsElement.getAttribute(IMPLEMENT_INTERFACE)).
+						addConstructorArg(declareParentsElement.getAttribute(TYPE_PATTERN)).
+						addConstructorArg(declareParentsElement.getAttribute(DEFAULT_IMPL)).
+						setSource(declareParentsElement).getBeanDefinition();
+		String name = BeanDefinitionReaderUtils.generateBeanName(beanDefinition, parserContext.getRegistry(), false);
+		parserContext.getRegistry().registerBeanDefinition(name, beanDefinition);
+		return beanDefinition;
 	}
 
 	/**
@@ -293,7 +317,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * or '<code>around</code>' and registers the resulting {@link BeanDefinition} with the supplied {@link BeanDefinitionRegistry}.
 	 * @return the generated advice {@link RootBeanDefinition}
 	 */
-	private RootBeanDefinition parseAdvice(String aspectName, int order, Element adviceElement, BeanDefinitionRegistry registry) {
+	private AbstractBeanDefinition parseAdvice(String aspectName, int order, Element adviceElement, BeanDefinitionRegistry registry) {
 
 		// create the properties for the advisor
 		MutablePropertyValues advisorProperties = new MutablePropertyValues();
@@ -308,11 +332,11 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		instanceFactoryDefinition.getPropertyValues().addPropertyValue("aspectBeanName", aspectName);
 
 		// create the advice
-		RootBeanDefinition adviceDefinition = null;
 		boolean isAroundAdvice = false;
 
 		// register the pointcut
-		adviceDefinition = createAdviceDefinition(adviceElement, advisorProperties, registry, aspectName, order, methodDefinition, instanceFactoryDefinition);
+		AbstractBeanDefinition adviceDefinition = createAdviceDefinition(adviceElement, advisorProperties,
+						registry, aspectName, order, methodDefinition, instanceFactoryDefinition);
 
 		// configure the advisor
 		RootBeanDefinition advisorDefinition = new RootBeanDefinition(AspectJPointcutAdvisor.class);
@@ -332,7 +356,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * so that the pointcut may be associate with the advice bean. This same pointcut is also configured as
 	 * the pointcut for the enclosing {@link Advisor} definition using the supplied {@link MutablePropertyValues}.
 	 */
-	private RootBeanDefinition createAdviceDefinition(Element adviceElement, MutablePropertyValues advisorProperties, BeanDefinitionRegistry registry, String aspectName, int order, RootBeanDefinition methodDefinition, RootBeanDefinition instanceFactoryDefinition) {
+	private AbstractBeanDefinition createAdviceDefinition(Element adviceElement, MutablePropertyValues advisorProperties, BeanDefinitionRegistry registry, String aspectName, int order, RootBeanDefinition methodDefinition, RootBeanDefinition instanceFactoryDefinition) {
 		boolean isAroundAdvice;
 		String pointcutBeanName = parsePointcutProperty(adviceElement, advisorProperties, registry);
 
@@ -421,7 +445,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * Parses the supplied <code>&lt;pointcut&gt;</code> and registers the resulting
 	 * {@link Pointcut} with the {@link BeanDefinitionRegistry}.
 	 */
-	private void parsePointcut(Element pointcutElement, ParserContext parserContext) {
+	private AbstractBeanDefinition parsePointcut(Element pointcutElement, ParserContext parserContext) {
 		String id = pointcutElement.getAttribute(ID);
 		String expression = pointcutElement.getAttribute(EXPRESSION);
 
@@ -437,6 +461,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 		PointcutComponentDefinition componentDefinition = new PointcutComponentDefinition(id, pointcutDefinition, expression);
 		parserContext.getReaderContext().fireComponentRegistered(componentDefinition);
+
+		return pointcutDefinition;
 	}
 
 	/**
@@ -477,7 +503,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * Creates a {@link BeanDefinition} for the {@link AspectJExpressionPointcut} class using
 	 * the supplied pointcut expression.
 	 */
-	protected RootBeanDefinition createPointcutDefinition(String expression) {
+	protected AbstractBeanDefinition createPointcutDefinition(String expression) {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition();
 		beanDefinition.setBeanClass(AspectJExpressionPointcut.class);
 		beanDefinition.setSingleton(false);
