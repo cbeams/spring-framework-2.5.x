@@ -44,7 +44,7 @@ import org.springframework.util.Assert;
  *
  * <p>Delegates to DataSourceUtils for automatically participating in thread-bound
  * transactions, for example managed by DataSourceTransactionManager.
- * <code>getConnection</code> calls and <code>close<code> calls on returned Connections
+ * <code>getConnection</code> calls and <code>close</code> calls on returned Connections
  * will behave properly within a transaction, i.e. always work on the transactional
  * Connection. If not within a transaction, normal DataSource behavior applies.
  *
