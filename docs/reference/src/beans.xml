@@ -1630,22 +1630,29 @@ public class ReplacementComputeValue implements MethodReplacer {
         dependency. In either case, the dependency is properly initialized
         before the dependent bean.
       </para>
-            <para>
-        For the relatively infrequent situations where dependencies
-        between beans are less direct (for example, when a static initializer in
-        a class needs to be triggered, such as database driver registration),
-        the <literal>depends-on</literal> element may be used to explicitly
-        force one or more beans to be initialized before the bean using this
-        element is initialized.
-      </para>
-            <para>
-        Find below an example of using <literal>depends-on</literal>
-      </para>
+            <para>For the relatively infrequent situations where dependencies
+			between beans are less direct (for example, when a static initializer in
+			a class needs to be triggered, such as database driver registration),
+			the <literal>depends-on</literal> element may be used to explicitly
+			force one or more beans to be initialized before the bean using this
+			element is initialized.</para>
+            <para>Find below an example of using <literal>depends-on</literal> to
+            express a dependency on a single bean.</para>
             <programlisting><![CDATA[<bean id="beanOne" class="ExampleBean" depends-on="manager">
   <property name="manager" ref="manager" />
 </bean>
 
 <bean id="manager" class="ManagerBean" />]]></programlisting>
+            <para>If you need to express a dependency on multiple beans, you can supply a delimited list
+            of beans names as the value of the <literal>depends-on</literal> attribute, with commas, whitespace
+            and semi-colons all valid delimiters. Find below an example of using <literal>depends-on</literal> to
+            express a dependency on a number of beans.</para>
+            <programlisting><![CDATA[<bean id="beanOne" class="ExampleBean" depends-on="manager,accountDao">
+  <property name="manager" ref="manager" />
+</bean>
+
+<bean id="manager" class="ManagerBean" />
+<bean id="accountDao" class="x.y.jdbc.JdbcAccountDao" />]]></programlisting>
         </section>
         <section id="beans-factory-lazy-init">
             <title>Using <literal>lazy-init</literal></title>
