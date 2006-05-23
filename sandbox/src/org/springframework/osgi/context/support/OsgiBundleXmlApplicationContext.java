@@ -28,6 +28,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.xml.DefaultNamespaceHandlerResolver;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.AbstractXmlApplicationContext;
 import org.springframework.core.io.Resource;
@@ -73,6 +75,7 @@ public class OsgiBundleXmlApplicationContext extends
 	private static final String APPLICATION_CONTEXT_SERVICE_POSTFIX = "-springApplicationContext";
 	private static final char   PREFIX_SEPARATOR = ':';
 	private static final String ABSOLUTE_PATH_PREFIX = "/";
+	private static final String OSGI_SPRING_HANDLERS_LOCATION = "org/springframework/osgi/handlers/spring.handlers";
 	
 	private Bundle osgiBundle;
 	private BundleContext osgiBundleContext;
@@ -105,7 +108,16 @@ public class OsgiBundleXmlApplicationContext extends
 	public BundleContext getBundleContext() {
 		return this.osgiBundleContext;		
 	}
-	
+
+	/**
+	 * We can't look in META-INF across bundles when using osgi, so we need to
+	 * change the default namespace handler (spring.handlers) location with a 
+	 * custom resolver.
+	 */
+	protected void initBeanDefinitionReader(XmlBeanDefinitionReader beanDefinitionReader) {
+		beanDefinitionReader.setNamespaceHandlerResolver(
+				new DefaultNamespaceHandlerResolver(OSGI_SPRING_HANDLERS_LOCATION,getClassLoader()));
+	}
 
 	protected void publishContextAsOsgiService() {
 		Dictionary serviceProperties = new Properties();
