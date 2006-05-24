@@ -1795,4 +1795,48 @@
 
 	</target>
 
+	<!-- install spring jars in your local maven repository
+                  using appropriate version numbers -->
+	<target name="mvn.install.jars" depends="alljars">
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-beans"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-aop"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-context"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-core"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-dao"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-jdbc"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-remoting"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-support"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-web"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-webmvc"/>
+		</antcall>
+	</target>
+
+	<target name="mvn.install">
+                <exec executable="mvn.bat" dir="${dist.dir}" failonerror="true">
+                   <arg line="install:install-file"/>
+                   <arg line="-Dfile=modules/${spring-module}.jar"/>
+                   <arg line="-DgroupId=org.springframework"/>
+                   <arg line="-DartifactId=${spring-module} -Dversion=${spring-version}"/>
+                   <arg line="-Dpackaging=jar"/>
+                </exec>
+	</target>
 </project>
