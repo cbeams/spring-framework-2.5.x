@@ -16,29 +16,30 @@
 
 package org.springframework.test.jpa;
 
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
-import org.springframework.orm.jpa.SharedEntityManagerCreator;
-import org.springframework.orm.jpa.ContainerEntityManagerFactoryBean;
-import org.springframework.test.annotation.AbstractAnnotationAwareTransactionalTests;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.instrument.classloading.AbstractLoadTimeWeaver;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
-
-import java.lang.instrument.ClassFileTransformer;
-import java.lang.reflect.Method;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
+import org.springframework.orm.jpa.ContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.EntityManagerPlus;
+import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
+import org.springframework.orm.jpa.SharedEntityManagerCreator;
+import org.springframework.test.annotation.AbstractAnnotationAwareTransactionalTests;
 
 /**
  * Convenient support class for JPA-related tests.
@@ -52,8 +53,6 @@ import java.lang.reflect.Field;
  */
 public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactionalTests {
 
-	private static Class shadowedTestClass;
-
 	private static Object cachedContext;
 
 	private static ShadowingClassLoader shadowingClassLoader;
@@ -61,6 +60,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	protected EntityManagerFactory entityManagerFactory;
 
 	private boolean shadowed = false;
+
 	/**
 	 * Subclasses can use this in test cases.
 	 * It will participate in any current transaction.
@@ -71,7 +71,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	public void setEntityManagerFactory(EntityManagerFactory entityManagerFactory) {
 		this.entityManagerFactory = entityManagerFactory;
 		this.sharedEntityManager = SharedEntityManagerCreator.createSharedEntityManager(
-				this.entityManagerFactory, EntityManager.class);
+				this.entityManagerFactory, EntityManagerPlus.class);
 	}
 
 	/**
@@ -92,13 +92,13 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 			super.runBare();
 		}
 		else {
-			if(shadowingClassLoader == null) {
+			if (shadowingClassLoader == null) {
 			 shadowingClassLoader = new ShadowingClassLoader(classLoader);
 			}
 			Thread.currentThread().setContextClassLoader(shadowingClassLoader);
 			String[] configLocations = getConfigLocations();
 
-			if (shadowedTestClass == null) {
+			if (cachedContext == null) {
 
 				// create load time weaver
 				Class shadowingLoadTimeWeaverClass = shadowingClassLoader.loadClass(ShadowingLoadTimeWeaver.class.getName());
@@ -139,10 +139,10 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 				// refresh
 				genericApplicationContextClass.getMethod("refresh").invoke(cachedContext);
-
-				// create the shadowed test
-				shadowedTestClass = shadowingClassLoader.loadClass(getClass().getName());
 			}
+
+			// create the shadowed test
+			Class shadowedTestClass = shadowingClassLoader.loadClass(getClass().getName());
 			Object testCase = BeanUtils.instantiateClass(shadowedTestClass);
 
 			/* shadowed = true */
@@ -165,6 +165,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 			testMethod.invoke(testCase, null);
 		}
 	}
+
 
 	private static class LoadTimeWeaverInjectingBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter {
 
