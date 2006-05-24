@@ -10,10 +10,12 @@
 		
 		<exclude-unlisted-classes/>
 
+		<!--
 		<properties>
 			<property name="toplink.logging.level" value="FINE"/>
 			<property name="toplink.ddl-generation" value="drop-and-create-tables"/>
 		</properties>
+		-->
 
 	</persistence-unit>
 

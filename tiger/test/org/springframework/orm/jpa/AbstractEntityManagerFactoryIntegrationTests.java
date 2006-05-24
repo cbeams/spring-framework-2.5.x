@@ -36,13 +36,15 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends Abstr
 		"/org/springframework/orm/jpa/inject.xml"
 	};
 
+
 	public static Provider getProvider() {
 		String provider = System.getProperty("org.springframework.orm.jpa.provider");
-		if (provider != null && provider.toLowerCase().indexOf("toplink") > -1) {
+		if (provider != null && provider.toLowerCase().indexOf("hibernate") > -1) {
 			return Provider.TOPLINK;
 		}
 		return Provider.HIBERNATE;
 	}
+
 
 	protected String[] getConfigLocations() {
 		Provider provider = getProvider();

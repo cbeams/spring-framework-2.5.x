@@ -14,42 +14,40 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.jpa.toplink;
+package org.springframework.orm.jpa.hibernate;
 
-import oracle.toplink.essentials.internal.ejb.cmp3.base.EntityManagerFactoryImpl;
+import org.hibernate.ejb.HibernateEntityManager;
+import org.hibernate.ejb.HibernateEntityManagerFactory;
 
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 
 /**
- * TopLink-specific JPA tests.
+ * Hibernate-specific JPA tests.
  * 
- * @author Costin Leau
- * @author Rod Johnson
+ * @author Juergen Hoeller
  */
-public class TopLinkEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
+public class HibernateEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 	
 	protected String[] getConfigLocations() {
-		return TOPLINK_CONFIG_LOCATIONS;
+		return HIBERNATE_CONFIG_LOCATIONS;
 	}
 
 
-	public void testCanCastNativeEntityManagerFactoryToTopLinkEntityManagerFactoryImpl() {
+	public void testCanCastNativeEntityManagerFactoryToToplinkEntityManagerFactoryImpl() {
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
-		assertTrue(emfi.getNativeEntityManagerFactory() instanceof EntityManagerFactoryImpl);
-	}
-	
-	public void testCannotCastSharedEntityManagerProxyToToplinkEntityManager() {
-		assertFalse(sharedEntityManager instanceof oracle.toplink.essentials.ejb.cmp3.EntityManager);
+		assertTrue(emfi.getNativeEntityManagerFactory() instanceof HibernateEntityManagerFactory);
 	}
 
-	public void testCanGetSharedTopLinkEntityManagerProxy() {
-		oracle.toplink.essentials.ejb.cmp3.EntityManager toplinkEntityManager =
-				(oracle.toplink.essentials.ejb.cmp3.EntityManager)
-				SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory,
-						oracle.toplink.essentials.ejb.cmp3.EntityManager.class);
-		assertNotNull(toplinkEntityManager.getActiveSession());
+	public void testCannotCastSharedEntityManagerProxyToToplinkEntityManager() {
+		assertFalse(sharedEntityManager instanceof HibernateEntityManager);
+	}
+
+	public void testCanGetSharedHibernateEntityManagerProxy() {
+		HibernateEntityManager hibernateEntityManager = (HibernateEntityManager)
+				SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory, HibernateEntityManager.class);
+		assertNotNull(hibernateEntityManager.getSession());
 	}
 
 }

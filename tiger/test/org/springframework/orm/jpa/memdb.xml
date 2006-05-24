@@ -63,13 +63,6 @@
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager" >
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
 		<property name="dataSource" ref="dataSource"/>
-	
-		<!-- TODO coordinate into one tag  -->
-		<property name="jpaDialect" ref="jpaDialect"/>
-		<!--
-			<bean class="org.springframework.orm.jpa.spi.TopLinkJpaDialect" />
-		</property>
-		 -->
 	</bean>
 	
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" >

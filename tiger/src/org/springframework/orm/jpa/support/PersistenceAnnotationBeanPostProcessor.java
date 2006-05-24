@@ -55,6 +55,7 @@ import org.springframework.util.ReflectionUtils;
  * should be no conflict in implementation.
  * 
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
@@ -118,7 +119,7 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 	 * @throws NoSuchBeanDefinitionException if there is no such EntityManagerFactory
 	 * in the context
 	 */
-	protected EntityManagerFactory findEntityManagerFactoryWithName(String emfName)
+	protected EntityManagerFactory findEntityManagerFactoryByName(String emfName)
 			throws NoSuchBeanDefinitionException {
 
 		initMapsIfNecessary();
@@ -209,7 +210,7 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 			Class<?> memberType = getMemberType();
 			if (!(EntityManagerFactory.class.isAssignableFrom(memberType) ||
 					EntityManager.class.isAssignableFrom(memberType))) {
-				throw new IllegalArgumentException("Cannot inject " + member + ": not a JPA type");
+				throw new IllegalArgumentException("Cannot inject " + member + ": not a supported JPA type");
 			}
 		}
 
@@ -262,11 +263,17 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 			}
 		}
 
-		// Resolve the object against the application context
+		/**
+		 * Resolve the object against the application context.
+		 */
 		protected Object resolve() {
-			// Resolves to EM or EMF
-			EntityManagerFactory emf = findEntityManagerFactoryWithName(this.unitName);
+			// Resolves to EM or EMF.
+			EntityManagerFactory emf = findEntityManagerFactoryByName(this.unitName);
 			if (EntityManagerFactory.class.isAssignableFrom(getMemberType())) {
+				if (!getMemberType().isInstance(emf)) {
+					throw new IllegalArgumentException("Cannot inject " + this.member +
+							" with EntityManagerFactory [" + emf + "]: type mismatch");
+				}
 				return emf;
 			}
 			else {

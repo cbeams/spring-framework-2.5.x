@@ -19,6 +19,7 @@ package org.springframework.orm.jpa;
 import java.sql.SQLException;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 
 import org.springframework.dao.DataAccessException;
@@ -75,7 +76,7 @@ public class DefaultJpaDialect implements JpaDialect {
 	/**
 	 * This implementation always returns <code>null</code>.
 	 */
-	public ConnectionHandle getJdbcConnection(EntityManager em, boolean readOnly)
+	public ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
 			throws PersistenceException, SQLException {
 
 		return null;
@@ -104,6 +105,23 @@ public class DefaultJpaDialect implements JpaDialect {
 	 */
 	public DataAccessException translateException(PersistenceException ex) {
 		return EntityManagerFactoryUtils.convertJpaAccessException(ex);
+	}
+
+
+	public boolean supportsEntityManagerFactoryPlusOperations() {
+		return false;
+	}
+
+	public boolean supportsEntityManagerPlusOperations() {
+		return false;
+	}
+
+	public EntityManagerFactoryPlusOperations getEntityManagerFactoryPlusOperations(EntityManagerFactory rawEntityManager) {
+		throw new UnsupportedOperationException(getClass().getName() + " does not support EntityManagerFactoryPlusOperations");
+	}
+
+	public EntityManagerPlusOperations getEntityManagerPlusOperations(EntityManager rawEntityManager) {
+		throw new UnsupportedOperationException(getClass().getName() + " does not support EntityManagerPlusOperations");
 	}
 
 }

@@ -242,7 +242,9 @@ public class ContainerEntityManagerFactoryBeanTests extends AbstractEntityManage
 		containerEmfb.afterPropertiesSet();
 		
 		assertEquals(entityManagerName, actualPui.getPersistenceUnitName());
-		assertSame(props, actualProps);
+		if (props != null) {
+			assertEquals(props, actualProps);
+		}
 		//checkInvariants(containerEmfb);
 		
 		return containerEmfb;

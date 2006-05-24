@@ -21,6 +21,9 @@ import javax.persistence.EntityManagerFactory;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.orm.jpa.EntityManagerFactoryInfo;
+import org.springframework.orm.jpa.EntityManagerPlus;
+import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.Assert;
 
@@ -52,16 +55,14 @@ public class SharedEntityManagerBean implements FactoryBean, InitializingBean {
 
 	private EntityManagerFactory target;
 
-	private Class entityManagerInterface = EntityManager.class;
+	private Class entityManagerInterface;
 
 	private EntityManager shared;
 
 
 	/**
 	 * Set the EntityManagerFactory that this adapter is supposed to
-	 * expose a shared JPA EntityManager for. This should be the raw
-	 * EntityManagerFactory, as accessed by JpaTransactionManager.
-	 * @see org.springframework.orm.jpa.JpaTransactionManager
+	 * expose a shared JPA EntityManager for.
 	 */
 	public void setEntityManagerFactory(EntityManagerFactory target) {
 		this.target = target;
@@ -69,9 +70,10 @@ public class SharedEntityManagerBean implements FactoryBean, InitializingBean {
 
 	/**
 	 * Specify the EntityManager interface to expose.
-	 * <p>Default is the standard <code>javax.persistence.EntityManager</code>
-	 * interface. This can be overridden to make the proxy expose a
-	 * vendor-extended EntityManager interface.
+	 * <p>Default is the the EntityManager interface as defined by the
+	 * EntityManagerFactoryInfo, if available. Else, the standard
+	 * <code>javax.persistence.EntityManager</code> interface will be used.
+	 * @see org.springframework.orm.jpa.EntityManagerFactoryInfo#getEntityManagerInterface()
 	 * @see javax.persistence.EntityManager
 	 */
 	public void setEntityManagerInterface(Class entityManagerInterface) {
@@ -79,14 +81,33 @@ public class SharedEntityManagerBean implements FactoryBean, InitializingBean {
 		Assert.isAssignable(EntityManager.class, entityManagerInterface);
 		this.entityManagerInterface = entityManagerInterface;
 	}
-	
+
 
 	public final void afterPropertiesSet() {
 		if (this.target == null) {
 			throw new IllegalArgumentException("entityManagerFactory is required");
 		}
-		this.shared = SharedEntityManagerCreator.createSharedEntityManager(
-				this.target, this.entityManagerInterface);
+		Class[] ifcs = null;
+		if (this.target instanceof EntityManagerFactoryInfo) {
+			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) this.target;
+			if (this.entityManagerInterface == null) {
+				this.entityManagerInterface = emfInfo.getEntityManagerInterface();
+			}
+			JpaDialect jpaDialect = emfInfo.getJpaDialect();
+			if (jpaDialect != null && jpaDialect.supportsEntityManagerPlusOperations()) {
+				ifcs = new Class[] {this.entityManagerInterface, EntityManagerPlus.class};
+			}
+			else {
+				ifcs = new Class[] {this.entityManagerInterface};
+			}
+		}
+		else {
+			if (this.entityManagerInterface == null) {
+				this.entityManagerInterface = EntityManager.class;
+			}
+			ifcs = new Class[] {this.entityManagerInterface};
+		}
+		this.shared = SharedEntityManagerCreator.createSharedEntityManager(this.target, ifcs);
 	}
 
 

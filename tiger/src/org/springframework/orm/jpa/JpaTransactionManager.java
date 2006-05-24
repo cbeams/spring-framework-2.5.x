@@ -181,7 +181,6 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 
 	/**
 	 * Return the JPA dialect to use for this transaction manager.
-	 * Creates a default one for the specified EntityManagerFactory if none set.
 	 */
 	public JpaDialect getJpaDialect() {
 		return this.jpaDialect;
@@ -195,6 +194,12 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 	public void afterPropertiesSet() {
 		if (getEntityManagerFactory() == null) {
 			throw new IllegalArgumentException("entityManagerFactory is required");
+		}
+		if (getEntityManagerFactory() instanceof EntityManagerFactoryInfo) {
+			JpaDialect jpaDialect = ((EntityManagerFactoryInfo) getEntityManagerFactory()).getJpaDialect();
+			if (jpaDialect != null) {
+				setJpaDialect(jpaDialect);
+			}
 		}
 	}
 

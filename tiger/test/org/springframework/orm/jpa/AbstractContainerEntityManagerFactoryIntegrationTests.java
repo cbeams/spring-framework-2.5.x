@@ -23,8 +23,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.orm.jpa.EntityManagerFactoryInfo;
-import org.springframework.orm.jpa.AbstractEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.domain.DriversLicense;
 import org.springframework.orm.jpa.domain.Person;
 import org.springframework.test.annotation.ExpectedException;
@@ -40,7 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Rod Johnson
  * @since 2.0
  */
-public class ContainerEntityManagerFactoryIntegrationTests extends AbstractEntityManagerFactoryIntegrationTests {
+public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
+		extends AbstractEntityManagerFactoryIntegrationTests {
 	
 	@NotTransactional
 	public void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {

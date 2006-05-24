@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.jpa.support;
+package org.springframework.orm.jpa.vendor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -30,23 +30,24 @@ import org.springframework.jdbc.datasource.SimpleConnectionHandle;
 import org.springframework.orm.jpa.DefaultJpaDialect;
 
 /**
- * Hibernate-specific JpaDialect.
+ * Hibernate-specific JpaDialect implementation.
  * 
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class HibernateJpaDialect extends DefaultJpaDialect {
 
 	@Override
-	public ConnectionHandle getJdbcConnection(EntityManager em, boolean readOnly)
+	public ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
 			throws PersistenceException, SQLException {
 
-		Session session = getHibernateSession(em);
+		Session session = getSession(entityManager);
 		Connection con = session.connection();
 		return (con != null ? new SimpleConnectionHandle(con) : null);
 	}
 
-	protected Session getHibernateSession(EntityManager em) {
+	protected Session getSession(EntityManager em) {
 		return ((HibernateEntityManager) em).getSession();
 	}
 

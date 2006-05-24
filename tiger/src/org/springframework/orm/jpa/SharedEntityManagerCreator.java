@@ -27,30 +27,14 @@ import javax.persistence.EntityManagerFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.orm.jpa.EntityManagerFactoryUtils;
-
 /**
- * FactoryBean that exposes a shared JPA EntityManager reference for a
- * given EntityManagerFactory. Typically used for an EntityManagerFactory
- * created by LocalEntityManagerFactoryBean, as direct alternative to a
- * JndiObjectFactoryBean definition for a Java EE 5 server's EntityManager.
- * Also allows convenient creation of shared EntityManager proxies.
+ * Factory for a shared JPA EntityManager for a given EntityManagerFactory.
  *
  * <p>The shared EntityManager will behave just like an EntityManager fetched
  * from an application server's JNDI environment, as defined by the JPA
  * specification. It will delegate all calls to the current transactional
  * EntityManager, if any; else, it will fall back to a newly created
  * EntityManager per operation.
- *
- * <p>Can be passed to DAOs that expect a shared EntityManager reference
- * rather than an EntityManagerFactory reference. Note that Spring's
- * JpaTransactionManager always needs an EntityManagerFactory reference,
- * to be able to create new transactional EntityManager instances.
- *
- * <p>This adapter is also able to expose a vendor-extended EntityManager
- * interface: Simply specify the extended interface as "entityManagerInterface".
- * By default, only the standard <code>javax.persistence.EntityManager</code>
- * interface will be exposed.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -59,17 +43,45 @@ import org.springframework.orm.jpa.EntityManagerFactoryUtils;
  * @see org.springframework.orm.jpa.JpaTransactionManager
  */
 public abstract class SharedEntityManagerCreator {
-	
+
 	/**
-	 * Return a shared transactional EntityManager proxy,
+	 * Create a shared transactional EntityManager proxy,
 	 * given this EntityManagerFactory
+	 * @param emf the EntityManagerFactory to delegate to.
+	 * If this implements the EntityManagerFactoryInfo interface, appropriate handling
+	 * of the native EntityManagerFactory and available EntityManagerPlusOperations
+	 * will automatically apply.
+	 * @return a shareable transaction EntityManager proxy
+	 */
+	public static EntityManager createSharedEntityManager(EntityManagerFactory emf) {
+		Class[] entityManagerInterfaces = null;
+		if (emf instanceof EntityManagerFactoryInfo) {
+			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
+			Class entityManagerInterface = emfInfo.getEntityManagerInterface();
+			JpaDialect jpaDialect = emfInfo.getJpaDialect();
+			if (jpaDialect != null && jpaDialect.supportsEntityManagerPlusOperations()) {
+				entityManagerInterfaces = new Class[] {entityManagerInterface, EntityManagerPlus.class};
+			}
+			else {
+				entityManagerInterfaces = new Class[] {entityManagerInterface};
+			}
+		}
+		else {
+			entityManagerInterfaces = new Class[] {EntityManager.class};
+		}
+		return createSharedEntityManager(emf, entityManagerInterfaces);
+	}
+
+	/**
+	 * Create a shared transactional EntityManager proxy,
+	 * given this EntityManagerFactory
+	 * @param emf EntityManagerFactory to obtain EntityManagers from as needed
 	 * @param entityManagerInterfaces interfaces to be implemented by the
 	 * EntityManager. Allows the addition or specification of proprietary interfaces.
-	 * @param emf EntityManagerFactory to obtain EntityManagers from as needed
 	 * @return a shareable transaction EntityManager proxy
 	 */
 	public static EntityManager createSharedEntityManager(
-			EntityManagerFactory emf, Class...entityManagerInterfaces) {
+			EntityManagerFactory emf, Class... entityManagerInterfaces) {
 
 		return (EntityManager) Proxy.newProxyInstance(
 				SharedEntityManagerCreator.class.getClassLoader(),

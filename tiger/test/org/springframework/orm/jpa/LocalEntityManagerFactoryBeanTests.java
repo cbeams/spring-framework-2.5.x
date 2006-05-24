@@ -64,7 +64,9 @@ public class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFac
 		lemfb.afterPropertiesSet();
 		
 		assertSame(entityManagerName, actualName);
-		assertSame(props, actualProps);
+		if (props != null) {
+			assertEquals(props, actualProps);
+		}
 		checkInvariants(lemfb);
 		
 		lemfb.destroy();

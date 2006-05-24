@@ -251,7 +251,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	 */
 	private final class MockPersistenceAnnotationBeanPostProcessor extends PersistenceAnnotationBeanPostProcessor {
 		@Override
-		protected EntityManagerFactory findEntityManagerFactoryWithName(String emfName) throws NoSuchBeanDefinitionException {
+		protected EntityManagerFactory findEntityManagerFactoryByName(String emfName) throws NoSuchBeanDefinitionException {
 			return mockEmf;
 		}
 	}

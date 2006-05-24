@@ -27,6 +27,7 @@ import javax.persistence.spi.PersistenceUnitInfo;
  * they implement.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public interface EntityManagerFactoryInfo {
@@ -57,5 +58,17 @@ public interface EntityManagerFactoryInfo {
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getPersistenceUnitName()
 	 */
 	String getPersistenceUnitName();
+
+	/**
+	 * Return the (potentially vendor-specific) EntityManager interface
+	 * that this factory's EntityManagers will implement.
+	 */
+	Class getEntityManagerInterface();
+
+	/**
+	 * Return the vendor-specific JpaDialect implementation for this
+	 * EntityManagerFactory, or <code>null</code> if not known.
+	 */
+	JpaDialect getJpaDialect();
 
 }

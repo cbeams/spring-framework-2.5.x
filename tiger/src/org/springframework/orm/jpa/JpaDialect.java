@@ -19,6 +19,7 @@ package org.springframework.orm.jpa;
 import java.sql.SQLException;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 
 import org.springframework.dao.DataAccessException;
@@ -47,10 +48,49 @@ import org.springframework.transaction.TransactionException;
  * @see JpaTransactionManager#setJpaDialect
  * @see JpaAccessor#setJpaDialect
  * @see DefaultJpaDialect
- * @see PortableEntityManagerPlus
- * @see PortableEntityManagerFactoryPlus
  */
 public interface JpaDialect {
+
+	//-----------------------------------------------------------------------------------
+	// Hooks for non-standard persistence operations (used by EntityManagerFactory beans)
+	//-----------------------------------------------------------------------------------
+
+	/**
+	 * Return whether the EntityManagerFactoryPlus(Operations) interface is
+	 * supported by this provider.
+	 * @see EntityManagerFactoryPlusOperations
+	 * @see EntityManagerFactoryPlus
+	 */
+	boolean supportsEntityManagerFactoryPlusOperations();
+
+	/**
+	 * Return whether the EntityManagerPlus(Operations) interface is
+	 * supported by this provider.
+	 * @see EntityManagerPlusOperations
+	 * @see EntityManagerPlus
+	 */
+	boolean supportsEntityManagerPlusOperations();
+
+	/**
+	 * Return an EntityManagerFactoryPlusOperations implementation for
+	 * the given raw EntityManagerFactory. This operations object can be
+	 * used to serve the additional operations behind a proxy that
+	 * implements the EntityManagerFactoryPlus interface.
+	 * @param rawEntityManager the raw provider-specific EntityManagerFactory
+	 * @return the EntityManagerFactoryPlusOperations implementation
+	 */
+	EntityManagerFactoryPlusOperations getEntityManagerFactoryPlusOperations(EntityManagerFactory rawEntityManager);
+
+	/**
+	 * Return an EntityManagerPlusOperations implementation for
+	 * the given raw EntityManager. This operations object can be
+	 * used to serve the additional operations behind a proxy that
+	 * implements the EntityManagerPlus interface.
+	 * @param rawEntityManager the raw provider-specific EntityManagerFactory
+	 * @return the EntityManagerFactoryPlusOperations implementation
+	 */
+	EntityManagerPlusOperations getEntityManagerPlusOperations(EntityManager rawEntityManager);
+
 
 	//-------------------------------------------------------------------------
 	// Hooks for transaction management (used by JpaTransactionManager)
@@ -116,7 +156,7 @@ public interface JpaDialect {
 	 * implementation can return a SimpleConnectionHandle that just contains the
 	 * Connection. If some other object is needed in <code>releaseJdbcConnection</code>,
 	 * an implementation should use a special handle that references that other object.
-	 * @param em the current JPA EntityManager
+	 * @param entityManager the current JPA EntityManager
 	 * @return a handle for the JDBC Connection, to be passed into
 	 * <code>releaseJdbcConnection</code>, or <code>null</code>
 	 * if no JDBC Connection can be retrieved
@@ -128,7 +168,7 @@ public interface JpaDialect {
 	 * @see JpaTransactionManager#setDataSource
 	 * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
 	 */
-	ConnectionHandle getJdbcConnection(EntityManager em, boolean readOnly)
+	ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
 			throws PersistenceException, SQLException;
 
 	/**
@@ -139,12 +179,12 @@ public interface JpaDialect {
 	 * by <code>getJdbcConnection</code> will be implicitly closed when the JPA
 	 * transaction completes or when the EntityManager is closed.
 	 * @param conHandle the JDBC Connection handle to release
-	 * @param em the current JPA EntityManager
+	 * @param entityManager the current JPA EntityManager
 	 * @throws javax.persistence.PersistenceException if thrown by JPA methods
 	 * @throws java.sql.SQLException if thrown by JDBC methods
 	 * @see #getJdbcConnection
 	 */
-	void releaseJdbcConnection(ConnectionHandle conHandle, EntityManager em)
+	void releaseJdbcConnection(ConnectionHandle conHandle, EntityManager entityManager)
 			throws PersistenceException, SQLException;
 
 
@@ -153,10 +193,10 @@ public interface JpaDialect {
 	//-----------------------------------------------------------------------------------
 
 	/**
-	 * Translate the given PersistenceException to a corresponding exception from Spring's
-	 * generic DataAccessException hierarchy. An implementation should apply
-	 * EntityManagerFactoryUtils' standard exception translation if can't do
-	 * anything more specific.
+	 * Translate the given PersistenceException to a corresponding exception from
+	 * Spring's generic DataAccessException hierarchy. An implementation should
+	 * apply EntityManagerFactoryUtils' standard exception translation if can't
+	 * do anything more specific.
 	 * <p>Of particular importance is the correct translation to
 	 * DataIntegrityViolationException, for example on constraint violation.
 	 * Unfortunately, standard JPA does not allow for portable detection of this.

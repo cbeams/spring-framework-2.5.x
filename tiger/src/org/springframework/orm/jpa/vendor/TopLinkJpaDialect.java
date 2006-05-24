@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.jpa.support;
+package org.springframework.orm.jpa.vendor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -23,6 +23,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
 import oracle.toplink.essentials.internal.sessions.AbstractSession;
+import oracle.toplink.essentials.sessions.Session;
 import oracle.toplink.essentials.sessions.UnitOfWork;
 
 import org.springframework.jdbc.datasource.ConnectionHandle;
@@ -33,8 +34,8 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
 /**
- * TopLink implementation of the JpaDialect interface. Main value add
- * is the ability to obtain a JDBC Connection from the current TopLink session, which
+ * TopLink implementation of the JpaDialect interface. Main value add is the
+ * ability to obtain a JDBC Connection from the current TopLink session, which
  * enables the mixing of JDBC and TopLink JPA operations in the same transaction,
  * as per Spring's normal data access contract. Spring's JPA support will work
  * correctly, except for mixing JPA with JDBC operations, with the default
@@ -55,7 +56,7 @@ import org.springframework.transaction.TransactionException;
  */
 public class TopLinkJpaDialect extends DefaultJpaDialect {
 	
-	private boolean lazyDatabaseTransaction;
+	private boolean lazyDatabaseTransaction = false;
 
 
 	/**
@@ -84,8 +85,8 @@ public class TopLinkJpaDialect extends DefaultJpaDialect {
 			// This is the magic bit. As with the existing Spring TopLink integration,
 			// begin an early transaction to force TopLink to get a JDBC connection
 			// so that Spring can manage transactions with JDBC as well as TopLink.
-			AbstractSession sess = getTopLinkSession(entityManager);
-			((UnitOfWork) sess).beginEarlyTransaction();
+			UnitOfWork uow = (UnitOfWork) getSession(entityManager);
+			uow.beginEarlyTransaction();
 		}
 		// Could return the UOW, if there were any advantage in having it later.
 		return null;
@@ -95,20 +96,19 @@ public class TopLinkJpaDialect extends DefaultJpaDialect {
 	public ConnectionHandle getJdbcConnection(EntityManager em, boolean readOnly)
 			throws PersistenceException, SQLException {
 
-		AbstractSession sess = getTopLinkSession(em);
+		AbstractSession session = (AbstractSession) getSession(em);
 		// The connection was already acquired eagerly in beginTransaction,
 		// unless lazyDatabaseTransaction was set to true.
-		Connection con = sess.getAccessor().getConnection();
-		return (con != null ? new SimpleConnectionHandle(sess.getAccessor().getConnection()) : null);
+		Connection con = session.getAccessor().getConnection();
+		return (con != null ? new SimpleConnectionHandle(con) : null);
 	}
 
 	/**
 	 * Get a traditional TopLink Session from the given EntityManager.
 	 */
-	protected AbstractSession getTopLinkSession(EntityManager em) {
+	protected Session getSession(EntityManager em) {
 		oracle.toplink.essentials.ejb.cmp3.EntityManager emi = (oracle.toplink.essentials.ejb.cmp3.EntityManager) em;
-		AbstractSession sess = (AbstractSession) emi.getActiveSession();
-		return sess;
+		return emi.getActiveSession();
 	}
 
 }
