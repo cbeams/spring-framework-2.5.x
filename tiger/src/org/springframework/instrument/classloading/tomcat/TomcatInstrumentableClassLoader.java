@@ -19,74 +19,35 @@ import java.lang.instrument.ClassFileTransformer;
 
 import org.apache.catalina.loader.ResourceEntry;
 import org.apache.catalina.loader.WebappClassLoader;
-import org.springframework.instrument.classloading.InstrumentableClassLoader;
-import org.springframework.instrument.classloading.InstrumentedClassLoader;
-import org.springframework.util.ClassUtils;
+import org.springframework.instrument.classloading.AspectJWeavingTransformer;
+import org.springframework.instrument.classloading.InstrumentationRegistry;
 import org.springframework.util.StringUtils;
 
 /**
- * Extension of tomcat default classloader which adds instrumentation to loaded classes
- * without the need of using an agent.
+ * Extension of tomcat default classloader which adds instrumentation to loaded
+ * classes without the need of using an agent.
  * 
  * @author Costin Leau
  * 
- * TODO: allow InstrumentableClassLoader to be loaded from the server classloader to avoid reflection.
- * TODO make Spring depend on this, but not the reverse.
- * put outside the core Spring code tree
- * 
  */
-public class TomcatInstrumentableClassLoader extends WebappClassLoader implements InstrumentedClassLoader {
+public class TomcatInstrumentableClassLoader extends WebappClassLoader implements InstrumentationRegistry {
 
-	// use an internal instrumentable classloader for delegation to reuse the logic
-	InstrumentableClassLoader instrumentableClassLoader;
-
+	// use an internal weavingTransformer.
+	AspectJWeavingTransformer weavingTransformer;
 
 	public TomcatInstrumentableClassLoader() {
 		super();
-		instrumentableClassLoader = new InstrumentableClassLoader(ClassUtils.getDefaultClassLoader());
+		weavingTransformer = new AspectJWeavingTransformer();
 	}
 
 	public TomcatInstrumentableClassLoader(ClassLoader cl) {
 		super(cl);
-		instrumentableClassLoader = new InstrumentableClassLoader(cl);
+		weavingTransformer = new AspectJWeavingTransformer(cl);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.lwt.AbstractOverridingClassLoader#addClassNameToExcludeFromUndelegation(java.lang.String)
-	 */
-	public void addClassNameToExcludeFromUndelegation(String className) {
-		instrumentableClassLoader.addClassNameToExcludeFromUndelegation(className);
+	public void addClassFileTransformer(ClassFileTransformer cft) {
+		weavingTransformer.addClassFileTransformer(cft);
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.lwt.InstrumentableClassLoader#addTransformer(java.lang.instrument.ClassFileTransformer)
-	 */
-	public void addTransformer(ClassFileTransformer cft) {
-		instrumentableClassLoader.addTransformer(cft);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.lwt.InstrumentableClassLoader#isAspectJWeavingEnabled()
-	 */
-	public boolean isAspectJWeavingEnabled() {
-		return instrumentableClassLoader.isAspectJWeavingEnabled();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.lwt.InstrumentableClassLoader#setAspectJWeavingEnabled(boolean)
-	 */
-	public void setAspectJWeavingEnabled(boolean flag) {
-		instrumentableClassLoader.setAspectJWeavingEnabled(flag);
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -98,11 +59,11 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader implement
 		sb.append(super.toString());
 		return sb.toString();
 	}
-	
+
 	//
 	// add hooks for adding transformation
 	//
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -113,15 +74,14 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader implement
 	protected ResourceEntry findResourceInternal(String name, String path) {
 
 		ResourceEntry entry = super.findResourceInternal(name, path);
-		
-		// postpone string parsing as much as possible (they are slow) 
+
+		// postpone string parsing as much as possible (they are slow)
 		if (entry != null && entry.binaryContent != null && path.endsWith(".class")) {
 			String internalName = StringUtils.replace(name, ".", "/");
-			byte[] transformed = instrumentableClassLoader.transformIfNecessary(name, internalName, entry.binaryContent);
+			byte[] transformed = weavingTransformer.transformIfNecessary(name, internalName, entry.binaryContent);
 			entry.binaryContent = transformed;
 		}
 		return entry;
 	}
-
 
 }

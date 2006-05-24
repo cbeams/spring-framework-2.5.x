@@ -16,7 +16,6 @@
 
 package org.springframework.instrument.classloading;
 
-import java.lang.instrument.ClassFileTransformer;
 
 /**
  * Interface supporting adding one or more ClassFileTransformers
@@ -26,25 +25,8 @@ import java.lang.instrument.ClassFileTransformer;
  * @author Rod Johnson
  * @since 2.0
  */
-public interface LoadTimeWeaver {
+public interface LoadTimeWeaver extends ClassLoaderWeaver {
 	
-	/**
-	 * Return a class loader that supports instrumentation through
-	 * AspectJ load time weaving and user-defined ClassFileTransformers.
-	 * May be the current class loader, or a class loader created by the
-	 * implementation of this interface.
-	 * @return an instrumentable class loader.
-	 */
-	ClassLoader getInstrumentableClassLoader();
-	
-	/**
-	 * Add the given ClassFileTransformer to the current environment.
-	 * @param classFileTransformer ClassFileTransformer to add. The change
-	 * will affect the behaviour of the class loader returned by
-	 * <code>getInstrumentableClassLoader()</code>
-	 */
-	void addClassFileTransformer(ClassFileTransformer classFileTransformer);
-
 	/**
 	 * Return a throwaway class loader, enabling classes to be loaded and inspected
 	 * without affecting the parent class loader. Most <i>not</i> return the same as

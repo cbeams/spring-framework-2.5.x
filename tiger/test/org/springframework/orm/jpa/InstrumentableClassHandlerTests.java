@@ -25,9 +25,9 @@ public class InstrumentableClassHandlerTests extends TestCase {
 	ReflectionClassLoaderHandler handler;
 
 	public void testHandler() {
-		handler = new ReflectionClassLoaderHandler(new InstrumentableClassLoader(ClassUtils.getDefaultClassLoader()));
-		handler.isAspectJWeavingEnabled();
-		handler.setAspectJWeavingEnabled(false);
+		ClassLoader loader = new InstrumentableClassLoader(ClassUtils.getDefaultClassLoader());
+		handler = new ReflectionClassLoaderHandler(loader);
+		assertSame(loader, handler.getInstrumentableClassLoader());
 	}
 
 }

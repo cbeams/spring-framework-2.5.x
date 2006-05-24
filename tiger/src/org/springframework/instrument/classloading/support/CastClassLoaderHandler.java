@@ -18,22 +18,22 @@ package org.springframework.instrument.classloading.support;
 
 import java.lang.instrument.ClassFileTransformer;
 
-import org.springframework.instrument.classloading.DelegatedInstrumentedClassLoader;
 import org.springframework.instrument.classloading.InstrumentableClassLoader;
+import org.springframework.instrument.classloading.ClassLoaderWeaver;
 
 /**
- * InstrumentedClassLoader that holds a narrow reference to the internal
+ * InstrumentableClassLoader that holds a narrow reference to the internal
  * classloader delegate. Such class is useful when the container classloader
- * allows the interface is loaded by the same classloader (the web application
- * has access to the classes loaded by the parent). This class should be always
- * used if possible, instead of ReflectionClassLoaderHandler since it avoids the
- * reflection mechanism.
+ * allows the interface to be loaded by the same classloader (the web
+ * application has access to the classes loaded by the parent). This class
+ * should be always used if possible, instead of ReflectionClassLoaderHandler
+ * since it avoids the reflection mechanism.
  * 
  * @author Costin Leau
  * @since 2.0
  */
-public class CastClassLoaderHandler implements DelegatedInstrumentedClassLoader {
-	
+public class CastClassLoaderHandler implements ClassLoaderWeaver {
+
 	private InstrumentableClassLoader classLoader;
 
 	public CastClassLoaderHandler(ClassLoader loader) {
@@ -47,40 +47,16 @@ public class CastClassLoaderHandler implements DelegatedInstrumentedClassLoader 
 	public CastClassLoaderHandler() {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.lwt.InstrumentedClassLoader#addClassNameToExcludeFromUndelegation(java.lang.String)
-	 */
 	public void addClassNameToExcludeFromUndelegation(String className) {
 		classLoader.addClassNameToExcludeFromUndelegation(className);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.lwt.InstrumentedClassLoader#addTransformer(java.lang.instrument.ClassFileTransformer)
-	 */
-	public void addTransformer(ClassFileTransformer cft) {
+	public void addClassFileTransformer(ClassFileTransformer cft) {
 		classLoader.addTransformer(cft);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.lwt.InstrumentedClassLoader#isAspectJWeavingEnabled()
-	 */
-	public boolean isAspectJWeavingEnabled() {
-		return classLoader.isAspectJWeavingEnabled();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.lwt.InstrumentedClassLoader#setAspectJWeavingEnabled(boolean)
-	 */
-	public void setAspectJWeavingEnabled(boolean flag) {
-		classLoader.setAspectJWeavingEnabled(flag);
+	public ClassLoader getInstrumentableClassLoader() {
+		return classLoader;
 	}
 
 	/**
@@ -91,20 +67,9 @@ public class CastClassLoaderHandler implements DelegatedInstrumentedClassLoader 
 	}
 
 	/**
-	 * @param classLoader
-	 *            The classLoader to set.
+	 * @param classLoader The classLoader to set.
 	 */
 	public void setClassLoader(InstrumentableClassLoader loader) {
 		this.classLoader = loader;
 	}
-
-	/* (non-Javadoc)
-	 * @see org.springframework.lwt.support.DelegatedInstrumentedClassLoader#getDelegatedClassLoader()
-	 */
-	public ClassLoader getDelegatedClassLoader() {
-		return classLoader;
-	}
-	
-	
-
 }

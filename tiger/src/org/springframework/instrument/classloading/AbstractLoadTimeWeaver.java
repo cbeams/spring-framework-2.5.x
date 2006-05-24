@@ -16,8 +16,8 @@
 
 package org.springframework.instrument.classloading;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.springframework.util.ClassUtils;
+
 
 /**
  * Abstract implementation of the LoadTimeWeaver interface
@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
 public abstract class AbstractLoadTimeWeaver implements LoadTimeWeaver {
 	
 	protected ClassLoader getContextClassLoader() {
-		return Thread.currentThread().getContextClassLoader();
+		return ClassUtils.getDefaultClassLoader();
 	}
 
 	public ClassLoader getThrowawayClassLoader() {

@@ -14,40 +14,36 @@
  * limitations under the License.
  */
 
-package org.springframework.instrument.classloading.tomcat;
+package org.springframework.instrument.classloading;
 
 import java.lang.instrument.ClassFileTransformer;
 
-import org.springframework.instrument.classloading.AbstractLoadTimeWeaver;
-import org.springframework.instrument.classloading.DelegatedInstrumentedClassLoader;
 import org.springframework.instrument.classloading.support.ReflectionClassLoaderHandler;
 
 /**
- * Tomcat specific LoadTimeWeaver. It uses indirection mechanism and interfaces to work with the inner classloader to avoid
- * class loading problems as the container classes are not accessible inside a web application.
+ * Reflection based LoadTimeWeaver. It uses indirection mechanism and interfaces to work with the inner classloader to avoid
+ * class loading problems as the container classes are not accessible inside a web application (by default).
  * 
  * @author Costin Leau
  * @since 2.0
  */
-public class TomcatLoadTimeWeaver extends AbstractLoadTimeWeaver {
+public class ReflectionLoadTimeWeaver extends AbstractLoadTimeWeaver {
 
-	private DelegatedInstrumentedClassLoader classLoader;
+	private ClassLoaderWeaver classLoader;
 
 	public ClassLoader getInstrumentableClassLoader() {
-		return classLoader.getDelegatedClassLoader();
+		return classLoader.getInstrumentableClassLoader();
 	}
-
-	
 
 	public void addClassFileTransformer(ClassFileTransformer classFileTransformer) {
-		classLoader.addTransformer(classFileTransformer);
+		classLoader.addClassFileTransformer(classFileTransformer);
 	}
 
-	public TomcatLoadTimeWeaver() {
+	public ReflectionLoadTimeWeaver() {
 		setInstrumentedClassLoader(getContextClassLoader());
 	}
 	
-	public TomcatLoadTimeWeaver(ClassLoader classLoader) {
+	public ReflectionLoadTimeWeaver(ClassLoader classLoader) {
 		setInstrumentedClassLoader(classLoader);
 	}
 

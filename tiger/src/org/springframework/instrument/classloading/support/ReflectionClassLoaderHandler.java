@@ -19,7 +19,7 @@ package org.springframework.instrument.classloading.support;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.reflect.Method;
 
-import org.springframework.instrument.classloading.DelegatedInstrumentedClassLoader;
+import org.springframework.instrument.classloading.ClassLoaderWeaver;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -31,52 +31,20 @@ import org.springframework.util.ReflectionUtils;
  * @author Costin Leau
  * 
  */
-public class ReflectionClassLoaderHandler implements DelegatedInstrumentedClassLoader {
+public class ReflectionClassLoaderHandler implements ClassLoaderWeaver {
 	
-	// keep a common reference to avoid ClassCastExceptions
+	// keep a loose reference to avoid ClassCastExceptions
 	private ClassLoader loader;
 
 	public ReflectionClassLoaderHandler(ClassLoader loader) {
 		this.loader = loader;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.lwt.InstrumentedClassLoader#addClassNameToExcludeFromUndelegation(java.lang.String)
-	 */
-	public void addClassNameToExcludeFromUndelegation(String className) {
-		invokeMethod("addClassNameToExcludeFromUndelegation", new Object[] { className }, String.class);
+	public void addClassFileTransformer(ClassFileTransformer cft) {
+		invokeMethod("addClassFileTransformer", new Object[] { cft }, ClassFileTransformer.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.lwt.InstrumentedClassLoader#addTransformer(java.lang.instrument.ClassFileTransformer)
-	 */
-	public void addTransformer(ClassFileTransformer cft) {
-		invokeMethod("addTransformer", new Object[] { cft }, ClassFileTransformer.class);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.lwt.InstrumentedClassLoader#isAspectJWeavingEnabled()
-	 */
-	public boolean isAspectJWeavingEnabled() {
-		return ((Boolean) invokeMethod("isAspectJWeavingEnabled", null, (Class[]) null)).booleanValue();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.lwt.InstrumentedClassLoader#setAspectJWeavingEnabled(boolean)
-	 */
-	public void setAspectJWeavingEnabled(boolean flag) {
-		invokeMethod("setAspectJWeavingEnabled", new Object[] { Boolean.valueOf(flag) }, boolean.class);
-	}
-
-	protected Object invokeMethod(String methodName, Object[] args, Class... argumentTypes) {
+	public Object invokeMethod(String methodName, Object[] args, Class... argumentTypes) {
 		try {
 			Method method = loader.getClass().getDeclaredMethod(methodName, argumentTypes);
 			return ReflectionUtils.invokeMethod(method, loader, args);
@@ -92,12 +60,7 @@ public class ReflectionClassLoaderHandler implements DelegatedInstrumentedClassL
 		throw new UnsupportedOperationException("this line should not be reached");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.springframework.lwt.support.DelegatedInstrumentedClassLoader#getDelegatedClassLoader()
-	 */
-	public ClassLoader getDelegatedClassLoader() {
+	public ClassLoader getInstrumentableClassLoader() {
 		return loader;
 	}
 }
