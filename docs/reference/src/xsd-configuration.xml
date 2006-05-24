@@ -280,8 +280,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <section id="xsd-config-body-schemas-jee">
             <title>The <literal>jee</literal> schema</title>
             <para>The <literal>jee</literal> tags deal with JEE (Java Enterprise Edition)-related
-            configuration issues, such as looking up a JNDI object and defining EJB references.
-            </para>
+            configuration issues, such as looking up a JNDI object and defining EJB references.</para>
             <para>To use the tags in the <literal>jee</literal> schema, you need to have
             the following preamble at the top of your Spring XML configuration file;
             the emboldened text in the following snippet references the correct schema so that
@@ -341,7 +340,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 </jee:jndi-lookup>]]></programlisting>
             </section>
             <section>
-                <title><literal>&lt;jndi:lookup/&gt;</literal> (complex)</title>
+                <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (complex)</title>
                 <para>Before...</para>
                 <programlisting><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
     <property name="jndiName" value="jdbc/MyDataSource"/>
@@ -359,6 +358,63 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
              lookup-on-startup="false"
              expected-type="com.myapp.DefaultFoo"
              proxy-interface="com.myapp.Foo"/>]]></programlisting>
+            </section>
+            <section>
+                <title><literal>&lt;jee:local-slsb/&gt;</literal> (simple)</title>
+                <para>The <literal>&lt;jee:local-slsb/&gt;</literal> tag configures a
+                reference to an EJB Stateless SessionBean.</para>
+                <para>Before...</para>
+                <programlisting><![CDATA[<bean id="simple"
+      class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
+  <property name="jndiName" value="ejb/RentalServiceBean"/>
+  <property name="businessInterface" value="com.foo.service.RentalService"/>
+</bean>]]></programlisting>
+                <para>After...</para>
+                <programlisting><![CDATA[<jee:local-slsb id="simpleSlsb" jndi-name="ejb/RentalServiceBean"
+    business-interface="com.foo.service.RentalService"/>]]></programlisting>
+            </section>
+            <section>
+                <title><literal>&lt;jee:local-slsb/&gt;</literal> (complex)</title>
+                <programlisting><![CDATA[<bean id="complexLocalEjb"
+      class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
+  <property name="jndiName" value="ejb/RentalServiceBean"/>
+  <property name="businessInterface" value="com.foo.service.RentalService"/>
+  <property name="cacheHome" value="true"/>
+  <property name="lookupHomeOnStartup" value="true"/>
+  <property name="resourceRef" value="true"/>
+</bean>]]></programlisting>
+                <para>After...</para>
+                <programlisting><![CDATA[<jee:local-slsb id="complexLocalEjb"
+    jndi-name="ejb/RentalServiceBean"
+    business-interface="com.foo.service.RentalService"
+    cache-home="true"
+    lookup-home-on-startup="true"
+    resource-ref="true">]]></programlisting>
+            </section>
+            <section>
+                <title><literal>&lt;jee:remote-slsb/&gt;</literal> (simple)</title>
+                <para>The <literal>&lt;jee:remote-slsb/&gt;</literal> tag configures a
+                reference to a <literal>remote</literal> EJB Stateless SessionBean.</para>
+                <para>Before...</para>
+                <programlisting><![CDATA[<bean id="complexRemoteEjb"
+      class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
+  <property name="jndiName" value="ejb/MyRemoteBean"/>
+  <property name="businessInterface" value="com.foo.service.RentalService"/>
+  <property name="cacheHome" value="true"/>
+  <property name="lookupHomeOnStartup" value="true"/>
+  <property name="resourceRef" value="true"/>
+  <property name="homeInterface" value="com.foo.service.RentalService"/>
+  <property name="refreshHomeOnConnectFailure" value="true"/>
+</bean>]]></programlisting>
+                <para>After...</para>
+                <programlisting><![CDATA[<jee:remote-slsb id="complexRemoteEjb"
+    jndi-name="ejb/MyRemoteBean"
+    business-interface="com.foo.service.RentalService"
+    cache-home="true"
+    lookup-home-on-startup="true"
+    resource-ref="true"
+    home-interface="com.foo.service.RentalService"
+    refresh-home-on-connect-failure="true">]]></programlisting>
             </section>
         </section>
         <section id="xsd-config-body-schemas-lang">
