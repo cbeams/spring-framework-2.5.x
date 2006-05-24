@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.jee;
+package org.springframework.ejb.config;
 
-import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
-import org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean;
 import org.w3c.dom.Element;
 
+import org.springframework.jndi.JndiObjectFactoryBean;
+
 /**
+ * Simple {@link org.springframework.beans.factory.xml.BeanDefinitionParser} implementation that
+ * translates <code>jndi-lookup</code> tag into {@link JndiObjectFactoryBean} definitions.
+ *
  * @author Rob Harrop
  * @since 2.0
+ * @see JndiObjectFactoryBean
  */
-class RemoteStatelessSessionBeanDefinitionParser extends AbstractJndiLocatedBeanDefinitionParser {
+class JndiLookupBeanDefinitionParser extends AbstractJndiLocatedBeanDefinitionParser {
 
 	protected Class getBeanClass(Element element) {
-		return SimpleRemoteStatelessSessionProxyFactoryBean.class;
+		return JndiObjectFactoryBean.class;
 	}
+
 }

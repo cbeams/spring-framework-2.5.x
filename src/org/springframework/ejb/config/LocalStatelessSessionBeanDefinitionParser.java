@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.jee;
+package org.springframework.ejb.config;
 
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
 import org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean;
+import org.springframework.ejb.config.AbstractJndiLocatedBeanDefinitionParser;
+
 import org.w3c.dom.Element;
 
 /**
@@ -33,4 +35,5 @@ class LocalStatelessSessionBeanDefinitionParser extends AbstractJndiLocatedBeanD
 	protected Class getBeanClass(Element element) {
 		return LocalStatelessSessionProxyFactoryBean.class;
 	}
+
 }

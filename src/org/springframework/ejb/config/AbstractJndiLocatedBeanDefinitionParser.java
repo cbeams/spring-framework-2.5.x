@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jee;
+package org.springframework.ejb.config;
 
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
@@ -43,3 +43,4 @@ abstract class AbstractJndiLocatedBeanDefinitionParser extends AbstractSimpleBea
 		}
 	}
 }
+
