@@ -87,11 +87,11 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 						this.createDdlTempFile.getPath());
 				this.dropDdlTempFile = new File(new File("").getAbsolutePath(), this.dropDdlTempFile.getPath());
 				this.createDdlTempFile = new File(new File("").getAbsolutePath(), this.createDdlTempFile.getPath());
-				System.out.println(this.dropDdlTempFile.exists());
-				System.out.println(this.createDdlTempFile.exists());
+				this.dropDdlTempFile.deleteOnExit();
+				this.createDdlTempFile.deleteOnExit();
 			}
 			catch (IOException ex) {
-				ex.printStackTrace();
+				logger.warn("Could not create temporary DDL files", ex);
 			}
 		}
 		if (getDatabase() != null) {
@@ -134,17 +134,15 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 				this.jpaDialect.beginTransaction(em, new DefaultTransactionDefinition());
 				ConnectionHandle conHandle = this.jpaDialect.getJdbcConnection(em, false);
 				Connection con = conHandle.getConnection();
-				try {
-					executeDdl(con, this.dropDdlTempFile);
-				}
-				catch (Exception ex) {
-					ex.printStackTrace();
-				}
+				executeDdl(con, this.dropDdlTempFile);
 				executeDdl(con, this.createDdlTempFile);
 				em.getTransaction().commit();
 			}
+			catch (IOException ex) {
+				throw new IllegalArgumentException("Failed to read DDL script", ex);
+			}
 			catch (SQLException ex) {
-				ex.printStackTrace();
+				logger.warn("Could not execute DDL statements", ex);
 			}
 			finally {
 				em.close();
@@ -152,11 +150,10 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 	}
 
-	private void executeDdl(Connection con, File ddlFile) throws SQLException {
+	private void executeDdl(Connection con, File ddlFile) throws SQLException, IOException {
 		List<String> statements = new LinkedList<String>();
-		LineNumberReader lnr = null;
+		LineNumberReader lnr = new LineNumberReader(new InputStreamReader(new FileInputStream(ddlFile)));
 		try {
-			lnr = new LineNumberReader(new InputStreamReader(new FileInputStream(ddlFile)));
 			String lastLine = lnr.readLine();
 			while (lastLine != null) {
 				statements.add(lastLine);
@@ -164,17 +161,8 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 			}
 			executeSchemaScript(con, statements.toArray(new String[statements.size()]));
 		}
-		catch (IOException ex) {
-			throw new IllegalArgumentException("Failed to read DDL script at resource location '" + ddlFile + "'", ex);
-		}
 		finally {
-			try {
-				if (lnr != null)
-					lnr.close();
-			}
-			catch (IOException e) {
-				// ignore
-			}
+			lnr.close();
 		}
 	}
 
@@ -233,4 +221,5 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 			}
 		}
 	}
+
 }
