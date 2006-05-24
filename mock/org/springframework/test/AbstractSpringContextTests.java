@@ -97,6 +97,10 @@ public abstract class AbstractSpringContextTests extends ConditionalTestCase {
 		}
 	}
 
+	public final void addContext(Object key, ConfigurableApplicationContext context) {
+		contextKeyToContextMap.put(contextKeyString(key), context);
+	}
+
 	protected ConfigurableApplicationContext getContext(Object key) {
 		String keyString = contextKeyString(key);
 		ConfigurableApplicationContext ctx =
