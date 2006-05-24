@@ -40,9 +40,9 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends Abstr
 	public static Provider getProvider() {
 		String provider = System.getProperty("org.springframework.orm.jpa.provider");
 		if (provider != null && provider.toLowerCase().indexOf("hibernate") > -1) {
-			return Provider.TOPLINK;
+			return Provider.HIBERNATE;
 		}
-		return Provider.HIBERNATE;
+		return Provider.TOPLINK;
 	}
 
 
