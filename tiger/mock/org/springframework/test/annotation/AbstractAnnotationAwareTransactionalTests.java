@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -73,7 +73,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests
 	 */
 	@Override
 	public void runBare() throws Throwable {
-		// getName will return the name of the method being run
+		// getName will return the name of the method being run.
 		if (isDisabledInThisEnvironment(getName())) {
 			// Let superclass log that we didn't run the test.
 			super.runBare();
@@ -81,7 +81,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests
 		}
 		
 		// Use same algorithm as JUnit itself to retrieve the test method
-		// about to be executed (the method name is returned by getName())
+		// about to be executed (the method name is returned by getName).
 		// It has to be public so we can retrieve it
 		Method testMethod = getClass().getMethod(getName(), (Class[]) null);
 		
@@ -99,7 +99,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests
 			setTransactionDefinition(explicitTransactionDefinition);
 		}
 		else if (testMethod.isAnnotationPresent(NotTransactional.class)) {
-			// Don't have any transaction
+			// Don't have any transaction...
 			preventTransaction();
 		}
 		
