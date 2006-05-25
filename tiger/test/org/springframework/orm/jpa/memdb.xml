@@ -6,60 +6,16 @@
 
 	<import resource="weaver.xml"/>
 
-<!--
-	<bean class="org.springframework.aop.aspectj.autoproxy.AspectJAutoProxyCreator" />
-	
-	<bean class="org.springframework.orm.jpa.ExceptionTranslationAspect" />
-	
-	Semantic pointcut - classes that reference JPA
--->
-	
 	<!--
 
 	<bean class="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect" 
 		factory-method="aspectOf" />
-		
 	-->
 	
-	<!--
-	<bean 
-		id="entityManagerFactory"
-		class="org.springframework.orm.jpa.ContainerEntityManagerFactoryBean" >
-		<property name="dataSource" ref="dataSource" /> 
-		
-		<property name="persistenceProviderClass" 
-			value="oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider" />
-			
-		<property name="location"
-			value="org/springframework/orm/jpa/domain/persistence.xml" />
-	</bean>
-	
-	
-	<bean 
-		id="entityManagerFactory"
-		class="org.springframework.orm.jpa.spi.TopLinkVendorProperties" >
-		<property name="dataSource" ref="dataSource" /> 
-		
-		<property name="database" value="HSQL" />
-		
-		<property name="generateDDL" value="true" />
-		<property name="loadTimeWeaver" ref="weaver"/>
-		<property name="showSql" value="true" />
-		
-		<property name="location"
-			value="org/springframework/orm/jpa/domain/persistence.xml" />
-	</bean>
-	
-	-->
 	<bean id="entityManager" class="org.springframework.orm.jpa.support.SharedEntityManagerBean"
 		autowire="byType"/>
 
-	<!--
-	<bean id="entityManager"
-		class="org.springframework.orm.jpa.support.SharedEntityManagerProxyFactoryBean"
-		autowire="byType" />
-		-->
-
+	
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager" >
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
 		<property name="dataSource" ref="dataSource"/>
@@ -81,10 +37,6 @@
 		<property name="password" value=""/>
 	</bean>
 	 -->
-	
-	<bean id="testBean" class="org.springframework.beans.TestBean" >
-		<property name="name" value="Ramnivas" />
-	</bean>
 	
 	<!--
 		Do not specify class, to avoid dependencies
