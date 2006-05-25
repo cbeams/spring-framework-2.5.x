@@ -52,6 +52,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 /**
  * TopLink-specific JpaVendorAdapter implementation.
  *
+ * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 2.0
  */
@@ -94,12 +95,20 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 				logger.warn("Could not create temporary DDL files", ex);
 			}
 		}
-		if (getDatabase() != null) {
+		
+		if (getDatabasePlatformClass() != null) {
+			jpaProperties.setProperty(EntityManagerFactoryProvider.TOPLINK_PLATFORM_PROPERTY,
+					getDatabasePlatformClass().getName());
+		}		
+		else if (getDatabase() != null) {
 			Class databasePlatformClass = getDatabasePlatformClass(getDatabase());
 			if (databasePlatformClass != null) {
 				jpaProperties.setProperty(EntityManagerFactoryProvider.TOPLINK_PLATFORM_PROPERTY,
 						databasePlatformClass.getName());
 			}
+		}
+		else {
+			logger.warn("Relying on default database platform class. Consider setting database or databasePlatformClass properties.");
 		}
 		return jpaProperties;
 	}
