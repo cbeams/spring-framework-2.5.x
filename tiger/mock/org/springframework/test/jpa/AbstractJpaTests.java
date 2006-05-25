@@ -16,6 +16,16 @@
 
 package org.springframework.test.jpa;
 
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -31,15 +41,7 @@ import org.springframework.orm.jpa.ContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.test.annotation.AbstractAnnotationAwareTransactionalTests;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import java.lang.instrument.ClassFileTransformer;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.test.instrument.classloading.ShadowingClassLoader;
 
 /**
  * Convenient support class for JPA-related tests.
@@ -54,11 +56,15 @@ import java.util.Map;
  */
 public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactionalTests {
 
-	private Class shadowedTestClass;
+	private static final String DEFAULT_ORM_XML_LOCATION = "META-INF/orm.xml";
+	
+	/**
+	 * Values are intentionally not strongly typed, to avoid potential class cast exceptions
+	 * through use between different class loaders.
+	 */
+	private static Map<String, Object> contextCache = new HashMap<String, Object>();
 
-	private static Map contextCache = new HashMap();
-
-	private static Map classLoaderCache = new HashMap();
+	private static Map<String, ClassLoader> classLoaderCache = new HashMap<String, ClassLoader>();
 
 	protected EntityManagerFactory entityManagerFactory;
 
@@ -90,29 +96,29 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	@Override
 	public void runBare() throws Throwable {
 		String cacheKey = getClass().getName();
-		ClassLoader classLoader = getClass().getClassLoader();
+		ClassLoader classLoaderForThisTestClass = getClass().getClassLoader();
 		if (this.shadowed) {
-			Thread.currentThread().setContextClassLoader(classLoader);
+			Thread.currentThread().setContextClassLoader(classLoaderForThisTestClass);
 			super.runBare();
 		}
 		else {
 			ShadowingClassLoader shadowingClassLoader = (ShadowingClassLoader) classLoaderCache.get(cacheKey);
 
 			if (shadowingClassLoader == null) {
-				shadowingClassLoader = new ShadowingClassLoader(classLoader);
+				shadowingClassLoader = (ShadowingClassLoader) createShadowingClassLoader(classLoaderForThisTestClass);
 				classLoaderCache.put(cacheKey, shadowingClassLoader);
 			}
 			try {
 				Thread.currentThread().setContextClassLoader(shadowingClassLoader);
 				String[] configLocations = getConfigLocations();
 
+				// Do not strongly type, to avoid ClassCastException
 				Object cachedContext = contextCache.get(cacheKey);
 
 				if (cachedContext == null) {
 
 					// create load time weaver
 					Class shadowingLoadTimeWeaverClass = shadowingClassLoader.loadClass(ShadowingLoadTimeWeaver.class.getName());
-					Class shadowedShadowingClassLoaderClass = ShadowingClassLoader.class;
 					Constructor constructor = shadowingLoadTimeWeaverClass.getConstructor(ClassLoader.class);
 					constructor.setAccessible(true);
 					Object ltw = constructor.newInstance(shadowingClassLoader);
@@ -173,13 +179,31 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 				/* TestCase.runBare() */
 				Method testMethod = shadowedTestClass.getMethod("runBare");
-				testMethod.invoke(testCase, null);
+				testMethod.invoke(testCase, (Object[]) null);
 			}
 			finally {
-				Thread.currentThread().setContextClassLoader(classLoader);
+				Thread.currentThread().setContextClassLoader(classLoaderForThisTestClass);
 			}
 		}
 	}
+
+	/**
+	 * NB: This method must <b>not</b> have a return type of ShadowingClassLoader as that would cause that
+	 * class to be loaded eagerly when this test case loads, creating verify errors at runtime.
+	 */
+	private Object createShadowingClassLoader(ClassLoader classLoader) {
+		return new OrmXmlOverridingShadowingClassLoader(classLoader, getSpringResourceStringForOrmXml());		
+	}
+	
+	/**
+	 * Subclasses can override this to return the real location path for
+	 * orm.xml or null if they do not wish to find any orm.xml
+	 * @return orm.xml path or null to hide any such file
+	 */
+	protected String getSpringResourceStringForOrmXml() {
+		return DEFAULT_ORM_XML_LOCATION;
+	}
+
 
 	private static class LoadTimeWeaverInjectingBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter {
 

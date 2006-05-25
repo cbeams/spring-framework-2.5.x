@@ -1,24 +1,38 @@
-package org.springframework.test.jpa;
+/*
+ * Copyright 2002-2006 the original author or authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import org.springframework.util.Assert;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.core.io.ClassPathResource;
+package org.springframework.test.instrument.classloading;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
-import java.lang.reflect.Method;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.io.InputStream;
-import java.io.IOException;
+
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.Assert;
+import org.springframework.util.FileCopyUtils;
 
 /**
  * @author Rob Harrop
  */
-class ShadowingClassLoader extends ClassLoader {
+public class ShadowingClassLoader extends ClassLoader {
 
 	private final ClassLoader enclosingClassLoader;
 
@@ -31,7 +45,7 @@ class ShadowingClassLoader extends ClassLoader {
 		this.enclosingClassLoader = enclosingClassLoader;
 	}
 
-	public Class loadClass(String name) throws ClassNotFoundException {
+	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		if (shouldShadow(name)) {
 			Class cls = classCache.get(name);
 			if (cls != null) {
@@ -52,6 +66,7 @@ class ShadowingClassLoader extends ClassLoader {
 			return true;
 		}
 	}
+	
 
 	private boolean isExcluded(String name) {
 		return name.equals(getClass().getName()) || name.startsWith("java.") ||
@@ -82,8 +97,8 @@ class ShadowingClassLoader extends ClassLoader {
 				try {
 					inputStream.close();
 				}
-				catch (IOException e) {
-					e.printStackTrace();
+				catch (IOException ex) {
+					ex.printStackTrace();
 				}
 			}
 		}
