@@ -97,9 +97,25 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	protected EntityManager createContainerManagedEntityManager() {
 		return ExtendedEntityManagerCreator.createContainerManagedEntityManager(this.entityManagerFactory);
 	}
+	
+	/**
+	 * Subclasses should override this method if they wish
+	 * to disable shadow class loading. Do this only
+	 * if instrumentation is not required in your
+	 * JPA implementation. 
+	 * @return whether to disable shadow loading functionality
+	 */
+	protected boolean shouldUseShadowLoader() {
+		return true;
+	}
 
 	@Override
 	public void runBare() throws Throwable {
+		if (!shouldUseShadowLoader()) {
+			super.runBare();
+			return;
+		}
+		
 		String combinationOfContextLocationsForThisTestClass = StringUtils.arrayToCommaDelimitedString(getConfigLocations()); 			
 		ClassLoader classLoaderForThisTestClass = getClass().getClassLoader();
 		if (this.shadowed) {
