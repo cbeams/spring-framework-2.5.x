@@ -20,6 +20,7 @@ import java.lang.reflect.Proxy;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.Query;
 
 import org.springframework.aop.support.AopUtils;
@@ -84,6 +85,18 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	@ExpectedException(RuntimeException.class)
 	public void testBogusQuery() {
 		sharedEntityManager.createQuery("It's raining toads");
+	}
+	
+	@ExpectedException(EntityNotFoundException.class)
+	public void testGetReferenceWhenNoRow() {
+		// Fails here with TopLink
+		Person notThere = sharedEntityManager.getReference(Person.class, 666);
+		
+		// We may get here (as with Hibernate). 
+		// Either behaviour is
+		// valid--throw exception on first access
+		// or on getReference itself
+		notThere.getFirstName();
 	}
 
 	public void testLazyLoading() {

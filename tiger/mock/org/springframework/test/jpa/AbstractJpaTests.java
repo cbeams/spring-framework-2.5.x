@@ -19,6 +19,7 @@ package org.springframework.test.jpa;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -201,6 +202,11 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 				/* TestCase.runBare() */
 				Method testMethod = shadowedTestClass.getMethod("runBare");
 				testMethod.invoke(testCase, (Object[]) null);
+			}
+			catch (InvocationTargetException ex) {
+				// Unwrap this for better exception reporting
+				// when running tests
+				throw ex.getTargetException();
 			}
 			finally {
 				Thread.currentThread().setContextClassLoader(classLoaderForThisTestClass);

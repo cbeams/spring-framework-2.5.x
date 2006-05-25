@@ -40,8 +40,11 @@ class OrmXmlOverridingShadowingClassLoader extends ShadowingClassLoader {
 	private List<String> providerPrefixes = new LinkedList<String>(); {
 		// Automatically exclude classes from these well-known persistence providers
 		providerPrefixes.add("oracle.toplink.essentials");
-		providerPrefixes.add("org.hibernate");
 		providerPrefixes.add("kodo");
+		
+		// Do NOT exclude Hibernate classes --
+		// this causes class casts due to use of
+		// CGLIB by Hibernate
 	}
 	
 	private static final Enumeration<URL> EMPTY_URL_ENUMERATION = new Enumeration<URL>() {
