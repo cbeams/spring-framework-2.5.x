@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.dao;
+package org.springframework.dao.support;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.TypeMismatchDataAccessException;
 
 /**
  * @author Juergen Hoeller
@@ -236,6 +241,37 @@ public class DataAccessUtilsTests extends TestCase {
 		}
 		catch (TypeMismatchDataAccessException ex) {
 			// expected
+		}
+	}
+	
+	public void testExceptionTranslationWithNoTranslation() {
+		MapPersistenceExceptionTranslator mpet = new MapPersistenceExceptionTranslator();
+		RuntimeException in = new RuntimeException();
+		assertSame(in, DataAccessUtils.translateIfNecessary(in, mpet));
+	}
+	
+	public void testExceptionTranslationWithTranslation() {
+		MapPersistenceExceptionTranslator mpet = new MapPersistenceExceptionTranslator();
+		RuntimeException in = new RuntimeException("in");
+		InvalidDataAccessApiUsageException out = new InvalidDataAccessApiUsageException("out");
+		mpet.addTranslation(in, out);
+		assertSame(out, DataAccessUtils.translateIfNecessary(in, mpet));
+	}
+	
+	
+	public static class MapPersistenceExceptionTranslator implements PersistenceExceptionTranslator {
+		
+		/**
+		 * Map<RuntimeException,RuntimeException>: in to out
+		 */
+		private Map translations = new HashMap();
+		
+		public void addTranslation(RuntimeException in, RuntimeException out) {
+			this.translations.put(in, out);
+		}
+		
+		public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
+			return (DataAccessException) translations.get(ex);
 		}
 	}
 

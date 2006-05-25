@@ -18,9 +18,11 @@ package org.springframework.dao.support;
 
 import java.util.Collection;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.TypeMismatchDataAccessException;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.NumberUtils;
 
@@ -149,6 +151,21 @@ public abstract class DataAccessUtils {
 			throws IncorrectResultSizeDataAccessException, TypeMismatchDataAccessException {
 
 		return ((Number) objectResult(results, Number.class)).longValue();
+	}
+	
+	
+	/**
+	 * Return a translated exception if this is appropriate,
+	 * otherwise return the input exception
+	 * @param rawException exception we may wish to translate
+	 * @param pet PersistenceExceptionTranslator to use to perform the translation
+	 * @return a translated exception if translation is possible, or
+	 * the raw exception if it is not
+	 */
+	public static RuntimeException translateIfNecessary(RuntimeException rawException, PersistenceExceptionTranslator pet) {
+		Assert.notNull(pet);
+		DataAccessException dex = pet.translateExceptionIfPossible(rawException);
+		return (dex != null) ? dex : rawException;
 	}
 
 }
