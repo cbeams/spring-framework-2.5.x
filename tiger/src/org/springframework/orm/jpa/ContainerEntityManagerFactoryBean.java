@@ -88,8 +88,8 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 	 * Set whether redeployment of an EntityManagerFactory with the same name
 	 * in the same class loader is legal. The default is for it NOT to be legal.
 	 */
-	public void setAllowRedeploymentWithSameName(boolean preventRedeploymentWithSameName) {
-		this.allowRedeploymentWithSameName = preventRedeploymentWithSameName;
+	public void setAllowRedeploymentWithSameName(boolean allowRedeploymentWithSameName) {
+		this.allowRedeploymentWithSameName = allowRedeploymentWithSameName;
 	}
 
 	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
@@ -156,7 +156,12 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 				throw new IllegalArgumentException("Cannot resolve provider class name '" + puiProviderClassName + "'", ex);
 			}
 		}
-
+		
+		if (persistenceProviderClass == null) {
+			throw new IllegalStateException("Unable to determine persistence p rovider class. " +
+					"Please check configuration of " + getClass().getName() + "; " +
+					"ideally specify the appropriate JpaVendorAdapter class for this provider");
+		}
 		PersistenceProvider pp = (PersistenceProvider) BeanUtils.instantiateClass(persistenceProviderClass);
 		this.nativeEntityManagerFactory =
 				pp.createContainerEntityManagerFactory(this.persistenceUnitInfo, getJpaPropertyMap());
