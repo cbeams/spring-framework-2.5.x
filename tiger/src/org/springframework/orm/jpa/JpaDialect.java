@@ -22,7 +22,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 
-import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -49,7 +49,7 @@ import org.springframework.transaction.TransactionException;
  * @see JpaAccessor#setJpaDialect
  * @see DefaultJpaDialect
  */
-public interface JpaDialect {
+public interface JpaDialect extends PersistenceExceptionTranslator {
 
 	//-----------------------------------------------------------------------------------
 	// Hooks for non-standard persistence operations (used by EntityManagerFactory beans)
@@ -187,29 +187,5 @@ public interface JpaDialect {
 	void releaseJdbcConnection(ConnectionHandle conHandle, EntityManager entityManager)
 			throws PersistenceException, SQLException;
 
-
-	//-----------------------------------------------------------------------------------
-	// Hook for exception translation (used by JpaTransactionManager and JpaTemplate)
-	//-----------------------------------------------------------------------------------
-
-	/**
-	 * Translate the given PersistenceException to a corresponding exception from
-	 * Spring's generic DataAccessException hierarchy. An implementation should
-	 * apply EntityManagerFactoryUtils' standard exception translation if can't
-	 * do anything more specific.
-	 * <p>Of particular importance is the correct translation to
-	 * DataIntegrityViolationException, for example on constraint violation.
-	 * Unfortunately, standard JPA does not allow for portable detection of this.
-	 * <p>Can use a SQLExceptionTranslator for translating underlying SQLExceptions
-	 * in a database-specific fashion.
-	 * @param ex the PersistenceException thrown
-	 * @return the corresponding DataAccessException (must not be <code>null</code>)
-	 * @see JpaAccessor#convertJpaAccessException
-	 * @see JpaTransactionManager#convertJpaAccessException
-	 * @see EntityManagerFactoryUtils#convertJpaAccessException
-	 * @see org.springframework.dao.DataIntegrityViolationException
-	 * @see org.springframework.jdbc.support.SQLExceptionTranslator
-	 */
-	DataAccessException translateException(PersistenceException ex);
 
 }

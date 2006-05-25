@@ -22,6 +22,7 @@ import javax.persistence.PersistenceException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -99,15 +100,22 @@ public class JpaInterceptor extends JpaAccessor implements MethodInterceptor {
 			flushIfNecessary(em, !isNewEm);
 			return retVal;
 		}
-		catch (PersistenceException ex) {
+		catch (RuntimeException rawException) {
 			if (this.exceptionConversionEnabled) {
-				throw convertJpaAccessException(ex);
+				// Translation enabled. Translate if we understand the exception.
+				DataAccessException dex = translateExceptionIfPossible(rawException);
+				if (dex != null) {
+					throw dex;
+				}
+				else {
+					throw rawException;
+				}
 			}
 			else {
-				throw ex;
+				// Translation not enabled. Don't try to translate.
+				throw rawException;
 			}
 		}
-		// TODO what about IllegalStateException?
 		finally {
 			if (isNewEm) {
 				TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());

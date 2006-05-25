@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.orm.jpa;
 
-import java.sql.SQLException;
+package org.springframework.orm.jpa;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.OptimisticLockException;
-import javax.persistence.PersistenceException;
 
 import junit.framework.TestCase;
 
@@ -80,7 +78,8 @@ public class DefaultJpaDialectTests extends TestCase {
 
 	public void testTranslateException() {
 		OptimisticLockException ex = new OptimisticLockException();
-		assertEquals(EntityManagerFactoryUtils.convertJpaAccessException(ex).getCause(),
-				dialect.translateException(ex).getCause());
+		assertEquals(
+				EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex).getCause(),
+				dialect.translateExceptionIfPossible(ex).getCause());
 	}
 }

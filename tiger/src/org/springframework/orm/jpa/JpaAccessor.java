@@ -22,9 +22,9 @@ import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.PersistenceExceptionTranslator;
 
 /**
  * Base class for JpaTemplate and JpaInterceptor, defining common
@@ -41,7 +41,7 @@ import org.springframework.dao.DataAccessException;
  * @see JpaInterceptor
  * @see #setFlushEager
  */
-public abstract class JpaAccessor implements InitializingBean {
+public abstract class JpaAccessor implements InitializingBean, PersistenceExceptionTranslator {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -161,12 +161,13 @@ public abstract class JpaAccessor implements InitializingBean {
 	 * <code>org.springframework.dao</code> hierarchy.
 	 * <p>Default implementation delegates to the JpaDialect.
 	 * May be overridden in subclasses.
-	 * @param ex PersistenceException that occured
+	 * @param ex runtime exception that occured, which may or may not
+	 * be JPA-related
 	 * @return the corresponding DataAccessException instance
 	 * @see JpaDialect#translateException
 	 */
-	public DataAccessException convertJpaAccessException(PersistenceException ex) {
-		return getJpaDialect().translateException(ex);
+	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
+		return getJpaDialect().translateExceptionIfPossible(ex);
 	}
 
 }

@@ -131,7 +131,7 @@ public abstract class JpaDaoSupport extends DaoSupport {
 	 * @see org.springframework.orm.jpa.JpaTemplate#convertJpaAccessException
 	 */
 	protected final DataAccessException convertJpaAccessException(PersistenceException ex) {
-		return this.jpaTemplate.convertJpaAccessException(ex);
+		return this.jpaTemplate.translateExceptionIfPossible(ex);
 	}
 
 }

@@ -34,7 +34,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * @author Costin Leau
- * 
+ * @author Rod Johnson
  */
 public class EntityManagerFactoryUtilsTests extends TestCase {
 
@@ -83,8 +83,29 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 		}
 	}
 	
-	// TODO test conversion of IllegalArgumentException
-	// and IllegalStateException
+	public void testTranslatesIllegalStateException() {
+		IllegalStateException ise = new IllegalStateException();
+		DataAccessException dex = EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ise);
+		assertSame(ise, dex.getCause());
+		assertTrue(dex instanceof InvalidDataAccessApiUsageException);
+	}
+	
+	public void testTranslatesIllegalArgumentException() {
+		IllegalArgumentException iae = new IllegalArgumentException();
+		DataAccessException dex = EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(iae);
+		assertSame(iae, dex.getCause());
+		assertTrue(dex instanceof InvalidDataAccessApiUsageException);
+	}
+	
+	/**
+	 * We do not convert unknown exceptions. They may result from user code.
+	 */
+	public void testDoesNotTranslateUnfamiliarException() {
+		UnsupportedOperationException userRuntimeException = new UnsupportedOperationException();
+		assertNull(
+				"Exception should not be wrapped",
+				EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(userRuntimeException));
+	}
 
 	/*
 	 * Test method for
@@ -92,30 +113,29 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 	 */
 	public void testConvertJpaPersistenceException() {
 		EntityNotFoundException entityNotFound = new EntityNotFoundException();
-		assertSame(JpaObjectRetrievalFailureException.class, EntityManagerFactoryUtils.convertJpaAccessException(
+		assertSame(JpaObjectRetrievalFailureException.class, EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(
 				entityNotFound).getClass());
 
 		OptimisticLockException optimisticLock = new OptimisticLockException();
-		assertSame(JpaOptimisticLockingFailureException.class, EntityManagerFactoryUtils.convertJpaAccessException(
+		assertSame(JpaOptimisticLockingFailureException.class, EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(
 				optimisticLock).getClass());
 
 		EntityExistsException entityExists = new EntityExistsException("foo");
-		DataAccessException convertedJpaAccessException = EntityManagerFactoryUtils.convertJpaAccessException(
+		DataAccessException convertedJpaAccessException = EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(
 						entityExists);
 		assertSame(InvalidDataAccessApiUsageException.class, convertedJpaAccessException.getClass());
 
 		NoResultException noResult = new NoResultException();
-		assertSame(InvalidDataAccessApiUsageException.class, EntityManagerFactoryUtils.convertJpaAccessException(
+		assertSame(InvalidDataAccessApiUsageException.class, EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(
 				noResult).getClass());
 
 		NonUniqueResultException nonUnique = new NonUniqueResultException();
-		assertSame(InvalidDataAccessApiUsageException.class, EntityManagerFactoryUtils.convertJpaAccessException(
+		assertSame(InvalidDataAccessApiUsageException.class, EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(
 				nonUnique).getClass());
 
 		PersistenceException unknown = new PersistenceException() {
 		};
-		assertSame(JpaSystemException.class, EntityManagerFactoryUtils.convertJpaAccessException(unknown).getClass());
-
+		assertSame(JpaSystemException.class, EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(unknown).getClass());
 	}
 
 }

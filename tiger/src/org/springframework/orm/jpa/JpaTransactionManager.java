@@ -355,9 +355,15 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 			EntityTransaction tx = txObject.getEntityManagerHolder().getEntityManager().getTransaction();
 			tx.commit();
 		}
-		catch (PersistenceException ex) {
+		catch (RuntimeException rawException) {
 			// Assumably failed to flush changes to database.
-			throw convertJpaAccessException(ex);
+			DataAccessException translatedException = getJpaDialect().translateExceptionIfPossible(rawException);
+			if (translatedException != null) {
+				throw translatedException;
+			}
+			else {
+				throw rawException;
+			}
 		}
 	}
 
@@ -422,19 +428,6 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 		else {
 			logger.debug("Not closing pre-bound JPA EntityManager after transaction");
 		}
-	}
-
-	/**
-	 * Convert the given PersistenceException to an appropriate exception from the
-	 * <code>org.springframework.dao</code> hierarchy.
-	 * <p>Default implementation delegates to the JpaDialect.
-	 * May be overridden in subclasses.
-	 * @param ex PersistenceException that occured
-	 * @return the corresponding DataAccessException instance
-	 * @see JpaDialect#translateException
-	 */
-	protected DataAccessException convertJpaAccessException(PersistenceException ex) {
-		return getJpaDialect().translateException(ex);
 	}
 
 

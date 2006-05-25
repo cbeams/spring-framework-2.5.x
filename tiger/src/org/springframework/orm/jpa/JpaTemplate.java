@@ -194,7 +194,8 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 			return result;
 		}
 		catch (PersistenceException ex) {
-			throw convertJpaAccessException(ex);
+			// TODO translation util method
+			throw translateExceptionIfPossible(ex);
 		}
 		catch (RuntimeException ex) {
 			// callback code threw application exception
