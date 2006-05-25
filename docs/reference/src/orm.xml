@@ -6,17 +6,17 @@
     <title>Introduction</title>
 
     <para>Spring provides integration with <emphasis>Hibernate, JDO, Oracle
-    TopLink, Apache OJB</emphasis> and <emphasis>iBATIS SQL Maps</emphasis>:
-    in terms of resource management, DAO implementation support, and
-    transaction strategies. For example for Hibernate, there is first-class
-    support with lots of IoC convenience features, addressing many typical
-    Hibernate integration issues. All of these support packages for O/R
-    mappers comply with Spring's generic transaction and DAO exception
-    hierarchies. There are usually two integration styles: either using
-    Spring's DAO 'templates' or coding DAOs against plain
-    Hibernate/JDO/TopLink/etc APIs. In both cases, DAOs can be configured
-    through Dependency Injection and participate in Spring's resource and
-    transaction management.</para>
+    TopLink, Apache OJB</emphasis>, <emphasis>iBATIS SQL Map
+    <emphasis>and</emphasis> JPA</emphasis>: in terms of resource management,
+    DAO implementation support, and transaction strategies. For example for
+    Hibernate, there is first-class support with lots of IoC convenience
+    features, addressing many typical Hibernate integration issues. All of
+    these support packages for O/R mappers comply with Spring's generic
+    transaction and DAO exception hierarchies. There are usually two
+    integration styles: either using Spring's DAO 'templates' or coding DAOs
+    against plain Hibernate/JDO/TopLink/etc APIs. In both cases, DAOs can be
+    configured through Dependency Injection and participate in Spring's
+    resource and transaction management.</para>
 
     <para>Spring's adds significant support when using the O/R mapping layer
     of your choice to create data access applications. First of all, you
@@ -266,7 +266,8 @@
     </sect2>
 
     <sect2>
-      <title>Inversion of Control: HibernateTemplate and HibernateCallback</title>
+      <title>Inversion of Control: HibernateTemplate and
+      HibernateCallback</title>
 
       <para>The basic programming model for templating looks as follows, for
       methods that can be part of any custom data access object or business
@@ -820,7 +821,8 @@
     </sect2>
 
     <sect2 id="orm-hibernate-invalid-jdbc-access-error">
-      <title>Spurious AppServer warnings about the transaction or DataSource no longer being active</title>
+      <title>Spurious AppServer warnings about the transaction or DataSource
+      no longer being active</title>
 
       <para>In some JTA environments with very strict XADataSource
       implementations -- currently only some WebLogic and WebSphere versions
@@ -836,10 +838,10 @@
       <para><programlisting>java.sql.SQLException: The transaction is no longer active - status: 'Committed'.
    No further JDBC access is allowed within this transaction. </programlisting></para>
 
-      <para>This warning is easy to resolve by simply making Hibernate
-      aware of the JTA <literal>TransactionManager</literal> instance, to
-      which it will also synchronize (along with Spring). This may be done in
-      two ways:</para>
+      <para>This warning is easy to resolve by simply making Hibernate aware
+      of the JTA <literal>TransactionManager</literal> instance, to which it
+      will also synchronize (along with Spring). This may be done in two
+      ways:</para>
 
       <itemizedlist>
         <listitem>
@@ -865,9 +867,9 @@
         </listitem>
       </itemizedlist>
 
-      <para>It is not necessary to read any more for proper usage, but the full
-      sequence of events with and without Hibernate being aware of the JTA
-      <literal>TransactionManager</literal> will now be described.</para>
+      <para>It is not necessary to read any more for proper usage, but the
+      full sequence of events with and without Hibernate being aware of the
+      JTA <literal>TransactionManager</literal> will now be described.</para>
 
       <para>When Hibernate is not configured with any awareness of the JTA
       <literal>TransactionManager</literal>, the sequence of events when a JTA
@@ -887,18 +889,20 @@
 
         <listitem>
           <para>Among other activities, this can trigger a callback by Spring
-          to Hibernate, via Hibernate's <literal>afterTransactionCompletion</literal>
-          callback (used to clear the Hibernate cache), followed by an explicit
-					<literal>close()</literal> call on the Hibernate Session, which
+          to Hibernate, via Hibernate's
+          <literal>afterTransactionCompletion</literal> callback (used to
+          clear the Hibernate cache), followed by an explicit
+          <literal>close()</literal> call on the Hibernate Session, which
           results in Hibernate trying to <literal>close()</literal> the JDBC
           Connection.</para>
         </listitem>
 
         <listitem>
-          <para>In some environments, this <literal>Connection.close()</literal>
-          call then triggers the warning or error, as the application server
-          no longer considers the Connection usable at all, since the
-          transaction has already been committed.</para>
+          <para>In some environments, this
+          <literal>Connection.close()</literal> call then triggers the warning
+          or error, as the application server no longer considers the
+          Connection usable at all, since the transaction has already been
+          committed.</para>
         </listitem>
       </itemizedlist>
 
@@ -2257,8 +2261,309 @@
 
   <sect1 id="orm-jpa">
     <title>JPA</title>
-    <para>
-		...
-    </para>
+
+    <para>Spring JPA (available under
+    <literal>org.springframework.orm.jpa</literal> package) offers support for
+    <ulink
+    url="http://java.sun.com/developer/technicalArticles/J2EE/jpa/index.html">Java
+    Persistence API</ulink> (part of <ulink url="???">JSR 220</ulink>) in a
+    similar manner to the integration with Hibernate or JDO, while being aware
+    of the underlying implementation in order to provide additional
+    features.</para>
+
+    <sect2>
+      <title>JPA setup in a Spring environment</title>
+
+      <para>Spring JPA offers two ways of setting up JPA
+      <literal>EntityManagerFactory</literal>:</para>
+
+      <sect3>
+        <title>LocalEntityManagerFactoryBean</title>
+
+        <para>which, as the name implies, creates a
+        <literal>EntityManager</literal> suitable for local environments which
+        solely use JPA for data access. The factory bean will use JPA
+        <literal><literal>PersistenceProvider</literal></literal>
+        autodetection mechanism and in most cases, requires only the
+        persistence unit name:</para>
+
+        <para><programlisting>&lt;beans&gt;
+...
+&lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean"&gt;
+ &lt;property name="entityManagerName" value="myPersistenceUnit"/&gt;
+&lt;/bean&gt;
+...
+&lt;/beans&gt;</programlisting>Switching to a JNDI
+        <literal>EntityManagerFactory</literal> (for example in JTA
+        environments), is just a matter of changing the XML
+        configuration:<programlisting>&lt;beans&gt;
+...
+&lt;jndi:lookup id="entityManagerFactory" jndi-name="jpa/myPersistenceUnit"/&gt;
+...
+&lt;/beans&gt;</programlisting></para>
+
+        <para>-- and --</para>
+      </sect3>
+
+      <sect3>
+        <title>ContainerEntityManagerFactoryBean</title>
+
+        <para>which gives full control over JPA
+        <literal>EntityManagerFactory</literal> and is approapriate for
+        environments where fine customizations are required. The FactoryBean
+        will create a <literal>PersistenceUnitInfo</literal> based on the
+        persistence.xml file, the supplied <literal>dataSourceLookup</literal>
+        strategy and the <literal>loadTimeWeaver</literal>. It is thus
+        possible, to work with custom datasource outside the JNDI and control
+        the weaving process.</para>
+
+        <para><programlisting>&lt;beans&gt;
+ ...
+ &lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.ContainerEntityManagerFactoryBean"&gt;
+  &lt;property name="dataSources"&gt;
+   &lt;map&gt;
+    &lt;entry key="dataSource1" value-ref="someDataSource"/&gt;
+    &lt;entry key="dataSource2" value-ref="anotherDataSource"/&gt;
+   &lt;/map&gt;
+  &lt;/property&gt;
+  &lt;property name="loadTimeWeaver"&gt;
+    &lt;bean class="org.springframework.instrument.classloading.SimpleLoadTimeWeaver"/&gt;
+  &lt;/property&gt;
+ &lt;/bean&gt;
+&lt;/beans&gt;</programlisting></para>
+
+        <para>The <literal>loadTimeWeaver</literal> allows JPA
+        ClassTransformers to be plugged in a specific manner depending on the
+        environment (i.e. Tomcat). Hooking
+        <literal>ClassTransformers</literal> through a JDK 5.0 <ulink
+        url="http://java.sun.com/j2se/1.5.0/docs/api/java/lang/instrument/package-summary.html">Agent</ulink>
+        is not efficient - there can be only one agent which works against the
+        entire virtual machine and inspects *every* class that is loaded -
+        something undesirable in a server enviroment.</para>
+
+        <para>TODO: Tomcat Example</para>
+
+        <para>Note that switching from one type of
+        <literal>EntityManagerFactoryBean</literal> to another is just a
+        matter of configuration and does not affect you code.</para>
+      </sect3>
+    </sect2>
+
+    <sect2>
+      <title>JpaTemplate and JpaDaoSupport</title>
+
+      <para>Each JPA-based DAO will then receive a
+      <literal>EntityManagerFactory</literal> through dependency injection,
+      i.e. through setter or construction injection. Such a DAO can be coded
+      against plain JPA and work with the given <literal>EntityManagerFactory
+      </literal>or rather through Spring's
+      <literal>JpaTemplate</literal>:</para>
+
+      <para><programlisting>&lt;beans&gt;
+...
+  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
+    &lt;property name="entityManagerFactory" ref="entityManagerFactory"/&gt;
+  &lt;/bean&gt;
+...
+&lt;/beans&gt;</programlisting><programlisting>public class ProductDaoImpl implements ProductDao {
+  
+    private EntityManagerFactory entityManagerFactory;
+
+    public void setEntityManagerFactory(EntityManagerFactory emf) {
+        this.entityManagerFactoryeManagerFactory = emf;
+    }
+
+    public Collection loadProductsByCategory(final String category) throws DataAccessException {
+        JpaTemplate jpaTemplate = new JpaTemplate(this.entityManagerFactory);
+        return (Collection) jpaTemplate.execute(new JpaCallback() {
+            public Object doInJpa(EntityManager em) throws PersistenceException {
+                Query query = em.createQuery("from Product");
+                List result = query.execute(category);
+                // do some further stuff with the result list
+                return result;
+            }
+        });
+    }
+}</programlisting>The JpaCallback implementation allows any type of JPA data
+      access. The JpaTemplate will ensure that EntityManagers are properly
+      opened and closed and automatically participate in transactions.
+      Moreover, the JpaTemplate properly handles exceptions, making sure
+      resources are cleaned up and the approapriate transactions rolled back.
+      The template instances are thread-safe and reusable and they can be kept
+      as instance variable of the enclosing class. Note that JpaTemplate
+      offers single-step actions such as find, load, merge, etc along with
+      alternative convenience methods that can replace one line callback
+      implementations.</para>
+
+      <para>Furthermore, Spring provides a convenient JdoDaoSupport base class
+      that provides the get/setEntityManagerFactory and getJpaTemplate to be
+      used by subclases:</para>
+
+      <para><programlisting>public class ProductDaoImpl extends JpaDaoSupport implements ProductDao {
+  
+    public Collection loadProductsByCategory(String category) throws DataAccessException {
+        return getJpaTemplate().find("from Product");
+    }
+}</programlisting></para>
+
+      <para>Besides working with Spring's JpaTemplate, one can also code
+      Spring-based DAOs against the JPA, explicitly handling EntityManagers.
+      As elaborated in teh corresponsing Hibernate section, the main advantage
+      of this approach is that that your data access code is able to throw
+      checked exceptions. JpaDaoSupport offers a variety of support methods
+      for this scenario, for retrieving and releasing a transaction
+      EntityManager, as well as for converting exceptions.</para>
+    </sect2>
+
+    <sect2>
+      <title>Implementing DAOs based on plain JPA</title>
+
+      <para>It is possible to write code against the plain JPA without using
+      any Spring dependencies, directly using an injected
+      <literal>EntityManagerFactory</literal>. A corresponding DAO
+      implementation might look like this:</para>
+
+      <para><programlisting>public class ProductDaoImpl implements ProductDao {
+
+    private EntityManagerFactory entityManagerFactory;
+
+    public void setEntityManagerFactory(entityManagerFactory emf) {
+        this.entityManagerFactory = emf;
+    }
+
+    public Collection loadProductsByCategory(String category) {
+        EntityManager em = this.entityManagerFactory.getEntityManager();
+        try {
+             Query query = em.createQuery("from Product");
+             return result = query.execute(category);
+        }
+        finally {
+        if (em != null)
+          em.close();
+        }
+    }
+}</programlisting>The DAO above, still follows the Dependency Injection
+      pattern and still fits nicely into a Spring application context, just
+      like it would if coded against Spring's <literal>JpaTemplate</literal>:
+      </para>
+
+      <para><programlisting>&lt;beans&gt;
+  ...
+
+  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
+    &lt;property name="entityManagerFactory" ref="myEMF"/&gt;
+  &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting></para>
+
+      <para>The main issue with such DAOs is that it always gets a new
+      PersistenceManager from the factory. In order to access a Spring-managed
+      transactional EntityManager (aware of the ongoing transation), consider
+      using SharedEntityManagerCreator. The main advantage of this DAO style
+      is that it depends on JPA API only; no import of any Spring class is
+      required. This is of course appealing from a non-invasiveness
+      perspective, and might feel more natural to JPA developers. However, the
+      DAO throws plain JPAException (which is unchecked, so does not have to
+      be declared or caught), which means that callers can only treat
+      exceptions as generally fatal - unless they want to depend on JPA's own
+      exception structure. Catching specific causes such as an optimistic
+      locking failure is not possible without tying the caller to the
+      implementation strategy. This tradeoff might be acceptable to
+      applications that are strongly JPA-based and/or do not need any special
+      exception treatment. In summary: DAOs can be implemented based on plain
+      JPA API, while still being able to participate in Spring-managed
+      transactions. This might in particular appeal to people already familar
+      with JPA, feeling more natural to them. However, such DAOs will throw
+      plain JPAException; conversion to Spring's DataAccessException would
+      have to happen explicitly (if desired).</para>
+    </sect2>
+
+    <sect2>
+      <title>Transaction Management</title>
+
+      <para>To execute service operations within transactions, you can use
+      Spring's common declarative transaction facilities. For example, you
+      could define a <literal>TransactionProxyFactoryBean</literal> for a
+      ProductService, which in turn delegates to the JPA-based ProductDao.
+      Each specified method would then automatically get executed within a
+      transaction, with all affected DAO operations automatically
+      participating in it.</para>
+
+      <para><programlisting>&lt;beans&gt;
+  ...
+
+  &lt;bean id="myTxManager" class="org.springframework.orm.jpa.JpaTransactionManager"&gt;
+    &lt;property name="entityManagerFactory" ref="myEmf"/&gt;
+  &lt;/bean&gt;
+
+  &lt;bean id="myProductServiceTarget" class="product.ProductServiceImpl"&gt;
+    &lt;property name="productDao" ref="myProductDao"/&gt;
+  &lt;/bean&gt;
+
+  &lt;bean id="myProductService"
+      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+    &lt;property name="transactionManager" ref="myTxManager"/&gt;
+    &lt;property name="target" ref="myProductServiceTarget"/&gt;
+    &lt;property name="transactionAttributes"&gt;
+      &lt;props&gt;
+        &lt;prop key="increasePrice*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+        &lt;prop key="someOtherBusinessMethod"&gt;PROPAGATION_REQUIRES_NEW&lt;/prop&gt;
+        &lt;prop key="*"&gt;PROPAGATION_SUPPORTS,readOnly&lt;/prop&gt;
+      &lt;/props&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting> Spring JPA allows
+      <literal>JpaTransactionManager</literal> to expose a JPA transaction to
+      JDBC access code that accesses the same JDBC
+      <literal>DataSource</literal>, provided that the registered
+      <literal>JpaDialect</literal> supports retrieval of the underlying JDBC
+      <literal>Connection</literal>. Out of the box, Spring provides dialects
+      for Hibernate, Toplink and Kodo JPA implementations. See next section
+      for details on the <literal>JpaDialect</literal> mechanism.</para>
+    </sect2>
+
+    <sect2>
+      <title>JpaDialect</title>
+
+      <para>As an advanced feature <literal>JpaTemplate</literal>,
+      <literal>JpaTransactionManager</literal> and subclasses of
+      <literal>AbstractEntityManagerFactoryBean</literal> support a custom
+      <literal>JpaDialect</literal>, to be passed into the "jpaDialect" bean
+      property. In such a scenario, the DAOs won't receive a
+      <literal>EntityManagerFactory</literal> reference but rather a full
+      <literal>JpaTemplate</literal> instance instead (for example, passed
+      into <literal>JpaDaoSupport</literal>'s "jpaTemplate" property). A
+      <literal>JpaDialect</literal> implementation can enable some advanced
+      features supported by Spring, usually in a vendor-specific
+      manner:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>applying specific transaction semantics (such as custom
+          isolation level or transaction timeout)</para>
+        </listitem>
+
+        <listitem>
+          <para>retrieving the transactional JDBC
+          <literal>Connection</literal> (for exposure to JDBC-based
+          DAOs)</para>
+        </listitem>
+
+        <listitem>
+          <para>advanced translation of <literal>JPAExceptions</literal> to
+          Spring <literal>DataAccessExceptions</literal></para>
+        </listitem>
+      </itemizedlist>
+
+      <para>This is particularly valuable for special transaction semantics
+      and for advanced translation of exception. Note that the default
+      implementation used (<literal>DefaultJpaDialect</literal>) doesn't
+      provide any special capabilities and if the above features are required,
+      the approapriate dialect has to be specified.</para>
+
+      <para>See the <literal>JpaDialect</literal> javadoc for more details on
+      its operations and how they are used within Spring's JPA support.</para>
+    </sect2>
   </sect1>
 </chapter>
