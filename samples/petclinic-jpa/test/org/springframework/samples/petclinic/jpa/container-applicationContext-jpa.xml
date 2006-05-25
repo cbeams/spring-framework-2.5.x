@@ -2,6 +2,42 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
+
+	<bean id="weaver" class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver"/>
+
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.ContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+
+<!--
+<property name="persistenceProviderClass" value="oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider" />
+-->
+
+		<property name="loadTimeWeaver" ref="weaver" />
+		
+
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter">
+				
+				<property name="generateDdl" value="false" />
+							
+				<!--
+				<property name="database" value="HSQL" />
+					-->
+							
+				<property name="databasePlatformClass" 
+					value="org.springframework.samples.petclinic.toplink.EssentialsHSQLPlatformWithNativeSequence" />
+
+				<property name="showSql" value="true" />
+
+			</bean>
+		</property>
+				
+		
+
+		<property name="persistenceXmlLocation"
+			value="META-INF/petclinic-persistence.xml" />
+	</bean>
 	
 	<bean 
 		class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" /> 
@@ -14,48 +50,14 @@
 		<property name="password"><value></value></property>
 	</bean>
 	
-	<bean id="weaver" class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver"/>
-
-	<bean id="entityManagerFactory"
-		class="org.springframework.orm.jpa.spi.ContainerEntityManagerFactoryBean">
-		<property name="dataSource" ref="dataSource" />
-
-		<property name="vendorProperties">
-			<bean class="org.springframework.orm.jpa.spi.toplink.TopLinkVendorProperties">
-				
-				<property name="generateDdl" value="false" />
-			
-				
-				<!--
-				<property name="database" value="HSQL" />
-					-->
-				
-				
-				<property name="databasePlatformClass" value="org.springframework.samples.petclinic.toplink.EssentialsHSQLPlatformWithNativeSequence" /> 
-
-				<property name="showSql" value="true" />
-
-			</bean>
-		</property>
-				
-		<property name="loadTimeWeaver" ref="weaver" />
-		
-
-		<property name="location"
-			value="META-INF/petclinic-persistence.xml" />
-	</bean>
+	
 	
 	
 
 
-	<bean id="jpaDialect"
-		class="org.springframework.orm.jpa.spi.toplink.TopLinkJpaDialect" />
-	
-	
-
-	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
-		<property name="entityManagerFactory"><ref local="entityManagerFactory"/></property>
-		<property name="dataSource"><ref local="dataSource"/></property>
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager" >
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+		<property name="dataSource" ref="dataSource"/>
 	</bean>
 
 	<!--
