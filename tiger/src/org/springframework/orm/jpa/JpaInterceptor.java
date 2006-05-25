@@ -17,12 +17,9 @@
 package org.springframework.orm.jpa;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -103,13 +100,7 @@ public class JpaInterceptor extends JpaAccessor implements MethodInterceptor {
 		catch (RuntimeException rawException) {
 			if (this.exceptionConversionEnabled) {
 				// Translation enabled. Translate if we understand the exception.
-				DataAccessException dex = translateExceptionIfPossible(rawException);
-				if (dex != null) {
-					throw dex;
-				}
-				else {
-					throw rawException;
-				}
+				throw translateIfNecessary(rawException);
 			}
 			else {
 				// Translation not enabled. Don't try to translate.

@@ -193,13 +193,8 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 			flushIfNecessary(em, !isNewEm);
 			return result;
 		}
-		catch (PersistenceException ex) {
-			// TODO translation util method
-			throw translateExceptionIfPossible(ex);
-		}
 		catch (RuntimeException ex) {
-			// callback code threw application exception
-			throw ex;
+			throw translateIfNecessary(ex);
 		}
 		finally {
 			if (isNewEm) {

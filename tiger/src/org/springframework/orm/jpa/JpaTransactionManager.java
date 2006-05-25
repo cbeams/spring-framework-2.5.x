@@ -23,7 +23,7 @@ import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
@@ -357,13 +357,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 		}
 		catch (RuntimeException rawException) {
 			// Assumably failed to flush changes to database.
-			DataAccessException translatedException = getJpaDialect().translateExceptionIfPossible(rawException);
-			if (translatedException != null) {
-				throw translatedException;
-			}
-			else {
-				throw rawException;
-			}
+			throw DataAccessUtils.translateIfNecessary(rawException, getJpaDialect());
 		}
 	}
 

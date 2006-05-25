@@ -18,10 +18,9 @@ package org.springframework.orm.jpa.support;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceException;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DaoSupport;
+import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaTemplate;
 
 /**
@@ -122,16 +121,19 @@ public abstract class JpaDaoSupport extends DaoSupport {
 
 
 	/**
-	 * Convert the given PersistenceException to an appropriate exception from the
-	 * org.springframework.dao hierarchy.
-	 * <p>Delegates to the convertJpaAccessException method of this DAO's JpaTemplate.
-	 * @param ex PersistenceException that occured
-	 * @return the corresponding DataAccessException instance
-	 * @see #setJpaTemplate
-	 * @see org.springframework.orm.jpa.JpaTemplate#convertJpaAccessException
+	 * Convert the given runtime exception to an appropriate exception from the
+	 * <code>org.springframework.dao</code> hierarchy if necessary, or
+	 * return the exception itself if it is not persistence related
+	 * <p>Default implementation delegates to the JpaDialect.
+	 * May be overridden in subclasses.
+	 * @param ex runtime exception that occured, which may or may not
+	 * be JPA-related
+	 * @return the corresponding DataAccessException instance if
+	 * wrapping should occur, otherwise the raw exception
+	 * @see JpaDialect#translateException
 	 */
-	protected final DataAccessException convertJpaAccessException(PersistenceException ex) {
-		return this.jpaTemplate.translateExceptionIfPossible(ex);
+	protected final RuntimeException translateIfNecessary(RuntimeException ex) {
+		return this.jpaTemplate.translateIfNecessary(ex);
 	}
 
 }

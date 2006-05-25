@@ -23,8 +23,7 @@ import javax.persistence.PersistenceException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.support.PersistenceExceptionTranslator;
+import org.springframework.dao.support.DataAccessUtils;
 
 /**
  * Base class for JpaTemplate and JpaInterceptor, defining common
@@ -41,7 +40,7 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
  * @see JpaInterceptor
  * @see #setFlushEager
  */
-public abstract class JpaAccessor implements InitializingBean, PersistenceExceptionTranslator {
+public abstract class JpaAccessor implements InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -157,17 +156,19 @@ public abstract class JpaAccessor implements InitializingBean, PersistenceExcept
 	}
 
 	/**
-	 * Convert the given PersistenceException to an appropriate exception from the
-	 * <code>org.springframework.dao</code> hierarchy.
+	 * Convert the given runtime exception to an appropriate exception from the
+	 * <code>org.springframework.dao</code> hierarchy if necessary, or
+	 * return the exception itself if it is not persistence related
 	 * <p>Default implementation delegates to the JpaDialect.
 	 * May be overridden in subclasses.
 	 * @param ex runtime exception that occured, which may or may not
 	 * be JPA-related
-	 * @return the corresponding DataAccessException instance
+	 * @return the corresponding DataAccessException instance if
+	 * wrapping should occur, otherwise the raw exception
 	 * @see JpaDialect#translateException
 	 */
-	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
-		return getJpaDialect().translateExceptionIfPossible(ex);
+	public RuntimeException translateIfNecessary(RuntimeException ex) {
+		return DataAccessUtils.translateIfNecessary(ex, getJpaDialect());
 	}
 
 }
