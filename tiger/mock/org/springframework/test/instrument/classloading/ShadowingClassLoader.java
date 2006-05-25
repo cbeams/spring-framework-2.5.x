@@ -59,22 +59,28 @@ public class ShadowingClassLoader extends ClassLoader {
 	}
 
 	private boolean shouldShadow(String name) {
-		if (isExcluded(name)) {
-			return false;
-		}
-		else {
-			return true;
-		}
+		return !isExcluded(name);
 	}
 	
 
 	private boolean isExcluded(String name) {
-		return name.equals(getClass().getName()) || name.startsWith("java.") ||
+		return name.equals(getClass().getName()) || 
+						name.startsWith("java.") ||
 						name.startsWith("javax.") ||
 						name.startsWith("org.apache.commons.logging") ||
 						name.startsWith("org.xml.sax") ||
 						name.startsWith("org.w3c") ||
-						name.startsWith("sun");
+						name.startsWith("sun") ||
+						isClassNameExcludedFromShadowing(name);
+	}
+	
+	/**
+	 * Subclasses can override this method to specify whether or not
+	 * particular classes are excluded from shadowing
+	 * @param className class name to test
+	 */
+	protected boolean isClassNameExcludedFromShadowing(String className) {
+		return false;
 	}
 
 	private Class doLoadClass(String name) throws ClassNotFoundException {
@@ -89,8 +95,8 @@ public class ShadowingClassLoader extends ClassLoader {
 			classCache.put(name, cls);
 			return cls;
 		}
-		catch (IOException e) {
-			throw new ClassNotFoundException("Class '" + name + "' cannot be found.");
+		catch (IOException ex) {
+			throw new ClassNotFoundException("Class '" + name + "' cannot be found", ex);
 		}
 		finally {
 			if (inputStream != null) {
@@ -113,8 +119,8 @@ public class ShadowingClassLoader extends ClassLoader {
 			}
 			return bytes;
 		}
-		catch (IllegalClassFormatException e) {
-			throw new RuntimeException(e);
+		catch (IllegalClassFormatException ex) {
+			throw new RuntimeException(ex);
 		}
 	}
 
