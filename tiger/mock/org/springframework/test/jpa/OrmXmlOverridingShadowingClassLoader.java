@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.springframework.test.instrument.classloading.ShadowingClassLoader;
 
@@ -35,6 +37,12 @@ import org.springframework.test.instrument.classloading.ShadowingClassLoader;
  */
 class OrmXmlOverridingShadowingClassLoader extends ShadowingClassLoader {
 	
+	private List<String> providerPrefixes = new LinkedList<String>(); {
+		providerPrefixes.add("oracle.toplink.essentials");
+		//providerPrefixes.add("org.hibernate");
+		//providerPrefixes.add("kodo");
+	}
+	
 	private static final Enumeration<URL> EMPTY_URL_ENUMERATION = new Enumeration<URL>() {
 		public boolean hasMoreElements() {
 			return false;
@@ -49,6 +57,16 @@ class OrmXmlOverridingShadowingClassLoader extends ShadowingClassLoader {
 	OrmXmlOverridingShadowingClassLoader(ClassLoader loader, String realOrmXmlLocation) {
 		super(loader);
 		this.realOrmXmlLocation = realOrmXmlLocation;
+	}
+	
+	@Override
+	protected boolean isClassNameExcludedFromShadowing(String className) {
+		for (String providerPrefix : providerPrefixes) {
+			if (className.startsWith(providerPrefix)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	private boolean askingForDefaultOrmXmlLocation(String requestedPath) {

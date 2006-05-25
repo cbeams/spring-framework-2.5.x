@@ -42,11 +42,15 @@ import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.test.annotation.AbstractAnnotationAwareTransactionalTests;
 import org.springframework.test.instrument.classloading.ShadowingClassLoader;
+import org.springframework.util.StringUtils;
 
 /**
  * Convenient support class for JPA-related tests.
+ * Offers the same contract as AbstractTransactionalDataSourceSpringContextTests
+ * and equally good performance, even when performing the instrumentation
+ * required by the JPA specification.
  * <p/>
- * <p>Exposes an EntityManagerFactory and a shared EntityManager.
+ * Exposes an EntityManagerFactory and a shared EntityManager.
  * Requires EntityManagerFactory to be injected, plus DataSource and
  * JpaTransactionManager from superclass.
  *
@@ -59,6 +63,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	private static final String DEFAULT_ORM_XML_LOCATION = "META-INF/orm.xml";
 	
 	/**
+	 * Map from String defining unique combination of config locations, to ApplicationContext.
 	 * Values are intentionally not strongly typed, to avoid potential class cast exceptions
 	 * through use between different class loaders.
 	 */
@@ -95,25 +100,25 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 	@Override
 	public void runBare() throws Throwable {
-		String cacheKey = getClass().getName();
+		String combinationOfContextLocationsForThisTestClass = StringUtils.arrayToCommaDelimitedString(getConfigLocations()); 			
 		ClassLoader classLoaderForThisTestClass = getClass().getClassLoader();
 		if (this.shadowed) {
 			Thread.currentThread().setContextClassLoader(classLoaderForThisTestClass);
 			super.runBare();
 		}
 		else {
-			ShadowingClassLoader shadowingClassLoader = (ShadowingClassLoader) classLoaderCache.get(cacheKey);
+			ShadowingClassLoader shadowingClassLoader = (ShadowingClassLoader) classLoaderCache.get(combinationOfContextLocationsForThisTestClass);
 
 			if (shadowingClassLoader == null) {
 				shadowingClassLoader = (ShadowingClassLoader) createShadowingClassLoader(classLoaderForThisTestClass);
-				classLoaderCache.put(cacheKey, shadowingClassLoader);
+				classLoaderCache.put(combinationOfContextLocationsForThisTestClass, shadowingClassLoader);
 			}
 			try {
 				Thread.currentThread().setContextClassLoader(shadowingClassLoader);
 				String[] configLocations = getConfigLocations();
 
 				// Do not strongly type, to avoid ClassCastException
-				Object cachedContext = contextCache.get(cacheKey);
+				Object cachedContext = contextCache.get(combinationOfContextLocationsForThisTestClass);
 
 				if (cachedContext == null) {
 
@@ -152,7 +157,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 					Class genericApplicationContextClass = shadowingClassLoader.loadClass(GenericApplicationContext.class.getName());
 					Class defaultListableBeanFactoryClass = shadowingClassLoader.loadClass(DefaultListableBeanFactory.class.getName());
 					cachedContext = genericApplicationContextClass.getConstructor(defaultListableBeanFactoryClass).newInstance(beanFactory);
-					contextCache.put(cacheKey, cachedContext);
+					contextCache.put(combinationOfContextLocationsForThisTestClass, cachedContext);
 
 					// refresh
 					genericApplicationContextClass.getMethod("refresh").invoke(cachedContext);
