@@ -27,20 +27,21 @@ import org.springframework.orm.jpa.SharedEntityManagerCreator;
  * Hibernate-specific JPA tests.
  * 
  * @author Juergen Hoeller
+ * @author Rod Johnson
  */
 public class HibernateEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 	
 	protected String[] getConfigLocations() {
 		return HIBERNATE_CONFIG_LOCATIONS;
 	}
+		
 
-
-	public void testCanCastNativeEntityManagerFactoryToToplinkEntityManagerFactoryImpl() {
+	public void testCanCastNativeEntityManagerFactoryToHibernateEntityManagerFactoryImpl() {
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
 		assertTrue(emfi.getNativeEntityManagerFactory() instanceof HibernateEntityManagerFactory);
 	}
 
-	public void testCannotCastSharedEntityManagerProxyToToplinkEntityManager() {
+	public void testCannotCastSharedEntityManagerProxyToHibernateEntityManager() {
 		assertFalse(sharedEntityManager instanceof HibernateEntityManager);
 	}
 
