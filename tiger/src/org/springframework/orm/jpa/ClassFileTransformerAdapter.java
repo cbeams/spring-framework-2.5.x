@@ -51,7 +51,7 @@ class ClassFileTransformerAdapter implements ClassFileTransformer {
 	public byte[] transform(
 			ClassLoader loader, String className, Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-
+		
 		try {
 			byte[] transformed = this.classTransformer.transform(
 					loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
@@ -61,6 +61,11 @@ class ClassFileTransformerAdapter implements ClassFileTransformer {
 						classfileBuffer.length + "; bytes out=" + transformed.length);
 			}
 			return transformed;
+		}
+		catch (ClassCircularityError ex) {
+			logger.error("Error weaving class [" + className + "] with " +
+					"transformer of class [" + this.classTransformer.getClass().getName() + "]", ex);
+			throw new IllegalStateException("Could not weave class [" + className + "]", ex);
 		}
 		catch (Throwable ex) {
 			if (logger.isWarnEnabled()) {
