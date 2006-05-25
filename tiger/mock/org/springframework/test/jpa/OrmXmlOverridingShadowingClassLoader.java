@@ -38,9 +38,10 @@ import org.springframework.test.instrument.classloading.ShadowingClassLoader;
 class OrmXmlOverridingShadowingClassLoader extends ShadowingClassLoader {
 	
 	private List<String> providerPrefixes = new LinkedList<String>(); {
+		// Automatically exclude classes from these well-known persistence providers
 		providerPrefixes.add("oracle.toplink.essentials");
-		//providerPrefixes.add("org.hibernate");
-		//providerPrefixes.add("kodo");
+		providerPrefixes.add("org.hibernate");
+		providerPrefixes.add("kodo");
 	}
 	
 	private static final Enumeration<URL> EMPTY_URL_ENUMERATION = new Enumeration<URL>() {
