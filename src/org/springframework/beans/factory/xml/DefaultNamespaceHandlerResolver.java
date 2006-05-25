@@ -97,6 +97,9 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 */
 	private void initHandlerMappings() {
 		Properties mappings = loadMappings();
+    if (logger.isDebugEnabled()) {
+      logger.debug("Loaded mappings [" + mappings + "]");
+    }
 		this.handlerMappings = new HashMap(mappings.size());
 		for (Enumeration en = mappings.propertyNames(); en.hasMoreElements();) {
 			String namespaceUri = (String) en.nextElement();
@@ -121,6 +124,9 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 
 	private Properties loadMappings() {
 		try {
+      if (logger.isDebugEnabled()) {
+        logger.debug("Loading mappings from [" + handlerMappingsLocation + "]");
+      }
 			return PropertiesLoaderUtils.loadAllProperties(this.handlerMappingsLocation, this.classLoader);
 		}
 		catch (IOException ex) {

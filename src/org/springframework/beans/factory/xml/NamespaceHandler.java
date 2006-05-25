@@ -27,8 +27,8 @@ import org.w3c.dom.Node;
  * of the {@link BeanDefinitionParser} interface for custom top-level
  * tags and implementations of the {@link BeanDefinitionDecorator} interface for custom nested tags.
  * <p/>
- * <p>The parser will call {@link #findParserForElement} when it encounters a custom tag directly
- * under the <code>&lt;beans&gt;</code> tags and {@link #findDecoratorForElement} when it encounters
+ * <p>The parser will call {@link #parse} when it encounters a custom tag directly
+ * under the <code>&lt;beans&gt;</code> tags and {@link #decorate} when it encounters
  * a custom tag directly under a <code>&lt;bean&gt;</code> tag.
  *
  * @author Rob Harrop

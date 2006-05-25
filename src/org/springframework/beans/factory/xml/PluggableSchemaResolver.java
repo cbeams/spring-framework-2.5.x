@@ -27,14 +27,22 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.Assert;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * {@link EntityResolver} implementation that attempts to resolve schema URLs into
  * local {@link ClassPathResource classpath resources} using a set of mappings files.
  *
- * <p>By default, this class will look for mapping files using the pattern:
+ * <p>By default, this class will look for mapping files in the classpath using the pattern:
  * <code>META-INF/spring.schemas</code> allowing for multiple files to exist on the
  * classpath at any one time.
+ *
+ * The format of <code>META-INF/spring.schemas</code> is a properties
+ * file where each line should be of the form <code>systemId=schema-location</code>
+ * where <code>schema-location</code> should also be a schema file in the classpath.
+ * Since systemId is commonly a URL, one must be careful to escape any ':' characters
+ * which are treated as delimiters in properties files.
  *
  * <p>The pattern for the mapping files can be overidden using the
  * {@link #PluggableSchemaResolver(ClassLoader, String)} constructor
@@ -57,6 +65,8 @@ public class PluggableSchemaResolver implements EntityResolver {
 	 */
 	private Properties schemaMappings;
 
+  	/** Logger available to subclasses */
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
 	 * Loads the schema URL -> schema file location mappings using the default
@@ -75,6 +85,10 @@ public class PluggableSchemaResolver implements EntityResolver {
 	public PluggableSchemaResolver(ClassLoader classLoader, String schemaMappingsLocation) {
 		Assert.notNull(classLoader, "'classLoader' cannot be null");
 		Assert.hasText(schemaMappingsLocation, "'schemaMappingsLocation' cannot be null or empty");
+    if (logger.isDebugEnabled()) {
+      logger.debug("Loading schema mappings from [" + schemaMappingsLocation + "].");
+    }
+
 		try {
 			this.schemaMappings =
 					PropertiesLoaderUtils.loadAllProperties(schemaMappingsLocation, classLoader);
@@ -88,6 +102,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 
 	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
 		if (systemId != null) {
+
 			String resourceLocation = this.schemaMappings.getProperty(systemId);
 			if (resourceLocation != null) {
 				Resource resource = new ClassPathResource(resourceLocation);
