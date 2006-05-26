@@ -84,7 +84,13 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, 
 	}
 
 	public Class getObjectType() {
-		return (this.scopedTargetSource != null ? this.scopedTargetSource.getTargetClass() : null);
+		if (this.proxy != null) {
+			return this.proxy.getClass();
+		}
+		if (this.scopedTargetSource != null) {
+			return this.scopedTargetSource.getTargetClass();
+		}
+		return null;
 	}
 
 	public boolean isSingleton() {
