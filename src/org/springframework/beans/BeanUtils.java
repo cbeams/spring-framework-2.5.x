@@ -272,7 +272,7 @@ public abstract class BeanUtils {
 			for (int i = 0; i < parameterTypeNames.length; i++) {
 				String parameterTypeName = parameterTypeNames[i].trim();
 				try {
-					parameterTypes[i] = ClassUtils.forName(parameterTypeName);
+					parameterTypes[i] = ClassUtils.forName(parameterTypeName, clazz.getClassLoader());
 				}
 				catch (ClassNotFoundException ex) {
 					throw new IllegalArgumentException("Invalid method signature: unable to locate type [" +
