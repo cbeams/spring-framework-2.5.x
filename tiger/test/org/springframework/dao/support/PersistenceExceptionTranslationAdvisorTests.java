@@ -112,7 +112,7 @@ public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
 		void throwsPersistenceException() throws PersistenceException;
 	}
 	
-	public class RepositoryInterfaceImpl implements RepositoryInterface {
+	public static class RepositoryInterfaceImpl implements RepositoryInterface {
 		private RuntimeException runtimeException;
 				
 		public void setBehaviour(RuntimeException rex) {
@@ -133,8 +133,8 @@ public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
 	}
 	
 	@Repository
-	public class StereotypedRepositoryInterfaceImpl extends RepositoryInterfaceImpl {
-		
+	public static class StereotypedRepositoryInterfaceImpl extends RepositoryInterfaceImpl {
+		// Extends above class just to add repository annotation
 	}
 
 }
