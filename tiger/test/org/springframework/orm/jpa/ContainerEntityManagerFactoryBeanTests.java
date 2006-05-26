@@ -22,11 +22,13 @@ import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
 
 import org.easymock.MockControl;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.orm.jpa.AbstractEntityManagerFactoryBeanTests;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -35,7 +37,10 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 
 /**
+ * Unit tests for ContainerEntityManagerFactoryBean
+ * 
  * @author Rod Johnson
+ * @since 2.0
  */
 public class ContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBeanTests {
 	
@@ -46,6 +51,19 @@ public class ContainerEntityManagerFactoryBeanTests extends AbstractEntityManage
 	
 	public void testValidPersistenceUnit() throws Exception {
 		parseValidPersistenceUnit();
+	}
+	
+	public void testExceptionTranslationWithNoDialect() throws Exception {
+		ContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
+		EntityManagerFactory emf = cefb.getObject();
+		assertNull("No dialect set", cefb.getJpaDialect());
+		
+		RuntimeException in1 = new RuntimeException("in1");
+		PersistenceException in2 = new PersistenceException();
+		assertNull("No translation here", cefb.translateExceptionIfPossible(in1));
+		DataAccessException dex = cefb.translateExceptionIfPossible(in2);
+		assertNotNull(dex);
+		assertSame(in2, dex.getCause());
 	}
 	
 	public void testEntityManagerFactoryIsProxied() throws Exception {

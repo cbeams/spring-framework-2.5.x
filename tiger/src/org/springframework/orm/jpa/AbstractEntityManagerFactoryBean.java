@@ -38,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.dao.DataAccessException;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -191,6 +192,14 @@ public abstract class AbstractEntityManagerFactoryBean
 	public JpaDialect getJpaDialect() {
 		return jpaDialect;
 	}
+	
+	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
+		// Use the dialect's conversion if possible: otherwise fall 
+		// back to generic conversion
+		return (jpaDialect != null) ?
+				jpaDialect.translateExceptionIfPossible(ex) :
+				EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex);
+	}
 
 
 	public final void afterPropertiesSet() throws PersistenceException {
@@ -322,7 +331,7 @@ public abstract class AbstractEntityManagerFactoryBean
 		
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			try {
-				if (method.getDeclaringClass().equals(EntityManagerFactoryInfo.class)) {
+				if (method.getDeclaringClass().isAssignableFrom(EntityManagerFactoryInfo.class)) {
 					return method.invoke(this.entityManagerFactoryInfo, args);
 				}
 				if (method.getDeclaringClass().equals(EntityManagerFactoryPlusOperations.class)) {

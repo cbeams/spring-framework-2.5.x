@@ -19,6 +19,8 @@ package org.springframework.orm.jpa;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceUnitInfo;
 
+import org.springframework.dao.support.PersistenceExceptionTranslator;
+
 /**
  * Metadata interface for a Spring-managed EntityManagerFactory.
  *
@@ -30,7 +32,7 @@ import javax.persistence.spi.PersistenceUnitInfo;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public interface EntityManagerFactoryInfo {
+public interface EntityManagerFactoryInfo extends PersistenceExceptionTranslator {
 	
 	/**
 	 * Return the underlying EntityManagerFactory, returned

@@ -19,19 +19,44 @@ package org.springframework.orm.jpa;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.TransactionRequiredException;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.dao.DataAccessException;
 import org.springframework.orm.jpa.domain.Person;
-import org.springframework.orm.jpa.AbstractEntityManagerFactoryIntegrationTests;
 import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.annotation.NotTransactional;
 
 /**
+ * Integration tests using in-memory database for container-managed JPA
+ * 
  * @author Rod Johnson
+ * @since 2.0
  */
 public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntityManagerFactoryIntegrationTests {
+	
+	@NotTransactional
+	public void testExceptionTranslationWithDialectFoundOnIntroducedEntityManagerInfo() throws Exception {		
+		doTestExceptionTranslationWithDialectFound((EntityManagerFactoryInfo) entityManagerFactory);
+	}
+	
+	@NotTransactional
+	public void testExceptionTranslationWithDialectFoundOnEntityManagerFactoryBean() throws Exception {
+		AbstractEntityManagerFactoryBean aefb = (AbstractEntityManagerFactoryBean) applicationContext.getBean("&entityManagerFactory");
+		assertNotNull("Dialect must have been set", aefb.getJpaDialect());
+		doTestExceptionTranslationWithDialectFound(aefb);
+	}
+		
+	protected void doTestExceptionTranslationWithDialectFound(EntityManagerFactoryInfo emfi) throws Exception {		
+		RuntimeException in1 = new RuntimeException("in1");
+		PersistenceException in2 = new PersistenceException();
+		assertNull("No translation here", emfi.translateExceptionIfPossible(in1));
+		DataAccessException dex = emfi.translateExceptionIfPossible(in2);
+		assertNotNull(dex);
+		assertSame(in2, dex.getCause());
+	}
 	
 	public void testEntityManagerProxyIsProxy() {
 		EntityManager em = createContainerManagedEntityManager();
