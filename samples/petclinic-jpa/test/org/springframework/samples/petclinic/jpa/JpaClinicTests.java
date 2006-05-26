@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2006 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.samples.petclinic.jpa;
 
 import java.util.Collection;
@@ -37,24 +53,9 @@ import org.springframework.test.jpa.AbstractJpaTests;
  * @see AbstractJpaTests
  * @author Rod Johnson
  */
-public class JpaClinicTests extends AbstractJpaTests {
+public abstract class JpaClinicTests extends AbstractJpaTests {
 	
-	private static final String[] JPA_TEMPLATE_LOCATIONS = new String[] { 
-		"/org/springframework/samples/petclinic/jpa/container-applicationContext-jpa.xml",
-		"/org/springframework/samples/petclinic/jpa/jpaTemplate-clinic.xml"
-	};
-	
-	private static final String[] ENTITY_MANAGER_LOCATIONS = new String[] { 
-		"/org/springframework/samples/petclinic/jpa/container-applicationContext-jpa.xml",
-		"/org/springframework/samples/petclinic/jpa/entityManager-clinic.xml"
-	};
-
 	protected Clinic clinic;
-	
-	protected String[] getConfigLocations() {
-		//return JPA_TEMPLATE_LOCATIONS;
-		return ENTITY_MANAGER_LOCATIONS;
-	}
 	
 	@ExpectedException(IllegalArgumentException.class)
 	public void testBogusJpql() {
