@@ -9,13 +9,8 @@
 		class="org.springframework.orm.jpa.ContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="dataSource" />
 
-<!--
-<property name="persistenceProviderClass" value="oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider" />
--->
-
 		<property name="loadTimeWeaver" ref="weaver" />
 		
-
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter">
 				
@@ -31,52 +26,25 @@
 				<property name="showSql" value="true" />
 
 			</bean>
-		</property>
-				
-		
+		</property>				
 
 		<property name="persistenceXmlLocation"
 			value="META-INF/petclinic-persistence.xml" />
 	</bean>
 	
-	<bean 
-		class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" /> 
-
 
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName"><value>org.hsqldb.jdbcDriver</value></property>
 		<property name="url"><value>jdbc:hsqldb:hsql://localhost:9001</value></property>
 		<property name="username"><value>sa</value></property>
 		<property name="password"><value></value></property>
-	</bean>
-	
-	
-	
-	
+	</bean>		
 
 
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager" >
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
 		<property name="dataSource" ref="dataSource"/>
 	</bean>
-
-	<!--
-		Note the use of an inner bean for the "target" property.
-		This ensures that there is only one instance of this bean in the
-		factory, allowing us to use autowire by type if necessary.
-	-->
-	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref local="transactionManager"/></property>
-		<property name="target">
-			<bean class="org.springframework.samples.petclinic.jpa.JpaClinic">
-				<property name="entityManagerFactory"><ref local="entityManagerFactory"/></property>
-			</bean>
-		</property>
-		<property name="transactionAttributes">
-			<props>
-				<prop key="*">PROPAGATION_REQUIRED</prop>
-			</props>
-		</property>
-	</bean>
+	
 
 </beans>

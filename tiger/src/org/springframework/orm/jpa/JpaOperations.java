@@ -72,12 +72,12 @@ public interface JpaOperations {
 
 	List find(String queryString, Object... values) throws DataAccessException;
 
-	List find(String queryString, Map<String,Object> params) throws DataAccessException;
+	List findByNamedParams(String queryString, Map<String,? extends Object> params) throws DataAccessException;
 
 	List findByNamedQuery(String queryName) throws DataAccessException;
 
 	List findByNamedQuery(String queryName, Object... values) throws DataAccessException;
 
-	List findByNamedQuery(String queryName, Map<String,Object> params) throws DataAccessException;
+	List findByNamedQueryAndNamedParams(String queryName, Map<String,? extends Object> params) throws DataAccessException;
 
 }

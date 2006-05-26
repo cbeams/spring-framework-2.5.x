@@ -316,7 +316,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		});
 	}
 
-	public List find(final String queryString, final Map<String,Object> params) throws DataAccessException {
+	public List findByNamedParams(final String queryString, final Map<String,? extends Object> params) throws DataAccessException {
 		return executeFind(new JpaCallback() {
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				Query queryObject = em.createQuery(queryString);
@@ -349,7 +349,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		});
 	}
 
-	public List findByNamedQuery(final String queryName, final Map<String, Object> params)
+	public List findByNamedQueryAndNamedParams(final String queryName, final Map<String, ? extends Object> params)
 			throws DataAccessException {
 
 		return executeFind(new JpaCallback() {

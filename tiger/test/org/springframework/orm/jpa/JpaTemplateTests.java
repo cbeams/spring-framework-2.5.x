@@ -421,7 +421,7 @@ public class JpaTemplateTests extends TestCase {
 		factoryControl.replay();
 		queryControl.replay();
 
-		assertSame(result, template.find(queryString, params));
+		assertSame(result, template.findByNamedParams(queryString, params));
 
 		managerControl.verify();
 		factoryControl.verify();
@@ -510,7 +510,7 @@ public class JpaTemplateTests extends TestCase {
 		factoryControl.replay();
 		queryControl.replay();
 
-		assertSame(result, template.findByNamedQuery(queryName, params));
+		assertSame(result, template.findByNamedQueryAndNamedParams(queryName, params));
 
 		managerControl.verify();
 		factoryControl.verify();
