@@ -16,12 +16,13 @@
 
 package org.springframework.dao.support;
 
+import java.lang.reflect.Method;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.ClassFilter;
-import org.springframework.aop.MethodMatcher;
-import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -31,43 +32,53 @@ import org.springframework.stereotype.Repository;
  * @since 2.0
  */
 public class PersistenceExceptionTranslationAdvisor extends DefaultPointcutAdvisor {
-	
-	private static PersistenceExceptionTranslationAdvisor instance = new PersistenceExceptionTranslationAdvisor();
-	
-	public static PersistenceExceptionTranslationAdvisor getInstance() {
-		return instance;
-	}
-	
-	private PersistenceExceptionTranslationAdvisor() {
+
+	private static final long serialVersionUID = 1L;
+
+	public PersistenceExceptionTranslationAdvisor(PersistenceExceptionTranslator persistenceExceptionTranslator) {
 		super(
 				new RepositoryAnnotationMatchingPointcut(),
-				new PersistenceExceptionTranslationInterceptor()
-		);
+				new PersistenceExceptionTranslationInterceptor(persistenceExceptionTranslator)
+		);		
 	}
 	
 	private static class PersistenceExceptionTranslationInterceptor implements MethodInterceptor {
+		
+		private final PersistenceExceptionTranslator persistenceExceptionTranslator;
+		
+		public PersistenceExceptionTranslationInterceptor(PersistenceExceptionTranslator persistenceExceptionTranslator) {
+			this.persistenceExceptionTranslator = persistenceExceptionTranslator;
+		}
+		
 		public Object invoke(MethodInvocation mi) throws Throwable {
 			try {
 				return mi.proceed();
 			}
 			catch (RuntimeException ex) {
-				return DataAccessUtils.translateIfNecessary(ex, null);
+				// Let it throw raw if the type of the exception is on the throws clause of the method
+				for (Class<?> exceptionClass : mi.getMethod().getExceptionTypes()) {
+					if (exceptionClass.isInstance(ex)) {
+						throw ex;
+					}
+				}
+				
+				throw DataAccessUtils.translateIfNecessary(ex, this.persistenceExceptionTranslator);
 			}
 		}
 	}
 	
-	private static class RepositoryAnnotationMatchingPointcut implements Pointcut {
+	private static class RepositoryAnnotationMatchingPointcut extends StaticMethodMatcherPointcut {
 
-		public ClassFilter getClassFilter() {
-			return new ClassFilter() {
-				public boolean matches(java.lang.Class clazz) {
+		public RepositoryAnnotationMatchingPointcut() {
+			setClassFilter(new ClassFilter() {
+				public boolean matches(Class clazz) {
 					return clazz.isAnnotationPresent(Repository.class);
 				}
-			};
-		}
-
-		public MethodMatcher getMethodMatcher() {
-			return MethodMatcher.TRUE;
+			});
+		}	
+		
+		public boolean matches(Method method, Class targetClass) {
+			return true;
 		}
 		
 	}
