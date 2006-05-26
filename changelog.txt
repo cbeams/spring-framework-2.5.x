@@ -3,13 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 RC1 (18.5.2006)
---------------------------------------
+Changes in version 2.0 M5 (29.5.2006)
+-------------------------------------
 
 Package org.springframework.aop
 * reworked support for scoped proxies to build on scoping support in core BeanFactory
 * removed incomplete support for ScopedObject handles and persistent scopes
+* removed deprecated AttributesPooling/Prototype/ThreadLocalTargetSourceCreator
 * removed unused Class argument from ParameterNameDiscoverer's "getParameterNames(Method)"
+* reworked ProxyFactoryBean's "setProxyInterfaces" method from String array to Class array
+* factored out AbstractSingletonProxyFactoryBean from TransactionProxyFactoryBean
 
 Package org.springframework.beans
 * introduced lazy loading (and lazy validation) of bean classes in standard bean factories and bean definition readers
@@ -22,6 +25,9 @@ Package org.springframework.beans
 * reworked RequiredBeanFactoryPostProcessor into RequiredAnnotationBeanPostProcessor, properly handling bean inheritance
 * added scoping support to core BeanFactory, for creating raw target beans in arbitrary scopes
 * added "scope" attribute at bean level to XML bean definition format, superseding singleton="true"/"false"
+* renamed XmlBeanDefinitionReader's (Default)XmlBeanDefinitionParser SPI to (Default)BeanDefinitionDocumentReader
+* renamed XmlBeanDefinitionParserHelper to BeanDefinitionParserDelegate
+* re-introduced Spring 1.2 XmlBeanDefinitionParser SPI for backwards compatibility in case of "parserClass" specified
 
 Package org.springframework.context
 * synchronized AbstractApplicationContext's "refresh()" method, for hot refreshing in concurrent environments
@@ -29,6 +35,9 @@ Package org.springframework.context
 Package org.springframework.core
 * renamed GenericsHelper to GenericCollectionTypeResolver, more clearly reflecting its actual role
 * AnnotationUtils discovers annotations inherited via bridge methods now, through the new BridgeMethodResolver
+
+Package org.springframework.instrument
+* introduced class instrumentation support based on standard ClassFileTransformers (used by JPA SPI support)
 
 Package org.springframework.jdbc
 * refined default SQL error codes for DB2 and HSQLDB
@@ -40,6 +49,11 @@ Package org.springframework.orm
 * fixed JpaTransactionManager to not cause an NPE when the creation of a transactional EntityManager raises an exception
 * fixed JpaInterceptor to actually bind a new EntityManager to the thread again (worked in M3, didn't work in M4)
 * fixed EntityManagerFactoryUtils's "convertJpaAccessException" to always return rather than throw DataAccessExceptions
+* added full support for JPA SPI, in the form of a ContainerEntityManagerFactoryBean with LoadTimeWeaver support
+* added PersistenceAnnotationPostProcessor, processing EJB3-style @PersistenceUnit and @PersistenceContext annotations
+
+Package org.springframework.test
+* added support classes for annotation-based tests in general and for JPA-based tests in particular
 
 Package org.springframework.transaction
 * added "failEarlyOnGlobalRollbackOnly" flag to AbstractPlatformTransactionManager, for consistent fail-early behavior
@@ -53,6 +67,10 @@ Package org.springframework.validation
 * added "setDisallowedFields" method to DataBinder, for specifying disallowed fields instead of allowed fields
 
 Package org.springframework.web
+* reworked mvc RequestHandler interface into HttpRequestHandler in root web package, to minimize module dependencies
+* reworked RequestMethodNotSupportedException into HttpRequestMethodNotSupportedException in root web package
+* reworked SessionRequiredException into HttpSessionRequiredException and PortletSessionRequiredException
+* added HttpRequestHandlerServlet to "web.context.support" package, for exposing a single HttpRequestHandler bean
 * dropped "getCause()" method from NestedServletException, to avoid conflicts with JDK-1.4-based ServletException class
 * added support for request and session scopes to all WebApplicationContexts
 * moved StaticPortletApplicationContext from test tree over to main source tree
@@ -377,7 +395,7 @@ Package org.springframework.core
 * refined AbstractResource to work around "FilterInputStream.close()" NPE, simply catching Throwable and ignoring it
 * PathMatchingResourcePatternResolver considers URL protocol "wsjar" as jar file (to load from WebSphere-managed jars)
 * ResourceArrayPropertyEditor can translate a set/list of patterns into a Resource array (rather than just one pattern)
-* split previous AnnotationUtils helper into core.annotation.AnnotationUtils and beans.annotation.AnnotationBeanUtils
+* split previous AnnotationUtils delegatetetetete into core.annotation.AnnotationUtils and beans.annotation.AnnotationBeanUtils
 
 Package org.springframework.jdbc
 * DataSourceTransactionManager only attempts to release Connection if not pre-bound (to avoid inappropriate log message)

@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.0 RC1 (May 2006)
-------------------------------------------------
+THE SPRING FRAMEWORK, release 2.0 M5 (May 2006)
+-----------------------------------------------
 http://www.springframework.org
 
 
@@ -90,7 +90,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL STANDARD JAR (dist):
 
-* "spring" (~1985 KB)
+* "spring" (~1755 KB)
 - Convenient jar file that combines all standard modules (see "module jars" below)
 - Note: Does NOT include extension modules! (see "extension module jars" below)
 
@@ -100,16 +100,16 @@ STANDARD MODULE JARS (dist/modules):
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~310 KB)
+* "spring-beans" (~320 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
-* "spring-aop" (~275 KB)
+* "spring-aop" (~265 KB)
 - Contents: AOP framework, source-level metadata support, AOP Alliance interfaces
 - Dependencies: spring-core, (spring-beans, CGLIB, Commons Attributes)
 
-* "spring-context" (~145 KB)
-- Contents: application context, validation, JNDI, UI context support, scripting
+* "spring-context" (~160 KB)
+- Contents: application context, validation, JNDI, UI context support, instrumentation, scripting
 - Dependencies: spring-beans, (Velocity, FreeMarker, JasperReports)
 
 * "spring-dao" (~105 KB)
@@ -120,17 +120,13 @@ STANDARD MODULE JARS (dist/modules):
 - Contents: JDBC support, iBATIS SQL Maps support
 - Dependencies: spring-dao, spring-beans, (iBATIS SQL Maps)
 
-* "spring-support" (~190 KB)
+* "spring-support" (~195 KB)
 - Contents: JMX support, JCA support, scheduling support, mail support, caching support
 - Dependencies: spring-beans, (spring-context, spring-dao, spring-jdbc, JMX, Quartz, JavaMail, EHCache)
 
-* "spring-web" (~160 KB)
+* "spring-web" (~165 KB)
 - Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
 - Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts, JSF)
-
-* "spring-webmvc" (~255 KB)
-- Contents: framework servlets, web MVC framework, web controllers, web views
-- Dependencies: spring-web, (Tiles, iText, POI, Velocity, FreeMarker, JasperReports)
 
 * "spring-remoting" (~180 KB)
 - Contents: remoting support, EJB support, JMS support
@@ -138,25 +134,29 @@ STANDARD MODULE JARS (dist/modules):
 
 EXTENSION MODULE JARS (dist/extmodules):
 
+* "spring-webmvc" (~260 KB)
+- Contents: framework servlets, web MVC framework, web controllers, web views
+- Dependencies: spring-web, (Tiles, iText, POI, Velocity, FreeMarker, JasperReports)
+
 * "spring-portlet" (~110 KB)
 - Contents: framework portlets, portlet MVC
-- Dependencies: spring-web, spring-webmvc, (Portlet)
+- Dependencies: spring-webmvc, (Portlet)
 
 * "spring-jdo" (~65 KB)
 - Contents: JDO 1.0/2.0 support
-- Dependencies: spring-dao, spring-jdbc, JDO, (spring-web, spring-portlet)
+- Dependencies: spring-dao, spring-jdbc, JDO, (spring-webmvc, spring-portlet)
 
-* "spring-jpa" (~45 KB)
+* "spring-jpa" (~70 KB)
 - Contents: JPA 1.0 support
-- Dependencies: spring-dao, spring-jdbc, JPA, (spring-web, spring-portlet)
+- Dependencies: spring-dao, spring-jdbc, JPA, (spring-webmvc, spring-portlet)
 
 * "spring-hibernate2" (~90 KB)
 - Contents: Hibernate 2.1 support
-- Dependencies: spring-dao, spring-jdbc, Hibernate2, (spring-web, spring-portlet)
+- Dependencies: spring-dao, spring-jdbc, Hibernate2, (spring-webmvc, spring-portlet)
 
 * "spring-hibernate3" (~110 KB)
 - Contents: Hibernate 3.0/3.1/3.2 support
-- Dependencies: spring-dao, spring-jdbc, Hibernate3, (spring-web, spring-portlet)
+- Dependencies: spring-dao, spring-jdbc, Hibernate3, (spring-webmvc, spring-portlet)
 
 * "spring-toplink" (~55 KB)
 - Contents: TopLink support
@@ -166,7 +166,7 @@ EXTENSION MODULE JARS (dist/extmodules):
 - Contents: OJB 1.0 support
 - Dependencies: spring-dao, spring-jdbc, OJB
 
-* "spring-mock" (~75 KB)
+* "spring-mock" (~85 KB)
 - Contents: JNDI mocks, Servlet API mocks, Portlet API mocks, JUnit support
 - Dependencies: spring-core
 
