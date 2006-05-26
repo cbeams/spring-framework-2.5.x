@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.support;
+package org.springframework.web;
 
 import javax.servlet.ServletException;
 
 /**
- * Exception thrown when a web content generator requires a pre-existing session.
+ * Exception thrown when an HTTP request handler requires a pre-existing session.
  *
- * @author Rod Johnson
- * @see WebContentGenerator
+ * @author Juergen Hoeller
+ * @since 2.0
  */
-public class SessionRequiredException extends ServletException {
+public class HttpSessionRequiredException extends ServletException {
 
 	/**
-	 * Create a new SessionRequiredException.
+	 * Create a new HttpSessionRequiredException.
 	 * @param msg the detail message
 	 */
-	public SessionRequiredException(String msg) {
+	public HttpSessionRequiredException(String msg) {
 		super(msg);
 	}
 

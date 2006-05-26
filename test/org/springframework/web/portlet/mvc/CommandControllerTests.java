@@ -47,7 +47,7 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
-import org.springframework.web.portlet.handler.SessionRequiredException;
+import org.springframework.web.portlet.handler.PortletSessionRequiredException;
 
 /**
  * @author Mark Fisher
@@ -139,9 +139,9 @@ public class CommandControllerTests extends TestCase {
 		MockRenderResponse response = new MockRenderResponse();
 		try {
 			tc.handleRenderRequest(request, response);
-			fail("Should have thrown SessionRequiredException");
+			fail("Should have thrown PortletSessionRequiredException");
 		}
-		catch(SessionRequiredException e) {
+		catch (PortletSessionRequiredException ex) {
 			// expected
 		}
 	}
@@ -157,8 +157,8 @@ public class CommandControllerTests extends TestCase {
 		try {
 			tc.handleRenderRequest(request, response);
 		}
-		catch(SessionRequiredException e) {
-			fail("Should not have thrown SessionRequiredException");
+		catch (PortletSessionRequiredException ex) {
+			fail("Should not have thrown PortletSessionRequiredException");
 		}
 	}
 	
@@ -457,4 +457,5 @@ public class CommandControllerTests extends TestCase {
 			return new ModelAndView(request.getContextPath() + "-view", model);
 		}
 	}
+
 }

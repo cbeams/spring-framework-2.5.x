@@ -33,7 +33,7 @@ import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationBasedExporter;
 import org.springframework.remoting.support.RemoteInvocationResult;
 import org.springframework.util.Assert;
-import org.springframework.web.servlet.mvc.RequestHandler;
+import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.util.NestedServletException;
 
 /**
@@ -58,7 +58,7 @@ import org.springframework.web.util.NestedServletException;
  * @see org.springframework.remoting.caucho.BurlapServiceExporter
  */
 public class HttpInvokerServiceExporter extends RemoteInvocationBasedExporter
-		implements RequestHandler, InitializingBean {
+		implements HttpRequestHandler, InitializingBean {
 
 	/**
 	 * Default content type: "application/x-java-serialized-object"

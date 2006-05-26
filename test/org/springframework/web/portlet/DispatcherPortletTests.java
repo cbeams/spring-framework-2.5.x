@@ -41,11 +41,10 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.portlet.context.PortletApplicationContextUtils;
-import org.springframework.web.portlet.handler.SessionRequiredException;
+import org.springframework.web.portlet.handler.PortletSessionRequiredException;
 import org.springframework.web.portlet.multipart.MultipartActionRequest;
 import org.springframework.web.servlet.ViewRendererServlet;
 import org.springframework.web.servlet.view.InternalResourceView;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Mark Fisher
@@ -180,9 +179,9 @@ public class DispatcherPortletTests extends TestCase {
 		request.setParameter("action", "form-session-bind");
 		try {
 			simpleDispatcherPortlet.doDispatch(request, response);
-			fail("Should have thrown SessionRequiredException");
+			fail("Should have thrown PortletSessionRequiredException");
 		}
-		catch (SessionRequiredException ex) {
+		catch (PortletSessionRequiredException ex) {
 			// expected
 		}
 	}

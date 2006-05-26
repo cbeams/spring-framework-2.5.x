@@ -35,6 +35,7 @@ import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
@@ -42,7 +43,6 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 import org.springframework.web.servlet.mvc.multiaction.ParameterMethodNameResolver;
 import org.springframework.web.servlet.mvc.multiaction.PropertiesMethodNameResolver;
-import org.springframework.web.servlet.support.SessionRequiredException;
 
 /**
  * @author Rod Johnson
@@ -339,7 +339,7 @@ public class MultiActionControllerTests extends TestCase {
 			contr.handleRequest(request, response);
 			fail("Should have thrown exception");
 		}
-		catch (SessionRequiredException ex) {
+		catch (HttpSessionRequiredException ex) {
 			//assertTrue("session required", ex.equals(t));
 		}
 		request = new MockHttpServletRequest("GET", "/testSession.html");
@@ -600,7 +600,7 @@ public class MultiActionControllerTests extends TestCase {
 	/** Extends previous to handle exception */
 	public static class TestSessionRequiredExceptionHandler extends TestSessionRequiredController {
 
-		public ModelAndView handleServletException(HttpServletRequest request, HttpServletResponse response, SessionRequiredException ex) {
+		public ModelAndView handleServletException(HttpServletRequest request, HttpServletResponse response, HttpSessionRequiredException ex) {
 			invoked.put("handle(SRE)", Boolean.TRUE);
 			return new ModelAndView("handle(SRE)");
 		}

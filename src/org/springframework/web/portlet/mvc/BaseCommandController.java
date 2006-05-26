@@ -30,7 +30,7 @@ import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
-import org.springframework.web.portlet.handler.SessionRequiredException;
+import org.springframework.web.portlet.handler.PortletSessionRequiredException;
 
 /**
  * <p>Controller implementation which creates an object (the command object) on
@@ -589,11 +589,11 @@ public abstract class BaseCommandController extends AbstractController {
 	protected final Object getRenderCommand(RenderRequest request) throws PortletException {
 		PortletSession session = request.getPortletSession(false);
 		if (session == null) {
-			throw new SessionRequiredException("Could not obtain portlet session");
+			throw new PortletSessionRequiredException("Could not obtain portlet session");
 		}
 		Object command = session.getAttribute(getRenderCommandSessionAttributeName());
 		if (command == null) {
-			throw new SessionRequiredException("Could not obtain command object from portlet session");
+			throw new PortletSessionRequiredException("Could not obtain command object from portlet session");
 		}
 		return command;
 	}
@@ -607,11 +607,11 @@ public abstract class BaseCommandController extends AbstractController {
 	protected final BindException getRenderErrors(RenderRequest request) throws PortletException {
 		PortletSession session = request.getPortletSession(false);
 		if (session == null) {
-			throw new SessionRequiredException("Could not obtain portlet session");
+			throw new PortletSessionRequiredException("Could not obtain portlet session");
 		}
 		BindException errors = (BindException) session.getAttribute(getRenderErrorsSessionAttributeName());
 		if (errors == null) {
-			throw new SessionRequiredException("Could not obtain errors object from portlet session");
+			throw new PortletSessionRequiredException("Could not obtain errors object from portlet session");
 		}
 		return errors;
 	}

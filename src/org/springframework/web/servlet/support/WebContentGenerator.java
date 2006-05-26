@@ -24,6 +24,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.StringUtils;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 
 /**
@@ -45,17 +47,17 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  */
 public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
-	public static final String METHOD_HEAD = "HEAD";
+	private static final String METHOD_HEAD = "HEAD";
 
-	public static final String METHOD_GET = "GET";
+	private static final String METHOD_GET = "GET";
 
-	public static final String METHOD_POST = "POST";
+	private static final String METHOD_POST = "POST";
 
-	public static final String HEADER_PRAGMA = "Pragma";
+	private static final String HEADER_PRAGMA = "Pragma";
 
-	public static final String HEADER_EXPIRES = "Expires";
+	private static final String HEADER_EXPIRES = "Expires";
 
-	public static final String HEADER_CACHE_CONTROL = "Cache-Control";
+	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
 
 	/** Set of supported methods. HEAD, GET and POST by default. */
@@ -198,13 +200,13 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		// check whether we should support the request method
 		String method = request.getMethod();
 		if (!this.supportedMethods.contains(method)) {
-			throw new RequestMethodNotSupportedException("Request method '" + method + "' not supported");
+			throw new HttpRequestMethodNotSupportedException(method);
 		}
 
 		// check whether session is required
 		if (this.requireSession) {
 			if (request.getSession(false) == null) {
-				throw new SessionRequiredException("Pre-existing session required but none found");
+				throw new HttpSessionRequiredException("Pre-existing session required but none found");
 			}
 		}
 

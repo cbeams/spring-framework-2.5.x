@@ -27,7 +27,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.support.SessionRequiredException;
+import org.springframework.web.HttpSessionRequiredException;
 
 /**
  * <p>Form controller that auto-populates a form bean from the request.
@@ -249,7 +249,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 				BindException errors = new BindException(binder.getBindingResult());
 				return processFormSubmission(request, response, command, errors);
 			}
-			catch (SessionRequiredException ex) {
+			catch (HttpSessionRequiredException ex) {
 				// Cannot submit a session form if no form object is in the session.
 				if (logger.isDebugEnabled()) {
 					logger.debug("Invalid submit detected: " + ex.getMessage());
@@ -403,7 +403,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * form for resubmission.
 	 * @param request current HTTP request
 	 * @return object form to bind onto
-	 * @throws org.springframework.web.servlet.support.SessionRequiredException
+	 * @throws org.springframework.web.HttpSessionRequiredException
 	 * if a session was expected but no active session (or session form object) found
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #formBackingObject
@@ -417,12 +417,12 @@ public abstract class AbstractFormController extends BaseCommandController {
 		// Session-form mode: retrieve form object from HTTP session attribute.
 		HttpSession session = request.getSession(false);
 		if (session == null) {
-			throw new SessionRequiredException("Must have session when trying to bind (in session-form mode)");
+			throw new HttpSessionRequiredException("Must have session when trying to bind (in session-form mode)");
 		}
 		String formAttrName = getFormSessionAttributeName(request);
 		Object sessionFormObject = session.getAttribute(formAttrName);
 		if (sessionFormObject == null) {
-			throw new SessionRequiredException("Form object not found in session (in session-form mode)");
+			throw new HttpSessionRequiredException("Form object not found in session (in session-form mode)");
 		}
 
 		// Remove form object from HTTP session: we might finish the form workflow

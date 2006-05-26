@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.support;
+package org.springframework.web.portlet.handler;
 
-import javax.servlet.ServletException;
+import javax.portlet.PortletException;
 
 /**
- * Exception thrown when a web content generator does not support a
- * specific request method.
+ * Exception thrown when a portlet content generator requires a pre-existing session.
  *
- * @author Juergen Hoeller
- * @since 1.1
- * @see WebContentGenerator
+ * @author John A. Lewis
+ * @since 2.0
+ * @see org.springframework.web.portlet.handler.PortletContentGenerator
  */
-public class RequestMethodNotSupportedException extends ServletException {
+public class PortletSessionRequiredException extends PortletException {
 
 	/**
-	 * Create a new RequestMethodNotSupportedException.
+	 * Create a new PortletSessionRequiredException.
 	 * @param msg the detail message
 	 */
-	public RequestMethodNotSupportedException(String msg) {
+	public PortletSessionRequiredException(String msg) {
 		super(msg);
 	}
 

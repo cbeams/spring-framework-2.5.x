@@ -31,9 +31,8 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.util.Assert;
-import org.springframework.web.servlet.mvc.RequestHandler;
-import org.springframework.web.servlet.support.RequestMethodNotSupportedException;
-import org.springframework.web.servlet.support.WebContentGenerator;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.util.NestedServletException;
 
 /**
@@ -58,7 +57,8 @@ import org.springframework.web.util.NestedServletException;
  * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
  * @see org.springframework.remoting.rmi.RmiServiceExporter
  */
-public class HessianServiceExporter extends RemoteExporter implements RequestHandler, InitializingBean {
+public class HessianServiceExporter extends RemoteExporter
+		implements HttpRequestHandler, InitializingBean {
 
 	private HessianSkeleton skeleton;
 
@@ -100,8 +100,9 @@ public class HessianServiceExporter extends RemoteExporter implements RequestHan
 
 		Assert.notNull(this.skeleton, "HessianServiceExporter has not been initialized");
 
-		if (!WebContentGenerator.METHOD_POST.equals(request.getMethod())) {
-			throw new RequestMethodNotSupportedException("HessianServiceExporter only supports POST requests");
+		if (!"POST".equals(request.getMethod())) {
+			throw new HttpRequestMethodNotSupportedException(
+					"POST", "HessianServiceExporter only supports POST requests");
 		}
 
 		HessianInput in = new HessianInput(request.getInputStream());

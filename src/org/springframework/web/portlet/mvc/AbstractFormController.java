@@ -31,7 +31,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.bind.PortletRequestDataBinder;
-import org.springframework.web.portlet.handler.SessionRequiredException;
+import org.springframework.web.portlet.handler.PortletSessionRequiredException;
 
 /**
  * <p>Form controller that auto-populates a form bean from the request.
@@ -424,7 +424,7 @@ public abstract class AbstractFormController extends BaseCommandController {
                 setRenderCommandAndErrors(request, command, errors);
                 return;
             }
-            catch (SessionRequiredException ex) {
+            catch (PortletSessionRequiredException ex) {
                 // Cannot submit a session form if no form object is in the session.
                 if (logger.isDebugEnabled()) {
                     logger.debug("Invalid submit detected: " + ex.getMessage());
@@ -687,12 +687,12 @@ public abstract class AbstractFormController extends BaseCommandController {
 		// Session-form mode: retrieve form object from portlet session attribute.
 		PortletSession session = request.getPortletSession(false);
 		if (session == null) {
-			throw new SessionRequiredException("Must have session when trying to bind (in session-form mode)");
+			throw new PortletSessionRequiredException("Must have session when trying to bind (in session-form mode)");
 		}
 		String formAttrName = getFormSessionAttributeName(request);
 		Object sessionFormObject = session.getAttribute(formAttrName);
 		if (sessionFormObject == null) {
-			throw new SessionRequiredException("Form object not found in session (in session-form mode)");
+			throw new PortletSessionRequiredException("Form object not found in session (in session-form mode)");
 		}
 
 		// Remove form object from porlet session: we might finish the form workflow
@@ -705,7 +705,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 
         // Check the command object to make sure its valid
         if (!checkCommand(sessionFormObject)) {
-            throw new SessionRequiredException("Object found in session does not match commandClass");
+            throw new PortletSessionRequiredException("Object found in session does not match commandClass");
         }
 
         return sessionFormObject;

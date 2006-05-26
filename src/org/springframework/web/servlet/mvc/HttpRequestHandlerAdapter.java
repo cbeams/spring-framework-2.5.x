@@ -19,31 +19,32 @@ package org.springframework.web.servlet.mvc;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Adapter to use the plain RequestHandler interface with the generic DispatcherServlet.
- * Supports handlers that implement the LastModified interface.
+ * Adapter to use the plain HttpRequestHandler interface with the generic
+ * DispatcherServlet. Supports handlers that implement the LastModified interface.
  *
  * <p>This is an SPI class, not used directly by application code.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.web.servlet.DispatcherServlet
- * @see RequestHandler
+ * @see HttpRequestHandler
  * @see LastModified
  */
-public class SimpleRequestHandlerAdapter implements HandlerAdapter {
+public class HttpRequestHandlerAdapter implements HandlerAdapter {
 
 	public boolean supports(Object handler) {
-		return (handler instanceof RequestHandler);
+		return (handler instanceof HttpRequestHandler);
 	}
 
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 
-		((RequestHandler) handler).handleRequest(request, response);
+		((HttpRequestHandler) handler).handleRequest(request, response);
 		return null;
 	}
 

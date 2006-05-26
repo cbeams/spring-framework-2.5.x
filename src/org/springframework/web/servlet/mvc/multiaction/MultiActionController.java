@@ -35,11 +35,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.util.Assert;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
+import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.servlet.mvc.LastModified;
-import org.springframework.web.servlet.support.SessionRequiredException;
 import org.springframework.web.util.NestedServletException;
 
 /**
@@ -416,7 +416,7 @@ public class MultiActionController extends AbstractController implements LastMod
 			if (method.getParameterTypes().length >= 3 && method.getParameterTypes()[2].equals(HttpSession.class) ){
 				HttpSession session = request.getSession(false);
 				if (session == null) {
-					throw new SessionRequiredException(
+					throw new HttpSessionRequiredException(
 							"Pre-existing session required for handler method '" + methodName + "'");
 				}
 				params.add(session);
@@ -588,7 +588,7 @@ public class MultiActionController extends AbstractController implements LastMod
 
 	/**
 	 * We've encountered an exception which may be recoverable
-	 * (InvocationTargetException or SessionRequiredException).
+	 * (InvocationTargetException or HttpSessionRequiredException).
 	 * Allow the subclass a chance to handle it.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
