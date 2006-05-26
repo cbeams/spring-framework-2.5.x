@@ -23,7 +23,8 @@ import org.springframework.util.Assert;
 
 /**
  * Default implementation of the ResourceLoader interface.
- * Used by ResourceEditor, but also suitable for standalone usage.
+ * Used by ResourceEditor, and serves as base class for AbstractApplicationContext.
+ * Can also be used standalone.
  *
  * <p>Will return an UrlResource if the location value is a URL, and a
  * ClassPathResource if it is a non-URL path or a "classpath:" pseudo-URL.
@@ -34,6 +35,7 @@ import org.springframework.util.Assert;
  * @see ResourceEditor
  * @see UrlResource
  * @see ClassPathResource
+ * @see org.springframework.context.support.AbstractApplicationContext
  */
 public class DefaultResourceLoader implements ResourceLoader {
 
@@ -42,8 +44,8 @@ public class DefaultResourceLoader implements ResourceLoader {
 
 	/**
 	 * Create a new DefaultResourceLoader.
-	 * <p>ClassLoader access will happen via the thread context class loader on actual
-	 * access (applying to the thread that does ClassPathResource calls).
+	 * <p>ClassLoader access will by default happen via the thread context
+	 * class loader as obtained on application startup.
 	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	public DefaultResourceLoader() {
