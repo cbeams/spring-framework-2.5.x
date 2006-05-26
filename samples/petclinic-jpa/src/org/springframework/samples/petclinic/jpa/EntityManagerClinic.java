@@ -13,6 +13,7 @@ import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.PetType;
 import org.springframework.samples.petclinic.Visit;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * JPA implementation of the Clinic interface using EntityManager.
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Repository;
  * @since 22.4.2006
  */
 @Repository
+@Transactional
 public class EntityManagerClinic implements Clinic {
 	
 	@PersistenceContext

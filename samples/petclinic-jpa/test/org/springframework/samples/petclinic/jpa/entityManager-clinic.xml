@@ -1,30 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
-<beans>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+
+	<!--
+		Instruct Spring to perform declarative transaction management automatically
+		on annotated classes.
+	-->
+	<tx:annotation-driven />
 	
+	<!--
+		PostProcessors to perform exception translation on @Repository classes
+		and injection according to the JPA specification.
+		A JPA namespace handler will simplify specification of entity manager factories
+		and remove the requirement for these bean definitions in 2.0 final.
+	-->
 	<bean class="org.springframework.dao.support.PersistenceExceptionTranslationPostProcessor" />
 	
 	<bean 
 		class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" /> 
-
+	
 	
 	<!--
-		Note the use of an inner bean for the "target" property.
-		This ensures that there is only one instance of this bean in the
-		factory, allowing us to use autowire by type if necessary.
+		Will automatically be transactional due to annotation usage.
+		EntityManager will be auto injected.
 	-->
-	<bean id="clinic" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager"/>
-		<property name="target">
-			<bean class="org.springframework.samples.petclinic.jpa.EntityManagerClinic"
-				/>
-		</property>
-		<property name="transactionAttributes">
-			<props>
-				<prop key="*">PROPAGATION_REQUIRED</prop>
-			</props>
-		</property>
-	</bean>
+	<bean id="clinic" 
+			class="org.springframework.samples.petclinic.jpa.EntityManagerClinic"
+		/>
 
 </beans>

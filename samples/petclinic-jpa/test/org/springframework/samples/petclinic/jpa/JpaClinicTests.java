@@ -52,8 +52,8 @@ public class JpaClinicTests extends AbstractJpaTests {
 	protected Clinic clinic;
 	
 	protected String[] getConfigLocations() {
-		return JPA_TEMPLATE_LOCATIONS;
-		//return ENTITY_MANAGER_LOCATIONS;
+		//return JPA_TEMPLATE_LOCATIONS;
+		return ENTITY_MANAGER_LOCATIONS;
 	}
 	
 	@ExpectedException(IllegalArgumentException.class)
