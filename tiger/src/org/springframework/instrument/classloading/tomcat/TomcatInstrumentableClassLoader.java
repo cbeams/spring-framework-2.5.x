@@ -19,35 +19,36 @@ import java.lang.instrument.ClassFileTransformer;
 
 import org.apache.catalina.loader.ResourceEntry;
 import org.apache.catalina.loader.WebappClassLoader;
-import org.springframework.instrument.classloading.AspectJWeavingTransformer;
 import org.springframework.instrument.classloading.InstrumentationRegistry;
-import org.springframework.util.StringUtils;
+import org.springframework.instrument.classloading.support.WeavingTransformer;
 
 /**
  * Extension of tomcat default classloader which adds instrumentation to loaded
  * classes without the need of using an agent.
  * 
  * @author Costin Leau
+ * @since 2.0
  * 
  */
 public class TomcatInstrumentableClassLoader extends WebappClassLoader implements InstrumentationRegistry {
 
 	// use an internal weavingTransformer.
-	AspectJWeavingTransformer weavingTransformer;
+	WeavingTransformer weavingTransformer;
 
 	public TomcatInstrumentableClassLoader() {
 		super();
-		weavingTransformer = new AspectJWeavingTransformer();
+		weavingTransformer = new WeavingTransformer();
 	}
 
 	public TomcatInstrumentableClassLoader(ClassLoader cl) {
 		super(cl);
-		weavingTransformer = new AspectJWeavingTransformer(cl);
+		weavingTransformer = new WeavingTransformer(cl);
 	}
 
 	public void addClassFileTransformer(ClassFileTransformer cft) {
 		weavingTransformer.addClassFileTransformer(cft);
 	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -72,13 +73,11 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader implement
 	 */
 	@Override
 	protected ResourceEntry findResourceInternal(String name, String path) {
-
 		ResourceEntry entry = super.findResourceInternal(name, path);
 
 		// postpone string parsing as much as possible (they are slow)
 		if (entry != null && entry.binaryContent != null && path.endsWith(".class")) {
-			String internalName = StringUtils.replace(name, ".", "/");
-			byte[] transformed = weavingTransformer.transformIfNecessary(name, internalName, entry.binaryContent);
+			byte[] transformed = weavingTransformer.transformIfNecessary(name, entry.binaryContent, null);
 			entry.binaryContent = transformed;
 		}
 		return entry;

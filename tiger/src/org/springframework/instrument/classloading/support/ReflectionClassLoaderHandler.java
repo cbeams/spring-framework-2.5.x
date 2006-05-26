@@ -29,6 +29,7 @@ import org.springframework.util.ReflectionUtils;
  * not visible to the web application).
  * 
  * @author Costin Leau
+ * @since 2.0
  * 
  */
 public class ReflectionClassLoaderHandler implements ClassLoaderWeaver {
@@ -47,6 +48,7 @@ public class ReflectionClassLoaderHandler implements ClassLoaderWeaver {
 	public Object invokeMethod(String methodName, Object[] args, Class... argumentTypes) {
 		try {
 			Method method = loader.getClass().getDeclaredMethod(methodName, argumentTypes);
+			method.setAccessible(true);
 			return ReflectionUtils.invokeMethod(method, loader, args);
 		}
 		catch (SecurityException e) {

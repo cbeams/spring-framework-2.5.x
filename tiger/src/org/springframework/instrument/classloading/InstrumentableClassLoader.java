@@ -17,11 +17,6 @@
 package org.springframework.instrument.classloading;
 
 import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.aspectj.weaver.loadtime.ClassPreProcessorAgentAdapter;
 
 import org.springframework.util.ClassUtils;
 
@@ -29,59 +24,39 @@ import org.springframework.util.ClassUtils;
  * Simplistic implementation. Usable in tests and standalone.
  * 
  * @author Rod Johnson
+ * @author Costin Leau
  * @since 2.0
  */
 public class InstrumentableClassLoader extends AbstractOverridingClassLoader {
 
-	private List<ClassFileTransformer> transformers = new ArrayList<ClassFileTransformer>();
-
-	private boolean enableAspectJ;
+	private AspectJWeavingTransformer weavingTransformer;
 
 	public InstrumentableClassLoader(ClassLoader parent) {
 		super(parent);
+		weavingTransformer = new AspectJWeavingTransformer(parent);
 	}
 
 	public InstrumentableClassLoader() {
 		super(ClassUtils.getDefaultClassLoader());
-	}
-
-	public void setAspectJWeavingEnabled(boolean flag) {
-		if (flag && !this.enableAspectJ) {
-			this.enableAspectJ = true;
-			this.transformers.add(new ClassPreProcessorAgentAdapter());
-		}
-	}
-
-	public boolean isAspectJWeavingEnabled() {
-		return this.enableAspectJ;
+		weavingTransformer = new AspectJWeavingTransformer(ClassUtils.getDefaultClassLoader());
 	}
 
 	public void addTransformer(ClassFileTransformer cft) {
-		this.transformers.add(cft);
+		weavingTransformer.addClassFileTransformer(cft);
 	}
 
 	// TODO could have exclusions built on classes known to be entities?
 
+	/**
+	 * @return Returns the weavingTransformer.
+	 */
+	public AspectJWeavingTransformer getWeavingTransformer() {
+		return weavingTransformer;
+	}
+
 	@Override
 	public byte[] transformIfNecessary(String name, String internalName, byte[] bytes) {
-		for (ClassFileTransformer cft : transformers) {
-			try {
-				byte[] transformed = cft.transform(this, internalName, null, null, bytes);
-				if (transformed == null) {
-					if (debug)
-						logger.debug(name + " is already weaved by transformer " + cft);
-				}
-				else {
-					if (debug)
-						logger.debug("Weaving: " + name + " with transformer " + cft);
-					bytes = transformed;
-				}
-			}
-			catch (IllegalClassFormatException ex) {
-				throw new RuntimeException("Cannot transform", ex);
-			}
-		}
-		return bytes;
+		return weavingTransformer.transformIfNecessary(name, bytes, null);
 	}
 
 }

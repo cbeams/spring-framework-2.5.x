@@ -21,7 +21,7 @@ import java.lang.instrument.ClassFileTransformer;
 import org.springframework.instrument.classloading.support.ReflectionClassLoaderHandler;
 
 /**
- * Reflection based LoadTimeWeaver. It uses indirection mechanism and interfaces to work with the inner classloader to avoid
+ * Reflection based LoadTimeWeaver. Internally it uses a reflection based classLoader handler that through indirection  mechanism and interfaces avoids
  * class loading problems as the container classes are not accessible inside a web application (by default).
  * 
  * @author Costin Leau

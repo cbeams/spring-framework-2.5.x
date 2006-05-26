@@ -17,6 +17,7 @@ package org.springframework.instrument.classloading.support;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
+import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,12 +25,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.instrument.classloading.InstrumentationRegistry;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * ClassFileTransformer based weaving, allowing for a list of transformers to be
  * applied on class byte array. Normally used inside classloaders.
  * 
+ * @author Rod Johnson
  * @author Costin Leau
+ * @since 2.0
  * 
  */
 public class WeavingTransformer implements InstrumentationRegistry {
@@ -44,7 +48,7 @@ public class WeavingTransformer implements InstrumentationRegistry {
 	private ClassLoader classLoader;
 
 	public WeavingTransformer() {
-		classLoader = ClassUtils.getDefaultClassLoader();
+		this.classLoader = ClassUtils.getDefaultClassLoader();
 	}
 
 	public WeavingTransformer(ClassLoader loader) {
@@ -55,10 +59,10 @@ public class WeavingTransformer implements InstrumentationRegistry {
 		this.transformers.add(cft);
 	}
 
-	public byte[] transformIfNecessary(String name, String internalName, byte[] bytes) {
+	public byte[] transformIfNecessary(String name, String internalName, byte[] bytes, ProtectionDomain pd) {
 		for (ClassFileTransformer cft : transformers) {
 			try {
-				byte[] transformed = cft.transform(classLoader, internalName, null, null, bytes);
+				byte[] transformed = cft.transform(classLoader, internalName, null, pd, bytes);
 				if (transformed == null) {
 					if (debug)
 						logger.debug(name + " is already weaved by transformer " + cft);
@@ -74,5 +78,10 @@ public class WeavingTransformer implements InstrumentationRegistry {
 			}
 		}
 		return bytes;
+	}
+
+	public byte[] transformIfNecessary(String className, byte[] bytes, ProtectionDomain pd) {
+		String internalName = StringUtils.replace(className, ".", "/");
+		return transformIfNecessary(className, internalName, bytes, pd);
 	}
 }

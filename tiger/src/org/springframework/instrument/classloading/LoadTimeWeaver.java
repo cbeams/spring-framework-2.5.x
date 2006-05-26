@@ -23,6 +23,7 @@ package org.springframework.instrument.classloading;
  * course provide their own class loaders.
  * 
  * @author Rod Johnson
+ * @author Costin Leau
  * @since 2.0
  */
 public interface LoadTimeWeaver extends ClassLoaderWeaver {
