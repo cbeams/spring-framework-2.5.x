@@ -18,6 +18,12 @@ package org.springframework.dao.support;
 
 import junit.framework.TestCase;
 
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -62,7 +68,13 @@ public class PersistenceExceptionTranslationPostProcessorTests extends TestCase 
 		bdrb.register("notProxied", BeanDefinitionBuilder.rootBeanDefinition(RepositoryInterfaceImpl.class));
 		bdrb.register("proxied", BeanDefinitionBuilder.rootBeanDefinition(StereotypedRepositoryInterfaceImpl.class));
 		bdrb.register("classProxied", BeanDefinitionBuilder.rootBeanDefinition(RepositoryWithoutInterface.class));
+		bdrb.register("classProxiedAndAdvised", BeanDefinitionBuilder.rootBeanDefinition(RepositoryWithoutInterfaceAndOtherwiseAdvised.class));		
+		
 		bdrb.register(BeanDefinitionBuilder.rootBeanDefinition(ChainedPersistenceExceptionTranslator.class));
+		
+		bdrb.register(BeanDefinitionBuilder.rootBeanDefinition(AnnotationAwareAspectJAutoProxyCreator.class).
+				addPropertyValue("order", 50));
+		bdrb.register(BeanDefinitionBuilder.rootBeanDefinition(LogAllAspect.class));
 		
 		gac.refresh();
 		
@@ -72,12 +84,50 @@ public class PersistenceExceptionTranslationPostProcessorTests extends TestCase 
 		assertTrue(AopUtils.isAopProxy(shouldBeProxied));
 		RepositoryWithoutInterface rwi = (RepositoryWithoutInterface) gac.getBean("classProxied");
 		assertTrue(AopUtils.isAopProxy(rwi));
+		checkWillTranslateExceptions(rwi);
+		
+		Additional rwi2 = (Additional) gac.getBean("classProxiedAndAdvised");
+		assertTrue(AopUtils.isAopProxy(rwi2));
+		rwi2.additionalMethod();
+		checkWillTranslateExceptions(rwi2);
+	}
+	
+	protected void checkWillTranslateExceptions(Object o) {
+		assertTrue(o instanceof Advised);
+		Advised a = (Advised) o;
+		System.out.println(a.toProxyConfigString());
+		for (Advisor advisor : a.getAdvisors()) {
+			if (advisor instanceof PersistenceExceptionTranslationAdvisor) {
+				return;
+			}
+		}
+		fail("No translation");
 	}
 	
 	
 	@Repository
 	public static class RepositoryWithoutInterface {
 		public void nameDoesntMatter() {			
+		}
+	}
+	
+	public interface Additional {
+		void additionalMethod();
+	}
+	
+	public static class RepositoryWithoutInterfaceAndOtherwiseAdvised extends StereotypedRepositoryInterfaceImpl
+								implements Additional {
+		public void additionalMethod() {
+			
+		}
+	}
+	
+	@Aspect
+	public static class LogAllAspect {
+		//@Before("execution(* *())")
+		@Before("execution(void *.additionalMethod())")
+		public void log(JoinPoint jp) {
+			System.out.println("Before " + jp.getSignature().getName());
 		}
 	}
 

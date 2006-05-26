@@ -19,6 +19,7 @@ package org.springframework.dao.support;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.core.Ordered;
 
 /**
  * Exception translation aspect applying to DAOs annotated with the
@@ -35,9 +37,16 @@ import org.springframework.beans.factory.config.InstantiationAwareBeanPostProces
  * @since 2.0
  */
 public class PersistenceExceptionTranslationPostProcessor 
-				extends InstantiationAwareBeanPostProcessorAdapter implements BeanFactoryAware {
+				extends InstantiationAwareBeanPostProcessorAdapter 
+				implements BeanFactoryAware, Ordered {
 	
 	private PersistenceExceptionTranslationAdvisor persistenceExceptionTranslationAdvisor;
+	
+	public int getOrder() {
+		// This should run after all other post processors, so
+		// that it can just add an advisor to existing proxies rather than double proxy
+		return LOWEST_PRECEDENCE;
+	}
 	
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (!(beanFactory instanceof ListableBeanFactory)) {
@@ -63,12 +72,33 @@ public class PersistenceExceptionTranslationPostProcessor
 	
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-		if (AopUtils.canApply(persistenceExceptionTranslationAdvisor, bean.getClass())) {
-			ProxyFactory pf = new ProxyFactory(bean);
-			pf.addAdvisor(persistenceExceptionTranslationAdvisor);
-			return pf.getProxy();
+		Class<?> targetClass;
+		if (bean instanceof Advised) {
+			Advised advised = (Advised) bean;
+			targetClass = advised.getTargetSource().getClass();
 		}
 		else {
+			targetClass = bean.getClass();
+		}
+		
+		if (targetClass == null) {
+			// Can't do much here
+			return bean;
+		}
+		
+		if (AopUtils.canApply(persistenceExceptionTranslationAdvisor, targetClass)) {
+			if (bean instanceof Advised) {
+				Advised advised = (Advised) bean;
+				throw new UnsupportedOperationException();
+			}			
+			else {
+				ProxyFactory pf = new ProxyFactory(bean);
+				pf.addAdvisor(persistenceExceptionTranslationAdvisor);
+				return pf.getProxy();
+			}
+		}
+		else {
+			// This is not a repository
 			return bean;
 		}
 	}
@@ -81,7 +111,7 @@ public class PersistenceExceptionTranslationPostProcessor
 	protected List<PersistenceExceptionTranslator> validateAndFilter(List<PersistenceExceptionTranslator> allPets) throws IllegalStateException {
 		List<PersistenceExceptionTranslator> filteredPets = new LinkedList<PersistenceExceptionTranslator>();
 		for (PersistenceExceptionTranslator pet : allPets) {
-			// TODO fix this properly
+			// TODO filter according to rules: one of each class etc.
 			filteredPets.add(pet);
 		}
 		
