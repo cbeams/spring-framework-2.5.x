@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -141,28 +141,6 @@ public abstract class AopUtils {
 			}
 		}
 		return method;
-	}
-	
-	/**
-	 * Convenience method to convert a string array of interface names
-	 * to a class array.
-	 * @return an array of interface classes
-	 * @throws IllegalArgumentException if any of the classes is not an interface
-	 * @throws ClassNotFoundException if any of the classes can't be loaded
-	 */
-	public static Class[] toInterfaceArray(String[] interfaceNames)
-	    throws IllegalArgumentException, ClassNotFoundException {
-
-		Class interfaces[] = new Class[interfaceNames.length];
-		for (int i = 0; i < interfaceNames.length; i++) {
-			interfaces[i] = ClassUtils.forName(interfaceNames[i].trim());
-			// Check whether it is an interface.
-			if (!interfaces[i].isInterface()) {
-				throw new IllegalArgumentException(
-						"Can proxy only interfaces: [" + interfaces[i].getName() + "] is a class");
-			}
-		}
-		return interfaces;
 	}
 
 	/**

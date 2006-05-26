@@ -31,7 +31,6 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.UnknownAdviceTypeException;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -90,8 +89,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 	
 	/*
 	 * Implementation notes. There are two cases of usage of this class:
-	 * usage as a singleton, when only one object will be created, and usage
-	 * as a prototype, when the FactoryBean.getObject() method must return an 
+	 * usage as a singleton, when only one object will be created, and usage as a
+	 * prototype, when the <code>FactoryBean.getObject()</code> method must return an
 	 * independent proxy on each invocation. In the latter case, a distinct instance of
 	 * any non-singleton Advisors or Advices must be used, as well as a distinct
 	 * target/TargetSource instance if the target is a prototype and is specified in the
@@ -153,13 +152,13 @@ public class ProxyFactoryBean extends AdvisedSupport
 	/**
 	 * Set the names of the interfaces we're proxying. If no interface
 	 * is given, a CGLIB for the actual class will be created.
-	 * <p>Alternatively, use the "interfaces" property of type Class array
-	 * (the bean factory will automatically convert from String to Class there).
+	 * <p>This is essentially equivalent to the "setInterfaces" method,
+	 * but mirrors TransactionProxyFactoryBean's "setProxyInterfaces".
 	 * @see #setInterfaces
+	 * @see AbstractSingletonProxyFactoryBean#setProxyInterfaces
 	 */
-	public void setProxyInterfaces(String[] interfaceNames) throws ClassNotFoundException {
-		Class[] interfaces = AopUtils.toInterfaceArray(interfaceNames);
-		setInterfaces(interfaces);
+	public void setProxyInterfaces(Class[] proxyInterfaces) throws ClassNotFoundException {
+		setInterfaces(proxyInterfaces);
 	}
 
 	/**
@@ -195,10 +194,9 @@ public class ProxyFactoryBean extends AdvisedSupport
 
 	/**
 	 * Set whether to autodetect proxy interfaces if none specified.
-	 * Will only kick in if "proxyTargetClass" is off (which is the default).
-	 * <p>Default is "false": If no proxy interfaces specified, a CGLIB
-	 * proxy for the full target class will be created. Specify "true" to
-	 * autodetect all interfaces implemented by the target class in this case.
+	 * <p>Default is "true". Turn this flag off to create a CGLIB
+	 * proxy for the full target class if no interfaces specified.
+	 * @see #setProxyTargetClass
 	 */
 	public void setAutodetectInterfaces(boolean autodetectInterfaces) {
 		this.autodetectInterfaces = autodetectInterfaces;
