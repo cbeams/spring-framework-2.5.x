@@ -37,13 +37,13 @@ import org.springframework.util.StringUtils;
 
 /**
  * Superclass for Spring Advices wrapping an AspectJ aspect
- * or annotated advice method
+ * or annotated advice method.
  *
  * @author Rod Johnson
  * @author Adrian Colyer
  * @since 2.0
  */
-public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJPrecedenceInformation {
+public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformation, InitializingBean {
 	
 	/**
 	 * Key used in ReflectiveMethodInvocation userAtributes map for the current
@@ -170,12 +170,11 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 	}
 	
 	/**
-	 * Gets the precedence (order) associated with the aspect declaring this
-	 * advice
+	 * Get the precedence (order) associated with the aspect declaring this advice.
 	 */
 	public int getOrder() {
 		if (this.aspectBean != null && (this.aspectBean instanceof Ordered)) {
-			return ((Ordered)this.aspectBean).getOrder();
+			return ((Ordered) this.aspectBean).getOrder();
 		}
 		return Ordered.LOWEST_PRECEDENCE;
 	}
@@ -186,27 +185,26 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 	public void setDeclarationOrder(int order) {
 		this.declarationOrder = order;
 	}
-	
+
 	public int getDeclarationOrder() {
 		return this.declarationOrder;
 	}
-	
+
 	/**
 	 * Set by creator of this advice object if the argument names are known.
-	 * This could be for example because they have been explicitly specified in xml,
-	 * or in an advice annotation
-	 * @param argNames - comma delimited list of arg names
+	 * This could be for example because they have been explicitly specified in XML,
+	 * or in an advice annotation.
+	 * @param argNames comma delimited list of arg names
 	 */
 	public void setArgumentNames(String argNames) {
 		String[] tokens = StringUtils.commaDelimitedListToStringArray(argNames);
-		setArgNamesFromStringArray(tokens);
+		setArgumentNamesFromStringArray(tokens);
 	}
-	
-	public void setArgNamesFromStringArray(String[] args) {
+
+	public void setArgumentNamesFromStringArray(String[] args) {
 		this.argumentNames = new String[args.length];
 		for (int i = 0; i < args.length; i++) {
 			this.argumentNames[i] = StringUtils.trimWhitespace(args[i]);
-
 			if (!isVariableName(this.argumentNames[i])) {
 				throw new IllegalArgumentException(
 						"argumentNames property of AbstractAspectJAdvice " + 
@@ -215,13 +213,13 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 			}
 		}		
 	}
-	
+
 	public void setReturningName(String name) {
 		throw new UnsupportedOperationException("Only afterReturning advice can be used to bind a return value");
 	}
-	
+
 	/** 
-	 * we need to hold the returning name at this level for argument binding calculations,
+	 * We need to hold the returning name at this level for argument binding calculations,
 	 * this method allows the afterReturning advice subclass to set the name.
 	 */
 	protected void setReturningNameNoCheck(String name) {
@@ -232,9 +230,10 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 		else {
 			// assume a type
 			try {
+				// TODO: which ClassLoader to use here?
 				this.discoveredReturningType = Class.forName(name);
 			}
-			catch (ClassNotFoundException cnfEx) {
+			catch (ClassNotFoundException ex) {
 				throw new IllegalArgumentException("Returning name '" + name  +
 						"' is neither a valid argument name, nor the fully-qualified name of the Java type on the classpath");
 			}
@@ -250,7 +249,7 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 	}
 	
 	/** 
-	 * we need to hold the throwing name at this level for argument binding calculations,
+	 * We need to hold the throwing name at this level for argument binding calculations,
 	 * this method allows the afterThrowing advice subclass to set the name.
 	 */
 	protected void setThrowingNameNoCheck(String name) {
@@ -261,6 +260,7 @@ public abstract class AbstractAspectJAdvice implements InitializingBean, AspectJ
 		else {
 			// assume a type
 			try {
+				// TODO: which ClassLoader to use here?
 				this.discoveredThrowingType = Class.forName(name);
 			}
 			catch (ClassNotFoundException cnfEx) {

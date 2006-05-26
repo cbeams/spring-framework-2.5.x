@@ -122,13 +122,15 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 			throw new AspectException("defaultImpl must be set on DeclareParents");
 		}
 
-		return new DeclareParentsAdvisor(introductionField.getType(), declareParents.value(), declareParents.defaultImpl());
+		return new DeclareParentsAdvisor(
+				introductionField.getType(), declareParents.value(), declareParents.defaultImpl());
 	}
 
 
 	public InstantiationModelAwarePointcutAdvisorImpl getAdvisor(
 			Method candidateAspectJAdviceMethod, MetadataAwareAspectInstanceFactory aif,
 			int declarationOrderInAspect, String aspectName) {
+
 		validate(aif.getAspectMetadata().getAspectClass());
 
 		AspectJExpressionPointcut ajexp =
@@ -136,15 +138,15 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		if (ajexp == null) {
 			return null;
 		}
-		return new InstantiationModelAwarePointcutAdvisorImpl(this, ajexp, aif, candidateAspectJAdviceMethod, declarationOrderInAspect, aspectName);
+		return new InstantiationModelAwarePointcutAdvisorImpl(
+				this, ajexp, aif, candidateAspectJAdviceMethod, declarationOrderInAspect, aspectName);
 	}
 
 	/**
-	 * @return <code>null</code> if the method is not an AspectJ advice method or if it is a pointcut
-	 * that will be used by other advice but will not create a Springt advice in its own right
+	 * Return <code>null</code> if the method is not an AspectJ advice method or if it is a pointcut
+	 * that will be used by other advice but will not create a Springt advice in its own right.
 	 */
-	public Advice getAdvice(
-			Method candidateAspectJAdviceMethod,
+	public Advice getAdvice(Method candidateAspectJAdviceMethod,
 			AspectJExpressionPointcut ajexp,
 			MetadataAwareAspectInstanceFactory aif,
 			int declarationOrderInAspect,
@@ -171,66 +173,68 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 		AbstractAspectJAdvice springAdvice;
 
-		switch(aspectJAnnotation.getAnnotationType()) {
-		case AtBefore:
-			springAdvice = new AspectJMethodBeforeAdvice(candidateAspectJAdviceMethod, ajexp, aif);
-			break;
-		case AtAfter:
-			springAdvice = new AspectJAfterAdvice(candidateAspectJAdviceMethod, ajexp, aif);
-			break;
-		case AtAfterReturning:
-			springAdvice = new AspectJAfterReturningAdvice(candidateAspectJAdviceMethod, ajexp, aif);
-			AfterReturning afterReturningAnnotation = (AfterReturning) aspectJAnnotation.getAnnotation();
-			if (StringUtils.hasText(afterReturningAnnotation.returning())) {
-				springAdvice.setReturningName(afterReturningAnnotation.returning());
-			}
-			break;
-		case AtAfterThrowing:
-			springAdvice = new AspectJAfterThrowingAdvice(candidateAspectJAdviceMethod, ajexp, aif);
-			AfterThrowing afterThrowingAnnotation = (AfterThrowing) aspectJAnnotation.getAnnotation();
-			if (StringUtils.hasText(afterThrowingAnnotation.throwing())) {
-				springAdvice.setThrowingName(afterThrowingAnnotation.throwing());
-			}
-			break;
-		case AtAround:
-			springAdvice = new AspectJAroundAdvice(
-					candidateAspectJAdviceMethod, ajexp, aif, parameterNameDiscoverer);
-			break;
-		case AtPointcut:
-			logger.debug("Processing pointcut '" + candidateAspectJAdviceMethod.getName() + "'");
-			return null;
-		default:
-			throw new UnsupportedOperationException("Unsupported advice type on method " + candidateAspectJAdviceMethod);
+		switch (aspectJAnnotation.getAnnotationType()) {
+			case AtBefore:
+				springAdvice = new AspectJMethodBeforeAdvice(candidateAspectJAdviceMethod, ajexp, aif);
+				break;
+			case AtAfter:
+				springAdvice = new AspectJAfterAdvice(candidateAspectJAdviceMethod, ajexp, aif);
+				break;
+			case AtAfterReturning:
+				springAdvice = new AspectJAfterReturningAdvice(candidateAspectJAdviceMethod, ajexp, aif);
+				AfterReturning afterReturningAnnotation = (AfterReturning) aspectJAnnotation.getAnnotation();
+				if (StringUtils.hasText(afterReturningAnnotation.returning())) {
+					springAdvice.setReturningName(afterReturningAnnotation.returning());
+				}
+				break;
+			case AtAfterThrowing:
+				springAdvice = new AspectJAfterThrowingAdvice(candidateAspectJAdviceMethod, ajexp, aif);
+				AfterThrowing afterThrowingAnnotation = (AfterThrowing) aspectJAnnotation.getAnnotation();
+				if (StringUtils.hasText(afterThrowingAnnotation.throwing())) {
+					springAdvice.setThrowingName(afterThrowingAnnotation.throwing());
+				}
+				break;
+			case AtAround:
+				springAdvice = new AspectJAroundAdvice(candidateAspectJAdviceMethod, ajexp, aif, parameterNameDiscoverer);
+				break;
+			case AtPointcut:
+				if (logger.isDebugEnabled()) {
+					logger.debug("Processing pointcut '" + candidateAspectJAdviceMethod.getName() + "'");
+				}
+				return null;
+			default:
+				throw new UnsupportedOperationException("Unsupported advice type on method " + candidateAspectJAdviceMethod);
 		}
 
-		// now to configure the advice...
+		// Now to configure the advice...
 		springAdvice.setAspectName(aspectName);
 		springAdvice.setDeclarationOrder(declarationOrderInAspect);
-		String[] argNames = getArgNames(candidateAspectJAdviceMethod);
+		String[] argNames = getArgumentNames(candidateAspectJAdviceMethod);
 		if (argNames != null) {
-			springAdvice.setArgNamesFromStringArray(argNames);
+			springAdvice.setArgumentNamesFromStringArray(argNames);
 		}
 		try {
 			springAdvice.afterPropertiesSet();
-		} catch (Exception ex) {
-			throw new IllegalArgumentException("Advice configuration failed",ex);
+		}
+		catch (Exception ex) {
+			throw new IllegalArgumentException("Advice configuration failed", ex);
 		}
 		return (Advice) springAdvice;
 	}
 
-	private String[] getArgNames(Method forMethod) {
+	private String[] getArgumentNames(Method forMethod) {
 		String[] argNames = this.parameterNameDiscoverer.getParameterNames(forMethod);
 		if (argNames != null) {
-			if (forMethod.getParameterTypes().length == (argNames.length + 1) ) {
+			if (forMethod.getParameterTypes().length == (argNames.length + 1)) {
 				// may need to add implicit join point arg name
 				Class firstArgType = forMethod.getParameterTypes()[0];
 				if (firstArgType == JoinPoint.class ||
-					firstArgType == ProceedingJoinPoint.class ||
-					firstArgType == JoinPoint.StaticPart.class) {
+						firstArgType == ProceedingJoinPoint.class ||
+						firstArgType == JoinPoint.StaticPart.class) {
 					String[] oldNames = argNames;
 					argNames = new String[oldNames.length + 1];
 					argNames[0] = "THIS_JOIN_POINT";
-					System.arraycopy(oldNames,0,argNames,1,oldNames.length);
+					System.arraycopy(oldNames, 0, argNames, 1, oldNames.length);
 				}
 			}
 		}
@@ -243,8 +247,6 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		if (aspectJAnnotation == null) {
 			return null;
 		}
-
-
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut(candidateAspectClass, new String[0], new Class[0]);
 		ajexp.setExpression(aspectJAnnotation.getPointcutExpression());
 		return ajexp;
@@ -253,7 +255,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 	/**
 	 * Synthetic advisor that instantiates the aspect.
-	 * Triggered by perclause pointcut on non-singleton aspect.
+	 * Triggered by per-clause pointcut on non-singleton aspect.
 	 * The advice has no effect.
 	 */
 	protected static class SyntheticInstantiationAdvisor extends DefaultPointcutAdvisor {
