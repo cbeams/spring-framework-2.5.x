@@ -16,13 +16,14 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.w3c.dom.Node;
+
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 
 /**
  * Interface used by the {@link org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader}
  * to handle custom, nested (directly under a <code>&lt;bean&gt;</code>) tags.
- * 
+ *
  * <p>Decoration may also occur based on custom attributes applied to the
  * <code>&lt;bean&gt;</code> tag. Implementations are free to turn the metadata in the
  * custom tag into as many
@@ -59,15 +60,12 @@ public interface BeanDefinitionDecorator {
 	/**
 	 * Parse the specified {@link Node} (either an element or an attribute) and decorate
 	 * the supplied {@link org.springframework.beans.factory.config.BeanDefinition},
-     * returning the decorated definition.
+	 * returning the decorated definition.
 	 * <p>Implementations may choose to return a completely new definition, which will
-     * replace the original definition in the resulting
-     * {@link org.springframework.beans.factory.BeanFactory}.
+	 * replace the original definition in the resulting
+	 * {@link org.springframework.beans.factory.BeanFactory}.
 	 * <p>The supplied {@link ParserContext} can be used to register any additional
-     * beans needed to support the main definition.
-     * @param node
-     * @param definition
-     * @param parserContext
+	 * beans needed to support the main definition.
 	 */
 	BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext);
 
