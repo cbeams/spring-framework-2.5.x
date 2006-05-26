@@ -2332,20 +2332,71 @@
  &lt;/bean&gt;
 &lt;/beans&gt;</programlisting></para>
 
-        <para>The <literal>loadTimeWeaver</literal> allows JPA
-        ClassTransformers to be plugged in a specific manner depending on the
-        environment (i.e. Tomcat). Hooking
+        <para>The <literal>LoadTimeWeaver</literal> is a Spring class that
+        allows JPA <literal>ClassTransformers</literal> to be plugged in a
+        specific manner depending on the environment (web
+        container/application server). Hooking
         <literal>ClassTransformers</literal> through a JDK 5.0 <ulink
-        url="http://java.sun.com/j2se/1.5.0/docs/api/java/lang/instrument/package-summary.html">Agent</ulink>
+        url="http://java.sun.com/j2se/1.5.0/docs/api/java/lang/instrument/package-summary.html">agent</ulink>
         is not efficient - there can be only one agent which works against the
         entire virtual machine and inspects *every* class that is loaded -
         something undesirable in a server enviroment.</para>
 
-        <para>TODO: Tomcat Example</para>
+        <para>Spring provides special LoadTimeWeaver for various environments,
+        allowing ClassTransformers to be applied only per classloader and not
+        per VM.</para>
 
-        <para>Note that switching from one type of
-        <literal>EntityManagerFactoryBean</literal> to another is just a
-        matter of configuration and does not affect you code.</para>
+        <sect4>
+          <title>Tomcat environment setup</title>
+
+          <para>Jakarta Tomcat default classloader does not support class
+          transformation but allows custom classloaders to be used. Spring
+          offers <literal>TomcatInstrumentableClassLoader</literal> (inside
+          <literal>org.springframework.instrument.classloading.tomcat</literal>)
+          which extends Tomcat classloader
+          (<literal>WebappClassLoader</literal>) and allows JPA
+          ClassTransformers to be 'enhance' all classes loaded by it. In
+          short, JPA transformers will be applied only inside a specific web
+          application (which uses
+          <literal>TomcatInstrumentableClassLoader</literal>).</para>
+
+          <para>In order to use the custom classloader:</para>
+
+          <orderedlist>
+            <listitem>
+              <para>Copy <literal>spring-tomcat-jpa-support.jar</literal> into
+              <emphasis>$CATALINA_HOME</emphasis>/server/lib (where
+              <emphasis>$CATALINA_HOME</emphasis> represents the root of the
+              tomcat instalation).</para>
+            </listitem>
+
+            <listitem>
+              <para>Instruct Tomcat to use the custom classloader (instead of
+              the default one) by editing the web application context
+              file:</para>
+
+              <para><programlisting>&lt;Context path="/myWebApp" docBase="/my/webApp/location" ...&gt;
+   &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
+...
+&lt;/Context&gt;</programlisting>Tomcat supports several context locations,
+              the most popular being the global one
+              (<emphasis>$CATALINA_HOME/conf/context.xml</emphasis>) and
+              per-webapp(<emphasis>$CATALINA_HOME/conf/[enginename]/[hostname]/context.xml</emphasis>)
+              .For efficiency, the latter configuration style is recommended
+              since only application which use JPA require a custom
+              classloader. Please see the Tomcat official <ulink
+              url="http://tomcat.apache.org/tomcat-5.5-doc/config/context.html">documentation</ulink>
+              for more details about Tomcat's context locations.</para>
+            </listitem>
+          </orderedlist>
+
+          <para>Using this tehnique, JPA applications relying on
+          instrumentation, can run in Tomcat without the need of an agent.
+          This is important especially when hosting applications which rely on
+          different JPA implementations since the JPA transformers are applied
+          only at classloader level and thus, are isolated from each
+          other.</para>
+        </sect4>
       </sect3>
     </sect2>
 
@@ -2444,8 +2495,8 @@
     }
 }</programlisting>The DAO above, still follows the Dependency Injection
       pattern and still fits nicely into a Spring application context, just
-      like it would if coded against Spring's <literal>JpaTemplate</literal>:
-      </para>
+      like it would if coded against Spring's
+      <literal>JpaTemplate</literal>:</para>
 
       <para><programlisting>&lt;beans&gt;
   ...
