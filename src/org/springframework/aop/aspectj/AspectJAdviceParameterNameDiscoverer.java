@@ -1,18 +1,19 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Constructor;
@@ -95,6 +96,8 @@ import org.springframework.util.StringUtils;
  */
 public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscoverer {
 	
+	private static final String ANNOTATION_CLASS_NAME = "java.lang.annotation.Annotation";
+
 	private static final String THIS_JOIN_POINT = "thisJoinPoint";
 	private static final String THIS_JOIN_POINT_STATIC_PART = "thisJoinPointStaticPart";
 
@@ -108,6 +111,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	private static final int STEP_FINISHED = 7;
 	
 	private static final Set singleValuedAnnotationPcds = new HashSet();
+
 	private static Class annotationClass;
 	
 	static {
@@ -118,13 +122,15 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		singleValuedAnnotationPcds.add("@annotation");
 		
 		try {
-			annotationClass = Class.forName("java.lang.annotation.Annotation");
-		} catch(ClassNotFoundException cnfEx) {
-			// running on < JDK 1.5, this is ok...
+			annotationClass = Class.forName(ANNOTATION_CLASS_NAME);
+		}
+		catch(ClassNotFoundException ex) {
+			// Running on < JDK 1.5, this is ok...
 			annotationClass = null;
 		}
 	}
-	
+
+
 	private boolean raiseExceptions = false;
 	
 	/**
@@ -142,10 +148,13 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 */
 	private String pointcutExpression = null;
 	
-	private Class[]  argumentTypes;
+	private Class[] argumentTypes;
+
 	private String[] parameterNameBindings;
-	private int      numberOfRemainingUnboundArguments;
-	private int 	 algorithmicStep = STEP_JOIN_POINT_BINDING;
+
+	private int numberOfRemainingUnboundArguments;
+
+	private int algorithmicStep = STEP_JOIN_POINT_BINDING;
 	
 	
 	/**

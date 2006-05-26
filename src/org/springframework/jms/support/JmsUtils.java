@@ -166,7 +166,7 @@ public abstract class JmsUtils {
 			String longName = JmsException.class.getPackage().getName() + "." + shortName;
 
 			try {
-				Class clazz = Class.forName(longName);
+				Class clazz = ClassUtils.forName(longName, JmsException.class.getClassLoader());
 				Constructor ctor = clazz.getConstructor(new Class[] {ex.getClass()});
 				Object counterpart = ctor.newInstance(new Object[] {ex});
 				return (JmsException) counterpart;
