@@ -75,7 +75,7 @@ public class PersistenceExceptionTranslationPostProcessor
 		Class<?> targetClass;
 		if (bean instanceof Advised) {
 			Advised advised = (Advised) bean;
-			targetClass = advised.getTargetSource().getClass();
+			targetClass = advised.getTargetSource().getTargetClass();
 		}
 		else {
 			targetClass = bean.getClass();
@@ -89,7 +89,9 @@ public class PersistenceExceptionTranslationPostProcessor
 		if (AopUtils.canApply(persistenceExceptionTranslationAdvisor, targetClass)) {
 			if (bean instanceof Advised) {
 				Advised advised = (Advised) bean;
-				throw new UnsupportedOperationException();
+				advised.addAdvisor(persistenceExceptionTranslationAdvisor);
+				return bean;
+				//throw new UnsupportedOperationException();
 			}			
 			else {
 				ProxyFactory pf = new ProxyFactory(bean);
