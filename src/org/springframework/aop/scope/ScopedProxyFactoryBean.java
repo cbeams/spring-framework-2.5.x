@@ -16,12 +16,13 @@
 
 package org.springframework.aop.scope;
 
-import org.springframework.aop.framework.AbstractSingletonProxyFactoryBean;
+import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.aop.target.PrototypeTargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
 /**
@@ -39,7 +40,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class ScopedProxyFactoryBean extends AbstractSingletonProxyFactoryBean implements BeanFactoryAware {
+public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, BeanFactoryAware {
 
 	/** TargetSource that manages scoping */
 	private final PrototypeTargetSource scopedTargetSource = new PrototypeTargetSource();
@@ -83,7 +84,11 @@ public class ScopedProxyFactoryBean extends AbstractSingletonProxyFactoryBean im
 	}
 
 	public Class getObjectType() {
-		return this.scopedTargetSource.getTargetClass();
+		return (this.scopedTargetSource != null ? this.scopedTargetSource.getTargetClass() : null);
+	}
+
+	public boolean isSingleton() {
+		return true;
 	}
 
 }
