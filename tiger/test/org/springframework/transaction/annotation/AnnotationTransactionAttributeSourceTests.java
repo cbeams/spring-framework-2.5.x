@@ -169,7 +169,7 @@ public class AnnotationTransactionAttributeSourceTests extends TestCase {
 		Method[] methods = MyFoo.class.getMethods();
 		for (int i = 0; i < methods.length; i++) {
 			Method method = methods[i];
-			System.out.println(method.isSynthetic() + " " + method.isBridge() + " " + method);
+			//System.out.println(method.isSynthetic() + " " + method.isBridge() + " " + method);
 		}
 	}
 	public interface ITestBean {
