@@ -22,44 +22,36 @@ import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
 /**
  * Spring AOP exception translation access for use at Repository or DAO layer level.
+ * 
  * @author Rod Johnson
+ * @since 2.0
  */
-public class ExceptionTranslationAdvisor extends DefaultPointcutAdvisor {
+public class PersistenceExceptionTranslationAdvisor extends DefaultPointcutAdvisor {
 	
-	private static ExceptionTranslationAdvisor instance = new ExceptionTranslationAdvisor();
+	private static PersistenceExceptionTranslationAdvisor instance = new PersistenceExceptionTranslationAdvisor();
 	
-	public static ExceptionTranslationAdvisor getInstance() {
+	public static PersistenceExceptionTranslationAdvisor getInstance() {
 		return instance;
 	}
 	
-	private ExceptionTranslationAdvisor() {
+	private PersistenceExceptionTranslationAdvisor() {
 		super(
 				new RepositoryAnnotationMatchingPointcut(),
-				new ExceptionTranslationInterceptor()
+				new PersistenceExceptionTranslationInterceptor()
 		);
 	}
 	
-	private static class ExceptionTranslationInterceptor implements MethodInterceptor {
+	private static class PersistenceExceptionTranslationInterceptor implements MethodInterceptor {
 		public Object invoke(MethodInvocation mi) throws Throwable {
 			try {
 				return mi.proceed();
 			}
 			catch (RuntimeException ex) {
-				DataAccessException dex = null;
-				if (dex != null) {
-					throw dex;
-				}
-				else {
-					throw ex;
-				}
-			}
-			finally {
-				
+				return DataAccessUtils.translateIfNecessary(ex, null);
 			}
 		}
 	}
