@@ -54,9 +54,9 @@ public class PersistenceExceptionTranslationPostProcessor
 		}
 		ListableBeanFactory lbf = (ListableBeanFactory) beanFactory;
 		
-		// Find all translators
+		// Find all translators, being careful not to activate FactoryBeans
 		List<PersistenceExceptionTranslator> pets = new LinkedList<PersistenceExceptionTranslator>();
-		for (String petBeanName : lbf.getBeanNamesForType(PersistenceExceptionTranslator.class)) {
+		for (String petBeanName : lbf.getBeanNamesForType(PersistenceExceptionTranslator.class, false, false)) {
 			if (lbf.isSingleton(petBeanName)) {
 				pets.add((PersistenceExceptionTranslator) lbf.getBean(petBeanName));
 			}
