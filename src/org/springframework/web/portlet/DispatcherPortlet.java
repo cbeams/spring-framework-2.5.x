@@ -47,6 +47,7 @@ import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.scope.RequestContextHolder;
 import org.springframework.web.multipart.MultipartException;
@@ -518,7 +519,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 				String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
 				strategies = new ArrayList(classNames.length);
 				for (int i = 0; i < classNames.length; i++) {
-					Class clazz = Class.forName(classNames[i], true, getClass().getClassLoader());
+					Class clazz = ClassUtils.forName(classNames[i], getClass().getClassLoader());
 					Object strategy = createDefaultStrategy(clazz);
 					strategies.add(strategy);
 				}

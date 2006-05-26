@@ -660,7 +660,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
 				strategies = new ArrayList(classNames.length);
 				for (int i = 0; i < classNames.length; i++) {
-					Class clazz = ClassUtils.forName(classNames[i]);
+					Class clazz = ClassUtils.forName(classNames[i], getClass().getClassLoader());
 					Object strategy = createDefaultStrategy(clazz);
 					strategies.add(strategy);
 				}
