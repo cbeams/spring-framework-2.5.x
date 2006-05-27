@@ -453,7 +453,7 @@ public class ExampleJob extends QuartzJobBean {
 				
 				<listitem>
 					<para>
-						<classname>TimeTaskExecutor</classname>
+						<classname>TimerTaskExecutor</classname>
 					</para>
 
 					<para>
