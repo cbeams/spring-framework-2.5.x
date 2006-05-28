@@ -2332,6 +2332,7 @@
  &lt;/bean&gt;
 &lt;/beans&gt;</programlisting></para>
 
+<!-- 
         <para>The <literal>LoadTimeWeaver</literal> is a Spring class that
         allows JPA <literal>ClassTransformers</literal> to be plugged in a
         specific manner depending on the environment (web
@@ -2399,7 +2400,7 @@
         </sect4>
       </sect3>
     </sect2>
-
+ -->
     <sect2>
       <title>JpaTemplate and JpaDaoSupport</title>
 
