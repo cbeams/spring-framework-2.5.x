@@ -549,6 +549,9 @@ xsi:schemaLocation="
             on the transaction stuff and not have to worry about the domain model - because
             there isn't one.)</para>
             <programlisting><lineannotation>&lt;!-- the service (facade) interface that we want to make transactional --&gt;</lineannotation><![CDATA[
+            
+package x.y.service;
+            
 public interface FooService {
 
     Foo getFoo(String fooName);
@@ -560,6 +563,9 @@ public interface FooService {
     void updateFoo(Foo foo);
 }]]></programlisting>
             <programlisting><lineannotation>&lt;!-- an implementation of the above interface --&gt;</lineannotation><![CDATA[
+            
+package x.y.service;
+
 public class DefaultFooService implements FooService {
 
     public Foo getFoo(String fooName) {
@@ -618,10 +624,11 @@ public class DefaultFooService implements FooService {
     </tx:attributes>
   </tx:advice>
   
-  ]]><lineannotation>&lt;!-- this <emphasis>applies</emphasis> the above transactional advice to any <interfacename>FooService</interfacename> implementation <emphasis role="bold">bean</emphasis> --&gt;</lineannotation><![CDATA[
+  ]]><lineannotation>&lt;!-- ensure that the above transactional advice runs for any execution
+      of an operation defined by the <interfacename>FooService</interfacename> interface --&gt;</lineannotation><![CDATA[
   <aop:config>
-    <aop:advisor pointcut="execution(* *..FooService+.*(..))"
-                 advice-ref="txAdvice"/>
+    <aop:pointcut id="fooServiceMethods" expression="execution(* x.y.service.FooService.*(..))"/>
+    <aop:advisor advice-ref="txAdvice" pointcut-ref="fooServiceMethods"/>
   </aop:config>
   
   ]]><lineannotation>&lt;!-- don't forget the <interfacename>DataSource</interfacename> --&gt;</lineannotation><![CDATA[
@@ -662,30 +669,27 @@ public class DefaultFooService implements FooService {
                 and use the <literal>'transaction-manager'</literal> attribute.</para>
             </tip>
             <para>The final piece of the configuration is the <literal>&lt;aop:config/&gt;</literal>
-            definition. It is <emphasis>this</emphasis> element that actually effects the
-            creation of a transactional proxy for all beans that are defined that are
-            implementations of the <interfacename>FooService</interfacename> interface.</para>
-            <para>In the case of this specific example, there are two important parts
-            of the <literal>&lt;aop:config/&gt;</literal> definition: the first is the
-            value of the <literal>'pointcut'</literal> attribute. The value....</para>
-            <programlisting><![CDATA[execution(* *..FooService+.*(..))]]></programlisting>
-            <para>... is actually an AspectJ <emphasis>pointcut definition</emphasis>
-            expression. It reads <quote><emphasis>... apply the <literal>'txAdvice'</literal> advice to
-            the <emphasis>execution</emphasis> of all methods of any bean that is [an
-            implementation] of the <interfacename>FooService</interfacename> interface
-            [regardless of access modifiers, package, or method arguments]</emphasis></quote>.</para>
-            <para>The second notable part of the <literal>&lt;aop:config/&gt;</literal>
-            definition is the <literal>'advice-ref'</literal> attribute. This is the
-            name of the bean that actually <emphasis>is</emphasis> the advice that is
-            going to happen at the <literal>execution</literal> of an advised
-            method. In the case of this specific example, it is set to the name
-            of the transaction advice (<literal>'txAdvice'</literal>), because we
-            want to apply transactional advice.</para>
-            <note>
-                <para>Although not strictly necessary, you may wish to read the previous
-                chapters entitled <xref linkend="aop"/> if all of this talk of
-                <emphasis>advisors</emphasis> and AspectJ is proving obscure.</para>
-            </note>
+            definition. This ensures that the transactional advice defined by the
+            <literal>'txAdvice'</literal> bean actually gets to execute at the appropriate points
+            in the application. First we define a pointcut that matches the execution of any
+            operation defined in the <interfacename>FooService</interfacename> interface
+            (and we called this pointcut <literal>'fooServiceOperation'</literal>). Then we
+            combine the pointcut with the <literal>'txAdvice'</literal> using an advisor.
+            The result indicates that at the execution of a <literal>'fooServiceOperation'</literal>,
+            the advice defined by <literal>'txAdvice'</literal> will be run.</para>
+            <para>The expression defined within the <literal>&lt;aop:pointcut/&gt;</literal>
+            element is an AspectJ pointcut expression; see the chapter entitled <xlink ref="aop"/>
+            for more details on pointcut expressions in Spring 2.0.</para>
+            <para>A common requirement is to make an entire service layer transactional.
+            The best way to do this is simply to change the pointcut expression to match
+            any operation in your service layer. For example:</para>
+            <programlisting><![CDATA[<aop:config>
+    <aop:pointcut id="fooServiceMethods" expression="execution(* x.y.service.*.*(..))"/>
+    <aop:advisor advice-ref="txAdvice" pointcut-ref="fooServiceMethods"/>
+  </aop:config>]]></programlisting>
+            <para><emphasis>(This example assumes that all your service interfaces are defined
+            in the <literal>'x.y.service'</literal> package, again, see the chapter entitled
+            <xlink  ref="aop"/> for more details.)</emphasis></para>
             <para>Now that we've picked apart the configuration, you may be asking
             yourself, <quote><emphasis>Okayyy... but what does all this configuration actually
             <emphasis role="bold">do</emphasis>?</emphasis></quote>.</para>
@@ -753,7 +757,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
             with differing <literal>'pointcut'</literal> and <emphasis>'advice-ref'</emphasis>
             attribute values.</para>
             <para>By way of an example, let's assume that all of your service layer classes
-            are defined in a root <literal>'org.xyz.service'</literal> package. To make all
+            are defined in a root <literal>'x.y.service'</literal> package. To make all
             beans that are instances of classes (or - better - implementations of interfaces)
             defined in said service package (or in subpackages) and that have names ending in
             <literal>'Service'</literal> have the default transactional semantics, you could
@@ -769,8 +773,13 @@ Exception in thread "main" java.lang.UnsupportedOperationException
     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
 <aop:config>
-    <aop:advisor pointcut="execution(* org.xyz.service..*Service.*(..))" 
+
+    <aop:pointcut id="serviceOperationWithDefaultTxSemantics"
+                    expression="execution(* x.y.service..*Service.*(..))"/>
+
+    <aop:advisor pointcut-ref="serviceOperationWithDefaultTxSemantics" 
                     advice-ref="txAdvice"/>
+
 </aop:config>
 
 ]]><lineannotation>&lt;!-- these two beans will have the transactional advice applied to them --&gt;</lineannotation><![CDATA[
@@ -841,7 +850,7 @@ public interface FooService {
   ]]><lineannotation>&lt;!-- this is the service object that we want to make transactional --&gt;</lineannotation><![CDATA[
   <bean id="fooService" class="x.y.service.DefaultFooService"/>
 
-  ]]><lineannotation>&lt;!-- this is the magic line... --&gt;</lineannotation><![CDATA[
+  ]]><lineannotation>&lt;!-- enable the configuration of transactional behaviour based on annotations --&gt;</lineannotation><![CDATA[
   ]]><emphasis role="bold"><![CDATA[<tx:annotation-driven/>]]></emphasis><![CDATA[
 
   ]]><lineannotation>&lt;!-- a <interfacename>PlatformTransactionManager</interfacename> is still required --&gt;</lineannotation><![CDATA[
@@ -867,7 +876,17 @@ public interface FooService {
                 <literal>&lt;tx:annotation-driven/&gt;</literal> element that
                 <emphasis>switches on</emphasis> the transactional behaviour.</para>
             </note>
-            <para>Please note that the most derived location takes precedence when evaluating
+            <para>In keeping with one of the Spring framework's central tenets, namely 'just do
+            the right thing', Spring's treatment of the <interfacename>@Transactional</interfacename>
+            annotation with regard to inheritance just makes sense. If you annotate an interface
+            at the class level with the <interfacename>@Transactional</interfacename>
+            annotation, then all implementations of that interface will inherit the
+            transaction settings applied to the interface. This is the direct
+            opposite of the usual semantics that apply to annotations, where annotations on
+            interfaces and methods are <emphasis role="bold">never</emphasis> inherited.
+            You can override the default transaction settings that may be inherited from a
+            superclass or interface by specifying your own <interfacename>@Transactional</interfacename>
+            values; basically, the most derived location takes precedence when evaluating
             the transaction semantics of a method. In the case of the following example, the
             <interfacename>FooService</interfacename>interface is annotated with default transaction
             settings, but the <interfacename>@Transactional</interfacename> annotation on the
@@ -887,12 +906,18 @@ public interface FooService {
         ]]><lineannotation>// do something</lineannotation><![CDATA[
     }
 
-    ]]><lineannotation>&lt;!-- <emphasis role="bold">these</emphasis> settings have precedence --&gt;</lineannotation><![CDATA[
+    ]]><lineannotation>// <emphasis role="bold">these</emphasis> settings have precedence</lineannotation><![CDATA[
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public void updateFoo(Foo foo) {
         ]]><lineannotation>// do something</lineannotation><![CDATA[
     }
 }]]></programlisting>
+            <note>Please note that this 'plain common sense' approach to inheriting
+            <interfacename>@Transactional</interfacename> settings <emphasis>only</emphasis>
+            applies in the case of SpringAOP-driven transaction management. If you are
+            using another transaction management strategy, such as AspectJ-driven transactions,
+            then the usual Java rules with regard to annotations apply
+            (i.e. there is no inheritance).</note>
             <section>
                 <title><interfacename>@Transactional</interfacename> settings</title>
                 <para>Used in bare form, the <interfacename>@Transactional</interfacename> annotation
@@ -984,11 +1009,11 @@ public interface FooService {
                 </section>
         </section>
         <section id="transaction-declarative-applying-more-than-just-tx-advice">
-            <title>Adding other advice to a transactional method</title>
-            <para>Here's the pitch: you have an instance of a class, and you would like
-            to apply <emphasis>both</emphasis> transactional <emphasis>and</emphasis>
-            (for the sake of argument an to keep things simple) some basic profiling
-            advice... so how do you effect this in the context of using
+            <title>Advising transactional operations</title>
+            <para>Consider the situation where you have an instance of a class, and
+            you would like to execute <emphasis>both</emphasis> transactional
+            <emphasis>and</emphasis> (to keep things simple) some basic profiling
+            advice ... so how do you effect this in the context of using
             <literal>&lt;tx:annotation-driven/&gt;</literal>?</para>
             <para>What we want to see when we invoke the
             <literal>updateFoo(Foo)</literal> method is a) some
@@ -1018,17 +1043,22 @@ import org.springframework.core.Ordered;
 
 public class SimpleProfiler implements Ordered {
 
+    private int order;
+
     public int getOrder() {
-        ]]><lineannotation>// we want this advice to 'execute' before anything else</lineannotation><![CDATA[
-        return Integer.MIN_VALUE;
+        return this.order;
     }
 
-    public Object profile(ProceedingJoinPoint point) throws Throwable {
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    public Object profile(ProceedingJoinPoint call) throws Throwable {
         Object returnValue;
         StopWatch clock = new StopWatch(getClass().getName());
         try {
-            clock.start(point.toShortString());
-            returnValue = point.proceed();
+            clock.start(call.toShortString());
+            returnValue = call.proceed();
         } finally {
             clock.stop();
             System.out.println(clock.prettyPrint());
@@ -1039,233 +1069,95 @@ public class SimpleProfiler implements Ordered {
 ]]></programlisting>
             <para>Here is the attendant configuration that will effect what we want.</para>
             <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:aop="http://www.springframework.org/schema/aop"
-    xmlns:tx="http://www.springframework.org/schema/tx"
-    xsi:schemaLocation="
-    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
-    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+<beans
+        xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:aop="http://www.springframework.org/schema/aop"
+        xmlns:tx="http://www.springframework.org/schema/tx"
+        xsi:schemaLocation="
+   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+   http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
-]]><lineannotation>&lt;!-- this object will have <emphasis role="bold">both</emphasis> transactional and profiling advice --&gt;</lineannotation><![CDATA[
-<bean id="fooService" class="x.y.service.DefaultFooService"/>
+    <bean id="fooService" class="x.y.service.DefaultFooService"/>
 
-]]><lineannotation>&lt;!-- this effects the application of transactional advice --&gt;</lineannotation><![CDATA[
-<tx:annotation-driven/>
+    ]]><lineannotation>&lt;!-- the profiling advice --&gt;</lineannotation><![CDATA[
+    <bean id="profiler" class="x.y.SimpleProfiler">
+        ]]><lineannotation>&lt;!-- execute before the transactional advice (hence the lower order number) --&gt;</lineannotation><![CDATA[
+        <property name="order" value="1"/>
+    </bean>
 
-]]><lineannotation>&lt;!-- the profiling advice --&gt;</lineannotation><![CDATA[
-<bean id="profiler" class="x.y.SimpleProfiler"/>
+    <aop:config>
+        
+        <aop:pointcut id="entryPointMethod" expression="execution(* x.y..*Service.*(..))"/>
 
-]]><lineannotation>&lt;!-- apply the above profiling advice... --&gt;</lineannotation><![CDATA[
-<aop:config>
-    <aop:aspect id="profilingAspect" ref="profiler">
-        <aop:pointcut id="publicServiceMethods"
-                        expression="execution(public * x.y..*Service.*(..))"/>
-        <aop:around method="profile" pointcut-ref="publicServiceMethods"/>
-    </aop:aspect>
-</aop:config>
+        ]]><lineannotation>&lt;!-- will execute after the profiling advice (c.f. the order attribute) --&gt;</lineannotation><![CDATA[
+        <aop:advisor
+                advice-ref="txAdvice"
+                pointcut-ref="entryPointMethod"
+                order="2"/> ]]><lineannotation>&lt;!-- order value is higher than the profiling aspects --&gt;</lineannotation><![CDATA[
 
-]]><lineannotation>&lt;!-- other transaction infrastructure beans such as a <interfacename>PlatformTransactionManager</interfacename> omitted... --&gt;</lineannotation><![CDATA[
+        <aop:aspect id="profilingAspect" ref="profiler">
+            <aop:pointcut id="serviceMethodWithReturnValue"
+                          expression="execution(!void x.y..*Service.*(..))"/>
+            <aop:around method="profile" pointcut-ref="serviceMethodWithReturnValue"/>
+        </aop:aspect>
+
+    </aop:config>
+
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
+
+    ]]><lineannotation>&lt;!-- other &lt;bean/&gt; definitions such as a <interfacename>DataSource</interfacename> and a <interfacename>PlatformTransactionManager</interfacename> here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
             <para>The result of the above configuration will be a <literal>'fooService'</literal>
             bean that has profiling and transactional aspects applied to it
-            <emphasis>in that order</emphasis>. The configuration of any number of additional
-            aspects is effected in a similar fashion.</para>
+            <emphasis>in that order</emphasis>. If we wanted the profiling advice to
+            execute <emphasis>after</emphasis> the transactional advice on the way in, and
+            <emphasis>before</emphasis> the transactional advice on the way out, then we would
+            simply swap the value of the profiling aspect bean's <literal>'order'</literal>
+            property such that it was higher than the transactional advice's order value.</para>
+            <para>The configuration of any number of additional aspects is effected in a
+            similar fashion.</para>
         </section>
         <section id="transaction-declarative-aspectj">
             <title>Using <interfacename>@Transactional</interfacename> with AspectJ</title>
-            <para>The previous sections have dealt with making beans that have been defined in
-            a Spring container (typically an <interfacename>ApplicationContext</interfacename>
-            instance) transactional. This next section shows you how you can use the
-            transactional metadata encapsulated by the <interfacename>@Transactional</interfacename>
-            annotation in conjunction with a (Spring-provided) AspectJ aspect to make pretty much
-            <emphasis role="bold">any</emphasis> object transactional.</para>
+            <para>It is also possible to use Spring's <interfacename>@Transactional</interfacename>
+            support outside of a Spring container by means of an AspectJ aspect shipped in
+            <literal>spring-aspects.jar</literal>. To use this support you first annotate types and methods with the
+            <interfacename>@Transactional</interfacename> annotation, and then you must link (weave)
+            your application with the
+            <classname>org.springframework.transaction.aspectj.AnnotationTransactionAspect</classname>
+            defined in <literal>spring-aspects.jar</literal>. The aspect must also be configured with
+            a transaction manager. You could of course use Spring to dependency inject the aspect, but
+            since we're focusing here on applications running outside of a Spring container, we'll
+            show you how to do it programmatically</para>
             <note>
                 <para>Prior to continuing, you may well want to read the previous sections entitled
                 <xref linkend="transaction-declarative-annotations"/> and <xref linkend="aop"/>
                 respectively.</para>
             </note>
-            <para>The basic usage pattern for this style of transaction configuration is quite
-            straightforward... you annotate your classes (or interfaces or methods) with the
-            <interfacename>@Transactional</interfacename> annotation; you then configure
-            exactly <emphasis>one</emphasis> aspect bean - the <classname>AnnotationTransactionAspect</classname>
-            - (well, one bean in addition to the standard
-            <interfacename>PlatformTransactionManager</interfacename> and
-            <interfacename>DataSource</interfacename> beans; and then <emphasis>in your Java</emphasis>
-            code (or in your Spring configuration) you simply instantiate instances of your
-            <interfacename>@Transactional</interfacename>-annotated classes and voila... the resulting
-            object(s) will be fully transactional and will work in accordance with the semantics of the
-            transactional metadata applied via the <interfacename>@Transactional</interfacename>
-            annotation(s).</para>
-            <note>
-                <para>You will require the aspect library that ships with the Spring distribution
-                to be present on your classpath; the relevant aspect library file is called
-                <literal>'spring-aspects.jar'</literal>.</para>
-            </note>
-            <para>An example may prove instructive; to wit, consider the following interface, which
-            is annotated with the <interfacename>@Transactional</interfacename> annotation.</para>
-            <programlisting><![CDATA[@Transactional(readOnly = true)
-public interface FooService {
+            <programlisting><lineannotation>// construct an appropriate transaction manager </lineannotation><![CDATA[
+DataSourceTransactionManager txManager = new  DataSourceTransactionManager(getDataSource());
 
-    Foo getFoo(String fooName);
-    
-    @Transactional
-    void updateFoo(Foo foo);
-}]]></programlisting>
-            <programlisting><![CDATA[public class DefaultFooService implements FooService {
-
-    public Foo getFoo(String fooName) {
-        ]]><lineannotation>// do something</lineannotation><![CDATA[
-    }
-
-    @Transactional(readOnly = false)
-    public void updateFoo(Foo foo) {
-        ]]><lineannotation>// do something</lineannotation><![CDATA[
-    }
-}]]></programlisting>
-            <para>Here is the Spring configuration...</para>
-            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-
-    ]]><lineannotation>&lt;!-- the transactional (AspectJ) aspect --&gt;</lineannotation><![CDATA[
-    <bean class="org.springframework.transaction.aspectj.AnnotationTransactionAspect"
-          factory-method="aspectOf">
-        <property name="transactionManager" ref="txManager"/>
-    </bean>
-
-    ]]><lineannotation>&lt;!-- don't forget the DataSource --&gt;</lineannotation><![CDATA[
-    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-        <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
-        <property name="url" value="jdbc:oracle:thin:@rj-t42:1521:elvis"/>
-        <property name="username" value="scott"/>
-        <property name="password" value="tiger"/>
-    </bean>
-
-    ]]><lineannotation>&lt;!-- similarly, don't forget the (correct) PlatformTransactionManager --&gt;</lineannotation><![CDATA[
-    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-        <property name="dataSource" ref="dataSource"/>
-    </bean>
-
-    ]]><lineannotation>&lt;!-- other &lt;bean/&gt; definitions here --&gt;</lineannotation><![CDATA[
-
-</beans>]]></programlisting>
-            <para>The definition of the <classname>org.springframework.transaction.aspectj.AnnotationTransactionAspect</classname>
-            is key. <classname>AnnotationTransactionAspect</classname> is an AspectJ aspect that applies
-            transactional advice to the <emphasis role="bold">public</emphasis> methods of classes (or implementations
-            of interfaces) that have been annotated with the <interfacename>@Transactional</interfacename>
-            annotation. This is a pretty powerful aspect; consider the following code...</para>
-            <programlisting><![CDATA[import org.springframework.context.support.ClassPathXmlApplicationContext;
-import x.y.Foo;
-import x.y.service.DefaultFooService;
-import x.y.service.FooService;
-
-public final class Boot {
-
-    public static void main(final String[] args) throws Exception {
-    
-        ]]><lineannotation>&lt;!-- creating an <interfacename>ApplicationContext</interfacename> is enought to configure the <classname>AnnotationTransactionAspect</classname> --&gt;</lineannotation><![CDATA[
-        new ClassPathXmlApplicationContext(new String[]{"context.xml"});
-        
-        ]]><lineannotation>&lt;!-- let's just new an instance of the <classname>DefaultFooService</classname> (normally we would use a <literal>&lt;bean/&gt;</literal>) --&gt;</lineannotation><![CDATA[
-        FooService foo = new DefaultFooService();
-        
-        ]]><lineannotation>&lt;!-- let's invoke a method that has been marked as <interfacename>@Transactional</interfacename> --&gt;</lineannotation><![CDATA[
-        foo.updateFoo(new Foo());
-    }
-}]]></programlisting>
-            <para>The output from running the above program will be (something like) the following (note
-            that the output has been cleaned up a bit to be less noisy).</para>
-            <programlisting><lineannotation>&lt;!-- the application starts up (more about this later)... --&gt;</lineannotation>
-<![CDATA["C:\Program Files\Java\jdk1.5.0_02\bin\java" -javaagent:lib/aspectjweaver.jar
-        -Didea.launcher.port=7532
-        "-Didea.launcher.bin.path=C:\Program Files\JetBrains\IntelliJ IDEA 5.0\bin"
-        -Dfile.encoding=windows-1252
-        -classpath "*" com.intellij.rt.execution.application.AppMain Boot
-[XmlBeanDefinitionReader] - Loading XML bean definitions from class path resource [context.xml]
-
-]]><lineannotation>&lt;!-- we're using Load-Time Weaving to weave the transactional aspect into our classes --&gt;</lineannotation><![CDATA[
-
-[AspectJ Weaver] - register aspect org.springframework.transaction.aspectj.AnnotationTransactionAspect
-[AspectJ Weaver] - weaving 'x/y/service/FooService'
-[AspectJ Weaver] - weaving 'x/y/service/DefaultFooService'
-[AnnotationTransactionAttributeSource] - Adding transactional method [updateFoo]
-        with attribute [PROPAGATION_REQUIRED,ISOLATION_DEFAULT]
-
-]]><lineannotation>&lt;!-- the <literal>update(..)</literal> method is being invoked on our <classname>DefaultFooService</classname>... --&gt;</lineannotation><![CDATA[
-
-[AnnotationTransactionAspect] - Getting transaction for x.y.service.DefaultFooService.updateFoo
-[DataSourceTransactionManager] - Creating new transaction with name
-        [x.y.service.DefaultFooService.updateFoo]
-
-]]><lineannotation>&lt;!-- the <literal>update(..)</literal> method does its logic <emphasis>in the context of a transaction</emphasis>  --&gt;</lineannotation><![CDATA[
-
-[AnnotationTransactionAspect] - Invoking commit for transaction
-        on x.y.service.DefaultFooService.updateFoo
-[DataSourceUtils] - Returning JDBC Connection to DataSource
-
-]]><lineannotation>&lt;!-- nothing untoward happens, and the transaction commits when the method returns... --&gt;</lineannotation><![CDATA[
-
-Process finished with exit code 0]]></programlisting>
-            <para>Now to be fair, I (the author) have been a tad disingenuous up to this point...
-            defining the <classname>AnnotationTransactionAspect</classname> as a Spring bean (so that
-            it can be dependency injected with an appropriate
-            <interfacename>PlatformTransactionManager</interfacename> with which to drive
-            transactions), and annotating your classes with the <interfacename>@Transactional</interfacename>
-            annotation is not quite enough to effect the above behaviour. You need to actually
-            <emphasis>weave</emphasis> (or link) the transactional aspect into the relevant classes
-            in your codebase.</para>
-            <sidebar>
-                <title>Load-Time Weaving</title>
-                <para>Load-time weaving is simply binary weaving defered until the point that
-                a class loader loads a class file and defines the class to the JVM. To support this,
-                one or more "weaving class loaders", either provided explicitly by the run-time
-                environment or enabled through a "weaving agent" are required.</para>
-            </sidebar>
-            <para>The Spring reference manual is not the place to discuss the many and varied ways
-            that you can actually effect this weaving process. Weaving the <classname>AnnotationTransactionAspect</classname> using a
-            <ulink url="http://www.eclipse.org/aspectj/doc/released/devguide/ajc-ref.html">dedicated compilation step</ulink>
-            is probably the best option for your application (the keyword there is
-            <emphasis>probably</emphasis>); another option (and the one used in the above example)
-            is load-time weaving (LTW). The
-            <ulink url="http://www.eclipse.org/aspectj/doc/released/devguide/index.html">AspectJ developers guide</ulink>
-            has a
-            <ulink url="http://www.eclipse.org/aspectj/doc/released/devguide/ltw.html">chapter</ulink>
-            dedicated solely to LTW, and you are directed towards said chapter to configure
-            your application appropriately.</para>
-            <para>However (by way of an accelerated introduction to LTW), if you look at the first line
-            of the above program output, you will see that an argument has been passed to the JVM...</para>
-            <programlisting><![CDATA[C:\Program Files\Java\jdk1.5.0_02\bin\java" ]]><emphasis role="bold">-javaagent:lib/aspectjweaver.jar</emphasis><![CDATA[ ...]]></programlisting>
-            <para>The <literal>'-javaagent:lib/aspectjweaver.jar'</literal> argument actually 'switches'
-            on the AspectJ load time weaver, and this results in the <classname>AnnotationTransactionAspect</classname>
-            being woven into those classes that have been annotated with the <interfacename>@Transactional</interfacename>
-            annotation. The load time weaving process can be futher controlled by the presence of a file called
-            <literal>'aop.xml'</literal> in a directory called <literal>'META-INF'</literal> at the root of your
-            classpath. The contents of the <literal>'aop.xml'</literal> file that was used in the execution
-            of the above example program follows. (LTW configuration
-            <ulink url="http://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html">is covered</ulink>
-            in exhaustive detail in the AspectJ documentation)</para>
-            <programlisting><![CDATA[<!DOCTYPE aspectj PUBLIC    
-  "-//AspectJ//DTD//EN"    "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">
-<aspectj>
-    ]]><lineannotation>&lt;!-- the 'options' provide copious diagnostic info about the weaving process --&gt;</lineannotation><![CDATA[
-    <weaver options="-showWeaveInfo
--XmessageHandlerClass:org.springframework.aop.aspectj.AspectJWeaverMessageHandler">
-        ]]><lineannotation>&lt;!-- the <literal>&lt;include/&gt;</literal> element limits the classes considered for weaving --&gt;</lineannotation><![CDATA[
-        <include within="x.y.service..*"/>
-    </weaver>
-    <aspects>
-        ]]><lineannotation>&lt;!-- we only want to weave the transactional aspect (bundled with Spring) --&gt;</lineannotation><![CDATA[
-        <aspect name="org.springframework.transaction.aspectj.AnnotationTransactionAspect"/>
-    </aspects>
-</aspectj>
-]]></programlisting>
-            <para>An excellent resource that describes the various ins-and-outs
-            of using LTW (with a particular slant towards Spring and Eclipse) is Adrian Colyer's
-             blog entry entitled
-             <ulink url="http://www.aspectprogrammer.org/blogs/adrian/2006/02/a_practical_gui_2.html">A Practical Guide to Using an Aspect Library (part I)</ulink>.</para>
+]]><lineannotation>// configure the <classname>AnnotationTransactionAspect</classname> to use it, this must be done before executing any transactional methods</lineannotation><![CDATA[
+AnnotationTransactionAspect.aspectOf().setTransactionManager (txManager); ]]></programlisting>
+            <para>When using this aspect the <interfacename>@Transactional</interfacename> annotation
+            can be used to annotate a type or interface as transactional, and subsequently the execution
+            of any <emphasis role="bold">public</emphasis> operation defined by that type will
+            have transactional semantics. Transactional semantics for an individual <emphasis role="bold">public</emphasis>
+            method can be defined by annotating the corresponding method definition. Note that if
+            annotating interface members (as opposed to methods implementing the interface), the
+            interface itself should also be annotated as <interfacename>@Transactional</interfacename>.</para>
+            <para>To weave your applications with the
+            <classname>AnnotationTransactionAspect</classname> you must either build your
+            application with AspectJ (see the <ulink url="http://www.eclipse.org/aspectj/doc/ released/devguide/index.html">AspectJ Development Guide</ulink>)
+            or use load-time weaving. See <xref linkend="aop-aj-ltw"/> for a discussion of load-time weaving with AspectJ.</para>
         </section>
     </section>
     <section id="transaction-default-settings">
@@ -1344,7 +1236,7 @@ Process finished with exit code 0]]></programlisting>
             typically be supplied to the class via dependency injection). It is
             easy to unit test such classes with a mock or stub
             <interfacename>PlatformTransactionManager</interfacename>. There is
-            no JNDI lookup or <literal>static</literal> magic here: it is a simple
+            no JNDI lookup or <literal>static</literal> shenanigans here: it is a simple
             interface. As usual, you can use Spring to simplify your unit testing.</para>
         </section>
         <section id="transaction-programmatic-ptm">
