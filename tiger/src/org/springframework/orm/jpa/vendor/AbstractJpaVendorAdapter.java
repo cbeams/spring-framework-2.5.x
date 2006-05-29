@@ -47,11 +47,18 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	public void setDatabase(Database database) {
 		this.database = database;
 	}
-	
+
+	/**
+	 * Return the target database to operate on.
+	 */
+	protected Database getDatabase() {
+		return database;
+	}
+
 	/**
 	 * Set the database platform class. Use this mechanism as a fallback
 	 * if the values of the enum passed to the database property are
-	 * insufficient
+	 * insufficient.
 	 * @param databasePlatformClass the databasePlatformClass to set
 	 */
 	public void setDatabasePlatformClass(Class<?> databasePlatformClass) {
@@ -59,17 +66,10 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	}
 	
 	/**
-	 * @return the databasePlatformClass
+	 * Return the database platform class for the target database.
 	 */
 	protected Class<?> getDatabasePlatformClass() {
 		return this.databasePlatformClass;
-	}
-
-	/**
-	 * Return the target database to operate on.
-	 */
-	protected Database getDatabase() {
-		return database;
 	}
 
 	/**

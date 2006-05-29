@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,28 +23,27 @@ import java.util.List;
 import org.springframework.dao.DataAccessException;
 
 /**
- * Implementation of PersistenceExceptionTranslator that
- * supports chaining, allowing the addition of PersistenceExceptionTranslator
- * instances in order. Returns non-null on the first (if any)
- * match.
- * 
+ * Implementation of PersistenceExceptionTranslator that supports chaining,
+ * allowing the addition of PersistenceExceptionTranslator instances in order.
+ * Returns <code>non-null</code> on the first (if any) match.
+ *
  * @author Rod Johnson
  * @since 2.0
  */
 public class ChainedPersistenceExceptionTranslator implements PersistenceExceptionTranslator {
 	
-	/**
-	 * List<PersistenceExceptionTranslator>
-	 */
+	/** List of PersistenceExceptionTranslators */
 	private List translators = new LinkedList();
-	
+
+
 	public void add(PersistenceExceptionTranslator pet) {
-		translators.add(pet);
+		this.translators.add(pet);
 	}
+
 
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		DataAccessException translatedDex = null;
-		for (Iterator it = translators.iterator(); translatedDex == null && it.hasNext(); ) {
+		for (Iterator it = this.translators.iterator(); translatedDex == null && it.hasNext(); ) {
 			PersistenceExceptionTranslator pet = (PersistenceExceptionTranslator) it.next();
 			translatedDex = pet.translateExceptionIfPossible(ex);
 		}

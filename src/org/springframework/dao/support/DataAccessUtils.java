@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,16 +156,18 @@ public abstract class DataAccessUtils {
 	
 	/**
 	 * Return a translated exception if this is appropriate,
-	 * otherwise return the input exception
+	 * otherwise return the input exception.
 	 * @param rawException exception we may wish to translate
 	 * @param pet PersistenceExceptionTranslator to use to perform the translation
 	 * @return a translated exception if translation is possible, or
 	 * the raw exception if it is not
 	 */
-	public static RuntimeException translateIfNecessary(RuntimeException rawException, PersistenceExceptionTranslator pet) {
-		Assert.notNull(pet);
+	public static RuntimeException translateIfNecessary(
+			RuntimeException rawException, PersistenceExceptionTranslator pet) {
+
+		Assert.notNull(pet, "PersistenceExceptionTranslator must not be null");
 		DataAccessException dex = pet.translateExceptionIfPossible(rawException);
-		return (dex != null) ? dex : rawException;
+		return (dex != null ? dex : rawException);
 	}
 
 }
