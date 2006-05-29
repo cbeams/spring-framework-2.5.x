@@ -18,6 +18,7 @@ package org.springframework.jms.support.destination;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
+import org.springframework.jms.StubQueue;
 
 import javax.jms.*;
 
@@ -98,27 +99,5 @@ public final class DynamicDestinationResolverTests extends TestCase {
         assertSame(expectedDestination, destination);
     }
 
-
-    private static final class StubQueue implements Queue {
-
-        public static final String DEFAULT_QUEUE_NAME = "banjo";
-
-
-        private String queueName = DEFAULT_QUEUE_NAME;
-
-
-        public StubQueue() {
-        }
-
-        public StubQueue(String queueName) {
-            this.queueName = queueName;
-        }
-
-
-        public String getQueueName() {
-            return this.queueName;
-        }
-
-    }
 
 }
