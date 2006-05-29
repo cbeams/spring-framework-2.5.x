@@ -2328,7 +2328,7 @@
    </map>
   </property>
   <property name="loadTimeWeaver">
-    <bean class="org.springframework.instrument.classloading.SimpleLoadTimeWeaver"/>
+    <bean class="org.springframework.instrument.classloading.support.SimpleLoadTimeWeaver"/>
   </property>
  </bean>
 </beans>]]></programlisting>

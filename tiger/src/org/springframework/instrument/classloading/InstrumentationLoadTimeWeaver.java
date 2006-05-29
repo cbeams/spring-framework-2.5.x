@@ -28,10 +28,10 @@ import org.apache.commons.logging.LogFactory;
  * <code>
  * -javaagent:path/to/jpa-test-agent.jar
  * </code>
- * where jpa-test-agent.jar is the JAR file containing 
- * InstrumentationSavingAgent.
- * <p>
- * In Eclipse, for example, set the Run configuration's JVM
+ * where <code>jpa-test-agent.jar</code> is a JAR file
+ * containing the InstrumentationSavingAgent class.
+ *
+ * <p>In Eclipse, for example, set the Run configuration's JVM
  * args to be of the form:
  * <code>
  * -javaagent:${project_loc}/lib/jpa-test-agent.jar

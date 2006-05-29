@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.instrument.classloading;
+package org.springframework.instrument.classloading.support;
 
 import java.lang.instrument.ClassFileTransformer;
+
+import org.springframework.instrument.classloading.AbstractLoadTimeWeaver;
+import org.springframework.util.ClassUtils;
 
 /**
  * Intended for use only in simple environments, such as an IDE.
@@ -29,7 +32,7 @@ public class SimpleLoadTimeWeaver extends AbstractLoadTimeWeaver {
 
 	
 	public SimpleLoadTimeWeaver() {
-		this.instrumentableClassLoader = new InstrumentableClassLoader(getContextClassLoader());
+		this.instrumentableClassLoader = new InstrumentableClassLoader(ClassUtils.getDefaultClassLoader());
 	}
 
 //	public void setAspectJWeavingEnabled(boolean flag) {

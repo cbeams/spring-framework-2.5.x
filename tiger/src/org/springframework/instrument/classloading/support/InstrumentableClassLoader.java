@@ -14,42 +14,42 @@
  * limitations under the License.
  */
 
-package org.springframework.instrument.classloading;
+package org.springframework.instrument.classloading.support;
 
 import java.lang.instrument.ClassFileTransformer;
 
+import org.springframework.instrument.classloading.AbstractOverridingClassLoader;
 import org.springframework.util.ClassUtils;
 
 /**
  * Simplistic implementation. Usable in tests and standalone.
- * 
+ *
  * @author Rod Johnson
  * @author Costin Leau
  * @since 2.0
  */
 public class InstrumentableClassLoader extends AbstractOverridingClassLoader {
 
-	private AspectJWeavingTransformer weavingTransformer;
+	private final AspectJWeavingTransformer weavingTransformer;
+
 
 	public InstrumentableClassLoader(ClassLoader parent) {
 		super(parent);
-		weavingTransformer = new AspectJWeavingTransformer(parent);
+		this.weavingTransformer = new AspectJWeavingTransformer(parent);
 	}
 
 	public InstrumentableClassLoader() {
 		super(ClassUtils.getDefaultClassLoader());
-		weavingTransformer = new AspectJWeavingTransformer(ClassUtils.getDefaultClassLoader());
+		this.weavingTransformer = new AspectJWeavingTransformer(ClassUtils.getDefaultClassLoader());
 	}
 
+
 	public void addTransformer(ClassFileTransformer cft) {
-		weavingTransformer.addClassFileTransformer(cft);
+		this.weavingTransformer.addClassFileTransformer(cft);
 	}
 
 	// TODO could have exclusions built on classes known to be entities?
 
-	/**
-	 * @return Returns the weavingTransformer.
-	 */
 	public AspectJWeavingTransformer getWeavingTransformer() {
 		return weavingTransformer;
 	}

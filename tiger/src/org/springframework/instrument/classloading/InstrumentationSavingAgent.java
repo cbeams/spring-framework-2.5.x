@@ -19,9 +19,9 @@ package org.springframework.instrument.classloading;
 import java.lang.instrument.Instrumentation;
 
 /**
- * Java agent that saves the Instrumentation interface from the
- * JVM for later use.
- * 
+ * Java agent that saves the Instrumentation interface
+ * from the JVM for later use.
+ *
  * @author Rod Johnson
  * @since 2.0
  * @see InstrumentationLoadTimeWeaver
@@ -29,11 +29,13 @@ import java.lang.instrument.Instrumentation;
 public class InstrumentationSavingAgent {
 	
 	private static Instrumentation instrumentation;
-	
+
+
 	public static void premain(String agentArgs, Instrumentation inst) {
 		instrumentation = inst;
 	}
-	
+
+
 	/**
 	 * Return the Instrumentation interface exposed by the JVM.
 	 */

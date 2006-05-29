@@ -50,8 +50,8 @@ import org.springframework.util.StringUtils;
  * Offers the same contract as AbstractTransactionalDataSourceSpringContextTests
  * and equally good performance, even when performing the instrumentation
  * required by the JPA specification.
- * <p/>
- * Exposes an EntityManagerFactory and a shared EntityManager.
+ *
+ * <p>Exposes an EntityManagerFactory and a shared EntityManager.
  * Requires EntityManagerFactory to be injected, plus DataSource and
  * JpaTransactionManager from superclass.
  *
@@ -248,6 +248,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 		}
 	}
 
+
 	private static class ShadowingLoadTimeWeaver extends AbstractLoadTimeWeaver {
 
 		private final ClassLoader shadowingClassLoader;
@@ -260,18 +261,20 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 		}
 
 		public ClassLoader getInstrumentableClassLoader() {
-			return (ClassLoader) shadowingClassLoader;
+			return (ClassLoader) this.shadowingClassLoader;
 		}
 
 		public void addClassFileTransformer(ClassFileTransformer classFileTransformer) {
 			try {
-				Method addClassFileTransformer = shadowingClassLoaderClass.getMethod("addClassFileTransformer", ClassFileTransformer.class);
+				Method addClassFileTransformer =
+						this.shadowingClassLoaderClass.getMethod("addClassFileTransformer", ClassFileTransformer.class);
 				addClassFileTransformer.setAccessible(true);
-				addClassFileTransformer.invoke(shadowingClassLoader, classFileTransformer);
+				addClassFileTransformer.invoke(this.shadowingClassLoader, classFileTransformer);
 			}
 			catch (Exception ex) {
 				throw new RuntimeException(ex);
 			}
 		}
 	}
+
 }

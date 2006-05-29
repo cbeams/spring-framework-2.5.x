@@ -33,9 +33,9 @@ import org.springframework.util.StringUtils;
 /**
  * Abstract superclass for class loaders that do <i>not</i> always delegate to
  * their parent loader, as normal class loaders do. This enables, for example,
- * instrumentation to be forced, or a "throwaway" class loader behavior,
- * where selected classes are loaded by a child loader but not loaded by the parent.
- * 
+ * instrumentation to be forced, or a "throwaway" class loader behavior, where
+ * selected classes are loaded by a child loader but not loaded by the parent.
+ *
  * @author Rod Johnson
  * @since 2.0
  */
@@ -99,7 +99,9 @@ public abstract class AbstractOverridingClassLoader extends ClassLoader {
 				return defineClass(name, transformed, 0, transformed.length);
 			}
 			catch (IOException ex) {
-				logger.warn("Cannot load resource for file: " + classRes, ex);
+				if (logger.isWarnEnabled()) {
+					logger.warn("Cannot load resource for file: " + classRes, ex);
+				}
 				throw new ClassNotFoundException(name);
 			}
 		}
@@ -110,9 +112,9 @@ public abstract class AbstractOverridingClassLoader extends ClassLoader {
 	}
 
 	/**
-	 * Transformation hook to be implemented by subclasses
+	 * Transformation hook to be implemented by subclasses.
 	 * @param name FQN of class being transformed
-	 * @param bytes class tyes
+	 * @param bytes class bytes
 	 * @return transformed bytes. Return same as input bytes if
 	 * the transformation produced no changes.
 	 */

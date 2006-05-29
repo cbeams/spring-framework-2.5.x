@@ -27,7 +27,7 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
 import org.springframework.instrument.classloading.LoadTimeWeaver;
-import org.springframework.instrument.classloading.ThrowawayClassLoader;
+import org.springframework.instrument.classloading.SimpleThrowawayClassLoader;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -197,7 +197,7 @@ class SpringPersistenceUnitInfo implements PersistenceUnitInfo {
 			return this.loadTimeWeaver.getThrowawayClassLoader();
 		}
 		else {
-			return new ThrowawayClassLoader(ClassUtils.getDefaultClassLoader());
+			return new SimpleThrowawayClassLoader(ClassUtils.getDefaultClassLoader());
 		}
 	}
 

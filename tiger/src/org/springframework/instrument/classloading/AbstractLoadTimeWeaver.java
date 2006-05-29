@@ -18,12 +18,11 @@ package org.springframework.instrument.classloading;
 
 import org.springframework.util.ClassUtils;
 
-
 /**
- * Abstract implementation of the LoadTimeWeaver interface
- * providing access to the current ClassLoader and
- * defining a throwaway class loader
- * 
+ * Abstract implementation of the LoadTimeWeaver interface,
+ * providing access to the current ClassLoader and defining
+ * a throwaway class loader.
+ *
  * @author Rod Johnson
  * @since 2.0
  */
@@ -34,7 +33,7 @@ public abstract class AbstractLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 	public ClassLoader getThrowawayClassLoader() {
-		return new ThrowawayClassLoader(getContextClassLoader());
+		return new SimpleThrowawayClassLoader(getContextClassLoader());
 	}
 
 }
