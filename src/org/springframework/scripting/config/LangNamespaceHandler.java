@@ -17,7 +17,6 @@
 package org.springframework.scripting.config;
 
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
-import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.scripting.bsh.BshScriptFactory;
 import org.springframework.scripting.groovy.GroovyScriptFactory;
 import org.springframework.scripting.jruby.JRubyScriptFactory;

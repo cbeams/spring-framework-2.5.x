@@ -64,7 +64,6 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 
 	private String exceptionAttribute = DEFAULT_EXCEPTION_ATTRIBUTE;
 
-	private String logLevel;
 
 	public void setOrder(int order) {
 	  this.order = order;
@@ -160,7 +159,6 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 
 		String viewName = null;
 
-		logException(ex);
 		// Check for specific exception mappings.
 		if (this.exceptionMappings != null) {
 			viewName = findMatchingViewName(this.exceptionMappings, ex);
@@ -182,9 +180,6 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 		else {
 			return null;
 		}
-	}
-
-	private void logException(Exception ex) {
 	}
 
 

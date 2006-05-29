@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,6 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,10 +51,6 @@ import org.apache.commons.logging.LogFactory;
  * @see #forClass(Class)
  */
 final class CachedIntrospectionResults {
-
-	//---------------------------------------------------------------------
-	// Static section
-	//---------------------------------------------------------------------
 
 	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
 
@@ -130,10 +124,6 @@ final class CachedIntrospectionResults {
 		return false;
 	}
 
-
-	//---------------------------------------------------------------------
-	// Instance section
-	//---------------------------------------------------------------------
 
 	private final BeanInfo beanInfo;
 

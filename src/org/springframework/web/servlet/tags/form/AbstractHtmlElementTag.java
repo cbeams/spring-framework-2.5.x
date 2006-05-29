@@ -20,7 +20,6 @@ import javax.servlet.jsp.JspException;
 
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.Errors;
 
 /**
  * Base class for databinding-aware JSP tags that render HTML element. Provides
@@ -497,7 +496,7 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 
 	/**
 	 * Gets the appropriate CSS class to use based on the state of the current
-	 * {@link BindStatus} object.
+	 * {@link org.springframework.web.servlet.support.BindStatus} object.
 	 */
 	private String resolveCssClass() throws JspException {
 		if (getBindStatus().isError() && StringUtils.hasText(getCssErrorClass())) {

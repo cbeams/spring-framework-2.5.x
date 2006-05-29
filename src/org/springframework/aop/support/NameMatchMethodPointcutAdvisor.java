@@ -19,10 +19,7 @@ package org.springframework.aop.support;
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.ClassFilter;
-import org.springframework.core.Ordered;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Convenient class for name-match method pointcuts that hold an Interceptor,
@@ -44,7 +41,8 @@ public class NameMatchMethodPointcutAdvisor extends AbstractPointcutAdvisor {
 		setAdvice(advice);
 	}
 
-	public Pointcut getPointcut() {
+
+    public Pointcut getPointcut() {
 		return this.pointcut;
 	}
 
@@ -67,4 +65,5 @@ public class NameMatchMethodPointcutAdvisor extends AbstractPointcutAdvisor {
 	public void setClassFilter(ClassFilter classFilter) {
 		this.pointcut.setClassFilter(classFilter);
 	}
+
 }

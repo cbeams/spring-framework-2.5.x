@@ -44,7 +44,6 @@ import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.LocaleEditor;
 import org.springframework.beans.propertyeditors.PropertiesEditor;
-import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.Resource;

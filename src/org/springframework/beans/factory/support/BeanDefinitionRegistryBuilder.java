@@ -16,8 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-
 /**
  * Programmatic builder-style object to make it easier to construct bean definitions.
  * Intended for use primarily when authoring Spring 2.0 NamespaceHandlers.

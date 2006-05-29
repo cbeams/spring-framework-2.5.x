@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Holder for constructor argument values, as part of a bean definition.
