@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,34 +14,55 @@
  * limitations under the License.
  */
 
-package org.springframework.dao.support;
+package org.springframework.dao.annotation;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
-import org.springframework.stereotype.Repository;
+import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.dao.support.PersistenceExceptionTranslator;
 
 /**
  * Spring AOP exception translation access for use at Repository or DAO layer level.
- * 
+ *
  * @author Rod Johnson
  * @since 2.0
  */
-public class PersistenceExceptionTranslationAdvisor extends DefaultPointcutAdvisor {
+class PersistenceExceptionTranslationAdvisor extends DefaultPointcutAdvisor {
 
-	private static final long serialVersionUID = 1L;
+	public PersistenceExceptionTranslationAdvisor(
+			PersistenceExceptionTranslator persistenceExceptionTranslator,
+			Class<? extends Annotation> repositoryAnnotationType) {
 
-	public PersistenceExceptionTranslationAdvisor(PersistenceExceptionTranslator persistenceExceptionTranslator) {
 		super(
-				new RepositoryAnnotationMatchingPointcut(),
+				new RepositoryAnnotationMatchingPointcut(repositoryAnnotationType),
 				new PersistenceExceptionTranslationInterceptor(persistenceExceptionTranslator)
 		);		
 	}
-	
+
+
+	private static class RepositoryAnnotationMatchingPointcut extends StaticMethodMatcherPointcut {
+
+		public RepositoryAnnotationMatchingPointcut(final Class<? extends Annotation> repositoryAnnotationType) {
+			setClassFilter(new ClassFilter() {
+				public boolean matches(Class clazz) {
+					return clazz.isAnnotationPresent(repositoryAnnotationType);
+				}
+			});
+		}
+
+		public boolean matches(Method method, Class targetClass) {
+			return true;
+		}
+	}
+
+
 	private static class PersistenceExceptionTranslationInterceptor implements MethodInterceptor {
 		
 		private final PersistenceExceptionTranslator persistenceExceptionTranslator;
@@ -61,26 +82,9 @@ public class PersistenceExceptionTranslationAdvisor extends DefaultPointcutAdvis
 						throw ex;
 					}
 				}
-				
 				throw DataAccessUtils.translateIfNecessary(ex, this.persistenceExceptionTranslator);
 			}
 		}
 	}
-	
-	private static class RepositoryAnnotationMatchingPointcut extends StaticMethodMatcherPointcut {
 
-		public RepositoryAnnotationMatchingPointcut() {
-			setClassFilter(new ClassFilter() {
-				public boolean matches(Class clazz) {
-					return clazz.isAnnotationPresent(Repository.class);
-				}
-			});
-		}	
-		
-		public boolean matches(Method method, Class targetClass) {
-			return true;
-		}
-		
-	}
-	
 }

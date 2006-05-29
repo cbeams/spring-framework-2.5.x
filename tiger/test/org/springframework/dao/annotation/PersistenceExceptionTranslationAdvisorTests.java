@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package org.springframework.dao.support;
+package org.springframework.dao.annotation;
 
 import javax.persistence.PersistenceException;
+
+import junit.framework.TestCase;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.support.ChainedPersistenceExceptionTranslator;
 import org.springframework.dao.support.DataAccessUtilsTests.MapPersistenceExceptionTranslator;
+import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.stereotype.Repository;
-
-import junit.framework.TestCase;
 
 /**
  * @author Rod Johnson
- *
  */
 public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
 	
@@ -39,7 +40,7 @@ public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
 	protected RepositoryInterface createProxy(RepositoryInterfaceImpl target, PersistenceExceptionTranslator pet) {
 		ProxyFactory pf = new ProxyFactory(target);
 		pf.addInterface(RepositoryInterface.class);
-		PersistenceExceptionTranslationAdvisor peta = new PersistenceExceptionTranslationAdvisor(pet);
+		PersistenceExceptionTranslationAdvisor peta = new PersistenceExceptionTranslationAdvisor(pet, Repository.class);
 		pf.addAdvisor(peta);
 		return (RepositoryInterface) pf.getProxy();
 	}

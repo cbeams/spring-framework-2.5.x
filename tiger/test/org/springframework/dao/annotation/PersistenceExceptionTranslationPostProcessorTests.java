@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.dao.support;
+package org.springframework.dao.annotation;
 
 import junit.framework.TestCase;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.aop.framework.Advised;
@@ -29,16 +29,17 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryBuilder;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.dao.support.PersistenceExceptionTranslationAdvisorTests.RepositoryInterface;
-import org.springframework.dao.support.PersistenceExceptionTranslationAdvisorTests.RepositoryInterfaceImpl;
-import org.springframework.dao.support.PersistenceExceptionTranslationAdvisorTests.StereotypedRepositoryInterfaceImpl;
+import org.springframework.dao.annotation.PersistenceExceptionTranslationAdvisorTests.RepositoryInterface;
+import org.springframework.dao.annotation.PersistenceExceptionTranslationAdvisorTests.RepositoryInterfaceImpl;
+import org.springframework.dao.annotation.PersistenceExceptionTranslationAdvisorTests.StereotypedRepositoryInterfaceImpl;
+import org.springframework.dao.support.ChainedPersistenceExceptionTranslator;
 import org.springframework.stereotype.Repository;
 
 /**
  * Unit tests for PersistenceExceptionTranslationPostProcessor. Does not test
- * translation--there are unit tests for the Spring AOP Advisor. Just checks
- * whether proxying occurs correctly, as a unit test should.
- * 
+ * translation; there are separate unit tests for the Spring AOP Advisor.
+ * Just checks whether proxying occurs correctly, as a unit test should.
+ *
  * @author Rod Johnson
  * @since 2.0
  */
@@ -110,18 +111,22 @@ public class PersistenceExceptionTranslationPostProcessorTests extends TestCase 
 		public void nameDoesntMatter() {			
 		}
 	}
-	
+
+
 	public interface Additional {
+
 		void additionalMethod();
 	}
-	
+
+
 	public static class RepositoryWithoutInterfaceAndOtherwiseAdvised extends StereotypedRepositoryInterfaceImpl
-								implements Additional {
+			implements Additional {
+
 		public void additionalMethod() {
-			
 		}
 	}
-	
+
+
 	@Aspect
 	public static class LogAllAspect {
 		//@Before("execution(* *())")
