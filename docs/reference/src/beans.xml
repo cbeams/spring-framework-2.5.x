@@ -202,9 +202,9 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 				</sidebar>
 				<para>
 					Please be advised that in the vast majority of application scenarios,
-					explicit user code will is not required to instantiate one or more instances
+					explicit user code is not required to instantiate one or more instances
 					of a Spring IoC container. For example, in a web application scenario, a simple
-					8 (or so) lines of absolutely boilerpate J2EE web descriptor XML in the
+					eight (or so) lines of absolutely boilerpate J2EE web descriptor XML in the
 					attendant <literal>web.xml</literal> file of the application will typically
 					suffice (see <xref linkend="context-create" />).
 				</para>
@@ -218,8 +218,8 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 				<literal>&lt;beans/&gt;</literal> element.
 			</para>
 			<para>
-				As mentioned (briefly) previously, these bean definitions correspond
-				to the actual objects that makeup your application (or applications).
+				These bean definitions correspond to the actual objects that makeup your
+				application (or applications).
 				Typically one will have bean definitions for one's service layer objects,
 				one's data access objects (DAOs), presentation objects such as
 				Struts <interfacename>Action</interfacename> instances, infrastructure
@@ -484,8 +484,7 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 					should still be set via the <literal>factory-method</literal>
 					attribute (as seen in the example below).
 				</para>
-                <programlisting><![CDATA[<!-- The factory bean, which contains a method called
-     createInstance -->
+                <programlisting><![CDATA[<!-- The factory bean, which contains a method called <literal>createInstance()</literal> -->
 <bean id="myFactoryBean" class="...">
   ...
 </bean>
@@ -493,10 +492,9 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 <bean id="exampleBean"
       factory-bean="myFactoryBean"
       factory-method="createInstance"/>]]></programlisting>
-                <para>
-					Although the mechanisms for setting bean properties are still to
-					be discussed, one implication of this approach is that the factory
-					bean itself can be managed and configured via DI.
+                <para>Alhough the mechanisms for setting bean properties are still to
+				be discussed, one implication of this approach is that the factory
+				bean itself can be managed and configured via DI.
 				</para>
             </section>
         </section>
@@ -510,15 +508,14 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 				considered aliases.
 			</para>
             <para>
-				In an <classname>XmlBeanFactory</classname> (including <interfacename>ApplicationContext</interfacename> variants), you
-				use the <literal>id</literal> or <literal>name</literal> attributes to
-				specify the bean id(s). The <literal>id</literal> attribute allows you
-				to specify one id, and as it is marked in the XML DTD (definition
-				document) as a real XML element ID attribute, the parser is able to do
+				In an <classname>XmlBeanFactory</classname> , you use the <literal>id</literal>
+				or <literal>name</literal> attributes to specify the bean id(s). The
+				<literal>id</literal> attribute allows you to specify one id, and as
+				it is a real XML element ID attribute, the XML parser is able to do
 				some extra validation when other elements point back to this one. As
 				such, it is the preferred way to specify a bean id. However, the XML
-				spec does limit the characters which are legal in XML IDs. This is
-				usually not really a constraint, but if you have a need to use one of
+				specification does limit the characters which are legal in XML IDs.
+				This is usually not a constraint, but if you have a need to use one of
 				these characters, or want to introduce other aliases to the bean, you
 				may also or instead specify one or more bean ids, separated by a comma
 				(<literal>,</literal>), semicolon (<literal>;</literal>), or whitespace
