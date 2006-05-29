@@ -23,6 +23,7 @@ import java.util.Map;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
 
@@ -82,13 +83,15 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.web.servlet.mvc.BaseCommandController#setPropertyEditorRegistrars
  * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
  */
-public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered {
+public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanClassLoaderAware, Ordered {
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
 	private PropertyEditorRegistrar[] propertyEditorRegistrars;
 
 	private Map customEditors;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 
 	public void setOrder(int order) {
@@ -121,6 +124,10 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered
 		this.customEditors = customEditors;
 	}
 
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+		this.beanClassLoader = beanClassLoader;
+	}
+
 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.propertyEditorRegistrars != null) {
@@ -139,7 +146,7 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered
 				else if (key instanceof String) {
 					String className = (String) key;
 					try {
-						requiredType = ClassUtils.forName(className);
+						requiredType = ClassUtils.forName(className, this.beanClassLoader);
 					}
 					catch (ClassNotFoundException ex) {
 						throw new BeanInitializationException(

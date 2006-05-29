@@ -17,29 +17,33 @@
 package org.springframework.beans.factory;
 
 /**
- * Interface to be implemented by beans that want to be aware of their
- * bean name in a bean factory. Note that it is not usually recommended
- * that an object depend on its bean name, as this represents a potentially
- * brittle dependence on external configuration, as well as a possibly
- * unnecessary dependence on a Spring API.
+ * Interface to be implemented by beans that wish to be aware of the bean class
+ * loader, that is, the class loader uses by the present bean factory to load
+ * bean classes.
+ *
+ * <p>This is mainly intended to be implemented by framework classes which
+ * have to pick up application classes by name despite themselves potentially
+ * being loaded from a shared class loader.
  *
  * <p>For a list of all bean lifecycle methods, see the
  * {@link BeanFactory BeanFactory javadocs}.
  *
  * @author Juergen Hoeller
- * @since 01.11.2003
- * @see BeanClassLoaderAware
+ * @since 2.0
+ * @see BeanNameAware
  * @see BeanFactoryAware
  * @see InitializingBean
  */
-public interface BeanNameAware {
+public interface BeanClassLoaderAware {
 
 	/**
-	 * Set the name of the bean in the bean factory that created this bean.
+	 * Callback that supplies the bean class loader to a bean instance.
 	 * <p>Invoked after population of normal bean properties but before an init
-	 * callback like InitializingBean's afterPropertiesSet or a custom init-method.
-	 * @param name the name of the bean in the factory
+	 * callback like InitializingBean's <code>afterPropertiesSet</code> or a
+	 * custom init-method.
+	 * @param classLoader owning class loader (may be <code>null</code> in
+	 * case of the caller class loader to be used)
 	 */
-	void setBeanName(String name);
+	void setBeanClassLoader(ClassLoader classLoader);
 
 }

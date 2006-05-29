@@ -54,6 +54,8 @@ public class MethodInvoker {
 
 	private String targetMethod;
 
+	private String staticMethod;
+
 	private Object[] arguments;
 
 	/** The method we will call */
@@ -124,16 +126,8 @@ public class MethodInvoker {
 	 * @see #setTargetClass
 	 * @see #setTargetMethod
 	 */
-	public void setStaticMethod(String staticMethod) throws ClassNotFoundException {
-		int lastDotIndex = staticMethod.lastIndexOf('.');
-		if (lastDotIndex == -1 || lastDotIndex == staticMethod.length()) {
-			throw new IllegalArgumentException("staticMethod must be a fully qualified class plus method name: " +
-					"e.g. 'example.MyExampleClass.myExampleMethod'");
-		}
-		String className = staticMethod.substring(0, lastDotIndex);
-		String methodName = staticMethod.substring(lastDotIndex + 1);
-		setTargetClass(ClassUtils.forName(className));
-		setTargetMethod(methodName);
+	public void setStaticMethod(String staticMethod) {
+		this.staticMethod = staticMethod;
 	}
 
 	/**
@@ -159,13 +153,25 @@ public class MethodInvoker {
 	 * @see #invoke
 	 */
 	public void prepare() throws ClassNotFoundException, NoSuchMethodException {
+		if (this.staticMethod != null) {
+			int lastDotIndex = this.staticMethod.lastIndexOf('.');
+			if (lastDotIndex == -1 || lastDotIndex == this.staticMethod.length()) {
+				throw new IllegalArgumentException(
+						"staticMethod must be a fully qualified class plus method name: " +
+						"e.g. 'example.MyExampleClass.myExampleMethod'");
+			}
+			String className = this.staticMethod.substring(0, lastDotIndex);
+			String methodName = this.staticMethod.substring(lastDotIndex + 1);
+			this.targetClass = resolveClassName(className);
+			this.targetMethod = methodName;
+		}
+
 		if (this.targetClass == null) {
 			throw new IllegalArgumentException("Either targetClass or targetObject is required");
 		}
 		if (this.targetMethod == null) {
 			throw new IllegalArgumentException("targetMethod is required");
 		}
-
 		if (this.arguments == null) {
 			this.arguments = new Object[0];
 		}
@@ -190,6 +196,18 @@ public class MethodInvoker {
 		if (this.targetObject == null && !Modifier.isStatic(this.methodObject.getModifiers())) {
 			throw new IllegalArgumentException("Target method must not be non-static without a target");
 		}
+	}
+
+	/**
+	 * Resolve the given class name into a Class.
+	 * <p>The default implementations uses <code>ClassUtils.forName</code>,
+	 * using the thread context class loader.
+	 * @param className the class name to resolve
+	 * @return the resolved Class
+	 * @throws ClassNotFoundException if the class name was invalid
+	 */
+	protected Class resolveClassName(String className) throws ClassNotFoundException {
+		return ClassUtils.forName(className);
 	}
 
 	/**

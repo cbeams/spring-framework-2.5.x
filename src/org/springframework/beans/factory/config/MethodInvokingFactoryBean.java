@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,10 +19,12 @@ package org.springframework.beans.factory.config;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 import org.springframework.util.MethodInvoker;
+import org.springframework.util.ClassUtils;
 
 /**
  * <p>FactoryBean which returns a value which is the result of a static or instance
@@ -91,9 +93,11 @@ import org.springframework.util.MethodInvoker;
  * @since 21.11.2003
  */
 public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
-		implements FactoryBean, InitializingBean {
+		implements FactoryBean, BeanClassLoaderAware, InitializingBean {
 
 	private boolean singleton = true;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/** Method call result in the singleton case */
 	private Object singletonObject;
@@ -106,6 +110,15 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 	public void setSingleton(boolean singleton) {
 		this.singleton = singleton;
 	}
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
+	protected Class resolveClassName(String className) throws ClassNotFoundException {
+		return ClassUtils.forName(className, this.beanClassLoader);
+	}
+
 
 	public void afterPropertiesSet() throws Exception {
 		prepare();

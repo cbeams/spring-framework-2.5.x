@@ -19,6 +19,7 @@ package org.springframework.beans.factory.config;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -44,7 +45,7 @@ import org.springframework.util.ClassUtils;
  * @since 1.1
  * @see #setStaticField
  */
-public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, InitializingBean {
+public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, BeanClassLoaderAware, InitializingBean {
 
 	private Class targetClass;
 
@@ -55,6 +56,8 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, I
 	private String staticField;
 
 	private String beanName;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	// the field we will retrieve
 	private Field fieldObject;
@@ -135,6 +138,10 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, I
 		this.beanName = beanName;
 	}
 
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
 
 	public void afterPropertiesSet() throws ClassNotFoundException, NoSuchFieldException {
 		if (this.targetClass != null && this.targetObject != null) {
@@ -161,7 +168,7 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, I
 			}
 			String className = this.staticField.substring(0, lastDotIndex);
 			String fieldName = this.staticField.substring(lastDotIndex + 1);
-			this.targetClass = ClassUtils.forName(className);
+			this.targetClass = ClassUtils.forName(className, this.beanClassLoader);
 			this.targetField = fieldName;
 		}
 

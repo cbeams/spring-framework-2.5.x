@@ -60,24 +60,24 @@ import org.springframework.beans.BeansException;
  * in any parent factory.
  *
  * <p>Bean factory implementations should support the standard bean lifecycle interfaces
- * as far as possible. The maximum set of initialization methods and their standard
- * order is:<br>
+ * as far as possible. The full set of initialization methods and their standard order is:<br>
  * 1. BeanNameAware's <code>setBeanName</code><br>
- * 2. BeanFactoryAware's <code>setBeanFactory</code><br>
- * 3. ResourceLoaderAware's <code>setResourceLoader</code>
+ * 2. BeanClassLoaderAware's <code>setBeanClassLoader</code><br>
+ * 3. BeanFactoryAware's <code>setBeanFactory</code><br>
+ * 4. ResourceLoaderAware's <code>setResourceLoader</code>
  * (only applicable when running in an application context)<br>
- * 4. ApplicationEventPublisherAware's <code>setApplicationEventPublisher</code>
+ * 5. ApplicationEventPublisherAware's <code>setApplicationEventPublisher</code>
  * (only applicable when running in an application context)<br>
- * 5. MessageSourceAware's <code>setMessageSource</code>
+ * 6. MessageSourceAware's <code>setMessageSource</code>
  * (only applicable when running in an application context)<br>
- * 6. ApplicationContextAware's <code>setApplicationContext</code>
+ * 7. ApplicationContextAware's <code>setApplicationContext</code>
  * (only applicable when running in an application context)<br>
- * 7. ServletContextAware's <code>setServletContext</code>
+ * 8. ServletContextAware's <code>setServletContext</code>
  * (only applicable when running in a web application context)<br>
- * 8. <code>postProcessBeforeInitialization</code> methods of BeanPostProcessors<br>
- * 9. InitializingBean's <code>afterPropertiesSet</code><br>
- * 10. a custom init-method definition<br>
- * 11. <code>postProcessAfterInitialization</code> methods of BeanPostProcessors
+ * 9. <code>postProcessBeforeInitialization</code> methods of BeanPostProcessors<br>
+ * 10. InitializingBean's <code>afterPropertiesSet</code><br>
+ * 11. a custom init-method definition<br>
+ * 12. <code>postProcessAfterInitialization</code> methods of BeanPostProcessors
  *
  * <p>On shutdown of a bean factory, the following lifecycle methods apply:<br>
  * 1. DisposableBean's <code>destroy</code><br>
@@ -89,6 +89,7 @@ import org.springframework.beans.BeansException;
  * @see ListableBeanFactory
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory
  * @see BeanNameAware#setBeanName
+ * @see BeanClassLoaderAware#setBeanClassLoader
  * @see BeanFactoryAware#setBeanFactory
  * @see org.springframework.context.ResourceLoaderAware#setResourceLoader
  * @see org.springframework.context.ApplicationEventPublisherAware#setApplicationEventPublisher

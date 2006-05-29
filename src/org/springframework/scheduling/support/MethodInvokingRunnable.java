@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,10 @@ import java.lang.reflect.InvocationTargetException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
+import org.springframework.util.ClassUtils;
 
 /**
  * Adapter that implements the Runnable interface as a configurable
@@ -52,10 +54,20 @@ import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
  * @see java.util.concurrent.Executor#execute(Runnable)
  */
 public class MethodInvokingRunnable extends ArgumentConvertingMethodInvoker
-		implements Runnable, InitializingBean {
+		implements Runnable, BeanClassLoaderAware, InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
+	protected Class resolveClassName(String className) throws ClassNotFoundException {
+		return ClassUtils.forName(className, this.beanClassLoader);
+	}
 
 	public void afterPropertiesSet() throws ClassNotFoundException, NoSuchMethodException {
 		prepare();

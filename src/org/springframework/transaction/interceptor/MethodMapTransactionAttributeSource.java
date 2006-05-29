@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,6 +26,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.TransactionUsageException;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.PatternMatchUtils;
@@ -40,44 +42,74 @@ import org.springframework.util.PatternMatchUtils;
  * @see #isMatch
  * @see NameMatchTransactionAttributeSource
  */
-public class MethodMapTransactionAttributeSource implements TransactionAttributeSource {
+public class MethodMapTransactionAttributeSource
+		implements TransactionAttributeSource, BeanClassLoaderAware, InitializingBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/** Map from method name to attribute value */
+	private Map methodMap;
+
 	/** Map from Method to TransactionAttribute */
-	private Map methodMap = new HashMap();
+	private Map transactionAttributeMap = new HashMap();
 
 	/** Map from Method to name pattern used for registration */
-	private Map nameMap = new HashMap();
+	private Map methodNameMap = new HashMap();
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 
 	/**
 	 * Set a name/attribute map, consisting of "FQCN.method" method names
 	 * (e.g. "com.mycompany.mycode.MyClass.myMethod") and TransactionAttribute
 	 * instances (or Strings to be converted to TransactionAttribute instances).
+	 * <p>Intended for configuration via setter injection, typically within
+	 * a Spring bean factory. Relies on <code>afterPropertiesSet()</code>
+	 * being called afterwards.
 	 * @see TransactionAttribute
 	 * @see TransactionAttributeEditor
 	 */
 	public void setMethodMap(Map methodMap) {
-		Iterator it = methodMap.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry) it.next();
-			String name = (String) entry.getKey();
+		this.methodMap = methodMap;
+	}
 
-			// Check whether we need to convert from String to TransactionAttribute.
-			TransactionAttribute attr = null;
-			if (entry.getValue() instanceof TransactionAttribute) {
-				attr = (TransactionAttribute) entry.getValue();
-			}
-			else {
-				TransactionAttributeEditor editor = new TransactionAttributeEditor();
-				editor.setAsText(entry.getValue().toString());
-				attr = (TransactionAttribute) editor.getValue();
-			}
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+		this.beanClassLoader = beanClassLoader;
+	}
 
-			addTransactionalMethod(name, attr);
+	/**
+	 * Eagerly initializes the specified "methodMap", if any.
+	 * @see #initMethodMap()
+	 */
+	public void afterPropertiesSet() {
+		initMethodMap();
+	}
+
+	/**
+	 * Initialize the specified "methodMap", if any.
+	 * @see #setMethodMap
+	 */
+	protected synchronized void initMethodMap() {
+		if (this.methodMap != null) {
+			Iterator it = this.methodMap.entrySet().iterator();
+			while (it.hasNext()) {
+				Map.Entry entry = (Map.Entry) it.next();
+				String name = (String) entry.getKey();
+				// Check whether we need to convert from String to TransactionAttribute.
+				TransactionAttribute attr = null;
+				if (entry.getValue() instanceof TransactionAttribute) {
+					attr = (TransactionAttribute) entry.getValue();
+				}
+				else {
+					TransactionAttributeEditor editor = new TransactionAttributeEditor();
+					editor.setAsText(entry.getValue().toString());
+					attr = (TransactionAttribute) editor.getValue();
+				}
+				addTransactionalMethod(name, attr);
+			}
 		}
 	}
+
 
 	/**
 	 * Add an attribute for a transactional method.
@@ -93,7 +125,7 @@ public class MethodMapTransactionAttributeSource implements TransactionAttribute
 		String className = name.substring(0, lastDotIndex);
 		String methodName = name.substring(lastDotIndex + 1);
 		try {
-			Class clazz = ClassUtils.forName(className);
+			Class clazz = ClassUtils.forName(className, this.beanClassLoader);
 			addTransactionalMethod(clazz, methodName, attr);
 		}
 		catch (ClassNotFoundException ex) {
@@ -129,7 +161,7 @@ public class MethodMapTransactionAttributeSource implements TransactionAttribute
 		// register all matching methods
 		for (Iterator it = matchingMethods.iterator(); it.hasNext();) {
 			Method method = (Method) it.next();
-			String regMethodName = (String) this.nameMap.get(method);
+			String regMethodName = (String) this.methodNameMap.get(method);
 			if (regMethodName == null || (!regMethodName.equals(name) && regMethodName.length() <= name.length())) {
 				// No already registered method name, or more specific
 				// method name specification now -> (re-)register method.
@@ -137,7 +169,7 @@ public class MethodMapTransactionAttributeSource implements TransactionAttribute
 					logger.debug("Replacing attribute for transactional method [" + method + "]: current name '" +
 							name + "' is more specific than '" + regMethodName + "'");
 				}
-				this.nameMap.put(method, name);
+				this.methodNameMap.put(method, name);
 				addTransactionalMethod(method, attr);
 			}
 			else {
@@ -158,7 +190,7 @@ public class MethodMapTransactionAttributeSource implements TransactionAttribute
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding transactional method [" + method + "] with attribute [" + attr + "]");
 		}
-		this.methodMap.put(method, attr);
+		this.transactionAttributeMap.put(method, attr);
 	}
 
 	/**
@@ -176,7 +208,10 @@ public class MethodMapTransactionAttributeSource implements TransactionAttribute
 
 
 	public TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
-		return (TransactionAttribute) this.methodMap.get(method);
+		if (this.methodMap != null) {
+			initMethodMap();
+		}
+		return (TransactionAttribute) this.transactionAttributeMap.get(method);
 	}
 
 }

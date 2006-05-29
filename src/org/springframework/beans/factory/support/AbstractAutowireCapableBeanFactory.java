@@ -39,6 +39,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
@@ -106,6 +107,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	public AbstractAutowireCapableBeanFactory() {
 		super();
 		ignoreDependencyInterface(BeanFactoryAware.class);
+		ignoreDependencyInterface(BeanClassLoaderAware.class);
 	}
 
 	/**
@@ -845,6 +847,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				logger.debug("Invoking setBeanName on BeanNameAware bean '" + beanName + "'");
 			}
 			((BeanNameAware) bean).setBeanName(beanName);
+		}
+
+		if (bean instanceof BeanClassLoaderAware) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invoking setBeanClassLoader on BeanClassLoaderAware bean '" + beanName + "'");
+			}
+			((BeanClassLoaderAware) bean).setBeanClassLoader(getBeanClassLoader());
 		}
 
 		if (bean instanceof BeanFactoryAware) {
