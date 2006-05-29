@@ -2149,12 +2149,12 @@ public final class Boot {
         AbstractApplicationContext ctx
             = new ClassPathXmlApplicationContext(new String []{"beans.xml"});
 
-        // add a shutdown hook for the above context...
+        ]]><lineannotation>// add a shutdown hook for the above context... </lineannotation><![CDATA[
         ctx.registerShutdownHook();
 
-        // app runs here...
+        ]]><lineannotation>// app runs here...</lineannotation><![CDATA[
 
-        // main method exits, hook is called prior to the app shutting down...
+        ]]><lineannotation>// main method exits, hook is called prior to the app shutting down...</lineannotation><![CDATA[
     }
 }]]></programlisting>
                 </section>
