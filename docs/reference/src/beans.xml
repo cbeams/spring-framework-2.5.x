@@ -2121,6 +2121,43 @@ public class AnotherExampleBean implements DisposableBean {
                         element itself.
                     </para>
                 </section>
+                <section>
+                    <title>Shutting down the Spring IoC container gracefully in non-web applications</title>
+                    <note>
+                        <para>This next section does not apply to web applications (in case the title of this section
+                        did not make that abundantly clear). Spring's web-based <interfacename>ApplicationContext</interfacename>
+                        implementations already have code in place to handle shutting down the Spring
+                        IoC container gracefully when the relevant web application is being shutdown.</para>
+                    </note>
+                    <para>If you are using Spring's IoC container in a non-web application environment, for
+                    example in a rich client desktop environment, and you want the container to shutdown
+                    gracefully and call the relevant destroy callbacks on your singleton beans, you will
+                    need to register a shutdown hook with the JVM. This is quite easy to do (see below), and will
+                    ensure that your Spring IoC container shuts down gracefully and that all resources
+                    held by your singletons are released (of course it is still up to you to both
+                    configure the destroy callbacks for your singletons and implement such
+                    destroy callbacks correctly).</para>
+                    <para>So to register a shutdown hook that enables the graceful shutdown of the relevant Spring
+                    IoC container, you simply need to call the <literal>registerShutdownHook()</literal> method
+                    that is declared on the <classname>AbstractApplicationContext</classname> class. To wit...</para>
+                    <programlisting><![CDATA[import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public final class Boot {
+
+    public static void main(final String[] args) throws Exception {
+        AbstractApplicationContext ctx
+            = new ClassPathXmlApplicationContext(new String []{"beans.xml"});
+
+        // add a shutdown hook for the above context...
+        ctx.registerShutdownHook();
+
+        // app runs here...
+
+        // main method exits, hook is called prior to the app shutting down...
+    }
+}]]></programlisting>
+                </section>
             </section>
         </section>
         <section id="beans-factory-aware">
