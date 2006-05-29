@@ -107,9 +107,7 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 						databasePlatformClass.getName());
 			}
 		}
-		else {
-			logger.warn("Relying on default database platform class. Consider setting database or databasePlatformClass properties.");
-		}
+
 		return jpaProperties;
 	}
 
