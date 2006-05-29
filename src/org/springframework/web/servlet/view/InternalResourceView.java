@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.view;
 
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
@@ -43,8 +42,7 @@ import org.springframework.web.util.WebUtils;
  * <p>Typical usage with InternalResourceViewResolver would look as follows,
  * from the perspective of the DispatcherServlet context definition:
  *
- * <pre>
- * &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
+ * <pre class="code">&lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
  *   &lt;property name="prefix" value="/WEB-INF/jsp/"/&gt;
  *   &lt;property name="suffix" value=".jsp"/&gt;
  * &lt;/bean&gt;</pre>
@@ -118,8 +116,10 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	/**
 	 * Expose helpers unique to each rendering operation. This is necessary so that
 	 * different rendering operations can't overwrite each other's contexts etc.
-	 * <p>Called by renderMergedTemplateModel. The default implementation is empty.
-	 * This method can be overridden to add custom helpers as request attributes.
+	 * <p>Called by
+     * {@link #renderMergedOutputModel(java.util.Map, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}.
+     * The default implementation is empty. This method can be overridden to add
+     * custom helpers as request attributes.
 	 * @param request current HTTP request
 	 * @throws Exception if there's a fatal error while we're adding attributes
 	 * @see #renderMergedOutputModel
