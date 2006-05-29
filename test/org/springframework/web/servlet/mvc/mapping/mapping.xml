@@ -8,6 +8,6 @@
 	<bean id="admin" class="org.springframework.web.servlet.mvc.mapping.AdminController"/>
 	<bean id="buy" class="org.springframework.web.servlet.mvc.mapping.BuyForm"/>
 	
-	<bean id="mapping" class="org.springframework.web.servlet.mvc.ControllerClassNameHandlerMapping"/>
+	<bean id="mapping" class="org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping"/>
 
 </beans>
