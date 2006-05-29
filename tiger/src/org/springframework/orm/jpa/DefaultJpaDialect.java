@@ -101,7 +101,7 @@ public class DefaultJpaDialect implements JpaDialect {
 
 	/**
 	 * This implementation delegates to EntityManagerFactoryUtils.
-	 * @see EntityManagerFactoryUtils#convertJpaAccessException
+	 * @see EntityManagerFactoryUtils#convertJpaAccessExceptionIfPossible
 	 */
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		return EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex);

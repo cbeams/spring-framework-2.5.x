@@ -59,7 +59,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see EntityManagerFactoryUtils#getEntityManager
  * @see JpaTransactionManager
  * @see JpaTemplate
  */

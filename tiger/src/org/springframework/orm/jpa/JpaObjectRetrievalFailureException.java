@@ -26,7 +26,7 @@ import org.springframework.orm.ObjectRetrievalFailureException;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see EntityManagerFactoryUtils#convertJpaAccessException
+ * @see EntityManagerFactoryUtils#convertJpaAccessExceptionIfPossible
  */
 public class JpaObjectRetrievalFailureException extends ObjectRetrievalFailureException {
 

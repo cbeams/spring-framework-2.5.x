@@ -22,6 +22,7 @@ import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.support.DataAccessUtils;
 
@@ -165,7 +166,7 @@ public abstract class JpaAccessor implements InitializingBean {
 	 * be JPA-related
 	 * @return the corresponding DataAccessException instance if
 	 * wrapping should occur, otherwise the raw exception
-	 * @see JpaDialect#translateException
+	 * @see org.springframework.dao.support.DataAccessUtils#translateIfNecessary
 	 */
 	public RuntimeException translateIfNecessary(RuntimeException ex) {
 		return DataAccessUtils.translateIfNecessary(ex, getJpaDialect());

@@ -26,7 +26,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see EntityManagerFactoryUtils#convertJpaAccessException
+ * @see EntityManagerFactoryUtils#convertJpaAccessExceptionIfPossible
  */
 public class JpaOptimisticLockingFailureException extends ObjectOptimisticLockingFailureException {
 

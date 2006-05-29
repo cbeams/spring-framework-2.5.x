@@ -28,6 +28,7 @@ import javax.persistence.TransactionRequiredException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -152,8 +153,8 @@ public abstract class EntityManagerFactoryUtils {
 	 * JpaTransactionManager support sophisticated translation of exceptions via a
 	 * JpaDialect.
 	 * @param ex runtime exception that occured
-	 * @return the corresponding DataAccessException instance or null if the exception
-	 * should not be translated
+	 * @return the corresponding DataAccessException instance,
+	 * or <code>null</code> if the exception should not be translated
 	 */
 	public static DataAccessException convertJpaAccessExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof EntityNotFoundException) {
