@@ -47,12 +47,14 @@ import org.springframework.jms.support.JmsUtils;
  * <p>For a different style of MessageListener handling, through looped
  * <code>MessageConsumer.receive()</code> calls that also allow for
  * transactional reception of messages (registering them with XA transactions),
- * see DefaultMessageListenerContainer. For dynamic adaptation of the active
- * number of Sessions, consider using ServerSessionMessageListenerContainer.
+ * see {@link DefaultMessageListenerContainer}. For dynamic adaptation of the active
+ * number of Sessions, consider using
+ * {@link org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer}.
  *
  * <p>This class requires a JMS 1.1+ provider, because it builds on the
- * domain-independent API. <b>Use the {@link SimpleMessageListenerContainer102
- * SimpleMessageListenerContainer102} subclass for JMS 1.0.2 providers.</b>
+ * domain-independent API. <b>Use the
+ * {@link SimpleMessageListenerContainer102 SimpleMessageListenerContainer102}
+ * subclass for JMS 1.0.2 providers.</b>
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -95,9 +97,20 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	public void setConcurrentConsumers(int concurrentConsumers) {
 		this.concurrentConsumers = concurrentConsumers;
 	}
+    
+
+	/**
+	 * Validates this instance's configuration.
+	 */
+	public void afterPropertiesSet() {
+		if (this.concurrentConsumers <= 0) {
+			throw new IllegalArgumentException("concurrentConsumers value must be at least 1 (one)");
+		}
+        super.afterPropertiesSet();
+	}
 
 
-	//-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 	// Implementation of AbstractMessageListenerContainer's template methods
 	//-------------------------------------------------------------------------
 

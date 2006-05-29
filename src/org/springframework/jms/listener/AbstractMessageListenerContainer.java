@@ -33,15 +33,17 @@ import org.springframework.jms.support.destination.JmsDestinationAccessor;
 
 /**
  * Abstract base class for message listener containers. Can either host
- * a standard JMS MessageListener or a Spring SessionAwareMessageListener.
+ * a standard JMS {@link MessageListener} or a Spring-specific
+ * {@link SessionAwareMessageListener}.
  *
- * <p>Holds a single JMS Connection that all listeners are supposed to be
+ * <p>Holds a single JMS {@link Connection} that all listeners are supposed to be
  * registered on. The actual registration process is up to concrete subclasses.
  *
  * <p><b>NOTE:</b> The default behavior of this message listener container
- * is to never propagate an exception thrown by a message listener up to
- * the JMS provider. Instead, it will log any such exception at error level.
- * From the JMS provider's perspective, no such listener will ever fail.
+ * is to <b>never</b> propagate an exception thrown by a message listener up to
+ * the JMS provider. Instead, it will log any such exception at the error level.
+ * This means that from the perspective of the attendant JMS provider no such
+ * listener will ever fail.
  *
  * <p>The listener container offers the following message acknowledgment options:
  * <ul>
@@ -76,9 +78,11 @@ import org.springframework.jms.support.destination.JmsDestinationAccessor;
  * set on the incoming message (else just process straightforwardly).
  * <li>Or wrap the <i>entire processing with an XA transaction</i>, covering the
  * reception of the message as well as the execution of the message listener.
- * This is only supported by DefaultMessageListenerContainer, through specifying
- * a "transactionManager" (typically a JtaTransactionManager, with corresponding
- * XA-aware JMS ConnectionFactory passed in as "connectionFactory").
+ * This is only supported by {@link DefaultMessageListenerContainer}, through
+ * specifying a "transactionManager" (typically a
+ * {@link org.springframework.transaction.jta.JtaTransactionManager}, with
+ * a corresponding XA-aware JMS {@link javax.jms.ConnectionFactory} passed in as
+ * "connectionFactory").
  * </ul>
  * Note that XA transaction coordination adds significant runtime overhead,
  * so it might be feasible to avoid it unless absolutely necessary.
@@ -91,7 +95,8 @@ import org.springframework.jms.support.destination.JmsDestinationAccessor;
  * This will work nicely in Tomcat or in a standalone environment, often
  * combined with custom duplicate message detection (if it is unacceptable
  * to ever process the same message twice).
- * <li>Alternatively, specify a JtaTransactionManager as "transactionManager"
+ * <li>Alternatively, specify a
+ * {@link org.springframework.transaction.jta.JtaTransactionManager} as "transactionManager"
  * for a full XA-aware JMS provider - typically when running on a J2EE server,
  * but also for other environments with a JTA transaction manager present.
  * This will give full "exactly-once" guarantees without custom duplicate
@@ -131,8 +136,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 
 	/**
-	 * Create a new AbstractMessageListenerContainer,
-	 * with a DynamicDestinationResolver as default DestinationResolver.
+	 * Create a new {@link AbstractMessageListenerContainer} ,
+	 * using a {@link DynamicDestinationResolver} as the default
+     * {@link org.springframework.jms.support.destination.DestinationResolver}.
 	 */
 	public AbstractMessageListenerContainer() {
 		setDestinationResolver(new DynamicDestinationResolver());
@@ -142,7 +148,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	/**
 	 * Set the destination to receive messages from.
 	 * <p>Alternatively, specify a "destinationName", to be dynamically
-	 * resolved via the DestinationResolver.
+	 * resolved via the {@link org.springframework.jms.support.destination.DestinationResolver}.
 	 * @see #setDestinationName(String)
 	 */
 	public void setDestination(Destination destination) {
@@ -151,15 +157,21 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	/**
 	 * Return the destination to receive messages from.
+     * @return the destination to receive messages from (will be 
+     * <code>null</code> if the configured destination is not an actual
+     * {@link Destination} type; c.f. {@link #setDestinationName(String)
+     * when the destination is a String})
 	 */
 	protected Destination getDestination() {
 		return (this.destination instanceof Destination ? (Destination) this.destination : null);
 	}
 
 	/**
-	 * Set the name of the destination to receive messages from. The specified
-	 * name will be dynamically resolved via the DestinationResolver.
-	 * <p>Alternatively, specify a JMS Destination object as "destination".
+	 * Set the name of the destination to receive messages from.
+     * <p>The specified name will be dynamically resolved via the configured
+     * {@link #setDestinationResolver(org.springframework.jms.support.destination.DestinationResolver) destination resolver}.
+	 * <p>Alternatively, specify a JMS {@link Destination} object as "destination".
+     * @param destinationName the desired destination (can be <code>null</code>) 
 	 * @see #setDestination(javax.jms.Destination)
 	 */
 	public void setDestinationName(String destinationName) {
@@ -168,6 +180,10 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	/**
 	 * Return the name of the destination to receive messages from.
+     * @return the name of the destination to receive messages from
+     * (will be <code>null</code> if the configured destination is not a
+     * {@link String} type; c.f. {@link #setDestination(Destination) when
+     * it is an actual Destination})
 	 */
 	protected String getDestinationName() {
 		return (this.destination instanceof String ? (String) this.destination : null);
@@ -192,8 +208,10 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	/**
 	 * Set the message listener implementation to register.
-	 * This can be either a standard JMS MessageListener object
-	 * or a Spring SessionAwareMessageListener object.
+	 * This can be either a standard JMS {@link MessageListener} object
+	 * or a Spring {@link SessionAwareMessageListener} object.
+     * @throws IllegalArgumentException if the supplied listener is not a 
+     * {@link MessageListener} or a {@link SessionAwareMessageListener}
 	 * @see javax.jms.MessageListener
 	 * @see SessionAwareMessageListener
 	 */
@@ -205,18 +223,21 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	/**
 	 * Check the given message listener, throwing an exception
 	 * if it does not correspond to a supported listener type.
-	 * <p>By default, only a standard JMS MessageListener object or a
-	 * Spring SessionAwareMessageListener object will be accepted.
+	 * <p>By default, only a standard JMS {@link MessageListener} object or a
+	 * Spring {@link SessionAwareMessageListener} object will be accepted.
 	 * @param messageListener the message listener object to check
+     * @throws IllegalArgumentException if the supplied listener is not a 
+     * {@link MessageListener} or a {@link SessionAwareMessageListener}
 	 * @see javax.jms.MessageListener
 	 * @see SessionAwareMessageListener
 	 */
 	protected void checkMessageListener(Object messageListener) {
 		if (!(messageListener instanceof MessageListener ||
 				messageListener instanceof SessionAwareMessageListener)) {
-			throw new IllegalArgumentException(
-					"messageListener needs to be of type [javax.jms.MessageListener] or " +
-					"[org.springframework.jmx.listener.SessionAwareMessageListener]");
+            throw new IllegalArgumentException(
+                    "messageListener needs to be of type [" +
+                            MessageListener.class.getName() + "] or [" +
+                            SessionAwareMessageListener.class.getName() + "]");
 		}
 	}
 
@@ -238,18 +259,20 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	/**
 	 * Return the JMS ExceptionListener to notify in case of a JMSException
 	 * thrown by the registered message listener, if any.
+     * @return the JMS ExceptionListener to notify in case of a JMSException
+	 * thrown by the registered message listener; may be <code>null</code> 
 	 */
 	protected ExceptionListener getExceptionListener() {
-		return exceptionListener;
+		return this.exceptionListener;
 	}
 
 	/**
 	 * Set whether to expose the listener JMS Session to a registered
-	 * SessionAwareMessageListener. Default is "true", reusing the listener's
-	 * Session.
+	 * {@link SessionAwareMessageListener}. Default is "true", reusing
+     * the listener's {@link Session}.
 	 * <p>Turn this off to expose a fresh JMS Session fetched from the same
-	 * underlying JMS Connection instead, which might be necessary on some
-	 * JMS providers.
+	 * underlying JMS {@link Connection} instead, which might be necessary
+     * on some JMS providers.
 	 * @see SessionAwareMessageListener
 	 */
 	public void setExposeListenerSession(boolean exposeListenerSession) {
@@ -257,8 +280,8 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	}
 
 	/**
-	 * Return whether to expose the listener JMS Session to a registered
-	 * SessionAwareMessageListener.
+	 * Return whether to expose the listener JMS {@link Session} to a
+     * registered {@link SessionAwareMessageListener}.
 	 */
 	protected boolean isExposeListenerSession() {
 		return exposeListenerSession;
@@ -274,7 +297,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 
 	/**
-	 * Validate configuration and call <code>initialize</code>.
+	 * Validate configuration and call {@link #initialize()}.
 	 * @see #initialize()
 	 */
 	public void afterPropertiesSet() {
@@ -292,8 +315,10 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	/**
 	 * Initialize this message listener container.
-	 * <p>Creates a JMS Connection, register the given listener object,
-	 * and start the Connection (if "autoStartup" hasn't been turned off).
+	 * <p>Creates a JMS Connection, registers the
+     * {@link #setMessageListener(Object) given listener object},
+	 * and starts the {@link Connection}
+     * (if {@link #setAutoStartup(boolean) "autoStartup"} hasn't been turned off).
 	 */
 	public void initialize() {
 		try {
@@ -358,8 +383,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 			this.connection.start();
 			this.running = true;
 		}
-		catch (javax.jms.IllegalStateException ex) {
-			// Ignore: already started.
+		catch (javax.jms.IllegalStateException ignoreSinceAlreadyStarted) {
 		}
 		catch (JMSException ex) {
 			throw convertJmsAccessException(ex);
@@ -377,8 +401,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 			this.connection.stop();
 			this.running = false;
 		}
-		catch (javax.jms.IllegalStateException ex) {
-			// Ignore: not started yet.
+		catch (javax.jms.IllegalStateException ignoreSinceNotYetStarted) {
 		}
 		catch (JMSException ex) {
 			throw convertJmsAccessException(ex);
@@ -565,7 +588,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	protected void rollbackOnExceptionIfNecessary(Session session, Throwable ex) throws JmsException {
 		try {
 			if (session.getTransacted() && isSessionTransacted()) {
-					// Transacted session created by this container -> rollback.
+				// Transacted session created by this container -> rollback.
 				if (logger.isDebugEnabled()) {
 					logger.debug("Initiating transaction rollback on application exception", ex);
 				}

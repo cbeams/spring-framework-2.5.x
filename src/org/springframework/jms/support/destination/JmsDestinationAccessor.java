@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,11 @@ import javax.jms.Session;
 import org.springframework.jms.support.JmsAccessor;
 
 /**
- * Base class for JmsTemplate and other JMS-accessing gateway helpers,
- * adding destination-related properties to JmsAccessor's common properties.
+ * Base class for {@link org.springframework.jms.core.JmsTemplate} and other
+ * JMS-accessing gateway helpers, adding destination-related properties to
+ * {@link JmsAccessor JmsAccessor's} common properties.
  *
- * <p>Not intended to be used directly. See JmsTemplate.
+ * <p>Not intended to be used directly. See {@link org.springframework.jms.core.JmsTemplate}.
  *
  * @author Juergen Hoeller
  * @since 1.2.5
@@ -37,7 +38,7 @@ public class JmsDestinationAccessor extends JmsAccessor {
 
 	private boolean pubSubDomain = false;
 
-	private DestinationResolver destinationResolver;
+	private DestinationResolver destinationResolver = new DynamicDestinationResolver();
 
 
 	/**
@@ -47,8 +48,8 @@ public class JmsDestinationAccessor extends JmsAccessor {
 	 * to use in the implementation of its operations. For JMS 1.1 based accessors, this
 	 * setting does usually not affect operations. However, for both JMS versions, this
 	 * setting tells what type of destination to create if dynamic destinations are enabled.
-	 * @param pubSubDomain "true" for Publish/Subscribe domain (Topics),
-	 * "false" for Point-to-Point domain (Queues)
+	 * @param pubSubDomain "true" for the Publish/Subscribe domain ({@link javax.jms.Topic Topics}),
+	 * "false" for the Point-to-Point domain ({@link javax.jms.Queue Queues})
 	 * @see #setDestinationResolver
 	 */
 	public void setPubSubDomain(boolean pubSubDomain) {
@@ -56,18 +57,19 @@ public class JmsDestinationAccessor extends JmsAccessor {
 	}
 
 	/**
-	 * Return whether the Publish/Subscribe domain (Topics) is used.
-	 * Otherwise, the Point-to-Point domain (Queues) is used.
+	 * Return whether the Publish/Subscribe domain ({@link javax.jms.Topic Topics}) is used.
+	 * Otherwise, the Point-to-Point domain ({@link javax.jms.Queue Queues}) is used.
 	 */
 	public boolean isPubSubDomain() {
 		return pubSubDomain;
 	}
 
 	/**
-	 * Set the destination resolver for this accessor. Used to resolve
-	 * destination names and to support dynamic destination functionality.
-	 * <p>The default resolver is a DynamicDestinationResolver. Specify a
-	 * JndiDestinationResolver for resolving destination names as JNDI locations.
+	 * Set the destination resolver that is to be used to resolve
+     * {@link Destination Destinations} for this accessor.
+	 * <p>The default resolver is a {@link DynamicDestinationResolver}. Specify a
+	 * {@link JndiDestinationResolver} for resolving destination names as JNDI locations.
+     * @param destinationResolver the destination resolver that is to be used
 	 * @see org.springframework.jms.support.destination.DynamicDestinationResolver
 	 * @see org.springframework.jms.support.destination.JndiDestinationResolver
 	 */
@@ -77,6 +79,7 @@ public class JmsDestinationAccessor extends JmsAccessor {
 
 	/**
 	 * Return the destination resolver for this accessor.
+     * @return the destination resolver for this accessor
 	 */
 	public DestinationResolver getDestinationResolver() {
 		return destinationResolver;
@@ -84,16 +87,29 @@ public class JmsDestinationAccessor extends JmsAccessor {
 
 
 	/**
-	 * Resolve the given destination name into a JMS Destination,
-	 * via this accessor's DestinationResolver.
-	 * @param session the current JMS Session
+	 * Resolve the given destination name into a JMS {@link Destination},
+	 * via this accessor's {@link DestinationResolver}.
+	 * @param session the current JMS {@link Session}
 	 * @param destinationName the name of the destination
-	 * @return the located Destination
+	 * @return the located {@link Destination}
 	 * @throws javax.jms.JMSException if resolution failed
 	 * @see #setDestinationResolver
+     * @see #getDestinationResolver() 
 	 */
 	protected Destination resolveDestinationName(Session session, String destinationName) throws JMSException {
 		return getDestinationResolver().resolveDestinationName(session, destinationName, isPubSubDomain());
+	}
+
+
+    /**
+	 * Validate configuration.
+	 */
+	public void afterPropertiesSet() {
+		super.afterPropertiesSet();
+
+		if (this.destinationResolver == null) {
+			throw new IllegalArgumentException("destinationResolver is required");
+		}
 	}
 
 }
