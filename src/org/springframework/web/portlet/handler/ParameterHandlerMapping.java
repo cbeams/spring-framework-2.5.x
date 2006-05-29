@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,33 +48,35 @@ import org.springframework.context.ApplicationContextException;
  * @author Rainer Schmitz
  * @author John A. Lewis
  * @since 2.0
+ * @see ParameterMappingInterceptor
  */
 public class ParameterHandlerMapping extends AbstractHandlerMapping {
 
-	// lazy init the handlers at startup
-	private boolean lazyInitHandler = false;
-
     // request parameter name to use for mapping to handlers
     public final static String DEFAULT_PARAMETER_NAME = "action";
+
+
 	private String parameterName = DEFAULT_PARAMETER_NAME;
 
-	// map passed in from application context file
 	private Map parameterMap;
 
-	// internal map build from passed in map and used by mapping routines
+	private boolean lazyInitHandlers = false;
+
 	protected final Map handlerMap = new HashMap();
+
+
+    /**
+     * Set the name of the parameter used for mapping.
+     */
+    public void setParameterName(String parameterName) {
+        this.parameterName = parameterName;
+    }
 
     /**
      * Get the name of the parameter used for mapping.
      */
     public String getParameterName() {
         return parameterName;
-    }
-    /**
-     * Set the name of the parameter used for mapping.
-     */
-    public void setParameterName(String parameterName) {
-        this.parameterName = parameterName;
     }
 
 	/**
@@ -84,6 +86,20 @@ public class ParameterHandlerMapping extends AbstractHandlerMapping {
 	 */
 	public void setParameterMap(Map parameterMap) {
 		this.parameterMap = parameterMap;
+	}
+
+	/**
+	 * Set whether to lazily initialize handlers. Only applicable to
+	 * singleton handlers, as prototypes are always lazily initialized.
+	 * Default is false, as eager initialization allows for more efficiency
+	 * through referencing the handler objects directly.
+	 * <p>If you want to allow your handlers to be lazily initialized,
+	 * make them "lazy-init" and set this flag to true. Just making them
+	 * "lazy-init" will not work, as they are initialized through the
+	 * references from the handler mapping in this case.
+	 */
+	public void setLazyInitHandlers(boolean lazyInitHandlers) {
+		this.lazyInitHandlers = lazyInitHandlers;
 	}
 
 	public void initApplicationContext() throws BeansException {
@@ -110,20 +126,6 @@ public class ParameterHandlerMapping extends AbstractHandlerMapping {
 		}
 	}
 	
-	/**
-	 * Set whether to lazily initialize handlers. Only applicable to
-	 * singleton handlers, as prototypes are always lazily initialized.
-	 * Default is false, as eager initialization allows for more efficiency
-	 * through referencing the handler objects directly.
-	 * <p>If you want to allow your handlers to be lazily initialized,
-	 * make them "lazy-init" and set this flag to true. Just making them
-	 * "lazy-init" will not work, as they are initialized through the
-	 * references from the handler mapping in this case.
-	 */
-	public void setLazyInitHandlers(boolean lazyInitHandlers) {
-		this.lazyInitHandler = lazyInitHandlers;
-	}
-
     /**
 	 * Register the given handler instance for the given parameter value.
 	 * @param parameter the parameter value to which this handler is mapped
@@ -140,7 +142,7 @@ public class ParameterHandlerMapping extends AbstractHandlerMapping {
 			        "]: there's already handler [" + mappedHandler + "] mapped");
 
 		// eagerly resolve handler if referencing singleton via name
-		if (!this.lazyInitHandler && handler instanceof String) {
+		if (!this.lazyInitHandlers && handler instanceof String) {
 			String handlerName = (String) handler;
 			if (getApplicationContext().isSingleton(handlerName)) {
 				handler = getApplicationContext().getBean(handlerName);

@@ -164,7 +164,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		ParameterHandlerMapping interceptingHandlerMapping = new ParameterHandlerMapping();
 		interceptingHandlerMapping.setParameterName("interceptingParam");
 		ParameterMappingInterceptor parameterMappingInterceptor = new ParameterMappingInterceptor();
-		parameterMappingInterceptor.setHandlerMapping(interceptingHandlerMapping);
+		parameterMappingInterceptor.setParameterName("interceptingParam");
 
 		List interceptors = new ArrayList();
 		interceptors.add(parameterMappingInterceptor);

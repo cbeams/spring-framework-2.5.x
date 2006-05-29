@@ -64,7 +64,7 @@ public class ParameterMappingInterceptorTests extends TestCase {
 		ParameterHandlerMapping handlerMapping = new ParameterHandlerMapping();
 		handlerMapping.setParameterName(param);
 		ParameterMappingInterceptor interceptor = new ParameterMappingInterceptor();
-		interceptor.setHandlerMapping(handlerMapping);
+		interceptor.setParameterName(param);
 		Object handler = new Object();
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
@@ -118,7 +118,7 @@ public class ParameterMappingInterceptorTests extends TestCase {
 		ParameterHandlerMapping handlerMapping = new ParameterHandlerMapping();
 		handlerMapping.setParameterName(param);
 		ParameterMappingInterceptor interceptor = new ParameterMappingInterceptor();
-		interceptor.setHandlerMapping(handlerMapping);
+		interceptor.setParameterName(param);
 		Object handler = new Object();
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();

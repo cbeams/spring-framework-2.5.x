@@ -76,6 +76,7 @@ import org.springframework.context.ApplicationContextException;
  * @author Yujin Kim
  * @author John A. Lewis
  * @since 2.0
+ * @see ParameterMappingInterceptor
  */
 public class PortletModeParameterHandlerMapping extends AbstractHandlerMapping {
 
@@ -87,11 +88,11 @@ public class PortletModeParameterHandlerMapping extends AbstractHandlerMapping {
 
 	private Map portletModeParameterMap;
 
-	private boolean allowDupParameters = false;
-
 	private boolean lazyInitHandlers = false;
 
 	protected final Map handlerMap = new HashMap();
+
+	private boolean allowDupParameters = false;
 
 	private Map parameterUsedMap = new HashMap();
 
@@ -104,7 +105,7 @@ public class PortletModeParameterHandlerMapping extends AbstractHandlerMapping {
 	}
 
 	/**
-	 * Return the name of the parameter used for mapping.
+	 * Get the name of the parameter used for mapping.
 	 */
 	public String getParameterName() {
 		return parameterName;
@@ -121,19 +122,6 @@ public class PortletModeParameterHandlerMapping extends AbstractHandlerMapping {
 	}
 
 	/**
-	 * Set whether to allow duplicate parameter values across different
-	 * portlet modes. Doing this is dangerous because the portlet mode
-	 * can be changed by the portal itself and the only way to see that
-	 * is a rerender of the portlet. If the same parameter value is
-	 * legal in multiple modes, then a change in mode could result in
-	 * a matched mapping that is not intended and the user could end up
-	 * in a strange place in the application.
-	 */
-	public void setAllowDupParameters(boolean allowDupParameters) {
-		this.allowDupParameters = allowDupParameters;
-	}
-
-	/**
 	 * Set whether to lazily initialize handlers. Only applicable to
 	 * singleton handlers, as prototypes are always lazily initialized.
 	 * Default is false, as eager initialization allows for more efficiency
@@ -147,21 +135,36 @@ public class PortletModeParameterHandlerMapping extends AbstractHandlerMapping {
 		this.lazyInitHandlers = lazyInitHandlers;
 	}
 
+	/**
+	 * Set whether to allow duplicate parameter values across different
+	 * portlet modes. Doing this is dangerous because the portlet mode
+	 * can be changed by the portal itself and the only way to see that
+	 * is a rerender of the portlet. If the same parameter value is
+	 * legal in multiple modes, then a change in mode could result in
+	 * a matched mapping that is not intended and the user could end up
+	 * in a strange place in the application.
+	 */
+	public void setAllowDupParameters(boolean allowDupParameters) {
+		this.allowDupParameters = allowDupParameters;
+	}
+
 
 	public void initApplicationContext() throws BeansException {
-		// Make sure parameterName has a value
+
+		// make sure parameterName has a value
 		if (this.parameterName == null) {
 			throw new IllegalArgumentException("A parameterName is required");
 		}
 
-		// Make sure the map got initialized.
+		// make sure the map got initialized.
 		if (this.portletModeParameterMap == null || this.portletModeParameterMap.isEmpty()) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("'portletModeParameterMap' not set on PortletModeParameterHandlerMapping");
 			}
 		}
 		else {
-			// Iterate through the portlet modes in the passed in map.
+			
+			// iterate through the portlet modes in the passed in map.
 			for (Iterator it = this.portletModeParameterMap.keySet().iterator(); it.hasNext();) {
 				// Get the portlet mode for this map
 				String modeKey = (String) it.next();

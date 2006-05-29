@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,62 +20,76 @@ import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
-import javax.portlet.RenderRequest;
-import javax.portlet.RenderResponse;
 
-import org.springframework.web.portlet.HandlerInterceptor;
-import org.springframework.web.portlet.ModelAndView;
+import org.springframework.beans.BeansException;
 
 /**
- * Interceptor to foward mapping request parameters to the render action.
+ * <p>Interceptor to forward a request parameter from the <code>ActionRequest</code> to the 
+ * <code>RenderRequest</code>.</p>
+ * 
+ * <p>This can be useful when using {@link ParameterHandlerMapping ParameterHandlerMapping}
+ * or {@link PortletModeParameterHandlerMapping PortletModeParameterHandlerMapping}.
+ * It will ensure that the parameter that was used to map the <code>ActionRequest</code>
+ * to a handler will be forwarded to the <code>RenderRequest</code> so that it will also be 
+ * mapped the same way.</p>
+ *
+ * <p>When using this Interceptor, you can still change the value of the mapping parameter
+ * in your handler in order to change where the render request will get mapped.</p>
+ *
+ * <p>Be aware that this Interceptor does call <code>ActionResponse.setRenderParameter</code>,
+ * which means that you will not be able to call <code>ActionResponse.sendRedirect</code> in
+ * your handler.  If you may need to issue a redirect, then you should avoid this Interceptor
+ * and either write a different one that does this in a different way, or manually forward
+ * the parameter from within your handler(s).</p>
  *
  * @author Rainer Schmitz
  * @author John A. Lewis
  * @since 2.0
  * @see ParameterHandlerMapping
+ * @see PortletModeParameterHandlerMapping
  */
-public class ParameterMappingInterceptor implements HandlerInterceptor {
+public class ParameterMappingInterceptor extends HandlerInterceptorAdapter {
 
-	private ParameterHandlerMapping handlerMapping;
+    // request parameter name to use for mapping to handlers
+    public final static String DEFAULT_PARAMETER_NAME = "action";
+
+	private String parameterName = DEFAULT_PARAMETER_NAME;
 
 
-	/**
-	 * Set the ParameterHandlerMapping containing the mapping request
-	 * parameter name. If no value is provided, the default parameter mapping
-	 * name {@link ParameterHandlerMapping#DEFAULT_PARAMETER_NAME} is used.
-	 * @param handlerMapping The ParameterHandlerMapping to set.
-	 */
-	public void setHandlerMapping(ParameterHandlerMapping handlerMapping) {
-		this.handlerMapping = handlerMapping;
+    /**
+     * Set the name of the parameter used for mapping.
+     */
+    public void setParameterName(String parameterName) {
+        this.parameterName = parameterName;
+    }
+
+    /**
+     * Get the name of the parameter used for mapping.
+     */
+    public String getParameterName() {
+        return parameterName;
+    }
+
+
+	public void initApplicationContext() throws BeansException {
+	    // make sure parameterName has a value
+		if (this.getParameterName() == null)
+            throw new IllegalArgumentException("A parameterName is required");
 	}
-
-
+	
 	/**
 	 * If request is an {@link javax.portlet.ActionRequest ActionRequest},
 	 * get handler mapping parameter and add it to the ActionResponse.
 	 */
 	public boolean preHandle(PortletRequest request, PortletResponse response, Object handler)
 			throws Exception {
-
 		if (request instanceof ActionRequest) {
-			String parameterName = (this.handlerMapping != null ? handlerMapping.getParameterName() :
-					ParameterHandlerMapping.DEFAULT_PARAMETER_NAME);
-			String mappingParameter = request.getParameter(parameterName);
+			String mappingParameter = request.getParameter(this.getParameterName());
 			if (mappingParameter != null) {
 				((ActionResponse) response).setRenderParameter(parameterName, mappingParameter);
 			}
 		}
 		return true;
-	}
-
-	public void postHandle(
-			RenderRequest request, RenderResponse response, Object handler, ModelAndView modelAndView)
-			throws Exception {
-	}
-
-	public void afterCompletion(
-			PortletRequest request, PortletResponse response, Object handler, Exception ex)
-			throws Exception {
 	}
 
 }

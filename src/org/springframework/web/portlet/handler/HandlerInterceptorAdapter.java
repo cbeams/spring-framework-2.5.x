@@ -21,6 +21,7 @@ import javax.portlet.PortletResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
+import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.web.portlet.HandlerInterceptor;
 import org.springframework.web.portlet.ModelAndView;
 
@@ -31,7 +32,8 @@ import org.springframework.web.portlet.ModelAndView;
  * @author John A. Lewis
  * @since 2.0
  */
-public abstract class HandlerInterceptorAdapter implements HandlerInterceptor {
+public abstract class HandlerInterceptorAdapter extends ApplicationObjectSupport
+	implements HandlerInterceptor {
 
 	/**
 	 * This implementation always returns true.
