@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Default implementation of the ResourceLoader interface.
@@ -49,7 +50,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	public DefaultResourceLoader() {
-		this.classLoader = Thread.currentThread().getContextClassLoader();
+		this.classLoader = ClassUtils.getDefaultClassLoader();
 	}
 
 	/**
