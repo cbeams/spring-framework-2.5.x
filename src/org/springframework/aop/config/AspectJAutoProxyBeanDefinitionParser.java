@@ -16,18 +16,19 @@
 
 package org.springframework.aop.config;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.Conventions;
 import org.springframework.util.StringUtils;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * {@link BeanDefinitionParser} implementation that for the '<code>aspectj-autoproxy</code>' tag
@@ -43,15 +44,16 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String PROXY_TARGET_CLASS = Conventions.attributeNameToPropertyName(PROXY_TARGET_ATTRIBUTE);
 
+
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
-		NamespaceHandlerUtils.registerAtAspectJAutoProxyCreatorIfNecessary(parserContext);
+		AopNamespaceUtils.registerAtAspectJAutoProxyCreatorIfNecessary(parserContext);
 		extendBeanDefinition(registry, element);
 		return null;
 	}
 
 	private void extendBeanDefinition(BeanDefinitionRegistry registry, Element element) {
-		BeanDefinition beanDef = registry.getBeanDefinition(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		BeanDefinition beanDef = registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		String proxyTargetClass = element.getAttribute(PROXY_TARGET_ATTRIBUTE);
 		if (StringUtils.hasText(proxyTargetClass)) {
 			beanDef.getPropertyValues().addPropertyValue(PROXY_TARGET_CLASS, proxyTargetClass);

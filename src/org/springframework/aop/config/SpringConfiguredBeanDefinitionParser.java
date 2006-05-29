@@ -16,13 +16,14 @@
 
 package org.springframework.aop.config;
 
-import org.springframework.beans.factory.support.BeanDefinitionRegistryBuilder;
+import org.w3c.dom.Element;
+
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryBuilder;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.util.ClassUtils;
-import org.w3c.dom.Element;
 
 /**
  * {@link BeanDefinitionParser} responsible for parsing the <code>&lt;aop:spring-configured/&gt;</code> tag.
@@ -37,7 +38,9 @@ class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String BEAN_CONFIGURER = "org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect";
 
+
 	private boolean registered;
+
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		if (!this.registered) {
@@ -51,9 +54,9 @@ class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 
 	/**
 	 * Returns the <code>Class</code> instance for the {@link #BEAN_CONFIGURER bean configurer}.
-	 * @throws IllegalStateException if the bean configurer <code>Class</code> cannot be found.
+	 * @throws IllegalStateException if the bean configurer <code>Class</code> cannot be found
 	 */
-	private Class getBeanConfigurerClass() throws IllegalStateException {
+	private static Class getBeanConfigurerClass() throws IllegalStateException {
 		try {
 			return ClassUtils.forName(BEAN_CONFIGURER);
 		}
@@ -62,4 +65,5 @@ class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 					"Unable to locate class [" + BEAN_CONFIGURER + "]: cannot use @Configurable");
 		}
 	}
+
 }

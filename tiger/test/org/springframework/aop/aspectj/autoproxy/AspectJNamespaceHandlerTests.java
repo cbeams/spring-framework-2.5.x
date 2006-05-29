@@ -18,7 +18,7 @@ package org.springframework.aop.aspectj.autoproxy;
 
 import junit.framework.TestCase;
 
-import org.springframework.aop.config.NamespaceHandlerUtils;
+import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -54,43 +54,43 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 	}
 
 	public void testRegisterAutoProxyCreator() throws Exception {
-		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(this.parserContext);
+		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(this.parserContext);
 		assertEquals("Incorrect number of definitions registered", 1, registry.getBeanDefinitionCount());
 
-		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
+		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
 		assertEquals("Incorrect number of definitions registered", 1, registry.getBeanDefinitionCount());
 	}
 
 	public void testRegisterAspectJAutoProxyCreator() throws Exception {
-		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
+		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
 		assertEquals("Incorrect number of definitions registered", 1, registry.getBeanDefinitionCount());
 
-		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
+		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
 		assertEquals("Incorrect number of definitions registered", 1, registry.getBeanDefinitionCount());
 
-		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		assertEquals("Incorrect APC class", AspectJInvocationContextExposingAdvisorAutoProxyCreator.class, definition.getBeanClass());
 	}
 
 	public void testRegisterAspectJAutoProxyCreatorWithExistingAutoProxyCreator() throws Exception {
-		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(this.parserContext);
+		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(this.parserContext);
 		assertEquals(1, registry.getBeanDefinitionCount());
 
-		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
+		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
 		assertEquals("Incorrect definition count", 1, registry.getBeanDefinitionCount());
 
-		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		assertEquals("APC class not swicthed", AspectJInvocationContextExposingAdvisorAutoProxyCreator.class, definition.getBeanClass());
 	}
 
 	public void testRegisterAutoProxyCreatorWhenAspectJAutoProxyCreatorAlreadyExists() throws Exception {
-		NamespaceHandlerUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
+		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
 		assertEquals(1, registry.getBeanDefinitionCount());
 
-		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(this.parserContext);
+		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(this.parserContext);
 		assertEquals("Incorrect definition count", 1, registry.getBeanDefinitionCount());
 
-		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		assertEquals("Incorrect APC class", AspectJInvocationContextExposingAdvisorAutoProxyCreator.class, definition.getBeanClass());
 	}
 

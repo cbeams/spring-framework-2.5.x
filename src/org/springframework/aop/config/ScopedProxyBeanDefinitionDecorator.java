@@ -36,11 +36,12 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
 	private static final String TARGET_NAME_PREFIX = "scopedTarget.";
 
+
 	public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
 
 		// Must use class proxying for any AOP advice now.
-		NamespaceHandlerUtils.forceAutoProxyCreatorToUseClassProxying(registry);
+		AopNamespaceUtils.forceAutoProxyCreatorToUseClassProxying(registry);
 
 		String originalBeanName = definition.getBeanName();
 		String targetBeanName = TARGET_NAME_PREFIX + originalBeanName;

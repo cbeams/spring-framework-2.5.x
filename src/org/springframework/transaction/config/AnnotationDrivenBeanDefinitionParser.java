@@ -18,7 +18,7 @@ package org.springframework.transaction.config;
 
 import org.w3c.dom.Element;
 
-import org.springframework.aop.config.NamespaceHandlerUtils;
+import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -38,11 +38,12 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	public static final String TRANSACTION_INTERCEPTOR = "transactionInterceptor";
 
+
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
 
 		// Register the APC if needed.
-		NamespaceHandlerUtils.registerAutoProxyCreatorIfNecessary(parserContext);
+		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext);
 
 		String transactionManagerName = element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE);
 		Class sourceClass = TxNamespaceUtils.getAnnotationTransactionAttributeSourceClass();

@@ -20,9 +20,9 @@ import junit.framework.TestCase;
 
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.PerTargetAspect;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.TwoAdviceAspect;
-import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
-import org.springframework.aop.config.NamespaceHandlerUtils;
+import org.springframework.aop.aspectj.annotation.AspectMetadata;
+import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
@@ -34,9 +34,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
- * Tests for AspectJ auto proxying. Includes mixing with Spring AOP 
- * Advisors to demonstrate that existing autoproxying contract is honoured.
- * 
+ * Tests for AspectJ auto proxying. Includes mixing with Spring AOP Advisors
+ * to demonstrate that existing autoproxying contract is honoured.
+ *
  * @author Rod Johnson
  */
 public class AspectJAutoProxyCreatorTests extends TestCase {
@@ -206,7 +206,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 	public void testForceProxyTargetClass() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 		"/org/springframework/aop/aspectj/autoproxy/aspectsWithCGLIB.xml");
-		ProxyConfig pc = (ProxyConfig) bf.getBean(NamespaceHandlerUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		ProxyConfig pc = (ProxyConfig) bf.getBean(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		assertTrue("should be proxying classes",pc.isProxyTargetClass());
 	}
 
