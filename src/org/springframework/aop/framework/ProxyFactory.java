@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,6 @@ import org.aopalliance.intercept.Interceptor;
 import org.springframework.aop.TargetSource;
 import org.springframework.util.ClassUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-
 /**
  * Factory for AOP proxies for programmatic use, rather than via a bean
  * factory. This class provides a simple way of obtaining and configuring
@@ -44,7 +40,9 @@ public class ProxyFactory extends AdvisedSupport implements AopProxy {
 
 	/**
 	 * Create a new ProxyFactory.
-	 * Proxy all interfaces of the given target.
+	 * <p>Will proxy all interfaces of the given target.
+     * @param target the target object that is to be proxied
+     * @throws AopConfigException if the supplied target object is <code>null</code> 
 	 */
 	public ProxyFactory(Object target) throws AopConfigException {
 		if (target == null) {
@@ -127,4 +125,5 @@ public class ProxyFactory extends AdvisedSupport implements AopProxy {
 		proxyFactory.setProxyTargetClass(true);
 		return proxyFactory.getProxy();
 	}
+
 }

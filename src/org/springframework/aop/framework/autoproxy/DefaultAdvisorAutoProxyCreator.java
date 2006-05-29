@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,7 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import org.springframework.aop.Advisor;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.ListableBeanFactory;
 
 /**
  * BeanPostProcessor implementation that creates AOP proxies based on all candidate
@@ -91,7 +85,8 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 		}
 	}
 
-	protected boolean isEligibleForProxying(String beanName) {
+
+    protected boolean isEligibleForProxying(String beanName) {
 		return (!this.usePrefix || beanName.startsWith(this.advisorBeanNamePrefix));
 	}              
 

@@ -18,7 +18,6 @@ package org.springframework.aop.support;
 
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.PointcutAdvisor;
-import org.springframework.aop.ClassFilter;
 import org.springframework.core.Ordered;
 import org.springframework.util.ObjectUtils;
 
