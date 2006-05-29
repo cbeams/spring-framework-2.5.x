@@ -58,28 +58,28 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	public static final String NO_ROLLBACK_FOR = "no-rollback-for";
 
+
 	protected Class getBeanClass(Element element) {
 		return TransactionInterceptor.class;
 	}
 
 	protected void doParse(Element element, BeanDefinitionBuilder builder) {
-		// set the transaction manager property
-		builder.addPropertyReference(TxNamespaceHandler.TRANSACTION_MANAGER_PROPERTY, element.getAttribute(TxNamespaceHandler.TRANSACTION_MANAGER_ATTRIBUTE));
+		// Set the transaction manager property.
+		builder.addPropertyReference(TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY,
+				element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE));
 
 		List txAttributes = DomUtils.getChildElementsByTagName(element, ATTRIBUTES);
-
 		if (txAttributes.size() > 1) {
 			throw new IllegalStateException("Element 'attributes' is allowed at most once inside element 'advice'");
 		}
 		else if (txAttributes.size() == 1) {
-			// using Attributes source
+			// Using attributes source.
 			parseAttributes((Element) txAttributes.get(0), builder);
 		}
 		else {
-			// assume annotations source
-			// TODO: fix this to use direct class reference when building all on 1.5
-			builder.addPropertyValue(TxNamespaceHandler.TRANSACTION_ATTRIBUTE_SOURCE,
-					new RootBeanDefinition(TxNamespaceHandler.getAnnotationSourceClass()));
+			// Assume annotations source.
+			Class sourceClass = TxNamespaceUtils.getAnnotationTransactionAttributeSourceClass();
+			builder.addPropertyValue(TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE, new RootBeanDefinition(sourceClass));
 		}
 	}
 
@@ -118,7 +118,7 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 		attributeSourceDefinition.setPropertyValues(new MutablePropertyValues());
 		attributeSourceDefinition.getPropertyValues().addPropertyValue(NAME_MAP, transactionAttributeMap);
 
-		builder.addPropertyValue(TxNamespaceHandler.TRANSACTION_ATTRIBUTE_SOURCE, attributeSourceDefinition);
+		builder.addPropertyValue(TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE, attributeSourceDefinition);
 	}
 
 	private void addRollbackRuleAttributesTo(List rollbackRules, String rollbackForValue) {

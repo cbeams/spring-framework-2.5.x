@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.transaction.config;
 
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
-import org.springframework.util.ClassUtils;
 import org.springframework.core.Conventions;
 
 /**
@@ -26,26 +25,9 @@ import org.springframework.core.Conventions;
  */
 public class TxNamespaceHandler extends NamespaceHandlerSupport {
 
-	public static final String TRANSACTION_MANAGER_ATTRIBUTE = "transaction-manager";
-
-	public static final String TRANSACTION_MANAGER_PROPERTY = Conventions.attributeNameToPropertyName(TRANSACTION_MANAGER_ATTRIBUTE);
-
-	public static final String TRANSACTION_ATTRIBUTE_SOURCE = "transactionAttributeSource";
-
-	public static final String ANNOTATION_SOURCE_CLASS_NAME = "org.springframework.transaction.annotation.AnnotationTransactionAttributeSource";
-
 	public void init() {
 		registerBeanDefinitionParser("advice", new TxAdviceBeanDefinitionParser());
 		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenBeanDefinitionParser());
-	}
-
-	public static Class getAnnotationSourceClass() {
-		try {
-			return ClassUtils.forName(ANNOTATION_SOURCE_CLASS_NAME);
-		}
-		catch (ClassNotFoundException e) {
-			throw new IllegalStateException("Unable to locate AnnotationTransactionAttributeSource. Are you running on Java 1.5?");
-		}
 	}
 
 }
