@@ -21,11 +21,11 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 /**
  * Base implementation of {@link ComponentDefinition} that provides a basic implementation of
  * {@link #getDescription} which delegates to {@link #getName}. Also provides a base implementation
- * of {@link toString} which delegates to {@link #getDescription} in keeping with the recommended
- * implementation strategy. Also provides a default implementation of {@link #getBeanReferences} that
- * returns an empty {@link RuntimeBeanReference RuntimeBeanReference[]} since this is not all
- * implementations will describe bean relationships in this way.
- * 
+ * of {@link #toString} which delegates to {@link #getDescription} in keeping with the recommended
+ * implementation strategy. Also provides a default implementation of {@link #getBeanReferences}
+ * that returns an empty {@link RuntimeBeanReference RuntimeBeanReference[]} since this is not
+ * all implementations will describe bean relationships in this way.
+ *
  * @author Rob Harrop
  * @since 2.0
  */
@@ -51,4 +51,5 @@ public abstract class AbstractComponentDefinition implements ComponentDefinition
 	public String toString() {
 		return getDescription();
 	}
+
 }

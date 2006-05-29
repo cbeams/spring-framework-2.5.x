@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,8 +93,7 @@ public abstract class AbstractUrlViewController extends AbstractController {
 	/**
 	 * Return the name of the view to render for this request, based on the
 	 * given lookup path. Called by <code>handleRequestInternal</code>.
-	 * @param urlPath the URL path to use for lookup,
-	 * according to the settings in this class
+	 * @param request current HTTP request
 	 * @return a view name for this request (never <code>null</code>)
 	 * @see #handleRequestInternal
 	 * @see #setAlwaysUseFullPath

@@ -16,16 +16,13 @@
 
 package org.springframework.web.servlet.view.xslt;
 
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContextException;
-import org.springframework.core.io.Resource;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.xml.SimpleTransformErrorListener;
-import org.springframework.web.servlet.view.AbstractUrlBasedView;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,28 +38,33 @@ import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContextException;
+import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.xml.SimpleTransformErrorListener;
+import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 /**
- * XSLT-driven {@link View} that allows for response context to be rendered as the
+ * XSLT-driven View that allows for response context to be rendered as the
  * result of an XSLT transformation.
- * <p/>
- * The XSLT {@link Source} object is supplied as a parameter in the model and then
+ *
+ * <p>The XSLT Source object is supplied as a parameter in the model and then
  * {@link #locateSource detected} during response rendering. Users can either specify
  * a specific entry in the model via the {@link #setSourceKey sourceKey} property or
- * have Spring locate the {@link Source} object. This class also provides basic
- * conversion of objects into {@link Source} implementations. See {@link #getSourceTypes() here}
+ * have Spring locate the Source object. This class also provides basic conversion
+ * of objects into Source implementations. See {@link #getSourceTypes() here}
  * for more details.
- * <p/>
- * All model parameters are
- * passed to the XSLT {@link Transformer} as parameters. In addition the user can configure
- * {@link #setOutputProperties output properties} to be passed to the {@link Transformer}.
+ *
+ * <p>All model parameters are passed to the XSLT Transformer as parameters.
+ * In addition the user can configure {@link #setOutputProperties output properties}
+ * to be passed to the Transformer.
  *
  * @author Rob Harrop
  * @since 2.0
@@ -279,9 +281,9 @@ public class XsltView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Copies all {@link Map.Entry entries} from the supplied {@link Map} into the
-	 * {@link Transformer#setParameter(String, Object) parameter set} of the supplied
-	 * {@link Transformer}.
+	 * Copies all entries from the supplied Map into the
+	 * {@link Transformer#setParameter(String, Object) parameter set}
+	 * of the supplied {@link Transformer}.
 	 */
 	protected final void copyModelParameters(Map model, Transformer transformer) {
 		copyMapEntriesToTransformerParameters(model, transformer);
