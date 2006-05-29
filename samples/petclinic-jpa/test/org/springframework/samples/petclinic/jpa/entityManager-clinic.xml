@@ -8,18 +8,14 @@
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
-
 	<aop:aspectj-autoproxy />
 	
 	<!--
-		Simply defining this bean will cause requests to
-		owner names to be saved. Spring automatically deploys the
-		@Aspect when AspectJ autoproxying is enabled.
-		Note that we can dependency inject this bean like any
-		other bean.
+		Simply defining this bean will cause requests to owner names to be saved.
+		Spring automatically deploys the @Aspect when AspectJ autoproxying is enabled.
+		Note that we can dependency inject this bean like any other bean.
 	-->
-	<bean 
-		class="org.springframework.samples.petclinic.aspects.UsageLogAspect" >
+	<bean class="org.springframework.samples.petclinic.aspects.UsageLogAspect" >
 		<property name="historySize" value="300" />
 	</bean>
 	
@@ -36,18 +32,14 @@
 		A JPA namespace handler will simplify specification of entity manager factories
 		and remove the requirement for these bean definitions in 2.0 final.
 	-->
-	<bean class="org.springframework.dao.support.PersistenceExceptionTranslationPostProcessor" />
+	<bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
 	
-	<bean 
-		class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" /> 
-	
-	
+	<bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+
 	<!--
 		Will automatically be transactional due to annotation usage.
 		EntityManager will be auto injected.
 	-->
-	<bean id="clinic" 
-			class="org.springframework.samples.petclinic.jpa.EntityManagerClinic"
-		/>
+	<bean id="clinic" class="org.springframework.samples.petclinic.jpa.EntityManagerClinic"/>
 
 </beans>
