@@ -624,7 +624,7 @@
 		<copy file="${src.dir}/org/springframework/aop/config/spring-aop.xsd"
 					todir="${dist.dir}" preservelastmodified="true"/>
 
-		<copy file="${src.dir}/org/springframework/jndi/config/spring-jndi.xsd"
+		<copy file="${src.dir}/org/springframework/ejb/spring-jee.xsd"
 					todir="${dist.dir}" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/transaction/config/spring-tx.xsd"
