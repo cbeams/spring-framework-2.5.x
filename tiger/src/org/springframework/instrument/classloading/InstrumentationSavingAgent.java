@@ -18,6 +18,8 @@ package org.springframework.instrument.classloading;
 
 import java.lang.instrument.Instrumentation;
 
+import org.springframework.instrument.classloading.support.InstrumentationLoadTimeWeaver;
+
 /**
  * Java agent that saves the Instrumentation interface
  * from the JVM for later use.
