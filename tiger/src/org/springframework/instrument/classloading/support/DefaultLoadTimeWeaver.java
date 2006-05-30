@@ -17,52 +17,51 @@
 package org.springframework.instrument.classloading.support;
 
 import java.lang.instrument.ClassFileTransformer;
-import java.lang.reflect.Method;
 
-import org.springframework.instrument.classloading.ClassLoaderWeaver;
+import org.springframework.instrument.classloading.LoadTimeWeaver;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
  * ClassLoaderWeaver that uses reflection to delegate methods to an internal
  * class loader. Useful when the delegating class loader is loaded in a
- * different class loader (such as the container server based class loader
- * that is not visible to the web application).
- *
+ * different class loader (such as the container server based class loader that
+ * is not visible to the web application).
+ * 
  * @author Costin Leau
  * @since 2.0
  */
-public class ReflectiveClassLoaderWeaver implements ClassLoaderWeaver {
-	
+public class DefaultLoadTimeWeaver extends AbstractLoadTimeWeaver {
+
 	/** Keep a loose reference to avoid ClassCastExceptions */
 	private ClassLoader classLoader;
 
+	protected String METHOD_NAME_ADD_TRANSFORMERS = "addClassFileTransformer";
 
-	public ReflectiveClassLoaderWeaver(ClassLoader classLoader) {
+	protected String METHOD_NAME_THROWAWAY_CLASSLOADER = "getThrowawayClassLoader";
+
+	public DefaultLoadTimeWeaver(ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
+	public DefaultLoadTimeWeaver() {
+		this.classLoader = getContextClassLoader();
+	}
 
 	public void addClassFileTransformer(ClassFileTransformer cft) {
-		invokeMethod("addClassFileTransformer", new Object[] { cft }, ClassFileTransformer.class);
+		invokeMethod(METHOD_NAME_ADD_TRANSFORMERS, new Object[] { cft }, ClassFileTransformer.class);
 	}
 
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.classLoader;
 	}
 
+	public ClassLoader getThrowawayClassLoader() {
+		return (ClassLoader) invokeMethod(METHOD_NAME_THROWAWAY_CLASSLOADER, null, (Class[]) null);
+	}
+
 	public Object invokeMethod(String methodName, Object[] args, Class... argumentTypes) {
-		try {
-			Method method = this.classLoader.getClass().getDeclaredMethod(methodName, argumentTypes);
-			method.setAccessible(true);
-			return ReflectionUtils.invokeMethod(method, this.classLoader, args);
-		}
-		catch (SecurityException ex) {
-			ReflectionUtils.handleReflectionException(ex);
-		}
-		catch (NoSuchMethodException ex) {
-			ReflectionUtils.handleReflectionException(ex);
-		}
-		throw new IllegalStateException("Invalid state reached during reflection handling");
+		return ReflectionUtils.invokeMethod(methodName, classLoader.getClass(), classLoader, args, argumentTypes);
 	}
 
 }

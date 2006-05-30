@@ -59,6 +59,8 @@ public class WeavingTransformer implements InstrumentationRegistry {
 
 
 	public void addClassFileTransformer(ClassFileTransformer cft) {
+		if (debug)
+			logger.debug("adding transformer " + cft);
 		this.transformers.add(cft);
 	}
 
@@ -68,11 +70,11 @@ public class WeavingTransformer implements InstrumentationRegistry {
 				byte[] transformed = cft.transform(classLoader, internalName, null, pd, bytes);
 				if (transformed == null) {
 					if (debug)
-						logger.debug(name + " is already weaved by transformer " + cft);
+						logger.debug("Not Weaving : " + name + " w/ transformer " + cft);
 				}
 				else {
 					if (debug)
-						logger.debug("Weaving: " + name + " with transformer " + cft);
+						logger.debug("Weaving: " + name + " w/ transformer " + cft);
 					bytes = transformed;
 				}
 			}

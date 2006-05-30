@@ -18,7 +18,6 @@ package org.springframework.instrument.classloading.support;
 
 import java.lang.instrument.ClassFileTransformer;
 
-import org.springframework.instrument.classloading.AbstractLoadTimeWeaver;
 import org.springframework.util.ClassUtils;
 
 /**

@@ -25,21 +25,21 @@ import org.springframework.instrument.classloading.ClassLoaderWeaver;
  * classloader delegate. Such class is useful when the container classloader
  * allows the interface to be loaded by the same class loader (the web
  * application has access to the classes loaded by the parent). This class
- * should be always used if possible, instead of ReflectiveClassLoaderWeaver
+ * should be always used if possible, instead of DefaultLoadTimeWeaver
  * since it avoids the reflection mechanism.
  *
  * @author Costin Leau
  * @since 2.0
  */
-public class DefaultClassLoaderWeaver implements ClassLoaderWeaver {
+public class CastClassLoaderWeaver implements ClassLoaderWeaver {
 
 	private InstrumentableClassLoader classLoader;
 
 
-	public DefaultClassLoaderWeaver() {
+	public CastClassLoaderWeaver() {
 	}
 
-	public DefaultClassLoaderWeaver(InstrumentableClassLoader classLoader) {
+	public CastClassLoaderWeaver(InstrumentableClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 

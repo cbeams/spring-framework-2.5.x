@@ -16,17 +16,26 @@
 
 package org.springframework.instrument.classloading.support;
 
-import junit.framework.TestCase;
-
-import org.springframework.instrument.classloading.support.InstrumentableClassLoader;
+import org.springframework.instrument.classloading.LoadTimeWeaver;
+import org.springframework.instrument.classloading.SimpleThrowawayClassLoader;
 import org.springframework.util.ClassUtils;
 
-public class InstrumentableClassLoaderTests extends TestCase {
+/**
+ * Abstract implementation of the LoadTimeWeaver interface,
+ * providing access to the current ClassLoader and defining
+ * a throwaway class loader.
+ *
+ * @author Rod Johnson
+ * @since 2.0
+ */
+public abstract class AbstractLoadTimeWeaver implements LoadTimeWeaver {
+	
+	protected ClassLoader getContextClassLoader() {
+		return ClassUtils.getDefaultClassLoader();
+	}
 
-	public void testDefaultLoadTimeWeaver() {
-		ClassLoader loader = new InstrumentableClassLoader(ClassUtils.getDefaultClassLoader());
-		DefaultLoadTimeWeaver handler = new DefaultLoadTimeWeaver(loader);
-		assertSame(loader, handler.getInstrumentableClassLoader());
+	public ClassLoader getThrowawayClassLoader() {
+		return new SimpleThrowawayClassLoader(getContextClassLoader());
 	}
 
 }
