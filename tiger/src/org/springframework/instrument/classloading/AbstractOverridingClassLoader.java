@@ -17,16 +17,13 @@
 package org.springframework.instrument.classloading;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
@@ -46,61 +43,50 @@ public abstract class AbstractOverridingClassLoader extends ClassLoader {
 	// Determined at startup since parsing the log hierarchy can be expensive.
 	protected final boolean debug = logger.isDebugEnabled();
 
-	private Set<String> namesSeen = new HashSet<String>();
+	private final Set<String> exclusions = new HashSet<String>();
 
-	private Set<String> exclusions = new HashSet<String>();
+	private final Set<String> inclusions = new HashSet<String>();
 
-	private Set<String> inclusions;
-
-	private final ResourceLoader loader;
+	private final Set<String> namesSeen = new HashSet<String>();
 
 
 	protected AbstractOverridingClassLoader(ClassLoader parent) {
-		this(parent, new DefaultResourceLoader(parent));
-	}
-
-	protected AbstractOverridingClassLoader(ClassLoader parent, ResourceLoader loader) {
 		super(parent);
-		this.loader = loader;
 	}
 
 
 	public void addClassNameToExcludeFromUndelegation(String className) {
-		exclusions.add(className);
+		this.exclusions.add(className);
 	}
 
-	public void setExplicitInclusions(Collection<String> explicitClassNames) {
-		this.inclusions = new HashSet<String>();
-		inclusions.addAll(explicitClassNames);
+	public void addClassNameToExplicitlyInclude(String className) {
+		this.inclusions.add(className);
 	}
 
 	protected boolean excludeFromUndelegation(String name) {
-		return exclusions.contains(name) || (inclusions != null && !inclusions.contains(name));
+		return (this.exclusions.contains(name) || !this.inclusions.contains(name));
 	}
+
 
 	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		if (!name.startsWith("java") && !this.namesSeen.contains(name) && !excludeFromUndelegation(name)) {
 			this.namesSeen.add(name);
-
 			String internalName = StringUtils.replace(name, ".", "/");
-			
-			StringBuilder path = new StringBuilder("classpath:");
-			path.append(internalName);
-			path.append(".class");
-
-			Resource classRes = loader.getResource(path.toString());
+			InputStream is = getParent().getResourceAsStream(internalName + ".class");
+			if (is == null) {
+				throw new ClassNotFoundException(name);
+			}
 			try {
 				// Load the raw bytes.
-				byte[] bytes = FileCopyUtils.copyToByteArray(classRes.getInputStream());
-	
+				byte[] bytes = FileCopyUtils.copyToByteArray(is);
 				// Transform if necessary and use the potentially transformed bytes.
 				byte[] transformed = transformIfNecessary(name, internalName, bytes);
 				return defineClass(name, transformed, 0, transformed.length);
 			}
 			catch (IOException ex) {
 				if (logger.isWarnEnabled()) {
-					logger.warn("Cannot load resource for file: " + classRes, ex);
+					logger.warn("Cannot load resource for class [" + name + "]", ex);
 				}
 				throw new ClassNotFoundException(name);
 			}

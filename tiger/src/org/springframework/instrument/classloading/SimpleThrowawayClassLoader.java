@@ -16,8 +16,6 @@
 
 package org.springframework.instrument.classloading;
 
-import org.springframework.core.io.ResourceLoader;
-
 /**
  * ClassLoader that can be used to load classes without bringing them
  * into the parent loader. Intended to support JPA "temp class loader"
@@ -31,11 +29,6 @@ public class SimpleThrowawayClassLoader extends AbstractOverridingClassLoader {
 	public SimpleThrowawayClassLoader(ClassLoader parent) {
 		super(parent);
 	}
-
-	public SimpleThrowawayClassLoader(ClassLoader parent, ResourceLoader resourceLoader) {
-		super(parent, resourceLoader);
-	}
-
 
 	@Override
 	public byte[] transformIfNecessary(String name, String internalName, byte[] bytes) {
