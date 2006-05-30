@@ -33,6 +33,7 @@ import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.UnknownAdviceTypeException;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -85,7 +86,7 @@ import org.springframework.util.ObjectUtils;
  * @see org.springframework.aop.target.SingletonTargetSource
  */
 public class ProxyFactoryBean extends AdvisedSupport
-    implements FactoryBean, BeanFactoryAware, AdvisedSupportListener {
+    implements FactoryBean, BeanClassLoaderAware, BeanFactoryAware, AdvisedSupportListener {
 	
 	/*
 	 * Implementation notes. There are two cases of usage of this class:
@@ -135,6 +136,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * Indicates whether the proxy should be frozen before creation.
 	 */
 	private boolean freezeProxy = false;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/**
 	 * Owning bean factory, which cannot be changed after this
@@ -225,6 +228,10 @@ public class ProxyFactoryBean extends AdvisedSupport
 
 	public void setFrozen(boolean frozen) {
 		this.freezeProxy = frozen;
+	}
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
@@ -334,15 +341,15 @@ public class ProxyFactoryBean extends AdvisedSupport
 
 	/**
 	 * Return the proxy object to expose.
-	 * <p>Default implementation uses a plain <code>getProxy()</code> call.
-	 * Can be overridden to specify a custom class loader.
+	 * <p>The default implementation uses a <code>getProxy</code> call with
+	 * the factory's bean class loader. Can be overridden to specify a
+	 * custom class loader.
 	 * @param aopProxy the prepared AopProxy instance to get the proxy from
 	 * @return the proxy object to expose
-	 * @see AopProxy#getProxy()
 	 * @see AopProxy#getProxy(ClassLoader)
 	 */
 	protected Object getProxy(AopProxy aopProxy) {
-		return aopProxy.getProxy();
+		return aopProxy.getProxy(this.beanClassLoader);
 	}
 
 	/**
