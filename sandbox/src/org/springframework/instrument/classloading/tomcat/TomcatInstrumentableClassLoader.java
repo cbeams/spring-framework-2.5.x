@@ -20,6 +20,7 @@ import java.lang.instrument.ClassFileTransformer;
 
 import org.apache.catalina.loader.ResourceEntry;
 import org.apache.catalina.loader.WebappClassLoader;
+
 import org.springframework.instrument.classloading.InstrumentationRegistry;
 import org.springframework.instrument.classloading.support.WeavingTransformer;
 
@@ -34,31 +35,27 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader implement
 
 	/** Use an internal weavingTransformer */
 	private final WeavingTransformer weavingTransformer;
-	private boolean isNewTempClassLoader = false;
+
 
 	public TomcatInstrumentableClassLoader() {
 		super();
 		this.weavingTransformer = new WeavingTransformer();
 	}
 
-	public TomcatInstrumentableClassLoader(ClassLoader cl) {
-		super(cl);
-		this.weavingTransformer = new WeavingTransformer(cl);
+	public TomcatInstrumentableClassLoader(ClassLoader classLoader) {
+		super(classLoader);
+		this.weavingTransformer = new WeavingTransformer(classLoader);
 	}
+
 
 	public void addClassFileTransformer(ClassFileTransformer cft) {
 		this.weavingTransformer.addClassFileTransformer(cft);
 	}
 
-	//
-	// add hooks for adding transformation
-	//
-
 	@Override
 	protected ResourceEntry findResourceInternal(String name, String path) {
-        ResourceEntry entry = super.findResourceInternal(name, path);
-
-		// postpone string parsing as much as possible (they are slow)
+		ResourceEntry entry = super.findResourceInternal(name, path);
+		// Postpone String parsing as much as possible (it is slow).
 		if (entry != null && entry.binaryContent != null && path.endsWith(".class")) {
 			byte[] transformed = weavingTransformer.transformIfNecessary(name, entry.binaryContent, null);
 			entry.binaryContent = transformed;
@@ -67,10 +64,7 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader implement
 	}
 
 	/**
-	 * Return a new clone of the existing classloader w/ transforming turned
-	 * off.
-	 * 
-	 * @return
+	 * Return a new clone of the existing classloader w/ transforming turned off.
 	 */
 	public ClassLoader getThrowawayClassLoader() {
 		// copy properties
@@ -103,38 +97,34 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader implement
 		// copy the rest of the fields through methods
 		tempClassLoader.setAntiJARLocking(this.getAntiJARLocking());
 
-		tempClassLoader.isNewTempClassLoader = true;
 		if (tempClassLoader.hasExternalRepositories) {
 			/*// get URLClassLoader internal URLs and add it to the new temp class
 			for (URL url : retrieveURLs()) {
 				tempClassLoader.addURL(url);
 			}*/
-			log.warn("copy URLS also");
+			WebappClassLoader.log.warn("copy URLS also");
 		}
 
 		return tempClassLoader;
-		//return this;
 	}
 
-
-	
 	/**
 	 * Get super URLClassloader internal URLs. This is required since Tomcat's
 	 * WebappClassLoader rewrites this method and add's extra URLs. The current
 	 * implementation uses reflection in order to avoid too much coupling with
 	 * WebappClassLoader internals.
-	 * 
-	 * @return
 	 *
 	protected URL[] retrieveURLs() {
 		return (URL[]) ReflectionUtils.invokeMethod("getURLs", URLClassLoader.class, this, null, (Class[]) null);
 	}
-	
 	*/
+
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("TomcatInstrumentedClassLoader\r\n");
 		sb.append(super.toString());
 		return sb.toString();
 	}
+
 }
