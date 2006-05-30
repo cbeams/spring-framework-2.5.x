@@ -30,6 +30,7 @@ import java.util.List;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Rod Johnson
+ * @author Costin Leau
  * @since 1.2.2
  */
 public abstract class ReflectionUtils {
@@ -75,6 +76,28 @@ public abstract class ReflectionUtils {
 		throw new IllegalStateException(
 				"Unexpected exception thrown by method - " + ex.getTargetException().getClass().getName() +
 				": " + ex.getTargetException().getMessage());
+	}
+	
+	/**
+	 * Determine the {@link Method} using the given methodName against the targetClass and then invoke it 
+	 * against the supplied target object with the given arguments.
+	 * The target object can be <code>null</code> when invoking a static {@link Method}.
+	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
+	 */
+	public static Object invokeMethod(String methodName, Class targetClass, Object target, Object[] args,
+			Class[] argumentTypes) {
+		try {
+			Method method = targetClass.getDeclaredMethod(methodName, argumentTypes);
+			method.setAccessible(true);
+			return invokeMethod(method, target, args);
+		}
+		catch (SecurityException ex) {
+			handleReflectionException(ex);
+		}
+		catch (NoSuchMethodException ex) {
+			handleReflectionException(ex);
+		}
+		throw new IllegalStateException("Invalid state reached during reflection invocation");
 	}
 
 	/**
