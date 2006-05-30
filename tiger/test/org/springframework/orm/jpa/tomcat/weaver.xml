@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<!-- agent for standalone tests
+	<bean id="weaver" class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver"/>
+	-->
+	<bean id="weaver" class="org.springframework.instrument.classloading.ReflectionLoadTimeWeaver"/>
+</beans>
