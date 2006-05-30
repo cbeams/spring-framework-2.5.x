@@ -18,14 +18,14 @@ package org.springframework.instrument.classloading.support;
 
 import junit.framework.TestCase;
 
-import org.springframework.instrument.classloading.support.InstrumentableClassLoader;
+import org.springframework.instrument.classloading.support.SimpleInstrumentableClassLoader;
 import org.springframework.util.ClassUtils;
 
 public class InstrumentableClassLoaderTests extends TestCase {
 
 	public void testDefaultLoadTimeWeaver() {
-		ClassLoader loader = new InstrumentableClassLoader(ClassUtils.getDefaultClassLoader());
-		DefaultLoadTimeWeaver handler = new DefaultLoadTimeWeaver(loader);
+		ClassLoader loader = new SimpleInstrumentableClassLoader(ClassUtils.getDefaultClassLoader());
+		ReflectiveLoadTimeWeaver handler = new ReflectiveLoadTimeWeaver(loader);
 		assertSame(loader, handler.getInstrumentableClassLoader());
 	}
 

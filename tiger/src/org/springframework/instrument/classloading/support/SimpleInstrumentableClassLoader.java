@@ -19,6 +19,7 @@ package org.springframework.instrument.classloading.support;
 import java.lang.instrument.ClassFileTransformer;
 
 import org.springframework.instrument.classloading.AbstractOverridingClassLoader;
+import org.springframework.instrument.classloading.InstrumentationRegistry;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -28,31 +29,27 @@ import org.springframework.util.ClassUtils;
  * @author Costin Leau
  * @since 2.0
  */
-public class InstrumentableClassLoader extends AbstractOverridingClassLoader {
+public class SimpleInstrumentableClassLoader extends AbstractOverridingClassLoader
+		implements InstrumentationRegistry {
 
 	private final AspectJWeavingTransformer weavingTransformer;
 
 
-	public InstrumentableClassLoader(ClassLoader parent) {
+	public SimpleInstrumentableClassLoader(ClassLoader parent) {
 		super(parent);
 		this.weavingTransformer = new AspectJWeavingTransformer(parent);
 	}
 
-	public InstrumentableClassLoader() {
+	public SimpleInstrumentableClassLoader() {
 		super(ClassUtils.getDefaultClassLoader());
-		this.weavingTransformer = new AspectJWeavingTransformer(ClassUtils.getDefaultClassLoader());
+		this.weavingTransformer = new AspectJWeavingTransformer(getParent());
 	}
 
 
-	public void addTransformer(ClassFileTransformer cft) {
+	public void addClassFileTransformer(ClassFileTransformer cft) {
 		this.weavingTransformer.addClassFileTransformer(cft);
 	}
 
-	// TODO could have exclusions built on classes known to be entities?
-
-	public AspectJWeavingTransformer getWeavingTransformer() {
-		return weavingTransformer;
-	}
 
 	@Override
 	public byte[] transformIfNecessary(String name, String internalName, byte[] bytes) {

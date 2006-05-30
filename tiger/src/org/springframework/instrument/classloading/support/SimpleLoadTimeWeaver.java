@@ -18,45 +18,40 @@ package org.springframework.instrument.classloading.support;
 
 import java.lang.instrument.ClassFileTransformer;
 
-import org.springframework.util.ClassUtils;
-
 /**
- * Intended for use only in simple environments, such as an IDE.
- * 
+ * LoadTimeWeaver that holds a narrow reference to the internal class
+ * loader delegate. Such a class is useful when the container class loader
+ * allows the interface to be loaded by the same class loader (the web
+ * application has access to the classes loaded by the parent). This class
+ * should be always used if possible instead of ReflectiveLoadTimeWeaver
+ * since it avoids the reflection mechanism.
+ *
+ * <p>Mainly intended for use in simple environments, such as an IDE.
+ *
  * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @since 2.0
  */
 public class SimpleLoadTimeWeaver extends AbstractLoadTimeWeaver {
 
-	private final InstrumentableClassLoader instrumentableClassLoader;
+	private final SimpleInstrumentableClassLoader classLoader;
 
 	
 	public SimpleLoadTimeWeaver() {
-		this.instrumentableClassLoader = new InstrumentableClassLoader(ClassUtils.getDefaultClassLoader());
+		this.classLoader = new SimpleInstrumentableClassLoader(getContextClassLoader());
 	}
 
-//	public void setAspectJWeavingEnabled(boolean flag) {
-//		if (flag == true && !instrumentableClassLoader.isAspectJWeavingEnabled()) {
-//			instrumentableClassLoader.setAspectJWeavingEnabled(true);
-//		}
-//	}
+	public SimpleLoadTimeWeaver(SimpleInstrumentableClassLoader classLoader) {
+		this.classLoader = classLoader;
+	}
 
+
+	public void addClassFileTransformer(ClassFileTransformer classFileTransformer) {
+		this.classLoader.addClassFileTransformer(classFileTransformer);
+	}
 
 	public ClassLoader getInstrumentableClassLoader() {
-		return instrumentableClassLoader;
+		return this.classLoader;
 	}
-
-	public void addClassFileTransformer(final ClassFileTransformer classFileTransformer) {
-		this.instrumentableClassLoader.addTransformer(classFileTransformer);
-	}
-
-	//
-	// public void addClassNameToExcludeFromWeaving(String className) {
-	// instrumentableClassLoader.addClassNameToExcludeFromUndelegation(className);
-	// }
-	//	
-	// public void setExplicitInclusions(Collection<String> explicitClassNames)
-	// {
-	// instrumentableClassLoader.setExplicitInclusions(explicitClassNames);
-	// }
 
 }

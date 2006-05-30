@@ -18,8 +18,6 @@ package org.springframework.instrument.classloading.support;
 
 import java.lang.instrument.ClassFileTransformer;
 
-import org.springframework.instrument.classloading.LoadTimeWeaver;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -31,22 +29,25 @@ import org.springframework.util.ReflectionUtils;
  * @author Costin Leau
  * @since 2.0
  */
-public class DefaultLoadTimeWeaver extends AbstractLoadTimeWeaver {
-
-	/** Keep a loose reference to avoid ClassCastExceptions */
-	private ClassLoader classLoader;
+public class ReflectiveLoadTimeWeaver extends AbstractLoadTimeWeaver {
 
 	protected String METHOD_NAME_ADD_TRANSFORMERS = "addClassFileTransformer";
 
 	protected String METHOD_NAME_THROWAWAY_CLASSLOADER = "getThrowawayClassLoader";
 
-	public DefaultLoadTimeWeaver(ClassLoader classLoader) {
+
+	/** Keep a loose reference to avoid ClassCastExceptions */
+	private final ClassLoader classLoader;
+
+
+	public ReflectiveLoadTimeWeaver() {
+		this.classLoader = getContextClassLoader();
+	}
+
+	public ReflectiveLoadTimeWeaver(ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
-	public DefaultLoadTimeWeaver() {
-		this.classLoader = getContextClassLoader();
-	}
 
 	public void addClassFileTransformer(ClassFileTransformer cft) {
 		invokeMethod(METHOD_NAME_ADD_TRANSFORMERS, new Object[] { cft }, ClassFileTransformer.class);
@@ -60,8 +61,8 @@ public class DefaultLoadTimeWeaver extends AbstractLoadTimeWeaver {
 		return (ClassLoader) invokeMethod(METHOD_NAME_THROWAWAY_CLASSLOADER, null, (Class[]) null);
 	}
 
-	public Object invokeMethod(String methodName, Object[] args, Class... argumentTypes) {
-		return ReflectionUtils.invokeMethod(methodName, classLoader.getClass(), classLoader, args, argumentTypes);
+	private Object invokeMethod(String methodName, Object[] args, Class... argumentTypes) {
+		return ReflectionUtils.invokeMethod(methodName, this.classLoader.getClass(), this.classLoader, args, argumentTypes);
 	}
 
 }
