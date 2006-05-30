@@ -29,16 +29,11 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import org.easymock.MockControl;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
-import org.springframework.orm.jpa.AbstractEntityManagerFactoryBeanTests;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.ContainerEntityManagerFactoryBean;
+import org.springframework.instrument.classloading.support.InstrumentationLoadTimeWeaver;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 
 /**
- * Unit tests for ContainerEntityManagerFactoryBean
- * 
  * @author Rod Johnson
  * @since 2.0
  */
@@ -242,7 +237,9 @@ public class ContainerEntityManagerFactoryBeanTests extends AbstractEntityManage
 		}
 	}
 	
-	protected ContainerEntityManagerFactoryBean createEntityManagerFactoryBean(String persistenceXml, Properties props, String entityManagerName) throws Exception {
+	protected ContainerEntityManagerFactoryBean createEntityManagerFactoryBean(
+			String persistenceXml, Properties props, String entityManagerName) throws Exception {
+
 		// This will be set by DummyPersistenceProvider
 		actualPui = null;
 		actualProps = null;
@@ -297,7 +294,6 @@ public class ContainerEntityManagerFactoryBeanTests extends AbstractEntityManage
 		public EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo pui, Map map) {
 			actualPui = pui;
 			actualProps = map;
-			
 			return mockEmf;
 		}
 		
@@ -328,7 +324,6 @@ public class ContainerEntityManagerFactoryBeanTests extends AbstractEntityManage
 		public boolean isActive() {
 			throw new UnsupportedOperationException();
 		}
-		
 	}
 
 }
