@@ -457,9 +457,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		this.beanClassLoader = (beanClassLoader != null ? beanClassLoader : ClassUtils.getDefaultClassLoader());
 	}
 
-	/**
-	 * Return the class loader to use for loading bean classes.
-	 */
 	public ClassLoader getBeanClassLoader() {
 		return beanClassLoader;
 	}
@@ -468,10 +465,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		this.cacheBeanMetadata = cacheBeanMetadata;
 	}
 
-	/**
-	 * Return whether to cache bean metadata such as given bean definitions
-	 * (in merged fashion) and resolved bean classes.
-	 */
 	public boolean isCacheBeanMetadata() {
 		return cacheBeanMetadata;
 	}

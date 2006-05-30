@@ -61,6 +61,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	 * <p>Note that the parent shouldn't be changed: It should only be set outside
 	 * a constructor if it isn't available when an object of this class is created.
 	 * @param parentBeanFactory the parent bean factory
+	 * @see #getParentBeanFactory()
 	 */
 	void setParentBeanFactory(BeanFactory parentBeanFactory);
 
@@ -72,9 +73,14 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	 * Spring 2.0 by default: Bean definitions only carry bean class names,
 	 * to be resolved once the factory processes the bean definition.
 	 * @param beanClassLoader the class loader to use,
-	 * or <code>null</code> for suggesting the default class loader
+	 * or <code>null</code> to suggest the default class loader
 	 */
 	void setBeanClassLoader(ClassLoader beanClassLoader);
+
+	/**
+	 * Return this factory's class loader for loading bean classes.
+	 */
+	ClassLoader getBeanClassLoader();
 
 	/**
 	 * Set whether to cache bean metadata such as given bean definitions
@@ -84,6 +90,12 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	 * instance will re-query the bean class loader for newly resolved classes.
 	 */
 	void setCacheBeanMetadata(boolean cacheBeanMetadata);
+
+	/**
+	 * Return whether to cache bean metadata such as given bean definitions
+	 * (in merged fashion) and resolved bean classes.
+	 */
+	boolean isCacheBeanMetadata();
 
 	/**
 	 * Add a PropertyEditorRegistrar to be applied to all bean creation processes.
