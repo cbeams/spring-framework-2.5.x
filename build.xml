@@ -167,7 +167,6 @@
 			<fileset dir="${src.dir}/org/springframework/web/servlet/tags">
 				<include name="*.tld"/>
 			</fileset>
-
 			<fileset dir="${src.dir}/org/springframework/web/servlet/tags/form">
 				<include name="*.tld"/>
 			</fileset>
@@ -242,6 +241,7 @@
 		<jar jarfile="${dist.dir}/spring.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="META-INF/**"/>
+				<exclude name="META-INF/*.tld"/>
 				<include name="org/springframework/**"/>
 				<exclude name="org/springframework/jca/**"/>
 				<exclude name="org/springframework/jms/**"/>
@@ -271,6 +271,7 @@
 
 		<jar jarfile="${dist.dir}/spring-ext.jar">
 			<fileset dir="${target.classes.dir}">
+				<include name="META-INF/*.tld"/>
 				<include name="org/springframework/jca/**"/>
 				<include name="org/springframework/jms/**"/>
 				<include name="org/springframework/orm/hibernate/**"/>
@@ -445,7 +446,7 @@
 
 		<delete>
 			<fileset dir="${dist.dir}">
-				<include name="ext/*.jar"/>
+				<include name="extmodules/*.jar"/>
 			</fileset>
 		</delete>
 
@@ -463,7 +464,6 @@
 
 		<jar jarfile="${dist.dir}/extmodules/spring-portlet.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="META-INF/*.tld"/>
 				<include name="org/springframework/web/portlet/**"/>
 			</fileset>
 			<manifest>
@@ -475,7 +475,6 @@
 
 		<jar jarfile="${dist.dir}/extmodules/spring-struts.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="META-INF/*.tld"/>
 				<include name="org/springframework/web/struts/**"/>
 			</fileset>
 			<manifest>
@@ -487,7 +486,6 @@
 
 		<jar jarfile="${dist.dir}/extmodules/spring-jsf.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="META-INF/*.tld"/>
 				<include name="org/springframework/web/jsf/**"/>
 			</fileset>
 			<manifest>
@@ -1263,31 +1261,32 @@
 
 	<target name="tld.to.docbook" depends="original.tld.to.docbook,forms.tld.to.docbook"/>
 
-	<target name="forms.tld.to.docbook">
-
-		<antcall target="hack.DOCTYPE">
-			<param name="doctype.input.file" value="src/org/springframework/web/servlet/tags/form/spring-form.tld"/>
-			<param name="doctype.scrubbed.file" value="${doc.dir}/spring-form.tld"/>
-		</antcall>
-
-		<antcall target="private.tld.to.docbook">
-			<param name="input.tld" value="spring-form.tld"/>
-			<param name="input.tld.file" value="${doc.dir}/spring-form.tld"/>
-		</antcall>
-
-	</target>
-
 
 	<target name="original.tld.to.docbook">
 
 		<antcall target="hack.DOCTYPE">
 			<param name="doctype.input.file" value="src/org/springframework/web/servlet/tags/spring.tld"/>
-			<param name="doctype.scrubbed.file" value="${doc.dir}/spring.tld"/>
+			<param name="doctype.scrubbed.file" value="${doc.ref.dir}/src/spring.tld"/>
 		</antcall>
 
 		<antcall target="private.tld.to.docbook">
 			<param name="input.tld" value="spring.tld"/>
-			<param name="input.tld.file" value="${doc.dir}/spring.tld"/>
+			<param name="input.tld.file" value="${doc.ref.dir}/src/spring.tld"/>
+		</antcall>
+
+	</target>
+
+
+	<target name="forms.tld.to.docbook">
+
+		<antcall target="hack.DOCTYPE">
+			<param name="doctype.input.file" value="src/org/springframework/web/servlet/tags/form/spring-form.tld"/>
+			<param name="doctype.scrubbed.file" value="${doc.ref.dir}/src/spring-form.tld"/>
+		</antcall>
+
+		<antcall target="private.tld.to.docbook">
+			<param name="input.tld" value="spring-form.tld"/>
+			<param name="input.tld.file" value="${doc.ref.dir}/src/spring-form.tld"/>
 		</antcall>
 
 	</target>
@@ -1351,11 +1350,11 @@
 	<target name="beans.xsd.to.docbook">
 
 		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans.xsd"
-					tofile="${doc.dir}/spring-beans.xsd"/>
+					tofile="${doc.ref.dir}/src/spring-beans.xsd"/>
 
 		<antcall target="private.xsd.to.docbook">
 			<param name="input.xsd" value="spring-beans.xsd"/>
-			<param name="input.xsd.file" value="${doc.dir}/spring-beans.xsd"/>
+			<param name="input.xsd.file" value="${doc.ref.dir}/src/spring-beans.xsd"/>
 		</antcall>
 
 	</target>
