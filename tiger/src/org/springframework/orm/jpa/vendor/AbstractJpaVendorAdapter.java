@@ -32,11 +32,11 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 
 	private Database database = Database.DEFAULT;
 
+	private String databaseName;
+
 	private boolean showSql;
 
 	private boolean generateDdl;
-	
-	private Class<?> databasePlatformClass;
 
 
 	/**
@@ -56,20 +56,18 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	}
 
 	/**
-	 * Set the database platform class. Use this mechanism as a fallback
-	 * if the values of the enum passed to the database property are
-	 * insufficient.
-	 * @param databasePlatformClass the databasePlatformClass to set
+	 * Specify the name of the target database to operate on.
+	 * The supported values are vendor-dependent.
 	 */
-	public void setDatabasePlatformClass(Class<?> databasePlatformClass) {
-		this.databasePlatformClass = databasePlatformClass;
+	public void setDatabaseName(String databaseName) {
+		this.databaseName = databaseName;
 	}
-	
+
 	/**
-	 * Return the database platform class for the target database.
+	 * Return the name of the target database to operate on.
 	 */
-	protected Class<?> getDatabasePlatformClass() {
-		return this.databasePlatformClass;
+	protected String getDatabaseName() {
+		return databaseName;
 	}
 
 	/**

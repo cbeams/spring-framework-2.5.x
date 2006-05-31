@@ -59,11 +59,11 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 			jpaProperties.setProperty(Environment.HBM2DDL_AUTO, "create");
 		}
 
-		if (getDatabasePlatformClass() != null) {
-			jpaProperties.setProperty(Environment.DIALECT, getDatabasePlatformClass().getName());
+		if (getDatabaseName() != null) {
+			jpaProperties.setProperty(Environment.DIALECT, getDatabaseName());
 		}
 		else if (getDatabase() != null) {
-			Class databaseDialectClass = getDatabaseDialectClass(getDatabase());
+			Class databaseDialectClass = determineDatabaseDialectClass(getDatabase());
 			if (databaseDialectClass != null) {
 				jpaProperties.setProperty(Environment.DIALECT, databaseDialectClass.getName());
 			}
@@ -72,7 +72,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		return jpaProperties;
 	}
 
-	protected Class getDatabaseDialectClass(Database database) {
+	protected Class determineDatabaseDialectClass(Database database) {
 		switch (database) {
 			case DB2: return DB2Dialect.class;
 			case HSQL: return HSQLDialect.class;
