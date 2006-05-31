@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="jms">
   <title>JMS</title>
-
+  
   <sect1>
-    <title>Introduction</title>
-
-    <para>Spring provides a JMS abstraction framework that simplifies the use
+  	<title>Introduction</title>
+  	
+  	<para>Spring provides a JMS abstraction framework that simplifies the use
     of the JMS API and shields the user from differences between the JMS 1.0.2
     and 1.1 APIs.</para>
 
@@ -14,8 +14,7 @@
     <classname>JmsTemplate</classname> class is used for message production
     and synchronous message reception. For asynchronous reception similar to
     Java EE's message-driven bean style, Spring provides a number of
-    <classname>MessageListenerContainer</classname>s used to create
-    message-driven POJOs.</para>
+    Message Listener Containers used to create Message-Driven POJOs.</para>
 
     <para>The package <literal>org.springframework.jms.core</literal> provides
     the core functionality for using JMS. It contains JMS template classes
@@ -52,11 +51,11 @@
     JMS. This allows for integration of JMS as a transactional resource into
     Spring's transaction management mechanisms.</para>
   </sect1>
-
+  
   <sect1>
-    <title>Domain unification</title>
-
-    <para>There are two major releases of the JMS specification, 1.0.2 and
+  	<title>Domain Unification</title>
+  	
+  	<para>There are two major releases of the JMS specification, 1.0.2 and
     1.1. JMS 1.0.2 defined two types of messaging domains, point-to-point
     (Queues) and publish/subscribe (Topics). The 1.0.2 API reflected these two
     messaging domains by providing a parallel class hierarchy for each domain.
@@ -73,204 +72,260 @@
     application servers that are currently in use are only required to support
     JMS 1.0.2.</para>
   </sect1>
-
+  
   <sect1>
-    <title>JmsTemplate</title>
+  	<title>Using Spring JMS</title>
+  	
+  	<sect2>
+  		<title>JmsTemplate</title> 
+  		
+  		<para>Two implementations of the JmsTemplate are provided. The class
+    	<classname>JmsTemplate</classname> uses the JMS 1.1 API and the subclass
+    	<classname>JmsTemplate102</classname> uses the JMS 1.0.2 API.</para>
 
-    <para>Two implementations of the JmsTemplate are provided. The class
-    <classname>JmsTemplate</classname> uses the JMS 1.1 API and the subclass
-    <classname>JmsTemplate102</classname> uses the JMS 1.0.2 API.</para>
+    	<para>Code that uses the <classname>JmsTemplate</classname> only needs to
+    	implement callback interfaces giving them a clearly defined contract. The
+    	<classname>MessageCreator</classname> callback interface creates a message
+    	given a Session provided by the calling code in JmsTemplate. In order to
+    	allow for more complex usage of the JMS API, the callback
+    	<classname>SessionCallback</classname> provides the user with the JMS
+    	session and the callback <classname>ProducerCallback</classname> exposes a
+    	Session and MessageProducer pair.</para>
 
-    <para>Code that uses the <classname>JmsTemplate</classname> only needs to
-    implement callback interfaces giving them a clearly defined contract. The
-    <classname>MessageCreator</classname> callback interface creates a message
-    given a Session provided by the calling code in JmsTemplate. In order to
-    allow for more complex usage of the JMS API, the callback
-    <classname>SessionCallback</classname> provides the user with the JMS
-    session and the callback <classname>ProducerCallback</classname> exposes a
-    Session and MessageProducer pair.</para>
+    	<para>The JMS API exposes two types of send methods, one that takes
+    	delivery mode, priority, and time-to-live as quality of service (QOS)
+    	parameters and one that takes no QOS parameters which uses default values.
+    	Since there are many send methods in <classname>JmsTemplate</classname>,
+    	the setting of the QOS parameters have been exposed as bean properties to
+    	avoid duplication in the number of send methods. Similarly, the timeout
+    	value for synchronous receive calls is set using the property
+    	<classname>setReceiveTimeout</classname>.</para>
 
-    <para>The JMS API exposes two types of send methods, one that takes
-    delivery mode, priority, and time-to-live as quality of service (QOS)
-    parameters and one that takes no QOS parameters which uses default values.
-    Since there are many send methods in <classname>JmsTemplate</classname>,
-    the setting of the QOS parameters have been exposed as bean properties to
-    avoid duplication in the number of send methods. Similarly, the timeout
-    value for synchronous receive calls is set using the property
-    <classname>setReceiveTimeout</classname>.</para>
+    	<para>Some JMS providers allow the setting of default QOS values
+    	administratively through the configuration of the ConnectionFactory. This
+    	has the effect that a call to <classname>MessageProducer</classname>'s
+    	send method <methodname>send(Destination destination, Message
+    	message)</methodname> will use different QOS default values than those
+    	specified in the JMS specification. Therefore, in order to provide
+    	consistent management of QOS values, the
+    	<classname>JmsTemplate</classname> must be specifically enabled to use its
+    	own QOS values by setting the boolean property
+    	<literal><property>isExplicitQosEnabled</property></literal> to
+    	true.</para> 		
+  		</sect2>
+  	
+  	<sect2>
+  		<title>Connection Factory</title>
+  		
+  		<para>The <classname>JmsTemplate</classname> requires a reference to a
+      	<classname>ConnectionFactory</classname>. The
+      	<classname>ConnectionFactory</classname> is part of the JMS
+      	specification and serves as the entry point for working with JMS. It is
+      	used by the client application as a factory to create connections with
+      	the JMS provider and encapsulates various configuration parameters, many
+      	of which are vendor specific such as SSL configuration options.</para>
 
-    <para>Some JMS providers allow the setting of default QOS values
-    administratively through the configuration of the ConnectionFactory. This
-    has the effect that a call to <classname>MessageProducer</classname>'s
-    send method <methodname>send(Destination destination, Message
-    message)</methodname> will use different QOS default values than those
-    specified in the JMS specification. Therefore, in order to provide
-    consistent management of QOS values, the
-    <classname>JmsTemplate</classname> must be specifically enabled to use its
-    own QOS values by setting the boolean property
-    <literal><property>isExplicitQosEnabled</property></literal> to
-    true.</para>
+      	<para>When using JMS inside an EJB the vendor provides implementations
+      	of the JMS interfaces so that they can participate in declarative
+      	transaction management and perform pooling of connections and session.
+      	In order to use this implementation, Java EE containers typically require
+      	that you declare a JMS connection factory as a
+      	<property>resource-ref</property> inside the EJB or servlet deployment
+      	descriptors. To ensure the use of these features with the
+     	<classname>JmsTemplate</classname> inside an EJB, the client application
+      	should ensure that it references the managed implementation of the
+      	<classname>ConnectionFactory</classname>.</para>
 
-    <sect2>
-      <title>ConnectionFactory</title>
+      	<para>Spring provides an implementation of the
+      	<classname>ConnectionFactory</classname> interface,
+      	<classname>SingleConnectionFactory</classname>, that will return the
+      	same <classname>Connection</classname> on all
+      	<methodname>createConnection</methodname> calls and ignore calls to
+      	<methodname>close.</methodname> This is useful for testing and
+      	standalone environments so that the same connection can be used for
+      	multiple <classname>JmsTemplate</classname> calls that may span any
+      	number of transactions. <classname>SingleConnectionFactory</classname>
+      	takes a reference to a standard <classname>ConnectionFactory</classname>
+      	that would typically comes from JNDI.</para>
+  	</sect2>
+  	
+  	<sect2>
+  		<title>Destination Management</title>
+  		
+  		<para>Destinations, like ConnectionFactories, are JMS administered
+      	objects that can be stored and retrieved in JNDI. When configuring a
+      	Spring application context you can use the JNDI factory class
+      	<classname>JndiObjectFactoryBean</classname> to perform dependency
+      	injection on your object's references to JMS destinations. However,
+      	often this strategy is cumbersome if there are a large number of
+      	destinations in the application or if there are advanced destination
+      	management features unique to the JMS provider. Examples of such
+      	advanced destination management would be the creation of dynamic
+      	destinations or support for a hierarchical namespace of destinations.
+      	The <classname>JmsTemplate</classname> delegates the resolution of a
+      	destination name to a JMS destination object to an implementation of the
+      	interface <classname>DestinationResolver</classname>.
+      	<classname>DynamicDestinationResolver</classname> is the default
+      	implementation used by <classname>JmsTemplate</classname> and
+      	accommodates resolving dynamic destinations. A
+      	<classname>JndiDestinationResolver</classname> is also provided that
+      	acts as a service locator for destinations contained in JNDI and
+      	optionally falls back to the behavior contained in
+      	<classname>DynamicDestinationResolver</classname>.</para>
 
-      <para>The <classname>JmsTemplate</classname> requires a reference to a
-      <classname>ConnectionFactory</classname>. The
-      <classname>ConnectionFactory</classname> is part of the JMS
-      specification and serves as the entry point for working with JMS. It is
-      used by the client application as a factory to create connections with
-      the JMS provider and encapsulates various configuration parameters, many
-      of which are vendor specific such as SSL configuration options.</para>
+      	<para>Quite often the destinations used in a JMS application are only
+      	known at runtime and therefore cannot be administratively created when
+      	the application is deployed. This is often because there is shared
+      	application logic between interacting system components that create
+     	destinations at runtime according to a well-known naming convention.
+     	Even though the creation of dynamic destinations are not part of the JMS
+      	specification, most vendors have provided this functionality. Dynamic
+      	destinations are created with a name defined by the user which
+      	differentiates them from temporary destinations and are often not
+      	registered in JNDI. The API used to create dynamic destinations varies
+      	from provider to provider since the properties associated with the
+      	destination are vendor specific. However, a simple implementation choice
+      	that is sometimes made by vendors is to disregard the warnings in the
+      	JMS specification and to use the <classname>TopicSession</classname>
+      	method <methodname>createTopic(String topicName)</methodname> or the
+      	<classname>QueueSession</classname> method
+      	<methodname>createQueue(String queueName)</methodname> to create a new
+      	destination with default destination properties. Depending on the vendor
+      	implementation, <classname>DynamicDestinationResolver</classname> may
+      	then also create a physical destination instead of only resolving
+      	one.</para>
 
-      <para>When using JMS inside an EJB the vendor provides implementations
-      of the JMS interfaces so that they can participate in declarative
-      transaction management and perform pooling of connections and session.
-      In order to use this implementation, Java EE containers typically require
-      that you declare a JMS connection factory as a
-      <property>resource-ref</property> inside the EJB or servlet deployment
-      descriptors. To ensure the use of these features with the
-      <classname>JmsTemplate</classname> inside an EJB, the client application
-      should ensure that it references the managed implementation of the
-      <classname>ConnectionFactory</classname>.</para>
+      	<para>The boolean property <property>PubSubDomain</property> is used to
+      	configure the <classname>JmsTemplate</classname> with knowledge of what
+      	JMS domain is being used. By default the value of this property is
+      	false, indicating that the point-to-point domain, Queues, will be used.
+      	In the 1.0.2 implementation the value of this property determines if the
+      	<classname>JmsTemplate</classname>'s send operations will send a message
+      	to a Queue or to a Topic. This flag has no effect on send operations for
+      	the 1.1 implementation. However, in both implementations, this property
+      	determines the behavior of resolving dynamic destination via
+      	implementations of <classname>DestinationResolver</classname>.</para>
 
-      <para>Spring provides an implementation of the
-      <classname>ConnectionFactory</classname> interface,
-      <classname>SingleConnectionFactory</classname>, that will return the
-      same <classname>Connection</classname> on all
-      <methodname>createConnection</methodname> calls and ignore calls to
-      <methodname>close.</methodname> This is useful for testing and
-      standalone environments so that the same connection can be used for
-      multiple <classname>JmsTemplate</classname> calls that may span any
-      number of transactions. <classname>SingleConnectionFactory</classname>
-      takes a reference to a standard <classname>ConnectionFactory</classname>
-      that would typically comes from JNDI.</para>
-    </sect2>
+      	<para>You can also configure the <classname>JmsTemplate</classname> with
+      	a default destination via the property
+      	<property>DefaultDestination</property>. The default destination will be
+      	used with send and receive operations that do not refer to a specific
+      	destination.</para>
+  	</sect2>
+  	
+  	<sect2>
+  		<title>Message Listener Containers</title>
+  		
+  		<para>One of the most common uses of JMS messages in the EJB world is to
+		drive message-driven beans (MDBs). Spring offers a solution to create
+		message-driven POJOs (MDPs) in a way that does not tie a user to an EJB
+		container.</para>
+		
+        <para>A subclass of <classname>AbstractMessageListenerContainer</classname>
+        is used to receive messages from a JMS message queue and drive
+        the MDPs that are injected into it. The
+        <classname>AbstractMessageListenerContainer</classname> is responsible
+        for all threading of message reception and dispatch into the MDPs
+        for processing.</para>
+		
+		<para>There are three subclasses of
+		<classname>AbstractMessageListenerContainer</classname> packaged
+		with Spring, each with its own advantages.</para>
+		
+		<sect3>
+			<title><classname>SimpleMessageListenerContainer</classname></title>
+			
+			<para>This message listener container is the simplest of the
+			three subclasses.  It simply creates a fixed number of JMS
+			sessions at startup and uses them throughout the lifespan of
+			the container.  This subclass doesn't allow for dynamic adaption to
+			runtime demands or participate in transactional reception of
+			messages.  However, it does have the fewest requirements on 
+			the JMS provider.  This subclass only requires simple JMS API
+			behaviors.</para>
+		</sect3>
+		
+		<sect3>
+			<title><classname>DefaultMessageListenerContainer</classname></title>
+			
+			<para>This message listener container is the one used in most
+			cases.  As in the <classname>SimpleMessageLisenerContainer</classname>
+			this subclass does not allow for dynamic adaption to runtime
+			demands.  However, this flavor does participate in transactions.
+			Each received message is registered with an XA transaction
+			(when configured) and can take advantage of XA transation
+			semantics.  This subclass strikes a good balance between low
+			requirements on the JMS provider and good functionality including
+			transaction participation.</para>
+		</sect3>
+		
+		<sect3>
+			<title><classname>ServerSessionMessageListenerContainer</classname></title>
+			
+			<para>This subclass is the most powerful of the three.  It
+			leverages the JMS ServerSessionPool SPI to allow for dynamic
+			management of JMS sessions.  This implementation also particpates
+			in transactions.  The use of this variety of message listener
+			container enables powerful runtime tuning but places a larger
+			burden of requirements (ServerSessionPool SPI) on the JMS
+			provider being used.  If there is no need for runtime performance
+			tuning, look to the <classname>DefaultMessageListenerContainer</classname>
+			or the <classname>SimpleMessageListenerContainer</classname></para>
+		</sect3>
+  	</sect2>
+  	
+  	<sect2>
+  		<title>TransactionManagement</title>
+  		
+  		<para>Spring provides a <classname>JmsTransactionManager</classname>
+        that manages transactions for a single JMS
+        <classname>ConnectionFactory</classname>. This allows JMS applications
+        to leverage the managed transaction features of Spring as described in
+        <xref linkend="transaction" />. The
+        <classname>JmsTransactionManager</classname> binds a Connection/Session
+        pair from the specified <classname>ConnectionFactory</classname> to the
+        thread. However, in a Java EE environment the
+        <classname>ConnectionFactory</classname> will pool connections and
+        sessions, so the instances that are bound to the thread depend on the
+        pooling behavior. In a standalone environment, using Spring's
+        <classname>SingleConnectionFactory</classname> will result in a using a
+        single JMS <classname>Connection</classname> and each transaction having
+        its own <classname>Session</classname>. The
+        <classname>JmsTemplate</classname> can also be used with the
+        <classname>JtaTransactionManager</classname> and an XA-capable JMS
+        <classname>ConnectionFactory</classname> for performing distributed
+        transactions.</para>
 
-    <sect2>
-      <title>Transaction Management</title>
-
-      <para>Spring provides a <classname>JmsTransactionManager</classname>
-      that manages transactions for a single JMS
-      <classname>ConnectionFactory</classname>. This allows JMS applications
-      to leverage the managed transaction features of Spring as described in
-      <xref linkend="transaction" />. The
-      <classname>JmsTransactionManager</classname> binds a Connection/Session
-      pair from the specified <classname>ConnectionFactory</classname> to the
-      thread. However, in a Java EE environment the
-      <classname>ConnectionFactory</classname> will pool connections and
-      sessions, so the instances that are bound to the thread depend on the
-      pooling behavior. In a standalone environment, using Spring's
-      <classname>SingleConnectionFactory</classname> will result in a using a
-      single JMS <classname>Connection</classname> and each transaction having
-      its own <classname>Session</classname>. The
-      <classname>JmsTemplate</classname> can also be used with the
-      <classname>JtaTransactionManager</classname> and an XA-capable JMS
-      <classname>ConnectionFactory</classname> for performing distributed
-      transactions.</para>
-
-      <para>Reusing code across a managed and unmanaged transactional
-      environment can be confusing when using the JMS API to create a
-      <classname>Session</classname> from a <classname>Connection</classname>.
-      This is because the JMS API only has only one factory method to create a
-      <classname>Session</classname> and it requires values for the
-      transaction and acknowledgement modes. In a managed environment, setting
-      these values is the responsibility of the environment's transactional
-      infrastructure, so these values are ignored by the vendor's wrapper to
-      the JMS Connection. When using the <classname>JmsTemplate</classname> in
-      an unmanaged environment you can specify these values through the use of
-      the properties <classname>SessionTransacted</classname> and
-      <classname>SessionAcknowledgeMode</classname>. When using a
-      <classname>PlatformTransactionManager</classname> with
-      <classname>JmsTemplate</classname>, the template will always be given a
-      transactional JMS <classname>Session</classname>.</para>
-    </sect2>
-
-    <sect2>
-      <title>Destination Management</title>
-
-      <para>Destinations, like ConnectionFactories, are JMS administered
-      objects that can be stored and retrieved in JNDI. When configuring a
-      Spring application context you can use the JNDI factory class
-      <classname>JndiObjectFactoryBean</classname> to perform dependency
-      injection on your object's references to JMS destinations. However,
-      often this strategy is cumbersome if there are a large number of
-      destinations in the application or if there are advanced destination
-      management features unique to the JMS provider. Examples of such
-      advanced destination management would be the creation of dynamic
-      destinations or support for a hierarchical namespace of destinations.
-      The <classname>JmsTemplate</classname> delegates the resolution of a
-      destination name to a JMS destination object to an implementation of the
-      interface <classname>DestinationResolver</classname>.
-      <classname>DynamicDestinationResolver</classname> is the default
-      implementation used by <classname>JmsTemplate</classname> and
-      accommodates resolving dynamic destinations. A
-      <classname>JndiDestinationResolver</classname> is also provided that
-      acts as a service locator for destinations contained in JNDI and
-      optionally falls back to the behavior contained in
-      <classname>DynamicDestinationResolver</classname>.</para>
-
-      <para>Quite often the destinations used in a JMS application are only
-      known at runtime and therefore cannot be administratively created when
-      the application is deployed. This is often because there is shared
-      application logic between interacting system components that create
-      destinations at runtime according to a well-known naming convention.
-      Even though the creation of dynamic destinations are not part of the JMS
-      specification, most vendors have provided this functionality. Dynamic
-      destinations are created with a name defined by the user which
-      differentiates them from temporary destinations and are often not
-      registered in JNDI. The API used to create dynamic destinations varies
-      from provider to provider since the properties associated with the
-      destination are vendor specific. However, a simple implementation choice
-      that is sometimes made by vendors is to disregard the warnings in the
-      JMS specification and to use the <classname>TopicSession</classname>
-      method <methodname>createTopic(String topicName)</methodname> or the
-      <classname>QueueSession</classname> method
-      <methodname>createQueue(String queueName)</methodname> to create a new
-      destination with default destination properties. Depending on the vendor
-      implementation, <classname>DynamicDestinationResolver</classname> may
-      then also create a physical destination instead of only resolving
-      one.</para>
-
-      <para>The boolean property <property>PubSubDomain</property> is used to
-      configure the <classname>JmsTemplate</classname> with knowledge of what
-      JMS domain is being used. By default the value of this property is
-      false, indicating that the point-to-point domain, Queues, will be used.
-      In the 1.0.2 implementation the value of this property determines if the
-      <classname>JmsTemplate</classname>'s send operations will send a message
-      to a Queue or to a Topic. This flag has no effect on send operations for
-      the 1.1 implementation. However, in both implementations, this property
-      determines the behavior of resolving dynamic destination via
-      implementations of <classname>DestinationResolver</classname>.</para>
-
-      <para>You can also configure the <classname>JmsTemplate</classname> with
-      a default destination via the property
-      <property>DefaultDestination</property>. The default destination will be
-      used with send and receive operations that do not refer to a specific
-      destination.</para>
-    </sect2>
+        <para>Reusing code across a managed and unmanaged transactional
+        environment can be confusing when using the JMS API to create a
+        <classname>Session</classname> from a <classname>Connection</classname>.
+        This is because the JMS API only has only one factory method to create a
+        <classname>Session</classname> and it requires values for the
+        transaction and acknowledgement modes. In a managed environment, setting
+        these values is the responsibility of the environment's transactional
+        infrastructure, so these values are ignored by the vendor's wrapper to
+        the JMS Connection. When using the <classname>JmsTemplate</classname> in
+        an unmanaged environment you can specify these values through the use of
+        the properties <classname>SessionTransacted</classname> and
+        <classname>SessionAcknowledgeMode</classname>. When using a
+        <classname>PlatformTransactionManager</classname> with
+        <classname>JmsTemplate</classname>, the template will always be given a
+        transactional JMS <classname>Session</classname>.</para>
+  	</sect2>
   </sect1>
-
+  
   <sect1>
-    <title>Using the JmsTemplate</title>
+  	<title>Sending a Message</title>
+  	
+  	<para>The <classname>JmsTemplate</classname> contains many convenience
+    methods to send a message. There are send methods that specify the
+    destination using a <classname>javax.jms.Destination</classname> object
+    and those that specify the destination using a string for use in a JNDI
+    lookup. The send method that takes no destination argument uses the
+    default destination. Here is an example that sends a message to a queue
+    using the 1.0.2 implementation.</para>
 
-    <para>To get started using the <classname>JmsTemplate</classname> you need
-    to select either the JMS 1.0.2 implementation
-    <classname>JmsTemplate102</classname> or the JMS 1.1 implementation
-    <classname>JmsTemplate</classname>. Check your JMS provider to determine
-    what version is supported.</para>
-
-    <sect2>
-      <title>Sending a message</title>
-
-      <para>The <classname>JmsTemplate</classname> contains many convenience
-      methods to send a message. There are send methods that specify the
-      destination using a <classname>javax.jms.Destination</classname> object
-      and those that specify the destination using a string for use in a JNDI
-      lookup. The send method that takes no destination argument uses the
-      default destination. Here is an example that sends a message to a queue
-      using the 1.0.2 implementation.</para>
-
-      <programlisting>import javax.jms.ConnectionFactory;
+    <programlisting>import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Queue;
@@ -303,88 +358,73 @@ public class JmsQueueSender {
   }
 }</programlisting>
 
-      <para>This example uses the <classname>MessageCreator</classname>
-      callback to create a text message from the supplied
-      <classname>Session</classname> object and the
-      <classname>JmsTemplate</classname> is constructed by passing a reference
-      to a <classname>ConnectionFactory</classname> and a boolean specifying
-      the messaging domain. A zero argument constructor and
-      <property>connectionFactory</property> / <property>queue</property> bean
-      properties are provided and can be used for constructing the instance
-      (using a BeanFactory or plain Java code). Alternatively, consider
-      deriving from Spring's <classname>JmsGatewaySupport</classname>
-      convenience base class, which provides pre-built bean properties for JMS
-      configuration.</para>
+    <para>This example uses the <classname>MessageCreator</classname>
+    callback to create a text message from the supplied
+    <classname>Session</classname> object and the
+    <classname>JmsTemplate</classname> is constructed by passing a reference
+    to a <classname>ConnectionFactory</classname> and a boolean specifying
+    the messaging domain. A zero argument constructor and
+    <property>connectionFactory</property> / <property>queue</property> bean
+    properties are provided and can be used for constructing the instance
+    (using a BeanFactory or plain Java code). Alternatively, consider
+    deriving from Spring's <classname>JmsGatewaySupport</classname>
+    convenience base class, which provides pre-built bean properties for JMS
+    configuration.</para>
 
-      <para>When configuring the JMS 1.0.2 support in an application context,
-      it is important to remember setting the value of the boolean property
-      <property>pubSubDomain</property> property in order to indicate if you
-      want to send to Queues or Topics.</para>
+    <para>When configuring the JMS 1.0.2 support in an application context,
+    it is important to remember setting the value of the boolean property
+    <property>pubSubDomain</property> property in order to indicate if you
+    want to send to Queues or Topics.</para>
 
-      <para>The method <methodname>send(String destinationName, MessageCreator
-      creator)</methodname> lets you send to a message using the string name
-      of the destination. If these names are registered in JNDI, you should
-      set the <classname>DestinationResolver</classname> property of the
-      template to an instance of
-      <classname>JndiDestinationResolver</classname>.</para>
+    <para>The method <methodname>send(String destinationName, MessageCreator
+    creator)</methodname> lets you send to a message using the string name
+    of the destination. If these names are registered in JNDI, you should
+    set the <classname>DestinationResolver</classname> property of the
+    template to an instance of
+    <classname>JndiDestinationResolver</classname>.</para>
 
-      <para>If you created the <classname>JmsTemplate</classname> and
-      specified a default destination, the <methodname>send(MessageCreator
-      c)</methodname> sends a message to that destination.</para>
-    </sect2>
+    <para>If you created the <classname>JmsTemplate</classname> and
+    specified a default destination, the <methodname>send(MessageCreator
+    c)</methodname> sends a message to that destination.</para>
+  	
+  	<sect2>
+  		<title>Using Message Converters</title>
+  		
+  		<para>In order to facilitate the sending of domain model objects, the
+        <classname>JmsTemplate</classname> has various send methods that take a
+        Java object as an argument for a message's data content. The overloaded
+        methods <methodname>convertAndSend</methodname> and
+        <methodname>receiveAndConvert</methodname> in
+        <classname>JmsTemplate</classname> delegate the conversion process to an
+        instance of the <literal>MessageConverter</literal> interface. This
+        interface defines a simple contract to convert between Java objects and
+        JMS messages. The default implementation,
+        <classname>SimpleMessageConverter</classname> supports conversion
+        between <classname>String</classname> and
+        <classname>TextMessage</classname>, <classname>byte[]</classname> and
+        <classname>BytesMesssage</classname>, and
+        <classname>java.util.Map</classname> and
+        <classname>MapMessage</classname>. By using the converter, you and your
+        application code can focus on the business object that is being sent or
+        received via JMS and not be concerned with the details of how it is
+        represented as a JMS message.</para>
 
-    <sect2>
-      <title>Synchronous Receiving</title>
+        <para>The sandbox currently includes a
+        <classname>MapMessageConverter</classname> which uses reflection to
+        convert between a JavaBean and a <classname>MapMessage</classname>.
+        Other popular implementations choices you might implement yourself are
+        Converters that use an existing XML marshalling package, such as JAXB,
+        Castor, XMLBeans, or XStream, to create a
+        <classname>TextMessage</classname> representing the object.</para>
 
-      <para>While JMS is typically associated with asynchronous processing, it
-      is possible to consume messages synchronously. The overloaded
-      <methodname>receive</methodname> methods provide this functionality.
-      During a synchronous receive the calling thread blocks until a message
-      becomes available. This can be a dangerous operation since the calling
-      thread can potentially be blocked indefinitely. The property
-      <property>receiveTimeout</property> specifies how long the receiver
-      should wait before giving up waiting for a message.</para>
-    </sect2>
+        <para>To accommodate the setting of a message's properties, headers, and
+        body that can not be generically encapsulated inside a converter class,
+        the interface <literal>MessagePostProcessor</literal> gives you access
+        to the message after it has been converted, but before it is sent. The
+        example below shows how to modify a message header and a property after
+        a <classname>java.util.Map</classname> is converted to a message.</para>
 
-    <sect2>
-      <title>Using Message Converters</title>
-
-      <para>In order to facilitate the sending of domain model objects, the
-      <classname>JmsTemplate</classname> has various send methods that take a
-      Java object as an argument for a message's data content. The overloaded
-      methods <methodname>convertAndSend</methodname> and
-      <methodname>receiveAndConvert</methodname> in
-      <classname>JmsTemplate</classname> delegate the conversion process to an
-      instance of the <literal>MessageConverter</literal> interface. This
-      interface defines a simple contract to convert between Java objects and
-      JMS messages. The default implementation,
-      <classname>SimpleMessageConverter</classname> supports conversion
-      between <classname>String</classname> and
-      <classname>TextMessage</classname>, <classname>byte[]</classname> and
-      <classname>BytesMesssage</classname>, and
-      <classname>java.util.Map</classname> and
-      <classname>MapMessage</classname>. By using the converter, you and your
-      application code can focus on the business object that is being sent or
-      received via JMS and not be concerned with the details of how it is
-      represented as a JMS message.</para>
-
-      <para>The sandbox currently includes a
-      <classname>MapMessageConverter</classname> which uses reflection to
-      convert between a JavaBean and a <classname>MapMessage</classname>.
-      Other popular implementations choices you might implement yourself are
-      Converters that use an existing XML marshalling package, such as JAXB,
-      Castor, XMLBeans, or XStream, to create a
-      <classname>TextMessage</classname> representing the object.</para>
-
-      <para>To accommodate the setting of a message's properties, headers, and
-      body that can not be generically encapsulated inside a converter class,
-      the interface <literal>MessagePostProcessor</literal> gives you access
-      to the message after it has been converted, but before it is sent. The
-      example below shows how to modify a message header and a property after
-      a <classname>java.util.Map</classname> is converted to a message.</para>
-
-      <programlisting>
-public void sendWithConversion() {
+        <programlisting>public void sendWithConversion() {
   Map m = new HashMap();
   m.put("Name", "Mark");
   m.put("Age", new Integer(35));
@@ -397,10 +437,9 @@ public void sendWithConversion() {
   });
 }</programlisting>
 
-      <para>This results in a message of the form</para>
+        <para>This results in a message of the form</para>
 
-      <programlisting>
-MapMessage={ 
+        <programlisting>MapMessage={ 
   Header={ 
     ... standard headers ...
     CorrelationID={123-00001} 
@@ -413,47 +452,55 @@ MapMessage={
     Age={Integer:35} 
   } 
 }</programlisting>
-    </sect2>
-
-    <sect2>
-      <title>SessionCallback and ProducerCallback</title>
-
-      <para>While the send operations cover many common usage scenarios, there
-      are cases when you want to perform multiple operations on a JMS
-      <classname>Session</classname> or
-      <classname>MessageProducer</classname>. The
-      <classname>SessionCallback</classname> and
-      <classname>ProducerCallback</classname> expose the JMS
-      <classname>Session</classname> and
-      <classname>Session</classname>/<classname>MessageProducer</classname>
-      pair respectfully. The <methodname>execute()</methodname> methods on
-      <classname>JmsTemplate</classname> execute these callback
-      methods.</para>
-    </sect2>
+  	</sect2>
+  	
+  	<sect2>
+  		<title>
+  			<classname>SessionCallback</classname> and <classname>ProducerCallback</classname>
+  		</title>
+  		
+  		<para>While the send operations cover many common usage scenarios, there
+        are cases when you want to perform multiple operations on a JMS
+        <classname>Session</classname> or
+        <classname>MessageProducer</classname>. The
+        <classname>SessionCallback</classname> and
+        <classname>ProducerCallback</classname> expose the JMS
+        <classname>Session</classname> and
+        <classname>Session</classname>/<classname>MessageProducer</classname>
+        pair respectfully. The <methodname>execute()</methodname> methods on
+        <classname>JmsTemplate</classname> execute these callback
+        methods.</para>
+  	</sect2>
   </sect1>
-
-  <sect1 id="jms-asynchronousMessageReception">
-    <title>Asynchronous Message Reception</title>
-    <para>
-		One of the most common uses of JMS messages in the EJB world is to
-		drive message-driven beans (MDBs). Spring offers a solution to create
-		message-driven POJOs (MDPs) in a way that does not tie a user to an EJB
-		container.
-	</para>
-
-    <sect2>
-      <title>Message-Driven POJO</title>
-
-      <para>
-		Similar to an MDB in the EJB world, the message-drive POJO or MDP
-		acts as a receiver for JMS messages. The one restriction on an MDP is
-		that it must implement the
-		<interfacename>javax.jms.MessageListener</interfacename> interface. In the case
-		where your POJO will be receiving messages on multiple threads, it's
-		important to ensure that your implementation is thread-safe.
-	  </para>
-
-      <programlisting><![CDATA[import javax.jms.JMSException;
+  
+  <sect1>
+  	<title>Receiving a message</title>
+  	
+  	<sect2>
+  		<title>Synchronous Reception</title>
+  		
+  		<para>While JMS is typically associated with asynchronous processing, it
+        is possible to consume messages synchronously. The overloaded
+        <methodname>receive</methodname> methods provide this functionality.
+        During a synchronous receive the calling thread blocks until a message
+        becomes available. This can be a dangerous operation since the calling
+        thread can potentially be blocked indefinitely. The property
+        <property>receiveTimeout</property> specifies how long the receiver
+        should wait before giving up waiting for a message.</para>
+  	</sect2>
+  	
+  	<sect2 id="jms-asynchronousMessageReception">
+  		<title>Asynchronous Reception</title>
+  		
+  		<para>Similar to an MDB in the EJB world, the Message-Driven POJO
+  		or MDP acts as a receiver for JMS messages. The one restriction
+  		on an MDP is that it must implement the
+		<interfacename>javax.jms.MessageListener</interfacename> interface.
+		In the case where your POJO will be receiving messages on multiple
+		threads, it's important to ensure that your implementation is
+		thread-safe.</para>
+		
+		<programlisting><![CDATA[import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
@@ -473,20 +520,12 @@ public class ExampleListener implements MessageListener {
     }
   }
 }]]></programlisting>
-    </sect2>
 
-    <sect2>
-      <title>Message Listener Containers</title>
+		<para>Once you've got your <interfacename>MessageListener</interfacename>
+		written, it's time to create your Message Listener Container.
+		This is just a standard bean definition.</para>
 
-      <para>
-		An <classname>AbstractMessageListenerContainer</classname> is used to
-		receive messages from a JMS message queue and drive the MDPs that are
-		injected into it. The <classname>AbstractMessageListenerContainer</classname> is
-		responsible for all threading of message reception and dispatch into the
-		MDPs for processing.
-	  </para>
-
-      <programlisting><![CDATA[<bean id="messageListener" class="jmsexample.ExampleListener" />
+		<programlisting><![CDATA[<bean id="messageListener" class="jmsexample.ExampleListener" />
 
 <bean id="listenerContainer"
   class="org.springframework.jms.listener.DefaultMessageListenerContainer">
@@ -495,6 +534,37 @@ public class ExampleListener implements MessageListener {
   <property name="destination" ref="destination" />
   <property name="messageListener" ref="messageListener" />
 </bean>]]></programlisting>
-    </sect2>
+  	</sect2>
+  	
+  	<sect2>
+  		<title>Participating in Transactions</title>
+  	
+  		<para>Participation in transactions requires only a couple of minor
+  		changes.  The gist is that you need to create a transaction manager
+  		and register that transaction manager with one of the subclasses
+  		that can participate in transactions (<classname>DefaultMessageListenerContainer</classname>
+  		or <classname>ServerSessionMessageListenerContainer</classname>)</para>
+  		
+  		<para>To create the transaction manager, you'll want to create an
+  		instance of <classname>JmsTransactionManager</classname> and give
+  		it an XA transaction capable connection factory.</para>
+  		
+  		<programlisting><![CDATA[<bean id="transactionManager" class="org.springframework.jms.connection.JmsTransactionManager">
+  <property name="connectionFactory" ref="connectionFactory" />
+</bean>]]></programlisting>
+
+		<para>Then you just need to add it to our earlier container
+		configuration.  The container will take care of the rest.</para>
+		
+		<programlisting><![CDATA[<bean id="listenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+  <property name="concurrentConsumers" value="5" />
+  <property name="connectionFactory" ref="connectionFactory" />
+  <property name="destination" ref="destination" />
+  <property name="messageListener" ref="messageListener" />
+  <property name="transactionManager" ref="transactionManager" />
+</bean>]]></programlisting>
+  	</sect2>  	
+  	
   </sect1>
+
 </chapter>
