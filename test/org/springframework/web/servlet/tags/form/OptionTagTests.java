@@ -89,7 +89,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
-		assertContainsAttribute(output, "value", "bar");
+		assertAttributeNotPresent(output, "value");
 		assertBlockTagContains(output, "bar");
 	}
 
@@ -197,13 +197,13 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
-		assertContainsAttribute(output, "value", "Sally");
+		assertAttributeNotPresent(output, "value");
 		assertContainsAttribute(output, "selected", "selected");
 		assertBlockTagContains(output, "Sally");
 	}
 
 	private void assertOptionTagOpened(String output) {
-		assertTrue(output.startsWith("<option "));
+		assertTrue(output.startsWith("<option"));
 	}
 
 	private void assertOptionTagClosed(String output) {

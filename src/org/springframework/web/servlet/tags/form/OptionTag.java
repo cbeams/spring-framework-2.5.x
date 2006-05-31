@@ -102,7 +102,9 @@ public class OptionTag extends AbstractFormTag {
 
 		Object resolvedValue = evaluate("value", getValue());
 
-		tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(resolvedValue));
+		if (!ObjectUtils.getDisplayString(resolvedValue).equals(getLabelValue(resolvedValue))) {
+			tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(resolvedValue));
+		}
 		if (isSelected(resolvedValue)) {
 			tagWriter.writeAttribute("selected", "selected");
 		}

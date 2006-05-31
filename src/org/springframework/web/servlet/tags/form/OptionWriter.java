@@ -158,7 +158,10 @@ final class OptionWriter {
 	 */
 	private void renderOption(TagWriter tagWriter, Object item, Object value, String label) throws JspException {
 		tagWriter.startTag("option");
-		tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(value));
+		if (!ObjectUtils.getDisplayString(value).equals(label)) {
+			tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(value));
+		}
+
 		if (isSelected(value) || isSelected(item)) {
 			tagWriter.writeAttribute("selected", "selected");
 		}

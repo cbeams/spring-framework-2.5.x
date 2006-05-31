@@ -165,10 +165,10 @@ public class SelectTagTests extends AbstractFormTagTests {
 		List children = rootElement.elements();
 		assertEquals("Incorrect number of children", 50, children.size());
 
-		Element e = (Element) rootElement.selectSingleNode("option[@value = '12']");
+		Element e = (Element) rootElement.selectSingleNode("option[text() = '12']");
 		assertEquals("'12' node not selected", "selected", e.attribute("selected").getValue());
 
-		e = (Element) rootElement.selectSingleNode("option[@value = '34']");
+		e = (Element) rootElement.selectSingleNode("option[text() = '34']");
 		assertEquals("'34' node not selected", "selected", e.attribute("selected").getValue());
 	}
 
@@ -254,7 +254,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		List children = rootElement.elements();
 		assertEquals("Incorrect number of children", 4, children.size());
 
-		Element e = (Element) rootElement.selectSingleNode("option[@value = 'Rob']");
+		Element e = (Element) rootElement.selectSingleNode("option[text() = 'Rob']");
 		assertEquals("Rob node not selected", "selected", e.attribute("selected").getValue());
 	}
 
