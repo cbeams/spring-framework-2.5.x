@@ -2247,12 +2247,12 @@ public class FileUploadBean {
     <td>Interests:</td>
     <td>
         Quidditch: <input name="preferences.interests" type="checkbox" value="Quidditch"/>
-        <input type="hidden" boundValue="1" name="_preferences.interests"/>
+        <input type="hidden" value="1" name="_preferences.interests"/>
         Herbology: <input name="preferences.interests" type="checkbox" value="Herbology"/>
-        <input type="hidden" boundValue="1" name="_preferences.interests"/>
+        <input type="hidden" value="1" name="_preferences.interests"/>
         Defence Against the Dark Arts: <input name="preferences.interests" type="checkbox"
             value="Defence Against the Dark Arts"/>
-        <input type="hidden" boundValue="1" name="_preferences.interests"/>
+        <input type="hidden" value="1" name="_preferences.interests"/>
     </td>
     <td></td>
 </tr>]]></programlisting>

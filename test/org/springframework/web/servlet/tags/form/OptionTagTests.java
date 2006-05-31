@@ -92,7 +92,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertAttributeNotPresent(output, "value");
 		assertBlockTagContains(output, "bar");
 	}
-
+	                                  
 	public void testWithoutContext() throws Exception {
 		this.tag.setParent(null);
 		this.tag.setValue("foo");
