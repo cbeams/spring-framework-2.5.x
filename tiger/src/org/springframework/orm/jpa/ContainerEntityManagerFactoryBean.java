@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -66,6 +66,8 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 	/** Location of persistence.xml file */
 	private String persistenceXmlLocation = DEFAULT_PERSISTENCE_XML_LOCATION;
 
+	private Resource persistenceUnitRootLocation;
+
 	private boolean allowRedeploymentWithSameName = false;
 
 	private LoadTimeWeaver loadTimeWeaver;
@@ -77,8 +79,6 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	private SpringPersistenceUnitInfo persistenceUnitInfo;
-	
-	private String persistenceUnitRootLocation;
 
 	
 	/**
@@ -93,22 +93,17 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 	}
 	
 	/**
-	 * Optional property setting the location of the persistence unit root URL, as a Spring
-	 * resource location string. The value may need to be platform-specific--
-	 * for example, a file path--and may differ between a test and deployed
-	 * environment.
-	 * <br/>It may be necessary to set this property if the persistence provider needs to
-	 * locate the orm.xml file.
-	 * With a pure annotation approach, it should not be
-	 * required. If this property is not specified, 
-	 * it will automatically be set to the root of
-	 * the classpath as returned by the Spring resource loading infrastructure. 
-	 * This defaulting may not work if there are multiple directories
-	 * or JARs on the classpath.
-	 * @param persistenceUnitRootPath Spring resouce location string identifying
-	 * the root of the persistence unit
+	 * Optional property setting the location of the persistence unit root URL,
+	 * as a Spring resource location string. The value may need to be platform-specific
+	 * (for example, a file path) and may differ between a test and deployed environment.
+	 * <p>It may be necessary to set this property if the persistence provider needs to
+	 * locate the <code>orm.xml</code> file. With a pure annotation approach, this
+	 * should not be required. If this property is not specified, it will automatically
+	 * be set to the root of the class path as returned by the Spring resource loading
+	 * infrastructure. This defaulting may not work reliably if there are multiple
+	 * directories or JARs on the class path.
 	 */
-	public void setPersistenceUnitRootLocation(String persistenceUnitRootPath) {
+	public void setPersistenceUnitRootLocation(Resource persistenceUnitRootPath) {
 		this.persistenceUnitRootLocation = persistenceUnitRootPath;
 	}
 
@@ -191,23 +186,25 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 	}
 
 	/**
-	 * Try to deduce the persistence unit root URL using multiple strategies
-	 * @return the persistence unit root URL to pass to the
-	 * JPA PersistenceProvider
+	 * Try to deduce the persistence unit root URL using multiple strategies.
+	 * @return the persistence unit root URL to pass to the JPA PersistenceProvider
 	 */
 	private URL findPersistenceUnitRootUrl() {
 		try {
-			// First try the persistence unit path
+			// First try the persistence unit path.
 			String rootPath = "";
 			if (this.persistenceUnitRootLocation != null) {
-				logger.info("Using explicit  persistence unit root URL location");
-				rootPath = this.persistenceUnitRootLocation;
+				if (logger.isInfoEnabled()) {
+					logger.info("Using explicit persistence unit root location: " + this.persistenceUnitRootLocation);
+				}
+				return this.persistenceUnitRootLocation.getURL();
 			}
-			
-			// Fallback: use the root of the classpath. May not work if
-			// the classpath is built up of multiple trees
+			// Fallback: use the root of the class path. May not work reliably
+			// if the classpath is built up of multiple trees.
 			Resource res = this.resourceLoader.getResource(rootPath);
-			logger.info("Defaulting persistence unit root URL to classpath root");
+			if (logger.isInfoEnabled()) {
+				logger.info("Defaulting persistence unit root location to class path root: " + res);
+			}
 			return res.getURL();
 		}
 		catch (IOException ex) {
@@ -220,12 +217,13 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 	 * ContainerPersistenceUnitInfo. Otherwise check for a matching name.
 	 * @return Spring-specific PersistenceUnitInfo
 	 */
-	protected SpringPersistenceUnitInfo parsePersistenceUnitInfo() {
+	private SpringPersistenceUnitInfo parsePersistenceUnitInfo() {
 		PersistenceUnitReader reader = new PersistenceUnitReader(this.resourceLoader, this.dataSourceLookup);
 
 		SpringPersistenceUnitInfo[] infos = reader.readPersistenceUnitInfos(this.persistenceXmlLocation);
 		if (infos.length == 0) {
-			throw new IllegalArgumentException("No persistence units parsed from [" + this.persistenceXmlLocation + "]");
+			throw new IllegalArgumentException(
+					"No persistence units parsed from [" + this.persistenceXmlLocation + "]");
 		}
 
 		SpringPersistenceUnitInfo pui = null;
