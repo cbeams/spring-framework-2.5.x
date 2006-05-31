@@ -2099,7 +2099,7 @@ MyInterfaceType proxy = factory.getProxy();]]></programlisting>
 		  of any object. The support is intended to be used for objects created 
 		  <emphasis>outside of the control of any container</emphasis>. Domain objects
 		  often fall into this category: they may be created programmatically using the
-		  <literal>new</literal> operator, or by an ORM tool as a result of a database query.  			
+		  <literal>new</literal> operator, or by an ORM tool as a result of a database query.
 		</para>
 		
 		<remark>
