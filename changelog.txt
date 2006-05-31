@@ -3,8 +3,14 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 M5 (29.5.2006)
+Changes in version 2.0 M5 (31.5.2006)
 -------------------------------------
+
+General
+* spring-aop.jar does not contain AOP Alliance interfaces (in contrast to spring.jar); explicitly add aopalliance.jar
+* spring-webmvc.jar, spring-struts.jar and spring-jsf.jar are now extension modules; not part of spring.jar anymore
+* spring-ibatis.jar, spring-jca.jar and spring-jms.jar are now extension modules; not part of spring.jar anymore
+* introduced spring-ext.jar, encompassing all extension modules as a convenience (preferably use individual ext jars)
 
 Package org.springframework.aop
 * reworked support for scoped proxies to build on scoping support in core BeanFactory
@@ -12,11 +18,14 @@ Package org.springframework.aop
 * removed deprecated AttributesPooling/Prototype/ThreadLocalTargetSourceCreator
 * removed unused Class argument from ParameterNameDiscoverer's "getParameterNames(Method)"
 * reworked ProxyFactoryBean's "setProxyInterfaces" method from String array to Class array
+* reworked ProxyFactoryBean to use the ClassLoader passed in through BeanClassLoaderAware
 * factored out AbstractSingletonProxyFactoryBean from TransactionProxyFactoryBean
 
 Package org.springframework.beans
 * introduced lazy loading (and lazy validation) of bean classes in standard bean factories and bean definition readers
 * redefined ListableBeanFactory's "includeFactoryBeans" flag for "getBean(Name)sOfType" into "allowEagerInit"
+* introduced BeanClassLoaderAware interface, for passing the factory's class loader to beans that resolve class names
+* reworked all FactoryBeans that resolve class names to leverage the BeanClassLoaderAware mechanism
 * PropertyPlaceholderConfigurer is able to resolve placeholders in lazily loaded bean class names
 * added support for PropertyEditorRegistrars to ConfigurableBeanFactory, for non-synchronized usage of custom editors
 * CustomEditorConfigurer supports PropertyEditorRegistrars, to be applied to its containing BeanFactory
@@ -36,8 +45,13 @@ Package org.springframework.core
 * renamed GenericsHelper to GenericCollectionTypeResolver, more clearly reflecting its actual role
 * AnnotationUtils discovers annotations inherited via bridge methods now, through the new BridgeMethodResolver
 
+Package org.springframework.dao
+* added generic PersistenceExceptionTranslator mechanism, supported by the JpaDialect abstraction for JPA providers
+* added PersistenceExceptionTranslationPostProcessor, for automatic translation to DataAccessExceptions
+
 Package org.springframework.instrument
 * introduced class instrumentation support based on standard ClassFileTransformers (used by JPA SPI support)
+* introduced LoadTimeWeaver abstraction for instrumentation-aware ClassLoaders plus throwaway ClassLoader support
 
 Package org.springframework.jdbc
 * refined default SQL error codes for DB2 and HSQLDB
@@ -50,6 +64,7 @@ Package org.springframework.orm
 * fixed JpaInterceptor to actually bind a new EntityManager to the thread again (worked in M3, didn't work in M4)
 * fixed EntityManagerFactoryUtils's "convertJpaAccessException" to always return rather than throw DataAccessExceptions
 * added full support for JPA SPI, in the form of a ContainerEntityManagerFactoryBean with LoadTimeWeaver support
+* added JpaVendorAdapter abstraction, with out-of-the-box TopLinkJpaVendorAdapter and HibernateJpaVendorAdapter
 * added PersistenceAnnotationPostProcessor, processing EJB3-style @PersistenceUnit and @PersistenceContext annotations
 
 Package org.springframework.test
@@ -76,6 +91,7 @@ Package org.springframework.web
 * moved StaticPortletApplicationContext from test tree over to main source tree
 * fixed SimpleMappingExceptionResolver to use local "exceptionMappings" reference
 * factored out reusable "prepareBinder" method in BaseCommandController, for easier overriding of "createBinder"
+* refined JSP form tag library
 
 
 Changes in version 2.0 M4 (23.4.2006)
