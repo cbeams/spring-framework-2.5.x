@@ -37,7 +37,7 @@
 					In the case of TopLink, this property can be
 					set to a platform class.
 				-->	
-				<property name="databaseName" 
+				<property name="databasePlatform" 
 					value="org.springframework.samples.petclinic.toplink.EssentialsHSQLPlatformWithNativeSequence" />	
 
 				<property name="showSql" value="true" />
