@@ -32,11 +32,11 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 
 	private Database database = Database.DEFAULT;
 
-	private String databaseName;
-
-	private boolean showSql;
+	private String databasePlatform;
 
 	private boolean generateDdl;
+
+	private boolean showSql;
 
 
 	/**
@@ -57,31 +57,17 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 
 	/**
 	 * Specify the name of the target database to operate on.
-	 * The supported values are vendor-dependent.
+	 * The supported values are vendor-dependent platform identifiers.
 	 */
-	public void setDatabaseName(String databaseName) {
-		this.databaseName = databaseName;
+	public void setDatabasePlatform(String databasePlatform) {
+		this.databasePlatform = databasePlatform;
 	}
 
 	/**
 	 * Return the name of the target database to operate on.
 	 */
-	protected String getDatabaseName() {
-		return databaseName;
-	}
-
-	/**
-	 * Set whether to show SQL in the log (or in the console).
-	 */
-	public void setShowSql(boolean showSql) {
-		this.showSql = showSql;
-	}
-
-	/**
-	 * Return whether to show SQL in the log (or in the console).
-	 */
-	protected boolean isShowSql() {
-		return showSql;
+	protected String getDatabasePlatform() {
+		return databasePlatform;
 	}
 
 	/**
@@ -98,6 +84,20 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	 */
 	protected boolean isGenerateDdl() {
 		return generateDdl;
+	}
+
+	/**
+	 * Set whether to show SQL in the log (or in the console).
+	 */
+	public void setShowSql(boolean showSql) {
+		this.showSql = showSql;
+	}
+
+	/**
+	 * Return whether to show SQL in the log (or in the console).
+	 */
+	protected boolean isShowSql() {
+		return showSql;
 	}
 
 

@@ -45,24 +45,24 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	public Map getJpaPropertyMap() {
 		Properties jpaProperties = new Properties();
 
-		if (isShowSql()) {
-			jpaProperties.setProperty(TopLinkProperties.LOGGING_LEVEL, Level.FINE.toString());
-		}
-		if (isGenerateDdl()) {
-			jpaProperties.setProperty(EntityManagerFactoryProvider.DDL_GENERATION,
-					EntityManagerFactoryProvider.DROP_AND_CREATE);
-			jpaProperties.setProperty(EntityManagerFactoryProvider.DDL_GENERATION_MODE,
-					EntityManagerFactoryProvider.DDL_DATABASE_GENERATION);
-		}
-
-		if (getDatabaseName() != null) {
-			jpaProperties.setProperty(TopLinkProperties.TARGET_DATABASE, getDatabaseName());
+		if (getDatabasePlatform() != null) {
+			jpaProperties.setProperty(TopLinkProperties.TARGET_DATABASE, getDatabasePlatform());
 		}
 		else if (getDatabase() != null) {
 			String targetDatabase = determineTargetDatabaseName(getDatabase());
 			if (targetDatabase != null) {
 				jpaProperties.setProperty(TopLinkProperties.TARGET_DATABASE, targetDatabase);
 			}
+		}
+
+		if (isGenerateDdl()) {
+			jpaProperties.setProperty(EntityManagerFactoryProvider.DDL_GENERATION,
+					EntityManagerFactoryProvider.DROP_AND_CREATE);
+			jpaProperties.setProperty(EntityManagerFactoryProvider.DDL_GENERATION_MODE,
+					EntityManagerFactoryProvider.DDL_DATABASE_GENERATION);
+		}
+		if (isShowSql()) {
+			jpaProperties.setProperty(TopLinkProperties.LOGGING_LEVEL, Level.FINE.toString());
 		}
 
 		return jpaProperties;

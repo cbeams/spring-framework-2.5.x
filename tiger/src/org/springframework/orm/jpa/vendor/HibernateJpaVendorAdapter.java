@@ -52,21 +52,21 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	public Map getJpaPropertyMap() {
 		Properties jpaProperties = new Properties();
 
-		if (isShowSql()) {
-			jpaProperties.setProperty(Environment.SHOW_SQL, "true");
-		}
-		if (isGenerateDdl()) {
-			jpaProperties.setProperty(Environment.HBM2DDL_AUTO, "create");
-		}
-
-		if (getDatabaseName() != null) {
-			jpaProperties.setProperty(Environment.DIALECT, getDatabaseName());
+		if (getDatabasePlatform() != null) {
+			jpaProperties.setProperty(Environment.DIALECT, getDatabasePlatform());
 		}
 		else if (getDatabase() != null) {
 			Class databaseDialectClass = determineDatabaseDialectClass(getDatabase());
 			if (databaseDialectClass != null) {
 				jpaProperties.setProperty(Environment.DIALECT, databaseDialectClass.getName());
 			}
+		}
+
+		if (isGenerateDdl()) {
+			jpaProperties.setProperty(Environment.HBM2DDL_AUTO, "create");
+		}
+		if (isShowSql()) {
+			jpaProperties.setProperty(Environment.SHOW_SQL, "true");
 		}
 
 		return jpaProperties;
