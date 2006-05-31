@@ -354,8 +354,13 @@ distribution/website before using any of them in your own applications.
 
 * toplink/toplink-api.jar
 - Oracle TopLink 10.1.3 API (http://www.oracle.com/technology/products/ias/toplink)
-- required for building the framework (or full toplink.jar from TopLink 10.1.3)
+- required for building the framework
 - replaced with full toplink.jar at runtime when using Spring's TopLink support
+
+* toplink/toplink-essentials.jar
+- Oracle TopLink Essentials v2 b03 (http://www.oracle.com/technology/products/ias/toplink/jpa)
+- required for building the framework
+- required at runtime when using Spring's JPA TopLink support
 
 * velocity/velocity-1.4.jar
 - Velocity 1.4 (http://jakarta.apache.org/velocity)
