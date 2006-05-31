@@ -53,7 +53,7 @@ public class FindOwnersForm	extends AbstractClinicForm {
 
 		if (results.size() < 1) {
 			// no owners found
-			errors.rejectValue("lastName", "notFound", null, "not found");
+			errors.rejectValue("lastName", "notFound", "not found");
 			return showForm(request, response, errors);
 		}
 
