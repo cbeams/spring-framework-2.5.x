@@ -25,7 +25,18 @@ package org.springframework.instrument.classloading;
  * @author Costin Leau
  * @since 2.0
  */
-public interface LoadTimeWeaver extends ClassLoaderWeaver {
+public interface LoadTimeWeaver extends InstrumentationRegistry {
+	
+
+	
+	/**
+	 * Return a class loader that supports instrumentation through AspectJ load
+	 * time weaving and user-defined ClassFileTransformers. May be the current
+	 * class loader, or a class loader created by the implementation of this
+	 * interface.
+	 * @return an instrumentable class loader
+	 */
+	ClassLoader getInstrumentableClassLoader();
 	
 	/**
 	 * Return a throwaway class loader, enabling classes to be loaded and inspected
