@@ -40,6 +40,11 @@
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
 		</fileset>
+		<fileset dir="${spring.root}/dist/extmodules">
+			<include name="spring-ibatis.jar"/>
+			<include name="spring-struts.jar"/>
+			<include name="spring-webmvc.jar"/>
+		</fileset>
 
 	</path>
 
@@ -134,6 +139,11 @@
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/dist/extmodules">
+				<include name="spring-ibatis.jar"/>
+				<include name="spring-struts.jar"/>
+				<include name="spring-webmvc.jar"/>
 			</fileset>
 		</copy>
 

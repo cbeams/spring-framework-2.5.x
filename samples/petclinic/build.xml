@@ -38,7 +38,6 @@
 		<fileset dir="${spring.root}/lib/ojb">
 			<include name="db-ojb-*.jar"/>
 		</fileset>
-
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
 		</fileset>
@@ -46,6 +45,7 @@
 			<include name="spring-hibernate3.jar"/>
 			<include name="spring-ojb.jar"/>
 			<include name="spring-toplink.jar"/>
+			<include name="spring-webmvc.jar"/>
 		</fileset>
 
 	</path>
@@ -62,19 +62,6 @@
 			<include name="toplink-api.jar"/>
 		</fileset>
 
-	</path>
-	
-	<path id="jpa-classpath">
-		<fileset dir="${spring.root}/lib/toplink">
-			<include name="toplink*.jar"/>
-		</fileset>
-		<fileset dir="${spring.root}/dist/extmodules">
-			<include name="spring-jpa.jar"/>
-		</fileset>
-		<fileset dir="${spring.root}/lib/aspectj">
-			<include name="aspectj*.jar"/>
-		</fileset>
-		
 	</path>
 
 
@@ -116,7 +103,7 @@
 			<include name="toplink.jar"/>
 			<include name="xmlparserv2.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/dist/extmodules">
+		<fileset dir="${spring.root}/dist">
 			<include name="spring-mock.jar"/>
 		</fileset>
 
@@ -131,14 +118,13 @@
 		<echo message=""/>
 		<echo message="Available targets are:"/>
 		<echo message=""/>
-		<echo message="clean       --> Clean output dirs"/>
-		<echo message="build       --> Compile main Java sources and copy libraries (for JDK 1.5 w/  JPA)"/>
-		<echo message="build-jdk13 --> Compile main Java sources and copy libraries (for JDK 1.3 w/o JPA)"/>		
-		<echo message="docs        --> Create complete Javadoc documentation"/>
-		<echo message="warfile     --> Build the web application archive"/>
-		<echo message="setupDB     --> Initialize the database"/>
-		<echo message="tests       --> Run tests using initialized database"/>
-		<echo message="all         --> Clean, build, docs, warfile, tests"/>
+		<echo message="clean    --> Clean output dirs"/>
+		<echo message="build    --> Compile main Java sources and copy libraries"/>
+		<echo message="docs     --> Create complete Javadoc documentation"/>
+		<echo message="warfile  --> Build the web application archive"/>
+		<echo message="setupDB  --> Initialize the database"/>
+		<echo message="tests    --> Run tests using initialized database"/>
+		<echo message="all      --> Clean, build, docs, warfile, tests"/>
 		<echo message=""/>
 
 	</target>
@@ -163,32 +149,6 @@
 	</target>
 
 
-	<target name="build-jpa" depends="build" description="Compile source tree java files into class files, generate jar files">
-		<javac destdir="${build.dir}" source="1.5" target="1.5" debug="true"
-				deprecation="false" optimize="false" failonerror="true">
-			<src path="${src.dir}"/>
-			<include name="${jpa.excludes}"/>
-			<include name="${toplink.excludes}"/>
-			<include name="${aspectj.excludes}"/>
-			<classpath refid="master-classpath"/>
-			<classpath refid="jpa-classpath"/>			
-		</javac>
-		
-		<copy todir="${webclasses.dir}" preservelastmodified="true">
-			<fileset dir="${src.dir}">
-				<include name="**/jpa/**/*.xml"/>
-				<include name="META-INF/*.xml"/>
-			</fileset>
-		</copy>
-		
-		<jar jarfile="${weblib.dir}/${name}.jar" compress="true">
-			<fileset dir="${build.dir}">
-				<include name="**"/>
-			</fileset>
-		</jar>
-		
-	</target>
-	
 	<target name="build" description="Compile main source tree java files into class files, generate jar files">
 
 		<mkdir dir="${build.dir}"/>
@@ -196,10 +156,6 @@
 		<javac destdir="${build.dir}" source="1.3" target="1.3" debug="true"
 				deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
-			<exclude name="${jpa.excludes}"/>
-			<exclude name="${toplink.excludes}"/>			
-			<exclude name="${aspectj.excludes}"/>
-			
 			<classpath refid="master-classpath"/>
 			<classpath refid="build-classpath"/>
 		</javac>
@@ -270,6 +226,7 @@
 				<include name="spring-hibernate3.jar"/>
 				<include name="spring-ojb.jar"/>
 				<include name="spring-toplink.jar"/>
+				<include name="spring-webmvc.jar"/>
 			</fileset>
 		</copy>
 
@@ -300,9 +257,9 @@
 			for autobuilds testing.
 		-->
 	</target>
-	
+
 	<target name="warfile" depends="build" description="Build the web application archive">
-		
+
 		<mkdir dir="${dist.dir}"/>
 
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
@@ -320,7 +277,7 @@
 
 	</target>
 
-	
+
 	<!--
 	If you are going to deploy the application into Geronimo (or an
 	application server variant of Geronimo), run this target in preference
@@ -329,7 +286,7 @@
 	-->
 	<target name="geronimo.warfile" depends="build"
 			description="Build the web application archive packaged specifically for Geronimo">
-		
+
 		<mkdir dir="${dist.dir}"/>
 
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
@@ -386,8 +343,6 @@
 		<mkdir dir="${testhtml.dir}"/>
 
 		<javac srcdir="${testsrc.dir}" destdir="${testbuild.dir}" debug="true" deprecation="true">
-			<exclude name="${jpa.excludes}"/>
-			<exclude name="${toplink.excludes}"/>	
 			<classpath path="${build.dir}"/>
 			<classpath refid="master-classpath"/>
 			<classpath path="${spring.root}/lib/junit/junit.jar"/>
@@ -419,37 +374,6 @@
 		<!-- restore the database -->
 		<ant antfile="${db.dir}/build.xml"/>
 
-	</target>
-	
-	<target name="tests-jpa" depends="build-jpa, tests" description="Run tests using initialized database">
-		<javac srcdir="${testsrc.dir}" destdir="${testbuild.dir}" debug="true" deprecation="true" target="1.5" source="1.5">
-			<include name="${jpa.excludes}"/>
-			<include name="${toplink.excludes}"/>	
-			<classpath path="${build.dir}"/>
-			<classpath refid="master-classpath"/>
-			<classpath path="${spring.root}/lib/junit/junit.jar"/>
-			<classpath refid="jpa-classpath"/>
-			<classpath refid="test-classpath"/>			
-		</javac>
-
-		<junit printsummary="true" fork="yes">
-			<formatter type="xml"/>
-			<test name="org.springframework.samples.petclinic.jpa.JpaTemplateClinicTests" todir="${testreports.dir}"/>
-			<classpath path="${build.dir}"/>
-			<classpath path="${src.dir}"/>
-			<classpath path="${testbuild.dir}"/>
-			<classpath path="${testsrc.dir}"/>
-			<classpath refid="master-classpath"/>
-			<classpath refid="test-classpath"/>
-			<classpath refid="jpa-classpath"/>			
-		</junit>
-		
-		<junitreport todir="${testhtml.dir}">
-			<fileset dir="${testreports.dir}">
-				<include name="TEST-*.xml"/>
-			</fileset>
-			<report format="frames" todir="${testhtml.dir}"/>
-		</junitreport>
 	</target>
 
 
