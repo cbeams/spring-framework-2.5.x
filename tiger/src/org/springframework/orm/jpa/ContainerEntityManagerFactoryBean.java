@@ -17,6 +17,7 @@
 package org.springframework.orm.jpa;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -36,8 +37,6 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
-import org.springframework.orm.jpa.AbstractEntityManagerFactoryBean;
-import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -78,10 +77,39 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	private SpringPersistenceUnitInfo persistenceUnitInfo;
+	
+	private String persistenceUnitRootLocation;
 
 	
+	/**
+	 * Set the location of the persistence.xml file
+	 * we want to use. This is a Spring resource string.
+	 * @param persistenceXmlLocation a Spring resource string
+	 * identifying the location of the persistence.xml this
+	 * ContainerEntityManagerFactoryBean should parse.
+	 */
 	public void setPersistenceXmlLocation(String persistenceXmlLocation) {
 		this.persistenceXmlLocation = persistenceXmlLocation;
+	}
+	
+	/**
+	 * Optional property setting the location of the persistence unit root URL, as a Spring
+	 * resource location string. The value may need to be platform-specific--
+	 * for example, a file path--and may differ between a test and deployed
+	 * environment.
+	 * <br/>It may be necessary to set this property if the persistence provider needs to
+	 * locate the orm.xml file.
+	 * With a pure annotation approach, it should not be
+	 * required. If this property is not specified, 
+	 * it will automatically be set to the root of
+	 * the classpath as returned by the Spring resource loading infrastructure. 
+	 * This defaulting may not work if there are multiple directories
+	 * or JARs on the classpath.
+	 * @param persistenceUnitRootPath Spring resouce location string identifying
+	 * the root of the persistence unit
+	 */
+	public void setPersistenceUnitRootLocation(String persistenceUnitRootPath) {
+		this.persistenceUnitRootLocation = persistenceUnitRootPath;
 	}
 
 	/**
@@ -136,15 +164,7 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 		}
 		this.persistenceUnitInfo.setLoadTimeWeaver(this.loadTimeWeaver);
 
-		// TODO: This is not the right approach if we have JARs,
-		// maybe we need an expanded flag.
-		try {
-			Resource res = this.resourceLoader.getResource("");
-			this.persistenceUnitInfo.setPersistenceUnitRootUrl(res.getURL());
-		}
-		catch (IOException ex) {
-			throw new PersistenceException("Unable to resolve persistence unit root URL", ex);
-		}
+		this.persistenceUnitInfo.setPersistenceUnitRootUrl(findPersistenceUnitRootUrl());
 
 		Class persistenceProviderClass = getPersistenceProviderClass();
 		String puiProviderClassName = this.persistenceUnitInfo.getPersistenceProviderClassName();
@@ -168,6 +188,31 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 		postProcessEntityManagerFactory(this.nativeEntityManagerFactory, this.persistenceUnitInfo);
 
 		return this.nativeEntityManagerFactory;
+	}
+
+	/**
+	 * Try to deduce the persistence unit root URL using multiple strategies
+	 * @return the persistence unit root URL to pass to the
+	 * JPA PersistenceProvider
+	 */
+	private URL findPersistenceUnitRootUrl() {
+		try {
+			// First try the persistence unit path
+			String rootPath = "";
+			if (this.persistenceUnitRootLocation != null) {
+				logger.info("Using explicit  persistence unit root URL location");
+				rootPath = this.persistenceUnitRootLocation;
+			}
+			
+			// Fallback: use the root of the classpath. May not work if
+			// the classpath is built up of multiple trees
+			Resource res = this.resourceLoader.getResource(rootPath);
+			logger.info("Defaulting persistence unit root URL to classpath root");
+			return res.getURL();
+		}
+		catch (IOException ex) {
+			throw new PersistenceException("Unable to resolve persistence unit root URL", ex);
+		}
 	}
 
 	/**
