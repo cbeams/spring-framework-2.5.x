@@ -70,6 +70,8 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertTagOpened(output);
 		assertTagClosed(output);
 
+		assertContainsAttribute(output, "id", "spouse.name");
+		assertContainsAttribute(output, "name", "spouse.name");
 		assertContainsAttribute(output, "type", getType());
 		assertContainsAttribute(output, "value", "Sally");
 	}

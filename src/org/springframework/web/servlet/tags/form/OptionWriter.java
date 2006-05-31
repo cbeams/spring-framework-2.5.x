@@ -160,7 +160,7 @@ final class OptionWriter {
 		tagWriter.startTag("option");
 		tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(value));
 		if (isSelected(value) || isSelected(item)) {
-			tagWriter.writeAttribute("selected", "true");
+			tagWriter.writeAttribute("selected", "selected");
 		}
 		tagWriter.appendValue(label);
 		tagWriter.endTag();

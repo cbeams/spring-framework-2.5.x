@@ -53,6 +53,21 @@ public class LabelTagTests extends AbstractFormTagTests {
 		assertTrue(output.endsWith("</label>"));
 	}
 
+	public void testOverrideFor() throws Exception {
+		this.tag.setFor("myElement");
+		int startResult = this.tag.doStartTag();
+		int endResult = this.tag.doEndTag();
+
+		assertEquals(Tag.EVAL_BODY_INCLUDE, startResult);
+		assertEquals(Tag.EVAL_PAGE, endResult);
+
+		String output = getWriter().toString();
+		assertContainsAttribute(output, "for", "myElement");
+		assertContainsAttribute(output, "name", "myElement.label");
+		assertTrue(output.startsWith("<label "));
+		assertTrue(output.endsWith("</label>"));
+	}
+
 	protected TestBean createTestBean() {
 		return new TestBean();
 	}

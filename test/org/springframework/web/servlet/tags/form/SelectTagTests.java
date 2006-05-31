@@ -166,10 +166,10 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertEquals("Incorrect number of children", 50, children.size());
 
 		Element e = (Element) rootElement.selectSingleNode("option[@value = '12']");
-		assertEquals("'12' node not selected", "true", e.attribute("selected").getValue());
+		assertEquals("'12' node not selected", "selected", e.attribute("selected").getValue());
 
 		e = (Element) rootElement.selectSingleNode("option[@value = '34']");
-		assertEquals("'34' node not selected", "true", e.attribute("selected").getValue());
+		assertEquals("'34' node not selected", "selected", e.attribute("selected").getValue());
 	}
 
 	public void testWithMultiList() throws Exception {
@@ -185,7 +185,6 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
-		System.out.println(output);
 		assertTrue(output.startsWith("<select "));
 		assertTrue(output.endsWith("</select>"));
 
@@ -199,10 +198,10 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertEquals("Incorrect number of children", 4, children.size());
 
 		Element e = (Element) rootElement.selectSingleNode("option[@value = 'UK']");
-		assertEquals("UK node not selected", "true", e.attribute("selected").getValue());
+		assertEquals("UK node not selected", "selected", e.attribute("selected").getValue());
 
 		e = (Element) rootElement.selectSingleNode("option[@value = 'AT']");
-		assertEquals("AT node not selected", "true", e.attribute("selected").getValue());
+		assertEquals("AT node not selected", "selected", e.attribute("selected").getValue());
 	}
 
 	public void testWithMultiMap() throws Exception {
@@ -218,7 +217,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
-		System.out.println(output);
+
 		assertTrue(output.startsWith("<select "));
 		assertTrue(output.endsWith("</select>"));
 
@@ -232,10 +231,10 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertEquals("Incorrect number of children", 2, children.size());
 
 		Element e = (Element) rootElement.selectSingleNode("option[@value = 'M']");
-		assertEquals("M node not selected", "true", e.attribute("selected").getValue());
+		assertEquals("M node not selected", "selected", e.attribute("selected").getValue());
 
 		e = (Element) rootElement.selectSingleNode("option[@value = 'F']");
-		assertEquals("F node not selected", "true", e.attribute("selected").getValue());
+		assertEquals("F node not selected", "selected", e.attribute("selected").getValue());
 	}
 
 	private void assertStringArray() throws JspException, DocumentException {
@@ -256,7 +255,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertEquals("Incorrect number of children", 4, children.size());
 
 		Element e = (Element) rootElement.selectSingleNode("option[@value = 'Rob']");
-		assertEquals("Rob node not selected", "true", e.attribute("selected").getValue());
+		assertEquals("Rob node not selected", "selected", e.attribute("selected").getValue());
 	}
 
 	private String[] getNames() {
@@ -303,7 +302,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		Element e = (Element) rootElement.selectSingleNode("option[@value = 'UK']");
 		Attribute selectedAttr = e.attribute("selected");
 		if (selected) {
-			assertTrue(selectedAttr != null && "true".equals(selectedAttr.getValue()));
+			assertTrue(selectedAttr != null && "selected".equals(selectedAttr.getValue()));
 		}
 		else {
 			assertNull(selectedAttr);

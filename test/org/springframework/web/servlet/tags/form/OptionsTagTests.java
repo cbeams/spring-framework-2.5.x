@@ -64,8 +64,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 		assertEquals("Incorrect number of children", 4, children.size());
 
 		Element e = (Element) rootElement.selectSingleNode("option[@value = 'UK']");
-		assertEquals("UK node not selected", "true", e.attribute("selected").getValue());
-		System.out.println(getWriter());
+		assertEquals("UK node not selected", "selected", e.attribute("selected").getValue());
 	}
 	                                                                                  
 

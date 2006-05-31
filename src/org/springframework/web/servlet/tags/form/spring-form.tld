@@ -876,7 +876,7 @@
 
 		<attribute>
 			<name>items</name>
-			<required>false</required>
+			<required>true</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>The Collection, Map or array of objects used to generate the inner 'option' tags</description>
 		</attribute>
@@ -1628,17 +1628,10 @@
 		</attribute>
 
 		<attribute>
-			<name>delimiter</name>
+			<name>for</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Delimiter for displaying multiple error messages. Defaults to the br tag.</description>
-		</attribute>
-
-		<attribute>
-			<name>cssClass</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description>Equivalent to "class" - HTML Optional Attribute</description>
+			<description>HTML Standard Attribute</description>
 		</attribute>
 
 		<attribute>

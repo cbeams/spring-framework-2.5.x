@@ -16,6 +16,10 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+
 import javax.servlet.jsp.JspException;
 
 /**
@@ -42,12 +46,34 @@ public class LabelTag extends AbstractHtmlElementTag {
 	private TagWriter tagWriter;
 
 	/**
+	 * The value of the '<code>for</code>' attribute.
+	 */
+	private String forId;
+
+	/**
+	 * Sets the value of the '<code>for</code>' attribute. Defaults to the value of
+	 * {@link #getPath}. May be a runtime expression.
+	 */
+	public void setFor(String forId) {
+		Assert.notNull(forId, "'forId' cannot be null.");
+		this.forId = forId;
+	}
+
+	/**
+	 * Gets the value of the '<code>id</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public String getFor() {
+		return this.forId;
+	}
+
+	/**
 	 * Writes the opening '<code>label</code>' tag and forces a block tag so
 	 * that body content is written correctly.
 	 */
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag(LABEL_TAG);
-		tagWriter.writeAttribute(FOR_ATTRIBUTE, getPath());
+		tagWriter.writeAttribute(FOR_ATTRIBUTE, resolveFor());
 		writeDefaultAttributes(tagWriter);
 		tagWriter.forceBlock();
 		this.tagWriter = tagWriter;
@@ -55,11 +81,23 @@ public class LabelTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Overrides {@link #getName()} and appends '<code>.label</code>' to the end
-	 * of the default value.
+	 * Overrides {@link #getName()} to use the value of {@link #resolveFor} with'<code>.label</code>'
+	 * appended to the end.
 	 */
 	protected String getName() throws JspException {
-		return super.getName() + ".label";
+		return resolveFor() + ".label";
+	}
+
+	/**
+	 * Returns the value that should be used for '<code>for</code>' attribute.
+	 */
+	protected final String resolveFor() throws JspException {
+		if (StringUtils.hasText(this.forId)) {
+			return ObjectUtils.getDisplayString(evaluate(FOR_ATTRIBUTE, this.forId));
+		}
+		else {
+			return getPath();
+		}
 	}
 
 	/**

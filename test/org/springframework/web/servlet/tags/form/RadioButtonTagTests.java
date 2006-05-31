@@ -48,7 +48,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "name", "sex");
 		assertContainsAttribute(output, "type", "radio");
 		assertContainsAttribute(output, "value", "M");
-		assertContainsAttribute(output, "checked", "true");
+		assertContainsAttribute(output, "checked", "checked");
 	}
 
 	public void testWithCheckedObjectValue() throws Exception {
@@ -63,7 +63,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "name", "myFloat");
 		assertContainsAttribute(output, "type", "radio");
 		assertContainsAttribute(output, "value", getFloat().toString());
-		assertContainsAttribute(output, "checked", "true");
+		assertContainsAttribute(output, "checked", "checked");
 	}
 
 	public void testWithUncheckedObjectValue() throws Exception {

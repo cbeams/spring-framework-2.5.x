@@ -17,6 +17,8 @@
 package org.springframework.web.servlet.tags.form;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.tags.NestedPathTag;
 
@@ -63,8 +65,8 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	}
 
 	/**
-	 * Sets the value of the '<code>id</code>' attribute.
-	 * May be a runtime expression.
+	 * Sets the value of the '<code>id</code>' attribute. Defaults to the value of
+	 * {@link #getName}. May be a runtime expression.
 	 */
 	public void setId(String id) {
 		Assert.notNull(id, "'id' cannot be null.");
@@ -96,7 +98,14 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 * to render default attributes.
 	 */
 	protected void writeDefaultAttributes(TagWriter tagWriter) throws JspException {
-		writeOptionalAttribute(tagWriter, ID_ATTRIBUTE, getId());
+		String id = getId();
+		if (StringUtils.hasText(id)) {
+			tagWriter.writeAttribute(ID_ATTRIBUTE, ObjectUtils.getDisplayString(evaluate(ID_ATTRIBUTE, id)));
+		}
+		else {
+			// write the default id which matches the name
+			tagWriter.writeAttribute(ID_ATTRIBUTE, getName());
+		}
 		tagWriter.writeAttribute("name", getName());
 	}
 
