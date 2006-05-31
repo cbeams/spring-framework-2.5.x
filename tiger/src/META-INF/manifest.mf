@@ -1,2 +1,2 @@
-Premain-Class: org.springframework.instrument.classloading.InstrumentationSavingAgent
+Premain-Class: org.springframework.instrument.InstrumentationSavingAgent
 Can-Redefine-Classes:true

@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.instrument.classloading;
+package org.springframework.instrument.classloading;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,29 +25,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.instrument.ClassFileTransformerRegistry;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Rob Harrop
+ * @since 2.0
  */
-public class ShadowingClassLoader extends ClassLoader {
+public class ShadowingClassLoader extends ClassLoader implements ClassFileTransformerRegistry {
 
 	private final ClassLoader enclosingClassLoader;
 
-	private final List<ClassFileTransformer> classFilterTransformers = new ArrayList<ClassFileTransformer>();
+	private final List<ClassFileTransformer> classFileTransformers = new ArrayList<ClassFileTransformer>();
 
 	private final Map<String, Class> classCache = new HashMap<String, Class>();
 
+
 	public ShadowingClassLoader(ClassLoader enclosingClassLoader) {
-		Assert.notNull(enclosingClassLoader, "'enclosingClassLoader' cannot be null.");
+		Assert.notNull(enclosingClassLoader, "Enclosing ClassLoader must not be null");
 		this.enclosingClassLoader = enclosingClassLoader;
 	}
 
+
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		if (shouldShadow(name)) {
-			Class cls = classCache.get(name);
+			Class cls = this.classCache.get(name);
 			if (cls != null) {
 				return cls;
 			}
@@ -62,7 +66,6 @@ public class ShadowingClassLoader extends ClassLoader {
 		return !isExcluded(name);
 	}
 	
-
 	private boolean isExcluded(String name) {
 		return name.equals(getClass().getName()) || 
 						name.startsWith("java.") ||
@@ -84,47 +87,40 @@ public class ShadowingClassLoader extends ClassLoader {
 	}
 
 	private Class doLoadClass(String name) throws ClassNotFoundException {
-		String path = name.replaceAll("\\.", "/") + ".class";
-		ClassPathResource cpr = new ClassPathResource(path);
-		InputStream inputStream = null;
+		String internalName = StringUtils.replace(name, ".", "/") + ".class";
+		InputStream is = getParent().getResourceAsStream(internalName);
+		if (is == null) {
+			throw new ClassNotFoundException(name);
+		}
 		try {
-			inputStream = cpr.getInputStream();
-			byte[] bytes = FileCopyUtils.copyToByteArray(inputStream);
+			byte[] bytes = FileCopyUtils.copyToByteArray(is);
 			bytes = applyTransformers(name, bytes);
 			Class cls = defineClass(name, bytes, 0, bytes.length);
-			classCache.put(name, cls);
+			this.classCache.put(name, cls);
 			return cls;
 		}
 		catch (IOException ex) {
-			throw new ClassNotFoundException("Class '" + name + "' cannot be found", ex);
-		}
-		finally {
-			if (inputStream != null) {
-				try {
-					inputStream.close();
-				}
-				catch (IOException ex) {
-					ex.printStackTrace();
-				}
-			}
+			throw new ClassNotFoundException("Cannot load resource for class [" + name + "]", ex);
 		}
 	}
 
 	private byte[] applyTransformers(String name, byte[] bytes) {
-		String internalName = name.replaceAll("\\.", "/");
+		String internalName = StringUtils.replace(name, ".", "/");
 		try {
-			for (ClassFileTransformer transformer : this.classFilterTransformers) {
+			for (ClassFileTransformer transformer : this.classFileTransformers) {
 				byte[] transformed = transformer.transform(this, internalName, null, null, bytes);
 				bytes = (transformed != null ? transformed : bytes);
 			}
 			return bytes;
 		}
 		catch (IllegalClassFormatException ex) {
-			throw new RuntimeException(ex);
+			throw new IllegalStateException(ex);
 		}
 	}
 
-	public void addClassFileTransformer(ClassFileTransformer classFileTransformer) {
-		this.classFilterTransformers.add(classFileTransformer);
+
+	public void addTransformer(ClassFileTransformer transformer) {
+		this.classFileTransformers.add(transformer);
 	}
+
 }

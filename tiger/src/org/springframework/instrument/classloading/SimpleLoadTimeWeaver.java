@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.instrument.classloading.support;
+package org.springframework.instrument.classloading;
 
 import java.lang.instrument.ClassFileTransformer;
 
@@ -46,8 +46,8 @@ public class SimpleLoadTimeWeaver extends AbstractLoadTimeWeaver {
 	}
 
 
-	public void addClassFileTransformer(ClassFileTransformer classFileTransformer) {
-		this.classLoader.addClassFileTransformer(classFileTransformer);
+	public void addTransformer(ClassFileTransformer transformer) {
+		this.classLoader.addTransformer(transformer);
 	}
 
 	public ClassLoader getInstrumentableClassLoader() {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.instrument.classloading.support;
+package org.springframework.instrument.classloading;
 
 import java.lang.instrument.ClassFileTransformer;
 
@@ -31,7 +31,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class ReflectiveLoadTimeWeaver extends AbstractLoadTimeWeaver {
 
-	protected String METHOD_NAME_ADD_TRANSFORMERS = "addClassFileTransformer";
+	protected String METHOD_NAME_ADD_TRANSFORMERS = "addTransformer";
 
 	protected String METHOD_NAME_THROWAWAY_CLASSLOADER = "getThrowawayClassLoader";
 
@@ -49,8 +49,8 @@ public class ReflectiveLoadTimeWeaver extends AbstractLoadTimeWeaver {
 	}
 
 
-	public void addClassFileTransformer(ClassFileTransformer cft) {
-		invokeMethod(METHOD_NAME_ADD_TRANSFORMERS, new Object[] { cft }, ClassFileTransformer.class);
+	public void addTransformer(ClassFileTransformer transformer) {
+		invokeMethod(METHOD_NAME_ADD_TRANSFORMERS, new Object[] { transformer }, ClassFileTransformer.class);
 	}
 
 	public ClassLoader getInstrumentableClassLoader() {

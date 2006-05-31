@@ -4,5 +4,6 @@
 <beans>
 
 	<!-- agent for standalone tests -->
-	<bean id="weaver" class="org.springframework.instrument.classloading.support.InstrumentationLoadTimeWeaver"/>
+	<bean id="weaver" class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver"/>
+
 </beans>

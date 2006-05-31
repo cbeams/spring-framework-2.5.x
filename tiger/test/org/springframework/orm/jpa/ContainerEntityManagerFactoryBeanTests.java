@@ -29,7 +29,7 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import org.easymock.MockControl;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.instrument.classloading.support.InstrumentationLoadTimeWeaver;
+import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 

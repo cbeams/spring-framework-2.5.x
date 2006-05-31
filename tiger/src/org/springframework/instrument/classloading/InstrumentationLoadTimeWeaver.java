@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.instrument.classloading.support;
+package org.springframework.instrument.classloading;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.instrument.classloading.InstrumentationSavingAgent;
+
+import org.springframework.instrument.InstrumentationSavingAgent;
 
 /**
  * Load time weaver relying on Instrumentation.
@@ -49,7 +50,7 @@ public class InstrumentationLoadTimeWeaver extends AbstractLoadTimeWeaver {
 
 	public InstrumentationLoadTimeWeaver() {
 		// Always do AspectJ load time weaving
-		//addClassFileTransformer(new ClassPreProcessorAgentAdapter());
+		//addTransformer(new ClassPreProcessorAgentAdapter());
 	}
 
 
@@ -62,16 +63,16 @@ public class InstrumentationLoadTimeWeaver extends AbstractLoadTimeWeaver {
 		return getContextClassLoader();
 	}
 
-	public void addClassFileTransformer(ClassFileTransformer classFileTransformer) {
+	public void addTransformer(ClassFileTransformer transformer) {
 		if (logger.isInfoEnabled()) {
-			logger.info("Installing " + classFileTransformer);
+			logger.info("Installing " + transformer);
 		}
 		Instrumentation instrumentation = InstrumentationSavingAgent.getInstrumentation();
 		if (instrumentation == null) {
 			throw new UnsupportedOperationException(
 					"Must start with Java agent to use InstrumentationLoadTimeWeaver. See Spring documentation.");
 		}
-		instrumentation.addTransformer(classFileTransformer);
+		instrumentation.addTransformer(transformer);
 	}
 
 }

@@ -189,7 +189,7 @@ class SpringPersistenceUnitInfo implements PersistenceUnitInfo {
 		if (this.loadTimeWeaver == null) {
 			throw new IllegalStateException("Cannot apply class transformer without LoadTimeWeaver specified");
 		}
-		this.loadTimeWeaver.addClassFileTransformer(new ClassFileTransformerAdapter(classTransformer));
+		this.loadTimeWeaver.addTransformer(new ClassFileTransformerAdapter(classTransformer));
 	}
 
 	public ClassLoader getNewTempClassLoader() {

@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.instrument.classloading;
+package org.springframework.instrument;
 
 import java.lang.instrument.Instrumentation;
-
-import org.springframework.instrument.classloading.support.InstrumentationLoadTimeWeaver;
 
 /**
  * Java agent that saves the Instrumentation interface
@@ -26,13 +24,16 @@ import org.springframework.instrument.classloading.support.InstrumentationLoadTi
  *
  * @author Rod Johnson
  * @since 2.0
- * @see InstrumentationLoadTimeWeaver
+ * @see org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver
  */
 public class InstrumentationSavingAgent {
 	
 	private static Instrumentation instrumentation;
 
 
+	/**
+	 * Save the Instrumentation interface exposed by the JVM.
+	 */
 	public static void premain(String agentArgs, Instrumentation inst) {
 		instrumentation = inst;
 	}

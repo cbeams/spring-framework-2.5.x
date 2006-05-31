@@ -16,6 +16,8 @@
 
 package org.springframework.instrument.classloading;
 
+import org.springframework.instrument.ClassFileTransformerRegistry;
+
 /**
  * Interface supporting adding one or more ClassFileTransformers
  * to the current class loader. Implementation strategies may of
@@ -25,15 +27,12 @@ package org.springframework.instrument.classloading;
  * @author Costin Leau
  * @since 2.0
  */
-public interface LoadTimeWeaver extends InstrumentationRegistry {
-	
-
+public interface LoadTimeWeaver extends ClassFileTransformerRegistry {
 	
 	/**
-	 * Return a class loader that supports instrumentation through AspectJ load
-	 * time weaving and user-defined ClassFileTransformers. May be the current
-	 * class loader, or a class loader created by the implementation of this
-	 * interface.
+	 * Return a class loader that supports instrumentation through AspectJ-style
+	 * load time weaving based on user-defined ClassFileTransformers. May be the
+	 * current class loader, or a class loader created by this LoadTimeWeaver.
 	 * @return an instrumentable class loader
 	 */
 	ClassLoader getInstrumentableClassLoader();
@@ -41,15 +40,10 @@ public interface LoadTimeWeaver extends InstrumentationRegistry {
 	/**
 	 * Return a throwaway class loader, enabling classes to be loaded and inspected
 	 * without affecting the parent class loader. Most <i>not</i> return the same as
-	 * <code>getInstrumentableClassLoader()</code>.
+	 * {@link #getInstrumentableClassLoader() getInstrumentableClassLoader()}.
 	 * @return a temporary throwaway class loader. Should return a new
 	 * instance for each call, with no existing state.
 	 */
 	ClassLoader getThrowawayClassLoader();
-	
-	// TODO consider adding patterns to include or exclude, for performance optimization
-	//void addClassNameToExcludeFromWeaving(String className); 
-	
-	//void setExplicitInclusions(Collection<String> explicitClassNames); 
-	
+
 }

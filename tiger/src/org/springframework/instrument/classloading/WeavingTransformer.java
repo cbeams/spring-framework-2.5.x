@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.instrument.classloading.support;
+package org.springframework.instrument.classloading;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -25,19 +25,19 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.instrument.classloading.InstrumentationRegistry;
+import org.springframework.instrument.ClassFileTransformerRegistry;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * ClassFileTransformer based weaving, allowing for a list of transformers to be
- * applied on class byte array. Normally used inside classloaders.
+ * applied on a class byte array. Normally used inside class loaders.
  *
  * @author Rod Johnson
  * @author Costin Leau
  * @since 2.0
  */
-public class WeavingTransformer implements InstrumentationRegistry {
+public class WeavingTransformer implements ClassFileTransformerRegistry {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -58,7 +58,7 @@ public class WeavingTransformer implements InstrumentationRegistry {
 	}
 
 
-	public void addClassFileTransformer(ClassFileTransformer cft) {
+	public void addTransformer(ClassFileTransformer cft) {
 		if (debug)
 			logger.debug("adding transformer " + cft);
 		this.transformers.add(cft);

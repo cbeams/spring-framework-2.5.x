@@ -21,8 +21,10 @@ import java.lang.instrument.ClassFileTransformer;
 import org.apache.catalina.loader.ResourceEntry;
 import org.apache.catalina.loader.WebappClassLoader;
 
-import org.springframework.instrument.classloading.InstrumentationRegistry;
-import org.springframework.instrument.classloading.support.WeavingTransformer;
+import org.springframework.instrument.ClassFileTransformerRegistry;
+import org.springframework.instrument.classloading.WeavingTransformer;
+import org.springframework.instrument.classloading.WeavingTransformer;
+import org.springframework.instrument.ClassFileTransformerRegistry;
 
 /**
  * Extension of tomcat default classloader which adds instrumentation to loaded
@@ -31,7 +33,7 @@ import org.springframework.instrument.classloading.support.WeavingTransformer;
  * @author Costin Leau
  * @since 2.0
  */
-public class TomcatInstrumentableClassLoader extends WebappClassLoader implements InstrumentationRegistry {
+public class TomcatInstrumentableClassLoader extends WebappClassLoader implements ClassFileTransformerRegistry {
 
 	/** Use an internal weavingTransformer */
 	private final WeavingTransformer weavingTransformer;
@@ -48,8 +50,8 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader implement
 	}
 
 
-	public void addClassFileTransformer(ClassFileTransformer cft) {
-		this.weavingTransformer.addClassFileTransformer(cft);
+	public void addTransformer(ClassFileTransformer transformer) {
+		this.weavingTransformer.addTransformer(transformer);
 	}
 
 	@Override

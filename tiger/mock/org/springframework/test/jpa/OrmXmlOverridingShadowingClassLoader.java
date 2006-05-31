@@ -23,17 +23,19 @@ import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.test.instrument.classloading.ShadowingClassLoader;
+import org.springframework.instrument.classloading.ShadowingClassLoader;
+import org.springframework.instrument.classloading.ShadowingClassLoader;
 
 /**
  * Subclass of ShadowingClassLoader that overrides attempts to
- * locate orm.xml.
- * <p>
- * This class must <b>not</b> be an inner class of AbstractJpaTest to avoid
- * it being loaded until first used.
- * 
+ * locate <code>orm.xml</code>.
+ *
+ * <p>This class must <b>not</b> be an inner class of AbstractJpaTests
+ * to avoid it being loaded until first used.
+ *
  * @author Rod Johnson
  * @author Adrian Colyer
+ * @since 2.0
  */
 class OrmXmlOverridingShadowingClassLoader extends ShadowingClassLoader {
 	
@@ -48,9 +50,11 @@ class OrmXmlOverridingShadowingClassLoader extends ShadowingClassLoader {
 	}
 	
 	private static final Enumeration<URL> EMPTY_URL_ENUMERATION = new Enumeration<URL>() {
+
 		public boolean hasMoreElements() {
 			return false;
 		}
+
 		public URL nextElement() {
 			throw new UnsupportedOperationException("Should not be called. I am empty");
 		}
@@ -111,4 +115,5 @@ class OrmXmlOverridingShadowingClassLoader extends ShadowingClassLoader {
 			return super.getResources(requestedPath);
 		}
 	}
+
 }

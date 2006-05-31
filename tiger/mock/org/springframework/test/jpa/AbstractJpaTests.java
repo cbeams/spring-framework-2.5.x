@@ -36,13 +36,13 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.instrument.classloading.AbstractLoadTimeWeaver;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
-import org.springframework.instrument.classloading.support.AbstractLoadTimeWeaver;
+import org.springframework.instrument.classloading.ShadowingClassLoader;
 import org.springframework.orm.jpa.ContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.test.annotation.AbstractAnnotationAwareTransactionalTests;
-import org.springframework.test.instrument.classloading.ShadowingClassLoader;
 import org.springframework.util.StringUtils;
 
 /**
@@ -264,12 +264,12 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 			return (ClassLoader) this.shadowingClassLoader;
 		}
 
-		public void addClassFileTransformer(ClassFileTransformer classFileTransformer) {
+		public void addTransformer(ClassFileTransformer transformer) {
 			try {
 				Method addClassFileTransformer =
-						this.shadowingClassLoaderClass.getMethod("addClassFileTransformer", ClassFileTransformer.class);
+						this.shadowingClassLoaderClass.getMethod("addTransformer", ClassFileTransformer.class);
 				addClassFileTransformer.setAccessible(true);
-				addClassFileTransformer.invoke(this.shadowingClassLoader, classFileTransformer);
+				addClassFileTransformer.invoke(this.shadowingClassLoader, transformer);
 			}
 			catch (Exception ex) {
 				throw new RuntimeException(ex);

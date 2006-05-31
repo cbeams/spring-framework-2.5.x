@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.instrument.classloading;
+package org.springframework.instrument;
 
 import java.lang.instrument.ClassFileTransformer;
 
@@ -22,14 +22,15 @@ import java.lang.instrument.ClassFileTransformer;
  * Simple interface for adding ClassFileTransformers.
  * 
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 2.0
  */
-public interface InstrumentationRegistry {
+public interface ClassFileTransformerRegistry {
 
 	/**
 	 * Add the given ClassFileTransformer to the current environment.
-	 * @param classFileTransformer the ClassFileTransformer to add
+	 * @param transformer the ClassFileTransformer to add
 	 */
-	void addClassFileTransformer(ClassFileTransformer classFileTransformer);
+	void addTransformer(ClassFileTransformer transformer);
 
 }

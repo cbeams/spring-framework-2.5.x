@@ -72,8 +72,8 @@ public abstract class AbstractOverridingClassLoader extends ClassLoader {
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		if (!name.startsWith("java") && !this.namesSeen.contains(name) && !excludeFromUndelegation(name)) {
 			this.namesSeen.add(name);
-			String internalName = StringUtils.replace(name, ".", "/");
-			InputStream is = getParent().getResourceAsStream(internalName + ".class");
+			String internalName = StringUtils.replace(name, ".", "/") + ".class";
+			InputStream is = getParent().getResourceAsStream(internalName);
 			if (is == null) {
 				throw new ClassNotFoundException(name);
 			}
@@ -85,10 +85,7 @@ public abstract class AbstractOverridingClassLoader extends ClassLoader {
 				return defineClass(name, transformed, 0, transformed.length);
 			}
 			catch (IOException ex) {
-				if (logger.isWarnEnabled()) {
-					logger.warn("Cannot load resource for class [" + name + "]", ex);
-				}
-				throw new ClassNotFoundException(name);
+				throw new ClassNotFoundException("Cannot load resource for class [" + name + "]", ex);
 			}
 		}
 		else {

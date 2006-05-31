@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.instrument.classloading.support;
+package org.springframework.instrument.classloading;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,7 +26,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Retrieves a class loader from the context class loader using the className property.
- * It will traverse the classloaders hierarchy and analyze the classloader class,
+ * It will traverse the class loader hierarchy and analyze the class loader,
  * interfaces and superclasses.
  *
  * @author Costin Leau
@@ -71,8 +71,8 @@ public class InstrumentableClassLoaderFactoryBean implements FactoryBean, Initia
 				}
 		}
 
-		throw new IllegalArgumentException(className + " was not found in the current classloader hierarchy - "
-				+ "see the JPA docs on how to use instrumented classloaders inside various containers");
+		throw new IllegalArgumentException(this.className + " was not found in the current classloader hierarchy - "
+				+ "see docs on how to use instrumented classloaders inside various environments");
 	}
 
 	protected boolean analyzeClasses(ClassLoader loader, Class... classes) {

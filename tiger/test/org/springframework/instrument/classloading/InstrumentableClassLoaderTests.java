@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package org.springframework.instrument.classloading.support;
+package org.springframework.instrument.classloading;
 
 import junit.framework.TestCase;
 
-import org.springframework.instrument.classloading.support.SimpleInstrumentableClassLoader;
 import org.springframework.util.ClassUtils;
 
+/**
+ * @author Costin Leau
+ * @author Juergen Hoeller
+ */
 public class InstrumentableClassLoaderTests extends TestCase {
 
 	public void testDefaultLoadTimeWeaver() {

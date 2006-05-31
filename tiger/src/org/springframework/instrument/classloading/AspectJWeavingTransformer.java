@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.instrument.classloading.support;
+package org.springframework.instrument.classloading;
 
 import org.aspectj.weaver.loadtime.ClassPreProcessorAgentAdapter;
 
@@ -22,6 +22,7 @@ import org.aspectj.weaver.loadtime.ClassPreProcessorAgentAdapter;
  * AspectJ based-WeavingTransfomer.
  * 
  * @author Costin Leau
+ * @since 2.0
  * @see org.aspectj.weaver.loadtime.ClassPreProcessorAgentAdapter
  */
 public class AspectJWeavingTransformer extends WeavingTransformer {
@@ -41,7 +42,7 @@ public class AspectJWeavingTransformer extends WeavingTransformer {
 	public void setAspectJWeavingEnabled(boolean flag) {
 		if (flag && !this.enableAspectJ) {
 			this.enableAspectJ = true;
-			addClassFileTransformer(new ClassPreProcessorAgentAdapter());
+			addTransformer(new ClassPreProcessorAgentAdapter());
 		}
 	}
 
