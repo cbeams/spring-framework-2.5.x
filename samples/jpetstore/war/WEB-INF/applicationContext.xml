@@ -43,33 +43,39 @@
 	<!-- Generic validator for Order objects, to be used for example by the Spring web tier -->
 	<bean id="orderValidator" class="org.springframework.samples.jpetstore.domain.logic.OrderValidator"/>
 
-	<!-- AOP advice used to send confirmation email after order has been submitted -->
 	<!--
-	<bean id="emailAdvice" class="org.springframework.samples.jpetstore.domain.logic.SendOrderConfirmationEmailAdvice">
-		<property name="mailSender" ref="mailSender"/>
-	</bean>-->
+	  - JPetStore primary business object (default implementation).
+		- Transaction advice gets applied through the AOP configuration below.
+		-->
+	<bean id="petStore" class="org.springframework.samples.jpetstore.domain.logic.PetStoreImpl">
+		<property name="accountDao" ref="accountDao"/>
+		<property name="categoryDao" ref="categoryDao"/>
+		<property name="productDao" ref="productDao"/>
+		<property name="itemDao" ref="itemDao"/>
+		<property name="orderDao" ref="orderDao"/>
+	</bean>
 
-	<!--
-		This definition creates auto-proxy infrastructure based on the given pointcut,
-		expressed in AspectJ pointcut language. Here: applying the advice named
-		"txAdvice" to all methods on classes named PetStoreImpl.
-	-->
+
+	<!-- ========================= ASPECT CONFIGURATION ======================== -->
+
 	<aop:config>
-		<aop:advisor pointcut="execution(* *..PetStoreImpl.*(..))" advice-ref="txAdvice"/>
+		<!--
+			This definition creates auto-proxy infrastructure based on the given pointcut,
+			expressed in AspectJ pointcut language. Here: applying the advice named
+			"txAdvice" to all methods on classes named PetStoreImpl.
+		-->
+		<aop:advisor pointcut="execution(* *..PetStoreFacade.*(..))" advice-ref="txAdvice"/>
+
+		<!--
+			This definition creates auto-proxy infrastructure based on the given pointcut,
+			expressed in AspectJ pointcut language. Here: applying the advice named
+			"emailAdvice" to insertOrder(Order) method of PetStoreImpl
+		-->
+		<!--
+		<aop:advisor pointcut="execution(* *..PetStoreFacade.insertOrder(*..Order))" advice-ref="emailAdvice"/>
+		-->
 	</aop:config>
-	
-	<!--
-		This definition creates auto-proxy infrastructure based on the given pointcut,
-		expressed in AspectJ pointcut language. Here: applying the advice named
-		"emailAdvice" to insertOrder(Order) method of PetStoreImpl
-	-->
-	<!--
-	<aop:config>
-		<aop:advisor pointcut="execution(* *..PetStoreImpl.insertOrder(*..Order))" 
-					 advice-ref="emailAdvice"/>
-	</aop:config>
-	-->
-	
+
 	<!--
 		Transaction advice definition, based on method name patterns.
 		Defaults to PROPAGATION_REQUIRED for all methods whose name starts with
@@ -84,16 +90,11 @@
 		</tx:attributes>
 	</tx:advice>
 
+	<!-- AOP advice used to send confirmation email after order has been submitted -->
 	<!--
-	  - JPetStore primary business object (default implementation)
-		-->
-	<bean id="petStore" class="org.springframework.samples.jpetstore.domain.logic.PetStoreImpl">
-		<property name="accountDao" ref="accountDao"/>
-		<property name="categoryDao" ref="categoryDao"/>
-		<property name="productDao" ref="productDao"/>
-		<property name="itemDao" ref="itemDao"/>
-		<property name="orderDao" ref="orderDao"/>
-	</bean>
+	<bean id="emailAdvice" class="org.springframework.samples.jpetstore.domain.logic.SendOrderConfirmationEmailAdvice">
+		<property name="mailSender" ref="mailSender"/>
+	</bean>-->
 
 
 	<!-- ========================= REMOTE EXPORTER DEFINITIONS ======================== -->
