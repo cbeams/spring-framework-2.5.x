@@ -15,6 +15,13 @@
 				<property name="generateDdl" value="true"/>
 			</bean>
 		</property>
+		<property name="jpaPropertyMap">
+			<props>
+			<!-- 
+				<prop key="hibernate.ejb.use_class_enhancer">true</prop>
+				 -->
+			</props>
+		</property>
 	</bean>
 
 </beans>

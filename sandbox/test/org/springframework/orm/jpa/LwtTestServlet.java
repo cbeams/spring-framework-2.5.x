@@ -80,7 +80,7 @@ public class LwtTestServlet extends HttpServlet {
 			IOException {
 		log.info("LWT servlet called");
 		
-		//System.setProperty("org.springframework.orm.jpa.provider", "hibernate");
+		System.setProperty("org.springframework.orm.jpa.provider", "hibernate");
 		
 		TestSuite suite = new TestSuite(TomcatContainerManagedEntityManagerIntegrationTsts.class);
 		TestResult result = new TestResult();
