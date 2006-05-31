@@ -46,8 +46,8 @@ public abstract class AbstractClinicForm extends SimpleFormController {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		dateFormat.setLenient(false);
 		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
-        binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
-    }
+		binder.registerCustomEditor(String.class, new StringTrimmerEditor(false));
+	}
 
 	/**
 	 * Method disallows duplicate form submission.
