@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.jsp.tagext.Tag;
 import java.beans.PropertyEditor;
+import java.beans.PropertyEditorSupport;
 
 /**
  * @author Rob Harrop
@@ -74,7 +75,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
 		assertContainsAttribute(output, "value", "foo");
-		assertContainsAttribute(output, "selected", "true");
+		assertContainsAttribute(output, "selected", "selected");
 		assertBlockTagContains(output, "Foo");
 	}
 
@@ -122,7 +123,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
 		assertContainsAttribute(output, "value", value);
-		assertContainsAttribute(output, "selected", "true");
+		assertContainsAttribute(output, "selected", "selected");
 		assertBlockTagContains(output, label);
 	}
 
@@ -166,9 +167,39 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
 		assertContainsAttribute(output, "value", ARRAY_SOURCE);
-		assertContainsAttribute(output, "selected", "true");
+		assertContainsAttribute(output, "selected", "selected");
 		assertBlockTagContains(output, "someArray");
 
+	}
+
+	public void testWithPropertyEditorStringComparison() throws Exception {
+		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.spouse", false) {
+			public PropertyEditor getEditor() {
+				return new PropertyEditorSupport() {
+					public void setAsText(String text) throws IllegalArgumentException {
+						setValue(new TestBean(text, 123));
+					}
+
+					public String getAsText() {
+						return ((TestBean)getValue()).getName();
+					}
+				};
+			}
+		};
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
+
+		this.tag.setValue("Sally");
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		assertOptionTagOpened(output);
+		assertOptionTagClosed(output);
+		assertContainsAttribute(output, "value", "Sally");
+		assertContainsAttribute(output, "selected", "selected");
+		assertBlockTagContains(output, "Sally");
 	}
 
 	private void assertOptionTagOpened(String output) {
@@ -184,6 +215,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		bean.setName("foo");
 		bean.setFavouriteColour(Colour.GREEN);
 		bean.setStringArray(ARRAY);
+		bean.setSpouse(new TestBean("Sally"));
 		request.setAttribute("testBean", bean);
 	}
 }
