@@ -47,7 +47,7 @@ public class MapBasedReaderEventListener implements ReaderEventListener {
 		return (ComponentDefinition[]) collection.toArray(new ComponentDefinition[collection.size()]);
 	}
 
-	public void aliasRegistered(String targetBeanName, String alias) {
+	public void aliasRegistered(String targetBeanName, String alias, Object source) {
 		List aliases = (List) this.aliasMap.get(targetBeanName);
 		if(aliases == null) {
 			aliases = new ArrayList();
@@ -61,7 +61,7 @@ public class MapBasedReaderEventListener implements ReaderEventListener {
 		return aliases == null ? null : Collections.unmodifiableList(aliases);
 	}
 
-	public void importProcessed(String importedResource) {
+	public void importProcessed(String importedResource, Object source) {
 		this.imports.add(importedResource);
 	}
 

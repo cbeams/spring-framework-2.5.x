@@ -585,11 +585,11 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			// no-op
 		}
 
-		public void aliasRegistered(String targetBeanName, String alias) {
+		public void aliasRegistered(String targetBeanName, String alias, Object source) {
 			// no-op
 		}
 
-		public void importProcessed(String importedResource) {
+		public void importProcessed(String importedResource, Object source) {
 			// no-op
 		}
 	}

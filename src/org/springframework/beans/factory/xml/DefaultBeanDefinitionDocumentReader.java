@@ -151,7 +151,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			String name = ele.getAttribute(NAME_ATTRIBUTE);
 			String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
 			getReaderContext().getReader().getBeanFactory().registerAlias(name, alias);
-			getReaderContext().fireAliasRegistered(name, alias);
+			Object source = getReaderContext().getSourceExtractor().extract(ele);
+			getReaderContext().fireAliasRegistered(name, alias, source);
 		}
 		else if (DomUtils.nodeNameEquals(ele, BEAN_ELEMENT)) {
 			BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele, false);
@@ -196,7 +197,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			}
 		}
 
-		getReaderContext().fireImportProcessed(location);
+		Object source = getReaderContext().getSourceExtractor().extract(ele);
+		getReaderContext().fireImportProcessed(location, source);
 	}
 
 	/**

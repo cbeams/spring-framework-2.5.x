@@ -24,7 +24,7 @@ public interface ReaderEventListener {
 
 	void componentRegistered(ComponentDefinition componentDefinition);
 
-	void aliasRegistered(String targetBeanName, String alias);
+	void aliasRegistered(String targetBeanName, String alias, Object source);
 
-	void importProcessed(String importedResource);
+	void importProcessed(String importedResource, Object source);
 }
