@@ -3,14 +3,12 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 M5 (31.5.2006)
--------------------------------------
+Changes in version 2.0 M5 (1.6.2006)
+------------------------------------
 
 General
+* spring.jar is now all-encompassing, including all modules (with the exception of mock and aspects)
 * spring-aop.jar does not contain AOP Alliance interfaces (in contrast to spring.jar); explicitly add aopalliance.jar
-* spring-webmvc.jar, spring-struts.jar and spring-jsf.jar are now extension modules; not part of spring.jar anymore
-* spring-ibatis.jar, spring-jca.jar and spring-jms.jar are now extension modules; not part of spring.jar anymore
-* introduced spring-ext.jar, encompassing all extension modules as a convenience (preferably use individual ext jars)
 
 Package org.springframework.aop
 * reworked support for scoped proxies to build on scoping support in core BeanFactory
@@ -91,6 +89,8 @@ Package org.springframework.web
 * moved StaticPortletApplicationContext from test tree over to main source tree
 * fixed SimpleMappingExceptionResolver to use local "exceptionMappings" reference
 * factored out reusable "prepareBinder" method in BaseCommandController, for easier overriding of "createBinder"
+* InternalResourceView exposes Servlet 2.4 forward request attributes even for Servlet 2.3-
+* added "getOriginatingRequestUri" method to UrlPathHelper, detecting the Servlet 2.4 request URI attribute in a forward
 * refined JSP form tag library
 
 
