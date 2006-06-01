@@ -58,28 +58,32 @@ public class WeavingTransformer implements ClassFileTransformerRegistry {
 	}
 
 
-	public void addTransformer(ClassFileTransformer cft) {
-		if (debug)
-			logger.debug("adding transformer " + cft);
-		this.transformers.add(cft);
+	public void addTransformer(ClassFileTransformer transformer) {
+		if (debug) {
+			logger.debug("Adding transformer: " + transformer);
+		}
+		this.transformers.add(transformer);
 	}
 
 	public byte[] transformIfNecessary(String name, String internalName, byte[] bytes, ProtectionDomain pd) {
-		for (ClassFileTransformer cft : transformers) {
+		for (ClassFileTransformer cft : this.transformers) {
 			try {
-				byte[] transformed = cft.transform(classLoader, internalName, null, pd, bytes);
+				byte[] transformed = cft.transform(this.classLoader, internalName, null, pd, bytes);
 				if (transformed == null) {
-					if (debug)
-						logger.debug("Not Weaving : " + name + " w/ transformer " + cft);
+					if (debug) {
+						logger.debug("Not weaving class [" + name + "] with transformer [" + cft + "]");
+					}
 				}
 				else {
-					if (debug)
-						logger.debug("Weaving: " + name + " w/ transformer " + cft);
+					if (debug) {
+						logger.debug("Weaving [" + name + "] with transformer [" + cft + "]");
+					}
 					bytes = transformed;
 				}
 			}
 			catch (IllegalClassFormatException ex) {
-				throw new RuntimeException("Cannot transform", ex);
+				throw new IllegalStateException(
+						"Cannot transform class [" + name + "] with transformer [" + cft + "]", ex);
 			}
 		}
 		return bytes;

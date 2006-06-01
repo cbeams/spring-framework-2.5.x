@@ -23,13 +23,11 @@ import org.apache.catalina.loader.WebappClassLoader;
 
 import org.springframework.instrument.ClassFileTransformerRegistry;
 import org.springframework.instrument.classloading.WeavingTransformer;
-import org.springframework.instrument.classloading.WeavingTransformer;
-import org.springframework.instrument.ClassFileTransformerRegistry;
 
 /**
- * Extension of tomcat default classloader which adds instrumentation to loaded
- * classes without the need of using an agent.
- * 
+ * Extension of Tomcat's default class loader which adds instrumentation to
+ * loaded classes without the need of using an agent.
+ *
  * @author Costin Leau
  * @since 2.0
  */
@@ -104,7 +102,7 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader implement
 			for (URL url : retrieveURLs()) {
 				tempClassLoader.addURL(url);
 			}*/
-			WebappClassLoader.log.warn("copy URLS also");
+			WebappClassLoader.log.warn("copy URLs also");
 		}
 
 		return tempClassLoader;
