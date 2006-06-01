@@ -90,7 +90,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 
 			Object value = getValue();
 			if (value == null) {
-				throw new IllegalArgumentException("Attribute 'value' is required when binding to non-Boolean values.");
+				throw new IllegalArgumentException("Attribute 'value' is required when binding to non-boolean values");
 			}
 
 			Object resolvedValue = (value instanceof String ? evaluate("value", (String)value) : value);
@@ -132,9 +132,9 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Renders the '<code>input(checkbox)</code>' with the supplied value, marking the
-	 * '<code>input</code>' element as 'checked' if the supplied value is present
-	 * in the bound {@link Collection} value.
+	 * Renders the '<code>input(checkbox)</code>' with the supplied value, marking
+	 * the '<code>input</code>' element as 'checked' if the supplied value is
+	 * present in the bound Collection value.
 	 */
 	private void renderFromCollection(Object resolvedValue, Collection boundValue, TagWriter tagWriter) throws JspException {
 		tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(resolvedValue));
@@ -145,8 +145,8 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Renders the '<code>input(checkbox)</code>' with the supplied value, marking the
-	 * '<code>input</code>' element as 'checked' if the supplied {@link Boolean} is
+	 * Renders the '<code>input(checkbox)</code>' with the supplied value, marking
+	 * the '<code>input</code>' element as 'checked' if the supplied Boolean is
 	 * <code>true</code>.
 	 */
 	private void renderFromBoolean(Boolean boundValue, TagWriter tagWriter) throws JspException {
@@ -157,7 +157,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Returns a unique ID for the bound name within the current {@link PageContext}.
+	 * Returns a unique ID for the bound name within the current PageContext.
 	 * @see TagIdGenerator#nextId
 	 */
 	protected String autogenerateId() throws JspException {

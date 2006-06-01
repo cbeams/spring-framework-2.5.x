@@ -81,10 +81,11 @@ public class RadioButtonTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Returns a unique ID for the bound name within the current {@link PageContext}.
+	 * Returns a unique ID for the bound name within the current PageContext.
 	 * @see TagIdGenerator#nextId
 	 */
 	protected String autogenerateId() throws JspException {
 		return TagIdGenerator.nextId(getName(), this.pageContext);
 	}
+
 }
