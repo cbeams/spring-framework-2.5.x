@@ -244,6 +244,12 @@
 				<exclude name="META-INF/aop.xml"/>
 				<exclude name="org/springframework/beans/factory/aspectj/**"/>
 				<exclude name="org/springframework/transaction/aspectj/**"/>
+				
+				<!-- exclude classes that are part of Tomcat class loader -->
+				<exclude name="org/springframework/instrument/classloading/tomcat/**"/>
+				<exclude name="org/springframework/instrument/ClassFileTransformerRegistry.class"/>
+				<exclude name="org/springframework/instrument/classloading/WeavingTransformer.class"/>
+				
 			</fileset>
 			<zipfileset src="lib/aopalliance/aopalliance.jar"/>
 			<manifest>
@@ -485,6 +491,20 @@
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
+		
+		<jar jarfile="${dist.dir}/modules/spring-tomcat-weaver.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/instrument/classloading/tomcat/**"/>
+				<include name="org/springframework/instrument/ClassFileTransformerRegistry.class"/>
+				<include name="org/springframework/instrument/classloading/WeavingTransformer.class"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
 
 		<jar jarfile="${dist.dir}/modules/spring-hibernate2.jar">
 			<fileset dir="${target.classes.dir}">
