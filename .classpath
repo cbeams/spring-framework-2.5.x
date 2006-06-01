@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry output="target/classes" kind="src" path="src"/>
-	<classpathentry kind="src" path="samples/petclinic-jpa/test"/>
-	<classpathentry kind="src" path="samples/petclinic-jpa/src"/>
 	<classpathentry kind="src" path="tiger/src"/>
 	<classpathentry output="target/test-classes" kind="src" path="test"/>
 	<classpathentry output="target/load-classes" kind="src" path="load"/>
