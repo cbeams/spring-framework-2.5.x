@@ -18,7 +18,6 @@ package org.springframework.instrument.classloading;
 
 import java.lang.instrument.ClassFileTransformer;
 
-import org.springframework.instrument.ClassFileTransformerRegistry;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -28,8 +27,7 @@ import org.springframework.util.ClassUtils;
  * @author Costin Leau
  * @since 2.0
  */
-public class SimpleInstrumentableClassLoader extends AbstractOverridingClassLoader
-		implements ClassFileTransformerRegistry {
+public class SimpleInstrumentableClassLoader extends AbstractOverridingClassLoader  {
 
 	private final AspectJWeavingTransformer weavingTransformer;
 

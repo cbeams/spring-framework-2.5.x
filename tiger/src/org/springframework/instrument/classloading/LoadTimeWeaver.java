@@ -16,7 +16,8 @@
 
 package org.springframework.instrument.classloading;
 
-import org.springframework.instrument.ClassFileTransformerRegistry;
+import java.lang.instrument.ClassFileTransformer;
+
 
 /**
  * Interface supporting adding one or more ClassFileTransformers
@@ -27,7 +28,9 @@ import org.springframework.instrument.ClassFileTransformerRegistry;
  * @author Costin Leau
  * @since 2.0
  */
-public interface LoadTimeWeaver extends ClassFileTransformerRegistry {
+public interface LoadTimeWeaver {//extends ClassFileTransformerRegistry {
+	
+	void addTransformer(ClassFileTransformer transformer) ;
 	
 	/**
 	 * Return a class loader that supports instrumentation through AspectJ-style

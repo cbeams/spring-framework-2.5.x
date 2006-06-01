@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.instrument.ClassFileTransformerRegistry;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
@@ -34,7 +33,7 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @since 2.0
  */
-public class ShadowingClassLoader extends ClassLoader implements ClassFileTransformerRegistry {
+public class ShadowingClassLoader extends ClassLoader {
 
 	private final ClassLoader enclosingClassLoader;
 

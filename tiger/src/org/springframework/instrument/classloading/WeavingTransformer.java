@@ -25,10 +25,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.instrument.ClassFileTransformerRegistry;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
-
 /**
  * ClassFileTransformer based weaving, allowing for a list of transformers to be
  * applied on a class byte array. Normally used inside class loaders.
@@ -37,7 +33,7 @@ import org.springframework.util.StringUtils;
  * @author Costin Leau
  * @since 2.0
  */
-public class WeavingTransformer implements ClassFileTransformerRegistry {
+public class WeavingTransformer {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -48,9 +44,22 @@ public class WeavingTransformer implements ClassFileTransformerRegistry {
 
 	private List<ClassFileTransformer> transformers = new ArrayList<ClassFileTransformer>();
 
+	/**
+	 * See ClassUtils. We don't depend on that to avoid pulling in
+	 * more of Spring
+	 * @return
+	 */
+	private static ClassLoader getDefaultClassLoader() {
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		if (cl == null) {
+			// No thread context class loader -> use class loader of this class.
+			cl = WeavingTransformer.class.getClassLoader();
+		}
+		return cl;
+	}
 
 	public WeavingTransformer() {
-		this.classLoader = ClassUtils.getDefaultClassLoader();
+		this.classLoader = getDefaultClassLoader();
 	}
 
 	public WeavingTransformer(ClassLoader classLoader) {
@@ -58,39 +67,35 @@ public class WeavingTransformer implements ClassFileTransformerRegistry {
 	}
 
 
-	public void addTransformer(ClassFileTransformer transformer) {
-		if (debug) {
-			logger.debug("Adding transformer: " + transformer);
-		}
-		this.transformers.add(transformer);
+	public void addTransformer(ClassFileTransformer cft) {
+		if (debug)
+			logger.debug("adding transformer " + cft);
+		this.transformers.add(cft);
 	}
 
 	public byte[] transformIfNecessary(String name, String internalName, byte[] bytes, ProtectionDomain pd) {
-		for (ClassFileTransformer cft : this.transformers) {
+		for (ClassFileTransformer cft : transformers) {
 			try {
-				byte[] transformed = cft.transform(this.classLoader, internalName, null, pd, bytes);
+				byte[] transformed = cft.transform(classLoader, internalName, null, pd, bytes);
 				if (transformed == null) {
-					if (debug) {
-						logger.debug("Not weaving class [" + name + "] with transformer [" + cft + "]");
-					}
+					if (debug)
+						logger.debug("Not Weaving : " + name + " w/ transformer " + cft);
 				}
 				else {
-					if (debug) {
-						logger.debug("Weaving [" + name + "] with transformer [" + cft + "]");
-					}
+					if (debug)
+						logger.debug("Weaving: " + name + " w/ transformer " + cft);
 					bytes = transformed;
 				}
 			}
 			catch (IllegalClassFormatException ex) {
-				throw new IllegalStateException(
-						"Cannot transform class [" + name + "] with transformer [" + cft + "]", ex);
+				throw new RuntimeException("Cannot transform", ex);
 			}
 		}
 		return bytes;
 	}
 
 	public byte[] transformIfNecessary(String className, byte[] bytes, ProtectionDomain pd) {
-		String internalName = StringUtils.replace(className, ".", "/");
+		String internalName = className.replace(".", "/");
 		return transformIfNecessary(className, internalName, bytes, pd);
 	}
 
