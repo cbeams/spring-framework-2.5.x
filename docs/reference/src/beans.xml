@@ -1193,7 +1193,7 @@ public class ExampleBean {
 </bean>
 <beans>]]></programlisting>
             <para>
-                Notice the use of the <literal>merge=true</literal> attribute on the definition
+                Notice the use of the <literal>merge=true</literal> attribute on the <literal><![CDATA[<props/>]]></literal> element
                 of the <literal>adminEmails</literal> property of the <literal>child</literal> bean definition.
                 When the <literal>child</literal> bean is actually resolved and instantiated by the
                 container, the resulting instance will have an <literal>adminEmails</literal>
@@ -1236,15 +1236,14 @@ support=support@somecompany.co.uk]]></programlisting>
                 <para>If you are one of the lucky few to be using Java5 (Tiger), you will be aware
                 that it is possible (and I daresay recommended) to have strongly typed collections.
                 That is, it is possible to declare a <interfacename>Collection</interfacename> type
-                such that it can only contain <classname>String</classname> elements.</para>
+                such that it can only contain <classname>String</classname> elements (for example).</para>
                 <para>If you are using Spring to dependency inject a strongly-typed
                 <interfacename>Collection</interfacename> into a bean, you can take advantage
                 of Spring's type-conversion support such that the elements of your strongly-typed
                 <interfacename>Collection</interfacename> instances will be converted to the
-                appropriate strong type prior to being added to the
-                <interfacename>Collection</interfacename>.</para>
+                appropriate type prior to being added to the <interfacename>Collection</interfacename>.</para>
                 <para>An example will make this clear; consider the following class definition, and
-                it's attendant  (XML) definition...</para>
+                it's attendant (XML) configuration...</para>
                 <programlisting><![CDATA[public class Foo {
                 
     private Map<String, Float> accounts;
