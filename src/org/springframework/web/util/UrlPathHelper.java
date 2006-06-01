@@ -44,18 +44,22 @@ import org.springframework.util.StringUtils;
 public class UrlPathHelper {
 
 	/**
-	 * Standard Servlet spec request attributes for include URI and paths.
+	 * Standard Servlet 2.3+ spec request attributes for include URI and paths.
 	 * <p>If included via a RequestDispatcher, the current resource will see the
-	 * original request. Its own URI and paths are exposed as request attributes.
+	 * originating request. Its own URI and paths are exposed as request attributes.
 	 */
 	public static final String INCLUDE_URI_REQUEST_ATTRIBUTE = "javax.servlet.include.request_uri";
 	public static final String INCLUDE_CONTEXT_PATH_REQUEST_ATTRIBUTE = "javax.servlet.include.context_path";
 	public static final String INCLUDE_SERVLET_PATH_REQUEST_ATTRIBUTE = "javax.servlet.include.servlet_path";
 
 	/**
-	 * Standard Servlet spec request attributes for forward URI and paths.
+	 * Standard Servlet 2.4+ spec request attributes for forward URI and paths.
+	 * <p>If forwarded to via a RequestDispatcher, the current resource will see its
+	 * own URI and paths. The originating URI and paths are exposed as request attributes.
 	 */
 	public static final String FORWARD_URI_REQUEST_ATTRIBUTE = "javax.servlet.forward.request_uri";
+	public static final String FORWARD_CONTEXT_PATH_REQUEST_ATTRIBUTE = "javax.servlet.forward.context_path";
+	public static final String FORWARD_SERVLET_PATH_REQUEST_ATTRIBUTE = "javax.servlet.forward.servlet_path";
 
 
 	private final Log logger = LogFactory.getLog(getClass());
@@ -245,18 +249,23 @@ public class UrlPathHelper {
 	}
 
 	/**
-	 * Returns the request URI for root of the given request. If this is a forwarded request,
-	 * correctly resolves to the request URI of the original request. Relies on the Servlet 2.4
-	 * 'forward' attributes. These attributes may be set by other components when running in
-	 * a Servlet 2.3- environment.
+	 * Return the request URI for root of the given request. If this is a forwarded request,
+	 * correctly resolves to the request URI of the original request. Relies on the Servlet
+	 * 2.4 'forward' attributes. These attributes may be set by other components when
+	 * running in a Servlet 2.3- environment.
 	 */
 	public String getOriginatingRequestUri(HttpServletRequest request) {
 		String originatingUri = (String) request.getAttribute(FORWARD_URI_REQUEST_ATTRIBUTE);
-		return originatingUri == null ? getRequestUri(request) : decodeAndCleanUriString(request, originatingUri);
+		if (originatingUri != null) {
+			return decodeAndCleanUriString(request, originatingUri);
+		}
+		else {
+			return getRequestUri(request);
+		}
 	}
 
 	/**
-	 * Decodes the supplied URI string and strips any extraneous portion after a ';'.
+	 * Decode the supplied URI string and strips any extraneous portion after a ';'.
 	 */
 	private String decodeAndCleanUriString(HttpServletRequest request, String uri) {
 		uri = decodeRequestString(request, uri);
