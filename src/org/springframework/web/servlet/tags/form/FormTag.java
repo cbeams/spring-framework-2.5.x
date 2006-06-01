@@ -17,6 +17,8 @@
 package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -222,12 +224,22 @@ public class FormTag extends AbstractFormTag {
 		return EVAL_BODY_INCLUDE;
 	}
 
+	/**
+	 * Resolve the value of the '<code>action</code>' attribute. If the user configured
+	 * an '<code>action</code>' value then the result of evaluating this value is used.
+	 * Otherwise, the {@link org.springframework.web.servlet.support.RequestContext#getRequestUri() originating URI}
+	 * is used.
+	 */
 	private String resolveAction() throws JspException {
 		if (StringUtils.hasText(this.action)) {
 			return ObjectUtils.getDisplayString(evaluate(ACTION_ATTRIBUTE, this.action));
 		}
 		else {
 			String requestUri = getRequestContext().getRequestUri();
+			ServletResponse response = this.pageContext.getResponse();
+			if (response instanceof HttpServletResponse) {
+				requestUri = ((HttpServletResponse) response).encodeURL(requestUri);
+			}
 			if (StringUtils.hasText(requestUri)) {
 				return requestUri;
 			}
