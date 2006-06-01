@@ -4,8 +4,9 @@
 <beans>
 
 	<bean id="weaver" 
-		class="org.springframework.instrument.classloading.support.InstrumentationLoadTimeWeaver"/>
+		class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver"/>
 
+	
 	<bean id="entityManagerFactory"
 		class="org.springframework.orm.jpa.ContainerEntityManagerFactoryBean">
 	
@@ -14,15 +15,11 @@
 		<property name="loadTimeWeaver" ref="weaver" />
 		
 		<property name="persistenceXmlLocation"
-			value="META-INF/petclinic-persistence.xml" />
+			value="classpath:META-INF/petclinic-persistence.xml" />
 		
-		<!--
-			If this is not specified, will try to pick up from
-			the root of the classpath. Obviously this value
-			will vary between deployed environments.
-		-->
 		<property name="persistenceUnitRootLocation" 
-			value="file:/c:/work/spring/spring/target/other-classes" />
+			value="file:/c:/work/spring/spring/samples/petclinic/.classes" />
+
 		
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter">
@@ -36,10 +33,10 @@
 				<!--
 					In the case of TopLink, this property can be
 					set to a platform class.
-				-->	
+				-->
 				<property name="databasePlatform" 
 					value="org.springframework.samples.petclinic.toplink.EssentialsHSQLPlatformWithNativeSequence" />	
-
+				
 				<property name="showSql" value="true" />
 
 			</bean>

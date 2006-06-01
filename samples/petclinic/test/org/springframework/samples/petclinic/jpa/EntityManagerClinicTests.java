@@ -45,7 +45,7 @@ import org.springframework.test.jpa.AbstractJpaTests;
 public class EntityManagerClinicTests extends JpaClinicTests {
 	
 	private static final String[] ENTITY_MANAGER_LOCATIONS = new String[] { 
-		"/org/springframework/samples/petclinic/jpa/container-applicationContext-jpa.xml",
+		"/org/springframework/samples/petclinic/jpa/dataAccess.xml",
 		"/org/springframework/samples/petclinic/jpa/entityManager-clinic.xml"
 	};
 	

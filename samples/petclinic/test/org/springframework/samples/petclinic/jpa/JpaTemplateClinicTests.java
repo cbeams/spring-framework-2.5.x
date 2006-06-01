@@ -42,7 +42,7 @@ import org.springframework.test.jpa.AbstractJpaTests;
 public class JpaTemplateClinicTests extends JpaClinicTests {
 	
 	private static final String[] JPA_TEMPLATE_LOCATIONS = new String[] { 
-		"/org/springframework/samples/petclinic/jpa/container-applicationContext-jpa.xml",
+		"/org/springframework/samples/petclinic/jpa/dataAccess.xml",
 		"/org/springframework/samples/petclinic/jpa/jpaTemplate-clinic.xml"
 	};
 	

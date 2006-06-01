@@ -47,7 +47,7 @@ public class EntityManagerClinic implements Clinic {
 	}
 
 	public Owner loadOwner(int id) throws DataAccessException {
-		return em.find(Owner.class, id);
+		return em.find(Owner.class, id);	
 	}
 
 	public Pet loadPet(int id) throws DataAccessException {

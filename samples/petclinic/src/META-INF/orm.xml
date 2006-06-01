@@ -92,7 +92,8 @@
                 <column name="BIRTH_DATE"/>
                 <temporal>DATE</temporal>
             </basic> 
-            <many-to-one name="owner"/>
+            <many-to-one name="owner"
+				fetch="LAZY" />
             <many-to-one name="type"/>
             <one-to-many name="visitsInternal" target-entity="Visit" mapped-by="pet">
                 <cascade><cascade-all/></cascade>
