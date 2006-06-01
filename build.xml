@@ -227,7 +227,6 @@
 
 		<mkdir dir="${dist.dir}"/>
 		<mkdir dir="${dist.dir}/modules"/>
-		<mkdir dir="${dist.dir}/extmodules"/>
 		<mkdir dir="${dist.dir}/resources"/>
 
 	</target>
@@ -236,56 +235,17 @@
 	<target name="fulljar" depends="build,initdist" description="Create full JAR file with all Spring classes">
 
 		<delete file="${dist.dir}/spring.jar"/>
-		<delete file="${dist.dir}/spring-ext.jar"/>
 
 		<jar jarfile="${dist.dir}/spring.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="META-INF/**"/>
-				<exclude name="META-INF/*.tld"/>
 				<include name="org/springframework/**"/>
-				<exclude name="org/springframework/jca/**"/>
-				<exclude name="org/springframework/jms/**"/>
-				<exclude name="org/springframework/orm/hibernate/**"/>
-				<exclude name="org/springframework/orm/hibernate3/**"/>
-				<exclude name="org/springframework/orm/ibatis/**"/>
-				<exclude name="org/springframework/orm/jdo/**"/>
-				<exclude name="org/springframework/orm/jpa/**"/>
-				<exclude name="org/springframework/orm/ojb/**"/>
-				<exclude name="org/springframework/orm/toplink/**"/>
-				<exclude name="org/springframework/web/jsf/**"/>
-				<exclude name="org/springframework/web/portlet/**"/>
-				<exclude name="org/springframework/web/servlet/**"/>
-				<exclude name="org/springframework/web/struts/**"/>
 				<!-- exclude content of spring-aspects.jar -->
+				<exclude name="META-INF/aop.xml"/>
 				<exclude name="org/springframework/beans/factory/aspectj/**"/>
 				<exclude name="org/springframework/transaction/aspectj/**"/>
-				<exclude name="META-INF/aop.xml"/>	
 			</fileset>
 			<zipfileset src="lib/aopalliance/aopalliance.jar"/>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/spring-ext.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="META-INF/*.tld"/>
-				<include name="org/springframework/jca/**"/>
-				<include name="org/springframework/jms/**"/>
-				<include name="org/springframework/orm/hibernate/**"/>
-				<include name="org/springframework/orm/hibernate3/**"/>
-				<include name="org/springframework/orm/ibatis/**"/>
-				<include name="org/springframework/orm/jdo/**"/>
-				<include name="org/springframework/orm/jpa/**"/>
-				<include name="org/springframework/orm/ojb/**"/>
-				<include name="org/springframework/orm/toplink/**"/>
-				<include name="org/springframework/web/jsf/**"/>
-				<include name="org/springframework/web/portlet/**"/>
-				<include name="org/springframework/web/servlet/**"/>
-				<include name="org/springframework/web/struts/**"/>
-			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
 				<attribute name="Implementation-Version" value="${spring-version}"/>
@@ -417,7 +377,6 @@
 				<exclude name="org/springframework/web/servlet/**"/>
 				<exclude name="org/springframework/web/portlet/**"/>
 				<exclude name="org/springframework/web/struts/**"/>
-				<exclude name="org/springframework/web/jsf/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -426,31 +385,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/modules/spring-remoting.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/ejb/**"/>
-				<include name="org/springframework/jmx/**"/>
-				<include name="org/springframework/remoting/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-	</target>
-
-
-	<target name="extjars" depends="build,initdist" description="Create extension JAR files (extending spring.jar)">
-
-		<delete>
-			<fileset dir="${dist.dir}">
-				<include name="extmodules/*.jar"/>
-			</fileset>
-		</delete>
-
-		<jar jarfile="${dist.dir}/extmodules/spring-webmvc.jar">
+		<jar jarfile="${dist.dir}/modules/spring-webmvc.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="META-INF/*.tld"/>
 				<include name="org/springframework/web/servlet/**"/>
@@ -462,7 +397,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/extmodules/spring-portlet.jar">
+		<jar jarfile="${dist.dir}/modules/spring-portlet.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/web/portlet/**"/>
 			</fileset>
@@ -473,7 +408,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/extmodules/spring-struts.jar">
+		<jar jarfile="${dist.dir}/modules/spring-struts.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/web/struts/**"/>
 			</fileset>
@@ -484,9 +419,10 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/extmodules/spring-jsf.jar">
+		<jar jarfile="${dist.dir}/modules/spring-remoting.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/web/jsf/**"/>
+				<include name="org/springframework/ejb/**"/>
+				<include name="org/springframework/remoting/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -495,9 +431,9 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/extmodules/spring-jdo.jar">
+		<jar jarfile="${dist.dir}/modules/spring-jmx.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/orm/jdo/**"/>
+				<include name="org/springframework/jmx/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -506,9 +442,9 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/extmodules/spring-jpa.jar">
+		<jar jarfile="${dist.dir}/modules/spring-jms.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/orm/jpa/**"/>
+				<include name="org/springframework/jms/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -517,62 +453,7 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/extmodules/spring-hibernate2.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/orm/hibernate/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/extmodules/spring-hibernate3.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/orm/hibernate3/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/extmodules/spring-toplink.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/orm/toplink/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/extmodules/spring-ojb.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/orm/ojb/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/extmodules/spring-ibatis.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/orm/ibatis/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/extmodules/spring-jca.jar">
+		<jar jarfile="${dist.dir}/modules/spring-jca.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/jca/**"/>
 			</fileset>
@@ -583,9 +464,75 @@
 			</manifest>
 		</jar>
 
-		<jar jarfile="${dist.dir}/extmodules/spring-jms.jar">
+		<jar jarfile="${dist.dir}/modules/spring-jdo.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/jms/**"/>
+				<include name="org/springframework/orm/jdo/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-jpa.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/orm/jpa/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-hibernate2.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/orm/hibernate/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-hibernate3.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/orm/hibernate3/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-toplink.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/orm/toplink/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-ojb.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/orm/ojb/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+		<jar jarfile="${dist.dir}/modules/spring-ibatis.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/orm/ibatis/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -669,9 +616,9 @@
 
 		<jar jarfile="${dist.dir}/spring-aspects.jar">
 			<fileset dir="${target.classes.dir}">
+				<include name="META-INF/aop.xml"/>
 				<include name="org/springframework/beans/factory/aspectj/**"/>
 				<include name="org/springframework/transaction/aspectj/**"/>
-				<include name="META-INF/aop.xml"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -740,7 +687,7 @@
 	</target>
 
 
-	<target name="alljars" depends="fulljar,modulejars,extjars,aspectjar,mockjar,srczip"
+	<target name="alljars" depends="fulljar,modulejars,aspectjar,mockjar,srczip"
 					description="Create all JAR files"/>
 
 

@@ -88,14 +88,14 @@ The "dist" directory contains the following distinct jar files for use in applic
 jar files and a jar file with all of Spring are provided. The following list specifies the respective contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
-FULL STANDARD JAR (dist):
+FULL JAR (dist):
 
-* "spring" (~1715 KB)
-- Convenient jar file that combines all standard modules (see "module jars" below)
+* "spring" (~2545 KB)
+- Convenient jar file that combines all modules
 - Also includes the AOP Alliance interfaces (as a convenience)
-- Note: Does NOT include extension modules! (see "extension module jars" below)
+- Note: Does not include contents of mock jar and aspects jar!
 
-STANDARD MODULE JARS (dist/modules):
+MODULE JARS (dist/modules):
 
 * "spring-core" (~155 KB)
 - Contents: core utilities
@@ -125,15 +125,9 @@ STANDARD MODULE JARS (dist/modules):
 - Contents: UI template support, mail support, scripting, scheduling, caching
 - Dependencies: spring-context, (Velocity, FreeMarker, JasperReports, JavaMail, BSH, Groovy, JRuby, Quartz, EHCache)
 
-* "spring-web" (~135 KB)
+* "spring-web" (~140 KB)
 - Contents: web application context, multipart resolver, web utilities
 - Dependencies: spring-context, Servlet API, (JSP API, JSTL, Commons FileUpload, COS)
-
-* "spring-remoting" (~180 KB)
-- Contents: remoting support, EJB support, JMX support
-- Dependencies: spring-aop, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB, JMX)
-
-EXTENSION MODULE JARS (dist/extmodules):
 
 * "spring-webmvc" (~260 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
@@ -147,9 +141,21 @@ EXTENSION MODULE JARS (dist/extmodules):
 - Contents: Struts support
 - Dependencies: spring-web, Struts
 
-* "spring-jsf" (~15 KB)
-- Contents: JSF support
-- Dependencies: spring-web, JSF API
+* "spring-remoting" (~100 KB)
+- Contents: remoting support, EJB support
+- Dependencies: spring-aop, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB API)
+
+* "spring-jmx" (~85 KB)
+- Contents: JMX 1.0/1.2 support
+- Dependencies: spring-aop, JMX API
+
+* "spring-jms" (~90 KB)
+- Contents: JMS 1.0.2/1.1 support
+- Dependencies: spring-dao, JMS API
+
+* "spring-jca" (~35 KB)
+- Contents: JCA 1.0 support
+- Dependencies: spring-dao, JCA API
 
 * "spring-jdo" (~65 KB)
 - Contents: JDO 1.0/2.0 support
@@ -179,25 +185,17 @@ EXTENSION MODULE JARS (dist/extmodules):
 - Contents: iBATIS SQL Maps support
 - Dependencies: spring-dao, spring-jdbc, iBATIS SQL Maps
 
-* "spring-jca" (~35 KB)
-- Contents: JCA 1.0 support
-- Dependencies: spring-dao, JCA API
-
-* "spring-jms" (~90 KB)
-- Contents: JMS 1.0.2/1.1 support
-- Dependencies: spring-dao, JMS API
-
-MOCKS JAR (dist/mocks)
+MOCK JAR (dist)
 
 * "spring-mock" (~85 KB)
 - Contents: JNDI mocks, Servlet API mocks, Portlet API mocks, JUnit support
 - Dependencies: spring-core
 
-ASPECTS JAR (dist/aspects)
+ASPECTS JAR (dist)
 
 * "spring-aspects" (~10 KB)
 - Contents: AspectJ aspects, for explicitly linking aspects into an IDE (Eclipse AJDT)
-- Not needed for deployment, since its classes are also in "spring" and "spring-aop"
+- Dependencies: spring-aop, AspectJ, (spring-dao)
 
 Note: The above lists of third-party libraries assume J2SE 1.4 as foundation. For J2SE 1.3, an XML parser like
 Xerces, the JDBC 2.0 standard extension interfaces, and JNDI have to be added when using XML bean definitions,
