@@ -57,13 +57,13 @@ public class InternalResourceViewTests extends TestCase {
 		model.put("foo", "bar");
 		model.put("I", obj);
 
-		MockControl wacControl = MockControl.createControl(WebApplicationContext.class);
+		MockControl wacControl = MockControl.createNiceControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wacControl.getMock();
 		wacControl.replay();
 		
 		String url = "forward-to";
 		
-		MockControl reqControl = MockControl.createControl(HttpServletRequest.class);
+		MockControl reqControl = MockControl.createNiceControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) reqControl.getMock();
 		Set keys = model.keySet();
 		for (Iterator iter = keys.iterator(); iter.hasNext();) {
@@ -96,13 +96,13 @@ public class InternalResourceViewTests extends TestCase {
 		model.put("foo", "bar");
 		model.put("I", obj);
 
-		MockControl wacControl = MockControl.createControl(WebApplicationContext.class);
+		MockControl wacControl = MockControl.createNiceControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wacControl.getMock();
 		wacControl.replay();
 
 		String url = "forward-to";
 
-		MockControl reqControl = MockControl.createControl(HttpServletRequest.class);
+		MockControl reqControl = MockControl.createNiceControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) reqControl.getMock();
 		Set keys = model.keySet();
 		for (Iterator iter = keys.iterator(); iter.hasNext();) {
@@ -135,13 +135,13 @@ public class InternalResourceViewTests extends TestCase {
 		model.put("foo", "bar");
 		model.put("I", obj);
 
-		MockControl wacControl = MockControl.createControl(WebApplicationContext.class);
+		MockControl wacControl = MockControl.createNiceControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wacControl.getMock();
 		wacControl.replay();
 
 		String url = "forward-to";
 
-		MockControl reqControl = MockControl.createControl(HttpServletRequest.class);
+		MockControl reqControl = MockControl.createNiceControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) reqControl.getMock();
 		Set keys = model.keySet();
 		for (Iterator iter = keys.iterator(); iter.hasNext();) {

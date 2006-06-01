@@ -52,6 +52,11 @@ public class UrlPathHelper {
 	public static final String INCLUDE_CONTEXT_PATH_REQUEST_ATTRIBUTE = "javax.servlet.include.context_path";
 	public static final String INCLUDE_SERVLET_PATH_REQUEST_ATTRIBUTE = "javax.servlet.include.servlet_path";
 
+	/**
+	 * Standard Servlet spec request attributes for forward URI and paths.
+	 */
+	public static final String FORWARD_URI_REQUEST_ATTRIBUTE = "javax.servlet.forward.request_uri";
+
 
 	private final Log logger = LogFactory.getLog(getClass());
 
@@ -236,6 +241,24 @@ public class UrlPathHelper {
 		if (uri == null) {
 			uri = request.getRequestURI();
 		}
+		return decodeAndCleanUriString(request, uri);
+	}
+
+	/**
+	 * Returns the request URI for root of the given request. If this is a forwarded request,
+	 * correctly resolves to the request URI of the original request. Relies on the Servlet 2.4
+	 * 'forward' attributes. These attributes may be set by other components when running in
+	 * a Servlet 2.3- environment.
+	 */
+	public String getOriginatingRequestUri(HttpServletRequest request) {
+		String originatingUri = (String) request.getAttribute(FORWARD_URI_REQUEST_ATTRIBUTE);
+		return originatingUri == null ? getRequestUri(request) : decodeAndCleanUriString(request, originatingUri);
+	}
+
+	/**
+	 * Decodes the supplied URI string and strips any extraneous portion after a ';'.
+	 */
+	private String decodeAndCleanUriString(HttpServletRequest request, String uri) {
 		uri = decodeRequestString(request, uri);
 		int semicolonIndex = uri.indexOf(';');
 		return (semicolonIndex != -1 ? uri.substring(0, semicolonIndex) : uri);

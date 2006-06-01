@@ -20,6 +20,7 @@ import javax.servlet.jsp.JspException;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Data-binding aware JSP tag for rendering an HTML '<code>form</code>' whose
@@ -209,7 +210,7 @@ public class FormTag extends AbstractFormTag {
 		this.tagWriter.writeAttribute(METHOD_ATTRIBUTE,
 						ObjectUtils.getDisplayString(evaluate(METHOD_ATTRIBUTE, this.method)));
 		writeOptionalAttribute(tagWriter, NAME_ATTRIBUTE, this.name);
-		writeOptionalAttribute(tagWriter, ACTION_ATTRIBUTE, this.action);
+		this.tagWriter.writeAttribute(ACTION_ATTRIBUTE, resolveAction());
 		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, this.enctype);
 		writeOptionalAttribute(tagWriter, ONSUBMIT_ATTRIBUTE, this.onsubmit);
 		writeOptionalAttribute(tagWriter, ONRESET_ATTRIBUTE, this.onreset);
@@ -219,6 +220,22 @@ public class FormTag extends AbstractFormTag {
 		// expose the command name for nested tags
 		this.pageContext.setAttribute(COMMAND_NAME_VARIABLE_NAME, resolveCommandName());
 		return EVAL_BODY_INCLUDE;
+	}
+
+	private String resolveAction() throws JspException {
+		if (StringUtils.hasText(this.action)) {
+			return ObjectUtils.getDisplayString(evaluate(ACTION_ATTRIBUTE, this.action));
+		}
+		else {
+			String requestUri = getRequestContext().getRequestUri();
+			if (StringUtils.hasText(requestUri)) {
+				return requestUri;
+			}
+			else {
+				throw new IllegalArgumentException("Attribute 'action' is required. Attempted to resolve " +
+								"against current request URI but request URI was null.");
+			}
+		}
 	}
 
 	/**

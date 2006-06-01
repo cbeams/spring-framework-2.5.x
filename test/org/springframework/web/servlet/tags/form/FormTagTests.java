@@ -74,6 +74,40 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(output, "onreset", onreset);
 	}
 
+	public void testWithActionFromRequest() throws Exception {
+		String commandName = "myCommand";
+		String enctype = "my/enctype";
+		String method = "POST";
+		String onsubmit = "onsubmit";
+		String onreset = "onreset";
+
+		this.tag.setCommandName(commandName);
+		this.tag.setEnctype(enctype);
+		this.tag.setMethod(method);
+		this.tag.setOnsubmit(onsubmit);
+		this.tag.setOnreset(onreset);
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_BODY_INCLUDE, result);
+		assertEquals("Command name not exposed", commandName, getPageContext().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME));
+
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		this.tag.doFinally();
+		assertNull("Command name not cleared after tag ends", getPageContext().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME));
+
+		String output = getWriter().toString();
+		assertFormTagOpened(output);
+		assertFormTagClosed(output);
+
+		assertContainsAttribute(output, "action", getRequestUri());
+		assertContainsAttribute(output, "enctype", enctype);
+		assertContainsAttribute(output, "method", method);
+		assertContainsAttribute(output, "onsubmit", onsubmit);
+		assertContainsAttribute(output, "onreset", onreset);
+	}
+
 	public void testWithNullResolvedCommand() throws Exception {
 		this.tag.setCommandName("${null}");
 		try {
@@ -93,6 +127,10 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	protected void extendRequest(MockHttpServletRequest request) {
-		//
+		request.setRequestURI(getRequestUri());
+	}
+
+	private String getRequestUri() {
+		return "/my/form";
 	}
 }

@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.util.WebUtils;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Wrapper for a JSP or other resource within the same web application.
@@ -53,6 +54,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @see javax.servlet.RequestDispatcher#forward
  * @see javax.servlet.RequestDispatcher#include
  * @see javax.servlet.ServletResponse#flushBuffer
@@ -84,6 +86,9 @@ public class InternalResourceView extends AbstractUrlBasedView {
 		// Expose the model object as request attributes.
 		exposeModelAsRequestAttributes(model, request);
 
+		// Expose the current request URI if needed
+		exposeOriginatingRequestUri(request);
+
 		// Expose helpers as request attributes, if any.
 		exposeHelpers(request);
 
@@ -114,12 +119,22 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	}
 
 	/**
+	 * Exposes the current request URI in the {@link HttpServletRequest} attributes under
+	 * the key <code>javax.servlet.forward.request_uri</code> as defined in the Servlet 2.4 specification.
+	 * Does not override values if already present.
+	 */
+	protected void exposeOriginatingRequestUri(HttpServletRequest request) {
+		if(request.getAttribute(UrlPathHelper.FORWARD_URI_REQUEST_ATTRIBUTE) != null) {
+			request.setAttribute(UrlPathHelper.FORWARD_URI_REQUEST_ATTRIBUTE, request.getRequestURI());
+		}
+	}
+
+	/**
 	 * Expose helpers unique to each rendering operation. This is necessary so that
 	 * different rendering operations can't overwrite each other's contexts etc.
-	 * <p>Called by
-     * {@link #renderMergedOutputModel(java.util.Map, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}.
-     * The default implementation is empty. This method can be overridden to add
-     * custom helpers as request attributes.
+	 * <p>Called by {@link #renderMergedOutputModel(Map, HttpServletRequest, HttpServletResponse)}.
+	 * The default implementation is empty. This method can be overridden to add
+	 * custom helpers as request attributes.
 	 * @param request current HTTP request
 	 * @throws Exception if there's a fatal error while we're adding attributes
 	 * @see #renderMergedOutputModel
