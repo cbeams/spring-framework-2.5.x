@@ -1183,9 +1183,9 @@ public class ExampleBean {
     </property>
 </bean>
 <bean id="child" parent="parent">
-    ]]><lineannotation>&lt;!-- the merge is specified on the *child* collection definition --&gt;</lineannotation><![CDATA[
-    <property name="adminEmails" merge="true">
-        <props>
+    <property name="adminEmails">
+        ]]><lineannotation>&lt;!-- the merge is specified on the *child* collection definition --&gt;</lineannotation><![CDATA[
+        <props merge="true">
             <prop key="sales">sales@somecompany.com</prop>
             <prop key="support">support@somecompany.co.uk</prop>
         </props>
