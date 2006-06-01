@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
+        "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <bean name="/list.htm" class="org.springframework.showcase.formtags.web.ListController">
+        <property name="userManager" ref="userManager"/>
+    </bean>
+
+    <bean name="/form.htm" class="org.springframework.showcase.formtags.web.FormController">
+        <property name="formView" value="form"/>
+        <property name="successView" value="redirect:list.htm"/>
+        <property name="userManager" ref="userManager"/>
+        <property name="validators" ref="userValidator"/>
+    </bean>
+
+    <bean id="userValidator" class="org.springframework.showcase.formtags.validation.UserValidator"/>
+
+</beans>
