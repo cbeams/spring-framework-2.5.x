@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,13 @@ package org.springframework.util.xml;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.w3c.dom.CharacterData;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Element;
 import org.w3c.dom.EntityReference;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.CharacterData;
+
 import org.springframework.util.Assert;
 
 /**
@@ -90,8 +91,8 @@ public abstract class DomUtils {
 	 * otherwise returns <code>false</code>.
 	 */
 	public static boolean nodeNameEquals(Node node, String desiredName) {
-		Assert.notNull(node, "'node' cannot be null.");
-		Assert.notNull(desiredName, "'desiredName' cannot be null.");
+		Assert.notNull(node, "Node must not be null");
+		Assert.notNull(desiredName, "Desired name must not be null");
 		return desiredName.equals(node.getNodeName()) || desiredName.equals(node.getLocalName());
 	}
 
