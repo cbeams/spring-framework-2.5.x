@@ -67,6 +67,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	/**
 	 * Sets the value of the '<code>id</code>' attribute. Defaults to the value of
 	 * {@link #getName}. May be a runtime expression.
+	 * <p/>Note that the default value may not be valid for certain tags
 	 */
 	public void setId(String id) {
 		Assert.notNull(id, "'id' cannot be null.");
@@ -104,9 +105,17 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 		}
 		else {
 			// write the default id which matches the name
-			tagWriter.writeAttribute(ID_ATTRIBUTE, getName());
+			tagWriter.writeAttribute(ID_ATTRIBUTE, autogenerateId());
 		}
 		tagWriter.writeAttribute("name", getName());
+	}
+
+	/**
+	 * Autogenerate the '<code>id</code>' attribute value for this tag. The deafault
+	 * implementation simply delegates to {@link #getName}.
+	 */
+	protected String autogenerateId() throws JspException {
+		return getName();
 	}
 
 	/**

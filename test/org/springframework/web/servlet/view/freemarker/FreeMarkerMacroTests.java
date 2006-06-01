@@ -135,6 +135,7 @@ public class FreeMarkerMacroTests extends TestCase {
 		names.put("Darren", "Darren Davison");
 		names.put("John", "John Doe");
 		names.put("Fred", "Fred Bloggs");
+		names.put("Rob&Harrop", "Rob Harrop");
 
 		Configuration config = fc.getConfiguration();
 		Map model = new HashMap();
@@ -154,6 +155,7 @@ public class FreeMarkerMacroTests extends TestCase {
 
 		// tokenize output and ignore whitespace
 		String output = response.getContentAsString();
+		System.out.println(output);
 		String[] tokens = StringUtils.tokenizeToStringArray(output, "\t\n");
 
 		for (int i = 0; i < tokens.length; i++) {

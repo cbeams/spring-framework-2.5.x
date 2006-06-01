@@ -156,4 +156,11 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 		}
 	}
 
+	/**
+	 * Returns a unique ID for the bound name within the current {@link PageContext}.
+	 * @see TagIdGenerator#nextId
+	 */
+	protected String autogenerateId() throws JspException {
+		return TagIdGenerator.nextId(getName(), this.pageContext);
+	}
 }

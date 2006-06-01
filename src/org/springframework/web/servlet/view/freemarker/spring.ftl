@@ -1,3 +1,4 @@
+<#ftl strip_whitespace=true>
 <#--
  * spring.ftl
  *
@@ -157,7 +158,7 @@
  -->
 <#macro formTextarea path attributes="" >
     <@bind path/>
-    <textarea id="${status.expression}" name="${status.expression}" ${attributes}>${stringStatusValue}</textarea>
+    <textarea id="${status.expression}" name="${status.expression}" ${attributes}>${stringStatusValue?html}</textarea>
 </#macro>
 
 <#--
@@ -175,7 +176,7 @@
     <@bind path/>
     <select id="${status.expression}" name="${status.expression}" ${attributes}>
         <#list options?keys as value>
-        <option value="${value}"<@checkSelected value/>>${options[value]}</option>
+        <option value="${value?html}"<@checkSelected value/>>${options[value]?html}</option>
         </#list>
     </select>
 </#macro>
@@ -196,7 +197,7 @@
     <select multiple="multiple" id="${status.expression}" name="${status.expression}" ${attributes}>
         <#list options?keys as value>
         <#assign isSelected = contains(status.value?default([""]), value)>
-        <option value="${value}" <#if isSelected>selected="selected"</#if>>${options[value]}</option>
+        <option value="${value?html}" <#if isSelected>selected="selected"</#if>>${options[value]?html}</option>
         </#list>
     </select>
 </#macro>
@@ -216,10 +217,11 @@
 <#macro formRadioButtons path options separator attributes="">
     <@bind path/>
     <#list options?keys as value>
-    <input type="radio" id="${status.expression}" name="${status.expression}" value="${value}"
+    <#assign id="${status.expression}${value_index}">
+    <input type="radio" id="${id}" name="${status.expression}" value="${value?html}"
         <#if stringStatusValue == value>checked="checked"</#if> ${attributes}
     <@closeTag/>
-    ${options[value]}${separator}
+    <label for="${id}">${options[value]?html}</label>${separator}
     </#list>
 </#macro>
 
@@ -238,11 +240,12 @@
 <#macro formCheckboxes path options separator attributes="">
     <@bind path/>
     <#list options?keys as value>
+    <#assign id="${status.expression}${value_index}">
     <#assign isSelected = contains(status.value?default([""]), value)>
-    <input type="checkbox" id="${status.expression}" name="${status.expression}" value="${value}"
+    <input type="checkbox" id="${id}" name="${status.expression}" value="${value?html}"
         <#if isSelected>checked="checked"</#if> ${attributes}
     <@closeTag/>
-    ${options[value]}${separator}
+    <label for="${id}">${options[value]?html}</label>${separator}
     </#list>
 </#macro>
 
