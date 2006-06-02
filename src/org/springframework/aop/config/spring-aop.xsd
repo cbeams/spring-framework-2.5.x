@@ -49,7 +49,7 @@
 				<xsd:sequence>
 					<xsd:element name="pointcut" type="pointcutType" minOccurs="0" maxOccurs="1"/>
 					<xsd:element name="declare-parents" type="declareParentsType" minOccurs="0" maxOccurs="unbounded"/>
-					<xsd:choice minOccurs="1" maxOccurs="unbounded">
+					<xsd:choice minOccurs="0" maxOccurs="unbounded">
 						<xsd:element name="before" type="basicAdviceType"/>
 						<xsd:element name="after" type="basicAdviceType"/>
 						<xsd:element name="after-returning" type="afterReturningAdviceType"/>
