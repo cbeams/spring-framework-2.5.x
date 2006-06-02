@@ -94,12 +94,13 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 		//	Find introduction fields
 		for (Field f : aspectClass.getDeclaredFields()) {
-			if (Modifier.isStatic(f.getModifiers()) && Modifier.isPublic(f.getModifiers())) {
+			// AMC: not sure why this test is here? AspectJ doesn't enforce this...
+			//if (Modifier.isStatic(f.getModifiers()) && Modifier.isPublic(f.getModifiers())) {
 				Advisor a = getDeclareParentsAdvisor(f);
 				if (a != null) {
 					advisors.add(a);
 				}
-			}
+			//}
 		}
 
 		return advisors;
