@@ -23,13 +23,14 @@ import java.util.Map;
 import org.springframework.util.Assert;
 
 /**
- * Exception to be thrown when abinding errors are considered fatal.
- * Implements the BindingResult interface (and hence its super-interface Errors)
- * to allow for direct analysis of binding errors.
+ * Thrown when binding errors are considered fatal. Implements the
+ * BindingResult interface (and thus its super-interface Errors)
+ * to allow for the direct analysis of binding errors.
  *
  * <p>As of Spring 2.0, this is a special-purpose class. Normally, application
  * code will work with the BindingResult interface, or a DataBinder that
- * in turn exposes a BindingResult via <code>getBindingResult()</code>.
+ * in turn exposes a BindingResult via
+ * {@link org.springframework.validation.DataBinder#getBindingResult()}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
