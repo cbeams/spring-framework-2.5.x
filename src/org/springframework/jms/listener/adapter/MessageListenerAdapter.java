@@ -43,8 +43,8 @@ import org.springframework.util.MethodInvoker;
  * Allows listener methods to operate on message content types, completely
  * independent from the JMS API.
  *
- * <p>The content of incoming JMS messages gets extracted before passed into
- * the target listener method, to let the target method operate on message
+ * <p>The content of incoming JMS messages gets extracted before being passed
+ * into the target listener method, to let the target method operate on message
  * content types such as String or byte array instead of the raw
  * <code>javax.jms.Message</code>.
  *
@@ -83,7 +83,10 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	public static final String ORIGINAL_DEFAULT_LISTENER_METHOD = "handleMessage";
 
 
-	protected final Log logger = LogFactory.getLog(getClass());
+    /**
+     * Logger available to subclasses.
+     */
+    protected final Log logger = LogFactory.getLog(getClass());
 
 	private Object delegate;
 
