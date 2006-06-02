@@ -15,7 +15,7 @@
 		<xsd:annotation>
 			<xsd:documentation source="java:org.springframework.beans.factory.config.PropertiesFactoryBean">
 				Loads a Properties instance from the resource location specified by the
-				'<code>location</code>;' attribute.
+				'&lt;code&gt;location&lt;/code&gt;' attribute.
 			</xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
