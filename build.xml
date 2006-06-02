@@ -680,6 +680,9 @@
 		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans.xsd"
 					todir="${dist.dir}/resources" preservelastmodified="true"/>
 
+		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-tool.xsd"
+					todir="${dist.dir}/resources" preservelastmodified="true"/>
+
 		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-util.xsd"
 					todir="${dist.dir}/resources" preservelastmodified="true"/>
 
@@ -687,6 +690,9 @@
 					todir="${dist.dir}/resources" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/ejb/spring-jee.xsd"
+					todir="${dist.dir}/resources" preservelastmodified="true"/>
+
+		<copy file="${src.dir}/org/springframework/scripting/config/spring-lang.xsd"
 					todir="${dist.dir}/resources" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/transaction/config/spring-tx.xsd"
