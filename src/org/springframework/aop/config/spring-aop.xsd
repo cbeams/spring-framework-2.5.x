@@ -67,6 +67,13 @@
 	</xsd:complexType>
 
 	<xsd:complexType name="pointcutType">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="org.springframework.aop.Pointcut"/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
 		<xsd:complexContent>
 			<xsd:extension base="beans:identifiedType">
 				<xsd:attribute name="expression" use="required" type="xsd:string"/>
@@ -114,6 +121,13 @@
 	</xsd:complexType>
 
 	<xsd:complexType name="advisorType">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="org.springframework.aop.Advisor"/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
 		<xsd:complexContent>
 			<xsd:extension base="beans:identifiedType">
 				<xsd:attribute name="advice-ref" type="xsd:string" use="required">

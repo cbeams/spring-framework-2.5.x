@@ -3,11 +3,13 @@
 <xsd:schema xmlns="http://www.springframework.org/schema/lang"
 						xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 						xmlns:beans="http://www.springframework.org/schema/beans"
+						xmlns:tool="http://www.springframework.org/schema/tool"
 						targetNamespace="http://www.springframework.org/schema/lang"
 						elementFormDefault="qualified"
 						attributeFormDefault="unqualified">
 
 	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
 
 	<xsd:element name="groovy" type="simpleScriptType"/>
 	<xsd:element name="jruby" type="dynamicScriptType"/>
@@ -15,6 +17,13 @@
 
 	<!-- Script Types -->
 	<xsd:complexType name="simpleScriptType">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
 		<xsd:complexContent>
 			<xsd:extension base="beans:identifiedType">
 				<xsd:sequence>

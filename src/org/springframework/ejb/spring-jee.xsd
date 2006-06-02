@@ -48,6 +48,13 @@
 	<!-- base types -->
 	<xsd:complexType name="jndiLocatedType" abstract="true">
 		<xsd:complexContent>
+			<xsd:annotation>
+				<xsd:appinfo>
+					<tool:annotation>
+						<tool:exports/>
+					</tool:annotation>
+				</xsd:appinfo>
+			</xsd:annotation>
 			<xsd:extension base="beans:identifiedType">
 				<xsd:sequence>
 					<xsd:element name="environment" minOccurs="0" maxOccurs="1">
@@ -73,6 +80,13 @@
 	</xsd:complexType>
 
 	<xsd:complexType name="entityManagerFactoryType">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="javax.persistence.EntityManagerFactory"/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
 		<xsd:complexContent>
 			<xsd:extension base="beans:identifiedType">
 				<xsd:attribute name="persistence-unit-name" type="xsd:string"/>
@@ -89,7 +103,7 @@
 				</xsd:attribute>
 				<xsd:attribute name="provider-class" type="xsd:string">
 					<xsd:annotation>
-					  <xsd:appinfo>
+						<xsd:appinfo>
 							<tool:annotation>
 								<tool:expected-type type="java.lang.Class"/>
 								<!-- TODO: Is there a base type for all providers such that we can add a constraint here? -->

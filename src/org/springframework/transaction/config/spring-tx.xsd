@@ -1,18 +1,34 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <xsd:schema xmlns="http://www.springframework.org/schema/tx"
-			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-			targetNamespace="http://www.springframework.org/schema/tx"
-			elementFormDefault="qualified"
-			attributeFormDefault="unqualified">
+						xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+						xmlns:beans="http://www.springframework.org/schema/beans"
+						xmlns:tool="http://www.springframework.org/schema/tool"
+						targetNamespace="http://www.springframework.org/schema/tx"
+						elementFormDefault="qualified"
+						attributeFormDefault="unqualified">
+
+	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
+
 
 	<xsd:element name="advice">
 		<xsd:complexType>
-			<xsd:sequence>
-				<xsd:element name="attributes" type="attributesType" minOccurs="0" maxOccurs="1"/>
-			</xsd:sequence>
-			<xsd:attribute name="id" type="xsd:ID" use="required"/>
-			<xsd:attribute name="transaction-manager" type="xsd:string" default="transactionManager"/>
+			<xsd:annotation>
+				<xsd:appinfo>
+					<tool:annotation>
+						<tool:exports type="org.springframework.transaction.interceptor.TransactionInterceptor"/>
+					</tool:annotation>
+				</xsd:appinfo>
+			</xsd:annotation>
+			<xsd:complexContent>
+				<xsd:extension base="beans:identifiedType">
+					<xsd:sequence>
+						<xsd:element name="attributes" type="attributesType" minOccurs="0" maxOccurs="1"/>
+					</xsd:sequence>
+					<xsd:attribute name="transaction-manager" type="xsd:string" default="transactionManager"/>
+				</xsd:extension>
+			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
 
@@ -28,28 +44,28 @@
 				<xsd:complexType>
 					<xsd:attribute name="name" type="xsd:string" use="required"/>
 					<xsd:attribute name="propagation" default="REQUIRED">
-						 <xsd:simpleType>
-							 <xsd:restriction base="xsd:string">
-								 <xsd:enumeration value="REQUIRED"/>
-								 <xsd:enumeration value="SUPPORTS"/>
-								 <xsd:enumeration value="MANDATORY"/>
-								 <xsd:enumeration value="REQUIRES_NEW"/>
-								 <xsd:enumeration value="NOT_SUPPORTED"/>
-								 <xsd:enumeration value="NEVER"/>
-								 <xsd:enumeration value="NESTED"/>
-							 </xsd:restriction>
-						 </xsd:simpleType>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:enumeration value="REQUIRED"/>
+								<xsd:enumeration value="SUPPORTS"/>
+								<xsd:enumeration value="MANDATORY"/>
+								<xsd:enumeration value="REQUIRES_NEW"/>
+								<xsd:enumeration value="NOT_SUPPORTED"/>
+								<xsd:enumeration value="NEVER"/>
+								<xsd:enumeration value="NESTED"/>
+							</xsd:restriction>
+						</xsd:simpleType>
 					</xsd:attribute>
 					<xsd:attribute name="isolation" default="DEFAULT">
-						 <xsd:simpleType>
-							 <xsd:restriction base="xsd:string">
-								 <xsd:enumeration value="DEFAULT"/>
-								 <xsd:enumeration value="READ_UNCOMMITTED"/>
-								 <xsd:enumeration value="READ_COMMITTED"/>
-								 <xsd:enumeration value="REPEATABLE_READ"/>
-								 <xsd:enumeration value="SERIALIZABLE"/>
-							 </xsd:restriction>
-						 </xsd:simpleType>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:enumeration value="DEFAULT"/>
+								<xsd:enumeration value="READ_UNCOMMITTED"/>
+								<xsd:enumeration value="READ_COMMITTED"/>
+								<xsd:enumeration value="REPEATABLE_READ"/>
+								<xsd:enumeration value="SERIALIZABLE"/>
+							</xsd:restriction>
+						</xsd:simpleType>
 					</xsd:attribute>
 					<xsd:attribute name="timeout" type="xsd:integer" default="-1"/>
 					<xsd:attribute name="read-only" type="xsd:boolean" default="false"/>

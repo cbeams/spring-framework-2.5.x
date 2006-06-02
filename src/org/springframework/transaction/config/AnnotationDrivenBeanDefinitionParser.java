@@ -16,31 +16,27 @@
 
 package org.springframework.transaction.config;
 
-import org.w3c.dom.Element;
-
 import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.xml.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
+import org.w3c.dom.Element;
 
 /**
  * @author Rob Harrop
  * @since 2.0
  */
-class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
+class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private static final String TRANSACTION_ATTRIBUTE_SOURCE_ADVISOR_NAME = ".transactionAttributeSourceAdvisor";
 
 	public static final String TRANSACTION_INTERCEPTOR = "transactionInterceptor";
 
-
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		BeanDefinitionRegistry registry = parserContext.getRegistry();
+	protected BeanDefinition parseInternal(Element element, ParserContext parserContext) {
 
 		// Register the APC if needed.
 		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext);
@@ -51,17 +47,17 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		// Create the TransactionInterceptor definition
 		RootBeanDefinition interceptorDefinition = new RootBeanDefinition(TransactionInterceptor.class);
 		interceptorDefinition.getPropertyValues().addPropertyValue(
-				TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY, new RuntimeBeanReference(transactionManagerName));
+						TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY, new RuntimeBeanReference(transactionManagerName));
 		interceptorDefinition.getPropertyValues().addPropertyValue(
-				TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE, new RootBeanDefinition(sourceClass));
+						TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE, new RootBeanDefinition(sourceClass));
 
 		// Create the TransactionAttributeSourceAdvisor definition.
 		RootBeanDefinition advisorDefinition = new RootBeanDefinition(TransactionAttributeSourceAdvisor.class);
 		advisorDefinition.getPropertyValues().addPropertyValue(TRANSACTION_INTERCEPTOR, interceptorDefinition);
-
-		registry.registerBeanDefinition(TRANSACTION_ATTRIBUTE_SOURCE_ADVISOR_NAME, advisorDefinition);
-
-		return null;
+		return advisorDefinition;
 	}
 
+	protected boolean autogenerateId() {
+		return true;
+	}
 }

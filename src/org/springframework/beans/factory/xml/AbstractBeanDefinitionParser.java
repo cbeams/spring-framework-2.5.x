@@ -20,6 +20,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
@@ -34,82 +35,104 @@ import org.w3c.dom.Element;
  */
 public abstract class AbstractBeanDefinitionParser implements BeanDefinitionParser {
 
-    /**
-     * Constant for the id attribute.
-     */
-    public static final String ID_ATTRIBUTE = "id";
+	/**
+	 * Constant for the id attribute.
+	 */
+	public static final String ID_ATTRIBUTE = "id";
 
 
-    public final BeanDefinition parse(Element element, ParserContext parserContext) {
-        BeanDefinition definition = parseInternal(element, parserContext);
-        String id = extractId(element);
-        if (StringUtils.hasText(id)) {
-            BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
-            BeanDefinitionReaderUtils.registerBeanDefinition(holder, parserContext.getRegistry());
-            if (shouldFireEvents()) {
-                BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
-                postProcessComponentDefinition(componentDefinition);
-                parserContext.getReaderContext().fireComponentRegistered(componentDefinition);
-            }
-        } else if (!parserContext.isNested()) {
-            throw new IllegalArgumentException("Attribute '" + ID_ATTRIBUTE + "' is required for element '"
-                    + element.getLocalName() + "' when used as a top-level tag.");
-        }
-        return definition;
-    }
+	public final BeanDefinition parse(Element element, ParserContext parserContext) {
+		BeanDefinition definition = parseInternal(element, parserContext);
+		String id =resolveId(definition, parserContext, element);
+		if (StringUtils.hasText(id)) {
+			BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
+			BeanDefinitionReaderUtils.registerBeanDefinition(holder, parserContext.getRegistry());
+			if (shouldFireEvents()) {
+				BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
+				postProcessComponentDefinition(componentDefinition);
+				parserContext.getReaderContext().fireComponentRegistered(componentDefinition);
+			}
+		}
+		else if (!parserContext.isNested()) {
+			throw new IllegalArgumentException("Attribute '" + ID_ATTRIBUTE + "' is required for element '"
+							+ element.getLocalName() + "' when used as a top-level tag.");
+		}
+		return definition;
+	}
+
+	/**
+	 * Resolves the ID for the supplied {@link BeanDefinition}. When using {@link #autogenerateId autogeneration}
+	 * a name is generated automatically, otherwise the ID is extracted by delegating to {@link #extractId}.
+	 */
+	private String resolveId(BeanDefinition definition, ParserContext parserContext, Element element) {
+		if (autogenerateId()) {
+			return BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) definition, parserContext.getRegistry(), parserContext.isNested());
+		}
+		else {
+			return extractId(element);
+		}
+	}
 
 
-    /**
-     * Central template method to actually parse the supplied {@link Element}
-     * into one or more {@link BeanDefinition BeanDefinitions}.
-     * @param element       the element that is to be parsed into one or more {@link BeanDefinition BeanDefinitions}
-     * @param parserContext the object encapsulating the current state of the parse;
-     *                      provides access to a {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
-     * @return the primary {@link BeanDefinition} resulting from the parsing of the supplied {@link Element}
-     * @see #parse(org.w3c.dom.Element, ParserContext) 
-     * @see #postProcessComponentDefinition(org.springframework.beans.factory.support.BeanComponentDefinition) 
-     */
-    protected abstract BeanDefinition parseInternal(Element element, ParserContext parserContext);
+	/**
+	 * Central template method to actually parse the supplied {@link Element}
+	 * into one or more {@link BeanDefinition BeanDefinitions}.
+	 * @param element			 the element that is to be parsed into one or more {@link BeanDefinition BeanDefinitions}
+	 * @param parserContext the object encapsulating the current state of the parse;
+	 *                      provides access to a {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
+	 * @return the primary {@link BeanDefinition} resulting from the parsing of the supplied {@link Element}
+	 * @see #parse(org.w3c.dom.Element, ParserContext)
+	 * @see #postProcessComponentDefinition(org.springframework.beans.factory.support.BeanComponentDefinition)
+	 */
+	protected abstract BeanDefinition parseInternal(Element element, ParserContext parserContext);
 
-    /**
-     * Hook method called after the primary parsing of a
-     * {@link BeanComponentDefinition} but before the
-     * {@link BeanComponentDefinition} has been registered with a
-     * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}.
-     * <p>Derived classes can override this emthod to supply any custom logic that
-     * is to be executed after all the parsing is finished.
-     * <p>The default implementation is a no-op.
-     * @param componentDefinition the {@link BeanComponentDefinition} that is to be processed 
-     */
-    protected void postProcessComponentDefinition(BeanComponentDefinition componentDefinition) {
-    }
+	/**
+	 * Hook method called after the primary parsing of a
+	 * {@link BeanComponentDefinition} but before the
+	 * {@link BeanComponentDefinition} has been registered with a
+	 * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}.
+	 * <p>Derived classes can override this emthod to supply any custom logic that
+	 * is to be executed after all the parsing is finished.
+	 * <p>The default implementation is a no-op.
+	 * @param componentDefinition the {@link BeanComponentDefinition} that is to be processed
+	 */
+	protected void postProcessComponentDefinition(BeanComponentDefinition componentDefinition) {
+	}
 
-    /**
-     * Convenience method to extract the id of a bean definition from the supplied
-     * {@link Element element}.
-     * @param element the element from which an id is to be extracted
-     * @return the extracted id; must return <code>null</code> if no id could be extracted 
-     * @see #ID_ATTRIBUTE
-     */
-    protected String extractId(Element element) {
-        return element.getAttribute(ID_ATTRIBUTE);
-    }
+	/**
+	 * Convenience method to extract the id of a bean definition from the supplied
+	 * {@link Element element}.
+	 * @param element the element from which an id is to be extracted
+	 * @return the extracted id; must return <code>null</code> if no id could be extracted
+	 * @see #ID_ATTRIBUTE
+	 */
+	protected String extractId(Element element) {
+		return element.getAttribute(ID_ATTRIBUTE);
+	}
 
-    /**
-     * Controls whether this instance is to
-     * {@link org.springframework.beans.factory.support.ReaderContext#fireComponentRegistered(org.springframework.beans.factory.support.ComponentDefinition) fire an event}
-     * when a bean definition has been totally parsed?
-     * <p>Implementations must return <code>true</code> if they want an event
-     * will be fired when a bean definition has been totally parsed; returning
-     * <code>false</code> means that an event will not be fired.
-     * <p>This implementation returns <code>true</code> by default; that is, an event
-     * will be fired when a bean definition has been totally parsed.
-     * @return <code>true</code> if this instance is to
-     * {@link org.springframework.beans.factory.support.ReaderContext#fireComponentRegistered(org.springframework.beans.factory.support.ComponentDefinition) fire an event}
-     * when a bean definition has been totally parsed
-     */
-    protected boolean shouldFireEvents() {
-        return true;
-    }
+	/**
+	 * Controls whether this instance is to
+	 * {@link org.springframework.beans.factory.support.ReaderContext#fireComponentRegistered(org.springframework.beans.factory.support.ComponentDefinition) fire an event}
+	 * when a bean definition has been totally parsed?
+	 * <p>Implementations must return <code>true</code> if they want an event
+	 * will be fired when a bean definition has been totally parsed; returning
+	 * <code>false</code> means that an event will not be fired.
+	 * <p>This implementation returns <code>true</code> by default; that is, an event
+	 * will be fired when a bean definition has been totally parsed.
+	 * @return <code>true</code> if this instance is to
+	 *         {@link org.springframework.beans.factory.support.ReaderContext#fireComponentRegistered(org.springframework.beans.factory.support.ComponentDefinition) fire an event}
+	 *         when a bean definition has been totally parsed
+	 */
+	protected boolean shouldFireEvents() {
+		return true;
+	}
+
+	/**
+	 * Should an ID be autogenerated instead of read for the passed in {@link Element}? Subclasses
+	 * can override this to enable ID autogeneration, which is disabled by default.
+	 */
+	protected boolean autogenerateId() {
+		return false;
+	}
 
 }
