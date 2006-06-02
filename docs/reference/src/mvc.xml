@@ -18,6 +18,29 @@
     typically be subclasses of those. Note that you can choose an appropriate
     base class: if you don't have a form, you don't need a form controller.
     This is a major difference to Struts.</para>
+    
+    <sidebar id="mvc-open-for-extension">
+        <title><quote>Open for extension...</quote></title>
+        <para>One of the overarching design principles in Spring MVC (and in Spring in general)
+        is the <quote><emphasis>Open for extension, closed for modification</emphasis></quote>
+        principle.</para>
+        <para>The reason that this principle is being mentioned here is because a number
+        of methods in the core classes in Spring MVC have <literal>final</literal> methods.
+        This means of course that you as a developer cannot override these methods to
+        supply your own behaviour... this is <emphasis>by design</emphasis> and has not
+        been done arbitrarily to annoy.</para>
+        <para>The book 'Expert Spring MVC and Web Flow' by Seth Ladd and others explains this
+        principle and the reasons for adhering to it in some depth on page 117 (first edition)
+        in the section entitled 'A Look At Design'.</para>
+        <para>If you don't have access to the aforementioned book, then the following article
+        may be of interest the next time you find yourself going
+        <quote>Gah! Why can't I override this method?</quote>.</para>
+        <orderedlist>
+            <listitem>
+                <para><ulink url="http://www.objectmentor.com/publications/ocp.pdf">Bob Martin, The Open-Closed Principle (PDF)</ulink></para>
+            </listitem>
+        </orderedlist>
+    </sidebar>
 
     <para>You can use any object as a command or form object - there is no need
     to implement an interface or derive from a base class. Spring's data
