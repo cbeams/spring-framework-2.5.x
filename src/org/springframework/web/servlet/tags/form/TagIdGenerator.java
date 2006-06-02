@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.core.Conventions;
-
 import javax.servlet.jsp.PageContext;
 
 /**

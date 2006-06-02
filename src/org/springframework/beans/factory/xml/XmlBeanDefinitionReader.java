@@ -92,16 +92,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	public static final int VALIDATION_XSD = 3;
 
 	/**
-	 * JAXP attribute used to configure the schema language for validation.
-	 */
-	private static final String SCHEMA_LANGUAGE_ATTRIBUTE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
-
-	/**
-	 * JAXP attribute value indicating the XSD schema language.
-	 */
-	private static final String XSD_SCHEMA_LANGUAGE = "http://www.w3.org/2001/XMLSchema";
-
-	/**
 	 * The maximum number of lines the validation autodetection process should peek into
 	 * a file looking for the <code>DOCTYPE</code> definition.
 	 */
@@ -162,6 +152,10 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	private NamespaceHandlerResolver namespaceHandlerResolver;
 
+	/**
+	 * The {@link DocumentLoader} to use for loading DOM {@link Document Documents}.
+	 */
+	private DocumentLoader documentLoader = new DefaultDocumentLoader();
 
 	/**
 	 * Create new XmlBeanDefinitionReader for the given bean factory.
@@ -249,6 +243,15 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	public void setNamespaceHandlerResolver(NamespaceHandlerResolver namespaceHandlerResolver) {
 		this.namespaceHandlerResolver = namespaceHandlerResolver;
+	}
+
+	/**
+	 * Specify the {@link DocumentLoader} to use. The default implementation is
+	 * {@link DefaultDocumentLoader} which loads {@link Document} instances using JAXP.
+	 */
+	public void setDocumentLoader(DocumentLoader documentLoader) {
+		Assert.notNull(documentLoader, "'documentLoader' cannot be null.");
+		this.documentLoader = documentLoader;
 	}
 
 	/**
@@ -380,13 +383,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	protected int doLoadBeanDefinitions(InputSource inputSource, Resource resource) throws BeansException {
 		try {
-			DocumentBuilderFactory factory =
-					createDocumentBuilderFactory(resource, getValidationModeForResource(resource));
-			if (logger.isDebugEnabled()) {
-				logger.debug("Using JAXP provider [" + factory + "]");
-			}
-			DocumentBuilder builder = createDocumentBuilder(factory);
-			Document doc = builder.parse(inputSource);
+			int validationMode = getValidationModeForResource(resource);
+			Document doc = this.documentLoader.loadDocument(inputSource, this.entityResolver, this.errorHandler, validationMode, this.namespaceAware);
 			return registerBeanDefinitions(doc, resource);
 		}
 		catch (ParserConfigurationException ex) {
@@ -402,6 +400,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 		catch (IOException ex) {
 			throw new BeanDefinitionStoreException("IOException parsing XML document from " + resource, ex);
+		}
+		catch (Exception ex) {
+			throw new BeanDefinitionStoreException("Unexpected exception parsing XML document from " + resource, ex);
 		}
 	}
 
@@ -459,63 +460,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 					"validationMode on your XmlBeanDefinitionReader instance?", ex);
 		}
 	}
-
-	/**
-	 * Creates the {@link DocumentBuilderFactory} instance.
-	 * @param resource the {@link Resource} being parsed.
-	 * @param validationMode the resolved validation mode.
-	 * Correctly reflects any mode that was detected automatically.
-	 */
-	protected DocumentBuilderFactory createDocumentBuilderFactory(Resource resource, int validationMode)
-			throws ParserConfigurationException {
-
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setNamespaceAware(this.namespaceAware);
-
-		if (validationMode != VALIDATION_NONE) {
-			factory.setValidating(true);
-
-			if (validationMode == VALIDATION_XSD) {
-				// enforce namespace aware for XSD
-				factory.setNamespaceAware(true);
-				try {
-					factory.setAttribute(SCHEMA_LANGUAGE_ATTRIBUTE, XSD_SCHEMA_LANGUAGE);
-				}
-				catch (IllegalArgumentException ex) {
-					throw new FatalBeanException(
-							"Unable to validate using XSD: Your JAXP provider [" +
-							factory + "] does not support XML Schema. " +
-							"Are you running on Java 1.4 or below with Apache Crimson? " +
-							"Upgrade to Apache Xerces (or Java 1.5) for full XSD support.");
-				}
-			}
-		}
-
-		return factory;
-	}
-
-	/**
-	 * Create a JAXP DocumentBuilder that this bean definition reader
-	 * will use for parsing XML documents. Can be overridden in subclasses,
-	 * adding further initialization of the builder.
-	 * @param factory the JAXP DocumentBuilderFactory that the
-	 * DocumentBuilder should be created with
-	 * @return the JAXP DocumentBuilder
-	 * @throws ParserConfigurationException if thrown by JAXP methods
-	 */
-	protected DocumentBuilder createDocumentBuilder(DocumentBuilderFactory factory)
-			throws ParserConfigurationException {
-
-		DocumentBuilder docBuilder = factory.newDocumentBuilder();
-		if (this.errorHandler != null) {
-			docBuilder.setErrorHandler(this.errorHandler);
-		}
-		if (this.entityResolver != null) {
-			docBuilder.setEntityResolver(this.entityResolver);
-		}
-		return docBuilder;
-	}
-
 
 	/**
 	 * Register the bean definitions contained in the given DOM document.
