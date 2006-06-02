@@ -1415,14 +1415,21 @@
 		<fileset id="main" dir=".">
 			<include name="dist/**"/>
 			<include name="docs/**"/>
+			<include name="docs/reference/styles/html.css"/>
+			<include name="docs/reference/images/admons/*.png"/>
+			<include name="docs/reference/images/admons/*.gif"/>
+			<include name="docs/reference/images/admons/*.tif"/>
 			<exclude name="docs/reference/*"/>
 			<exclude name="docs/reference/src/**"/>
-			<exclude name="docs/reference/images/**"/>
-			<exclude name="docs/reference/styles/**"/>
+			<exclude name="docs/reference/images/CVS/**"/>
+			<exclude name="docs/reference/images/*.db"/>
+			<exclude name="docs/reference/images/.cvsignore"/>
+			<exclude name="docs/reference/styles/*.xsl"/>
+			<exclude name="docs/reference/styles/CVS/**"/>
 			<exclude name="docs/reference/lib/**"/>
 			<exclude name="docs/reference/html/**"/>
 			<exclude name="docs/reference/pdf/images/**"/>
-			<include name="samples/countries/**"/>
+            <include name="samples/countries/**"/>
 			<include name="samples/imagedb/**"/>
 			<include name="samples/jpetstore/**"/>
 			<include name="samples/petclinic/**"/>
@@ -1433,7 +1440,7 @@
 			<zipfileset refid="main" prefix="${release.path}"/>
 		</zip>
 
-		<zip zipfile="${target.release.dir}/${release-with-dependencies.zip}">
+        <zip zipfile="${target.release.dir}/${release-with-dependencies.zip}">
 			<zipfileset refid="main" prefix="${release.path}"/>
 			<zipfileset dir="." prefix="${release.path}">
 				<include name="*.bat"/>
@@ -1495,7 +1502,7 @@
 			</zipfileset>
 		</zip>
 
-	</target>
+    </target>
 
 
 	<target name="clean_release" depends="clean, release"/>
