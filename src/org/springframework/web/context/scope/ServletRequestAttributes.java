@@ -108,7 +108,7 @@ public class ServletRequestAttributes implements RequestAttributes {
 	public void updateAccessedAttributes() {
 		HttpSession session = this.request.getSession(false);
 		if (session != null) {
-			for (Iterator it = this.sessionAttributesToUpdate.keySet().iterator(); it.hasNext();) {
+			for (Iterator it = this.sessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
 				String name = (String) entry.getKey();
 				Object newValue = entry.getValue();
