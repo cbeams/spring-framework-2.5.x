@@ -12,18 +12,18 @@
                 transaction APIs such as JTA, JDBC, Hibernate, JPA, and JDO.</para>
             </listitem>
             <listitem>
-                <para>Supports declarative transaction management</para>
+                <para>Supports declarative transaction management.</para>
             </listitem>
             <listitem>
                 <para>Provides a simpler, easier to use, API for programmatic
-                transaction management than a number of disparate transaction APIs such as JTA</para>
+                transaction management than a number of disparate transaction APIs such as JTA.</para>
             </listitem>
             <listitem>
-                <para>Integrates with Spring' various data access abstractions</para>
+                <para>Integrates with Spring's various data access abstractions.</para>
             </listitem>
         </itemizedlist>
         <para>This chapter is divided up into a number of sections; these sections are
-        described below, along with a link so that you can navigate directly to that
+        described below, along with a link so that you can navigate directly to the
         section which interests you.</para>
         <itemizedlist>
             <listitem>
@@ -37,20 +37,20 @@
             <listitem>
                 <para>The second section, entitled
                 <link linkend="transaction-strategies">Key abstractions</link>
-                outlines the core classes in Spring's transaction support, and well
+                outlines the core classes in Spring's transaction support, as well
                 as how to configure and obtain <interfacename>DataSource</interfacename>
                 instances from a variety of sources.</para>
             </listitem>
             <listitem>
                 <para>The third section, entitled
                 <link linkend="transaction-declarative">Declarative transaction management</link>
-                covers (unsurprisingly), Spring's support for declarative transaction
+                covers, Spring's support for declarative transaction
                 management.</para>
             </listitem>
             <listitem>
                 <para>The fourth section, entitled
                 <link linkend="transaction-programmatic">Programmatic transaction management</link>
-                covers (again, unsurprisingly), Spring's support for programmatic (i.e. explicitly
+                covers, Spring's support for programmatic (i.e. explicitly
                 coded) transaction management.</para>
             </listitem>
         </itemizedlist>
@@ -71,9 +71,10 @@
             declarative transactions offer more power and a much more productive
             programming model than EJB CMT.</para>
             <para>You need an application server's JTA capability only if you need to
-            enlist multiple transactional resources, and many applications just don't
-            face this requirement. For example, many high-end applications
-            use a single, highly scalable database (such as Oracle 9i RAC).</para>
+            enlist multiple transactional resources, and for many applications being able
+            to handle transactions across multiple resources isn't a requirement. 
+            For example, many high-end applications use a single, highly scalable 
+            database (such as Oracle 9i RAC).</para>
             <para>Of course you may need other application server capabilities such as
             JMS and JCA.</para>
             <para>The most important point is that with Spring <emphasis>you can
@@ -82,17 +83,17 @@
             EJB CMT or JTA was to write code using local transactions such as those
             on JDBC connections, and face a hefty rework if you ever needed that code
             to run within global, container-managed transactions. With Spring, only
-            configuration needs to change: your code doesn't.</para>
+            configuration needs to change so that your code doesn't have to.</para>
         </sidebar>
         <para>Traditionally, J2EE developers have had two choices for transaction
         management: <emphasis>global</emphasis> or <emphasis>local</emphasis> transactions.
         Global transactions are managed by the application server, using the Java Transaction 
         API (JTA). Local transactions are resource-specific: the most common example would
-        be a transaction associated with a JDBC connection. This choice had profound
-        implications... global transactions provide the ability to work with multiple
+        be a transaction associated with a JDBC connection. This choice has profound
+        implications. For instance, global transactions provide the ability to work with multiple
         transactional resources (typically relational databases and message queues).
         With local transactions, the application server is not involved in
-        transaction management, and cannot help ensure correctness across multiple
+        transaction management and cannot help ensure correctness across multiple
         resources. (It is worth noting that most applications use a single transaction
         resource.)</para>
         <formalpara>
@@ -109,10 +110,10 @@
             CMT is a form of <emphasis role="bold">declarative transaction management</emphasis>
             (as distinguished from <emphasis role="bold">programmatic transaction management</emphasis>).
             EJB CMT removes the need for transaction-related JNDI lookups - although of course
-            the use of EJB itself necessitates the use of JNDI. It removes most - not
-            all - need to write Java code to control transactions. The significant
-            downside is that CMT is (obviously) tied to JTA and an application server
-            environment; and that it is only available if one chooses to implement
+            the use of EJB itself necessitates the use of JNDI. It removes most of the need (although
+            not entirely) to write Java code to control transactions. The significant
+            downside is that CMT is tied to JTA and an application server
+            environment. Also, it is only available if one chooses to implement
             business logic in EJBs, or at least behind a transactional EJB facade. The
             negatives around EJB in general are so great that this is not an
             attractive proposition, especially in the face of compelling alternatives for
@@ -120,11 +121,11 @@
         </formalpara>
         <formalpara>
             <title>Local Transactions</title>
-            <para>Local transactions may be easier to use, but also have significant
-            disadvantages: they cannot work across multiple transactional resources,
-            and tend to invade the programming model. For example, code that manages
-            transactions using a JDBC connection cannot run within a global JTA
-            transaction.</para>
+            <para>Local transactions may be easier to use, but have significant
+            disadvantages: they cannot work across multiple transactional resources.
+	    For example, code that manages transactions using a JDBC connection cannot 
+	    run within a global JTA transaction. Another downside is that local 
+	    transactions tend to be invasive of the programming model.</para>
         </formalpara>
         <para>Spring resolves these problems. It enables application developers to
         use a <emphasis>consistent</emphasis> programming model <emphasis>in any
@@ -133,9 +134,9 @@
         Spring provides both declarative and programmatic transaction management.
         Declarative transaction management is preferred by most users, and is
         recommended in most cases.</para>
-        <para>With programmatic transaction management developers work with the
+        <para>With programmatic transaction management, developers work with the
         Spring transaction abstraction, which can run over any underlying
-        transaction infrastructure. With the preferred declarative model
+        transaction infrastructure. With the preferred declarative model,
         developers typically write little or no code related to transaction
         management, and hence don't depend on Spring's transaction API (or indeed
         on any other transaction API).</para>
@@ -164,22 +165,22 @@
         as necessary. Nor is it tied to a lookup strategy such as JNDI:
         <interfacename>PlatformTransactionManager</interfacename> implementations
         are defined like any other object (or bean) in a Spring IoC container.
-        This benefit alone makes this a worthwhile abstraction even when working
+        This benefit alone makes it a worthwhile abstraction even when working
         with JTA: transactional code can be tested much more easily than if it
         used JTA directly.</para>
-        <para>In keeping with Spring's philosophy, the <classname>TransactionException</classname>
+        <para>Again in keeping with Spring's philosophy, the <classname>TransactionException</classname>
         that can be thrown by any of the <interfacename>PlatformTransactionManager</interfacename>
         interface's methods is <emphasis>unchecked</emphasis> (i.e. it extends the
         <classname>java.lang.RuntimeException</classname> class). Transaction infrastructure
-        failures are almost invariably fatal... in rare cases where application code can actually
+        failures are almost invariably fatal. In rare cases where application code can actually
         recover from a transaction failure, the application developer can still choose to catch
-        and handle <classname>TransactionException</classname>... the salient point is
-        that developers are not <emphasis>forced</emphasis> to.</para>
+        and handle <classname>TransactionException</classname>. The salient point is
+        that developers are not <emphasis>forced</emphasis> to do so.</para>
         <para>The <literal>getTransaction()</literal>method returns a
         <interfacename>TransactionStatus</interfacename> object, depending on a
         <interfacename>TransactionDefinition</interfacename> parameter. The returned
         <interfacename>TransactionStatus</interfacename> might represent a new or
-        existing transaction (if there was a matching transaction in the current
+        existing transaction (if there were a matching transaction in the current
         call stack - with the implication being that (as with J2EE transaction contexts)
         a <interfacename>TransactionStatus</interfacename> is associated with a
         <emphasis role="bold">thread</emphasis> of execution).</para>
@@ -291,7 +292,7 @@ xsi:schemaLocation="
         use to obtain Hibernate <interfacename>Session</interfacename> instances.</para>
         <para>The <interfacename>DataSource</interfacename> bean definition will be
         similar to one of the above examples, and is not shown. (If it is a container
-        <interfacename>DataSource</interfacename> it should be non-transactional as
+        <interfacename>DataSource</interfacename>, it should be non-transactional as
         Spring, rather than the container, will manage transactions.)</para>
         <para>The <literal>'txManager'</literal> bean in this case is of class
         <classname>HibernateTransactionManager</classname>. In the same way as the
@@ -316,7 +317,7 @@ xsi:schemaLocation="
 <bean id="txManager" class="org.springframework.orm.hibernate.HibernateTransactionManager">
   <property name="sessionFactory" ref="sessionFactory" />
 </bean>]]></programlisting>
-        <para>With Hibernate and JTA transactions we could simply use the
+        <para>With Hibernate and JTA transactions, we could simply use the
             <classname>JtaTransactionManager</classname> as with JDBC or any other resource strategy.</para>
         <programlisting><![CDATA[<bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>]]></programlisting>
         <para>Note that this is identical to JTA configuration for any resource,
@@ -337,22 +338,22 @@ xsi:schemaLocation="
         to a JDBC <interfacename>DataSource</interfacename>,
         <classname>HibernateTransactionManager</classname> to a Hibernate
         <interfacename>SessionFactory</interfacename>, etc.). There remains the question
-        however of how the application code directly or indirectly using a
+        however of how the application code, directly or indirectly using a
         persistence API (JDBC, Hibernate, JDO, etc.), ensures that these resources
         are obtained and handled properly, in terms of proper
-        creation/reuse/cleanup and to trigger (optionally) transaction
+        creation/reuse/cleanup and trigger (optionally) transaction
         synchronization via the relevant
         <interfacename>PlatformTransactionManager</interfacename>.</para>
         <section>
             <title>High-level approach</title>
             <para>The preferred approach is to use Spring's highest level
             persistence integration APIs. These do not replace the native APIs, but
-            do internally handle resource creation/reuse, cleanup, optional
-            transaction synchronization of the resources and exception mapping, so
+            internally handle resource creation/reuse, cleanup, optional
+            transaction synchronization of the resources and exception mapping so
             that user data access code doesn't have to worry about these concerns at
             all, but can concentrate purely on non-boilerplate persistence logic.
-            Generally, the same<emphasis> template</emphasis> approach is followed
-            for all persistence APIs, with classes such as
+            Generally, the same<emphasis> template</emphasis> approach is used
+            for all persistence APIs, with examples such as
             <classname>JdbcTemplate</classname>, <classname>HibernateTemplate</classname>,
             <classname>JdoTemplate</classname>, etc. These integration classes are
             detailed in subsequent chapters of this reference documentation.</para>
@@ -363,12 +364,12 @@ xsi:schemaLocation="
             <classname>DataSourceUtils</classname> (for JDBC),
             <classname>SessionFactoryUtils</classname> (for Hibernate),
             <classname>PersistenceManagerFactoryUtils</classname> (for JDO), and so on.
-            When it is preferred for application code to deal directly with the
+            When it is preferable for application code to deal directly with the
             resource types of the native persistence APIs, these classes ensure that
             proper Spring-managed instances are obtained, transactions are
-            (optionally) synchronized to, and exceptions which happen in the process
+            (optionally) synchronized, and exceptions which happen in the process
             are properly mapped to a consistent API.</para>
-            <para>For example, for JDBC, instead of the traditional JDBC approach of
+            <para>For example, in the case of JDBC, instead of the traditional JDBC approach of
             calling the <literal>getConnection()</literal> method on the
             <interfacename>DataSource</interfacename>, you would instead use Spring's
             <classname>org.springframework.jdbc.datasource.DataSourceUtils</classname>
@@ -378,7 +379,7 @@ xsi:schemaLocation="
             synchronized (linked) to it, that instance will be returned. Otherwise,
             the method call will trigger the creation of a new connection, which
             will be (optionally) synchronized to any existing transaction, and
-            available for subsequent reuse in that same transaction. As mentioned,
+            made available for subsequent reuse in that same transaction. As mentioned,
             this has the added advantage that any <classname>SQLException</classname>
             will be wrapped in a Spring
             <classname>CannotGetJdbcConnectionException</classname> - one of Spring's
@@ -403,14 +404,14 @@ xsi:schemaLocation="
             <title><classname>TransactionAwareDataSourceProxy</classname></title>
             <para>At the very lowest level exists the
             <classname>TransactionAwareDataSourceProxy</classname> class. This is a
-            proxy for a target <interfacename>DataSource</interfacename>, which wraps that
+            proxy for a target <interfacename>DataSource</interfacename>, which wraps the
             target <interfacename>DataSource</interfacename> to add awareness of Spring-managed
-            transactions. In this respect it is similar to a transactional JNDI
+            transactions. In this respect, it is similar to a transactional JNDI
             <interfacename>DataSource</interfacename> as provided by a J2EE server.</para>
-            <para>It should almost never be necessary or desireable to use this
+            <para>It should almost never be necessary or desirable to use this
             class, except when existing code exists which must be called and passed
             a standard JDBC <interfacename>DataSource</interfacename> interface implementation.
-            In this case, it's possible to still have this code be usable, but
+            In that case, it's possible to still have this code be usable, but
             participating in Spring managed transactions. It is preferable to write
             your own new code using the higher level abstractions mentioned
             above.</para>
@@ -422,14 +423,14 @@ xsi:schemaLocation="
         the option with the least impact on application code, and hence is most
         consistent with the ideals of a <emphasis>non-invasive</emphasis>
         lightweight container.</remark>
-        <para>Spring's declarative transaction management is enabled by Spring AOP,
+        <para>Spring's declarative transaction management is made possible with Spring AOP,
         although, as the transactional aspects code comes with Spring and may be used
         in a boilerplate fashion, AOP concepts do not generally have to be understood
         to make effective use of this code.</para>
         <para>It may be helpful to begin by considering EJB CMT and explaining the
         similarities and differences with Spring declarative transaction
         management. The basic approach is similar: it is possible to specify
-        transaction behavior (or lack of it) down to individual methods. It is
+        transaction behavior (or lack of it) down to individual method level. It is
         possible to make a <literal>setRollbackOnly()</literal> call within a
         transaction context if necessary. The differences are:</para>
         <itemizedlist>
@@ -460,13 +461,13 @@ xsi:schemaLocation="
             <listitem>
                 <para>Spring does not support propagation of transaction contexts
                 across remote calls, as do high-end application servers. If you need
-                this feature, we recommend that you use EJB. However, do not use this
-                feature lightly... normally we do not want transactions to span remote
+                this feature, we recommend that you use EJB. However, consider carefully before
+                using such a feature. Normally, we do not want transactions to span remote
                 calls.</para>
             </listitem>
         </itemizedlist>
         <sidebar>
-			<title>Where is <classname>TransactionProxyFactoryBean</classname>?</title>
+		<title>Where is <classname>TransactionProxyFactoryBean</classname>?</title>
             <para>Declarative transaction configuration in versions of Spring 2.0 and above
             differs considerably from previous versions of Spring. The main difference is
             that there is no longer any need to configure
