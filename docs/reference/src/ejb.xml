@@ -88,10 +88,10 @@
 				One of the main reasons to use the Business Methods Interface pattern
 				is to ensure that synchronization between method signatures in local
 				interface and bean implementation class is automatic. Another reason is
-				that it later makes it much easier for us to switch to a POJO (plain
-				java object) implementation of the service if it makes sense to do so)
+				that it later makes it much easier for us to switch to a POJO (plain old
+				Java object) implementation of the service if it makes sense to do so.
 				Of course we’ll also need to implement the local home interface and
-				provide a bean implementation class that implements <classname>SessionBean</classname>
+				provide an implementation class that implements <classname>SessionBean</classname>
 				and the <classname>MyComponent</classname> business methods interface. Now the
 				only Java coding we’ll  need to do to hook up our web tier controller to the
 				EJB implementation is to expose a setter method of type <classname>MyComponent</classname>
@@ -108,7 +108,7 @@ public void setMyComponent(MyComponent myComponent) {
 				method in the controller. Now assuming we are obtaining our controller
 				object out of a Spring container, we can (in the same context) configure a
 				<classname>LocalStatelessSessionProxyFactoryBean</classname> instance, which
-				will be EJB proxy object. The configuration of the proxy, and setting of
+				will be the EJB proxy object. The configuration of the proxy, and setting of
 				the <literal>myComponent</literal> property of the controller is done
 				with a configuration entry such as:
 			</para>
@@ -122,7 +122,7 @@ public void setMyComponent(MyComponent myComponent) {
   <property name="myComponent" ref="myComponent"/>
 </bean>]]></programlisting>
 			<para>
-				There’s a lot of magic happening behind the scenes, courtesy of
+				There’s a lot of work happening behind the scenes, courtesy of
 				the Spring AOP framework, although you aren’t forced to work with AOP
 				concepts to enjoy the results. The <literal>myComponent</literal> bean
 				definition creates a proxy for the EJB, which implements the business
@@ -133,8 +133,8 @@ public void setMyComponent(MyComponent myComponent) {
 			</para>
 			<para>
 				The <literal>myController</literal> bean definition sets the
-				<literal>myController</literal> property of the controller class to this
-				proxy.
+				<literal>myComponent</literal> property of the controller class to the
+				EJB proxy.
 			</para>
 			<para>
 				This EJB access mechanism delivers huge simplification of
@@ -148,10 +148,10 @@ public void setMyComponent(MyComponent myComponent) {
 			<para>
 				Benchmarks and experience in real applications indicate that the
 				performance overhead of this approach (which involves reflective
-				invocation of the target EJB) is minimal, and undetectable in typical
-				use. Remember that we don’t want to make fine-grained calls to EJBs
-				anyway, as there’s a cost associated with the EJB infrastructure in the
-				application server.
+				invocation of the target EJB) is minimal, and is typically undetectable
+				in typical use. Remember that we don’t want to make fine-grained calls
+				to EJBs anyway, as there’s a cost associated with the EJB infrastructure
+				in the application server.
 			</para>
 			<para>
 				There is one caveat with regards to the JNDI lookup. In a bean
@@ -325,8 +325,8 @@ public void setMyComponent(MyComponent myComponent) {
 		</para>
 		<programlisting><![CDATA[<beans>
     <bean id="businessBeanFactory" class="org.springframework.context.support.ClassPathXmlApplicationContext">
-				<constructor-arg value="businessApplicationContext.xml" />
-			</bean>
+        <constructor-arg value="businessApplicationContext.xml" />
+    </bean>
 </beans>]]></programlisting>
 		<para>
 		In the above example, the <literal>ServicesConstants.PRIMARY_CONTEXT_ID</literal> constant
