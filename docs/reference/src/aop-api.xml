@@ -1318,8 +1318,8 @@ public interface IntroductionInfo {
       methods: A significant improvement in readability and architectural
       flexibility.</para>
 
-      <para>See the chapter on Spring EJB services in this manual for further
-      information.</para>
+      <para>See the chapter <link linkend="ejb">on Spring EJB services</link>
+      in this manual for further information.</para>
     </sect2>
   </sect1>
 
