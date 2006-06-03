@@ -679,7 +679,7 @@ public class DefaultFooService implements FooService {
             The result indicates that at the execution of a <literal>'fooServiceOperation'</literal>,
             the advice defined by <literal>'txAdvice'</literal> will be run.</para>
             <para>The expression defined within the <literal>&lt;aop:pointcut/&gt;</literal>
-            element is an AspectJ pointcut expression; see the chapter entitled <xlink ref="aop"/>
+            element is an AspectJ pointcut expression; see the chapter entitled <xref linkend="aop"/>
             for more details on pointcut expressions in Spring 2.0.</para>
             <para>A common requirement is to make an entire service layer transactional.
             The best way to do this is simply to change the pointcut expression to match
@@ -690,7 +690,7 @@ public class DefaultFooService implements FooService {
   </aop:config>]]></programlisting>
             <para><emphasis>(This example assumes that all your service interfaces are defined
             in the <literal>'x.y.service'</literal> package, again, see the chapter entitled
-            <xlink  ref="aop"/> for more details.)</emphasis></para>
+            <xref linkend="aop"/> for more details.)</emphasis></para>
             <para>Now that we've picked apart the configuration, you may be asking
             yourself, <quote><emphasis>Okayyy... but what does all this configuration actually
             <emphasis role="bold">do</emphasis>?</emphasis></quote>.</para>
