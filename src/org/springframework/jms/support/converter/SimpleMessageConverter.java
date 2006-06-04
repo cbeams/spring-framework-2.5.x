@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,7 +189,7 @@ public class SimpleMessageConverter implements MessageConverter {
 	}
 
 	/**
-	 * Extract a byte array from the given TextMessage.
+	 * Extract a byte array from the given {@link BytesMessage}.
 	 * @param message the message to convert
 	 * @return the resulting byte array
 	 * @throws JMSException if thrown by JMS methods
@@ -201,7 +201,7 @@ public class SimpleMessageConverter implements MessageConverter {
 	}
 
 	/**
-	 * Extract a Map from the given TextMessage.
+	 * Extract a Map from the given {@link MapMessage}.
 	 * @param message the message to convert
 	 * @return the resulting Map
 	 * @throws JMSException if thrown by JMS methods
@@ -217,7 +217,7 @@ public class SimpleMessageConverter implements MessageConverter {
 	}
 
 	/**
-	 * Extract a Serializable object from the given TextMessage.
+	 * Extract a Serializable object from the given {@link ObjectMessage}.
 	 * @param message the message to convert
 	 * @return the resulting Serializable object
 	 * @throws JMSException if thrown by JMS methods
