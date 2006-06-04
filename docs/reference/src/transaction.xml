@@ -501,7 +501,7 @@ xsi:schemaLocation="
             that is sometimes associated with the use of declarative transactions. 
             It is all very well for this reference documentation simply to tell you to annotate 
             your classes with the <interfacename>@Transactional</interfacename> annotation, 
-            add the magic line (<literal>'&lt;tx:annotation-driven/&gt;'</literal>) to your configuration,
+            add the line (<literal>'&lt;tx:annotation-driven/&gt;'</literal>) to your configuration,
             and then expect you to understand how it all works. This section
             will explain the inner workings of Spring's declarative transaction infrastructure to help 
             you navigate your way back upstream to calmer waters in the event of transaction-related issues.</para>
@@ -1141,7 +1141,7 @@ DataSourceTransactionManager txManager = new  DataSourceTransactionManager(getDa
 
 ]]><lineannotation>// configure the <classname>AnnotationTransactionAspect</classname> to use it, this must be done before executing any transactional methods</lineannotation><![CDATA[
 AnnotationTransactionAspect.aspectOf().setTransactionManager (txManager); ]]></programlisting>
-            <para>When using this aspect the <interfacename>@Transactional</interfacename>, annotation
+            <para>When using this aspect the <interfacename>@Transactional</interfacename> annotation
             can be used to annotate a type or interface as transactional, and subsequently the execution
             of any <emphasis role="bold">public</emphasis> operation defined by that type will
             have transactional semantics. Transactional semantics for an individual <emphasis role="bold">public</emphasis>
