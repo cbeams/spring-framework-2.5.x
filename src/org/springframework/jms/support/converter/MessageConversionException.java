@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,30 @@ package org.springframework.jms.support.converter;
 import org.springframework.jms.JmsException;
 
 /**
- * Thrown by MessageConverter when it can not convert an object to/from a JMS message.
+ * Thrown by {@link MessageConverter} implementations when the conversion
+ * of an object to/from a {@link javax.jms.Message} fails.
  *
  * @author Mark Pollack
- * @since 1.1
  * @see MessageConverter
+ * @since 1.1
  */
 public class MessageConversionException extends JmsException {
 
-	public MessageConversionException(String msg) {
-		super(msg);
-	}
+    /**
+     * Creates a new instance of the {@link MessageConversionException} class.
+     * @param msg the detail message (if any)
+     */
+    public MessageConversionException(String msg) {
+        super(msg);
+    }
 
-	public MessageConversionException(String msg, Throwable ex) {
-		super(msg, ex);
-	}
+    /**
+     * Creates a new instance of the {@link MessageConversionException} class.
+     * @param msg the detail message (if any)
+     * @param ex  the root cause (if any)
+     */
+    public MessageConversionException(String msg, Throwable ex) {
+        super(msg, ex);
+    }
 
 }
