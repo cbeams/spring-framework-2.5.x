@@ -16,32 +16,42 @@
 
 package org.springframework.jms.listener.adapter;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Queue;
-import javax.jms.QueueSender;
-import javax.jms.QueueSession;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.jms.TopicPublisher;
-import javax.jms.TopicSession;
+import javax.jms.*;
 
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.converter.SimpleMessageConverter102;
 
 /**
- * A subclass of MessageListenerAdapter that uses the JMS 1.0.2 specification,
+ * A {@link MessageListenerAdapter} subclass that uses the JMS 1.0.2 specification,
  * rather than the JMS 1.1 methods used by MessageListenerAdapter itself.
- * This class can be used for JMS 1.0.2 providers, offering the same facility
+ * 
+ * <p>This class can be used for JMS 1.0.2 providers, offering the same facility
  * as MessageListenerAdapter does for JMS 1.1 providers.
  *
  * @author Juergen Hoeller
+ * @author Rick Evans
  * @since 2.0
  */
 public class MessageListenerAdapter102 extends MessageListenerAdapter {
+    
+	/**
+	 * Create a new instance of the {@link MessageListenerAdapter102} class
+     * with the default settings.
+	 */
+	public MessageListenerAdapter102() {
+	}
 
 	/**
+	 * Create a new instance of the {@link MessageListenerAdapter102} class
+     * for the given delegate.
+     * @param delegate the target object to delegate message listening to 
+	 */
+	public MessageListenerAdapter102(Object delegate) {
+        super(delegate);
+	}
+
+
+    /**
 	 * Initialize the default implementations for the adapter's strategies:
 	 * SimpleMessageConverter102.
 	 * @see #setMessageConverter
@@ -52,31 +62,27 @@ public class MessageListenerAdapter102 extends MessageListenerAdapter {
 	}
 
 	/**
-	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
+	 * Overrides the superclass method to use the JMS 1.0.2 API to send a response.
 	 * <p>Uses the JMS pub-sub API if the given destination is a topic,
-	 * else the JMS queue API.
+	 * else uses the JMS queue API.
 	 */
-	protected void sendResponse(Message response, Destination destination, Session session) throws JMSException {
-		if (destination instanceof Topic) {
-			TopicPublisher publisher = ((TopicSession) session).createPublisher((Topic) destination);
-			try {
-				postProcessProducer(publisher, response);
-				publisher.publish(response);
-			}
-			finally {
-				JmsUtils.closeMessageProducer(publisher);
-			}
-		}
-		else {
-			QueueSender sender = ((QueueSession) session).createSender((Queue) destination);
-			try {
-				postProcessProducer(sender, response);
-				sender.send(response);
-			}
-			finally {
-				JmsUtils.closeMessageProducer(sender);
-			}
-		}
-	}
+	protected void sendResponse(Session session, Destination destination, Message response) throws JMSException {
+        MessageProducer producer = null;
+        try {
+            if (destination instanceof Topic) {
+                producer = ((TopicSession) session).createPublisher((Topic) destination);
+                postProcessProducer(producer, response);
+                ((TopicPublisher) producer).publish(response);
+            } else {
+                producer = ((QueueSession) session).createSender((Queue) destination);
+                postProcessProducer(producer, response);
+				((QueueSender) producer).send(response);
+            }
+        } finally {
+            if(producer != null) {
+                JmsUtils.closeMessageProducer(producer);
+            }
+        }
+    }
 
 }
