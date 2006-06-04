@@ -81,7 +81,7 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 	/**
 	 * Check and prepare the given request and response according to the settings
 	 * of this generator. Checks for a required session, and applies the number of 
-	 * cache seconds configured for this generator (if it is a render request/reponse).
+	 * cache seconds configured for this generator (if it is a render request/response).
 	 * @param request current portlet request
 	 * @param response current portlet response
 	 * @throws PortletException if the request cannot be handled because a check failed
@@ -95,7 +95,7 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 	/**
 	 * Check and prepare the given request and response according to the settings
 	 * of this generator. Checks for a required session, and applies the given 
-	 * number of cache seconds (if it is a render request/reponse).
+	 * number of cache seconds (if it is a render request/response).
 	 * @param request current portlet request
 	 * @param response current portlet response
 	 * @param cacheSeconds positive number of seconds into the future that the

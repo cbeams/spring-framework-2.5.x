@@ -29,14 +29,14 @@ import org.springframework.web.portlet.handler.PortletContentGenerator;
 import org.springframework.web.portlet.util.PortletUtils;
 
 /**
- * <p>Convenient superclass for controller implementations, using the Template
- * Method design pattern.</p>
+ * Convenient superclass for controller implementations, using the Template
+ * Method design pattern.
  *
  * <p>As stated in the {@link Controller Controller}
  * interface, a lot of functionality is already provided by certain abstract
  * base controllers. The AbstractController is one of the most important
  * abstract base controller providing basic features such controlling if a
- * session is required and render caching.</p>
+ * session is required and render caching.
  *
  * <p><b><a name="workflow">Workflow
  * (<a href="Controller.html#workflow">and that defined by interface</a>):</b><br>
@@ -61,7 +61,6 @@ import org.springframework.web.portlet.util.PortletUtils;
  *      return {@link org.springframework.web.portlet.ModelAndView ModelAndView} objects.
  *      This will be executed repeatedly as the portal updates the current displayed page.</li>
  * </ol>
- * </p>
  *
  * <p><b><a name="config">Exposed configuration properties</a>
  * (<a href="Controller.html#config">and those defined by interface</a>):</b><br>
@@ -96,7 +95,7 @@ import org.springframework.web.portlet.util.PortletUtils;
  *          the render response generatedby  this request. 0 (zero) will indicate
  *          no caching is allowed at all, -1 (the default) will not override the
  *          portlet configuration and any positive number will cause the render
- *          reponse to declare the amount indicated as seconds to cache the content</td>
+ *          response to declare the amount indicated as seconds to cache the content</td>
  *  </tr>
  *  <tr>
  *      <td>renderWhenMinimized</td>
@@ -117,7 +116,6 @@ import org.springframework.web.portlet.util.PortletUtils;
  * you want the new controller to see.  This avoids unexpected parameters from being passed
  * to the render phase of the second controller, such as the parameter indicating a form
  * submit ocurred in an <code>AbstractFormController</code>.
- * </p>
  *
  * @author John A. Lewis
  * @author Rainer Schmitz
@@ -226,7 +224,7 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 
 
 	/**
-	 * <p>Subclasses are meant to override this method if the controller
+	 * Subclasses are meant to override this method if the controller
 	 * is expected to handle render requests. The contract is the same as
 	 * for <code>handleRenderRequest</code>.
 	 * <p>The default implementation throws a PortletException.
@@ -240,7 +238,7 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 	}
 
 	/**
-	 * <p>Subclasses are meant to override this method if the controller
+	 * Subclasses are meant to override this method if the controller
 	 * is expected to handle action requests. The contract is the same as
 	 * for <code>handleActionRequest</code>.
 	 * <p>The default implementation throws a PortletException.

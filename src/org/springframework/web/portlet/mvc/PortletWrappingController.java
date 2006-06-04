@@ -37,17 +37,18 @@ import org.springframework.web.portlet.context.PortletConfigAware;
 import org.springframework.web.portlet.context.PortletContextAware;
 
 /**
- * Spring Controller implementation that wraps a portlet instance which it manages
+ * {@link Controller} implementation that wraps a portlet instance which it manages
  * internally. Such a wrapped portlet is not known outside of this controller;
  * its entire lifecycle is covered here.
  *
  * <p>Useful to invoke an existing portlet via Spring's dispatching infrastructure,
- * for example to apply Spring HandlerInterceptors to its requests.
+ * for example to apply Spring
+ * {@link org.springframework.web.portlet.HandlerInterceptor HandlerInterceptors}
+ * to its requests.
  *
  * <p><b>Example:</b>
  *
- * <pre>
- * &lt;bean id="wrappingController" class="org.springframework.web.portlet.mvc.PortletWrappingController"&gt;
+ * <pre class="code">&lt;bean id="wrappingController" class="org.springframework.web.portlet.mvc.PortletWrappingController"&gt;
  *   &lt;property name="portletClass"&gt;
  *     &lt;value&gt;org.springframework.web.portlet.sample.HelloWorldPortlet&lt;/value&gt;
  *   &lt;/property&gt;
@@ -170,11 +171,13 @@ public class PortletWrappingController extends AbstractController
 
 
 	/**
-	 * Internal implementation of the ServletConfig interface, to be passed
-	 * to the wrapped servlet. Delegates to PortletWrappingController fields
+	 * Internal implementation of the PortletConfig interface, to be passed
+	 * to the wrapped portlet.
+     * 
+     * <p>Delegates to {@link PortletWrappingController} fields
 	 * and methods to provide init parameters and other environment info.
 	 */
-	private class DelegatingPortletConfig implements PortletConfig {
+	private final class DelegatingPortletConfig implements PortletConfig {
 
 		public String getPortletName() {
 			return portletName;
