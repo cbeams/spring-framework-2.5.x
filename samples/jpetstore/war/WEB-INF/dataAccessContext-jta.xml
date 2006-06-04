@@ -14,21 +14,21 @@
   -->
 <beans xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xmlns:jndi="http://www.springframework.org/schema/jndi"
+	   xmlns:jee="http://www.springframework.org/schema/jee"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/jndi http://www.springframework.org/schema/jndi/spring-jndi.xsd">
+       http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd">
 
 	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
 
 	<!-- Main JNDI DataSource for J2EE environments -->
 	<!-- Refers to the main database, containing product and account data -->
 	<!-- (see dataAccessContext-local.xml for an alternative) -->
-	<jndi:lookup id="dataSource" jndi-name="java:comp/env/jdbc/jpetstore"/>
+    <jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/jpetstore"/>
 
 	<!-- Additional JNDI DataSource for J2EE environments -->
 	<!-- Refers to the order database, containing order data -->
 	<!-- (see dataAccessContext-local.xml for an alternative) -->
-	<jndi:lookup id="orderDataSource" jndi-name="java:comp/env/jdbc/jpetstore-order"/>
+    <jee:jndi-lookup id="orderDataSource" jndi-name="java:comp/env/jdbc/jpetstore-order"/>
 
 	<!-- Transaction manager that delegates to JTA (for a transactional JNDI DataSource) -->
 	<!-- Necessary here due to the need for distributed transactions across two databases -->
