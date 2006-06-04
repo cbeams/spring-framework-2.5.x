@@ -16,121 +16,173 @@
 
 package org.springframework.web.portlet.mvc;
 
-import java.io.IOException;
-
-import javax.portlet.ActionRequest;
-import javax.portlet.ActionResponse;
-import javax.portlet.Portlet;
-import javax.portlet.PortletConfig;
-import javax.portlet.PortletException;
-import javax.portlet.RenderRequest;
-import javax.portlet.RenderResponse;
-
 import junit.framework.TestCase;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.mock.web.portlet.MockActionRequest;
-import org.springframework.mock.web.portlet.MockActionResponse;
-import org.springframework.mock.web.portlet.MockPortletConfig;
-import org.springframework.mock.web.portlet.MockPortletContext;
-import org.springframework.mock.web.portlet.MockRenderRequest;
-import org.springframework.mock.web.portlet.MockRenderResponse;
+import org.springframework.mock.web.portlet.*;
+import org.springframework.test.AssertThrows;
 import org.springframework.web.portlet.context.ConfigurablePortletApplicationContext;
 import org.springframework.web.portlet.context.StaticPortletApplicationContext;
 
+import javax.portlet.*;
+import java.io.IOException;
+
 /**
+ * Unit tests for the {@link PortletWrappingController} class.
+ *
  * @author Mark Fisher
+ * @author Rick Evans
  */
-public class PortletWrappingControllerTests extends TestCase {
+public final class PortletWrappingControllerTests extends TestCase {
 
-	private PortletWrappingController controller;
-	private ConfigurablePortletApplicationContext applicationContext;
-	
-	public void setUp() {
-		this.applicationContext = new MyApplicationContext();
-		MockPortletConfig config = new MockPortletConfig(new MockPortletContext(), "wrappedPortlet");
-		this.applicationContext.setPortletConfig(config);
-		this.applicationContext.refresh();
-		controller = (PortletWrappingController) this.applicationContext.getBean("controller");	
-	}
-	
-	public void testActionRequest() throws Exception {
-		MockActionRequest request = new MockActionRequest();
-		MockActionResponse response = new MockActionResponse();
-		request.setParameter("test", "test");
-		controller.handleActionRequest(request, response);
-		String result = response.getRenderParameter("result");
-		assertEquals("myPortlet-action", result);
-	}
+    private static final String RESULT_RENDER_PARAMETER_NAME = "result";
+    private static final String PORTLET_WRAPPING_CONTROLLER_BEAN_NAME = "controller";
+    private static final String RENDERED_RESPONSE_CONTENT = "myPortlet-view";
+    private static final String PORTLET_NAME_ACTION_REQUEST_PARAMETER_NAME = "portletName";
 
-	public void testRenderRequest() throws Exception {
-		MockRenderRequest request = new MockRenderRequest();
-		MockRenderResponse response = new MockRenderResponse();
-		controller.handleRenderRequest(request, response);
-		String result = response.getContentAsString();
-		assertEquals("myPortlet-view", result);
-	}
-	
-	public void testActionRequestWithNoParameters() throws Exception {
-		MockActionRequest request = new MockActionRequest();
-		MockActionResponse response = new MockActionResponse();
-		try {
-			controller.handleActionRequest(request, response);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch(IllegalArgumentException ex) {
-			//expected
-		}
-	}
 
-	public void testPortletName() throws Exception {
-		MockActionRequest request = new MockActionRequest();
-		MockActionResponse response = new MockActionResponse();	
-		request.setParameter("portletName", "test");
-		controller.handleActionRequest(request, response);
-		String result = response.getRenderParameter("result");
-		assertEquals("wrappedPortlet", result);
-	}
+    private PortletWrappingController controller;
 
-	public static class MyPortlet implements Portlet {
-		
-		private PortletConfig portletConfig;
 
-		public void init(PortletConfig portletConfig) throws PortletException {
-			this.portletConfig = portletConfig;
-		}
+    public void setUp() {
+        ConfigurablePortletApplicationContext applicationContext = new MyApplicationContext();
+        MockPortletConfig config = new MockPortletConfig(new MockPortletContext(), "wrappedPortlet");
+        applicationContext.setPortletConfig(config);
+        applicationContext.refresh();
+        controller = (PortletWrappingController) applicationContext.getBean(PORTLET_WRAPPING_CONTROLLER_BEAN_NAME);
+    }
 
-		public void processAction(ActionRequest request, ActionResponse response) throws PortletException {
-			if(request.getParameter("test") != null) {
-				response.setRenderParameter("result", "myPortlet-action");
-			}
-			else if(request.getParameter("portletName") != null) {
-				response.setRenderParameter("result", getPortletConfig().getPortletName());
-			}
-			else {
-				throw new IllegalArgumentException("no request parameters");
-			}
-		}
 
-		public void render(RenderRequest request, RenderResponse response) throws PortletException, IOException {
-			response.getWriter().write("myPortlet-view");
-		}
-		
-		public PortletConfig getPortletConfig() {
-			return this.portletConfig;
-		}
+    public void testActionRequest() throws Exception {
+        MockActionRequest request = new MockActionRequest();
+        MockActionResponse response = new MockActionResponse();
+        request.setParameter("test", "test");
+        controller.handleActionRequest(request, response);
+        String result = response.getRenderParameter(RESULT_RENDER_PARAMETER_NAME);
+        assertEquals("myPortlet-action", result);
+    }
 
-		public void destroy() {}
-	}
-	
-	public static class MyApplicationContext extends StaticPortletApplicationContext {
-		
-		public void refresh() throws BeansException {
-			MutablePropertyValues pvs = new MutablePropertyValues();
-			pvs.addPropertyValue("portletClass", MyPortlet.class);
-			registerSingleton("controller", PortletWrappingController.class, pvs);
-			super.refresh();
-		}
-	}
+    public void testRenderRequest() throws Exception {
+        MockRenderRequest request = new MockRenderRequest();
+        MockRenderResponse response = new MockRenderResponse();
+        controller.handleRenderRequest(request, response);
+        String result = response.getContentAsString();
+        assertEquals(RENDERED_RESPONSE_CONTENT, result);
+    }
+
+    public void testActionRequestWithNoParameters() throws Exception {
+        final MockActionRequest request = new MockActionRequest();
+        final MockActionResponse response = new MockActionResponse();
+        new AssertThrows(IllegalArgumentException.class) {
+            public void test() throws Exception {
+                controller.handleActionRequest(request, response);
+            }
+        }.runTest();
+    }
+
+    public void testRejectsPortletClassThatDoesNotImplementPortletInterface() throws Exception {
+        new AssertThrows(IllegalArgumentException.class) {
+            public void test() throws Exception {
+                PortletWrappingController controller = new PortletWrappingController();
+                controller.setPortletClass(String.class);
+                controller.afterPropertiesSet();
+            }
+        }.runTest();
+    }
+
+    public void testRejectsIfPortletClassIsNotSupplied() throws Exception {
+        new AssertThrows(IllegalArgumentException.class) {
+            public void test() throws Exception {
+                PortletWrappingController controller = new PortletWrappingController();
+                controller.setPortletClass(null);
+                controller.afterPropertiesSet();
+            }
+        }.runTest();
+    }
+
+    public void testDestroyingTheControllerPropagatesDestroyToWrappedPortlet() throws Exception {
+        final PortletWrappingController controller = new PortletWrappingController();
+        controller.setPortletClass(MyPortlet.class);
+        controller.afterPropertiesSet();
+        // test for destroy() call being propagated via exception being thrown :(
+        new AssertThrows(IllegalStateException.class) {
+            public void test() throws Exception {
+                controller.destroy();
+            }
+        }.runTest();
+    }
+
+    public void testPortletName() throws Exception {
+        MockActionRequest request = new MockActionRequest();
+        MockActionResponse response = new MockActionResponse();
+        request.setParameter(PORTLET_NAME_ACTION_REQUEST_PARAMETER_NAME, "test");
+        controller.handleActionRequest(request, response);
+        String result = response.getRenderParameter(RESULT_RENDER_PARAMETER_NAME);
+        assertEquals("wrappedPortlet", result);
+    }
+
+    public void testDelegationToMockPortletConfigIfSoConfigured() throws Exception {
+
+        final String BEAN_NAME = "Sixpence None The Richer";
+
+        MockActionRequest request = new MockActionRequest();
+        MockActionResponse response = new MockActionResponse();
+
+        PortletWrappingController controller = new PortletWrappingController();
+        controller.setPortletClass(MyPortlet.class);
+        controller.setUseSharedPortletConfig(false);
+        controller.setBeanName(BEAN_NAME);
+        controller.afterPropertiesSet();
+
+        request.setParameter(PORTLET_NAME_ACTION_REQUEST_PARAMETER_NAME, "true");
+        controller.handleActionRequest(request, response);
+
+        String result = response.getRenderParameter(RESULT_RENDER_PARAMETER_NAME);
+        assertEquals(BEAN_NAME, result);
+    }
+
+
+    public static final class MyPortlet implements Portlet {
+
+        private PortletConfig portletConfig;
+
+
+        public void init(PortletConfig portletConfig) {
+            this.portletConfig = portletConfig;
+        }
+
+        public void processAction(ActionRequest request, ActionResponse response) throws PortletException {
+            if (request.getParameter("test") != null) {
+                response.setRenderParameter(RESULT_RENDER_PARAMETER_NAME, "myPortlet-action");
+            } else if (request.getParameter(PORTLET_NAME_ACTION_REQUEST_PARAMETER_NAME) != null) {
+                response.setRenderParameter(RESULT_RENDER_PARAMETER_NAME, getPortletConfig().getPortletName());
+            } else {
+                throw new IllegalArgumentException("no request parameters");
+            }
+        }
+
+        public void render(RenderRequest request, RenderResponse response) throws IOException {
+            response.getWriter().write(RENDERED_RESPONSE_CONTENT);
+        }
+
+        public PortletConfig getPortletConfig() {
+            return this.portletConfig;
+        }
+
+        public void destroy() {
+            throw new IllegalStateException("Being destroyed...");
+        }
+
+    }
+
+    private static final class MyApplicationContext extends StaticPortletApplicationContext {
+
+        public void refresh() throws BeansException {
+            MutablePropertyValues pvs = new MutablePropertyValues();
+            pvs.addPropertyValue("portletClass", MyPortlet.class);
+            registerSingleton(PORTLET_WRAPPING_CONTROLLER_BEAN_NAME, PortletWrappingController.class, pvs);
+            super.refresh();
+        }
+    }
+
 }
