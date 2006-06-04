@@ -264,3 +264,7 @@ HR  {
 .programlisting * .literal {
     font-size: 95%;
 }
+
+.property {
+	font-family: "Courier New", Courier, monospace;
+}
