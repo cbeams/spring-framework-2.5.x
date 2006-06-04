@@ -831,8 +831,8 @@ void setMessage(String aMessage) {
 	            Find below an example of an
 	            <interfacename>org.springframework.web.servlet.mvc.Controller</interfacename>
 	            implemented using the Groovy dynamic language. (This example is taken in
-	            part from the 'mvc' portion of the dynamic language support showcase project that
-	            is supplied with the Spring distribution.
+	            part from the dynamic language support showcase project that is supplied
+	            with the Spring distribution.)
 			</para>
 			<programlisting><![CDATA[TODO]]></programlisting>
 		</section>
@@ -852,22 +852,39 @@ void setMessage(String aMessage) {
 	            in the execution of a running application and would not require the restart
 	            of an application.
 			</para>
+			<note>
+				<para>
+		            Please note that in order to effect the automatic 'pickup' of any changes
+		            to dynamic-language-backed beans, you will have had to enable the
+		            'refreshable beans' feature. See the section entitled
+		            <xref linkend="dynamic-language-refreshable-beans"/> for a full and
+		            detailed treatment of this feature.
+				</para>
+			</note>
 			<para>
 	            Find below an example of a Spring
 	            <interfacename>org.springframework.validation.Validator</interfacename>
-	            implemented using the JRuby dynamic language. (See the section entitled
+	            implemented using the Groovy dynamic language. (See the section entitled
 	            <xref linkend="validator"/> for a discussion of the
 	            <interfacename>Validator</interfacename> interface.)
 			</para>
-			<programlisting><![CDATA[TODO]]></programlisting>
-			<note>
-				<para>
-		            Please note that in order to effect this automatic 'pickup' of any changes
-		            to dynamic-language-backed beans, you will have had to enable the 'refreshable beans'
-		            feature. See the section entitled <xref linkend="dynamic-language-refreshable-beans"/>
-		            for a full and detailed treatment of this feature.
-				</para>
-			</note>
+			<programlisting><![CDATA[import org.springframework.validation.Validator
+import org.springframework.validation.Errors
+import org.springframework.beans.TestBean
+
+public class TestBeanValidator implements Validator {
+
+    boolean supports(Class clazz) {
+        return TestBean.isAssignableFrom(clazz)
+    }
+    
+    void validate(Object bean, Errors errors) {
+        String name = bean.getName()
+        if(name == null || name.trim().length == 0) {
+            errors.reject("whitespace", "Cannot be composed wholly of whitespace")
+        }
+    }
+}]]></programlisting>
 		</section>
 	</section>
 	<section id="dynamic-language-resources">
@@ -887,5 +904,11 @@ void setMessage(String aMessage) {
 				<para>The <ulink url="http://www.beanshell.org/">BeanShell</ulink> homepage</para>
 			</listitem>
 		</itemizedlist>
+		<para>Some of the more active members of the Spring community have also added support for
+		a number of additional dynamic languages above and beyond the ones covered in this
+		chapter. While it is possible that such third party contributions may be added to the
+		list of languages supported by the main Spring distribution, your best bet for seeing
+		if your favourite scripting language is supported is the
+		<ulink url="https://springmodules.dev.java.net/">Spring Modules project</ulink>.</para>
 	</section>
 </chapter>
