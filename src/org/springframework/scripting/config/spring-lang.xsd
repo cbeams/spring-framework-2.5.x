@@ -28,7 +28,7 @@
 			<xsd:extension base="beans:identifiedType">
 				<xsd:sequence>
 					<xsd:element name="inline-script" minOccurs="0" maxOccurs="1"/>
-					<xsd:element name="property" type="beans:propertyType" minOccurs="0"/>
+					<xsd:element name="property" type="beans:propertyType" minOccurs="0" maxOccurs="unbounded"/>
 				</xsd:sequence>
 				<xsd:attribute name="refresh-check-delay" type="xsd:long"/>
 				<xsd:attribute name="script-source" type="xsd:string"/>

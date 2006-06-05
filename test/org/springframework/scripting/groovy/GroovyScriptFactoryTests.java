@@ -25,10 +25,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.scripting.Calculator;
-import org.springframework.scripting.Messenger;
-import org.springframework.scripting.ScriptCompilationException;
-import org.springframework.scripting.ScriptSource;
+import org.springframework.scripting.*;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 
 import java.io.FileNotFoundException;
@@ -284,5 +281,21 @@ public class GroovyScriptFactoryTests extends TestCase {
 		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
 		assertEquals("Hello World!", messenger.getMessage());
 		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
-	}                                  
+	}
+
+    /**
+     * Tests the SPR-2098 bug whereby no more than 1 property element could be
+     * passed to a scripted bean :(
+     */
+    public void testCanPassInMoreThanOneProperty_SPR_2098() {
+        if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+        ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-multiple-properties.xml", getClass());
+		ScriptBean bean = (ScriptBean) ctx.getBean("bean");
+        assertEquals("The first property ain't bein' injected.", "Sophie Marceau", bean.getName());
+        assertEquals("The second property ain't bein' injected.", 31, bean.getAge());
+    }
+    
 }
