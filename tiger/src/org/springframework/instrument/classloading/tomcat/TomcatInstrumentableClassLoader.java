@@ -17,6 +17,8 @@
 package org.springframework.instrument.classloading.tomcat;
 
 import java.lang.instrument.ClassFileTransformer;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 import org.apache.catalina.loader.ResourceEntry;
 import org.apache.catalina.loader.WebappClassLoader;
@@ -34,7 +36,6 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 	/** Use an internal weavingTransformer */
 	private final WeavingTransformer weavingTransformer;
 
-
 	public TomcatInstrumentableClassLoader() {
 		super();
 		this.weavingTransformer = new WeavingTransformer();
@@ -44,7 +45,6 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 		super(classLoader);
 		this.weavingTransformer = new WeavingTransformer(classLoader);
 	}
-
 
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.weavingTransformer.addTransformer(transformer);
@@ -61,62 +61,12 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 		return entry;
 	}
 
-	/**
-	 * Return a new clone of the existing classloader w/ transforming turned off.
-	 */
 	public ClassLoader getThrowawayClassLoader() {
-		// copy properties
-		TomcatInstrumentableClassLoader tempClassLoader = new TomcatInstrumentableClassLoader(this.parent);
-		// copy protected fields
-		tempClassLoader.allPermission = this.allPermission;
-		tempClassLoader.delegate = this.delegate;
-		tempClassLoader.files = this.files;
-		tempClassLoader.hasExternalRepositories = this.hasExternalRepositories;
-		tempClassLoader.jarFiles = this.jarFiles;
-		tempClassLoader.jarNames = this.jarNames;
-		tempClassLoader.jarPath = this.jarPath;
-		tempClassLoader.jarRealFiles = this.jarRealFiles;
-		tempClassLoader.lastJarAccessed = this.lastJarAccessed;
-		tempClassLoader.lastModifiedDates = this.lastModifiedDates;
-		tempClassLoader.loaderDir = this.loaderDir;
-		tempClassLoader.loaderPC = this.loaderPC;
-		tempClassLoader.needConvert = this.needConvert;
-		tempClassLoader.notFoundResources = this.notFoundResources;
-		tempClassLoader.parent = this.parent;
-		tempClassLoader.paths = this.paths;
-		tempClassLoader.permissionList = this.permissionList;
-		tempClassLoader.repositories = this.repositories;
-		tempClassLoader.repositoryURLs = this.repositoryURLs;
-		//tempClassLoader.resourceEntries = this.resourceEntries;
-		tempClassLoader.resources = this.resources;
-		tempClassLoader.securityManager = this.securityManager;
-		tempClassLoader.started = this.started;
-		tempClassLoader.system = this.system;
-		// copy the rest of the fields through methods
-		tempClassLoader.setAntiJARLocking(this.getAntiJARLocking());
-
-		if (tempClassLoader.hasExternalRepositories) {
-			/*// get URLClassLoader internal URLs and add it to the new temp class
-			for (URL url : retrieveURLs()) {
-				tempClassLoader.addURL(url);
-			}*/
-			WebappClassLoader.log.warn("copy URLS also");
-		}
-
-		return tempClassLoader;
+		WebappClassLoader tempLoader = new WebappClassLoader();
+		// use reflection to copy all the fields since most of them are private on pre-5.5.x Tomcat
+		shallowCopyFieldState(this, tempLoader);
+		return tempLoader;
 	}
-
-	/**
-	 * Get super URLClassloader internal URLs. This is required since Tomcat's
-	 * WebappClassLoader rewrites this method and add's extra URLs. The current
-	 * implementation uses reflection in order to avoid too much coupling with
-	 * WebappClassLoader internals.
-	 *
-	protected URL[] retrieveURLs() {
-		return (URL[]) ReflectionUtils.invokeMethod("getURLs", URLClassLoader.class, this, null, (Class[]) null);
-	}
-	*/
-
 
 	@Override
 	public String toString() {
@@ -125,4 +75,66 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 		return sb.toString();
 	}
 
+	// The code below is orginially taken from ReflectionUtils and optimized for local usage
+	// There is no dependency on ReflectionUtils and this class is self contained to avoid classloading problems.
+	
+	/**
+	 * Given the source object and the destination, which must be the same class
+	 * or a subclass, copy all fields, including inherited fields. Designed to
+	 * work on objects with public no-arg constructors.
+	 * 
+	 * @throws IllegalArgumentException if arguments are incompatible or either
+	 *             is <code>null</code>
+	 */
+	protected void shallowCopyFieldState(final Object src, final Object dest) throws IllegalArgumentException {
+		if (src == null) {
+			throw new IllegalArgumentException("Source for field copy cannot be null");
+		}
+		if (dest == null) {
+			throw new IllegalArgumentException("Destination for field copy cannot be null");
+		}
+		Class targetClass = findCommonAncestor(src.getClass(), dest.getClass());
+
+		// Keep backing up the inheritance hierarchy.
+		do {
+			// Copy each field declared on this class unless it's static or
+			// file.
+			Field[] fields = targetClass.getDeclaredFields();
+			for (int i = 0; i < fields.length; i++) {
+				Field field = fields[i];
+				// Skip static and final fields (the old FieldFilter)
+				if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())
+						|| field.getName().equals("resourceEntries"));
+				try {
+					// copy the field (the old FieldCallback)
+					field.setAccessible(true);
+					Object srcValue = field.get(src);
+					field.set(dest, srcValue);
+				}
+				catch (IllegalAccessException ex) {
+					throw new IllegalStateException("Shouldn't be illegal to access field '" + fields[i].getName()
+							+ "': " + ex);
+				}
+			}
+			targetClass = targetClass.getSuperclass();
+		} while (targetClass != null && targetClass != Object.class);
+	}
+
+	protected Class findCommonAncestor(Class one, Class two) throws IllegalArgumentException {
+		Class ancestor = one;
+
+		while (ancestor != Object.class || ancestor != null) {
+			if (ancestor.isAssignableFrom(two))
+				return ancestor;
+			ancestor = ancestor.getSuperclass();
+		}
+		// try the other class hierarchy
+		ancestor = two;
+		while (ancestor != Object.class || ancestor != null) {
+			if (ancestor.isAssignableFrom(one))
+				return ancestor;
+			ancestor = ancestor.getSuperclass();
+		}
+		return null;
+	}
 }
