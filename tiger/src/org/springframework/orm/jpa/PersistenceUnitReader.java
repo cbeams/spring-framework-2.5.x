@@ -159,7 +159,7 @@ class PersistenceUnitReader {
 		Element child = getChildElementByName(rootElement, childName);
 		String value = null;
 		if (child != null)
-			value = DomUtils.getTextValue(child);
+			value = DomUtils.getTextValue(child).trim();
 
 		return (StringUtils.hasText(value) ? value : null);
 	}
@@ -170,9 +170,9 @@ class PersistenceUnitReader {
 	protected SpringPersistenceUnitInfo parsePersistenceUnitInfo(Element persistenceUnit) throws IOException {
 		SpringPersistenceUnitInfo unitInfo = new SpringPersistenceUnitInfo();
 		// set name
-		unitInfo.setPersistenceUnitName(persistenceUnit.getAttribute(UNIT_NAME));
+		unitInfo.setPersistenceUnitName(persistenceUnit.getAttribute(UNIT_NAME).trim());
 		// set transaction type
-		String txType = persistenceUnit.getAttribute(TRANSACTION_TYPE);
+		String txType = persistenceUnit.getAttribute(TRANSACTION_TYPE).trim();
 
 		if (StringUtils.hasText(txType))
 			unitInfo.setTransactionType(PersistenceUnitTransactionType.valueOf(txType));
@@ -230,7 +230,7 @@ class PersistenceUnitReader {
 	protected void parseClass(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
 		List<Element> classes = DomUtils.getChildElementsByTagName(persistenceUnit, MANAGED_CLASS_NAME);
 		for (Element element : classes) {
-			String value = DomUtils.getTextValue(element);
+			String value = DomUtils.getTextValue(element).trim();
 			if (StringUtils.hasText(value))
 				unitInfo.addManagedClassName(value);
 		}
@@ -243,7 +243,7 @@ class PersistenceUnitReader {
 	protected void parseJarFiles(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) throws IOException {
 		List<Element> jars = DomUtils.getChildElementsByTagName(persistenceUnit, JAR_FILE_URL);
 		for (Element element : jars) {
-			String value = DomUtils.getTextValue(element);
+			String value = DomUtils.getTextValue(element).trim();
 			if (StringUtils.hasText(value)) {
 				Resource resource = this.resourceLoader.getResource(value);
 				unitInfo.addJarFileUrl(resource.getURL());
@@ -258,7 +258,7 @@ class PersistenceUnitReader {
 	protected void parseMappingFiles(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
 		List<Element> files = DomUtils.getChildElementsByTagName(persistenceUnit, MAPPING_FILE_NAME);
 		for (Element element : files) {
-			String value = DomUtils.getTextValue(element);
+			String value = DomUtils.getTextValue(element).trim();
 			if (StringUtils.hasText(value))
 				unitInfo.addMappingFileName(value);
 		}

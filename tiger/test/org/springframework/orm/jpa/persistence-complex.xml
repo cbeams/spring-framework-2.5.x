@@ -9,10 +9,10 @@
 			features provided by the com.acme.persistence
 			implementation.
 		</description>
-		<provider>com.acme.AcmePersistence</provider>
+		<provider>    com.acme.AcmePersistence</provider>
 		<jta-data-source>jdbc/MyPartDB</jta-data-source>
-		<mapping-file>ormap2.xml</mapping-file>
-		<jar-file>order.jar</jar-file>
+		<mapping-file>  ormap2.xml</mapping-file>
+		<jar-file>   order.jar    </jar-file>
 		<properties>
 			<property name="com.acme.persistence.sql-logging" value="on"/>
 			<property name="foo" value="bar" />
@@ -20,10 +20,10 @@
 	</persistence-unit>
 
 	<persistence-unit name="pu2" transaction-type="JTA">
-		<provider>com.acme.AcmePersistence</provider>
-		<non-jta-data-source>jdbc/MyDB</non-jta-data-source>
-		<mapping-file>order2.xml</mapping-file>
-		<jar-file>order-supplemental.jar</jar-file>
+		<provider> com.acme.AcmePersistence  </provider>
+		<non-jta-data-source>jdbc/MyDB  </non-jta-data-source>
+		<mapping-file>order2.xml </mapping-file>
+		<jar-file>   order-supplemental.jar</jar-file>
 		<exclude-unlisted-classes />
 	</persistence-unit>
 
