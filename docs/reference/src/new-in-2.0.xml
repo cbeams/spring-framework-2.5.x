@@ -61,13 +61,14 @@
       plug into their own Spring configuration files. This allows you to have
       your own domain specific language (the term is used loosely here) of
       sorts be reflected in the specific configuration of your own components.</para>
-
-      <para>Since this feature may not be of interest to every single application
-      developer or enterprise architect using Spring in their own projects,
-      it has not (as yet) been detailed in this reference documentation. If
-      you are interested in writing your own Spring configuration tags,
-      begin by looking at the existing Spring tags. To create your own tag is
-      straightforward, simply create one Java class and a corresponding XSD schema.</para>
+      
+      <para>Implementing custom Spring tags may not be of interest to every single 
+      application developer or enterprise architect using Spring in their own projects.
+      We expect third-party vendors to be highly interested in developing
+      custom configuration tags for use in Spring configuration files.</para>
+      
+      <para>The extensible configuration mechanism is more thoroughly documented in 
+      <xref linkend="extensible-xml"/>.</para>
     </section>
 
     <section id="new-in-2-ioc-scopes">
