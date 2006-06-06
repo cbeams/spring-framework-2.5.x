@@ -17,6 +17,7 @@
 package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -264,5 +265,51 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 			sb.append("<pointcut expression not set>");
 		}
 		return sb.toString();
+	}
+
+	public int hashCode() {
+		final int PRIME = 31;
+		int result = 1;
+		result = PRIME * result + ((this.pointcutDeclarationScope == null) ? 0 : this.pointcutDeclarationScope.hashCode());
+		result = PRIME * result + Arrays.hashCode(this.pointcutParameterNames);
+		result = PRIME * result + Arrays.hashCode(this.pointcutParameterTypes);
+		result = PRIME * result + ((this.getExpression() == null) ? 0 : this.getExpression().hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final AspectJExpressionPointcut other = (AspectJExpressionPointcut) obj;
+		if (this.pointcutDeclarationScope == null) {
+			if (other.pointcutDeclarationScope != null) {
+				return false;
+			}
+		}
+		else if (!this.pointcutDeclarationScope.equals(other.pointcutDeclarationScope)) {
+			return false;
+		}
+		if (this.getExpression() == null) {
+			if (other.getExpression() != null) {
+				return false;
+			}
+		}
+		else if (!this.getExpression().equals(other.getExpression())) {
+			return false;
+		}
+		if (!Arrays.equals(this.pointcutParameterNames, other.pointcutParameterNames)) {
+			return false;
+		}
+		if (!Arrays.equals(this.pointcutParameterTypes, other.pointcutParameterTypes)) {
+			return false;
+		}
+		return true;
 	}
 }
