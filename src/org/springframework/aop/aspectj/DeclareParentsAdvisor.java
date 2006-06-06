@@ -17,12 +17,10 @@
 package org.springframework.aop.aspectj;
 
 import org.aopalliance.aop.Advice;
-import org.aopalliance.aop.AspectException;
-
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.support.ClassFilters;
-import org.springframework.aop.support.DelegatingIntroductionInterceptor;
+import org.springframework.aop.support.DelegatePerTargetObjectDelegatingIntroductionInterceptor;
 import org.springframework.aop.support.TypePatternClassFilter;
 
 /**
@@ -60,23 +58,7 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 
 		this.typePatternClassFilter = ClassFilters.intersection(typePatternFilter, exclusion);
 
-		// Try to instantiate a mixin instance and do delegation
-		try {
-			Object newIntroductionInstanceToUse = defaultImpl.newInstance();
-			this.advice = new DelegatingIntroductionInterceptor(newIntroductionInstanceToUse);
-		}
-		catch (IllegalArgumentException ex) {
-			throw new AspectException("Cannot create default implementation for '" +
-					interfaceType.getName() + "' mixin (" + defaultImpl.getName() + ")" , ex);
-		}
-		catch (IllegalAccessException ex) {
-			throw new AspectException("Cannot create default implementation for '" +
-					interfaceType.getName() + "' mixin (" + defaultImpl.getName() + ")" , ex);
-		}
-		catch (InstantiationException ex) {
-			throw new AspectException("Cannot create default implementation for '" +
-					interfaceType.getName() + "' mixin (" + defaultImpl.getName() + ")" , ex);
-		}
+		this.advice = new DelegatePerTargetObjectDelegatingIntroductionInterceptor(defaultImpl,interfaceType);
 	}
 
 
