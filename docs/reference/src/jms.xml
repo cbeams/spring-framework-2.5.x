@@ -11,7 +11,7 @@
     class is used for message production and synchronous message reception. For
     asynchronous reception similar to Java EE's message-driven bean style, Spring
     provides a number of message listener containers that are used to create
-    Message Driven POJOs (MDPs).</para>
+    Message-Driven POJOs (MDPs).</para>
 
     <sidebar>
   	    <title>Domain Unification</title>
@@ -103,13 +103,12 @@
     	has the effect that a call to <classname>MessageProducer</classname>'s
     	send method <methodname>send(Destination destination, Message
     	message)</methodname> will use different QOS default values than those
-    	specified in the JMS specification. Therefore, in order to provide
-    	consistent management of QOS values, the
-    	<classname>JmsTemplate</classname> must be specifically enabled to use its
-    	own QOS values by setting the boolean property
-    	<literal><property>isExplicitQosEnabled</property></literal> to
-    	true.</para> 		
-  		</section>
+    	specified in the JMS specification. In order to provide consistent 
+    	management of QOS values, the <classname>JmsTemplate</classname> must 
+    	therefore be specifically enabled to use its own QOS values by setting 
+    	the boolean property <literal><property>isExplicitQosEnabled</property>
+    	</literal> totrue.</para> 		
+	</section>
   	
   	<section>
   		<title>Connection Factory</title>
@@ -122,7 +121,7 @@
       	the JMS provider and encapsulates various configuration parameters, many
       	of which are vendor specific such as SSL configuration options.</para>
 
-      	<para>When using JMS inside an EJB the vendor provides implementations
+      	<para>When using JMS inside an EJB, the vendor provides implementations
       	of the JMS interfaces so that they can participate in declarative
       	transaction management and perform pooling of connections and session.
       	In order to use this implementation, Java EE containers typically require
@@ -230,12 +229,12 @@
         participating in transactions, resource acquisition and release, exception
         conversion and suchlike. This allows you as an application developer to write
         the (posssibly complex) business logic associated with receiving a message
-        (and possibly responding to it), and leaves otherwise boilerplate JMS
+        (and possibly responding to it), and delegates boilerplate JMS
         infrastructure concerns to the framework.</para>
 		
 		<para>There are three subclasses of
 		<classname>AbstractMessageListenerContainer</classname> packaged
-		with Spring, each with its own advantages.</para>
+		with Spring, each with its specialised feature set.</para>
 		
 		<section>
 			<title><classname>SimpleMessageListenerContainer</classname></title>
@@ -254,7 +253,7 @@
 			<title><classname>DefaultMessageListenerContainer</classname></title>
 			
 			<para>This message listener container is the one used in most
-			cases. As in the <classname>SimpleMessageListenerContainer</classname>
+			cases. As with the <classname>SimpleMessageListenerContainer</classname>
 			this subclass does not allow for dynamic adaption to runtime
 			demands. However, this flavor does participate in transactions.
 			Each received message is registered with an XA transaction
@@ -269,13 +268,13 @@
 			
 			<para>This subclass is the most powerful of the three.  It
 			leverages the JMS ServerSessionPool SPI to allow for dynamic
-			management of JMS sessions.  This implementation also particpates
+			management of JMS sessions.  This implementation also participates
 			in transactions.  The use of this variety of message listener
 			container enables powerful runtime tuning but places a larger
-			burden of requirements (ServerSessionPool SPI) on the JMS
+			set of requirements (ServerSessionPool SPI) on the JMS
 			provider being used.  If there is no need for runtime performance
 			tuning, look to the <classname>DefaultMessageListenerContainer</classname>
-			or the <classname>SimpleMessageListenerContainer</classname></para>
+			or the <classname>SimpleMessageListenerContainer</classname>.</para>
 		</section>
   	</section>
   	
@@ -294,7 +293,7 @@
         sessions, so the instances that are bound to the thread depend on the
         pooling behavior. In a standalone environment, using Spring's
         <classname>SingleConnectionFactory</classname> will result in a using a
-        single JMS <classname>Connection</classname> and each transaction having
+        single JMS <classname>Connection</classname> with each transaction having
         its own <classname>Session</classname>. The
         <classname>JmsTemplate</classname> can also be used with the
         <classname>JtaTransactionManager</classname> and an XA-capable JMS
@@ -402,7 +401,7 @@ public class JmsQueueSender {
         <classname>JmsTemplate</classname> delegate the conversion process to an
         instance of the <literal>MessageConverter</literal> interface. This
         interface defines a simple contract to convert between Java objects and
-        JMS messages. The default implementation,
+        JMS messages. The default implementation
         <classname>SimpleMessageConverter</classname> supports conversion
         between <classname>String</classname> and
         <classname>TextMessage</classname>, <classname>byte[]</classname> and
@@ -440,7 +439,7 @@ public class JmsQueueSender {
     }
   });
 }]]></programlisting>
-        <para>This results in a message of the form...</para>
+        <para>This results in a message of the form:</para>
         <programlisting><![CDATA[MapMessage={ 
   Header={ 
     ... standard headers ...
@@ -468,7 +467,7 @@ public class JmsQueueSender {
         <interfacename>SessionCallback</interfacename> and
         <interfacename>ProducerCallback</interfacename> expose the JMS
         <interfacename>Session</interfacename> and
-        <interfacename>Session</interfacename>/<interfacename>MessageProducer</interfacename>
+        <interfacename>Session</interfacename> / <interfacename>MessageProducer</interfacename>
         pair respectfully. The <methodname>execute()</methodname> methods on
         <classname>JmsTemplate</classname> execute these callback
         methods.</para>
@@ -484,7 +483,7 @@ public class JmsQueueSender {
   		<para>While JMS is typically associated with asynchronous processing, it
         is possible to consume messages synchronously. The overloaded
         <methodname>receive(..)</methodname> methods provide this functionality.
-        During a synchronous receive the calling thread blocks until a message
+        During a synchronous receive, the calling thread blocks until a message
         becomes available. This can be a dangerous operation since the calling
         thread can potentially be blocked indefinitely. The property
         <property>receiveTimeout</property> specifies how long the receiver
@@ -492,9 +491,9 @@ public class JmsQueueSender {
   	</section>
   	
   	<section id="jms-asynchronousMessageReception">
-  		<title>Asynchronous Reception - Message Driven POJOs</title>
+  		<title>Asynchronous Reception - Message-Driven POJOs</title>
   		
-  		<para>In a fashion similar to a Message Driven Bean (MDB) in the EJB world,
+  		<para>In a fashion similar to a Message-Driven Bean (MDB) in the EJB world,
   		the Message-Driven POJO (MDP) acts as a receiver for JMS messages. The one
   		restriction (but see also below for the discussion of the
   		<classname>MessageListenerAdapter</classname> class) on an MDP is that it
@@ -502,7 +501,7 @@ public class JmsQueueSender {
   		interface. Please also be aware that in the case where your POJO will be
   		receiving messages on multiple threads, it is important to ensure that your
   		implementation is thread-safe.</para>
-		<para>Find below a simple implementation of an MDP.</para>
+		<para>Below is a simple implementation of an MDP:</para>
 		<programlisting><![CDATA[import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -522,15 +521,15 @@ public class ExampleListener implements MessageListener {
     }
   }
 }]]></programlisting>
-		<para>Once you've got your <interfacename>MessageListener</interfacename>
-		written, it's time to create a message listener container.</para>
-		<para>Find below an example of defining and configuring one of the message listener
-		containers that ships with Spring (the <classname>DefaultMessageListenerContainer</classname>
-		in this case).</para>
+		<para>Once you've implemented your <interfacename>MessageListener</interfacename>, 
+		it's time to create a message listener container.</para>
+		<para>Below an example of how to define and configure one of the message listener
+		containers that ships with Spring (in this case the 
+		<classname>DefaultMessageListenerContainer</classname>).</para>
 		<programlisting><lineannotation>&lt;!-- this is the Message Driven POJO (MDP) --&gt;</lineannotation>
 <![CDATA[<bean id="messageListener" class="jmsexample.ExampleListener" />
 
-]]><lineannotation>&lt;!-- and this is the attendant message listener container... --&gt;</lineannotation><![CDATA[
+]]><lineannotation>&lt;!-- and this is the attendant message listener container --&gt;</lineannotation><![CDATA[
 <bean id="listenerContainer"
   class="org.springframework.jms.listener.DefaultMessageListenerContainer">
   <property name="concurrentConsumers" value="5"/>
@@ -538,8 +537,8 @@ public class ExampleListener implements MessageListener {
   <property name="destination" ref="destination" />
   ]]><emphasis role="bold"><![CDATA[<property name="messageListener" ref="messageListener" />]]></emphasis><![CDATA[
 </bean>]]></programlisting>
-        <para>Please do refer yourself to the (decidely copious) Javadoc for the various message
-        listener containers for a full discussion of the features supported by each implementation.</para>
+        <para>Please refer to the Spring Javadoc of the various message
+        listener containers for a full description of the features supported by each implementation.</para>
   	</section>
   	
   	<section>
@@ -561,33 +560,33 @@ public interface SessionAwareMessageListener {
         <interfacename>Session</interfacename> supplied in the
         <literal>onMessage(Message, Session)</literal> method). All of the message listener
         container implementations that ship wth Spring have support for MDPs that implement either
-        the either the <interfacename>MessageListener</interfacename> or
-        <interfacename>SessionAwareMessageListener</interfacename> interfaces. Classes
-        that implement the <interfacename>SessionAwareMessageListener</interfacename> do come
-        with the caveat that they are then tied somewhat to Spring. The choice of whether
-        or not to use it (naturally) is left up to you as an application developer or architect.</para>
-        <para>Please notice the fact that the <literal>'onMessage(..)'</literal> method of the
+        the <interfacename>MessageListener</interfacename> or
+        <interfacename>SessionAwareMessageListener</interfacename> interface. Classes
+        that implement the <interfacename>SessionAwareMessageListener</interfacename> come
+        with the caveat that they are then tied to Spring through the interface. The choice of whether
+        or not to use it is left entirely up to you as an application developer or architect.</para>
+        <para>Please note that the <literal>'onMessage(..)'</literal> method of the
         <interfacename>SessionAwareMessageListener</interfacename> interface throws
         <classname>JMSException</classname>. In contrast to the standard JMS
         <interfacename>MessageListener</interfacename> interface, when using the
-        <interfacename>SessionAwareMessageListener</interfacename> interface it is the responsibility
-        of the client code to handle any resulting exceptions.</para>
+        <interfacename>SessionAwareMessageListener</interfacename> interface, it is the responsibility
+        of the client code to handle any exceptions thrown.</para>
   	</section>
   	
   	<section>
   	    <title>The <classname>MessageListenerAdapter</classname></title>
   	    <para>The <classname>MessageListenerAdapter</classname> class is the final component in
-  	    Spring's asynchronous messaging support: in a nutshell, it allows you to (pretty much)
-  	    expose <emphasis>any</emphasis> class as a MDP (there are of course some restrictions).</para>
+  	    Spring's asynchronous messaging support: in a nutshell, it allows you to 
+  	    expose almost <emphasis>any</emphasis> class as a MDP (there are of course some constraints).</para>
   	    <note>
-  	        <para>If you developing against the JMS 1.0.2 API, you will want to use the
+  	        <para>If you using the the JMS 1.0.2 API, you will want to use the
   	        <classname>MessageListenerAdapter102</classname> class which provides the exact
   	        same functionality and value add as the <classname>MessageListenerAdapter</classname>
   	        class, but for the JMS 1.0.2 API.</para>
   	    </note>
-  	    <para>Consider the following interface definition... notice that the interface does not
-  	    extend either the <interfacename>MessageListener</interfacename> or
-        <interfacename>SessionAwareMessageListener</interfacename> interfaces, but it can still
+  	    <para>Consider the following interface definition. Notice that although the interface extends
+  	    neither the <interfacename>MessageListener</interfacename> nor
+        <interfacename>SessionAwareMessageListener</interfacename> interfaces, it can still
         be used as a MDP via the use of the <classname>MessageListenerAdapter</classname> class.
         Notice also how the various message handling methods are strongly typed according to
         the <emphasis>contents</emphasis> of the various <interfacename>Message</interfacename>
@@ -605,10 +604,10 @@ public interface SessionAwareMessageListener {
         <programlisting><![CDATA[public class DefaultMessageDelegate implements MessageDelegate {
     ]]><lineannotation>// implementation elided for clarity...</lineannotation><![CDATA[
 }]]></programlisting>
-        <para>Notice how attendant implementation of the <interfacename>MessageDelegate</interfacename>
+        <para>In particular, note how the above implementation of the <interfacename>MessageDelegate</interfacename>
         interface (the above <classname>DefaultMessageDelegate</classname> class) has
         <emphasis>no</emphasis> JMS dependencies at all. It truly is a POJO that we will
-        make into an MDP via the following configuration...</para>
+        make into an MDP via the following configuration.</para>
 		<programlisting><lineannotation>&lt;!-- this is the Message Driven POJO (MDP) --&gt;</lineannotation>
 <emphasis role="bold"><![CDATA[<bean id="messageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
     <constructor-arg>
@@ -624,11 +623,11 @@ public interface SessionAwareMessageListener {
   <property name="destination" ref="destination" />
   ]]><emphasis role="bold"><![CDATA[<property name="messageListener" ref="messageListener" />]]></emphasis><![CDATA[
 </bean>]]></programlisting>
-        <para>Find below an example of another MDP that can only handle the receiving of
+        <para>Below is an example of another MDP that can only handle the receiving of
         JMS <interfacename>TextMessage</interfacename> messages. Notice how the message handling
-        method is actually called <literal>'receive'</literal> : the name of the message handling
+        method is actually called <literal>'receive'</literal> (the name of the message handling
         method in a <classname>MessageListenerAdapter</classname> defaults to
-        <literal>'handleMessage'</literal>, but this is configurable (as you will see below).
+        <literal>'handleMessage'</literal>), but it is configurable (as you will see below).
         Notice also how the <literal>'receive(..)'</literal> method is strongly typed to
         receive and respond only to JMS <interfacename>TextMessage</interfacename> messages.</para>
         <programlisting><![CDATA[public interface TextMessageDelegate {
@@ -639,7 +638,7 @@ public interface SessionAwareMessageListener {
     ]]><lineannotation>// implementation elided for clarity...</lineannotation><![CDATA[
 }]]></programlisting>
         <para>The configuration of the attendant <classname>MessageListenerAdapter</classname> would
-        look like so...</para>
+        look like this:</para>
         <programlisting><![CDATA[<bean id="messageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
     <constructor-arg>
         <bean class="jmsexample.DefaultTextMessageDelegate"/>
@@ -657,7 +656,7 @@ public interface SessionAwareMessageListener {
         <para>Another of the capabilities of the <classname>MessageListenerAdapter</classname>
         class is the ability to automatically send back a response <interfacename>Message</interfacename>
         if a handler method returns a non-void value.</para>
-        <para>Consider the following interface and it's attendant implementation...</para>
+        <para>Consider the following interface and its attendant implementation:</para>
         <programlisting><![CDATA[public interface ResponsiveTextMessageDelegate {
 
     ]]><lineannotation><emphasis role="bold">// notice the return type...</emphasis></lineannotation><![CDATA[
@@ -671,11 +670,11 @@ public interface SessionAwareMessageListener {
         value that is returned from the execution of the <literal>'receive(..)'</literal>
         method will (in the default configuration) be converted into a
         <interfacename>TextMessage</interfacename>. The resulting <interfacename>TextMessage</interfacename>
-        will then be sent to (if one exists) the <interfacename>Destination</interfacename>
+        will then be sent to the <interfacename>Destination</interfacename> (if one exists) 
         defined in the JMS Reply-To property of the original <interfacename>Message</interfacename>, or the
         default <interfacename>Destination</interfacename> set on the
         <classname>MessageListenerAdapter</classname> (if one has been configured); if no
-        <interfacename>Destination</interfacename> can be found then an
+        <interfacename>Destination</interfacename> is found then an
         <classname>InvalidDestinationException</classname> will be thrown (and please note
         that this exception <emphasis>will not</emphasis> be swallowed and
         <emphasis>will</emphasis> propagate up the call stack).</para>
@@ -685,10 +684,10 @@ public interface SessionAwareMessageListener {
   		<title>Participating in transactions</title>
   	
   		<para>Participation in transactions requires only a couple of minor
-  		changes. The gist is that you need to create a transaction manager
+  		changes. You will need to create a transaction manager
   		and register that transaction manager with one of the subclasses
   		that can participate in transactions (<classname>DefaultMessageListenerContainer</classname>
-  		or <classname>ServerSessionMessageListenerContainer</classname>)</para>
+  		or <classname>ServerSessionMessageListenerContainer</classname>).</para>
   		
   		<para>To create the transaction manager, you'll want to create an
   		instance of <classname>JmsTransactionManager</classname> and give
