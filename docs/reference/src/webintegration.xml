@@ -892,7 +892,7 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
         interface="org.apache.tapestry.services.ApplicationInitializer"
         visibility="private">
         <invoke-factory>
-            <construct class="SpringApplicationInitializer">
+            <construct class="com.javaforge.tapestry.spring.SpringApplicationInitializer">
                 <set-object property="beanFactoryHolder"
                     value="service:hivemind.lib.DefaultSpringBeanFactoryHolder" />
             </construct>
