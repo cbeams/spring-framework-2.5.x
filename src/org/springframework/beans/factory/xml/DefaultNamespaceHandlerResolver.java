@@ -137,7 +137,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 */
 	public NamespaceHandler resolve(String namespaceUri) {
 		NamespaceHandler namespaceHandler = (NamespaceHandler) this.handlerMappings.get(namespaceUri);
-		if (namespaceUri == null) {
+		if (namespaceHandler == null) {
 			throw new IllegalArgumentException(
 					"Unable to locate NamespaceHandler for namespace URI [" + namespaceUri + "]");
 		}
