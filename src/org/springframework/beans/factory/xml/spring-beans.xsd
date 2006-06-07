@@ -121,7 +121,7 @@
 		<xsd:attribute name="factory-method" type="xsd:string"/>
 		<xsd:attribute name="factory-bean" type="xsd:string"/>
 		<xsd:attribute name="autowire-candidate" type="xsd:boolean"/>
-		<xsd:anyAttribute namespace="##other" processContents="strict"/>
+		<xsd:anyAttribute namespace="##other" processContents="lax"/>
 	</xsd:attributeGroup>
 
 	<!-- the <meta> element -->

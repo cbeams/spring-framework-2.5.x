@@ -218,7 +218,7 @@
 			<rtexprvalue>true</rtexprvalue>
 			<description>Equivalent to "class" - HTML Optional Attribute. Used when the bound field has errors.</description>
 		</attribute>
-
+		                                     
 		<attribute>
 			<name>cssStyle</name>
 			<required>false</required>
