@@ -274,7 +274,7 @@ public class OrderManagerImpl implements OrderManager {
 JavaMailSenderImpl sender = new JavaMailSenderImpl();
 sender.setHost("mail.host.com");
 
-MimeMessage message = sender.createMimeMesage();
+MimeMessage message = sender.createMimeMessage();
 MimeMessageHelper helper = new MimeMessageHelper(message);
 helper.setTo("test@host.com");
 helper.setText("Thank you for ordering!");
@@ -295,7 +295,7 @@ sender.send(message);
 JavaMailSenderImpl sender = new JavaMailSenderImpl();
 sender.setHost("mail.host.com");
 
-MimeMessage message = sender.createMimeMesage();
+MimeMessage message = sender.createMimeMessage();
 
 // use the true flag to indicate you need a multipart message
 MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -303,7 +303,7 @@ helper.setTo("test@host.com");
 
 // use the true flag to indicate the text included is HTML
 helper.setText(
-  "<html><body><img src='cid:identifier1234'></body></html>"
+  "<html><body><img src='cid:identifier1234'></body></html>",
   true);
 
 // let's include the infamous windows Sample file (this time copied to c:/)
