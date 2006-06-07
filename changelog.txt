@@ -3,6 +3,25 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.0 RC1 (14.6.2006)
+--------------------------------------
+
+General
+* completed reference documentation
+
+Package org.springframework.ejb
+* fixed AbstractSlsbInvokerInterceptor to reobtain createMethod in case of cacheHome="false"/lookupHomeOnStartup="true"
+
+Package org.springframework.orm
+* removed LocalSessionFactoryBean's early "buildMappings" call to avoid side effects with AnnotationSessionFactoryBean
+
+Package org.springframework.scripting
+* fixed "spring-lang.xsd" to allow for multiple nested property elements
+
+Package org.springframework.web
+* fixed Servlet/PortletRequestAttributes to correctly update accessed attributes
+
+
 Changes in version 2.0 M5 (1.6.2006)
 ------------------------------------
 
