@@ -57,8 +57,18 @@ import org.springframework.util.ClassUtils;
 public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean
 		implements ResourceLoaderAware {
 
-	private final static String DEFAULT_PERSISTENCE_XML_LOCATION = "/META-INF/persistence.xml";
+	/**
+	 * Default location of the <code>persistence.xml</code> file:
+	 * "classpath:META-INF/persistence.xml".
+	 */
+	public final static String DEFAULT_PERSISTENCE_XML_LOCATION = "classpath:META-INF/persistence.xml";
 	
+	/**
+	 * Default location of the <code>persistence.xml</code> file:
+	 * "classpath:", indicating the root of the class path.
+	 */
+	public final static String DEFAULT_PERSISTENCE_UNIT_ROOT_LOCATION = "classpath:";
+
 	/** Set of deployed EntityManagerFactory names */
 	private static Set<String> entityManagerFactoryNamesDeployed = new HashSet<String>();
 
@@ -66,7 +76,7 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 	/** Location of persistence.xml file */
 	private String persistenceXmlLocation = DEFAULT_PERSISTENCE_XML_LOCATION;
 
-	private Resource persistenceUnitRootLocation;
+	private String persistenceUnitRootLocation = DEFAULT_PERSISTENCE_UNIT_ROOT_LOCATION;
 
 	private boolean allowRedeploymentWithSameName = false;
 
@@ -82,16 +92,17 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 
 	
 	/**
-	 * Set the location of the persistence.xml file
-	 * we want to use. This is a Spring resource string.
-	 * @param persistenceXmlLocation a Spring resource string
-	 * identifying the location of the persistence.xml this
-	 * ContainerEntityManagerFactoryBean should parse.
+	 * Set the location of the <code>persistence.xml</code> file
+	 * we want to use. This is a Spring resource location.
+	 * <p>Default is "classpath:META-INF/persistence.xml".
+	 * @param persistenceXmlLocation a Spring resource String
+	 * identifying the location of the <code>persistence.xml</code> file
+	 * that this ContainerEntityManagerFactoryBean should parse
 	 */
 	public void setPersistenceXmlLocation(String persistenceXmlLocation) {
 		this.persistenceXmlLocation = persistenceXmlLocation;
 	}
-	
+
 	/**
 	 * Optional property setting the location of the persistence unit root URL,
 	 * as a Spring resource location string. The value may need to be platform-specific
@@ -103,7 +114,7 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 	 * infrastructure. This defaulting may not work reliably if there are multiple
 	 * directories or JARs on the class path.
 	 */
-	public void setPersistenceUnitRootLocation(Resource persistenceUnitRootPath) {
+	public void setPersistenceUnitRootLocation(String persistenceUnitRootPath) {
 		this.persistenceUnitRootLocation = persistenceUnitRootPath;
 	}
 
@@ -186,33 +197,6 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 	}
 
 	/**
-	 * Try to deduce the persistence unit root URL using multiple strategies.
-	 * @return the persistence unit root URL to pass to the JPA PersistenceProvider
-	 */
-	private URL findPersistenceUnitRootUrl() {
-		try {
-			// First try the persistence unit path.
-			String rootPath = "";
-			if (this.persistenceUnitRootLocation != null) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Using explicit persistence unit root location: " + this.persistenceUnitRootLocation);
-				}
-				return this.persistenceUnitRootLocation.getURL();
-			}
-			// Fallback: use the root of the class path. May not work reliably
-			// if the classpath is built up of multiple trees.
-			Resource res = this.resourceLoader.getResource(rootPath);
-			if (logger.isInfoEnabled()) {
-				logger.info("Defaulting persistence unit root location to class path root: " + res);
-			}
-			return res.getURL();
-		}
-		catch (IOException ex) {
-			throw new PersistenceException("Unable to resolve persistence unit root URL", ex);
-		}
-	}
-
-	/**
 	 * If no entity manager name was found, take first in the parsed array of
 	 * ContainerPersistenceUnitInfo. Otherwise check for a matching name.
 	 * @return Spring-specific PersistenceUnitInfo
@@ -246,10 +230,26 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 					"No persistence info with name matching '" + getPersistenceUnitName() + "' found");
 		}
 
-		// loadTimeWeaver.setExplicitInclusions(pui.getManagedClassNames());
-
 		return pui;
 	}
+
+	/**
+	 * Try to deduce the persistence unit root URL using multiple strategies.
+	 * @return the persistence unit root URL to pass to the JPA PersistenceProvider
+	 */
+	private URL findPersistenceUnitRootUrl() {
+		try {
+			Resource res = this.resourceLoader.getResource(this.persistenceUnitRootLocation);
+			if (logger.isInfoEnabled()) {
+				logger.info("Using explicit persistence unit root location: " + res);
+			}
+			return res.getURL();
+		}
+		catch (IOException ex) {
+			throw new PersistenceException("Unable to resolve persistence unit root URL", ex);
+		}
+	}
+
 
 	public PersistenceUnitInfo getPersistenceUnitInfo() {
 		return this.persistenceUnitInfo;
@@ -261,6 +261,7 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 		}
 		return super.getPersistenceUnitName();
 	}
+
 
 	/**
 	 * Hook method allowing subclasses to customize the EntityManagerFactory.
