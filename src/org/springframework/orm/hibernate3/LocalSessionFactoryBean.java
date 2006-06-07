@@ -788,11 +788,6 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 				}
 			}
 
-			// Make sure the Configuration object parsed its metadata as far as possible.
-			// This call is particularly important for Hibernate 3.1.1+, to still give
-			// custom LocalSessionFactoryBean subclasses access to all parsed metadata.
-			config.buildMappings();
-
 			// Perform custom post-processing in subclasses.
 			postProcessConfiguration(config);
 
