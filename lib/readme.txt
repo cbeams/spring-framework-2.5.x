@@ -347,7 +347,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's Quartz scheduling support
 
 * struts/struts.jar
-- Apache Struts 1.2.8 (http://jakarta.apache.org/struts)
+- Apache Struts 1.2.9 (http://jakarta.apache.org/struts)
 - required for building the framework
 - required at runtime when using the Struts support or TilesView
 - required for running JPetStore's Struts web tier
