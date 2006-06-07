@@ -138,7 +138,7 @@ public class PortletRequestAttributes implements RequestAttributes {
 	public void updateAccessedAttributes() {
 		PortletSession session = this.request.getPortletSession(false);
 		if (session != null) {
-			for (Iterator it = this.sessionAttributesToUpdate.keySet().iterator(); it.hasNext();) {
+			for (Iterator it = this.sessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
 				String name = (String) entry.getKey();
 				Object newValue = entry.getValue();
@@ -147,7 +147,7 @@ public class PortletRequestAttributes implements RequestAttributes {
 					session.setAttribute(name, newValue);
 				}
 			}
-			for (Iterator it = this.globalSessionAttributesToUpdate.keySet().iterator(); it.hasNext();) {
+			for (Iterator it = this.globalSessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
 				String name = (String) entry.getKey();
 				Object newValue = entry.getValue();
