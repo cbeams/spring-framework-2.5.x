@@ -1906,6 +1906,9 @@
 			<param name="spring-module" value="spring-jmx"/>
 		</antcall>
 		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-jms"/>
+		</antcall>
+		<antcall target="mvn.install">
 			<param name="spring-module" value="spring-hibernate2"/>
 		</antcall>
 		<antcall target="mvn.install">
