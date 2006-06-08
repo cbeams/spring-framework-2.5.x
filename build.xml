@@ -1902,6 +1902,39 @@
 		<antcall target="mvn.install">
 			<param name="spring-module" value="spring-webmvc"/>
 		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-jmx"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-hibernate2"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-hibernate3"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-ibatis"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-jpa"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-jca"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-ojb"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-portlet"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-toplink"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-struts"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-tomcat-weaver"/>
+		</antcall>
 	</target>
 
 	<target name="mvn.install">
