@@ -27,7 +27,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
 /**
  * Convenient proxy factory bean for scoped objects.
- * Proxies creating using this factory bean are thread-safe singletons,
+ * Proxies created using this factory bean are thread-safe singletons,
  * and may be injected, with transparent scoping behavior.
  *
  * <p>Proxies returned by this class implement the ScopedObject interface.
