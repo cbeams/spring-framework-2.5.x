@@ -28,6 +28,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * Provides supporting functionality to render a list of '<code>option</code>'
@@ -66,6 +67,8 @@ final class OptionWriter {
 
 	private String labelProperty;
 
+	private boolean htmlEscape;
+
 
 	/**
 	 * Creates a new <code>OptionWriter</code> for the supplied <code>objectSource</code>.
@@ -74,13 +77,14 @@ final class OptionWriter {
 	 * @param valueProperty the name of the property used to render '<code>option</code>' '<code>values</code>'. Optional.
 	 * @param labelProperty the name of the property used to render '<code>option</code>' labels. Optional.
 	 */
-	public OptionWriter(Object optionSource, BindStatus bindStatus, String valueProperty, String labelProperty) {
+	public OptionWriter(Object optionSource, BindStatus bindStatus, String valueProperty, String labelProperty, boolean htmlEscape) {
 		Assert.notNull(optionSource, "'optionSource' cannot be null.");
 		Assert.notNull(bindStatus, "'bindStatus' cannot be null.");
 		this.optionSource = optionSource;
 		this.bindStatus = bindStatus;
 		this.valueProperty = valueProperty;
 		this.labelProperty = labelProperty;
+		this.htmlEscape = htmlEscape;
 	}
 
 	/**
@@ -159,13 +163,13 @@ final class OptionWriter {
 	private void renderOption(TagWriter tagWriter, Object item, Object value, String label) throws JspException {
 		tagWriter.startTag("option");
 		if (!ObjectUtils.getDisplayString(value).equals(label)) {
-			tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(value));
+			tagWriter.writeAttribute("value", getDisplayString(value));
 		}
 
 		if (isSelected(value) || isSelected(item)) {
 			tagWriter.writeAttribute("selected", "selected");
 		}
-		tagWriter.appendValue(label);
+		tagWriter.appendValue(getDisplayString(label));
 		tagWriter.endTag();
 	}
 
@@ -175,6 +179,15 @@ final class OptionWriter {
 	 */
 	private boolean isSelected(Object resolvedValue) {
 		return SelectedValueComparator.isSelected(this.bindStatus, resolvedValue);
+	}
+
+	/**
+	 * Gets the display value of the supplied <code>Object</code>, HTML escaped
+	 * as required.
+	 */
+	private String getDisplayString(Object value) {
+		String displayValue = ObjectUtils.getDisplayString(value);
+		return (this.htmlEscape ? HtmlUtils.htmlEscape(displayValue) : displayValue);
 	}
 
 }

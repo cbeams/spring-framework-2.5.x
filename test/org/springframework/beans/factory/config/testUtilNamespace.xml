@@ -23,6 +23,12 @@
 		</property>
 	</bean>
 
+	<bean id="constructedTestBean" class="org.springframework.beans.TestBean">
+		<constructor-arg index="0">
+			<util:property-path path="configuredBean.name"/>
+		</constructor-arg>
+	</bean>
+
 	<bean id="configuredBean" class="org.springframework.beans.TestBean">
 		<property name="name" value="Rob Harrop"/>
 	</bean>

@@ -18,7 +18,6 @@ package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
 
-import org.springframework.util.ObjectUtils;
 
 /**
  * Data-binding aware JSP tag for rendering a hidden HTML '<code>input</code>' field
@@ -49,7 +48,7 @@ public class HiddenInputTag extends AbstractDataBoundFormElementTag {
 		tagWriter.startTag("input");
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute("type", "hidden");
-		tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(getBoundValue()));
+		tagWriter.writeAttribute("value", getDisplayString(getBoundValue()));
 		tagWriter.endTag();
 		return EVAL_PAGE;
 	}

@@ -35,6 +35,13 @@
 		</attribute>
 
 		<attribute>
+			<name>htmlEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Enable/disable HTML escaping of rendered values.</description>
+		</attribute>
+
+		<attribute>
 			<name>cssClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -206,6 +213,13 @@
 		</attribute>
 
 		<attribute>
+			<name>htmlEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Enable/disable HTML escaping of rendered values.</description>
+		</attribute>
+
+		<attribute>
 			<name>cssClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -218,7 +232,7 @@
 			<rtexprvalue>true</rtexprvalue>
 			<description>Equivalent to "class" - HTML Optional Attribute. Used when the bound field has errors.</description>
 		</attribute>
-		                                     
+
 		<attribute>
 			<name>cssStyle</name>
 			<required>false</required>
@@ -416,6 +430,13 @@
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>HTML Standard Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>htmlEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Enable/disable HTML escaping of rendered values.</description>
 		</attribute>
 
 		<attribute>
@@ -630,6 +651,13 @@
 			<description>HTML Standard Attribute</description>
 		</attribute>
 
+		<attribute>
+			<name>htmlEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Enable/disable HTML escaping of rendered values.</description>
+		</attribute>
+
 	</tag>
 
 	<!-- <form:select/> -->
@@ -651,6 +679,13 @@
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>HTML Standard Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>htmlEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Enable/disable HTML escaping of rendered values.</description>
 		</attribute>
 
 		<attribute>
@@ -864,6 +899,13 @@
 			<rtexprvalue>true</rtexprvalue>
 			<description>HTML Optional Attribute</description>
 		</attribute>
+
+		<attribute>
+			<name>htmlEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Enable/disable HTML escaping of rendered values.</description>
+		</attribute>
 	</tag>
 
 	<!-- <form:options/> -->
@@ -895,6 +937,12 @@
 			<description>Name of the property mapped to the inner text of the 'option' tag</description>
 		</attribute>
 
+		<attribute>
+			<name>htmlEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Enable/disable HTML escaping of rendered values.</description>
+		</attribute>
 	</tag>
 
 	<!-- <form:radiobutton/> -->
@@ -916,6 +964,13 @@
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>HTML Standard Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>htmlEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Enable/disable HTML escaping of rendered values.</description>
 		</attribute>
 
 		<attribute>
@@ -1103,6 +1158,13 @@
 		</attribute>
 
 		<attribute>
+			<name>htmlEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Enable/disable HTML escaping of rendered values.</description>
+		</attribute>
+
+		<attribute>
 			<name>cssClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1284,6 +1346,13 @@
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>HTML Standard Attribute</description>
+		</attribute>
+
+		<attribute>
+			<name>htmlEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Enable/disable HTML escaping of rendered values.</description>
 		</attribute>
 
 		<attribute>
@@ -1486,6 +1555,13 @@
 		</attribute>
 
 		<attribute>
+			<name>htmlEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Enable/disable HTML escaping of rendered values.</description>
+		</attribute>
+
+		<attribute>
 			<name>delimiter</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1627,6 +1703,13 @@
 			<description>HTML Standard Attribute</description>
 		</attribute>
 
+		<attribute>
+			<name>htmlEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Enable/disable HTML escaping of rendered values.</description>
+		</attribute>
+		
 		<attribute>
 			<name>for</name>
 			<required>false</required>

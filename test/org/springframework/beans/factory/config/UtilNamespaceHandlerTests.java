@@ -126,4 +126,9 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		Set set = bean.getSomeSet();
 		assertTrue(set.contains(min));
 	}
+
+	public void testNestedInConstructor() throws Exception {
+		TestBean bean = (TestBean) this.beanFactory.getBean("constructedTestBean");
+		assertEquals("Rob Harrop", bean.getName());
+	}
 }

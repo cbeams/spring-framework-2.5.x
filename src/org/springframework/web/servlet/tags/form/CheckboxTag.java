@@ -124,7 +124,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	 * bound value.
 	 */
 	private void renderSingleValue(Object resolvedValue, TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(resolvedValue));
+		tagWriter.writeAttribute("value", getDisplayString(resolvedValue));
 
 		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
 			tagWriter.writeAttribute("checked", "true");
@@ -137,7 +137,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	 * present in the bound Collection value.
 	 */
 	private void renderFromCollection(Object resolvedValue, Collection boundValue, TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(resolvedValue));
+		tagWriter.writeAttribute("value", getDisplayString(resolvedValue));
 
 		if (boundValue.contains(resolvedValue)) {
 			tagWriter.writeAttribute("checked", "true");

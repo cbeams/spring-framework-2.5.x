@@ -245,8 +245,7 @@ public class FormTag extends AbstractFormTag {
 		this.tagWriter = tagWriter;
 		this.tagWriter.startTag("form");
 
-		this.tagWriter.writeAttribute(METHOD_ATTRIBUTE,
-						ObjectUtils.getDisplayString(evaluate(METHOD_ATTRIBUTE, this.method)));
+		this.tagWriter.writeAttribute(METHOD_ATTRIBUTE, getDisplayString(evaluate(METHOD_ATTRIBUTE, this.method)));
 		writeOptionalAttribute(tagWriter, NAME_ATTRIBUTE, this.name);
 		this.tagWriter.writeAttribute(ACTION_ATTRIBUTE, resolveAction());
 		writeOptionalAttribute(tagWriter, CLASS_ATTRIBUTE, this.cssClass);

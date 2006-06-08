@@ -70,7 +70,7 @@ public class RadioButtonTag extends AbstractHtmlInputElementTag {
 
 		Object value = getValue();
 		Object resolvedValue = (value instanceof String ? evaluate("value", (String)value) : value);
-		tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(resolvedValue));
+		tagWriter.writeAttribute("value", getDisplayString(resolvedValue));
 
 		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
 			tagWriter.writeAttribute("checked", "checked");

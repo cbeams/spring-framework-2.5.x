@@ -106,7 +106,7 @@ public class OptionsTag extends AbstractFormTag {
 		String labelProperty = (itemLabel == null ? null :
 						ObjectUtils.getDisplayString(evaluate("itemLabel", itemLabel)));
 
-		OptionWriter optionWriter = new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty);
+		OptionWriter optionWriter = new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
 		optionWriter.writeOptions(tagWriter);
 
 		return EVAL_PAGE;

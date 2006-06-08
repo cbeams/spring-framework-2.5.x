@@ -21,6 +21,7 @@ import javax.servlet.jsp.JspException;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.tags.HtmlEscapingAwareTag;
 import org.springframework.web.util.ExpressionEvaluationUtils;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * Base class for all JSP form tags. Provides utility methods for
@@ -59,7 +60,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * @see TagWriter#writeOptionalAttributeValue(String, String)
 	 */
 	protected final void writeOptionalAttribute(TagWriter tagWriter, String attributeName, String value) throws JspException {
-		tagWriter.writeOptionalAttributeValue(attributeName, ObjectUtils.getDisplayString(evaluate(attributeName, value)));
+		tagWriter.writeOptionalAttributeValue(attributeName, getDisplayString(evaluate(attributeName, value)));
 	}
 
 	/**
@@ -79,6 +80,15 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 */
 	protected final int doStartTagInternal() throws Exception {
 		return writeTagContent(createTagWriter());
+	}
+
+	/**
+	 * Gets the display value of the supplied <code>Object</code>, HTML escaped
+	 * as required.
+	 */
+	protected String getDisplayString(Object value) {
+		String displayValue = ObjectUtils.getDisplayString(value);
+		return (isHtmlEscape() ? HtmlUtils.htmlEscape(displayValue) : displayValue);
 	}
 
 	/**

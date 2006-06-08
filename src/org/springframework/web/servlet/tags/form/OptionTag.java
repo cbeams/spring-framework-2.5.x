@@ -103,7 +103,7 @@ public class OptionTag extends AbstractFormTag {
 		Object resolvedValue = evaluate("value", getValue());
 
 		if (!ObjectUtils.getDisplayString(resolvedValue).equals(getLabelValue(resolvedValue))) {
-			tagWriter.writeAttribute("value", ObjectUtils.getDisplayString(resolvedValue));
+			tagWriter.writeAttribute("value", getDisplayString(resolvedValue));
 		}
 		if (isSelected(resolvedValue)) {
 			tagWriter.writeAttribute("selected", "selected");
@@ -134,7 +134,7 @@ public class OptionTag extends AbstractFormTag {
 	private String getLabelValue(Object resolvedValue) throws JspException {
 		String label = getLabel();
 		Object labelObj = (label == null ? resolvedValue : evaluate("label", label));
-		return ObjectUtils.getDisplayString(labelObj);
+		return  getDisplayString(labelObj);
 	}
 
 	private BindStatus getBindStatus() {

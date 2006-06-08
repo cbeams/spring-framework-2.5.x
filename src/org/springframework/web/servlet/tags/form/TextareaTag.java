@@ -18,7 +18,6 @@ package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
 
-import org.springframework.util.ObjectUtils;
 
 /**
  * Databinding-aware JSP tag for rendering an HTML '<code>textarea</code>'.
@@ -114,7 +113,7 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 		writeOptionalAttribute(tagWriter, ROWS_ATTRIBUTE, getRows());
 		writeOptionalAttribute(tagWriter, COLS_ATTRIBUTE, getCols());
 		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, getOnselect());
-		tagWriter.appendValue(ObjectUtils.getDisplayString(getBoundValue()));
+		tagWriter.appendValue(getDisplayString(getBoundValue()));
 		tagWriter.endTag();
 		return EVAL_PAGE;
 	}

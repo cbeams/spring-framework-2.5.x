@@ -147,7 +147,7 @@
 		<xsd:complexType>
 			<xsd:sequence>
 				<xsd:element ref="description" minOccurs="0"/>
-				<xsd:choice minOccurs="0">
+				<xsd:choice minOccurs="0" maxOccurs="1">
 					<xsd:element ref="bean"/>
 					<xsd:element ref="ref"/>
 					<xsd:element ref="idref"/>
@@ -157,6 +157,7 @@
 					<xsd:element ref="set"/>
 					<xsd:element ref="map"/>
 					<xsd:element ref="props"/>
+					<xsd:any namespace="##other" processContents="strict"/>
 				</xsd:choice>
 			</xsd:sequence>
 			<xsd:attribute name="index" type="xsd:string"/>
@@ -267,7 +268,7 @@
 	<xsd:complexType name="propertyType">
 		<xsd:sequence>
 			<xsd:element ref="description" minOccurs="0"/>
-			<xsd:choice minOccurs="0">
+			<xsd:choice minOccurs="0" maxOccurs="1">
 				<xsd:element ref="meta"/>
 				<xsd:element ref="bean"/>
 				<xsd:element ref="ref"/>
@@ -278,7 +279,7 @@
 				<xsd:element ref="set"/>
 				<xsd:element ref="map"/>
 				<xsd:element ref="props"/>
-				<xsd:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:any namespace="##other" processContents="strict"/>
 			</xsd:choice>
 		</xsd:sequence>
 		<xsd:attribute name="name" type="xsd:string" use="required"/>

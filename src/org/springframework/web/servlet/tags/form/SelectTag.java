@@ -182,7 +182,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 			tagWriter.writeAttribute("multiple", "true");
 		}
 
-		tagWriter.writeOptionalAttributeValue("size", ObjectUtils.getDisplayString(evaluate("size", getSize())));
+		tagWriter.writeOptionalAttributeValue("size", getDisplayString(evaluate("size", getSize())));
 
 		Object items = getItems();
 		if (items != null) {
@@ -193,7 +193,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 			String labelProperty = (getItemLabel() == null ? null :
 							ObjectUtils.getDisplayString(evaluate("itemLabel", getItemLabel())));
 
-			OptionWriter optionWriter = new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty);
+			OptionWriter optionWriter = new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
 			optionWriter.writeOptions(tagWriter);
 
 			tagWriter.endTag();

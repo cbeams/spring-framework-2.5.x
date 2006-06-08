@@ -93,7 +93,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	 */
 	protected final String resolveFor() throws JspException {
 		if (StringUtils.hasText(this.forId)) {
-			return ObjectUtils.getDisplayString(evaluate(FOR_ATTRIBUTE, this.forId));
+			return getDisplayString(evaluate(FOR_ATTRIBUTE, this.forId));
 		}
 		else {
 			return getPath();
