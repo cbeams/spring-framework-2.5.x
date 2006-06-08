@@ -68,6 +68,16 @@ public class FormTag extends AbstractFormTag {
 	public static final String COMMAND_NAME_ATTRIBUTE = "commandName";
 
 	/**
+	 * The name of the '<code>class</code>' attribute.
+	 */
+	public static final String CLASS_ATTRIBUTE = "class";
+
+	/**
+	 * The name of the '<code>style</code>' attribute.
+	 */
+	public static final String STYLE_ATTRIBUTE = "style";
+
+	/**
 	 * The name of the '<code>name</code>' attribute.
 	 */
 	public static final String NAME_ATTRIBUTE = "name";
@@ -109,6 +119,16 @@ public class FormTag extends AbstractFormTag {
 	private String commandName = DEFAULT_COMMAND_NAME;
 
 	/**
+	 * The value of the '<code>class</code>' attribute.
+	 */
+	private String cssClass;
+
+	/**
+	 * The value of the '<code>style</code>' attribute.
+	 */
+	private String cssStyle;
+
+	/**
 	 * The value of the '<code>name</code>' attribute.
 	 */
 	private String name;
@@ -146,6 +166,22 @@ public class FormTag extends AbstractFormTag {
 	public void setCommandName(String commandName) {
 		Assert.notNull(commandName, "'commandName' cannot be null");
 		this.commandName = commandName;
+	}
+
+	/**
+	 * Sets the value of the '<code>Class</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setCssClass(String cssClass) {
+		this.cssClass = cssClass;
+	}
+
+	/**
+	 * Sets the value of the '<code>style</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setCssStyle(String cssStyle) {
+		this.cssStyle = cssStyle;
 	}
 
 	/**
@@ -213,6 +249,8 @@ public class FormTag extends AbstractFormTag {
 						ObjectUtils.getDisplayString(evaluate(METHOD_ATTRIBUTE, this.method)));
 		writeOptionalAttribute(tagWriter, NAME_ATTRIBUTE, this.name);
 		this.tagWriter.writeAttribute(ACTION_ATTRIBUTE, resolveAction());
+		writeOptionalAttribute(tagWriter, CLASS_ATTRIBUTE, this.cssClass);
+		writeOptionalAttribute(tagWriter, STYLE_ATTRIBUTE, this.cssStyle);
 		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, this.enctype);
 		writeOptionalAttribute(tagWriter, ONSUBMIT_ATTRIBUTE, this.onsubmit);
 		writeOptionalAttribute(tagWriter, ONRESET_ATTRIBUTE, this.onreset);

@@ -19,7 +19,6 @@ package org.springframework.web.servlet.tags.form;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.JspException;
 
 /**
  * @author Rob Harrop
@@ -45,7 +44,11 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		String method = "POST";
 		String onsubmit = "onsubmit";
 		String onreset = "onreset";
+		String cssClass = "myClass";
+		String cssStyle = "myStyle";
 
+		this.tag.setCssClass(cssClass);
+		this.tag.setCssStyle(cssStyle);
 		this.tag.setAction(action);
 		this.tag.setCommandName(commandName);
 		this.tag.setEnctype(enctype);
@@ -67,6 +70,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertFormTagOpened(output);
 		assertFormTagClosed(output);
 
+		assertContainsAttribute(output, "class", cssClass);
+		assertContainsAttribute(output, "style", cssStyle);
 		assertContainsAttribute(output, "action", action);
 		assertContainsAttribute(output, "enctype", enctype);
 		assertContainsAttribute(output, "method", method);

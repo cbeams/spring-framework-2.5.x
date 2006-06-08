@@ -1635,6 +1635,13 @@
 		</attribute>
 
 		<attribute>
+			<name>cssClass</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Equivalent to "class" - HTML Optional Attribute.</description>
+		</attribute>
+
+		<attribute>
 			<name>cssErrorClass</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
