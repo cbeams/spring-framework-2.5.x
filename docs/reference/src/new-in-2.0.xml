@@ -158,7 +158,7 @@
       producing messages. This functionality (encapsulated by the
       <classname>JmsTemplate</classname> class) was good, but it didn't
       address the full JMS stack such as the production
-      <emphasis>and</emphasis> consumption of messages.</para>
+      and consumption of messages <emphasis>asynchronously</emphasis>.</para>
 
       <para>This missing piece of the JMS stack has been added, and
       Spring 2.0 now ships with full support for the consumption of messages
@@ -190,15 +190,6 @@
           <para><xref linkend="jdbc-SimpleJdbcTemplate" /></para>
         </listitem>
       </itemizedlist>
-    </section>
-
-    <section id="new-in-2-middle-tier-hibernate">
-      <title>Hibernate</title>
-
-      <para>[TODO : mention the fact that Spring now builds against Hibernate
-      3.1]</para>
-
-      <para>[TODO : cover any new Spring-Hibernate integration]</para>
     </section>
   </section>
 
@@ -240,9 +231,7 @@
       should you choose to move forward with it into production.</para>
 
       <para>Spring MVC's convention-over-configuration support is detailed in
-      the section entitled [TODO : provide a link to the
-      <emphasis>'convention-over-configuration'</emphasis> section of the MVC
-      documentation here]</para>
+      the section entitled <xref linkend="mvc-convention"/></para>
     </section>
 
     <section id="new-in-2-web-portlet">
