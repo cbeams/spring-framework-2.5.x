@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns="http://www.springframework.org/schema/jpa"
+						xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+						xmlns:beans="http://www.springframework.org/schema/beans"
+						xmlns:tool="http://www.springframework.org/schema/tool"
+						targetNamespace="http://www.springframework.org/schema/jpa"
+						elementFormDefault="qualified"
+						attributeFormDefault="unqualified">
+
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool.xsd"/>
+	
+	<xsd:element name="local" type="localEMFType"/>
+	<xsd:element name="container" type="containerEMFType"/>
+		
+	<!-- base types -->
+	<xsd:complexType name="abstractEMFType" abstract="true">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="javax.persistence.EntityManagerFactory"/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="beans:identifiedType">
+			
+				<xsd:sequence>
+					<!-- jpaPropertyMap map element -->
+					<xsd:element name="propsMap" minOccurs="0" maxOccurs="1">
+						<xsd:complexType>
+							<xsd:complexContent>
+								<xsd:extension base="beans:mapType">
+									<xsd:annotation>
+									<xsd:appinfo>
+										<tool:annotation>
+											<tool:exports type="java.util.Map"/>
+										</tool:annotation>
+									</xsd:appinfo>
+									</xsd:annotation>
+									<xsd:attribute name="map-class" type="xsd:string">
+									<xsd:annotation>
+										<xsd:appinfo>
+											<tool:annotation>
+												<tool:expected-type type="java.util.Class"/>
+												<tool:assignable-to type="java.util.Map"/>
+											</tool:annotation>
+										</xsd:appinfo>
+									</xsd:annotation>
+									</xsd:attribute>
+								</xsd:extension>
+							</xsd:complexContent>
+						</xsd:complexType>
+					</xsd:element>	
+					
+				<!-- jpaProperties element -->
+					<xsd:element name="props" minOccurs="0" maxOccurs="1">
+						<xsd:complexType>
+							<xsd:complexContent>
+								<xsd:extension base="beans:propsType">
+									<xsd:annotation>
+									<xsd:appinfo>
+										<tool:annotation>
+											<tool:exports type="java.util.Properties"/>
+										</tool:annotation>
+									</xsd:appinfo>
+									</xsd:annotation>
+								</xsd:extension>
+							</xsd:complexContent>
+						</xsd:complexType>
+					</xsd:element>
+				<!-- vendor adapater -->				
+				<xsd:element name="vendor" minOccurs="0" maxOccurs="1" type="vendorAdapterType"/>
+				</xsd:sequence>								
+				
+				<xsd:attribute name="persistence-unit-name" type="xsd:string" use="required"/>
+				<xsd:attribute name="provider-class" type="xsd:string">
+					<xsd:annotation>
+						<xsd:appinfo>
+							<tool:annotation>
+								<tool:expected-type type="java.lang.Class"/>
+								<!-- TODO: Is there a base type for all providers such that we can add a constraint here? -->
+							</tool:annotation>
+						</xsd:appinfo>
+					</xsd:annotation>
+				</xsd:attribute>
+
+				<xsd:attribute name="entity-manager-interface" type="xsd:string">
+					<xsd:annotation>
+						<xsd:appinfo>
+							<tool:annotation>
+								<tool:expected-type type="java.lang.Class"/>
+								<!-- TODO: Is there a base type for all providers such that we can add a constraint here? -->
+							</tool:annotation>
+						</xsd:appinfo>
+					</xsd:annotation>
+				</xsd:attribute>
+
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	
+	<xsd:complexType name="vendorAdapterType">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<tool:annotation>
+					<tool:exports type="org.springframework.orm.jpa.JpaVendorAdapter"/>
+				</tool:annotation>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:choice>
+			<xsd:element name="provided">
+				<xsd:complexType>
+					<xsd:attribute name="name">	
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:enumeration value="toplink"/>
+								<xsd:enumeration value="kodo"/>
+								<xsd:enumeration value="hibernate"/>
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:attribute>
+				</xsd:complexType>
+			</xsd:element>
+			
+			<xsd:element name="custom">
+				<xsd:complexType>
+					<xsd:attribute name="ref" type="xsd:string"/>	
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:choice>		
+		<xsd:attribute name="show-sql" type="xsd:boolean"/>
+		<xsd:attribute name="generate-ddl" type="xsd:boolean"/>				
+		<xsd:attribute name="database-platform" type="xsd:string"/>
+		<xsd:attribute name="database">		
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="default"/>
+					<xsd:enumeration value="db2"/>
+					<xsd:enumeration value="hsql"/>
+					<xsd:enumeration value="informix"/>
+					<xsd:enumeration value="mysql"/>
+					<xsd:enumeration value="oracle"/>
+					<xsd:enumeration value="postgresql"/>					
+					<xsd:enumeration value="sybase"/>					
+					<xsd:enumeration value="sql_server"/>															
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="localEMFType">
+		<xsd:complexContent>
+			<xsd:extension base="abstractEMFType">
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	
+	<xsd:complexType name="containerEMFType">
+		<xsd:complexContent>
+			<xsd:extension base="abstractEMFType">
+				<xsd:attribute name="inject" type="xsd:boolean"/>
+				<xsd:attribute name="translate" type="xsd:boolean"/>
+				
+				<xsd:attribute name="allow-redeployments-with-same-name" type="xsd:boolean"/>
+				
+
+				
+				<xsd:attribute name="data-source-lookup" type="xsd:string">
+					<xsd:annotation>
+						<xsd:appinfo>
+							<tool:annotation kind="ref">
+								<tool:expected-type type="org.springframework.jdbc.datasource.lookup.DataSourceLookup"/>
+							</tool:annotation>
+						</xsd:appinfo>
+					</xsd:annotation>
+				</xsd:attribute>
+								
+				<xsd:attribute name="data-source-ref" type="xsd:string">
+					<xsd:annotation>
+						<xsd:appinfo>
+							<tool:annotation kind="ref">
+								<tool:expected-type type="javax.sql.DataSource"/>
+							</tool:annotation>
+						</xsd:appinfo>
+					</xsd:annotation>
+				</xsd:attribute>
+				
+				<xsd:attribute name="load-time-weaver" type="xsd:string" use="required">
+					<xsd:annotation>
+						<xsd:appinfo>
+							<tool:annotation kind="ref">
+								<tool:expected-type type="org.springframework.instrument.classloading.LoadTimeWeaver"/>
+							</tool:annotation>
+						</xsd:appinfo>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="resource-loader" type="xsd:string">
+					<xsd:annotation>
+						<xsd:appinfo>
+							<tool:annotation kind="ref">
+								<tool:expected-type type="org.springframework.core.io.ResourceLoader"/>
+							</tool:annotation>
+						</xsd:appinfo>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="root-location" type="xsd:string"/>
+				<xsd:attribute name="xml-location" type="xsd:string" use="required"/>
+				
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	
+</xsd:schema>
