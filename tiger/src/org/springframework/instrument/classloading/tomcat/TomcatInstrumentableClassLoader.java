@@ -63,7 +63,8 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 
 	public ClassLoader getThrowawayClassLoader() {
 		WebappClassLoader tempLoader = new WebappClassLoader();
-		// use reflection to copy all the fields since most of them are private on pre-5.5.x Tomcat
+		// use reflection to copy all the fields since most of them are private
+		// on pre-5.5.x Tomcat
 		shallowCopyFieldState(this, tempLoader);
 		return tempLoader;
 	}
@@ -75,9 +76,11 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 		return sb.toString();
 	}
 
-	// The code below is orginially taken from ReflectionUtils and optimized for local usage
-	// There is no dependency on ReflectionUtils and this class is self contained to avoid classloading problems.
-	
+	// The code below is orginially taken from ReflectionUtils and optimized for
+	// local usage
+	// There is no dependency on ReflectionUtils and this class is self
+	// contained to avoid classloading problems.
+
 	/**
 	 * Given the source object and the destination, which must be the same class
 	 * or a subclass, copy all fields, including inherited fields. Designed to
@@ -103,17 +106,19 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 			for (int i = 0; i < fields.length; i++) {
 				Field field = fields[i];
 				// Skip static and final fields (the old FieldFilter)
-				if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())
-						|| field.getName().equals("resourceEntries"));
-				try {
-					// copy the field (the old FieldCallback)
-					field.setAccessible(true);
-					Object srcValue = field.get(src);
-					field.set(dest, srcValue);
-				}
-				catch (IllegalAccessException ex) {
-					throw new IllegalStateException("Shouldn't be illegal to access field '" + fields[i].getName()
-							+ "': " + ex);
+				// do not copy resourceEntries - it's a cache that holds class entries.
+				if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())
+						|| field.getName().equals("resourceEntries"))) {
+					try {
+						// copy the field (the old FieldCallback)
+						field.setAccessible(true);
+						Object srcValue = field.get(src);
+						field.set(dest, srcValue);
+					}
+					catch (IllegalAccessException ex) {
+						throw new IllegalStateException("Shouldn't be illegal to access field '" + fields[i].getName()
+								+ "': " + ex);
+					}
 				}
 			}
 			targetClass = targetClass.getSuperclass();

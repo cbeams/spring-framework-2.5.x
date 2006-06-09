@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * ClassFileTransformer based weaving, allowing for a list of transformers to be
  * applied on a class byte array. Normally used inside class loaders.
- *
+ * 
  * @author Rod Johnson
  * @author Costin Leau
  * @since 2.0
@@ -38,15 +38,16 @@ public class WeavingTransformer {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	// Determined at startup since parsing the log hierarchy can be expensive.
-	protected final boolean debug = logger.isDebugEnabled();
+	protected final boolean trace = logger.isTraceEnabled();
 
 	private final ClassLoader classLoader;
 
 	private List<ClassFileTransformer> transformers = new ArrayList<ClassFileTransformer>();
 
 	/**
-	 * See ClassUtils. We don't depend on that to avoid pulling in
-	 * more of Spring
+	 * See ClassUtils. We don't depend on that to avoid pulling in more of
+	 * Spring
+	 * 
 	 * @return
 	 */
 	private static ClassLoader getDefaultClassLoader() {
@@ -59,31 +60,30 @@ public class WeavingTransformer {
 	}
 
 	public WeavingTransformer() {
-		this.classLoader = getDefaultClassLoader();
+		this(null);
 	}
 
 	public WeavingTransformer(ClassLoader classLoader) {
-		this.classLoader = classLoader;
+		this.classLoader = (classLoader != null ? classLoader : getDefaultClassLoader());
 	}
 
-
 	public void addTransformer(ClassFileTransformer cft) {
-		if (debug)
+		if (logger.isDebugEnabled())
 			logger.debug("adding transformer " + cft);
 		this.transformers.add(cft);
 	}
 
-	public byte[] transformIfNecessary(String name, String internalName, byte[] bytes, ProtectionDomain pd) {
+	public byte[] transformIfNecessary(String className, String internalName, byte[] bytes, ProtectionDomain pd) {
 		for (ClassFileTransformer cft : transformers) {
 			try {
 				byte[] transformed = cft.transform(classLoader, internalName, null, pd, bytes);
 				if (transformed == null) {
-					if (debug)
-						logger.debug("Not Weaving : " + name + " w/ transformer " + cft);
+					if (trace)
+						logger.trace("Not Weaving: " + className + " w/ transformer " + cft);
 				}
 				else {
-					if (debug)
-						logger.debug("Weaving: " + name + " w/ transformer " + cft);
+					if (trace)
+						logger.trace("Weaving: " + className + " w/ transformer " + cft);
 					bytes = transformed;
 				}
 			}
