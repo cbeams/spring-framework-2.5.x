@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * have not appeared before, through the use of a single Hibernate Session for the
  * processing of an entire request. In particular, the reassociation of persistent
  * objects with a Hibernate Session has to occur at the very beginning of request
- * processing, to avoid clashes will already loaded instances of the same objects.
+ * processing, to avoid clashes with already loaded instances of the same objects.
  *
  * <p>Alternatively, turn this filter into deferred close mode, by specifying
  * "singleSession"="false": It will not use a single session per request then,
