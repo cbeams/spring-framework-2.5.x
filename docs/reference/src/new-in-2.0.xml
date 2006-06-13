@@ -50,7 +50,7 @@
     </section>
 
     <section id="new-in-2-ioc-custom-configuration">
-      <title>Extensible XML support</title>
+      <title>Extensible XML authoring</title>
 
       <para>Not only is XML configuration easier to specify, it is now also
       extensible.</para>
