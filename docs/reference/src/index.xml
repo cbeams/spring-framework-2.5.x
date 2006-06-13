@@ -29,7 +29,7 @@
 <!ENTITY scripting			SYSTEM "scripting.xml">
 <!ENTITY dynamic-languages  SYSTEM "dynamic-languages.xml">
 <!ENTITY xsd-configuration  SYSTEM "xsd-configuration.xml">
-<!ENTITY schema-beans       SYSTEM "spring-beans.xsd.xml">
+<!ENTITY xml-custom         SYSTEM "xml-custom.xml">
 <!ENTITY dtd				SYSTEM "dtd.xml">
 <!ENTITY spring.tld         SYSTEM "spring.tld.xml">
 <!ENTITY spring-form.tld    SYSTEM "spring-form.tld.xml">
@@ -100,12 +100,12 @@
 				<surname>Lewis</surname>
 			</author>
 			<author>
-				<firstname>Rick</firstname>
-				<surname>Evans</surname>
-			</author>
-			<author>
 				<firstname>Costin</firstname>
 				<surname>Leau</surname>
+			</author>
+			<author>
+				<firstname>Rick</firstname>
+				<surname>Evans</surname>
 			</author>
 		</authorgroup>
 		<legalnotice>
@@ -320,7 +320,7 @@
 	</part>
 	<!-- back matter -->
 	&xsd-configuration;
-	&schema-beans;
+	&xml-custom;
 	&dtd;
 	&spring.tld;
 	&spring-form.tld;

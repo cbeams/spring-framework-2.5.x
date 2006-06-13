@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<appendix id="extensible-xml">
+    <title>Extensible XML authoring</title>
+    <section>
+        <title>Introduction</title>
+        <para>This section of the reference documentation details how you would
+        go about writing your own custom XML bean definition parsers and integrating such
+        parsers into the Spring IoC container. Since version 2.0, Spring has featured
+        a mechanism for schema-based extensions to the basic Spring XML format for defining
+        and configuring beans.</para>
+    	<para>
+    		Spring's extensible XML configuration mechanism is based on XML Schema, to facilitate
+    		authoring configuration files using a schema-aware XML editor. If you're not familiar
+    		with Spring's current XML configuration extensions that come with the standard
+    		Spring distribution, please first read the appendix entitled <xref linkend="xsd-config"/>.
+    	</para>
+    	<para>
+    		Creating new XML configuration extensions can be done by following a simple process of
+    		authoring an XML Schema, coding a <interfacename>NamespaceHandler</interfacename>, coding one or more
+    		<interfacename>BeanDefinitionParser</interfacename> instances and registering the <interfacename>NamespaceHandler</interfacename> and the schema
+    		in a dedicated properties file. What follows is a description of each of these steps. In the example,
+    		we'll create a XML extension that allows us to configure objects of type <classname>SimpleDateFormat</classname>, directly in an
+    		Spring IoC container.
+    	</para>
+    </section>
+    	<section id="extensible-xml-schema">
+    		<title>Authoring the schema</title>
+    		<para>
+    			Creating an XML configuration extension for use with Spring's IoC container starts with
+    			authoring an XML Schema. What follows is the schema we'll use to configure <classname>SimpleDateFormat</classname>
+    			objects. The emphasized line contains an extension base for all tags that will be identifiable (meaning they have an 
+    			<literal>id</literal> attribute that will be used as the bean identifier in the container).
+       		</para>    			
+    		<programlisting><![CDATA[#### myns.xsd (inside package org/springframework/samples/xml)
+
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://www.springframework.org/schema/myns"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:beans="http://www.springframework.org/schema/beans"
+    targetNamespace="http://www.mycompany.com/schema/myns"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+   <xsd:import namespace="http://www.springframework.org/schema/beans"/>
+   
+   <xsd:element name="dateformat">
+      <xsd:complexType>
+         <xsd:complexContent>]]>
+            <emphasis role="bold"><![CDATA[<xsd:extension base="beans:identifiedType">]]></emphasis><![CDATA[
+               <xsd:attribute name="lenient" type="xsd:boolean"/>
+               <xsd:attribute name="pattern" type="xsd:string" use="required"/>
+            </xsd:extension>
+         </xsd:complexContent>
+      </xsd:complexType>
+   </xsd:element>
+   
+</xsd:schema>]]></programlisting>
+			<para>
+				The above schema will be used to configure <classname>SimpleDateFormat</classname> objects, directly in the application context using
+				the <literal>myns:dateformat</literal> configuration directive. As noted above, the <literal>id</literal> attribute
+				will (<emphasis>in this case</emphasis>) be used as the bean identifier for the <classname>SimpleDateFormat</classname> bean.
+			</para>
+			<programlisting><![CDATA[<myns:dateformat id="dateFormat" 
+	pattern="yyyy-MM-dd HH:mm"
+	lenient="true"/>
+]]></programlisting>
+			<para>
+				Note that after we've created the infrastructure classes, this will essentially be exactly 
+				the same as the following. In other words, we're just creating a bean in the
+				container, identified by <literal>dateFormat</literal> of type 
+				<classname>SimpleDateFormat</classname>, with a couple of properties set.
+			</para>
+			<programlisting><![CDATA[<bean id="dateFormat" class="java.text.SimpleDateFormat">
+	<constructor-arg value="yyyy-HH-dd HH:mm"/>
+	<property name="lenient" value="true"/>
+</bean>]]></programlisting>
+			<para>
+				<note>The schema-based approach to creating configuration format, allows for
+				tight integration with an IDE that has a schema-aware XML editor. Using properly
+				authored schema, you can for example use autocompletion to have a user
+				choose between several configuration options defined in the enumeration.</note>
+			</para>
+		</section>
+		<section>
+			<title>Coding a <interfacename>NamespaceHandler</interfacename></title>
+			<para>
+				In addition to the schema, we need a <interfacename>NamespaceHandler</interfacename>
+				that will parse all elements of this specific namespace Spring encounters
+				while parsing configuration files. The <interfacename>NamespaceHandler</interfacename> should in our case
+				take care of the parsing of the <literal>myns:dateformat</literal> element.
+			</para>
+			<para>
+				The <interfacename>NamespaceHandler</interfacename> interface is pretty simple in that 
+				it onyl features three methods:
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para><literal>init()</literal> - allows for initialization of
+						the <interfacename>NamespaceHandler</interfacename> and will be called by Spring before the handler is used</para>
+					</listitem>
+					<listitem>
+						<para><literal>BeanDefinition parse(Element element, ParserContext parserContext)</literal> - 
+						called when Spring encounters an top-level element (not nested inside a bean definition
+						or a different namespace). This method can register bean definitions itself and/or
+						return a bean definition.</para>
+					</listitem>
+					<listitem>
+						<para><literal>BeanDefinitionHolder decorate(Node element, BeanDefinitionHolder definition, ParserContext parserContext)</literal> -
+						called when Spring encounters an attribute or nested element of a different namespace, inside
+						for example the Spring namespace. Decoration of bean definition is used
+						for example with the out-of-the-box scopes Spring 2.0 comes with (see
+						<xref linkend="beans-factory-scopes"/> for more information about scopes). We'll
+						start by highlighting a simple example not using decoration after which we show decoration
+						in a somewhat more advanced example.</para>
+					</listitem>
+				</itemizedlist>
+			</para>
+			<para>
+				Although it is perfectly possible to code one's own <interfacename>NamespaceHandler</interfacename> for the entire namespace
+				(hence provide code that parses each and every element in the namespace), it's often the case
+				that <emphasis>each top-level XML element in a schema results in a bean definition</emphasis>
+				(as in our case, where the <literal>myns:dateformat</literal> element results in a 
+				<classname>SimpleDateFormat</classname> bean definition). Therefore, Spring features a couple of
+				convenience classes that support this kind of behavior. In this example, we'll use the most
+				often used convenience class which is the <classname>NamespaceHandlerSupport</classname> class:
+			</para>
+			<programlisting><![CDATA[package org.springframework.samples.xml;
+
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+
+public class MyNamespaceHandler extends NamespaceHandlerSupport {
+    
+    public void init() {        ]]><emphasis role="bold"><![CDATA[
+        registerBeanDefinitionParser("dateformat", 
+                new SimpleDateFormatBeanDefinitionParser());        
+    ]]></emphasis><![CDATA[}
+}]]></programlisting>
+		</section>
+		<section>
+			<title>Coding a <interfacename>BeanDefinitionParser</interfacename></title>
+			<para>
+				As you can see, the namespace handler shown above registers so-called <literal>BeanDefinitionParsers</literal>.
+				A <interfacename>BeanDefinitionParser</interfacename> in this case will be consulted if Spring the namespace handler
+				encounters an XML element of the type that has been mapped to this specific bean definition parser (which
+				is <literal>dateformat</literal> in this case).
+				In other words, the <interfacename>BeanDefinitionParser</interfacename> is responsible for parsing
+				one distinct top-level XML element defined in the schema. 
+				In the parser, we'll have access to the XML element (and its subelements)
+				and the <classname>ParserContext</classname>. The latter can be used to obtain a reference
+				to for example the <interfacename>BeanDefinitionRegistry</interfacename> as done in the
+				example below.
+			</para>
+			<programlisting><![CDATA[package org.springframework.samples.xml;
+
+import java.text.SimpleDateFormat;
+
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.util.StringUtils;
+import org.w3c.dom.Element;
+
+public class SimpleDateFormatBeanDefinitionParser implements BeanDefinitionParser {
+   
+   public BeanDefinition parse(Element element, ParserContext parserContext) {
+      
+      // create a RootBeanDefinition that will serve as configuration
+      // holder for the 'pattern' attribute and the 'lenient' attribute]]><emphasis role="bold"><![CDATA[
+      RootBeanDefinition beanDef = new RootBeanDefinition();
+      beanDef.setBeanClass(SimpleDateFormat.class);]]></emphasis><![CDATA[      
+
+      ]]><lineannotation>// never <literal>null</literal> since the schema requires it </lineannotation><![CDATA[
+      String pattern = element.getAttribute("pattern");]]><emphasis role="bold"><![CDATA[
+      beanDef.getConstructorArgumentValues().addGenericArgumentValue(pattern);]]></emphasis><![CDATA[
+
+      String lenientString = element.getAttribute("lenient");
+      if (StringUtils.hasText(lenientString)) {
+         // won't throw exception if validation is turned on (boolean type set in schema)         ]]><emphasis role="bold"><![CDATA[
+         beanDef.getPropertyValues().addPropertyValue("lenient", new Boolean(lenientString));]]></emphasis><![CDATA[
+      }
+      
+      ]]><lineannotation>// retrieve the ID attribute that will serve as the bean identifier in the context </lineannotation><![CDATA[
+      String id = element.getAttribute("id");
+      
+      // create a bean definition holder to be able to register the
+      // bean definition with the bean definition registry
+      // (obtained through the ParserContext)
+      BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDef, id);
+      
+      // register the BeanDefinitionHolder (which contains the bean definition)
+      // with the BeanDefinitionRegistry]]><emphasis role="bold"><![CDATA[
+      BeanDefinitionReaderUtils.registerBeanDefinition(holder, parserContext.getRegistry());]]></emphasis><![CDATA[
+      
+      return beanDef;
+   }
+}]]></programlisting>
+			<para>
+				<note>
+					In the example here, we're defining a <interfacename>BeanDefinition</interfacename> and registering it
+					with the <interfacename>BeanDefinitionRegistry</interfacename>. Note that you don't necessarily have to 
+					register a bean definition with the registry or return a bean definition
+					from the <literal>parse()</literal> method. You are free to do whatever you
+					want with the information given to you (i.e. the XML element) and the
+					<classname>ParserContext</classname>.
+				</note>
+			</para>
+			<para>
+				The ParserContext provides access to following properties
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para><literal>readerContext</literal> - provides access
+							to the bean factory and also to the <interfacename>NamespaceHandlerResolver</interfacename>, which
+							can optionally be used to resolve nested namespaces.
+						</para>
+					</listitem>
+					<listitem>
+						<para><literal>parserDelegate</literal> - controlling component
+						that drives the parsing of (parts of) the configuration file. Typically
+						you don't need to access this.</para>
+					</listitem>
+					<listitem>
+						<para><literal>registry</literal> - the <interfacename>BeanDefinitionRegistry</interfacename>
+						that allows you to register newly created <interfacename>BeanDefinition</interfacename> instances with.
+						</para>
+					</listitem>
+					<listitem>
+						<para><literal>nested</literal> - indicates whether or the XML element that is currently
+						being processed is part of a outer bean definition (in other words, it's defined similar
+						to traditional inner-beans).
+						</para>
+					</listitem>
+				</itemizedlist>
+			</para>
+		</section>
+		<section>
+			<title>Registering the handler and the schema</title>
+			<para>
+				We're done implementing the <interfacename>NamespaceHandler</interfacename> and the <interfacename>BeanDefinitionParser</interfacename> that will
+				take care of parsing the custom XML Schema for us. We now have the following artifacts:
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para><classname>org.springframework.samples.xml.MyNamespaceHandler</classname> - 
+						namespace handler that will register one or more <interfacename>BeanDefinitionParser</interfacename> instances</para>
+					</listitem>
+					<listitem>
+						<para><classname>org.springframework.samples.xml.SimpleDateFormatBeanDefinitionParser</classname> - 
+						used my the namespace handler to parse elements of type <literal>dateformat</literal></para>
+					</listitem>
+					<listitem>
+						<para><literal>org/springframework/samples/xml/myns.xsd</literal> - the actual schema that 
+						will be used in the Spring configuration files 
+						(<emphasis role="bold">note that this file needs to be on the classpath, alongside your 
+						namespace handler and parser classes as we'll see later on</emphasis>)</para>
+					</listitem>
+				</itemizedlist>
+			</para>
+			<para>
+				The last thing we need to do is getting the namespace ready for use by registering
+				it in two special purpose properties files. These properties files are both placed in META-INF
+				and can for example be distributed alongside your binary classes in a JAR file. Spring will 
+				automatically pick up the new namespaces and handlers once it finds the properties
+				files on the classpath.
+			</para>
+			<section>
+				<title>META-INF/spring.handlers</title>
+				<para>
+					The properties file called <literal>spring.handlers</literal> contains a mapping
+					of XML Schema URIs to namespace handler classes. So for our example, we need to 
+					mention the following here:
+				</para>
+				<programlisting><![CDATA[http\://www.mycompany.com/schema/myns=org.springframework.samples.xml.MyNamespaceHandler]]></programlisting>
+			</section>
+			<section>
+				<title>META-INF/spring.schemas</title>
+				<para>
+					The properties file called <literal>spring.schemas</literal> contains a mapping
+					of XML Schema locations (mention alongside the schema declaration in XML files
+					that use the schema as part of the <literal>xsi:schemaLocation</literal> attribute)
+					to classpath resources. This file is needed to prevent Spring from having to use a default
+					<literal>EntityResolver</literal> that requires Internet access to retrieve the 
+					schema file. If you mention the mapping in this properties file, Spring will
+					search on the classpath for the schema (in this case; myns.xsd in the package 
+					org.springframework.samples.xml):
+				</para>
+			    <programlisting><![CDATA[http\://www.mycompany.com/schema/myns/myns.xsd=org/springframework/samples/xml/myns.xsd]]></programlisting>
+			</section>
+		</section>
+    
+</appendix>
