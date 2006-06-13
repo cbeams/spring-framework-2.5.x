@@ -2103,16 +2103,22 @@ MyInterfaceType proxy = factory.getProxy();]]></programlisting>
 		</para>
 		
 		<remark>
-		  Spring provides the <literal>DependencyInjectionInterceptorFactoryBean</literal>
-		  in the <literal>org.springframework.orm.hibernate.support</literal> package. This
-		  can be used to have Spring create and configure prototype domain objects for 
-		  Hibernate (using either autowiring or named prototype bean definitions). See the
-		  javadocs for more information. The interceptor does not of course support 
-		  configuration of objects that you create yourself programmatically rather than
-	      retrieve from the database. Similar techniques may be possible with other
-		  frameworks. As ever, be pragramatic and choose the simplest thing
-		  that meets your requirements.	
-		</remark>  
+		    <para>
+		        The <classname>DependencyInjectionInterceptorFactoryBean</classname>
+		        in the <literal>org.springframework.orm.hibernate.support</literal> package
+		        can be used to have Spring create and configure prototype domain objects for 
+		        Hibernate (using either autowiring or named prototype bean definitions).
+		        The interceptor does not of course support 
+		        configuration of objects that you create yourself programmatically rather than
+	            retrieve from the database. Similar techniques may be possible with other
+		        frameworks. As ever, be pragramatic and choose the simplest thing
+		        that meets your requirements. Please note that the aforementioned class does
+		        <emphasis role="bold">not</emphasis> ship with the Spring distribution. If you
+		        want to make use of it, you will have to download it from the Spring CVS repository
+		        and compile it yourself; the file itself can be found in the <literal>'sandbox'</literal>
+		        directory of the Spring CVS repository tree.
+		    </para>
+		</remark>
 		  
 		<para>
 		  The <literal>@Configurable</literal> annotation marks a class as eligible for
