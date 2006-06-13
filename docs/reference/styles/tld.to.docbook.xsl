@@ -37,20 +37,14 @@
             <xsl:attribute name="id">
                 <xsl:value-of select="$title"/>
             </xsl:attribute>
-            <xsl:element name="title">
-                <xsl:element name="literal">
-                    <xsl:value-of select="$title"/>
-                </xsl:element>
-            </xsl:element>
+            <xsl:element name="title"><xsl:value-of select="$title"/></xsl:element>
 
             <xsl:element name="section">
                 <xsl:attribute name="id">
                     <xsl:value-of select="$title"/>
                     <xsl:text>-intro</xsl:text>
                 </xsl:attribute>
-                <xsl:element name="title">
-                    <xsl:text>Introduction</xsl:text>
-                </xsl:element>
+                <xsl:element name="title"><xsl:text>Introduction</xsl:text></xsl:element>
             </xsl:element>
 
             <xsl:element name="para">

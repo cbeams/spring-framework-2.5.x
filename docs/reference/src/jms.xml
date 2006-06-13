@@ -456,9 +456,7 @@ public class JmsQueueSender {
   	</section>
   	
   	<section>
-  		<title>
-  			<interfacename>SessionCallback</interfacename> and <interfacename>ProducerCallback</interfacename>
-  		</title>
+  		<title><interfacename>SessionCallback</interfacename> and <interfacename>ProducerCallback</interfacename></title>
   		
   		<para>While the send operations cover many common usage scenarios, there
         are cases when you want to perform multiple operations on a JMS

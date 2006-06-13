@@ -296,7 +296,7 @@ public class ExampleJob extends QuartzJobBean {
 		</section>
 	</section>
 	<section id="taskexecutor">
-		<title>The Spring <classname>TaskExecutor</classname> abstraction</title>
+		<title>The Spring <interfacename>TaskExecutor</interfacename> abstraction</title>
 
 		<para>
 			Spring 2.0 introduces a new abstraction for dealing with
@@ -311,10 +311,10 @@ public class ExampleJob extends QuartzJobBean {
 		</para>
 
 		<section>
-			<title>The <classname>TaskExecutor</classname> interface</title>
+			<title>The <interfacename>TaskExecutor</interfacename> interface</title>
 
 			<para>
-				Spring's <classname>TaskExecutor</classname> interface is
+				Spring's <interfacename>TaskExecutor</interfacename> interface is
 				identical to the <classname>java.util.concurrent.Executor</classname>
 				interface. In fact, its primary reason for existence is
 				to abstract away the need for Java 5 when using thread
@@ -326,15 +326,15 @@ public class ExampleJob extends QuartzJobBean {
 		</section>
 
 		<section>
-			<title>Where to use a <classname>TaskExecutor</classname></title>
+			<title>Where to use a <interfacename>TaskExecutor</interfacename></title>
 
 			<para>
-				The <classname>TaskExecutor</classname> was originally
+				The <interfacename>TaskExecutor</interfacename> was originally
 				created to give other Spring components an abstraction
 				for thread pooling where needed. Components such as the
 				<classname>ApplicationEventMulticaster</classname>,
 				JMS's <classname>AbstractMessageListenerContainer</classname>,
-				and Quartz integration all use the <classname>TaskExecutor</classname>
+				and Quartz integration all use the <interfacename>TaskExecutor</interfacename>
 				abstraction to pool threads. However, if your beans need
 				thread pooling behavior, it is possible to use this
 				abstraction for your own needs.
@@ -342,11 +342,11 @@ public class ExampleJob extends QuartzJobBean {
 		</section>
 		
 		<section>
-			<title><classname>TaskExecutor</classname> types</title>
+			<title><interfacename>TaskExecutor</interfacename> types</title>
 
 			<para>
 				There are a number of pre-built implementations of
-				<classname>TaskExecutor</classname> included with the
+				<interfacename>TaskExecutor</interfacename> included with the
 				Spring distribution. In all likelihood, you shouldn't ever
 				need to implement your own.
 			</para>
@@ -442,7 +442,7 @@ public class ExampleJob extends QuartzJobBean {
 						one in that environment. It exposes bean properties for
 						configuring a 
 						<classname>java.util.concurrent.ThreadPoolExecutor</classname>
-						and wraps it in a <classname>TaskExecutor</classname>.
+						and wraps it in a <interfacename>TaskExecutor</interfacename>.
 						If you need something advanced such as a
 						<classname>ScheduledThreadPoolExecutor</classname>,
 						it is recommended that you use a
@@ -497,17 +497,15 @@ public class ExampleJob extends QuartzJobBean {
 			</itemizedlist>
 		</section>
 		<section>
-			<title>
-				Using a <classname>TaskExecutor</classname>
-			</title>
+			<title>Using a <interfacename>TaskExecutor</interfacename></title>
 			
 			<para>
-				Spring's <classname>TaskExecutor</classname> implementations
+				Spring's <interfacename>TaskExecutor</interfacename> implementations
 				are used as simple JavaBeans.  In the example below, we define
 				a bean that uses the <classname>ThreadPoolTaskExecutor</classname>
 				to asynchronously print out a set of messages.
 			</para>
-			
+
 			<programlisting><![CDATA[import org.springframework.core.task.TaskExecutor;
 
 public class TaskExecutorExample {
@@ -543,12 +541,12 @@ public class TaskExecutorExample {
 			<para>
 				As you can see, rather than retrieving a thread from the
 				pool and executing yourself, you add your <classname>Runnable</classname>
-				to the queue and the <classname>TaskExecutor</classname>
+				to the queue and the <interfacename>TaskExecutor</interfacename>
 				uses it's internal rules to decide when the task gets executed.
 			</para>
 			
 			<para>
-				To configure the rules that the <classname>TaskExecutor</classname>
+				To configure the rules that the <interfacename>TaskExecutor</interfacename>
 				will use, simple bean properties have been exposed.
 			</para>
 			
@@ -561,6 +559,7 @@ public class TaskExecutorExample {
 <bean id="taskExecutorExample" class="TaskExecutorExample">
   <constructor-arg ref="taskExecutor" />
 </bean>]]></programlisting>
+
 		</section>
 	</section>
 </chapter>
