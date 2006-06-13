@@ -59,13 +59,13 @@ public abstract class ClassUtils {
 
 	/**
 	 * Map with primitive wrapper type as key and corresponding primitive
-	 * type as value, for example: Integer.class -> int.class
+	 * type as value, for example: Integer.class -> int.class.
 	 */
 	private static final Map primitiveWrapperTypeMap = new HashMap(8);
 
 	/**
 	 * Map with primitive type name as key and corresponding primitive
-	 * type as value, for example: "int" -> "int.class"
+	 * type as value, for example: "int" -> "int.class".
 	 */
 	private static final Map primitiveTypeNameMap = new HashMap(8);
 
