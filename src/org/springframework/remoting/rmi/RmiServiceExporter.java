@@ -49,8 +49,8 @@ import org.springframework.beans.factory.InitializingBean;
  * <p>Note: RMI makes a best-effort attempt to obtain the fully qualified host name.
  * If one cannot be determined, it will fall back and use the IP address. Depending
  * on your network configuration, in some cases it will resolve the IP to the loopback
- * address. Ensuring that RMI will use the host name bound to the correct network
- * interface you should pass the <code>java.rmi.server.hostname</code> property to the
+ * address. To ensure that RMI will use the host name bound to the correct network
+ * interface, you should pass the <code>java.rmi.server.hostname</code> property to the
  * JVM that will export the registry and/or the service using the "-D" JVM argument.
  * For example: <code>-Djava.rmi.server.hostname=myserver.com</code>
  *

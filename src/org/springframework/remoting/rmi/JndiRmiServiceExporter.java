@@ -48,8 +48,7 @@ import org.springframework.jndi.JndiTemplate;
  * or be configured in a <code>jndi.properties</code> file or as system properties.
  * For example:
  *
- * <pre>
- * &lt;property name="jndiEnvironment"&gt;
+ * <pre class="code">&lt;property name="jndiEnvironment"&gt;
  * 	 &lt;props>
  *		 &lt;prop key="java.naming.factory.initial"&gt;com.sun.jndi.cosnaming.CNCtxFactory&lt;/prop&gt;
  *		 &lt;prop key="java.naming.provider.url"&gt;iiop://localhost:1050&lt;/prop&gt;

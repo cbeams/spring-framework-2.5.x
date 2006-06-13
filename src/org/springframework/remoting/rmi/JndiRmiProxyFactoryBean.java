@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import org.springframework.beans.factory.FactoryBean;
 
 /**
  * Factory bean for RMI proxies from JNDI.
- * Typically used for RMI-IIOP (CORBA), but can also be used for EJB home objects
+ * 
+ * <p>Typically used for RMI-IIOP (CORBA), but can also be used for EJB home objects
  * (for example, a Stateful Session Bean home). In contrast to a plain JNDI lookup,
  * this accessor also performs narrowing through PortableRemoteObject.
  *
@@ -38,8 +39,7 @@ import org.springframework.beans.factory.FactoryBean;
  * or be configured in a jndi.properties file or as system properties.
  * For example:
  *
- * <pre>
- * &lt;property name="jndiEnvironment"&gt;
+ * <pre class="code">&lt;property name="jndiEnvironment"&gt;
  * 	 &lt;props>
  *		 &lt;prop key="java.naming.factory.initial"&gt;com.sun.jndi.cosnaming.CNCtxFactory&lt;/prop&gt;
  *		 &lt;prop key="java.naming.provider.url"&gt;iiop://localhost:1050&lt;/prop&gt;
@@ -54,7 +54,6 @@ import org.springframework.beans.factory.FactoryBean;
  * @see #setJndiEnvironment
  * @see #setJndiName
  * @see JndiRmiServiceExporter
- * @see JndiRmiProxyFactoryBean
  * @see org.springframework.remoting.RemoteAccessException
  * @see java.rmi.RemoteException
  * @see java.rmi.Remote
