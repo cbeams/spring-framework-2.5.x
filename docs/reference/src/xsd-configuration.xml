@@ -783,7 +783,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             so that if you encounter an issue when switching over to the XSD-style in some
             specific environment you can refer to this section for the authoritative answer.</para>
             
-            <section id="">
+            <section>
                 <title>XML parsing errors in the Resin v.3 application server</title>
                 <para>If you are using the XSD-style for Spring 2.0 XML configuration
                 and deploying to v.3 of Caucho's Resin application server, you will need
