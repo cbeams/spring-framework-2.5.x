@@ -27,19 +27,23 @@ import org.springframework.util.ClassUtils;
 
 /**
  * FactoryBean which retrieves a static or non-static field value.
- * Typically used for retrieving public static final constants.
+ * 
+ * <p>Typically used for retrieving public static final constants. Usage example:
  *
- * <p>Usage example:
- *
- * <pre>
- * // standard definition for exposing a static field, specifying the "staticField" property
+ * <pre class="code">// standard definition for exposing a static field, specifying the "staticField" property
  * &lt;bean id="myField" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"&gt;
- *   &lt;property name="staticField"&gt;&lt;value&gt;java.sql.Connection.TRANSACTION_SERIALIZABLE&lt;/value&gt;&lt;/property&gt;
+ *   &lt;property name="staticField" value="java.sql.Connection.TRANSACTION_SERIALIZABLE"/&gt;
  * &lt;/bean&gt;
  *
  * // convenience version that specifies a static field pattern as bean name
- * &lt;bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/&gt;</pre>
+ * &lt;bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
+ *       class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/&gt;</pre>
  * </pre>
+ * 
+ * <p>If you are using Spring 2.0, you can also use the following style of configuration for
+ * public static fields.
+ * 
+ * <pre class="code">&lt;util:constant static-field="java.sql.Connection.TRANSACTION_SERIALIZABLE"/&gt;</pre>
  *
  * @author Juergen Hoeller
  * @since 1.1
