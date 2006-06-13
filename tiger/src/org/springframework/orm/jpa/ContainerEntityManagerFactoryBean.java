@@ -184,7 +184,7 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 		}
 		
 		if (persistenceProviderClass == null) {
-			throw new IllegalStateException("Unable to determine persistence p rovider class. " +
+			throw new IllegalStateException("Unable to determine persistence provider class. " +
 					"Please check configuration of " + getClass().getName() + "; " +
 					"ideally specify the appropriate JpaVendorAdapter class for this provider");
 		}
