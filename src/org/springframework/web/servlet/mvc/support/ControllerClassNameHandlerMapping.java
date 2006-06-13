@@ -129,6 +129,8 @@ public class ControllerClassNameHandlerMapping extends AbstractUrlHandlerMapping
 
 		if (MultiActionController.class.isAssignableFrom(controllerClass)) {
 			pathMapping.append("/*");
+		} else {
+			pathMapping.append("*");
 		}
 
 		return pathMapping.toString();

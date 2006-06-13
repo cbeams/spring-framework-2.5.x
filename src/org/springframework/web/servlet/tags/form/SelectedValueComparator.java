@@ -16,39 +16,39 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import java.beans.PropertyEditor;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-
 import org.springframework.core.enums.LabeledEnum;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
 
+import java.beans.PropertyEditor;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+
 /**
  * Utility class for testing whether a candidate value matches a {@link BindStatus#getValue data bound value}.
  * Eagerly attempts to prove a comparison through a number of avenues to deal with issues such as instance
  * inequality, logical (String-representation-based) equality and {@link PropertyEditor}-based comparison.
- *
+ * <p/>
  * <p>Full supports is provided for comparing arrays, {@link Collection Collections} and {@link Map Maps}.
- *
+ * <p/>
  * <p><h1><a name="equality-contract">Equality Contract</a></h1>
  * For single-valued objects equality is first tested using standard {@link Object#equals Java equality}. As
  * such, user code should endeavour to implement {@link Object#equals} to speed up the comparison process. If
  * {@link Object#equals} returns <code>false</code> then an attempt is made at an
  * {@link #exhaustiveCompare exhaustive comparison} with the aim being to <strong>prove</strong> equality rather
  * than disprove it.
- *
+ * <p/>
  * <p>Special support is given for instances of {@link LabeledEnum} with a <code>String</code>-based
  * comparison of the candidate value against the code of the {@link LabeledEnum}. This can be useful when a
  * {@link LabeledEnum} is used to define a list of '<code>&lt;option&gt;</code>' elements in HTML.
- *
+ * <p/>
  * <p>Next, an attempt is made to compare the <code>String</code> representations of both the candidate and bound
  * values. This may result in <code>true</code> in a number of cases due to the fact both values will be represented
  * as <code>Strings</code> when shown to the user.
- *
+ * <p/>
  * <p>Next, if the candidate value is a <code>String</code>, an attempt is made to compare the bound value to
  * result of applying the corresponding {@link PropertyEditor} to the candidate. This comparison may be
  * executed twice, once against the direct <code>String</code> instances, and then against the <code>String</code>
@@ -128,7 +128,7 @@ abstract class SelectedValueComparator {
 	}
 
 	private static boolean exhaustiveCollectionCompare(
-			Collection collection, Object candidateValue, PropertyEditor propertyEditor) {
+					Collection collection, Object candidateValue, PropertyEditor propertyEditor) {
 
 		for (Iterator iterator = collection.iterator(); iterator.hasNext();) {
 			Object o = iterator.next();
@@ -139,36 +139,35 @@ abstract class SelectedValueComparator {
 		return false;
 	}
 
-	private static boolean exhaustiveCompare(Object value, Object candidate, PropertyEditor propertyEditor) {
-		if (value instanceof LabeledEnum) {
-			String enumCodeAtString = ObjectUtils.getDisplayString(((LabeledEnum) value).getCode());
+	private static boolean exhaustiveCompare(Object boundValue, Object candidate, PropertyEditor propertyEditor) {
+		if (boundValue instanceof LabeledEnum) {
+			String enumCodeAtString = ObjectUtils.getDisplayString(((LabeledEnum) boundValue).getCode());
 			if (enumCodeAtString.equals(ObjectUtils.getDisplayString(candidate))) {
 				return true;
 			}
 		}
-		else if (ObjectUtils.getDisplayString(value).equals(ObjectUtils.getDisplayString(candidate))) {
+		else if (ObjectUtils.getDisplayString(boundValue).equals(ObjectUtils.getDisplayString(candidate))) {
 			return true;
 		}
 		else if (propertyEditor != null && candidate instanceof String) {
 
 			// try PE-based comparison (PE should *not* be allowed to escape creating thread)
 			Object originalValue = propertyEditor.getValue();
+			String candidateAsString = (String) candidate;
 			try {
-				String candidateAsString = (String) candidate;
 				propertyEditor.setAsText(candidateAsString);
-				if (ObjectUtils.nullSafeEquals(value, propertyEditor.getValue())) {
+				if (ObjectUtils.nullSafeEquals(boundValue, propertyEditor.getValue())) {
 					return true;
-				}
-
-				if (propertyEditor.getValue() != null) {
-					return ObjectUtils.nullSafeEquals(candidateAsString, propertyEditor.getAsText());
 				}
 			}
 			finally {
 				propertyEditor.setValue(originalValue);
 			}
+
+			if (propertyEditor.getValue() != null) {
+				return ObjectUtils.nullSafeEquals(candidateAsString, propertyEditor.getAsText());
+			}
 		}
 		return false;
 	}
-
 }

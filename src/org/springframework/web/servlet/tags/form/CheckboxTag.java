@@ -112,7 +112,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 		tagWriter.startTag("input");
 		tagWriter.writeAttribute("type", "hidden");
 		tagWriter.writeAttribute("value", "1");
-		tagWriter.writeAttribute("name", "_" + getPath());
+		tagWriter.writeAttribute("name", "_" + getName());
 		tagWriter.endTag();
 
 		return EVAL_PAGE;
@@ -127,7 +127,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 		tagWriter.writeAttribute("value", getDisplayString(resolvedValue));
 
 		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
-			tagWriter.writeAttribute("checked", "true");
+			tagWriter.writeAttribute("checked", "checked");
 		}
 	}
 
@@ -140,7 +140,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 		tagWriter.writeAttribute("value", getDisplayString(resolvedValue));
 
 		if (boundValue.contains(resolvedValue)) {
-			tagWriter.writeAttribute("checked", "true");
+			tagWriter.writeAttribute("checked", "checked");
 		}
 	}
 
@@ -152,7 +152,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	private void renderFromBoolean(Boolean boundValue, TagWriter tagWriter) throws JspException {
 		tagWriter.writeAttribute("value", "true");
 		if (boundValue.booleanValue()) {
-			tagWriter.writeAttribute("checked", "true");
+			tagWriter.writeAttribute("checked", "checked");
 		}
 	}
 

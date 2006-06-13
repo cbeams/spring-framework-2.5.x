@@ -25,6 +25,7 @@ import org.springframework.validation.BindException;
 import org.springframework.mock.web.MockPageContext;
 
 import javax.servlet.jsp.tagext.Tag;
+import javax.servlet.jsp.PageContext;
 import javax.servlet.http.HttpServletRequest;
 import java.io.StringWriter;
 import java.util.Map;
@@ -173,7 +174,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	public void testWithNestedBind() throws Exception {
-		getPageContext().setAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, "spouse");
+		getPageContext().setAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, "spouse.", PageContext.REQUEST_SCOPE);
 
 		this.tag.setPath("name");
 

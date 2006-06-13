@@ -23,6 +23,7 @@ import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.tags.NestedPathTag;
 
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
 
 /**
  * Base tag for all data-binding aware JSP form tags. Provides the common
@@ -120,14 +121,15 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 
 	/**
 	 * Gets the value for the HTML '<code>name</code>' attribute. The default
-	 * implementation simply delegates to {@link #getPath} to use the property
+	 * implementation simply delegates to {@link #getNestedPath} and {@link #getPath()} to use the property
 	 * path as the name. For the most part this is desirable as it links with
 	 * the server-side expectation for databinding. However, some subclasses
 	 * may wish to change the value of the '<code>name</code>' attribute without
 	 * changing the bind path.
 	 */
 	protected String getName() throws JspException {
-		return getPath();
+		String nestedPath = getNestedPath();
+		return (nestedPath == null) ? getPath() : nestedPath + getPath();
 	}
 
 	/**
@@ -161,7 +163,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 
 		String nestedPath = getNestedPath();
 		if(nestedPath != null) {
-			sb.append(nestedPath).append('.');
+			sb.append(nestedPath);
 		}
 
 		return sb.append(resolvedSubPath).toString();
@@ -172,7 +174,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 * {@link NestedPathTag}.
 	 */
 	private String getNestedPath() {
-		return (String) this.pageContext.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME);
+		return (String) this.pageContext.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 	}
 
 	private String getCommandName() {

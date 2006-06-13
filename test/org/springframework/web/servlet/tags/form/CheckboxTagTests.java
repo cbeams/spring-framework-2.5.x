@@ -62,7 +62,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("input", checkboxElement.getName());
 		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
 		assertEquals("jedi", checkboxElement.attribute("name").getValue());
-		assertEquals("true", checkboxElement.attribute("checked").getValue());
+		assertEquals("checked", checkboxElement.attribute("checked").getValue());
 		assertEquals("true", checkboxElement.attribute("value").getValue());
 	}
 
@@ -127,7 +127,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("input", checkboxElement.getName());
 		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
 		assertEquals("name", checkboxElement.attribute("name").getValue());
-		assertEquals("true", checkboxElement.attribute("checked").getValue());
+		assertEquals("checked", checkboxElement.attribute("checked").getValue());
 		assertEquals("Rob Harrop", checkboxElement.attribute("value").getValue());
 	}
 
@@ -148,7 +148,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("input", checkboxElement.getName());
 		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
 		assertEquals("stringArray", checkboxElement.attribute("name").getValue());
-		assertEquals("true", checkboxElement.attribute("checked").getValue());
+		assertEquals("checked", checkboxElement.attribute("checked").getValue());
 		assertEquals("foo", checkboxElement.attribute("value").getValue());
 	}
 
@@ -190,7 +190,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("input", checkboxElement.getName());
 		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
 		assertEquals("someList", checkboxElement.attribute("name").getValue());
-		assertEquals("true", checkboxElement.attribute("checked").getValue());
+		assertEquals("checked", checkboxElement.attribute("checked").getValue());
 		assertEquals("foo", checkboxElement.attribute("value").getValue());
 	}
 
@@ -212,7 +212,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("input", checkboxElement.getName());
 		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
 		assertEquals("date", checkboxElement.attribute("name").getValue());
-		assertEquals("true", checkboxElement.attribute("checked").getValue());
+		assertEquals("checked", checkboxElement.attribute("checked").getValue());
 		assertEquals(getDate().toString(), checkboxElement.attribute("value").getValue());
 	}
 

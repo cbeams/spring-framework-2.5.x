@@ -20,8 +20,8 @@ import org.springframework.beans.Colour;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.support.BindStatus;
 
 import javax.servlet.jsp.tagext.Tag;
 import java.beans.PropertyEditor;
@@ -92,7 +92,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertAttributeNotPresent(output, "value");
 		assertBlockTagContains(output, "bar");
 	}
-	                                  
+
 	public void testWithoutContext() throws Exception {
 		this.tag.setParent(null);
 		this.tag.setValue("foo");
@@ -173,17 +173,11 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testWithPropertyEditorStringComparison() throws Exception {
+		final PropertyEditor testBeanEditor = new TestBeanPropertyEditor();
+		testBeanEditor.setValue(new TestBean("Sally"));
 		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.spouse", false) {
 			public PropertyEditor getEditor() {
-				return new PropertyEditorSupport() {
-					public void setAsText(String text) throws IllegalArgumentException {
-						setValue(new TestBean(text, 123));
-					}
-
-					public String getAsText() {
-						return ((TestBean)getValue()).getName();
-					}
-				};
+				return testBeanEditor;
 			}
 		};
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
@@ -194,7 +188,6 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
-
 		assertOptionTagOpened(output);
 		assertOptionTagClosed(output);
 		assertAttributeNotPresent(output, "value");
@@ -217,5 +210,16 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		bean.setStringArray(ARRAY);
 		bean.setSpouse(new TestBean("Sally"));
 		request.setAttribute("testBean", bean);
+	}
+
+	private static class TestBeanPropertyEditor extends PropertyEditorSupport {
+
+		public void setAsText(String text) throws IllegalArgumentException {
+			setValue(new TestBean(text + "k", 123));
+		}
+
+		public String getAsText() {
+			return ((TestBean) getValue()).getName();
+		}
 	}
 }
