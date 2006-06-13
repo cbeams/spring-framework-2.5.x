@@ -773,5 +773,26 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 Repeat as required for setting up IDEA to reference the other Spring XSD files.
             </para>
         </section>
+        
+        <section id="xsd-config-integration">
+            <title>Integration issues</title>
+            <para>This final section details integration issues that may arise when you switch over
+            to using the above XSD-style for Spring 2.0 configuration.</para>
+            <para>This section is quite small at the moment (and hopefully it will stay that way).
+            It has been included in the Spring documentation as a convenience to Spring users
+            so that if you encounter an issue when switching over to the XSD-style in some
+            specific environment you can refer to this section for the authoritative answer.</para>
+            
+            <section id="">
+                <title>XML parsing errors in the Resin v.3 application server</title>
+                <para>If you are using the XSD-style for Spring 2.0 XML configuration
+                and deploying to v.3 of Caucho's Resin application server, you will need
+                to set some configuration options prior to startup so that an XSD-aware
+                parser is available to Spring.</para>
+                <para>Please do consult the following resource on the Caucho Resin website for
+                more information.</para>
+                <para><ulink url="http://www.caucho.com/resin-3.0/xml/jaxp.xtp#xerces">http://www.caucho.com/resin-3.0/xml/jaxp.xtp#xerces</ulink></para>
+            </section>
+        </section>
     </section>
 </appendix>
