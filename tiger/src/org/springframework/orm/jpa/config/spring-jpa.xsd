@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<xsd:schema xmlns="http://www.springframework.org/schema/jpa"
+<xsd:schema xmlns="http://www.springframework.org/schema/orm/jpa"
 						xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 						xmlns:beans="http://www.springframework.org/schema/beans"
 						xmlns:tool="http://www.springframework.org/schema/tool"
-						targetNamespace="http://www.springframework.org/schema/jpa"
+						targetNamespace="http://www.springframework.org/schema/orm/jpa"
 						elementFormDefault="qualified"
 						attributeFormDefault="unqualified">
 
 	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
 	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool.xsd"/>
-	
-	<xsd:element name="local" type="localEMFType"/>
-	<xsd:element name="container" type="containerEMFType"/>
 		
-	<!-- base types -->
+	<xsd:element name="entityManagerFactory" type="fullEMFType"/>
+		
+	<!-- basic type -->
 	<xsd:complexType name="abstractEMFType" abstract="true">
 		<xsd:annotation>
 			<xsd:appinfo>
@@ -27,10 +26,11 @@
 			
 				<xsd:sequence>
 					<!-- jpaPropertyMap map element -->
-					<xsd:element name="propsMap" minOccurs="0" maxOccurs="1">
+					<xsd:element name="map" type="beans:mapType" minOccurs="0" maxOccurs="1">
+					<!-- 
 						<xsd:complexType>
 							<xsd:complexContent>
-								<xsd:extension base="beans:mapType">
+								<xsd:extension base=""/>
 									<xsd:annotation>
 									<xsd:appinfo>
 										<tool:annotation>
@@ -51,10 +51,12 @@
 								</xsd:extension>
 							</xsd:complexContent>
 						</xsd:complexType>
+						 -->
 					</xsd:element>	
 					
 				<!-- jpaProperties element -->
-					<xsd:element name="props" minOccurs="0" maxOccurs="1">
+					<xsd:element ref="beans:props" minOccurs="0" maxOccurs="1">
+					<!-- 
 						<xsd:complexType>
 							<xsd:complexContent>
 								<xsd:extension base="beans:propsType">
@@ -68,6 +70,7 @@
 								</xsd:extension>
 							</xsd:complexContent>
 						</xsd:complexType>
+						 -->
 					</xsd:element>
 				<!-- vendor adapater -->				
 				<xsd:element name="vendor" minOccurs="0" maxOccurs="1" type="vendorAdapterType"/>
@@ -125,7 +128,7 @@
 			
 			<xsd:element name="custom">
 				<xsd:complexType>
-					<xsd:attribute name="ref" type="xsd:string"/>	
+					<xsd:attribute name="class" type="xsd:string"/>	
 				</xsd:complexType>
 			</xsd:element>
 		</xsd:choice>		
@@ -149,22 +152,15 @@
 		</xsd:attribute>
 	</xsd:complexType>
 
-	<xsd:complexType name="localEMFType">
-		<xsd:complexContent>
-			<xsd:extension base="abstractEMFType">
-			</xsd:extension>
-		</xsd:complexContent>
-	</xsd:complexType>
-	
-	<xsd:complexType name="containerEMFType">
+
+	<!-- extended type (useful it local and container impl diverge at some point) -->	
+	<xsd:complexType name="fullEMFType">
 		<xsd:complexContent>
 			<xsd:extension base="abstractEMFType">
 				<xsd:attribute name="inject" type="xsd:boolean"/>
 				<xsd:attribute name="translate" type="xsd:boolean"/>
 				
 				<xsd:attribute name="allow-redeployments-with-same-name" type="xsd:boolean"/>
-				
-
 				
 				<xsd:attribute name="data-source-lookup" type="xsd:string">
 					<xsd:annotation>
@@ -186,7 +182,7 @@
 					</xsd:annotation>
 				</xsd:attribute>
 				
-				<xsd:attribute name="load-time-weaver" type="xsd:string" use="required">
+				<xsd:attribute name="load-time-weaver" type="xsd:string">
 					<xsd:annotation>
 						<xsd:appinfo>
 							<tool:annotation kind="ref">
@@ -204,8 +200,8 @@
 						</xsd:appinfo>
 					</xsd:annotation>
 				</xsd:attribute>
-				<xsd:attribute name="root-location" type="xsd:string"/>
-				<xsd:attribute name="xml-location" type="xsd:string" use="required"/>
+				<xsd:attribute name="persistence-unit-root-location" type="xsd:string"/>
+				<xsd:attribute name="persistence-xml-location" type="xsd:string"/>
 				
 			</xsd:extension>
 		</xsd:complexContent>

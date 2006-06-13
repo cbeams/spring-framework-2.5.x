@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:container allow-redeployments-with-same-name="true" data-source-lookup="" data-source-ref="" generate-ddl="true" id="idvalue0" inject="true" load-time-weaver="" persistence-unit-name="" provider-class="" resource-loader="" root-location="" show-sql="true" translate="true" vendor="toplink" xml-location="" xmlns:p="http://www.springframework.org/schema/jpa" xmlns:p0="http://www.springframework.org/schema/beans" xmlns:p1="http://www.springframework.org/schema/tool" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/jpa spring-jpa.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tool http://www.springframework.org/schema/beans/spring-tool.xsd ">
+  <p:propsMap key-type="" map-class="" merge="default" value-type="">
+    <p0:entry key="" key-ref="" value="" value-ref="">
+      <p0:key>
+        <p0:bean abstract="true" autowire="default" autowire-candidate="true" class="" dependency-check="default" depends-on="" destroy-method="" factory-bean="" factory-method="" id="idvalue1" init-method="" lazy-init="default" name="" parent="" scope="" singleton="true">
+          <p0:description/>
+          <p0:meta key="" value=""/>
+        </p0:bean>
+      </p0:key>
+      <p0:bean abstract="true" autowire="default" autowire-candidate="true" class="" dependency-check="default" depends-on="" destroy-method="" factory-bean="" factory-method="" id="idvalue2" init-method="" lazy-init="default" name="" parent="" scope="" singleton="true">
+        <p0:description/>
+        <p0:meta key="" value=""/>
+      </p0:bean>
+    </p0:entry>
+  </p:propsMap>
+  <p:props merge="default">
+    <p0:prop key=""/>
+  </p:props>
+</p:container>

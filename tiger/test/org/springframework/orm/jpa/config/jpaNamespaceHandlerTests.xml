@@ -1,27 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-			 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			 xmlns:jpa="http://www.springframework.org/schema/jpa"
-			 xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       							 http://www.springframework.org/schema/jpa spring-jpa.xsd">
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:jpa="http://www.springframework.org/schema/orm/jpa"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		 				   http://www.springframework.org/schema/orm/jpa http://www.springframework.org/schema/orm/jpa/spring-jpa.xsd">
        
-       <jpa:local id="myFactory" persistence-unit-name="myPersistenceUnit" />
+       <jpa:entityManagerFactory id="simple" persistence-unit-name="myPersistenceUnit" />
        
-       <jpa:container persistence-unit-name="containerPU" load-time-weaver="myBeanWeaver" xml-location="META-INF/persistence.xml" root-location="classpath:/">
-		    <jpa:propsMap>
+	   
+	   <jpa:entityManagerFactory id="medium" persistence-unit-name="anotherPU">
+		    <jpa:map>
 				<entry key="costin" value="leau"/>
-		    </jpa:propsMap>
-		    <jpa:props>
+		    </jpa:map>
+		    <props>
 				<prop key="foo">bar</prop>
-		    </jpa:props>
+		    </props>
 		    <jpa:vendor database="hsql" generate-ddl="true" show-sql="false">
 		    	<jpa:provided name="toplink"/>
 		    </jpa:vendor>
-	   </jpa:container>
+	   </jpa:entityManagerFactory>
 	   
-	   <jpa:container persistence-unit-name="anotherCPU" load-time-weaver="myWeaverImplemention" xml-location="META-INF/persistence.xml" root-location="classpath:/">
-	   		<jpa:vendor show-sql="true">
-	   			<jpa:custom ref="someBean"/>
+       <jpa:entityManagerFactory id="complex" persistence-unit-name="customVendor" load-time-weaver="myBeanWeaver" persistence-xml-location="META-INF/persistence.xml" persistence-unit-root-location="classpath:/">
+       		<jpa:vendor show-sql="true">
+	   			<jpa:provided name="toplink"/>
 	   		</jpa:vendor>
-	   </jpa:container>
+       </jpa:entityManagerFactory>
+       
+       <bean id="someVendorAdapter" class="org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter"/>
+	   
 </beans>
