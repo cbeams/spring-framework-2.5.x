@@ -20,10 +20,11 @@ import org.springframework.beans.BeansException;
 
 /**
  * Interface to be implemented by beans that wish to be aware of their owning
- * BeanFactory. Beans can for example look up collaborating beans via the factory.
- *
- * <p>Note that most beans will choose to receive references to collaborating
- * beans via corresponding bean properties.
+ * BeanFactory.
+ * 
+ * <p>For example, beans can look up collaborating beans via the factory
+ * (Dependency Lookup). Note that most beans will choose to receive references
+ * to collaborating beans via corresponding bean properties (Dependency Injection).
  *
  * <p>For a list of all bean lifecycle methods, see the
  * {@link BeanFactory BeanFactory javadocs}.
@@ -39,9 +40,10 @@ public interface BeanFactoryAware {
 	
 	/**
 	 * Callback that supplies the owning factory to a bean instance.
-	 * <p>Invoked after population of normal bean properties but before an init
-	 * callback like InitializingBean's <code>afterPropertiesSet</code> or a
-	 * custom init-method.
+	 * <p>Invoked after the population of normal bean properties but
+     * before an initialization callback such as
+     * {@link org.springframework.beans.factory.InitializingBean#afterPropertiesSet()}
+     * or a custom init-method.
 	 * @param beanFactory owning BeanFactory (may not be <code>null</code>).
 	 * The bean can immediately call methods on the factory.
 	 * @throws BeansException in case of initialization errors
