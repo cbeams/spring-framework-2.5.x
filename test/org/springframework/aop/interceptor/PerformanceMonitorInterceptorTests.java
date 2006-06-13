@@ -17,23 +17,94 @@
 package org.springframework.aop.interceptor;
 
 import junit.framework.TestCase;
+import org.aopalliance.intercept.MethodInvocation;
+import org.apache.commons.logging.Log;
+import org.easymock.MockControl;
+
+import java.lang.reflect.Method;
 
 /**
+ * Unit tests for the {@link PerformanceMonitorInterceptor} class.
+ *
  * @author Rob Harrop
+ * @author Rick Evans
  */
 public class PerformanceMonitorInterceptorTests extends TestCase {
 
-	public void testSuffixAndPrefixAssignment() {
-		PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor();
+    public void testSuffixAndPrefixAssignment() {
+        PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor();
 
-		assertNotNull(interceptor.getPrefix());
-		assertNotNull(interceptor.getSuffix());
+        assertNotNull(interceptor.getPrefix());
+        assertNotNull(interceptor.getSuffix());
 
-		interceptor.setPrefix(null);
-		interceptor.setSuffix(null);
+        interceptor.setPrefix(null);
+        interceptor.setSuffix(null);
 
-		assertNotNull(interceptor.getPrefix());
-		assertNotNull(interceptor.getSuffix());
-	}
+        assertNotNull(interceptor.getPrefix());
+        assertNotNull(interceptor.getSuffix());
+    }
+
+    public void testSunnyDayPathLogsPerformanceMetricsCorrectly() throws Throwable {
+        MockControl mockLog = MockControl.createControl(Log.class);
+        Log log = (Log) mockLog.getMock();
+
+        MockControl mockMethodInvocation = MockControl.createControl(MethodInvocation.class);
+        MethodInvocation methodInvocation = (MethodInvocation) mockMethodInvocation.getMock();
+
+        Method toString = String.class.getMethod("toString", new Class[] {});
+
+        methodInvocation.getMethod();
+        mockMethodInvocation.setReturnValue(toString);
+        methodInvocation.getMethod();
+        mockMethodInvocation.setReturnValue(toString);
+        methodInvocation.proceed();
+        mockMethodInvocation.setReturnValue(null);
+        log.trace("Some performance metric");
+        mockLog.setMatcher(MockControl.ALWAYS_MATCHER);
+        mockLog.setVoidCallable();
+
+        mockMethodInvocation.replay();
+        mockLog.replay();
+
+        PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor(true);
+        interceptor.invokeUnderTrace(methodInvocation, log);
+
+        mockLog.verify();
+        mockMethodInvocation.verify();
+    }
+
+    public void testExceptionPathStillLogsPerformanceMetricsCorrectly() throws Throwable {
+        MockControl mockLog = MockControl.createControl(Log.class);
+        final Log log = (Log) mockLog.getMock();
+
+        MockControl mockMethodInvocation = MockControl.createControl(MethodInvocation.class);
+        final MethodInvocation methodInvocation = (MethodInvocation) mockMethodInvocation.getMock();
+
+        Method toString = String.class.getMethod("toString", new Class[] {});
+
+        methodInvocation.getMethod();
+        mockMethodInvocation.setReturnValue(toString);
+        methodInvocation.getMethod();
+        mockMethodInvocation.setReturnValue(toString);
+        methodInvocation.proceed();
+        mockMethodInvocation.setThrowable(new IllegalArgumentException());
+        log.trace("Some performance metric");
+        mockLog.setMatcher(MockControl.ALWAYS_MATCHER);
+        mockLog.setVoidCallable();
+
+        mockMethodInvocation.replay();
+        mockLog.replay();
+
+        final PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor(true);
+
+        try {
+            interceptor.invokeUnderTrace(methodInvocation, log);
+            fail("Must have propagated the IllegalArgumentException.");
+        } catch (IllegalArgumentException expected) {
+        }
+
+        mockLog.verify();
+        mockMethodInvocation.verify();
+    }
 
 }
