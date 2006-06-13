@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:lang="http://www.springframework.org/schema/lang"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd">
+
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+	<lang:groovy id="fortune"
+				 refresh-check-delay="3000"
+				 script-source="/WEB-INF/groovy/FortuneController.groovy">
+		<lang:property name="fortuneService" ref="fortuneService"/>
+	</lang:groovy>
+
+    <bean id="home" class="org.springframework.web.servlet.mvc.ParameterizableViewController">
+        <property name="viewName" value="home"/>
+    </bean>
+
+    <bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="mappings">
+            <value>
+                /fortune.htm=fortune
+                /home.htm=home
+            </value>
+        </property>
+    </bean>
+
+</beans>
