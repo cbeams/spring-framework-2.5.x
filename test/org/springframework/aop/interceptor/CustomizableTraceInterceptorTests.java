@@ -122,6 +122,9 @@ public final class CustomizableTraceInterceptorTests extends TestCase {
     }
 
     public void testSunnyDayPathLogsCorrectly() throws Throwable {
+        if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+            return;
+        }
         MockControl mockLog = MockControl.createControl(Log.class);
         Log log = (Log) mockLog.getMock();
 
@@ -163,6 +166,9 @@ public final class CustomizableTraceInterceptorTests extends TestCase {
     }
 
     public void testExceptionPathLogsCorrectly() throws Throwable {
+        if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+            return;
+        }
         MockControl mockLog = MockControl.createControl(Log.class);
         Log log = (Log) mockLog.getMock();
 
@@ -209,6 +215,9 @@ public final class CustomizableTraceInterceptorTests extends TestCase {
     }
 
     public void testSunnyDayPathLogsCorrectlyWithPrettyMuchAllPlaceholdersMatching() throws Throwable {
+        if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+            return;
+        }
         MockControl mockLog = MockControl.createControl(Log.class);
         Log log = (Log) mockLog.getMock();
 
