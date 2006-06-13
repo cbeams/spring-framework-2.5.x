@@ -25,9 +25,9 @@
                 generally desirable.
             </para>
             <para>
-				The main usage scenario when one might prefer to use the
+				The main usage scenario when you might prefer to use the
                 <interfacename>BeanFactory</interfacename> is when memory usage is the greatest
-                concern (such as in an applet where every last kilobyte counts), and one doesn't
+                concern (such as in an applet where every last kilobyte counts), and you don't
                 need all the features of the <interfacename>ApplicationContext</interfacename>.
             </para>
         </sidebar>
@@ -538,13 +538,32 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 				<literal>'userDao'</literal>, <literal>'loginController'</literal>etc.
 				Adopting a standard way of naming your beans will go a long way towards
 				making your configuration easy to read and understand; adopting such
-				naming standards is not hard to do, and if you are using SpringAOP it can
-				pay off handsomely when it comes to applying advice to a set of beans
-				related by name.
+				naming standards is not hard to do, and if you are using Spring AOP it
+				can pay off handsomely when it comes to applying advice to a set of
+				beans related by name.
 			</para>
         </section>
         <section id="beans-factory-scopes">
             <title>Bean scopes</title>
+			<sidebar>
+			    <title>The Singleton pattern</title>
+			    <para>Spring's concept of a singleton bean is quite different from
+			    the Singleton pattern as defined in the seminal Gang of Four (GoF)
+			    book.</para>
+			    <para>The classic GoF Singleton hardcodes the scope of an object such
+			    that one <emphasis>and only one</emphasis> instance of a particular
+			    class will be created
+			    <emphasis>per <classname>ClassLoader</classname></emphasis>.</para>
+			    <para>The scope of the Spring singleton is best described as
+			    <emphasis>per <interfacename>ApplicationContext</interfacename> and
+			    per bean</emphasis>. This means that if you define one bean for a
+			    particular class in a single Spring container, then the Spring container
+			    will create one <emphasis>and only one</emphasis> instance of the class
+			    defined by that bean definition. This also means that you can define
+			    more than one bean definition for a single class, and then Spring will
+			    create exactly two instances of that particular class, each with their
+			    own particular configuration.</para>
+			</sidebar>
             <para>
 				Beans are defined to be deployed in one of two scopes: singleton or
 				non-singleton. (The latter is also called a prototype, although the term
@@ -559,15 +578,17 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 				the <emphasis>creation of a new bean instance</emphasis> every time a
 				request for that specific bean is made. This is ideal for situations
 				where for example each user needs an independent user object or
-				something similar.
+				something similar. This approach is very powerful and gives you -
+				the application developer - the flexibility to <emphasis>choose</emphasis>
+				the scope of the objects you create, and not have to 'bake in' scope
+				at the Java class level.
 			</para>
             <para>
 				Beans are deployed in singleton scope by default, unless you
 				specify otherwise. Keep in mind that by changing the type to
 				non-singleton (prototype), each request for a bean will result in a
-				newly created bean and this might not be what you actually want. So only
-				change the scope to prototype when absolutely necessary.
-			</para>
+				newly created bean; only change the scope to prototype when absolutely
+				necessary.</para>
             <para>
 				In the example below, two beans are declared of which one is
 				defined as a singleton, and the other one is a non-singleton
@@ -589,8 +610,8 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 					container does not keep track of it at all any longer. You can think of Spring's
 					role when talking about a prototype bean as a replacement for the 'new'
 					operator. Any lifecycle aspects past that point have to be handled by
-					the client. The lifecycle of a bean in the <interfacename>BeanFactory</interfacename> is further
-					described in <xref linkend="beans-factory-lifecycle" />.
+					the client. The lifecycle of a bean in the <interfacename>BeanFactory</interfacename>
+					is further described in the section entitled <xref linkend="beans-factory-lifecycle" />.
 				</para>
 			</note>
         </section>
@@ -600,10 +621,9 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
         <section id="beans-factory-collaborators">
             <title>Setting bean properties and collaborators</title>
             <para>
-				IoC has already been referred to as
-				<emphasis>Dependency Injection</emphasis> (DI). The basic principle behind
-				DI is that beans define their dependencies (i.e. the other objects they work with)
-				only through constructor arguments, arguments to a factory method, or
+				The basic principle behind <emphasis>Dependency Injection</emphasis> (DI)
+				is that object define their dependencies (i.e. the other objects they work
+				with) only through constructor arguments, arguments to a factory method, or
 				properties which are set on the object instance after it has been
 				constructed or returned from a factory method. Then, it is the job of
 				the container to actually <emphasis>inject</emphasis> those dependencies
@@ -613,11 +633,11 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 				something like the <emphasis>Service Locator</emphasis> pattern.
 			</para>
 			<para>
-				It becomes evident upon usage that code gets much cleaner, and
-				reaching a higher grade of decoupling is much easier when beans do not
-				look up their dependencies, but are provided with them, and additionally
-				do not even know where the dependencies are located and of what actual
-				type they are.
+				It becomes evident upon usage that code gets much cleaner when the DI
+				principle is applied, and reaching a higher grade of decoupling is much
+				easier when beans do not look up their dependencies, but are provided
+				with them (and additionally do not even know where the dependencies are
+				located and of what actual class they are).
 			</para>
             <para>
 				As touched on in the previous paragraph, DI exists in two major variants,
@@ -627,16 +647,14 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 			<section id="beans-setter-injection">
 				<title>Setter Injection</title>
                 <para>
-					<emphasis>setter-based</emphasis> DI is realized by calling setter methods
+					<emphasis>Setter-based</emphasis> DI is realized by calling setter methods
 					on your beans after invoking a no-argument constructor or no-argument
-					<literal>static</literal> factory method to instantiate your bean. Beans
-					defined in a container that use only setter-based DI are
-					<emphasis>true JavaBeans</emphasis>.
+					<literal>static</literal> factory method to instantiate your bean.
 				</para>
 				<para>
-					Find below an example of a class that could only be dependency injected
-					using pure setter injection. Note that there is nothing <emphasis>special</emphasis>
-					about this class... it's plain Java really.
+					Find below an example of a class that can only be dependency injected
+					using pure setter injection. Note that there is nothing
+					<emphasis>special</emphasis> about this class... it is plain old Java.
 				</para>
 				<programlisting><![CDATA[public class SimpleMovieLister {
 
@@ -654,18 +672,18 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 			<section id="beans-constructor-injection">
 				<title>Constructor Injection</title>
                 <para>
-					<emphasis>constructor-based</emphasis> DI
+					<emphasis>Constructor-based</emphasis> DI
 					is realized by invoking a constructor with a number of arguments,
 					each representing a collaborator. Additionally,
-					calling a <literal>static</literal> factory method with specific arguments, to
-					construct the bean, can be considered almost equivalent, and the
-					rest of this text will consider arguments to a constructor and
+					calling a <literal>static</literal> factory method with specific
+					arguments to construct the bean, can be considered almost equivalent,
+					and the rest of this text will consider arguments to a constructor and
 					arguments to a <literal>static</literal> factory method similarly.
 				</para>
 				<para>
 					Find below an example of a class that could only be dependency injected
-					using constructor injection. Again, note that there is nothing <emphasis>special</emphasis>
-					about this class.
+					using constructor injection. Again, note that there is nothing
+					<emphasis>special</emphasis> about this class.
 				</para>
 				<programlisting><![CDATA[public class SimpleMovieLister {
 
@@ -687,18 +705,19 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 					since a large number of constructor arguments can get unwieldy,
 					especially when some properties are optional. The presence of
 					setter methods also makes objects of that class amenable to being
-					re-configured (or re-injected) at some later time (
-					<link linkend="jmx">JMX MBeans</link> is a particularly compelling use case).
+					re-configured (or re-injected) at some later time (for management
+					via <link linkend="jmx">JMX MBeans</link> is a particularly
+					compelling use case).
 				</para>
 				<para>
-					Constructor-injection is favoured by some purists though (and with
-					good reason)... supplying all of an object's dependencies means that
+					Constructor-injection is favored by some purists though (and with
+					good reason). Supplying all of an object's dependencies means that
 					that object is never returned to client (calling) code in a less than
 					totally intialized state. The flipside is that the object becomes
 					less amenable to re-configuration (or re-injection).
 				</para>
 				<para>
-					There is no hard and fast rule here... use whatever type of DI makes
+					There is no hard and fast rule here. Use whatever type of DI makes
 					the most sense for a particular class; sometimes, when dealing with
 					third party classes to which one does not have the source, the choice
 					will already have been made for you - a legacy class may not expose
@@ -707,16 +726,15 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 				</para>
 			</sidebar>
             <para>
-				The <classname>BeanFactory</classname> supports both of these
+				The <interfacename>BeanFactory</interfacename> supports both of these
 				variants for injecting dependencies into beans it manages. (It in fact
 				also supports injecting setter-based dependencies after some
 				dependencies have already been supplied via the constructor approach.)
 				The configuration for the dependencies comes in the form of a
 				<interfacename>BeanDefinition</interfacename>, which is used together with
-				<interfacename>PropertyEditor</interfacename> instances to know how to convert properties
-				from one format to another. The actual values being passed around are
-				done in the form of <classname>PropertyValue</classname> objects. However,
-				most users of Spring will not be dealing with these classes directly
+				<interfacename>PropertyEditor</interfacename> instances to know how to
+				convert properties from one format to another. However, most users of
+				Spring will not be dealing with these classes directly
 				(i.e. programmatically), but rather with an XML definition file which
 				will be converted internally into instances of these classes, and used
 				to load an entire Spring IoC container instance.
@@ -727,11 +745,12 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 			<orderedlist>
                 <listitem>
                     <para>
-						The <interfacename>BeanFactory</interfacename> is created and initialized with a
-						configuration which describes all the beans. (Most Spring users use
-						a <interfacename>BeanFactory</interfacename> or
-						<interfacename>ApplicationContext</interfacename> variant which supports XML
-						format configuration files.)
+						The <interfacename>BeanFactory</interfacename> is created
+						and initialized with a configuration which describes all
+						the beans. (Most Spring users use a
+						<interfacename>BeanFactory</interfacename> or
+						<interfacename>ApplicationContext</interfacename> implementation
+						that supports XML format configuration files.)
 					</para>
                 </listitem>
                 <listitem>
@@ -745,49 +764,44 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
                 </listitem>
                 <listitem>
                     <para>
-						Each property or constructor-arg is either an actual
+						Each property or constructor argument is either an actual
 						definition of the value to set, or a reference to another bean in
-						the container. In the case of the <interfacename>ApplicationContext</interfacename>, the
-						reference can be to a bean in a parent <interfacename>ApplicationContext</interfacename>.
+						the container.
 					</para>
                 </listitem>
                 <listitem>
                     <para>
 						<anchor id="beans-factory-collaborators-propertyeditor" />
-						Each property or
-						constructor argument which is a value must be able to be converted
-						from whatever format it was specified in, to the actual type of
-						that property or constructor argument. By default Spring can
-						convert a value supplied in string format to all built-in types,
-						such as <literal>int</literal>, <literal>long</literal>,
-						<literal>String</literal>, <literal>boolean</literal>, etc.
-					</para>
-                </listitem>
-                <listitem>
-                    <para>
-						It is important to realize that Spring validates the
-						configuration of each bean in a container as and when the container
-						is created, including the validation that properties which are
-						bean references are actually referring to valid beans (i.e. the
-						beans being referred to are also defined in the <interfacename>BeanFactory</interfacename>, or in
-						the case of <interfacename>ApplicationContext</interfacename>, a parent context). However, the
-						bean properties themselves are not set until the bean <emphasis>is
-						actually created</emphasis>. For beans which are singleton-scoped and set
-						to be pre-instantiated (such as singleton beans in an
-						<interfacename>ApplicationContext</interfacename>), creation happens at the time that the
-						<interfacename>BeanFactory</interfacename> is created, but otherwise this is only when the bean
-						is requested. When a bean actually has to be created, this will
-						potentially cause a graph of other beans to be created, as its
-						dependencies and its dependencies' dependencies (and so on) are
-						created and assigned.
+						Each property or constructor argument which is a value must
+						be able to be converted from whatever format it was specified
+						in, to the actual type of that property or constructor argument.
+						By default Spring can convert a value supplied in string format
+						to all built-in types, such as <literal>int</literal>,
+						<literal>long</literal>, <literal>String</literal>,
+						<literal>boolean</literal>, etc.
 					</para>
                 </listitem>
             </orderedlist>
             <para>
+				It is important to realize that Spring validates the
+				configuration of each bean in a container as the container
+				is created, including the validation that properties which are
+				bean references are actually referring to valid beans (i.e. the
+				beans being referred to are also defined in the container.
+				However, the bean properties themselves are not set until the
+				bean <emphasis>is actually created</emphasis>. For that which
+				are singleton-scoped and set to be pre-instantiated (such as
+				singleton beans in an <interfacename>ApplicationContext</interfacename>),
+				creation happens at the time that the container is created, but
+				otherwise this is only when the bean is requested. When a bean
+				actually has to be created, this will potentially cause a graph
+				of other beans to be created, as its dependencies and its
+				dependencies' dependencies (and so on) are created and assigned.
+			</para>
+            <para>
 				You can generally trust Spring to do the right thing. It
-				will pick up configuration issues, including references to
-				non-existent beans and circular dependencies, at
-				<interfacename>BeanFactory</interfacename>
+				will detect mis-configuration issues, such as references to
+				non-existent beans and circular dependencies, at container
 				load-time. It will actually set properties and resolve
 				dependencies (i.e. create those dependencies if needed) as late as
 				possible, which is when the bean is actually created. This does
@@ -823,34 +837,36 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 		<section id="beans-some-examples">
 			<title>Some examples</title>
             <para>
-				First, an example of using the <interfacename>BeanFactory</interfacename> for setter-based
-				DI. Below is a small part of an
-				<classname>XmlBeanFactory</classname> configuration file specifying some
-				bean definitions. Following is the code for the actual main bean itself,
-				showing the appropriate setters declared.
+				First, an example of using the <classname>XmlBeanFactory</classname> for
+				setter-based DI. Find below a small part of a Spring XML configuration file
+				specifying some bean definitions.
 			</para>
 			<programlisting><![CDATA[<bean id="exampleBean" class="examples.ExampleBean">
+
+  ]]><lineannotation>&lt;!-- setter injection using the nested <literal>&lt;ref/&gt;</literal> element --&gt;</lineannotation><![CDATA[
   <property name="beanOne"><ref bean="anotherExampleBean"/></property>
+
+  ]]><lineannotation>&lt;!-- setter injection using the neater 'ref' attribute --&gt;</lineannotation><![CDATA[
   <property name="beanTwo"><ref bean="yetAnotherBean"/></property>
-  <property name="integerProperty"><value>1</value></property>
+  <property name="integerProperty" value="1"/>
 </bean>
 
 <bean id="anotherExampleBean" class="examples.AnotherBean"/>
 <bean id="yetAnotherBean" class="examples.YetAnotherBean"/>]]></programlisting>
 			<programlisting><![CDATA[public class ExampleBean {
-    
+
     private AnotherBean beanOne;
     private YetAnotherBean beanTwo;
     private int i;
-    
+
     public void setBeanOne(AnotherBean beanOne) {
         this.beanOne = beanOne;
     }
-    
+
     public void setBeanTwo(YetAnotherBean beanTwo) {
         this.beanTwo = beanTwo;
     }
-    
+
     public void setIntegerProperty(int i) {
         this.i = i;
     }    
@@ -860,15 +876,19 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 				the properties specified in the XML file.
 			</para>
             <para>
-				Now, an example of using the <interfacename>BeanFactory</interfacename> for
-				constructor-based DI. Below is a snippet from an XML
-				configuration that specifies constructor arguments and the actual bean
-				code, showing the constructor:
+				Now, an example of using constructor-based DI. Find below a
+				snippet from an XML	configuration that specifies constructor
+				arguments, and the corresponding Java class.
 			</para>
 			<programlisting><![CDATA[<bean id="exampleBean" class="examples.ExampleBean">
+
+  ]]><lineannotation>&lt;!-- constructor injection using the nested <literal>&lt;ref/&gt;</literal> element --&gt;</lineannotation><![CDATA[
   <constructor-arg><ref bean="anotherExampleBean"/></constructor-arg>
-  <constructor-arg><ref bean="yetAnotherBean"/></constructor-arg>
-  <constructor-arg type="int"><value>1</value></constructor-arg>
+  
+  ]]><lineannotation>&lt;!-- constructor injection using the neater 'ref' attribute --&gt;</lineannotation><![CDATA[
+  <constructor-arg ref="yetAnotherBean"/>
+  
+  <constructor-arg type="int" value="1"/>
 </bean>
 
 <bean id="anotherExampleBean" class="examples.AnotherBean"/>
@@ -924,13 +944,13 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
     }
 }]]></programlisting>
             <para>
-				Note that arguments to the <literal>static</literal> factory method are supplied via
-				<literal>constructor-arg</literal> elements, exactly the same as if a
-				constructor had actually been used. These arguments are optional. Also,
-				it is important to realize that the type of the class being returned by
+				Note that arguments to the <literal>static</literal> factory method
+				are supplied via <literal>constructor-arg</literal> elements, exactly
+				the same as if a constructor had actually been used. Also, it is
+				important to realize that the type of the class being returned by
 				the factory method does not have to be of the same type as the class
-				which contains the <literal>static</literal> factory method, although in this example it
-				is. An instance (non-static) factory method, mentioned previously, would
+				which contains the <literal>static</literal> factory method, although
+				in this example it is. An instance (non-static) factory method would
 				be used in an essentially identical fashion (aside from the use of the
 				<literal>factory-bean</literal> attribute instead of the
 				<literal>class</literal> attribute), so will not be detailed here.
@@ -1016,8 +1036,8 @@ public class ExampleBean {
 					by use of the <literal>index</literal> attribute. For example:
 				</para>
 				<programlisting><![CDATA[<bean id="exampleBean" class="examples.ExampleBean">
-  <constructor-arg index="0"><value>7500000</value></constructor-arg>
-  <constructor-arg index="1"><value>42</value></constructor-arg>
+  <constructor-arg index="0" value="7500000"/>
+  <constructor-arg index="1" value="42"/>
 </bean>]]></programlisting>
 				<para>
 					As well as solving the ambiguity problem of
@@ -1036,22 +1056,22 @@ public class ExampleBean {
             <para>As mentioned in the previous section, bean properties and
       constructor arguments can be defined as either references to other
       managed beans (collaborators), or values defined inline. The
-      <literal>XmlBeanFactory</literal> supports a number of sub-element types
-      within its <literal>property</literal> and
-      <literal>constructor-arg</literal> elements for this purpose.</para>
+      <classname>XmlBeanFactory</classname> supports a number of sub-element types
+      within its <literal>property</literal> and <literal>constructor-arg</literal>
+      elements for this purpose.</para>
             <section id="beans-value-element">
-                <title>The <literal>value</literal> element</title>
+                <title>Injecting plain values (primitives, Strings, etc.)</title>
                 <para>
-					The <literal>value</literal> element specifies a property or
+					The <literal>&lt;value/&gt;</literal> element specifies a property or
 					constructor argument as a human-readable string representation. As
 					mentioned in detail <link linkend="beans-factory-collaborators-propertyeditor">previously</link>,
 					JavaBeans PropertyEditors are used to convert these string values from
-					a <literal>java.lang.String</literal> to the actual property or
+					a <classname>java.lang.String</classname> to the actual property or
 					argument type.
-			</para>
-			<programlisting><![CDATA[<bean id="myDataSource" destroy-method="close"
+			    </para>
+			    <programlisting><![CDATA[<bean id="myDataSource" destroy-method="close"
     class="org.apache.commons.dbcp.BasicDataSource">
-  <!-- results in a setDriverClassName(String) call -->
+  ]]><lineannotation>&lt;!-- results in a setDriverClassName(String) call --&gt;</lineannotation><![CDATA[
   <property name="driverClassName">
     <value>com.mysql.jdbc.Driver</value>
   </property>
@@ -1064,66 +1084,77 @@ public class ExampleBean {
 </bean>]]></programlisting>
             </section>
             <section id="beans-null-element">
-                <title>The <literal>&lt;null/&gt;</literal> element</title>
+                <title>Injecting null</title>
                 <para>The <literal>&lt;null/&gt;</literal> element is used to handle <literal>null</literal>
         values. Spring treats empty arguments for properties and the like as
-        empty Strings. The following <classname>XmlBeanFactory</classname> configuration:
-        <programlisting>&lt;bean class="ExampleBean"&gt;
-  &lt;property name="email"&gt;&lt;value&gt;&lt;/value&gt;&lt;/property&gt;
-&lt;/bean&gt;        </programlisting>results in the email property being set
-        to "", equivalent to the Java code:
-        <literal>exampleBean.setEmail("")</literal>. The special
-        <literal>&lt;null&gt;</literal> element may be used to indicate a <literal>null</literal>
-        value, so that: <programlisting>&lt;bean class="ExampleBean"&gt;
-  &lt;property name="email"&gt;&lt;null/&gt;&lt;/property&gt;
-&lt;/bean&gt;        </programlisting>is equivalent to the java code:
-        <literal>exampleBean.setEmail(null)</literal>.
-				</para>
+        empty Strings. The following <classname>XmlBeanFactory</classname> configuration
+        results in the email property being set to the empty <classname>String</classname>
+        value ("")</para>
+
+        <programlisting><![CDATA[<bean class="ExampleBean">
+  <property name="email"><value></value></property>
+</bean>]]></programlisting>
+
+                <para>This is equivalent to the following Java code:
+                <literal>exampleBean.setEmail("")</literal>. The special
+                <literal>&lt;null&gt;</literal> element may be used to indicate a
+                <literal>null</literal> value. For example:</para>
+            
+                <programlisting><![CDATA[<bean class="ExampleBean">
+  <property name="email"><null/></property>
+</bean>]]></programlisting>
+
+                <para>The above configuration is equivalent to the Java code:
+                <literal>exampleBean.setEmail(null)</literal>. </para>
             </section>
             <section id="beans-inner-beans">
-                <title>Inner bean definitions via nested bean elements</title>
+                <title>Inner beans</title>
                 <para>A <literal>bean</literal> element inside the
         <literal>property</literal> element is used to define a bean value
         inline, instead of referring to a bean defined elsewhere in the
-        BeanFactory. The inline bean definition does not need to have any id
-        defined. <programlisting>&lt;bean id="outer" class="..."&gt;
-  &lt;!-- Instead of using a reference to target, just use an inner bean --&gt;
-  &lt;property name="target"&gt;
-    &lt;bean class="com.mycompany.PersonImpl"&gt;
-      &lt;property name="name"&gt;&lt;value&gt;Tony&lt;/value&gt;&lt;/property&gt;
-      &lt;property name="age"&gt;&lt;value&gt;51&lt;/value&gt;&lt;/property&gt;
-    &lt;/bean&gt;
-  &lt;/property&gt;
-&lt;/bean&gt;</programlisting></para>
+        container. The inline bean definition does not need to have any id
+        defined, and it is best not to because it will be ignored.</para>
+        
+                <programlisting><![CDATA[<bean id="outer" class="...">
+  ]]><lineannotation>&lt;!-- instead of using a reference to target, just use an inner bean --&gt;</lineannotation><![CDATA[
+  <property name="target">
+    <bean class="com.mycompany.PersonImpl">
+      <property name="name" value="Tony"/>
+      <property name="age" value="51"/>
+    </bean>
+  </property>
+</bean>]]></programlisting>
+
                 <para>Note that the <literal>singleton</literal> flag and any
-        <literal>id</literal> attribute are effectively ignored. Inner beans
-        are anonymous prototypes.</para>
+                <literal>id</literal> attribute are effectively ignored. Inner beans
+                are <emphasis>always</emphasis> anonymous prototypes.</para>
             </section>
             <section id="beans-collection-elements">
-                <title>The collection elements</title>
+                <title>Collections</title>
                 <para>The <literal>list</literal>, <literal>set</literal>,
-        <literal>map</literal>, and <literal>props</literal> elements allow
-        properties and arguments of Java type <interfacename>List</interfacename>,
-        <interfacename>Set</interfacename>, <interfacename>Map</interfacename>, and
-        <interfacename>Properties</interfacename>, respectively, to be defined and
-        set.</para>
+                <literal>map</literal>, and <literal>props</literal> elements allow
+                properties and arguments of Java type <interfacename>List</interfacename>,
+                <interfacename>Set</interfacename>, <interfacename>Map</interfacename>, and
+                <interfacename>Properties</interfacename>, respectively, to be defined and
+                set.</para>
+
                 <programlisting><![CDATA[<bean id="moreComplexObject" class="example.ComplexObject">
-  <!-- results in a setAdminEmails(java.util.Properties) call -->
+  ]]><lineannotation>&lt;!-- results in a setAdminEmails(java.util.Properties) call --&gt;</lineannotation><![CDATA[
   <property name="adminEmails">
     <props>
         <prop key="administrator">administrator@somecompany.org</prop>
         <prop key="support">support@somecompany.org</prop>
         <prop key="development">development@somecompany.org</prop>
     </props>
-</property>
-  <!-- results in a setSomeList(java.util.List) call -->
+  </property>
+  ]]><lineannotation>&lt;!-- results in a setSomeList(java.util.List) call --&gt;</lineannotation><![CDATA[
   <property name="someList">
     <list>
         <value>a list element followed by a reference</value>
         <ref bean="myDataSource" />
     </list>
   </property>
-  <!-- results in a setSomeMap(java.util.Map) call -->
+  ]]><lineannotation>&lt;!-- results in a setSomeMap(java.util.Map) call --&gt;</lineannotation><![CDATA[
   <property name="someMap">
     <map>
         <entry>
@@ -1140,7 +1171,7 @@ public class ExampleBean {
         </entry>
     </map>
   </property>
-  <!-- results in a setSomeSet(java.util.Set) call -->
+  ]]><lineannotation>&lt;!-- results in a setSomeSet(java.util.Set) call --&gt;</lineannotation><![CDATA[
   <property name="someSet">
     <set>
         <value>just some string</value>
@@ -1149,31 +1180,31 @@ public class ExampleBean {
   </property>
 </bean>]]></programlisting>
                 <para>
-                    <emphasis>Note that the value of a map key or value, or a set value, can also
-            again be any of the following elements:</emphasis>
+                    <emphasis>Note that the value of a map key or value, or a set value,
+                    can also again be any of the following elements:</emphasis>
                 </para>
                 <programlisting><![CDATA[bean | ref | idref | list | set | map | props | value | null]]></programlisting>
                 <section id="beans-collection-elements-merging">
                     <title>Collection merging</title>
                     <para>
-                As of Spring 2.0, the container also supports the <emphasis>merging</emphasis> of collections. This allows
-                an application developer to define a parent-style <literal>list</literal>, <literal>map</literal>,
-                <literal>set</literal> or <literal>props</literal> element, and have child-style
-                <literal>list</literal>, <literal>map</literal>, <literal>set</literal> or <literal>props</literal> elements
-                inherit and override values from the parent collection; i.e. the child collection's values will be the
-                result obtained from the merging of the elements of the parent and child collections, with the child's
-                collection elements overriding values specified in the parent collection.
-            </para>
-            <para>
-                <emphasis>Please note that this section on merging makes use of the parent-child
-				bean mechanism. This concept has not yet been introduced, so readers unfamiliar with the
-				concept of parent and child bean definitions may wish to read the corresponding section
-				before continuing (see <xref linkend="beans-child-bean-definitions" />).</emphasis>
-            </para>
-            <para>
-                An example would perhaps serve best to illustrate this feature...
-            </para>
-            <programlisting><![CDATA[<beans>
+                    As of Spring 2.0, the container also supports the <emphasis>merging</emphasis> of collections. This allows
+                    an application developer to define a parent-style <literal>list</literal>, <literal>map</literal>,
+                    <literal>set</literal> or <literal>props</literal> element, and have child-style
+                    <literal>list</literal>, <literal>map</literal>, <literal>set</literal> or <literal>props</literal> elements
+                    inherit and override values from the parent collection; i.e. the child collection's values will be the
+                    result obtained from the merging of the elements of the parent and child collections, with the child's
+                    collection elements overriding values specified in the parent collection.
+                    </para>
+                    <para>
+                        <emphasis>Please note that this section on merging makes use of the parent-child
+				        bean mechanism. This concept has not yet been introduced, so readers unfamiliar with the
+				        concept of parent and child bean definitions may wish to read the corresponding section
+				        before continuing (see <xref linkend="beans-child-bean-definitions" />).</emphasis>
+                    </para>
+                    <para>
+                        An example would perhaps serve best to illustrate this feature...
+                    </para>
+                    <programlisting><![CDATA[<beans>
 <bean id="parent" abstract="true" class="example.ComplexObject">
     <property name="adminEmails">
         <props>
@@ -1192,44 +1223,44 @@ public class ExampleBean {
     </property>
 </bean>
 <beans>]]></programlisting>
-            <para>
-                Notice the use of the <literal>merge=true</literal> attribute on the <literal><![CDATA[<props/>]]></literal> element
-                of the <literal>adminEmails</literal> property of the <literal>child</literal> bean definition.
-                When the <literal>child</literal> bean is actually resolved and instantiated by the
-                container, the resulting instance will have an <literal>adminEmails</literal>
-                <classname>Properties</classname> collection that contains the result of the merging of the
-                child's <literal>adminEmails</literal> collection with the parent's <literal>adminEmails</literal>
-                collection.
-            </para>
-            <programlisting><![CDATA[administrator=administrator@somecompany.com
-sales=sales@somecompany.com
-support=support@somecompany.co.uk]]></programlisting>
-            <para>
-                Notice how the child <classname>Properties</classname> collection's value set will have inherited
-                all the property elements from the parent <literal><![CDATA[<props/>]]></literal>. Notice also
-                how the child's value for the <literal>support</literal> value overrides the attendant
-                value in the parent collection.
-            </para>
-            <para>
-                This merging behaviour applies similarly to the <literal>list</literal>, <literal>map</literal>,
-                and <literal>set</literal> collection types. In the specific case of the <literal>list</literal>
-                element, the semantics associated with the <classname>List</classname> collection type, i.e.
-                the notion of an <literal>ordered</literal> collection of values, is maintained... the 
-                parent's values will precede all of the child list's values. In the case of the <literal>map</literal>,
-                <literal>set</literal>, and <literal>props</literal> collection types, there is no notion of ordering
-                and hence no ordering semantics are in effect for the collection types that underly the associated
-                <classname>Map</classname>, <classname>Set</classname> and <classname>Properties</classname>
-                implementation types used internally by the container.
-            </para>
-            <para>
-                Finally, some minor notes about the merging support are in order; one cannot merge different
-                collection types (e.g. a <literal>map</literal> and a <literal>list</literal>), and if one does
-                attempt to do so an appropriate <classname>Exception</classname> will be thrown; and in case it
-                is not immediately obvious, the <literal>merge</literal> attribute must be specified on the
-                lower level, inherited, child definition... specifying the <literal>merge</literal> attribute on
-                a parent collection definition is redundant and will not result in the desired merging; and
-                (lastly), please note that this merging feature is only available in Spring 2.0 (and later versions).
-            </para>
+                <para>
+                    Notice the use of the <literal>merge=true</literal> attribute on the <literal><![CDATA[<props/>]]></literal> element
+                    of the <literal>adminEmails</literal> property of the <literal>child</literal> bean definition.
+                    When the <literal>child</literal> bean is actually resolved and instantiated by the
+                    container, the resulting instance will have an <literal>adminEmails</literal>
+                    <classname>Properties</classname> collection that contains the result of the merging of the
+                    child's <literal>adminEmails</literal> collection with the parent's <literal>adminEmails</literal>
+                    collection.
+                </para>
+                <programlisting><![CDATA[administrator=administrator@somecompany.com
+    sales=sales@somecompany.com
+    support=support@somecompany.co.uk]]></programlisting>
+                <para>
+                    Notice how the child <classname>Properties</classname> collection's value set will have inherited
+                    all the property elements from the parent <literal><![CDATA[<props/>]]></literal>. Notice also
+                    how the child's value for the <literal>support</literal> value overrides the attendant
+                    value in the parent collection.
+                </para>
+                <para>
+                    This merging behaviour applies similarly to the <literal>list</literal>, <literal>map</literal>,
+                    and <literal>set</literal> collection types. In the specific case of the <literal>list</literal>
+                    element, the semantics associated with the <classname>List</classname> collection type, i.e.
+                    the notion of an <literal>ordered</literal> collection of values, is maintained... the 
+                    parent's values will precede all of the child list's values. In the case of the <literal>map</literal>,
+                    <literal>set</literal>, and <literal>props</literal> collection types, there is no notion of ordering
+                    and hence no ordering semantics are in effect for the collection types that underly the associated
+                    <classname>Map</classname>, <classname>Set</classname> and <classname>Properties</classname>
+                    implementation types used internally by the container.
+                </para>
+                <para>
+                    Finally, some minor notes about the merging support are in order; one cannot merge different
+                    collection types (e.g. a <literal>map</literal> and a <literal>list</literal>), and if one does
+                    attempt to do so an appropriate <classname>Exception</classname> will be thrown; and in case it
+                    is not immediately obvious, the <literal>merge</literal> attribute must be specified on the
+                    lower level, inherited, child definition... specifying the <literal>merge</literal> attribute on
+                    a parent collection definition is redundant and will not result in the desired merging; and
+                    (lastly), please note that this merging feature is only available in Spring 2.0 (and later versions).
+                </para>
             </section>
             <section>
                 <title>Strongly-typed collection (Java5+ only)</title>
@@ -1280,11 +1311,10 @@ support=support@somecompany.co.uk]]></programlisting>
             <section id="beans-idref-element">
                 <title>The <literal>idref</literal> element</title>
                 <para>
-            The <literal>idref</literal> element is simply an error-proof way to
-            pass the <emphasis>id</emphasis> of another bean in the container (to
-            a &lt;constructor-arg&gt; or &lt;property&gt; element).
-        </para>
-        <programlisting><![CDATA[<bean id="theTargetBean" class="..."/>
+                The <literal>idref</literal> element is simply an error-proof way to
+                pass the <emphasis>id</emphasis> of another bean in the container (to
+                a &lt;constructor-arg&gt; or &lt;property&gt; element).</para>
+                <programlisting><![CDATA[<bean id="theTargetBean" class="..."/>
 
 <bean id="theClientBean" class="...">
     <property name="targetName">
@@ -1325,7 +1355,7 @@ support=support@somecompany.co.uk]]></programlisting>
         </para>
         <programlisting><![CDATA[<property name="targetName">
    ]]><lineannotation>&lt;!--
-a bean with an id of 'target' must exist, else an XML exception will be thrown
+   a bean with an id of 'target' must exist, else an XML exception will be thrown
    --&gt;</lineannotation><![CDATA[
    <idref local="theTargetBean"/>
 </property>]]></programlisting>
@@ -1339,7 +1369,7 @@ a bean with an id of 'target' must exist, else an XML exception will be thrown
         </para>
             </section>
             <section id="beans-ref-element">
-                <title>The <literal>ref</literal> element</title>
+                <title>References to other beans (collaborators)</title>
                 <para>
             The <literal>ref</literal> element is the final element allowed
             inside a <literal>&lt;constructor-arg/&gt;</literal> or
@@ -1475,7 +1505,7 @@ a bean with an id of 'target' must exist, else an XML exception will be thrown
   <property name="fred.bob.sammy" value="123" />
 </bean>]]></programlisting>
                 <para>
-            The foo bean has a <literal>fred</literal> property which has a
+            The <literal>foo</literal> bean has a <literal>fred</literal> property which has a
             <literal>bob</literal> property, which has a <literal>sammy</literal>
             property, and that final <literal>sammy</literal> property is being
             set to a scalar value of 123. In order for this to work, the
@@ -1502,17 +1532,17 @@ a bean with an id of 'target' must exist, else an XML exception will be thrown
       bean B every time one is needed.</para>
             <para>One solution to this problem is to forgo some inversion of
       control. Bean A can be aware of the container (as described <link linkend="beans-factory-aware-beanfactoryaware">here</link>) by
-      implementing<literal> BeanFactoryAware</literal>, and use programmatic
+      implementing <literal>BeanFactoryAware</literal>, and use programmatic
       means (as described <link linkend="beans-factory-client">here</link>) to
       ask the container via a <literal>getBean("B")</literal> call for (a new)
       bean B every time it needs it. This is generally not a desirable
       solution since the bean code is then aware of and coupled to
       Spring.</para>
-            <para>Method Injection, an advanced feature of the <interfacename>BeanFactory</interfacename>, allows
-      this use case to be handled in a clean fashion, along with some other
-      scenarios.</para>
+            <para>Method Injection, an advanced feature of the Spring IoC container, allows
+            this use case to be handled in a clean fashion, along with some other
+            scenarios.</para>
             <section>
-                <title>Lookup method Injection</title>
+                <title>Lookup method injection</title>
                 <para>Lookup method injection refers to the ability of the container
         to override abstract or concrete methods on managed beans in the
         container, to return the result of looking up another named bean in
@@ -1524,24 +1554,22 @@ a bean with an id of 'target' must exist, else an XML exception will be thrown
                 <para>In the client class containing the method to be injected, the
         method definition must be an abstract (or concrete) definition in this
         form:</para>
-                <para>
-                    <programlisting>protected abstract SingleShotHelper createSingleShotHelper();</programlisting>
-                </para>
+                <programlisting><![CDATA[protected abstract SingleShotHelper createSingleShotHelper();]]></programlisting>
                 <para>If the method is not abstract, Spring will simply override the
         existing implementation. In the XmlBeanFactory case, you instruct
         Spring to inject/override this method to return a particular bean from
         the container, by using the <literal>lookup-method</literal> element
-        inside the bean definition. For example:<programlisting>&lt;!-- a stateful bean deployed as a prototype (non-singleton) --&gt;
-&lt;bean id="singleShotHelper" class="..." singleton="false"&gt;
-&lt;/bean&gt;
+        inside the bean definition. For example:</para>
+        <programlisting><lineannotation>&lt;!-- a stateful bean deployed as a prototype (non-singleton) --&gt;</lineannotation><![CDATA[
+<bean id="singleShotHelper" class="..." singleton="false"/>
 
-&lt;!-- myBean uses singleShotHelper --&gt;
-&lt;bean id="myBean" class="..."&gt;
-  &lt;lookup-method name="createSingleShotHelper" bean="singleShotHelper"/&gt;
-  &lt;property&gt;
+]]><lineannotation>&lt;!-- myBean uses singleShotHelper --&gt;</lineannotation><![CDATA[
+<bean id="myBean" class="...">
+  <lookup-method name="createSingleShotHelper" bean="singleShotHelper"/>
+  <property>
     ...
-  &lt;/property&gt;
-&lt;/bean&gt;</programlisting></para>
+  </property>
+</bean>]]></programlisting>
                 <para>The bean identified as <emphasis>myBean</emphasis> will call its
         own method <literal>createSingleShotHelper</literal> whenever it needs
         a new instance of the <emphasis>singleShotHelper</emphasis> bean. It
@@ -1566,18 +1594,21 @@ a bean with an id of 'target' must exist, else an XML exception will be thrown
                 <para>In an XmlBeanFactory, the <literal>replaced-method</literal>
         element may be used to replace an existing method implementation with
         another, for a deployed bean. Consider the following class, with a
-        method computeValue, which we want to override:<programlisting>...
+        method computeValue, which we want to override:</para>
+        
+        <programlisting>...
 public class MyValueCalculator {
   public String computeValue(String input) {
     ... some real code
   }
 
   ... some other methods
-}</programlisting></para>
+}</programlisting>
                 <para>A class implementing the
-        <literal>org.springframework.beans.factory.support.MethodReplacer</literal>
-        interface is needed to provide the new method
-        definition.<programlisting>/** meant to be used to override the existing computeValue
+                <interfacename>org.springframework.beans.factory.support.MethodReplacer</interfacename>
+                interface is needed to provide the new method definition.</para>
+                
+                <programlisting><![CDATA[/** meant to be used to override the existing computeValue
     implementation in MyValueCalculator */
 public class ReplacementComputeValue implements MethodReplacer {
 
@@ -1586,27 +1617,35 @@ public class ReplacementComputeValue implements MethodReplacer {
         String input = (String) args[0];
         ... 
         return ...;
-}</programlisting></para>
-                <para>The <interfacename>BeanFactory</interfacename> deployment definition to deploy the original
-        class and specify the method override would look like:<programlisting>&lt;bean id="myValueCalculator class="x.y.z.MyValueCalculator"&gt;
-  &lt;!-- arbitrary method replacement --&gt;
-  &lt;replaced-method name="computeValue" replacer="replacementComputeValue"&gt;
-    &lt;arg-type&gt;String&lt;/arg-type&gt;
-  &lt;/replaced-method&gt;
-&lt;/bean&gt;
+}]]></programlisting>
 
-&lt;bean id="replacementComputeValue" class="a.b.c.ReplaceMentComputeValue"/&gt;
-</programlisting>One or more contained <literal>arg-type</literal> elements
-        within the <literal>replaced-method</literal> element may be used to
+                <para>The bean definition to deploy the original class and specify the
+                method override would look like this:</para>
+                
+                <programlisting><![CDATA[<bean id="myValueCalculator class="x.y.z.MyValueCalculator">
+  <!-- arbitrary method replacement -->
+  <replaced-method name="computeValue" replacer="replacementComputeValue">
+    <arg-type>String</arg-type>
+  </replaced-method>
+</bean>
+
+<bean id="replacementComputeValue" class="a.b.c.ReplacementComputeValue"/>]]></programlisting>
+
+            <para>One or more contained <literal>&lt;arg-type/&gt;</literal> elements
+        within the <literal>&lt;replaced-method/&gt;</literal> element may be used to
         indicate the method signature of the method being overridden. Note
         that the signature for the arguments is actually only needed in the
         case that the method is actually overloaded and there are multiple
         variants within the class. For convenience, the type string for an
         argument may be a substring of the fully qualified type name. For
         example, all the following would match
-        <emphasis>java.lang.String</emphasis>.<programlisting>    java.lang.String
+        <emphasis>java.lang.String</emphasis>.</para>
+        
+        <programlisting><![CDATA[    java.lang.String
     String
-    Str</programlisting>Since the number of arguments is often enough to
+    Str]]></programlisting>
+        
+        <para>Since the number of arguments is often enough to
         distinguish between each possible choice, this shortcut can save a lot
         of typing, by just using the shortest string which will match an
         argument.</para>
@@ -1615,21 +1654,20 @@ public class ReplacementComputeValue implements MethodReplacer {
         <section id="beans-factory-dependson">
             <title>Using <literal>depends-on</literal></title>
             <para>
-        For most situations, the fact that a bean is a dependency of
-        another is expressed simply by the fact that one bean is set as a
-        property of another. This is typically done with the
-        <literal>ref</literal> element in the XmlBeanFactory. In a variation of
-        this, sometimes a bean which is aware of the container is simply given
-        the id of its dependency (using a string value or alternately the
-        <literal>idref</literal> element, which evaluates the same as a string
-        value). The first bean then programmatically asks the container for its
-        dependency. In either case, the dependency is properly initialized
-        before the dependent bean.
-      </para>
+            For most situations, the fact that a bean is a dependency of
+            another is expressed simply by the fact that one bean is set as a
+            property of another. This is typically done with the
+            <literal>ref</literal> element in XML-aware container. In a variation of
+            this, sometimes a bean which is aware of the container is simply given
+            the id of its dependency (using a string value or alternately the
+            <literal>idref</literal> element, which evaluates the same as a string
+            value). The first bean then programmatically asks the container for its
+            dependency. In either case, the dependency is properly initialized
+            before the dependent bean.</para>
             <para>For the relatively infrequent situations where dependencies
 			between beans are less direct (for example, when a static initializer in
 			a class needs to be triggered, such as database driver registration),
-			the <literal>depends-on</literal> element may be used to explicitly
+			the <literal>&lt;depends-on/&gt;</literal> element may be used to explicitly
 			force one or more beans to be initialized before the bean using this
 			element is initialized.</para>
             <para>Find below an example of using <literal>depends-on</literal> to
@@ -1640,7 +1678,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 
 <bean id="manager" class="ManagerBean" />]]></programlisting>
             <para>If you need to express a dependency on multiple beans, you can supply a delimited list
-            of beans names as the value of the <literal>depends-on</literal> attribute, with commas, whitespace
+            of beans names as the value of the <literal>&lt;depends-on/&gt;</literal> attribute, with commas, whitespace
             and semi-colons all valid delimiters. Find below an example of using <literal>depends-on</literal> to
             express a dependency on a number of beans.</para>
             <programlisting><![CDATA[<bean id="beanOne" class="ExampleBean" depends-on="manager,accountDao">
@@ -1709,7 +1747,6 @@ public class ReplacementComputeValue implements MethodReplacer {
             <programlisting><![CDATA[<beans default-lazy-init="true">
     ]]><lineannotation>&lt;!-- no beans will be eagerly pre-instantiated... --&gt;</lineannotation><![CDATA[
 </beans>]]></programlisting>
-            <para></para>
         </section>
         <section id="beans-factory-autowire">
             <title>Autowiring collaborators</title>
@@ -3658,12 +3695,12 @@ public class Client {
             loaded only once.
         </para>
         <section>
-            <title>Using <classname>SingletonBeanFactoryLocator</classname> and <classname>ContextSingletonBeanFactoryLocator</classname></title>
+            <title>Using the Singleton-helper classes</title>
             <para>
                 One can see a detailed example of using
-                <literal><ulink url="http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLocator</ulink></literal>
+                <ulink url="http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLocator</ulink>
                 and
-                <literal><ulink url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink></literal>
+                <ulink url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink>
                 by viewing their respective JavaDocs.
             </para>
             <para>
@@ -3675,303 +3712,5 @@ public class Client {
                 a need.
             </para>
         </section>
-    </section>
-    <section id="extensible-xml">
-    	<title>Extensible XML configuration</title>
-    	<para>
-    		This chapter has explained the Spring IoC container using the XML configuration format, currently the most often
-    		used configuration format for setting up Spring <literal>ApplicationContext</literal>s.
-    		Since version 2.0, Spring features a mechanism for schema-based extensions to the
-    		basic Spring format for configuring beans.
-    	</para>
-    	<para>
-    		Spring's extensible XML configuration mechanism is based on XML Schema, to facilitate
-    		authoring configuration files using a schema-aware XML editor. If you're not familiar
-    		with Spring's current XML configuration extensions that come with the standard
-    		Spring distribution, please first read <xref linkend="xsd-config"/>.
-    	</para>
-    	<para>
-    		Creating new XML configuration extensions can be done by following a simple process of
-    		authoring an XML Schema, coding a <literal>NamespaceHandler</literal>, coding one or more
-    		<literal>BeanDefinitionParser</literal>s and registering the NamespaceHandler and the schema
-    		in a dedicated properties file. What follows is a description of each of these steps. In the example,
-    		we'll create a XML extension that allows us to configure objects of type SimpleDateFormat, directly in an
-    		ApplicationContext.
-    	</para>    	
-    	
-    	<section id="extensible-xml-schema">
-    		<title>Authoring the schema</title>
-    		<para>
-    			Creating an XML configuration extension for use with Spring's IoC container starts with
-    			authoring an XML Schema. What follows is the schema we'll use to configure <literal>SimpleDateFormat</literal>
-    			objects. The emphasized line contains an extension base for all tags that will be identifiable (meaning they have an 
-    			<literal>id</literal> attribute that will be used as the bean identifier in the <literal>ApplicationContext</literal>).    			
-       		</para>    			
-    		<programlisting><![CDATA[#### myns.xsd (inside package org/springframework/samples/xml)
-
-<?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns="http://www.springframework.org/schema/myns"
-    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:beans="http://www.springframework.org/schema/beans"
-    targetNamespace="http://www.mycompany.com/schema/myns"
-    elementFormDefault="qualified"
-    attributeFormDefault="unqualified">
-
-	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
-	
-	<xsd:element name="dateformat">
-		<xsd:complexType>
-			<xsd:complexContent>]]>
-				<emphasis role="bold"><![CDATA[<xsd:extension base="beans:identifiedType">]]></emphasis><![CDATA[
-					<xsd:attribute name="lenient" type="xsd:boolean"/>
-					<xsd:attribute name="pattern" type="xsd:string" use="required"/>
-				</xsd:extension>
-			</xsd:complexContent>
-		</xsd:complexType>
-	</xsd:element>
-	
-</xsd:schema>
-	]]></programlisting>
-			<para>
-				The above schema will be used to configure SimpleDateFormat objects, directly in the application context using
-				the <literal>myns:dateformat</literal> configuration directive. As noted above, the <literal>id</literal> attribute
-				will (<emphasis>in this case</emphasis>) be used as the bean identifier for the <literal>SimpleDateFormat</literal> bean.
-			</para>
-			<programlisting><![CDATA[<myns:dateformat id="dateFormat" 
-	pattern="yyyy-MM-dd HH:mm"
-	lenient="true"/>
-]]></programlisting>
-			<para>
-				Note that after we've created the infrastructure classes, this will essentially be exactly 
-				the same as the following. In other words, we're just creating a bean in the
-				ApplicationContext, identified by <literal>dateFormat</literal> of type 
-				<literal>SimpleDateFormat</literal>, with a couple of properties set.
-			</para>
-			<programlisting><![CDATA[<bean id="dateFormat" class="java.text.SimpleDateFormat">
-	<constructor-arg value="yyyy-HH-dd HH:mm"/>
-	<property name="lenient" value="true"/>
-</bean>
-			]]></programlisting>
-			<para>
-				<note>The schema-based approach to creating configuration format, allows for
-				tight integration with an IDE that has a schema-aware XML editor. Using properly
-				authored schema, you can for example use autocompletion to have a user
-				choose between several configuration options defined in the enumeration.</note>
-			</para>
-		</section>
-		<section>
-			<title>Coding a NamespaceHandler</title>
-			<para>
-				In addition to the schema, we need a <literal>NamespaceHandler</literal>
-				that will parse all elements of this specific namespace Spring encounters
-				while parsing configuration files. The NamespaceHandler should in our case
-				take care of the parsing of the <literal>myns:dateformat</literal> element.
-			</para>
-			<para>
-				The <literal>NamespaceHandler</literal> interface is pretty simple in that 
-				it onyl features three methods:
-				<itemizedlist spacing="compact">
-					<listitem>
-						<para><literal>init()</literal> - allows for initialization of
-						the NamespaceHandler and will be called by Spring before the handler is used</para>
-					</listitem>
-					<listitem>
-						<para><literal>BeanDefinition parse(Element element, ParserContext parserContext)</literal> - 
-						called when Spring encounters an top-level element (not nested inside a bean definition
-						or a different namespace). This method can register bean definitions itself and/or
-						return a bean definition.</para>
-					</listitem>
-					<listitem>
-						<para><literal>BeanDefinitionHolder decorate(Node element, BeanDefinitionHolder definition, ParserContext parserContext)</literal> -
-						called when Spring encounters an attribute or nested element of a different namespace, inside
-						for example the Spring namespace. Decoration of bean definition is used
-						for example with the out-of-the-box scopes Spring 2.0 comes with (see
-						<xref linkend="beans-factory-scopes"/> for more information about scopes). We'll
-						start by highlighting a simple example not using decoration after which we show decoration
-						in a somewhat more advanced example.</para>
-					</listitem>
-				</itemizedlist>
-			</para>
-			<para>
-				Although it is perfectly possible to code one's own NamespaceHandler for the entire namespace
-				(hence provide code that parses each and every element in the namespace), it's often the case
-				that <emphasis>each top-level XML element in a schema results in a bean definition</emphasis>
-				(as in our case, where the <literal>myns:dateformat</literal> element results in a 
-				<literal>SimpleDateFormat</literal> bean definition). Therefore, Spring features a couple of
-				convenience classes that support this kind of behavior. In this example, we'll use the most
-				often used convenience class which is the <literal>NamespaceHandlerSupport</literal> class:
-			</para>
-			<programlisting><![CDATA[package org.springframework.samples.xml;
-
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
-
-public class MyNamespaceHandler extends NamespaceHandlerSupport {
-	
-	public void init() {		]]><emphasis role="bold"><![CDATA[
-		registerBeanDefinitionParser("dateformat", 
-				new SimpleDateFormatBeanDefinitionParser());		
-	]]></emphasis><![CDATA[}
-}]]></programlisting>
-		</section>
-		<section>
-			<title>Coding one or more BeanDefinitionParsers</title>
-			<para>
-				As you can see, the namespace handler shown above registers so-called <literal>BeanDefinitionParsers</literal>.
-				A BeanDefinitionParser in this case will be consulted if Spring the namespace handler
-				encounters an XML element of the type that has been mapped to this specific bean definition parser (which
-				is <literal>dateformat</literal> in this case).
-				In other words, the BeanDefinitionParser is responsible for parsing
-				one distinct top-level XML element defined in the schema. 
-				In the parser, we'll have access to the XML element (and its subelements)
-				and the <literal>ParserContext</literal>. The latter can be used to obtain a reference
-				to for example the <literal>BeanDefinitionRegistry</literal> as done in the
-				example below.
-			</para>
-			<para>
-				<programlisting><![CDATA[package org.springframework.samples.xml;
-
-import java.text.SimpleDateFormat;
-
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.xml.BeanDefinitionParser;
-import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.util.StringUtils;
-import org.w3c.dom.Element;
-
-public class SimpleDateFormatBeanDefinitionParser implements BeanDefinitionParser {
-	
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		
-		// create a RootBeanDefinition that will serve as configuration
-		// holder for the 'pattern' attribute and the 'lenient' attribute]]><emphasis role="bold"><![CDATA[
-		RootBeanDefinition beanDef = new RootBeanDefinition();
-		beanDef.setBeanClass(SimpleDateFormat.class);]]></emphasis><![CDATA[		
-
-		// never 'null' since the schema requires it
-		String pattern = element.getAttribute("pattern");]]><emphasis role="bold"><![CDATA[
-		beanDef.getConstructorArgumentValues().addGenericArgumentValue(pattern);]]></emphasis><![CDATA[
-
-		String lenientString = element.getAttribute("lenient");
-		if (StringUtils.hasText(lenientString)) {
-			// won't throw exception if validation is turned on (boolean type set in schema)			]]><emphasis role="bold"><![CDATA[
-			beanDef.getPropertyValues().addPropertyValue("lenient", new Boolean(lenientString));]]></emphasis><![CDATA[
-		}
-		
-		// retrieve the ID attribute that will serve as the bean identifier in the context
-		String id = element.getAttribute("id");
-		
-		// create a bean definition holder to be able to register the
-		// bean definition with the bean definition registry
-		// (obtained through the ParserContext)
-		BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDef, id);
-		
-		// register the BeanDefinitionHolder (which contains the bean definition)
-		// with the BeanDefinitionRegistry]]><emphasis role="bold"><![CDATA[
-		BeanDefinitionReaderUtils.registerBeanDefinition(holder, parserContext.getRegistry());]]></emphasis><![CDATA[
-		
-		return beanDef;
-	}
-}
-]]></programlisting>
-			</para>
-			<para>
-				<note>
-					In the example here, we're defining a BeanDefinition and registering it
-					with the BeanDefinitionRegistry. Note that you don't necessarily have to 
-					register a bean definition with the registry or return a bean definition
-					from the <literal>parse()</literal> method. You are free to do whatever you
-					want with the information given to you (i.e. the XML element) and the
-					ParserContext.
-				</note>
-			</para>
-			<para>
-				The ParserContext provides access to following properties
-				<itemizedlist spacing="compact">
-					<listitem>
-						<para><literal>readerContext</literal> - provides access
-							to the bean factory and also to the NamespaceHandlerResolver, which
-							can optionally be used to resolve nested namespaces.
-						</para>
-					</listitem>
-					<listitem>
-						<para><literal>parserDelegate</literal> - controlling component
-						that drives the parsing of (parts of) the configuration file. Typically
-						you don't need to access this.</para>
-					</listitem>
-					<listitem>
-						<para><literal>registry</literal> - the <literal>BeanDefinitionRegistry</literal>
-						that allows you to register newly created <literal>BeanDefinition</literal>s with.
-						</para>
-					</listitem>
-					<listitem>
-						<para><literal>nested</literal> - indicates whether or the XML element that is currently
-						being processed is part of a outer bean definition (in other words, it's defined similar
-						to traditional inner-beans).
-						</para>
-					</listitem>
-				</itemizedlist>
-			</para>
-		</section>
-		<section>
-			<title>Registering the handler and the schema</title>
-			<para>
-				We're done implementing the NamespaceHandler and the BeanDefinitionParser that will
-				take care of parsing the custom XML Schema for us. We now have the following artifacts:
-				
-				<itemizedlist spacing="compact">
-					<listitem>
-						<para><literal>org.springframework.samples.xml.MyNamespaceHandler</literal> - 
-						namespace handler that will register a set (in this case only one) BeanDefinitionParsers</para>
-					</listitem>
-					<listitem>
-						<para><literal>org.springframework.samples.xml.SimpleDateFormatBeanDefinitionParser</literal> - 
-						used my the namespace handler to parse elements of type <literal>dateformat</literal></para>
-					</listitem>
-					<listitem>
-						<para><literal>org/springframework/samples/xml/myns.xsd</literal> - the actual schema that 
-						will be used in the Spring configuration files 
-						(<emphasis role="bold">note that this file needs to be on the classpath, alongside your 
-						namespace handler and parser classes as we'll see later on</emphasis>)</para>
-					</listitem>
-				</itemizedlist>
-			</para>
-			<para>
-				The last thing we need to do is getting the namespace ready for use by registering
-				it in two special purpose properties files. These properties files are both placed in META-INF
-				and can for example be distributed alongside your binary classes in a JAR file. Spring will 
-				automatically pick up the new namespaces and handlers once it finds the properties
-				files on the classpath.
-			</para>
-			<section>
-				<title>META-INF/spring.handlers</title>
-				<para>
-					The properties file called <literal>spring.handlers</literal> contains a mapping
-					of XML Schema URIs to namespace handler classes. So for our example, we need to 
-					mention the following here:
-				</para>
-				<para>
-					<programlisting><![CDATA[http\://www.mycompany.com/schema/myns=org.springframework.samples.xml.MyNamespaceHandler]]></programlisting>
-				</para>
-			</section>
-			<section>
-				<title>META-INF/spring.schemas</title>
-				<para>
-					The properties file called <literal>spring.schemas</literal> contains a mapping
-					of XML Schema locations (mention alongside the schema declaration in XML files
-					that use the schema as part of the <literal>xsi:schemaLocation</literal> attribute)
-					to classpath resources. This file is needed to prevent Spring from having to use a default
-					<literal>EntityResolver</literal> that requires Internet access to retrieve the 
-					schema file. If you mention the mapping in this properties file, Spring will
-					search on the classpath for the schema (in this case; myns.xsd in the package 
-					org.springframework.samples.xml):
-				</para>
-				<para>
-					<programlisting><![CDATA[http\://www.mycompany.com/schema/myns/myns.xsd=org/springframework/samples/xml/myns.xsd]]></programlisting>
-				</para>
-			</section>
-		</section>
     </section>
 </chapter>
