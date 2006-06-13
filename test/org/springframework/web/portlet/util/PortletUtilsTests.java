@@ -23,6 +23,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.mock.web.portlet.*;
 import org.springframework.test.AssertThrows;
 import org.springframework.web.util.WebUtils;
+import org.springframework.AbstractScalarMockTemplate;
 
 import javax.portlet.PortletContext;
 import javax.portlet.PortletRequest;
@@ -59,7 +60,7 @@ public final class PortletUtilsTests extends TestCase {
     public void testGetRealPathInterpretsLocationAsRelativeToWebAppRootIfPathDoesNotBeginWithALeadingSlash() throws Exception {
         final String originalPath = "web/foo";
         final String expectedRealPath = "/" + originalPath;
-        new AbstractEasyMockTemplate(PortletContext.class) {
+        new AbstractScalarMockTemplate(PortletContext.class) {
             public void setupExpectations(MockControl mockControl, Object mockObject) throws Exception {
                 PortletContext ctx = (PortletContext) mockObject;
                 ctx.getRealPath(expectedRealPath);
@@ -596,96 +597,6 @@ public final class PortletUtilsTests extends TestCase {
         private NoPublicCtor() {
         	throw new IllegalArgumentException("Just for eclipse...");
         }
-    }
-
-
-    private static abstract class AbstractEasyMockTemplate {
-
-        private Class mockInterface;
-
-
-        /**
-         * Creates a new instance of the EasyMockTemplate class.
-         */
-        protected AbstractEasyMockTemplate() {
-        }
-
-        /**
-         * Creates a new instance of the EasyMockTemplate class.
-         *
-         * @param mockInterface the interface that is to be mocked
-         */
-        protected AbstractEasyMockTemplate(Class mockInterface) {
-            this.mockInterface = mockInterface;
-        }
-
-
-        /**
-         * Sets the interface that is to be mocked.
-         *
-         * @param mockInterface the interface that is to be mocked
-         */
-        public void setMockInterface(Class mockInterface) {
-            this.mockInterface = mockInterface;
-        }
-
-        /**
-         * Gets the interface that is to be mocked.
-         *
-         * @return the interface that is to be mocked
-         */
-        public Class getMockInterface() {
-            return mockInterface;
-        }
-
-
-        /**
-         * Setup any expectations for the test.
-         * <p>The default implementation is a no-op; i.e. no expectations are set.
-         *
-         * @param mockControl the EasyMock {@link org.easymock.MockControl} for the mocked object
-         * @param mockObject  the mocked object
-         * @throws Exception if calling methods on the supplied <code>mockObject</code> that are declared as throwing one more exceptions (just here to satisfy the compiler really).
-         */
-        public void setupExpectations(MockControl mockControl, Object mockObject) throws Exception {
-        }
-
-        /**
-         * Do the EasyMock-led test.
-         * <p>This is the driving template method, and should not typically need to overriden.
-         *
-         * @throws Exception if an exception is thrown during testing
-         */
-        public void test() throws Exception {
-            MockControl mockControl = createMockControl();
-            Object mockObject = mockControl.getMock();
-            setupExpectations(mockControl, mockObject);
-            mockControl.replay();
-            doTest(mockObject);
-            mockControl.verify();
-        }
-
-        /**
-         * Do the actual test using the supplied mock.
-         *
-         * @param mockObject the mocked object
-         * @throws Exception if an exception is thrown during the test logic
-         */
-        public abstract void doTest(Object mockObject) throws Exception;
-
-
-        /**
-         * Create a {@link org.easymock.MockControl} for the mocked interface.
-         * <p>The default implementation creates a vanilla {@link org.easymock.MockControl};
-         * override this method if you want to create a strict control, or handle
-         * the creation of the {@link org.easymock.MockControl} yourself.
-         *
-         * @return a {@link org.easymock.MockControl} for the mocked interface
-         */
-        protected MockControl createMockControl() {
-            return MockControl.createControl(this.getMockInterface());
-        }
-
     }
 
 }
