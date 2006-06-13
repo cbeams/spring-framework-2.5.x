@@ -118,6 +118,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Rick Evans
  * @since 2.0
  */
 public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
@@ -219,10 +220,10 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			if (refreshCheckDelay >= 0) {
 				RefreshableScriptTargetSource ts =
 						new RefreshableScriptTargetSource(this.scriptBeanFactory, scriptedObjectBeanName, scriptSource);
-				ts.setRefreshCheckDelay(this.defaultRefreshCheckDelay);
+				ts.setRefreshCheckDelay(refreshCheckDelay);
 				return createRefreshableProxy(ts, interfaces);
 			}
-		}
+        }
 
 		return this.scriptBeanFactory.getBean(scriptedObjectBeanName);
 	}
@@ -232,13 +233,15 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * If the {@link BeanDefinition} has a {@link org.springframework.core.AttributeAccessor metadata attribute}
 	 * under the key {@link #REFRESH_CHECK_DELAY_ATTRIBUTE} which is a valid {@link Number} type, then this value
 	 * is used. Otherwise, the the {@link #defaultRefreshCheckDelay} value is used.
+     * @return the refresh check delay
 	 */
 	protected long resolveRefreshCheckDelay(BeanDefinition bd) {
-		Object attributeValue = bd.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
-		if (attributeValue instanceof Number) {
-			return ((Number) attributeValue).longValue();
+        Object attributeValue = bd.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
+        long refreshCheckDelay = this.defaultRefreshCheckDelay;
+        if (attributeValue instanceof Number) {
+			refreshCheckDelay = ((Number) attributeValue).longValue();
 		}
-		return this.defaultRefreshCheckDelay;
+        return refreshCheckDelay;
 	}
 
 	/**
