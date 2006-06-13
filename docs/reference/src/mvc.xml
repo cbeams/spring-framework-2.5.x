@@ -480,7 +480,9 @@
 
     <para>Spring's basis for the controller architecture is the
     <literal>org.springframework.web.servlet.mvc.Controller</literal>
-    interface, which is listed below. <programlisting>public interface Controller {
+    interface, which is listed below. </para>
+    
+    <programlisting><![CDATA[public interface Controller {
 
     /**
      * Process the request and return a ModelAndView object which the DispatcherServlet
@@ -490,7 +492,9 @@
         HttpServletRequest request,
         HttpServletResponse response)
     throws Exception;
-}</programlisting> As you can see, the <literal>Controller</literal> interface
+}]]></programlisting>
+
+    <para>As you can see, the <literal>Controller</literal> interface
     requires a single method that should be capable of handling a request and
     returning an appropriate model and view. These three concepts are the
     basis for the Spring MVC implementation -
@@ -600,8 +604,9 @@
       <literal>handleRequestInternal(HttpServletRequest,
       HttpServletResponse)</literal> method, implement your logic, and return
       a <classname>ModelAndView</classname> object. Here is short example
-      consisting of a class and a declaration in the web application context.
-      <programlisting>package samples;
+      consisting of a class and a declaration in the web application context.</para>
+      
+      <programlisting><![CDATA[package samples;
 
 public class SampleController extends AbstractController {
 
@@ -613,9 +618,13 @@ public class SampleController extends AbstractController {
         mav.addObject("message", "Hello World!");
         return mav;        
     }
-}</programlisting> <programlisting>&lt;bean id="sampleController" class="samples.SampleController"&gt;
-    &lt;property name="cacheSeconds" value="120"/&gt;
-&lt;/bean&gt;</programlisting> The class above and the declaration in the web
+}]]></programlisting>
+
+    <programlisting><![CDATA[<bean id="sampleController" class="samples.SampleController">
+    <property name="cacheSeconds" value="120"/>
+</bean>]]></programlisting>
+
+    <para>The class above and the declaration in the web
       application context is all you need besides setting up a handler mapping
       (see <xref linkend="mvc-handlermapping" />) to get this very simple
       controller working. This controller will generate caching directives
@@ -680,7 +689,7 @@ public class SampleController extends AbstractController {
               <entry>there are two usage-scenarios for the
               MultiActionController. Either you subclass the
               MultiActionController and specify the methods that will be
-              resolved by the MethodNameResolver on the subclass (in which
+              resolved by the <interfacename>MethodNameResolver</interfacename> on the subclass (in which
               case you don't need to set the delegate), or you define a
               delegate object, on which methods resolved by the Resolver will
               be invoked. If you choose this scenario, you will have to define
@@ -712,15 +721,15 @@ ModelAndView actionName(HttpServletRequest, HttpServletResponse);</programlistin
 ModelAndView anyMeaningfulName(HttpServletRequest, HttpServletResponse, ExceptionClass);</programlisting>
       The <literal>ExceptionClass</literal> can be <emphasis>any</emphasis>
       exception, as long as it's a subclass of
-      <literal>java.lang.Exception</literal> or
-      <literal>java.lang.RuntimeException</literal>.</para>
+      <classname>java.lang.Exception</classname> or
+      <classname>java.lang.RuntimeException</classname>.</para>
 
-      <para>The <literal>MethodNameResolver</literal> is supposed to resolve
+      <para>The <interfacename>MethodNameResolver</interfacename> is supposed to resolve
       method names based on the request coming in. There are three resolvers
       at your disposal, but of course you can implement more of them yourself
       if you want to. <itemizedlist spacing="compact">
           <listitem>
-            <para><literal>ParameterMethodNameResolver</literal> - capable of
+            <para><classname>ParameterMethodNameResolver</classname> - capable of
             resolving a request parameter and using that as the method name
             (<literal>http://www.sf.net/index.view?testParam=testIt</literal>
             will result in a method <literal>testIt(HttpServletRequest,
@@ -730,7 +739,7 @@ ModelAndView anyMeaningfulName(HttpServletRequest, HttpServletResponse, Exceptio
           </listitem>
 
           <listitem>
-            <para><literal>InternalPathMethodNameResolver</literal> -
+            <para><classname>InternalPathMethodNameResolver</classname> -
             retrieves the filename from the path and uses that as the method
             name (<literal>http://www.sf.net/testing.view</literal> will
             result in a method <literal>testing(HttpServletRequest,
@@ -738,7 +747,7 @@ ModelAndView anyMeaningfulName(HttpServletRequest, HttpServletResponse, Exceptio
           </listitem>
 
           <listitem>
-            <para><literal>PropertiesMethodNameResolver</literal> - uses a
+            <para><classname>PropertiesMethodNameResolver</classname> - uses a
             user-defined properties object with request URLs mapped to
             methodnames. When the properties contain
             <literal>/index/welcome.html=doIt</literal> and a request to
@@ -752,18 +761,20 @@ ModelAndView anyMeaningfulName(HttpServletRequest, HttpServletResponse, Exceptio
         </itemizedlist></para>
 
       <para>Here are a couple of examples. First, an example showing the
-      <literal>ParameterMethodNameResolver</literal> and the delegate
+      <classname>ParameterMethodNameResolver</classname> and the delegate
       property, which will accept requests to urls with the parameter method
-      included and set to <literal>retrieveIndex</literal>: <programlisting>&lt;bean id="paramResolver" class="org....mvc.multiaction.ParameterMethodNameResolver"&gt;
-  &lt;property name="paramName"&gt;&lt;value&gt;method&lt;/value&gt;&lt;/property&gt;
-&lt;/bean&gt;
+      included and set to <literal>retrieveIndex</literal>: </para>
+      
+      <programlisting><![CDATA[<bean id="paramResolver" class="org....mvc.multiaction.ParameterMethodNameResolver">
+  <property name="paramName" value="method"/>
+</bean>
 
-&lt;bean id="paramMultiController" class="org....mvc.multiaction.MultiActionController"&gt;
-  &lt;property name="methodNameResolver"&gt;&lt;ref bean="paramResolver"/&gt;&lt;/property&gt;
-  &lt;property name="delegate"&gt;&lt;ref bean="sampleDelegate"/&gt;&lt;/property&gt;
-&lt;/bean&gt;
+<bean id="paramMultiController" class="org....mvc.multiaction.MultiActionController">
+  <property name="methodNameResolver" ref="paramResolver"/>
+  <property name="delegate" ref="sampleDelegate"/>
+</bean>
 
-&lt;bean id="sampleDelegate" class="samples.SampleDelegate"/&gt;
+<bean id="sampleDelegate" class="samples.SampleDelegate"/>
 
 ## together with
 
@@ -775,22 +786,27 @@ public class SampleDelegate {
 
         return new ModelAndView("index", "date", new Long(System.currentTimeMillis()));
     }
-}</programlisting> When using the delegates shown above, we could also use the
-      <literal>PropertiesMethodNameResolver</literal> to match a couple of
-      URLs to the method we defined: <programlisting>&lt;bean id="propsResolver" class="org....mvc.multiaction.PropertiesMethodNameResolver"&gt;
-  &lt;property name="mappings"&gt;
-    &lt;props&gt;
-      &lt;prop key="/index/welcome.html"&gt;retrieveIndex&lt;/prop&gt;
-      &lt;prop key="/**/notwelcome.html"&gt;retrieveIndex&lt;/prop&gt;
-      &lt;prop key="/*/user?.html"&gt;retrieveIndex&lt;/prop&gt;
-    &lt;/props&gt;
-  &lt;/property&gt;
-&lt;/bean&gt;
+}]]></programlisting>
 
-&lt;bean id="paramMultiController" class="org....mvc.multiaction.MultiActionController"&gt;
-    &lt;property name="methodNameResolver"&gt;&lt;ref bean="propsResolver"/&gt;&lt;/property&gt;
-    &lt;property name="delegate"&gt;&lt;ref bean="sampleDelegate"/&gt;&lt;/property&gt;
-&lt;/bean&gt;</programlisting></para>
+        <para>When using the delegates shown above, we could also use the
+      <classname>PropertiesMethodNameResolver</classname> to match a couple of
+      URLs to the method we defined: </para>
+      
+      <programlisting><![CDATA[<bean id="propsResolver" class="org....mvc.multiaction.PropertiesMethodNameResolver">
+  <property name="mappings">
+    <props>
+      <prop key="/index/welcome.html">retrieveIndex</prop>
+      <prop key="/**/notwelcome.html">retrieveIndex</prop>
+      <prop key="/*/user?.html">retrieveIndex</prop>
+    </props>
+  </property>
+</bean>
+
+<bean id="paramMultiController" class="org....mvc.multiaction.MultiActionController">
+    <property name="methodNameResolver" ref="propsResolver"/>
+    <property name="delegate" ref="sampleDelegate"/>
+</bean>]]></programlisting>
+
     </section>
 
     <section id="mvc-controller-command">
@@ -1038,7 +1054,7 @@ public class SampleDelegate {
       <classname>SimpleUrlHandlerMapping</classname>. This mapping is configurable
       in the application context and has Ant-style path matching capabilities
       (see the Javadoc for
-      <literal>org.springframework.util.PathMatcher</literal>). Here is an
+      <classname>org.springframework.util.PathMatcher</classname> class). Here is an
       example:</para>
       <programlisting><![CDATA[<web-app>
     ...
@@ -1079,10 +1095,10 @@ public class SampleDelegate {
 
     <bean id="editAccountFormController"
           class="org.springframework.web.servlet.mvc.SimpleFormController">
-        <property name="formView"><value>account</value></property>
-        <property name="successView"><value>account-created</value></property>
-        <property name="commandName"><value>Account</value></property>
-        <property name="commandClass"><value>samples.Account</value></property>
+        <property name="formView" value="account"/>
+        <property name="successView" value="account-created"/>
+        <property name="commandName" value="Account"/>
+        <property name="commandClass" value="samples.Account"/>
     </bean>
 <beans>]]></programlisting>
         <para>This handler mapping routes requests for
@@ -1145,8 +1161,8 @@ public class SampleDelegate {
 
     <bean id="officeHoursInterceptor"
           class="samples.TimeBasedAccessInterceptor">
-        <property name="openingTime"><value>9</value></property>
-        <property name="closingTime"><value>18</value></property>
+        <property name="openingTime" value="9"/>
+        <property name="closingTime" value="18"/>
     </bean>
 <beans>]]></programlisting>
         <programlisting><![CDATA[package samples;
@@ -1224,7 +1240,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
           <thead>
             <row>
-              <entry>ViewResolver</entry>
+              <entry><interfacename>ViewResolver</interfacename></entry>
 
               <entry>Description</entry>
             </row>
@@ -1232,7 +1248,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
           <tbody>
             <row>
-              <entry>AbstractCachingViewResolver</entry>
+              <entry><classname>AbstractCachingViewResolver</classname></entry>
 
               <entry>An abstract view resolver which takes care of caching
               views. Often views need preparation before they can be used,
@@ -1240,28 +1256,28 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
             </row>
 
             <row>
-              <entry>XmlViewResolver</entry>
+              <entry><classname>XmlViewResolver</classname></entry>
 
-              <entry>An implementation of ViewResolver that accepts a
+              <entry>An implementation of <interfacename>ViewResolver</interfacename> that accepts a
               configuration file written in XML with the same DTD as Spring's
               bean factories. The default configuration file is
               <literal>/WEB-INF/views.xml</literal>.</entry>
             </row>
 
             <row>
-              <entry>ResourceBundleViewResolver</entry>
+              <entry><classname>ResourceBundleViewResolver</classname></entry>
 
-              <entry>An implementation of ViewResolver that uses bean
-              definitions in a ResourceBundle, specified by the bundle
+              <entry>An implementation of <interfacename>ViewResolver</interfacename> that uses bean
+              definitions in a <classname>ResourceBundle</classname>, specified by the bundle
               basename. The bundle is typically defined in a properties file,
               located in the classpath. The default file name is
               <literal>views.properties</literal>.</entry>
             </row>
 
             <row>
-              <entry>UrlBasedViewResolver</entry>
+              <entry><classname>UrlBasedViewResolver</classname></entry>
 
-              <entry>A simple implementation of ViewResolver that allows for
+              <entry>A simple implementation of <interfacename>ViewResolver</interfacename> that allows for
               direct resolution of symbolic view names to URLs, without an
               explicit mapping definition. This is appropriate if your
               symbolic names match the names of your view resources in a
@@ -1270,9 +1286,9 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
             </row>
 
             <row>
-              <entry>InternalResourceViewResolver</entry>
+              <entry><classname>InternalResourceViewResolver</classname></entry>
 
-              <entry>A convenience subclass of UrlBasedViewResolver that
+              <entry>A convenience subclass of <classname>UrlBasedViewResolver</classname> that
               supports InternalResourceView (i.e. Servlets and JSPs), and
               subclasses like JstlView and TilesView. The view class for all
               views generated by this resolver can be specified via
@@ -1281,11 +1297,11 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
             </row>
 
             <row>
-              <entry>VelocityViewResolver / FreeMarkerViewResolver</entry>
+              <entry><classname>VelocityViewResolver</classname> / <classname>FreeMarkerViewResolver</classname></entry>
 
-              <entry>A convenience subclass of UrlBasedViewResolver that
-              supports VelocityView (i.e. Velocity templates) or
-              FreeMarkerView respectively and custom subclasses of
+              <entry>A convenience subclass of <classname>UrlBasedViewResolver</classname> that
+              supports <classname>VelocityView</classname> (i.e. Velocity templates) or
+              <classname>FreeMarkerView</classname> respectively and custom subclasses of
               them.</entry>
             </row>
           </tbody>
@@ -1293,25 +1309,31 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       </table>
 
       <para>As an example, when using JSP for a view technology you can use
-      the <literal>UrlBasedViewResolver</literal>. This view resolver
+      the <classname>UrlBasedViewResolver</classname>. This view resolver
       translates a view name to a URL and hands the request over the
-      RequestDispatcher to render the view. <programlisting>&lt;bean id="viewResolver"
-      class="org.springframework.web.servlet.view.UrlBasedViewResolver"&gt;
-    &lt;property name="prefix"&gt;&lt;value&gt;/WEB-INF/jsp/&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="suffix"&gt;&lt;value&gt;.jsp&lt;/value&gt;&lt;/property&gt;
-&lt;/bean&gt;</programlisting> When returning <literal>test</literal> as a
+      RequestDispatcher to render the view.</para>
+      
+      <programlisting><![CDATA[<bean id="viewResolver"
+      class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+    <property name="prefix" value="/WEB-INF/jsp/"/>
+    <property name="suffix" value=".jsp"/>
+</bean>]]></programlisting>
+
+      <para>When returning <literal>test</literal> as a
       viewname, this view resolver will hand the request over to the
-      RequestDispatcher that will send the request to
+      <classname>RequestDispatcher</classname> that will send the request to
       <literal>/WEB-INF/jsp/test.jsp</literal>.</para>
 
       <para>When mixing different view technologies in a web application, you
-      can use the ResourceBundleViewResolver: <programlisting>&lt;bean id="viewResolver"
-      class="org.springframework.web.servlet.view.ResourceBundleViewResolver"&gt;
-    &lt;property name="basename"&gt;&lt;value&gt;views&lt;/value&gt;&lt;/property&gt;
-    &lt;property name="defaultParentView"&gt;&lt;value&gt;parentView&lt;/value&gt;&lt;/property&gt;
-&lt;/bean&gt;</programlisting></para>
+      can use the <classname>ResourceBundleViewResolver</classname>:</para>
+      
+      <programlisting><![CDATA[<bean id="viewResolver"
+      class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
+    <property name="basename" value="views"/>
+    <property name="defaultParentView" value="parentView"/>
+</bean>]]></programlisting>
 
-      <para>The ResourceBundleViewResolver inspects the ResourceBundle
+      <para>The <classname>ResourceBundleViewResolver</classname> inspects the ResourceBundle
       identified by the basename, and for each view it is supposed to resolve,
       it uses the value of the property <literal>[viewname].class</literal> as
       the view class and the value of the property
@@ -1321,7 +1343,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       example.</para>
 
       <para><emphasis>A note on caching</emphasis> - subclasses of
-      <literal>AbstractCachingViewResolver</literal> cache view instances they
+      <classname>AbstractCachingViewResolver</classname> cache view instances they
       have resolved. This greatly improves performance when using certain view
       technology. It's possible to turn off the cache, by setting the
       <literal>cache</literal> property to false. Furthermore, if you have the
@@ -1343,43 +1365,41 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       resolver will be positioned in the chain.</para>
 
       <para>In the following example, the chain of view resolvers consists of
-      two resolvers, a <literal>InternalResourceViewResolver</literal> (which
+      two resolvers, a <classname>InternalResourceViewResolver</classname> (which
       is always automatically positioned as the last resolver in the chain)
       and an <literal>XmlViewResolver</literal> for specifying Excel views
-      (which are not supported by the InternalResourceViewResolver):
-      <programlisting>
-&lt;bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;
-  &lt;property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/&gt;
-  &lt;property name="prefix" value="/WEB-INF/jsp/"/&gt;
-  &lt;property name="suffix" value=".jsp"/&gt;
-&lt;/bean&gt;
+      (which are not supported by the InternalResourceViewResolver):</para>
+      <programlisting><![CDATA[<bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+  <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+  <property name="prefix" value="/WEB-INF/jsp/"/>
+  <property name="suffix" value=".jsp"/>
+</bean>
 
-&lt;bean id="excelViewResolver" class="org.springframework.web.servlet.view.XmlViewResolver"&gt;
-  &lt;property name="order" value="1"/&gt;
-  &lt;property name="location" value="/WEB-INF/views.xml"/&gt;
-&lt;/bean&gt;
+<bean id="excelViewResolver" class="org.springframework.web.servlet.view.XmlViewResolver">
+  <property name="order" value="1"/>
+  <property name="location" value="/WEB-INF/views.xml"/>
+</bean>
 
 ### views.xml
 
-&lt;beans&gt;
-  &lt;bean name="report" class="org.springframework.example.ReportExcelView"/&gt;
-&lt;/beans&gt;
-</programlisting></para>
+<beans>
+  <bean name="report" class="org.springframework.example.ReportExcelView"/>
+</beans>]]></programlisting>
 
       <para>If a specific view resolver does not result in a view, Spring will
       inspect the context to see if other view resolvers are configured. If
       there are additional view resolvers, it will continue to inspect them.
-      If not, it will throw an Exception.</para>
+      If not, it will throw an <classname>Exception</classname>.</para>
 
       <para>You have to keep something else in mind - the contract of a view
       resolver mentions that a view resolver <emphasis>can</emphasis> return
       null to indicate the view could not be found. Not all view resolvers do
       this however! This is because in some cases, the resolver simply cannot
       detect whether or not the view exists. For example, the
-      <literal>InternalResourceViewResolver</literal> uses the
-      RequestDispatcher internally, and dispatching is the only way to figure
+      <classname>InternalResourceViewResolver</classname> uses the
+      <classname>RequestDispatcher</classname> internally, and dispatching is the only way to figure
       out if a JSP exists -this can only be done once. The same holds for the
-      VelocityViewResolver and some others. Check the JavaDoc for the view
+      <classname>VelocityViewResolver</classname> and some others. Check the JavaDoc for the view
       resolver to see if you're dealing with a view resolver that does not
       report non-existing views. As a result of this, putting an
       <classname>InternalResourceViewResolver</classname> in the chain in a place
@@ -1455,7 +1475,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
         <para>The special <literal>redirect:</literal> prefix allows this to be achived. If a
         view name is returned which has the prefix redirect:, then
-        <literal>UrlBasedViewResolver</literal> (and all subclasses) will
+        <classname>UrlBasedViewResolver</classname> (and all subclasses) will
         recognize this as a special indication that a redirect is needed. The
         rest of the view name will be treated as the redirect URL.</para>
 
@@ -1502,7 +1522,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     <para>Most parts of Spring's architecture support internationalization,
     just as the Spring web MVC framework does. <classname>DispatcherServlet</classname> enables you
     to automatically resolve messages using the client's locale. This is done
-    with <literal>LocaleResolver</literal> objects.</para>
+    with <interfacename>LocaleResolver</interfacename> objects.</para>
 
     <para>When a request comes in, the <classname>DispatcherServlet</classname> looks for a locale
     resolver and if it finds one it tries to use it to set the locale. Using
@@ -1521,7 +1541,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     selection of the locale resolvers included in Spring.</para>
 
     <section id="mvc-localeresolver-acceptheader">
-      <title><literal>AcceptHeaderLocaleResolver</literal></title>
+      <title><classname>AcceptHeaderLocaleResolver</classname></title>
 
       <para>This locale resolver inspects the
       <literal>accept-language</literal> header in the request that was sent
@@ -1535,12 +1555,14 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <para>This locale resolver inspects a Cookie that might exist on the
       client, to see if a locale is specified. If so, it uses that specific
       locale. Using the properties of this locale resolver, you can specify
-      the name of the cookie, as well as the maximum age. <programlisting>&lt;bean id="localeResolver"&gt;
-    &lt;property name="cookieName"&gt;&lt;value&gt;clientlanguage&lt;/value&gt;&lt;/property&gt;
-    &lt;!-- in seconds. If set to -1, the cookie is not persisted (deleted when browser shuts down) --&gt;
-    &lt;property name="cookieMaxAge"&gt;&lt;value&gt;100000&lt;/value&gt;&lt;/property&gt;
-&lt;/bean&gt;</programlisting> This is an example of defining a
-      CookieLocaleResolver.</para>
+      the name of the cookie, as well as the maximum age. Find below an example of
+      defining a CookieLocaleResolver.</para>
+      
+      <programlisting><![CDATA[<bean id="localeResolver">
+    <property name="cookieName"><value>clientlanguage</value></property>
+    <!-- in seconds. If set to -1, the cookie is not persisted (deleted when browser shuts down) -->
+    <property name="cookieMaxAge"><value>100000</value></property>
+</bean>]]></programlisting>
 
       <table frame="all">
         <title>Special beans in the <interfacename>WebApplicationContext</interfacename></title>
@@ -1606,37 +1628,37 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     </section>
 
     <section id="mvc-localeresolver-interceptor">
-      <title><literal>LocaleChangeInterceptor</literal></title>
+      <title><classname>LocaleChangeInterceptor</classname></title>
 
       <para>You can build in changing of locales using the
-      <literal>LocaleChangeInterceptor</literal>. This interceptor needs to be
+      <classname>LocaleChangeInterceptor</classname>. This interceptor needs to be
       added to one of the handler mappings (see <xref
       linkend="mvc-handlermapping" />). It will detect a parameter in the
       request and change the locale (it calls <literal>setLocale()</literal>
-      on the LocaleResolver that also exists in the context). <programlisting>&lt;bean id="localeChangeInterceptor"
-      class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"&gt;
-    &lt;property name="paramName"&gt;&lt;value&gt;siteLanguage&lt;/value&gt;&lt;/property&gt;
-&lt;/bean&gt;
+      on the LocaleResolver that also exists in the context).</para>
+      
+      <programlisting><![CDATA[<bean id="localeChangeInterceptor"
+      class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+    <property name="paramName" value="siteLanguage"/>
+</bean>
 
-&lt;bean id="localeResolver"
-      class="org.springframework.web.servlet.i18n.CookieLocaleResolver"/&gt;
+<bean id="localeResolver"
+      class="org.springframework.web.servlet.i18n.CookieLocaleResolver"/>
 
-&lt;bean id="urlMapping"
-      class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"&gt;
-    &lt;property name="interceptors"&gt;
-        &lt;list&gt;
-            &lt;ref bean="localeChangeInterceptor"/&gt;
-        &lt;/list&gt;
-    &lt;/property&gt;
-    &lt;property name="mappings"&gt;
-        &lt;props&gt;
-            &lt;prop key="/**/*.view"&gt;someController&lt;/prop&gt;
-        &lt;/props&gt;
-    &lt;/property&gt;
-&lt;/bean&gt;</programlisting> All calls to all *.view resources containing a
+<bean id="urlMapping"
+      class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+    <property name="interceptors">
+        <list>
+            <ref bean="localeChangeInterceptor"/>
+        </list>
+    </property>
+    <property name="mappings">
+        <value>/**/*.view=someController</value>
+    </property>
+</bean>]]></programlisting>
+        <para>All calls to all *.view resources containing a
       parameter named <literal>siteLanguage</literal> will now change the
-      locale. So a call to
-      <literal>http://www.sf.net/home.view?siteLanguage=nl</literal> will
+      locale. So a call to <literal>http://www.sf.net/home.view?siteLanguage=nl</literal> will
       change the site language to Dutch.</para>
     </section>
   </section>
@@ -1659,46 +1681,45 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <title>Defining themes</title>
 
       <para>When you want to use themes in your web application you'll have to
-      setup a <literal>org.springframework.ui.context.ThemeSource</literal>.
+      setup a <interfacename>org.springframework.ui.context.ThemeSource</interfacename>.
       The <interfacename>WebApplicationContext</interfacename> interface extends
-      <literal>ThemeSource</literal> but delegates its responsabilities to a
+      <interfacename>ThemeSource</interfacename> but delegates its responsibilities to a
       dedicated implementation. By default the delegate will be a
       <literal>org.springframework.ui.context.support.ResourceBundleThemeSource</literal>
       that loads properties files from the root of the classpath. If you want
-      to use a custom <literal>ThemeSource</literal> implementation or if you
+      to use a custom <interfacename>ThemeSource</interfacename> implementation or if you
       need to configure the basename prefix of the
-      <literal>ResourceBundleThemeSource</literal>, you can register a bean in
+      <classname>ResourceBundleThemeSource</classname>, you can register a bean in
       the application context with the reserved name "themeSource". The web
       application context will automatically detect that bean and start using
       it.</para>
 
-      <para>When using the <literal>ResourceBundleThemeSource</literal>, a
+      <para>When using the <classname>ResourceBundleThemeSource</classname>, a
       theme is defined in a simple properties file. The properties file lists
-      the resources that make up the theme. Here's an example:
-      <programlisting>styleSheet=/themes/cool/style.css
-background=/themes/cool/img/coolBg.jpg
-</programlisting> The keys of the properties are the names used to refer to
+      the resources that make up the theme. Here is an example:</para>
+      <programlisting><![CDATA[styleSheet=/themes/cool/style.css
+background=/themes/cool/img/coolBg.jpg]]></programlisting>
+      <para>The keys of the properties are the names used to refer to
       the themed elements from view code. For a JSP this would typically be
       done using the <literal>spring:theme</literal> custom tag, which is very
       similar to the <literal>spring:message</literal> tag. The following JSP
-      fragment uses the theme defined above to customize the look and feel:
-      <programlisting>&lt;taglib prefix="spring" uri="http://www.springframework.org/tags"%&gt;
-&lt;html&gt;
-   &lt;head&gt;
-      &lt;link rel="stylesheet" href="&lt;spring:theme code="styleSheet"/&gt;" type="text/css"/&gt;
-   &lt;/head&gt;
-   &lt;body background="&lt;spring:theme code="background"/&gt;"&gt;
+      fragment uses the theme defined above to customize the look and feel:</para>
+      <programlisting><![CDATA[<taglib prefix="spring" uri="http://www.springframework.org/tags"%>
+<html>
+   <head>
+      <link rel="stylesheet" href="<spring:theme code="styleSheet"/>" type="text/css"/>
+   </head>
+   <body background="<spring:theme code="background"/>">
       ...
-   &lt;/body&gt;
-&lt;/html&gt;
-</programlisting></para>
+   </body>
+</html>]]></programlisting>
 
-      <para>By default, the <literal>ResourceBundleThemeSource</literal> uses
+      <para>By default, the <classname>ResourceBundleThemeSource</classname> uses
       an empty basename prefix. As a result the properties files will be
       loaded from the root of the classpath, so we'll have to put our
       <literal>cool.properties</literal> theme definition in a directory at
       the root of the classpath, e.g. in <literal>/WEB-INF/classes</literal>.
-      Note that the <literal>ResourceBundleThemeSource</literal> uses the
+      Note that the <classname>ResourceBundleThemeSource</classname> uses the
       standard Java resource bundle loading mechanism, allowing for full
       internationalisation of themes. For instance, we could have a
       <literal>/WEB-INF/classes/cool_nl.properties</literal> that references a
@@ -1711,14 +1732,14 @@ background=/themes/cool/img/coolBg.jpg
       <para>Now that we have our themes defined, the only thing left to do is
       decide which theme to use. The <classname>DispatcherServlet</classname> will
       look for a bean named "themeResolver" to find out which
-      <literal>ThemeResolver</literal> implementation to use. A theme resolver
-      works in much the same way as a <literal>LocalResolver</literal>. It can
+      <interfacename>ThemeResolver</interfacename> implementation to use. A theme resolver
+      works in much the same way as a <interfacename>LocaleResolver</interfacename>. It can
       detect the theme that should be used for a particular request and can
       also alter the request's theme. The following theme resolvers are
       provided by Spring:</para>
 
       <table frame="all">
-        <title>ThemeResolver implementations</title>
+        <title><interfacename>ThemeResolver</interfacename> implementations</title>
 
         <tgroup cols="2">
           <colspec colname="c1" colwidth="1*" />
@@ -1735,14 +1756,14 @@ background=/themes/cool/img/coolBg.jpg
 
           <tbody>
             <row>
-              <entry>FixedThemeResolver</entry>
+              <entry><classname>FixedThemeResolver</classname></entry>
 
               <entry>Selects a fixed theme, set using the "defaultThemeName"
               property.</entry>
             </row>
 
             <row>
-              <entry>SessionThemeResolver</entry>
+              <entry><classname>SessionThemeResolver</classname></entry>
 
               <entry>The theme is maintained in the users HTTP session. It
               only needs to be set once for each session, but is not persisted
@@ -1750,7 +1771,7 @@ background=/themes/cool/img/coolBg.jpg
             </row>
 
             <row>
-              <entry>CookieThemeResolver</entry>
+              <entry><classname>CookieThemeResolver</classname></entry>
 
               <entry>The selected theme is stored in a cookie on the client's
               machine.</entry>
@@ -1759,7 +1780,7 @@ background=/themes/cool/img/coolBg.jpg
         </tgroup>
       </table>
 
-      <para>Spring also provides a <literal>ThemeChangeInterceptor</literal>,
+      <para>Spring also provides a <classname>ThemeChangeInterceptor</classname>,
       which allows changing the theme on every request by including a simple
       request parameter.</para>
     </section>
@@ -2592,14 +2613,32 @@ public class FileUploadBean {
     result as when using the servlet specific exception mappings).</para>
 
     <para>Besides implementing the
-    <literal>HandlerExceptionResolver</literal>, which is only a matter of
+    <interfacename>HandlerExceptionResolver</interfacename>, which is only a matter of
     implementing the <literal>resolveException(Exception, Handler)</literal>
     method and returning a <classname>ModelAndView</classname>, you may also use
-    the <literal>SimpleMappingExceptionResolver</literal>. This resolver
+    the <classname>SimpleMappingExceptionResolver</classname>. This resolver
     enables you to take the class name of any exception that might be thrown
     and map it to a view name. This is functionally equivalent to the
     exception mapping feature from the Servlet API, but it's also possible to
     implement more fine grained mappings of exceptions from different
     handlers.</para>
   </section>
+  
+    <section id="mvc-convention">
+        <title>Convention over configuration</title>
+        <para>For a lot of projects, sticking to established conventions and
+        having reasonable defaults is just what they (the projects) need...
+        this theme of convention-over-configuration now has explicit support in
+        Spring MVC. What this means is that if you establish a set of naming
+        conventions and suchlike, you can <emphasis>substantially</emphasis>
+        cut down on the amount of configuration that is required to setup handler
+        mappings, view resolvers, <classname>ModelAndView</classname> instances,
+        etc. This is obviously a great boon with regards to rapid prototyping,
+        and can also lend a degree of (always good-to-have) consistency across
+        a codebase should you choose to move forward with it into production.</para>
+        
+        <para>The convention-over-configuration support is perhaps best illustrated
+        with an example, with the nuances being explained afterwards.</para>
+    </section>
+  
 </chapter>
