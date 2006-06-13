@@ -830,11 +830,40 @@ void setMessage(String aMessage) {
 			<para>
 	            Find below an example of an
 	            <interfacename>org.springframework.web.servlet.mvc.Controller</interfacename>
-	            implemented using the Groovy dynamic language. (This example is taken in
+	            implemented using the Groovy dynamic language. This example is taken in
 	            part from the dynamic language support showcase project that is supplied
-	            with the Spring distribution.)
+	            with the Spring distribution; please do see the project in the
+	            <literal>'samples/showcases/dynamvc/'</literal> directory of the Spring distribution.
 			</para>
-			<programlisting><![CDATA[TODO]]></programlisting>
+			<programlisting><lineannotation>&lt;!-- from the file '/WEB-INF/groovy/FortuneController.groovy' --&gt;</lineannotation><![CDATA[
+package org.springframework.showcase.fortune.web;
+
+import org.springframework.showcase.fortune.service.FortuneService;
+import org.springframework.showcase.fortune.domain.Fortune;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.Controller;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class FortuneController implements Controller {
+
+    @Property FortuneService fortuneService
+
+    public ModelAndView handleRequest(
+            HttpServletRequest request, HttpServletResponse httpServletResponse) {
+        return new ModelAndView("tell", "fortune", this.fortuneService.tellFortune())
+    }
+
+}]]></programlisting>
+			<para>The attendant bean definition for the above <interfacename>Controller</interfacename>
+			might look like this:</para>
+			<programlisting><![CDATA[<lang:groovy id="fortune"
+             refresh-check-delay="3000"
+             script-source="/WEB-INF/groovy/FortuneController.groovy">
+    <lang:property name="fortuneService" ref="fortuneService"/>
+</lang:groovy>
+]]></programlisting>
 		</section>
 		<section id="dynamic-language-scenarios-validators">
 			<title>Scripted Validators</title>
