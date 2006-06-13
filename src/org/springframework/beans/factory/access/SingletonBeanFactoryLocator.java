@@ -110,8 +110,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * SingletonBeanFactoryLocator usage scenario, where there is only one single
  * <code>beanRefFactory.xml</code> definition file:
  *
- * <pre>
- * &lt;?xml version="1.0" encoding="UTF-8"?>
+ * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
  * 
  * &lt;beans>
@@ -132,7 +131,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  *
  * The client code is as simple as:
  *
- * <pre>
+ * <pre class="code">
  * BeanFactoryLocator bfl = SingletonBeanFactoryLocator.getInstance();
  * BeanFactoryReference bf = bfl.useBeanFactory("com.mycompany.myapp");
  * // now use some bean from factory 
@@ -141,8 +140,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  *
  * Another relatively simple variation of the <code>beanRefFactory.xml</code> definition file could be:
  *
- * <pre>
- * &lt;?xml version="1.0" encoding="UTF-8"?>
+ * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
  * 
  * &lt;beans>
@@ -201,8 +199,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  *
  * <p><code>beanRefFactory.xml</code> file inside jar for util module:
  *
- * <pre>
- * &lt;?xml version="1.0" encoding="UTF-8"?>
+ * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
  * 
  * &lt;beans>
@@ -217,8 +214,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * 
  * <code>beanRefFactory.xml</code> file inside jar for data-access module:<br>
  *
- * <pre>
- * &lt;?xml version="1.0" encoding="UTF-8"?>
+ * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
  * 
  * &lt;beans>
@@ -237,8 +233,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * 
  * <code>beanRefFactory.xml</code> file inside jar for services module:
  *
- * <pre>
- * &lt;?xml version="1.0" encoding="UTF-8"?>
+ * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
  * 
  * &lt;beans>
@@ -259,8 +254,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * create any of its own contexts, but allows the other ones to be referred to be
  * a name known to this module:
  *
- * <pre>
- * &lt;?xml version="1.0" encoding="UTF-8"?>
+ * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
  * 
  * &lt;beans>

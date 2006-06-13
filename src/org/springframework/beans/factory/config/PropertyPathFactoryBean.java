@@ -31,8 +31,7 @@ import org.springframework.beans.factory.FactoryBean;
  *
  * <p>Usage examples:
  *
- * <pre>
- * // target bean to be referenced by name
+ * <pre class="code">// target bean to be referenced by name
  * &lt;bean id="tb" class="org.springframework.beans.TestBean" singleton="false"&gt;
  *   &lt;property name="age"&gt;&lt;value&gt;10&lt;/value&gt;&lt;/property&gt;
  *   &lt;property name="spouse"&gt;

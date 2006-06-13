@@ -27,7 +27,7 @@ import org.springframework.util.MethodInvoker;
 import org.springframework.util.ClassUtils;
 
 /**
- * <p>FactoryBean which returns a value which is the result of a static or instance
+ * FactoryBean which returns a value which is the result of a static or instance
  * method invocation. For most use cases it is better to just use the container's 
  * built-in factory-method support for the same purpose, since that is smarter at
  * converting arguments. This factory bean is still useful though when you need to
@@ -64,7 +64,7 @@ import org.springframework.util.ClassUtils;
  * <p>An example (in an XML based bean factory definition) of a bean definition
  * which uses this class to call a static factory method:</p>
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="myObject" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
  *   &lt;property name="staticMethod">&lt;value>com.whatever.MyClassFactory.getInstance&lt;/value>&lt;/property>
  * &lt;/bean></pre>
@@ -72,7 +72,7 @@ import org.springframework.util.ClassUtils;
  * <p>An example of calling a static method then an instance method to get at a
  * Java system property. Somewhat verbose, but it works.
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="sysProps" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
  *   &lt;property name="targetClass">&lt;value>java.lang.System&lt;/value>&lt;/property>
  *   &lt;property name="targetMethod">&lt;value>getProperties&lt;/value>&lt;/property>

@@ -38,8 +38,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  *
  * <p>Example:
  *
- * <pre>
- * create table tab (id int not null primary key, text varchar(100));
+ * <pre class="code">create table tab (id int not null primary key, text varchar(100));
  * create table tab_sequence (value identity);
  * insert into tab_sequence values(0);</pre>
  *

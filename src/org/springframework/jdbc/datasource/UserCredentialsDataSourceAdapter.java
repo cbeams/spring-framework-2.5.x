@@ -36,8 +36,7 @@ import org.springframework.util.Assert;
  * the preconfigured "myDataSource", implicitly accessing "myTargetDataSource"
  * with the specified user credentials.
  *
- * <pre>
- * &lt;bean id="myTargetDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+ * <pre class="code">&lt;bean id="myTargetDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
  *   &lt;property name="jndiName">&lt;value>java:comp/env/jdbc/myds&lt;/value>&lt;/property>
  * &lt;/bean>
  *

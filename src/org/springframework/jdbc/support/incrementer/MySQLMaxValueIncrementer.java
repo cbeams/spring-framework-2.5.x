@@ -40,8 +40,7 @@ import org.springframework.jdbc.support.JdbcUtils;
  *
  * <p>Example:
  *
- * <pre>
- * create table tab (id int unsigned not null primary key, text varchar(100));
+ * <pre class="code">create table tab (id int unsigned not null primary key, text varchar(100));
  * create table tab_sequence (value int not null) type=MYISAM;
  * insert into tab_sequence values(0);</pre>
  *

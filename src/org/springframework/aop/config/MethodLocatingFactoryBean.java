@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ public class MethodLocatingFactoryBean implements FactoryBean, BeanFactoryAware 
 
 	/**
 	 * Set the name of the bean to locate the {@link Method} on.
+     * <p>This property is required.
+     * @param targetBeanName the name of the bean to locate the {@link Method} on
 	 */
 	public void setTargetBeanName(String targetBeanName) {
 		this.targetBeanName = targetBeanName;
@@ -48,6 +50,8 @@ public class MethodLocatingFactoryBean implements FactoryBean, BeanFactoryAware 
 
 	/**
 	 * Set the name of the {@link Method} to locate.
+     * <p>This property is required.
+     * @param methodName the name of the {@link Method} to locate
 	 */
 	public void setMethodName(String methodName) {
 		this.methodName = methodName;

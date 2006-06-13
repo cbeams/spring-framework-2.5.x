@@ -32,8 +32,7 @@ import org.springframework.jdbc.core.SqlTypeValue;
  * <p>A usage example from a StoredProcedure (compare this to the plain
  * SqlTypeValue version in the superclass javadoc):
  *
- * <pre>
- * proc.declareParameter(new SqlParameter("myarray", Types.ARRAY, "NUMBERS"));
+ * <pre class="code">proc.declareParameter(new SqlParameter("myarray", Types.ARRAY, "NUMBERS"));
  * ...
  *
  * Map in = new HashMap();

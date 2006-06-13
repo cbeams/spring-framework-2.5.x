@@ -29,7 +29,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  *
  * <p>The <code>pointcut</code> tag allows for creation of named
  * {@link AspectJExpressionPointcut} beans using a simple syntax:
- * <pre>
+ * <pre class="code">
  * &lt;aop:pointcut id=&quot;getNameCalls&quot; expression=&quot;execution(* *..ITestBean.getName(..))&quot;/&gt;
  * </pre>
  *
@@ -38,7 +38,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  * automatically. The <code>advisor</code> tag supports both in-line and referenced
  * {@link org.springframework.aop.Pointcut Pointcuts}:
  *
- * <pre>
+ * <pre class="code">
  * &lt;aop:advisor id=&quot;getAgeAdvisor&quot;
  *              pointcut=&quot;execution(* *..ITestBean.getAge(..))&quot;
  *              advice-ref=&quot;getAgeCounter&quot;/&gt;

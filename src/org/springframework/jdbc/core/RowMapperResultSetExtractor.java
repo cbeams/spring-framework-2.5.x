@@ -37,8 +37,7 @@ import org.springframework.util.Assert;
  *
  * <p>A usage example with JdbcTemplate:
  *
- * <pre>
- * JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);  // reusable object
+ * <pre class="code">JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);  // reusable object
  * RowMapper rowMapper = new UserRowMapper();  // reusable object
  *
  * List allUsers = jdbcTemplate.query(

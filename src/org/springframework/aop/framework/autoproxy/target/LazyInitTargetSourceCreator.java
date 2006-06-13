@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,18 +32,18 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  * creation of lazy-init proxies only. For example, as autodetected
  * infrastructure bean in an XML application context definition:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator"&gt;
  *   &lt;property name="customTargetSourceCreators"&gt;
  *     &lt;list&gt;
  *       &lt;bean class="org.springframework.aop.framework.autoproxy.target.LazyInitTargetSourceCreator"/&gt;
  *     &lt;/list&gt;
  *   &lt;/property&gt;
- * %lt;/bean&gt;
+ * &lt;/bean&gt;
  *
  * &lt;bean id="myLazyInitBean" class="mypackage.MyBeanClass" lazy-init="true"&gt;
  *   ...
- * %lt;/bean&gt;</pre>
+ * &lt;/bean&gt;</pre>
  *
  * @author Juergen Hoeller
  * @since 1.2

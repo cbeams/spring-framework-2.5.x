@@ -35,8 +35,7 @@ import org.springframework.util.ClassUtils;
  * implementations that in turn register desired editors on a given registry.
  * Each PropertyEditorRegistrar can register any number of custom editors.
  *
- * <pre>
- * &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
+ * <pre class="code">&lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
  *   &lt;property name="propertyEditorRegistrars"&gt;
  *     &lt;list&gt;
  *       &lt;bean class="mypackage.MyCustomDateEditorRegistrar"/&gt;
@@ -48,8 +47,7 @@ import org.springframework.util.ClassUtils;
  * Alternative configuration example with custom editor instances,
  * assuming inner beans for PropertyEditor instances:
  *
- * <pre>
- * &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
+ * <pre class="code">&lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
  *   &lt;property name="customEditors"&gt;
  *     &lt;map&gt;
  *       &lt;entry key="java.util.Date"&gt;

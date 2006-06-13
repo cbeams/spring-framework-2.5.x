@@ -47,8 +47,7 @@ import org.springframework.util.StringUtils;
  *
  * <p><b>Example:</b>
  *
- * <pre>
- * employee.(class)=MyClass       // bean is of class MyClass
+ * <pre class="code">employee.(class)=MyClass       // bean is of class MyClass
  * employee.(abstract)=true       // this bean can't be instantiated directly
  * employee.group=Insurance       // real property
  * employee.usesDialUp=false      // real property (potentially overridden)

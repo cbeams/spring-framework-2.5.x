@@ -31,13 +31,11 @@ import org.springframework.util.Assert;
  * <p>The name of the bootstrap factory must be "bootstrapBeanFactory".
  * Thus a typical definition might be:
  *
- * <pre>
- * bootstrapBeanFactory.class=com.mycompany.MyBeanFactory</pre>
+ * <pre class="code">bootstrapBeanFactory.class=com.mycompany.MyBeanFactory</pre>
  *
  * Use as follows:
  *
- * <pre>
- * BeanFactory bf = BeanFactoryBootstrap.getInstance().getBeanFactory();</pre>
+ * <pre class="code">BeanFactory bf = BeanFactoryBootstrap.getInstance().getBeanFactory();</pre>
  *
  * @author Rod Johnson
  * @since 02.12.2002

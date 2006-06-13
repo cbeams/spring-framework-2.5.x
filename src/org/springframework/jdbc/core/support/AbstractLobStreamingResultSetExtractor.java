@@ -36,8 +36,7 @@ import org.springframework.jdbc.core.ResultSetExtractor;
  *
  * <p>A usage example with JdbcTemplate:
  *
- * <pre>
- * JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);  // reusable object
+ * <pre class="code">JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);  // reusable object
  * final LobHandler lobHandler = new DefaultLobHandler();  // reusable object
  *
  * jdbcTemplate.query(

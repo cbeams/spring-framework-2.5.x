@@ -31,13 +31,11 @@ import org.springframework.beans.factory.BeanInitializationException;
  *
  * <p>Configuration lines are expected to be of the following form:
  *
- * <pre>
- * beanName.property=value</pre>
+ * <pre class="code">beanName.property=value</pre>
  *
  * Example properties file:
  *
- * <pre>
- * dataSource.driverClassName=com.mysql.jdbc.Driver
+ * <pre class="code">dataSource.driverClassName=com.mysql.jdbc.Driver
  * dataSource.url=jdbc:mysql:mydb</pre>
  *
  * In contrast to PropertyPlaceholderConfigurer, the original definition can have default

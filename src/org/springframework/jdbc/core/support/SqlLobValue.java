@@ -41,8 +41,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
  *
  * <p>A usage example:
  *
- * <pre>
- * JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);  // reusable object
+ * <pre class="code">JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);  // reusable object
  * LobHandler lobHandler = new DefaultLobHandler();  // reusable object
  *
  * jdbcTemplate.update(
