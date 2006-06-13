@@ -30,7 +30,8 @@ package org.springframework.beans.factory;
  * either create objects lazily on demand or eagerly on startup.
  *
  * <p>This interface is heavily used within the framework, for
- * example for the AOP ProxyFactoryBean or JndiObjectFactoryBean.
+ * example for the AOP {@link org.springframework.aop.framework.ProxyFactoryBean}
+ * or {@link org.springframework.jndi.JndiObjectFactoryBean}.
  * It can be used for application components, but this is not common
  * outside of infrastructure code.
  *
@@ -45,11 +46,12 @@ public interface FactoryBean {
 
 	/**
 	 * Return an instance (possibly shared or independent) of the object
-	 * managed by this factory. As with a BeanFactory, this allows
-	 * support for both the Singleton and Prototype design pattern.
-	 * <p>If this method returns <code>null</code>, the factory will consider
-	 * the FactoryBean as not fully initialized and throw a corresponding
-	 * FactoryBeanNotInitializedException.
+	 * managed by this factory.
+     * <p>As with a {@link BeanFactory}, this allows support for both the
+     * Singleton and Prototype design pattern.
+	 * <p>If this method returns <code>null</code>, the Spring IoC container
+     * will consider the FactoryBean as being not fully initialized and throw
+     * a corresponding {@link FactoryBeanNotInitializedException}.
 	 * @return an instance of the bean (should not be <code>null</code>;
 	 * a <code>null</code> value will be considered as an indication of
 	 * incomplete initialization)
@@ -60,10 +62,12 @@ public interface FactoryBean {
 
 	/**
 	 * Return the type of object that this FactoryBean creates, or <code>null</code>
-	 * if not known in advance. This allows to check for specific types
-	 * of beans without instantiating objects, for example on autowiring.
-	 * <p>For a singleton, this should try to avoid singleton creation
-	 * as far as possible; it should rather estimate the type in advance.
+	 * if not known in advance.
+     * <p>This allows one to check for specific types of beans without
+     * instantiating objects, for example on autowiring.
+	 * <p>In the case of implementations that are creating a singleton object,
+     * this method should try to avoid singleton creation as far as possible;
+     * it should rather estimate the type in advance.
 	 * For prototypes, returning a meaningful type here is advisable too.
 	 * <p>This method can be called <i>before</i> this FactoryBean has
 	 * been fully initialized. It must not rely on state created during
