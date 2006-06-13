@@ -432,7 +432,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 		StringBuffer output = new StringBuffer(input.length());
 		while (matcher.find()) {
 			matcher.appendReplacement(output, "");
-			output.append("\\" + matcher.group());
+            output.append("\\").append(matcher.group());
 		}
 		matcher.appendTail(output);
 		return output.toString();
