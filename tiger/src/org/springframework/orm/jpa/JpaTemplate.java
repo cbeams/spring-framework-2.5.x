@@ -56,27 +56,27 @@ import org.springframework.util.ClassUtils;
  * the application context, in the first case given to the service directly,
  * in the second case to the prepared template.
  *
- * <p>This class can be considered as direct alternative to working with the raw
- * JPA EntityManager API (through <code>EntityManagerFactory.getEntityManager()</code>
- * or a shared EntityManager reference). The major advantage is its automatic
- * conversion to DataAccessExceptions, the major disadvantage that no checked
- * application exceptions can get thrown from within data access code.
- * Corresponding checks and the actual throwing of such exceptions can often
- * be deferred to after callback execution, though.
+ * <p>This class can be considered as direct alternative to working with the
+ * raw JPA EntityManager API (through a shared EntityManager reference).
+ * The major advantage is its automatic conversion to DataAccessExceptions,
+ * the major disadvantage that no checked application exceptions can get thrown
+ * from within data access code. Corresponding checks and the actual throwing
+ * of such exceptions can often be deferred to after callback execution, though.
  *
  * <p>Note that even if JpaTransactionManager is used for transaction
  * demarcation in higher-level services, all those services above the data
- * access layer don't need need to be JPA-aware. Setting such a special
+ * access layer don't need to be JPA-aware. Setting such a special
  * PlatformTransactionManager is a configuration issue, without introducing
  * code dependencies: For example, switching to JTA is just a matter of
  * Spring configuration (use JtaTransactionManager instead) and JPA provider
  * configuration, neither affecting application code.
  *
- * <p>LocalEntityManagerFactoryBean is the preferred way of obtaining a
- * reference to an EntityManagerFactory outside of a full Java EE 5 environment.
- * Within a Java EE 5 environment, you will typically work with either an
- * EntityManagerFactory obtained from JNDI or a shared EntityManager proxy
- * obtained from JNDI (via Spring's JndiObjectFactoryBean).
+ * <p>LocalEntityManagerFactoryBean and ContainerEntityManagerFactoryBean are
+ * the preferred ways of obtaining a reference to an EntityManagerFactory
+ * outside of a full Java EE 5 environment. Within a Java EE 5 environment,
+ * you will typically work with either an EntityManagerFactory obtained from
+ * JNDI or a shared EntityManager proxy obtained from JNDI (via Spring's
+ * JndiObjectFactoryBean).
  *
  * <p>Note that lazy loading will just work with an open JPA EntityManager,
  * either within a Spring-driven transaction (with JpaTransactionManager or
