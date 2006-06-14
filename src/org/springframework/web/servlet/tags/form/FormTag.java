@@ -44,7 +44,7 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  * @see org.springframework.web.servlet.mvc.SimpleFormController
  */
-public class FormTag extends AbstractFormTag {
+public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * The name of the {@link javax.servlet.jsp.PageContext} attribute under which the
@@ -66,16 +66,6 @@ public class FormTag extends AbstractFormTag {
 	 * The name of the '<code>commandName</code>' attribute.
 	 */
 	public static final String COMMAND_NAME_ATTRIBUTE = "commandName";
-
-	/**
-	 * The name of the '<code>class</code>' attribute.
-	 */
-	public static final String CLASS_ATTRIBUTE = "class";
-
-	/**
-	 * The name of the '<code>style</code>' attribute.
-	 */
-	public static final String STYLE_ATTRIBUTE = "style";
 
 	/**
 	 * The name of the '<code>name</code>' attribute.
@@ -119,16 +109,6 @@ public class FormTag extends AbstractFormTag {
 	private String commandName = DEFAULT_COMMAND_NAME;
 
 	/**
-	 * The value of the '<code>class</code>' attribute.
-	 */
-	private String cssClass;
-
-	/**
-	 * The value of the '<code>style</code>' attribute.
-	 */
-	private String cssStyle;
-
-	/**
 	 * The value of the '<code>name</code>' attribute.
 	 */
 	private String name;
@@ -166,22 +146,6 @@ public class FormTag extends AbstractFormTag {
 	public void setCommandName(String commandName) {
 		Assert.notNull(commandName, "'commandName' cannot be null");
 		this.commandName = commandName;
-	}
-
-	/**
-	 * Sets the value of the '<code>Class</code>' attribute.
-	 * May be a runtime expression.
-	 */
-	public void setCssClass(String cssClass) {
-		this.cssClass = cssClass;
-	}
-
-	/**
-	 * Sets the value of the '<code>style</code>' attribute.
-	 * May be a runtime expression.
-	 */
-	public void setCssStyle(String cssStyle) {
-		this.cssStyle = cssStyle;
 	}
 
 	/**
@@ -244,12 +208,10 @@ public class FormTag extends AbstractFormTag {
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		this.tagWriter = tagWriter;
 		this.tagWriter.startTag("form");
-
+		writeDefaultAttributes(tagWriter);
 		this.tagWriter.writeAttribute(METHOD_ATTRIBUTE, getDisplayString(evaluate(METHOD_ATTRIBUTE, this.method)));
 		writeOptionalAttribute(tagWriter, NAME_ATTRIBUTE, this.name);
 		this.tagWriter.writeAttribute(ACTION_ATTRIBUTE, resolveAction());
-		writeOptionalAttribute(tagWriter, CLASS_ATTRIBUTE, this.cssClass);
-		writeOptionalAttribute(tagWriter, STYLE_ATTRIBUTE, this.cssStyle);
 		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, this.enctype);
 		writeOptionalAttribute(tagWriter, ONSUBMIT_ATTRIBUTE, this.onsubmit);
 		writeOptionalAttribute(tagWriter, ONRESET_ATTRIBUTE, this.onreset);
@@ -260,6 +222,7 @@ public class FormTag extends AbstractFormTag {
 		this.pageContext.setAttribute(COMMAND_NAME_VARIABLE_NAME, resolveCommandName());
 		return EVAL_BODY_INCLUDE;
 	}
+
 
 	/**
 	 * Resolve the value of the '<code>action</code>' attribute. If the user configured
@@ -309,12 +272,34 @@ public class FormTag extends AbstractFormTag {
 		return EVAL_PAGE;
 	}
 
+
+	/**
+	 * Override resolve CSS class since error class is not supported.
+	 */
+	protected String resolveCssClass() throws JspException {
+		return ObjectUtils.getDisplayString(evaluate("class", getCssClass()));
+	}
+
 	/**
 	 * Clears the stored {@link TagWriter}.
 	 */
 	public void doFinally() {
 		super.doFinally();
 		this.tagWriter = null;
+	}
+
+	/**
+	 * Unsupported for forms.
+	 */
+	public void setPath(String path) {
+		throw new UnsupportedOperationException("The 'path' attribute is not supported for forms.");
+	}
+
+	/**
+	 * Unsupported for forms.
+	 */
+	public void setCssErrorClass(String cssErrorClass) {
+		throw new UnsupportedOperationException("The 'cssErrorClass' attribute is not supported for forms.");
 	}
 
 }

@@ -498,7 +498,7 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	 * Gets the appropriate CSS class to use based on the state of the current
 	 * {@link org.springframework.web.servlet.support.BindStatus} object.
 	 */
-	private String resolveCssClass() throws JspException {
+	protected String resolveCssClass() throws JspException {
 		if (getBindStatus().isError() && StringUtils.hasText(getCssErrorClass())) {
 			return ObjectUtils.getDisplayString(evaluate("cssErrorClass", getCssErrorClass()));
 		}
