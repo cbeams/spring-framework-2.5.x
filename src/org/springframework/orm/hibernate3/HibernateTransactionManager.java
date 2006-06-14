@@ -454,7 +454,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			txObject.getSessionHolder().setSynchronizedWithTransaction(true);
 			session = txObject.getSessionHolder().getSession();
 
-			Integer previousIsolationLevel = null;
 			if (this.prepareConnection && isSameConnectionForEntireSession(session)) {
 				// We're allowed to change the transaction settings of the JDBC Connection.
 				if (logger.isDebugEnabled()) {
@@ -462,7 +461,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 							"Preparing JDBC Connection of Hibernate Session [" + SessionFactoryUtils.toString(session) + "]");
 				}
 				Connection con = session.connection();
-				previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
+				Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 				txObject.setPreviousIsolationLevel(previousIsolationLevel);
 			}
 			else {
@@ -541,7 +540,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 
 		catch (Exception ex) {
-			SessionFactoryUtils.releaseSession(session, getSessionFactory());
+			SessionFactoryUtils.closeSession(session);
 			throw new CannotCreateTransactionException("Could not open Hibernate Session for transaction", ex);
 		}
 	}
@@ -656,7 +655,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				logger.debug("Closing Hibernate Session [" + SessionFactoryUtils.toString(session) +
 						"] after transaction");
 			}
-			SessionFactoryUtils.releaseSession(session, getSessionFactory());
+			SessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, getSessionFactory());
 		}
 		else {
 			if (logger.isDebugEnabled()) {
@@ -665,13 +664,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 			if (txObject.getSessionHolder().getPreviousFlushMode() != null) {
 				session.setFlushMode(txObject.getSessionHolder().getPreviousFlushMode());
-			}
-			if (!session.isConnected()) {
-				// We're running against Hibernate 3.1 RC1, where Hibernate will
-				// automatically disconnect the Session after a transaction.
-				// We'll reconnect it here, as the Session is likely gonna be
-				// used for lazy loading during an "open session in view" phase.
-				session.reconnect();
 			}
 		}
 		txObject.getSessionHolder().clear();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.orm.hibernate3;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -49,6 +48,7 @@ import org.hibernate.WrongClassException;
 import org.hibernate.connection.ConnectionProvider;
 import org.hibernate.engine.SessionFactoryImplementor;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -134,8 +134,7 @@ public abstract class SessionFactoryUtils {
 	 * Try to retrieve the JTA TransactionManager from the given SessionFactory
 	 * and/or Session. Check the passed-in SessionFactory for implementing
 	 * SessionFactoryImplementor (the usual case), falling back to the
-	 * SessionFactory reference that the Session itself carries (for example,
-	 * when using Hibernate's JCA Connector, i.e. JCASessionFactoryImpl).
+	 * SessionFactory reference that the Session itself carries.
 	 * @param sessionFactory Hibernate SessionFactory
 	 * @param session Hibernate Session (can also be <code>null</code>)
 	 * @return the JTA TransactionManager, if any
@@ -143,7 +142,6 @@ public abstract class SessionFactoryUtils {
 	 * @see SessionFactoryImplementor#getTransactionManager
 	 * @see Session#getSessionFactory
 	 * @see org.hibernate.impl.SessionFactoryImpl
-	 * @see org.hibernate.jca.JCASessionFactoryImpl
 	 */
 	public static TransactionManager getJtaTransactionManager(SessionFactory sessionFactory, Session session) {
 		SessionFactoryImplementor sessionFactoryImpl = null;
@@ -354,7 +352,7 @@ public abstract class SessionFactoryUtils {
 
 		// Check whether we are allowed to return the Session.
 		if (!allowCreate && !isSessionTransactional(session, sessionFactory)) {
-			doClose(session);
+			closeSession(session);
 			throw new IllegalStateException("No Hibernate Session bound to thread, " +
 			    "and configuration does not allow creation of non-transactional one here");
 		}
@@ -688,7 +686,7 @@ public abstract class SessionFactoryUtils {
 			holderMap = new HashMap();
 			deferredCloseHolder.set(holderMap);
 		}
-		holderMap.put(sessionFactory, new HashSet());
+		holderMap.put(sessionFactory, CollectionFactory.createLinkedSetIfPossible(4));
 	}
 
 	/**
@@ -709,7 +707,7 @@ public abstract class SessionFactoryUtils {
 		logger.debug("Processing deferred close of Hibernate Sessions");
 		Set sessions = (Set) holderMap.remove(sessionFactory);
 		for (Iterator it = sessions.iterator(); it.hasNext();) {
-			doClose((Session) it.next());
+			closeSession((Session) it.next());
 		}
 
 		if (holderMap.isEmpty()) {
@@ -720,7 +718,7 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Close the given Session, created via the given factory,
 	 * if it is not managed externally (i.e. not bound to the thread).
-	 * @param session the Hibernate Session to close
+	 * @param session the Hibernate Session to close (may be <code>null</code>)
 	 * @param sessionFactory Hibernate SessionFactory that the Session was created with
 	 * (can be <code>null</code>)
 	 */
@@ -746,26 +744,23 @@ public abstract class SessionFactoryUtils {
 		Map holderMap = (Map) deferredCloseHolder.get();
 		if (holderMap != null && sessionFactory != null && holderMap.containsKey(sessionFactory)) {
 			logger.debug("Registering Hibernate Session for deferred close");
+			// Switch Session to FlushMode.NEVER for remaining lifetime.
+			session.setFlushMode(FlushMode.NEVER);
 			Set sessions = (Set) holderMap.get(sessionFactory);
 			sessions.add(session);
-			if (!session.isConnected()) {
-				// We're running against Hibernate 3.1 RC1, where Hibernate will
-				// automatically disconnect the Session after a transaction.
-				// We'll reconnect it here, as the Session is likely gonna be
-				// used for lazy loading during an "open session in view" pase.
-				session.reconnect();
-			}
 		}
 		else {
-			doClose(session);
+			closeSession(session);
 		}
 	}
 
 	/**
-	 * Perform the actual closing of the Hibernate Session.
-	 * @param session the Hibernate Session to close
+	 * Perform actual closing of the Hibernate Session,
+	 * catching and logging any cleanup exceptions thrown.
+	 * @param session the Hibernate Session to close (may be <code>null</code>)
+	 * @see org.hibernate.Session#close()
 	 */
-	private static void doClose(Session session) {
+	public static void closeSession(Session session) {
 		if (session != null) {
 			logger.debug("Closing Hibernate Session");
 			try {
@@ -774,7 +769,7 @@ public abstract class SessionFactoryUtils {
 			catch (HibernateException ex) {
 				logger.error("Could not close Hibernate Session", ex);
 			}
-			catch (RuntimeException ex) {
+			catch (Throwable ex) {
 				logger.error("Unexpected exception on closing Hibernate Session", ex);
 			}
 		}
