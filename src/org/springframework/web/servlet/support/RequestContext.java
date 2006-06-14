@@ -101,7 +101,7 @@ public class RequestContext {
 
 	private Theme theme;
 
-	private boolean defaultHtmlEscape = false;
+	private boolean defaultHtmlEscape;
 
 	private UrlPathHelper urlPathHelper;
 

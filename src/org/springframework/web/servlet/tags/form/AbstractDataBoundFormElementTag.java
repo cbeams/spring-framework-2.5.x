@@ -159,14 +159,20 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	private String getBindPath(String resolvedSubPath) {
 
 		StringBuffer sb = new StringBuffer();
-		sb.append(getCommandName()).append('.');
+		sb.append(getCommandName());
 
 		String nestedPath = getNestedPath();
-		if(nestedPath != null) {
-			sb.append(nestedPath);
+		if (nestedPath != null) {
+			sb.append('.').append(nestedPath);
 		}
 
-		return sb.append(resolvedSubPath).toString();
+		if (resolvedSubPath != null) {
+			if(sb.charAt(sb.length() - 1) != '.') {
+				sb.append('.');
+			}
+			sb.append(resolvedSubPath);
+		}
+		return sb.toString();
 	}
 
 	/**

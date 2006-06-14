@@ -1542,7 +1542,7 @@
 
 		<attribute>
 			<name>path</name>
-			<required>true</required>
+			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>Path to errors object for data binding</description>
 		</attribute>
