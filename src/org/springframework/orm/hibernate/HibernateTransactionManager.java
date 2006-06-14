@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -450,7 +450,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 
 		catch (Exception ex) {
-			SessionFactoryUtils.releaseSession(session, getSessionFactory());
+			SessionFactoryUtils.closeSession(session);
 			throw new CannotCreateTransactionException("Could not open Hibernate Session for transaction", ex);
 		}
 	}
@@ -559,7 +559,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing Hibernate Session [" + session + "] after transaction");
 			}
-			SessionFactoryUtils.releaseSession(session, getSessionFactory());
+			SessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, getSessionFactory());
 		}
 		else {
 			if (logger.isDebugEnabled()) {

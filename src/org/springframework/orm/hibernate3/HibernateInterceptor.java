@@ -123,7 +123,7 @@ public class HibernateInterceptor extends HibernateAccessor implements MethodInt
 			}
 			else {
 				TransactionSynchronizationManager.unbindResource(getSessionFactory());
-				SessionFactoryUtils.releaseSession(session, getSessionFactory());
+				SessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, getSessionFactory());
 			}
 		}
 	}
