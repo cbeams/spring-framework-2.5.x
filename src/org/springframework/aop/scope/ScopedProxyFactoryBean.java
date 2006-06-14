@@ -24,6 +24,9 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.util.ClassUtils;
+
+import java.lang.reflect.Modifier;
 
 /**
  * Convenient proxy factory bean for scoped objects.
@@ -45,17 +48,20 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, 
 	/** TargetSource that manages scoping */
 	private final PrototypeTargetSource scopedTargetSource = new PrototypeTargetSource();
 
+	private String targetBeanName;
+
 	/** The cached singleton proxy */
 	private Object proxy;
 
 
 	public ScopedProxyFactoryBean() {
 		// Change default to proxy target class.
-		setProxyTargetClass(true);
+		//setProxyTargetClass(true);
 	}
 
 
 	public void setTargetBeanName(String targetBeanName) {
+		this.targetBeanName = targetBeanName;
 		this.scopedTargetSource.setTargetBeanName(targetBeanName);
 	}
 
@@ -67,9 +73,17 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, 
 
 		this.scopedTargetSource.setBeanFactory(beanFactory);
 
+
 		ProxyFactory pf = new ProxyFactory();
 		pf.copyFrom(this);
 		pf.setTargetSource(this.scopedTargetSource);
+
+		Class beanType = beanFactory.getType(this.targetBeanName);
+		if(Modifier.isPrivate(beanType.getModifiers()) || beanType.isInterface()) {
+			pf.setInterfaces(ClassUtils.getAllInterfacesForClass(beanType));
+		} else {
+			pf.setProxyTargetClass(true);
+		}
 
 		// Add an introduction that implements only the methods on ScopedObject.
 		ScopedObject scopedObject = new DefaultScopedObject(cbf, this.scopedTargetSource.getTargetBeanName());
