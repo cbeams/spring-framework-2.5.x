@@ -138,7 +138,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	/**
 	 * Create a new {@link AbstractMessageListenerContainer} ,
 	 * using a {@link DynamicDestinationResolver} as the default
-     * {@link org.springframework.jms.support.destination.DestinationResolver}.
+	 * {@link org.springframework.jms.support.destination.DestinationResolver}.
 	 */
 	public AbstractMessageListenerContainer() {
 		setDestinationResolver(new DynamicDestinationResolver());
@@ -157,10 +157,10 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	/**
 	 * Return the destination to receive messages from.
-     * @return the destination to receive messages from (will be 
-     * <code>null</code> if the configured destination is not an actual
-     * {@link Destination} type; c.f. {@link #setDestinationName(String)
-     * when the destination is a String})
+	 * @return the destination to receive messages from (will be
+	 * <code>null</code> if the configured destination is not an actual
+	 * {@link Destination} type; c.f. {@link #setDestinationName(String)
+	 * when the destination is a String})
 	 */
 	protected Destination getDestination() {
 		return (this.destination instanceof Destination ? (Destination) this.destination : null);
@@ -168,10 +168,10 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	/**
 	 * Set the name of the destination to receive messages from.
-     * <p>The specified name will be dynamically resolved via the configured
-     * {@link #setDestinationResolver(org.springframework.jms.support.destination.DestinationResolver) destination resolver}.
+	 * <p>The specified name will be dynamically resolved via the configured
+	 * {@link #setDestinationResolver(org.springframework.jms.support.destination.DestinationResolver) destination resolver}.
 	 * <p>Alternatively, specify a JMS {@link Destination} object as "destination".
-     * @param destinationName the desired destination (can be <code>null</code>) 
+	 * @param destinationName the desired destination (can be <code>null</code>)
 	 * @see #setDestination(javax.jms.Destination)
 	 */
 	public void setDestinationName(String destinationName) {
@@ -180,10 +180,10 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	/**
 	 * Return the name of the destination to receive messages from.
-     * @return the name of the destination to receive messages from
-     * (will be <code>null</code> if the configured destination is not a
-     * {@link String} type; c.f. {@link #setDestination(Destination) when
-     * it is an actual Destination})
+	 * @return the name of the destination to receive messages from
+	 * (will be <code>null</code> if the configured destination is not a
+	 * {@link String} type; c.f. {@link #setDestination(Destination) when
+	 * it is an actual Destination})
 	 */
 	protected String getDestinationName() {
 		return (this.destination instanceof String ? (String) this.destination : null);
@@ -210,8 +210,8 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * Set the message listener implementation to register.
 	 * This can be either a standard JMS {@link MessageListener} object
 	 * or a Spring {@link SessionAwareMessageListener} object.
-     * @throws IllegalArgumentException if the supplied listener is not a 
-     * {@link MessageListener} or a {@link SessionAwareMessageListener}
+	 * @throws IllegalArgumentException if the supplied listener is not a
+	 * {@link MessageListener} or a {@link SessionAwareMessageListener}
 	 * @see javax.jms.MessageListener
 	 * @see SessionAwareMessageListener
 	 */
@@ -226,8 +226,8 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * <p>By default, only a standard JMS {@link MessageListener} object or a
 	 * Spring {@link SessionAwareMessageListener} object will be accepted.
 	 * @param messageListener the message listener object to check
-     * @throws IllegalArgumentException if the supplied listener is not a 
-     * {@link MessageListener} or a {@link SessionAwareMessageListener}
+	 * @throws IllegalArgumentException if the supplied listener is not a
+	 * {@link MessageListener} or a {@link SessionAwareMessageListener}
 	 * @see javax.jms.MessageListener
 	 * @see SessionAwareMessageListener
 	 */
@@ -235,9 +235,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 		if (!(messageListener instanceof MessageListener ||
 				messageListener instanceof SessionAwareMessageListener)) {
             throw new IllegalArgumentException(
-                    "messageListener needs to be of type [" +
-                            MessageListener.class.getName() + "] or [" +
-                            SessionAwareMessageListener.class.getName() + "]");
+								"messageListener needs to be of type [" +
+								MessageListener.class.getName() + "] or [" +
+								SessionAwareMessageListener.class.getName() + "]");
 		}
 	}
 
@@ -269,10 +269,10 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	/**
 	 * Set whether to expose the listener JMS Session to a registered
 	 * {@link SessionAwareMessageListener}. Default is "true", reusing
-     * the listener's {@link Session}.
+	 * the listener's {@link Session}.
 	 * <p>Turn this off to expose a fresh JMS Session fetched from the same
 	 * underlying JMS {@link Connection} instead, which might be necessary
-     * on some JMS providers.
+	 * on some JMS providers.
 	 * @see SessionAwareMessageListener
 	 */
 	public void setExposeListenerSession(boolean exposeListenerSession) {
@@ -281,7 +281,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	/**
 	 * Return whether to expose the listener JMS {@link Session} to a
-     * registered {@link SessionAwareMessageListener}.
+	 * registered {@link SessionAwareMessageListener}.
 	 */
 	protected boolean isExposeListenerSession() {
 		return exposeListenerSession;
@@ -316,9 +316,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	/**
 	 * Initialize this message listener container.
 	 * <p>Creates a JMS Connection, registers the
-     * {@link #setMessageListener(Object) given listener object},
+	 * {@link #setMessageListener(Object) given listener object},
 	 * and starts the {@link Connection}
-     * (if {@link #setAutoStartup(boolean) "autoStartup"} hasn't been turned off).
+	 * (if {@link #setAutoStartup(boolean) "autoStartup"} hasn't been turned off).
 	 */
 	public void initialize() {
 		try {
@@ -354,16 +354,16 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @see #destroyListener()
 	 * @see javax.jms.Connection#close()
 	 */
-	public void destroy() throws JmsException {
+	public synchronized void destroy() throws JmsException {
 		try {
 			this.active = false;
 			destroyListener();
-			logger.debug("Closing JMS Connection");
-			this.connection.close();
 		}
 		catch (JMSException ex) {
-			JmsUtils.closeConnection(this.connection);
 			throw convertJmsAccessException(ex);
+		}
+		finally {
+			JmsUtils.closeConnection(this.connection);
 		}
 	}
 
@@ -420,7 +420,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * Return whether this listener container is currently active,
 	 * that is, whether it has been set up and not destroyed yet.
 	 */
-	public final boolean isActive() {
+	public final synchronized boolean isActive() {
 		return this.active;
 	}
 
@@ -618,7 +618,16 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @param ex the exception to handle
 	 */
 	protected void handleListenerException(Throwable ex) {
-		logger.error("Execution of JMS message listener failed", ex);
+		if (isActive()) {
+			// Regular case: failed while active.
+			// Log at error level.
+			logger.error("Execution of JMS message listener failed", ex);
+		}
+		else {
+			// Rare case: listener thread failed after container shutdown.
+			// Log at debug level, to avoid spamming the shutdown log.
+			logger.debug("Listener exception after container shutdown", ex);
+		}
 	}
 
 

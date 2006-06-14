@@ -107,7 +107,7 @@ class PersistenceUnitReader {
 			try {
 				Document document = validateResource(handler, stream);
 				parseDocument(document, infos);
-				return infos.toArray(new SpringPersistenceUnitInfo[] {});
+				return infos.toArray(new SpringPersistenceUnitInfo[infos.size()]);
 			}
 			finally {
 				stream.close();

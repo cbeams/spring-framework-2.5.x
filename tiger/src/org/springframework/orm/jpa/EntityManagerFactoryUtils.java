@@ -123,9 +123,7 @@ public abstract class EntityManagerFactoryUtils {
 			return null;
 		}
 
-		// Create a new EntityManager with PersistenceContextType.EXTENDED,
-		// as we are likely to execute outside of transactions as well
-		// (for example, to enable lazy loading through OpenEntityManagerInView).
+		// Create a new EntityManager for use within the current transaction.
 		logger.debug("Opening JPA EntityManager");
 		EntityManager em = emf.createEntityManager();
 
