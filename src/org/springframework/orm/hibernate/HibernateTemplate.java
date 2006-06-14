@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -73,7 +73,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  *
  * <p>Note that even if HibernateTransactionManager is used for transaction
  * demarcation in higher-level services, all those services above the data
- * access layer don't need need to be Hibernate-aware. Setting such a special
+ * access layer don't need to be Hibernate-aware. Setting such a special
  * PlatformTransactionManager is a configuration issue: For example,
  * switching to JTA is just a matter of Spring configuration (use
  * JtaTransactionManager instead) that does not affect application code.
@@ -383,7 +383,13 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 			}
 			else {
-				SessionFactoryUtils.releaseSession(session, getSessionFactory());
+				// Never use deferred close for an explicitly new Session.
+				if (isAlwaysUseNewSession()) {
+					SessionFactoryUtils.closeSession(session);
+				}
+				else {
+					SessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, getSessionFactory());
+				}
 			}
 		}
 	}

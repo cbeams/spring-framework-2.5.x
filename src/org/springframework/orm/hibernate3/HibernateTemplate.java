@@ -76,7 +76,7 @@ import org.springframework.util.Assert;
  *
  * <p>Note that even if HibernateTransactionManager is used for transaction
  * demarcation in higher-level services, all those services above the data
- * access layer don't need need to be Hibernate-aware. Setting such a special
+ * access layer don't need to be Hibernate-aware. Setting such a special
  * PlatformTransactionManager is a configuration issue: For example,
  * switching to JTA is just a matter of Spring configuration (use
  * JtaTransactionManager instead) that does not affect application code.
@@ -386,7 +386,13 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 				}
 			}
 			else {
-				SessionFactoryUtils.releaseSession(session, getSessionFactory());
+				// Never use deferred close for an explicitly new Session.
+				if (isAlwaysUseNewSession()) {
+					SessionFactoryUtils.closeSession(session);
+				}
+				else {
+					SessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, getSessionFactory());
+				}
 			}
 		}
 	}
