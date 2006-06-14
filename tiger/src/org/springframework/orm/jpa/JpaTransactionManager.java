@@ -48,21 +48,21 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <p>This implementation is appropriate for applications that solely use JPA for
  * transactional data access. JTA (usually through JtaTransactionManager) is necessary for
  * accessing multiple transactional resources. Note that you need to configure your JPA
- * tool accordingly to make it participate in JTA transactions. In contrast to Hibernate,
- * this cannot be transparently provided by the Spring transaction manager implementation.
+ * provider accordingly to make it participate in JTA transactions.
  *
  * <p>With a JpaDialect specified, this implementation also supports direct DataSource
  * access within a transaction (i.e. plain JDBC code working with the same DataSource).
  * This allows for mixing services that access JPA (including transactional caching)
  * and services that use plain JDBC (without being aware of JPA)!
  * Application code needs to stick to the same simple Connection lookup pattern as
- * with DataSourceTransactionManager (i.e. <code>DataSourceUtils.getConnection</code>).
+ * with DataSourceTransactionManager (i.e. <code>DataSourceUtils.getConnection</code>
+ * or going through a TransactionAwareDataSourceProxy).
  *
  * <p>Note that to be able to register a DataSource's Connection for plain JDBC code,
  * this instance needs to be aware of the DataSource (see "dataSource" property).
  * The given DataSource should obviously match the one used by the given
  * EntityManagerFactory. This transaction manager will autodetect the DataSource
- * that acts as "connectionFactory" of the EntityManagerFactory, so you usually
+ * used as known connection factory of the EntityManagerFactory, so you usually
  * don't need to explicitly specify the "dataSource" property.
  *
  * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC
@@ -131,7 +131,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 	 * Set the JDBC DataSource that this instance should manage transactions for.
    * The DataSource should match the one used by the JPA EntityManagerFactory:
 	 * for example, you could specify the same JNDI DataSource for both.
-	 * <p>If the EntityManagerFactory uses a DataSource as connection factory,
+	 * <p>If the EntityManagerFactory uses a known DataSource as connection factory,
 	 * the DataSource will be autodetected: You can still explictly specify the
 	 * DataSource, but you don't need to in this case.
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
@@ -145,6 +145,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 	 * manager needs to work on the underlying target DataSource. If there's
 	 * nevertheless a TransactionAwareDataSourceProxy passed in, it will be
 	 * unwrapped to extract its target DataSource.
+	 * @see EntityManagerFactoryInfo#getDataSource()
 	 * @see #setJpaDialect
 	 * @see org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils
@@ -171,8 +172,13 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 
 	/**
 	 * Set the JPA dialect to use for this transaction manager.
+	 * Used for vendor-specific transaction management and JDBC connection exposure.
+	 * <p>If the EntityManagerFactory uses a known JpaDialect, it will be autodetected:
+	 * You can still explictly specify the DataSource, but you don't need to in this case.
 	 * <p>The dialect object can be used to retrieve the underlying JDBC connection
 	 * and thus allows for exposing JPA transactions as JDBC transactions.
+	 * @see EntityManagerFactoryInfo#getJpaDialect()
+	 * @see JpaDialect#beginTransaction
 	 * @see JpaDialect#getJdbcConnection
 	 */
 	public void setJpaDialect(JpaDialect jpaDialect) {
@@ -196,7 +202,12 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 			throw new IllegalArgumentException("entityManagerFactory is required");
 		}
 		if (getEntityManagerFactory() instanceof EntityManagerFactoryInfo) {
-			JpaDialect jpaDialect = ((EntityManagerFactoryInfo) getEntityManagerFactory()).getJpaDialect();
+			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) getEntityManagerFactory();
+			DataSource dataSource = emfInfo.getDataSource();
+			if (dataSource != null) {
+				setDataSource(dataSource);
+			}
+			JpaDialect jpaDialect = emfInfo.getJpaDialect();
 			if (jpaDialect != null) {
 				setJpaDialect(jpaDialect);
 			}
@@ -304,7 +315,6 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 			throw ex;
 		}
 		catch (Exception ex) {
-			ex.printStackTrace();
 			if (em != null) {
 				em.close();
 			}
@@ -313,10 +323,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	private EntityManager createEntityManagerForTransaction() {
-		// If the EntityManagerFactory is a Spring proxy,
-		// unwrap it. Otherwise the returned EntityManager
-		// created from calls to createEntityManager() would
-		// try to synchronize with the transaction itself.
+		// If the EntityManagerFactory is a Spring proxy, unwrap it.
 		EntityManagerFactory emfToUse = getEntityManagerFactory();
 		if (emfToUse instanceof EntityManagerFactoryInfo) {
 			emfToUse = ((EntityManagerFactoryInfo) emfToUse).getNativeEntityManagerFactory();

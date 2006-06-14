@@ -31,6 +31,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
+import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -273,6 +274,10 @@ public abstract class AbstractEntityManagerFactoryBean
 
 	public EntityManagerFactory getNativeEntityManagerFactory() {
 		return this.nativeEntityManagerFactory;
+	}
+
+	public DataSource getDataSource() {
+		return null;
 	}
 
 	public PersistenceUnitInfo getPersistenceUnitInfo() {

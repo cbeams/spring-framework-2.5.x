@@ -18,6 +18,7 @@ package org.springframework.orm.jpa;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceUnitInfo;
+import javax.sql.DataSource;
 
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 
@@ -25,8 +26,7 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
  * Metadata interface for a Spring-managed EntityManagerFactory.
  *
  * This interface can be obtained from Spring-managed EntityManagerFactory
- * proxies, through the PortableEntityManagerFactoryPlus interface that
- * they implement.
+ * proxies through casting the EntityManagerFactory to this interface.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -35,12 +35,18 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
 public interface EntityManagerFactoryInfo extends PersistenceExceptionTranslator {
 	
 	/**
-	 * Return the underlying EntityManagerFactory, returned
-	 * by the PersistenceProvider.
-	 * @return the unadorned EntityManagerFactory
+	 * Return the raw underlying EntityManagerFactory.
+	 * @return the unadorned EntityManagerFactory (never <code>null</code>)
 	 */
 	EntityManagerFactory getNativeEntityManagerFactory();
-	
+
+	/**
+	 * Return the JDBC DataSource that this EntityManagerFactory
+	 * obtains its JDBC Connections from.
+	 * @return the JDBC DataSource, or <code>null</code> if not known
+	 */
+	DataSource getDataSource();
+
 	/**
 	 * Return the PersistenceUnitInfo used to create this
 	 * EntityManagerFactory, if the in-container API was used.
@@ -49,7 +55,7 @@ public interface EntityManagerFactoryInfo extends PersistenceExceptionTranslator
 	 * configure the EntityManagerFactory
 	 */
 	PersistenceUnitInfo getPersistenceUnitInfo();
-	
+
 	/**
 	 * Return the name of the EntityManager, or <code>null</code> if
 	 * it is an unnamed default. If <code>getPersistenceUnitInfo()</code>

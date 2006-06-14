@@ -241,7 +241,7 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 		try {
 			Resource res = this.resourceLoader.getResource(this.persistenceUnitRootLocation);
 			if (logger.isInfoEnabled()) {
-				logger.info("Using explicit persistence unit root location: " + res);
+				logger.info("Using persistence unit root location: " + res);
 			}
 			return res.getURL();
 		}
@@ -250,6 +250,10 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 		}
 	}
 
+
+	public DataSource getDataSource() {
+		return this.dataSource;
+	}
 
 	public PersistenceUnitInfo getPersistenceUnitInfo() {
 		return this.persistenceUnitInfo;
