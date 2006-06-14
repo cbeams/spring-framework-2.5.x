@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -261,6 +261,8 @@ public class OpenSessionInViewTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf);
+		session.setFlushMode(FlushMode.NEVER);
+		sessionControl.setVoidCallable(1);
 		sfControl.replay();
 		sessionControl.replay();
 		interceptor.preHandle(request, response, "handler");
@@ -455,6 +457,8 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.setReturnValue(sf);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.NEVER, 1);
+		session.setFlushMode(FlushMode.NEVER);
+		sessionControl.setVoidCallable(1);
 		sfControl.replay();
 		sessionControl.replay();
 
@@ -477,6 +481,8 @@ public class OpenSessionInViewTests extends TestCase {
 		txControl.setVoidCallable(1);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
+		session2.setFlushMode(FlushMode.NEVER);
+		session2Control.setVoidCallable(1);
 		sf2Control.replay();
 		session2Control.replay();
 		txControl.replay();
@@ -579,6 +585,8 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.setReturnValue(sf);
 		session.getFlushMode();
 		sessionControl.setReturnValue(FlushMode.NEVER, 1);
+		session.setFlushMode(FlushMode.NEVER);
+		sessionControl.setVoidCallable(1);
 		sfControl.replay();
 		sessionControl.replay();
 
