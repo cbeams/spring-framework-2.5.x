@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -75,22 +75,22 @@ import org.springframework.web.portlet.ModelAndView;
 public interface Controller {
 
 	/**
-	 * Process the render request and return a ModelAndView object which the DispatcherPortlet
-	 * will render. A null return is not an error: It indicates that this object
-	 * completed request processing itself, thus there is no ModelAndView to render.
-	 * @param request current portlet render request
-	 * @param response current portlet render response
-	 * @return a ModelAndView to render, or null if handled directly
-	 * @throws Exception in case of errors
-	 */
-	ModelAndView handleRenderRequest(RenderRequest request, RenderResponse response) throws Exception;
-	
-	/**
 	 * Process the action request.  There is nothing to return.
 	 * @param request current portlet action request
 	 * @param response current portlet action response
 	 * @throws Exception in case of errors
 	 */
 	void handleActionRequest(ActionRequest request, ActionResponse response) throws Exception;
+
+	/**
+	 * Process the render request and return a ModelAndView object which the DispatcherPortlet
+	 * will render. A <code>null</code> return value is not an error: It indicates that this
+	 * object completed request processing itself, thus there is no ModelAndView to render.
+	 * @param request current portlet render request
+	 * @param response current portlet render response
+	 * @return a ModelAndView to render, or null if handled directly
+	 * @throws Exception in case of errors
+	 */
+	ModelAndView handleRenderRequest(RenderRequest request, RenderResponse response) throws Exception;
 
 }

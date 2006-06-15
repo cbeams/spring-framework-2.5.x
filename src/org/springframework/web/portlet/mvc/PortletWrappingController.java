@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import org.springframework.web.portlet.context.PortletContextAware;
  *
  * <p><b>Example:</b>
  *
- * <pre class="code">&lt;bean id="wrappingController" class="org.springframework.web.portlet.mvc.PortletWrappingController"&gt;
+ * <pre>&lt;bean id="wrappingController" class="org.springframework.web.portlet.mvc.PortletWrappingController"&gt;
  *   &lt;property name="portletClass"&gt;
  *     &lt;value&gt;org.springframework.web.portlet.sample.HelloWorldPortlet&lt;/value&gt;
  *   &lt;/property&gt;
@@ -135,6 +135,7 @@ public class PortletWrappingController extends AbstractController
 		this.beanName = name;
 	}
 
+
 	public void afterPropertiesSet() throws Exception {
 		if (this.portletClass == null) {
 			throw new IllegalArgumentException("portletClass is required");
@@ -154,17 +155,21 @@ public class PortletWrappingController extends AbstractController
 		this.portletInstance.init(config);
 	}
 
-	protected ModelAndView handleRenderRequestInternal(RenderRequest request,
-			RenderResponse response) throws Exception {
+
+	protected void handleActionRequestInternal(
+			ActionRequest request, ActionResponse response) throws Exception {
+
+		this.portletInstance.processAction(request, response);
+	}
+
+	protected ModelAndView handleRenderRequestInternal(
+			RenderRequest request, RenderResponse response) throws Exception {
+
 		this.portletInstance.render(request, response);
 		return null;
 	}
-	
-	protected void handleActionRequestInternal(ActionRequest request,
-			ActionResponse response) throws Exception {
-		this.portletInstance.processAction(request, response);
-	}
-	
+
+
 	public void destroy() {
 		this.portletInstance.destroy();
 	}
@@ -173,11 +178,10 @@ public class PortletWrappingController extends AbstractController
 	/**
 	 * Internal implementation of the PortletConfig interface, to be passed
 	 * to the wrapped portlet.
-     * 
-     * <p>Delegates to {@link PortletWrappingController} fields
+	 * <p>Delegates to {@link PortletWrappingController} fields
 	 * and methods to provide init parameters and other environment info.
 	 */
-	private final class DelegatingPortletConfig implements PortletConfig {
+	private class DelegatingPortletConfig implements PortletConfig {
 
 		public String getPortletName() {
 			return portletName;
@@ -196,7 +200,7 @@ public class PortletWrappingController extends AbstractController
 		}
 		
 		public ResourceBundle getResourceBundle(Locale locale) {
-			return portletConfig == null ? null : portletConfig.getResourceBundle(locale);
+			return (portletConfig != null ? portletConfig.getResourceBundle(locale) : null);
 		}
 
 	}

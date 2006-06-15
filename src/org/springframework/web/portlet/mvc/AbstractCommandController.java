@@ -85,6 +85,24 @@ public abstract class AbstractCommandController extends BaseCommandController {
 	}
 
 
+	protected final void handleActionRequestInternal(ActionRequest request, ActionResponse response)
+			throws Exception {
+
+		// Create the command object.
+		Object command = getCommand(request);
+
+		// Compute the errors object.
+		PortletRequestDataBinder binder = bindAndValidate(request, command);
+		BindException errors = new BindException(binder.getBindingResult());
+
+		// Actually handle the action.
+		handleAction(request, response, command, errors);
+
+		// Pass the command and errors forward to the render phase.
+		setRenderCommandAndErrors(request, command, errors);
+		setCommandInSession(response);
+	}
+
 	protected final ModelAndView handleRenderRequestInternal(
 			RenderRequest request, RenderResponse response) throws Exception {
 
@@ -115,23 +133,23 @@ public abstract class AbstractCommandController extends BaseCommandController {
 		return handleRender(request, response, command, errors);
 	}
 
-	protected final void handleActionRequestInternal(ActionRequest request, ActionResponse response)
-			throws Exception {
 
-		// Create the command object.
-		Object command = getCommand(request);
-
-		// Compute the errors object.
-		PortletRequestDataBinder binder = bindAndValidate(request, command);
-		BindException errors = new BindException(binder.getBindingResult());
-
-		// Actually handle the action.
-		handleAction(request, response, command, errors);
-
-		// Pass the command and errors forward to the render phase.
-		setRenderCommandAndErrors(request, command, errors);
-		setCommandInSession(response);
-	}
+	/**
+	 * Template method for request handling, providing a populated and validated instance
+	 * of the command class, and an Errors object containing binding and validation errors.
+	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
+	 * with the command and the Errors instance, under the specified command name,
+	 * as expected by the "spring:bind" tag.
+	 * @param request current action request
+	 * @param response current action response
+	 * @param command the populated command object
+	 * @param errors validation errors holder
+	 * @see org.springframework.validation.Errors
+	 * @see org.springframework.validation.BindException#getModel
+	 */
+	protected abstract void handleAction(
+			ActionRequest request, ActionResponse response, Object command, BindException errors)
+			throws Exception;
 
 	/**
 	 * Template method for render request handling, providing a populated and validated instance
@@ -151,22 +169,6 @@ public abstract class AbstractCommandController extends BaseCommandController {
 			RenderRequest request, RenderResponse response, Object command, BindException errors)
 			throws Exception;
 
-	/**
-	 * Template method for request handling, providing a populated and validated instance
-	 * of the command class, and an Errors object containing binding and validation errors.
-	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
-	 * with the command and the Errors instance, under the specified command name,
-	 * as expected by the "spring:bind" tag.
-	 * @param request current action request
-	 * @param response current action response
-	 * @param command the populated command object
-	 * @param errors validation errors holder
-	 * @see org.springframework.validation.Errors
-	 * @see org.springframework.validation.BindException#getModel
-	 */
-	protected abstract void handleAction(
-			ActionRequest request, ActionResponse response, Object command, BindException errors)
-			throws Exception;
 
 	/**
 	 * Return the name of the render parameter that indicates there
