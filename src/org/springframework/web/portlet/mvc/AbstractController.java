@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -177,6 +177,26 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 	}
 
 
+	public final void handleActionRequest(ActionRequest request, ActionResponse response)
+			throws Exception {
+
+		// Delegate to PortletContentGenerator for checking and preparing.
+		check(request, response);
+
+		// Execute in synchronized block if required.
+		if (this.synchronizeOnSession) {
+			PortletSession session = request.getPortletSession(false);
+			if (session != null) {
+				synchronized (session) {
+					handleActionRequestInternal(request, response);
+					return;
+				}
+			}
+		}
+
+		handleActionRequestInternal(request, response);
+	}
+
 	public final ModelAndView handleRenderRequest(RenderRequest request, RenderResponse response)
 			throws Exception {
 
@@ -202,40 +222,6 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 		return handleRenderRequestInternal(request, response);
 	}
 
-	public final void handleActionRequest(ActionRequest request, ActionResponse response)
-			throws Exception {
-
-		// delegate to PortletContentGenerator for checking and preparing
-		checkAndPrepare(request, response);
-		
-		// execute in synchronized block if required
-		if (this.synchronizeOnSession) {
-			PortletSession session = request.getPortletSession(false);
-			if (session != null) {
-				synchronized (session) {
-					handleActionRequestInternal(request, response);
-					return;
-				}
-			}
-		}
-
-		handleActionRequestInternal(request, response);
-	}
-
-
-	/**
-	 * Subclasses are meant to override this method if the controller
-	 * is expected to handle render requests. The contract is the same as
-	 * for <code>handleRenderRequest</code>.
-	 * <p>The default implementation throws a PortletException.
-	 * @see #handleRenderRequest
-	 * @see #handleActionRequestInternal
-	 */
-	protected ModelAndView handleRenderRequestInternal(RenderRequest request, RenderResponse response)
-			throws Exception {
-
-		throw new PortletException("[" + this.getClass().getName() + "] does not handle render requests");
-	}
 
 	/**
 	 * Subclasses are meant to override this method if the controller
@@ -248,7 +234,21 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 	protected void handleActionRequestInternal(ActionRequest request, ActionResponse response)
 			throws Exception {
 
-		throw new PortletException("[" + this.getClass().getName() + "] does not handle action requests");
+		throw new PortletException("[" + getClass().getName() + "] does not handle action requests");
+	}
+
+	/**
+	 * Subclasses are meant to override this method if the controller
+	 * is expected to handle render requests. The contract is the same as
+	 * for <code>handleRenderRequest</code>.
+	 * <p>The default implementation throws a PortletException.
+	 * @see #handleRenderRequest
+	 * @see #handleActionRequestInternal
+	 */
+	protected ModelAndView handleRenderRequestInternal(RenderRequest request, RenderResponse response)
+			throws Exception {
+
+		throw new PortletException("[" + getClass().getName() + "] does not handle render requests");
 	}
 
 }

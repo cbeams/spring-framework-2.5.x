@@ -16,9 +16,6 @@
 
 package org.springframework.web.portlet.handler;
 
-import java.util.Arrays;
-import java.util.Enumeration;
-
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
@@ -78,6 +75,23 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 		return cacheSeconds;
 	}
 
+
+	/**
+	 * Check and prepare the given request and response according to the settings
+	 * of this generator. Checks for a required session, and applies the number of
+	 * cache seconds configured for this generator (if it is a render request/response).
+	 * @param request current portlet request
+	 * @param response current portlet response
+	 * @throws PortletException if the request cannot be handled because a check failed
+	 */
+	protected final void check(PortletRequest request, PortletResponse response) throws PortletException {
+		if (this.requireSession) {
+			if (request.getPortletSession(false) == null) {
+				throw new PortletSessionRequiredException("Pre-existing session required but none found");
+			}
+		}
+	}
+
 	/**
 	 * Check and prepare the given request and response according to the settings
 	 * of this generator. Checks for a required session, and applies the number of 
@@ -86,9 +100,9 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 	 * @param response current portlet response
 	 * @throws PortletException if the request cannot be handled because a check failed
 	 */
-	protected final void checkAndPrepare(
-			PortletRequest request, PortletResponse response)
-		throws PortletException {
+	protected final void checkAndPrepare(RenderRequest request, RenderResponse response)
+			throws PortletException {
+
 		checkAndPrepare(request, response, this.cacheSeconds);
 	}
 
@@ -103,33 +117,11 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 	 * @throws PortletException if the request cannot be handled because a check failed
 	 */
 	protected final void checkAndPrepare(
-			PortletRequest request, PortletResponse response, int cacheSeconds)
-		throws PortletException {
+			RenderRequest request, RenderResponse response, int cacheSeconds)
+			throws PortletException {
 
-	    // debug output of request
-	    if (logger.isDebugEnabled()) {
-	        logger.debug("Checking and preparing " + 
-	                (request instanceof RenderRequest ? "RenderRequest" : "ActionRequest"));
-		    Enumeration params = request.getParameterNames();
-	        if (params.hasMoreElements()) logger.debug("Request Parameters:");
-		    while (params.hasMoreElements()) {
-		        String paramName = (String)params.nextElement();
-		        String paramValues[] = request.getParameterValues(paramName);
-		        logger.debug("-- '" + paramName + "' = " +
-		                (paramValues == null ? "NULL" : Arrays.asList(paramValues).toString()));
-		    }	        
-	    }
-	    
-		// check whether session is required
-		if (this.requireSession) {
-			if (request.getPortletSession(false) == null) {
-				throw new PortletSessionRequiredException("Pre-existing session required but none found");
-			}
-		}
-
-		// Do declarative cache control.
-		if (response instanceof RenderResponse)
-			applyCacheSeconds((RenderResponse)response, cacheSeconds);
+		check(request, response);
+		applyCacheSeconds(response, cacheSeconds);
 	}
 
 	/**
@@ -146,7 +138,7 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 	 * should be cacheable for
 	 */
 	protected final void cacheForSeconds(RenderResponse response, int seconds) {
-		response.setProperty(RenderResponse.EXPIRATION_CACHE, new Integer(seconds).toString());
+		response.setProperty(RenderResponse.EXPIRATION_CACHE, Integer.toString(seconds));
 	}
 
 	/**
