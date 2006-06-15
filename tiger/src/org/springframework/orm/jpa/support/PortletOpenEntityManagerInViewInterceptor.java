@@ -19,8 +19,8 @@ package org.springframework.orm.jpa.support;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
-import javax.portlet.PortletRequest;
-import javax.portlet.PortletResponse;
+import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,8 +33,8 @@ import org.springframework.web.portlet.handler.HandlerInterceptorAdapter;
 
 /**
  * Spring Portlet HandlerInterceptor that binds a JPA EntityManager to the
- * thread for the entire processing of the request. Intended for the "Open
- * EntityManager in View" pattern, i.e. to allow for lazy loading in
+ * thread for the entire processing of the render request. Intended for the
+ * "Open EntityManager in View" pattern, i.e. to allow for lazy loading in
  * web views despite the original transactions already being completed.
  *
  * <p>This filter works similar to the AOP JpaInterceptor: It just makes JPA
@@ -44,13 +44,9 @@ import org.springframework.web.portlet.handler.HandlerInterceptorAdapter;
  * EntityManagers pre-bound by this filter will automatically be used
  * for the transactions.
  *
- * <p>In contrast to OpenEntityManagerInViewFilter, this interceptor is set
- * up in a Spring application context and can thus take advantage of bean wiring.
- * It derives from JpaAccessor to inherit common JPA configuration properties.
- *
  * @author Juergen Hoeller
  * @since 2.0
- * @see OpenEntityManagerInViewFilter
+ * @see OpenEntityManagerInViewInterceptor
  * @see org.springframework.orm.jpa.JpaInterceptor
  * @see org.springframework.orm.jpa.JpaTransactionManager
  * @see org.springframework.orm.jpa.JpaTemplate#execute
@@ -90,7 +86,7 @@ public class PortletOpenEntityManagerInViewInterceptor extends HandlerIntercepto
 	}
 
 
-	public boolean preHandle(PortletRequest request, PortletResponse response, Object handler)
+	public boolean preHandleRender(RenderRequest request, RenderResponse response, Object handler)
 	    throws DataAccessException {
 
 		if (TransactionSynchronizationManager.hasResource(getEntityManagerFactory())) {
@@ -115,8 +111,8 @@ public class PortletOpenEntityManagerInViewInterceptor extends HandlerIntercepto
 		return true;
 	}
 
-	public void afterCompletion(
-			PortletRequest request, PortletResponse response, Object handler, Exception ex)
+	public void afterRenderCompletion(
+			RenderRequest request, RenderResponse response, Object handler, Exception ex)
 			throws DataAccessException {
 
 		String participateAttributeName = getParticipateAttributeName();

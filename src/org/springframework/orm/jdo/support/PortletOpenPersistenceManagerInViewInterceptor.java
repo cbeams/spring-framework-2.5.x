@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package org.springframework.orm.jdo.support;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
-import javax.portlet.PortletRequest;
-import javax.portlet.PortletResponse;
+import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,8 +32,8 @@ import org.springframework.web.portlet.handler.HandlerInterceptorAdapter;
 
 /**
  * Spring Portlet HandlerInterceptor that binds a JDO PersistenceManager to the
- * thread for the entire processing of the request. Intended for the "Open
- * PersistenceManager in View" pattern, i.e. to allow for lazy loading in
+ * thread for the entire processing of the render request. Intended for the
+ * "Open PersistenceManager in View" pattern, i.e. to allow for lazy loading in
  * web views despite the original transactions already being completed.
  *
  * <p>This filter works similar to the AOP JdoInterceptor: It just makes JDO
@@ -43,13 +43,9 @@ import org.springframework.web.portlet.handler.HandlerInterceptorAdapter;
  * PersistenceManagers pre-bound by this filter will automatically be used
  * for the transactions.
  *
- * <p>In contrast to OpenPersistenceManagerInViewFilter, this interceptor is set
- * up in a Spring application context and can thus take advantage of bean wiring.
- * It derives from JdoAccessor to inherit common JDO configuration properties.
- *
  * @author Juergen Hoeller
  * @since 2.0
- * @see OpenPersistenceManagerInViewFilter
+ * @see OpenPersistenceManagerInViewInterceptor
  * @see org.springframework.orm.jdo.JdoInterceptor
  * @see org.springframework.orm.jdo.JdoTransactionManager
  * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#getPersistenceManager
@@ -88,7 +84,7 @@ public class PortletOpenPersistenceManagerInViewInterceptor extends HandlerInter
 	}
 
 
-	public boolean preHandle(PortletRequest request, PortletResponse response, Object handler)
+	public boolean preHandleRender(RenderRequest request, RenderResponse response, Object handler)
 	    throws DataAccessException {
 
 		if (TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory())) {
@@ -110,7 +106,8 @@ public class PortletOpenPersistenceManagerInViewInterceptor extends HandlerInter
 		return true;
 	}
 
-	public void afterCompletion(PortletRequest request, PortletResponse response, Object handler, Exception ex)
+	public void afterRenderCompletion(
+			RenderRequest request, RenderResponse response, Object handler, Exception ex)
 			throws DataAccessException {
 
 		String participateAttributeName = getParticipateAttributeName();

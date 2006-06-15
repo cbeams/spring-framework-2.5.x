@@ -16,8 +16,8 @@
 
 package org.springframework.orm.hibernate.support;
 
-import javax.portlet.PortletRequest;
-import javax.portlet.PortletResponse;
+import javax.portlet.ActionRequest;
+import javax.portlet.ActionResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
@@ -34,7 +34,7 @@ import org.springframework.web.portlet.ModelAndView;
 
 /**
  * Spring Portlet HandlerInterceptor that binds a Hibernate Session to the thread for the
- * entire processing of the request. Intended for the "Open Session in View" pattern,
+ * entire processing of the render request. Intended for the "Open Session in View" pattern,
  * i.e. to allow for lazy loading in web views despite the original transactions
  * already being completed.
  *
@@ -43,10 +43,6 @@ import org.springframework.web.portlet.ModelAndView;
  * execution but also for middle tier transactions via HibernateTransactionManager
  * or JtaTransactionManager. In the latter case, Sessions pre-bound by this interceptor
  * will automatically be used for the transactions and flushed accordingly.
- *
- * <p>In contrast to OpenSessionInViewFilter, this interceptor is set up in a Spring
- * application context and can thus take advantage of bean wiring. It derives from
- * HibernateAccessor to inherit common Hibernate configuration properties.
  *
  * <p><b>WARNING:</b> Applying this interceptor to existing logic can cause issues that
  * have not appeared before, through the use of a single Hibernate Session for the
@@ -78,6 +74,7 @@ import org.springframework.web.portlet.ModelAndView;
  * @since 2.0
  * @see #setSingleSession
  * @see #setFlushMode
+ * @see OpenSessionInViewInterceptor
  * @see org.springframework.orm.hibernate.HibernateInterceptor
  * @see org.springframework.orm.hibernate.HibernateTransactionManager
  * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession
@@ -127,12 +124,26 @@ public class PortletOpenSessionInViewInterceptor extends HibernateAccessor imple
 
 
 	/**
+	 * This implementation always returns <code>true</code>.
+	 */
+	public boolean preHandleAction(ActionRequest request, ActionResponse response, Object handler) {
+		return true;
+	}
+
+	/**
+	 * This implementation is empty.
+	 */
+	public void afterActionCompletion(
+			ActionRequest request, ActionResponse response, Object handler, Exception ex) {
+	}
+
+	/**
 	 * Open a new Hibernate Session according to the settings of this HibernateAccessor
 	 * and binds in to the thread via TransactionSynchronizationManager.
 	 * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
-	public boolean preHandle(PortletRequest request, PortletResponse response, Object handler)
+	public boolean preHandleRender(RenderRequest request, RenderResponse response, Object handler)
 	    throws DataAccessException {
 
 		if ((isSingleSession() && TransactionSynchronizationManager.hasResource(getSessionFactory())) ||
@@ -169,7 +180,7 @@ public class PortletOpenSessionInViewInterceptor extends HibernateAccessor imple
 	 * middle tier transactions have flushed their changes on commit.
 	 * @see #setFlushMode
 	 */
-	public void postHandle(
+	public void postHandleRender(
 			RenderRequest request, RenderResponse response, Object handler, ModelAndView modelAndView)
 			throws DataAccessException {
 
@@ -193,8 +204,8 @@ public class PortletOpenSessionInViewInterceptor extends HibernateAccessor imple
 	 * during the current request (in deferred close mode).
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
-	public void afterCompletion(
-			PortletRequest request, PortletResponse response, Object handler, Exception ex)
+	public void afterRenderCompletion(
+			RenderRequest request, RenderResponse response, Object handler, Exception ex)
 			throws DataAccessException {
 
 		String participateAttributeName = getParticipateAttributeName();
