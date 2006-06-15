@@ -22,7 +22,7 @@
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/dist/extmodules">
+		<fileset dir="${spring.root}/dist/modules">
 			<include name="spring-portlet.jar"/>
 		</fileset>
 
@@ -102,7 +102,7 @@
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/dist/extmodules">
+			<fileset dir="${spring.root}/dist/modules">
 				<include name="spring-portlet.jar"/>
 			</fileset>
 		</copy>
