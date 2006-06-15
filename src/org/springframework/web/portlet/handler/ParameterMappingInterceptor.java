@@ -18,10 +18,6 @@ package org.springframework.web.portlet.handler;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
-import javax.portlet.PortletRequest;
-import javax.portlet.PortletResponse;
-
-import org.springframework.beans.BeansException;
 
 /**
  * <p>Interceptor to forward a request parameter from the <code>ActionRequest</code> to the 
@@ -50,44 +46,28 @@ import org.springframework.beans.BeansException;
  */
 public class ParameterMappingInterceptor extends HandlerInterceptorAdapter {
 
-    // request parameter name to use for mapping to handlers
-    public final static String DEFAULT_PARAMETER_NAME = "action";
+	/** Request parameter name to use for mapping to handlers */
+	public final static String DEFAULT_PARAMETER_NAME = "action";
 
 	private String parameterName = DEFAULT_PARAMETER_NAME;
 
 
-    /**
-     * Set the name of the parameter used for mapping.
-     */
-    public void setParameterName(String parameterName) {
-        this.parameterName = parameterName;
-    }
-
-    /**
-     * Get the name of the parameter used for mapping.
-     */
-    public String getParameterName() {
-        return parameterName;
-    }
-
-
-	public void initApplicationContext() throws BeansException {
-	    // make sure parameterName has a value
-		if (this.getParameterName() == null)
-            throw new IllegalArgumentException("A parameterName is required");
+	/**
+	 * Set the name of the parameter used for mapping.
+	 */
+	public void setParameterName(String parameterName) {
+		this.parameterName = (parameterName != null ? parameterName : DEFAULT_PARAMETER_NAME);
 	}
-	
+
+
 	/**
 	 * If request is an {@link javax.portlet.ActionRequest ActionRequest},
 	 * get handler mapping parameter and add it to the ActionResponse.
 	 */
-	public boolean preHandle(PortletRequest request, PortletResponse response, Object handler)
-			throws Exception {
-		if (request instanceof ActionRequest) {
-			String mappingParameter = request.getParameter(this.getParameterName());
-			if (mappingParameter != null) {
-				((ActionResponse) response).setRenderParameter(parameterName, mappingParameter);
-			}
+	public boolean preHandleAction(ActionRequest request, ActionResponse response, Object handler) {
+		String mappingParameter = request.getParameter(this.parameterName);
+		if (mappingParameter != null) {
+			response.setRenderParameter(parameterName, mappingParameter);
 		}
 		return true;
 	}

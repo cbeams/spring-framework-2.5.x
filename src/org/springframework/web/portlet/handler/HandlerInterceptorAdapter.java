@@ -16,12 +16,16 @@
 
 package org.springframework.web.portlet.handler;
 
-import javax.portlet.PortletRequest;
-import javax.portlet.PortletResponse;
+import java.io.IOException;
+
+import javax.portlet.ActionRequest;
+import javax.portlet.ActionResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletResponse;
+import javax.portlet.PortletException;
 
-import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.web.portlet.HandlerInterceptor;
 import org.springframework.web.portlet.ModelAndView;
 
@@ -29,31 +33,80 @@ import org.springframework.web.portlet.ModelAndView;
  * Abstract adapter class for the HandlerInterceptor interface,
  * for simplified implementation of pre-only/post-only interceptors.
  *
+ * @author Juergen Hoeller
  * @author John A. Lewis
  * @since 2.0
  */
-public abstract class HandlerInterceptorAdapter extends ApplicationObjectSupport
-	implements HandlerInterceptor {
+public abstract class HandlerInterceptorAdapter implements HandlerInterceptor {
 
 	/**
-	 * This implementation always returns true.
+	 * This implementation delegates to <code>preHandle</code>.
+	 * @see #preHandle
 	 */
-	public boolean preHandle(PortletRequest request, PortletResponse response, Object handler) throws Exception {
+	public boolean preHandleAction(ActionRequest request, ActionResponse response, Object handler) throws Exception {
+		return preHandle(request, response, handler);
+	}
+
+	/**
+	 * This implementation delegates to <code>afterCompletion</code>.
+	 * @see #afterCompletion
+	 */
+	public void afterActionCompletion(
+			ActionRequest request, ActionResponse response, Object handler, Exception ex) throws Exception {
+
+		afterCompletion(request, response, handler, ex);
+	}
+
+
+	/**
+	 * This implementation delegates to <code>preHandle</code>.
+	 * @see #preHandle
+	 */
+	public boolean preHandleRender(RenderRequest request, RenderResponse response, Object handler) throws Exception {
+		return preHandle(request, response, handler);
+	}
+
+	/**
+	 * This implementation is empty.
+	 */
+	public void postHandleRender(
+			RenderRequest request, RenderResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+	}
+
+	/**
+	 * This implementation delegates to <code>afterCompletion</code>.
+	 * @see #afterCompletion
+	 */
+	public void afterRenderCompletion(
+			RenderRequest request, RenderResponse response, Object handler, Exception ex) throws Exception {
+
+		afterCompletion(request, response, handler, ex);
+	}
+
+
+	/**
+	 * Default callback that both <code>preHandleRender</code>
+	 * and <code>preHandleAction</code> delegate to.
+	 * <p>This implementation always returns <code>true</code>.
+	 * @see #preHandleRender
+	 * @see #preHandleAction
+	 */
+	protected boolean preHandle(PortletRequest request, PortletResponse response, Object handler)
+			throws Exception {
+
 		return true;
 	}
 
 	/**
-	 * This implementation is empty.
+	 * Default callback that both <code>preHandleRender</code>
+	 * and <code>preHandleAction</code> delegate to.
+	 * <p>This implementation is empty.
+	 * @see #afterRenderCompletion
+	 * @see #afterActionCompletion
 	 */
-	public void postHandle(RenderRequest request, RenderResponse response, Object handler, ModelAndView modelAndView)
-			throws Exception {
-	}
-	
-	/**
-	 * This implementation is empty.
-	 */
-	public void afterCompletion(PortletRequest request, PortletResponse response, Object handler, Exception ex)
-			throws Exception {
+	protected void afterCompletion(
+			PortletRequest request, PortletResponse response, Object handler, Exception ex) throws Exception {
+
 	}
 
 }

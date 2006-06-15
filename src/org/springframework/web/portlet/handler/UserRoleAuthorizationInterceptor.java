@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.web.portlet.handler;
+
+import java.io.IOException;
 
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
@@ -26,12 +28,14 @@ import javax.portlet.PortletSecurityException;
  * user's roles, as evaluated by PortletRequest's isUserInRole method.
  *
  * @author John A. Lewis
+ * @author Juergen Hoeller
  * @since 2.0
  * @see javax.portlet.PortletRequest#isUserInRole
  */
 public class UserRoleAuthorizationInterceptor extends HandlerInterceptorAdapter {
 
 	private String[] authorizedRoles;
+
 
 	/**
 	 * Set the roles that this interceptor should treat as authorized.
@@ -41,8 +45,10 @@ public class UserRoleAuthorizationInterceptor extends HandlerInterceptorAdapter 
 		this.authorizedRoles = authorizedRoles;
 	}
 
+
 	public final boolean preHandle(PortletRequest request, PortletResponse response, Object handler)
-			throws PortletException {
+			throws PortletException, IOException {
+
 		if (this.authorizedRoles != null) {
 			for (int i = 0; i < this.authorizedRoles.length; i++) {
 				if (request.isUserInRole(this.authorizedRoles[i])) {
@@ -62,12 +68,13 @@ public class UserRoleAuthorizationInterceptor extends HandlerInterceptorAdapter 
 	 * @param request current portlet request
 	 * @param response current portlet response
 	 * @param handler chosen handler to execute, for type and/or instance evaluation
-	 * @throws javax.portlet.PortletException
+	 * @throws javax.portlet.PortletException if there is an internal error
+	 * @throws java.io.IOException in case of an I/O error when writing the response
 	 */
 	protected void handleNotAuthorized(PortletRequest request, PortletResponse response, Object handler)
-			throws PortletException {
-		throw new PortletSecurityException("");
-		
+			throws PortletException, IOException {
+
+		throw new PortletSecurityException("Request not authorized");
 	}
 
 }

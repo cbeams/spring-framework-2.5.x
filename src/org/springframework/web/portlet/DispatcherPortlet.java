@@ -593,8 +593,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			if (mappedHandler.getInterceptors() != null) {
 				for (int i = 0; i < mappedHandler.getInterceptors().length; i++) {
 					HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
-					if (!interceptor.preHandle(processedRequest, response, mappedHandler.getHandler())) {
-						triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
+					if (!interceptor.preHandleAction(processedRequest, response, mappedHandler.getHandler())) {
+						triggerAfterActionCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
 						return;
 					}
 					interceptorIndex = i;
@@ -606,12 +606,12 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			ha.handleAction(processedRequest, response, mappedHandler.getHandler());
 
 			// Trigger after-completion for successful outcome.
-			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
+			triggerAfterActionCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
 		}
 
 		catch (Exception ex) {
 			// Trigger after-completion for thrown exception.
-			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
+			triggerAfterActionCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
 			// Forward the exception to the render phase to be displayed.
 			logger.debug("Caught exception during action phase - forwarding to render phase", ex);
 			PortletSession session = request.getPortletSession();
@@ -622,7 +622,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			PortletException ex =
 					new PortletException("Error occured during request processing: " + err.getMessage(), err);
 			// Trigger after-completion for thrown exception.
-			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
+			triggerAfterActionCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
 			throw ex;
 		}
 
@@ -695,8 +695,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 				if (mappedHandler.getInterceptors() != null) {
 					for (int i = 0; i < mappedHandler.getInterceptors().length; i++) {
 						HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
-						if (!interceptor.preHandle(processedRequest, response, mappedHandler.getHandler())) {
-							triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
+						if (!interceptor.preHandleRender(processedRequest, response, mappedHandler.getHandler())) {
+							triggerAfterRenderCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
 							return;
 						}
 						interceptorIndex = i;
@@ -711,7 +711,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 				if (mappedHandler.getInterceptors() != null) {
 					for (int i = mappedHandler.getInterceptors().length - 1; i >= 0; i--) {
 						HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
-						interceptor.postHandle(processedRequest, response, mappedHandler.getHandler(), mv);
+						interceptor.postHandleRender(processedRequest, response, mappedHandler.getHandler(), mv);
 					}
 				}
 			}
@@ -736,19 +736,19 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			}
 
 			// Trigger after-completion for successful outcome.
-			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
+			triggerAfterRenderCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
 		}
 
 		catch (Exception ex) {
 			// Trigger after-completion for thrown exception.
-			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
+			triggerAfterRenderCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
 			throw ex;
 		}
 		catch (Error err) {
 			PortletException ex =
 					new PortletException("Error occured during request processing: " + err.getMessage(), err);
 			// Trigger after-completion for thrown exception.
-			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
+			triggerAfterRenderCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
 			throw ex;
 		}
 
@@ -882,6 +882,35 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		}
 	}
 
+	/**
+	 * Trigger afterCompletion callbacks on the mapped HandlerInterceptors.
+	 * Will just invoke afterCompletion for all interceptors whose preHandle
+	 * invocation has successfully completed and returned true.
+	 * @param mappedHandler the mapped HandlerExecutionChain
+	 * @param interceptorIndex index of last interceptor that successfully completed
+	 * @param ex Exception thrown on handler execution, or null if none
+	 * @see HandlerInterceptor#afterRenderCompletion
+	 */
+	private void triggerAfterActionCompletion(HandlerExecutionChain mappedHandler, int interceptorIndex,
+			ActionRequest request, ActionResponse response, Exception ex)
+			throws Exception {
+
+		// Apply afterCompletion methods of registered interceptors.
+		if (mappedHandler != null) {
+			if (mappedHandler.getInterceptors() != null) {
+				for (int i = interceptorIndex; i >= 0; i--) {
+					HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
+					try {
+						interceptor.afterActionCompletion(request, response, mappedHandler.getHandler(), ex);
+					}
+					catch (Throwable ex2) {
+						logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);
+					}
+				}
+			}
+		}
+	}
+
 
 	/**
 	 * Render the given ModelAndView. This is the last stage in handling a request.
@@ -982,10 +1011,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @param mappedHandler the mapped HandlerExecutionChain
 	 * @param interceptorIndex index of last interceptor that successfully completed
 	 * @param ex Exception thrown on handler execution, or null if none
-	 * @see HandlerInterceptor#afterCompletion
+	 * @see HandlerInterceptor#afterRenderCompletion
 	 */
-	private void triggerAfterCompletion(HandlerExecutionChain mappedHandler, int interceptorIndex,
-			PortletRequest request, PortletResponse response, Exception ex)
+	private void triggerAfterRenderCompletion(HandlerExecutionChain mappedHandler, int interceptorIndex,
+			RenderRequest request, RenderResponse response, Exception ex)
 			throws Exception {
 
 		// Apply afterCompletion methods of registered interceptors.
@@ -994,7 +1023,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 				for (int i = interceptorIndex; i >= 0; i--) {
 					HandlerInterceptor interceptor = mappedHandler.getInterceptors()[i];
 					try {
-						interceptor.afterCompletion(request, response, mappedHandler.getHandler(), ex);
+						interceptor.afterRenderCompletion(request, response, mappedHandler.getHandler(), ex);
 					}
 					catch (Throwable ex2) {
 						logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);

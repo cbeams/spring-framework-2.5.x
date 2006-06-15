@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,8 +16,8 @@
 
 package org.springframework.web.portlet;
 
-import javax.portlet.PortletRequest;
-import javax.portlet.PortletResponse;
+import javax.portlet.ActionRequest;
+import javax.portlet.ActionResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
@@ -81,7 +81,43 @@ public interface HandlerInterceptor {
 	 * that this interceptor has already dealt with the response itself.
 	 * @throws Exception in case of errors
 	 */
-	boolean preHandle(PortletRequest request, PortletResponse response, Object handler)
+	boolean preHandleAction(ActionRequest request, ActionResponse response, Object handler)
+	    throws Exception;
+
+	/**
+	 * Callback after completion of request processing, that is, after rendering
+	 * the view. Will be called on any outcome of handler execution, thus allows
+	 * for proper resource cleanup.
+	 * <p>Note: Will only be called if this interceptor's <code>preHandleAction</code>
+	 * method has successfully completed and returned <code>true</code>!
+	 * @param request current portlet request
+	 * @param response current portlet response
+	 * @param handler chosen handler to execute, for type and/or instance examination
+	 * @param ex exception thrown on handler execution, if any (only included as
+	 * additional context information for the case where a handler threw an exception;
+	 * request execution may have failed even when this argument is <code>null</code>)
+	 * @throws Exception in case of errors
+	 */
+	void afterActionCompletion(
+			ActionRequest request, ActionResponse response, Object handler, Exception ex)
+	    throws Exception;
+
+	/**
+	 * Intercept the execution of a handler. Called after HandlerMapping determined
+	 * an appropriate handler object, but before HandlerAdapter invokes the handler.
+	 * <p>DispatcherPortlet processes a handler in an execution chain, consisting
+	 * of any number of interceptors, with the handler itself at the end.
+	 * With this method, each interceptor can decide to abort the execution chain,
+	 * typically throwing an exception or writing a custom response.
+	 * @param request current portlet request
+	 * @param response current portlet response
+	 * @param handler chosen handler to execute, for type and/or instance evaluation
+	 * @return <code>true</code> if the execution chain should proceed with the
+	 * next interceptor or the handler itself. Else, DispatcherPortlet assumes
+	 * that this interceptor has already dealt with the response itself.
+	 * @throws Exception in case of errors
+	 */
+	boolean preHandleRender(RenderRequest request, RenderResponse response, Object handler)
 	    throws Exception;
 
 	/**
@@ -98,7 +134,7 @@ public interface HandlerInterceptor {
 	 * @param modelAndView the ModelAndView that the handler returned, can also be null
 	 * @throws Exception in case of errors
 	 */
-	void postHandle(
+	void postHandleRender(
 			RenderRequest request, RenderResponse response, Object handler, ModelAndView modelAndView)
 			throws Exception;
 
@@ -106,18 +142,18 @@ public interface HandlerInterceptor {
 	 * Callback after completion of request processing, that is, after rendering
 	 * the view. Will be called on any outcome of handler execution, thus allows
 	 * for proper resource cleanup.
-	 * <p>Note: Will only be called if this interceptor's <code>preHandle</code>
-	 * method has successfully completed and returned true!
+	 * <p>Note: Will only be called if this interceptor's <code>preHandleRender</code>
+	 * method has successfully completed and returned <code>true</code>!
 	 * @param request current portlet request
 	 * @param response current portlet response
 	 * @param handler chosen handler to execute, for type and/or instance examination
 	 * @param ex exception thrown on handler execution, if any (only included as
 	 * additional context information for the case where a handler threw an exception;
-	 * request execution may have failed even when this argument is null)
+	 * request execution may have failed even when this argument is <code>null</code>)
 	 * @throws Exception in case of errors
 	 */
-	void afterCompletion(
-			PortletRequest request, PortletResponse response, Object handler, Exception ex)
+	void afterRenderCompletion(
+			RenderRequest request, RenderResponse response, Object handler, Exception ex)
 			throws Exception;
 
 }
