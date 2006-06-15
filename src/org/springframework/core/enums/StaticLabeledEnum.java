@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.core.enums;
-
-
 
 /**
  * Base class for static type-safe labeled enum instances.
@@ -91,7 +89,7 @@ public abstract class StaticLabeledEnum extends AbstractLabeledEnum {
 	/**
 	 * Return the resolved type safe static enum instance.
 	 */
-	private Object readResolve() {
+	protected Object readResolve() {
 		return StaticLabeledEnumResolver.instance().getLabeledEnumByCode(getType(), getCode());
 	}
 
