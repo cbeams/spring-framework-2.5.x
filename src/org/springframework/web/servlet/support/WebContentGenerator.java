@@ -47,11 +47,15 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  */
 public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
-	private static final String METHOD_HEAD = "HEAD";
+	/** HTTP method "HEAD" */
+	public static final String METHOD_HEAD = "HEAD";
 
-	private static final String METHOD_GET = "GET";
+	/** HTTP method "GET" */
+	public static final String METHOD_GET = "GET";
 
-	private static final String METHOD_POST = "POST";
+	/** HTTP method "POST" */
+	public static final String METHOD_POST = "POST";
+
 
 	private static final String HEADER_PRAGMA = "Pragma";
 
