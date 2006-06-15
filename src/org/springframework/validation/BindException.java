@@ -198,6 +198,9 @@ public class BindException extends Exception implements BindingResult {
 		return this.bindingResult.getFieldValue(field);
 	}
 
+	public Class getFieldType(String field) {
+		return this.bindingResult.getFieldType(field);
+	}
 
 	public Object getTarget() {
 		return this.bindingResult.getTarget();

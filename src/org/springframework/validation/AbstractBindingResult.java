@@ -321,6 +321,7 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	}
 
 
+
 	/**
 	 * Return a model Map for the obtained state, exposing an Errors
 	 * instance as '{@link #MODEL_KEY_PREFIX MODEL_KEY_PREFIX} + objectName'
@@ -385,7 +386,7 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	 * @param field the field to check
 	 * @return the type of the field, or <code>null</code> if not determinable
 	 */
-	protected Class getFieldType(String field) {
+	public Class getFieldType(String field) {
 		return null;
 	}
 

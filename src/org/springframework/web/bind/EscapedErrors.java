@@ -174,6 +174,9 @@ public class EscapedErrors implements Errors {
 		return (value instanceof String ? HtmlUtils.htmlEscape((String) value) : value);
 	}
 
+	public Class getFieldType(String field) {
+		return this.source.getFieldType(field);
+	}
 
 	private ObjectError escapeObjectError(ObjectError source) {
 		if (source == null) {

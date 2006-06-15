@@ -90,6 +90,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private Colour favouriteColour;
 
+	private Boolean someBoolean;
 
 	public TestBean() {
 	}
@@ -112,7 +113,14 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.someProperties = someProperties;
 	}
 
+	public Boolean getSomeBoolean() {
+		return someBoolean;
+	}
 
+	public void setSomeBoolean(Boolean someBoolean) {
+		this.someBoolean = someBoolean;
+	}
+	
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}

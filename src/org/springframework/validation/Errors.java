@@ -256,4 +256,9 @@ public interface Errors {
 	 */
 	Object getFieldValue(String field);
 
+	/**
+	 * Returns the '<code>Class</code>' type of a given field. Works even when
+	 * the field value is '<code>null</code>'.
+	 */
+	Class getFieldType(String field);
 }

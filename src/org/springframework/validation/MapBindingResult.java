@@ -58,7 +58,7 @@ public class MapBindingResult extends AbstractBindingResult implements Serializa
 		return this.target;
 	}
 
-	protected Class getFieldType(String field) {
+	public Class getFieldType(String field) {
 		Object value = getActualFieldValue(field);
 		if (value != null) {
 			return value.getClass();

@@ -43,7 +43,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	}
 
 
-	protected Class getFieldType(String field) {
+	public Class getFieldType(String field) {
 		return getPropertyAccessor().getPropertyType(field);
 	}
 

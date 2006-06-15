@@ -59,7 +59,9 @@ public class BindStatus {
 
 	private Object value;
 
-	private PropertyEditor editor;
+    private Class valueType;
+
+    private PropertyEditor editor;
 
 	private List objectErrors;
 
@@ -113,6 +115,7 @@ public class BindStatus {
 				else {
 					this.objectErrors = this.errors.getFieldErrors(this.expression);
 					this.value = this.errors.getFieldValue(this.expression);
+					this.valueType = this.errors.getFieldType(this.expression);
 					this.editor = getCustomEditor(this.errors, this.expression);
 				}
 			}
@@ -137,7 +140,8 @@ public class BindStatus {
 
 			if (this.expression != null && !"*".equals(this.expression) && !this.expression.endsWith("*")) {
 				BeanWrapperImpl bw = new BeanWrapperImpl(target);
-				this.value = bw.getPropertyValue(this.expression);
+                this.valueType = bw.getPropertyType(this.expression);
+                this.value = bw.getPropertyValue(this.expression);
 			}
 
 			this.errorCodes = new String[0];
@@ -216,10 +220,19 @@ public class BindStatus {
 	 * already was a String.
 	 */
 	public Object getValue() {
-		return value;
+		return this.value;
 	}
 
 	/**
+	 * Gets the '<code>Class</code>' type of the field. Favour this instead of
+	 * '<code>getValue().getClass()</code>' since '<code>getValue()</code>' may
+	 * return '<code>null</code>'.
+	 */
+	public Class getValueType() {
+		return this.valueType;
+	}
+
+    /**
 	 * Return a suitable display value for the field, i.e. the stringified
 	 * value if not null, and an empty string in case of a null value.
 	 * <p>This value will be an HTML-escaped String if the original value
