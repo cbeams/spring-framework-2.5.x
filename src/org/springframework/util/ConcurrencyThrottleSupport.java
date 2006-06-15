@@ -103,13 +103,13 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 	/**
 	 * To be invoked before the main execution logic of concrete subclasses.
-	 * <p>
-	 * This implementation applies the concurrency throttle.
+	 * <p>This implementation applies the concurrency throttle.
 	 * @see #afterAccess() 
 	 */
 	protected void beforeAccess() {
 		if (this.concurrencyLimit == NO_CONCURRENCY) {
-			throw new IllegalStateException("Currently no invocations allowed - concurrency limit set to NO_CONCURRENCY");
+			throw new IllegalStateException(
+					"Currently no invocations allowed - concurrency limit set to NO_CONCURRENCY");
 		}
 		if (this.concurrencyLimit > 0) {
 			boolean debug = logger.isDebugEnabled();
