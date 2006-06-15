@@ -29,7 +29,6 @@ import javax.portlet.Portlet;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
-import javax.portlet.PortletResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
@@ -348,9 +347,17 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		}
 	}
 
+
 	public static class MyHandlerInterceptor1 implements HandlerInterceptor {
 
-		public boolean preHandle(PortletRequest request, PortletResponse response, Object handler)
+		public boolean preHandleAction(ActionRequest request, ActionResponse response, Object handler) {
+			return true;
+		}
+
+		public void afterActionCompletion(ActionRequest request, ActionResponse response, Object handler, Exception ex) {
+		}
+
+		public boolean preHandleRender(RenderRequest request, RenderResponse response, Object handler)
 		    throws PortletException {
 			if (request.getAttribute("test2-remove-never") != null) {
 				throw new PortletException("Wrong interceptor order");
@@ -361,7 +368,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 			return true;
 		}
 
-		public void postHandle(
+		public void postHandleRender(
 				RenderRequest request, RenderResponse response, Object handler, ModelAndView modelAndView)
 				throws PortletException {
 			if (request.getAttribute("test2-remove-post") != null) {
@@ -373,8 +380,8 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 			request.removeAttribute("test1-remove-post");
 		}
 
-		public void afterCompletion(
-				PortletRequest request, PortletResponse response, Object handler, Exception ex)
+		public void afterRenderCompletion(
+				RenderRequest request, RenderResponse response, Object handler, Exception ex)
 				throws PortletException {
 			if (request.getAttribute("test2-remove-after") != null) {
 				throw new PortletException("Wrong interceptor order");
@@ -383,9 +390,17 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		}
 	}
 
+
 	public static class MyHandlerInterceptor2 implements HandlerInterceptor {
 
-		public boolean preHandle(PortletRequest request, PortletResponse response, Object handler)
+		public boolean preHandleAction(ActionRequest request, ActionResponse response, Object handler) {
+			return true;
+		}
+
+		public void afterActionCompletion(ActionRequest request, ActionResponse response, Object handler, Exception ex) {
+		}
+
+		public boolean preHandleRender(RenderRequest request, RenderResponse response, Object handler)
 		    throws PortletException {
 			if (request.getAttribute("test1-remove-post") == null) {
 				throw new PortletException("Wrong interceptor order");
@@ -399,7 +414,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 			return true;
 		}
 
-		public void postHandle(
+		public void postHandleRender(
 				RenderRequest request, RenderResponse response, Object handler, ModelAndView modelAndView)
 				throws PortletException {
 			if ("true".equals(request.getParameter("noView"))) {
@@ -414,8 +429,8 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 			request.removeAttribute("test2-remove-post");
 		}
 
-		public void afterCompletion(
-				PortletRequest request, PortletResponse response, Object handler, Exception ex)
+		public void afterRenderCompletion(
+				RenderRequest request, RenderResponse response, Object handler, Exception ex)
 				throws Exception {
 			if (request.getAttribute("test1-remove-after") == null) {
 				throw new PortletException("Wrong interceptor order");
@@ -423,7 +438,8 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 			request.removeAttribute("test2-remove-after");
 		}
 	}
-	
+
+
 	public static class MultipartCheckingHandler implements MyHandler {
 
 		public void doSomething(PortletRequest request) throws PortletException, IllegalAccessException {
@@ -432,6 +448,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 			}
 		}
 	}
+
 
 	public static class MockMultipartResolver implements PortletMultipartResolver {
 
@@ -464,6 +481,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 			request.setAttribute("cleanedUp", Boolean.TRUE);
 		}
 	}
+
 
 	public static class TestApplicationListener implements ApplicationListener {
 

@@ -37,7 +37,7 @@ public class ParameterMappingInterceptorTests extends TestCase {
 		String value = "someValue";
 		request.setParameter(param, value);
 		assertNull(response.getRenderParameter(param));
-		boolean shouldProceed = interceptor.preHandle(request, response, handler);
+		boolean shouldProceed = interceptor.preHandleAction(request, response, handler);
 		assertTrue(shouldProceed);
 		assertNotNull(response.getRenderParameter(param));
 		assertEquals(value, response.getRenderParameter(param));
@@ -70,7 +70,7 @@ public class ParameterMappingInterceptorTests extends TestCase {
 		MockActionResponse response = new MockActionResponse();
 		request.setParameter(param, value);
 		assertNull(response.getRenderParameter(param));
-		boolean shouldProceed = interceptor.preHandle(request, response, handler);
+		boolean shouldProceed = interceptor.preHandleAction(request, response, handler);
 		assertTrue(shouldProceed);
 		assertNull(response.getRenderParameter(ParameterHandlerMapping.DEFAULT_PARAMETER_NAME));
 		assertNotNull(response.getRenderParameter(param));
