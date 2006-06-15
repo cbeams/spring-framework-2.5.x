@@ -5,24 +5,23 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
-     
-    <!--
+	<!--
 	<bean 
 		class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" />
 	-->
 	
 	<aop:aspectj-autoproxy/>
 	
-	<bean 
-		class="org.springframework.aop.aspectj.autoproxy.MultiplyReturnValue" >
-		<property name="multiple" value="2" />
+	<bean class="org.springframework.aop.aspectj.autoproxy.MultiplyReturnValue">
+		<property name="multiple" value="2"/>
 	</bean>
-		
-	<bean id="adrian" class="org.springframework.beans.TestBean">
-		<property name="name" value="adrian" />
-		<property name="age" value="34" />
+
+	<bean id="adrianParent" abstract="true">
+		<property name="name" value="adrian"/>
 	</bean>
-	
-	
-	
+
+	<bean id="adrian" class="org.springframework.beans.TestBean" parent="adrianParent">
+		<property name="age" value="34"/>
+	</bean>
+
 </beans>

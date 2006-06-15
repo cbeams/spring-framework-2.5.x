@@ -385,7 +385,8 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			}
 
 			// Check bean class whether we're dealing with a FactoryBean.
-			if (FactoryBean.class.isAssignableFrom(beanClass) && !BeanFactoryUtils.isFactoryDereference(name)) {
+			if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass) &&
+					!BeanFactoryUtils.isFactoryDereference(name)) {
 				// If it's a FactoryBean, we want to look at what it creates, not the factory class.
 				FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
 				return factoryBean.getObjectType();
