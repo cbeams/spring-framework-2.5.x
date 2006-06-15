@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -105,13 +105,13 @@ public interface HandlerInterceptor {
 	 * the view. Will be called on any outcome of handler execution, thus allows
 	 * for proper resource cleanup.
 	 * <p>Note: Will only be called if this interceptor's <code>preHandle</code>
-	 * method has successfully completed and returned true!
+	 * method has successfully completed and returned <code>true</code>!
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler chosen handler to execute, for type and/or instance examination
 	 * @param ex exception thrown on handler execution, if any (only included as
 	 * additional context information for the case where a handler threw an exception;
-	 * request execution may have failed even when this argument is null)
+	 * request execution may have failed even when this argument is <code>null</code>)
 	 * @throws Exception in case of errors
 	 */
 	void afterCompletion(
