@@ -58,6 +58,10 @@ import org.springframework.util.ClassUtils;
  * in combination with a JTA-aware ConnectionFactory that this message listener
  * container fetches its Connections from.
  *
+ * <p><b>NOTE:</b> Turn off the "cacheSessions" flag on JBoss 4.0 to make JMS
+ * message reception properly participate in XA transactions, where JBoss requires
+ * each listener thread to reobtain its JMS Session for each receive attempt.
+ *
  * <p>See the {@link AbstractMessageListenerContainer AbstractMessageListenerContainer}
  * javadoc for details on acknowledge modes and transaction options.
  *
@@ -71,6 +75,7 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 2.0
  * @see #setTransactionManager
+ * @see #setCacheSessions
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see javax.jms.MessageConsumer#receive(long)
  * @see SimpleMessageListenerContainer
@@ -102,6 +107,8 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	private TransactionTemplate transactionTemplate = new TransactionTemplate();
 
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
+
+	private boolean cacheSessions = true;
 
 
 	/**
@@ -219,6 +226,21 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		this.receiveTimeout = receiveTimeout;
 	}
 
+	/**
+	 * Specify whether to cache JMS Sessions in the listener threads,
+	 * using each Session for an unlimited number of message receive attempts.
+	 * Default is "true".
+	 * <p>Turn this flag off to reobtain the JMS Sessions for each receive operation:
+	 * This is usually just worth considering in the context of XA transactions,
+	 * where the JMS provider (or J2EE server) might only register itself with an
+	 * ongoing XA transaction in case of a freshly obtained JMS Session.
+	 * <p>Currently known providers that require this flag to be turned off
+	 * for proper XA transaction participation: JBoss 4.0
+	 */
+	public void setCacheSessions(boolean cacheSessions) {
+		this.cacheSessions = cacheSessions;
+	}
+
 
 	//-------------------------------------------------------------------------
 	// Implementation of AbstractMessageListenerContainer's template methods
@@ -270,7 +292,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		return createConsumer(session, destination);
 	}
 
-	protected void executeListener(final Session session, final MessageConsumer consumer) {
+	protected void executeListener(final Session session, final MessageConsumer consumer) throws JMSException {
 		if (this.transactionTemplate.getTransactionManager() != null) {
 			this.transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -298,11 +320,14 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	}
 
 	protected void doExecuteListener(Session session, MessageConsumer consumer) throws JMSException {
-		Message message =
-				(this.receiveTimeout < 0 ? consumer.receive() : consumer.receive(this.receiveTimeout));
+		Message message = receiveMessage(consumer, this.receiveTimeout);
 		if (message != null) {
 			doExecuteListener(session, message);
 		}
+	}
+
+	protected Message receiveMessage(MessageConsumer consumer, long receiveTimeout) throws JMSException {
+		return (receiveTimeout < 0 ? consumer.receive() : consumer.receive(receiveTimeout));
 	}
 
 	/**
@@ -363,16 +388,15 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 		public void run() {
 			try {
-				initResourcesIfNecessary();
 				if (maxMessagesPerTask < 0) {
 					while (isActive()) {
-						executeListener(this.session, this.consumer);
+						invokeListener();
 					}
 				}
 				else {
 					int messageCount = 0;
 					while (isActive() && messageCount < maxMessagesPerTask) {
-						executeListener(this.session, this.consumer);
+						invokeListener();
 						messageCount++;
 					}
 				}
@@ -389,6 +413,14 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 			}
 			else {
 				// We're shutting down completely.
+				clearResources();
+			}
+		}
+
+		private void invokeListener() throws JMSException {
+			initResourcesIfNecessary();
+			executeListener(this.session, this.consumer);
+			if (!cacheSessions) {
 				clearResources();
 			}
 		}
