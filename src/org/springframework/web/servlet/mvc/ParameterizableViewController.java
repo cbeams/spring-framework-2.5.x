@@ -94,7 +94,9 @@ public class ParameterizableViewController extends AbstractController {
 	/**
 	 * Return a ModelAndView object with the specified view name.
 	 */
-	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) {
+	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
 		return new ModelAndView(getViewName());
 	}
 
