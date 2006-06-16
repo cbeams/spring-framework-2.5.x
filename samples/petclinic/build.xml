@@ -38,10 +38,23 @@
 		<fileset dir="${spring.root}/lib/ojb">
 			<include name="db-ojb-*.jar"/>
 		</fileset>
+		<fileset dir="${spring.root}/lib/jpa">
+			<include name="persistence.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/asm">
+			<include name="asm-*.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/toplink">
+			<include name="toplink-essentials.jar"/>
+		</fileset>
+		<fileset dir="${spring.root}/lib/aspectj">
+			<include name="aspectjweaver.jar"/>
+		</fileset>
+		
 		<fileset dir="${spring.root}/dist">
 			<include name="spring.jar"/>
 		</fileset>
-
+	
 	</path>
 
 
@@ -95,8 +108,14 @@
 		</fileset>
 		<fileset dir="${spring.root}/lib/toplink">
 			<include name="toplink.jar"/>
+			<include name="toplink-essentials.jar"/>			
+			<include name="toplink-api.jar"/>						
 			<include name="xmlparserv2.jar"/>
 		</fileset>
+		<fileset dir="${spring.root}/lib/toplink">
+			<include name="toplink-essentials.jar"/>
+		</fileset>
+
 		<fileset dir="${spring.root}/dist">
 			<include name="spring-mock.jar"/>
 		</fileset>
@@ -147,7 +166,7 @@
 
 		<mkdir dir="${build.dir}"/>
 
-		<javac destdir="${build.dir}" source="1.3" target="1.3" debug="true"
+		<javac destdir="${build.dir}" source="1.5" target="1.5" debug="true"
 				deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
 			<classpath refid="master-classpath"/>
@@ -160,13 +179,26 @@
 				<include name="OJB*.*"/>
 				<include name="toplink*.*"/>
 			</fileset>
+			<!-- jpa meta-inf-->
+			<fileset dir="${src.dir}">
+				<include name="META-INF/*"/>
+			</fileset>
+			<fileset dir="${src.dir}">
+				<include name="**/jpa/**/*.xml"/>
+			</fileset>
 		</copy>
-
+		
+		<copy todir="${build.dir}" preservelastmodified="true">
+			<fileset dir="${src.dir}">
+				<include name="**/jpa/**/*.xml"/>
+			</fileset>
+		</copy>
+			
 		<mkdir dir="${weblib.dir}"/>
 
 		<jar jarfile="${weblib.dir}/${name}.jar" compress="true">
 			<fileset dir="${build.dir}">
-				<include name="**"/>
+				<include name="**/*"/>
 			</fileset>
 		</jar>
 
@@ -212,10 +244,18 @@
 			<fileset dir="${spring.root}/lib/toplink">
 				<include name="toplink.jar"/>
 				<include name="xmlparserv2.jar"/>
+				<include name="toplink-essentials.jar"/>			
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
 			</fileset>
+			<fileset dir="${spring.root}/lib/aspectj">
+				<include name="aspectj*.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/asm">
+				<include name="asm*.jar"/>
+			</fileset>
+			
 		</copy>
 
 	</target>
@@ -228,7 +268,7 @@
 		<mkdir dir="${docs.dir}"/>
 
 		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}" windowtitle="PetClinic"
-				source="1.3" author="true" version="true" use="true" packagenames="*">
+				source="1.5" author="true" version="true" use="true" packagenames="*">
 			<doctitle><![CDATA[<h1>PetClinic</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Ken Krebs and Juergen Hoeller, 2003-2004.</i>]]></bottom>
 			<classpath refid="master-classpath"/>
@@ -250,6 +290,13 @@
 
 		<mkdir dir="${dist.dir}"/>
 
+		<copy todir="${war.dir}" preservelastmodified="true">
+			<!-- tomcat meta-inf-->
+			<fileset dir="tomcat">
+				<include name="META-INF/*.xml"/>
+			</fileset>
+		</copy>
+
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
 			<include name="*"/>
 			<include name="docs/**"/>
@@ -257,10 +304,14 @@
 			<include name="WEB-INF/*.*"/>
 			<exclude name="WEB-INF/web.xml"/>
 			<include name="WEB-INF/classes/*.*"/>
+			<include name="WEB-INF/classes/META-INF/**"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
+			<include name="META-INF/*"/>			
 			<exclude name="**/.*"/>
 			<exclude name="WEB-INF/geronimo-web.xml"/>
+			
+
 		</war>
 
 	</target>
@@ -289,6 +340,7 @@
 			<exclude name="**/.*"/>
 			<exclude name="WEB-INF/lib/commons-logging.jar"/>
 			<exclude name="WEB-INF/lib/cglib*.jar"/>
+			
 		</war>
 
 	</target>
@@ -337,6 +389,12 @@
 			<classpath refid="test-classpath"/>
 		</javac>
 
+		<copy todir="${build.dir}" preservelastmodified="true">
+			<fileset dir="${src.dir}">
+				<include name="META-INF/*"/>
+			</fileset>
+		</copy>
+
 		<junit printsummary="true" fork="yes">
 			<formatter type="xml"/>
 			<test name="org.springframework.samples.petclinic.OwnerTests" todir="${testreports.dir}"/>
@@ -344,6 +402,7 @@
 			<test name="org.springframework.samples.petclinic.hibernate.HibernateClinicTests" todir="${testreports.dir}"/>
 			<test name="org.springframework.samples.petclinic.ojb.PersistenceBrokerClinicTests" todir="${testreports.dir}"/>
 			<test name="org.springframework.samples.petclinic.toplink.TopLinkClinicTests" todir="${testreports.dir}"/>
+			<test name="org.springframework.samples.petclinic.jpa.EntityManagerClinicTests" todir="${testreports.dir}"/>			
 			<classpath path="${build.dir}"/>
 			<classpath path="${src.dir}"/>
 			<classpath path="${testbuild.dir}"/>
