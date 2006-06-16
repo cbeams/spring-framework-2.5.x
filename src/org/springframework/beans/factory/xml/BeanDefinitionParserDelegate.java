@@ -835,9 +835,7 @@ public class BeanDefinitionParserDelegate {
 			}
 			if (StringUtils.hasText(typeClassName)) {
 				try {
-					Class typeClass = ClassUtils.forName(
-							typeClassName, getReaderContext().getReader().getBeanClassLoader());
-					return new TypedStringValue(value, typeClass);
+					return buildTypedStringValue(value, typeClassName);
 				}
 				catch (ClassNotFoundException ex) {
 					error("Type class [" + typeClassName + "] not found for <value> element", ele, ex);
@@ -1015,16 +1013,15 @@ public class BeanDefinitionParserDelegate {
 		if (!StringUtils.hasText(defaultTypeClassName)) {
 			return attributeValue;
 		}
-		Class type = null;
 		try {
-			type = ClassUtils.forName(defaultTypeClassName, getReaderContext().getReader().getBeanClassLoader());
+			return buildTypedStringValue(attributeValue, defaultTypeClassName);
 		}
-		catch (ClassNotFoundException e) {
-			error("Unable to load class '" + defaultTypeClassName + "' for Map key/value type.", mapElement, e);
-			return null;
+		catch (ClassNotFoundException ex) {
+			error("Unable to load class '" + defaultTypeClassName + "' for Map key/value type", mapElement, ex);
+			return attributeValue;
 		}
-		return new TypedStringValue(attributeValue, type);
 	}
+
 	/**
 	 * Parse a key sub-element of a map element.
 	 */
@@ -1129,6 +1126,17 @@ public class BeanDefinitionParserDelegate {
 			return null;
 		}
 		return innerDefinition;
+	}
+
+	protected TypedStringValue buildTypedStringValue(String value, String targetTypeName)
+			throws ClassNotFoundException {
+
+		ClassLoader classLoader = getReaderContext().getReader().getBeanClassLoader();
+		if (classLoader != null) {
+			Class targetType = ClassUtils.forName(targetTypeName, classLoader);
+			return new TypedStringValue(value, targetType);
+		}
+		return new TypedStringValue(value, targetTypeName);
 	}
 
 	private void error(String message, Object source) {

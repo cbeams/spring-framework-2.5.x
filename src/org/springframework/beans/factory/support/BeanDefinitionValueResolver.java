@@ -135,10 +135,10 @@ class BeanDefinitionValueResolver {
 			// Convert value to target type here.
 			TypedStringValue typedStringValue = (TypedStringValue) value;
 			try {
-				return this.beanFactory.doTypeConversionIfNecessary(
-						typedStringValue.getValue(), typedStringValue.getTargetType());
+				Class resolvedTargetType = resolveTargetType(typedStringValue);
+				return this.beanFactory.doTypeConversionIfNecessary(typedStringValue.getValue(), resolvedTargetType);
 			}
-			catch (TypeMismatchException ex) {
+			catch (Throwable ex) {
 				// Improve the message by showing the context.
 				throw new BeanCreationException(
 						this.beanDefinition.getResourceDescription(), this.beanName,
@@ -149,6 +149,13 @@ class BeanDefinitionValueResolver {
 			// No need to resolve value...
 			return value;
 		}
+	}
+
+	protected Class resolveTargetType(TypedStringValue value) throws ClassNotFoundException {
+		if (value.hasTargetType()) {
+			return value.getTargetType();
+		}
+		return value.resolveTargetType(this.beanFactory.getBeanClassLoader());
 	}
 
 	/**

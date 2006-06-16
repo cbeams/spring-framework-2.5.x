@@ -40,6 +40,8 @@ import org.springframework.beans.factory.config.SetFactoryBean;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.io.ClassPathResource;
 
+import net.sf.hibernate.FlushMode;
+
 /**
  * Tests for collections in XML bean definitions.
  *
@@ -384,6 +386,14 @@ public class XmlBeanCollectionTests extends TestCase {
 		assertEquals("val1", map.get("key1"));
 		assertEquals("val2", map.get("key2"));
 		assertEquals("val3", map.get("key3"));
+	}
+
+	public void testEnumSetFactory() throws Exception {
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
+		Set set = (Set) xbf.getBean("enumSetFactory");
+		assertTrue(set.size() == 2);
+		assertTrue(set.contains(FlushMode.NEVER));
+		assertTrue(set.contains(FlushMode.COMMIT));
 	}
 
 
