@@ -17,9 +17,10 @@
 		<property name="persistenceXmlLocation"
 			value="classpath:META-INF/petclinic-persistence.xml" />
 		
+		<!-- 
 		<property name="persistenceUnitRootLocation" 
 			value="file:/c:/work/spring/spring/samples/petclinic/.classes" />
-
+		 -->
 		
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter">
