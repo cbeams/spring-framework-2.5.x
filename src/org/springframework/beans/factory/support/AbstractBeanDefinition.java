@@ -262,7 +262,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 
 	/**
-	 * Return whether this definitions specifies a bean class.
+	 * Return whether this definition specifies a bean class.
 	 */
 	public boolean hasBeanClass() {
 		return (this.beanClass instanceof Class);
