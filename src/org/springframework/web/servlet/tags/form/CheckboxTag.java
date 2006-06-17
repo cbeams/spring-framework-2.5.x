@@ -85,7 +85,11 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 
 		Class valueType = getBindStatus().getValueType();
 		if (Boolean.class.equals(valueType) || boolean.class.equals(valueType)) {
-			Boolean booleanValue = (boundValue != null ? (Boolean)boundValue : Boolean.FALSE);
+			// the concrete type may not be a Boolean - can be String
+			if (boundValue instanceof String) {
+				boundValue = Boolean.valueOf((String) boundValue);
+			}
+			Boolean booleanValue = (boundValue != null ? (Boolean) boundValue : Boolean.FALSE);
 			renderFromBoolean(booleanValue, tagWriter);
 		}
 		else {
