@@ -2343,9 +2343,9 @@
         container/application server). Hooking
         <literal>ClassTransformers</literal> through a JDK 5.0 <ulink
         url="http://java.sun.com/j2se/1.5.0/docs/api/java/lang/instrument/package-summary.html">agent</ulink>
-        is not efficient - there can be only one agent which works against the
-        entire virtual machine and inspects *every* class that is loaded -
-        something undesirable in a server enviroment.</para>
+        is not efficient - the agents works against the entire virtual machine
+        and inspects *every* class that is loaded - something undesirable in a
+        server enviroment.</para>
 
         <para>Spring provides special LoadTimeWeaver for various environments,
         allowing ClassTransformers to be applied only per classloader and not
@@ -2424,7 +2424,7 @@
       <interfacename>EntityManagerFactory</interfacename> via dependency
       injection. Such a DAO can be coded against plain JPA and work with the
       given <interfacename>EntityManagerFactory</interfacename> or through
-      Spring's <classname>JpaTemplate</classname> (recommended):</para>
+      Spring's <classname>JpaTemplate</classname>:</para>
 
       <programlisting>&lt;beans&gt;
 ...
@@ -2438,7 +2438,7 @@
   
     private EntityManagerFactory entityManagerFactory;
 
-    public void setEntityManagerFactory(EntityManagerFactory emf) {
+    public void setEntityManagerFactory(EntityManagerFactory emf) {a
         this.entityManagerFactoryeManagerFactory = emf;
     }
 
@@ -2460,16 +2460,16 @@
 
       <para>The <interfacename>JpaCallback</interfacename> implementation
       allows any type of JPA data access. The
-      <classname>JpaTemplate</classname> will ensure that EntityManagers are
-      properly opened and closed and automatically participate in
-      transactions. Moreover, the <classname>JpaTemplate</classname> properly
-      handles exceptions, making sure resources are cleaned up and the
-      approapriate transactions rolled back. The template instances are
-      thread-safe and reusable and they can be kept as instance variable of
-      the enclosing class. Note that <classname>JpaTemplate</classname> offers
-      single-step actions such as find, load, merge, etc along with
-      alternative convenience methods that can replace one line callback
-      implementations.</para>
+      <classname>JpaTemplate</classname> will ensure that
+      <literal>EntityManager</literal>s are properly opened and closed and
+      automatically participate in transactions. Moreover, the
+      <classname>JpaTemplate</classname> properly handles exceptions, making
+      sure resources are cleaned up and the approapriate transactions rolled
+      back. The template instances are thread-safe and reusable and they can
+      be kept as instance variable of the enclosing class. Note that
+      <classname>JpaTemplate</classname> offers single-step actions such as
+      find, load, merge, etc along with alternative convenience methods that
+      can replace one line callback implementations.</para>
 
       <para>Furthermore, Spring provides a convenient
       <classname>JpaDaoSupport</classname> base class that provides the
@@ -2498,17 +2498,19 @@
       <title>Implementing DAOs based on plain JPA</title>
 
       <para>It is possible to write code against the plain JPA without using
-      any Spring dependencies, directly using an injected
-      <interfacename>EntityManagerFactory</interfacename>. A corresponding DAO
-      implementation might look like this:</para>
+      any Spring dependencies, using an injected
+      <interfacename>EntityManagerFactory</interfacename> or
+      <literal>EntityManager</literal>. Note that Spring can understand
+      <literal>@PersistenceUnit </literal>and
+      <literal>@PersistenceContext</literal> annotations both at field and
+      method level if
+      <literal>PersistenceAnnotationBeanPostProcessor</literal> is enabled. A
+      corresponding DAO implementation might look like this:</para>
 
       <programlisting>public class ProductDaoImpl implements ProductDao {
 
+    @PersistenceUnit
     private EntityManagerFactory entityManagerFactory;
-
-    public void setEntityManagerFactory(entityManagerFactory emf) {
-        this.entityManagerFactory = emf;
-    }
 
     public Collection loadProductsByCategory(String category) {
         EntityManager em = this.entityManagerFactory.getEntityManager();
@@ -2524,42 +2526,99 @@
     }
 }</programlisting>
 
-      <para>The DAO above, still follows the Dependency Injection pattern and
-      still fits nicely into a Spring application context, just like it would
-      if coded against Spring's <classname>JpaTemplate</classname>:</para>
+      <para>The DAO above has no dependency on Spring and still fits nicely
+      into a Spring application context, just like it would if coded against
+      Spring's <classname>JpaTemplate</classname>. Moreover, the DAO takes
+      advantage of annotations to require the injection of the default
+      entityManagerFactory:</para>
 
       <programlisting>&lt;beans&gt;
   ...
+  &lt;!-- JPA annotations bean post processor --&gt;
+  &lt;bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor"/&gt;
 
-  &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
-    &lt;property name="entityManagerFactory" ref="myEMF"/&gt;
-  &lt;/bean&gt;
+  &lt;bean id="myProductDao" class="product.ProductDaoImpl"/&gt;
 
 &lt;/beans&gt;</programlisting>
 
       <para>The main issue with such DAOs is that it always gets a new
-      PersistenceManager from the factory. In order to access a Spring-managed
-      transactional <interfacename>EntityManager</interfacename> (aware of the
-      ongoing transation), consider using
-      <classname>SharedEntityManagerCreator</classname>. The main advantage of
-      this DAO style is that it depends on JPA API only; no import of any
-      Spring class is required. This is of course appealing from a
-      non-invasiveness perspective, and might feel more natural to JPA
-      developers. However, the DAO throws plain
-      <classname>JPAException</classname> (which is unchecked, so does not
-      have to be declared or caught), which means that callers can only treat
-      exceptions as generally fatal - unless they want to depend on JPA's own
-      exception structure. Catching specific causes such as an optimistic
-      locking failure is not possible without tying the caller to the
-      implementation strategy. This tradeoff might be acceptable to
+      <literal>EntityManage</literal> from the factory. This can be easily
+      overcome by requesting an EntityManager to be injected instead of the
+      factory:</para>
+
+      <programlisting>public class ProductDaoImpl implements ProductDao {
+
+    private EntityManager em;
+
+    @PersistenceContext
+    public void setEntityManager(EntityManager em) {
+        this.em = em;
+    }
+
+    public Collection loadProductsByCategory(String category) {
+       Query query = em.createQuery("from Product");
+       return result = query.execute(category);
+    }
+}</programlisting>
+
+      <para>The injected <literal>EntityManager</literal> is Spring-managed
+      (aware of the ongoing transaction). It is important to note that even
+      though the new implementation prefers method level injection (of an
+      <literal>EntityManager</literal> instead of an
+      <literal>EntityManagerFactory)</literal>, no change is required in the
+      application context xml due to annotation usage.</para>
+
+      <para>The main advantage of this DAO style is that it depends on Java
+      Persistence API; no import of any Spring class is required. Moreover, as
+      the JPA annotations are understood, the injections are applied
+      automatically by the Spring container. This is of course appealing from
+      a non-invasiveness perspective, and might feel more natural to JPA
+      developers.</para>
+    </section>
+
+    <section>
+      <title>Exception Translation</title>
+
+      <para>However, the DAO throws plain
+      <literal>PersistenceException</literal> (which is unchecked, so does not
+      have to be declared or caught) but also
+      <literal>IllegalArgumentException</literal> and
+      <literal>IllegalStateException</literal>, which means that callers can
+      only treat exceptions as generally fatal - unless they want to depend on
+      JPA's own exception structure. Catching specific causes such as an
+      optimistic locking failure is not possible without tying the caller to
+      the implementation strategy. This tradeoff might be acceptable to
       applications that are strongly JPA-based and/or do not need any special
-      exception treatment. In summary: DAOs can be implemented based on plain
-      JPA API, while still being able to participate in Spring-managed
-      transactions. This might in particular appeal to people already familar
-      with JPA, feeling more natural to them. However, such DAOs will throw
-      plain <classname>JPAException</classname>; conversion to Spring's
-      <classname>DataAccessException</classname> would have to happen
-      explicitly (if desired).</para>
+      exception treatment. However, Spring offers a solution allowing
+      exception translation to be applied transparently through the
+      <literal>@Repository</literal> annotation:</para>
+
+      <programlisting>@Repository
+public class ProductDaoImpl implements ProductDao {
+ ...
+}</programlisting>
+
+      <programlisting>&lt;beans&gt;
+  ...
+  &lt;!-- Exception translation bean post processor --&gt;
+  &lt;bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/&gt;
+
+  &lt;bean id="myProductDao" class="product.ProductDaoImpl"/&gt;
+
+&lt;/beans&gt;</programlisting>
+
+      <para>The postprocessor will automatically look for all exception
+      translators (implementations of
+      <literal>PersistenceExceptionTranslator</literal> interface) and advice
+      all beans maked with the <literal>@Repository </literal>annotation so
+      that the discovered translators can intercept and apply the approapriate
+      translation on the thrown exceptions.</para>
+
+      <para>In summary: DAOs can be implemented based on plain Java
+      Persistence API and annotations, while still being able to benefit from
+      Spring-managed transactions and injections and as well as transparent
+      exception conversion (if desired) to Spring's or custom exception
+      hierarchies.</para>
     </section>
   </section>
 
@@ -2606,7 +2665,7 @@
     <interfacename>DataSource</interfacename>, provided that the registered
     <interfacename>JpaDialect</interfacename> supports retrieval of the
     underlying JDBC <interfacename>Connection</interfacename>. Out of the box,
-    Spring provides dialects for the Toplink, Kodo, and Hibernate JPA
+    Spring provides dialects for the Toplink and Hibernate JPA
     implementations. See the next section for details on the
     <interfacename>JpaDialect</interfacename> mechanism.</para>
   </section>
@@ -2639,8 +2698,8 @@
       </listitem>
 
       <listitem>
-        <para>advanced translation of <literal>JPAExceptions</literal> to
-        Spring <literal>DataAccessExceptions</literal></para>
+        <para>advanced translation of <literal>PersistenceExceptions</literal>
+        to Spring <literal>DataAccessExceptions</literal></para>
       </listitem>
     </itemizedlist>
 
@@ -2651,7 +2710,7 @@
     the approapriate dialect has to be specified.</para>
 
     <para>See the <interfacename>JpaDialect</interfacename> javadoc for more
-    details on its operations and how they are used within Spring's JPA
+    details of its operations and how they are used within Spring's JPA
     support.</para>
   </section>
 </chapter>
