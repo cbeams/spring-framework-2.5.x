@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<aspectj>
+
+	<aspects>
+        <aspect name="org.springframework.test.aj.TestAspect"/>
+        <aspect name="org.springframework.test.aj.FactoryAdvice"/>
+    </aspects>
+
+</aspectj>
