@@ -53,12 +53,12 @@ public class FormTag extends AbstractHtmlElementTag {
 	public static final String COMMAND_NAME_VARIABLE_NAME = "org.springframework.web.servlet.tags.form.FormTag.commandName";
 
 	/**
-	 * The default HTTP method using which form values are sent to the server.
+	 * The default HTTP method using which form values are sent to the server: "post".
 	 */
-	private static final String DEFAULT_METHOD = "POST";
+	private static final String DEFAULT_METHOD = "post";
 
 	/**
-	 * The default command object name.
+	 * The default command object name: "command".
 	 */
 	public static final String DEFAULT_COMMAND_NAME = "command";
 
