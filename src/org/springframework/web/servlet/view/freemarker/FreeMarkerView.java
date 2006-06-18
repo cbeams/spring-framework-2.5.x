@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -140,7 +140,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 		}
 
 		this.servletContextHashModel = new ServletContextHashModel(
-						new GenericServletAdapter(getServletContext()), ObjectWrapper.DEFAULT_WRAPPER);
+				new GenericServletAdapter(getServletContext()), ObjectWrapper.DEFAULT_WRAPPER);
 
 		checkTemplate();
 	}
@@ -195,7 +195,9 @@ public class FreeMarkerView extends AbstractTemplateView {
 	protected void renderMergedTemplateModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		response.setContentType(getContentType());
+		if (response.getContentType() == null) {
+			response.setContentType(getContentType());
+		}
 		exposeHelpers(model, request);
 		doRender(model, request, response);
 	}
@@ -236,8 +238,8 @@ public class FreeMarkerView extends AbstractTemplateView {
 		exposeModelAsRequestAttributes(model, request);
 		model.put(FreemarkerServlet.KEY_APPLICATION, servletContextHashModel);
 		model.put(FreemarkerServlet.KEY_JSP_TAGLIBS, taglibFactory);
-		model.put(FreemarkerServlet.KEY_REQUEST, new HttpRequestHashModel(request, response,
-						ObjectWrapper.DEFAULT_WRAPPER));
+		model.put(FreemarkerServlet.KEY_REQUEST,
+				new HttpRequestHashModel(request, response, ObjectWrapper.DEFAULT_WRAPPER));
 		if (logger.isDebugEnabled()) {
 			logger.debug("Rendering FreeMarker template [" + getUrl() + "] in FreeMarkerView '" + getBeanName() + "'");
 		}
@@ -293,6 +295,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 		template.process(model, response.getWriter());
 	}
 
+
 	/**
 	 * Simple adapter class that extends {@link GenericServlet} and exposes the currently
 	 * active {@link ServletContext}. Needed for JSP access in FreeMarker.
@@ -313,4 +316,5 @@ public class FreeMarkerView extends AbstractTemplateView {
 			return this.servletContext;
 		}
 	}
+
 }
