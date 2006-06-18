@@ -47,10 +47,8 @@ public abstract class JmsAccessor implements InitializingBean {
 	private static final Constants constants = new Constants(Session.class);
 
 
-    /**
-     * Logger available to subclasses.
-     */
-    protected final Log logger = LogFactory.getLog(getClass());
+	/** Logger available to subclasses */
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private ConnectionFactory connectionFactory;
 
@@ -61,9 +59,7 @@ public abstract class JmsAccessor implements InitializingBean {
 
 	/**
 	 * Set the connection factory used for obtaining JMS connections.
-     * <p>Do not set this to <code>null</code> or this class'
-     * {@link #afterPropertiesSet() initialization} will throw an {@link IllegalArgumentException}.
-     * @param connectionFactory connection factory used for obtaining JMS connections
+	 * @param connectionFactory connection factory used for obtaining JMS connections
 	 */
 	public void setConnectionFactory(ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
@@ -92,10 +88,10 @@ public abstract class JmsAccessor implements InitializingBean {
 
 	/**
 	 * Return whether the JMS {@link Session sessions} used for sending
-     * a message are transacted.
-     * @return <code>true</code> if the JMS {@link Session sessions} used
-     * for sending a message are transacted
-     * @see #setSessionTransacted(boolean) 
+	 * a message are transacted.
+	 * @return <code>true</code> if the JMS {@link Session sessions} used
+	 * for sending a message are transacted
+	 * @see #setSessionTransacted(boolean)
 	 */
 	public boolean isSessionTransacted() {
 		return sessionTransacted;
@@ -104,10 +100,9 @@ public abstract class JmsAccessor implements InitializingBean {
 	/**
 	 * Set the JMS acknowledgement mode by the name of the corresponding constant
 	 * in the JMS {@link Session} interface, e.g. "CLIENT_ACKNOWLEDGE".
-     * <p>If you want to use vendor-specific extensions to the acknowledgment mode,
-     * use {@link #setSessionAcknowledgeModeName(String)} instead.
+	 * <p>If you want to use vendor-specific extensions to the acknowledgment mode,
+	 * use {@link #setSessionAcknowledgeModeName(String)} instead.
 	 * @param constantName the name of the {@link Session} acknowledge mode constant
-     * 
 	 * @see javax.jms.Session#AUTO_ACKNOWLEDGE
 	 * @see javax.jms.Session#CLIENT_ACKNOWLEDGE
 	 * @see javax.jms.Session#DUPS_OK_ACKNOWLEDGE
@@ -119,14 +114,14 @@ public abstract class JmsAccessor implements InitializingBean {
 
 	/**
 	 * Set the JMS acknowledgement mode that is used when creating a JMS
-     * {@link Session} to send a message.
-     * <p>Default is {@link Session#AUTO_ACKNOWLEDGE}.
-     * <p>Vendor-specific extensions to the acknowledgment mode can be set here as well.
+	 * {@link Session} to send a message.
+	 * <p>Default is {@link Session#AUTO_ACKNOWLEDGE}.
+	 * <p>Vendor-specific extensions to the acknowledgment mode can be set here as well.
 	 * <p>Note that that inside an EJB the parameters to
 	 * create(Queue/Topic)Session(boolean transacted, int acknowledgeMode) method
-     * are not taken into account. Depending on the transaction context in the EJB,
-     * the container makes its own decisions on these values. See section 17.3.5
-     * of the EJB spec.
+	 * are not taken into account. Depending on the transaction context in the EJB,
+	 * the container makes its own decisions on these values. See section 17.3.5
+	 * of the EJB spec.
 	 * @param sessionAcknowledgeMode the acknowledgement mode
 	 * @see javax.jms.Session#AUTO_ACKNOWLEDGE
 	 * @see javax.jms.Session#CLIENT_ACKNOWLEDGE
@@ -139,8 +134,8 @@ public abstract class JmsAccessor implements InitializingBean {
 
 	/**
 	 * Return the acknowledgement mode for JMS {@link Session sessions}.
-     * @return the acknowledgement mode for JMS {@link Session sessions}.
-     * @see #setSessionAcknowledgeMode(int) 
+	 * @return the acknowledgement mode for JMS {@link Session sessions}.
+	 * @see #setSessionAcknowledgeMode(int)
 	 */
 	public int getSessionAcknowledgeMode() {
 		return sessionAcknowledgeMode;
@@ -157,7 +152,8 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * Convert the specified checked {@link javax.jms.JMSException JMSException} to
 	 * a Spring runtime {@link org.springframework.jms.JmsException JmsException}
 	 * equivalent.
-	 * <p>Default implementation delegates to the {@link org.springframework.jms.support.JmsUtils#convertJmsAccessException} method.
+	 * <p>Default implementation delegates to the
+	 * {@link org.springframework.jms.support.JmsUtils#convertJmsAccessException} method.
 	 * @param ex the original checked {@link JMSException} to convert
 	 * @return the Spring runtime {@link JmsException} wrapping <code>ex</code>
 	 * @see org.springframework.jms.support.JmsUtils#convertJmsAccessException
