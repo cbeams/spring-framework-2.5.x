@@ -101,6 +101,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** ClassLoader to resolve bean names with, if necessary */
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	/** Whether to cache bean metadata or rather reobtain it for every access */
 	private boolean cacheBeanMetadata = true;
 
 	/** Custom PropertyEditors to apply to the beans of this factory */
