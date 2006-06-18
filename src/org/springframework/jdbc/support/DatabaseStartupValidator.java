@@ -126,14 +126,7 @@ public class DatabaseStartupValidator implements InitializingBean {
 			}
 			finally {
 				JdbcUtils.closeStatement(stmt);
-				if (con != null) {
-					try {
-						con.close();
-					}
-					catch (SQLException ex) {
-						// ignore
-					}
-				}
+				JdbcUtils.closeConnection(con);
 			}
 
 			try {
@@ -147,11 +140,13 @@ public class DatabaseStartupValidator implements InitializingBean {
 
 		if (validated) {
 			float duration = (System.currentTimeMillis() - beginTime) / 1000;
-			logger.info("Database startup detected after " + duration + " seconds");
+			if (logger.isInfoEnabled()) {
+				logger.info("Database startup detected after " + duration + " seconds");
+			}
 		}
 		else {
-			throw new CannotGetJdbcConnectionException("Database has not started up within " +
-			                                           this.timeout + " seconds", latestEx);
+			throw new CannotGetJdbcConnectionException(
+					"Database has not started up within " + this.timeout + " seconds", latestEx);
 		}
 	}
 
