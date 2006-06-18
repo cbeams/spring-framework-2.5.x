@@ -80,9 +80,7 @@ public class PersistenceExceptionTranslationPostProcessor extends InstantiationA
 		// Find all translators, being careful not to activate FactoryBeans
 		List<PersistenceExceptionTranslator> pets = new LinkedList<PersistenceExceptionTranslator>();
 		for (String petBeanName : lbf.getBeanNamesForType(PersistenceExceptionTranslator.class, false, false)) {
-			if (lbf.isSingleton(petBeanName)) {
-				pets.add((PersistenceExceptionTranslator) lbf.getBean(petBeanName));
-			}
+			pets.add((PersistenceExceptionTranslator) lbf.getBean(petBeanName));
 		}
 		pets = validateAndFilter(pets);
 		ChainedPersistenceExceptionTranslator cpet = new ChainedPersistenceExceptionTranslator();
@@ -95,8 +93,8 @@ public class PersistenceExceptionTranslationPostProcessor extends InstantiationA
 	}
 
 	public int getOrder() {
-		// This should run after all other post processors, so
-		// that it can just add an advisor to existing proxies rather than double proxy
+		// This should run after all other post-processors, so that it can just add
+		// an advisor to existing proxies rather than double proxy.
 		return LOWEST_PRECEDENCE;
 	}
 
