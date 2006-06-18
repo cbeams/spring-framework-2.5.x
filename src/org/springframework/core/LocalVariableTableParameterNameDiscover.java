@@ -56,8 +56,8 @@ public class LocalVariableTableParameterNameDiscover implements ParameterNameDis
 		catch (IOException ex) {
 			// We couldn't load the class file, which is not fatal as it
 			// simply means this method of discovering parameter names won't work.
-			if (logger.isInfoEnabled()) {
-				logger.info("IOException whilst attempting to read .class file for class [" +
+			if (logger.isDebugEnabled()) {
+				logger.debug("IOException whilst attempting to read .class file for class [" +
 						method.getDeclaringClass().getName() +
 						"] - unable to determine parameter names for method " +
 						method.getName(),ex);
@@ -80,8 +80,8 @@ public class LocalVariableTableParameterNameDiscover implements ParameterNameDis
 		catch (IOException ex) {
 			// We couldn't load the class file, which is not fatal as it
 			// simply means this method of discovering parameter names won't work.
-			if (logger.isInfoEnabled()) {
-				logger.info("IOException whilst attempting to read .class file for class [" +
+			if (logger.isDebugEnabled()) {
+				logger.debug("IOException whilst attempting to read .class file for class [" +
 						ctor.getDeclaringClass().getName() + 
 						"] - unable to determine parameter names for constructor",ex);
 			}
@@ -92,9 +92,9 @@ public class LocalVariableTableParameterNameDiscover implements ParameterNameDis
 	/**
 	 * Visit the given method and discover its parameter names.
 	 */
-	private ParameterNameDiscoveringVisitor visitMethod(Method m) throws IOException {
-		ClassReader reader = new ClassReader(m.getDeclaringClass().getName());
-		FindMethodParamNamesClassVisitor classVisitor = new FindMethodParamNamesClassVisitor(m);
+	private ParameterNameDiscoveringVisitor visitMethod(Method method) throws IOException {
+		ClassReader reader = new ClassReader(method.getDeclaringClass().getName());
+		FindMethodParamNamesClassVisitor classVisitor = new FindMethodParamNamesClassVisitor(method);
 		reader.accept(classVisitor,false);
 		return classVisitor;
 	}
@@ -102,9 +102,9 @@ public class LocalVariableTableParameterNameDiscover implements ParameterNameDis
 	/**
 	 * Visit the given constructor and discover its parameter names.
 	 */
-	private ParameterNameDiscoveringVisitor visitConstructor(Constructor c) throws IOException {
-		ClassReader reader = new ClassReader(c.getDeclaringClass().getName());
-		FindConstructorParamNamesClassVisitor classVisitor = new FindConstructorParamNamesClassVisitor(c);
+	private ParameterNameDiscoveringVisitor visitConstructor(Constructor ctor) throws IOException {
+		ClassReader reader = new ClassReader(ctor.getDeclaringClass().getName());
+		FindConstructorParamNamesClassVisitor classVisitor = new FindConstructorParamNamesClassVisitor(ctor);
 		reader.accept(classVisitor,false);
 		return classVisitor;
 	}
@@ -117,9 +117,13 @@ public class LocalVariableTableParameterNameDiscover implements ParameterNameDis
 	private static abstract class ParameterNameDiscoveringVisitor extends EmptyVisitor {
 
 		private String methodNameToMatch;
+
 		private String descriptorToMatch;
+
 		private int numParamsExpected;
+
 		private boolean foundTargetMember = false;
+
 		private String[] parameterNames;
 		
 		public ParameterNameDiscoveringVisitor(String name,int numParams) {
@@ -186,8 +190,11 @@ public class LocalVariableTableParameterNameDiscover implements ParameterNameDis
 	private static class LocalVariableTableVisitor extends EmptyVisitor {
 
 		private ParameterNameDiscoveringVisitor memberVisitor;
+
 		private int numParameters;
+
 		private String[] parameterNames;
+
 		private boolean hasLVTInfo = false;
 		
 		public LocalVariableTableVisitor(ParameterNameDiscoveringVisitor memberVisitor, int numParams) {
@@ -198,7 +205,7 @@ public class LocalVariableTableParameterNameDiscover implements ParameterNameDis
 		
 		public void visitLocalVariable(String name, String description, String signature, Label start, Label end, int index) {
 			this.hasLVTInfo = true;
-			if ( (index > 0) && (index <= this.numParameters)) {
+			if (index > 0 && index <= this.numParameters) {
 				this.parameterNames[index-1] = name;
 			}
 		}
