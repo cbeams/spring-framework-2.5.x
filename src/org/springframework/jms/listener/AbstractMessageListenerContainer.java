@@ -249,18 +249,16 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	}
 
 	/**
-	 * Set the JMS ExceptionListener to notify in case of a JMSException
-	 * thrown by the registered message listener.
+	 * Set the JMS ExceptionListener to notify in case of a JMSException thrown
+	 * by the registered message listener or the invocation infrastructure.
 	 */
 	public void setExceptionListener(ExceptionListener exceptionListener) {
 		this.exceptionListener = exceptionListener;
 	}
 
 	/**
-	 * Return the JMS ExceptionListener to notify in case of a JMSException
-	 * thrown by the registered message listener, if any.
-     * @return the JMS ExceptionListener to notify in case of a JMSException
-	 * thrown by the registered message listener; may be <code>null</code> 
+	 * Return the JMS ExceptionListener to notify in case of a JMSException thrown
+	 * by the registered message listener or the invocation infrastructure, if any.
 	 */
 	protected ExceptionListener getExceptionListener() {
 		return this.exceptionListener;
@@ -319,8 +317,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * {@link #setMessageListener(Object) given listener object},
 	 * and starts the {@link Connection}
 	 * (if {@link #setAutoStartup(boolean) "autoStartup"} hasn't been turned off).
+	 * @throws JmsException if startup failed
 	 */
-	public void initialize() {
+	public void initialize() throws JmsException {
 		try {
 			this.active = true;
 			this.connection = createConnection();
@@ -465,10 +464,6 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 			invokeListener(session, message);
 		}
 		catch (JMSException ex) {
-			ExceptionListener exceptionListener = getExceptionListener();
-			if (exceptionListener != null) {
-				exceptionListener.onException(ex);
-			}
 			rollbackOnExceptionIfNecessary(session, ex);
 			throw ex;
 		}
@@ -558,24 +553,19 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * Perform a commit or message acknowledgement, as appropriate.
 	 * @param session the JMS Session to commit
 	 * @param message the Message to acknowledge
-	 * @throws org.springframework.jms.JmsException in case of commit failure
+	 * @throws javax.jms.JMSException in case of commit failure
 	 */
-	protected void commitIfNecessary(Session session, Message message) throws JmsException {
-		try {
-			// Commit session or acknowledge message.
-			if (session.getTransacted()) {
-				// Commit necessary - but avoid commit call within a JTA transaction.
-				if (isSessionTransacted()) {
-					// Transacted session created by this container -> commit.
-					JmsUtils.commitIfNecessary(session);
-				}
-			}
-			else if (isClientAcknowledge(session)) {
-				message.acknowledge();
+	protected void commitIfNecessary(Session session, Message message) throws JMSException {
+		// Commit session or acknowledge message.
+		if (session.getTransacted()) {
+			// Commit necessary - but avoid commit call within a JTA transaction.
+			if (isSessionTransacted()) {
+				// Transacted session created by this container -> commit.
+				JmsUtils.commitIfNecessary(session);
 			}
 		}
-		catch (JMSException ex) {
-			convertJmsAccessException(ex);
+		else if (isClientAcknowledge(session)) {
+			message.acknowledge();
 		}
 	}
 
@@ -583,9 +573,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * Perform a rollback, handling rollback exceptions properly.
 	 * @param session the JMS Session to rollback
 	 * @param ex the thrown application exception or error
-	 * @throws org.springframework.jms.JmsException in case of a rollback error
+	 * @throws javax.jms.JMSException in case of a rollback error
 	 */
-	protected void rollbackOnExceptionIfNecessary(Session session, Throwable ex) throws JmsException {
+	protected void rollbackOnExceptionIfNecessary(Session session, Throwable ex) throws JMSException {
 		try {
 			if (session.getTransacted() && isSessionTransacted()) {
 				// Transacted session created by this container -> rollback.
@@ -597,7 +587,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 		}
 		catch (JMSException ex2) {
 			logger.error("Application exception overridden by rollback exception", ex);
-			throw convertJmsAccessException(ex2);
+			throw ex2;
 		}
 		catch (RuntimeException ex2) {
 			logger.error("Application exception overridden by rollback exception", ex);
@@ -618,6 +608,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @param ex the exception to handle
 	 */
 	protected void handleListenerException(Throwable ex) {
+		if (ex instanceof JMSException) {
+			invokeExceptionListener((JMSException) ex);
+		}
 		if (isActive()) {
 			// Regular case: failed while active.
 			// Log at error level.
@@ -627,6 +620,18 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 			// Rare case: listener thread failed after container shutdown.
 			// Log at debug level, to avoid spamming the shutdown log.
 			logger.debug("Listener exception after container shutdown", ex);
+		}
+	}
+
+	/**
+	 * Invoke the registered JMS ExceptionListener, if any.
+	 * @param ex the exception that arose during JMS processing
+	 * @see #setExceptionListener
+	 */
+	protected void invokeExceptionListener(JMSException ex) {
+		ExceptionListener exceptionListener = getExceptionListener();
+		if (exceptionListener != null) {
+			exceptionListener.onException(ex);
 		}
 	}
 
