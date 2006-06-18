@@ -30,8 +30,7 @@ import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -95,6 +94,11 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 */
 	public static final long DEFAULT_RECEIVE_TIMEOUT = 1000;
 
+	/**
+	 * The default recovery interval: 5000 ms = 5 seconds.
+	 */
+	public static final long DEFAULT_RECOVERY_INTERVAL = 5000;
+
 
 	private boolean pubSubNoLocal = false;
 
@@ -104,9 +108,13 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 	private int maxMessagesPerTask = Integer.MIN_VALUE;
 
-	private TransactionTemplate transactionTemplate = new TransactionTemplate();
+	private PlatformTransactionManager transactionManager;
+
+	private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
+
+	private long recoveryInterval = DEFAULT_RECOVERY_INTERVAL;
 
 	private boolean cacheSessions = true;
 
@@ -176,18 +184,6 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	}
 
 	/**
-	 * Specify the Spring TransactionTemplate to use for transactional
-	 * wrapping of message reception plus listener execution.
-	 * Default is none, not performing any transactional wrapping.
-	 * <p>Alternatively, pass in a Spring PlatformTransactionManager directly
-	 * into the "transactionManager" property.
-	 * @see #setTransactionManager
-	 */
-	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
-		this.transactionTemplate = (transactionTemplate != null ? transactionTemplate : new TransactionTemplate());
-	}
-
-	/**
 	 * Specify the Spring PlatformTransactionManager to use for transactional
 	 * wrapping of message reception plus listener execution.
 	 * Default is none, not performing any transactional wrapping.
@@ -198,21 +194,21 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * into the "transactionTemplate" property.
 	 */
 	public void setTransactionManager(PlatformTransactionManager transactionManager) {
-		this.transactionTemplate.setTransactionManager(transactionManager);
+		this.transactionManager = transactionManager;
 	}
 
 	/**
-	 * Specify the transaction timeout to use for transactional wrapping, in seconds.
+	 * Specify the transaction timeout to use for transactional wrapping, in <b>seconds</b>.
 	 * Default is none, using the transaction manager's default timeout.
 	 * @see org.springframework.transaction.TransactionDefinition#getTimeout()
 	 * @see #setReceiveTimeout
 	 */
-	public void setTransactionTimeout(int timeout) {
-		this.transactionTemplate.setTimeout(timeout);
+	public void setTransactionTimeout(int transactionTimeout) {
+		this.transactionDefinition.setTimeout(transactionTimeout);
 	}
 
 	/**
-	 * Set the timeout to use for receive calls, in milliseconds.
+	 * Set the timeout to use for receive calls, in <b>milliseconds</b>.
 	 * The default is 1000 ms, that is, 1 second.
 	 * <p><b>NOTE:</b> This value needs to be smaller than the transaction
 	 * timeout used by the transaction manager (in the appropriate unit,
@@ -224,6 +220,15 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 */
 	public void setReceiveTimeout(long receiveTimeout) {
 		this.receiveTimeout = receiveTimeout;
+	}
+
+	/**
+	 * Specify the interval between recovery attempts, in <b>milliseconds</b>.
+	 * The default is 5000 ms, that is, 5 seconds.
+	 * @see #handleListenerSetupFailure
+	 */
+	public void setRecoveryInterval(long recoveryInterval) {
+		this.recoveryInterval = recoveryInterval;
 	}
 
 	/**
@@ -292,12 +297,21 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		return createConsumer(session, destination);
 	}
 
-	protected void executeListener(final Session session, final MessageConsumer consumer) throws JMSException {
-		if (this.transactionTemplate.getTransactionManager() != null) {
-			this.transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-				protected void doInTransactionWithoutResult(TransactionStatus status) {
+	/**
+	 * Execute the listener for a message received from the given consumer.
+	 * @param session the JMS Session to work on
+	 * @param consumer the MessageConsumer to work on
+	 * @throws JMSException if thrown by JMS methods
+	 */
+	protected void executeListener(Session session, MessageConsumer consumer) throws JMSException {
+		if (this.transactionManager != null) {
+			// Execute receive within transaction.
+			TransactionStatus status = this.transactionManager.getTransaction(this.transactionDefinition);
+			try {
+				Message message = receiveMessage(consumer);
+				if (message != null) {
 					try {
-						doExecuteListener(session, consumer);
+						doExecuteListener(session, message);
 					}
 					catch (Throwable ex) {
 						if (logger.isDebugEnabled()) {
@@ -307,27 +321,85 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 						handleListenerException(ex);
 					}
 				}
-			});
+			}
+			catch (JMSException ex) {
+				rollbackOnException(status, ex);
+				throw ex;
+			}
+			catch (RuntimeException ex) {
+				rollbackOnException(status, ex);
+				throw ex;
+			}
+			catch (Error err) {
+				rollbackOnException(status, err);
+				throw err;
+			}
+			this.transactionManager.commit(status);
 		}
+
 		else {
+			// Execute receive outside of transaction.
+			Message message = receiveMessage(consumer);
+			if (message != null) {
+				executeListener(session, message);
+			}
+		}
+	}
+
+	/**
+	 * Perform a rollback, handling rollback exceptions properly.
+	 * @param status object representing the transaction
+	 * @param ex the thrown application exception or error
+	 */
+	private void rollbackOnException(TransactionStatus status, Throwable ex) {
+		logger.debug("Initiating transaction rollback on application exception", ex);
+		try {
+			this.transactionManager.rollback(status);
+		}
+		catch (RuntimeException ex2) {
+			logger.error("Application exception overridden by rollback exception", ex);
+			throw ex2;
+		}
+		catch (Error err) {
+			logger.error("Application exception overridden by rollback error", ex);
+			throw err;
+		}
+	}
+
+	/**
+	 * Receive a message from the given consumer.
+	 * @param consumer the MessageConsumer to use
+	 * @return the Message, or <code>null</code> if none
+	 * @throws JMSException if thrown by JMS methods
+	 */
+	protected Message receiveMessage(MessageConsumer consumer) throws JMSException {
+		return (this.receiveTimeout < 0 ? consumer.receive() : consumer.receive(this.receiveTimeout));
+	}
+
+	/**
+	 * Handle the given exception that arose during setup of a listener.
+	 * <p>The default implementation logs the exception at error level
+	 * and lets the calling thread wait for the configured recovery interval;
+	 * the calling thread is excepted to attempt a retry afterwards.
+	 * This can be overridden in subclasses.
+	 * @param ex the exception to handle
+	 * @see #setRecoveryInterval
+	 */
+	protected void handleListenerSetupFailure(Throwable ex) {
+		if (ex instanceof JMSException) {
+			invokeExceptionListener((JMSException) ex);
+		}
+		logger.error("Setup of JMS message listener invoker failed", ex);
+		// Give the JMS provider some time to recover.
+		if (this.recoveryInterval > 0) {
 			try {
-				doExecuteListener(session, consumer);
+				Thread.sleep(this.recoveryInterval);
 			}
-			catch (Throwable ex) {
-				handleListenerException(ex);
+			catch (InterruptedException interEx) {
+				// Re-interrupt current thread, to allow other threads to react.
+				Thread.currentThread().interrupt();
 			}
 		}
-	}
-
-	protected void doExecuteListener(Session session, MessageConsumer consumer) throws JMSException {
-		Message message = receiveMessage(consumer, this.receiveTimeout);
-		if (message != null) {
-			doExecuteListener(session, message);
-		}
-	}
-
-	protected Message receiveMessage(MessageConsumer consumer, long receiveTimeout) throws JMSException {
-		return (receiveTimeout < 0 ? consumer.receive() : consumer.receive(receiveTimeout));
 	}
 
 	/**
@@ -402,8 +474,8 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 				}
 			}
 			catch (Throwable ex) {
-				logger.error("Setup of JMS message listener invoker failed", ex);
 				clearResources();
+				handleListenerSetupFailure(ex);
 			}
 			if (isActive()) {
 				// Reschedule this Runnable for receiving another message.
