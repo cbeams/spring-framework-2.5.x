@@ -84,7 +84,8 @@ public class JmxTestBean implements IJmxTestBean {
 		</para>
 		<programlisting><![CDATA[<beans>
 
-  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+  ]]><lineannotation>&lt;!-- this bean must <emphasis role="bold">not</emphasis> be lazily initialized if the exporting is to happen --&gt;</lineannotation><![CDATA[
+  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter" ]]><emphasis role="bold">lazy="false"</emphasis><![CDATA[>
     <property name="beans">
       <map>
         <entry key="bean:name=testBean1" value-ref="testBean"/>
