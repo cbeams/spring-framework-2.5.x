@@ -656,7 +656,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		synchronized (this.singletonCache) {
 			synchronized (this.disposableBeans) {
 				String[] disposableBeanNames = StringUtils.toStringArray(this.disposableBeans.keySet());
-				for (int i = 0; i < disposableBeanNames.length; i++) {
+				for (int i = disposableBeanNames.length - 1; i >= 0; i--) {
 					destroyDisposableBean(disposableBeanNames[i]);
 				}
 			}
