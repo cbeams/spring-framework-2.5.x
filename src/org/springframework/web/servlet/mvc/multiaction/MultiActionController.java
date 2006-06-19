@@ -95,8 +95,9 @@ import org.springframework.web.util.NestedServletException;
  *
  * <p>Note that method overloading isn't allowed.
  * 
- * <p>See also description of workflow performed by superclasses
- * <a href="AbstractController.html#workflow">here</a>.
+ * <p>See also the description of the workflow performed by
+ * {@link AbstractController the superclass} (in that section of the class
+ * level Javadoc entitled 'workflow').
  *
  * <p><b>Note:</b> For maximum data binding flexibility, consider direct usage
  * of a ServletRequestDataBinder in your controller method, instead of relying
