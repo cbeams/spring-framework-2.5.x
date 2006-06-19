@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,21 @@
 
 package org.springframework.jdbc.core;
 
-import org.springframework.dao.DataAccessResourceFailureException;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+
+import org.springframework.dao.DataAccessResourceFailureException;
 
 /**
  * RowMapper implementation that converts a row into a new instance
@@ -68,18 +72,19 @@ public class ActiveRowMapper implements RowMapper {
 	public void setMappedClass(Class mappedClass) {
 		this.mappedClass = mappedClass;
 		try {
-			defaultConstruct = mappedClass.getConstructor(null);
-		} catch (NoSuchMethodException e) {
-			throw new DataAccessResourceFailureException(new StringBuffer().append("Failed to access default constructor of ").append(mappedClass.getName()).toString(), e);
+			this.defaultConstruct = mappedClass.getConstructor((Class[]) null);
 		}
-		mappedFields = new HashMap();
+		catch (NoSuchMethodException ex) {
+			throw new DataAccessResourceFailureException(new StringBuffer().append("Failed to access default constructor of ").append(mappedClass.getName()).toString(), ex);
+		}
+		this.mappedFields = new HashMap();
 		Field[] f = mappedClass.getDeclaredFields();
 		for (int i = 0; i < f.length; i++) {
 			PersistentField pf = new PersistentField();
 			pf.setFieldName(f[i].getName());
 			pf.setColumnName(underscoreName(f[i].getName()));
 			pf.setJavaType(f[i].getType());
-			mappedFields.put(pf.getColumnName(), pf);
+			this.mappedFields.put(pf.getColumnName(), pf);
 		}
 	}
 
@@ -93,70 +98,76 @@ public class ActiveRowMapper implements RowMapper {
 	public Object mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		Object result;
 		try {
-			result = defaultConstruct.newInstance(null);
-		} catch (IllegalAccessException e) {
-			throw new DataAccessResourceFailureException("Failed to load class " + mappedClass.getName(), e);
-		} catch (InvocationTargetException e) {
-			throw new DataAccessResourceFailureException("Failed to load class " + mappedClass.getName(), e);
-		} catch (InstantiationException e) {
-			throw new DataAccessResourceFailureException("Failed to load class " + mappedClass.getName(), e);
+			result = this.defaultConstruct.newInstance((Object[]) null);
+		}
+		catch (IllegalAccessException e) {
+			throw new DataAccessResourceFailureException("Failed to load class " + this.mappedClass.getName(), e);
+		}
+		catch (InvocationTargetException e) {
+			throw new DataAccessResourceFailureException("Failed to load class " + this.mappedClass.getName(), e);
+		}
+		catch (InstantiationException e) {
+			throw new DataAccessResourceFailureException("Failed to load class " + this.mappedClass.getName(), e);
 		}
 		ResultSetMetaData meta = rs.getMetaData();
 		int columns = meta.getColumnCount();
 		for (int i = 1; i <= columns; i++) {
 			String field = meta.getColumnName(i).toLowerCase();
-			PersistentField fieldMeta = (PersistentField)mappedFields.get(field);
+			PersistentField fieldMeta = (PersistentField) this.mappedFields.get(field);
 			if (fieldMeta != null) {
 				try {
-                    Object value = null;
-                    Class fieldType = fieldMeta.getJavaType();
-                    Method m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[]{fieldType});
-                    if (fieldType.equals(String.class)) {
-                        value = rs.getString(field);
-                    }
-                    else if (fieldType.equals(byte.class) || fieldType.equals(Byte.class)) {
-                        value = new Byte(rs.getByte(field));
-                    }
-                    else if (fieldType.equals(short.class) || fieldType.equals(Short.class)) {
-                        value = new Short(rs.getShort(field));
-                    }
-                    else if (fieldType.equals(int.class) || fieldType.equals(Integer.class)) {
-                        value = new Integer(rs.getInt(field));
-                    }
-                    else if (fieldType.equals(long.class) || fieldType.equals(Long.class)) {
-                        value = new Long(rs.getLong(field));
-                    }
-                    else if (fieldType.equals(float.class) || fieldType.equals(Float.class)) {
-                        value = new Float(rs.getFloat(field));
-                    }
-                    else if (fieldType.equals(double.class) || fieldType.equals(Double.class)) {
-                        value = new Double(rs.getDouble(field));
-                    }
-                    else if (fieldType.equals(BigDecimal.class)) {
-                        value = rs.getBigDecimal(field);
-                    }
-                    else if (fieldType.equals(boolean.class) || fieldType.equals(Boolean.class)) {
-                        value = (rs.getBoolean(field)) ? Boolean.TRUE : Boolean.FALSE;
-                    }
-                    else if (fieldType.equals(Date.class)) {
-                        if (fieldMeta.getSqlType() == Types.DATE) {
-                            value = rs.getDate(field);
-                        }
-                        else if (fieldMeta.getSqlType() == Types.TIME) {
-                            value = rs.getTime(field);
-                        }
-                        else {
-                            value = rs.getTimestamp(field);
-                        }
-                    }
-                    if (m != null) {
-                        m.invoke(result, new Object[]{value});
-                    }
-				} catch (NoSuchMethodException e) {
+					Object value = null;
+					Class fieldType = fieldMeta.getJavaType();
+					Method m = result.getClass().getMethod(setterName(fieldMeta.getColumnName()), new Class[]{fieldType});
+					if (fieldType.equals(String.class)) {
+						value = rs.getString(field);
+					}
+					else if (fieldType.equals(byte.class) || fieldType.equals(Byte.class)) {
+						value = new Byte(rs.getByte(field));
+					}
+					else if (fieldType.equals(short.class) || fieldType.equals(Short.class)) {
+						value = new Short(rs.getShort(field));
+					}
+					else if (fieldType.equals(int.class) || fieldType.equals(Integer.class)) {
+						value = new Integer(rs.getInt(field));
+					}
+					else if (fieldType.equals(long.class) || fieldType.equals(Long.class)) {
+						value = new Long(rs.getLong(field));
+					}
+					else if (fieldType.equals(float.class) || fieldType.equals(Float.class)) {
+						value = new Float(rs.getFloat(field));
+					}
+					else if (fieldType.equals(double.class) || fieldType.equals(Double.class)) {
+						value = new Double(rs.getDouble(field));
+					}
+					else if (fieldType.equals(BigDecimal.class)) {
+						value = rs.getBigDecimal(field);
+					}
+					else if (fieldType.equals(boolean.class) || fieldType.equals(Boolean.class)) {
+						value = (rs.getBoolean(field)) ? Boolean.TRUE : Boolean.FALSE;
+					}
+					else if (fieldType.equals(Date.class)) {
+						if (fieldMeta.getSqlType() == Types.DATE) {
+							value = rs.getDate(field);
+						}
+						else if (fieldMeta.getSqlType() == Types.TIME) {
+							value = rs.getTime(field);
+						}
+						else {
+							value = rs.getTimestamp(field);
+						}
+					}
+					if (m != null) {
+						m.invoke(result, new Object[]{value});
+					}
+				}
+				catch (NoSuchMethodException e) {
 					throw new DataAccessResourceFailureException(new StringBuffer().append("Failed to map field ").append(fieldMeta.getFieldName()).append(".").toString(), e);
-				} catch (IllegalAccessException e) {
+				}
+				catch (IllegalAccessException e) {
 					throw new DataAccessResourceFailureException(new StringBuffer().append("Failed to map field ").append(fieldMeta.getFieldName()).append(".").toString(), e);
-				} catch (InvocationTargetException e) {
+				}
+				catch (InvocationTargetException e) {
 					throw new DataAccessResourceFailureException(new StringBuffer().append("Failed to map field ").append(fieldMeta.getFieldName()).append(".").toString(), e);
 				}
 			}
@@ -165,8 +176,8 @@ public class ActiveRowMapper implements RowMapper {
 	}
 
 	public static String underscoreName(String name) {
-        // This is a 1.4 and later method - do we need to support 1.3?
-        return name.substring(0,1).toLowerCase() + name.substring(1).replaceAll("([A-Z])", "_$1").toLowerCase();
+		// This is a 1.4 and later method - do we need to support 1.3?
+		return name.substring(0, 1).toLowerCase() + name.substring(1).replaceAll("([A-Z])", "_$1").toLowerCase();
 	}
 
 	private String setterName(String columnName) {
@@ -180,11 +191,15 @@ public class ActiveRowMapper implements RowMapper {
 		return "set" + propertyName.toString();
 	}
 
+
 	private class PersistentField {
 
 		private String fieldName;
+
 		private String columnName;
+
 		private Class javaType;
+
 		private int sqlType;
 
 		public String getFieldName() {
@@ -218,7 +233,6 @@ public class ActiveRowMapper implements RowMapper {
 		public void setSqlType(int sqlType) {
 			this.sqlType = sqlType;
 		}
-
 	}
 
 }
