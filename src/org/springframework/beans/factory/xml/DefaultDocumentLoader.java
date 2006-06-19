@@ -19,6 +19,7 @@ package org.springframework.beans.factory.xml;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.core.io.Resource;
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
@@ -45,21 +46,19 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	 */
 	private static final String XSD_SCHEMA_LANGUAGE = "http://www.w3.org/2001/XMLSchema";
 
+
 	protected final Log logger = LogFactory.getLog(getClass());
+
 
 	/**
 	 * Load the {@link Document} at the supplied {@link InputSource} using the standard JAXP-configured
 	 * XML parser.
-	 * @param inputSource
-	 * @param entityResolver
-	 * @param errorHandler
-	 * @param validationMode
-	 * @param namespaceAware
-	 * @return
-	 * @throws Exception
 	 */
-	public Document loadDocument(InputSource inputSource, EntityResolver entityResolver,
-															 ErrorHandler errorHandler, int validationMode, boolean namespaceAware) throws Exception {
+	public Document loadDocument(
+			InputSource inputSource, EntityResolver entityResolver,
+			ErrorHandler errorHandler, int validationMode, boolean namespaceAware)
+			throws Exception {
+
 		DocumentBuilderFactory factory =
 						createDocumentBuilderFactory(validationMode, namespaceAware);
 		if (logger.isDebugEnabled()) {
@@ -70,10 +69,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	}
 
 	/**
-	 * Creates the {@link DocumentBuilderFactory} instance.
-	 * @param resource			 the {@link Resource} being parsed.
-	 * @param validationMode the resolved validation mode.
-	 *                       Correctly reflects any mode that was detected automatically.
+	 * Create the {@link DocumentBuilderFactory} instance.
 	 */
 	protected DocumentBuilderFactory createDocumentBuilderFactory(int validationMode, boolean namespaceAware)
 					throws ParserConfigurationException {
@@ -91,11 +87,10 @@ public class DefaultDocumentLoader implements DocumentLoader {
 					factory.setAttribute(SCHEMA_LANGUAGE_ATTRIBUTE, XSD_SCHEMA_LANGUAGE);
 				}
 				catch (IllegalArgumentException ex) {
-					throw new FatalBeanException(
-									"Unable to validate using XSD: Your JAXP provider [" +
-													factory + "] does not support XML Schema. " +
-													"Are you running on Java 1.4 or below with Apache Crimson? " +
-													"Upgrade to Apache Xerces (or Java 1.5) for full XSD support.");
+					throw new BeanDefinitionStoreException(
+							"Unable to validate using XSD: Your JAXP provider [" + factory +
+							"] does not support XML Schema. Are you running on Java 1.4 or below with " +
+							"Apache Crimson? Upgrade to Apache Xerces (or Java 1.5) for full XSD support.");
 				}
 			}
 		}
@@ -107,13 +102,14 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	 * Create a JAXP DocumentBuilder that this bean definition reader
 	 * will use for parsing XML documents. Can be overridden in subclasses,
 	 * adding further initialization of the builder.
-	 * @param factory the JAXP DocumentBuilderFactory that the
-	 *                DocumentBuilder should be created with
+	 * @param factory the JAXP DocumentBuilderFactory that the DocumentBuilder
+	 * should be created with
 	 * @return the JAXP DocumentBuilder
 	 * @throws ParserConfigurationException if thrown by JAXP methods
 	 */
-	protected DocumentBuilder createDocumentBuilder(DocumentBuilderFactory factory, EntityResolver entityResolver, ErrorHandler errorHandler)
-					throws ParserConfigurationException {
+	protected DocumentBuilder createDocumentBuilder(
+			DocumentBuilderFactory factory, EntityResolver entityResolver, ErrorHandler errorHandler)
+			throws ParserConfigurationException {
 
 		DocumentBuilder docBuilder = factory.newDocumentBuilder();
 		if (errorHandler != null) {
@@ -124,4 +120,5 @@ public class DefaultDocumentLoader implements DocumentLoader {
 		}
 		return docBuilder;
 	}
+
 }
