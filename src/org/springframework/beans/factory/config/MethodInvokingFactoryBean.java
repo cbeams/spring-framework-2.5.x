@@ -25,7 +25,6 @@ import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.MethodInvoker;
 
 /**
  * FactoryBean which returns a value which is the result of a static or instance
@@ -146,10 +145,8 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 
 	/**
 	 * Returns the same value each time if the singleton property is set
-	 * to true, otherwise returns the value returned from invoking the
-	 * specified method. However, returns {@link MethodInvoker#VOID} if the
-	 * method returns null or has a void return type, since factory beans
-	 * must return a result.
+	 * to "true", otherwise returns the value returned from invoking the
+	 * specified method on the fly.
 	 */
 	public Object getObject() throws Exception {
 		if (this.singleton) {
