@@ -227,6 +227,7 @@
 
 		<mkdir dir="${dist.dir}"/>
 		<mkdir dir="${dist.dir}/modules"/>
+		<mkdir dir="${dist.dir}/weavers"/>
 		<mkdir dir="${dist.dir}/resources"/>
 
 	</target>
@@ -244,12 +245,6 @@
 				<exclude name="META-INF/aop.xml"/>
 				<exclude name="org/springframework/beans/factory/aspectj/**"/>
 				<exclude name="org/springframework/transaction/aspectj/**"/>
-				
-				<!-- exclude classes that are part of Tomcat class loader -->
-				<exclude name="org/springframework/instrument/classloading/tomcat/**"/>
-				<exclude name="org/springframework/instrument/ClassFileTransformerRegistry.class"/>
-				<exclude name="org/springframework/instrument/classloading/WeavingTransformer.class"/>
-				
 			</fileset>
 			<zipfileset src="lib/aopalliance/aopalliance.jar"/>
 			<manifest>
@@ -491,20 +486,6 @@
 				<attribute name="Spring-Version" value="${spring-version}"/>
 			</manifest>
 		</jar>
-		
-		<jar jarfile="${dist.dir}/modules/spring-tomcat-weaver.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/instrument/classloading/tomcat/**"/>
-				<include name="org/springframework/instrument/ClassFileTransformerRegistry.class"/>
-				<include name="org/springframework/instrument/classloading/WeavingTransformer.class"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
 
 		<jar jarfile="${dist.dir}/modules/spring-hibernate2.jar">
 			<fileset dir="${target.classes.dir}">
@@ -553,6 +534,50 @@
 		<jar jarfile="${dist.dir}/modules/spring-ibatis.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/orm/ibatis/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+	</target>
+
+
+	<target name="aspectjar" depends="build,initdist" description="Create aspect JAR file (containing AspectJ aspects only)">
+
+		<delete file="${dist.dir}/spring-aspects.jar"/>
+
+		<jar jarfile="${dist.dir}/spring-aspects.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="META-INF/aop.xml"/>
+				<include name="org/springframework/beans/factory/aspectj/**"/>
+				<include name="org/springframework/transaction/aspectj/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
+	</target>
+
+
+	<target name="weaverjars" depends="build,initdist" description="Create weaver JAR files (for specific platforms)">
+
+		<delete>
+			<fileset dir="${dist.dir}">
+				<include name="weavers/*.jar"/>
+			</fileset>
+		</delete>
+
+		<jar jarfile="${dist.dir}/weavers/spring-tomcat-weaver.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/instrument/classloading/tomcat/**"/>
+				<include name="org/springframework/instrument/ClassFileTransformerRegistry.class"/>
+				<include name="org/springframework/instrument/classloading/WeavingTransformer.class"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -630,26 +655,6 @@
 	</target>
 
 
-	<target name="aspectjar" depends="build,initdist" description="Create aspect JAR file (containing AspectJ aspects only)">
-
-		<delete file="${dist.dir}/spring-aspects.jar"/>
-
-		<jar jarfile="${dist.dir}/spring-aspects.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="META-INF/aop.xml"/>
-				<include name="org/springframework/beans/factory/aspectj/**"/>
-				<include name="org/springframework/transaction/aspectj/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-	</target>
-
-
 	<target name="srczip" depends="initdist" description="Create source ZIP (containing Java sources)">
 
 		<delete file="${dist.dir}/spring-src.zip"/>
@@ -713,7 +718,7 @@
 	</target>
 
 
-	<target name="alljars" depends="fulljar,modulejars,aspectjar,mockjar,srczip"
+	<target name="alljars" depends="fulljar,modulejars,aspectjar,weaverjars,mockjar,srczip"
 					description="Create all JAR files"/>
 
 
@@ -1411,7 +1416,7 @@
 					description="Generate and copy reference documentation"/>
 
 
-	<target name="release" depends="alljars,distfiles,javadoc,doc.all" description="Generate release zips">
+	<target name="releasezips" description="Generate release zips based on present artifacts">
 
 		<mkdir dir="${target.release.dir}"/>
 
@@ -1420,25 +1425,7 @@
 
 		<fileset id="main" dir=".">
 			<include name="dist/**"/>
-			<include name="docs/**"/>
-			<include name="docs/reference/styles/html.css"/>
-			<include name="docs/reference/images/admons/*.png"/>
-			<include name="docs/reference/images/admons/*.gif"/>
-			<include name="docs/reference/images/admons/*.tif"/>
-			<exclude name="docs/reference/*"/>
-			<exclude name="docs/reference/src/**"/>
-			<exclude name="docs/reference/images/CVS/**"/>
-			<exclude name="docs/reference/images/*.db"/>
-			<exclude name="docs/reference/images/.cvsignore"/>
-			<exclude name="docs/reference/styles/*.xsl"/>
-			<exclude name="docs/reference/styles/CVS/**"/>
-			<exclude name="docs/reference/lib/**"/>
-			<exclude name="docs/reference/html/**"/>
-			<exclude name="docs/reference/pdf/images/**"/>
-            <include name="samples/countries/**"/>
-			<include name="samples/imagedb/**"/>
-			<include name="samples/jpetstore/**"/>
-			<include name="samples/petclinic/**"/>
+			<include name="docs/reference/pdf/*.pdf"/>
 			<include name="*.txt"/>
 		</fileset>
 
@@ -1446,13 +1433,21 @@
 			<zipfileset refid="main" prefix="${release.path}"/>
 		</zip>
 
-        <zip zipfile="${target.release.dir}/${release-with-dependencies.zip}">
+		<zip zipfile="${target.release.dir}/${release-with-dependencies.zip}">
 			<zipfileset refid="main" prefix="${release.path}"/>
 			<zipfileset dir="." prefix="${release.path}">
 				<include name="*.bat"/>
 				<include name="*.xml"/>
 				<include name="*.properties"/>
 				<exclude name="junit*.properties"/>
+				<include name="docs/reference/html_single/**"/>
+				<include name="docs/reference/images/admons/*.png"/>
+				<include name="docs/reference/images/admons/*.gif"/>
+				<include name="docs/reference/images/admons/*.tif"/>
+				<include name="docs/reference/styles/html.css"/>
+				<include name="docs/MVC-step-by-step/**"/>
+				<include name="docs/taglib/**"/>
+				<include name="docs/api/**"/>
 				<include name="src/**"/>
 				<include name="mock/**"/>
 				<include name="test/**"/>
@@ -1502,16 +1497,22 @@
 				<include name="lib/portlet/**"/>
 				<include name="lib/quartz/**"/>
 				<include name="lib/struts/**"/>
+				<include name="lib/tomcat/**"/>
 				<include name="lib/toplink/**"/>
 				<include name="lib/velocity/**"/>
 				<include name="lib/xdoclet/**"/>
+				<include name="samples/countries/**"/>
+				<include name="samples/imagedb/**"/>
+				<include name="samples/jpetstore/**"/>
+				<include name="samples/petclinic/**"/>
 			</zipfileset>
 		</zip>
 
-    </target>
+	</target>
 
 
-	<target name="clean_release" depends="clean, release"/>
+	<target name="release" depends="clean,alljars,distfiles,javadoc,doc.all,releasezips"
+					description="Build release distributions from scratch"/>
 
 
 	<target name="sandbox.clean" description="Clean sandbox output dirs">
@@ -1534,7 +1535,7 @@
 		<mkdir dir="${sandbox.target.classes.dir}"/>
 		<mkdir dir="${sandbox.target.classes.dir}/META-INF"/>
 
-		<javac destdir="${sandbox.target.classes.dir}" source="1.3" target="1.3" debug="${debug}"
+		<javac destdir="${sandbox.target.classes.dir}" source="1.5" target="1.5" debug="${debug}"
 					 deprecation="false" optimize="false" failonerror="true">
 			<src path="${sandbox.src.dir}"/>
 			<classpath refid="all-libs"/>
@@ -1869,9 +1870,10 @@
 
 	</target>
 
-	<!-- install spring jars in your local maven repository
-                  using appropriate version numbers -->
+
+	<!-- Install spring jars in your local maven repository using appropriate version numbers -->
 	<target name="mvn.install.jars" depends="alljars">
+
 		<antcall target="mvn.install">
 			<param name="spring-module" value="spring-beans"/>
 		</antcall>
@@ -1938,15 +1940,20 @@
 		<antcall target="mvn.install">
 			<param name="spring-module" value="spring-tomcat-weaver"/>
 		</antcall>
+
 	</target>
 
+
 	<target name="mvn.install">
-                <exec executable="mvn.bat" dir="${dist.dir}" failonerror="true">
-                   <arg line="install:install-file"/>
-                   <arg line="-Dfile=modules/${spring-module}.jar"/>
-                   <arg line="-DgroupId=org.springframework"/>
-                   <arg line="-DartifactId=${spring-module} -Dversion=${spring-version}"/>
-                   <arg line="-Dpackaging=jar"/>
-                </exec>
+
+		<exec executable="mvn.bat" dir="${dist.dir}" failonerror="true">
+			 <arg line="install:install-file"/>
+			 <arg line="-Dfile=modules/${spring-module}.jar"/>
+			 <arg line="-DgroupId=org.springframework"/>
+			 <arg line="-DartifactId=${spring-module} -Dversion=${spring-version}"/>
+			 <arg line="-Dpackaging=jar"/>
+		</exec>
+
 	</target>
+
 </project>
