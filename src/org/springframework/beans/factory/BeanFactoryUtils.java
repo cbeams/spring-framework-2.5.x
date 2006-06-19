@@ -82,6 +82,7 @@ public abstract class BeanFactoryUtils {
 	 * @return the array of matching bean names, or an empty array if none
 	 */
 	public static String[] beanNamesIncludingAncestors(ListableBeanFactory lbf) {
+		Assert.notNull(lbf, "ListableBeanFactory must not be null");
 		Set result = new HashSet();
 		result.addAll(Arrays.asList(lbf.getBeanDefinitionNames()));
 		if (lbf instanceof HierarchicalBeanFactory) {
@@ -109,6 +110,7 @@ public abstract class BeanFactoryUtils {
 	 * @return the array of matching bean names, or an empty array if none
 	 */
 	public static String[] beanNamesForTypeIncludingAncestors(ListableBeanFactory lbf, Class type) {
+		Assert.notNull(lbf, "ListableBeanFactory must not be null");
 		Set result = new HashSet();
 		result.addAll(Arrays.asList(lbf.getBeanNamesForType(type)));
 		if (lbf instanceof HierarchicalBeanFactory) {
@@ -145,6 +147,7 @@ public abstract class BeanFactoryUtils {
 	public static String[] beanNamesForTypeIncludingAncestors(
 			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean allowEagerInit) {
 
+		Assert.notNull(lbf, "ListableBeanFactory must not be null");
 		Set result = new HashSet();
 		result.addAll(Arrays.asList(lbf.getBeanNamesForType(type, includePrototypes, allowEagerInit)));
 		if (lbf instanceof HierarchicalBeanFactory) {
@@ -173,6 +176,7 @@ public abstract class BeanFactoryUtils {
 	public static Map beansOfTypeIncludingAncestors(ListableBeanFactory lbf, Class type)
 	    throws BeansException {
 
+		Assert.notNull(lbf, "ListableBeanFactory must not be null");
 		Map result = new HashMap();
 		result.putAll(lbf.getBeansOfType(type));
 		if (lbf instanceof HierarchicalBeanFactory) {
@@ -217,6 +221,7 @@ public abstract class BeanFactoryUtils {
 			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean allowEagerInit)
 	    throws BeansException {
 
+		Assert.notNull(lbf, "ListableBeanFactory must not be null");
 		Map result = new HashMap();
 		result.putAll(lbf.getBeansOfType(type, includePrototypes, allowEagerInit));
 		if (lbf instanceof HierarchicalBeanFactory) {
@@ -326,6 +331,7 @@ public abstract class BeanFactoryUtils {
 	 * @throws BeansException if the bean could not be created
 	 */
 	public static Object beanOfType(ListableBeanFactory lbf, Class type) throws BeansException {
+		Assert.notNull(lbf, "ListableBeanFactory must not be null");
 		Map beansOfType = lbf.getBeansOfType(type);
 		if (beansOfType.size() == 1) {
 			return beansOfType.values().iterator().next();
@@ -365,6 +371,7 @@ public abstract class BeanFactoryUtils {
 			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean allowEagerInit)
 	    throws BeansException {
 
+		Assert.notNull(lbf, "ListableBeanFactory must not be null");
 		Map beansOfType = lbf.getBeansOfType(type, includePrototypes, allowEagerInit);
 		if (beansOfType.size() == 1) {
 			return beansOfType.values().iterator().next();

@@ -22,6 +22,7 @@ import java.lang.reflect.Modifier;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ClassUtils;
 
@@ -188,6 +189,10 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, B
 
 
 	public Object getObject() throws IllegalAccessException {
+		if (this.fieldObject == null) {
+			throw new FactoryBeanNotInitializedException();
+		}
+
 		if (!Modifier.isPublic(this.fieldObject.getModifiers()) ||
 				!Modifier.isPublic(this.fieldObject.getDeclaringClass().getModifiers())) {
 			this.fieldObject.setAccessible(true);

@@ -209,7 +209,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("voidRetvalMethod");
 		mcfb.afterPropertiesSet();
-		assertTrue(MethodInvokingFactoryBean.VOID.equals(mcfb.getObject()));
+		assertNull(mcfb.getObject());
 
 		// now see if we can match methods with arguments that have supertype arguments
 		mcfb = new MethodInvokingFactoryBean();

@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
@@ -51,6 +52,8 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 
 	private boolean singleton = true;
 
+	private boolean initialized = false;
+
 	private Object singletonInstance;
 
 
@@ -68,6 +71,7 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 
 	public void afterPropertiesSet() throws Exception {
 		if (this.singleton) {
+			this.initialized = true;
 			this.singletonInstance = createInstance();
 		}
 	}
@@ -75,6 +79,9 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 
 	public final Object getObject() throws Exception {
 		if (this.singleton) {
+			if (!this.initialized) {
+				throw new FactoryBeanNotInitializedException();
+			}
 			return this.singletonInstance;
 		}
 		else {

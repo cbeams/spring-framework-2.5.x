@@ -21,6 +21,7 @@ import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ClassUtils;
 
@@ -181,6 +182,9 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 
 
 	public Object getObject() {
+		if (this.proxy == null) {
+			throw new FactoryBeanNotInitializedException();
+		}
 		return this.proxy;
 	}
 

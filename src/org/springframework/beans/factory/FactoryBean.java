@@ -49,12 +49,15 @@ public interface FactoryBean {
 	 * managed by this factory.
 	 * <p>As with a {@link BeanFactory}, this allows support for both the
 	 * Singleton and Prototype design pattern.
-	 * <p>If this method returns <code>null</code>, the Spring IoC container
-	 * will consider the FactoryBean as being not fully initialized and throw
-	 * a corresponding {@link FactoryBeanNotInitializedException}.
-	 * @return an instance of the bean (should not be <code>null</code>;
-	 * a <code>null</code> value will be considered as an indication of
-	 * incomplete initialization)
+	 * <p>If this FactoryBean is not fully initialized yet at the time of
+	 * the call (for example because it is involved in a circular reference),
+	 * throw a corresponding {@link FactoryBeanNotInitializedException}.
+	 * <p>As of Spring 2.0, FactoryBeans are allowed to return <code>null</code>
+	 * objects. The factory will consider this as normal value to be used; it
+	 * will not throw a FactoryBeanNotInitializedException in this case anymore.
+	 * FactoryBean implementations are encouraged to throw
+	 * FactoryBeanNotInitializedException themselves now, as appropriate.
+	 * @return an instance of the bean (can be <code>null</code>)
 	 * @throws Exception in case of creation errors
 	 * @see FactoryBeanNotInitializedException
 	 */

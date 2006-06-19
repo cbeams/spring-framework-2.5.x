@@ -16,6 +16,8 @@
 
 package org.springframework.aop.scope;
 
+import java.lang.reflect.Modifier;
+
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
@@ -23,10 +25,9 @@ import org.springframework.aop.target.PrototypeTargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.util.ClassUtils;
-
-import java.lang.reflect.Modifier;
 
 /**
  * Convenient proxy factory bean for scoped objects.
@@ -94,6 +95,9 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, 
 
 
 	public Object getObject() {
+		if (this.proxy == null) {
+			throw new FactoryBeanNotInitializedException();
+		}
 		return this.proxy;
 	}
 

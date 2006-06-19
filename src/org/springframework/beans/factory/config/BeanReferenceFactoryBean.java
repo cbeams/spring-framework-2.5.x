@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
 /**
@@ -41,6 +42,7 @@ public class BeanReferenceFactoryBean implements FactoryBean, BeanFactoryAware {
 
 	private BeanFactory beanFactory;
 
+
 	/**
 	 * Set the name of the target bean,
 	 * potentially in a different bean definition file.
@@ -59,7 +61,11 @@ public class BeanReferenceFactoryBean implements FactoryBean, BeanFactoryAware {
 		}
 	}
 
+
 	public Object getObject() throws BeansException {
+		if (this.beanFactory == null) {
+			throw new FactoryBeanNotInitializedException();
+		}
 		return this.beanFactory.getBean(this.targetBeanName);
 	}
 

@@ -986,11 +986,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		catch (Throwable ex) {
 			throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
 		}
-		if (object == null) {
-			throw new FactoryBeanNotInitializedException(
-					beanName, "FactoryBean returned null object: " +
-					"probably not fully initialized (maybe due to circular bean reference)");
-		}
 		object = postProcessObjectFromFactoryBean(object, beanName);
 		return object;
 	}

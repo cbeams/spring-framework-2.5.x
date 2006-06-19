@@ -21,10 +21,11 @@ import java.lang.reflect.Method;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
-import org.springframework.util.MethodInvoker;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.MethodInvoker;
 
 /**
  * FactoryBean which returns a value which is the result of a static or instance
@@ -54,13 +55,6 @@ import org.springframework.util.ClassUtils;
  * <p>This class depends on {@link #afterPropertiesSet()} being called once
  * all properties have been set, as per the InitializingBean contract.</p>
  * 
- * <p>Note that this factory bean will return the special
- * {@link org.springframework.util.MethodInvoker#VOID} singleton instance when it is
- * used to invoke a method which returns null, or has a void return type. While the
- * user of the factory bean is presumably calling the method to perform some sort of
- * initialization, and doesn't care about any return value, all factory beans must
- * return a value, so this special singleton instance is used for this case.</p>
- *
  * <p>An example (in an XML based bean factory definition) of a bean definition
  * which uses this class to call a static factory method:</p>
  *
@@ -99,6 +93,8 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
+	private boolean initialized = false;
+
 	/** Method call result in the singleton case */
 	private Object singletonObject;
 
@@ -123,8 +119,8 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 	public void afterPropertiesSet() throws Exception {
 		prepare();
 		if (this.singleton) {
-			Object obj = doInvoke();
-			this.singletonObject = (obj != null ? obj : MethodInvoker.VOID);
+			this.initialized = true;
+			this.singletonObject = doInvoke();
 		}
 	}
 
@@ -157,13 +153,15 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 	 */
 	public Object getObject() throws Exception {
 		if (this.singleton) {
+			if (!this.initialized) {
+				throw new FactoryBeanNotInitializedException();
+			}
 			// Singleton: return shared object.
 			return this.singletonObject;
 		}
 		else {
 			// Prototype: new object on each call.
-			Object retVal = doInvoke();
-			return (retVal != null ? retVal : MethodInvoker.VOID);
+			return doInvoke();
 		}
 	}
 

@@ -42,12 +42,6 @@ import java.lang.reflect.Modifier;
  */
 public class MethodInvoker {
 
-	/**
-	 * Marker now used only by MethodInvokingFactoryBean, but left here for general use.
-	 */
-	public static final VoidType VOID = new VoidType();
-
-
 	private Class targetClass;
 
 	private Object targetObject;
