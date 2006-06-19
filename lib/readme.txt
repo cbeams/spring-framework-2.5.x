@@ -16,8 +16,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - included in spring.jar and spring-aop.jar
 
-* asm/asm*-2.2.1.jar
-- ObjectWeb ASM 2.2.1 (http://asm.objectweb.org)
+* asm/asm*-2.2.2.jar
+- ObjectWeb ASM 2.2.2 (http://asm.objectweb.org)
 - required for building the framework
 - required at runtime when using parameter name discovery with AspectJ
 
@@ -351,6 +351,10 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using the Struts support or TilesView
 - required for running JPetStore's Struts web tier
+
+* tomcat/catalina.jar
+- Apache Tomcat 5.5.17 (http://tomcat.apache.org)
+- required for building the Tomcat-specific weaver
 
 * toplink/toplink-api.jar
 - Oracle TopLink 10.1.3 API (http://www.oracle.com/technology/products/ias/toplink)
