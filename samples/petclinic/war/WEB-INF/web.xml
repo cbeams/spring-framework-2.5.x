@@ -61,7 +61,7 @@
 		<param-value>/WEB-INF/applicationContext-toplink.xml</param-value>
  		-->
 	</context-param>
-
+	<!-- 
 	<filter>
 		<filter-name>openEntityManagerInViewFilter</filter-name>
 		<filter-class>org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter</filter-class>
@@ -71,7 +71,7 @@
 		<filter-name>openEntityManagerInViewFilter</filter-name>
 		<servlet-name>petclinic</servlet-name>
 	</filter-mapping>
-	
+	 -->
 	<!--
 	  - Configures Log4J for this web app.
 	  - As this context specifies a context-param "log4jConfigLocation", its file path

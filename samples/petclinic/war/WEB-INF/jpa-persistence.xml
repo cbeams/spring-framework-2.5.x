@@ -2,37 +2,22 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
-	
+
+
 	<bean id="weaver"
 		class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver" />
-
+		
 	<bean id="entityManagerFactory"
 		class="org.springframework.orm.jpa.ContainerEntityManagerFactoryBean">
 	
 		<property name="dataSource" ref="dataSource" />
-
-		<property name="loadTimeWeaver" ref="weaver" />
-		
 		<property name="persistenceXmlLocation"
 			value="classpath:META-INF/petclinic-persistence.xml" />
 		
-		
-		<property name="persistenceUnitRootLocation" 
-			value="WEB-INF/lib/petclinic.jar" />
-		
+		<property name="loadTimeWeaver" ref="weaver"/>
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter">
-				
 				<property name="generateDdl" value="false" />
-							
-		<!--
-				<property name="database" value="HSQL" />
-		-->
-					
-				<!--
-					In the case of TopLink, this property can be
-					set to a platform class.
-				-->
 				<property name="databasePlatform" 
 					value="org.springframework.samples.petclinic.toplink.EssentialsHSQLPlatformWithNativeSequence" />	
 				
@@ -42,7 +27,6 @@
 		</property>				
 
 	</bean>
-	
 
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName"><value>org.hsqldb.jdbcDriver</value></property>
