@@ -3,23 +3,59 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 RC1 (14.6.2006)
+Changes in version 2.0 RC1 (20.6.2006)
 --------------------------------------
 
 General
 * completed reference documentation
+* fixed various documentation issues
+* basic download only contains reference PDF: no HTML variant and API docs anymore (only in -with-dependencies now!)
+
+Package org.springframework.aop
+* fixed AspectJAutoProxyCreator to avoid NPE in case of abstract beans without bean class specified
+
+Package org.springframework.beans
+* FactoryBeans are allowed to return null values now, with FactoryBeanNotInitializedException to be thrown by themselves
+* fixed AbstractBeanFactory's "getType" to avoid NPE in case of a bean definition without bean class
+* avoid ClassNotFoundException in case of explicit type specified on "value" tag
+* resolve target type of a TypedStringValue lazily, consistent with the handling of bean classes
+* moved parsing-related support classes from "beans.factory"/"beans.factory.support" to "beans.factory.parsing"
+
+Package org.springframework.core
+* StaticLabeledEnum offers its "readResolve" method with protected visibility, to kick in for subclasses as well
 
 Package org.springframework.ejb
 * fixed AbstractSlsbInvokerInterceptor to reobtain createMethod in case of cacheHome="false"/lookupHomeOnStartup="true"
 
+Package org.springframework.jms
+* added "cacheSessions" flag to DefaultMessageListenerContainer, to be turned off for reobtaining Sessions per receive
+* added "handleListenerSetupFailure" callback to DefaultMessageListenerContainer, a sibling of "handleListenerException"
+* DefaultMessageListenerContainer invokes a specified JMS ExceptionListener for listener setup failures as well
+
 Package org.springframework.orm
 * removed LocalSessionFactoryBean's early "buildMappings" call to avoid side effects with AnnotationSessionFactoryBean
+* Hibernate Open-Session-In-View's deferred close mode always switches its Sessions to FlushMode.NEVER until closing
+* refined HibernateTemplate to never register a Session for deferred close in case of "alwaysUseNewSession"=true
+* removed special Session reconnection check for Hibernate 3.1 RC1
+* fixed ContainerEntityManagerFactoryBean to always look for "META-INF/persistence.xml" in the class path by default
+* JpaTransactionManager autodetects the JDBC DataSource of the target EntityManagerFactory
+
+Package org.springframework.samples
+* added JPA support to PetClinic: EntityManagerClinic and JpaTemplateClinic, with TopLink Essentials as default provider
 
 Package org.springframework.scripting
 * fixed "spring-lang.xsd" to allow for multiple nested property elements
 
 Package org.springframework.web
 * fixed Servlet/PortletRequestAttributes to correctly update accessed attributes
+* turned WebContentGenerator's method constants public again, for calling "setSupportedMethods" in subclasses
+* FrameworkPortlet now catches all RuntimeException/Errors and rethrows them as PortletException
+* PortletContentGenerator response preperation operates on RenderRequest and RenderResponse only
+* changed Portlet HandlerInterceptor interface to have explicit callback methods for action/render requests
+* Portlet HandlerInterceptorAdapter allows to adapt the specific action/render callback methods to general callbacks
+* Portlet OpenXxxInViewInterceptors just wrap the render request, not the action request anymore
+* VelocityView and FreeMarkerView do not override a content type previously set on the response anymore
+* fixed various JSP form tag issues
 
 
 Changes in version 2.0 M5 (1.6.2006)

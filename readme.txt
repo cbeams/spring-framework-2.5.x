@@ -90,7 +90,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2545 KB)
+* "spring" (~2555 KB)
 - Convenient jar file that combines all modules
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar and aspects jar!
@@ -101,15 +101,15 @@ MODULE JARS (dist/modules):
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~320 KB)
+* "spring-beans" (~325 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
-* "spring-aop" (~260 KB)
+* "spring-aop" (~265 KB)
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, (spring-beans, AOP Alliance, CGLIB, Commons Attributes)
 
-* "spring-context" (~115 KB)
+* "spring-context" (~120 KB)
 - Contents: application context, JNDI support, instrumentation, validation
 - Dependencies: spring-beans, (spring-aop)
 
@@ -133,11 +133,11 @@ MODULE JARS (dist/modules):
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (spring-support, Tiles, iText, POI)
 
-* "spring-portlet" (~115 KB)
+* "spring-portlet" (~110 KB)
 - Contents: framework portlets, portlet MVC framework, portlet controllers
 - Dependencies: spring-web, Portlet API, (spring-webmvc)
 
-* "spring-struts" (~30 KB)
+* "spring-struts" (~25 KB)
 - Contents: Struts support
 - Dependencies: spring-web, Struts
 
@@ -187,7 +187,7 @@ MODULE JARS (dist/modules):
 
 MOCK JAR (dist)
 
-* "spring-mock" (~85 KB)
+* "spring-mock" (~90 KB)
 - Contents: JNDI mocks, Servlet API mocks, Portlet API mocks, JUnit support
 - Dependencies: spring-core
 
@@ -196,6 +196,12 @@ ASPECTS JAR (dist)
 * "spring-aspects" (~10 KB)
 - Contents: AspectJ aspects, for explicitly linking aspects into an IDE (Eclipse AJDT)
 - Dependencies: spring-aop, AspectJ, (spring-dao)
+
+WEAVER JARS (dist/weavers)
+
+* "spring-tomcat-weaver" (~5 KB)
+- Contents: extension of Tomcat's ClassLoader, capable of class instrumentation
+- Dependencies: none (for deployment into Tomcat's "server/lib" directory)
 
 Note: The above lists of third-party libraries assume J2SE 1.4 as foundation. For J2SE 1.3, an XML parser like
 Xerces, the JDBC 2.0 standard extension interfaces, and JNDI have to be added when using XML bean definitions,
@@ -207,20 +213,17 @@ Alternatively, the Jakarta implementation of the JSTL (standard.jar) has to be a
 
 4. WHERE TO START?
 
-Documentation can be found in the "docs" directory:
+Documentation can be found in the "docs" directory (depending on distribution zip):
 * the Spring reference documentation
 * the Spring MVC step-by-step tutorial
 
-Documented sample applications and skeletons can be found in "samples":
+Documented sample applications can be found in "samples" (depending on distribution zip):
 * countries
 * imagedb
 * jpetstore
 * petclinic
-* tiles-example
-* webapp-minimal
-* webapp-typical
 
-PetClinic features alternative DAO implementations and application configurations for JDBC, Hibernate,
+PetClinic features alternative DAO implementations and application configurations for JDBC, JPA, Hibernate,
 Apache OJB and Oracle TopLink, with HSQLDB and MySQL as target databases. The default PetClinic configuration
 is JDBC on HSQL, which also demonstrates Spring's JMX export through exposing the CachingClinic management
 interface. To to be able to build and run the Hibernate and OJB versions, the Spring distribution comes with
