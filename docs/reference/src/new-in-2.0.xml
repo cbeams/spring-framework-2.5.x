@@ -216,7 +216,7 @@
     </section>
 
     <section id="new-in-2-web-convention">
-      <title><emphasis>'convention-over-configuration'</emphasis></title>
+      <title>Sensible defaulting in Spring MVC</title>
 
       <para>For a lot of projects, sticking to established conventions and
       having reasonable defaults is just what they (the projects) need...
