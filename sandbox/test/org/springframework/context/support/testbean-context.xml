@@ -3,4 +3,6 @@
 
 <beans>
     <bean name="testBean" class="org.springframework.beans.TestBean"/>
+
+    <bean name="testBeanAdvice" class="org.springframework.context.support.TestBeanAdvice" factory-method="aspectOf"/>
 </beans>

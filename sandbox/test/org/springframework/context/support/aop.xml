@@ -4,6 +4,7 @@
 
 	<aspects>
         <aspect name="org.springframework.context.support.TestBeanAdvice"/>
+        <aspect name="org.springframework.context.support.ContextClassLoaderShadowingAspectForHibernate"/>
     </aspects>
 
 </aspectj>
