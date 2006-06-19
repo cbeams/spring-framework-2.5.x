@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
@@ -34,18 +32,15 @@ import org.xml.sax.SAXParseException;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.parsing.FailFastProblemReporter;
+import org.springframework.beans.factory.parsing.NullSourceExtractor;
+import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ComponentDefinition;
-import org.springframework.beans.factory.parsing.NullSourceExtractor;
-import org.springframework.beans.factory.parsing.SourceExtractor;
-import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.ReaderEventListener;
-import org.springframework.beans.factory.parsing.SourceExtractor;
-import org.springframework.beans.factory.parsing.ProblemReporter;
-import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.core.Constants;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
