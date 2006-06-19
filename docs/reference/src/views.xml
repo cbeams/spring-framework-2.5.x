@@ -349,16 +349,16 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
         <literal>freemarkerVariables</literal> property requires a
         <literal>java.util.Map</literal>.</para>
 
-        <programlisting>&lt;bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
-  &lt;property name="templateLoaderPath" value="/WEB-INF/freemarker/"/&gt;
-  &lt;property name="freemarkerVariables"&gt;
-    &lt;map&gt;
-      &lt;entry key="xml_escape" ref="fmXmlEscape"/&gt;
-    &lt;/map&gt;
-  &lt;/property&gt;
-&lt;/bean&gt;
+        <programlisting><![CDATA[<bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+  <property name="templateLoaderPath" value="/WEB-INF/freemarker/"/>
+  <property name="freemarkerVariables">
+    <map>
+      <entry key="xml_escape" value-ref="fmXmlEscape"/>
+    </map>
+  </property>
+</bean>
 
-&lt;bean id="fmXmlEscape" class="freemarker.template.utility.XmlEscape"/&gt;</programlisting>
+<bean id="fmXmlEscape" class="freemarker.template.utility.XmlEscape"/>]]></programlisting>
 
         <para>See the FreeMarker documentation for details of settings and
         variables as they apply to the <literal>Configuration</literal>
