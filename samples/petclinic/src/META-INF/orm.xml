@@ -79,6 +79,16 @@
             <basic name="lastName">
                 <column name="LAST_NAME"/>
             </basic>
+            <basic name="address">
+                <column name="ADDRESS"/>
+            </basic>            
+            <basic name="city">
+                <column name="CITY"/>
+            </basic>            
+            <basic name="telephone">
+                <column name="TELEPHONE"/>
+            </basic>            
+            
             <one-to-many name="petsInternal" target-entity="Pet" mapped-by="owner">
                 <cascade><cascade-all/></cascade>
             </one-to-many>
@@ -88,6 +98,9 @@
     <entity class="Pet">
         <table name="PETS"/>
         <attributes>
+            <basic name="name">
+                <column name="NAME"/>
+            </basic>        
             <basic name="birthDate">
                 <column name="BIRTH_DATE"/>
                 <temporal>DATE</temporal>
@@ -112,6 +125,9 @@
                 <column name="VISIT_DATE"/>
                 <temporal>DATE</temporal>
             </basic>
+            <basic name="description">
+                <column name="DESCRIPTION"/>
+            </basic>              
             <many-to-one name="pet"/>
         </attributes>
     </entity>
