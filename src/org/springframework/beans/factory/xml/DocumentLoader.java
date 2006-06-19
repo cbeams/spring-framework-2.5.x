@@ -27,6 +27,9 @@ import org.xml.sax.InputSource;
  */
 public interface DocumentLoader {
 
-	Document loadDocument(InputSource inputSource, EntityResolver entityResolver,
-												ErrorHandler errorHandler, int validationMode, boolean namespaceAware) throws Exception;
+	Document loadDocument(
+			InputSource inputSource, EntityResolver entityResolver,
+			ErrorHandler errorHandler, int validationMode, boolean namespaceAware)
+			throws Exception;
+
 }

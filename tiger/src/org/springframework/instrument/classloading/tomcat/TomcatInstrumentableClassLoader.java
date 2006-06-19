@@ -22,19 +22,21 @@ import java.lang.reflect.Modifier;
 
 import org.apache.catalina.loader.ResourceEntry;
 import org.apache.catalina.loader.WebappClassLoader;
+
 import org.springframework.instrument.classloading.WeavingTransformer;
 
 /**
- * Extension of tomcat default classloader which adds instrumentation to loaded
- * classes without the need of using an agent.
- * 
+ * Extension of Tomcat's default class loader which adds instrumentation
+ * to loaded classes without the need of using a VM-level agent.
+ *
  * @author Costin Leau
  * @since 2.0
  */
 public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 
-	/** Use an internal weavingTransformer */
+	/** Use an internal WeavingTransformer */
 	private final WeavingTransformer weavingTransformer;
+
 
 	public TomcatInstrumentableClassLoader() {
 		super();
@@ -45,6 +47,7 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 		super(classLoader);
 		this.weavingTransformer = new WeavingTransformer(classLoader);
 	}
+
 
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.weavingTransformer.addTransformer(transformer);
@@ -63,8 +66,8 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 
 	public ClassLoader getThrowawayClassLoader() {
 		WebappClassLoader tempLoader = new WebappClassLoader();
-		// use reflection to copy all the fields since most of them are private
-		// on pre-5.5.x Tomcat
+		// Use reflection to copy all the fields since most of them are private
+		// on pre-5.5.x Tomcat.
 		shallowCopyFieldState(this, tempLoader);
 		return tempLoader;
 	}
@@ -76,18 +79,18 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 		return sb.toString();
 	}
 
+
 	// The code below is orginially taken from ReflectionUtils and optimized for
-	// local usage
+	// local usage.
 	// There is no dependency on ReflectionUtils and this class is self
-	// contained to avoid classloading problems.
+	// contained to avoid class loading problems.
 
 	/**
 	 * Given the source object and the destination, which must be the same class
 	 * or a subclass, copy all fields, including inherited fields. Designed to
 	 * work on objects with public no-arg constructors.
-	 * 
 	 * @throws IllegalArgumentException if arguments are incompatible or either
-	 *             is <code>null</code>
+	 * is <code>null</code>
 	 */
 	protected void shallowCopyFieldState(final Object src, final Object dest) throws IllegalArgumentException {
 		if (src == null) {
@@ -142,4 +145,5 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 		}
 		return null;
 	}
+
 }
