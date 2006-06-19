@@ -254,9 +254,9 @@ public class ModelAndView {
 	 * Clear the state of this ModelAndView object.
 	 * The object will be empty afterwards.
 	 * <p>Can be used to suppress rendering of a given ModelAndView object
-	 * in the <code>postHandle</code> method of a HandlerInterceptor.
+	 * in the <code>postHandleRender</code> method of a HandlerInterceptor.
 	 * @see #isEmpty()
-	 * @see HandlerInterceptor#postHandle
+	 * @see HandlerInterceptor#postHandleRender
 	 */
 	public void clear() {
 		this.view = null;
