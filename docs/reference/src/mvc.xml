@@ -34,7 +34,7 @@
         in the section entitled 'A Look At Design'.</para>
         <para>If you don't have access to the aforementioned book, then the following article
         may be of interest the next time you find yourself going
-        <quote>Gah! Why can't I override this method?</quote>.</para>
+        <quote>Gah! Why can't I override this method?</quote> (if indeed you ever do).</para>
         <orderedlist>
             <listitem>
                 <para><ulink url="http://www.objectmentor.com/publications/ocp.pdf">Bob Martin, The Open-Closed Principle (PDF)</ulink></para>
@@ -1003,25 +1003,26 @@ public class SampleDelegate {
       already provided an appropriate FormController (see <xref
       linkend="mvc-controller-command" /> for more information on Command- and
       FormControllers) and a JSP view (or Velocity template) that renders the
-      form. When using the <classname>BeanNameUrlHandlerMapping</classname>, we could map the HTTP
-      request with URL <literal>http://samples.com/editaccount.form</literal>
-      to the appropriate FormController as follows:
+      form. When using the <classname>BeanNameUrlHandlerMapping</classname>, we
+      could map the HTTP request with the URL
+      <literal>http://samples.com/editaccount.form</literal> to the appropriate
+      form <interfacename>Controller</interfacename> as follows:
       </para>
-        <programlisting><![CDATA[<beans>
+      <programlisting><![CDATA[<beans>
   <bean id="handlerMapping" class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/>
 
   <bean name="/editaccount.form" class="org.springframework.web.servlet.mvc.SimpleFormController">
-    <property name="formView"><value>account</value></property>
-    <property name="successView"><value>account-created</value></property>
-    <property name="commandName"><value>Account</value></property>
-    <property name="commandClass"><value>samples.Account</value></property>
+    <property name="formView" value="account"/>
+    <property name="successView" value="account-created"/>
+    <property name="commandName" value="account"/>
+    <property name="commandClass" value="samples.Account"/>
   </bean>
 <beans>]]></programlisting>
-            <para>All incoming requests for the URL
+      <para>All incoming requests for the URL
       <literal>/editaccount.form</literal> will now be handled by the
-      FormController in the source listing above. Of course we have to define
-      a servlet-mapping in web.xml as well, to let through all the requests
-      ending with <literal>.form</literal>.
+      form <interfacename>Controller</interfacename> in the source listing above.
+      Of course we have to define a servlet-mapping in <literal>web.xml</literal>
+      as well, to let through all the requests ending with <literal>.form</literal>.
       </para>
       <programlisting><![CDATA[<web-app>
     ...
@@ -1031,7 +1032,7 @@ public class SampleDelegate {
         <load-on-startup>1</load-on-startup>
     </servlet>
 
-   <!-- Maps the sample dispatcher to /*.form -->
+   ]]><lineannotation>&lt;!-- maps the sample dispatcher to <literal>*.form</literal> --&gt;</lineannotation><![CDATA[
     <servlet-mapping>
         <servlet-name>sample</servlet-name>
         <url-pattern>*.form</url-pattern>
@@ -1039,12 +1040,13 @@ public class SampleDelegate {
     ...
 </web-app>]]></programlisting>
 
-      <para><emphasis>NOTE: if you want to use the
-      <classname>BeanNameUrlHandlerMapping</classname>, you don't necessarily have
-      to define it in the web application context (as indicated above). By
-      default, if no handler mapping can be found in the context, the
-      <classname>DispatcherServlet</classname> creates a <classname>BeanNameUrlHandlerMapping</classname>
-      for you! </emphasis></para>
+      <note>
+        <para>If you want to use the <classname>BeanNameUrlHandlerMapping</classname>,
+        you don't necessarily have to define it in the web application context (as
+        indicated above). By default, if no handler mapping can be found in the context,
+        the <classname>DispatcherServlet</classname> creates a
+        <classname>BeanNameUrlHandlerMapping</classname> for you!</para>
+      </note>
     </section>
 
     <section id="mvc-handlermapping-urlhandlermapping">
@@ -1064,29 +1066,35 @@ public class SampleDelegate {
         <load-on-startup>1</load-on-startup>
     </servlet>
 
-    <!-- Maps the sample dispatcher to /*.form -->
+    ]]><lineannotation>&lt;!-- maps the sample dispatcher to *.form --&gt;</lineannotation><![CDATA[
     <servlet-mapping>
         <servlet-name>sample</servlet-name>
         <url-pattern>*.form</url-pattern>
     </servlet-mapping>
+
+    ]]><lineannotation>&lt;!-- maps the sample dispatcher to *.html --&gt;</lineannotation><![CDATA[
     <servlet-mapping>
         <servlet-name>sample</servlet-name>
         <url-pattern>*.html</url-pattern>
     </servlet-mapping>
     ...
 </web-app>]]></programlisting>
-        <para>Allows all requests ending with .html and
-      <literal>.form</literal> to be handled by the sample dispatcher servlet.</para>
-      <programlisting><![CDATA[<beans>
-    <bean id="handlerMapping"
-          class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        
+        <para>The above <literal>web.xml</literal> configuration snippet enables all requests
+        ending with .html and <literal>.form</literal> to be handled by the sample dispatcher 
+        servlet.</para>
+      
+        <programlisting><![CDATA[<beans>
+        
+    ]]><lineannotation>&lt;!-- no <literal>'id'</literal> required, <interfacename>HandlerMapping</interfacename> beans are automatically detected by the <classname>DispatcherServlet</classname> --&gt;</lineannotation><![CDATA[
+    <bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
         <property name="mappings">
-            <props>
-                <prop key="/*/account.form">editAccountFormController</prop>
-                <prop key="/*/editaccount.form">editAccountFormController</prop>
-                <prop key="/ex/view*.html">someViewController</prop>
-                <prop key="/**/help.html">helpController</prop>
-            </props>
+            <value>
+                /*/account.form=editAccountFormController
+                /*/editaccount.form=editAccountFormController
+                /ex/view*.html=someViewController
+                /**/help.html=helpController
+            </value>
         </property>
     </bean>
 
@@ -1101,21 +1109,21 @@ public class SampleDelegate {
         <property name="commandClass" value="samples.Account"/>
     </bean>
 <beans>]]></programlisting>
-        <para>This handler mapping routes requests for
-      <literal>help.html</literal> in any directory to the
-      <literal>helpController</literal>, which is a UrlFilenameViewController
-      (more about controllers can be found in <xref
-      linkend="mvc-controller" />). Requests for a resource beginning with
-      <literal>view</literal>, and ending with <literal>.html</literal> in the
-      directory <literal>ex</literal>, will be routed to the
-      <literal>someViewController</literal>. Two further mappings are defined
-      for <literal>editAccountFormController</literal>.</para>
+
+        <para>This handler mapping routes requests for <literal>help.html</literal>
+        in any directory to the <literal>helpController</literal>, which is a
+        <classname>UrlFilenameViewController</classname> (more about controllers
+        can be found in the section entitled <xref linkend="mvc-controller" />).
+        Requests for a resource beginning with <literal>view</literal>, and ending
+        with <literal>.html</literal> in the directory <literal>ex</literal>, will
+        be routed to the <literal>someViewController</literal>. Two further mappings
+        are also defined for <literal>editAccountFormController</literal>.</para>
     </section>
 
     <section id="mvc-handlermapping-interceptor">
-      <title>Adding <literal>HandlerInterceptors</literal></title>
+      <title>Intercepting requests - the <interfacename>HandlerInterceptor</interfacename> interface</title>
 
-      <para>Spring's handler mapping mechanism has a notion of handler
+      <para>Spring's handler mapping mechanism has the notion of handler
       interceptors, that can be extremely useful when you want to apply
       specific functionality to certain requests, for example, checking for a
       principal.</para>
@@ -1130,20 +1138,20 @@ public class SampleDelegate {
       finished</emphasis>. These three methods should provide enough
       flexibility to do all kinds of pre- and post-processing.</para>
 
-      <para>The <literal>preHandle()</literal> method returns a boolean value.
+      <para>The <literal>preHandle(..)</literal> method returns a boolean value.
       You can use this method to break or continue the processing of the
       execution chain. When this method returns <literal>true</literal>, the
       handler execution chain will continue, when it returns false, the
-      <classname>DispatcherServlet</classname> assumes the interceptor itself has taken care of
-      requests (and, for example, rendered an appropriate view) and does not
-      continue executing the other interceptors and the actual handler in the
-      execution chain.</para>
+      <classname>DispatcherServlet</classname> assumes the interceptor itself has
+      taken care of requests (and, for example, rendered an appropriate view) and
+      does not continue executing the other interceptors and the actual handler in
+      the execution chain.</para>
 
       <para>The following example provides an interceptor that intercepts all
       requests and reroutes the user to a specific page if the time is not
       between 9 a.m. and 6 p.m.
       </para>
-        <programlisting><![CDATA[<beans>
+      <programlisting><![CDATA[<beans>
     <bean id="handlerMapping"
           class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
         <property name="interceptors">
@@ -1171,20 +1179,23 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
     private int openingTime;
     private int closingTime;
+
     public void setOpeningTime(int openingTime) {
         this.openingTime = openingTime;
     }
+
     public void setClosingTime(int closingTime) {
         this.closingTime = closingTime;
     }
+
     public boolean preHandle(
             HttpServletRequest request,
             HttpServletResponse response,
-            Object handler)
-    throws Exception {
+            Object handler) throws Exception {
+
         Calendar cal = Calendar.getInstance();
         int hour = cal.get(HOUR_OF_DAY);
-        if (openingTime &lt;= hour &lt; closingTime) {
+        if (openingTime <= hour < closingTime) {
             return true;
         } else {
             response.sendRedirect("http://host.com/outsideOfficeHours.html");
@@ -1198,8 +1209,9 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       file, saying, for example, he can only access the website during office
       hours.</para>
 
-      <para>As you can see, Spring has an adapter to make it easy for you to
-      extend the <interfacename>HandlerInterceptor</interfacename>.</para>
+      <para>As you can see, Spring has an adapter class (the cunningly named
+      <classname>HandlerInterceptorAdapter</classname>) to make it easier to
+      extend the <interfacename>HandlerInterceptor</interfacename> interface.</para>
     </section>
   </section>
 
@@ -1210,21 +1222,21 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     views. Spring provides view resolvers, which enable you to render models
     in a browser without tying you to a specific view technology. Out of the
     box, Spring enables you to use Java Server Pages, Velocity templates and
-    XSLT views, for example. <xref linkend="view" /> has details of
-    integrating various view technologies.</para>
+    XSLT views, for example. The section entitled <xref linkend="view" /> has
+    details of how to integrate and use a number of disparate view technologies.</para>
 
     <para>The two interfaces which are important to the way Spring handles
-    views are <literal>ViewResolver</literal> and <literal>View</literal>. The
-    <literal>ViewResolver</literal> provides a mapping between view names and
-    actual views. The <literal>View</literal> interface addresses the
-    preparation of the request and hands the request over to one of the view
-    technologies.</para>
+    views are <interfacename>ViewResolver</interfacename> and
+    <interfacename>View</interfacename>. The <interfacename>ViewResolver</interfacename>
+    provides a mapping between view names and actual views. The
+    <interfacename>View</interfacename> interface addresses the preparation of
+    the request and hands the request over to one of the view technologies.</para>
 
     <section id="mvc-viewresolver-resolver">
-      <title>ViewResolvers</title>
+      <title>Resolving views - the <interfacename>ViewResolver</interfacename> interface</title>
 
-      <para>As discussed in <xref linkend="mvc-controller" />, all controllers
-      in the Spring web MVC framework, return a
+      <para>As discussed in the section entitled <xref linkend="mvc-controller" />,
+      all controllers in the Spring Web MVC framework return a
       <classname>ModelAndView</classname> instance. Views in Spring are addressed
       by a view name and are resolved by a view resolver. Spring comes with
       quite a few view resolvers. We'll list most of them and then provide a
@@ -1235,13 +1247,11 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
         <tgroup cols="2">
           <colspec colname="c1" colwidth="1*" />
-
           <colspec colname="c2" colwidth="2*" />
 
           <thead>
             <row>
               <entry><interfacename>ViewResolver</interfacename></entry>
-
               <entry>Description</entry>
             </row>
           </thead>
@@ -1249,7 +1259,6 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
           <tbody>
             <row>
               <entry><classname>AbstractCachingViewResolver</classname></entry>
-
               <entry>An abstract view resolver which takes care of caching
               views. Often views need preparation before they can be used,
               extending this view resolver provides caching of views.</entry>
@@ -1257,43 +1266,41 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
             <row>
               <entry><classname>XmlViewResolver</classname></entry>
-
-              <entry>An implementation of <interfacename>ViewResolver</interfacename> that accepts a
-              configuration file written in XML with the same DTD as Spring's
-              bean factories. The default configuration file is
+              <entry>An implementation of <interfacename>ViewResolver</interfacename>
+              that accepts a configuration file written in XML with the same DTD
+              as Spring's XML bean factories. The default configuration file is
               <literal>/WEB-INF/views.xml</literal>.</entry>
             </row>
 
             <row>
               <entry><classname>ResourceBundleViewResolver</classname></entry>
-
-              <entry>An implementation of <interfacename>ViewResolver</interfacename> that uses bean
-              definitions in a <classname>ResourceBundle</classname>, specified by the bundle
-              basename. The bundle is typically defined in a properties file,
-              located in the classpath. The default file name is
+              <entry>An implementation of <interfacename>ViewResolver</interfacename>
+              that uses bean definitions in a <classname>ResourceBundle</classname>,
+              specified by the bundle basename. The bundle is typically defined in a
+              properties file, located in the classpath. The default file name is
               <literal>views.properties</literal>.</entry>
             </row>
 
             <row>
               <entry><classname>UrlBasedViewResolver</classname></entry>
 
-              <entry>A simple implementation of <interfacename>ViewResolver</interfacename> that allows for
-              direct resolution of symbolic view names to URLs, without an
-              explicit mapping definition. This is appropriate if your
+              <entry>A simple implementation of the <interfacename>ViewResolver</interfacename>
+              interface that effects the direct resolution of symbolic view names to
+              URLs, without an explicit mapping definition. This is appropriate if your
               symbolic names match the names of your view resources in a
-              straightforward manner, without the need for arbitrary
-              mappings.</entry>
+              straightforward manner, without the need for arbitrary mappings.</entry>
             </row>
 
             <row>
               <entry><classname>InternalResourceViewResolver</classname></entry>
 
-              <entry>A convenience subclass of <classname>UrlBasedViewResolver</classname> that
-              supports InternalResourceView (i.e. Servlets and JSPs), and
-              subclasses like JstlView and TilesView. The view class for all
-              views generated by this resolver can be specified via
-              setViewClass. See UrlBasedViewResolver's javadocs for
-              details.</entry>
+              <entry>A convenience subclass of <classname>UrlBasedViewResolver</classname>
+              that supports <classname>InternalResourceView</classname> (i.e. Servlets and JSPs),
+              and subclasses such as <classname>JstlView</classname> and
+              <classname>TilesView</classname>. The view class for all views generated
+              by this resolver can be specified via <literal>setViewClass(..)</literal>.
+              See the Javadocs for the <classname>UrlBasedViewResolver</classname> class
+              for details.</entry>
             </row>
 
             <row>
@@ -1333,8 +1340,9 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     <property name="defaultParentView" value="parentView"/>
 </bean>]]></programlisting>
 
-      <para>The <classname>ResourceBundleViewResolver</classname> inspects the ResourceBundle
-      identified by the basename, and for each view it is supposed to resolve,
+      <para>The <classname>ResourceBundleViewResolver</classname> inspects the
+      <classname>ResourceBundle</classname> identified by the basename, and for
+      each view it is supposed to resolve,
       it uses the value of the property <literal>[viewname].class</literal> as
       the view class and the value of the property
       <literal>[viewname].url</literal> as the view url. As you can see, you
@@ -1345,8 +1353,8 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <para><emphasis>A note on caching</emphasis> - subclasses of
       <classname>AbstractCachingViewResolver</classname> cache view instances they
       have resolved. This greatly improves performance when using certain view
-      technology. It's possible to turn off the cache, by setting the
-      <literal>cache</literal> property to false. Furthermore, if you have the
+      technologies. It's possible to turn off the cache, by setting the
+      <literal>cache</literal> property to <literal>false</literal>. Furthermore, if you have the
       requirement to be able to refresh a certain view at runtime (for example
       when a Velocity template has been modified), you can use the
       <literal>removeFromCache(String viewName, Locale loc)</literal>
@@ -1367,8 +1375,9 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <para>In the following example, the chain of view resolvers consists of
       two resolvers, a <classname>InternalResourceViewResolver</classname> (which
       is always automatically positioned as the last resolver in the chain)
-      and an <literal>XmlViewResolver</literal> for specifying Excel views
-      (which are not supported by the InternalResourceViewResolver):</para>
+      and an <classname>XmlViewResolver</classname> for specifying Excel views
+      (which are not supported by the <classname>InternalResourceViewResolver</classname>):</para>
+
       <programlisting><![CDATA[<bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
   <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
   <property name="prefix" value="/WEB-INF/jsp/"/>
@@ -1380,7 +1389,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
   <property name="location" value="/WEB-INF/views.xml"/>
 </bean>
 
-### views.xml
+]]><lineannotation>&lt;!-- ### in <literal>views.xml</literal> --&gt;</lineannotation><![CDATA[
 
 <beans>
   <bean name="report" class="org.springframework.example.ReportExcelView"/>
@@ -1398,7 +1407,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       detect whether or not the view exists. For example, the
       <classname>InternalResourceViewResolver</classname> uses the
       <classname>RequestDispatcher</classname> internally, and dispatching is the only way to figure
-      out if a JSP exists -this can only be done once. The same holds for the
+      out if a JSP exists - this can only be done once. The same holds for the
       <classname>VelocityViewResolver</classname> and some others. Check the JavaDoc for the view
       resolver to see if you're dealing with a view resolver that does not
       report non-existing views. As a result of this, putting an
@@ -1417,7 +1426,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       processed via the Servlet/JSP engine, this is normally handled via
       <classname>InternalResourceViewResolver</classname> / <classname>InternalResourceView</classname>
       which will ultimately end up issuing an internal forward or include, via
-      the Servlet API's <literal>RequestDispatcher.forward()</literal> or
+      the Servlet API's <literal>RequestDispatcher.forward(..)</literal> or
       <literal>RequestDispatcher.include()</literal>. For other view
       technologies, such as Velocity, XSLT, etc., the view itself produces the
       content on the response stream.</para>
@@ -1427,7 +1436,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       one controller has been called with <literal>POST</literal>ed data, and the response is
       actually a delegation to another controller (for example on a successful
       form submission). In this case, a normal internal forward will mean the
-      other controller will also see the same <literal>POST</literal> data, whih is potentially
+      other controller will also see the same <literal>POST</literal> data, which is potentially
       problematic if it can confuse it with other expected data. Another reason
       to do a redirect before displaying the result is that this will
       eliminate the possiblity of the user doing a double submission of form
@@ -1559,9 +1568,12 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       defining a CookieLocaleResolver.</para>
       
       <programlisting><![CDATA[<bean id="localeResolver">
-    <property name="cookieName"><value>clientlanguage</value></property>
-    <!-- in seconds. If set to -1, the cookie is not persisted (deleted when browser shuts down) -->
-    <property name="cookieMaxAge"><value>100000</value></property>
+
+    <property name="cookieName" value="clientlanguage"/>
+    
+    ]]><lineannotation>&lt;!-- in seconds. If set to <literal>-1</literal>, the cookie is not persisted (deleted when browser shuts down) --&gt;</lineannotation><![CDATA[
+    <property name="cookieMaxAge" value="100000">
+
 </bean>]]></programlisting>
 
       <table frame="all">
@@ -1577,9 +1589,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
           <thead>
             <row>
               <entry>Property</entry>
-
               <entry>Default</entry>
-
               <entry>Description</entry>
             </row>
           </thead>
@@ -1587,17 +1597,13 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
           <tbody>
             <row>
               <entry>cookieName</entry>
-
               <entry>classname + LOCALE</entry>
-
               <entry>The name of the cookie</entry>
             </row>
 
             <row>
               <entry>cookieMaxAge</entry>
-
               <entry>Integer.MAX_INT</entry>
-
               <entry>The maximum time a cookie will stay persistent on the
               client. If -1 is specified, the cookie will not be persisted. It
               will only be available until the client shuts down his or her
@@ -1606,9 +1612,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
             <row>
               <entry>cookiePath</entry>
-
               <entry>/</entry>
-
               <entry>Using this parameter, you can limit the visibility of the
               cookie to a certain part of your site. When cookiePath is
               specified, the cookie will only be visible to that path, and the
@@ -1685,7 +1689,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       The <interfacename>WebApplicationContext</interfacename> interface extends
       <interfacename>ThemeSource</interfacename> but delegates its responsibilities to a
       dedicated implementation. By default the delegate will be a
-      <literal>org.springframework.ui.context.support.ResourceBundleThemeSource</literal>
+      <classname>org.springframework.ui.context.support.ResourceBundleThemeSource</classname>
       that loads properties files from the root of the classpath. If you want
       to use a custom <interfacename>ThemeSource</interfacename> implementation or if you
       need to configure the basename prefix of the
@@ -1749,7 +1753,6 @@ background=/themes/cool/img/coolBg.jpg]]></programlisting>
           <thead>
             <row>
               <entry>Class</entry>
-
               <entry>Description</entry>
             </row>
           </thead>
@@ -1757,9 +1760,7 @@ background=/themes/cool/img/coolBg.jpg]]></programlisting>
           <tbody>
             <row>
               <entry><classname>FixedThemeResolver</classname></entry>
-
-              <entry>Selects a fixed theme, set using the "defaultThemeName"
-              property.</entry>
+              <entry>Selects a fixed theme, set using the "defaultThemeName" property.</entry>
             </row>
 
             <row>
@@ -2274,9 +2275,9 @@ public class FileUploadBean {
             resolved value of the <literal>setValue(Object)</literal> value property.</para></listitem>
 
             <listitem><para>Approach Two - When the bound value is of type <literal>array</literal> or
-            <literal>java.util.Collection</literal>, the <literal>input(checkbox)</literal> is marked as 'checked'
+            <interfacename>java.util.Collection</interfacename>, the <literal>input(checkbox)</literal> is marked as 'checked'
             if the configured <literal>setValue(Object)</literal> value is present in the bound
-            <literal>Collection</literal>.</para></listitem>
+            <interfacename>Collection</interfacename>.</para></listitem>
 
             <listitem><para>Approach Three - For any other bound value type, the <literal>input(checkbox)</literal>
             is marked as 'checked' if the the configured <literal>setValue(Object)</literal> is equal to the
@@ -2639,6 +2640,13 @@ public class FileUploadBean {
         
         <para>The convention-over-configuration support is perhaps best illustrated
         with an example, with the nuances being explained afterwards.</para>
+        
+        <tip>
+            <para>The Spring distribution ships with a web application that
+            showcases the convention over configuration support described in
+            this section. The application can be found in the
+            <literal>'samples/showcases/mvc-convention'</literal> directory.</para>
+        </tip>
     </section>
   
 </chapter>
