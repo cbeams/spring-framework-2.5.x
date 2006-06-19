@@ -16,15 +16,15 @@
 
 package org.springframework.beans.factory.support;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.util.Assert;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Rob Harrop
@@ -40,14 +40,23 @@ public class BeanComponentDefinition extends AbstractComponentDefinition {
 
 	private RuntimeBeanReference[] beanReferences;
 
+
 	public BeanComponentDefinition(BeanDefinition beanDefinition, String beanName) {
-		Assert.notNull(beanDefinition, "'beanDefinition' cannot be null.");
-		Assert.notNull(beanName, "'beanName' cannot be null.");
+		Assert.notNull(beanDefinition, "BeanDefinition must not be null");
+		Assert.notNull(beanName, "Bean name must not be null");
 		this.beanDefinition = beanDefinition;
 		this.beanName = beanName;
 		createDescription();
 		findBeanReferences();
 	}
+
+	public BeanComponentDefinition(BeanDefinitionHolder holder) {
+		Assert.notNull(holder, "BeanDefinitionHolder must not be null");
+		this.beanDefinition = holder.getBeanDefinition();
+		this.beanName = holder.getBeanName();
+		createDescription();
+	}
+
 
 	private void findBeanReferences() {
 		List references = new ArrayList();
@@ -62,17 +71,11 @@ public class BeanComponentDefinition extends AbstractComponentDefinition {
 		this.beanReferences = (RuntimeBeanReference[]) references.toArray(new RuntimeBeanReference[references.size()]);
 	}
 
-	public BeanComponentDefinition(BeanDefinitionHolder holder) {
-		Assert.notNull(holder, "'holder' cannot be null.");
-		this.beanDefinition = holder.getBeanDefinition();
-		this.beanName = holder.getBeanName();
-		createDescription();
-	}
-
 	private void createDescription() {
 		String beanType = ((AbstractBeanDefinition) this.beanDefinition).getBeanClassName();
 		this.description = "Bean '" + getName() + "' of type '" + beanType + "'";
 	}
+
 
 	public String getName() {
 		return this.beanName;
@@ -83,7 +86,7 @@ public class BeanComponentDefinition extends AbstractComponentDefinition {
 	}
 
 	public BeanDefinition[] getBeanDefinitions() {
-		return new BeanDefinition[]{this.beanDefinition};
+		return new BeanDefinition[] {this.beanDefinition};
 	}
 
 	public RuntimeBeanReference[] getBeanReferences() {
@@ -93,4 +96,5 @@ public class BeanComponentDefinition extends AbstractComponentDefinition {
 	public Object getSource() {
 		return this.beanDefinition.getSource();
 	}
+
 }

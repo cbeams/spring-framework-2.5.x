@@ -14,36 +14,34 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.xml;
+package org.springframework.beans.factory.parsing;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.support.Problem;
-import org.springframework.beans.factory.support.ProblemReporter;
 
 /**
  * Simple implementation of the {@link ProblemReporter} that exhibits fail-fast
  * behaviour when errors are encountered. The first error encountered results in
- * a {@link BeanDefinitionStoreException} being thrown.
- * <p/>
- * Warnings are written to the log for this class.
+ * a {@link BeanDefinitionParsingException} being thrown.
+ *
+ * <p>Warnings are written to the log for this class.
  *
  * @author Rob Harrop
  * @since 2.0
  */
-class FailFastProblemReporter implements ProblemReporter {
+public class FailFastProblemReporter implements ProblemReporter {
 
 	/**
 	 * {@link Log} instance for this class.
 	 */
 	private static final Log logger = LogFactory.getLog(FailFastProblemReporter.class);
 
+
 	/**
-	 * Throws a {@link BeanDefinitionStoreException} detailing the error that occured.
+	 * Throws a {@link BeanDefinitionParsingException} detailing the error that occured.
 	 */
 	public void error(Problem problem) {
-		throw new BeanDefinitionStoreException(problem.getResourceDescription(),
+		throw new BeanDefinitionParsingException(problem.getResourceDescription(),
 						problem.getParseState(),
 						problem.getMessage(),
 						problem.getRootCause());

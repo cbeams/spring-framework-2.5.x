@@ -14,33 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.support;
-
-import org.springframework.core.io.Resource;
+package org.springframework.beans.factory.parsing;
 
 /**
+ * {@link ParseState} entry representing a bean definition.
+ *
  * @author Rob Harrop
+ * @since 2.0
  */
-public class Location {
+public class BeanEntry implements ParseState.Entry {
 
-	private Resource resource;
+	/**
+	 * The name of the bean definition.
+	 */
+	private String name;
 
-	private Object source;
 
-	public Location(Resource resource) {
-		this.resource = resource;
+	public BeanEntry(String name) {
+		this.name = name;
 	}
 
-	public Location(Resource resource, Object source) {
-		this.resource = resource;
-		this.source = source;
+
+	public String toString() {
+		return "Bean '" + this.name + "'";
 	}
 
-	public Resource getResource() {
-		return this.resource;
-	}
-
-	public Object getSource() {
-		return this.source;
-	}
 }

@@ -14,28 +14,27 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.support;
+package org.springframework.beans.factory.parsing;
 
-import org.springframework.beans.factory.ParseState;
+
 
 /**
  * Represents a problem with a bean definition configuration. May be a
  * potential fatal problem (an error) or simply just a warning.
+ *
  * @author Rob Harrop
  * @since 2.0
  */
 public class Problem {
 
-	/**
-	 * The message
-	 */
-	private String message;
+	private final String message;
 
-	private ParseState parseState;
+	private final ParseState parseState;
 
-	private Throwable rootCause;
+	private final Throwable rootCause;
 
-	private Location location;
+	private final Location location;
+
 
 	public Problem(String message, ParseState parseState, Throwable rootCause, Location location) {
 		this.message = message;
@@ -43,6 +42,7 @@ public class Problem {
 		this.rootCause = rootCause;
 		this.location = location;
 	}
+
 
 	public ParseState getParseState() {
 		return this.parseState;
@@ -52,38 +52,22 @@ public class Problem {
 		return message;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
 	public Throwable getRootCause() {
 		return rootCause;
-	}
-
-	public void setRootCause(Throwable rootCause) {
-		this.rootCause = rootCause;
 	}
 
 	public Location getLocation() {
 		return location;
 	}
 
-	public void setLocation(Location location) {
-		this.location = location;
-	}
-
 	public String getResourceDescription() {
 		return getLocation().getResource().toString();
 	}
 
+
 	public String toString() {
-		return new StringBuffer()
-						.append('[')
-						.append(this.parseState)
-						.append("] ")
-						.append(this.message)
-						.append(" @ <")
-						.append(getResourceDescription())
-						.append(">.").toString();
+		return new StringBuffer().append('[').append(this.parseState).append("] ").
+				append(this.message).append(" @ <").append(getResourceDescription()).append(">").toString();
 	}
+
 }

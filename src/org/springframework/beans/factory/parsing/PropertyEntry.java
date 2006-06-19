@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.support;
+package org.springframework.beans.factory.parsing;
 
 /**
- * SPI interface allowing tools and other external processes to
- * handle errors and warnings reported during bean definition
- * parsing.
- * 
+ * {@link ParseState} entry representing a bean property.
+ *
  * @author Rob Harrop
  * @since 2.0
  */
-public interface ProblemReporter {
+public class PropertyEntry implements ParseState.Entry {
 
-	/**
-	 * Called when an error is encountered during parse. Implementations may choose
-	 * to treat errors as fatal.
-	 */
-	void error(Problem problem);
+	private String name;
 
-	/**
-	 * Called when a warning is raised during parse. Warnings are <strong>never</strong>
-	 * considered to be fatal.
-	 */
-	void warning(Problem problem);
+
+	public PropertyEntry(String name) {
+		this.name = name;
+	}
+
+
+	public String toString() {
+		return "Property '" + this.name + "'";
+	}
+
 }

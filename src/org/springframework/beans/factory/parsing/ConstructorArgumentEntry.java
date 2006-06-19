@@ -14,14 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory;
+package org.springframework.beans.factory.parsing;
 
 /**
- * Marker interface for entries into the {@link ParseState}.
+ * {@link ParseState} entry representing a constructor argument. May be indexed.
  * 
  * @author Rob Harrop
  * @since 2.0
  */
-public interface Entry {
+public class ConstructorArgumentEntry implements ParseState.Entry {
+
+	private int index = Integer.MIN_VALUE;
+
+
+	public ConstructorArgumentEntry() {
+	}
+
+	public ConstructorArgumentEntry(int index) {
+		this.index = index;
+	}
+
+
+	public String toString() {
+		return "Constructor-arg" + (this.index > Integer.MIN_VALUE ? ": #" + this.index : "");
+	}
 
 }

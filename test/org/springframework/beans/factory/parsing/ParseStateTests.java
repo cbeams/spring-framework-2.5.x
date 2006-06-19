@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory;
+package org.springframework.beans.factory.parsing;
 
 import junit.framework.TestCase;
+
+import org.springframework.beans.factory.parsing.ParseState;
 
 /**
  * @author Rob Harrop
@@ -63,8 +65,10 @@ public class ParseStateTests extends TestCase {
 		original.push(new MockEntry());
 		assertEquals("Snapshot should not have been modified.", entry, snapshot.peek());
 	}
-	
-	private static class MockEntry implements Entry {
+
+
+	private static class MockEntry implements ParseState.Entry {
 
 	}
+
 }

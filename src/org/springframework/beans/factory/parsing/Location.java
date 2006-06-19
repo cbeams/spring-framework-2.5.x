@@ -14,22 +14,37 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.support;
+package org.springframework.beans.factory.parsing;
+
+import org.springframework.core.io.Resource;
 
 /**
- * Simple implementation of {@link SourceExtractor} that returns <code>null</code>
- * as the source metadata. This is the default implementation and prevents to much
- * metadata from being held in memory during normal (non-tooled) runtime usage.
- *
  * @author Rob Harrop
  * @since 2.0
  */
-public class NullSourceExtractor implements SourceExtractor {
+public class Location {
 
-	/**
-	 * Returns <code>null</code>.
-	 */
-	public Object extract(Object sourceCandidate) {
-		return null;
+	private final Resource resource;
+
+	private final Object source;
+
+
+	public Location(Resource resource) {
+		this(resource, null);
 	}
+
+	public Location(Resource resource, Object source) {
+		this.resource = resource;
+		this.source = source;
+	}
+
+
+	public Resource getResource() {
+		return this.resource;
+	}
+
+	public Object getSource() {
+		return this.source;
+	}
+
 }

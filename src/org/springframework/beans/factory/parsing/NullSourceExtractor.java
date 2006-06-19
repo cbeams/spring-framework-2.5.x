@@ -14,28 +14,22 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.support;
+package org.springframework.beans.factory.parsing;
 
 /**
- * Simple implementation of the {@link SourceExtractor} that simply passes
- * the candidate source metadata object through for attachment. Using this
- * implementation means that tools will get raw access to the underlying
- * configuration source metadata provided by the tool.
- * <p/>
- * This implementation <strong>should not</strong> be used in a production
- * application since it is likely to keep too much metadata in memory
- * unnecessarily.
+ * Simple implementation of {@link SourceExtractor} that returns <code>null</code>
+ * as the source metadata. This is the default implementation and prevents to much
+ * metadata from being held in memory during normal (non-tooled) runtime usage.
  *
  * @author Rob Harrop
  * @since 2.0
  */
-public class PassThroughSourceExtractor implements SourceExtractor {
+public class NullSourceExtractor implements SourceExtractor {
 
 	/**
-	 * Returns the supplied <code>sourceCandidate</code>.
+	 * Returns <code>null</code>.
 	 */
 	public Object extract(Object sourceCandidate) {
-		return sourceCandidate;
+		return null;
 	}
-
 }

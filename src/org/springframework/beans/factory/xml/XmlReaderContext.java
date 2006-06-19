@@ -16,10 +16,11 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.springframework.beans.factory.support.ProblemReporter;
+import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.ReaderContext;
 import org.springframework.beans.factory.support.ReaderEventListener;
-import org.springframework.beans.factory.support.SourceExtractor;
+import org.springframework.beans.factory.parsing.SourceExtractor;
+import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.core.io.Resource;
 
 /**

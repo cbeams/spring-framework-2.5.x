@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory;
+package org.springframework.beans.factory.parsing;
 
 import java.util.Stack;
 
 /**
  * Simple {@link Stack}-based structure for tracking the logical position during
- * a parsing process. {@link Entry entries} are added to the stack at each point
- * during the parse phase in a {@link org.springframework.beans.factory.support.BeanDefinitionReader}-specific
- * manner.
- * <p/>
- * Calling {@link #toString()} will render a tree-style view of the current logical
+ * a parsing process. {@link Entry entries} are added to the stack at
+ * each point during the parse phase in a
+ * {@link org.springframework.beans.factory.support.BeanDefinitionReader}-specific manner.
+ *
+ * <p>Calling {@link #toString()} will render a tree-style view of the current logical
  * position in the parse phase. This representation is intended for use in
  * error messages.
  * 
@@ -43,37 +43,39 @@ public final class ParseState {
 	 */
 	private final Stack state;
 
+
 	/**
-	 * Creates a new <code>ParseState</code> with an empty {@link Stack}.
+	 * Create a new <code>ParseState</code> with an empty {@link Stack}.
 	 */
 	public ParseState() {
 		this.state = new Stack();
 	}
 
 	/**
-	 * Creates a new <code>ParseState</code> whose {@link Stack} is a {@link Object#clone clone}
+	 * Create a new <code>ParseState</code> whose {@link Stack} is a {@link Object#clone clone}
 	 * of that of the passed in <code>ParseState</code>.
 	 */
 	private ParseState(ParseState other) {
 		this.state = (Stack) other.state.clone();
 	}
 
+
 	/**
-	 * Adds a new {@link Entry} to the {@link Stack}.
+	 * Add a new {@link Entry} to the {@link Stack}.
 	 */
 	public void push(Entry entry) {
 		this.state.push(entry);
 	}
 
 	/**
-	 * Removes an {@link Entry} from the {@link Stack}.
+	 * Remove an {@link Entry} from the {@link Stack}.
 	 */
 	public void pop() {
 		this.state.pop();
 	}
 
 	/**
-	 * Returns the {@link Entry} currently at the top of the {@link Stack} or
+	 * Return the {@link Entry} currently at the top of the {@link Stack} or
 	 * <code>null</code> if the {@link Stack} is empty.
 	 */
 	public Entry peek() {
@@ -81,12 +83,13 @@ public final class ParseState {
 	}
 
 	/**
-	 * Creates a new instance of {@link ParseState} which is an independent snapshot
+	 * Create a new instance of {@link ParseState} which is an independent snapshot
 	 * of this instance.
 	 */
 	public ParseState snapshot() {
 		return new ParseState(this);
 	}
+
 
 	/**
 	 * Returns a tree-style representation of the current <code>ParseState</code>.
@@ -105,4 +108,13 @@ public final class ParseState {
 		}
 		return sb.toString();
 	}
+
+
+	/**
+	 * Marker interface for entries into the {@link ParseState}.
+	 */
+	public interface Entry {
+
+	}
+
 }

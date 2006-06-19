@@ -14,26 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory;
+package org.springframework.beans.factory.parsing;
+
 
 /**
- * {@link ParseState} entry representing a constructor. May be indexed.
+ * SPI interface allowing tools and other external processes to
+ * handle errors and warnings reported during bean definition
+ * parsing.
  * 
  * @author Rob Harrop
  * @since 2.0
  */
-public class ConstructorArgEntry implements Entry {
+public interface ProblemReporter {
 
-	private int index = Integer.MIN_VALUE;
+	/**
+	 * Called when an error is encountered during parse. Implementations may choose
+	 * to treat errors as fatal.
+	 */
+	void error(Problem problem);
 
-	public ConstructorArgEntry() {
-	}
+	/**
+	 * Called when a warning is raised during parse. Warnings are <strong>never</strong>
+	 * considered to be fatal.
+	 */
+	void warning(Problem problem);
 
-	public ConstructorArgEntry(int index) {
-		this.index = index;
-	}
-
-	public String toString() {
-		return "Constructor-arg" + (this.index > Integer.MIN_VALUE ? ": #" + this.index : "");
-	}
 }

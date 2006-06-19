@@ -19,11 +19,11 @@ package org.springframework.aop.aspectj.autoproxy;
 import junit.framework.TestCase;
 
 import org.springframework.aop.config.AopNamespaceUtils;
+import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MapBasedReaderEventListener;
-import org.springframework.beans.factory.support.SourceExtractor;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.factory.xml.XmlReaderContext;

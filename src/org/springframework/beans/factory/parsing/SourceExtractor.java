@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory;
+package org.springframework.beans.factory.parsing;
 
 /**
- * {@link Entry} in the {@link ParseState} representing a bean definition.
+ * Simple strategy allowing tools to control how source metadata is
+ * attached to the bean definition metadata.
+ *
+ * <p>Configuration parsers <strong>may</strong> provide the ability
+ * to attach source metadata during the parse phase. They will offer
+ * this metadata in a generic format which can be further modified by
+ * a <code>SourceExtractor</code> before being attached to the bean
+ * definition metadata.
  *
  * @author Rob Harrop
  * @since 2.0
  */
-public class BeanEntry implements Entry {
+public interface SourceExtractor {
 
 	/**
-	 * The name of the bean definition.
+	 * Extract the source metadata from the candidate object supplied
+	 * by the configuration parser.
 	 */
-	private String name;
+	Object extract(Object sourceCandidate);
 
-	public BeanEntry(String name) {
-		this.name = name;
-	}
-
-	public String toString() {
-		return "Bean '" + this.name + "'";
-	}
 }

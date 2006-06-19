@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.support;
+package org.springframework.beans.factory.parsing;
+
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 
 /**
- * Simple strategy allowing tools to control how source metadata is
- * attached to the bean definition metadata.
- * <p/>
- * Configuration parsers <strong>may</strong> provide the ability
- * to attach source metadata during the parse phase. They will offer
- * this metadata in a generic format which can be further modified by
- * a <code>SourceExtractor</code> before being attached to the bean
- * definition metadata.
+ * Exception thrown when a bean definition reader encounters an error during parsing.
  *
+ * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 2.0
  */
-public interface SourceExtractor {
+public class BeanDefinitionParsingException extends BeanDefinitionStoreException {
 
 	/**
-	 * Extracts the source metadata from the candidate object supplied
-	 * by the configuration parser.
+	 * Create a new BeanDefinitionParsingException.
 	 */
-	Object extract(Object sourceCandidate);
+	public BeanDefinitionParsingException(String resourceDescription, ParseState parseState, String msg, Throwable ex) {
+		super(resourceDescription, "Error '" + msg + "' in resource '" + resourceDescription + "' at:\n" + parseState, ex);
+	}
+
 }

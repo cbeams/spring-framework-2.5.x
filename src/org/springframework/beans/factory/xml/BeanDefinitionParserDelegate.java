@@ -33,10 +33,10 @@ import org.w3c.dom.NodeList;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.factory.BeanEntry;
-import org.springframework.beans.factory.ConstructorArgEntry;
-import org.springframework.beans.factory.ParseState;
-import org.springframework.beans.factory.PropertyEntry;
+import org.springframework.beans.factory.parsing.BeanEntry;
+import org.springframework.beans.factory.parsing.ConstructorArgumentEntry;
+import org.springframework.beans.factory.parsing.ParseState;
+import org.springframework.beans.factory.parsing.PropertyEntry;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -356,7 +356,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parses the supplied <code>&lt;bean&gt;</code> element. May return <code>null</code>
 	 * if there were errors during parse. Errors are reported to the
-	 * {@link org.springframework.beans.factory.support.ProblemReporter}.
+	 * {@link org.springframework.beans.factory.parsing.ProblemReporter}.
 	 */
 	public BeanDefinitionHolder parseBeanDefinitionElement(Element ele, boolean isInnerBean) {
 		String id = ele.getAttribute(ID_ATTRIBUTE);
@@ -529,7 +529,7 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
-	 * Invokes the {@link org.springframework.beans.factory.support.SourceExtractor} to pull the
+	 * Invokes the {@link org.springframework.beans.factory.parsing.SourceExtractor} to pull the
 	 * source metadata from the supplied {@link Element}.
 	 */
 	private Object extractSource(Element ele) {
@@ -657,7 +657,7 @@ public class BeanDefinitionParserDelegate {
 				}
 
 				try {
-					this.parseState.push(new ConstructorArgEntry(index));
+					this.parseState.push(new ConstructorArgumentEntry(index));
 					Object val = parsePropertyValue(ele, null);
 					if (StringUtils.hasLength(typeAttr)) {
 						cargs.addIndexedArgumentValue(index, val, typeAttr);
@@ -676,7 +676,7 @@ public class BeanDefinitionParserDelegate {
 		}
 		else {
 			try {
-				this.parseState.push(new ConstructorArgEntry());
+				this.parseState.push(new ConstructorArgumentEntry());
 				Object val = parsePropertyValue(ele, null);
 				if (StringUtils.hasLength(typeAttr)) {
 					cargs.addGenericArgumentValue(val, typeAttr);

@@ -39,10 +39,13 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ComponentDefinition;
-import org.springframework.beans.factory.support.NullSourceExtractor;
-import org.springframework.beans.factory.support.ProblemReporter;
+import org.springframework.beans.factory.parsing.NullSourceExtractor;
+import org.springframework.beans.factory.parsing.SourceExtractor;
+import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.ReaderEventListener;
-import org.springframework.beans.factory.support.SourceExtractor;
+import org.springframework.beans.factory.parsing.SourceExtractor;
+import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.core.Constants;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
@@ -205,8 +208,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Specify which {@link ProblemReporter} to use. Default implementation is
-	 * {@link FailFastProblemReporter} which exhibits fail fast behaviour. External tools
+	 * Specify which {@link org.springframework.beans.factory.parsing.ProblemReporter} to use. Default implementation is
+	 * {@link org.springframework.beans.factory.parsing.FailFastProblemReporter} which exhibits fail fast behaviour. External tools
 	 * can provide an alternative implementation that collates errors and warnings for
 	 * display in the tool UI.
 	 */

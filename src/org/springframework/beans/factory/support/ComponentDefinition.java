@@ -43,7 +43,7 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
  * <code>ComponentDefinition</code> has its own {@link BeanDefinition#getSource() source object} which may point
  * to a different, more specific, set of configuration data. Beyond this, individual pieces of bean metadata such
  * as the {@link org.springframework.beans.PropertyValue PropertyValues} may also have a source object giving an
- * even greater level of detail. Source object extraction is handled through the {@link SourceExtractor} which
+ * even greater level of detail. Source object extraction is handled through the {@link org.springframework.beans.factory.parsing.SourceExtractor} which
  * can be customized as required.
  *
  * <p>Whilst direct access to important {@link RuntimeBeanReference RuntimeBeanReferences} is provided through
@@ -108,7 +108,7 @@ public interface ComponentDefinition {
 	 * Retrieve the <code>Object</code> representing the original configuration data
 	 * that resulted in this particular <code>ComponentDefinition</code>.
 	 * May be <code>null</code>.
-	 * @see SourceExtractor
+	 * @see org.springframework.beans.factory.parsing.SourceExtractor
 	 */
 	Object getSource();
 
