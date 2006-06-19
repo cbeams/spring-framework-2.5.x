@@ -57,7 +57,7 @@
             <basic name="lastName">
                 <column name="LAST_NAME"/>
             </basic>
-            <many-to-many name="specialtiesInternal" target-entity="Specialty">
+            <many-to-many name="specialtiesInternal" target-entity="Specialty" fetch="EAGER">
                 <join-table name="VET_SPECIALTIES">
                     <join-column name="VET_ID"/>
                     <inverse-join-column name="SPECIALTY_ID"/>
@@ -89,7 +89,7 @@
                 <column name="TELEPHONE"/>
             </basic>            
             
-            <one-to-many name="petsInternal" target-entity="Pet" mapped-by="owner">
+            <one-to-many name="petsInternal" target-entity="Pet" mapped-by="owner" fetch="EAGER">
                 <cascade><cascade-all/></cascade>
             </one-to-many>
         </attributes>
@@ -104,11 +104,13 @@
             <basic name="birthDate">
                 <column name="BIRTH_DATE"/>
                 <temporal>DATE</temporal>
-            </basic> 
-            <many-to-one name="owner"
-				fetch="LAZY" />
-            <many-to-one name="type"/>
-            <one-to-many name="visitsInternal" target-entity="Visit" mapped-by="pet">
+            </basic>
+            <!--  uncomment this to enable lazy loading
+            <many-to-one name="owner" fetch="LAZY" />
+             --> 
+            <many-to-one name="owner" fetch="EAGER"/>             
+            <many-to-one name="type" fetch="EAGER"/>
+            <one-to-many name="visitsInternal" target-entity="Visit" mapped-by="pet" fetch="EAGER">
                 <cascade><cascade-all/></cascade>
             </one-to-many>
         </attributes>
@@ -128,7 +130,7 @@
             <basic name="description">
                 <column name="DESCRIPTION"/>
             </basic>              
-            <many-to-one name="pet"/>
+            <many-to-one name="pet" fetch="EAGER"/>
         </attributes>
     </entity>
 
