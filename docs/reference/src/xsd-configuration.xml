@@ -335,8 +335,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 </bean>]]></programlisting>
                 <para>After...</para>
                 <programlisting><![CDATA[<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource">
-    <jee:environment>foo=bar</jee:environment>
-    <jee:environment>ping=pong</jee:environment>
+    ]]><lineannotation>&lt;!-- newline-separated, key-value pairs for the environment (standard <classname>Properties</classname> format) --&gt;</lineannotation><![CDATA[
+    <jee:environment>
+        foo=bar
+        ping=pong
+    </jee:environment>
 </jee:jndi-lookup>]]></programlisting>
             </section>
             <section>
