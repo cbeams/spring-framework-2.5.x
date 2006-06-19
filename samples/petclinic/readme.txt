@@ -75,6 +75,20 @@ Note on enabling Log4J:
 - rename "WEB-INF/classes/log4j.properties.rename" to "log4j.properties"
 - uncomment the Log4J listener in "WEB-INF/web.xml"
 
+Note on using Java Persistence API (JPA) on Tomcat:
+To use JPA, Tomcat has to be instructed to use a custom classloader which supports 
+instrumentation. See the JPA section from Spring reference documentation for complete 
+details. 
+The steps are:
+- copy spring-tomcat-weaver.jar from Spring distribution to TOMCAT_HOME/server/lib
+- if you're running on Tomcat 5.x+ simply deploy the war
+- if you're running on Tomcat 4.x then modify TOMCAT_HOME/conf/server.xml and add a new
+<Context> element for petclinic:
+
+<Context path="/petclinic" docBase="/petclinic/location" ...>
+   <Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/>
+...
+</Context>
 
 Additional documentation can be found in the file "petclinic.html" which is
 in the "war/html" directory. This file is available in the running application
