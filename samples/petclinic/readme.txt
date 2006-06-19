@@ -5,6 +5,7 @@
 @author Ken Krebs
 @author Juergen Hoeller
 @author Rob Harrop
+@author Costin Leau
 
 
 1. DATA ACCESS STRATEGIES
@@ -22,16 +23,16 @@ On JDK < 1.5, your application server's JMX infrastructure needs to be used.
 Note that special setup is necessary on WebLogic <= 8.1 and on JBoss:
 see "jmxExporter" definition in "applicationContext-jdbc.xml" for details!
 
-The Spring distribution comes with all required Hibernate and OJB jar files
-to be able to build and run PetClinic on those two ORM tools. For TopLink,
-only a minimal toplink-api.jar is included in the Spring distribution.
+The Spring distribution comes with all required Hibernate, OJB and TopLink Essentials
+(JPA RI) jar files to be able to build and run PetClinic on those two ORM tools. For
+standard TopLink, only a minimal toplink-api.jar is included in the Spring distribution.
 To run PetClinic with TopLink, download TopLink 10.1.3 or higher from the Oracle
 website (http://www.oracle.com/technology/products/ias/toplink), install it and
 copy toplink.jar and xmlparserv2.jar into Spring's "lib/toplink" directory.
 
 * NOTE: The sample currently only works against TopLink 10.1.3 developer previews.
 * The reason for this is an incompatibility in TopLink 10.1.3 final's HSQLDB
-* platform adapter. This will be resolved until Spring 2.0 RC1.
+* platform adapter. This will be resolved until Spring 2.0 final.
 
 All data access strategies can work with JTA for transaction management,
 by activating the JtaTransactionManager and a JndiObjectFactoryBean that
@@ -75,22 +76,25 @@ Note on enabling Log4J:
 - rename "WEB-INF/classes/log4j.properties.rename" to "log4j.properties"
 - uncomment the Log4J listener in "WEB-INF/web.xml"
 
-Note on using Java Persistence API (JPA) on Tomcat:
-To use JPA, Tomcat has to be instructed to use a custom classloader which supports 
-instrumentation. See the JPA section from Spring reference documentation for complete 
-details. 
-The steps are:
-- copy spring-tomcat-weaver.jar from Spring distribution to TOMCAT_HOME/server/lib
-- if you're running on Tomcat 5.x+ simply deploy the war
-- if you're running on Tomcat 4.x then modify TOMCAT_HOME/conf/server.xml and add a new
-<Context> element for petclinic:
+
+3. JPA ON TOMCAT
+
+Notes on using the Java Persistence API (JPA) on Apache Tomcat 4.x or higher, with a
+persistence provider that requires class instrumentation (such as TopLink Essentials):
+
+To use JPA class instrumentation, Tomcat has to be instructed to use a custom class
+loader which supports instrumentation. See the JPA section from Spring reference
+documentation for complete details.
+
+The basic steps are:
+- copy spring-tomcat-weaver.jar from Spring distribution to "TOMCAT_HOME/server/lib"
+- if you're running on Tomcat 4.x or 5.x, modify "TOMCAT_HOME/conf/server.xml"
+and add a new "<Context>" element for petclinic (see below)
+- if you're running on Tomcat 5.x, you can also deploy the WAR including
+"META-INF/context.xml" from this application's "tomcat" directory
 
 <Context path="/petclinic" docBase="/petclinic/location" ...>
-   <Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/>
+  <Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/>
 ...
 </Context>
-
-Additional documentation can be found in the file "petclinic.html" which is
-in the "war/html" directory. This file is available in the running application
-through the "Tutorial" link.
 

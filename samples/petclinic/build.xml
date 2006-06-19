@@ -107,15 +107,10 @@
 			<include name="log4j-*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/toplink">
+			<include name="toplink-essentials.jar"/>
 			<include name="toplink.jar"/>
-			<include name="toplink-essentials.jar"/>			
-			<include name="toplink-api.jar"/>						
 			<include name="xmlparserv2.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/lib/toplink">
-			<include name="toplink-essentials.jar"/>
-		</fileset>
-
 		<fileset dir="${spring.root}/dist">
 			<include name="spring-mock.jar"/>
 		</fileset>
@@ -152,6 +147,8 @@
 				<include name="*.hbm.xml"/>
 				<include name="OJB*.*"/>
 				<include name="toplink*.*"/>
+				<!-- JPA meta-inf -->
+				<include name="META-INF/*"/>
 			</fileset>
 		</delete>
 		<delete dir="${weblib.dir}"/>
@@ -165,6 +162,7 @@
 	<target name="build" description="Compile main source tree java files into class files, generate jar files">
 
 		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${weblib.dir}"/>
 
 		<javac destdir="${build.dir}" source="1.5" target="1.5" debug="true"
 				deprecation="false" optimize="false" failonerror="true">
@@ -178,24 +176,11 @@
 				<include name="*.hbm.xml"/>
 				<include name="OJB*.*"/>
 				<include name="toplink*.*"/>
-			</fileset>
-			<!-- jpa meta-inf-->
-			<fileset dir="${src.dir}">
+				<!-- JPA meta-inf -->
 				<include name="META-INF/*"/>
-			</fileset>
-			<fileset dir="${src.dir}">
-				<include name="**/jpa/**/*.xml"/>
 			</fileset>
 		</copy>
 		
-		<copy todir="${build.dir}" preservelastmodified="true">
-			<fileset dir="${src.dir}">
-				<include name="**/jpa/**/*.xml"/>
-			</fileset>
-		</copy>
-			
-		<mkdir dir="${weblib.dir}"/>
-
 		<jar jarfile="${weblib.dir}/${name}.jar" compress="true">
 			<fileset dir="${build.dir}">
 				<include name="**/*"/>
@@ -208,6 +193,13 @@
 			</fileset>
 			<fileset dir="${spring.root}/lib/antlr">
 				<include name="antlr*.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/asm">
+				<include name="asm-*.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/aspectj">
+				<include name="aspectjrt.jar"/>
+				<include name="aspectjweaver.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/cglib">
 				<include name="cglib*.jar"/>
@@ -242,20 +234,14 @@
 				<include name="db-ojb-*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/toplink">
+				<include name="toplink-essentials.jar"/>
 				<include name="toplink.jar"/>
 				<include name="xmlparserv2.jar"/>
-				<include name="toplink-essentials.jar"/>			
 			</fileset>
 			<fileset dir="${spring.root}/dist">
 				<include name="spring.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/aspectj">
-				<include name="aspectj*.jar"/>
-			</fileset>
-			<fileset dir="${spring.root}/lib/asm">
-				<include name="asm*.jar"/>
-			</fileset>
-			
+
 		</copy>
 
 	</target>
@@ -270,7 +256,7 @@
 		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}" windowtitle="PetClinic"
 				source="1.5" author="true" version="true" use="true" packagenames="*">
 			<doctitle><![CDATA[<h1>PetClinic</h1>]]></doctitle>
-			<bottom><![CDATA[<i>Ken Krebs and Juergen Hoeller, 2003-2004.</i>]]></bottom>
+			<bottom><![CDATA[<i>Ken Krebs and Juergen Hoeller, 2003-2006.</i>]]></bottom>
 			<classpath refid="master-classpath"/>
 			<classpath refid="build-classpath"/>
 		</javadoc>
@@ -286,16 +272,10 @@
 		-->
 	</target>
 
+
 	<target name="warfile" depends="build" description="Build the web application archive">
 
 		<mkdir dir="${dist.dir}"/>
-
-		<copy todir="${war.dir}" preservelastmodified="true">
-			<!-- tomcat meta-inf-->
-			<fileset dir="tomcat">
-				<include name="META-INF/*.xml"/>
-			</fileset>
-		</copy>
 
 		<war warfile="${dist.dir}/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
 			<include name="*"/>
@@ -310,18 +290,16 @@
 			<include name="META-INF/*"/>			
 			<exclude name="**/.*"/>
 			<exclude name="WEB-INF/geronimo-web.xml"/>
-			
-
 		</war>
 
 	</target>
 
 
 	<!--
-	If you are going to deploy the application into Geronimo (or an
-	application server variant of Geronimo), run this target in preference
-	to the plain 'warfile'. This is required because of Geronimo
-	classloading issues.
+		If you are going to deploy the application into Geronimo (or an
+		application server variant of Geronimo), run this target in preference
+		to the plain 'warfile'. This is required because of Geronimo
+		class loading issues.
 	-->
 	<target name="geronimo.warfile" depends="build"
 			description="Build the web application archive packaged specifically for Geronimo">
@@ -340,7 +318,6 @@
 			<exclude name="**/.*"/>
 			<exclude name="WEB-INF/lib/commons-logging.jar"/>
 			<exclude name="WEB-INF/lib/cglib*.jar"/>
-			
 		</war>
 
 	</target>
@@ -403,6 +380,7 @@
 			<test name="org.springframework.samples.petclinic.ojb.PersistenceBrokerClinicTests" todir="${testreports.dir}"/>
 			<test name="org.springframework.samples.petclinic.toplink.TopLinkClinicTests" todir="${testreports.dir}"/>
 			<test name="org.springframework.samples.petclinic.jpa.EntityManagerClinicTests" todir="${testreports.dir}"/>			
+			<test name="org.springframework.samples.petclinic.jpa.JpaTemplateClinicTests" todir="${testreports.dir}"/>
 			<classpath path="${build.dir}"/>
 			<classpath path="${src.dir}"/>
 			<classpath path="${testbuild.dir}"/>
