@@ -193,13 +193,17 @@ public abstract class AbstractEntityManagerFactoryBean
 	public JpaDialect getJpaDialect() {
 		return jpaDialect;
 	}
-	
+
+	/**
+	 * Use the dialect's conversion if possible: otherwise fall back
+	 * to generic excepton conversion.
+	 * @see JpaDialect#translateExceptionIfPossible
+	 * @see EntityManagerFactoryUtils#convertJpaAccessExceptionIfPossible
+	 */
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
-		// Use the dialect's conversion if possible: otherwise fall 
-		// back to generic conversion
-		return (jpaDialect != null) ?
-				jpaDialect.translateExceptionIfPossible(ex) :
-				EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex);
+		return (this.jpaDialect != null ?
+				this.jpaDialect.translateExceptionIfPossible(ex) :
+				EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex));
 	}
 
 
@@ -235,7 +239,7 @@ public abstract class AbstractEntityManagerFactoryBean
 			this.jpaVendorAdapter.postProcessEntityManagerFactory(this.nativeEntityManagerFactory);
 		}
 
-		// Wrap the EntityManagerFactory in a factory implementing all its interfaces
+		// Wrap the EntityManagerFactory in a factory implementing all its interfaces.
 		// This allows interception of createEntityManager methods to return an
 		// application-managed EntityManager proxy that automatically joins existing
 		// transactions.
