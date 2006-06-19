@@ -83,7 +83,7 @@ public abstract class WebUtils {
 	/** Name suffixes in case of image buttons */
 	public static final String[] SUBMIT_IMAGE_SUFFIXES = {".x", ".y"};
 
-	/* Key for the mutex session attribute */
+	/** Key for the mutex session attribute */
 	public static final String SESSION_MUTEX_ATTRIBUTE = WebUtils.class.getName() + ".MUTEX";
 
 
