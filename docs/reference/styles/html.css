@@ -268,3 +268,12 @@ HR  {
 .property {
 	font-family: "Courier New", Courier, monospace;
 }
+
+a code {
+	font-family: Verdana, Arial;
+	font-size: 12px;
+}
+
+td code {
+    font-size: 110%;
+}

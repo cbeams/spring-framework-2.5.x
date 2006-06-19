@@ -329,7 +329,7 @@ public class JmxTestBean implements IJmxTestBean {
 			extensible mechanism for controlling the management interfaces of your beans.
 		</para>
 		<section id="jmx-interface-assembler">
-			<title>The <classname>MBeanInfoAssembler</classname> Interface</title>
+			<title>The <interfacename>MBeanInfoAssembler</interfacename> Interface</title>
 			<para>
 				Behind the scenes, the <classname>MBeanExporter</classname> delegates to an implementation
 				of the <classname>org.springframework.jmx.export.assembler.MBeanInfoAssembler</classname>
@@ -338,7 +338,7 @@ public class JmxTestBean implements IJmxTestBean {
 				<classname>org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler</classname>,
 				simply defines a management interface that exposes all public properties and methods
 				(as you saw in the previous examples). Spring provides two additional implementations of
-				the <classname>MBeanInfoAssembler</classname> interface that allow you to control the
+				the <interfacename>MBeanInfoAssembler</interfacename> interface that allow you to control the
 				generated management interface using either source-level metadata or any arbitrary interface.
 			</para>
 		</section>
@@ -499,9 +499,9 @@ public class JmxTestBean implements IJmxTestBean {
 			<para>
 				To enable the use of JDK 5.0 annotations for management interface definition, Spring
 				provides a set of annotations that mirror the Commons Attribute attribute classes and
-				an implementation of the <classname>JmxAttributeSource</classname> strategy interface,
+				an implementation of the <interfacename>JmxAttributeSource</interfacename> strategy interface,
 				the <classname>AnnotationsJmxAttributeSource</classname> class, that allows the
-				<classname>MBeanInfoAssembler</classname> to read them.
+				<interfacename>MBeanInfoAssembler</interfacename> to read them.
 			</para>
 			<para>
 				The example below shows a bean with a JDK 5.0 annotation defined management interface:
@@ -573,13 +573,13 @@ public class AnnotationTestBean implements IJmxTestBean {
     <bean id="jmxAttributeSource"
           class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
 
-    <!-- will create management interface using annotation metadata -->
+    ]]><lineannotation>&lt;!-- will create management interface using annotation metadata --&gt;</lineannotation><![CDATA[
     <bean id="assembler"
           class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
         <property name="attributeSource" ref="jmxAttributeSource"/>
     </bean>
 
-    <!-- will pick up ObjectName from annotation -->
+    ]]><lineannotation>&lt;!-- will pick up ObjectName from annotation --&gt;</lineannotation><![CDATA[
     <bean id="namingStrategy"
           class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
         <property name="attributeSource" ref="jmxAttributeSource"/>
@@ -817,7 +817,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 			<para>
 				To simply configuration even further, Spring introduces the
 				<classname>AutodetectCapableMBeanInfoAssembler</classname> interface which
-				extends the <classname>MBeanInfoAssembler</classname> interface to add
+				extends the <interfacename>MBeanInfoAssembler</interfacename> interface to add
 				support for autodetection of MBean resources. If you configure the
 				<classname>MBeanExporter</classname> with an instance of
 				<classname>AutodetectCapableMBeanInfoAssembler</classname> then it is
@@ -835,17 +835,29 @@ public class AnnotationTestBean implements IJmxTestBean {
 			<programlisting><![CDATA[<beans>
 
   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+    ]]><lineannotation>&lt;!-- notice how no <literal>'beans'</literal> are explicitly configured here --&gt;</lineannotation><![CDATA[
+    <property name="autodetect" value="true"/>
     <property name="assembler" ref="assembler"/>
-	  <property name="autodetect" value="true"/>
   </bean>
 
-  <bean name="bean:name=testBean1" class="org.springframework.jmx.JmxTestBean">
+  <bean id="testBean" class="org.springframework.jmx.JmxTestBean">
     <property name="name" value="TEST"/>
     <property name="age" value="100"/>
   </bean>
 
+  ]]><lineannotation>&lt;!-- (for Commons Atributes-based metadata) --&gt;</lineannotation><![CDATA[
   <bean id="attributeSource"
-      class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource"/>
+        class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource">
+    <property name="attributes">
+      <bean class="org.springframework.metadata.commons.CommonsAttributes"/>
+    </property>
+  </bean>
+  
+  ]]><lineannotation>&lt;!-- (for Java5+ annotations-based metadata) --&gt;</lineannotation><![CDATA[
+  <!--
+  <bean id="attributeSource"
+        class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+  -->
 
   <bean id="assembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
     <property name="attributeSource" ref="attributeSource"/>
@@ -932,7 +944,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 			<para>
 				Here you can see that the
 				<classname>InterfaceBasedMBeanInfoAssembler</classname> is configured to use
-				the <classname>IJmxTestBean</classname> interface when constructing the
+				the <interfacename>IJmxTestBean</interfacename> interface when constructing the
 				management interface for any bean. It is important to understand that
 				beans processed by the
 				<classname>InterfaceBasedMBeanInfoAssembler</classname> are <emphasis>not</emphasis>
@@ -940,7 +952,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 				interface.
 			</para>
 			<para>
-				In the case above, the <classname>IJmxTestBean</classname> interface
+				In the case above, the <interfacename>IJmxTestBean</interfacename> interface
 				is used to construct all management interfaces for all beans. In many
 				cases this is not the desired behavior and you may want to use different
 				interfaces for different beans. In this case, you can pass
