@@ -17,7 +17,7 @@ import org.springframework.samples.petclinic.Visit;
  * located in the META-INF dir.
  *
  * @author Mike Keith
- * @since 22.4.2006
+ * @since 22.04.2006
  */
 public class JpaTemplateClinic extends JpaDaoSupport implements Clinic {
 	
@@ -30,8 +30,8 @@ public class JpaTemplateClinic extends JpaDaoSupport implements Clinic {
 	}
 
 	public Collection findOwners(String lastName) throws DataAccessException {
-        HashMap<String,String> map = new HashMap<String, String>();
-        map.put("lastName", lastName + "%");
+		HashMap<String,String> map = new HashMap<String, String>();
+		map.put("lastName", lastName + "%");
 		return getJpaTemplate().findByNamedParams("SELECT owner FROM Owner owner WHERE owner.lastName LIKE :lastName", map);
 	}
 

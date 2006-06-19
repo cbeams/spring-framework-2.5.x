@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+
+	<!-- Configurer that replaces ${...} placeholders with values from a properties file -->
+	<!-- (in this case, JDBC-related settings for the dataSource definition below) -->
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="/WEB-INF/jdbc.properties"/>
+	</bean>
+
+
+	<!-- Local DataSource that works in any environment -->
+	<!-- Note that DriverManagerDataSource does not pool; it is not intended for production -->
+	<!-- See JPetStore for an example of using Commons DBCP BasicDataSource as alternative -->
+	<!-- See Image Database for an example of using C3P0 ComboPooledDataSource as alternative -->
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="${jdbc.driverClassName}"/>
+		<property name="url" value="${jdbc.url}"/>
+		<property name="username" value="${jdbc.username}"/>
+		<property name="password" value="${jdbc.password}"/>
+	</bean>
+
+	<!-- JPA EntityManagerFactory -->
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.ContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="loadTimeWeaver">
+			<bean class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"/>
+		</property>
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter">
+				<property name="databasePlatform"
+						value="org.springframework.samples.petclinic.toplink.EssentialsHSQLPlatformWithNativeSequence"/>
+				<property name="generateDdl" value="false"/>
+				<property name="showSql" value="true" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- Transaction manager for a single JPA EntityManagerFactory (alternative to JTA) -->
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>
+	</bean>
+
+
+	<aop:aspectj-autoproxy />
+
+	<!--
+		Simply defining this bean will cause requests to owner names to be saved.
+		Spring automatically deploys the @Aspect when AspectJ autoproxying is enabled.
+		Note that we can dependency inject this bean like any other bean.
+	-->
+	<bean class="org.springframework.samples.petclinic.aspects.UsageLogAspect">
+		<property name="historySize" value="300"/>
+	</bean>
+
+
+	<!--
+		Instruct Spring to perform declarative transaction management automatically
+		on annotated classes.
+	-->
+	<tx:annotation-driven/>
+
+	<!--
+		PostProcessors to perform exception translation on @Repository classes
+		and injection according to the JPA specification.
+		A JPA namespace handler will simplify specification of entity manager factories
+		and remove the requirement for these bean definitions in 2.0 final.
+	-->
+	<bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>
+
+	<bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor"/>
+
+
+	<!--
+		Will automatically be transactional due to annotation usage.
+		EntityManager will be auto-injected due to @PersistenceContext.
+	-->
+	<bean id="clinic" class="org.springframework.samples.petclinic.jpa.EntityManagerClinic"/>
+
+
+</beans>

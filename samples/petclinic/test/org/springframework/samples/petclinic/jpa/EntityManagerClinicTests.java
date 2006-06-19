@@ -39,15 +39,11 @@ import org.springframework.test.jpa.AbstractJpaTests;
  *
  * <p>The AbstractTransactionalDataSourceSpringContextTests and related classes are shipped
  * in the spring-mock.jar.
- * @see AbstractJpaTests
+ *
  * @author Rod Johnson
+ * @see AbstractJpaTests
  */
 public class EntityManagerClinicTests extends JpaClinicTests {
-	
-	private static final String[] ENTITY_MANAGER_LOCATIONS = new String[] { 
-		"/org/springframework/samples/petclinic/jpa/dataAccess.xml",
-		"/org/springframework/samples/petclinic/jpa/entityManager-clinic.xml"
-	};
 	
 	private UsageLogAspect usageLogAspect;
 	
@@ -56,9 +52,12 @@ public class EntityManagerClinicTests extends JpaClinicTests {
 	}
 	
 	protected String[] getConfigLocations() {
-		return ENTITY_MANAGER_LOCATIONS;
+		return new String[] {
+			"/org/springframework/samples/petclinic/jpa/applicationContext-jpaCommon.xml",
+			"/org/springframework/samples/petclinic/jpa/applicationContext-entityManager.xml"
+		};
 	}
-	
+
 	public void testUsageLogAspectIsInvoked() {
 		String name1 = "Schuurman";
 		String name2 = "Greenwood";

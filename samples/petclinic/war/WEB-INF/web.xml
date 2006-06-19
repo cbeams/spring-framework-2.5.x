@@ -35,43 +35,27 @@
 		- Can be set to "/WEB-INF/applicationContext-hibernate.xml" for the Hibernate
 		- implementation, "/WEB-INF/applicationContext-ojb.xml" for the Apache OJB one,
 		- "/WEB-INF/applicationContext-toplink.xml" for the Oracle TopLink one,
+		- "/WEB-INF/applicationContext-jpa.xml" for the JPA one,
 		- or "/WEB-INF/applicationContext-jdbc.xml" for the JDBC one.
 	  -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		
-		<!--
 		<param-value>/WEB-INF/applicationContext-jdbc.xml</param-value>
-		-->
-		
-		<!--
-			To use the JPA variant below you will need to enable
-			Spring load-time weaving in your server environment.
-			See Spring JPA documentation for information on how to do this.
-		-->
-		
-		<param-value>
-			/WEB-INF/jpa-persistence.xml
-			classpath:org/springframework/samples/petclinic/jpa/entityManager-clinic.xml
-		</param-value>
-		
 		<!--
 		<param-value>/WEB-INF/applicationContext-hibernate.xml</param-value>
 		<param-value>/WEB-INF/applicationContext-ojb.xml</param-value>
 		<param-value>/WEB-INF/applicationContext-toplink.xml</param-value>
+		<param-value>/WEB-INF/applicationContext-jpa.xml</param-value>
  		-->
+
+		<!--
+			To use the JPA variant above, you will need to enable Spring load-time
+			weaving in your server environment. See PetClinic's readme and/or
+			Spring's JPA documentation for information on how to do this.
+		-->
 	</context-param>
-	<!-- 
-	<filter>
-		<filter-name>openEntityManagerInViewFilter</filter-name>
-		<filter-class>org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter</filter-class>
-	</filter>
-	
-	<filter-mapping>
-		<filter-name>openEntityManagerInViewFilter</filter-name>
-		<servlet-name>petclinic</servlet-name>
-	</filter-mapping>
-	 -->
+
 	<!--
 	  - Configures Log4J for this web app.
 	  - As this context specifies a context-param "log4jConfigLocation", its file path
@@ -107,8 +91,6 @@
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
-	
-
 
 	<!--
 	  - Servlet that dispatches request to registered handlers (Controller implementations).
@@ -124,7 +106,6 @@
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
-	
 
 	<!--
 	  - Maps the petclinic dispatcher to *.htm. All handler mappings in

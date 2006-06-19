@@ -36,19 +36,17 @@ import org.springframework.test.jpa.AbstractJpaTests;
  *
  * <p>The AbstractTransactionalDataSourceSpringContextTests and related classes are shipped
  * in the spring-mock.jar.
- * @see AbstractJpaTests
+ *
  * @author Rod Johnson
+ * @see AbstractJpaTests
  */
 public class JpaTemplateClinicTests extends JpaClinicTests {
 	
-	private static final String[] JPA_TEMPLATE_LOCATIONS = new String[] { 
-		"/org/springframework/samples/petclinic/jpa/dataAccess.xml",
-		"/org/springframework/samples/petclinic/jpa/jpaTemplate-clinic.xml"
-	};
-	
-	
 	protected String[] getConfigLocations() {
-		return JPA_TEMPLATE_LOCATIONS;
+		return new String[] {
+			"/org/springframework/samples/petclinic/jpa/applicationContext-jpaCommon.xml",
+			"/org/springframework/samples/petclinic/jpa/applicationContext-jpaTemplate.xml"
+		};
 	}
-	
+
 }
