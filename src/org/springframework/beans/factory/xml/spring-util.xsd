@@ -91,7 +91,7 @@
 						<xsd:annotation>
 							<xsd:appinfo>
 								<tool:annotation>
-									<tool:expected-type type="java.util.Class"/>
+									<tool:expected-type type="java.lang.Class"/>
 									<tool:assignable-to type="java.util.Map"/>
 								</tool:annotation>
 							</xsd:appinfo>
@@ -118,7 +118,7 @@
 						<xsd:annotation>
 							<xsd:appinfo>
 								<tool:annotation>
-									<tool:expected-type type="java.util.Class"/>
+									<tool:expected-type type="java.lang.Class"/>
 									<tool:assignable-to type="java.util.List"/>
 								</tool:annotation>
 							</xsd:appinfo>
@@ -145,7 +145,7 @@
 						<xsd:annotation>
 							<xsd:appinfo>
 								<tool:annotation>
-									<tool:expected-type type="java.util.Class"/>
+									<tool:expected-type type="java.lang.Class"/>
 									<tool:assignable-to type="java.util.Set"/>
 								</tool:annotation>
 							</xsd:appinfo>
