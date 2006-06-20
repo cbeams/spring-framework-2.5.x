@@ -586,9 +586,24 @@ public class QuartzSupportTests extends TestCase {
 		assertEquals(ac, jobDetail.getJobDataMap().get("appCtx"));
 	}
 
+	public void testMethodInvokingJobDetailFactoryBeanWithListenerNames() throws Exception {
+		TestMethodInvokingTask task = new TestMethodInvokingTask();
+		MethodInvokingJobDetailFactoryBean mijdfb = new MethodInvokingJobDetailFactoryBean();
+		String[] names = new String[] {"test1", "test2"};
+		mijdfb.setName("myJob1");
+		mijdfb.setGroup(Scheduler.DEFAULT_GROUP);
+		mijdfb.setTargetObject(task);
+		mijdfb.setTargetMethod("doSomething");
+		mijdfb.setJobListenerNames(names);
+		mijdfb.afterPropertiesSet();
+		JobDetail jobDetail = (JobDetail) mijdfb.getObject();
+		List result = Arrays.asList(jobDetail.getJobListenerNames());
+		assertEquals(Arrays.asList(names), result);
+	}
+
 	public void testJobDetailBeanWithListenerNames() {
 		JobDetailBean jobDetail = new JobDetailBean();
-		String[] names = new String[]{"test1", "test2"};
+		String[] names = new String[] {"test1", "test2"};
 		jobDetail.setJobListenerNames(names);
 		List result = Arrays.asList(jobDetail.getJobListenerNames());
 		assertEquals(Arrays.asList(names), result);
@@ -596,7 +611,7 @@ public class QuartzSupportTests extends TestCase {
 
 	public void testCronTriggerBeanWithListenerNames() {
 		CronTriggerBean trigger = new CronTriggerBean();
-		String[] names = new String[]{"test1", "test2"};
+		String[] names = new String[] {"test1", "test2"};
 		trigger.setTriggerListenerNames(names);
 		List result = Arrays.asList(trigger.getTriggerListenerNames());
 		assertEquals(Arrays.asList(names), result);
@@ -604,7 +619,7 @@ public class QuartzSupportTests extends TestCase {
 
 	public void testSimpleTriggerBeanWithListenerNames() {
 		SimpleTriggerBean trigger = new SimpleTriggerBean();
-		String[] names = new String[]{"test1", "test2"};
+		String[] names = new String[] {"test1", "test2"};
 		trigger.setTriggerListenerNames(names);
 		List result = Arrays.asList(trigger.getTriggerListenerNames());
 		assertEquals(Arrays.asList(names), result);

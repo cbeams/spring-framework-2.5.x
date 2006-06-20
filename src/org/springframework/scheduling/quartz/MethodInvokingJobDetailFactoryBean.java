@@ -67,6 +67,8 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 
 	private boolean concurrent = true;
 
+	private String[] jobListenerNames;
+
 	private String beanName;
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
@@ -107,6 +109,18 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		this.concurrent = concurrent;
 	}
 
+	/**
+	 * Set a list of JobListener names for this job, referring to
+	 * non-global JobListeners registered with the Scheduler.
+	 * <p>A JobListener name always refers to the name returned
+	 * by the JobListener implementation.
+	 * @see SchedulerFactoryBean#setJobListeners
+	 * @see org.quartz.JobListener#getName
+	 */
+	public void setJobListenerNames(String[] names) {
+		this.jobListenerNames = names;
+	}
+
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
@@ -129,9 +143,17 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		// Consider the concurrent flag to choose between stateful and stateless job.
 		Class jobClass = (this.concurrent ? (Class) MethodInvokingJob.class : StatefulMethodInvokingJob.class);
 
+		// Build JobDetail instance.
 		this.jobDetail = new JobDetail(name, this.group, jobClass);
 		this.jobDetail.getJobDataMap().put("methodInvoker", this);
-		this.jobDetail.setVolatility(true);		
+		this.jobDetail.setVolatility(true);
+
+		// Register job listener names.
+		if (this.jobListenerNames != null) {
+			for (int i = 0; i < this.jobListenerNames.length; i++) {
+				this.jobDetail.addJobListener(this.jobListenerNames[i]);
+			}
+		}
 	}
 
 
@@ -199,6 +221,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	 * won't let jobs interfere with each other.
 	 */
 	public static class StatefulMethodInvokingJob extends MethodInvokingJob implements StatefulJob {
+
 		// No implementation, just a addition of the tag interface StatefulJob
 		// in order to allow stateful method invoking jobs.
 	}
