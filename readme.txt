@@ -90,10 +90,10 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2555 KB)
-- Convenient jar file that combines all modules
+* "spring" (~2470 KB)
+- Convenient jar file combining all standard modules (except for superseded modules)
 - Also includes the AOP Alliance interfaces (as a convenience)
-- Note: Does not include contents of mock jar and aspects jar!
+- Note: Does not include contents of mock jar, aspects jar, and spring-hibernate2 jar!
 
 MODULE JARS (dist/modules):
 
@@ -166,7 +166,7 @@ MODULE JARS (dist/modules):
 - Dependencies: spring-dao, spring-jdbc, JPA API, (spring-webmvc, spring-portlet)
 
 * "spring-hibernate2" (~90 KB)
-- Contents: Hibernate 2.1 support
+- Contents: Hibernate 2.1 support (superseded)
 - Dependencies: spring-dao, spring-jdbc, Hibernate2, (spring-webmvc, spring-portlet)
 
 * "spring-hibernate3" (~110 KB)
