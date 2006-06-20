@@ -826,6 +826,19 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		}
 	}
 
+	public void testPrototypeFactoryBeanNotEagerlyCalled() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(FactoryBeanThatShouldntBeCalled.class));
+		lbf.preInstantiateSingletons();
+	}
+
+	public void testPrototypeFactoryBeanNotEagerlyCalledInCaseOfBeanClassName() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test",
+				new RootBeanDefinition(FactoryBeanThatShouldntBeCalled.class.getName(), null, null));
+		lbf.preInstantiateSingletons();
+	}
+
 	public void testBeanPostProcessorWithWrappedObjectAndDisposableBean() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDisposableBean.class);
@@ -1086,6 +1099,22 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 		public Object createGeneric() {
 			return create();
+		}
+	}
+
+
+	public static class FactoryBeanThatShouldntBeCalled implements FactoryBean {
+
+		public Object getObject() {
+			throw new IllegalStateException();
+		}
+
+		public Class getObjectType() {
+			return null;
+		}
+
+		public boolean isSingleton() {
+			return false;
 		}
 	}
 
