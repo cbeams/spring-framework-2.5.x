@@ -71,7 +71,7 @@ import org.springframework.util.ClassUtils;
  * Spring configuration (use JtaTransactionManager instead) and JPA provider
  * configuration, neither affecting application code.
  *
- * <p>LocalEntityManagerFactoryBean and ContainerEntityManagerFactoryBean are
+ * <p>LocalEntityManagerFactoryBean and LocalContainerEntityManagerFactoryBean are
  * the preferred ways of obtaining a reference to an EntityManagerFactory
  * outside of a full Java EE 5 environment. Within a Java EE 5 environment,
  * you will typically work with either an EntityManagerFactory obtained from

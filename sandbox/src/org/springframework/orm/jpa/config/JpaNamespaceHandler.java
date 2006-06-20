@@ -1,56 +1,56 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.orm.jpa.config;
 
-import java.util.List;
-
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
-import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
-import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
-import org.springframework.beans.factory.xml.BeanDefinitionParser;
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
-import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.core.Conventions;
-import org.springframework.orm.jpa.ContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.JpaVendorAdapter;
-import org.springframework.orm.jpa.LocalEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter;
-import org.springframework.util.StringUtils;
-import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.core.Conventions;
+import org.springframework.orm.jpa.JpaVendorAdapter;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.LocalEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter;
+import org.springframework.util.StringUtils;
+
 /**
- * 
  * @author Costin Leau
  * @since 2.0
  */
 public class JpaNamespaceHandler extends NamespaceHandlerSupport {
 
+	public void init() {
+		registerBeanDefinitionParser("entityManagerFactory", new ConfigBeanDefinitionParser());
+	}
+
+
 	private class ConfigBeanDefinitionParser implements BeanDefinitionParser {
+
 		private static final String VENDOR = "vendor";
 
 		private static final String VENDOR_PROVIDED = "provided";
@@ -73,7 +73,7 @@ public class JpaNamespaceHandler extends NamespaceHandlerSupport {
 					if (VENDOR.equals(localName)) {
 						parseVendor((Element) node, parserContext, builder);
 					}
-					
+
 				}
 			}
 
@@ -95,7 +95,7 @@ public class JpaNamespaceHandler extends NamespaceHandlerSupport {
 					continue;
 				}
 				if (LOAD_TIME_WEAVER.equals(name)) {
-					builder.getBeanDefinition().setBeanClass(ContainerEntityManagerFactoryBean.class);
+					builder.getBeanDefinition().setBeanClass(LocalContainerEntityManagerFactoryBean.class);
 				}
 
 				builder.addPropertyValue(extractPropertyName(name), attribute.getValue());
@@ -146,16 +146,9 @@ public class JpaNamespaceHandler extends NamespaceHandlerSupport {
 					}
 				}
 			}
-			
+
 			builder.addPropertyValue("jpaVendorAdapter", vendorBuilder.getBeanDefinition());
-
 		}
-
-	}
-
-	public void init() {
-		registerBeanDefinitionParser("entityManagerFactory", new ConfigBeanDefinitionParser());
-
 	}
 
 }

@@ -37,7 +37,7 @@ import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
  * @author Rod Johnson
  * @since 2.0
  */
-public class ContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBeanTests {
+public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBeanTests {
 	
 	// Set by DummyPersistenceProvider inner class
 	private static Map actualProps;
@@ -49,7 +49,7 @@ public class ContainerEntityManagerFactoryBeanTests extends AbstractEntityManage
 	}
 	
 	public void testExceptionTranslationWithNoDialect() throws Exception {
-		ContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
+		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
 		EntityManagerFactory emf = cefb.getObject();
 		assertNull("No dialect set", cefb.getJpaDialect());
 		
@@ -62,7 +62,7 @@ public class ContainerEntityManagerFactoryBeanTests extends AbstractEntityManage
 	}
 	
 	public void testEntityManagerFactoryIsProxied() throws Exception {
-		ContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
+		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
 		EntityManagerFactory emf = cefb.getObject();
 		assertSame("EntityManagerFactory reference must be cached after init", emf, cefb.getObject());
 		
@@ -87,7 +87,7 @@ public class ContainerEntityManagerFactoryBeanTests extends AbstractEntityManage
 		emfMc.setVoidCallable();
 		emfMc.replay();
 		
-		ContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
+		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
 		EntityManagerFactory emf = cefb.getObject();
 		assertSame("EntityManagerFactory reference must be cached after init", emf, cefb.getObject());
 		
@@ -140,7 +140,7 @@ public class ContainerEntityManagerFactoryBeanTests extends AbstractEntityManage
 		emfMc.setVoidCallable();
 		emfMc.replay();
 		
-		ContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
+		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
 		
 		JpaTransactionManager jpatm = new JpaTransactionManager();
 		jpatm.setEntityManagerFactory(cefb.getObject());
@@ -197,7 +197,7 @@ public class ContainerEntityManagerFactoryBeanTests extends AbstractEntityManage
 		emfMc.setVoidCallable();
 		emfMc.replay();
 
-		ContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
+		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
 
 		JpaTransactionManager jpatm = new JpaTransactionManager();
 		jpatm.setEntityManagerFactory(cefb.getObject());
@@ -220,8 +220,8 @@ public class ContainerEntityManagerFactoryBeanTests extends AbstractEntityManage
 		emMc.verify();
 	}
 
-	public ContainerEntityManagerFactoryBean parseValidPersistenceUnit() throws Exception {
-		ContainerEntityManagerFactoryBean emfb = createEntityManagerFactoryBean(
+	public LocalContainerEntityManagerFactoryBean parseValidPersistenceUnit() throws Exception {
+		LocalContainerEntityManagerFactoryBean emfb = createEntityManagerFactoryBean(
 				"org/springframework/orm/jpa/domain/persistence.xml", null, 
 				"Person");
 		return emfb;
@@ -237,14 +237,14 @@ public class ContainerEntityManagerFactoryBeanTests extends AbstractEntityManage
 		}
 	}
 	
-	protected ContainerEntityManagerFactoryBean createEntityManagerFactoryBean(
+	protected LocalContainerEntityManagerFactoryBean createEntityManagerFactoryBean(
 			String persistenceXml, Properties props, String entityManagerName) throws Exception {
 
 		// This will be set by DummyPersistenceProvider
 		actualPui = null;
 		actualProps = null;
 		
-		ContainerEntityManagerFactoryBean containerEmfb = new ContainerEntityManagerFactoryBean();
+		LocalContainerEntityManagerFactoryBean containerEmfb = new LocalContainerEntityManagerFactoryBean();
 		containerEmfb.setAllowRedeploymentWithSameName(true);
 		
 		containerEmfb.setPersistenceUnitName(entityManagerName);
@@ -264,16 +264,12 @@ public class ContainerEntityManagerFactoryBeanTests extends AbstractEntityManage
 		
 		return containerEmfb;
 		
-//		containerEmfb.destroy();
-//		
-//		emfMc.verify();
-		
-		
+		//containerEmfb.destroy();
+		//emfMc.verify();
 	}
 	
 	public void testRejectsMissingPersistenceUnitInfo() throws Exception {
-		
-		ContainerEntityManagerFactoryBean containerEmfb = new ContainerEntityManagerFactoryBean();
+		LocalContainerEntityManagerFactoryBean containerEmfb = new LocalContainerEntityManagerFactoryBean();
 		String entityManagerName = "call me Bob";
 		
 		containerEmfb.setPersistenceUnitName(entityManagerName);
@@ -301,7 +297,8 @@ public class ContainerEntityManagerFactoryBeanTests extends AbstractEntityManage
 			throw new UnsupportedOperationException();
 		}
 	}
-	
+
+
 	protected static class NoOpEntityTransaction implements EntityTransaction {
 
 		public void begin() {

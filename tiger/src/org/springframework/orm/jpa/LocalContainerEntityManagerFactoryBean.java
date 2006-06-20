@@ -40,21 +40,39 @@ import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
 import org.springframework.util.ClassUtils;
 
 /**
- * Generic fully Spring-configured EntityManagerFactory FactoryBean for use with
- * the container contract for JPA bootstrapping, parsing XML files and creating
- * a PersistenceUnitInfo.
+ * Powerful FactoryBean that creates a fully Spring-configured EntityManagerFactory
+ * according to the container contract for JPA bootstrapping
  *
- * <p>Created EntityManagerFactory object implements all the interfaces
- * of the underlying native EntityManagerFactory returned by the
- * PersistenceProvider, plus the EntityManagerFactoryInfo interface,
- * which exposes additional information.
+ * <p>As with LocalEntityManagerFactoryBean, configuration settings are usually read in
+ * from a <code>META-INF/persistence.xml</code> config file, residing in the class path,
+ * according to the general JPA configuration contract. However, this FactoryBean is
+ * more flexible in that you can override the location of the <code>persistence.xml</code>
+ * file, specify the JDBC DataSources to link to, etc. Furthermore, it allows for
+ * pluggable class instrumentation through the Spring LoadTimeWeaver abstraction,
+ * instead of being tied to a special VM agent specified on JVM startup.
+ *
+ * <p>Internally, this FactoryBean parses the <code>persistence.xml</code> file itself
+ * and creates a corresponding PersistenceUnitInfo object (with further configuration
+ * merged in, such as JDBC DataSources and the LoadTimeWeaver), to be passed to the
+ * JPA PersistenceProvider. This corresponds to full-fledged local JPA container.
+ *
+ * <p>The exposed EntityManagerFactory object will implement all the interfaces of
+ * the underlying native EntityManagerFactory returned by the PersistenceProvider,
+ * plus the EntityManagerFactoryInfo interface which exposes additional metadata.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 2.0
+ * @see #setPersistenceXmlLocation
+ * @see #setJpaProperties
+ * @see #setJpaVendorAdapter
+ * @see #setLoadTimeWeaver
+ * @see #setDataSource
  * @see EntityManagerFactoryInfo
+ * @see LocalEntityManagerFactoryBean
+ * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory
  */
-public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean
+public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean
 		implements ResourceLoaderAware {
 
 	/**
@@ -97,7 +115,7 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 	 * <p>Default is "classpath:META-INF/persistence.xml".
 	 * @param persistenceXmlLocation a Spring resource String
 	 * identifying the location of the <code>persistence.xml</code> file
-	 * that this ContainerEntityManagerFactoryBean should parse
+	 * that this LocalContainerEntityManagerFactoryBean should parse
 	 */
 	public void setPersistenceXmlLocation(String persistenceXmlLocation) {
 		this.persistenceXmlLocation = persistenceXmlLocation;
@@ -126,18 +144,61 @@ public class ContainerEntityManagerFactoryBean extends AbstractEntityManagerFact
 		this.allowRedeploymentWithSameName = allowRedeploymentWithSameName;
 	}
 
+	/**
+	 * Specify the Spring LoadTimeWeaver to use for class instrumentation according
+	 * to the JPA class transformer contract.
+	 * <p>It is a not required to specify a LoadTimeWeaver: Most providers will be
+	 * able to provide a subset of their functionality without class instrumentation
+	 * as well, or operate with their VM agent specified on JVM startup.
+	 * <p>In terms of Spring-provided weaving options, the most important ones are
+	 * InstrumentationLoadTimeWeaver, which requires a Spring-specific (but very general)
+	 * VM agent specified on JVM startup, and ReflectiveLoadTimeWeaver, which interacts
+	 * with an underlying ClassLoader based on specific extended methods being available
+	 * on it (for example, interacting with Spring's TomcatInstrumentableClassLoader).
+	 * @see org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver
+	 * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
+	 * @see org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader
+	 */
 	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
 		this.loadTimeWeaver = loadTimeWeaver;
 	}
 
+	/**
+	 * Specify the JDBC DataSource that the JPA persistence provider is supposed
+	 * to use for accessing the database. This is an alternative to keeping the
+	 * JDBC configuration in <code>persistence.xml</code>, passing in a Spring-managed
+	 * DataSource instead.
+	 * <p>In JPA speak, a DataSource passed in here will be uses as "nonJtaDataSource"
+	 * on the PersistenceUnitInfo passed to the PersistenceProvider, overriding
+	 * data source configuration in <code>persistence.xml</code> (if any).
+	 * @see javax.persistence.spi.PersistenceUnitInfo#getNonJtaDataSource()
+	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
+	/**
+	 * Specify the JDBC DataSources that the JPA persistence provider is supposed
+	 * to use for accessing the database, resolving data source names in
+	 * <code>persistence.xml</code> against Spring-managed DataSources.
+	 * <p>The specified Map needs to define data source names for specific DataSource
+	 * objects, matching the data source names used in <code>persistence.xml</code>.
+	 * If not specified, data source names will be resolved as JNDI names instead
+	 * (as defined by standard JPA).
+	 * @see org.springframework.jdbc.datasource.lookup.MapDataSourceLookup
+	 */
 	public void setDataSources(Map<String, DataSource> dataSources) {
 		this.dataSourceLookup = new MapDataSourceLookup(dataSources);
 	}
 
+	/**
+	 * Specify the JDBC DataSources that the JPA persistence provider is supposed
+	 * to use for accessing the database, resolving data source names in
+	 * <code>persistence.xml</code> against Spring-managed DataSources.
+	 * <p>Default is JndiDataSourceLookup, which resolves data source names as
+	 * JNDI names (as defined by standard JPA).
+	 * @see org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup
+	 */
 	public void setDataSourceLookup(DataSourceLookup dataSourceLookup) {
 		this.dataSourceLookup = dataSourceLookup;
 	}

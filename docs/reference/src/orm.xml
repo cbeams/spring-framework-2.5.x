@@ -2370,13 +2370,13 @@
       </section>
 
       <section>
-        <title><classname>ContainerEntityManagerFactoryBean</classname></title>
+        <title><classname>LocalContainerEntityManagerFactoryBean</classname></title>
 
-        <para>The <classname>ContainerEntityManagerFactoryBean</classname>
+        <para>The <classname>LocalContainerEntityManagerFactoryBean</classname>
         gives full control over the JPA
         <interfacename>EntityManagerFactory</interfacename> and is appropriate
         for environments where fine customizations are required. The
-        <classname>ContainerEntityManagerFactoryBean</classname> will create a
+        <classname>LocalContainerEntityManagerFactoryBean</classname> will create a
         <interfacename>PersistenceUnitInfo</interfacename> based on the
         <literal>'persistence.xml'</literal> file, the supplied
         <literal>dataSourceLookup</literal> strategy and the
@@ -2386,7 +2386,7 @@
 
         <programlisting><![CDATA[<beans>
  ...
- <bean id="entityManagerFactory" class="org.springframework.orm.jpa.ContainerEntityManagerFactoryBean">
+ <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
   <property name="dataSources">
    <map>
     <entry key="dataSource1" value-ref="someDataSource"/>

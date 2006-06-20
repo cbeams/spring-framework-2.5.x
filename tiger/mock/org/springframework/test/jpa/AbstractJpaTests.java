@@ -39,8 +39,8 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.instrument.classloading.AbstractLoadTimeWeaver;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.instrument.classloading.ShadowingClassLoader;
-import org.springframework.orm.jpa.ContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.test.annotation.AbstractAnnotationAwareTransactionalTests;
 import org.springframework.util.StringUtils;
@@ -241,8 +241,8 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 		}
 
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-			if (bean instanceof ContainerEntityManagerFactoryBean) {
-				((ContainerEntityManagerFactoryBean) bean).setLoadTimeWeaver(ltw);
+			if (bean instanceof LocalContainerEntityManagerFactoryBean) {
+				((LocalContainerEntityManagerFactoryBean) bean).setLoadTimeWeaver(ltw);
 			}
 			return bean;
 		}

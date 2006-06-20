@@ -33,7 +33,7 @@ import org.springframework.test.annotation.Timed;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Integration tests for ContainerEntityManagerFactoryBean.
+ * Integration tests for LocalContainerEntityManagerFactoryBean.
  * Uses an in-memory database.
  *
  * @author Rod Johnson
