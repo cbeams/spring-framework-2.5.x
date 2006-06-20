@@ -665,6 +665,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (txObject.getSessionHolder().getPreviousFlushMode() != null) {
 				session.setFlushMode(txObject.getSessionHolder().getPreviousFlushMode());
 			}
+			if (hibernateSetTimeoutAvailable) {
+				// Running against Hibernate 3.1+...
+				// Let's explicitly disconnect the Session to provide efficient Connection handling
+				// even with connection release mode "on_close". The Session will automatically
+				// obtain a new Connection in case of further database access.
+				// Couldn't do this on Hibernate 3.0, where disconnect required a manual reconnect.
+				session.disconnect();
+			}
 		}
 		txObject.getSessionHolder().clear();
 	}

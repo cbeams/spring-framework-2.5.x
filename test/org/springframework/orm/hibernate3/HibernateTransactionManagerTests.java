@@ -1035,6 +1035,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(true, 1);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
+		session.disconnect();
+		sessionControl.setReturnValue(null, 1);
 
 		dsControl.replay();
 		conControl.replay();
@@ -1124,6 +1126,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(con, 6);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 2);
+		session.disconnect();
+		sessionControl.setReturnValue(null, 2);
 
 		dsControl.replay();
 		conControl.replay();
