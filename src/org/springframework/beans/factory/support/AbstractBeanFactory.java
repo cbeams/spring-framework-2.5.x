@@ -895,20 +895,27 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		}
 	}
 
-	protected Class resolveBeanClass(RootBeanDefinition bd, String beanName) {
-		if (bd.hasBeanClass()) {
-			return bd.getBeanClass();
+	/**
+	 * Resolve the bean class for the specified bean definition,
+	 * resolving a bean class name into a Class references (if necessary).
+	 * @param mbd the merged bean definition to determine the class for
+	 * @param beanName the name of the bean (for error handling purposes)
+	 * @return the resolved bean class (or <code>null</code> if none)
+	 */
+	protected Class resolveBeanClass(RootBeanDefinition mbd, String beanName) {
+		if (mbd.hasBeanClass()) {
+			return mbd.getBeanClass();
 		}
 		try {
-			return bd.resolveBeanClass(getBeanClassLoader());
+			return mbd.resolveBeanClass(getBeanClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
-			throw new BeanDefinitionStoreException(bd.getResourceDescription(),
-					beanName, "Bean class [" + bd.getBeanClassName() + "] not found", ex);
+			throw new BeanDefinitionStoreException(mbd.getResourceDescription(),
+					beanName, "Bean class [" + mbd.getBeanClassName() + "] not found", ex);
 		}
 		catch (NoClassDefFoundError err) {
-			throw new BeanDefinitionStoreException(bd.getResourceDescription(),
-					beanName, "Class that bean class [" + bd.getBeanClassName() + "] depends on not found", err);
+			throw new BeanDefinitionStoreException(mbd.getResourceDescription(),
+					beanName, "Class that bean class [" + mbd.getBeanClassName() + "] depends on not found", err);
 		}
 	}
 
