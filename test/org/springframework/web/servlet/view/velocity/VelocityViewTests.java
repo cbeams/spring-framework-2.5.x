@@ -50,6 +50,7 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.servlet.view.AbstractView;
 
 /**
  * @author Rod Johnson
@@ -288,6 +289,49 @@ public class VelocityViewTests extends TestCase {
 
 		wmc.verify();
 		reqControl.verify();
+		assertEquals(AbstractView.DEFAULT_CONTENT_TYPE, expectedResponse.getContentType());
+	}
+
+	public void testKeepExistingContentType() throws Exception {
+		final String templateName = "test.vm";
+
+		MockControl wmc = MockControl.createControl(WebApplicationContext.class);
+		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
+		wac.getParentBeanFactory();
+		wmc.setReturnValue(null);
+		final Template expectedTemplate = new Template();
+		VelocityConfig vc = new VelocityConfig() {
+			public VelocityEngine getVelocityEngine() {
+				return new TestVelocityEngine(templateName, expectedTemplate);
+			}
+		};
+		wac.getBeansOfType(VelocityConfig.class, true, false);
+		Map configurers = new HashMap();
+		configurers.put("velocityConfigurer", vc);
+		wmc.setReturnValue(configurers);
+		wmc.replay();
+
+		HttpServletRequest request = new MockHttpServletRequest();
+		final HttpServletResponse expectedResponse = new MockHttpServletResponse();
+		expectedResponse.setContentType("myContentType");
+
+		VelocityView vv = new VelocityView() {
+			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) throws Exception {
+				assertTrue(template == expectedTemplate);
+				assertTrue(response == expectedResponse);
+			}
+
+			protected void exposeHelpers(Map model, HttpServletRequest request) throws Exception {
+				model.put("myHelper", "myValue");
+			}
+		};
+
+		vv.setUrl(templateName);
+		vv.setApplicationContext(wac);
+		vv.render(new HashMap(), request, expectedResponse);
+
+		wmc.verify();
+		assertEquals("myContentType", expectedResponse.getContentType());
 	}
 
 	public void testVelocityToolboxView() throws Exception {

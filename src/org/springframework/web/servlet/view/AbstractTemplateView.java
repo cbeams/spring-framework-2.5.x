@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Enumeration;
 import java.util.Map;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -49,6 +50,20 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 	 */
 	public static final String SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE = "springMacroRequestContext";
 
+
+	private static boolean responseGetContentTypeAvailable;
+
+	static {
+		// Determine whether the Servlet 2.4 ServletResponse.getContentType method
+		// is available.
+		try {
+			ServletResponse.class.getMethod("getContentType", new Class[] {});
+			responseGetContentTypeAvailable = true;
+		}
+		catch (NoSuchMethodException ex) {
+			responseGetContentTypeAvailable = false;
+		}
+	}
 
 	private boolean exposeRequestAttributes = false;
 
@@ -158,7 +173,24 @@ public abstract class AbstractTemplateView extends AbstractUrlBasedView {
 			model.put(SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, new RequestContext(request, model));
 		}
 
+		applyContentType(response);
+
 		renderMergedTemplateModel(model, request, response);
+	}
+
+	/**
+	 * Apply this view's content type as specified in the "contentType"
+	 * bean property to the given response.
+	 * <p>When running on Servlet 2.4, only applies the view's contentType
+	 * if no content type has been set on the response before. This allows
+	 * handlers to override the default content type beforehand.
+	 * @param response current HTTP response
+	 * @see #setContentType
+	 */
+	protected void applyContentType(HttpServletResponse response)	{
+		if (!responseGetContentTypeAvailable || response.getContentType() == null) {
+			response.setContentType(getContentType());
+		}
 	}
 
 	/**

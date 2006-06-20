@@ -38,6 +38,7 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.view.AbstractView;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 /**
@@ -110,7 +111,41 @@ public class FreeMarkerViewTests extends TestCase {
 		fv.render(model, request, response);
 
 		wmc.verify();
+		assertEquals(AbstractView.DEFAULT_CONTENT_TYPE, response.getContentType());
 	}
+
+	public void testKeepExistingContentType() throws Exception {
+		FreeMarkerView fv = new FreeMarkerView();
+
+		MockControl wmc = MockControl.createNiceControl(WebApplicationContext.class);
+		WebApplicationContext wac = (WebApplicationContext) wmc.getMock();
+		wac.getBeansOfType(FreeMarkerConfig.class, true, false);
+		Map configs = new HashMap();
+		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+		configurer.setConfiguration(new TestConfiguration());
+		configs.put("freemarkerConfig", configurer);
+		wmc.setReturnValue(configs);
+		wac.getParentBeanFactory();
+		wmc.setReturnValue(null);
+		wmc.replay();
+
+		fv.setUrl("templateName");
+		fv.setApplicationContext(wac);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addPreferredLocale(Locale.US);
+		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
+		HttpServletResponse response = new MockHttpServletResponse();
+		response.setContentType("myContentType");
+
+		Map model = new HashMap();
+		model.put("myattr", "myvalue");
+		fv.render(model, request, response);
+
+		wmc.verify();
+		assertEquals("myContentType", response.getContentType());
+	}
+
 
 	private class TestConfiguration extends Configuration {
 
@@ -125,7 +160,6 @@ public class FreeMarkerViewTests extends TestCase {
 				}
 			};
 		}
-
 	}
 
 }

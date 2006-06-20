@@ -311,9 +311,6 @@ public class VelocityView extends AbstractTemplateView {
 	protected void renderMergedTemplateModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		if (response.getContentType() == null) {
-			response.setContentType(getContentType());
-		}
 		exposeHelpers(model, request);
 
 		Context velocityContext = createVelocityContext(model, request, response);

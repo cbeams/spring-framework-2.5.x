@@ -195,9 +195,6 @@ public class FreeMarkerView extends AbstractTemplateView {
 	protected void renderMergedTemplateModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		if (response.getContentType() == null) {
-			response.setContentType(getContentType());
-		}
 		exposeHelpers(model, request);
 		doRender(model, request, response);
 	}
