@@ -31,14 +31,15 @@ import org.springframework.web.portlet.ModelAndView;
  * <p>Any implementation of the portlet Controller interface should be a
  * <i>reusable, threadsafe</i> class, capable of handling multiple
  * portlet requests throughout the lifecycle of an application. To be able to
- * configure Controller in an easy way, Controllers are usually JavaBeans.</p>
+ * configure Controller(s) in an easy way, Controllers are usually JavaBeans.</p>
  *
  * <p><b><a name="workflow">Workflow</a>:</b></p>
  *
  * <p>After the DispatcherPortlet has received a request and has done its work
- * to resolve locales, themes and things a like, it tries to resolve a
- * Controller, using a {@link org.springframework.web.portlet.HandlerMapping
- * HandlerMapping}. When a Controller has been found, the
+ * to resolve locales, themes and suchlike, it tries to resolve a
+ * Controller to handle that request, using a
+ * {@link org.springframework.web.portlet.HandlerMapping HandlerMapping}.
+ * When a Controller has been found, the
  * {@link #handleRenderRequest handleRenderRequest} or {@link #handleActionRequest handleActionRequest}
  * method will be invoked, which is responsible for handling the actual
  * request and - if applicable - returning an appropriate ModelAndView.

@@ -19,7 +19,7 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.factory.ObjectFactory;
 
 /**
- * Strategy interface used by a ConfigurableBeanFactory,
+ * Strategy interface used by a {@link ConfigurableBeanFactory},
  * representing a target scope to hold beans in.
  *
  * <p>Provides the ability to get and put objects from whatever underlying
@@ -27,11 +27,11 @@ import org.springframework.beans.factory.ObjectFactory;
  * this class's <code>get</code> and <code>put</code> methods will identify
  * the target attribute in the scope.
  *
- * <p>ScopeMaps are expected to be thread-safe. One Scope
+ * <p>Scope implementations are expected to be thread-safe. One Scope
  * can be used with multiple bean factories, if desired.
  *
  * <p>Can be implemented on top of a session API such as the
- * Servlet API's HttpSession interface.
+ * Servlet API's {@link javax.servlet.http.HttpSession} interface.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
