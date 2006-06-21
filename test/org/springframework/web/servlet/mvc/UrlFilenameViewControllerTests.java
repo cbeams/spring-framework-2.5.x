@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,24 @@ import junit.framework.TestCase;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.AntPathMatcher;
 
 /**
+ * Unit tests for the {@link UrlFilenameViewController} class.
+ * 
  * @author Juergen Hoeller
+ * @author Rick Evans
  * @since 14.09.2005
  */
 public class UrlFilenameViewControllerTests extends TestCase {
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
-	public void testWithPlainFilename() throws Exception {
+
+    public void testWithPlainFilename() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -121,8 +124,25 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		assertEquals("docs/cvs/commit", mv.getViewName());
 		assertTrue(mv.getModel().isEmpty());
 	}
-	private void exposePathInMapping(MockHttpServletRequest request, String mapping) {
+
+    public void testSettingPrefixToNullCausesEmptyStringToBeUsed() throws Exception {
+        UrlFilenameViewController ctrl = new UrlFilenameViewController();
+        ctrl.setPrefix(null);
+        assertNotNull("When setPrefix(..) is called with a null argument, the empty string value must be used instead.", ctrl.getPrefix());
+        assertEquals("When setPrefix(..) is called with a null argument, the empty string value must be used instead.", "", ctrl.getPrefix());
+    }
+
+    public void testSettingSuffixToNullCausesEmptyStringToBeUsed() throws Exception {
+        UrlFilenameViewController ctrl = new UrlFilenameViewController();
+        ctrl.setSuffix(null);
+        assertNotNull("When setSuffix(..) is called with a null argument, the empty string value must be used instead.", ctrl.getSuffix());
+        assertEquals("When setSuffix(..) is called with a null argument, the empty string value must be used instead.", "", ctrl.getSuffix());
+    }
+
+
+    private void exposePathInMapping(MockHttpServletRequest request, String mapping) {
 		String pathInMapping = this.pathMatcher.extractPathWithinPattern(mapping, request.getRequestURI());
 		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathInMapping);
 	}
+
 }
