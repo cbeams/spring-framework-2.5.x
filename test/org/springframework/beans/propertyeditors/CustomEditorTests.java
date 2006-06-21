@@ -43,7 +43,10 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 
 /**
+ * Unit tests for the various PropertyEditors in Spring.
+ * 
  * @author Juergen Hoeller
+ * @author Rick Evans
  * @since 10.06.2003
  */
 public class CustomEditorTests extends TestCase {
@@ -473,8 +476,28 @@ public class CustomEditorTests extends TestCase {
 		assertEquals(TestBean[].class, classEditor.getValue());
 		assertEquals("org.springframework.beans.TestBean[]", classEditor.getAsText());
 	}
+    
+    /*
+     * SPR_2165 - ClassEditor is inconsistent with multidimensional arrays
+     */
+    public void testGetAsTextWithTwoDimensionalArray() throws Exception {
+        String[][] chessboard = new String[8][8];
+        ClassEditor editor = new ClassEditor();
+        editor.setValue(chessboard.getClass());
+        assertEquals("java.lang.String[][]", editor.getAsText());
+    }
 
-	public void testFileEditor() {
+    /*
+     * SPR_2165 - ClassEditor is inconsistent with multidimensional arrays
+     */
+    public void testGetAsTextWithRidiculousMultiDimensionalArray() throws Exception {
+        String[][][][][] ridiculousChessboard = new String[8][4][0][1][3];
+        ClassEditor editor = new ClassEditor();
+        editor.setValue(ridiculousChessboard.getClass());
+        assertEquals("java.lang.String[][][][][]", editor.getAsText());
+    }
+
+    public void testFileEditor() {
 		PropertyEditor fileEditor = new FileEditor();
 		fileEditor.setAsText("file:myfile.txt");
 		assertEquals(new File("myfile.txt"), fileEditor.getValue());

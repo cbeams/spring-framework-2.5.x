@@ -30,6 +30,7 @@ import org.springframework.util.StringUtils;
  * Delegates to ClassUtils for actual class name resolution.
  *
  * @author Juergen Hoeller
+ * @author Rick Evans
  * @since 13.05.2003
  * @see java.lang.Class#forName
  * @see org.springframework.util.ClassUtils#forName(String, ClassLoader)
@@ -77,11 +78,22 @@ public class ClassEditor extends PropertyEditorSupport {
 			return "";
 		}
 		if (clazz.isArray()) {
-			return clazz.getComponentType().getName() + ClassUtils.ARRAY_SUFFIX;
-		}
+            return getArrayAsText(clazz);
+        }
 		else {
 			return clazz.getName();
 		}
 	}
+
+
+    private static String getArrayAsText(Class clazz) {
+        StringBuffer buffer = new StringBuffer();
+        while (clazz.isArray()) {
+            clazz = clazz.getComponentType();
+            buffer.append(ClassUtils.ARRAY_SUFFIX);
+        }
+        buffer.insert(0, clazz.getName());
+        return buffer.toString();
+    }
 
 }
