@@ -149,11 +149,29 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
+	 * Gets the value of the '<code>commandName</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getCommandName() {
+		return this.commandName;
+	}
+
+	/**
 	 * Sets the value of the '<code>name</code>' attribute.
+	 * Defaults to the value of {@link #resolveCommandName} if
+	 * not specified.
 	 * May be a runtime expression.
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * Gets the value of the '<code>name</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getName() {
+		return this.name;
 	}
 
 	/**
@@ -162,6 +180,14 @@ public class FormTag extends AbstractHtmlElementTag {
 	 */
 	public void setAction(String action) {
 		this.action = (action != null ? action : "");
+	}
+
+	/**
+	 * Gets the value of the '<code>action</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getAction() {
+		return this.action;
 	}
 
 	/**
@@ -174,12 +200,28 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
+	 * Gets the value of the '<code>method</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getMethod() {
+		return this.method;
+	}
+
+	/**
 	 * Sets the value of the '<code>enctype</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setEnctype(String enctype) {
 		Assert.hasText(enctype, "'enctype' cannot be null or zero length");
 		this.enctype = enctype;
+	}
+
+	/**
+	 * Gets the value of the '<code>enctype</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getEnctype() {
+		return this.enctype;
 	}
 
 	/**
@@ -192,12 +234,28 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
+	 * Gets the value of the '<code>onsubmit</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOnsubmit() {
+		return this.onsubmit;
+	}
+
+	/**
 	 * Sets the value of the '<code>onreset</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOnreset(String onreset) {
 		Assert.hasText(onreset, "'onreset' cannot be null or zero length");
 		this.onreset = onreset;
+	}
+
+	/**
+	 * Gets the value of the '<code>onreset</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	protected String getOnreset() {
+		return this.onreset;
 	}
 
 
@@ -210,7 +268,7 @@ public class FormTag extends AbstractHtmlElementTag {
 		this.tagWriter.startTag("form");
 		writeDefaultAttributes(tagWriter);
 		this.tagWriter.writeAttribute(METHOD_ATTRIBUTE, getDisplayString(evaluate(METHOD_ATTRIBUTE, this.method)));
-		writeOptionalAttribute(tagWriter, NAME_ATTRIBUTE, this.name);
+		writeOptionalAttribute(tagWriter, NAME_ATTRIBUTE, resolveName());
 		this.tagWriter.writeAttribute(ACTION_ATTRIBUTE, resolveAction());
 		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, this.enctype);
 		writeOptionalAttribute(tagWriter, ONSUBMIT_ATTRIBUTE, this.onsubmit);
@@ -221,6 +279,20 @@ public class FormTag extends AbstractHtmlElementTag {
 		// expose the command name for nested tags
 		this.pageContext.setAttribute(COMMAND_NAME_VARIABLE_NAME, resolveCommandName());
 		return EVAL_BODY_INCLUDE;
+	}
+
+	/**
+	 * Resolves the value of the '<code>name</code>' attribute. If the user specifies a value for
+	 * '<code>name</code>' then this is used. Otherwise the value returned by {@link #resolveCommandName()}
+	 * is used.
+	 */
+	private String resolveName() throws JspException {
+		String name = getName();
+		if(StringUtils.hasText(name)) {
+			return ObjectUtils.getDisplayString(evaluate(NAME_ATTRIBUTE, name));
+		} else {
+			return resolveCommandName();
+		}
 	}
 
 
@@ -254,7 +326,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * {@link #evaluate Resolves} and returns the name of the command object.
 	 * @throws IllegalArgumentException if the command object resolves to null.
 	 */
-	private String resolveCommandName() throws JspException {
+	protected String resolveCommandName() throws JspException {
 		Object resolvedCommmandName = evaluate(COMMAND_NAME_ATTRIBUTE, this.commandName);
 		if (resolvedCommmandName == null) {
 			throw new IllegalArgumentException("'commandName' cannot be null");

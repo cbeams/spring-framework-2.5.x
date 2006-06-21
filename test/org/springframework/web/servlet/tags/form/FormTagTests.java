@@ -77,6 +77,52 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(output, "method", method);
 		assertContainsAttribute(output, "onsubmit", onsubmit);
 		assertContainsAttribute(output, "onreset", onreset);
+		assertContainsAttribute(output, "name", commandName);
+	}
+
+	public void testWriteFormWithName() throws Exception {
+		String action = "/form.html";
+		String commandName = "myCommand";
+		String enctype = "my/enctype";
+		String method = "POST";
+		String onsubmit = "onsubmit";
+		String onreset = "onreset";
+		String cssClass = "myClass";
+		String cssStyle = "myStyle";
+		String name = "myName";
+
+		this.tag.setCssClass(cssClass);
+		this.tag.setCssStyle(cssStyle);
+		this.tag.setAction(action);
+		this.tag.setCommandName(commandName);
+		this.tag.setName(name);
+		this.tag.setEnctype(enctype);
+		this.tag.setMethod(method);
+		this.tag.setOnsubmit(onsubmit);
+		this.tag.setOnreset(onreset);
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_BODY_INCLUDE, result);
+		assertEquals("Command name not exposed", commandName, getPageContext().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME));
+
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		this.tag.doFinally();
+		assertNull("Command name not cleared after tag ends", getPageContext().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME));
+
+		String output = getWriter().toString();
+		assertFormTagOpened(output);
+		assertFormTagClosed(output);
+
+		assertContainsAttribute(output, "class", cssClass);
+		assertContainsAttribute(output, "style", cssStyle);
+		assertContainsAttribute(output, "action", action);
+		assertContainsAttribute(output, "enctype", enctype);
+		assertContainsAttribute(output, "method", method);
+		assertContainsAttribute(output, "onsubmit", onsubmit);
+		assertContainsAttribute(output, "onreset", onreset);
+		assertContainsAttribute(output, "name", name);
 	}
 
 	public void testWithActionFromRequest() throws Exception {
