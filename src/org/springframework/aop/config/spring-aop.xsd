@@ -2,13 +2,14 @@
 
 <xsd:schema xmlns="http://www.springframework.org/schema/aop"
 						xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+						xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 						xmlns:beans="http://www.springframework.org/schema/beans"
 						xmlns:tool="http://www.springframework.org/schema/tool"
 						targetNamespace="http://www.springframework.org/schema/aop"
 						elementFormDefault="qualified"
 						attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
 	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
 
 	<xsd:element name="config">

@@ -126,20 +126,24 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * @param root the DOM root element of the document
 	 */
 	protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate delegate) {
-		NodeList nl = root.getChildNodes();
+		if (delegate.isDefaultNamespace(root.getNamespaceURI())) {
+			NodeList nl = root.getChildNodes();
 
-		for (int i = 0; i < nl.getLength(); i++) {
-			Node node = nl.item(i);
-			if (node instanceof Element) {
-				Element ele = (Element) node;
-				String namespaceUri = ele.getNamespaceURI();
-				if (delegate.isDefaultNamespace(namespaceUri)) {
-					parseDefaultElement(ele, delegate);
-				}
-				else {
-					delegate.parseCustomElement(ele, false);
+			for (int i = 0; i < nl.getLength(); i++) {
+				Node node = nl.item(i);
+				if (node instanceof Element) {
+					Element ele = (Element) node;
+					String namespaceUri = ele.getNamespaceURI();
+					if (delegate.isDefaultNamespace(namespaceUri)) {
+						parseDefaultElement(ele, delegate);
+					}
+					else {
+						delegate.parseCustomElement(ele, false);
+					}
 				}
 			}
+		} else {
+			delegate.parseCustomElement(root, false);
 		}
 	}
 
