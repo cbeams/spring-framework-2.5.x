@@ -23,7 +23,6 @@ class RubyCalculator &lt; Calculator
  end
 
 end
-RubyCalculator.new
 		</lang:inline-script>
 	</lang:jruby>
 

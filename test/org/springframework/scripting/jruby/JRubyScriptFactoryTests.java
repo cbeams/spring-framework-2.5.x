@@ -95,20 +95,6 @@ public class JRubyScriptFactoryTests extends TestCase {
 		}
 	}
 
-	public void testWhereJRubyScriptDoesNotReturnNewObject() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			return;
-		}
-
-		try {
-			new ClassPathXmlApplicationContext("org/springframework/scripting/jruby/jrubyDoesNotReturnObjectContext.xml");
-			fail("Must throw exception for script file that does not have 'xxx.new' as last statement");
-		}
-		catch (NestedRuntimeException expected) {
-			assertTrue(expected.contains(ScriptCompilationException.class));
-		}
-	}
-
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;

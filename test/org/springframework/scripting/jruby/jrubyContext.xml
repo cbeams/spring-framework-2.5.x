@@ -19,7 +19,6 @@ class RubyCalculator &lt; Calculator
  end
 
 end
-RubyCalculator.new
 			</value>
 		</constructor-arg>
 		<constructor-arg value="org.springframework.scripting.Calculator"/>

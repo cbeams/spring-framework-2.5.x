@@ -9,4 +9,3 @@ class RubyCalculator < Calculator
  end
 
 end
-RubyCalculator.new

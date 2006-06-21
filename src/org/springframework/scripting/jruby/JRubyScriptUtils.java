@@ -19,10 +19,20 @@ package org.springframework.scripting.jruby;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.List;
 
 import org.jruby.Ruby;
 import org.jruby.RubyNil;
 import org.jruby.IRuby;
+import org.jruby.evaluator.Instruction;
+import org.jruby.evaluator.EvaluationState;
+import org.jruby.evaluator.InstructionContext;
+import org.jruby.ast.Node;
+import org.jruby.ast.ClassNode;
+import org.jruby.ast.NewlineNode;
+import org.jruby.ast.ConstNode;
+import org.jruby.ast.Colon2Node;
+import org.jruby.ast.visitor.AbstractVisitor;
 import org.jruby.exceptions.JumpException;
 import org.jruby.javasupport.JavaUtil;
 import org.jruby.runtime.builtin.IRubyObject;
@@ -49,12 +59,71 @@ public abstract class JRubyScriptUtils {
 	 */
 	public static Object createJRubyObject(String scriptSource, Class[] interfaces) throws JumpException {
 		IRuby ruby = Ruby.getDefaultInstance();
-		IRubyObject rubyObject = ruby.evalScript(scriptSource);
-		if(rubyObject instanceof RubyNil) {
+
+		Node scriptRootNode = ruby.parse(scriptSource, "");
+		IRubyObject rubyObject = ruby.eval(scriptRootNode);
+
+		if (rubyObject instanceof RubyNil) {
+			ClassNode classNode = findClassNode(scriptRootNode);
+			String className = findClassName(scriptRootNode);
+			rubyObject = ruby.evalScript("\n" + className + ".new");
+		}
+
+		// still null?
+		if (rubyObject instanceof RubyNil) {
 			throw new ScriptCompilationException("Compilation of JRuby script returned '" + rubyObject + "'");
 		}
 		return Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(),
-				interfaces, new RubyObjectInvocationHandler(rubyObject, ruby));
+						interfaces, new RubyObjectInvocationHandler(rubyObject, ruby));
+	}
+
+	/**
+	 * Given the root {@link Node} in a JRuby AST will locate the name of the class defined
+	 * by that AST.
+	 * @throws IllegalArgumentException if no class is defined by the supplied AST.
+	 */
+	private static String findClassName(Node rootNode) {
+		ClassNode classNode = findClassNode(rootNode);
+
+		if (classNode == null) {
+			throw new IllegalArgumentException("Unable to determine class name for root node '" + rootNode + "'");
+		}
+
+		Colon2Node node = (Colon2Node) classNode.getCPath();
+		return node.getName();
+	}
+
+	/**
+	 * Finds the first {@link ClassNode} under the supplied {@link Node}. Returns
+	 * '<code>null</code>' if no {@link ClassNode} is found.
+	 */
+	private static ClassNode findClassNode(Node node) {
+		if (node instanceof ClassNode) {
+			return (ClassNode) node;
+		}
+		List children = node.childNodes();
+		for (int i = 0; i < children.size(); i++) {
+			Node child = (Node) children.get(i);
+			if (child instanceof ClassNode) {
+				return (ClassNode) child;
+			}
+			else if (child instanceof NewlineNode) {
+				NewlineNode nn = (NewlineNode) child;
+				Node found = findClassNode(nn.getNextNode());
+				if (found instanceof ClassNode) {
+					return (ClassNode) found;
+				}
+			}
+		}
+
+		for (int i = 0; i < children.size(); i++) {
+			Node child = (Node) children.get(i);
+			Node found = findClassNode(child);
+			if (found instanceof ClassNode) {
+				return (ClassNode) child;
+			}
+		}
+		return null;
 	}
 
 
@@ -85,5 +154,6 @@ public abstract class JRubyScriptUtils {
 			return JavaUtil.convertJavaArrayToRuby(this.ruby, javaArgs);
 		}
 	}
+
 
 }

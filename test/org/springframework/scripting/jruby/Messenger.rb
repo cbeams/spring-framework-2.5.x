@@ -12,4 +12,3 @@ class RubyMessenger < Messenger
   @@message
  end
 end
-RubyMessenger.new
