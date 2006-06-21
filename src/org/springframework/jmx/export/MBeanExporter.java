@@ -896,7 +896,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	/**
-	 * Called when an MBean is registered. Notifies all registered
+	 * Called when an MBean is unregistered. Notifies all registered
 	 * {@link MBeanExporterListener MBeanExporterListeners} of the unregistration event.
 	 */
 	protected void onUnregister(ObjectName objectName) {
