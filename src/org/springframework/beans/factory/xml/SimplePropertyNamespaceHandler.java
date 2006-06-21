@@ -20,6 +20,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.core.Conventions;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -68,10 +69,10 @@ public class SimplePropertyNamespaceHandler implements NamespaceHandler {
 
 			if (propertyName.endsWith(REF_SUFFIX)) {
 				propertyName = propertyName.substring(0, propertyName.length() - REF_SUFFIX.length());
-				pvs.addPropertyValue(propertyName, new RuntimeBeanReference(propertyValue));
+				pvs.addPropertyValue(Conventions.attributeNameToPropertyName(propertyName), new RuntimeBeanReference(propertyValue));
 			}
 			else {
-				pvs.addPropertyValue(propertyName, propertyValue);
+				pvs.addPropertyValue(Conventions.attributeNameToPropertyName(propertyName), propertyValue);
 			}
 		}
 		return definition;
