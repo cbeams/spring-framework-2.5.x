@@ -18,48 +18,52 @@ package org.springframework.beans.factory.config;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Factory bean for
  * <a href="http://jakarta.apache.org/commons/logging.html">commons-logging</a>
- * Log instances.
- * Will expose the created Log object on <code>getBean</code> calls, and can be
- * passed to bean properties of type <code>org.apache.commons.logging.Log</code>.
+ * {@link org.apache.commons.logging.Log} instances.
  *
  * <p>Useful for sharing Log instances among multiple beans instead of using
  * one Log instance per class name, e.g. for common log topics.
  *
  * @author Juergen Hoeller
- * @since 16.11.2003
  * @see org.apache.commons.logging.Log
+ * @since 16.11.2003
  */
 public class CommonsLogFactoryBean implements FactoryBean, InitializingBean {
 
-  private Log log;
+    private Log log;
 
-  public void setLogName(String logName) {
-    this.log = LogFactory.getLog(logName);
-  }
 
-	public void afterPropertiesSet() {
-		if (this.log == null) {
-			throw new IllegalArgumentException("logName is required");
-		}
-	}
+    /**
+     * The name of the log.
+     * <p>This property is required.
+     * @param logName the name of the log
+     */
+    public void setLogName(String logName) {
+        this.log = LogFactory.getLog(logName);
+    }
 
-  public Object getObject() {
-    return log;
-  }
 
-	public Class getObjectType() {
-		return (this.log != null ? this.log.getClass() : Log.class);
-	}
+    public void afterPropertiesSet() {
+        if (this.log == null) {
+            throw new IllegalArgumentException("logName is required");
+        }
+    }
 
-  public boolean isSingleton() {
-    return true;
-  }
+    public Object getObject() {
+        return log;
+    }
+
+    public Class getObjectType() {
+        return (this.log != null ? this.log.getClass() : Log.class);
+    }
+
+    public boolean isSingleton() {
+        return true;
+    }
 
 }

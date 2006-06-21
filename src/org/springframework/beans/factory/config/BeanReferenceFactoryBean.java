@@ -30,7 +30,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  * using this FactoryBean to link it in and expose it under a different name.
  * Effectively, this corresponds to an alias for the target bean.
  *
- * <p><b>NOTE:</b> For XML bean definition files, a <code>&lt;alias&gt;</code>
+ * <p><b>NOTE:</b> For XML bean definition files, an <code>&lt;alias&gt;</code>
  * tag is available that effectively achieves the same.
  *
  * @author Juergen Hoeller
@@ -44,8 +44,9 @@ public class BeanReferenceFactoryBean implements FactoryBean, BeanFactoryAware {
 
 
 	/**
-	 * Set the name of the target bean,
-	 * potentially in a different bean definition file.
+	 * Set the name of the target bean.
+     * <p>This property is required.
+     * @param targetBeanName the name of the target bean
 	 */
 	public void setTargetBeanName(String targetBeanName) {
 		this.targetBeanName = targetBeanName;
