@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,14 @@ import org.springframework.web.util.CookieGenerator;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Implementation of LocaleResolver that uses a cookie sent back to the user
+ * {@link LocaleResolver} implementation that uses a cookie sent back to the user
  * in case of a custom setting, with a fallback to the accept header locale.
- * This is particularly useful for stateless applications without user sessions.
+ * 
+ * <p>This is particularly useful for stateless applications without user sessions.
  *
  * <p>Custom controllers can thus override the user's locale by calling
- * <code>setLocale</code>, e.g. responding to a certain locale change request.
+ * {@link #setLocale(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.util.Locale)},
+ * e.g. responding to a certain locale change request.
  *
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
@@ -43,18 +45,27 @@ import org.springframework.web.util.WebUtils;
 public class CookieLocaleResolver extends CookieGenerator implements LocaleResolver {
 
 	/**
-	 * Name of the request attribute that holds the locale. Only used for
-	 * overriding a cookie value if the locale has been changed in the
-	 * course of the current request! Use RequestContext.getLocale() to
-	 * retrieve the current locale in controllers or views.
+	 * The name of the request attribute that holds the locale.
+     * 
+     * <p>Only used for overriding a cookie value if the locale has been
+     * changed in the course of the current request! Use
+     * {@link org.springframework.web.servlet.support.RequestContext#getLocale}
+     * to retrieve the current locale in controllers or views.
 	 * @see org.springframework.web.servlet.support.RequestContext#getLocale
 	 */
 	public static final String LOCALE_REQUEST_ATTRIBUTE_NAME = CookieLocaleResolver.class.getName() + ".LOCALE";
 
-	public static final String DEFAULT_COOKIE_NAME = CookieLocaleResolver.class.getName() + ".LOCALE";
+    /**
+     * The default cookie name used if none is explicitly set.
+     */
+    public static final String DEFAULT_COOKIE_NAME = CookieLocaleResolver.class.getName() + ".LOCALE";
 
 
-	public CookieLocaleResolver() {
+    /**
+     * Creates a new instance of the {@link CookieLocaleResolver} class
+     * using the {@link #DEFAULT_COOKIE_NAME default cookie name}.
+     */
+    public CookieLocaleResolver() {
 		setCookieName(DEFAULT_COOKIE_NAME);
 	}
 
@@ -89,7 +100,6 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleResol
 			request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME, locale);
 			addCookie(response, locale.toString());
 		}
-
 		else {
 			// Set request attribute to fallback locale and remove cookie.
 			request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME, request.getLocale());
