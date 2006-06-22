@@ -24,15 +24,10 @@ import java.util.List;
 import org.jruby.Ruby;
 import org.jruby.RubyNil;
 import org.jruby.IRuby;
-import org.jruby.evaluator.Instruction;
-import org.jruby.evaluator.EvaluationState;
-import org.jruby.evaluator.InstructionContext;
 import org.jruby.ast.Node;
 import org.jruby.ast.ClassNode;
 import org.jruby.ast.NewlineNode;
-import org.jruby.ast.ConstNode;
 import org.jruby.ast.Colon2Node;
-import org.jruby.ast.visitor.AbstractVisitor;
 import org.jruby.exceptions.JumpException;
 import org.jruby.javasupport.JavaUtil;
 import org.jruby.runtime.builtin.IRubyObject;
@@ -64,7 +59,6 @@ public abstract class JRubyScriptUtils {
 		IRubyObject rubyObject = ruby.eval(scriptRootNode);
 
 		if (rubyObject instanceof RubyNil) {
-			ClassNode classNode = findClassNode(scriptRootNode);
 			String className = findClassName(scriptRootNode);
 			rubyObject = ruby.evalScript("\n" + className + ".new");
 		}
@@ -77,18 +71,17 @@ public abstract class JRubyScriptUtils {
 						interfaces, new RubyObjectInvocationHandler(rubyObject, ruby));
 	}
 
-	/**
+
+    /**
 	 * Given the root {@link Node} in a JRuby AST will locate the name of the class defined
 	 * by that AST.
 	 * @throws IllegalArgumentException if no class is defined by the supplied AST.
 	 */
 	private static String findClassName(Node rootNode) {
 		ClassNode classNode = findClassNode(rootNode);
-
 		if (classNode == null) {
 			throw new IllegalArgumentException("Unable to determine class name for root node '" + rootNode + "'");
 		}
-
 		Colon2Node node = (Colon2Node) classNode.getCPath();
 		return node.getName();
 	}
