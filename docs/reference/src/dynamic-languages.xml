@@ -58,7 +58,7 @@
 		<title>A first example</title>
 		<para>
 			This bulk of this chapter is concerned with describing the dynamic language support
-			in detail. Before diving into all of the ins and outs of dynamic language support,
+			in detail. Before diving into all of the ins and outs of the dynamic language support,
 			let's look at a quick example of a bean defined in a dynamic language.
 		</para>
 		<para>
@@ -541,11 +541,11 @@ RubyMessenger.new
 			</para>
 			<para>
 	            In contrast to Groovy, JRuby-backed bean definitions require some (small)
-	            additional configuration. The implementation of the BeanShell dynamic language
+	            additional configuration. The implementation of the JRuby dynamic language
 	            support in Spring is interesting in that what happens is this: Spring creates
 	            a JDK dynamic proxy implementing all of the interfaces that are specified in the
 	            <literal>'script-interfaces'</literal> attribute value of the
-	            <literal>&lt;lang:bsh&gt;</literal> element (this is why
+	            <literal>&lt;lang:ruby&gt;</literal> element (this is why
 	            you <emphasis>must</emphasis> supply at least one interface in the value
 	            of said attribute, and (accordingly) program to interfaces when using
 	            JRuby-backed beans). This means that every method call on a JRuby-backed
@@ -577,23 +577,25 @@ class RubyMessenger < Messenger
   @@message
  end
 end
-RubyMessenger.new]]><lineannotation> # IMPORTANT (see below)</lineannotation></programlisting>
+RubyMessenger.new]]><lineannotation> # this last line is not essential (but see below)</lineannotation></programlisting>
 			<para>
 	            And here is the Spring XML that defines an instance of the
 	            <classname>RubyMessenger</classname> JRuby bean.
 			</para>
-			<programlisting><![CDATA[<lang:jruby id="messageService" script-interfaces="org.springframework.scripting.Messenger"
-    script-source="classpath:RubyMessenger.rb">
+			<programlisting><![CDATA[<lang:jruby id="messageService"
+            script-interfaces="org.springframework.scripting.Messenger"
+            script-source="classpath:RubyMessenger.rb">
     
     <property name="message" value="Hello World!" />
+
 </lang:jruby>]]></programlisting>
 			<para>
-				Take especial notice of the last line of that JRuby source. When using JRuby
-				in the context of Spring's dynamic language support, it is <emphasis>vitally</emphasis>
-				important that you return a new instance of the JRuby class that you want to
-				expose as a dynamic-language-backed bean as the result of the execution of your JRuby source. You
-				can achieve this by simply instantiating a new instance of your JRuby class
-				on the last line of the source file like so:
+				Take note of the last line of that JRuby source (<literal>'RubyMessenger.new'</literal>).
+				When using JRuby in the context of Spring's dynamic language support, you are encouraged
+				to instantiate and return a new instance of the JRuby class that you want to expose as a
+				dynamic-language-backed bean as the result of the execution of your JRuby source. You
+				can achieve this by simply instantiating a new instance of your JRuby class on the last
+				line of the source file like so:
 	        </para>
 			<programlisting>require 'java'
 
@@ -601,23 +603,29 @@ include_class 'org.springframework.scripting.Messenger'
 
 # class definition same as above...
 
-<lineannotation># this last line is required! if omitted, an <classname>Exception</classname> *will* be thrown</lineannotation>
+<lineannotation># instantiate and return a new instance of the <literal>RubyMessenger</literal> class</lineannotation>
 RubyMessenger.new</programlisting>
 			<para>
-				If you forget to do this, an opaque <classname>ScriptCompilationException</classname>
+				If you forget to do this, it's not the end of the world; this will however result in
+				Spring having to trawl (reflectively) through the type representation of your JRuby class
+				looking for a class to instantiate. In the grand scheme of things this will be so fast
+				that you'll never notice it, but it is something that can be avoided by simply
+				having a line such as the one above as the last line of your JRuby script. If you don't
+				supply such a line, or if Spring cannot find a JRuby class in your script to instantiate
+				then an opaque <classname>ScriptCompilationException</classname>
 				will be thrown immediately after the source is executed by the JRuby
 				interpreter. The key text that identifies this as the root cause of an
 				exception can be found immediately below (so if your Spring container
-				throws an exception when creating your dynamic-language-backed bean and the following
-				text is there in the corresponding stacktrace, you can identify the cause
-				immediately):
+				throws the following exception when creating your dynamic-language-backed bean
+				and the following text is there in the corresponding stacktrace, this will hopefully
+				allow you to identify and then easily rectify the issue):
 			</para>
 			<programlisting><![CDATA[org.springframework.scripting.ScriptCompilationException: Compilation of JRuby script returned '']]></programlisting>
 			<para>
 	            To rectify this, simply instantiate a new instance of whichever class
 	            you want to expose as a JRuby-dynamic-language-backed bean (as shown above). Please
 	            also note that you can actually define as many classes and objects
-	            as you want in your JRuby script. What is important is that the
+	            as you want in your JRuby script; what is important is that the
 	            source file as a whole must return an object (for Spring to configure).
 			</para>
 			<para>
