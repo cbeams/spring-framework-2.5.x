@@ -29,6 +29,16 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.jdbc.datasource.lookup.DataSourceLookup;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import org.springframework.util.xml.DomUtils;
+import org.springframework.util.xml.SimpleSaxErrorHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -36,18 +46,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.jdbc.datasource.lookup.DataSourceLookup;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-import org.springframework.util.xml.DomUtils;
-import org.springframework.util.xml.SimpleSaxErrorHandler;
-
 /**
  * Helper class for reading <code>persistence.xml</code> files.
- *
+ * 
  * @author Costin Leau
  * @author Juergen Hoeller
  * @since 2.0
@@ -82,13 +83,11 @@ class PersistenceUnitReader {
 
 	private static final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
 
-
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private final ResourceLoader resourceLoader;
 
 	private final DataSourceLookup dataSourceLookup;
-
 
 	public PersistenceUnitReader(ResourceLoader resourceLoader, DataSourceLookup dataSourceLookup) {
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
@@ -96,7 +95,6 @@ class PersistenceUnitReader {
 		this.resourceLoader = resourceLoader;
 		this.dataSourceLookup = dataSourceLookup;
 	}
-
 
 	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String persistenceXmlLocation) {
 		ErrorHandler handler = new SimpleSaxErrorHandler(logger);
@@ -139,7 +137,8 @@ class PersistenceUnitReader {
 	}
 
 	/**
-	 * Utility method that returns the first child element identified by its name.
+	 * Utility method that returns the first child element identified by its
+	 * name.
 	 */
 	protected Element getChildElementByName(Element rootElement, String childName) {
 		NodeList nl = rootElement.getChildNodes();
@@ -153,7 +152,8 @@ class PersistenceUnitReader {
 	}
 
 	/**
-	 * Utility method that returns the first child element value identified by its name.
+	 * Utility method that returns the first child element value identified by
+	 * its name.
 	 */
 	protected String getChildElementValueByName(Element rootElement, String childName) {
 		Element child = getChildElementByName(rootElement, childName);
@@ -265,12 +265,30 @@ class PersistenceUnitReader {
 	}
 
 	/**
+	 * Try to locate the SCHEMA_NAME first on disk before using the URL
+	 * specified inside the XML.
+	 * 
+	 * @return an existing resource or null if one can't be find (or it does not exist)
+	 */
+	protected Resource findSchemaResource(String schemaName) throws IOException {
+		// first search the classpath root (Toplink)
+		Resource schemaLocation = new ClassPathResource(schemaName);
+
+		if (schemaLocation.exists())
+			return schemaLocation;
+
+		ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+
+		Resource[] resources = resolver.getResources("classpath*:**/" + schemaName);
+
+		return (resources.length > 0 ? resources[0] : null);
+	}
+
+	/**
 	 * Validate the given stream and return a valid DOM document for parsing.
 	 */
-	protected Document validateResource(ErrorHandler handler, InputStream stream)
-			throws ParserConfigurationException, SAXException, IOException {
-
-		Resource schemaLocation = new ClassPathResource(SCHEMA_NAME);
+	protected Document validateResource(ErrorHandler handler, InputStream stream) throws ParserConfigurationException,
+			SAXException, IOException {
 
 		// InputSource source = new InputSource(stream);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -278,8 +296,14 @@ class PersistenceUnitReader {
 		dbf.setNamespaceAware(true);
 
 		dbf.setAttribute(JAXP_SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
-		dbf.setAttribute(JAXP_SCHEMA_SOURCE, schemaLocation.getURL().toString());
-		//dbf.setAttribute(XERCES_SCHEMA_LOCATION, schemaLocation.getURL().toString());
+		Resource schemaLocation = findSchemaResource(SCHEMA_NAME);
+		
+		// set schema location only if we found one inside the classpath 
+		if (schemaLocation != null)
+			dbf.setAttribute(JAXP_SCHEMA_SOURCE, schemaLocation.getURL().toString());
+		
+		// dbf.setAttribute(XERCES_SCHEMA_LOCATION,
+		// schemaLocation.getURL().toString());
 		/*
 		 * see if these should be used on other jdks
 		 * 

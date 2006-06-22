@@ -28,6 +28,7 @@ import junit.framework.TestCase;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
@@ -39,7 +40,8 @@ import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 public class PersistenceXmlParsingTests extends TestCase {
 
 	public void testExample1() throws Exception {
-		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(), new JndiDataSourceLookup());
+		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(),
+				new JndiDataSourceLookup());
 		String resource = "/org/springframework/orm/jpa/persistence-example1.xml";
 		PersistenceUnitInfo[] info = reader.readPersistenceUnitInfos(resource);
 
@@ -49,7 +51,8 @@ public class PersistenceXmlParsingTests extends TestCase {
 	}
 
 	public void testExample2() throws Exception {
-		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(), new JndiDataSourceLookup());
+		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(),
+				new JndiDataSourceLookup());
 		String resource = "/org/springframework/orm/jpa/persistence-example2.xml";
 		PersistenceUnitInfo[] info = reader.readPersistenceUnitInfos(resource);
 
@@ -64,7 +67,8 @@ public class PersistenceXmlParsingTests extends TestCase {
 	}
 
 	public void testExample3() throws Exception {
-		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(), new JndiDataSourceLookup());
+		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(),
+				new JndiDataSourceLookup());
 		String resource = "/org/springframework/orm/jpa/persistence-example3.xml";
 		PersistenceUnitInfo[] info = reader.readPersistenceUnitInfos(resource);
 
@@ -85,7 +89,8 @@ public class PersistenceXmlParsingTests extends TestCase {
 		DataSource ds = new DriverManagerDataSource();
 		builder.bind("jdbc/MyDB", ds);
 
-		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(), new JndiDataSourceLookup());
+		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(),
+				new JndiDataSourceLookup());
 		String resource = "/org/springframework/orm/jpa/persistence-example4.xml";
 		PersistenceUnitInfo[] info = null;
 		info = reader.readPersistenceUnitInfos(resource);
@@ -117,7 +122,8 @@ public class PersistenceXmlParsingTests extends TestCase {
 	}
 
 	public void testExample5() throws Exception {
-		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(), new JndiDataSourceLookup());
+		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(),
+				new JndiDataSourceLookup());
 		String resource = "/org/springframework/orm/jpa/persistence-example5.xml";
 		PersistenceUnitInfo[] info = reader.readPersistenceUnitInfos(resource);
 
@@ -177,7 +183,6 @@ public class PersistenceXmlParsingTests extends TestCase {
 
 		assertSame(ds, pu1.getJtaDataSource());
 
-
 		PersistenceUnitInfo pu2 = info[1];
 
 		assertSame(PersistenceUnitTransactionType.JTA, pu2.getTransactionType());
@@ -197,7 +202,8 @@ public class PersistenceXmlParsingTests extends TestCase {
 	}
 
 	public void testExample6() throws Exception {
-		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(), new JndiDataSourceLookup());
+		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(),
+				new JndiDataSourceLookup());
 		String resource = "/org/springframework/orm/jpa/persistence-example6.xml";
 		PersistenceUnitInfo[] info = reader.readPersistenceUnitInfos(resource);
 		assertEquals(1, info.length);
@@ -206,7 +212,8 @@ public class PersistenceXmlParsingTests extends TestCase {
 	}
 
 	public void testInvalidPersistence() throws Exception {
-		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(), new JndiDataSourceLookup());
+		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(),
+				new JndiDataSourceLookup());
 		String resource = "/org/springframework/orm/jpa/persistence-invalid.xml";
 		try {
 			reader.readPersistenceUnitInfos(resource);
@@ -218,7 +225,8 @@ public class PersistenceXmlParsingTests extends TestCase {
 	}
 
 	public void testNoSchemaPersistence() throws Exception {
-		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(), new JndiDataSourceLookup());
+		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(),
+				new JndiDataSourceLookup());
 		String resource = "/org/springframework/orm/jpa/persistence-no-schema.xml";
 		try {
 			reader.readPersistenceUnitInfos(resource);
@@ -227,6 +235,20 @@ public class PersistenceXmlParsingTests extends TestCase {
 		catch (RuntimeException ex) {
 			// okay
 		}
+	}
+
+	public void testSchemaLocation() throws Exception {
+		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(),
+				new JndiDataSourceLookup());
+		Resource res = reader.findSchemaResource("memdb.xml");
+		assertNotNull(res);
+		res = reader.findSchemaResource("persistence.xml");
+		assertNotNull(res);
+		res = reader.findSchemaResource("hibernate-manager.xml");
+		assertNotNull(res);
+		res = reader.findSchemaResource("white-horse.xml");
+		assertNull(res);
+
 	}
 
 }
