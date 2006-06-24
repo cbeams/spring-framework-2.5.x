@@ -22,12 +22,12 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Editor for <code>java.lang.Class</code>, to directly populate a Class property
- * instead of using a String class name property as bridge.
+ * Property editor for {@link java.lang.Class java.lang.Class}, to enable the direct
+ * population of a <code>Class</code> property without recourse to having to use a
+ * String class name property as bridge.
  *
- * <p>Also supports "java.lang.String[]"-style array class names,
- * in contrast to the standard <code>Class.forName</code> method.
- * Delegates to ClassUtils for actual class name resolution.
+ * <p>Also supports "java.lang.String[]"-style array class names, in contrast to the
+ * standard {@link Class#forName(String)} method.
  *
  * @author Juergen Hoeller
  * @author Rick Evans
@@ -77,23 +77,7 @@ public class ClassEditor extends PropertyEditorSupport {
 		if (clazz == null) {
 			return "";
 		}
-		if (clazz.isArray()) {
-            return getArrayAsText(clazz);
-        }
-		else {
-			return clazz.getName();
-		}
+        return ClassUtils.getQualifiedName(clazz);
 	}
-
-
-    private static String getArrayAsText(Class clazz) {
-        StringBuffer buffer = new StringBuffer();
-        while (clazz.isArray()) {
-            clazz = clazz.getComponentType();
-            buffer.append(ClassUtils.ARRAY_SUFFIX);
-        }
-        buffer.insert(0, clazz.getName());
-        return buffer.toString();
-    }
 
 }

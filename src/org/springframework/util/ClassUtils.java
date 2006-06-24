@@ -224,7 +224,8 @@ public abstract class ClassUtils {
 	public static String getQualifiedName(Class clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isArray()) {
-			return clazz.getComponentType().getName() + ARRAY_SUFFIX;
+            return getQualifiedNameForArray(clazz);
+//			return clazz.getComponentType().getName() + ARRAY_SUFFIX;
 		}
 		else {
 			return clazz.getName();
@@ -496,5 +497,16 @@ public abstract class ClassUtils {
 		}
 		return interfaces;
 	}
+    
+
+    private static String getQualifiedNameForArray(Class clazz) {
+        StringBuffer buffer = new StringBuffer();
+        while (clazz.isArray()) {
+            clazz = clazz.getComponentType();
+            buffer.append(ClassUtils.ARRAY_SUFFIX);
+        }
+        buffer.insert(0, clazz.getName());
+        return buffer.toString();
+    }
 
 }

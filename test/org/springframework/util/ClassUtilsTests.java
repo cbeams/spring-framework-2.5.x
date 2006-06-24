@@ -32,9 +32,12 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 
 /**
+ * Unit tests for the {@link ClassUtils} class.
+ * 
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Rick Evans
  */
 public class ClassUtilsTests extends TestCase {
 
@@ -44,11 +47,13 @@ public class ClassUtilsTests extends TestCase {
 		InnerClass.overloadedCalled = false;
 	}
 
-	public void testForName() throws ClassNotFoundException {
+
+    public void testForName() throws ClassNotFoundException {
 		assertEquals(String.class, ClassUtils.forName("java.lang.String"));
 		assertEquals(String[].class, ClassUtils.forName("java.lang.String[]"));
 		assertEquals(TestBean.class, ClassUtils.forName("org.springframework.beans.TestBean"));
 		assertEquals(TestBean[].class, ClassUtils.forName("org.springframework.beans.TestBean[]"));
+		assertEquals(TestBean[][].class, ClassUtils.forName("org.springframework.beans.TestBean[][]"));
 	}
 
 	public void testForNameWithPrimitiveClasses() throws ClassNotFoundException {
@@ -83,9 +88,19 @@ public class ClassUtilsTests extends TestCase {
 		assertEquals("Class name did not match", "java.lang.Object[]", className);
 	}
 
+	public void testGetQualifiedNameForMultiDimensionalObjectArrayClass() {
+		String className = ClassUtils.getQualifiedName(Object[][].class);
+		assertEquals("Class name did not match", "java.lang.Object[][]", className);
+	}
+
 	public void testGetQualifiedNameForPrimitiveArrayClass() {
 		String className = ClassUtils.getQualifiedName(byte[].class);
 		assertEquals("Class name did not match", "byte[]", className);
+	}
+
+	public void testGetQualifiedNameForMultiDimensionalPrimitiveArrayClass() {
+		String className = ClassUtils.getQualifiedName(byte[][].class);
+		assertEquals("Class name did not match", "byte[][]", className);
 	}
 
 	public void testGetShortName() {
@@ -98,9 +113,19 @@ public class ClassUtilsTests extends TestCase {
 		assertEquals("Class name did not match", "Object[]", className);
 	}
 
+	public void testGetShortNameForMultiDimensionalObjectArrayClass() {
+		String className = ClassUtils.getShortName(Object[][].class);
+		assertEquals("Class name did not match", "Object[][]", className);
+	}
+
 	public void testGetShortNameForPrimitiveArrayClass() {
 		String className = ClassUtils.getShortName(byte[].class);
 		assertEquals("Class name did not match", "byte[]", className);
+	}
+
+	public void testGetShortNameForMultiDimensionalPrimitiveArrayClass() {
+		String className = ClassUtils.getShortName(byte[][][].class);
+		assertEquals("Class name did not match", "byte[][][]", className);
 	}
 
 	public void testGetShortNameForInnerClass() {
