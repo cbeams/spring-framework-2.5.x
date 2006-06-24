@@ -52,12 +52,11 @@
     <section id="new-in-2-ioc-custom-configuration">
       <title>Extensible XML authoring</title>
 
-      <para>Not only is XML configuration easier to specify, it is now also
-      extensible.</para>
+      <para>Not only is XML configuration easier to write, it is now also extensible.</para>
 
       <para>What 'extensible' means in this context is that you, as an
       application developer, or (more likely) as a third party framework or
-      product vendor, can write your own tags that other developers can then
+      product vendor, can write custom tags that other developers can then
       plug into their own Spring configuration files. This allows you to have
       your own domain specific language (the term is used loosely here) of
       sorts be reflected in the specific configuration of your own components.</para>
@@ -80,8 +79,7 @@
       depending on the environment in which Spring is being deployed (for
       example, request and session scoped beans in a web environment), but
       also by providing 'hooks' (for want of a better word) so that Spring
-      users can integrate their own scopes with (hopefully) a minimum of
-      effort.</para>
+      users can create their own scopes.</para>
 
       <para>It should be noted that although the underlying (and internal)
       implementation for singleton- and prototype-scoped beans has been
@@ -108,17 +106,17 @@
 
       <para>Spring 2.0 introduces new schema support for defining aspects backed by
       regular Java objects. This support takes advantage of the AspectJ pointcut
-      language and offers fully typed advice (no more casting and <literal>Object[]</literal>
-      manipulation). Details of this support can be found in 
-      <xref linkend="aop-schema" />.</para>
+      language and offers fully typed advice (i.e. no more casting and
+      <literal>Object[]</literal> argument manipulation). Details of this support
+      can be found in the section entitled <xref linkend="aop-schema" />.</para>
     </section>
 
     <section id="new-in-2-aop-aspectJ">
       <title>Support for @AspectJ aspects</title>
 
       <para>Spring 2.0 also supports aspects defined using the @AspectJ annotations.
-      These aspects can be shared between AspectJ and Spring AOP, and require only
-      trivial configuration. The support for @AspectJ aspects is discussed in
+      These aspects can be shared between AspectJ and Spring AOP, and require (honestly!)
+      only som simple configuration. The support for @AspectJ aspects is discussed in
       <xref linkend="aop-ataspectj" />.</para>
     </section>
   </section>
@@ -141,9 +139,9 @@
     <section id="new-in-2-middle-tier-jpa">
       <title>JPA</title>
 
-      <para>Spring 2.0 ships with a JPA abstraction layer, that is similar in
-      intent to Spring's JDBC abstraction layer in the scope of what it
-      addresses and in its general usage patterns.</para>
+      <para>Spring 2.0 ships with a JPA abstraction layer, that is similar in intent
+      to Spring's JDBC abstraction layer in the scope of what it addresses and in its
+      general usage patterns.</para>
 
       <para>If you are interested in using a JPA-implementation as the
       backbone of your persistence layer, the section entitled <xref
@@ -211,8 +209,8 @@
       the Spring team is confident it will satisfy all of those developers who
       voted for the issue on JIRA. The new tag library is itself covered in the
       section entitled <xref linkend="mvc" />, and a quick reference to all of
-      the new tags can be found in the appendix entitled <xref
-      linkend="spring-form.tld" />.</para>
+      the new tags can be found in the appendix entitled
+      <xref linkend="spring-form.tld" />.</para>
     </section>
 
     <section id="new-in-2-web-convention">
@@ -222,16 +220,15 @@
       having reasonable defaults is just what they (the projects) need...
       this theme of convention-over-configuration now has explicit support in
       Spring MVC. What this means is that if you establish a set of naming
-      conventions and suchlike,
-      you can <emphasis>substantially</emphasis> cut down on the amount of
-      configuration that is required to setup handler mappings, view
-      resolvers, <classname>ModelAndView</classname> instances, etc. This is
-      obviously a great boon with regards to rapid prototyping, and can also
+      conventions and suchlike, you can <emphasis>substantially</emphasis> cut
+      down on the amount of configuration that is required to setup handler
+      mappings, view resolvers, <classname>ModelAndView</classname> instances,
+      etc. This is a great boon with regards to rapid prototyping, and can also
       lend a degree of (always good-to-have) consistency across a codebase
       should you choose to move forward with it into production.</para>
 
       <para>Spring MVC's convention-over-configuration support is detailed in
-      the section entitled <xref linkend="mvc-convention"/></para>
+      the section entitled <xref linkend="mvc-coc"/></para>
     </section>
 
     <section id="new-in-2-web-portlet">
@@ -296,12 +293,6 @@
       to Spring Java 5-only features.)</para>
 
       <itemizedlist>
-        <listitem>
-          <xref linkend="jdbc-SimpleJdbcTemplate" />
-        </listitem>
-        <listitem>
-          <xref linkend="metadata-annotations-required" />
-        </listitem>
 		<listitem>
 			<xref linkend="aop-atconfigurable"/>
 		</listitem>
@@ -311,6 +302,12 @@
 		<listitem>
 			<xref linkend="transaction-declarative-aspectj"/>
 		</listitem>
+        <listitem>
+          <xref linkend="metadata-annotations-required" />
+        </listitem>
+        <listitem>
+          <xref linkend="jdbc-SimpleJdbcTemplate" />
+        </listitem>
       </itemizedlist>
     </section>
   </section>
@@ -321,10 +318,9 @@
     <para>The reference documentation has been markedly improved, and now
     sports a host of fleshed out examples and (hopefully) clearer
     explanations. A number of the sample applications that ship with the full
-    Spring distribution also have been updated to show-off the new and
+    Spring distribution also have been updated to showcase the new and
     improved features and functionality of Spring 2.0, so do check them out...
     the aforementioned sample applications can be found in the
-    <literal>samples</literal> directory of the full Spring
-    distribution.</para>
+    <literal>samples</literal> directory of the full Spring distribution.</para>
   </section>
 </chapter>
