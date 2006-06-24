@@ -225,7 +225,6 @@ public abstract class ClassUtils {
 		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isArray()) {
             return getQualifiedNameForArray(clazz);
-//			return clazz.getComponentType().getName() + ARRAY_SUFFIX;
 		}
 		else {
 			return clazz.getName();
