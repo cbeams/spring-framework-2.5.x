@@ -19,9 +19,8 @@ package org.springframework.web.servlet;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Strategy interface used to translate an incoming
- * {@link javax.servlet.http.HttpServletRequest} into a view name
- * when no view name is explicitly supplied.
+ * Translates an incoming {@link javax.servlet.http.HttpServletRequest}
+ * into a logical view name when no view name is explicitly supplied.
  *
  * @author Rob Harrop
  * @since 2.0
@@ -33,7 +32,7 @@ public interface RequestToViewNameTranslator {
 	 * @param request the incoming {@link HttpServletRequest} providing the
 	 *                context from which a view name is to be resolved
 	 * @return the view name (never <code>null</code>)
-	 * @throws Exception if view name translation failed
+	 * @throws Exception if view name translation fails
 	 */
 	String getViewName(HttpServletRequest request) throws Exception;
 

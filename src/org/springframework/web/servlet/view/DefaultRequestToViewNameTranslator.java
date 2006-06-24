@@ -24,21 +24,28 @@ import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Default implementation of the {@link RequestToViewNameTranslator} interface
- * that simply transforms the URI of the incoming request into the view name.
- * Can be explicitly defined as the "viewNameTranslator" bean in a
- * {@link org.springframework.web.servlet.DispatcherServlet} context; else, a
- * plain default instance will be used.
+ * Simply transforms the URI of the incoming request into the view name.
+ * 
+ * <p>Can be explicitly defined as the "viewNameTranslator" bean in a
+ * {@link org.springframework.web.servlet.DispatcherServlet} context; else,
+ * a plain default instance will be used.
  *
  * <p>The default transformation simply strips the leading slash and file
  * extension of the URI and returns the result as the view name with the
  * configured {@link #setPrefix(String) "prefix"} and and
  * {@link #setSuffix(String) "suffix"} added as appropriate.
  *
- * <p>Stripping of the leading slash and file extension can be disabled using
- * the {@link #setStripLeadingSlash(boolean) "stripLeadingSlash"} and
+ * <p>The stripping of the leading slash and file extension can be disabled
+ * using the {@link #setStripLeadingSlash(boolean) "stripLeadingSlash"} and
  * {@link #setStripExtension(boolean) "stripExtension"} properties,
  * respectively.
+ * 
+ * <p>Find below some examples of request to view name translation.
+ * 
+ * <pre class="code"> http://localhost:8080/gamecast/display.html -> display
+ * http://localhost:8080/gamecast/displayShoppingCart.html -> displayShoppingCart
+ * http://localhost:8080/gamecast/admin/index.html -> admin/index
+ * </pre>
  *
  * @author Rob Harrop
  * @since 2.0
@@ -160,7 +167,8 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 		return this.prefix + transformPath(lookupPath) + this.suffix;
 	}
 
-	/**
+
+    /**
 	 * Transform the request URI (in the context of the webapp) stripping
 	 * slashes and extensions, and replacing the separator as required.
 	 * @param lookupPath the lookup path for the current request,
@@ -170,19 +178,15 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 */
 	protected String transformPath(String lookupPath) {
 		String path = lookupPath;
-
 		if (this.stripLeadingSlash && path.startsWith(SLASH)) {
 			path = path.substring(1);
 		}
-
 		if (this.stripExtension) {
 			path = StringUtils.stripFilenameExtension(path);
 		}
-
 		if (!SLASH.equals(this.separator)) {
 			path = StringUtils.replace(path, SLASH, this.separator);
 		}
-
 		return path;
 	}
 

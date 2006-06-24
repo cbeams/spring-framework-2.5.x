@@ -81,39 +81,21 @@ public class ControllerClassNameHandlerMapping extends AbstractUrlHandlerMapping
 		detectHandlers();
 	}
 
-	/**
-	 * Detect all the {@link org.springframework.web.servlet.mvc.Controller} and
-	 * {@link org.springframework.web.servlet.mvc.throwaway.ThrowawayController}
-	 * beans registered in the {@link org.springframework.context.ApplicationContext}
-	 * and register a URL path mapping for each one based on rules defined here.
-	 * @see #generatePathMapping(Class)
-	 */
-	private void detectHandlers() {
-		String[] beanNames = getApplicationContext().getBeanNamesForType(Controller.class);
-		for (int i = 0; i < beanNames.length; i++) {
-			registerController(beanNames[i]);
-		}
-		beanNames = getApplicationContext().getBeanNamesForType(ThrowawayController.class);
-		for (int i = 0; i < beanNames.length; i++) {
-			registerController(beanNames[i]);
-		}
-	}
-
-	/**
-	 * Register the controller with the given name, as defined
-	 * in the current application context.
-	 * @param beanName the name of the controller bean
-	 * @see #getApplicationContext()
-	 */
-	protected void registerController(String beanName) {
-		Class controllerClass = getApplicationContext().getType(beanName);
-		String urlPath = generatePathMapping(controllerClass);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Registering Controller '" + beanName +
-					"' as handler for URL path [" + urlPath + "]");
-		}
-		registerHandler(urlPath, beanName);
-	}
+    /**
+     * Register the controller with the given name, as defined
+     * in the current application context.
+     * @param beanName the name of the controller bean
+     * @see #getApplicationContext()
+     */
+    protected void registerController(String beanName) {
+        Class controllerClass = getApplicationContext().getType(beanName);
+        String urlPath = generatePathMapping(controllerClass);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Registering Controller '" + beanName +
+                    "' as handler for URL path [" + urlPath + "]");
+        }
+        registerHandler(urlPath, beanName);
+    }
 
 	/**
 	 * Generate the actual URL path for the given {@link Controller} class. Sub-classes
@@ -135,5 +117,25 @@ public class ControllerClassNameHandlerMapping extends AbstractUrlHandlerMapping
 
 		return pathMapping.toString();
 	}
+
+
+    /**
+	 * Detect all the {@link org.springframework.web.servlet.mvc.Controller} and
+	 * {@link org.springframework.web.servlet.mvc.throwaway.ThrowawayController}
+	 * beans registered in the {@link org.springframework.context.ApplicationContext}
+	 * and register a URL path mapping for each one based on rules defined here.
+	 * @see #generatePathMapping(Class)
+	 */
+	private void detectHandlers() {
+        registerHandlersForThe(Controller.class);
+        registerHandlersForThe(ThrowawayController.class);
+    }
+
+    private void registerHandlersForThe(Class controllerType) {
+        String[] beanNames = getApplicationContext().getBeanNamesForType(controllerType);
+        for (int i = 0; i < beanNames.length; i++) {
+            registerController(beanNames[i]);
+        }
+    }
 
 }
