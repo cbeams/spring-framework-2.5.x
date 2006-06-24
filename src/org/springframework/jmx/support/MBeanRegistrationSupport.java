@@ -193,16 +193,24 @@ public class MBeanRegistrationSupport {
 	 */
 	protected void unregisterBeans() {
 		for (Iterator it = this.registeredBeans.iterator(); it.hasNext();) {
-			ObjectName objectName = (ObjectName) it.next();
-			try {
-				this.server.unregisterMBean(objectName);
-				onUnregister(objectName);
-			}
-			catch (JMException ex) {
-				if (logger.isErrorEnabled()) {
-					logger.error("Could not unregister MBean [" + objectName + "]", ex);
-				}
-			}
+            ObjectName objectName = (ObjectName) it.next();
+            try {
+                // MBean might already have been unregistered by an external process
+                if (this.server.isRegistered(objectName)) {
+                    this.server.unregisterMBean(objectName);
+                    onUnregister(objectName);
+                } else {
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Could not unregister MBean [" + objectName + "] as " +
+                                "said MBean is not registered (perhaps already unregistered by an external process)");
+                    }
+                }
+            }
+            catch (JMException ex) {
+                if (logger.isErrorEnabled()) {
+                    logger.error("Could not unregister MBean [" + objectName + "]", ex);
+                }
+            }
 		}
 		this.registeredBeans.clear();
 	}

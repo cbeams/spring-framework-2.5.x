@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.jmx.export;
 import javax.management.ObjectName;
 
 /**
- * Listener to be registered with an <code>MBeanExporter</code>.
- * Allows application code to be notified when an MBean is registered and unregistered.
+ * A listener that allows application code to be notified when an MBean is
+ * registered and unregistered via an {@link MBeanExporter}.
  *
  * @author Rob Harrop
  * @since 1.2.2
@@ -29,15 +29,15 @@ import javax.management.ObjectName;
 public interface MBeanExporterListener {
 
 	/**
-	 * Called by <code>MBeanExporter</code> after an MBean has been registered with the
-	 * <code>MBeanServer</code>.
+	 * Called by {@link MBeanExporter} after an MBean has been <i>successfully</i>
+     * registered with an {@link javax.management.MBeanServer}.
 	 * @param objectName the <code>ObjectName</code> of the registered MBean
 	 */
 	void mbeanRegistered(ObjectName objectName);
 
 	/**
-	 * Called by <code>MBeanExporter</code> after an MBean has been unregistered from the
-	 * <code>MBeanServer</code>.
+	 * Called by {@link MBeanExporter} after an MBean has been <i>successfully</i>
+     * unregistered from an {@link javax.management.MBeanServer}.
 	 * @param objectName the <code>ObjectName</code> of the unregistered MBean
 	 */
 	void mbeanUnregistered(ObjectName objectName);

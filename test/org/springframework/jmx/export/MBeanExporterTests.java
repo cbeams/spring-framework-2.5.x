@@ -513,6 +513,23 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		}
 		catch (MBeanExportException expected) {}
 	}
+
+    /*
+     * SPR-2158
+     */
+    public void testMBeanIsNotUnregisteredSpuriouslyIfSomeExternalProcessHasUnregisteredMBean() throws Exception {
+		MBeanExporter adaptor = new MBeanExporter();
+		adaptor.setBeans(getBeanMap());
+		adaptor.setServer(server);
+        MockMBeanExporterListener listener = new MockMBeanExporterListener();
+        adaptor.setListeners(new MBeanExporterListener[]{listener});
+        adaptor.afterPropertiesSet();
+		assertIsRegistered("The bean was not registered with the MBeanServer", ObjectNameManager.getInstance(OBJECT_NAME));
+        
+        server.unregisterMBean(new ObjectName(OBJECT_NAME));
+        adaptor.destroy();
+        assertEquals("Listener should not have been invoked (MBean previously unregistered by external agent)", 0, listener.getUnregistered().size());
+    }
 	
 
 	private Map getBeanMap() {
