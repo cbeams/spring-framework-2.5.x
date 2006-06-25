@@ -1417,6 +1417,133 @@
 					description="Generate and copy reference documentation"/>
 
 
+	<!-- Start - MVC step-by-step guide -->
+
+	<target name="mvcstep.clean" description="Delete temporary and distribution directories for MVC step-by-step guide">
+
+		<delete quiet="true" dir="${basedir}/${dist.mvcstep.dir}/pdf"/>
+		<delete quiet="true" dir="${basedir}/${dist.mvcstep.dir}/html_single"/>
+		<delete quiet="true" dir="${basedir}/${dist.mvcstep.dir}/html"/>
+
+	</target>
+
+
+	<target name="mvcstep.prepare" description="Extra preparation for the MVC step-by-step guide">
+
+		<fail message="XSLT supporting lib not installed. Please see '${doc.ref.dir}/readme.txt' for instructions.">
+			<condition>
+				<not>
+					<available file="${basedir}/${doc.ref.dir}/lib"/>
+				</not>
+			</condition>
+		</fail>
+
+	</target>
+
+	<target name="mvcstep.pdf" depends="mvcstep.prepare" description="Compile MVC step-by-step guide to pdf">
+
+		<mkdir dir="${basedir}/${dist.mvcstep.dir}/pdf/images"/>
+
+		<copy todir="${basedir}/${dist.mvcstep.dir}/pdf/images">
+			<fileset dir="${basedir}/${doc.mvcstep.dir}/src/images">
+				<include name="*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+				<include name="*.png"/>
+			</fileset>
+		</copy>
+
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.mvcstep.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg value="-Xmx256M"/>
+			<arg value="-o"/>
+			<arg value="${basedir}/${dist.mvcstep.dir}/pdf/docbook_fop.tmp"/>
+			<arg value="${basedir}/${doc.mvcstep.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.ref.dir}/styles/fopdf.xsl"/>
+			<!-- controls the double sided pagination style -->
+			<arg value="double.sided=${double.sided}"/>
+		</java>
+
+		<java classname="org.apache.fop.apps.Fop" fork="true" maxmemory="256m" dir="${doc.mvcstep.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<arg value="${basedir}/${dist.mvcstep.dir}/pdf/docbook_fop.tmp"/>
+			<arg value="${basedir}/${dist.mvcstep.dir}/pdf/spring-mvc-step-by-step.pdf"/>
+		</java>
+
+		<delete file="${dist.mvcstep.dir}/pdf/docbook_fop.tmp"/>
+
+	</target>
+
+	<target name="mvcstep.html" depends="doc.prepare" description="Compile MVC step-by-step guide to chunked html">
+        
+		<mkdir dir="${dist.mvcstep.dir}/html/images"/>
+
+		<copy todir="${basedir}/${dist.mvcstep.dir}/html/images">
+			<fileset dir="${basedir}/${doc.mvcstep.dir}/src/images">
+				<include name="*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+				<include name="*.png"/>
+			</fileset>
+		</copy>
+
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${dist.mvcstep.dir}/html/">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg value="-Xmx256M"/>
+			<arg value="${basedir}/${doc.mvcstep.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.mvcstep.dir}/styles/html_chunk.xsl"/>
+		</java>
+
+	</target>
+
+
+	<target name="mvcstep.htmlsingle" description="Compile MVC step-by-step guide to single html">
+
+		<mkdir dir="${dist.mvcstep.dir}/html_single/images"/>
+
+		<copy todir="${basedir}/${dist.mvcstep.dir}/html_single/images">
+			<fileset dir="${basedir}/${doc.mvcstep.dir}/src/images">
+				<include name="*.gif"/>
+				<include name="*.svg"/>
+				<include name="*.jpg"/>
+				<include name="*.png"/>
+			</fileset>
+		</copy>
+
+		<java classname="com.icl.saxon.StyleSheet" fork="true" dir="${doc.mvcstep.dir}">
+			<classpath>
+				<fileset dir="${basedir}/${doc.ref.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<jvmarg value="-Xmx256M"/>
+			<arg value="-o"/>
+			<arg value="${basedir}/${dist.mvcstep.dir}/html_single/index.html"/>
+			<arg value="${basedir}/${doc.mvcstep.dir}/src/index.xml"/>
+			<arg value="${basedir}/${doc.mvcstep.dir}/styles/html.xsl"/>
+		</java>
+
+	</target>
+
+
+	<target name="mvcstep.all" depends="mvcstep.html,mvcstep.htmlsingle,mvcstep.pdf"
+					description="Generate and copy MVC step-by-step guide"/>
+
+	<!-- End - MVC step-by-step guide -->
+
+
 	<target name="releasezips" description="Generate release zips based on present artifacts">
 
 		<mkdir dir="${target.release.dir}"/>
