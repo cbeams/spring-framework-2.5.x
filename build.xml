@@ -1482,7 +1482,7 @@
 
 	</target>
 
-	<target name="mvcstep.html" depends="doc.prepare" description="Compile MVC step-by-step guide to chunked html">
+	<target name="mvcstep.html" depends="mvcstep.prepare" description="Compile MVC step-by-step guide to chunked html">
         
 		<mkdir dir="${dist.mvcstep.dir}/html/images"/>
 
