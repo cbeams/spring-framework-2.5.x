@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<chapter id="part1"> 
+<chapter id="part1">
   <title>Basic Application and Environment Setup</title>
 
-  <para>This is a step-by-step account of how to develop a web application from scratch using the Spring Framework.</para>
+  <para>This is a step-by-step account of how to develop a web application
+  from scratch using the Spring Framework.</para>
 
   <para>Prerequisites:</para>
 
@@ -11,34 +11,338 @@
     <listitem>
       <para>Java SDK (We are currently using version 1.5)</para>
     </listitem>
+
     <listitem>
       <para>Ant (using version 1.6.3)</para>
     </listitem>
+
     <listitem>
       <para>Apache Tomcat (using version 5.5.17)</para>
     </listitem>
   </itemizedlist>
 
-  <para>You should also be reasonably comfortable using the above software.</para>
-  <para>We are not going to cover a lot of background information or theory in this document -- there are plenty of books available that covers this in depth.
-  Instead we will dive right into developing the application.</para>
+  <para>You should also be reasonably comfortable using the above
+  software.</para>
+
+  <para>We are not going to cover a lot of background information or theory in
+  this document -- there are plenty of books available that covers this in
+  depth. Instead we will dive right into developing the application.</para>
 
   <section id="step1.1">
     <title>Development directory</title>
 
-    <para>We are going to need a place to keep all the source and other files we will be creating, so we create a directory named 'springapp'. You can
-    place this directory in your home folder or in some other location. We created ours in a 'Projects' directory that we already had in the home directory so 
-    the path to our directory is now '$HOME/Projects/springapp'. Inside this directory we create a  sub-directory named 'src' to hold all Java source files. 
-    Then we create another sub-directory that we name 'war'. This directory will hold everything that should go into the WAR file, that we would use to deploy 
-    our application. All source files other than Java source, like JSPs and configuration files, belongs in this directory.</para>
-    
+    <para>We are going to need a place to keep all the source and other files
+    we will be creating, so let's create a directory named 'springapp'. You
+    can place this directory in your home folder or in some other location. We
+    created ours in a 'Projects' directory that we already had in the home
+    directory so the path to our directory is now '$HOME/Projects/springapp'.
+    Inside this directory we create a sub-directory named 'src' to hold all
+    Java source files. Then we create another sub-directory that we name
+    'war'. This directory will hold everything that should go into the WAR
+    file, that we would use to deploy our application. All source files other
+    than Java source, like JSPs and configuration files, belongs in this
+    directory.</para>
   </section>
-  
+
   <section id="step1.2">
-        <title>index.jsp</title>
-        <para>We will start by creating a JSP page named <emphasis>'index.jsp'</emphasis> in the war directory. This is the entry point for our application.</para>
-        
-        
+    <title>Creating index.jsp</title>
+
+    <para>We will start by creating a JSP page named
+    <emphasis>'index.jsp'</emphasis> in the war directory. This is the entry
+    point for our application.</para>
+
+    <para><filename>springapp/war/index.jsp:</filename><programlisting>&lt;html&gt;
+  &lt;head&gt;&lt;title&gt;Example :: Spring Application&lt;/title&gt;&lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Example - Spring Application&lt;/h1&gt;
+    &lt;p&gt;This is my test.&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</programlisting></para>
+
+    <para>Just to have a complete web application, let's create a WEB-INF
+    directory inside the war directory and place a web.xml file in this new
+    directory.</para>
+
+    <para><filename>springapp/war/WEB-INF/web.xml:</filename><programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;web-app version="2.4"
+         xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
+         http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" &gt;
+
+  &lt;welcome-file-list&gt;
+    &lt;welcome-file&gt;
+      index.jsp
+    &lt;/welcome-file&gt;
+  &lt;/welcome-file-list&gt;
+
+&lt;/web-app&gt;</programlisting></para>
+  </section>
+
+  <section id="step1.3">
+    <title>Deploying the application to Tomcat</title>
+
+    <para>Next, we write an Ant build script that we are going to use
+    throughout this document. There are tasks for building and deploying the
+    application. A separate build script contains the app server specific
+    tasks There are also tasks for controlling the application under
+    Tomcat.</para>
+
+    <para><filename>springapp/build.xml:</filename><programlisting>&lt;?xml version="1.0"?&gt;
+
+&lt;project name="springapp" basedir="." default="usage"&gt;
+    &lt;property file="build.properties"/&gt;
+
+    &lt;property name="src.dir" value="src"/&gt;
+    &lt;property name="web.dir" value="war"/&gt;
+    &lt;property name="build.dir" value="${web.dir}/WEB-INF/classes"/&gt;
+    &lt;property name="name" value="springapp"/&gt;
+
+    &lt;path id="master-classpath"&gt;
+        &lt;fileset dir="${web.dir}/WEB-INF/lib"&gt;
+            &lt;include name="*.jar"/&gt;
+        &lt;/fileset&gt;
+        &lt;!-- We need the servlet API classes:        --&gt;
+        &lt;!--   for Tomcat 4.1 use servlet.jar        --&gt;
+        &lt;!--   for Tomcat 5.0 use servlet-api.jar    --&gt;
+        &lt;!--   for Other app server - check the docs --&gt;
+        &lt;fileset dir="${appserver.home}/common/lib"&gt;
+            &lt;include name="servlet*.jar"/&gt;
+        &lt;/fileset&gt;
+        &lt;pathelement path="${build.dir}"/&gt;
+    &lt;/path&gt;
+
+    &lt;target name="usage"&gt;
+        &lt;echo message=""/&gt;
+        &lt;echo message="${name} build file"/&gt;
+        &lt;echo message="-----------------------------------"/&gt;
+        &lt;echo message=""/&gt;
+        &lt;echo message="Available targets are:"/&gt;
+        &lt;echo message=""/&gt;
+        &lt;echo message="build     --&gt; Build the application"/&gt;
+        &lt;echo message="deploy    --&gt; Deploy application as directory"/&gt;
+        &lt;echo message="deploywar --&gt; Deploy application as a WAR file"/&gt;
+        &lt;echo message="install   --&gt; Install application in Tomcat"/&gt;
+        &lt;echo message="reload    --&gt; Reload application in Tomcat"/&gt;
+        &lt;echo message="start     --&gt; Start Tomcat application"/&gt;
+        &lt;echo message="stop      --&gt; Stop Tomcat application"/&gt;
+        &lt;echo message="list      --&gt; List Tomcat applications"/&gt;
+        &lt;echo message=""/&gt;
+    &lt;/target&gt;
+
+    &lt;target name="build" description="Compile main source tree java files"&gt;
+        &lt;mkdir dir="${build.dir}"/&gt;
+        &lt;javac destdir="${build.dir}" target="1.3" debug="true"
+               deprecation="false" optimize="false" failonerror="true"&gt;
+            &lt;src path="${src.dir}"/&gt;
+            &lt;classpath refid="master-classpath"/&gt;
+        &lt;/javac&gt;
+    &lt;/target&gt;
+
+    &lt;target name="deploy" depends="build" description="Deploy application"&gt;
+        &lt;copy todir="${deploy.path}/${name}" preservelastmodified="true"&gt;
+            &lt;fileset dir="${web.dir}"&gt;
+                &lt;include name="**/*.*"/&gt;
+            &lt;/fileset&gt;
+        &lt;/copy&gt;
+    &lt;/target&gt;
+
+    &lt;target name="deploywar" depends="build" description="Deploy application as a WAR file"&gt;
+        &lt;war destfile="${name}.war"
+             webxml="${web.dir}/WEB-INF/web.xml"&gt;
+            &lt;fileset dir="${web.dir}"&gt;
+                &lt;include name="**/*.*"/&gt;
+            &lt;/fileset&gt;
+        &lt;/war&gt;
+        &lt;copy todir="${deploy.path}" preservelastmodified="true"&gt;
+            &lt;fileset dir="."&gt;
+                &lt;include name="*.war"/&gt;
+            &lt;/fileset&gt;
+        &lt;/copy&gt;
+    &lt;/target&gt;
+
+&lt;!-- ============================================================== --&gt;
+&lt;!-- Tomcat tasks - remove these if you don't have Tomcat installed --&gt;
+&lt;!-- ============================================================== --&gt;
+
+    &lt;taskdef name="install" classname="org.apache.catalina.ant.InstallTask"&gt;
+        &lt;classpath&gt;
+            &lt;path location="${appserver.home}/server/lib/catalina-ant.jar"/&gt;
+        &lt;/classpath&gt;
+    &lt;/taskdef&gt;
+    &lt;taskdef name="reload" classname="org.apache.catalina.ant.ReloadTask"&gt;
+        &lt;classpath&gt;
+            &lt;path location="${appserver.home}/server/lib/catalina-ant.jar"/&gt;
+        &lt;/classpath&gt;
+    &lt;/taskdef&gt;
+    &lt;taskdef name="list" classname="org.apache.catalina.ant.ListTask"&gt;
+        &lt;classpath&gt;
+            &lt;path location="${appserver.home}/server/lib/catalina-ant.jar"/&gt;
+        &lt;/classpath&gt;
+    &lt;/taskdef&gt;
+    &lt;taskdef name="start" classname="org.apache.catalina.ant.StartTask"&gt;
+        &lt;classpath&gt;
+            &lt;path location="${appserver.home}/server/lib/catalina-ant.jar"/&gt;
+        &lt;/classpath&gt;
+    &lt;/taskdef&gt;
+    &lt;taskdef name="stop" classname="org.apache.catalina.ant.StopTask"&gt;
+        &lt;classpath&gt;
+            &lt;path location="${appserver.home}/server/lib/catalina-ant.jar"/&gt;
+        &lt;/classpath&gt;
+    &lt;/taskdef&gt;
+
+    &lt;target name="install" description="Install application in Tomcat"&gt;
+        &lt;install url="${tomcat.manager.url}"
+                 username="${tomcat.manager.username}"
+                 password="${tomcat.manager.password}"
+                 path="/${name}"
+                 war="${name}"/&gt;
+    &lt;/target&gt;
+
+    &lt;target name="reload" description="Reload application in Tomcat"&gt;
+        &lt;reload url="${tomcat.manager.url}"
+                 username="${tomcat.manager.username}"
+                 password="${tomcat.manager.password}"
+                 path="/${name}"/&gt;
+    &lt;/target&gt;
+
+    &lt;target name="start" description="Start Tomcat application"&gt;
+        &lt;start url="${tomcat.manager.url}"
+                 username="${tomcat.manager.username}"
+                 password="${tomcat.manager.password}"
+                 path="/${name}"/&gt;
+    &lt;/target&gt;
+
+    &lt;target name="stop" description="Stop Tomcat application"&gt;
+        &lt;stop url="${tomcat.manager.url}"
+                 username="${tomcat.manager.username}"
+                 password="${tomcat.manager.password}"
+                 path="/${name}"/&gt;
+    &lt;/target&gt;
+
+    &lt;target name="list" description="List Tomcat applications"&gt;
+        &lt;list url="${tomcat.manager.url}"
+                 username="${tomcat.manager.username}"
+                 password="${tomcat.manager.password}"/&gt;
+    &lt;/target&gt;
+
+&lt;!-- End Tomcat tasks --&gt;
+
+&lt;/project&gt;</programlisting></para>
+
+    <para>This script now contains all the targets that we are going to need
+    to make our development efforts easier. We arre not going to cover this
+    script in detail, since most if not all of it is pretty much standard Ant
+    and Tomcat stuff. You can just copy the above build file and put it at the
+    root of your development directory tree. We also need a build.properties
+    file that you should customize to match your server installation. This
+    file belongs in the same directory as the build.xml file.</para>
+
+    <para><filename>springapp/build.properties</filename><programlisting># Ant properties for building the springapp
+
+appserver.home=${user.home}/apache-tomcat-5.5.17
+deploy.path=${appserver.home}/webapps
+
+tomcat.manager.url=http://localhost:8080/manager
+tomcat.manager.username=admin
+tomcat.manager.password=tomcat</programlisting></para>
+
+    <remark>If you are on a system where you are not the owner of the Tomcat
+    install, then the Tomcat owner must either grant you full access to the
+    webapps directory or the owner must create a new directory named
+    'springapp' in the 'webapps' directory of the Tomcat installation, and
+    also give you full rights to deploy to this newly created directory. On
+    Linux I run the command chmod a+rwx springapp to give everybody full
+    rights to this directory. </remark>
+
+    <para> </para>
+
+    <remark>If you are using a different web application server, then you can
+    remove the Tomcat specific tasks at the end of the build script. You will
+    have to rely on your server's hot deploy feature, or you will have to stop
+    and start your application manually.</remark>
+
+    <para>Now we run Ant to make sure that everything is working OK. You
+    should have your current directory set to the 'springapp'
+    directory.</para>
+
+    <screen>samoa:~/Projects/springapp trisberg$ ant
+Buildfile: build.xml
+
+usage:
+
+     [echo] springapp build file
+     [echo] -----------------------------------
+
+     [echo] Available targets are:
+
+     [echo] build     --&gt; Build the application
+     [echo] deploy    --&gt; Deploy application as directory
+     [echo] deploywar --&gt; Deploy application as a WAR file
+     [echo] install   --&gt; Install application in Tomcat
+     [echo] reload    --&gt; Reload application in Tomcat
+     [echo] start     --&gt; Start Tomcat application
+     [echo] stop      --&gt; Stop Tomcat application
+     [echo] list      --&gt; List Tomcat applications
+
+
+BUILD SUCCESSFUL
+Total time: 2 seconds</screen>
+
+    <para>Last action here is to do the actual deployment. Just run Ant and
+    specify 'deploy' or 'deploywar' as the target.</para>
+
+    <screen>samoa:~/Projects/springapp trisberg$ ant deploy
+Buildfile: build.xml
+
+build:
+    [mkdir] Created dir: /Users/trisberg/Projects/springapp/war/WEB-INF/classes
+
+deploy:
+     [copy] Copying 2 files to /Users/trisberg/apache-tomcat-5.5.17/webapps/springapp
+
+BUILD SUCCESSFUL
+Total time: 4 seconds</screen>
+  </section>
+
+  <section id="step1.4">
+    <title>Test the application</title>
+
+    <para>Let's just quickly start Tomcat and make sure that we can access the
+    application. Use the 'list' task from our build file to see if Tomcat has
+    picked up the new application.</para>
+
+    <screen>samoa:~/Projects/springapp trisberg$ ant list
+Buildfile: build.xml
+
+list:
+     [list] OK - Listed applications for virtual host localhost
+     [list] /admin:running:0:/Users/trisberg/apache-tomcat-5.5.17/server/webapps/admin
+     [list] /webdav:running:0:webdav
+     [list] /servlets-examples:running:0:servlets-examples
+     [list] /springapp:running:0:springapp
+     [list] /jsp-examples:running:0:jsp-examples
+     [list] /balancer:running:0:balancer
+     [list] /host-manager:running:0:/Users/trisberg/apache-tomcat-5.5.17/server/webapps/host-manager
+     [list] /tomcat-docs:running:0:tomcat-docs
+     [list] /:running:0:ROOT
+     [list] /manager:running:0:/Users/trisberg/apache-tomcat-5.5.17/server/webapps/manager
+
+BUILD SUCCESSFUL
+Total time: 3 seconds</screen>
+
+    <para>Now open a browser and browse to <ulink
+    url="http://localhost:8080/springapp/index.jsp">http://localhost:8080/springapp/index.jsp</ulink>.</para>
+
+    <screenshot>
+      <screeninfo></screeninfo>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/screen1.png" />
+        </imageobject>
+      </mediaobject>
+    </screenshot>
   </section>
 </chapter>
-
