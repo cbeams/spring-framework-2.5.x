@@ -133,7 +133,7 @@
 
     &lt;target name="build" description="Compile main source tree java files"&gt;
         &lt;mkdir dir="${build.dir}"/&gt;
-        &lt;javac destdir="${build.dir}" target="1.3" debug="true"
+        &lt;javac destdir="${build.dir}" source="1.5" target="1.5" debug="true"
                deprecation="false" optimize="false" failonerror="true"&gt;
             &lt;src path="${src.dir}"/&gt;
             &lt;classpath refid="master-classpath"/&gt;
@@ -239,7 +239,7 @@
     file that you should customize to match your server installation. This
     file belongs in the same directory as the build.xml file.</para>
 
-    <para><filename>springapp/build.properties</filename><programlisting># Ant properties for building the springapp
+    <para><filename>springapp/build.properties:</filename><programlisting># Ant properties for building the springapp
 
 appserver.home=${user.home}/apache-tomcat-5.5.17
 deploy.path=${appserver.home}/webapps
@@ -408,5 +408,33 @@ Total time: 3 seconds</screen>
   &lt;/welcome-file-list&gt;
 
 &lt;/web-app&gt;</programlisting></para>
+
+    <para>Next, create a file called 'springapp-servlet.xml' in the
+    springapp/war/WEB-INF directory. This is the file where definitions used
+    by the DispatcherServlet should be entered. It is named based on the
+    servlet-name from web.xml with '-servlet' appended. This is the standard
+    naming convention used in the Spring Framework. Now, add a bean entry
+    named '/hello.htm' and make the class
+    <classname>springapp.web.HelloController</classname>. This defines the
+    controller that our application will be using and the url mapping used to
+    invoke it. The default is to use 'BeanNameUrlHandlerMapping' class as the
+    "handlerMapping" implementation. This class will use the bean name to map
+    to the URL in the request so that the DispatcherServlet knows which
+    controller should be invoked for different URLs.</para>
+
+    <para><filename>springapp/war/WEB-INF/springapp-servlet.xml:</filename><programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
+
+  &lt;!--
+    - Application context definition for "springapp" DispatcherServlet.
+    --&gt;
+
+  &lt;bean name="/hello.htm" class="springapp.web.HelloController"/&gt;
+
+&lt;/beans&gt;</programlisting></para>
   </section>
 </chapter>
