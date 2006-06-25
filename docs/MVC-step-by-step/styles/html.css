@@ -265,6 +265,12 @@ HR  {
     font-size: 95%;
 }
 
+.programlisting EM {
+    color: #F44;
+	font-style: normal;
+    font-weight: bold;
+}
+
 .property {
 	font-family: "Courier New", Courier, monospace;
 }

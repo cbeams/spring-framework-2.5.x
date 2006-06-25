@@ -254,9 +254,9 @@ tomcat.manager.password=tomcat</programlisting></para>
     'springapp' in the 'webapps' directory of the Tomcat installation, and
     also give you full rights to deploy to this newly created directory. On
     Linux I run the command chmod a+rwx springapp to give everybody full
-    rights to this directory. </remark>
+    rights to this directory.</remark>
 
-    <para> </para>
+    <para></para>
 
     <remark>If you are using a different web application server, then you can
     remove the Tomcat specific tasks at the end of the build script. You will
@@ -344,5 +344,69 @@ Total time: 3 seconds</screen>
         </imageobject>
       </mediaobject>
     </screenshot>
+  </section>
+
+  <section id="step1.5">
+    <title>Download Spring distribution</title>
+
+    <para>If you have not already downloaded the Spring Framework Release
+    file, now is the time to do so. We are currently using the 'Spring
+    Framework 2.0' release that can be downloaded from <ulink
+    url="http://www.springframework.org/download">http://www.springframework.org/download</ulink>.
+    Unzip this file somewhere, we are going to use several files from this
+    download later on.</para>
+
+    <important>
+      <para>This completes the setup of the environment that is necessary, and
+      now we can start actually developing our Spring Framework MVC
+      application.</para>
+    </important>
+  </section>
+
+  <section>
+    <title>Modify web.xml in WEB-INF directory</title>
+
+    <para>Go to the 'springapp/war/WEB-INF' directory. Modify the minimal
+    'web.xml' file that we created earlier. Now we will modify it to suit our
+    needs. We define a DispatcherServlet that is going to control where all
+    our request are routed based on information we will enter at a later
+    point. It also has a standard servlet-mapping entry that maps to the url
+    patterns that we will be using. I have decided to let any url with an
+    '.htm' extension be routed to the 'springapp' dispatcher.</para>
+
+    <sidebar>
+      <para>The class <classname>DispatcherServlet</classname> is a standard
+      dispatcher class that is central to Spring's MVC architecture. You can
+      <ulink
+      url="http://static.springframework.org/spring/docs/2.0.x/reference/mvc.html#mvc-servlet">read
+      more</ulink> about this class in the reference documentation.</para>
+    </sidebar>
+
+    <para><filename>springapp/war/WEB-INF/web.xml:</filename> <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;web-app version="2.4"
+         xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
+         http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" &gt;
+
+<emphasis>  &lt;servlet&gt;
+    &lt;servlet-name&gt;springapp&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
+    &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;springapp&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;*.htm&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+</emphasis>
+  &lt;welcome-file-list&gt;
+    &lt;welcome-file&gt;
+      index.jsp
+    &lt;/welcome-file&gt;
+  &lt;/welcome-file-list&gt;
+
+&lt;/web-app&gt;</programlisting></para>
   </section>
 </chapter>
