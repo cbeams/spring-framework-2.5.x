@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="part3">
+  <title>Adding Unit Tests and a Form to the Application</title>
+
+  <para>This is Chapter 3 of a step-by-step account of how to develop a web application from scratch using the Spring Framework. 
+	In Chapter 1 we configured the environment and set up a basic application that we will build upon. Chapter 2  
+	improved the application in several ways. We are now going to add some unit tests to the application.</para>
+
+  <section id="step3.1">
+    <title>Add unit test for the SpringappController</title>
+
+    <para>Before we create any unit tests, we want to prepare Ant and our build script to be able to handle this. Ant has a built
+    in JUnit target, but we need to add junit.jar to Ant's lib directory. I used the one that came with the Spring distribution
+    spring-framework-1.2/lib/junit/junit.jar. Just copy this file to the lib directory in your Ant installation. I also added the
+    following target to our build script.</para>
+  
+  </section>
+
+  <section id="step3.2">
+  
+      <title>Add unit test and new functionality for ProductManager</title>
+
+      <para>Next I add a test case for the ProductManager, and I also add a test for a new method to increase the prices that I
+      am planning on adding to the ProductManager.</para>
+      
+  </section>
+  
+</chapter>

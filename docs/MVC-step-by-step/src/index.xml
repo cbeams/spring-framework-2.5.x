@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding="iso-8859-1" ?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "../../reference/lib/docbook-dtd/docbookx.dtd"
+[
+<!ENTITY part1			SYSTEM "part1.xml">
+<!ENTITY part2			SYSTEM "part2.xml">
+<!ENTITY part3			SYSTEM "part3.xml">
+<!ENTITY part4			SYSTEM "part4.xml">
+]>
+<book>
+	<bookinfo>
+		<title>Developing a Spring Framework MVC application step-by-step</title>
+		<releaseinfo>Version 2.0</releaseinfo>
+		<authorgroup>
+			<author>
+				<firstname>Thomas</firstname>
+				<surname>Risberg</surname>
+			</author>
+			<author>
+				<firstname>Portia</firstname>
+				<surname>Tung</surname>
+			</author>
+		</authorgroup>
+		<legalnotice>
+			Copies of this document may be made for your own use and for
+			distribution to others, provided that you do not charge any
+			fee for such copies and further provided that each copy
+			contains this Copyright Notice, whether distributed in print
+			or electronically.
+		</legalnotice>
+	</bookinfo>
+	<!-- front matter -->
+	<toc />
+    &part1;
+	&part2;
+	&part3;
+	&part4;
+</book>

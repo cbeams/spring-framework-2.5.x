@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<chapter id="part1"> 
+  <title>Basic Application and Environment Setup</title>
+
+  <para>This is a step-by-step account of how to develop a web application from scratch using the Spring Framework.</para>
+
+  <para>Prerequisites:</para>
+
+  <itemizedlist spacing="compact">
+    <listitem>
+      <para>Java SDK (We are currently using version 1.5)</para>
+    </listitem>
+    <listitem>
+      <para>Ant (using version 1.6.3)</para>
+    </listitem>
+    <listitem>
+      <para>Apache Tomcat (using version 5.5.17)</para>
+    </listitem>
+  </itemizedlist>
+
+  <para>You should also be reasonably comfortable using the above software.</para>
+  <para>We are not going to cover a lot of background information or theory in this document -- there are plenty of books available that covers this in depth.
+  Instead we will dive right into developing the application.</para>
+
+  <section id="step1.1">
+    <title>Development directory</title>
+
+    <para>We are going to need a place to keep all the source and other files we will be creating, so we create a directory named 'springapp'. You can
+    place this directory in your home folder or in some other location. We created ours in a 'Projects' directory that we already had in the home directory so 
+    the path to our directory is now '$HOME/Projects/springapp'. Inside this directory we create a  sub-directory named 'src' to hold all Java source files. 
+    Then we create another sub-directory that we name 'war'. This directory will hold everything that should go into the WAR file, that we would use to deploy 
+    our application. All source files other than Java source, like JSPs and configuration files, belongs in this directory.</para>
+    
+  </section>
+  
+  <section id="step1.2">
+        <title>index.jsp</title>
+        <para>We will start by creating a JSP page named <emphasis>'index.jsp'</emphasis> in the war directory. This is the entry point for our application.</para>
+        
+        
+  </section>
+</chapter>
+

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="part2">
+  <title>Developing and Configuring the Application</title>
+
+  <section id="step2.1">
+    <title>Improve index.jsp</title>
+
+    <para>We will make use of JSP Standard Tag Library (JSTL) so I will start by copying the JSTL files we need to our WEB-INF/lib directory. 
+	Copy jstl.jar from the 'spring-framework-1.2/lib/j2ee' directory and standard.jar from the 'spring-framework-1.2/lib/jakarta-taglibs' directory 
+	to the springapp/war/WEB-INF/lib directory. I am also creating a “header” file that will be included in every JSP page that I'm going to write. 
+	This will make development easier and I will be sure that I have the same definitions in all JSPs. I am going to put all JSPs in a directory 
+	named jsp under the WEB-INF directory. This will ensure that only the controller has access to the views - it is not possible to get to these pages 
+	by entering them directly as a URL in the browser. This strategy might not work in all application servers and if this is the case with the one you 
+	are using, just move the jsp directory up a level. You would then use springapp/war/jsp as the directory instead of springapp/war/WEB-INF/jsp in all 
+	the code examples that will follow.</para>
+  
+  </section>
+
+  <section id="step2.2">
+  
+      <title>Improve the view and the controller</title>
+      <para>I am going to move the view hello.jsp to the WEB-INF/jsp directory. The same include that was added to index.jsp gets added to hello.jsp. 
+	I also add the current date and time as output that I will retrieve from the model, passed to the view, using the JSTL &lt;c:out&gt; tag.</para>
+      
+  </section>
+  
+</chapter>
