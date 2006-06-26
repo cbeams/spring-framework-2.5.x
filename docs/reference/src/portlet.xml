@@ -663,7 +663,7 @@ public class SampleController extends AbstractController {
 
 			<para>These command controllers are quite powerful, but they do 
 			require a detailed understanding of how they operate in order to use 
-			them efficiently. Carefully review the JavaDocs for this entire
+			them efficiently. Carefully review the Javadocs for this entire
 			hierarchy and then look at some sample implementations before you 
 			start using them.</para>
 

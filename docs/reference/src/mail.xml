@@ -24,7 +24,7 @@
     This package also contains a hierarchy of checked exceptions which provide
     a higher level of abstraction over the lower level mail system exceptions
     with the root exception being <classname>MailException</classname>. Please
-    refer to the javadocs for more information on the rich mail exception hierarchy.</para>
+    refer to the Javadocs for more information on the rich mail exception hierarchy.</para>
 
     <para>Spring also provides a sub-interface of <interfacename>MailSender</interfacename>
     for specialized <emphasis>JavaMail</emphasis> features such as MIME
@@ -264,7 +264,7 @@ public class OrderManagerImpl implements OrderManager {
       out of the box - the JavaMail implementation and the implementation on top of Jason
       Hunter's <classname>MailMessage</classname> class that's included in
       <ulink url="http://servlets.com/cos">http://servlets.com/cos</ulink>
-      (com.oreilly.servlet). Please refer to the relevant javadocs for more
+      (com.oreilly.servlet). Please refer to the relevant Javadocs for more
       information.</para>
     </section>
   </section>

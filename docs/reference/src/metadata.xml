@@ -347,7 +347,7 @@ public void echoException(Exception ex) throws Exception {
 				<para>the Commons Attributes compiler jar and API jar</para>
 			</listitem>
 			<listitem>
-				<para>xjavadoc.jar from XDoclet</para>
+				<para>xJavadoc.jar from XDoclet</para>
 			</listitem>
 			<listitem>
 				<para>commons-collections.jar from Jakarta Commons</para>

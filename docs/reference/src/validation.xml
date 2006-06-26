@@ -60,7 +60,7 @@
     <para>One quite important concept of the beans package is the
     <literal>BeanWrapper</literal> interface and its corresponding
     implementation (<literal>BeanWrapperImpl</literal>). As quoted from the
-    JavaDoc, the BeanWrapper offers functionality to set and get property
+    Javadoc, the BeanWrapper offers functionality to set and get property
     values (individually or in bulk), get property descriptors, and to query
     properties to determine if they are readable or writable. Also, the
     BeanWrapper offers support for nested properties, enabling the setting of
@@ -85,7 +85,7 @@
       <literal>setPropertyValue(s)</literal> and
       <literal>getPropertyValue(s)</literal> methods that both come with a
       couple of overloaded variants. They're all described in more detail in
-      the JavaDoc Spring comes with. What's important to know is that there
+      the Javadoc Spring comes with. What's important to know is that there
       are a couple of conventions for indicating properties of an object. A
       couple of examples: <table frame="all">
           <title>Examples of properties</title>
@@ -215,7 +215,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
       on a BeanWrapper or alternately in a specific Application Context as
       mentioned in the previous chapter, gives it the knowledge of how to
       convert properties to the desired type. Read more about PropertyEditors
-      in the JavaDoc of the <literal>java.beans</literal> package provided by
+      in the Javadoc of the <literal>java.beans</literal> package provided by
       Sun.</para>
 
       <para>A couple of examples where property editing is used in Spring
@@ -509,7 +509,7 @@ public class PersonValidator implements Validator {
 	}
 }]]></programlisting>
 			As you can see, the ValidationUtils is used to reject the name
-			property. Have a look at the JavaDoc for ValidationUtils to see
+			property. Have a look at the Javadoc for ValidationUtils to see
 			what functionality it provides besides the example we gave just now.
 		</para>
 	</sect1>
@@ -520,7 +520,7 @@ public class PersonValidator implements Validator {
 			In case of Spring Web MVC you can use <literal>spring:bind</literal> tags to
 			inspect the error messages, but of course you can also inspect the errors
 			object yourself. The methods it offers are pretty straightforward. More information
-			can be found in the JavaDoc.
+			can be found in the Javadoc.
 		</para>
 	</sect1>
 	<sect1 id="validation-conversion">
@@ -545,7 +545,7 @@ public class PersonValidator implements Validator {
 			(so the first will include the field name and the second will include the type of the field).
 		</para>
 		<para>
-			More information on the MessageCodesResolver and the default strategy can be found online with the JavaDocs for
+			More information on the MessageCodesResolver and the default strategy can be found online with the Javadocs for
 			<ulink url="http://www.springframework.org/docs/api/org/springframework/validation/MessageCodesResolver.html">
 				MessageCodesResolver
 			</ulink> and 

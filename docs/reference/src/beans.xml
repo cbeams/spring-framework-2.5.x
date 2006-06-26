@@ -2646,7 +2646,7 @@ cfg.postProcessBeanFactory(factory);</programlisting>
 				has three values, one to tell the configurer to always override, one to
 				let it <emphasis>never</emphasis> override and one to let it override
 				only if the property cannot be found in the properties file specified.
-				Please consult the JavaDoc for the <classname>PropertiesPlaceholderConfigurer</classname> for
+				Please consult the Javadoc for the <classname>PropertiesPlaceholderConfigurer</classname> for
 				more information.
 			</para>
         </section>
@@ -3344,7 +3344,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
 		<para>
 			The result type may be specifically set in the actual definition.
 			This is not necessary for most use cases, but can be of use for some.
-			Please see the JavaDocs for more info on this feature.
+			Please see the Javadocs for more info on this feature.
 		</para>
     </section>
     <section>
@@ -3596,7 +3596,7 @@ public class Client {
 			2.3 compatible containers already implement this feature. It is up to you
 			as to which one you use, but all things being equal you should probably
 			prefer <classname>ContextLoaderListener</classname>; for more information on
-			compatibility, have a look at the JavaDoc for the
+			compatibility, have a look at the Javadoc for the
 			<classname>ContextLoaderServlet</classname>.
 		</para>
         <para>
@@ -3701,7 +3701,7 @@ public class Client {
                 <ulink url="http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLocator</ulink>
                 and
                 <ulink url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink>
-                by viewing their respective JavaDocs.
+                by viewing their respective Javadocs.
             </para>
             <para>
                 As mentioned in the <link linkend="ejb">chapter on EJBs</link>, the

@@ -904,7 +904,7 @@ public class SampleDelegate {
             and forwards in the wizard even if validation fails for the
             current page.</para>
 
-            <para>For a full list of methods, see the JavaDoc for
+            <para>For a full list of methods, see the Javadoc for
             <classname>AbstractWizardFormController</classname>. There is an implemented example of
             this wizard in the jPetStore included in the Spring distribution:
             <classname>org.springframework.samples.jpetstore.web.spring.OrderFormController</classname>.</para>
@@ -1418,7 +1418,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <classname>InternalResourceViewResolver</classname> uses the
       <classname>RequestDispatcher</classname> internally, and dispatching is the only way to figure
       out if a JSP exists - this can only be done once. The same holds for the
-      <classname>VelocityViewResolver</classname> and some others. Check the JavaDoc for the view
+      <classname>VelocityViewResolver</classname> and some others. Check the Javadoc for the view
       resolver to see if you're dealing with a view resolver that does not
       report non-existing views. As a result of this, putting an
       <classname>InternalResourceViewResolver</classname> in the chain in a place

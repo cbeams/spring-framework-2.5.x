@@ -1027,7 +1027,7 @@ public class HomePage extends AbstractXsltView {
           locale based currency and date formatting. In recognition of the
           fact, Spring provides a helper class that you can use from within
           your <literal>createDomNode()</literal> methods to get such support.
-          See the javadocs for
+          See the Javadocs for
           <literal>org.springframework.web.servlet.view.xslt.FormatHelper</literal></para>
         </sect4>
       </sect3>

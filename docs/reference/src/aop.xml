@@ -2051,7 +2051,7 @@ public @interface Idempotent {
 	<para>The class <classname>org.springframework.aop.aspectj.annotation.AspectJProxyFactory</classname>
 	can be used to create a proxy for a target object that is advised by one or more
 	@AspectJ aspects. Basic usage for this class is very simple, as illustrated below. See 
-	the javadoc for full information.
+	the Javadoc for full information.
 	</para>
 
 	<programlisting><![CDATA[// create a factory that can generate a proxy for the given target object
@@ -2283,7 +2283,7 @@ public class Account {
 		<para>For AspectJ programmers that want to use the Spring configuration and 
 		transaction management support but don't want to (or can't) use annotations,
 		spring-aspects.jar also contains abstract aspects you can extend to provide
-		your own pointcut definitions. See the javadocs for 
+		your own pointcut definitions. See the Javadocs for 
 		<literal>AbstractBeanConfigurerAspect</literal> and 
 		<literal>AbstractTransactionAspect</literal> for more information. As an example,
 		the following excerpt shows how you could write an aspect to configure

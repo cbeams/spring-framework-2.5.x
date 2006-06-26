@@ -283,10 +283,10 @@ public void setMyComponent(MyComponent myComponent) {
 			<classname>BeanFactoryLocator</classname> implementation used may be overridden
 			by calling the <literal>setBeanFactoryLocator()</literal> method, either
 			in <literal>setSessionContext()</literal>, or in the actual constructor of
-			the EJB. Please see the JavaDocs for more details.
+			the EJB. Please see the Javadocs for more details.
 		</para>
 		<para>
-			As described in the JavaDocs, Stateful Session beans expecting to be
+			As described in the Javadocs, Stateful Session beans expecting to be
 			passivated and reactivated as part of their lifecycle, and which use a
 			non-serializable container instance (which is the normal case) will have
 			to manually call <literal>unloadBeanFactory()</literal> and
@@ -336,7 +336,7 @@ public void setMyComponent(MyComponent myComponent) {
     </para>
 		<programlisting><![CDATA[public static final String ServicesConstants.PRIMARY_CONTEXT_ID = "businessBeanFactory";]]></programlisting>
 		<para>
-		Please see the respective JavaDocs for the <classname>BeanFactoryLocator</classname> and
+		Please see the respective Javadocs for the <classname>BeanFactoryLocator</classname> and
 		<classname>ContextSingletonBeanFactoryLocator</classname> classes for more information on
 		their usage.
 	</para>

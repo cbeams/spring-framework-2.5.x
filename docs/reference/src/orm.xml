@@ -1353,7 +1353,7 @@
       and for advanced translation of exception, it is still valuable to
       derive vendor-specific <classname>JdoDialect</classname> subclasses.</para>
 
-      <para>See the <classname>JdoDialect</classname> javadoc for more details on
+      <para>See the <classname>JdoDialect</classname> Javadoc for more details on
       its operations and how they are used within Spring's JDO support.</para>
     </section>
   </section>
@@ -2775,7 +2775,7 @@ public class ProductDaoImpl implements ProductDao {
     provide any special capabilities and if the above features are required,
     the approapriate dialect has to be specified.</para>
 
-    <para>See the <interfacename>JpaDialect</interfacename> javadoc for more
+    <para>See the <interfacename>JpaDialect</interfacename> Javadoc for more
     details of its operations and how they are used within Spring's JPA
     support.</para>
   </section>
