@@ -47,7 +47,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends Abstr
 
 
 	@Override
-	protected String getSpringResourceStringForOrmXml() {
+	protected String getActualOrmXmlLocation() {
 		// Specify that we do NOT want to find such a file
 		return null;
 	}
