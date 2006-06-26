@@ -17,12 +17,12 @@
 package org.springframework.ui;
 
 import junit.framework.TestCase;
-
-import java.util.*;
-
+import org.springframework.beans.TestBean;
+import org.springframework.test.AssertThrows;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.beans.TestBean;
+
+import java.util.*;
 
 /**
  * Unit tests for the ModelMap class.
@@ -33,6 +33,25 @@ public final class ModelMapTests extends TestCase {
 
     public void testNoArgCtorYieldsEmptyModel() throws Exception {
         assertEquals(0, new ModelMap().size());
+    }
+
+    /* 
+     * SPR-2185 - Null model assertion causes backwards compatibility issue
+     */
+    public void testAddNullObjectWithExplicitKey() throws Exception {
+        ModelMap model = new ModelMap();
+        model.addObject("foo", null);
+        assertTrue(model.containsKey("foo"));
+        assertNull(model.get("foo"));
+    }
+
+    /* 
+     * SPR-2185 - Null model assertion causes backwards compatibility issue
+     */
+    public void testAddNullObjectViaCtorWithExplicitKey() throws Exception {
+        ModelMap model = new ModelMap("foo", null);
+        assertTrue(model.containsKey("foo"));
+        assertNull(model.get("foo"));
     }
 
     public void testNamedObjectCtor() throws Exception {
@@ -60,12 +79,11 @@ public final class ModelMapTests extends TestCase {
     }
 
     public void testOneArgCtorWithNull() throws Exception {
-        try {
-            new ModelMap(null);
-            fail("Null model arguments are not allowed.");
-        }
-        catch (IllegalArgumentException expected) {
-        }
+        new AssertThrows(IllegalArgumentException.class, "Null model arguments added without a name being explicitly supplied are not allowed.") {
+            public void test() throws Exception {
+                new ModelMap(null);
+            }
+        }.runTest();
     }
 
     public void testOneArgCtorWithCollection() throws Exception {
@@ -85,13 +103,12 @@ public final class ModelMapTests extends TestCase {
     }
 
     public void testAddObjectWithNull() throws Exception {
-        try {
-            ModelMap model = new ModelMap();
-            model.addObject(null);
-            fail("Null model arguments are not allowed.");
-        }
-        catch (IllegalArgumentException expected) {
-        }
+        new AssertThrows(IllegalArgumentException.class, "Null model arguments added without a name being explicitly supplied are not allowed.") {
+            public void test() throws Exception {
+                ModelMap model = new ModelMap();
+                model.addObject(null);
+            }
+        }.runTest();
     }
 
     public void testAddObjectWithEmptyArray() throws Exception {
@@ -115,16 +132,15 @@ public final class ModelMapTests extends TestCase {
     }
 
     public void testAddAllObjectsWithSparseArrayList() throws Exception {
-        ModelMap model = new ModelMap();
-        ArrayList list = new ArrayList();
-        list.add("bing");
-        list.add(null);
-        try {
-            model.addAllObjects(list);
-            fail("Null model arguments are not allowed.");
-        }
-        catch (IllegalArgumentException expected) {
-        }
+        new AssertThrows(IllegalArgumentException.class, "Null model arguments added without a name being explicitly supplied are not allowed.") {
+            public void test() throws Exception {
+                ModelMap model = new ModelMap();
+                ArrayList list = new ArrayList();
+                list.add("bing");
+                list.add(null);
+                model.addAllObjects(list);
+            }
+        }.runTest();
     }
 
     public void testAddMap() throws Exception {
@@ -155,7 +171,7 @@ public final class ModelMapTests extends TestCase {
         beans.add(new TestBean("one"));
         beans.add(new TestBean("two"));
         beans.add(new TestBean("three"));
-        
+
         ModelMap model = new ModelMap();
         model.addAllObjects(beans);
 

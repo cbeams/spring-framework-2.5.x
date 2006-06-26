@@ -68,11 +68,10 @@ public class ModelMap extends HashMap {
 	/**
 	 * Add the supplied <code>Object</code> under the supplied name.
 	 * @param modelName the name of the model attribute (never <code>null</code>)
-	 * @param modelObject the model attribute object (never <code>null</code>)
+	 * @param modelObject the model attribute object (can be <code>null</code>)
 	 */
 	public ModelMap addObject(String modelName, Object modelObject) {
-		Assert.notNull(modelName, "Model name should not be null");
-		Assert.notNull(modelObject, "Model object should not be null");
+		Assert.notNull(modelName, "Model name must not be null");
 		this.put(modelName, modelObject);
 		return this;
 	}
@@ -87,7 +86,7 @@ public class ModelMap extends HashMap {
 	 * @param modelObject the model attribute object (never <code>null</code>)
 	 */
 	public ModelMap addObject(Object modelObject) {
-		Assert.notNull(modelObject, "Model object should not be null");
+		Assert.notNull(modelObject, "Model object must not be null");
 		if (modelObject instanceof Collection && ((Collection) modelObject).isEmpty()) {
 			return this;
 		}

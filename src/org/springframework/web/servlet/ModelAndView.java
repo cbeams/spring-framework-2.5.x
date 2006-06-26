@@ -199,7 +199,7 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Returns the internal <code>ModelMap</code> instance. Will not be null.
+	 * Returns the internal <code>ModelMap</code> instance. Will not be <code>null</code> .
 	 */
 	protected ModelMap getModelMap() {
 		if (this.model == null) {
@@ -230,7 +230,7 @@ public class ModelAndView {
 	/**
 	 * Add an object to the model.
 	 * @param modelName name of the object to add to the model (never <code>null</code>)
-	 * @param modelObject object to add to the model (never <code>null</code>)
+	 * @param modelObject object to add to the model (can be <code>null</code>)
 	 * @return this ModelAndView, convenient to allow usages like
 	 * return modelAndView.addObject("foo", bar);
 	 */
