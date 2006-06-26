@@ -162,7 +162,17 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 		}
 	}
 
-	public Class getObjectType() {
+    /**
+	 * Return the type of object that this FactoryBean creates, or <code>null</code>
+	 * if not known in advance.
+	 * <p>If the method that this {@link MethodInvokingFactoryBean} instance
+     * is to invoke is known, the return type of the method will be returned.
+     * If the method is known and has a <code>void</code> return type, then this
+     * method will return the {@link VoidType} class.
+	 * @return the type of object that this FactoryBean creates,
+	 * or <code>null</code> if not known at the time of the call; see also above
+	 */
+    public Class getObjectType() {
 		Method preparedMethod = getPreparedMethod();
 		if (preparedMethod == null) {
 			// Not fully initialized yet ->
