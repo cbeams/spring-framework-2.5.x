@@ -2,6 +2,7 @@
 <chapter id="ejb">
 	<title>Enterprise Java Bean (EJB) integration</title>
 	<section id="ejb-introduction">
+	    <title>Introduction</title>
 	    <para>
 		    As a lightweight container, Spring is often considered an EJB
 		    replacement. We do believe that for many if not most applications and use
