@@ -7,4 +7,9 @@
 		<property name="logic"><ref bean="logicTwo"/></property>
 	</bean>
 
+	<!-- Returns void (null) -->
+	<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="staticMethod" value="java.lang.System.gc"/>
+	</bean>
+
 </beans>

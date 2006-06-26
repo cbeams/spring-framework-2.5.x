@@ -33,13 +33,13 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
@@ -265,11 +265,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
 			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
 			result = beanProcessor.postProcessBeforeInitialization(result, beanName);
-			if (result == null) {
-				throw new BeanCreationException(beanName,
-						"postProcessBeforeInitialization method of BeanPostProcessor [" + beanProcessor +
-						"] returned null for bean [" + result + "] with name [" + beanName + "]");
-			}
 		}
 		return result;
 	}
@@ -284,11 +279,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
 			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
 			result = beanProcessor.postProcessAfterInitialization(result, beanName);
-			if (result == null) {
-				throw new BeanCreationException(beanName,
-						"postProcessAfterInitialization method of BeanPostProcessor [" + beanProcessor +
-						"] returned null for bean [" + result + "] with name [" + beanName + "]");
-			}
 		}
 		return result;
 	}
