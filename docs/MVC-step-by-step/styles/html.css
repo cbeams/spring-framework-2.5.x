@@ -191,7 +191,7 @@ H6 {
 }
 
 TT {
-    font-size: 110%;
+    font-size: 100%;
     font-family: "Courier New", Courier, monospace;
     color: #000000;
 }
@@ -271,12 +271,15 @@ HR  {
     font-weight: bold;
 }
 
+PRE.programlisting {
+    margin-top: -5;
+}
+
 P {
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
 TT.filename {
-    background-color: #F4F4F4;
     font-weight: bold;
 }
 
