@@ -3,7 +3,7 @@
   <title>Aspect Oriented Programming with Spring</title>
 
   <section id="aop-introduction">
-    <title>Concepts</title>
+    <title>Introduction</title>
 
     <para><emphasis>Aspect-Oriented Programming</emphasis>
     (<emphasis>AOP</emphasis>) complements Object-Oriented Programming (OOP)

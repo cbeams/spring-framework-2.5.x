@@ -3,33 +3,38 @@
     <title>Extensible XML authoring</title>
     <section>
         <title>Introduction</title>
-        <para>This section of the reference documentation details how you would
-        go about writing your own custom XML bean definition parsers and integrating such
-        parsers into the Spring IoC container. Since version 2.0, Spring has featured
-        a mechanism for schema-based extensions to the basic Spring XML format for defining
-        and configuring beans.</para>
+        <para>Since version 2.0, Spring has featured a mechanism for schema-based extensions
+        to the basic Spring XML format for defining and configuring beans. This section is
+        devoted to detailing how you would go about writing your own custom XML bean definition
+        parsers and integrating such parsers into the Spring IoC container. </para>
     	<para>
-    		Spring's extensible XML configuration mechanism is based on XML Schema, to facilitate
-    		authoring configuration files using a schema-aware XML editor. If you're not familiar
-    		with Spring's current XML configuration extensions that come with the standard
-    		Spring distribution, please first read the appendix entitled <xref linkend="xsd-config"/>.
+    		To facilitate the authoring configuration files using a schema-aware XML editor,
+    		Spring's extensible XML configuration mechanism is based on XML Schema. If you are
+    		not familiar with Spring's current XML configuration extensions that come with the
+    		standard Spring distribution, please first read the appendix entitled
+    		<xref linkend="xsd-config"/>.
     	</para>
     	<para>
-    		Creating new XML configuration extensions can be done by following a simple process of
-    		authoring an XML Schema, coding a <interfacename>NamespaceHandler</interfacename>, coding one or more
-    		<interfacename>BeanDefinitionParser</interfacename> instances and registering the <interfacename>NamespaceHandler</interfacename> and the schema
-    		in a dedicated properties file. What follows is a description of each of these steps. In the example,
-    		we'll create a XML extension that allows us to configure objects of type <classname>SimpleDateFormat</classname>, directly in an
-    		Spring IoC container.
+    		Creating new XML configuration extensions can be done by following a (relatively)
+    		simple process of authoring an XML schema, coding a
+    		<interfacename>NamespaceHandler</interfacename> implementation, coding one or more
+    		<interfacename>BeanDefinitionParser</interfacename> instances and registering the
+    		<interfacename>NamespaceHandler</interfacename> and the schema in a dedicated
+    		properties file. What follows is a description of each of these steps. In the example,
+    		we'll create a XML extension (a custom XML element) that allows us to configure
+    		objects of type <classname>SimpleDateFormat</classname> directly in a Spring IoC
+    		container.
     	</para>
     </section>
     	<section id="extensible-xml-schema">
     		<title>Authoring the schema</title>
     		<para>
-    			Creating an XML configuration extension for use with Spring's IoC container starts with
-    			authoring an XML Schema. What follows is the schema we'll use to configure <classname>SimpleDateFormat</classname>
-    			objects. The emphasized line contains an extension base for all tags that will be identifiable (meaning they have an 
-    			<literal>id</literal> attribute that will be used as the bean identifier in the container).
+    			Creating an XML configuration extension for use with Spring's IoC container
+    			starts with authoring an XML Schema to describe the extension. What follows
+    			is the schema we'll use to configure <classname>SimpleDateFormat</classname>
+    			objects. The emphasized line contains an extension base for all tags that
+    			will be identifiable (meaning they have an <literal>id</literal> attribute
+    			that will be used as the bean identifier in the container).
        		</para>    			
     		<programlisting><![CDATA[#### myns.xsd (inside package org/springframework/samples/xml)
 
@@ -56,30 +61,32 @@
    
 </xsd:schema>]]></programlisting>
 			<para>
-				The above schema will be used to configure <classname>SimpleDateFormat</classname> objects, directly in the application context using
-				the <literal>myns:dateformat</literal> configuration directive. As noted above, the <literal>id</literal> attribute
-				will (<emphasis>in this case</emphasis>) be used as the bean identifier for the <classname>SimpleDateFormat</classname> bean.
+				The above schema will be used to configure <classname>SimpleDateFormat</classname>
+				objects, directly in an XML application context file using the
+				<literal>myns:dateformat</literal> configuration directive. As noted above, the
+				<literal>id</literal> attribute will (<emphasis>in this case</emphasis>) be used
+				as the bean identifier for the <classname>SimpleDateFormat</classname> bean.
 			</para>
 			<programlisting><![CDATA[<myns:dateformat id="dateFormat" 
-	pattern="yyyy-MM-dd HH:mm"
-	lenient="true"/>
+    pattern="yyyy-MM-dd HH:mm"
+    lenient="true"/>
 ]]></programlisting>
 			<para>
-				Note that after we've created the infrastructure classes, this will essentially be exactly 
-				the same as the following. In other words, we're just creating a bean in the
-				container, identified by <literal>dateFormat</literal> of type 
-				<classname>SimpleDateFormat</classname>, with a couple of properties set.
+				Note that after we've created the infrastructure classes, the above snippet of XML
+				will essentially be exactly the same as the following XML snippet. In other words,
+				we're just creating a bean in the container, identified by <literal>dateFormat</literal>
+				of type <classname>SimpleDateFormat</classname>, with a couple of properties set.
 			</para>
 			<programlisting><![CDATA[<bean id="dateFormat" class="java.text.SimpleDateFormat">
-	<constructor-arg value="yyyy-HH-dd HH:mm"/>
-	<property name="lenient" value="true"/>
+    <constructor-arg value="yyyy-HH-dd HH:mm"/>
+    <property name="lenient" value="true"/>
 </bean>]]></programlisting>
-			<para>
-				<note>The schema-based approach to creating configuration format, allows for
+			<note>
+			    <para>The schema-based approach to creating configuration format, allows for
 				tight integration with an IDE that has a schema-aware XML editor. Using properly
 				authored schema, you can for example use autocompletion to have a user
-				choose between several configuration options defined in the enumeration.</note>
-			</para>
+				choose between several configuration options defined in the enumeration.</para>
+			</note>
 		</section>
 		<section>
 			<title>Coding a <interfacename>NamespaceHandler</interfacename></title>
@@ -91,7 +98,7 @@
 			</para>
 			<para>
 				The <interfacename>NamespaceHandler</interfacename> interface is pretty simple in that 
-				it onyl features three methods:
+				it only features three methods:
 				<itemizedlist spacing="compact">
 					<listitem>
 						<para><literal>init()</literal> - allows for initialization of
@@ -99,29 +106,32 @@
 					</listitem>
 					<listitem>
 						<para><literal>BeanDefinition parse(Element element, ParserContext parserContext)</literal> - 
-						called when Spring encounters an top-level element (not nested inside a bean definition
+						called when Spring encounters a top-level element (not nested inside a bean definition
 						or a different namespace). This method can register bean definitions itself and/or
 						return a bean definition.</para>
 					</listitem>
 					<listitem>
 						<para><literal>BeanDefinitionHolder decorate(Node element, BeanDefinitionHolder definition, ParserContext parserContext)</literal> -
 						called when Spring encounters an attribute or nested element of a different namespace, inside
-						for example the Spring namespace. Decoration of bean definition is used
+						for example the Spring namespace. The decoration of one or more bean definitions is used
 						for example with the out-of-the-box scopes Spring 2.0 comes with (see
 						<xref linkend="beans-factory-scopes"/> for more information about scopes). We'll
-						start by highlighting a simple example not using decoration after which we show decoration
-						in a somewhat more advanced example.</para>
+						start by highlighting a simple example not using decoration after which we will
+						show decoration in a somewhat more advanced example.</para>
 					</listitem>
 				</itemizedlist>
 			</para>
 			<para>
-				Although it is perfectly possible to code one's own <interfacename>NamespaceHandler</interfacename> for the entire namespace
-				(hence provide code that parses each and every element in the namespace), it's often the case
-				that <emphasis>each top-level XML element in a schema results in a bean definition</emphasis>
-				(as in our case, where the <literal>myns:dateformat</literal> element results in a 
-				<classname>SimpleDateFormat</classname> bean definition). Therefore, Spring features a couple of
-				convenience classes that support this kind of behavior. In this example, we'll use the most
-				often used convenience class which is the <classname>NamespaceHandlerSupport</classname> class:
+				Although it is perfectly possible to code one's own
+				<interfacename>NamespaceHandler</interfacename> for the entire namespace
+				(and hence provide code that parses each and every element in the namespace),
+				it is often the case that <emphasis>each top-level XML element in a Spring XML
+				configuration file results in a single bean definition</emphasis> (as in our
+				case, where the <literal>myns:dateformat</literal> element results in a 
+				<classname>SimpleDateFormat</classname> bean definition). Spring features a
+				couple of convenience classes that support this scenario. In this example,
+				we'll use the most often used convenience class which is the
+				<classname>NamespaceHandlerSupport</classname> class:
 			</para>
 			<programlisting><![CDATA[package org.springframework.samples.xml;
 
@@ -129,11 +139,11 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
 public class MyNamespaceHandler extends NamespaceHandlerSupport {
     
-    public void init() {        ]]><emphasis role="bold"><![CDATA[
+    public void init() {]]><emphasis role="bold"><![CDATA[
         registerBeanDefinitionParser("dateformat", 
                 new SimpleDateFormatBeanDefinitionParser());        
-    ]]></emphasis><![CDATA[}
-}]]></programlisting>
+    ]]></emphasis>}
+}</programlisting>
 		</section>
 		<section>
 			<title>Coding a <interfacename>BeanDefinitionParser</interfacename></title>
@@ -207,7 +217,7 @@ public class SimpleDateFormatBeanDefinitionParser implements BeanDefinitionParse
 				</note>
 			</para>
 			<para>
-				The ParserContext provides access to following properties
+				The <classname>ParserContext</classname> provides access to following properties
 				<itemizedlist spacing="compact">
 					<listitem>
 						<para><literal>readerContext</literal> - provides access
@@ -264,7 +274,7 @@ public class SimpleDateFormatBeanDefinitionParser implements BeanDefinitionParse
 				files on the classpath.
 			</para>
 			<section>
-				<title>META-INF/spring.handlers</title>
+				<title><literal>META-INF/spring.handlers</literal></title>
 				<para>
 					The properties file called <literal>spring.handlers</literal> contains a mapping
 					of XML Schema URIs to namespace handler classes. So for our example, we need to 
@@ -273,16 +283,16 @@ public class SimpleDateFormatBeanDefinitionParser implements BeanDefinitionParse
 				<programlisting><![CDATA[http\://www.mycompany.com/schema/myns=org.springframework.samples.xml.MyNamespaceHandler]]></programlisting>
 			</section>
 			<section>
-				<title>META-INF/spring.schemas</title>
+				<title><literal>META-INF/spring.schemas</literal></title>
 				<para>
 					The properties file called <literal>spring.schemas</literal> contains a mapping
 					of XML Schema locations (mention alongside the schema declaration in XML files
 					that use the schema as part of the <literal>xsi:schemaLocation</literal> attribute)
 					to classpath resources. This file is needed to prevent Spring from having to use a default
-					<literal>EntityResolver</literal> that requires Internet access to retrieve the 
+					<interfacename>EntityResolver</interfacename> that requires Internet access to retrieve the 
 					schema file. If you mention the mapping in this properties file, Spring will
-					search on the classpath for the schema (in this case; myns.xsd in the package 
-					org.springframework.samples.xml):
+					search on the classpath for the schema (in this case <literal>'myns.xsd'</literal>
+					in the <literal>'org.springframework.samples.xml'</literal> package):
 				</para>
 			    <programlisting><![CDATA[http\://www.mycompany.com/schema/myns/myns.xsd=org/springframework/samples/xml/myns.xsd]]></programlisting>
 			</section>

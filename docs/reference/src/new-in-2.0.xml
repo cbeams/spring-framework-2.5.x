@@ -116,7 +116,7 @@
 
       <para>Spring 2.0 also supports aspects defined using the @AspectJ annotations.
       These aspects can be shared between AspectJ and Spring AOP, and require (honestly!)
-      only som simple configuration. The support for @AspectJ aspects is discussed in
+      only some simple configuration. The support for @AspectJ aspects is discussed in
       <xref linkend="aop-ataspectj" />.</para>
     </section>
   </section>

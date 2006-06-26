@@ -37,7 +37,7 @@
 <book>
 	<bookinfo>
 		<title>The Spring Framework - Reference Documentation</title>
-		<releaseinfo>Version 2.0 RC1</releaseinfo>
+		<releaseinfo>2.0 RC1</releaseinfo>
 		<authorgroup>
 			<author>
 				<firstname>Rod</firstname>
@@ -131,15 +131,12 @@
 			</para>
 			<para>
 				Foremost amongst these is the Spring Framework's
-				Inversion of Control (IoC) container.
-			</para>
-			<para>
-				A thorough treatment of the Spring Framework's IoC
-				container is closely followed by comprehensive coverage
-				of Spring's Aspect-Oriented Programming (AOP)
-				technologies. The Spring Framework has its own AOP
-				framework, which is conceptually easy to understand, and
-				which (successfully) addresses the 80% sweet spot of AOP
+				Inversion of Control (IoC) container. A thorough treatment
+				of the Spring Framework's IoC container is closely followed
+				by comprehensive coverage of Spring's Aspect-Oriented
+				Programming (AOP) technologies. The Spring Framework has
+				its own AOP	framework, which is conceptually easy to understand,
+				and	which successfully addresses the 80% sweet spot of AOP
 				requirements in Java enterprise programming.
 			</para>
 			<para>
@@ -159,8 +156,8 @@
 			    appropriate constructors on classes makes them
 			    easier to wire together on a test without having to set up
 			    service locator registries and suchlike)... the chapter
-			    dedicated solely to testing will hopefully convince you of this
-			    as well.
+			    dedicated solely to testing will hopefully convince you of
+			    this as well.
 			</para>
 			<itemizedlist>
 				<listitem>
@@ -234,21 +231,16 @@
 			</para>
 			<para>
 				The Spring Framework's own web framework,
-				<link linkend="mvc">Spring MVC</link>
-				, is coevered in the first couple of chapters. A number
-				of the remaining chapters in this part of the reference
-				documentation are concerned with the Spring Framework's
-				integration with other web technologies, including as
-				other web frameworks such as
-				<link linkend="struts">Struts</link>
-				and
-				<link linkend="jsf">JSF</link>
-				(to name but a few).
+				<link linkend="mvc">Spring Web MVC</link>, is covered in
+				the first couple of chapters. A number of the remaining
+				chapters in this part of the reference documentation are
+				concerned with the Spring Framework's integration with
+				other web technologies, such as <link linkend="struts">Struts</link>
+				and <link linkend="jsf">JSF</link> (to name but two).
 			</para>
 			<para>
-				This section concludes with coverage of Spring's
-				<link linkend="portlet">portlet framework</link>
-				.
+				This section concludes with coverage of Spring's MVC
+				<link linkend="portlet">portlet framework</link>.
 			</para>
 			<itemizedlist>
 				<listitem>

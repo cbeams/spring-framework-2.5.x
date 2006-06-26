@@ -2,7 +2,7 @@
 <chapter id="metadata">
 	<title>Annotations and Source Level Metadata Support</title>
 	<section id="metadata-concepts">
-		<title>Source-level metadata</title>
+		<title>Introduction</title>
 		<para>
 			Source-level metadata is the addition of <emphasis>attributes</emphasis> or
 			<emphasis>annotations</emphasis> to program elements - usually, classes

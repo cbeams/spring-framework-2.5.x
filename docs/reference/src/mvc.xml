@@ -5,7 +5,7 @@
   <section id="mvc-introduction">
     <title>Introduction</title>
 
-    <para>Spring's web MVC framework is designed around a <classname>DispatcherServlet</classname>
+    <para>Spring's Web MVC framework is designed around a <classname>DispatcherServlet</classname>
     that dispatches requests to handlers, with configurable handler mappings,
     view resolution, locale and theme resolution as well as support for upload
     files. The default handler is a very simple <interfacename>Controller</interfacename> interface, just
@@ -21,15 +21,15 @@
     
     <sidebar id="mvc-open-for-extension">
         <title><quote>Open for extension...</quote></title>
-        <para>One of the overarching design principles in Spring MVC (and in Spring in general)
+        <para>One of the overarching design principles in Spring Web MVC (and in Spring in general)
         is the <quote><emphasis>Open for extension, closed for modification</emphasis></quote>
         principle.</para>
         <para>The reason that this principle is being mentioned here is because a number
-        of methods in the core classes in Spring MVC have <literal>final</literal> methods.
+        of methods in the core classes in Spring Web MVC are marked <literal>final</literal>.
         This means of course that you as a developer cannot override these methods to
         supply your own behaviour... this is <emphasis>by design</emphasis> and has not
         been done arbitrarily to annoy.</para>
-        <para>The book 'Expert Spring MVC and Web Flow' by Seth Ladd and others explains this
+        <para>The book 'Expert Spring Web MVC and Web Flow' by Seth Ladd and others explains this
         principle and the reasons for adhering to it in some depth on page 117 (first edition)
         in the section entitled 'A Look At Design'.</para>
         <para>If you don't have access to the aforementioned book, then the following article
@@ -42,7 +42,7 @@
         </orderedlist>
     </sidebar>
 
-    <para>Spring MVC allows you to use any object as a command or form object -
+    <para>Spring Web MVC allows you to use any object as a command or form object -
     there is no need to implement a framework-specific interface or base class.
     Spring's data binding is highly flexible: for example, it treats type mismatches
     as validation errors that can be evaluated by the application, not as system
@@ -56,8 +56,8 @@
     <para>Compared to WebWork, Spring has more differentiated object roles. It
     supports the notion of a <interfacename>Controller</interfacename>, an optional
     command or form object, and a model that gets passed to the view. The model will
-    normally include the command or form object but also arbitrary reference data.
-    Instead, a WebWork <interfacename>Action</interfacename> combines all those
+    normally include the command or form object but also arbitrary reference data;
+    instead, a WebWork <interfacename>Action</interfacename> combines all those
     roles into one single object. WebWork does allow you to use existing business objects
     as part of your form, but only by making them bean properties of the respective
     <interfacename>Action</interfacename> class. Finally, the same
@@ -89,7 +89,7 @@
       investment in skills and tools. In addition, there is a large body of
       knowledge and experience avalailable for the Struts framework. Thus, if
       you can live with Struts' architectural flaws, it can still be a viable
-      choice for the web layer. The same applies to WebWork and other web MVC
+      choice for the web layer; the same applies to WebWork and other web MVC
       frameworks.</para>
 
       <para>If you don't want to use Spring's web MVC, but intend to leverage
@@ -113,7 +113,7 @@
     </section>
 
     <section id="mvc-features">
-      <title>Features of Spring MVC</title>
+      <title>Features of Spring Web MVC</title>
 
       <para>Spring's web module provides a wealth of unique web support
       features, including:</para>
@@ -203,29 +203,58 @@
     however, does more than just that. It is completely integrated with the
     Spring IoC container and as such allows you to use every other feature that
     Spring has.</para>
+    
+    <para>The request processing workflow of the Spring Web MVC
+    <classname>DispatcherServlet</classname> is illustrated in the following diagram.
+    The pattern-savvy reader will recognise that the <classname>DispatcherServlet</classname>
+    is an expression of the <quote>Front Controller</quote> design pattern (this is a
+    pattern that Spring Web MVC shares with many other leading web frameworks).</para>
+    
+	<para>
+		<mediaobject>
+			<imageobject role="fo">
+				<!-- TODO: replace with SVG version -->
+				<imagedata fileref="images/mvc.png" format="PNG" align="center" />
+			</imageobject>
+			<imageobject role="html">
+				<imagedata fileref="images/mvc.png" format="PNG" align="center" />
+			</imageobject>
+			<caption>
+				<para>The requesting processing workflow in Spring Web MVC (high level)</para>
+			</caption>
+		</mediaobject>
+	</para>
 
-    <para>Like ordinary servlets, the <classname>DispatcherServlet</classname>
-    is declared in the <literal>web.xml</literal> of your web application.
-    Requests that you want the <classname>DispatcherServlet</classname> to handle
-    will have to be mapped using a URL mapping in the same <literal>web.xml</literal>
-    file.</para>
+    <para>The <classname>DispatcherServlet</classname> <emphasis>is</emphasis> an
+    actual <interfacename>Servlet</interfacename> (it inherits from the
+    <classname>HttpServlet</classname> base class), and as such is declared in the
+    <literal>web.xml</literal> of your web application. Requests that you want the
+    <classname>DispatcherServlet</classname> to handle will have to be mapped using
+    a URL mapping in the same <literal>web.xml</literal> file. This is standard J2EE
+    servlet configuration; an example of such a <classname>DispatcherServlet</classname>
+    declaration and mapping can be found below.</para>
 
     <programlisting><![CDATA[<web-app>
-    ...
+
     <servlet>
         <servlet-name>example</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
+
     <servlet-mapping>
         <servlet-name>example</servlet-name>
         <url-pattern>*.form</url-pattern>
     </servlet-mapping>
+
 </web-app>]]></programlisting>
 
     <para>In the example above, all requests ending with <literal>.form</literal>
-    will be handled by the <classname>DispatcherServlet</classname>. The
-    <classname>DispatcherServlet</classname> itself now needs to be configured.</para>
+    will be handled by the <literal>'example'</literal>
+    <classname>DispatcherServlet</classname>. This is only the first step in
+    setting up Spring Web MVC... the various beans used by the Spring Web MVC framework (over
+    and above the <classname>DispatcherServlet</classname> itself) now need to be
+    configured.</para>
 
     <para>As detailed in the section entitled <xref linkend="context-introduction" />,
     <interfacename>ApplicationContext</interfacename> instances in Spring can be scoped.
@@ -244,7 +273,7 @@
 				<imagedata fileref="images/mvc-contexts.gif" format="GIF" align="center" />
 			</imageobject>
 			<caption>
-				<para>Context hierarchy in Spring MVC</para>
+				<para>Context hierarchy in Spring Web MVC</para>
 			</caption>
 		</mediaobject>
 	</para>
@@ -273,9 +302,9 @@
     
     <para>With the above servlet configuration in place, you will need to have a file called
     <literal>'/WEB-INF/<emphasis role="bold">golfing</emphasis>-servlet.xml'</literal> in your
-    application; this file will contain all of your Spring MVC-specific components (beans).
-    The exact location of this configuration file can be changed via a servlet initialization
-    parameter (see below for details).</para>
+    application; this file will contain all of your <emphasis>Spring Web MVC-specific</emphasis>
+    components (beans). The exact location of this configuration file can be changed via a
+    servlet initialization parameter (see below for details).</para>
 
     <para>The <interfacename>WebApplicationContext</interfacename> is an extension of the
     plain <interfacename>ApplicationContext</interfacename> that has some extra features
@@ -294,8 +323,8 @@
     the <interfacename>WebApplicationContext</interfacename>, just as any other bean would
     be configured. Each of those beans is described in more detail below. Right now, we'll
     just mention them, just to let you know they exist and to enable us to go on talking
-    about the <classname>DispatcherServlet</classname>. For most of the beans, defaults
-    are provided so you don't have to worry about configuring them.</para>
+    about the <classname>DispatcherServlet</classname>. For most of the beans, sensible
+    defaults are provided so you don't (initially) have to worry about configuring them.</para>
 
     <table frame="all">
       <title>Special beans in the <interfacename>WebApplicationContext</interfacename></title>
@@ -304,7 +333,7 @@
         <colspec colname="c2" colwidth="4*" />
         <thead>
           <row>
-            <entry>Expression</entry>
+            <entry>Bean type</entry>
             <entry>Explanation</entry>
           </row>
         </thead>
@@ -693,11 +722,16 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
       <para>Find below some examples of valid <classname>MultiActionController</classname>
       method signatures.</para>
       
+      <para>The standard signature (mirrors the <interfacename>Controller</interfacename> interface method).</para>
       <programlisting><![CDATA[public ModelAndView doRequest(HttpServletRequest, HttpServletResponse)]]></programlisting>
-      <programlisting><![CDATA[public void goHome(HttpServletRequest, HttpServletResponse)]]></programlisting>
-      <programlisting><![CDATA[public Map doRequest(HttpServletRequest, HttpServletResponse)]]></programlisting>
-      <programlisting><![CDATA[public ModelAndView processException(HttpServletRequest, HttpServletResponse, IllegalArgumentException)]]></programlisting>
+      <para>This signature accepts a <classname>Login</classname> argument that will be populated (bound) with parameters stripped from the request</para>
       <programlisting><![CDATA[public ModelAndView doLogin(HttpServletRequest, HttpServletResponse, Login)]]></programlisting>
+      <para>The signature for an <classname>Exception</classname> handling method.</para>
+      <programlisting><![CDATA[public ModelAndView processException(HttpServletRequest, HttpServletResponse, IllegalArgumentException)]]></programlisting>
+      <para>This signature has a void return type (see the section entitled <xref linkend="mvc-coc"/> below).</para>
+      <programlisting><![CDATA[public void goHome(HttpServletRequest, HttpServletResponse)]]></programlisting>
+      <para>This signature has a <interfacename>Map</interfacename> return type (see the section entitled <xref linkend="mvc-coc"/> below).</para>
+      <programlisting><![CDATA[public Map doRequest(HttpServletRequest, HttpServletResponse)]]></programlisting>
 
       <para>The <interfacename>MethodNameResolver</interfacename> is responsible for
       resolving method names based on the request coming in. Find below details about
@@ -752,7 +786,7 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
 
 <bean id="sampleDelegate" class="samples.SampleDelegate"/>
 
-## together with
+]]><lineannotation>## together with</lineannotation><![CDATA[
 
 public class SampleDelegate {
 
@@ -787,7 +821,7 @@ public class SampleDelegate {
       <title>Command controllers</title>
 
       <para>Spring's <emphasis>command controllers</emphasis> are a fundamental
-      part of the Spring MVC package. Command controllers provide a way to
+      part of the Spring Web MVC package. Command controllers provide a way to
       interact with data objects and dynamically bind parameters from the
       <interfacename>HttpServletRequest</interfacename> to the data object specified.
       They perform a somewhat similar role to the Struts <classname>ActionForm</classname>,
@@ -1537,8 +1571,8 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
     <section id="mvc-localeresolver-cookie">
       <title><classname>CookieLocaleResolver</classname></title>
 
-      <para>This locale resolver inspects a <classname>Cookie</classname> that might exist on the
-      client, to see if a locale is specified. If so, it uses that specific
+      <para>This locale resolver inspects a <classname>Cookie</classname> that might
+      exist on the client, to see if a locale is specified. If so, it uses that specific
       locale. Using the properties of this locale resolver, you can specify
       the name of the cookie, as well as the maximum age. Find below an example of
       defining a <classname>CookieLocaleResolver</classname>.</para>
@@ -1547,13 +1581,13 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
     <property name="cookieName" value="clientlanguage"/>
     
-    ]]><lineannotation>&lt;!-- in seconds. If set to <literal>-1</literal>, the cookie is not persisted (deleted when browser shuts down) --&gt;</lineannotation><![CDATA[
+    ]]><lineannotation>&lt;!-- in seconds. If set to <literal>-1</literal>, the cookie isnot persisted (deleted when browser shuts down) --&gt;</lineannotation><![CDATA[
     <property name="cookieMaxAge" value="100000">
 
 </bean>]]></programlisting>
 
       <table frame="all">
-        <title>Special beans in the <interfacename>WebApplicationContext</interfacename></title>
+        <title><classname>CookieLocaleResolver</classname> properties</title>
 
         <tgroup cols="3">
           <colspec colname="c1" colwidth="1*" />
@@ -1572,7 +1606,6 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
               <entry>classname + LOCALE</entry>
               <entry>The name of the cookie</entry>
             </row>
-
             <row>
               <entry>cookieMaxAge</entry>
               <entry>Integer.MAX_INT</entry>
@@ -1581,7 +1614,6 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
               will only be available until the client shuts down his or her
               browser.</entry>
             </row>
-
             <row>
               <entry>cookiePath</entry>
               <entry>/</entry>
@@ -1632,10 +1664,11 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         <value>/**/*.view=someController</value>
     </property>
 </bean>]]></programlisting>
-        <para>All calls to all *.view resources containing a
-      parameter named <literal>siteLanguage</literal> will now change the
-      locale. So a call to <literal>http://www.sf.net/home.view?siteLanguage=nl</literal> will
-      change the site language to Dutch.</para>
+        <para>All calls to all <literal>*.view</literal> resources containing a
+        parameter named <literal>siteLanguage</literal> will now change the
+        locale. So a request for the following URL,
+        <literal>http://www.sf.net/home.view?siteLanguage=nl</literal> will change
+        the site language to Dutch.</para>
     </section>
   </section>
 
@@ -1680,7 +1713,7 @@ background=/themes/cool/img/coolBg.jpg]]></programlisting>
       done using the <literal>spring:theme</literal> custom tag, which is very
       similar to the <literal>spring:message</literal> tag. The following JSP
       fragment uses the theme defined above to customize the look and feel:</para>
-      <programlisting><![CDATA[<taglib prefix="spring" uri="http://www.springframework.org/tags"%>
+      <programlisting><![CDATA[<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <html>
    <head>
       <link rel="stylesheet" href="<spring:theme code="styleSheet"/>" type="text/css"/>
@@ -2040,11 +2073,11 @@ public class FileUploadBean {
     <title>Using Spring's form tag library</title>
 
     <para>As of version 2.0, Spring provides a comprehensive set of data binding-aware tags for handling form elements
-    when using JSP and Spring MVC. Each tag provides support for the set of attributes of its corresponding HTML
+    when using JSP and Spring Web MVC. Each tag provides support for the set of attributes of its corresponding HTML
     tag counterpart, making the tags familiar and intuitive to use.
     The tag-generated HTML is HTML 4.01/XHTML 1.0 compliant.</para>
 
-    <para>Unlike other form/input tag libraries, Spring's form tag library is integrated with Spring MVC, giving
+    <para>Unlike other form/input tag libraries, Spring's form tag library is integrated with Spring Web MVC, giving
     the tags access to the command object and reference data your controller deals with. As you will see in the
     following examples, the form tags make JSPs easier to develop, read and maintain. </para>
 
@@ -2052,13 +2085,12 @@ public class FileUploadBean {
     We have included generated HTML snippets where certain tags require further commentary.</para>
 
   <section id="mvc-formtaglib-configuration">
-    <title><literal>Configuration</literal></title>
-    <para>
-        The form tag library comes bundled in <literal>spring.jar</literal>. The library descriptor is called
-        <literal>spring-form.tld</literal>.</para>
+    <title>Configuration</title>
+    <para>The form tag library comes bundled in <literal>spring.jar</literal>. The library descriptor is called
+    <literal>spring-form.tld</literal>.</para>
     <para>To use the tags from this library, add the following directive to the top of your JSP page:</para>
     
-    <programlisting><![CDATA[<@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>]]></programlisting>
+    <programlisting><![CDATA[<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>]]></programlisting>
     
     <para>... where <literal>form</literal> is the tag name prefix you want to use for the tags from this library.</para>
 
@@ -2073,9 +2105,9 @@ public class FileUploadBean {
         <literal>form</literal> tag.
     </para>
     <para>
-        Let's assume we have a domain object called <literal>User</literal>. It is a JavaBean with
+        Let's assume we have a domain object called <classname>User</classname>. It is a JavaBean with
         properties such as <literal>firstName</literal> and <literal>lastName</literal>. We will
-        use it as the form backing object of our <literal>FormController</literal> which returns
+        use it as the form backing object of our form controller which returns
         <literal>form.jsp</literal>. Below is an example of what <literal>form.jsp</literal> would
         look like:
     </para>
@@ -2100,8 +2132,8 @@ public class FileUploadBean {
     <para>
         The <literal>firstName</literal> and <literal>lastName</literal> values are
         retrieved from the command object placed in the <interfacename>PageContext</interfacename>
-        by the page controller. Scroll on to see more complex examples
-        of how inner tags are used with the <literal>form</literal> tag.
+        by the page controller. Keep reading to see more complex examples of how inner
+        tags are used with the <literal>form</literal> tag.
     </para>
 
     <para>The generated HTML looks like a standard form:</para>
@@ -2160,7 +2192,7 @@ public class FileUploadBean {
   <section id="mvc-formtaglib-checkboxtag">
     <title>The <literal>checkbox</literal> tag</title>
       <para>This tag renders an HTML 'input' tag with type 'checkbox'.</para>
-      <para>Let's assume our <literal>User</literal> has preferences such as newsletter subscription
+      <para>Let's assume our <classname>User</classname> has preferences such as newsletter subscription
       and a list of hobbies. Below is an example of the <classname>Preferences</classname> class:</para>
   </section>      
 
@@ -2203,7 +2235,7 @@ public class FileUploadBean {
     <table>
         <tr>
             <td>Subscribe to newsletter?:</td>
-            <%-- Approach 1: Property is of type java.lang.Boolean --%>
+            ]]><lineannotation>&lt;%-- Approach 1: Property is of type <classname>java.lang.Boolean</classname> --%&gt;</lineannotation><![CDATA[
             <td><form:checkbox path="preferences.receiveNewsletter"/></td>
             <td></td>
         </tr>
@@ -2211,7 +2243,7 @@ public class FileUploadBean {
         <tr>
             <td>Interests:</td>
             <td>
-                <%-- Approach 2: Property is of an array or of type java.util.Collection --%>
+                ]]><lineannotation>&lt;%-- Approach 2: Property is of an array or of type <interfacename>java.util.Collection</interfacename> --%&gt;</lineannotation><![CDATA[
                 Quidditch: <form:checkbox path="preferences.interests" value="Quidditch"/>
                 Herbology: <form:checkbox path="preferences.interests" value="Herbology"/>
                 Defence Against the Dark Arts: <form:checkbox path="preferences.interests"
@@ -2222,7 +2254,7 @@ public class FileUploadBean {
         <tr>
             <td>Favourite Word:</td>
             <td>
-                <%-- Approach 3: Property is of type java.lang.Object --%>
+                ]]><lineannotation>&lt;%-- Approach 3: Property is of type <classname>java.lang.Object</classname> --%&gt;</lineannotation><![CDATA[
                 Magic: <form:checkbox path="preferences.favouriteWord" value="Magic"/>
             </td>
             <td></td>
@@ -2267,13 +2299,14 @@ public class FileUploadBean {
 </tr>]]></programlisting>
 
     <para>What you might not expect to see is the additional hidden field after each checkbox.
-    When a checkbox in an HTML page is not checked, its value will not be sent to the server as part of the HTTP
-    request parameters once the form is submitted, so we need a workaround for this quirk in HTML in order for Spring
-    form data binding to work. The <literal>checkbox</literal> tag follows the existing Spring convention of
-    including a hidden parameter prefixed by an underscore ("_") for each checkbox. By doing this, you are
-    effectively telling Spring that <quote><emphasis>the checkbox was visible in the form and I want my
-    object to which the form data will be bound to reflect the state of the checkbox no matter
-    what</emphasis></quote>.</para>
+    When a checkbox in an HTML page is <emphasis>not</emphasis> checked, its value will not be
+    sent to the server as part of the HTTP request parameters once the form is submitted, so we
+    need a workaround for this quirk in HTML in order for Spring form data binding to work. The
+    <literal>checkbox</literal> tag follows the existing Spring convention of including a hidden
+    parameter prefixed by an underscore ("_") for each checkbox. By doing this, you are
+    effectively telling Spring that <quote><emphasis>the checkbox was visible in the form and I
+    want my object to which the form data will be bound to reflect the state of the checkbox no
+    matter what</emphasis></quote>.</para>
 
   <section id="mvc-formtaglib-radiobuttontag">
     <title>The <literal>radiobutton</literal> tag</title>
@@ -2303,9 +2336,10 @@ public class FileUploadBean {
 
   <section id="mvc-formtaglib-selecttag">
     <title>The <literal>select</literal> tag</title>
-    <para>This tag renders an HTML 'select' element. It supports data binding to the selected option as well as
-    the use of nested <literal>option</literal> and <literal>options</literal> tags.</para>
-    <para>Let's assume a <literal>User</literal> has a list of skills.</para>
+    <para>This tag renders an HTML 'select' element. It supports data binding to the selected
+    option as well as the use of nested <literal>option</literal> and <literal>options</literal>
+    tags.</para>
+    <para>Let's assume a <classname>User</classname> has a list of skills.</para>
 
     <programlisting><![CDATA[<tr>
     <td>Skills:</td>
@@ -2376,7 +2410,7 @@ public class FileUploadBean {
     <td></td>
 </tr>]]></programlisting>
 
-    <para>If the <literal>User</literal> lived in the UK, the HTML source of the 'Country'
+    <para>If the <classname>User</classname> lived in the UK, the HTML source of the 'Country'
     row would look like:</para>
 
     <programlisting><![CDATA[ <tr>
@@ -2417,8 +2451,9 @@ public class FileUploadBean {
 
   <section id="mvc-formtaglib-hiddeninputtag">
     <title>The <literal>hidden</literal> tag</title>
-    <para>This tag renders an HTML 'input' tag with type 'hidden' using the bound value. To submit an unbound hidden
-    value, use the HTML <literal>input</literal> tag with type 'hidden'.</para>
+    <para>This tag renders an HTML 'input' tag with type 'hidden' using the bound value.
+    To submit an unbound hidden value, use the HTML <literal>input</literal> tag with
+    type 'hidden'.</para>
 
     <programlisting><![CDATA[<form:hidden path="house" />
 ]]></programlisting>
@@ -2458,14 +2493,14 @@ public class FileUploadBean {
         <tr>
             <td>First Name:</td>
             <td><form:input path="firstName" /></td>
-            <%-- Show errors for firstName field --%>
+            ]]><lineannotation>&lt;%-- Show errors for firstName field --%&gt;</lineannotation><![CDATA[
             <td><form:errors path="firstName" /></td>
         </tr>
 
         <tr>
             <td>Last Name:</td>
             <td><form:input path="lastName" /></td>
-            <%-- Show errors for lastName field --%>
+            ]]><lineannotation>&lt;%-- Show errors for lastName field --%&gt;</lineannotation><![CDATA[
             <td><form:errors path="lastName"  /></td>
         </tr>
         <tr>
@@ -2484,14 +2519,14 @@ public class FileUploadBean {
         <tr>
             <td>First Name:</td>
             <td><input name="firstName" type="text" value=""/></td>
-            <%-- Associated errors to firstName field displayed --%>
+            ]]><lineannotation>&lt;%-- Associated errors to firstName field displayed --%&gt;</lineannotation><![CDATA[
             <td><span name="firstName.errors">Field is required.</span></td>
         </tr>
 
         <tr>
             <td>Last Name:</td>
             <td><input name="lastName" type="text" value=""/></td>
-            <%-- Associated errors to lastName field displayed --%>
+            ]]><lineannotation>&lt;%-- Associated errors to lastName field displayed --%&gt;</lineannotation><![CDATA[
             <td><span name="lastName.errors">Field is required.</span></td>
         </tr>
         <tr>
@@ -2507,9 +2542,11 @@ public class FileUploadBean {
     functionality.</para>
 
     <itemizedlist>
-        <listitem><literal>path="*"</literal> - displays all errors</listitem>
-        <listitem><literal>path="lastName*"</literal> - displays all errors associated with
-        the <literal>lastName</literal> field</listitem>
+        <listitem><para><literal>path="*"</literal> - displays all errors</para></listitem>
+        <listitem>
+            <para><literal>path="lastName*"</literal> - displays all errors associated with
+            the <literal>lastName</literal> field</para>
+        </listitem>
     </itemizedlist>
 
     <para>The example below will display a list of errors at the top of the page, followed by
@@ -2522,7 +2559,6 @@ public class FileUploadBean {
             <td><form:input path="firstName" /></td>
             <td><form:errors path="firstName" /></td>
         </tr>
-
         <tr>
             <td>Last Name:</td>
             <td><form:input path="lastName" /></td>
@@ -2577,24 +2613,23 @@ public class FileUploadBean {
     appropriately before the request is forwarded to another URL (the same end
     result as when using the servlet specific exception mappings).</para>
 
-    <para>Besides implementing the
-    <interfacename>HandlerExceptionResolver</interfacename>, which is only a matter of
-    implementing the <literal>resolveException(Exception, Handler)</literal>
-    method and returning a <classname>ModelAndView</classname>, you may also use
-    the <classname>SimpleMappingExceptionResolver</classname>. This resolver
-    enables you to take the class name of any exception that might be thrown
-    and map it to a view name. This is functionally equivalent to the
-    exception mapping feature from the Servlet API, but it's also possible to
-    implement more fine grained mappings of exceptions from different
-    handlers.</para>
-  </section>
+    <para>Besides implementing the <interfacename>HandlerExceptionResolver</interfacename>
+    interface, which is only a matter of implementing the
+    <literal>resolveException(Exception, Handler)</literal> method and returning a
+    <classname>ModelAndView</classname>, you may also use the
+    <classname>SimpleMappingExceptionResolver</classname>. This resolver enables you
+    to take the class name of any exception that might be thrown and map it to a view
+    name. This is functionally equivalent to the exception mapping feature from the
+    Servlet API, but it's also possible to implement more fine grained mappings of
+    exceptions from different handlers.</para>
+   </section>
   
     <section id="mvc-coc">
         <title>Convention over configuration</title>
         <para>For a lot of projects, sticking to established conventions and
         having reasonable defaults is just what they (the projects) need...
         this theme of convention-over-configuration now has explicit support in
-        Spring MVC. What this means is that if you establish a set of naming
+        Spring Web MVC. What this means is that if you establish a set of naming
         conventions and suchlike, you can <emphasis>substantially</emphasis>
         cut down on the amount of configuration that is required to setup handler
         mappings, view resolvers, <classname>ModelAndView</classname> instances,
@@ -2608,9 +2643,12 @@ public class FileUploadBean {
             this section. The application can be found in the
             <literal>'samples/showcases/mvc-convention'</literal> directory.</para>
         </tip>
+        
+        <para>This convention over configuration support address the three core areas
+        of MVC - namely, the models, views, and controllers.</para>
 
         <section id="mvc-coc-ccnhm">
-            <title><classname>ControllerClassNameHandlerMapping</classname></title>
+            <title>The Controller - <classname>ControllerClassNameHandlerMapping</classname></title>
             <para>The <classname>ControllerClassNameHandlerMapping</classname> class
             is a <interfacename>HandlerMapping</interfacename> implementation that
             uses a convention to determine the mapping between request URLs and
@@ -2625,7 +2663,7 @@ public class FileUploadBean {
         ]]><lineannotation>// the implementation is not hugely important for this example...</lineannotation><![CDATA[
     }
 }]]></programlisting>
-                <para>Here is a snippet from the attendent Spring MVC configuration file...</para>
+                <para>Here is a snippet from the attendent Spring Web MVC configuration file...</para>
                 <programlisting><![CDATA[<bean class="org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping"/>
                 
 <bean id=]]>"<emphasis role="bold">viewShoppingCart</emphasis>"<![CDATA[ class="x.y.z.ViewShoppingCartController">
@@ -2639,16 +2677,20 @@ public class FileUploadBean {
             familiar.</para>
             <itemizedlist>
                 <listitem>
-                    <para><classname>WelcomeController</classname> maps to the <literal>'/welcome'</literal> request URL</para>
+                    <para><classname>WelcomeController</classname> maps to the <literal>'/welcome*'</literal> request URL</para>
                 </listitem>
                 <listitem>
-                    <para><classname>HomeController</classname> maps to the <literal>'/home'</literal> request URL</para>
+                    <para><classname>HomeController</classname> maps to the <literal>'/home*'</literal> request URL</para>
                 </listitem>
                 <listitem>
-                    <para><classname>IndexController</classname> maps to the <literal>'/index'</literal> request URL</para>
+                    <para><classname>IndexController</classname> maps to the <literal>'/index*'</literal> request URL</para>
                 </listitem>
                 <listitem>
-                    <para><classname>RegisterController</classname> maps to the <literal>'/register'</literal> request URL</para>
+                    <para><classname>RegisterController</classname> maps to the <literal>'/register*'</literal> request URL</para>
+                </listitem>
+                <listitem>
+                    <para><classname>DisplayShoppingCartController</classname> maps to the <literal>'/displayshoppingcart*'</literal> request URL</para>
+                    <para><emphasis>(Notice the casing - all lowercase - in the case of camel-cased <interfacename>Controller</interfacename> class names.)</emphasis></para>
                 </listitem>
             </itemizedlist>
             <para>In the case of <classname>MultiActionController</classname> handler classes, the
@@ -2673,15 +2715,14 @@ public class FileUploadBean {
             tedium of having to firstly define and then having to maintain a potentially
             <emphasis>looooong</emphasis> <classname>SimpleUrlHandlerMapping</classname>
             (or suchlike).</para>
-            <para>There is not a whole lot more to be said about the
-            <classname>ControllerClassNameHandlerMapping</classname> class. It extends
+            <para>The <classname>ControllerClassNameHandlerMapping</classname> class extends
             the <classname>AbstractHandlerMapping</classname> base class so you can define
             <interfacename>HandlerInterceptor</interfacename> instances and everything else
             as per usual.</para>
         </section>
 
         <section id="mvc-coc-modelmap">
-            <title><classname>ModelMap</classname> (<classname>ModelAndView</classname>)</title>
+            <title>The Model - <classname>ModelMap</classname> (<classname>ModelAndView</classname>)</title>
             <para>The <classname>ModelMap</classname> class is an essentially glorified
             <interfacename>Map</interfacename> that can make adding objects that are
             to be displayed in (or on) a <interfacename>View</interfacename> adhere to
@@ -2743,7 +2784,7 @@ public class FileUploadBean {
             </itemizedlist>
             <sidebar>
                 <title>What, no automatic pluralisation?</title>
-                <para>Spring MVC's convention over configuration support does not
+                <para>Spring Web MVC's convention over configuration support does not
                 support automatic pluralisation. That is to say, you cannot add a
                 <interfacename>List</interfacename> of
                 <classname>Person</classname> objects to a
@@ -2788,16 +2829,16 @@ public class FileUploadBean {
         </section>
 
         <section id="mvc-coc-r2vnt">
-            <title><interfacename>RequestToViewNameTranslator</interfacename></title>
+            <title>The View - <interfacename>RequestToViewNameTranslator</interfacename></title>
             <para>The <interfacename>RequestToViewNameTranslator</interfacename> interface
-            is responsible for determining a <interfacename>View</interfacename> name when
-            no logical view name is explicitly supplied. It has but one implementation,
+            is responsible for determining a logical <interfacename>View</interfacename> name
+            when no such logical view name is explicitly supplied. It has but one implementation,
             the rather cunningly named <classname>DefaultRequestToViewNameTranslator</classname>
             class.</para>
             <para>The <classname>DefaultRequestToViewNameTranslator</classname> maps request
-            URLs in a fashion that is probably best explained by recourse to some examples.
-            Consider the following <interfacename>Controller</interfacename> implementation,
-            and the attendant Spring MVC XML configuration.</para>
+            URLs to logical view names in a fashion that is probably best explained by recourse
+            to an example. Consider the following <interfacename>Controller</interfacename>
+            implementation, and the attendant Spring Web MVC XML configuration.</para>
             <programlisting><![CDATA[public class RegistrationController implements Controller {
                 
     public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) {
@@ -2847,15 +2888,35 @@ public class FileUploadBean {
             <tip>
                 <para>You don't even need to define a <classname>DefaultRequestToViewNameTranslator</classname>
                 bean explicitly. If you are okay with the default settings of the
-                <classname>DefaultRequestToViewNameTranslator</classname>, then you can simply
-                rely on the fact that the Spring MVC <classname>DispatcherServlet</classname> will
-                actually instantiate an instance of this class if one is not explicitly configured.</para>
+                <classname>DefaultRequestToViewNameTranslator</classname>, then you can
+                rely on the fact that the Spring Web MVC <classname>DispatcherServlet</classname>
+                will actually instantiate an instance of this class if one is not
+                explicitly configured.</para>
             </tip>
             <para>Of course, if you need to change the default settings, then you do need to
             configure your own <classname>DefaultRequestToViewNameTranslator</classname> bean
             explicitly. Please do consult the quite comprehensive Javadoc for the
             <classname>DefaultRequestToViewNameTranslator</classname> class for details of the
             various properties that can be configured.</para>
-        </section>
+        </section>        
+    </section>        
+    <section id="mvc-resources">
+		<title>Further Resources</title>
+		<para>Find below links and pointers to further resources about Spring Web MVC.</para>
+		<itemizedlist>
+			<listitem>
+				<para>The Spring distribution ships with a Spring Web MVC tutorial that
+				guides the reader through building a complete Spring Web MVC-based application
+				using a step-by-step approach. This tutorial is available in the
+				<literal>'docs'</literal> directory of the Spring distribution. An
+				online version can also be found on the
+				<ulink url="http://springframework.org/">Spring Framework website</ulink>.</para>
+			</listitem>
+			<listitem>
+				<para>The book entitled <quote>Expert Spring Web MVC and WebFlow</quote> by
+				Seth Ladd and others (published by Apress) is an excellent hardcopy
+				source of Spring Web MVC goodness.</para>
+			</listitem>
+		</itemizedlist>
     </section>
 </chapter>

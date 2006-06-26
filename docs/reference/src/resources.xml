@@ -2,7 +2,7 @@
 <chapter id="resources">
 	<title>Resources</title>
 	<section>
-		<title>Overview</title>
+		<title>Introduction</title>
 		<para>
 			Java's standard <classname>java.net.URL</classname> interface and
 			standard handlers for various URL prefixes are unfortunately not quite

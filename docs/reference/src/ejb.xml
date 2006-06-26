@@ -1,31 +1,33 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <chapter id="ejb">
-	<title>Accessing and implementing EJBs</title>
-	<para>
-		As a lightweight container, Spring is often considered an EJB
-		replacement. We do believe that for many if not most applications and use
-		cases, Spring as a container, combined with its rich supporting
-		functionality in the area of transactions, ORM and JDBC access, is a better
-		choice than implementing equivalent functionality via an EJB container and
-		EJBs.
-    </para>
-	<para>
-		However, it is important to note that using Spring does not prevent
-		you from using EJBs. In fact, Spring makes it much easier to access EJBs and
-		implement EJBs and functionality within them. Additionally, using Spring to
-		access services provided by EJBs allows the implementation of those services
-		to later transparently be switched between local EJB, remote EJB, or POJO
-		(plain old Java object) variants, without the client code having to
-		be changed.
-    </para>
-	<para>
-		In this chapter, we look at how Spring can help you access and
-		implement EJBs. Spring provides particular value when accessing stateless
-		session beans (SLSBs), so we'll begin by discussing this.
-    </para>
-	<sect1 id="ejb-access">
+	<title>Enterprise Java Bean (EJB) integration</title>
+	<section id="ejb-introduction">
+	    <para>
+		    As a lightweight container, Spring is often considered an EJB
+		    replacement. We do believe that for many if not most applications and use
+		    cases, Spring as a container, combined with its rich supporting
+		    functionality in the area of transactions, ORM and JDBC access, is a better
+		    choice than implementing equivalent functionality via an EJB container and
+		    EJBs.
+        </para>
+	    <para>
+		    However, it is important to note that using Spring does not prevent
+		    you from using EJBs. In fact, Spring makes it much easier to access EJBs and
+		    implement EJBs and functionality within them. Additionally, using Spring to
+		    access services provided by EJBs allows the implementation of those services
+		    to later transparently be switched between local EJB, remote EJB, or POJO
+		    (plain old Java object) variants, without the client code having to
+		    be changed.
+        </para>
+	    <para>
+		    In this chapter, we look at how Spring can help you access and
+		    implement EJBs. Spring provides particular value when accessing stateless
+		    session beans (SLSBs), so we'll begin by discussing this.
+        </para>
+	</section>
+	<section id="ejb-access">
 		<title>Accessing EJBs</title>
-		<sect2 id="ejb-access-concepts">
+		<section id="ejb-access-concepts">
 			<title>Concepts</title>
 			<para>
 				To invoke a method on a local or remote stateless session bean,
@@ -71,8 +73,8 @@
 				JNDI lookup, or duplicate methods in a hand-coded Business Delegate unless
 				you are actually adding real value in such code.
 			</para>
-		</sect2>
-		<sect2 id="ejb-access-local">
+		</section>
+		<section id="ejb-access-local">
 			<title>Accessing local SLSBs</title>
 			<para>
 				Assume that we have a web controller that needs to use a local
@@ -172,8 +174,8 @@ public void setMyComponent(MyComponent myComponent) {
 				users, those doing programmatic AOP work with EJBs may want to look at
 				<classname>LocalSlsbInvokerInterceptor</classname>.
 			</para>
-		</sect2>
-		<sect2 id="ejb-access-remote">
+		</section>
+		<section id="ejb-access-remote">
 			<title>Accessing remote SLSBs</title>
 			<para>
 				Accessing remote EJBs is essentially identical to accessing local
@@ -212,9 +214,9 @@ public void setMyComponent(MyComponent myComponent) {
 				course, this is optional; there is nothing stopping you from declaring
 				<classname>RemoteExceptions</classname> in your business interface.
 			</para>
-		</sect2>
-	</sect1>
-	<sect1 id="ejb-implementation">
+		</section>
+	</section>
+	<section id="ejb-implementation">
 		<title>Using Spring's convenience EJB implementation classes</title>
 		<para>
 			Spring also provides convenience classes to help you implement EJBs.
@@ -338,5 +340,5 @@ public void setMyComponent(MyComponent myComponent) {
 		<classname>ContextSingletonBeanFactoryLocator</classname> classes for more information on
 		their usage.
 	</para>
-	</sect1>
+	</section>
 </chapter>

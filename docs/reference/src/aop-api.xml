@@ -2,7 +2,7 @@
 <chapter id="aop-api">
   <title>Spring AOP APIs</title>
 
-  <sect1 id="aop-api-introduction">
+  <section id="aop-api-introduction">
     <title>Introduction</title>
 
 	<para>The previous chapter described the Spring 2.0 support for AOP using
@@ -15,15 +15,14 @@
 	in this chapter is fully supported in Spring 2.0.
 	</para>
 
-  </sect1>
+  </section>
 
-  <sect1 id="aop-api-pointcuts">
+  <section id="aop-api-pointcuts">
     <title>Pointcut API in Spring</title>
 
-    <para>Let's look at how Spring handles the crucial pointcut
-    concept.</para>
+    <para>Let's look at how Spring handles the crucial pointcut concept.</para>
 
-    <sect2>
+    <section>
       <title>Concepts</title>
 
       <para>Spring's pointcut model enables pointcut reuse independent of
@@ -34,40 +33,40 @@
       is the central interface, used to target advices to particular classes
       and methods. The complete interface is shown below:</para>
 
-      <programlisting>public interface Pointcut {
+      <programlisting><![CDATA[public interface Pointcut {
 
     ClassFilter getClassFilter();
 
     MethodMatcher getMethodMatcher();
 
-}</programlisting>
+}]]></programlisting>
 
-      <para>Splitting the <literal>Pointcut</literal> interface into two parts
+      <para>Splitting the <interfacename>Pointcut</interfacename> interface into two parts
       allows reuse of class and method matching parts, and fine-grained
       composition operations (such as performing a "union" with another method
       matcher).</para>
 
-      <para>The <literal>ClassFilter</literal> interface is used to restrict
+      <para>The <interfacename>ClassFilter</interfacename> interface is used to restrict
       the pointcut to a given set of target classes. If the
       <literal>matches()</literal> method always returns true, all target
       classes will be matched:</para>
 
-      <programlisting>public interface ClassFilter {
+      <programlisting><![CDATA[public interface ClassFilter {
 
     boolean matches(Class clazz);
-}</programlisting>
+}]]></programlisting>
 
-      <para>The <literal>MethodMatcher</literal> interface is normally more
+      <para>The <interfacename>MethodMatcher</interfacename> interface is normally more
       important. The complete interface is shown below:</para>
 
-      <programlisting>public interface MethodMatcher {
+      <programlisting><![CDATA[public interface MethodMatcher {
 
     boolean matches(Method m, Class targetClass);
 
     boolean isRuntime();
 
     boolean matches(Method m, Class targetClass, Object[] args);
-}</programlisting>
+}]]></programlisting>
 
       <para>The <literal>matches(Method, Class) </literal>method is used to
       test whether this pointcut will ever match a given method on a target
@@ -87,9 +86,9 @@
       <remark>If possible, try to make pointcuts static, allowing the AOP
       framework to cache the results of pointcut evaluation when an AOP proxy
       is created.</remark>
-    </sect2>
+    </section>
 
-    <sect2>
+    <section>
       <title>Operations on pointcuts</title>
 
       <para>Spring supports operations on pointcuts: notably,
@@ -106,9 +105,9 @@
       using the <emphasis>ComposablePointcut</emphasis> class in the same
       package. However, using AspectJ pointcut expressions is usually a
       simpler approach.</para>
-    </sect2>
+    </section>
 
-    <sect2>
+    <section>
       <title>AspectJ expression pointcuts</title>
 
       <para>Since 2.0, the most important type of pointcut used by Spring is
@@ -119,16 +118,16 @@
       <para>See the previous chapter for a discussion of supported AspectJ pointcut
       primitives.
       </para>
-    </sect2>
+    </section>
 
-    <sect2>
+    <section>
       <title>Convenience pointcut implementations</title>
 
       <para>Spring provides several convenient pointcut implementations. Some
       can be used out of the box; others are intended to be subclassed in
       application-specific pointcuts.</para>
 
-      <sect3>
+      <section>
         <title>Static pointcuts</title>
 
         <para>Static pointcuts are based on method and target class, and
@@ -141,7 +140,7 @@
         <para>Let's consider some static pointcut implementations included
         with Spring.</para>
 
-        <sect4>
+        <section>
           <title>Regular expression pointcuts</title>
 
           <para>One obvious way to specific static pointcuts is regular
@@ -199,18 +198,18 @@
 
           <para><emphasis>RegexpMethodPointcutAdvisor</emphasis> can be used
           with any Advice type.</para>
-        </sect4>
+        </section>
 
-        <sect4>
+        <section>
           <title>Attribute-driven pointcuts</title>
 
           <para>An important type of static pointcut is a
           <emphasis>metadata-driven</emphasis> pointcut. This uses the values
           of metadata attributes: typically, source-level metadata.</para>
-        </sect4>
-      </sect3>
+        </section>
+      </section>
 
-      <sect3>
+      <section>
         <title>Dynamic pointcuts</title>
 
         <para>Dynamic pointcuts are costlier to evaluate than static
@@ -222,7 +221,7 @@
         <para>The main example is the <literal>control flow</literal>
         pointcut.</para>
 
-        <sect4>
+        <section>
           <title>Control flow pointcuts</title>
 
           <para>Spring control flow pointcuts are conceptually similar to
@@ -241,11 +240,11 @@
               1.4, the cost is about 5 times that of other dynamic pointcuts;
               in Java 1.3 more than 10.</para>
             </note></para>
-        </sect4>
-      </sect3>
-    </sect2>
+        </section>
+      </section>
+    </section>
 
-    <sect2>
+    <section>
       <title>Pointcut superclasses</title>
 
       <para>Spring provides useful pointcut superclasses to help you to
@@ -265,9 +264,9 @@
 
       <para>You can use custom pointcuts with any advice type in Spring 1.0
       RC2 and above.</para>
-    </sect2>
+    </section>
 
-    <sect2>
+    <section>
       <title>Custom pointcuts</title>
 
       <para>Because pointcuts in Spring AOP are Java classes, rather than
@@ -279,15 +278,15 @@
       <remark>Later versions of Spring may offer support for "semantic
       pointcuts" as offered by JAC: for example, "all methods that change
       instance variables in the target object."</remark>
-    </sect2>
-  </sect1>
+    </section>
+  </section>
 
-  <sect1>
+  <section>
     <title>Advice API in Spring</title>
 
     <para>Let's now look at how Spring AOP handles advice.</para>
 
-    <sect2>
+    <section>
       <title>Advice lifecycles</title>
 
       <para>Each advice is a Spring bean. An advice instance can be shared across all 
@@ -307,16 +306,16 @@
 
       <para>It's possible to use a mix of shared and per-instance advice in
       the same AOP proxy.</para>
-    </sect2>
+    </section>
 
-    <sect2 id="aop-api-advice-types">
+    <section id="aop-api-advice-types">
       <title>Advice types in Spring</title>
 
       <para>Spring provides several advice types out of the box, and is
       extensible to support arbitrary advice types. Let us look at the basic
       concepts and standard advice types.</para>
 
-      <sect3>
+      <section>
         <title>Interception around advice</title>
 
         <para>The most fundamental advice type in Spring is
@@ -367,9 +366,9 @@
         AOP framework. Note that pointcuts are not currently interoperable
         between frameworks, and the AOP Alliance does not currently define
         pointcut interfaces.</remark>
-      </sect3>
+      </section>
 
-      <sect3>
+      <section>
         <title>Before advice</title>
 
         <para>A simpler advice type is a <emphasis role="bold">before
@@ -418,9 +417,9 @@
 }</programlisting>
 
         <remark>Before advice can be used with any pointcut.</remark>
-      </sect3>
+      </section>
 
-      <sect3>
+      <section>
         <title>Throws advice</title>
 
         <para><emphasis role="bold">Throws advice</emphasis> is invoked after
@@ -479,9 +478,9 @@
 }</programlisting>
 
         <remark>Throws advice can be used with any pointcut.</remark>
-      </sect3>
+      </section>
 
-      <sect3>
+      <section>
         <title>After Returning advice</title>
 
         <para>An after returning advice in Spring must implement the
@@ -520,9 +519,9 @@
         return value.</para>
 
         <remark>After returning advice can be used with any pointcut.</remark>
-      </sect3>
+      </section>
 
-      <sect3>
+      <section>
          
 
         <title>Introduction advice</title>
@@ -576,8 +575,8 @@ public interface IntroductionInfo {
 
          
 
-        <para>There is no <literal>MethodMatcher</literal>, and hence no
-        <literal>Pointcut</literal>, associated with introduction advice. Only
+        <para>There is no <interfacename>MethodMatcher</interfacename>, and hence no
+        <interfacename>Pointcut</interfacename>, associated with introduction advice. Only
         class filtering is logical.</para>
 
          
@@ -749,11 +748,11 @@ public interface IntroductionInfo {
         handle introductions and stateful mixins.</para>
 
          
-      </sect3>
-    </sect2>
-  </sect1>
+      </section>
+    </section>
+  </section>
 
-  <sect1>
+  <section>
     <title>Advisor API in Spring</title>
 
     <para>In Spring, an Advisor is an aspect that contains just a single advice
@@ -770,9 +769,9 @@ public interface IntroductionInfo {
     AOP proxy. For example, you could use a interception around advice, throws
     advice and before advice in one proxy configuration: Spring will
     automatically create the necessary create interceptor chain.</para>
-  </sect1>
+  </section>
 
-  <sect1 id="aop-pfb">
+  <section id="aop-pfb">
     <title>Using the ProxyFactoryBean to create AOP proxies</title>
 
     <para>If you're using the Spring IoC container (an ApplicationContext or
@@ -789,7 +788,7 @@ public interface IntroductionInfo {
     and their ordering. However, there are simpler options that are preferable
     if you don't need such control.</para>
 
-    <sect2 id="aop-pfb-1">
+    <section id="aop-pfb-1">
       <title>Basics</title>
 
       <para>The <literal>ProxyFactoryBean</literal>, like other Spring
@@ -810,9 +809,9 @@ public interface IntroductionInfo {
       advice may itself reference application objects (besides the target,
       which should be available in any AOP framework), benefiting from all the
       pluggability provided by Dependency Injection.</para>
-    </sect2>
+    </section>
 
-    <sect2 id="aop-pfb-2">
+    <section id="aop-pfb-2">
       <title>JavaBean properties</title>
       <para>
 		In common with most <interfacename>FactoryBean</interfacename> implementations
@@ -930,9 +929,9 @@ public interface IntroductionInfo {
           </para>
         </listitem>
       </itemizedlist>
-    </sect2>
+    </section>
     
-    <sect2 id="aop-pfb-proxy-types">
+    <section id="aop-pfb-proxy-types">
 		<title>JDK- and CGLIB-based proxies</title>
         <para>
 			This section serves as the definitive documentation as to how the
@@ -1004,9 +1003,9 @@ public interface IntroductionInfo {
 			work, and less prone to typos.
 		</para>
 
-    </sect2>
+    </section>
 
-    <sect2>
+    <section>
       <title>Proxying interfaces</title>
 
       <para>
@@ -1126,9 +1125,9 @@ public interface IntroductionInfo {
       are times when being able to obtain the un-advised target from the
       factory might actually be an <emphasis>advantage</emphasis>: for
       example, in certain test scenarios.</para>
-    </sect2>
+    </section>
 
-    <sect2>
+    <section>
       <title>Proxying classes</title>
 
       <para>What if you need to proxy a class, rather than one or more
@@ -1173,9 +1172,9 @@ public interface IntroductionInfo {
       dynamic proxies. As of Spring 1.0, dynamic proxies are slightly faster.
       However, this may change in the future. Performance should not be a
       decisive consideration in this case.</para>
-    </sect2>
+    </section>
 
-    <sect2>
+    <section>
       <title>Using 'global' advisors</title>
 
       <para>By appending an asterisk to an interceptor name, all advisors with
@@ -1194,10 +1193,10 @@ public interface IntroductionInfo {
 &lt;bean id="global_debug" class="org.springframework.aop.interceptor.DebugInterceptor"/&gt;
 &lt;bean id="global_performance" class="org.springframework.aop.interceptor.PerformanceMonitorInterceptor"/&gt;
 </programlisting></para>
-    </sect2>
-  </sect1>
+    </section>
+  </section>
 
-  <sect1 id="aop-concise-proxy">
+  <section id="aop-concise-proxy">
     <title>Concise proxy definitions</title>
 
     <para>Especially when defining transactional proxies, you may end up with
@@ -1258,9 +1257,9 @@ public interface IntroductionInfo {
     <emphasis>abstract</emphasis> attribute to <emphasis>true</emphasis>,
     otherwise the application context will actually try to pre-instantiate
     it.</para>
-  </sect1>
+  </section>
 
-  <sect1 id="aop-prog">
+  <section id="aop-prog">
     <title>Creating AOP proxies programmatically with the ProxyFactory</title>
 
     <para>It's easy to create AOP proxies programmatically using Spring. This
@@ -1293,9 +1292,9 @@ MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();</programlisti
     <remark>Integrating AOP proxy creation with the IoC framework is best
     practice in most applications. We recommend that you externalize
     configuration from Java code with AOP, as in general.</remark>
-  </sect1>
+  </section>
 
-  <sect1>
+  <section>
     <title>Manipulating advised objects</title>
 
     <para>However you create AOP proxies, you can manipulate them using the
@@ -1385,9 +1384,9 @@ assertEquals("Added two advisors",
     example, to prevent calling code removing a security interceptor. It may
     also be used in Spring 1.1 to allow aggressive optimization if runtime
     advice modification is known not to be required.</para>
-  </sect1>
+  </section>
 
-  <sect1 id="aop-autoproxy">
+  <section id="aop-autoproxy">
     <title>Using the "autoproxy" facility</title>
 
     <para>So far we've considered explicit creation of AOP proxies using a
@@ -1418,13 +1417,13 @@ assertEquals("Added two advisors",
       </listitem>
     </itemizedlist>
 
-    <sect2 id="aop-autoproxy-choices">
+    <section id="aop-autoproxy-choices">
       <title>Autoproxy bean definitions</title>
 
       <para>The <literal>org.springframework.aop.framework.autoproxy</literal>
       package provides the following standard autoproxy creators.</para>
 
-      <sect3>
+      <section>
         <title>BeanNameAutoProxyCreator</title>
 
         <para>The BeanNameAutoProxyCreator automatically creates AOP proxies
@@ -1457,9 +1456,9 @@ assertEquals("Added two advisors",
         applied to all matching beans. Note that if advisors are used (rather
         than the interceptor in the above example), the pointcuts may apply
         differently to different beans.</para>
-      </sect3>
+      </section>
 
-      <sect3>
+      <section>
         <title>DefaultAdvisorAutoProxyCreator</title>
 
         <para>A more general and extremely powerful auto proxy creator is
@@ -1536,9 +1535,9 @@ assertEquals("Added two advisors",
         interface to ensure correct ordering if this is an issue. The
         TransactionAttributeSourceAdvisor used in the above example has a
         configurable order value; default is unordered.</para>
-      </sect3>
+      </section>
 
-      <sect3>
+      <section>
         <title>AbstractAdvisorAutoProxyCreator</title>
 
         <para>This is the superclass of DefaultAdvisorAutoProxyCreator. You
@@ -1546,10 +1545,10 @@ assertEquals("Added two advisors",
         the unlikely event that advisor definitions offer insufficient
         customization to the behavior of the framework
         <literal>DefaultAdvisorAutoProxyCreator</literal>.</para>
-      </sect3>
-    </sect2>
+      </section>
+    </section>
 
-    <sect2 id="aop-autoproxy-metadata">
+    <section id="aop-autoproxy-metadata">
       <title>Using metadata-driven auto-proxying</title>
 
       <para>A particularly important type of autoproxying is driven by
@@ -1692,10 +1691,10 @@ assertEquals("Added two advisors",
       <literal>myAttributeAwarePointcut</literal> pointcut can be a singleton
       definition, as it doesn't hold state for individual advised
       objects.</para>
-    </sect2>
-  </sect1>
+    </section>
+  </section>
 
-  <sect1 id="aop-targetsource">
+  <section id="aop-targetsource">
     <title>Using TargetSources</title>
 
     <para>Spring offers the concept of a <emphasis>TargetSource</emphasis>,
@@ -1722,7 +1721,7 @@ assertEquals("Added two advisors",
     to be a prototype rather than a singleton bean definition. This allows
     Spring to create a new target instance when required.</remark>
 
-    <sect2 id="aop-ts-swap">
+    <section id="aop-ts-swap">
       <title>Hot swappable target sources</title>
 
       <para>The
@@ -1761,9 +1760,9 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
       necessary to add advice to use a <literal>TargetSource</literal>--of
       course any <literal>TargetSource</literal> can be used in conjunction
       with arbitrary advice.</para>
-    </sect2>
+    </section>
 
-    <sect2 id="aop-ts-pool">
+    <section id="aop-ts-pool">
       <title>Pooling target sources</title>
 
       <para>Using a pooling target source provides a similar programming model
@@ -1833,8 +1832,8 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
 
       <para>The cast will look as follows:</para>
 
-      <para><programlisting>PoolingConfig conf = (PoolingConfig) beanFactory.getBean("businessObject");
-System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></para>
+      <programlisting><![CDATA[PoolingConfig conf = (PoolingConfig) beanFactory.getBean("businessObject");
+System.out.println("Max pool size is " + conf.getMaxSize());]]></programlisting>
 
       <remark>Pooling stateless service objects is not usually necessary. We
       don't believe it should be the default choice, as most stateless objects
@@ -1843,9 +1842,9 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
 
       <para>Simpler pooling is available using autoproxying. It's possible to
       set the TargetSources used by any autoproxy creator.</para>
-    </sect2>
+    </section>
 
-    <sect2 id="aop-ts-prototype">
+    <section id="aop-ts-prototype">
       <title>Prototype target sources</title>
 
       <para>Setting up a "prototype" target source is similar to a pooling
@@ -1859,47 +1858,47 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
       <literal>poolTargetSource</literal> definition shown above as follows.
       (I've also changed the name, for clarity.)</para>
 
-      <para><programlisting>&lt;bean id="prototypeTargetSource" class="org.springframework.aop.target.PrototypeTargetSource"&gt;
-  &lt;property name="targetBeanName" ref="businessObjectTarget"/&gt;
-&lt;/bean&gt;</programlisting></para>
+      <programlisting><![CDATA[<bean id="prototypeTargetSource" class="org.springframework.aop.target.PrototypeTargetSource">
+  <property name="targetBeanName" ref="businessObjectTarget"/>
+</bean>]]></programlisting>
 
       <para>There's only one property: the name of the target bean.
       Inheritance is used in the TargetSource implementations to ensure
       consistent naming. As with the pooling target source, the target bean
       must be a prototype bean definition.</para>
-    </sect2>
+    </section>
 
-    <sect2 id="aop-ts-threadlocal">
-      <title>ThreadLocal target sources</title>
+    <section id="aop-ts-threadlocal">
+      <title><classname>ThreadLocal</classname> target sources</title>
 
-      <para>ThreadLocal target sources are useful if you need an object to be
+      <para><classname>ThreadLocal</classname> target sources are useful if you need an object to be
       created for each incoming request (per thread that is). The concept of a
-      <literal>ThreadLocal</literal> provide a JDK-wide facility to
+      <classname>ThreadLocal</classname> provide a JDK-wide facility to
       transparently store resource alongside a thread. Setting up a
-      ThreadLocalTargetSource is pretty much the same as was explained for the
+      <classname>ThreadLocalTargetSource</classname> is pretty much the same as was explained for the
       other target sources:</para>
 
-      <para><programlisting>&lt;bean id="threadlocalTargetSource" class="org.springframework.aop.target.ThreadLocalTargetSource"&gt;
-  &lt;property name="targetBeanName" value="businessObjectTarget"/&gt;
-&lt;/bean&gt;</programlisting></para>
+      <programlisting><![CDATA[<bean id="threadlocalTargetSource" class="org.springframework.aop.target.ThreadLocalTargetSource">
+  <property name="targetBeanName" value="businessObjectTarget"/>
+</bean>]]></programlisting>
 
       <para><emphasis>ThreadLocals come with serious issues (potentially
       resulting in memory leaks) when incorrectly using them in a
       multi-threaded and multi-classloader environments. One should always
       consider wrapping a threadlocal in some other class and never directly
-      use the ThreadLocal itself (except of course in the wrapper class).
+      use the <classname>ThreadLocal</classname> itself (except of course in the wrapper class).
       Also, one should always remember to correctly set and unset (where the
-      latter simply involved a call to ThreadLocal.set(null)) the resource
+      latter simply involved a call to <literal>ThreadLocal.set(null)</literal>) the resource
       local to the thread. Unsetting should be done in any case since not
       unsetting it might result in problematic behavior. Spring's ThreadLocal
       support is doing this for you and should always be considered in favor
       of using ThreadLocals without other proper handling
       code.</emphasis></para>
-    </sect2>
-  </sect1>
+    </section>
+  </section>
 
-  <sect1 id="aop-extensibility">
-    <title>Defining new Advice types</title>
+  <section id="aop-extensibility">
+    <title>Defining new <interfacename>Advice</interfacename> types</title>
 
     <para>Spring AOP is designed to be extensible. While the interception
     implementation strategy is presently used internally, it is possible to
@@ -1910,16 +1909,16 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
     <para>The <literal>org.springframework.aop.framework.adapter</literal>
     package is an SPI package allowing support for new custom advice types to
     be added without changing the core framework. The only constraint on a
-    custom Advice type is that it must implement the
-    <literal>org.aopalliance.aop.Advice</literal> tag interface.</para>
+    custom <interfacename>Advice</interfacename> type is that it must implement the
+    <interfacename>org.aopalliance.aop.Advice</interfacename> tag interface.</para>
 
     <para>Please refer to the
     <literal>org.springframework.aop.framework.adapter</literal> package's
     Javadocs for further information</para>
-  </sect1>
+  </section>
 
-  <sect1>
-    <title>Further reading and resources</title>
+  <section>
+    <title>Further resources</title>
 
     <para>Please refer to the Spring sample applications for further examples
     of Spring AOP:</para>
@@ -1933,10 +1932,9 @@ System.out.println("Max pool size is " + conf.getMaxSize());</programlisting></p
 
       <listitem>
         <para>The <literal>/attributes</literal> directory of the JPetStore
-        illustrates the use of attribute-driven declarative transaction
-        management</para>
+        illustrates the use of attribute-driven declarative transaction management</para>
       </listitem>
     </itemizedlist>
 
-   </sect1>
+   </section>
 </chapter>

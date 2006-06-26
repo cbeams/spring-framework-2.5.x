@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <chapter id="portlet">
-	<title>Portlet integration</title>
+	<title>Portlet MVC Framework</title>
 
 	<section id="portlet-introduction">
 
-		<title>Introduction to the Portlet MVC framework</title>
+		<title>Introduction</title>
 
-		<para>In addition to supporting conventional Web development, Spring 
-		also supports JSR-168 Portlet development. As much as possible, the
-		Portlet MVC framework is a mirror image of the Web MVC framework. It
-		also uses all the same View technology. So, be sure to review the
-		chapters on the <link linkend="mvc">Web MVC Framework</link> and on
-		<link linkend="view">View Technologies</link> before 
-		continuing with this chapter.</para>
+		<para>In addition to supporting conventional (servlet-based) Web development,
+		Spring also supports JSR-168 Portlet development. As much as possible, the
+		Portlet MVC framework is a mirror image of the Web MVC framework, and also
+		uses the same underlying view abstractions and integration technology. So, be
+		sure to review the chapters entitled <xref linkend="mvc"/> and
+		<xref linkend="view"/> before continuing with this chapter.</para>
 		
 		<note>
 		    <para>Bear in mind that while the concepts of Spring MVC are the
