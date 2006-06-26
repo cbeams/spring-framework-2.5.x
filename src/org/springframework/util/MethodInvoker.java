@@ -270,14 +270,4 @@ public class MethodInvoker {
 		return this.methodObject.invoke(this.targetObject, this.arguments);
 	}
 
-
-	/**
-	 * Special marker class used for a void return value,
-	 * differentiating void from a null value returned by the method.
-	 * This is not used any longer by MethodInvoker, only MethodInvokingFactoryBean, but
-	 * left here for backwards compatibility.
-	 */
-	public static class VoidType {
-	}
-
 }

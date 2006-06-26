@@ -133,7 +133,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb.setTargetMethod("voidRetvalMethod");
 		mcfb.afterPropertiesSet();
 		Class objType = mcfb.getObjectType();
-		assertTrue(objType.equals(MethodInvokingFactoryBean.VoidType.class));
+		assertTrue(objType.equals(void.class));
 
 		// verify that we can call a method with args that are subtypes of the
 		// target method arg types
@@ -141,7 +141,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new Object[]{new ArrayList(), new ArrayList(), "hello"});
+		mcfb.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello"});
 		mcfb.afterPropertiesSet();
 		mcfb.getObjectType();
 
@@ -149,7 +149,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new Object[]{"1", "2", "3"});
+		mcfb.setArguments(new Object[] {"1", "2", "3"});
 		try {
 			mcfb.afterPropertiesSet();
 		}
