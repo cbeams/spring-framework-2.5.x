@@ -36,8 +36,8 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.instrument.classloading.AbstractLoadTimeWeaver;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
+import org.springframework.instrument.classloading.ResourceOverridingShadowingClassLoader;
 import org.springframework.instrument.classloading.ShadowingClassLoader;
 import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -62,7 +62,7 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactionalTests {
 
 	private static final String DEFAULT_ORM_XML_LOCATION = "META-INF/orm.xml";
-	
+
 	/**
 	 * Map from String defining unique combination of config locations, to ApplicationContext.
 	 * Values are intentionally not strongly typed, to avoid potential class cast exceptions
@@ -218,8 +218,23 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	 * NB: This method must <b>not</b> have a return type of ShadowingClassLoader as that would cause that
 	 * class to be loaded eagerly when this test case loads, creating verify errors at runtime.
 	 */
-	private Object createShadowingClassLoader(ClassLoader classLoader) {
-		return new OrmXmlOverridingShadowingClassLoader(classLoader, getSpringResourceStringForOrmXml());		
+	protected ClassLoader createShadowingClassLoader(ClassLoader classLoader) {
+		OrmXmlOverridingShadowingClassLoader orxl = new OrmXmlOverridingShadowingClassLoader(classLoader, 
+				getActualOrmXmlLocation());
+		customizeResourceOverridingShadowingClassLoader(orxl);
+		return orxl;
+	}
+	
+	/**
+	 * Customize the shadowing class loader
+	 * @param shadowingClassLoader this parameter is actually of type
+	 * ResourceOverridingShadowingClassLoader, and can safely to be
+	 * cast to that type. However, the signature must not be of that
+	 * type as that would cause the present class loader to load
+	 * that type.
+	 */
+	protected void customizeResourceOverridingShadowingClassLoader(ClassLoader shadowingClassLoader) {
+		// Empty
 	}
 	
 	/**
@@ -227,10 +242,9 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	 * orm.xml or null if they do not wish to find any orm.xml
 	 * @return orm.xml path or null to hide any such file
 	 */
-	protected String getSpringResourceStringForOrmXml() {
+	protected String getActualOrmXmlLocation() {
 		return DEFAULT_ORM_XML_LOCATION;
 	}
-
 
 	private static class LoadTimeWeaverInjectingBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter {
 
@@ -248,8 +262,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 		}
 	}
 
-
-	private static class ShadowingLoadTimeWeaver extends AbstractLoadTimeWeaver {
+	private static class ShadowingLoadTimeWeaver implements LoadTimeWeaver {
 
 		private final ClassLoader shadowingClassLoader;
 
@@ -262,6 +275,21 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 		public ClassLoader getInstrumentableClassLoader() {
 			return (ClassLoader) this.shadowingClassLoader;
+		}
+		
+		public ClassLoader getThrowawayClassLoader() {
+			// Be sure to copy the same resource overrides
+			// and same class file transformers:
+			// We want the throwaway class loader to behave
+			// like the instrumentable class loader
+			ResourceOverridingShadowingClassLoader roscl = new ResourceOverridingShadowingClassLoader(getClass().getClassLoader());
+			if (shadowingClassLoader instanceof ResourceOverridingShadowingClassLoader) {
+				roscl.copyOverrides((ResourceOverridingShadowingClassLoader) shadowingClassLoader);
+			}
+			if (shadowingClassLoader instanceof ShadowingClassLoader) {
+				roscl.addTransformers((ShadowingClassLoader) shadowingClassLoader);
+			}
+			return roscl;
 		}
 
 		public void addTransformer(ClassFileTransformer transformer) {

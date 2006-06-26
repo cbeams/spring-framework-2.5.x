@@ -16,15 +16,10 @@
 
 package org.springframework.test.jpa;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.instrument.classloading.ShadowingClassLoader;
-import org.springframework.instrument.classloading.ShadowingClassLoader;
+import org.springframework.instrument.classloading.ResourceOverridingShadowingClassLoader;
 
 /**
  * Subclass of ShadowingClassLoader that overrides attempts to
@@ -37,7 +32,7 @@ import org.springframework.instrument.classloading.ShadowingClassLoader;
  * @author Adrian Colyer
  * @since 2.0
  */
-class OrmXmlOverridingShadowingClassLoader extends ShadowingClassLoader {
+class OrmXmlOverridingShadowingClassLoader extends ResourceOverridingShadowingClassLoader {
 	
 	private List<String> providerPrefixes = new LinkedList<String>(); {
 		// Automatically exclude classes from these well-known persistence providers
@@ -49,22 +44,10 @@ class OrmXmlOverridingShadowingClassLoader extends ShadowingClassLoader {
 		// CGLIB by Hibernate
 	}
 	
-	private static final Enumeration<URL> EMPTY_URL_ENUMERATION = new Enumeration<URL>() {
 
-		public boolean hasMoreElements() {
-			return false;
-		}
-
-		public URL nextElement() {
-			throw new UnsupportedOperationException("Should not be called. I am empty");
-		}
-	};
-	
-	private final String realOrmXmlLocation;
-
-	OrmXmlOverridingShadowingClassLoader(ClassLoader loader, String realOrmXmlLocation) {
+	public OrmXmlOverridingShadowingClassLoader(ClassLoader loader, String realOrmXmlLocation) {
 		super(loader);
-		this.realOrmXmlLocation = realOrmXmlLocation;
+		override("META-INF/orm.xml", realOrmXmlLocation);
 	}
 	
 	@Override
@@ -77,43 +60,4 @@ class OrmXmlOverridingShadowingClassLoader extends ShadowingClassLoader {
 		return false;
 	}
 	
-	private boolean askingForDefaultOrmXmlLocation(String requestedPath) {
-		return "/META-INF/orm.xml".equals(requestedPath) ||
-					"META-INF/orm.xml".equals(requestedPath);
-	}
-
-	@Override
-	public URL getResource(String requestedPath) {
-		if (askingForDefaultOrmXmlLocation(requestedPath)) {
-			return realOrmXmlLocation == null ? 
-					null : 
-					super.getResource(this.realOrmXmlLocation);
-		}
-		else {
-			return super.getResource(requestedPath);
-		}
-	}
-
-	@Override
-	public InputStream getResourceAsStream(String requestedPath) {
-		if (askingForDefaultOrmXmlLocation(requestedPath)) {
-			return realOrmXmlLocation == null ? null : super.getResourceAsStream(this.realOrmXmlLocation);
-		}
-		else {
-			return super.getResourceAsStream(requestedPath);
-		}
-	}
-	
-	@Override
-	public Enumeration<URL> getResources(String requestedPath) throws IOException {
-		if (askingForDefaultOrmXmlLocation(requestedPath)) {
-			return realOrmXmlLocation == null ? 
-					EMPTY_URL_ENUMERATION :
-					super.getResources(this.realOrmXmlLocation);
-		}
-		else {
-			return super.getResources(requestedPath);
-		}
-	}
-
 }

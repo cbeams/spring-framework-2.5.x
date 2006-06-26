@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * @author Rob Harrop
+ * @author Rod Johnson
  * @since 2.0
  */
 public class ShadowingClassLoader extends ClassLoader {
@@ -67,6 +68,10 @@ public class ShadowingClassLoader extends ClassLoader {
 	
 	private boolean isExcluded(String name) {
 		return name.equals(getClass().getName()) || 
+						name.endsWith("ShadowingClassLoader") ||
+						name.startsWith("org.dom4j") ||
+			 			name.startsWith("org.aspectj") ||
+			 			name.startsWith("org.apache.xerces") ||
 						name.startsWith("java.") ||
 						name.startsWith("javax.") ||
 						name.startsWith("org.apache.commons.logging") ||
@@ -101,6 +106,10 @@ public class ShadowingClassLoader extends ClassLoader {
 		catch (IOException ex) {
 			throw new ClassNotFoundException("Cannot load resource for class [" + name + "]", ex);
 		}
+	}
+	
+	public void addTransformers(ShadowingClassLoader other) {
+		classFileTransformers.addAll(other.classFileTransformers);
 	}
 
 	private byte[] applyTransformers(String name, byte[] bytes) {
