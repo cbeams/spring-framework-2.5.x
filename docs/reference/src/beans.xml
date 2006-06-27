@@ -798,6 +798,23 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 				of other beans to be created, as its dependencies and its
 				dependencies' dependencies (and so on) are created and assigned.
 			</para>
+			<sidebar>
+			    <title>Circular dependencies</title>
+			    <para>If you are using predominantly constructor injection it is
+			    possible to write and configure your classes and beans such that
+			    an unresolvable circular dependency scenario is created.</para>
+			    <para>Consider the scenario where you have class A, which requires
+			    an instance of class B to be provided via constructor injection,
+			    and class B, which requires an instance of class A to be provided
+			    via constructor injection. If you configure beans for classes A and B
+			    to be injected into each other, the Spring IoC container will detect
+			    this circular reference at runtime, and throw a
+			    <classname>BeanCurrentlyInCreationException</classname>.</para>
+			    <para>One possible solution to this issue is to edit the source code of
+			    some of your classes to be configured via setters instead of via
+			    constructors. Another solution is to totally forego the use of
+			    constructor injection.</para>
+			</sidebar>
             <para>
 				You can generally trust Spring to do the right thing. It
 				will detect mis-configuration issues, such as references to
