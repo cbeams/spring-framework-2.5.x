@@ -152,7 +152,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 */
 	public boolean isGlobalRollbackOnly() {
 		return ((this.transaction instanceof SmartTransactionObject) &&
-		 ((SmartTransactionObject) this.transaction).isRollbackOnly());
+				((SmartTransactionObject) this.transaction).isRollbackOnly());
 	}
 
 	/**
