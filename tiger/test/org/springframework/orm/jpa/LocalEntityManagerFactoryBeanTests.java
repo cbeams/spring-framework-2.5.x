@@ -28,10 +28,13 @@ import javax.persistence.spi.PersistenceUnitInfo;
  */
 public class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBeanTests {
 	
-	// Set by DummyPersistenceProvider inner class
+	// Static fields set by inner class DummyPersistenceProvider
+
 	private static String actualName;
+
 	private static Map actualProps;
-	
+
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -84,7 +87,6 @@ public class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFac
 		public EntityManagerFactory createEntityManagerFactory(String emfName, Map properties) {
 			actualName = emfName;
 			actualProps = properties;
-			
 			return mockEmf;
 		}
 	}
