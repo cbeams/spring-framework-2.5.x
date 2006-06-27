@@ -103,4 +103,5 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 	protected void extendPageContext(MockPageContext pageContext) {
 		pageContext.setAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME, COMMAND_NAME);
 	}
+
 }

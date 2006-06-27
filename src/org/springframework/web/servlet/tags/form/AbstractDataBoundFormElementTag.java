@@ -24,6 +24,7 @@ import org.springframework.web.servlet.tags.NestedPathTag;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
+import java.beans.PropertyEditor;
 
 /**
  * Base tag for all data-binding aware JSP form tags. Provides the common
@@ -105,8 +106,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 			tagWriter.writeAttribute(ID_ATTRIBUTE, ObjectUtils.getDisplayString(evaluate(ID_ATTRIBUTE, id)));
 		}
 		else {
-			// write the default id which matches the name
-			tagWriter.writeAttribute(ID_ATTRIBUTE, autogenerateId());
+			writeOptionalAttribute(tagWriter, ID_ATTRIBUTE, autogenerateId());
 		}
 		tagWriter.writeAttribute("name", getName());
 	}
@@ -138,6 +138,13 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 */
 	protected final Object getBoundValue() throws JspException {
 		return getBindStatus().getValue();
+	}
+
+	/**
+	 * Gets the {@link PropertyEditor}, if any, in use for value bound to this tag.
+	 */
+	protected PropertyEditor getPropertyEditor() throws JspException {
+		return getBindStatus().getEditor();
 	}
 
 	/**

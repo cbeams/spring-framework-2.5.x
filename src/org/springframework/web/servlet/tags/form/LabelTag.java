@@ -112,6 +112,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	 * Clean the {@link TagWriter} instance.
 	 */
 	public void doFinally() {
-		this.tagWriter = null;
+        super.doFinally();
+        this.tagWriter = null;
 	}
 }

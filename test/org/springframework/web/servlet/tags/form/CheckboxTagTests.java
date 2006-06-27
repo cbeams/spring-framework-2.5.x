@@ -20,6 +20,8 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.Colour;
+import org.springframework.beans.Pet;
 
 import javax.servlet.jsp.tagext.Tag;
 import java.io.StringReader;
@@ -279,6 +281,132 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals(date.toString(), checkboxElement.attribute("value").getValue());
 	}
 
+	public void testCollectionOfColoursSelected() throws Exception {
+		this.tag.setPath("otherColours");
+		this.tag.setValue("RED");
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
+		assertEquals("otherColours", checkboxElement.attribute("name").getValue());
+		assertEquals("checked", checkboxElement.attribute("checked").getValue());
+	}
+
+	public void testCollectionOfColoursNotSelected() throws Exception {
+		this.tag.setPath("otherColours");
+		this.tag.setValue("PURPLE");
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
+		assertEquals("otherColours", checkboxElement.attribute("name").getValue());
+		assertNull(checkboxElement.attribute("checked"));
+	}
+
+	public void testCollectionOfPetsAsString() throws Exception {
+		this.tag.setPath("pets");
+		this.tag.setValue("Spot");
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
+		assertEquals("pets", checkboxElement.attribute("name").getValue());
+		assertEquals("checked", checkboxElement.attribute("checked").getValue());
+	}
+
+	public void testCollectionOfPetsAsStringNotSelected() throws Exception {
+		this.tag.setPath("pets");
+		this.tag.setValue("Santa's Little Helper");
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
+		assertEquals("pets", checkboxElement.attribute("name").getValue());
+		assertNull(checkboxElement.attribute("checked"));
+	}
+
+	public void testCollectionOfPets() throws Exception {
+		this.tag.setPath("pets");
+		this.tag.setValue(new Pet("Rudiger"));
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
+		assertEquals("pets", checkboxElement.attribute("name").getValue());
+		assertEquals("checked", checkboxElement.attribute("checked").getValue());
+	}
+
+	public void testCollectionOfPetsNotSelected() throws Exception {
+		this.tag.setPath("pets");
+		this.tag.setValue(new Pet("Santa's Little Helper"));
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
+		assertEquals("pets", checkboxElement.attribute("name").getValue());
+		assertNull(checkboxElement.attribute("checked"));
+	}
+
 	public void testWithNullValue() throws Exception {
 		try {
 			this.tag.setPath("name");
@@ -302,16 +430,31 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 	}
 
 	protected TestBean createTestBean() {
+		List colours = new ArrayList();
+		colours.add(Colour.BLUE);
+		colours.add(Colour.RED);
+		colours.add(Colour.GREEN);
+
+		List pets = new ArrayList();
+		pets.add(new Pet("Rudiger"));
+		pets.add(new Pet("Spot"));
+		pets.add(new Pet("Fluffy"));
+		pets.add(new Pet("Mufty"));
+
 		this.bean = new TestBean();
 		this.bean.setDate(getDate());
 		this.bean.setName("Rob Harrop");
 		this.bean.setJedi(true);
 		this.bean.setSomeBoolean(new Boolean(true));
 		this.bean.setStringArray(new String[]{"foo", "bar"});
+		this.bean.setOtherColours(colours);
+		this.bean.setPets(pets);
 		List list = new ArrayList();
 		list.add("foo");
 		list.add("bar");
 		this.bean.setSomeList(list);
 		return this.bean;
 	}
+
+
 }

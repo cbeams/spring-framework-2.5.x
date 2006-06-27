@@ -17,8 +17,10 @@
 package org.springframework.web.servlet.tags.form;
 
 import org.springframework.beans.TestBean;
+import org.springframework.validation.BeanPropertyBindingResult;
 
 import javax.servlet.jsp.tagext.Tag;
+import java.beans.PropertyEditorSupport;
 
 /**
  * @author Rob Harrop
@@ -45,10 +47,23 @@ public class TextareaTagTests extends AbstractFormTagTests {
 
 	}
 
+	public void testCustomBind() throws Exception {
+		BeanPropertyBindingResult result = new BeanPropertyBindingResult(createTestBean(), "testBean");
+		result.getPropertyAccessor().registerCustomEditor(Float.class, new SimpleFloatEditor());
+		exposeErrors(result);
+		this.tag.setPath("myFloat");
+		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		String output = getWriter().toString();
+		assertContainsAttribute(output, "name", "myFloat");
+		assertBlockTagContains(output, "12.34f");
+
+	}
+
 	protected TestBean createTestBean() {
 		// set up test data
 		TestBean rob = new TestBean();
 		rob.setName("Rob");
+		rob.setMyFloat(new Float(12.34));
 
 		TestBean sally = new TestBean();
 		sally.setName("Sally");

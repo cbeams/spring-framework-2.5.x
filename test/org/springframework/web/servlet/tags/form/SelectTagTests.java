@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.beans.PropertyEditor;
+import java.beans.PropertyEditorSupport;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
@@ -34,6 +36,7 @@ import org.dom4j.io.SAXReader;
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.validation.BeanPropertyBindingResult;
 
 /**
  * @author Rob Harrop
@@ -66,15 +69,16 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	public void testWithOtherValue() throws Exception {
-		TestBean tb = (TestBean) getPageContext().getRequest().getAttribute(COMMAND_NAME);
+		TestBean tb = getTestBean();
 		tb.setCountry("AT");
 		this.tag.setPath("country");
 		this.tag.setItems(Country.getCountries());
 		assertList(false);
 	}
 
+
 	public void testWithNullValue() throws Exception {
-		TestBean tb = (TestBean) getPageContext().getRequest().getAttribute(COMMAND_NAME);
+		TestBean tb = getTestBean();
 		tb.setCountry(null);
 		this.tag.setPath("country");
 		this.tag.setItems(Country.getCountries());
@@ -163,13 +167,51 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertEquals("someIntegerArray", rootElement.attribute("name").getValue());
 
 		List children = rootElement.elements();
-		assertEquals("Incorrect number of children", 50, children.size());
+		assertEquals("Incorrect number of children", array.length, children.size());
 
 		Element e = (Element) rootElement.selectSingleNode("option[text() = '12']");
 		assertEquals("'12' node not selected", "selected", e.attribute("selected").getValue());
 
 		e = (Element) rootElement.selectSingleNode("option[text() = '34']");
 		assertEquals("'34' node not selected", "selected", e.attribute("selected").getValue());
+	}
+
+	public void testWithFloatCustom() throws Exception {
+
+		PropertyEditor propertyEditor = new SimpleFloatEditor();
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(getTestBean(), COMMAND_NAME);
+		errors.getPropertyAccessor().registerCustomEditor(Float.class, propertyEditor);
+		exposeErrors(errors);
+
+		this.tag.setPath("myFloat");
+
+		Float[] array = new Float[] {
+						new Float("12.30"), new Float("12.32"), new Float("12.34"), new Float("12.36"),
+						new Float("12.38"), new Float("12.40"), new Float("12.42"), new Float("12.44"),
+						new Float("12.46"), new Float("12.48")
+		};
+
+		this.tag.setItems(array);
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		assertTrue(output.startsWith("<select "));
+		assertTrue(output.endsWith("</select>"));
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		assertEquals("select", rootElement.getName());
+		assertEquals("myFloat", rootElement.attribute("name").getValue());
+		List children = rootElement.elements();
+		assertEquals("Incorrect number of children", array.length, children.size());
+
+		Element e = (Element) rootElement.selectSingleNode("option[text() = '12.34f']");
+		assertEquals("'12.34' node not selected", "selected", e.attribute("selected").getValue());
+
+		e = (Element) rootElement.selectSingleNode("option[text() = '12.32f']");
+		assertNull("'12.32' node incorrectly selected", e.attribute("selected"));
 	}
 
 	public void testWithMultiList() throws Exception {
@@ -314,8 +356,13 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.bean.setName("Rob");
 		this.bean.setCountry("UK");
 		this.bean.setSex("M");
+		this.bean.setMyFloat(new Float("12.34"));
 		this.bean.setSomeIntegerArray(new Integer[]{new Integer(12), new Integer(34)});
 		return this.bean;
 	}
 
+	private TestBean getTestBean() {
+		TestBean tb = (TestBean) getPageContext().getRequest().getAttribute(COMMAND_NAME);
+		return tb;
+	}
 }

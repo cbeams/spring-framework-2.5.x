@@ -140,13 +140,19 @@ abstract class SelectedValueComparator {
 	}
 
 	private static boolean exhaustiveCompare(Object boundValue, Object candidate, PropertyEditor propertyEditor) {
+		String candidateDisplayString = ObjectUtils.getDisplayString(candidate);
 		if (boundValue instanceof LabeledEnum) {
-			String enumCodeAtString = ObjectUtils.getDisplayString(((LabeledEnum) boundValue).getCode());
-			if (enumCodeAtString.equals(ObjectUtils.getDisplayString(candidate))) {
+			LabeledEnum labeledEnum = (LabeledEnum) boundValue;
+			String enumCodeAsString = ObjectUtils.getDisplayString(labeledEnum.getCode());
+			if (enumCodeAsString.equals(candidateDisplayString)) {
+				return true;
+			}
+			String enumLabelAsString = ObjectUtils.getDisplayString(labeledEnum.getLabel());
+			if (enumLabelAsString.equals(candidateDisplayString)) {
 				return true;
 			}
 		}
-		else if (ObjectUtils.getDisplayString(boundValue).equals(ObjectUtils.getDisplayString(candidate))) {
+		else if (ObjectUtils.getDisplayString(boundValue).equals(candidateDisplayString)) {
 			return true;
 		}
 		else if (propertyEditor != null && candidate instanceof String) {

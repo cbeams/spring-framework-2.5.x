@@ -167,14 +167,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Gets the value of the '<code>name</code>' attribute.
-	 * May be a runtime expression.
-	 */
-	protected String getName() {
-		return this.name;
-	}
-
-	/**
 	 * Sets the value of the '<code>action</code>' attribute.
 	 * May be a runtime expression.
 	 */
@@ -268,7 +260,6 @@ public class FormTag extends AbstractHtmlElementTag {
 		this.tagWriter.startTag("form");
 		writeDefaultAttributes(tagWriter);
 		this.tagWriter.writeAttribute(METHOD_ATTRIBUTE, getDisplayString(evaluate(METHOD_ATTRIBUTE, this.method)));
-		writeOptionalAttribute(tagWriter, NAME_ATTRIBUTE, resolveName());
 		this.tagWriter.writeAttribute(ACTION_ATTRIBUTE, resolveAction());
 		writeOptionalAttribute(tagWriter, ENCTYPE_ATTRIBUTE, this.enctype);
 		writeOptionalAttribute(tagWriter, ONSUBMIT_ATTRIBUTE, this.onsubmit);
@@ -286,8 +277,8 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * '<code>name</code>' then this is used. Otherwise the value returned by {@link #resolveCommandName()}
 	 * is used.
 	 */
-	private String resolveName() throws JspException {
-		String name = getName();
+	protected String getName() throws JspException {
+		String name = this.name;
 		if(StringUtils.hasText(name)) {
 			return ObjectUtils.getDisplayString(evaluate(NAME_ATTRIBUTE, name));
 		} else {

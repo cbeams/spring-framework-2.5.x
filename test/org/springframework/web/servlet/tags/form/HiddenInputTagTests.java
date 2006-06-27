@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.tags.form;
 
 import org.springframework.beans.TestBean;
+import org.springframework.validation.BeanPropertyBindingResult;
 
 import javax.servlet.jsp.tagext.Tag;
 
@@ -27,6 +28,8 @@ import javax.servlet.jsp.tagext.Tag;
 public class HiddenInputTagTests extends AbstractFormTagTests {
 
 	private HiddenInputTag tag;
+
+	private TestBean bean;
 
 	protected void onSetUp() {
 		this.tag = new HiddenInputTag() {
@@ -44,16 +47,43 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 
 		String output = getWriter().toString();
 
-		assertTrue(output.startsWith("<input "));
-		assertTrue(output.endsWith("/>"));
+		assertTagOpened(output);
+		assertTagClosed(output);
 
 		assertContainsAttribute(output, "type", "hidden");
 		assertContainsAttribute(output, "value", "Sally Greenwood");
 	}
 
+	public void testWithCustomBinder() throws Exception {
+		this.tag.setPath("myFloat");
+
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
+		errors.getPropertyAccessor().registerCustomEditor(Float.class, new SimpleFloatEditor());
+		exposeErrors(errors);
+
+		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+
+		String output = getWriter().toString();
+
+		assertTagOpened(output);
+		assertTagClosed(output);
+
+		assertContainsAttribute(output, "type", "hidden");
+		assertContainsAttribute(output, "value", "12.34f");
+	}
+
+	private void assertTagClosed(String output) {
+		assertTrue(output.endsWith("/>"));
+	}
+
+	private void assertTagOpened(String output) {
+		assertTrue(output.startsWith("<input "));
+	}
+
 	protected TestBean createTestBean() {
-		TestBean bean = new TestBean();
+		this.bean = new TestBean();
 		bean.setName("Sally Greenwood");
+		bean.setMyFloat(new Float("12.34"));
 		return bean;
 	}
 }

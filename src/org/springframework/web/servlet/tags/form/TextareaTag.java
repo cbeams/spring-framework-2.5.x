@@ -113,7 +113,7 @@ public class TextareaTag extends AbstractHtmlInputElementTag {
 		writeOptionalAttribute(tagWriter, ROWS_ATTRIBUTE, getRows());
 		writeOptionalAttribute(tagWriter, COLS_ATTRIBUTE, getCols());
 		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, getOnselect());
-		tagWriter.appendValue(getDisplayString(getBoundValue()));
+		tagWriter.appendValue(getDisplayString(getBoundValue(), getPropertyEditor()));
 		tagWriter.endTag();
 		return EVAL_PAGE;
 	}

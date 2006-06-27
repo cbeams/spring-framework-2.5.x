@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import javax.servlet.jsp.JspException;
 
@@ -65,7 +66,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 
 	/**
 	 * Gets the value of the '<code>value</code>' attribute.
-	 * May be a runtime expression.
+	 * May be a runtime expression.                                              
 	 */
 	protected Object getValue() {
 		return this.value;
@@ -145,9 +146,9 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	private void renderFromCollection(Object resolvedValue, Collection boundValue, TagWriter tagWriter) throws JspException {
 		tagWriter.writeAttribute("value", getDisplayString(resolvedValue));
 
-		if (boundValue.contains(resolvedValue)) {
+		if (SelectedValueComparator.isSelected(getBindStatus(), resolvedValue)) {
 			tagWriter.writeAttribute("checked", "checked");
-		}
+		} 
 	}
 
 	/**

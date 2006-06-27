@@ -19,7 +19,6 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.JspException;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.util.TagUtils;
 
@@ -45,7 +44,7 @@ public class OptionTag extends AbstractFormTag {
 	/**
 	 * The 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
 	 */
-	private String value;
+	private Object value;
 
 	/**
 	 * The text body of the rendered HTML <code>&lt;option&gt;</code> tag.
@@ -57,7 +56,7 @@ public class OptionTag extends AbstractFormTag {
 	 * Sets the 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
 	 * May be a runtime expression.
 	 */
-	public void setValue(String value) {
+	public void setValue(Object value) {
 		Assert.notNull(value, "'value' cannot be null.");
 		this.value = value;
 	}
@@ -66,7 +65,7 @@ public class OptionTag extends AbstractFormTag {
 	 * Gets the 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
 	 * May be a runtime expression.
 	 */
-	protected String getValue() {
+	protected Object getValue() {
 		return this.value;
 	}
 
@@ -101,18 +100,33 @@ public class OptionTag extends AbstractFormTag {
 		tagWriter.startTag("option");
 
 		Object resolvedValue = evaluate("value", getValue());
+		String renderedValue = getDisplayString(resolvedValue, getBindStatus().getEditor());
+		String labelValue = getLabelValue(resolvedValue);
 
-		if (!ObjectUtils.getDisplayString(resolvedValue).equals(getLabelValue(resolvedValue))) {
-			tagWriter.writeAttribute("value", getDisplayString(resolvedValue));
+		if (!renderedValue.equals(labelValue)) {
+			tagWriter.writeAttribute("value", renderedValue);
 		}
+
 		if (isSelected(resolvedValue)) {
 			tagWriter.writeAttribute("selected", "selected");
 		}
-		tagWriter.appendValue(getLabelValue(resolvedValue));
+		tagWriter.appendValue(labelValue);
 
 		tagWriter.endTag();
 
 		return EVAL_PAGE;
+	}
+
+	/**
+	 * Returns the value of the label for this '<code>option</code>' element.
+	 * If the {@link #setLabel label} property is set then the resolved value
+	 * of that property is used, otherwise the value of the <code>resolvedValue</code>
+	 * argument is used.
+	 */
+	private String getLabelValue(Object resolvedValue) throws JspException {
+		String label = getLabel();
+		Object labelObj = (label == null ? resolvedValue : evaluate("label", label));
+		return  getDisplayString(labelObj, getBindStatus().getEditor());
 	}
 
 	private void assertUnderSelectTag() {
@@ -125,17 +139,6 @@ public class OptionTag extends AbstractFormTag {
 		return SelectedValueComparator.isSelected(getBindStatus(), resolvedValue);
 	}
 
-	/**
-	 * Returns the value of the label for this '<code>option</code>' element.
-	 * If the {@link #setLabel label} property is set then the resolved value
-	 * of that property is used, otherwise the value of the <code>resolvedValue</code>
-	 * argument is used.
-	 */
-	private String getLabelValue(Object resolvedValue) throws JspException {
-		String label = getLabel();
-		Object labelObj = (label == null ? resolvedValue : evaluate("label", label));
-		return  getDisplayString(labelObj);
-	}
 
 	private BindStatus getBindStatus() {
 	 return  (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);

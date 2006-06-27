@@ -17,11 +17,18 @@
 package org.springframework.web.servlet.tags.form;
 
 import org.springframework.web.servlet.tags.AbstractTagTests;
+import org.springframework.web.servlet.tags.RequestContextAwareTag;
+import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockPageContext;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.validation.Errors;
+import org.springframework.validation.BindingResult;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.StringWriter;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * @author Rob Harrop
@@ -40,4 +47,15 @@ public abstract class AbstractFormTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	protected abstract TestBean createTestBean();
+
+	protected void exposeErrors(Errors errors) {
+		// wrap errors in a Model
+		Map model = new HashMap();
+		model.put(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, errors);
+
+		// replace the request context with one containing the errors
+		MockPageContext pageContext = getPageContext();
+		RequestContext context = new RequestContext((HttpServletRequest) pageContext.getRequest(), model);
+		pageContext.setAttribute(RequestContextAwareTag.REQUEST_CONTEXT_PAGE_ATTRIBUTE, context);
+	}
 }

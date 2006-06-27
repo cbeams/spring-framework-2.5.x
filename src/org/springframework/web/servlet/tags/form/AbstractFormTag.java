@@ -23,6 +23,8 @@ import org.springframework.web.servlet.tags.HtmlEscapingAwareTag;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 import org.springframework.web.util.HtmlUtils;
 
+import java.beans.PropertyEditor;
+
 /**
  * Base class for all JSP form tags. Provides utility methods for
  * null-safe EL evaluation and for accessing and working with a {@link TagWriter}.
@@ -40,15 +42,22 @@ import org.springframework.web.util.HtmlUtils;
 public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 
 	/**
+	 * Helper class for rendering values into HTML.
+	 */
+	private final ValueFormatter valueFormatter = new ValueFormatter();
+
+	/**
 	 * Evaluates the supplied value for the supplied attribute name. If the supplied value
 	 * is <code>null</code> then <code>null</code> is returned, otherwise evaluation is
 	 * handled using {@link ExpressionEvaluationUtils#evaluate(String, String, javax.servlet.jsp.PageContext)}.
 	 */
-	protected Object evaluate(String attributeName, String value) throws JspException {
-		if (value == null) {
-			return null;
+	protected Object evaluate(String attributeName, Object value) throws JspException {
+		if (value instanceof String) {
+			return ExpressionEvaluationUtils.evaluate(attributeName, (String)value, this.pageContext);
 		}
-		return ExpressionEvaluationUtils.evaluate(attributeName, value, this.pageContext);
+		else {
+			return value;
+		}
 	}
 
 	/**
@@ -84,11 +93,22 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 
 	/**
 	 * Gets the display value of the supplied <code>Object</code>, HTML escaped
-	 * as required.
+	 * as required. This version is <strong>not</strong> {@link PropertyEditor}-aware.
+	 * @see ValueFormatter
 	 */
 	protected String getDisplayString(Object value) {
-		String displayValue = ObjectUtils.getDisplayString(value);
-		return (isHtmlEscape() ? HtmlUtils.htmlEscape(displayValue) : displayValue);
+		return this.valueFormatter.getDisplayString(value, isHtmlEscape());
+	}
+
+	/**
+	 * Gets the display value of the supplied <code>Object</code>, HTML escaped
+	 * as required. If the supplied value is not a {@link String} and the supplied
+	 * {@link PropertyEditor} is not null then the {@link PropertyEditor} is used
+	 * to obtain the display value.
+	 * @see ValueFormatter
+	 */
+	protected String getDisplayString(Object value, PropertyEditor propertyEditor) {
+		return this.valueFormatter.getDisplayString(value, propertyEditor, isHtmlEscape());
 	}
 
 	/**

@@ -195,6 +195,83 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertBlockTagContains(output, "Sally");
 	}
 
+	public void testWithCustomObjectSelected() throws Exception {
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.someNumber", false));
+		this.tag.setValue("${myNumber}");
+		this.tag.setLabel("GBP ${myNumber}");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		assertOptionTagOpened(output);
+		assertOptionTagClosed(output);
+		assertContainsAttribute(output, "value", "12.34");
+		assertContainsAttribute(output, "selected", "selected");
+		assertBlockTagContains(output, "GBP 12.34");
+	}
+
+	public void testWithCustomObjectNotSelected() throws Exception {
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.someNumber", false));
+		this.tag.setValue("${myOtherNumber}");
+		this.tag.setLabel("GBP ${myOtherNumber}");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		assertOptionTagOpened(output);
+		assertOptionTagClosed(output);
+		assertContainsAttribute(output, "value", "12.35");
+		assertAttributeNotPresent(output, "selected");
+		assertBlockTagContains(output, "GBP 12.35");
+	}
+
+	public void testWithCustomObjectAndEditorSelected() throws Exception {
+		final PropertyEditor floatEditor = new SimpleFloatEditor();
+		floatEditor.setValue(new Float("12.34"));
+		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.someNumber", false) {
+			public PropertyEditor getEditor() {
+				return floatEditor;
+			}
+		};
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
+
+		this.tag.setValue("${myNumber}");
+		this.tag.setLabel("${myNumber}");
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		assertOptionTagOpened(output);
+		assertOptionTagClosed(output);
+		assertContainsAttribute(output, "selected", "selected");
+		assertBlockTagContains(output, "12.34f");
+	}
+
+	public void testWithCustomObjectAndEditorNotSelected() throws Exception {
+		final PropertyEditor floatEditor = new SimpleFloatEditor();
+		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.someNumber", false) {
+			public PropertyEditor getEditor() {
+				return floatEditor;
+			}
+		};
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
+
+		this.tag.setValue("${myOtherNumber}");
+		this.tag.setLabel("${myOtherNumber}");
+
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		assertOptionTagOpened(output);
+		assertOptionTagClosed(output);
+		assertAttributeNotPresent(output, "selected");
+		assertBlockTagContains(output, "12.35f");
+	}
+
 	private void assertOptionTagOpened(String output) {
 		assertTrue(output.startsWith("<option"));
 	}
@@ -209,7 +286,11 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		bean.setFavouriteColour(Colour.GREEN);
 		bean.setStringArray(ARRAY);
 		bean.setSpouse(new TestBean("Sally"));
+		bean.setSomeNumber(new Float("12.34"));
+
 		request.setAttribute("testBean", bean);
+		request.setAttribute("myNumber", new Float(12.34));
+		request.setAttribute("myOtherNumber", new Float(12.35));
 	}
 
 	private static class TestBeanPropertyEditor extends PropertyEditorSupport {

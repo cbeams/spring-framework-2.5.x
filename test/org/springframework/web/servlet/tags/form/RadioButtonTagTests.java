@@ -115,4 +115,6 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		bean.setMyFloat(getFloat());
 		return bean;
 	}
+
+
 }

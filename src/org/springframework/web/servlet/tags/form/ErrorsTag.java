@@ -21,6 +21,15 @@ import javax.servlet.jsp.JspException;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * Form tag for displaying errors for a particular field or object.
+ * <p/>
+ * This tag supports three main usage patterns:
+ * <ol>
+ *  <li>Field only - set '<code>path</code>' to the field name (or path)</li>
+ *  <li>Object errors only - omit '<code>path</code>'</li>
+ *  <li>All errors - set '<code>path</code>' to '<code>*</code>'</li>
+ * </ol>
+ *
  * @author Rob Harrop
  * @since 2.0
  */
@@ -32,16 +41,24 @@ public class ErrorsTag extends AbstractHtmlElementTag {
 
 	private String delimiter = "<br/>";
 
-
+	/**
+	 * What delimiter should be used between error messages. Default to an HTML
+	 * '<code>&lt;br/&gt;</code>' tag.
+	 */
 	public void setDelimiter(String delimiter) {
 		this.delimiter = delimiter;
 	}
 
-
+	/**
+	 * Only renders output when there are errors for the configured {@link #setPath path}.
+	 */
 	protected boolean shouldRender() throws JspException {
 		return getBindStatus().isError();
 	}
 
+	/**
+	 * Appends '<code>.errors</code>' to the value returned by {@link #getPath()}.
+	 */
 	protected String getName() throws JspException {
 		return getPath() + ".errors";
 	}

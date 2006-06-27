@@ -26,9 +26,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
-import org.springframework.web.util.HtmlUtils;
 
 /**
  * Provides supporting functionality to render a list of '<code>option</code>'
@@ -59,15 +57,17 @@ import org.springframework.web.util.HtmlUtils;
  */
 final class OptionWriter {
 
-	private Object optionSource;
+	private final ValueFormatter valueFormatter = new ValueFormatter();
 
-	private BindStatus bindStatus;
+	private final Object optionSource;
 
-	private String valueProperty;
+	private final BindStatus bindStatus;
 
-	private String labelProperty;
+	private final String valueProperty;
 
-	private boolean htmlEscape;
+	private final String labelProperty;
+
+	private final boolean htmlEscape;
 
 
 	/**
@@ -147,10 +147,10 @@ final class OptionWriter {
 			Object item = iterator.next();
 			BeanWrapper wrapper = new BeanWrapperImpl(item);
 
-			Object value = (this.valueProperty == null ? item.toString() :
-							wrapper.getPropertyValue(this.valueProperty).toString());
-			String label = (this.labelProperty == null ? item.toString() :
-							ObjectUtils.getDisplayString(wrapper.getPropertyValue(this.labelProperty)));
+			Object value = (this.valueProperty == null ? item :
+							wrapper.getPropertyValue(this.valueProperty));
+			Object label = (this.labelProperty == null ? item :
+							wrapper.getPropertyValue(this.labelProperty));
 
 			renderOption(tagWriter, item, value, label);
 		}
@@ -160,16 +160,20 @@ final class OptionWriter {
 	 * Renders an HTML '<code>option</code>' with the supplied value and label. Marks the
 	 * value as 'selected' if either the item itself or its value match the bound value.
 	 */
-	private void renderOption(TagWriter tagWriter, Object item, Object value, String label) throws JspException {
+	private void renderOption(TagWriter tagWriter, Object item, Object value, Object label) throws JspException {
 		tagWriter.startTag("option");
-		if (!ObjectUtils.getDisplayString(value).equals(label)) {
-			tagWriter.writeAttribute("value", getDisplayString(value));
+
+		String valueDisplayString = getDisplayString(value);
+		String labelDisplayString = getDisplayString(label);
+
+		if (!valueDisplayString.equals(labelDisplayString)) {
+			tagWriter.writeAttribute("value", valueDisplayString);
 		}
 
 		if (isSelected(value) || isSelected(item)) {
 			tagWriter.writeAttribute("selected", "selected");
 		}
-		tagWriter.appendValue(getDisplayString(label));
+		tagWriter.appendValue(labelDisplayString);
 		tagWriter.endTag();
 	}
 
@@ -184,10 +188,10 @@ final class OptionWriter {
 	/**
 	 * Gets the display value of the supplied <code>Object</code>, HTML escaped
 	 * as required.
+	 * @see ValueFormatter
 	 */
 	private String getDisplayString(Object value) {
-		String displayValue = ObjectUtils.getDisplayString(value);
-		return (this.htmlEscape ? HtmlUtils.htmlEscape(displayValue) : displayValue);
+		return this.valueFormatter.getDisplayString(value, this.bindStatus.getEditor(), this.htmlEscape);
 	}
 
 }
