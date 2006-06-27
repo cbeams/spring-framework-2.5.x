@@ -10,7 +10,7 @@
         <property name="recipeManager" ref="recipeManager"/>
     </bean>
 
-    <!-- Controller names are not important when using the above HandlerMapping implementation -->
+    <!-- Controller names are important when using the above HandlerMapping implementation -->
     <bean class="org.springframework.showcase.coverc.web.SwitchBoardController"
           parent="baseRecipeController"/>
 
