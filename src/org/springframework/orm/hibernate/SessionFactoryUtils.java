@@ -31,8 +31,8 @@ import net.sf.hibernate.FlushMode;
 import net.sf.hibernate.HibernateException;
 import net.sf.hibernate.Interceptor;
 import net.sf.hibernate.JDBCException;
+import net.sf.hibernate.NonUniqueResultException;
 import net.sf.hibernate.ObjectDeletedException;
-import net.sf.hibernate.ObjectNotFoundException;
 import net.sf.hibernate.PersistentObjectException;
 import net.sf.hibernate.Query;
 import net.sf.hibernate.QueryException;
@@ -50,6 +50,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.CollectionFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
@@ -576,30 +577,32 @@ public abstract class SessionFactoryUtils {
 			// as HibernateTemplate etc will use SQLExceptionTranslator-based handling.
 			return new HibernateJdbcException((JDBCException) ex);
 		}
-		if (ex instanceof UnresolvableObjectException) {
-			return new HibernateObjectRetrievalFailureException((UnresolvableObjectException) ex);
-		}
-		if (ex instanceof ObjectNotFoundException) {
-			return new HibernateObjectRetrievalFailureException((ObjectNotFoundException) ex);
-		}
-		if (ex instanceof ObjectDeletedException) {
-			return new HibernateObjectRetrievalFailureException((ObjectDeletedException) ex);
-		}
-		if (ex instanceof WrongClassException) {
-			return new HibernateObjectRetrievalFailureException((WrongClassException) ex);
-		}
-		if (ex instanceof StaleObjectStateException) {
-			return new HibernateOptimisticLockingFailureException((StaleObjectStateException) ex);
-		}
-		if (ex instanceof QueryException) {
-			return new HibernateQueryException((QueryException) ex);
-		}
+
 		if (ex instanceof PersistentObjectException) {
 			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
 		if (ex instanceof TransientObjectException) {
 			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
+		if (ex instanceof ObjectDeletedException) {
+			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
+		}
+		if (ex instanceof QueryException) {
+			return new HibernateQueryException((QueryException) ex);
+		}
+		if (ex instanceof UnresolvableObjectException) {
+			return new HibernateObjectRetrievalFailureException((UnresolvableObjectException) ex);
+		}
+		if (ex instanceof WrongClassException) {
+			return new HibernateObjectRetrievalFailureException((WrongClassException) ex);
+		}
+		if (ex instanceof NonUniqueResultException) {
+			return new IncorrectResultSizeDataAccessException(ex.getMessage(), 1);
+		}
+		if (ex instanceof StaleObjectStateException) {
+			return new HibernateOptimisticLockingFailureException((StaleObjectStateException) ex);
+		}
+
 		// fallback
 		return new HibernateSystemException(ex);
 	}

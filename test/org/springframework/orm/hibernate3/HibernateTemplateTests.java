@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.JDBCException;
 import org.hibernate.LockMode;
+import org.hibernate.NonUniqueResultException;
 import org.hibernate.ObjectDeletedException;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.PersistentObjectException;
@@ -43,11 +44,13 @@ import org.hibernate.SessionFactory;
 import org.hibernate.StaleObjectStateException;
 import org.hibernate.StaleStateException;
 import org.hibernate.TransientObjectException;
+import org.hibernate.UnresolvableObjectException;
 import org.hibernate.WrongClassException;
 import org.hibernate.classic.Session;
 
 import org.springframework.beans.TestBean;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -2228,6 +2231,30 @@ public class HibernateTemplateTests extends TestCase {
 			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
 		}
 
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					throw new PersistentObjectException("");
+				}
+			});
+			fail("Should have thrown InvalidDataAccessApiUsageException");
+		}
+		catch (InvalidDataAccessApiUsageException ex) {
+			// expected
+		}
+
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					throw new TransientObjectException("");
+				}
+			});
+			fail("Should have thrown InvalidDataAccessApiUsageException");
+		}
+		catch (InvalidDataAccessApiUsageException ex) {
+			// expected
+		}
+
 		final ObjectDeletedException odex = new ObjectDeletedException("msg", "id", TestBean.class.getName());
 		try {
 			createTemplate().execute(new HibernateCallback() {
@@ -2235,11 +2262,59 @@ public class HibernateTemplateTests extends TestCase {
 					throw odex;
 				}
 			});
+			fail("Should have thrown InvalidDataAccessApiUsageException");
+		}
+		catch (InvalidDataAccessApiUsageException ex) {
+			// expected
+			assertEquals(odex, ex.getCause());
+		}
+
+		final QueryException qex = new QueryException("msg");
+		qex.setQueryString("query");
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					throw qex;
+				}
+			});
+			fail("Should have thrown InvalidDataAccessResourceUsageException");
+		}
+		catch (HibernateQueryException ex) {
+			// expected
+			assertEquals(qex, ex.getCause());
+			assertEquals("query", ex.getQueryString());
+		}
+
+		final UnresolvableObjectException uoex = new UnresolvableObjectException("id", TestBean.class.getName());
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					throw uoex;
+				}
+			});
 			fail("Should have thrown HibernateObjectRetrievalFailureException");
 		}
 		catch (HibernateObjectRetrievalFailureException ex) {
 			// expected
-			assertEquals(odex, ex.getCause());
+			assertEquals(TestBean.class.getName(), ex.getPersistentClassName());
+			assertEquals("id", ex.getIdentifier());
+			assertEquals(uoex, ex.getCause());
+		}
+
+		final ObjectNotFoundException onfe = new ObjectNotFoundException("id", TestBean.class.getName());
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					throw onfe;
+				}
+			});
+			fail("Should have thrown HibernateObjectRetrievalFailureException");
+		}
+		catch (HibernateObjectRetrievalFailureException ex) {
+			// expected
+			assertEquals(TestBean.class.getName(), ex.getPersistentClassName());
+			assertEquals("id", ex.getIdentifier());
+			assertEquals(onfe, ex.getCause());
 		}
 
 		final WrongClassException wcex = new WrongClassException("msg", "id", TestBean.class.getName());
@@ -2256,6 +2331,21 @@ public class HibernateTemplateTests extends TestCase {
 			assertEquals(TestBean.class.getName(), ex.getPersistentClassName());
 			assertEquals("id", ex.getIdentifier());
 			assertEquals(wcex, ex.getCause());
+		}
+
+		final NonUniqueResultException nuex = new NonUniqueResultException(2);
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					throw nuex;
+				}
+			});
+			fail("Should have thrown IncorrectResultSizeDataAccessException");
+		}
+		catch (IncorrectResultSizeDataAccessException ex) {
+			// expected
+			assertEquals(1, ex.getExpectedSize());
+			assertEquals(-1, ex.getActualSize());
 		}
 
 		final StaleObjectStateException sosex = new StaleObjectStateException(TestBean.class.getName(), "id");
@@ -2288,46 +2378,6 @@ public class HibernateTemplateTests extends TestCase {
 			assertNull(ex.getPersistentClassName());
 			assertNull(ex.getIdentifier());
 			assertEquals(ssex, ex.getCause());
-		}
-
-		final QueryException qex = new QueryException("msg");
-		qex.setQueryString("query");
-		try {
-			createTemplate().execute(new HibernateCallback() {
-				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
-					throw qex;
-				}
-			});
-			fail("Should have thrown InvalidDataAccessResourceUsageException");
-		}
-		catch (HibernateQueryException ex) {
-			// expected
-			assertEquals(qex, ex.getCause());
-			assertEquals("query", ex.getQueryString());
-		}
-
-		try {
-			createTemplate().execute(new HibernateCallback() {
-				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
-					throw new PersistentObjectException("");
-				}
-			});
-			fail("Should have thrown InvalidDataAccessApiUsageException");
-		}
-		catch (InvalidDataAccessApiUsageException ex) {
-			// expected
-		}
-
-		try {
-			createTemplate().execute(new HibernateCallback() {
-				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
-					throw new TransientObjectException("");
-				}
-			});
-			fail("Should have thrown InvalidDataAccessApiUsageException");
-		}
-		catch (InvalidDataAccessApiUsageException ex) {
-			// expected
 		}
 
 		final HibernateException hex = new HibernateException("msg");
