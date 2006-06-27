@@ -40,7 +40,7 @@ public class TypedStringValue {
 
 
 	/**
-	 * Create a new TypedStrignValue for the given String
+	 * Create a new {@link TypedStringValue} for the given String
 	 * value and target type.
 	 * @param value the String value
 	 * @param targetType the type to convert to
@@ -51,7 +51,7 @@ public class TypedStringValue {
 	}
 
 	/**
-	 * Create a new TypedStrignValue for the given String
+	 * Create a new {@link TypedStringValue} for the given String
 	 * value and target type.
 	 * @param value the String value
 	 * @param targetTypeName the type to convert to
