@@ -39,11 +39,13 @@ import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
  */
 public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBeanTests {
 	
-	// Set by DummyPersistenceProvider inner class
+	// Static fields set by inner class DummyPersistenceProvider
+
 	private static Map actualProps;
 
 	private static PersistenceUnitInfo actualPui;
-	
+
+
 	public void testValidPersistenceUnit() throws Exception {
 		parseValidPersistenceUnit();
 	}
@@ -315,11 +317,11 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		}
 
 		public boolean getRollbackOnly() {
-			throw new UnsupportedOperationException();
+			return false;
 		}
 
 		public boolean isActive() {
-			throw new UnsupportedOperationException();
+			return true;
 		}
 	}
 

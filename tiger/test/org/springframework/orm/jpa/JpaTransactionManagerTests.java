@@ -1,18 +1,19 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.orm.jpa;
 
 import java.sql.SQLException;
@@ -23,13 +24,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceException;
+import javax.persistence.RollbackException;
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
+
 import org.springframework.transaction.InvalidIsolationLevelException;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.UnexpectedRollbackException;
@@ -40,19 +41,19 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 public class JpaTransactionManagerTests extends TestCase {
 
-	MockControl factoryControl, managerControl, txControl;
+	private MockControl factoryControl, managerControl, txControl;
 
-	EntityManager manager;
+	private EntityManager manager;
 
-	EntityTransaction tx;
+	private EntityTransaction tx;
 
-	EntityManagerFactory factory;
+	private EntityManagerFactory factory;
 
-	PlatformTransactionManager transactionManager;
+	private JpaTransactionManager transactionManager;
 
-	JpaTemplate template;
+	private JpaTemplate template;
 
-	TransactionTemplate tt;
+	private TransactionTemplate tt;
 
 	protected void setUp() throws Exception {
 		factoryControl = MockControl.createControl(EntityManagerFactory.class);
@@ -71,7 +72,6 @@ public class JpaTransactionManagerTests extends TestCase {
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		tx.begin();
 		manager.close();
-
 	}
 
 	protected void tearDown() throws Exception {
@@ -93,6 +93,8 @@ public class JpaTransactionManagerTests extends TestCase {
 
 	public void testTransactionCommit() {
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		txControl.expectAndReturn(tx.getRollbackOnly(), false);
+		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		tx.commit();
 		manager.flush();
 
@@ -109,7 +111,6 @@ public class JpaTransactionManagerTests extends TestCase {
 		Object result = tt.execute(new TransactionCallback() {
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has no thread em", TransactionSynchronizationManager.hasResource(factory));
-
 				return template.execute(new JpaCallback() {
 					public Object doInJpa(EntityManager em) {
 						em.flush();
@@ -118,8 +119,52 @@ public class JpaTransactionManagerTests extends TestCase {
 				});
 			}
 		});
-
 		assertTrue("Correct result list", result == l);
+
+		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(factory));
+		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		factoryControl.verify();
+		managerControl.verify();
+		txControl.verify();
+	}
+
+	public void testTransactionCommitWithUnexpectedRollback() {
+		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		txControl.expectAndReturn(tx.getRollbackOnly(), true);
+		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		tx.commit();
+		txControl.setThrowable(new RollbackException());
+		manager.flush();
+
+		factoryControl.replay();
+		managerControl.replay();
+		txControl.replay();
+
+		final List<String> l = new ArrayList<String>();
+		l.add("test");
+
+		assertTrue("Hasn thread emf", !TransactionSynchronizationManager.hasResource(factory));
+		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		try {
+			Object result = tt.execute(new TransactionCallback() {
+				public Object doInTransaction(TransactionStatus status) {
+					assertTrue("Has no thread em", TransactionSynchronizationManager.hasResource(factory));
+					return template.execute(new JpaCallback() {
+						public Object doInJpa(EntityManager em) {
+							em.flush();
+							return l;
+						}
+					});
+				}
+			});
+			assertTrue("Correct result list", result == l);
+		}
+		catch (UnexpectedRollbackException ure) {
+			// it's okay
+			assertTrue(ure.getCause() instanceof RollbackException);
+		}
 
 		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(factory));
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
@@ -145,7 +190,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		try {
-			Object result = tt.execute(new TransactionCallback() {
+			tt.execute(new TransactionCallback() {
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue("Has no thread em", TransactionSynchronizationManager.hasResource(factory));
 
@@ -186,7 +231,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		try {
-			Object result = tt.execute(new TransactionCallback() {
+			tt.execute(new TransactionCallback() {
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue("Has no thread em", TransactionSynchronizationManager.hasResource(factory));
 
@@ -227,7 +272,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue("Hasn thread emf", !TransactionSynchronizationManager.hasResource(factory));
 		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
 
-		Object result = tt.execute(new TransactionCallback() {
+		tt.execute(new TransactionCallback() {
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has no thread em", TransactionSynchronizationManager.hasResource(factory));
 
@@ -249,10 +294,10 @@ public class JpaTransactionManagerTests extends TestCase {
 		factoryControl.verify();
 		managerControl.verify();
 		txControl.verify();
-
 	}
 
 	public void testParticipatingTransactionWithCommit() {
+		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		manager.flush();
@@ -267,10 +312,11 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue("Hasn thread emf", !TransactionSynchronizationManager.hasResource(factory));
 		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
 
-		Object result = tt.execute(new TransactionCallback() {
+		tt.execute(new TransactionCallback() {
 			public Object doInTransaction(TransactionStatus status) {
 				txControl.reset();
 				txControl.expectAndReturn(tx.isActive(), true);
+				txControl.expectAndReturn(tx.getRollbackOnly(), false);
 				tx.commit();
 				txControl.replay();
 
@@ -301,6 +347,7 @@ public class JpaTransactionManagerTests extends TestCase {
 	public void testParticipatingTransactionWithRollback() {
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		factoryControl.replay();
 		managerControl.replay();
 		txControl.replay();
@@ -312,12 +359,13 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		try {
-
-			Object result = tt.execute(new TransactionCallback() {
+			tt.execute(new TransactionCallback() {
 				public Object doInTransaction(TransactionStatus status) {
 					txControl.reset();
 					txControl.expectAndReturn(tx.isActive(), true);
 					txControl.expectAndReturn(tx.isActive(), true);
+					txControl.expectAndReturn(tx.isActive(), true);
+					tx.setRollbackOnly();
 					tx.rollback();
 					txControl.replay();
 
@@ -350,6 +398,8 @@ public class JpaTransactionManagerTests extends TestCase {
 	public void testParticipatingTransactionWithRollbackOnly() {
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		manager.flush();
 
 		factoryControl.replay();
@@ -363,12 +413,15 @@ public class JpaTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		try {
-			Object result = tt.execute(new TransactionCallback() {
+			tt.execute(new TransactionCallback() {
 				public Object doInTransaction(TransactionStatus status) {
 					txControl.reset();
 					txControl.expectAndReturn(tx.isActive(), true);
 					txControl.expectAndReturn(tx.isActive(), true);
-					tx.rollback();
+					tx.setRollbackOnly();
+					txControl.expectAndReturn(tx.getRollbackOnly(), true);
+					tx.commit();
+					txControl.setThrowable(new RollbackException());
 					txControl.replay();
 
 					assertTrue("Has no thread em", TransactionSynchronizationManager.hasResource(factory));
@@ -393,6 +446,7 @@ public class JpaTransactionManagerTests extends TestCase {
 		}
 		catch (UnexpectedRollbackException ure) {
 			// it's okay
+			assertTrue(ure.getCause() instanceof RollbackException);
 		}
 
 		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(factory));
@@ -405,6 +459,8 @@ public class JpaTransactionManagerTests extends TestCase {
 
 	public void testParticipatingTransactionWithWithRequiresNew() {
 		factoryControl.expectAndReturn(factory.createEntityManager(), manager);
+		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
@@ -430,8 +486,9 @@ public class JpaTransactionManagerTests extends TestCase {
 				txControl.expectAndReturn(tx.isActive(), true);
 
 				tx.begin();
-
+				txControl.expectAndReturn(tx.getRollbackOnly(), false);
 				tx.commit();
+				txControl.expectAndReturn(tx.getRollbackOnly(), false);
 				tx.commit();
 
 				txControl.replay();
@@ -467,6 +524,8 @@ public class JpaTransactionManagerTests extends TestCase {
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		managerControl.expectAndReturn(manager.getTransaction(), tx);
 
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		txControl.expectAndReturn(tx.isActive(), true);
@@ -491,8 +550,9 @@ public class JpaTransactionManagerTests extends TestCase {
 					txControl.expectAndReturn(tx.isActive(), true);
 
 					tx.begin();
-
+					txControl.expectAndReturn(tx.getRollbackOnly(), false);
 					tx.commit();
+					txControl.expectAndReturn(tx.getRollbackOnly(), false);
 					tx.commit();
 
 					txControl.replay();
@@ -651,9 +711,11 @@ public class JpaTransactionManagerTests extends TestCase {
 	public void testTransactionCommitWithDataSource() throws SQLException {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
-		((JpaTransactionManager)transactionManager).setDataSource(ds);
+		transactionManager.setDataSource(ds);
 		
 		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		txControl.expectAndReturn(tx.getRollbackOnly(), false);
 		tx.commit();
 		manager.flush();
 		
@@ -661,7 +723,6 @@ public class JpaTransactionManagerTests extends TestCase {
 		managerControl.replay();
 		txControl.replay();
 		dsControl.replay();
-		
 
 		final List<String> l = new ArrayList<String>();
 		l.add("test");
@@ -694,4 +755,5 @@ public class JpaTransactionManagerTests extends TestCase {
 		txControl.verify();
 		dsControl.verify();
 	}
+
 }

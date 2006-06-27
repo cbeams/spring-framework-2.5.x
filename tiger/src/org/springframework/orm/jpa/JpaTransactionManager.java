@@ -20,6 +20,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceException;
+import javax.persistence.RollbackException;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -33,6 +34,7 @@ import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -322,8 +324,11 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
+	/**
+	 * Create a JPA EntityManager to be used for a transaction.
+	 * If the EntityManagerFactory is a Spring proxy, unwrap it first.
+	 */
 	private EntityManager createEntityManagerForTransaction() {
-		// If the EntityManagerFactory is a Spring proxy, unwrap it.
 		EntityManagerFactory emfToUse = getEntityManagerFactory();
 		if (emfToUse instanceof EntityManagerFactoryInfo) {
 			emfToUse = ((EntityManagerFactoryInfo) emfToUse).getNativeEntityManagerFactory();
@@ -352,6 +357,14 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
+	/**
+	 * This implementation returns "true": a JPA commit will properly handle
+	 * transactions that have been marked rollback-only at a global level.
+	 */
+	protected boolean shouldCommitOnGlobalRollbackOnly() {
+		return true;
+	}
+
 	protected void doCommit(DefaultTransactionStatus status) {
 		JpaTransactionObject txObject = (JpaTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -361,6 +374,10 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 		try {
 			EntityTransaction tx = txObject.getEntityManagerHolder().getEntityManager().getTransaction();
 			tx.commit();
+		}
+		catch (RollbackException ex) {
+			throw new UnexpectedRollbackException(
+					"JPA transaction unexpectedly rolled back (maybe marked rollback-only after a failed operation)", ex);
 		}
 		catch (RuntimeException rawException) {
 			// Assumably failed to flush changes to database.
@@ -478,14 +495,18 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 		}
 
 		public void setRollbackOnly() {
-			getEntityManagerHolder().setRollbackOnly();
+			EntityTransaction tx = this.entityManagerHolder.getEntityManager().getTransaction();
+			if (tx.isActive()) {
+				tx.setRollbackOnly();
+			}
 			if (getConnectionHolder() != null) {
 				getConnectionHolder().setRollbackOnly();
 			}
 		}
 
 		public boolean isRollbackOnly() {
-			return getEntityManagerHolder().isRollbackOnly();
+			EntityTransaction tx = this.entityManagerHolder.getEntityManager().getTransaction();
+			return tx.getRollbackOnly();
 		}
 	}
 
