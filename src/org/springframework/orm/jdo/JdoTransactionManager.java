@@ -17,6 +17,7 @@
 package org.springframework.orm.jdo;
 
 import javax.jdo.JDOException;
+import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Transaction;
@@ -33,6 +34,7 @@ import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -92,6 +94,21 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
 public class JdoTransactionManager extends AbstractPlatformTransactionManager implements InitializingBean {
+
+	private static boolean jdoSetRollbackOnlyAvailable;
+
+	static {
+		// Determine whether the JDO 2.0 Transaction.setRollbackOnly method
+		// is available, for use in this JdoTransactionManager.
+		try {
+			Transaction.class.getMethod("setRollbackOnly", new Class[0]);
+			jdoSetRollbackOnlyAvailable = true;
+		}
+		catch (NoSuchMethodException ex) {
+			jdoSetRollbackOnlyAvailable = false;
+		}
+	}
+
 
 	private PersistenceManagerFactory persistenceManagerFactory;
 
@@ -365,6 +382,15 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 	}
 
+	/**
+	 * This implementation returns "true" for JDO 2.0: a JDO2 commit will properly
+	 * handle transactions that have been marked rollback-only at a global level.
+	 * On JDO 1.0, the rollback-only flag will be managed in Spring's resource holder.
+	 */
+	protected boolean shouldCommitOnGlobalRollbackOnly() {
+		return jdoSetRollbackOnlyAvailable;
+	}
+
 	protected void doCommit(DefaultTransactionStatus status) {
 		JdoTransactionObject txObject = (JdoTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -374,6 +400,10 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		try {
 			Transaction tx = txObject.getPersistenceManagerHolder().getPersistenceManager().currentTransaction();
 			tx.commit();
+		}
+		catch (JDOFatalDataStoreException ex) {
+			throw new UnexpectedRollbackException(
+					"JDO transaction unexpectedly rolled back (maybe marked rollback-only after a failed operation)", ex);
 		}
 		catch (JDOException ex) {
 			// Assumably failed to flush changes to database.
@@ -504,14 +534,28 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		}
 
 		public void setRollbackOnly() {
-			getPersistenceManagerHolder().setRollbackOnly();
+			if (jdoSetRollbackOnlyAvailable) {
+				Transaction tx = this.persistenceManagerHolder.getPersistenceManager().currentTransaction();
+				if (tx.isActive()) {
+					tx.setRollbackOnly();
+				}
+			}
+			else {
+				getPersistenceManagerHolder().setRollbackOnly();
+			}
 			if (getConnectionHolder() != null) {
 				getConnectionHolder().setRollbackOnly();
 			}
 		}
 
 		public boolean isRollbackOnly() {
-			return getPersistenceManagerHolder().isRollbackOnly();
+			if (jdoSetRollbackOnlyAvailable) {
+				Transaction tx = this.persistenceManagerHolder.getPersistenceManager().currentTransaction();
+				return tx.getRollbackOnly();
+			}
+			else {
+				return getPersistenceManagerHolder().isRollbackOnly();
+			}
 		}
 	}
 

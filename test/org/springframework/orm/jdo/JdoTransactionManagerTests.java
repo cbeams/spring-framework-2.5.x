@@ -28,6 +28,7 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
 import javax.jdo.Transaction;
+import javax.jdo.JDOFatalDataStoreException;
 import javax.sql.DataSource;
 import javax.transaction.Status;
 import javax.transaction.TransactionManager;
@@ -70,13 +71,15 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 2);
+		pmControl.setReturnValue(tx, 3);
 		pm.flush();
 		pmControl.setVoidCallable(2);
 		pm.close();
 		pmControl.setVoidCallable(1);
 		tx.begin();
 		txControl.setVoidCallable(1);
+		tx.getRollbackOnly();
+		txControl.setReturnValue(false, 1);
 		tx.commit();
 		txControl.setVoidCallable(1);
 		pmfControl.replay();
@@ -296,7 +299,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 3);
+		pmControl.setReturnValue(tx, 4);
 		pm.flush();
 		pmControl.setVoidCallable(1);
 		pm.close();
@@ -317,6 +320,8 @@ public class JdoTransactionManagerTests extends TestCase {
 				txControl.reset();
 				tx.isActive();
 				txControl.setReturnValue(true, 1);
+				tx.getRollbackOnly();
+				txControl.setReturnValue(false, 1);
 				tx.commit();
 				txControl.setVoidCallable(1);
 				txControl.replay();
@@ -354,7 +359,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 3);
+		pmControl.setReturnValue(tx, 4);
 		pm.close();
 		pmControl.setVoidCallable(1);
 		tx.isActive();
@@ -372,7 +377,9 @@ public class JdoTransactionManagerTests extends TestCase {
 				public Object doInTransaction(TransactionStatus status) {
 					txControl.reset();
 					tx.isActive();
-					txControl.setReturnValue(true, 2);
+					txControl.setReturnValue(true, 3);
+					tx.setRollbackOnly();
+					txControl.setVoidCallable(1);
 					tx.rollback();
 					txControl.setVoidCallable(1);
 					txControl.replay();
@@ -413,7 +420,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 3);
+		pmControl.setReturnValue(tx, 5);
 		pm.flush();
 		pmControl.setVoidCallable(1);
 		pm.close();
@@ -435,8 +442,12 @@ public class JdoTransactionManagerTests extends TestCase {
 					txControl.reset();
 					tx.isActive();
 					txControl.setReturnValue(true, 2);
-					tx.rollback();
+					tx.setRollbackOnly();
 					txControl.setVoidCallable(1);
+					tx.getRollbackOnly();
+					txControl.setReturnValue(true, 1);
+					tx.commit();
+					txControl.setThrowable(new JDOFatalDataStoreException(), 1);
 					txControl.replay();
 
 					return tt.execute(new TransactionCallback() {
@@ -478,7 +489,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 2);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 5);
+		pmControl.setReturnValue(tx, 7);
 		tx.begin();
 		txControl.setVoidCallable(1);
 		pm.flush();
@@ -503,6 +514,8 @@ public class JdoTransactionManagerTests extends TestCase {
 				txControl.setReturnValue(true, 1);
 				tx.begin();
 				txControl.setVoidCallable(1);
+				tx.getRollbackOnly();
+				txControl.setReturnValue(false, 2);
 				tx.commit();
 				txControl.setVoidCallable(2);
 				txControl.replay();
@@ -540,7 +553,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 6);
+		pmControl.setReturnValue(tx, 8);
 		tx.isActive();
 		txControl.setReturnValue(false, 1);
 		tx.begin();
@@ -570,6 +583,8 @@ public class JdoTransactionManagerTests extends TestCase {
 				txControl.setReturnValue(true, 1);
 				tx.begin();
 				txControl.setVoidCallable(1);
+				tx.getRollbackOnly();
+				txControl.setReturnValue(false, 2);
 				tx.commit();
 				txControl.setVoidCallable(2);
 				txControl.replay();
@@ -843,11 +858,13 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getConnectionFactory();
 		pmfControl.setReturnValue(null, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 3);
+		pmControl.setReturnValue(tx, 4);
 		tx.isActive();
 		txControl.setReturnValue(false, 1);
 		tx.begin();
 		txControl.setVoidCallable(1);
+		tx.getRollbackOnly();
+		txControl.setReturnValue(false, 1);
 		tx.commit();
 		txControl.setVoidCallable(1);
 		pmfControl.replay();
@@ -901,7 +918,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 2);
+		pmControl.setReturnValue(tx, 3);
 		pm.close();
 		pmControl.setVoidCallable(1);
 		TransactionTemplate tt = new TransactionTemplate();
@@ -913,6 +930,8 @@ public class JdoTransactionManagerTests extends TestCase {
 		dialectControl.setVoidCallable(1);
 		dialect.cleanupTransaction(null);
 		dialectControl.setVoidCallable(1);
+		tx.getRollbackOnly();
+		txControl.setReturnValue(false, 1);
 		tx.commit();
 		txControl.setVoidCallable(1);
 		pmfControl.replay();
@@ -975,7 +994,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 2);
+		pmControl.setReturnValue(tx, 3);
 		pm.close();
 		pmControl.setVoidCallable(1);
 		TransactionTemplate tt = new TransactionTemplate();
@@ -987,6 +1006,8 @@ public class JdoTransactionManagerTests extends TestCase {
 		dialectControl.setVoidCallable(1);
 		dialect.cleanupTransaction(null);
 		dialectControl.setVoidCallable(1);
+		tx.getRollbackOnly();
+		txControl.setReturnValue(false, 1);
 		tx.commit();
 		txControl.setVoidCallable(1);
 		pmfControl.replay();
@@ -1047,7 +1068,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 2);
+		pmControl.setReturnValue(tx, 3);
 		pm.flush();
 		pmControl.setVoidCallable(1);
 		pm.close();
@@ -1059,6 +1080,8 @@ public class JdoTransactionManagerTests extends TestCase {
 		dialectControl.setReturnValue(null, 1);
 		dialect.cleanupTransaction(null);
 		dialectControl.setVoidCallable(1);
+		tx.getRollbackOnly();
+		txControl.setReturnValue(false, 1);
 		tx.commit();
 		txControl.setVoidCallable(1);
 		pmfControl.replay();
@@ -1139,7 +1162,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, manualSavepoint ? 2 : 3);
+		pmControl.setReturnValue(tx, manualSavepoint ? 3 : 4);
 		pm.flush();
 		pmControl.setVoidCallable(1);
 		pm.close();
@@ -1167,6 +1190,8 @@ public class JdoTransactionManagerTests extends TestCase {
 			tx.isActive();
 			txControl.setReturnValue(true, 1);
 		}
+		tx.getRollbackOnly();
+		txControl.setReturnValue(false, 1);
 		tx.commit();
 		txControl.setVoidCallable(1);
 		pmfControl.replay();
@@ -1255,7 +1280,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 2);
+		pmControl.setReturnValue(tx, 3);
 		dialect.beginTransaction(tx, tt);
 		dialectControl.setReturnValue(null, 1);
 		if (!exposeNativePm) {
@@ -1267,6 +1292,8 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmControl.setReturnValue(query, 1);
 		pm.close();
 		pmControl.setVoidCallable(1);
+		tx.getRollbackOnly();
+		txControl.setReturnValue(false, 1);
 		tx.commit();
 		txControl.setVoidCallable(1);
 
