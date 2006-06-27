@@ -16,15 +16,15 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
-import org.springframework.aop.TargetSource;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.core.ControlFlow;
 import org.springframework.core.ControlFlowFactory;
 
@@ -96,12 +96,13 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * We override this to ensure that we don't get into circular reference hell
 	 * when our own infrastructure (such as this class) depends on advisors that depend
 	 * on beans... We use a ControlFlow object to check that we didn't arrived at this
-	 * call via this classes findCandidateAdvisors() method.
+	 * call via our own <code>findCandidateAdvisors()</code> method.
+	 * @see #findCandidateAdvisors()
 	 * @see org.springframework.core.ControlFlow
 	 */
 	protected boolean shouldSkip(Class beanClass, String name) {
-		// TODO consider pulling this test into AbstractBeanFactory.applyPostProcessors(),
-		// to protect all PostProcessors.
+		// TODO consider pulling this test into AbstractBeanFactory.applyBeanPostProcessors(),
+		// to protect all BeanPostProcessors.
 		ControlFlow cflow = ControlFlowFactory.createControlFlow();
 		return cflow.under(AbstractAdvisorAutoProxyCreator.class, "findCandidateAdvisors");
 	}
@@ -133,6 +134,11 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 		return candidateAdvisors;
 	}
 
+	/**
+	 * Return whether the bean with the given name is eligible for proxying
+	 * in the first place.
+	 * @param beanName the name of the target bean
+	 */
 	protected boolean isEligibleForProxying(String beanName) {
 		return true;
 	}

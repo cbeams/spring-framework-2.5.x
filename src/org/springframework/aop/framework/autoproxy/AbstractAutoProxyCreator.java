@@ -130,10 +130,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	  return order;
 	}
 
-	public boolean isFrozen() {
-		return this.freezeProxy;
-	}
-
 	/**
 	 * Sets whether or not the proxy should be frozen, preventing advice from being added to it
 	 * once it is created. Overridden from the super class to prevent the proxy configuration from
@@ -141,6 +137,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 */
 	public void setFrozen(boolean frozen) {
 		this.freezeProxy = frozen;
+	}
+
+	public boolean isFrozen() {
+		return this.freezeProxy;
 	}
 
 	/**

@@ -302,7 +302,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @see #canHandle
 	 */
 	public void setViewNames(String[] viewNames) {
-		this.viewNames = (viewNames == null ? new String[]{"*"} : viewNames);
+		this.viewNames = viewNames;
 	}
 
 	/**
@@ -354,24 +354,24 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @see #requiredViewClass
 	 */
 	protected View createView(String viewName, Locale locale) throws Exception {
-		if (canHandle(viewName, locale)) {
-			// Check for special "redirect:" prefix.
-			if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
-				String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
-				return new RedirectView(
-								redirectUrl, isRedirectContextRelative(), isRedirectHttp10Compatible());
-			}
-			// Check for special "forward:" prefix.
-			if (viewName.startsWith(FORWARD_URL_PREFIX)) {
-				String forwardUrl = viewName.substring(FORWARD_URL_PREFIX.length());
-				return new InternalResourceView(forwardUrl);
-			}
-			// Else fall back to superclass implementation: calling loadView.
-			return super.createView(viewName, locale);
-		}
-		else {
+		// If this resolver is not supposed to handle the given view,
+		// return null to pass on to the next resolver in the chain.
+		if (!canHandle(viewName, locale)) {
 			return null;
 		}
+		// Check for special "redirect:" prefix.
+		if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
+			String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
+			return new RedirectView(
+							redirectUrl, isRedirectContextRelative(), isRedirectHttp10Compatible());
+		}
+		// Check for special "forward:" prefix.
+		if (viewName.startsWith(FORWARD_URL_PREFIX)) {
+			String forwardUrl = viewName.substring(FORWARD_URL_PREFIX.length());
+			return new InternalResourceView(forwardUrl);
+		}
+		// Else fall back to superclass implementation: calling loadView.
+		return super.createView(viewName, locale);
 	}
 
 	/**
@@ -382,7 +382,8 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
 	 */
 	protected boolean canHandle(String viewName, Locale locale) {
-		return (getViewNames() == null || PatternMatchUtils.simpleMatch(getViewNames(), viewName));
+		String[] viewNames = getViewNames();
+		return (viewNames == null || PatternMatchUtils.simpleMatch(viewNames, viewName));
 	}
 
 	/**
@@ -414,7 +415,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @see #loadView(String, java.util.Locale)
 	 */
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
-		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(this.viewClass);
+		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(getViewClass());
 		view.setUrl(getPrefix() + viewName + getSuffix());
 		String contentType = getContentType();
 		if (contentType != null) {
