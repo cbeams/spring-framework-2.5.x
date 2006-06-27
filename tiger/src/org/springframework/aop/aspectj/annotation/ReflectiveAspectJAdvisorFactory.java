@@ -120,7 +120,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		if (declareParents.defaultImpl() == DeclareParents.class) {
 			// This is what comes back if it wasn't set. This seems bizarre...
 			// TODO this restriction possibly should be relaxed
-			throw new AspectException("defaultImpl must be set on DeclareParents");
+			throw new IllegalStateException("defaultImpl must be set on DeclareParents");
 		}
 
 		return new DeclareParentsAdvisor(
