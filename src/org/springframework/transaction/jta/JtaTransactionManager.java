@@ -819,7 +819,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			logger.debug("Setting JTA transaction rollback-only");
 		}
 		try {
-			txObject.getUserTransaction().setRollbackOnly();
+			if (txObject.getUserTransaction().getStatus() != Status.STATUS_NO_TRANSACTION) {
+				txObject.getUserTransaction().setRollbackOnly();
+			}
 		}
 		catch (IllegalStateException ex) {
 			throw new NoTransactionException("No active JTA transaction");
