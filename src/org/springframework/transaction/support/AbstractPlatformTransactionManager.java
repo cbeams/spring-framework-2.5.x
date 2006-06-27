@@ -499,7 +499,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			}
 			processRollback(defStatus);
 			// Throw UnexpectedRollbackException only at outermost transaction boundary
-			// or if explicitly asked to .
+			// or if explicitly asked to.
 			if (status.isNewTransaction() || isFailEarlyOnGlobalRollbackOnly()) {
 				throw new UnexpectedRollbackException(
 						"Transaction rolled back because it has been marked as rollback-only");
@@ -925,27 +925,26 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Return whether to call <code>doCommit</code> on a transaction
-	 * that has been marked as rollback-only in a global fashion.
-	 * <p>Does not apply if an application locally sets the transaction to
-	 * rollback-only via the TransactionStatus, but only to the transaction
-	 * itself being marked as rollback-only by the transaction coordinator.
-	 * <p>Default is "false": Local transaction strategies usually don't
-	 * hold the rollback-only marker in the transaction itself, therefore
-	 * they can't handle rollback-only transactions in a special manner.
-	 * Hence, AbstractPlatformTransactionManager will trigger a rollback
-	 * in that case, throwing an UnexpectedRollbackException afterwards.
-	 * <p>Override this to return "true" if the concrete transaction manager
-	 * expects a <code>doCommit</code> call even for a rollback-only transaction,
-	 * allowing for special handling there. This will, for example, be the case
-	 * for JTA, where <code>UserTransaction.commit</code> will check the read-only
-	 * flag itself and throw a corresponding RollbackException, which might
-	 * include the specific reason (such as a transaction timeout).
-	 * <p>If this method returns "true" but the <code>doCommit</code>
-	 * implementation does not throw an exception, this transaction manager
-	 * will throw an UnexpectedRollbackException itself. This should not be the
-	 * typical case; it is mainly checked to cover misbehaving JTA providers that
-	 * silently roll back even when the rollback has not been requested by the user.
+	 * Return whether to call <code>doCommit</code> on a transaction that has been
+	 * marked as rollback-only in a global fashion.
+	 * <p>Does not apply if an application locally sets the transaction to rollback-only
+	 * via the TransactionStatus, but only to the transaction itself being marked as
+	 * rollback-only by the transaction coordinator.
+	 * <p>Default is "false": Local transaction strategies usually don't hold the rollback-only
+	 * marker in the transaction itself, therefore they can't handle rollback-only transactions
+	 * as part of transaction commit. Hence, AbstractPlatformTransactionManager will trigger
+	 * a rollback in that case, throwing an UnexpectedRollbackException afterwards.
+	 * <p>Override this to return "true" if the concrete transaction manager expects a
+	 * <code>doCommit</code> call even for a rollback-only transaction, allowing for
+	 * special handling there. This will, for example, be the case for JTA, where
+	 * <code>UserTransaction.commit</code> will check the read-only flag itself and
+	 * throw a corresponding RollbackException, which might include the specific reason
+	 * (such as a transaction timeout).
+	 * <p>If this method returns "true" but the <code>doCommit</code> implementation does not
+	 * throw an exception, this transaction manager will throw an UnexpectedRollbackException
+	 * itself. This should not be the typical case; it is mainly checked to cover misbehaving
+	 * JTA providers that silently roll back even when the rollback has not been requested
+	 * by the calling code.
 	 * @see #doCommit
 	 * @see DefaultTransactionStatus#isGlobalRollbackOnly()
 	 * @see DefaultTransactionStatus#isLocalRollbackOnly()
