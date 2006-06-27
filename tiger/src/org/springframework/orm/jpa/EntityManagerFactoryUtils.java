@@ -31,6 +31,9 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
@@ -155,39 +158,43 @@ public abstract class EntityManagerFactoryUtils {
 	 * or <code>null</code> if the exception should not be translated
 	 */
 	public static DataAccessException convertJpaAccessExceptionIfPossible(RuntimeException ex) {
-		if (ex instanceof EntityNotFoundException) {
-			return new JpaObjectRetrievalFailureException((EntityNotFoundException) ex);
-		}
-		if (ex instanceof OptimisticLockException) {
-			return new JpaOptimisticLockingFailureException((OptimisticLockException) ex);
-		}
-		if (ex instanceof EntityExistsException) {
-			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
-		}
-		if (ex instanceof NoResultException) {
-			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
-		}
-		if (ex instanceof NonUniqueResultException) {
-			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
-		}
-		
-		// If we have another kind of PersistenceException, throw it
-		if (ex instanceof PersistenceException) {
-			return new JpaSystemException((PersistenceException) ex);
-		}
-		
 		// Following the JPA specification, a persistence provider can also
-		// throw these two exceptions, besides PersistenceException
+		// throw these two exceptions, besides PersistenceException.
 		if (ex instanceof IllegalStateException) {
 			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
 		if (ex instanceof IllegalArgumentException) {
 			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
+
+		// Check for well-known PersistenceException subclasses.
+		if (ex instanceof EntityNotFoundException) {
+			return new JpaObjectRetrievalFailureException((EntityNotFoundException) ex);
+		}
+		if (ex instanceof NoResultException) {
+			return new EmptyResultDataAccessException(ex.getMessage(), 1);
+		}
+		if (ex instanceof NonUniqueResultException) {
+			return new IncorrectResultSizeDataAccessException(ex.getMessage(), 1);
+		}
+		if (ex instanceof OptimisticLockException) {
+			return new JpaOptimisticLockingFailureException((OptimisticLockException) ex);
+		}
+		if (ex instanceof EntityExistsException) {
+			return new DataIntegrityViolationException(ex.getMessage(), ex);
+		}
+		if (ex instanceof TransactionRequiredException) {
+			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
+		}
+
+		// If we have another kind of PersistenceException, throw it.
+		if (ex instanceof PersistenceException) {
+			return new JpaSystemException((PersistenceException) ex);
+		}
 		
 		// If we get here, we have an exception that resulted from user code,
 		// rather than the persistence provider, so we return null to indicate
-		// that translation should not occur
+		// that translation should not occur.
 		return null;				
 	}
 
