@@ -30,7 +30,7 @@
         <para>The Spring 2.0 schema and @AspectJ based AOP support
         is discussed in this chapter. Spring 2.0 remains fully backwards compatible
         with Spring 1.2 and the lower-level AOP support offered by the Spring 1.2
-        APIs is discussed in <link linkend="aop-apis">the next chapter</link>.</para>
+        APIs is discussed in <link linkend="aop-api">the next chapter</link>.</para>
     </sidebar>
 
     <para>AOP is used in Spring:</para>
@@ -59,7 +59,7 @@
     This chapter first <link linkend="aop-introduction-defn">introduces AOP concepts</link>,
     which you will want to read whatever style of aspect declaration
     you choose to use. The remainder of the chapter focuses on the Spring 2.0 AOP 
-    support; see <link linkend="aop-apis">the following chapter</link> for an overview of
+    support; see <link linkend="aop-api">the following chapter</link> for an overview of
     the Spring 1.2 style AOP, which you may well encounter in books, articles, and
     existing applications.
     </para>
