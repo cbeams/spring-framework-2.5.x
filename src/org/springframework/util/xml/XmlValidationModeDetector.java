@@ -94,6 +94,9 @@ public class XmlValidationModeDetector {
 		}
 	}
 
+	/**
+	 * Does the content contain the the DTD DOCTYPE declaration?
+	 */
 	private boolean hasDoctype(String content) {
 		return content.indexOf(DOCTYPE) > -1;
 	}
@@ -118,12 +121,12 @@ public class XmlValidationModeDetector {
 	 * the DOCTYPE declaration or the root element of the document.
 	 */
 	private String consumeCommentTokens(String line) {
-		if(line.indexOf(START_COMMENT) == -1 && line.indexOf(END_COMMENT) == -1) {
+		if (line.indexOf(START_COMMENT) == -1 && line.indexOf(END_COMMENT) == -1) {
 			return line;
 		}
 
 		while ((line = consume(line)) != null) {
-			if(!inComment && !line.trim().startsWith(START_COMMENT)) {
+			if (!inComment && !line.trim().startsWith(START_COMMENT)) {
 				return line;
 			}
 		}
@@ -131,19 +134,25 @@ public class XmlValidationModeDetector {
 	}
 
 	/**
-	 * Consume
-	 * @param line
-	 * @return
+	 * Consume the next comment token, update the {@link #isInComment in comment flag}
+	 * and return the remaining content.
 	 */
 	private String consume(String line) {
 		int index = (inComment ? endComment(line) : startComment(line));
 		return (index == -1 ? null : line.substring(index));
 	}
 
-	public boolean isInComment() {
+	/**
+	 * Are we currently in a comment tag?
+	 */
+	private boolean isInComment() {
 		return inComment;
 	}
 
+	/**
+	 * Try to consume the {@link #START_COMMENT} token.
+	 * @see #commentToken(String, String, boolean)
+	 */
 	private int startComment(String line) {
 		return commentToken(line, START_COMMENT, true);
 
@@ -153,6 +162,11 @@ public class XmlValidationModeDetector {
 		return commentToken(line, END_COMMENT, false);
 	}
 
+	/**
+	 * Try to consume the supplied token against the supplied content and update the
+	 * in comment parse state to the supplied value. Returns the index into the content
+	 * which is after the token or -1 if the token is not found.
+	 */
 	private int commentToken(String line, String token, boolean inCommentIfPresent) {
 		int index = line.indexOf(token);
 		if (index > - 1) {
