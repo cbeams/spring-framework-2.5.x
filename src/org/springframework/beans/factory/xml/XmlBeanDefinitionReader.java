@@ -16,10 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -47,6 +45,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.Assert;
 import org.springframework.util.xml.SimpleSaxErrorHandler;
+import org.springframework.util.xml.XmlValidationModeDetector;
 
 /**
  * Bean definition reader for XML bean definitions. Delegates the actual XML
@@ -83,17 +82,11 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/**
 	 * Indicates that DTD validation should be used.
 	 */
-	public static final int VALIDATION_DTD = 2;
+	public static final int VALIDATION_DTD = XmlValidationModeDetector.VALIDATION_DTD;
 	/**
 	 * Indicates that XSD validation should be used.
 	 */
-	public static final int VALIDATION_XSD = 3;
-
-	/**
-	 * The maximum number of lines the validation autodetection process should peek into
-	 * a file looking for the <code>DOCTYPE</code> definition.
-	 */
-	private static final int MAX_PEEK_LINES = 5;
+	public static final int VALIDATION_XSD = XmlValidationModeDetector.VALIDATION_XSD;
 
 
 	/**
@@ -104,7 +97,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/**
 	 * Are namespaces important?
 	 */
-	private boolean namespaceAware = false;
+	private boolean namespaceAware;
 
 	/**
 	 * The current validation mode. Defaults to {@link #VALIDATION_AUTO}.
@@ -119,9 +112,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/**
 	 * The {@link EntityResolver} implementation to use.
 	 */
-	private EntityResolver entityResolver = null;
+	private EntityResolver entityResolver;
 
-	private Class parserClass = null;
+	private Class parserClass;
 
 	/**
 	 * The {@link BeanDefinitionDocumentReader} <code>Class</code> to use for reading.
@@ -154,6 +147,11 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * The {@link DocumentLoader} to use for loading DOM {@link Document Documents}.
 	 */
 	private DocumentLoader documentLoader = new DefaultDocumentLoader();
+
+	/**
+	 * The helper object to use for autodetection of validation mode
+	 */
+	private XmlValidationModeDetector validationModeDetector = new XmlValidationModeDetector();
 
 	/**
 	 * Create new XmlBeanDefinitionReader for the given bean factory.
@@ -423,39 +421,29 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	protected int detectValidationMode(Resource resource) {
 		if (resource.isOpen()) {
 			throw new BeanDefinitionStoreException(
-					"Passed-in Resource [" + resource + "] contains an open stream: " +
-					"cannot determine validation mode automatically. Either pass in a Resource " +
-					"that is able to create fresh streams, or explicitly specify the validationMode " +
-					"on your XmlBeanDefinitionReader instance.");
+							"Passed-in Resource [" + resource + "] contains an open stream: " +
+											"cannot determine validation mode automatically. Either pass in a Resource " +
+											"that is able to create fresh streams, or explicitly specify the validationMode " +
+											"on your XmlBeanDefinitionReader instance.");
 		}
 
-		// Peek into the file to look for DOCTYPE.
+		InputStream inputStream;
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
-			try {
-				boolean isDtdValidated = false;
-				for (int x = 0; x < MAX_PEEK_LINES; x++) {
-					String line = reader.readLine();
-					if (line == null) {
-						// End of stream...
-						break;
-					}
-					else if (line.indexOf("DOCTYPE") > -1) {
-						isDtdValidated = true;
-						break;
-					}
-				}
-				return (isDtdValidated ? VALIDATION_DTD : VALIDATION_XSD);
-			}
-			finally {
-				reader.close();
-			}
+			inputStream = resource.getInputStream();
 		}
 		catch (IOException ex) {
 			throw new BeanDefinitionStoreException(
-					"Unable to determine validation mode for [" + resource + "]: cannot open InputStream. " +
-					"Did you attempt to load directly from a SAX InputSource without specifying the " +
-					"validationMode on your XmlBeanDefinitionReader instance?", ex);
+							"Unable to determine validation mode for [" + resource + "]: cannot open InputStream. " +
+											"Did you attempt to load directly from a SAX InputSource without specifying the " +
+											"validationMode on your XmlBeanDefinitionReader instance?", ex);
+		}
+
+		try {
+			return this.validationModeDetector.detectValidationMode(inputStream);
+		}
+		catch (IOException ex) {
+			throw new BeanDefinitionStoreException("Unable to determine validation mode for [" +
+							resource + "]: an error occurred whilst reading from the InputStream.", ex);
 		}
 	}
 

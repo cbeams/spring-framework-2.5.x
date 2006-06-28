@@ -21,6 +21,7 @@ import org.xml.sax.InputSource;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -85,7 +86,7 @@ public final class XmlBeanDefinitionReaderTests extends TestCase {
 		catch (BeanDefinitionStoreException expected) {
 		}
 	}
-
+	                                                                           
 	public void testWithInputSourceAndExplicitValidationMode() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		InputSource resource = new InputSource(getClass().getResourceAsStream("test.xml"));
@@ -100,4 +101,19 @@ public final class XmlBeanDefinitionReaderTests extends TestCase {
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(resource);
 	}
 
+	public void testDtdValidationAutodetect() throws Exception {
+		doTestValidation("validateWithDtd.xml");
+	}
+
+	public void testXsdValidationAutodetect() throws Exception {
+		doTestValidation("validateWithXsd.xml");
+	}
+
+	private void doTestValidation(String resourceName) throws Exception {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		Resource resource = new ClassPathResource(resourceName, getClass());
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(resource);
+		TestBean bean = (TestBean) factory.getBean("testBean");
+		assertNotNull(bean);
+	}
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This is a top level block comment
+-->
+<!-- here is a line comment -->
+<!-- trying --> <!-- to trick --> <!--
+				the parser now --> <!-- <beans>
+				-->
+<!-- more trickery-->  <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!-- some nasty stuff -->
+
+<beans>
+	<bean id="testBean" class="org.springframework.beans.TestBean"/>
+</beans>

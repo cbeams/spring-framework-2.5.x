@@ -790,10 +790,10 @@ public class BeanDefinitionParserDelegate {
 		if (!isDefaultNamespace(ele.getNamespaceURI())) {
 			return parseNestedCustomElement(ele);
 		}
-		else if (ele.getTagName().equals(BEAN_ELEMENT)) {
+		else if (DomUtils.nodeNameEquals(ele, BEAN_ELEMENT)) {
 			return parseBeanDefinitionElement(ele, true);
 		}
-		else if (ele.getTagName().equals(REF_ELEMENT)) {
+		else if (DomUtils.nodeNameEquals(ele, REF_ELEMENT)) {
 			// A generic reference to any name of any bean.
 			String refName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
 			boolean toParent = false;
@@ -814,7 +814,7 @@ public class BeanDefinitionParserDelegate {
 			}
 			return new RuntimeBeanReference(refName, toParent);
 		}
-		else if (ele.getTagName().equals(IDREF_ELEMENT)) {
+		else if (DomUtils.nodeNameEquals(ele, IDREF_ELEMENT)) {
 			// A generic reference to any name of any bean.
 			String beanRef = ele.getAttribute(BEAN_REF_ATTRIBUTE);
 			if (!StringUtils.hasLength(beanRef)) {
@@ -826,11 +826,11 @@ public class BeanDefinitionParserDelegate {
 			}
 			return beanRef;
 		}
-		else if (ele.getTagName().equals(VALUE_ELEMENT)) {
+		else if (DomUtils.nodeNameEquals(ele, VALUE_ELEMENT)) {
 			// It's a literal value.
 			String value = DomUtils.getTextValue(ele);
 			String typeClassName = ele.getAttribute(TYPE_ATTRIBUTE);
-			if(!StringUtils.hasText(typeClassName)) {
+			if (!StringUtils.hasText(typeClassName)) {
 				typeClassName = defaultTypeClassName;
 			}
 			if (StringUtils.hasText(typeClassName)) {
@@ -843,20 +843,20 @@ public class BeanDefinitionParserDelegate {
 			}
 			return value;
 		}
-		else if (ele.getTagName().equals(NULL_ELEMENT)) {
+		else if (DomUtils.nodeNameEquals(ele, NULL_ELEMENT)) {
 			// It's a distinguished null value.
 			return null;
 		}
-		else if (ele.getTagName().equals(LIST_ELEMENT)) {
+		else if (DomUtils.nodeNameEquals(ele, LIST_ELEMENT)) {
 			return parseListElement(ele);
 		}
-		else if (ele.getTagName().equals(SET_ELEMENT)) {
+		else if (DomUtils.nodeNameEquals(ele, SET_ELEMENT)) {
 			return parseSetElement(ele);
 		}
-		else if (ele.getTagName().equals(MAP_ELEMENT)) {
+		else if (DomUtils.nodeNameEquals(ele, MAP_ELEMENT)) {
 			return parseMapElement(ele);
 		}
-		else if (ele.getTagName().equals(PROPS_ELEMENT)) {
+		else if (DomUtils.nodeNameEquals(ele, PROPS_ELEMENT)) {
 			return parsePropsElement(ele);
 		}
 		error("Unknown property sub-element: [" + ele.getTagName() + "]", ele);
@@ -922,7 +922,7 @@ public class BeanDefinitionParserDelegate {
 			for (int j = 0; j < entrySubNodes.getLength(); j++) {
 				if (entrySubNodes.item(j) instanceof Element) {
 					Element candidateEle = (Element) entrySubNodes.item(j);
-					if (candidateEle.getTagName().equals(KEY_ELEMENT)) {
+					if (DomUtils.nodeNameEquals(candidateEle, KEY_ELEMENT)) {
 						if (keyEle != null) {
 							error("<entry> element is only allowed to contain one <key> sub-element", entryEle);
 						}
