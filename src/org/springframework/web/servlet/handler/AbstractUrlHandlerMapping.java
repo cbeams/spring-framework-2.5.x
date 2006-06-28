@@ -28,6 +28,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.servlet.HandlerMapping;
 
 /**
  * Abstract base class for URL-mapped HandlerMapping implementations.
@@ -56,7 +57,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
-	private boolean lazyInitHandlers = false;
+	private boolean lazyInitHandlers;
 
 	private final Map handlerMap = new HashMap();
 
@@ -143,7 +144,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * both "/test" and "/team". For details, see the AntPathMatcher class.
 	 * <p>Looks for the most exact pattern, where most exact is defined as
 	 * the longest path pattern.
- 	 * @param urlPath URL the bean is mapped to
+		* @param urlPath URL the bean is mapped to
 	 * @return the associated handler instance, or <code>null</code> if not found
 	 * @see org.springframework.util.AntPathMatcher
 	 */
@@ -206,6 +207,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	}
 
 	protected void exposePathWithinMapping(String pathWithinMapping, HttpServletRequest request) {
-		request.setAttribute(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
 	}
 }

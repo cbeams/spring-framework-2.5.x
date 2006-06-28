@@ -118,8 +118,8 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 			nestedPath = "";
 		}
 		nestedPath = canonicalFieldName(nestedPath);
-		if (nestedPath.length() > 0 && !nestedPath.endsWith(NESTED_PATH_SEPARATOR)) {
-			nestedPath += NESTED_PATH_SEPARATOR;
+		if (nestedPath.length() > 0 && !nestedPath.endsWith(Errors.NESTED_PATH_SEPARATOR)) {
+			nestedPath += Errors.NESTED_PATH_SEPARATOR;
 		}
 		this.nestedPath = nestedPath;
 	}
@@ -343,7 +343,7 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	public Map getModel() {
 		Map model = new HashMap();
 		// Errors instance, even if no errors.
-		model.put(MODEL_KEY_PREFIX + getObjectName(), this);
+		model.put(BindingResult.MODEL_KEY_PREFIX + getObjectName(), this);
 		// Mapping from name to target object.
 		model.put(getObjectName(), getTarget());
 		return model;
