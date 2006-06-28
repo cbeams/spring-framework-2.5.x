@@ -523,7 +523,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         documented IDEs, then please do raise an issue on the Spring Framework
         <ulink url="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">JIRA Issue Tracker</ulink>
         and an example with the IDE <emphasis>may</emphasis> may be featured in the next release.</para>
-        <section id="xsd-config-setup-eclipse">
+        <procedure id="xsd-config-setup-eclipse">
             <title>Setting up Eclipse</title>
             <para>The following steps illustrate setting up
             <ulink url="http://www.eclipse.org/">Eclipse</ulink> to be XSD-aware. 
@@ -636,8 +636,8 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 			        </mediaobject>
 		        </para>
             </step>
-        </section>
-        <section id="xsd-config-setup-idea">
+        </procedure>
+        <procedure id="xsd-config-setup-idea">
             <title>Setting up IntelliJ IDEA</title>
             <para>The following steps illustrate how setting up
             <ulink url="http://www.jetbrains.com/idea/">IntelliJ IDEA</ulink> to be XSD-aware. It
@@ -775,7 +775,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             <para>
                 Repeat as required for setting up IDEA to reference the other Spring XSD files.
             </para>
-        </section>
+        </procedure>
         
         <section id="xsd-config-integration">
             <title>Integration issues</title>
