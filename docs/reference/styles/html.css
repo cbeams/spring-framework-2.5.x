@@ -277,3 +277,8 @@ a code {
 td code {
     font-size: 110%;
 }
+
+div.note * td, div.tip * td, div.warning * td {
+	text-align: justify;
+	font-size: 100%;
+}
