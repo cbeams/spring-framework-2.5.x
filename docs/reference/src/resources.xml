@@ -453,7 +453,7 @@
 			<para>
 				When such a location path doesn't have a prefix, the specific
 				<interfacename>Resource</interfacename> type built from that path and used
-				to load the bean definitons, depends on and is appropriate to the specific
+				to load the bean definitions, depends on and is appropriate to the specific
 				application context. For example, if you create a
 				<classname>ClassPathXmlApplicationContext</classname> as follows:
 			</para>
