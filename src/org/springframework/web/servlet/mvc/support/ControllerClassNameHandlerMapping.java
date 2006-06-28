@@ -46,7 +46,7 @@ import org.springframework.web.servlet.mvc.throwaway.ThrowawayController;
  * except that all sub-paths are registed using the trailing wildcard pattern <code>/*</code>.
  * For example:
  * <ul>
- * 	<li><code>AdminController</code> -> <code>/welcome/*</code></li>
+ * 	<li><code>WelcomeController</code> -> <code>/welcome/*</code></li>
  * 	<li><code>CatalogController</code> -> <code>/catalog/*</code></li>
  * </ul>
  *
