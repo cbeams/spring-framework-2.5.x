@@ -3,6 +3,40 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.0 RC2 (6.7.2006)
+-------------------------------------
+
+General
+* various documentation clarifications
+
+Package org.springframework.beans
+* AbstractAutowireCapableBeanFactory accepts null values returned from BeanPostProcessors
+* MethodInvokingFactoryBean returns "void.class" instead of "VoidType.class" for void methods
+
+Package org.springframework.core
+* NestedXxxException classes build nicer messages in case of root cause with no base exception message
+
+Package org.springframework.jmx
+* MBeanRegistrationSupport only logs a warning (no error) when an MBean does not exist anymore when trying to unregister
+
+Package org.springframework.orm
+* JdoTransactionManager uses JDO 2.0's rollback-only facility if available
+* JpaTransactionManager uses JPA's rollback-only facility now, for better integration with the persistence provider
+* JpaTransactionManager throws UnexpectedRollbackException in case of JPA RollbackException thrown from commit
+* refined JPA exception translation to throw EmptyResultDataAccessException in case of JPA NoResultException
+* refined JPA exception translation to throw IncorrectResultSizeDataAccessException in case of JPA NonUniqueResult
+* refined JPA exception translation to throw DataIntegrityViolationException in case of JPA EntityExistsException
+* refined JPA exception translation to throw InvalidDataAccessResourceUsageException in case of JPA TransactionRequired
+* refined Hib exception translation to throw InvalidDataAccessApiUsageException in case of Hibernate ObjectDeleted
+* refined Hib exception translation to throw IncorrectResultSizeDataAccessException in case of Hibernate NonUniqueResult
+
+Package org.springframework.transaction
+* JtaTransactionManager explicitly only calls "UserTransaction.setRollbackOnly()" if the transaction is still active
+
+Package org.springframework.web
+* fixed various JSP form tag issues
+
+
 Changes in version 2.0 RC1 (20.6.2006)
 --------------------------------------
 
