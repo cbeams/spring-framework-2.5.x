@@ -16,11 +16,12 @@
 
 package org.springframework.core;
 
+import junit.framework.TestCase;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Map;
-
-import junit.framework.TestCase;
 
 /**
  * @author Rob Harrop
@@ -70,6 +71,43 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals("foo(Integer) not resolved.", integerFoo, BridgeMethodResolver.findBridgedMethod(serializableBridge));
 	}
 
+	public void testFindBridgedMethodFromMultipleBridges() throws Exception {
+		Method loadWithObjectReturn = findMethodWithReturnType("load", Object.class, SettingsDaoImpl.class);
+		assertNotNull(loadWithObjectReturn);
+
+		Method loadWithSettingsReturn = findMethodWithReturnType("load", Settings.class, SettingsDaoImpl.class);
+		assertNotNull(loadWithSettingsReturn);
+
+		assertNotSame(loadWithObjectReturn, loadWithSettingsReturn);
+
+		Method method = SettingsDaoImpl.class.getMethod("load");
+		assertNotNull(method);
+
+		assertEquals(method, BridgeMethodResolver.findBridgedMethod(loadWithObjectReturn));
+		assertEquals(method, BridgeMethodResolver.findBridgedMethod(loadWithSettingsReturn));
+	}
+
+	public void testFindBridgedMethodFromParent() throws Exception {
+		Method loadFromParentBridge = SettingsDaoImpl.class.getMethod("loadFromParent");
+		assertNotNull(loadFromParentBridge);
+		assertTrue(loadFromParentBridge.isBridge());
+
+		Method loadFromParent = AbstractDaoImpl.class.getMethod("loadFromParent");
+		assertNotNull(loadFromParent);
+		assertFalse(loadFromParent.isBridge());
+
+		assertEquals(loadFromParent, BridgeMethodResolver.findBridgedMethod(loadFromParentBridge));
+	}
+
+	private Method findMethodWithReturnType(String name, Class returnType, Class targetType) {
+		Method[] methods = targetType.getMethods();
+		for(Method m : methods) {
+			if(m.getName().equals(name) && m.getReturnType().equals(returnType)) {
+				return m;
+			}
+		}
+		return null;
+	}
 
 	public static interface Foo<T extends Serializable> {
 
@@ -160,4 +198,58 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 	}
 
+	interface Settings {
+
+	}
+
+	interface ConcreteSettings extends Settings {
+
+	}
+
+	interface Dao<T, S> {
+
+		T load();
+
+		S loadFromParent();
+	}
+
+	interface SettingsDao<T extends Settings, S> extends Dao<T, S> {
+
+		T load();
+	}
+
+	interface ConcreteSettingsDao extends SettingsDao<ConcreteSettings, String> {
+
+		String loadFromParent();
+	}
+
+	abstract class AbstractDaoImpl<T, S> implements Dao<T, S> {
+
+		protected T object;
+
+		protected S otherObject;
+
+		protected AbstractDaoImpl(T object, S otherObject) {
+			this.object = object;
+			this.otherObject = otherObject;
+		}
+
+		@Transactional(readOnly = true)
+		public S loadFromParent() {
+			return otherObject;
+		}
+	}
+
+	class SettingsDaoImpl extends AbstractDaoImpl<ConcreteSettings, String> implements ConcreteSettingsDao {
+
+
+		protected SettingsDaoImpl(ConcreteSettings object) {
+			super(object, "From Parent");
+		}
+
+		@Transactional(readOnly = true)
+		public ConcreteSettings load() {
+			return super.object;
+		}
+	}
 }

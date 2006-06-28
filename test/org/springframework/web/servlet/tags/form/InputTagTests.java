@@ -81,7 +81,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		String dir = "ltr";
 		String tabindex = "2";
 		String readOnly = "true";
-		String disabled = "false";
+		String disabled = "true";
 		String onclick = "doClick()";
 		String ondblclick = "doDblclick()";
 		String onkeydown = "doKeydown()";
@@ -203,6 +203,13 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "type", getType());
 		assertContainsAttribute(output, "value", "Rob");
 		assertContainsAttribute(output, "class", "bad");
+	}
+
+	public void testDisabledFalse() throws Exception {
+		this.tag.setDisabled("false");
+	  this.tag.doStartTag();
+		String output = getWriter().toString();
+		assertAttributeNotPresent(output, "disabled");
 	}
 
 	public void testWithCustomBinder() throws Exception {

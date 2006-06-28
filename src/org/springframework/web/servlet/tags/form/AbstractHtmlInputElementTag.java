@@ -168,6 +168,8 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 		writeOptionalAttribute(tagWriter, ONBLUR_ATTRIBUTE, getOnblur());
 		writeOptionalAttribute(tagWriter, ONCHANGE_ATTRIBUTE, getOnchange());
 		writeOptionalAttribute(tagWriter, ACCESSKEY_ATTRIBUTE, getAccesskey());
-		writeOptionalAttribute(tagWriter, DISABLED_ATTRIBUTE, getDisabled());
+		if("true".equals(getDisabled())) {
+		  tagWriter.writeAttribute(DISABLED_ATTRIBUTE, getDisabled());
+		}
 	}
 }

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper for resolving synthetic {@link Method#isBridge bridge Methods} to the
@@ -68,7 +69,7 @@ public abstract class BridgeMethodResolver {
 
 		// Gather all methods with matching name and parameter size.
 		List candidateMethods = new ArrayList();
-		Method[] methods = bridgeMethod.getDeclaringClass().getDeclaredMethods();
+		Method[] methods = ReflectionUtils.getAllDeclaredMethods(bridgeMethod.getDeclaringClass());
 		for (int i = 0; i < methods.length; i++) {
 			Method candidateMethod = methods[i];
 			if (isBridgedCandidateFor(candidateMethod, bridgeMethod)) {
@@ -107,7 +108,7 @@ public abstract class BridgeMethodResolver {
 	 * checks and can be used quickly filter for a set of possible matches.
 	 */
 	private static boolean isBridgedCandidateFor(Method candidateMethod, Method bridgeMethod) {
-		return (!candidateMethod.equals(bridgeMethod) &&
+		return (!candidateMethod.isBridge() && !candidateMethod.equals(bridgeMethod) &&
 				candidateMethod.getName().equals(bridgeMethod.getName()) &&
 				candidateMethod.getParameterTypes().length == bridgeMethod.getParameterTypes().length);
 	}

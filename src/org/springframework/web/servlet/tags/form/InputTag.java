@@ -194,7 +194,6 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		writeOptionalAttribute(tagWriter, ALT_ATTRIBUTE, getAlt());
 		writeOptionalAttribute(tagWriter, ONSELECT_ATTRIBUTE, getOnselect());
 		writeOptionalAttribute(tagWriter, READONLY_ATTRIBUTE, getReadonly());
-		writeOptionalAttribute(tagWriter, DISABLED_ATTRIBUTE, getDisabled());
 		tagWriter.endTag();
 		return EVAL_PAGE;
 	}
