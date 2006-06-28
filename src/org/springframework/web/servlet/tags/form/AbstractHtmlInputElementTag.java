@@ -19,9 +19,10 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.JspException;
 
 /**
- * Base class for databinding-aware JSP tags that render HTML form input element. Provides
- * a set of properties corresponding to the set of HTML attributes that are common
- * across form input elements.
+ * Base class for databinding-aware JSP tags that render HTML form input element.
+ * 
+ * <p>Provides a set of properties corresponding to the set of HTML attributes
+ * that are common across form input elements.
  * 
  * @author Rob Harrop
  * @since 2.0
@@ -53,6 +54,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	 */
 	public static final String DISABLED_ATTRIBUTE = "disabled";
 
+
 	/**
 	 * The value of the '<code>onfocus</code>' attribute.
 	 */
@@ -78,6 +80,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	 */
 	protected String disabled;
 
+
 	/**
 	 * Sets the value of the '<code>onfocus</code>' attribute.
 	 * May be a runtime expression.
@@ -101,6 +104,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	public void setOnblur(String onblur) {
 		this.onblur = onblur;
 	}
+
 
 	/**
 	 * Gets the value of the '<code>onblur</code>' attribute.
@@ -158,6 +162,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 		return disabled;
 	}
 
+
 	/**
 	 * Writes the default attributes configured via this base class to the supplied {@link TagWriter}.
 	 * Subclasses should call this when they want the base attribute set to be written to the output.
@@ -169,7 +174,8 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 		writeOptionalAttribute(tagWriter, ONCHANGE_ATTRIBUTE, getOnchange());
 		writeOptionalAttribute(tagWriter, ACCESSKEY_ATTRIBUTE, getAccesskey());
 		if("true".equals(getDisabled())) {
-		  tagWriter.writeAttribute(DISABLED_ATTRIBUTE, getDisabled());
+			tagWriter.writeAttribute(DISABLED_ATTRIBUTE, getDisabled());
 		}
 	}
+
 }
