@@ -34,6 +34,10 @@ Package org.springframework.transaction
 * JtaTransactionManager explicitly only calls "UserTransaction.setRollbackOnly()" if the transaction is still active
 
 Package org.springframework.web
+* added/moved constants for all Servlet spec include/forward request attributes to WebUtils
+* InternalResourceView exposes all forward request attributes (delegating to "WebUtils.exposeForwardRequestAttributes")
+* RequestContext's "getContextPath()" always exposes the context path for the originating request now
+* added "getQueryString" method to RequestContext, exposing query string for originating request (even after forward)
 * fixed various JSP form tag issues
 
 
