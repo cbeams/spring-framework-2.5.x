@@ -21,6 +21,8 @@ import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 
+import org.springframework.core.NestedExceptionUtils;
+
 /**
  * Subclass of ServletException that properly handles a root cause in terms
  * of message and stacktrace, just like NestedChecked/RuntimeException does.
@@ -68,12 +70,7 @@ public class NestedServletException extends ServletException {
 	 * if there is one.
 	 */
 	public String getMessage() {
-		String message = super.getMessage();
-		Throwable cause = getRootCause();
-		if (cause != null) {
-			return message + "; nested exception is " + cause;
-		}
-		return message;
+		return NestedExceptionUtils.buildMessage(super.getMessage(), getRootCause());
 	}
 
 	/**
