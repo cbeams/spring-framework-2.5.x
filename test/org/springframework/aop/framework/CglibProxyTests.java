@@ -305,26 +305,6 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 	}
 
 
-	public void testProxyClassWithFinalMethods() throws Exception {
-
-		MyBean target = new MyBean();
-		target.setName("Rob Harrop");
-
-		ProxyFactory proxyFactory = new ProxyFactory();
-		proxyFactory.addAdvice(new NopInterceptor());
-		proxyFactory.setTarget(target);
-		proxyFactory.setProxyTargetClass(true);
-
-		MyBean proxy = (MyBean)proxyFactory.getProxy();
-
-		// name on target should still be not null
-		assertNotNull(target.getName());
-
-		// getName() is final so cant intercept - method call goes directly to
-		// the proxy and will not have access to a valid name field
-		assertNull(proxy.getName());
-	}
-
 	public void testProxyProtectedMethod() throws Exception {
 		CountingBeforeAdvice advice = new CountingBeforeAdvice();
 		ProxyFactory proxyFactory = new ProxyFactory(new MyBean());
@@ -364,11 +344,11 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 
 		private String name;
 
-		public final String getName() {
+		public String getName() {
 			return name;
 		}
 
-		public final void setName(String name) {
+		public void setName(String name) {
 			this.name = name;
 		}
 
