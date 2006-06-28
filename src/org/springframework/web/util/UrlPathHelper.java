@@ -44,22 +44,22 @@ import org.springframework.util.StringUtils;
 public class UrlPathHelper {
 
 	/**
-	 * Standard Servlet 2.3+ spec request attributes for include URI and paths.
-	 * <p>If included via a RequestDispatcher, the current resource will see the
-	 * originating request. Its own URI and paths are exposed as request attributes.
+	 * @deprecated in favor of <code>WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE</code>
+	 * @see org.springframework.web.util.WebUtils#INCLUDE_REQUEST_URI_ATTRIBUTE
 	 */
-	public static final String INCLUDE_URI_REQUEST_ATTRIBUTE = "javax.servlet.include.request_uri";
-	public static final String INCLUDE_CONTEXT_PATH_REQUEST_ATTRIBUTE = "javax.servlet.include.context_path";
-	public static final String INCLUDE_SERVLET_PATH_REQUEST_ATTRIBUTE = "javax.servlet.include.servlet_path";
+	public static final String INCLUDE_URI_REQUEST_ATTRIBUTE = WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE;
 
 	/**
-	 * Standard Servlet 2.4+ spec request attributes for forward URI and paths.
-	 * <p>If forwarded to via a RequestDispatcher, the current resource will see its
-	 * own URI and paths. The originating URI and paths are exposed as request attributes.
+	 * @deprecated in favor of <code>WebUtils.INCLUDE_CONTEXT_PATH_ATTRIBUTE</code>
+	 * @see org.springframework.web.util.WebUtils#INCLUDE_CONTEXT_PATH_ATTRIBUTE
 	 */
-	public static final String FORWARD_URI_REQUEST_ATTRIBUTE = "javax.servlet.forward.request_uri";
-	public static final String FORWARD_CONTEXT_PATH_REQUEST_ATTRIBUTE = "javax.servlet.forward.context_path";
-	public static final String FORWARD_SERVLET_PATH_REQUEST_ATTRIBUTE = "javax.servlet.forward.servlet_path";
+	public static final String INCLUDE_CONTEXT_PATH_REQUEST_ATTRIBUTE = WebUtils.INCLUDE_CONTEXT_PATH_ATTRIBUTE;
+
+	/**
+	 * @deprecated in favor of <code>WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE</code>
+	 * @see org.springframework.web.util.WebUtils#INCLUDE_SERVLET_PATH_ATTRIBUTE
+	 */
+	public static final String INCLUDE_SERVLET_PATH_REQUEST_ATTRIBUTE = WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE;
 
 
 	private final Log logger = LogFactory.getLog(getClass());
@@ -197,37 +197,6 @@ public class UrlPathHelper {
 		}
 	}
 
-	/**
-	 * Return the servlet path for the given request, regarding an include request
-	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by request.getServletPath() is already decoded by
-	 * the servlet container, this method will not attempt to decode it.
-	 * @param request current HTTP request
-	 * @return the servlet path
-	 */
-	public String getServletPath(HttpServletRequest request) {
-		String servletPath = (String) request.getAttribute(INCLUDE_SERVLET_PATH_REQUEST_ATTRIBUTE);
-		if (servletPath == null) {
-			servletPath = request.getServletPath();
-		}
-		return servletPath;
-	}
-
-	/**
-	 * Return the context path for the given request, detecting an include request
-	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by <code>request.getContextPath()</code> is <i>not</i>
-	 * decoded by the servlet container, this method will decode it.
-	 * @param request current HTTP request
-	 * @return the context path
-	 */
-	public String getContextPath(HttpServletRequest request) {
-		String contextPath = (String) request.getAttribute(INCLUDE_CONTEXT_PATH_REQUEST_ATTRIBUTE);
-		if (contextPath == null) {
-			contextPath = request.getContextPath();
-		}
-		return decodeRequestString(request, contextPath);
-	}
 
 	/**
 	 * Return the request URI for the given request, detecting an include request
@@ -241,12 +210,45 @@ public class UrlPathHelper {
 	 * @return the request URI
 	 */
 	public String getRequestUri(HttpServletRequest request) {
-		String uri = (String) request.getAttribute(INCLUDE_URI_REQUEST_ATTRIBUTE);
+		String uri = (String) request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
 		if (uri == null) {
 			uri = request.getRequestURI();
 		}
 		return decodeAndCleanUriString(request, uri);
 	}
+
+	/**
+	 * Return the context path for the given request, detecting an include request
+	 * URL if called within a RequestDispatcher include.
+	 * <p>As the value returned by <code>request.getContextPath()</code> is <i>not</i>
+	 * decoded by the servlet container, this method will decode it.
+	 * @param request current HTTP request
+	 * @return the context path
+	 */
+	public String getContextPath(HttpServletRequest request) {
+		String contextPath = (String) request.getAttribute(WebUtils.INCLUDE_CONTEXT_PATH_ATTRIBUTE);
+		if (contextPath == null) {
+			contextPath = request.getContextPath();
+		}
+		return decodeRequestString(request, contextPath);
+	}
+
+	/**
+	 * Return the servlet path for the given request, regarding an include request
+	 * URL if called within a RequestDispatcher include.
+	 * <p>As the value returned by request.getServletPath() is already decoded by
+	 * the servlet container, this method will not attempt to decode it.
+	 * @param request current HTTP request
+	 * @return the servlet path
+	 */
+	public String getServletPath(HttpServletRequest request) {
+		String servletPath = (String) request.getAttribute(WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE);
+		if (servletPath == null) {
+			servletPath = request.getServletPath();
+		}
+		return servletPath;
+	}
+
 
 	/**
 	 * Return the request URI for root of the given request. If this is a forwarded request,
@@ -255,14 +257,43 @@ public class UrlPathHelper {
 	 * running in a Servlet 2.3- environment.
 	 */
 	public String getOriginatingRequestUri(HttpServletRequest request) {
-		String originatingUri = (String) request.getAttribute(FORWARD_URI_REQUEST_ATTRIBUTE);
-		if (originatingUri != null) {
-			return decodeAndCleanUriString(request, originatingUri);
+		String uri = (String) request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE);
+		if (uri == null) {
+			uri = request.getRequestURI();
 		}
-		else {
-			return getRequestUri(request);
-		}
+		return decodeAndCleanUriString(request, uri);
 	}
+
+	/**
+	 * Return the context path for the given request, detecting an include request
+	 * URL if called within a RequestDispatcher include.
+	 * <p>As the value returned by <code>request.getContextPath()</code> is <i>not</i>
+	 * decoded by the servlet container, this method will decode it.
+	 * @param request current HTTP request
+	 * @return the context path
+	 */
+	public String getOriginatingContextPath(HttpServletRequest request) {
+		String contextPath = (String) request.getAttribute(WebUtils.FORWARD_CONTEXT_PATH_ATTRIBUTE);
+		if (contextPath == null) {
+			contextPath = request.getContextPath();
+		}
+		return decodeRequestString(request, contextPath);
+	}
+
+	/**
+	 * Return the request URI for root of the given request. If this is a forwarded request,
+	 * correctly resolves to the request URI of the original request. Relies on the Servlet
+	 * 2.4 'forward' attributes. These attributes may be set by other components when
+	 * running in a Servlet 2.3- environment.
+	 */
+	public String getOriginatingQueryString(HttpServletRequest request) {
+		String queryString = (String) request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE);
+		if (queryString != null) {
+			queryString = request.getQueryString();
+		}
+		return queryString;
+	}
+
 
 	/**
 	 * Decode the supplied URI string and strips any extraneous portion after a ';'.

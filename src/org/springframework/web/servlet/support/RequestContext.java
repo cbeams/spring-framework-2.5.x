@@ -178,6 +178,9 @@ public class RequestContext {
 		initContext(request, servletContext, model);
 	}
 
+	/**
+	 * Default constructor for subclasses.
+	 */
 	protected RequestContext() {
 	}
 
@@ -355,35 +358,53 @@ public class RequestContext {
 
 
 	/**
-	 * Return the context path of the current request,
-	 * i.e. the path that indicates the current web application.
+	 * Return the context path of the original request,
+	 * that is, the path that indicates the current web application.
+	 * This is useful for building links to other resources within the application.
 	 * <p>Delegates to the UrlPathHelper for decoding.
 	 * @see javax.servlet.http.HttpServletRequest#getContextPath
 	 * @see #getUrlPathHelper
 	 */
 	public String getContextPath() {
-		return this.urlPathHelper.getContextPath(this.request);
+		return this.urlPathHelper.getOriginatingContextPath(this.request);
 	}
 
 	/**
-	 * Return the request URI of the current request, that is, the invoked URL
-	 * without parameters. This is particularly useful as HTML form action target.
+	 * Return the request URI of the original request, that is, the invoked URL
+	 * without parameters. This is particularly useful as HTML form action target,
+	 * possibly in combination with the original query string.
 	 * <p><b>Note this implementation will correctly resolve to the URI of any
 	 * originating root request in the presence of a forwarded request. However, this
 	 * can only work when the Servlet 2.4 'forward' request attributes are present.
 	 * For use in a Servlet 2.3- environment, you can rely on
 	 * {@link org.springframework.web.servlet.view.InternalResourceView}
 	 * to add these prior to dispatching the request.
-	 * <p>Side note: As alternative for an HTML form action, either specify an empty
-	 * "action" or omit the "action" attribute completely. This is not covered by
-	 * the HTML spec, though, but known to work reliably on all current browsers.
 	 * <p>Delegates to the UrlPathHelper for decoding.
-	 * @see javax.servlet.http.HttpServletRequest#getRequestURI
+	 * @see #getQueryString
 	 * @see org.springframework.web.util.UrlPathHelper#getOriginatingRequestUri
 	 * @see #getUrlPathHelper
 	 */
 	public String getRequestUri() {
 		return this.urlPathHelper.getOriginatingRequestUri(this.request);
+	}
+
+	/**
+	 * Return the query string of the current request, that is, the part after
+	 * the request path. This is particularly useful for building an HTML form
+	 * action target in combination with the original request URI.
+	 * <p><b>Note this implementation will correctly resolve to the query string of any
+	 * originating root request in the presence of a forwarded request. However, this
+	 * can only work when the Servlet 2.4 'forward' request attributes are present.
+	 * For use in a Servlet 2.3- environment, you can rely on
+	 * {@link org.springframework.web.servlet.view.InternalResourceView}
+	 * to add these prior to dispatching the request.
+	 * <p>Delegates to the UrlPathHelper for decoding.
+	 * @see #getRequestUri
+	 * @see org.springframework.web.util.UrlPathHelper#getOriginatingQueryString
+	 * @see #getUrlPathHelper
+	 */
+	public String getQueryString() {
+		return this.urlPathHelper.getOriginatingQueryString(this.request);
 	}
 
 
