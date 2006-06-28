@@ -31,14 +31,13 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Convenient proxy factory bean for scoped objects.
- * Proxies created using this factory bean are thread-safe singletons,
+ * 
+ * <p>Proxies created using this factory bean are thread-safe singletons,
  * and may be injected, with transparent scoping behavior.
  *
  * <p>Proxies returned by this class implement the ScopedObject interface.
  * This presently allows to remove the corresponding object from the scope,
  * seamlessly creating a new instance in the scope on next access.
- *
- * <p>By default, this factory bean will create proxies that proxy the target class.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -55,12 +54,6 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, 
 	private Object proxy;
 
 
-	public ScopedProxyFactoryBean() {
-		// Change default to proxy target class.
-		//setProxyTargetClass(true);
-	}
-
-
 	public void setTargetBeanName(String targetBeanName) {
 		this.targetBeanName = targetBeanName;
 		this.scopedTargetSource.setTargetBeanName(targetBeanName);
@@ -74,13 +67,13 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, 
 
 		this.scopedTargetSource.setBeanFactory(beanFactory);
 
-
 		ProxyFactory pf = new ProxyFactory();
 		pf.copyFrom(this);
 		pf.setTargetSource(this.scopedTargetSource);
 
 		Class beanType = beanFactory.getType(this.targetBeanName);
-		if(Modifier.isPrivate(beanType.getModifiers()) || beanType.isInterface()) {
+		boolean isPrivate = Modifier.isPrivate(beanType.getModifiers());
+		if (isPrivate || beanType.isInterface()) {
 			pf.setInterfaces(ClassUtils.getAllInterfacesForClass(beanType));
 		} else {
 			pf.setProxyTargetClass(true);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package org.springframework.beans.factory;
 import org.springframework.beans.BeansException;
 
 /**
- * <p>Interface defining a factory which can return an Object instance
+ * Defines a factory which can return an Object instance
  * (possibly shared or independent) when invoked.
  * 
- * <p>This interface is typically used to encapsulate a generic factory  which
+ * <p>This interface is typically used to encapsulate a generic factory which
  * returns a new instance (prototype) of some target object on each invocation.
  *
  * <p>This interface is similar to FactoryBean, but implementations of the latter
