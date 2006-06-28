@@ -401,10 +401,6 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 			Transaction tx = txObject.getPersistenceManagerHolder().getPersistenceManager().currentTransaction();
 			tx.commit();
 		}
-		catch (JDOFatalDataStoreException ex) {
-			throw new UnexpectedRollbackException(
-					"JDO transaction unexpectedly rolled back (maybe marked rollback-only after a failed operation)", ex);
-		}
 		catch (JDOException ex) {
 			// Assumably failed to flush changes to database.
 			throw convertJdoAccessException(ex);

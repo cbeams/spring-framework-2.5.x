@@ -420,7 +420,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
-		pmControl.setReturnValue(tx, 5);
+		pmControl.setReturnValue(tx, 6);
 		pm.flush();
 		pmControl.setVoidCallable(1);
 		pm.close();
@@ -448,6 +448,8 @@ public class JdoTransactionManagerTests extends TestCase {
 					txControl.setReturnValue(true, 1);
 					tx.commit();
 					txControl.setThrowable(new JDOFatalDataStoreException(), 1);
+					tx.isActive();
+					txControl.setReturnValue(false, 1);
 					txControl.replay();
 
 					return tt.execute(new TransactionCallback() {
@@ -465,9 +467,9 @@ public class JdoTransactionManagerTests extends TestCase {
 					});
 				}
 			});
-			fail("Should have thrown UnexpectedRollbackException");
+			fail("Should have thrown JdoResourceFailureException");
 		}
-		catch (UnexpectedRollbackException ex) {
+		catch (JdoResourceFailureException ex) {
 			// expected
 		}
 
