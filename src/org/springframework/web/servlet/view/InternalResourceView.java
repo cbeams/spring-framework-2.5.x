@@ -23,7 +23,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -109,9 +108,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 		}
 
 		else {
-			// Expose the current request URI if needed
 			exposeForwardRequestAttributes(request);
-
 			rd.forward(request, response);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Forwarded to resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
@@ -174,23 +171,13 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	/**
 	 * Expose the current request URI and paths as {@link HttpServletRequest}
 	 * attributes under the keys defined in the Servlet 2.4 specification,
-	 * for Servlet 2.3- containers:
-	 * <code>javax.servlet.forward.request_uri</code>,
-	 * <code>javax.servlet.forward.context_path</code>,
-	 * <code>javax.servlet.forward.servlet_path</code>.
+	 * for Servlet 2.3- containers.
 	 * <p>Does not override values if already present, to not conflict
 	 * with Servlet 2.4+ containers.
+	 * @see org.springframework.web.util.WebUtils#exposeForwardRequestAttributes
 	 */
 	protected void exposeForwardRequestAttributes(HttpServletRequest request) {
-		if (request.getAttribute(UrlPathHelper.FORWARD_URI_REQUEST_ATTRIBUTE) != null) {
-			request.setAttribute(UrlPathHelper.FORWARD_URI_REQUEST_ATTRIBUTE, request.getRequestURI());
-		}
-		if (request.getAttribute(UrlPathHelper.FORWARD_CONTEXT_PATH_REQUEST_ATTRIBUTE) != null) {
-			request.setAttribute(UrlPathHelper.FORWARD_CONTEXT_PATH_REQUEST_ATTRIBUTE, request.getContextPath());
-		}
-		if (request.getAttribute(UrlPathHelper.FORWARD_SERVLET_PATH_REQUEST_ATTRIBUTE) != null) {
-			request.setAttribute(UrlPathHelper.FORWARD_SERVLET_PATH_REQUEST_ATTRIBUTE, request.getServletPath());
-		}
+		WebUtils.exposeForwardRequestAttributes(request);
 	}
 
 }

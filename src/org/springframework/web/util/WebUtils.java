@@ -42,6 +42,29 @@ import org.springframework.util.StringUtils;
 public abstract class WebUtils {
 
 	/**
+	 * Standard Servlet 2.3+ spec request attributes for include URI and paths.
+	 * <p>If included via a RequestDispatcher, the current resource will see the
+	 * originating request. Its own URI and paths are exposed as request attributes.
+	 */
+	public static final String INCLUDE_REQUEST_URI_ATTRIBUTE = "javax.servlet.include.request_uri";
+	public static final String INCLUDE_CONTEXT_PATH_ATTRIBUTE = "javax.servlet.include.context_path";
+	public static final String INCLUDE_SERVLET_PATH_ATTRIBUTE = "javax.servlet.include.servlet_path";
+	public static final String INCLUDE_PATH_INFO_ATTRIBUTE = "javax.servlet.include.path_info";
+	public static final String INCLUDE_QUERY_STRING_ATTRIBUTE = "javax.servlet.include.query_string";
+
+	/**
+	 * Standard Servlet 2.4+ spec request attributes for forward URI and paths.
+	 * <p>If forwarded to via a RequestDispatcher, the current resource will see its
+	 * own URI and paths. The originating URI and paths are exposed as request attributes.
+	 */
+	public static final String FORWARD_REQUEST_URI_ATTRIBUTE = "javax.servlet.forward.request_uri";
+	public static final String FORWARD_CONTEXT_PATH_ATTRIBUTE = "javax.servlet.forward.context_path";
+	public static final String FORWARD_SERVLET_PATH_ATTRIBUTE = "javax.servlet.forward.servlet_path";
+	public static final String FORWARD_PATH_INFO_ATTRIBUTE = "javax.servlet.forward.path_info";
+	public static final String FORWARD_QUERY_STRING_ATTRIBUTE = "javax.servlet.forward.query_string";
+
+
+	/**
 	 * Prefix of the charset clause in a content type String: ";charset="
 	 */
 	public static final String CONTENT_TYPE_CHARSET_PREFIX = ";charset=";
@@ -58,12 +81,6 @@ public abstract class WebUtils {
 	 * directory for the current web application, of type <code>java.io.File</code>.
 	 */
 	public static final String TEMP_DIR_CONTEXT_ATTRIBUTE = "javax.servlet.context.tempdir";
-
-	/**
-	 * Standard Servlet spec request attribute that implies that we're within an include
-	 * request. Any of the attributes associated with include paths does the job here.
-	 */
-	private static final String INCLUDE_REQUEST_ATTRIBUTE = "javax.servlet.include.request_uri";
 
 	/**
 	 * HTML escape parameter at the servlet context level
@@ -315,6 +332,48 @@ public abstract class WebUtils {
 
 
 	/**
+	 * Determine whether the given request is an include request,
+	 * that is, not a top-level HTTP request coming in from the outside.
+	 * <p>Checks the presence of the "javax.servlet.include.request_uri"
+	 * request attribute. Could check any request attribute that is only
+	 * present in an include request.
+	 * @param request current servlet request
+	 */
+	public static boolean isIncludeRequest(ServletRequest request) {
+		return (request.getAttribute(INCLUDE_REQUEST_URI_ATTRIBUTE) != null);
+	}
+
+	/**
+	 * Expose the current request URI and paths as {@link javax.servlet.http.HttpServletRequest}
+	 * attributes under the keys defined in the Servlet 2.4 specification,
+	 * for Servlet 2.3- containers:
+	 * <code>javax.servlet.forward.request_uri</code>,
+	 * <code>javax.servlet.forward.context_path</code>,
+	 * <code>javax.servlet.forward.servlet_path</code>,
+	 * <code>javax.servlet.forward.path_info</code>,
+	 * <code>javax.servlet.forward.query_string</code>.
+	 * <p>Does not override values if already present, to not conflict
+	 * with Servlet 2.4+ containers.
+	 */
+	public static void exposeForwardRequestAttributes(HttpServletRequest request) {
+		if (request.getAttribute(FORWARD_REQUEST_URI_ATTRIBUTE) != null) {
+			request.setAttribute(FORWARD_REQUEST_URI_ATTRIBUTE, request.getRequestURI());
+		}
+		if (request.getAttribute(FORWARD_CONTEXT_PATH_ATTRIBUTE) != null) {
+			request.setAttribute(FORWARD_CONTEXT_PATH_ATTRIBUTE, request.getContextPath());
+		}
+		if (request.getAttribute(FORWARD_SERVLET_PATH_ATTRIBUTE) != null) {
+			request.setAttribute(FORWARD_SERVLET_PATH_ATTRIBUTE, request.getServletPath());
+		}
+		if (request.getAttribute(FORWARD_PATH_INFO_ATTRIBUTE) != null) {
+			request.setAttribute(FORWARD_PATH_INFO_ATTRIBUTE, request.getPathInfo());
+		}
+		if (request.getAttribute(FORWARD_QUERY_STRING_ATTRIBUTE) != null) {
+			request.setAttribute(FORWARD_QUERY_STRING_ATTRIBUTE, request.getQueryString());
+		}
+	}
+
+	/**
 	 * Expose the given Map as request attributes, using the keys as attribute names
 	 * and the values as corresponding attribute values. Keys need to be Strings.
 	 * @param request current HTTP request
@@ -353,18 +412,6 @@ public abstract class WebUtils {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Determine whether the given request is an include request,
-	 * that is, not a top-level HTTP request coming in from the outside.
-	 * <p>Checks the presence of the "javax.servlet.include.request_uri"
-	 * request attribute. Could check any request attribute that is only
-	 * present in an include request.
-	 * @param request current servlet request
-	 */
-	public static boolean isIncludeRequest(ServletRequest request) {
-		return (request.getAttribute(INCLUDE_REQUEST_ATTRIBUTE) != null);
 	}
 
 	/**

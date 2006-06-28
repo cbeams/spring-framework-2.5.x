@@ -26,7 +26,7 @@ import junit.framework.TestCase;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.util.UrlPathHelper;
+import org.springframework.web.util.WebUtils;
 
 /**
  * @author Seth Ladd
@@ -101,7 +101,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 	public void testNoDefaultStatusCodeInInclude() {
 		exceptionResolver.setDefaultErrorView("default-view");
 		exceptionResolver.setDefaultStatusCode(HttpServletResponse.SC_BAD_REQUEST);
-		request.setAttribute(UrlPathHelper.INCLUDE_URI_REQUEST_ATTRIBUTE, "some path");
+		request.setAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE, "some path");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
 		assertEquals(HttpServletResponse.SC_OK, response.getStatus());
 	}
