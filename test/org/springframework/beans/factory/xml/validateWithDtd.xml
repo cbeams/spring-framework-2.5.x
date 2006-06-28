@@ -6,8 +6,7 @@ This is a top level block comment
 <!-- trying --> <!-- to trick --> <!--
 				the parser now --> <!-- <beans>
 				-->
-<!-- more trickery-->  <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
-<!-- some nasty stuff -->
+<!-- more trickery-->  <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd"><!-- some nasty stuff -->
 
 <beans>
 	<bean id="testBean" class="org.springframework.beans.TestBean"/>
