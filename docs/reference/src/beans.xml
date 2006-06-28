@@ -307,13 +307,13 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
                             </entry>
                         </row>
                         <row>
-                            <entry>id and name</entry>
+                            <entry>name</entry>
                             <entry>
                                 <xref linkend="beans-beanname" />
                             </entry>
                         </row>
                         <row>
-                            <entry>singleton or prototype</entry>
+                            <entry>scope</entry>
                             <entry>
                                 <xref linkend="beans-factory-scopes" />
                             </entry>
@@ -325,7 +325,7 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
                             </entry>
                         </row>
                         <row>
-                            <entry>bean properties</entry>
+                            <entry>properties</entry>
                             <entry>
                                 <xref linkend="beans-factory-collaborators" />
                             </entry>
@@ -488,18 +488,17 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 <bean id="myFactoryBean" class="...">
   ...
 </bean>
-<!-- The bean to be created via the factory bean -->
+]]><lineannotation>&lt;!-- The bean to be created via the factory bean --&gt;</lineannotation><![CDATA[
 <bean id="exampleBean"
       factory-bean="myFactoryBean"
       factory-method="createInstance"/>]]></programlisting>
-                <para>Alhough the mechanisms for setting bean properties are still to
+                <para>Although the mechanisms for setting bean properties are still to
 				be discussed, one implication of this approach is that the factory
-				bean itself can be managed and configured via DI.
-				</para>
+				bean itself can be managed and configured via DI.</para>
             </section>
         </section>
         <section id="beans-beanname">
-            <title>The bean identifiers (<literal>id</literal> and <literal>name</literal>)</title>
+            <title>Bean names</title>
             <para>
 				Every bean has one or more ids (also called identifiers, or names;
 				these terms refer to the same thing). These ids must be unique within
@@ -508,7 +507,7 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 				considered aliases.
 			</para>
             <para>
-				In an <classname>XmlBeanFactory</classname> , you use the <literal>id</literal>
+				In an <classname>XmlBeanFactory</classname>, you use the <literal>id</literal>
 				or <literal>name</literal> attributes to specify the bean id(s). The
 				<literal>id</literal> attribute allows you to specify one id, and as
 				it is a real XML element ID attribute, the XML parser is able to do
@@ -516,10 +515,10 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
 				such, it is the preferred way to specify a bean id. However, the XML
 				specification does limit the characters which are legal in XML IDs.
 				This is usually not a constraint, but if you have a need to use one of
-				these characters, or want to introduce other aliases to the bean, you
-				may also or instead specify one or more bean ids, separated by a comma
-				(<literal>,</literal>), semicolon (<literal>;</literal>), or whitespace
-				via the <literal>name</literal> attribute.
+				these special XML characters, or want to introduce other aliases to the
+				bean, you may also or instead specify one or more bean ids, separated by
+				a comma (<literal>,</literal>), semicolon (<literal>;</literal>), or
+				whitespace via the <literal>name</literal> attribute.
 			</para>
             <para>
 				Please note that you are not required to supply a name for a bean. If
@@ -545,75 +544,441 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
         </section>
         <section id="beans-factory-scopes">
             <title>Bean scopes</title>
-			<sidebar>
-			    <title>The Singleton pattern</title>
-			    <para>Spring's concept of a singleton bean is quite different from
-			    the Singleton pattern as defined in the seminal Gang of Four (GoF)
-			    book.</para>
-			    <para>The classic GoF Singleton hardcodes the scope of an object such
-			    that one <emphasis>and only one</emphasis> instance of a particular
-			    class will be created
-			    <emphasis>per <classname>ClassLoader</classname></emphasis>.</para>
+            <para>When you create a bean definition (typically via an XML configuration file)
+            what you are actually creating is (loosely speaking) a <emphasis>recipe</emphasis>
+            or template for creating actual instances of the objects defined by that
+            bean definition. The fact that a bean definition is a recipe is important,
+            because it means that, just like a class, you can potentially have many object
+            instances created off the back of a single recipe.</para>
+            <para>You can control not only the various dependencies and
+            configuration values that are to be plugged into an object that is created
+            from a particular bean definition, but also the <firstterm>scope</firstterm>
+            of the objects created from a particular bean definition. This approach is very
+            powerful and gives you the flexibility to <emphasis>choose</emphasis> the scope
+            of the objects you create, and not have to 'bake in' such scope at the Java
+            class level. Beans can be defined to be deployed in one of a number of scopes:
+            out of the box, the Spring Framework supports exactly five scopes (although
+            three of those scopes are only available if you are using a web-aware Spring
+            <interfacename>ApplicationContext</interfacename>).</para>
+			<para>The scopes supported out of the box are listed below:</para>
+		    <table>
+			    <title>Bean scopes</title>
+			    <tgroup cols="2">
+				    <thead>
+					    <row>
+						    <entry align="center">Scope</entry>
+						    <entry align="center">Description</entry>
+					    </row>
+				    </thead>
+				    <tbody>
+					    <row>
+						    <entry>
+							    <para><link linkend="beans-factory-scopes-singleton">singleton</link></para>
+						    </entry>
+						    <entry>
+							    <para>Scopes a single bean definition to a single object instance per Spring IoC container.</para>
+						    </entry>
+					    </row>
+					    <row>
+						    <entry>
+							    <para><link linkend="beans-factory-scopes-prototype">prototype</link></para>
+						    </entry>
+						    <entry>
+							    <para>Scopes a single bean definition to any number of object instances.</para>
+						    </entry>
+					    </row>
+					    <row>
+						    <entry>
+							    <para><link linkend="beans-factory-scopes-request">request</link></para>
+						    </entry>
+						    <entry>
+							    <para>Scopes a single bean definition to the lifecycle of
+							    a single HTTP request; i.e. each and every HTTP request will
+							    have it's own instance of a bean created off the back of a
+							    single bean definition. Only valid in the context of a
+							    web-aware Spring <interfacename>ApplicationContext</interfacename>.</para>
+						    </entry>
+					    </row>
+					    <row>
+						    <entry>
+							    <para><link linkend="beans-factory-scopes-global-session">session</link></para>
+						    </entry>
+						    <entry>
+							    <para>Scopes a single bean definition to the lifecycle of
+							    a HTTP <interfacename>Session</interfacename>. Only valid in
+							    the context of a web-aware Spring
+							    <interfacename>ApplicationContext</interfacename>.</para>
+						    </entry>
+					    </row>
+					    <row>
+						    <entry>
+							    <para><link linkend="beans-factory-scopes-global-session">global session</link></para>
+						    </entry>
+						    <entry>
+							    <para>Scopes a single bean definition to the lifecycle of a
+							    global HTTP <interfacename>Session</interfacename>. Typically
+							    only valid when used in a portlet context. Only valid in the
+							    context of a web-aware Spring
+							    <interfacename>ApplicationContext</interfacename>.</para>
+						    </entry>
+					    </row>
+				    </tbody>
+			    </tgroup>
+		    </table>
+
+		    <section id="beans-factory-scopes-singleton">
+		        <title>The singleton scope</title>
+		        <para>When a bean is a singleton, only one <emphasis>shared</emphasis>
+		        instance of the bean will be managed and all requests for beans with
+		        an id or ids matching that bean definition will result in that one
+		        specific bean instance being returned.</para>
+		        <para>To put it another way, when you define a bean definition and it
+		        is scoped as a singleton, then the Spring IoC container will create
+		        <emphasis>exactly one</emphasis> instance of the object defined by
+		        that bean definition (or recipe). This single instance will be 
+		        stored in a singleton cache, and <emphasis>all subsequent requests
+		        and references</emphasis> for that named bean will result in the cached
+		        object instance being returned.</para>
+		        <para>The following diagram illustrates the Spring singleton scope.</para>
+		        <para>
+			        <mediaobject>
+				        <imageobject role="fo">
+					        <imagedata fileref="images/singleton.png" format="PNG" align="center" />
+				        </imageobject>
+				        <imageobject role="html">
+					        <imagedata fileref="images/singleton.png" format="PNG" align="center" />
+				        </imageobject>
+			        </mediaobject>
+		        </para>
+			    <para>Please be aware that Spring's concept of a singleton bean is quite
+			    different from the Singleton pattern as defined in the seminal Gang of
+			    Four (GoF) patterns book. The classic GoF Singleton hardcodes the scope of
+			    an object such that one <emphasis>and only one</emphasis> instance of a
+			    particular class will ever be created<emphasis> per
+			    <classname>ClassLoader</classname></emphasis>.</para>
 			    <para>The scope of the Spring singleton is best described as
-			    <emphasis>per <interfacename>ApplicationContext</interfacename> and
-			    per bean</emphasis>. This means that if you define one bean for a
-			    particular class in a single Spring container, then the Spring container
-			    will create one <emphasis>and only one</emphasis> instance of the class
-			    defined by that bean definition. This also means that you can define
-			    more than one bean definition for a single class, and then Spring will
-			    create exactly two instances of that particular class, each with their
-			    own particular configuration.</para>
-			</sidebar>
-            <para>
-				Beans are defined to be deployed in one of two scopes: singleton or
-				non-singleton. (The latter is also called a prototype, although the term
-				is used loosely as it doesn't quite fit). When a bean is a singleton,
-				only one <emphasis>shared</emphasis> instance of the bean will be
-				managed and all requests for beans with an id or ids matching that bean
-				definition will result in that one specific bean instance being
-				returned.
-			</para>
-            <para>
-				The non-singleton, prototype scope of bean deployment results in
+			    <emphasis>per <interfacename>container</interfacename> and per bean</emphasis>.
+			    This means that if you define one bean for a particular class in a single
+			    Spring container, then the Spring container will create one
+			    <emphasis>and only one</emphasis> instance of the class defined by that
+			    bean definition. This also means that you can define more than one bean
+			    definition for a single class, and then Spring will create exactly two
+			    instances of that particular class, each with their own particular
+			    configuration.</para>
+		        <para><emphasis>The singleton scope is the default scope in Spring</emphasis>.
+		        To define a bean as a singleton in XML, you would write configuration like so:</para>
+		        <programlisting><![CDATA[<bean id="accountService" class="com.foo.DefaultAccountService"/>
+
+]]><lineannotation>&lt;!-- the following is equivalent, though redundant (singleton scope is the default) --&gt;</lineannotation><![CDATA[
+<bean id="accountService" class="com.foo.DefaultAccountService" scope="singleton"/>
+
+]]><lineannotation>&lt;!-- the following is equivalent, though redundant (and preserved for backward compatibility) --&gt;</lineannotation><![CDATA[
+<bean id="accountService" class="com.foo.DefaultAccountService" singleton="true"/>]]></programlisting>
+		    </section>
+
+		    <section id="beans-factory-scopes-prototype">
+		        <title>The prototype scope</title>
+		        <para>The non-singleton, prototype scope of bean deployment results in
 				the <emphasis>creation of a new bean instance</emphasis> every time a
 				request for that specific bean is made. This is ideal for situations
-				where for example each user needs an independent user object or
-				something similar. This approach is very powerful and gives you -
-				the application developer - the flexibility to <emphasis>choose</emphasis>
-				the scope of the objects you create, and not have to 'bake in' scope
-				at the Java class level.
-			</para>
-            <para>
-				Beans are deployed in singleton scope by default, unless you
-				specify otherwise. Keep in mind that by changing the type to
-				non-singleton (prototype), each request for a bean will result in a
-				newly created bean; only change the scope to prototype when absolutely
-				necessary.</para>
-            <para>
-				In the example below, two beans are declared of which one is
-				defined as a singleton, and the other one is a non-singleton
-				(prototype). <literal>exampleBean</literal> is created each and every
-				time a client asks the <interfacename>BeanFactory</interfacename> for this bean, while
-				<literal>yetAnotherExample</literal> is only created once; a reference
-				to the exact same instance is returned on each request for this
-				bean.
-			</para>
-			<programlisting><![CDATA[<bean id="exampleBean"
-      class="examples.ExampleBean" singleton="false"/>
-<bean name="yetAnotherExample"
-      class="examples.ExampleBeanTwo" singleton="true"/>]]></programlisting>
-            <note>
-				<para>
-					When deploying a bean in the prototype scope, the lifecycle
-					of the bean changes slightly. Spring cannot manage the complete lifecycle of a
-					prototype bean, since after it is created, it is given to the client and the
-					container does not keep track of it at all any longer. You can think of Spring's
-					role when talking about a prototype bean as a replacement for the 'new'
-					operator. Any lifecycle aspects past that point have to be handled by
-					the client. The lifecycle of a bean in the <interfacename>BeanFactory</interfacename>
-					is further described in the section entitled <xref linkend="beans-factory-lifecycle" />.
-				</para>
-			</note>
+				where for example each user needs an independent object that will be
+				populated with conversational or something similar.</para>
+		        <para>The following diagram illustrates the Spring prototype scope.
+		        <emphasis>Please note that a DAO would not typically be configured as a
+		        prototype, since a typical DAO would not hold any conversational state;
+		        it was just easier for this author to reuse the core of the singleton
+		        diagram.)</emphasis></para>
+		        <para>
+			        <mediaobject>
+				        <imageobject role="fo">
+					        <imagedata fileref="images/prototype.png" format="PNG" align="center" />
+				        </imageobject>
+				        <imageobject role="html">
+					        <imagedata fileref="images/prototype.png" format="PNG" align="center" />
+				        </imageobject>
+			        </mediaobject>
+		        </para>
+		        <para>To define a bean as a prototype in XML, you would write configuration like so:</para>
+		        <programlisting><![CDATA[<bean id="accountService" class="com.foo.DefaultAccountService" scope="prototype"/>
+
+]]><lineannotation>&lt;!-- the following is equivalent too (and preserved for backward compatibility) --&gt;</lineannotation><![CDATA[
+<bean id="accountService" class="com.foo.DefaultAccountService" singleton="false"/>]]></programlisting>
+				<para>There is one quite important thing to be aware of when deploying a bean
+				in the prototype scope, in that the lifecycle of the bean changes slightly.
+				Spring cannot (and hence does not) manage the complete lifecycle of a prototype
+				bean: the container instantiates, configures, decorates and otherwise assembles a
+				prototype object, hands it to the client and then has no further knowledge of that
+				prototype instance. This means that while initialization lifecycle callback
+				methods will be (and are) called on all objects regardless of scope, in the case
+				of prototypes any configured destruction lifecycle callbacks will <emphasis>not</emphasis>
+				be called. It is the responsibility of the the client code to clean up
+				prototype scoped objects and release any expensive resources that the prototype
+				bean(s) are holding onto.</para>
+				<para>You can in some respects think of the Spring containers role when talking
+				about a prototype-scoped bean as somewhat of a replacement for the Java
+				<literal>'new'</literal> operator. Any lifecycle aspects past that point have to
+				be handled by the client. The lifecycle of a bean in a Spring IoC container is
+				further described in the section entitled
+				<xref linkend="beans-factory-lifecycle" />.</para>
+		    </section>
+
+			<section id="beans-factory-scopes-other">
+			    <title>The other scopes</title>
+			    <para>The other scopes, namely <literal>request</literal>, <literal>session</literal>,
+			    and <literal>global session</literal> are for use only in web-based applications
+			    (and can be used irrespective of which particular web application framework you are
+			    using, if indeed any). In the interest of keeping related concepts together in
+			    one place in the reference documentation, these scopes are described here.</para>
+			    <note>
+			        <para>The scopes that are described in the following paragraphs are
+			        <emphasis>only</emphasis> available if you are using a web-aware
+			        Spring <interfacename>ApplicationContext</interfacename> implementation
+			        (such as <classname>XmlWebApplicationContext</classname>).
+			        If you try using these next scopes with regular Spring IoC containers such as
+			        <classname>XmlBeanFactory</classname> or
+			        <classname>ClassPathXmlApplicationContext</classname> you <emphasis>will</emphasis>
+			        get an <classname>IllegalStateException</classname> complaining about
+			        an unknown bean scope.</para>
+			    </note>
+
+			    <section id="beans-factory-scopes-other-web-configuration">
+			        <title>Initial web configuration</title>
+                    <para>In order to effect the scoping of beans at the <literal>request</literal>,
+                    <literal>session</literal>, and <literal>global session</literal> level
+                    (i.e. web-scoped beans), some initial (small) configuration is required
+                    before you can set about defining your bean definitions. Please note that
+                    this extra setup is <emphasis>not</emphasis> required if you just want the
+                    'normal' (for want of a better word) scopes; i.e. singleton and prototype.</para>
+                    <para>Now as things stand, there are a couple of ways to effect this
+                    initial setup depending on your particular servlet environment. If you are
+                    using a Servlet 2.4+ web container, then you need only add the following
+                    <interfacename>ContextListener</interfacename> to the XML declarations in
+                    your web applications <literal>'web.xml'</literal> file.</para>
+                    <programlisting><![CDATA[<web-app>
+  ...
+  <listener>
+    <listener-class>org.springframework.web.context.scope.RequestContextListener</listener-class>
+  </listener>
+  ...
+</web-app>]]></programlisting>
+                    <para>If you are using a Servlet 2.3+ web container, you will need to use
+                    a (provided) <interfacename>javax.servlet.Filter</interfacename> implementation.
+                    Find below a snippet of XML configuration that has to be included
+                    in the <literal>'web.xml'</literal> file of your web application if you
+                    want to have access to web-scoped beans. (The filter settings depend on
+                    the surrounding web application configuration and so you will have to change
+                    them as appropriate.)</para>
+                    <programlisting><![CDATA[<web-app>
+  ..
+  <filter> 
+    <filter-name>requestContextFilter</filter-name> 
+    <filter-class>org.springframework.web.filter.RequestContextFilter</filter-class>
+  </filter> 
+  <filter-mapping> 
+    <filter-name>requestContextFilter</filter-name> 
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  ...
+</web-app>]]></programlisting>
+                    <para>That's it. The <classname>RequestContextListener</classname> and
+                    <classname>RequestContextFilter</classname> classes both do exactly the
+                    same thing, namely bind the HTTP request object to the
+                    <classname>Thread</classname> that is servicing that request. This makes
+                    beans that are request- and session-scoped available further down the
+                    call chain.</para>
+			    </section>
+
+			    <section id="beans-factory-scopes-request">
+			        <title>The request scope</title>
+                    <para>Consider the following bean definition:</para>
+                    <programlisting><![CDATA[<bean id="loginAction" class="com.foo.LoginAction" scope="request"/>]]></programlisting>
+                    <para>With the above bean definition in place, the Spring container will create
+                    a brand new instance of the <classname>LoginAction</classname> bean
+                    using the <literal>'loginAction'</literal> bean definition for each and
+                    every HTTP request. That is, the <literal>'loginAction'</literal> bean will be
+                    effectively scoped at the HTTP request level. You can change or dirty
+                    the internal state of the instance that is created as much as you want,
+                    safe in the knowledge that other requests that are also using instances created
+                    off the back of the same <literal>'loginAction'</literal> bean definition
+                    will not be seeing these changes in state particular to an individual
+                    request. When the request is finished processing, the bean that is scoped
+                    to the request will be thrown away (roughly speaking).</para>
+			    </section>
+
+			    <section id="beans-factory-scopes-session">
+			        <title>The session scope</title>
+                    <para>Consider the following bean definition:</para>
+                    <programlisting><![CDATA[<bean id="userPreferences" class="com.foo.UserPreferences" scope="session"/>]]></programlisting>
+                    <para>With the above bean definition in place, the Spring container will create
+                    a brand new instance of the <classname>UserPreferences</classname> bean
+                    using the <literal>'userPreferences'</literal> bean definition for the
+                    lifetime of a single HTTP <interfacename>Session</interfacename>.
+                    In other words, the <literal>'userPreferences'</literal> bean will be
+                    effectively scoped at the HTTP <interfacename>Session</interfacename> level.
+                    Just like <literal>request-scoped</literal> beans you can change the internal
+                    state of the instance that is created as much as you want, safe in the
+                    knowledge that other HTTP <interfacename>Session</interfacename> instances
+                    that are also using instances created off the back of the same
+                    <literal>'userPreferences'</literal> bean definition
+                    will not be seeing these changes in state particular to an individual
+                    HTTP <interfacename>Session</interfacename>. When the HTTP
+                    <interfacename>Session</interfacename> is eventually discarded, the bean
+                    that is scoped to that particular HTTP <interfacename>Session</interfacename>
+                    will be thrown away (in a manner of speaking).</para>
+			    </section>
+
+			    <section id="beans-factory-scopes-global-session">
+			        <title>The global session scope</title>
+                    <para>Consider the following bean definition:</para>
+                    <programlisting><![CDATA[<bean id="userPreferences" class="com.foo.UserPreferences" scope="globalSession"/>]]></programlisting>
+                    <para>The <literal>global session</literal> scope is similar to the
+                    standard HTTP <interfacename>Session</interfacename> scope
+                    (<link linkend="beans-factory-scopes-session">described immediately above</link>),
+                    and really only makes sense in the context of portlet-based web applications.
+                    The portlet specification defines the notion of a global
+                    <interfacename>Session</interfacename> that is shared amongst all
+                    of the various portlets that make up a single portlet web application.
+                    Beans defined at the <literal>global session</literal> scope are scoped
+                    (or bound) to the lifetime of the global portlet
+                    <interfacename>Session</interfacename>.</para>
+                    <para>Please note that if you are writing a standard Servlet-based
+                    web application and you define one or more beans as having
+                    <literal>global session</literal> scope, the standard HTTP
+                    <interfacename>Session</interfacename> scope will be used, and no
+                    error will be raised.</para>
+			    </section>
+
+			    <section id="beans-factory-scopes-other-injection">
+			        <title>Scoped beans as dependencies</title>
+			        <para>Being able to define a bean scoped to a HTTP request or
+			        <interfacename>Session</interfacename> (or indeed
+			        <link linkend="beans-factory-scopes-custom">a custom scope</link>  of
+			        your own devising)is all very well, but one of the
+			        main valud-adds of the Spring IoC container is that it manages the
+			        not only the instantiation of your objects (beans), but also
+			        the wiring up of collaborators (or dependencies). If you want to inject
+			        a bean that, for the sake of argument is scoped at the HTTP request scope,
+			        into another bean, you will need to inject an AOP proxy in place of the
+			        scoped bean. That is to say, you need to inject a proxy object
+			        that exposes the same public interface as the scoped object, but that is
+			        smart enough to be able to retrieve the real, target object from
+			        the relevant scope (for example a HTTP request) and delegate
+			        method calls onto the real object.</para>
+                    <para>Let's look at the configuration that is required to effect this;
+                    it's not hugely difficult (one line), but it is important to understand
+                    the <quote>why</quote> as well as the <quote>how</quote>.</para>
+                    <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    ]]><lineannotation>&lt;!-- a HTTP <interfacename>Session</interfacename>-scoped bean exposed as a proxy --&gt;</lineannotation><![CDATA[
+    <bean id="userPreferences" class="com.foo.UserPreferences" ]]><emphasis role="bold">scope="session"</emphasis>&gt;
+          
+          <lineannotation>&lt;!-- this next element effects the proxying of the surrounding bean --&gt;</lineannotation>
+          <emphasis role="bold">&lt;aop:scoped-proxy/&gt;</emphasis><![CDATA[
+    </bean>
+    
+    ]]><lineannotation>&lt;!-- a singleton-scoped bean <emphasis role="bold">injected with a proxy to the above bean</emphasis> --&gt;</lineannotation><![CDATA[
+    <bean id="userService" class="com.foo.SimpleUserService">
+    
+        ]]><lineannotation>&lt;!-- a reference to the <emphasis role="bold">proxied</emphasis> <literal>'userPreferences'</literal> bean --&gt;</lineannotation><![CDATA[
+        <property name="userPreferences" ref="userPreferences"/>
+
+    </bean>
+</beans>
+]]></programlisting>
+                    <para>To create a proxy to a scoped bean using XML-based configuration, one need
+                    only insert a child <literal>&lt;aop:scoped-proxy/&gt;</literal> element into a
+                    scoped bean definition. It is an error to try to create a scoped proxy for a
+                    singleton bean (and the resulting <classname>BeanCreationException</classname>
+                    will certainly set you straight in this regard).</para>
+			    </section>
+			</section>
+			<section id="beans-factory-scopes-custom">
+			    <title>Custom scopes</title>
+			    <para>As of Spring 2.0, the bean scoping mechanism in Spring is extensible.
+			    This means that you are not limited to just the bean scopes that Spring
+			    provides out of the box; you can define your own scopes, or even redefine
+			    the existing scopes (although that last one would probably be considered
+			    bad practice).</para>
+			    <para>Scopes are defined by the
+			    <interfacename>org.springframework.beans.factory.config.Scope</interfacename>
+			    interface. This is the interface that you will need to implement in order
+			    to integrate your own custom scope(s) into the Spring container. The interface
+			    itself is quite simple, with two methods to get and remove an object from/to
+			    an underlying storage mechanism respectively. Possible custom scopes are
+			    beyond the scope of this reference manual. You may wish to look at the
+			    <interfacename>Scope</interfacename> implementations that are supplied with
+			    Spring for an idea of how to go about writing your own implementation.</para>
+			    <para>The remainder of this section details how, after you have written and
+			    tested one or more custom <interfacename>Scope</interfacename> implementations,
+			    you then go about making the Spring container aware of your new scope. The
+			    central method to register a new <interfacename>Scope</interfacename> with the
+			    Spring container is declared on the <interfacename>ConfigurableBeanFactory</interfacename>
+			    interface (implemented by most of the concrete <interfacename>BeanFactory</interfacename>
+			    implementations that ship with Spring); this central method is displayed below:</para>
+			    <programlisting><![CDATA[void registerScope(String scopeName, Scope scope);]]></programlisting>
+			    <para>The first argument to the <literal>registerScope(..)</literal> method is the
+			    unique name associated with a scope; examples of such names in the Spring container
+			    itself are <literal>'singleton'</literal> and <literal>'prototype'</literal>.
+			    The second argument to the <literal>registerScope(..)</literal> method is an
+			    actual instance of the custom <interfacename>Scope</interfacename> implementation
+			    that you wish to register and use.</para>
+			    <para>Let's assume that you have written your own custom
+			    <interfacename>Scope</interfacename> implementation, and you have registered it
+			    like so:</para>
+			    <programlisting><lineannotation>// the <classname>ThreadScope</classname> does <emphasis role="bold">not</emphasis> exist; I just made it up for the sake of this example</lineannotation><![CDATA[
+Scope customScope = new ThreadScope();
+beanFactory.registerScope("]]><emphasis role="bold">thread</emphasis><![CDATA[", scope);]]></programlisting>
+                <para>You can then create bean definitions that adhere to the scoping rules of your
+                custom <interfacename>Scope</interfacename> like so:</para>
+                <programlisting>&lt;bean id="..." class="..." <emphasis role="bold">scope="thread"</emphasis>/&gt;</programlisting>
+                <para>If you have your own custom <interfacename>Scope</interfacename> implementation(s),
+                you are not just limited to only programmatic registration of said custom scope(s).
+                You can also do the <interfacename>Scope</interfacename> registration declaratively,
+                using a custom <interfacename>BeanFactoryPostProcessor</interfacename>
+                implementation, the <classname>CustomScopeConfigurer</classname> class. The
+                <interfacename>BeanFactoryPostProcessor</interfacename> interface is one of the
+                primary means of extending the Spring IoC container, and is described in a
+                <link linkend="beans-factory-customizing-factory-postprocessors">later section</link>
+                of this very chapter.</para>
+                <para>The declarative registration of custom <interfacename>Scope</interfacename>
+                implementations using the <classname>CustomScopeConfigurer</classname> class is
+                shown below:</para>
+                <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
+        <property name="scopes">
+            <map>
+                ]]><emphasis role="bold">&lt;entry key="thread" value="com.foo.ThreadScope"/&gt;</emphasis><![CDATA[
+            </map>
+        </property>
+    </bean>
+
+    <bean id="bar" class="x.y.Bar" ]]><emphasis role="bold">scope="thread"</emphasis><![CDATA[>
+        <property name="name" value="Rick"/>
+        <aop:scoped-proxy/>
+    </bean>
+
+    <bean id="foo" class="x.y.Foo">
+        <property name="bar" ref="bar"/>
+    </bean>
+
+</beans>]]></programlisting>
+                <para>The <classname>CustomScopeConfigurer</classname> also allows you to specify
+                actual <classname>Class</classname> instances as entry values, as well as
+                actual <interfacename>Scope</interfacename> implementation instances; see the
+                Javadocs for the <classname>CustomScopeConfigurer</classname> class for details.</para>
+			</section>
         </section>
     </section>
     <section id="beans-dependencies">
@@ -622,7 +987,7 @@ BeanFactory factory = (BeanFactory) ctx;]]></programlisting>
             <title>Setting bean properties and collaborators</title>
             <para>
 				The basic principle behind <emphasis>Dependency Injection</emphasis> (DI)
-				is that object define their dependencies (i.e. the other objects they work
+				is that objects define their dependencies (i.e. the other objects they work
 				with) only through constructor arguments, arguments to a factory method, or
 				properties which are set on the object instance after it has been
 				constructed or returned from a factory method. Then, it is the job of
@@ -2413,44 +2778,50 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
     XmlBeanFactory. In an XmlBeanFactory bean definition, a child bean
     definition is indicated simply by using the <literal>parent</literal>
     attribute, specifying the parent bean as the value of this
-    attribute.<programlisting>&lt;bean id="inheritedTestBean" abstract="true"
-    class="org.springframework.beans.TestBean"&gt;
-  &lt;property name="name" value="parent"/&gt;
-  &lt;property name="age" value="1"/&gt;
-&lt;/bean&gt;
+    attribute.</para>
+        
+        <programlisting><![CDATA[<bean id="inheritedTestBean" abstract="true"
+    class="org.springframework.beans.TestBean">
+  <property name="name" value="parent"/>
+  <property name="age" value="1"/>
+</bean>
 
-&lt;bean id="inheritsWithDifferentClass"
+<bean id="inheritsWithDifferentClass"
     class="org.springframework.beans.DerivedTestBean"
-    parent="inheritedTestBean" init-method="initialize"&gt;
-  &lt;property name="name" value="override"/&gt;
-  &lt;!-- age should inherit value of 1 from parent --&gt;
-&lt;/bean&gt;</programlisting></para>
+    parent="inheritedTestBean" init-method="initialize">
+  <property name="name" value="override"/>
+  ]]><lineannotation>&lt;!-- age will inherit value of 1 from parent --&gt;</lineannotation><![CDATA[
+</bean>]]></programlisting>
+        
         <para>A child bean definition will use the bean class from the parent
-    definition if none is specified, but can also override it. In the latter
-    case, the child bean class must be compatible with the parent, i.e. it
-    must accept the parent's property values.</para>
+        definition if none is specified, but can also override it. In the latter
+        case, the child bean class must be compatible with the parent, i.e. it
+        must accept the parent's property values.</para>
         <para>A child bean definition will inherit constructor argument values,
-    property values and method overrides from the parent, with the option to
-    add new values. If init method, destroy method and/or static factory
-    method are specified, they will override the corresponding parent
-    settings.</para>
+        property values and method overrides from the parent, with the option to
+        add new values. If init method, destroy method and/or static factory
+        method are specified, they will override the corresponding parent
+        settings.</para>
         <para>The remaining settings will <emphasis>always</emphasis> be taken
-    from the child definition: <emphasis>depends on</emphasis>,
-    <emphasis>autowire mode</emphasis>, <emphasis>dependency check</emphasis>,
-    <emphasis>singleton</emphasis>, <emphasis>lazy init</emphasis>.</para>
+        from the child definition: <emphasis>depends on</emphasis>,
+        <emphasis>autowire mode</emphasis>, <emphasis>dependency check</emphasis>,
+        <emphasis>singleton</emphasis>, <emphasis>lazy init</emphasis>.</para>
         <para>Note that in the example above, we have explicitly marked the parent
-    bean definition as <emphasis>abstract</emphasis> by using the
-    <emphasis>abstract</emphasis> attribute. In the case that the parent
-    definition does not specify a class:<programlisting>&lt;bean id="inheritedTestBeanWithoutClass"&gt;
-    &lt;property name="name" value="parent"/&gt;
-    &lt;property name="age" value="1"/&gt;
-&lt;/bean&gt;
+        bean definition as <emphasis>abstract</emphasis> by using the
+        <emphasis>abstract</emphasis> attribute. In the case that the parent
+        definition does not specify a class:</para>
+    
+        <programlisting><![CDATA[<bean id="inheritedTestBeanWithoutClass">
+    <property name="name" value="parent"/>
+    <property name="age" value="1"/>
+</bean>
 
-&lt;bean id="inheritsWithClass" class="org.springframework.beans.DerivedTestBean"
-    parent="inheritedTestBeanWithoutClass" init-method="initialize"&gt;
-  &lt;property name="name" value="override"/&gt;
-  &lt;!-- age should inherit value of 1 from parent --&gt;
-&lt;/bean&gt;</programlisting></para>
+<bean id="inheritsWithClass" class="org.springframework.beans.DerivedTestBean"
+    parent="inheritedTestBeanWithoutClass" init-method="initialize">
+  <property name="name" value="override"/>
+  ]]><lineannotation>&lt;!-- age will inherit value of 1 from parent --&gt;</lineannotation><![CDATA[
+</bean>]]></programlisting>
+
         <para>the parent bean cannot get instantiated on its own since it is
     incomplete, and it's also considered abstract. When a definition is
     considered abstract like this (explicitly or implicitly), it's usable just
@@ -2461,31 +2832,37 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
     an error. Similarly, the container's internal
     <emphasis>preInstantiateSingletons</emphasis> method will completely
     ignore bean definitions which are considered abstract.</para>
-        <para><emphasis>Important Note</emphasis>: Application contexts (but not
-    simple bean factories) will by default pre-instantiate all singletons.
-    Therefore it is important (at least for singleton beans) that if you have
-    a (parent) bean definition which you intend to use only as a template, and
-    this definition specifies a class, you must make sure to set the
-    <emphasis>abstract</emphasis> attribute to <emphasis>true</emphasis>,
-    otherwise the application context will actually pre-instantiate it.</para>
+        
+        <note>
+        <para>Application contexts (but <emphasis>not</emphasis>
+        simple bean factories) will by default pre-instantiate all singletons.
+        Therefore it is important (at least for singleton beans) that if you have
+        a (parent) bean definition which you intend to use only as a template, and
+        this definition specifies a class, you must make sure to set the
+        <emphasis>abstract</emphasis> attribute to <emphasis>true</emphasis>,
+        otherwise the application context will actually pre-instantiate it.</para>
+        </note>
     </section>
     <section id="beans-factory-client">
-        <title>Interacting with the BeanFactory</title>
+        <title>Interacting with the <interfacename>BeanFactory</interfacename></title>
         <para>A <interfacename>BeanFactory</interfacename> is essentially nothing more than the interface for an
     advanced factory capable of maintaining a registry of different beans and
     their dependencies. The <interfacename>BeanFactory</interfacename> enables you to read bean definitions
-    and access them using the bean factory. When using just the BeanFactory
+    and access them using the bean factory. When using just the <interfacename>BeanFactory</interfacename>
     you would create one and read in some bean definitions in the XML format
-    as follows: <programlisting>InputStream is = new FileInputStream("beans.xml");
-XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
+    as follows:</para>
+    
+        <programlisting><![CDATA[InputStream is = new FileInputStream("beans.xml");
+XmlBeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
+
         <para>Basically that's all there is to it. Using
-    <literal>getBean(String)</literal> you can retrieve instances of your
-    beans. You'll get a reference to the same bean if you defined it as a
-    singleton (the default) or you'll get a new instance each time if you set
-    <literal>singleton</literal> to <emphasis>false</emphasis>. The
-    client-side view of the <interfacename>BeanFactory</interfacename> is surprisingly simple. The
-    <interfacename>BeanFactory</interfacename> interface has only five methods for clients
-    to call: <itemizedlist spacing="compact">
+        <literal>getBean(String)</literal> you can retrieve instances of your
+        beans. You'll get a reference to the same bean if you defined it as a
+        singleton (the default) or you'll get a new instance each time if you set
+        <literal>singleton</literal> to <emphasis>false</emphasis>. The
+        client-side view of the <interfacename>BeanFactory</interfacename> is surprisingly simple. The
+        <interfacename>BeanFactory</interfacename> interface has only five methods for clients
+        to call: <itemizedlist spacing="compact">
                 <listitem>
                     <para><literal>boolean containsBean(String)</literal>: returns true
           if the <interfacename>BeanFactory</interfacename> contains a bean definition or bean instance that
@@ -2493,73 +2870,73 @@ XmlBeanFactory factory = new XmlBeanFactory(is);</programlisting></para>
                 </listitem>
                 <listitem>
                     <para><literal>Object getBean(String)</literal>: returns an instance
-          of the bean registered under the given name. Depending on how the
-          bean was configured by the <interfacename>BeanFactory</interfacename> configuration, either a
-          singleton and thus shared instance or a newly created bean will be
-          returned. A <literal>BeansException</literal> will be thrown when
-          either the bean could not be found (in which case it'll be a
-          <literal>NoSuchBeanDefinitionException</literal>), or an exception
-          occurred while instantiating and preparing the bean</para>
+                    of the bean registered under the given name. Depending on how the
+                    bean was configured by the <interfacename>BeanFactory</interfacename> configuration, either a
+                    singleton and thus shared instance or a newly created bean will be
+                    returned. A <literal>BeansException</literal> will be thrown when
+                    either the bean could not be found (in which case it'll be a
+                    <literal>NoSuchBeanDefinitionException</literal>), or an exception
+                    occurred while instantiating and preparing the bean</para>
                 </listitem>
                 <listitem>
                     <para><literal>Object getBean(String,Class)</literal>: returns a
-          bean, registered under the given name. The bean returned will be
-          cast to the given Class. If the bean could not be cast,
-          corresponding exceptions will be thrown
-          (<literal>BeanNotOfRequiredTypeException</literal>). Furthermore,
-          all rules of the getBean(String) method apply (see above)</para>
+                    bean, registered under the given name. The bean returned will be
+                    cast to the given Class. If the bean could not be cast,
+                    corresponding exceptions will be thrown
+                    (<classname>BeanNotOfRequiredTypeException</classname>). Furthermore,
+                    all rules of the getBean(String) method apply (see above)</para>
                 </listitem>
                 <listitem>
                     <para><literal>boolean isSingleton(String)</literal>: determines
-          whether or not the bean definition or bean instance registered under
-          the given name is a singleton or a prototype. If no bean
-          corresponding to the given name could not be found, an exception
-          will be thrown
-          (<literal>NoSuchBeanDefinitionException</literal>)</para>
+                    whether or not the bean definition or bean instance registered under
+                    the given name is a singleton or a prototype. If no bean
+                    corresponding to the given name could not be found, an exception
+                    will be thrown
+                    (<classname>NoSuchBeanDefinitionException</classname>)</para>
                 </listitem>
                 <listitem>
                     <para><literal>String[] getAliases(String)</literal>: Return the
-          aliases for the given bean name, if any were defined in the bean
-          definition</para>
+                    aliases for the given bean name, if any were defined in the bean
+                    definition</para>
                 </listitem>
             </itemizedlist></para>
         <section>
-            <title>Obtaining a FactoryBean, not its product</title>
+            <title>Obtaining a <interfacename>FactoryBean</interfacename>, not its product</title>
             <para>Sometimes there is a need to ask a <interfacename>BeanFactory</interfacename> for an actual
-      FactoryBean instance itself, not the bean it produces. This may be done
-      by prepending the bean id with <literal>&amp;</literal> when calling the
-      <methodname>getBean</methodname> method of <interfacename>BeanFactory</interfacename> (including
-      ApplicationContext). So for a given FactoryBean with an id
-      <literal>myBean</literal>, invoking <literal>getBean("myBean")</literal>
-      on the <interfacename>BeanFactory</interfacename> will return the product of the FactoryBean, but
-      invoking <literal>getBean("&amp;myBean")</literal> will return the
-      FactoryBean instance itself.</para>
+            <interfacename>FactoryBean</interfacename> instance itself, not the bean it produces. This may be done
+            by prepending the bean id with <literal>&amp;</literal> when calling the
+            <methodname>getBean</methodname> method of <interfacename>BeanFactory</interfacename> (including
+            <interfacename>ApplicationContext</interfacename>). So for a given <interfacename>FactoryBean</interfacename> with an id
+            <literal>myBean</literal>, invoking <literal>getBean("myBean")</literal>
+            on the <interfacename>BeanFactory</interfacename> will return the product of the <interfacename>FactoryBean</interfacename>, but
+            invoking <literal>getBean("&amp;myBean")</literal> will return the
+            <interfacename>FactoryBean</interfacename> instance itself.</para>
         </section>
     </section>
     <section id="beans-factory-customizing">
         <title>Customizing beans with BeanPostProcessors</title>
         <para>A bean post-processor is a java class which implements the
-    <literal>org.springframework.beans.factory.config.BeanPostProcessor</literal>
-    interface, which consists of two callback methods. When such a class is
-    registered as a post-processor with the <interfacename>BeanFactory</interfacename>, for each bean
-    instance that is created by the <interfacename>BeanFactory</interfacename>, the post-processor will get a
-    callback from the <interfacename>BeanFactory</interfacename> before any initialization methods
-    (<emphasis>afterPropertiesSet</emphasis> and any declared init method) are
-    called, and also afterwards. The post-processor is free to do what it
-    wishes with the bean, including ignoring the callback completely. A bean
-    post-processor will typically check for marker interfaces, or do something
-    such as wrap a bean with a proxy. Some Spring helper classes are
-    implemented as bean post-processors.</para>
+        <interfacename>org.springframework.beans.factory.config.BeanPostProcessor</interfacename>
+        interface, which consists of two callback methods. When such a class is
+        registered as a post-processor with the <interfacename>BeanFactory</interfacename>, for each bean
+        instance that is created by the <interfacename>BeanFactory</interfacename>, the post-processor will get a
+        callback from the <interfacename>BeanFactory</interfacename> before any initialization methods
+        (<emphasis>afterPropertiesSet</emphasis> and any declared init method) are
+        called, and also afterwards. The post-processor is free to do what it
+        wishes with the bean, including ignoring the callback completely. A bean
+        post-processor will typically check for marker interfaces, or do something
+        such as wrap a bean with a proxy. Some Spring helper classes are
+        implemented as bean post-processors.</para>
         <para>It is important to know that a <interfacename>BeanFactory</interfacename> treats bean
-    post-processors slightly differently than an ApplicationContext. An
-    <interfacename>ApplicationContext</interfacename> will automatically detect any beans which are deployed
-    into it which implement the <literal>BeanPostProcessor</literal>
-    interface, and register them as post-processors, to be then called
-    appropriately by the factory on bean creation. Nothing else needs to be
-    done other than deploying the post-processor in a similar fashion to any
-    other bean. On the other hand, when using plain BeanFactories, bean
-    post-processors have to manually be <emphasis>explicitly</emphasis>
-    registered, with a code sequence such as the following:</para>
+        post-processors slightly differently than an ApplicationContext. An
+        <interfacename>ApplicationContext</interfacename> will automatically detect any beans which are deployed
+        into it which implement the <literal>BeanPostProcessor</literal>
+        interface, and register them as post-processors, to be then called
+        appropriately by the factory on bean creation. Nothing else needs to be
+        done other than deploying the post-processor in a similar fashion to any
+        other bean. On the other hand, when using plain BeanFactories, bean
+        post-processors have to manually be <emphasis>explicitly</emphasis>
+        registered, with a code sequence such as the following:</para>
         <programlisting><![CDATA[ConfigurableBeanFactory bf = new .....;     // create BeanFactory
    // now register some beans...
 // now register any needed BeanPostProcessors
@@ -2569,34 +2946,34 @@ bf.addBeanPostProcessor(pp);
 // now start using the factory
   ...]]></programlisting>
         <para>Since this manual registration step is not convenient, and
-    ApplicationContexts are functionally supersets of BeanFactories, it is
-    generally recommended that <interfacename>ApplicationContext</interfacename> implementations are used when bean
-    post-processors are needed.</para>
+        ApplicationContexts are functionally supersets of BeanFactories, it is
+        generally recommended that <interfacename>ApplicationContext</interfacename> implementations are used when bean
+        post-processors are needed.</para>
     </section>
     <section id="beans-factory-customizing-factory-postprocessors">
         <title>Customizing bean factories with BeanFactoryPostProcessors</title>
         <para>A bean factory post-processor is a java class which implements the
-    <literal>org.springframework.beans.factory.config.BeanFactoryPostProcessor</literal>
-    interface. It is executed manually (in the case of the BeanFactory) or
-    automatically (in the case of the ApplicationContext) to apply changes of
-    some sort to an entire <interfacename>BeanFactory</interfacename>, after it has been constructed. Spring
-    includes a number of pre-existing bean factory post-processors, such as
-    <literal>PropertyResourceConfigurer</literal> and
-    <literal>PropertyPlaceHolderConfigurer</literal>, both described below,
-    and <literal>BeanNameAutoProxyCreator</literal>, very useful for wrapping
-    other beans transactionally or with any other kind of proxy, as described
-    later in this manual. The BeanFactoryPostProcessor can be used to add
-    custom editors (as also mentioned in <xref linkend="beans-beanfactory-customeditors" />).</para>
+        <interfacename>org.springframework.beans.factory.config.BeanFactoryPostProcessor</interfacename>
+        interface. It is executed manually (in the case of the BeanFactory) or
+        automatically (in the case of the ApplicationContext) to apply changes of
+        some sort to an entire <interfacename>BeanFactory</interfacename>, after it has been constructed. Spring
+        includes a number of pre-existing bean factory post-processors, such as
+        <classname>PropertyResourceConfigurer</classname> and
+        <classname>PropertyPlaceHolderConfigurer</classname>, both described below,
+        and <classname>BeanNameAutoProxyCreator</classname>, very useful for wrapping
+        other beans transactionally or with any other kind of proxy, as described
+        later in this manual. The <interfacename>BeanFactoryPostProcessor</interfacename> can be used to add
+        custom editors (as also mentioned in <xref linkend="beans-beanfactory-customeditors" />).</para>
         <para>In a <interfacename>BeanFactory</interfacename>, the process of applying a BeanFactoryPostProcessor
-    is manual, and will be similar to this:</para>
+        is manual, and will be similar to this:</para>
         <para>
-            <programlisting>XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
+        <programlisting><![CDATA[XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
 // create placeholderconfigurer to bring in some property
 // values from a Properties file
 PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
 cfg.setLocation(new FileSystemResource("jdbc.properties"));
 // now actually do the replacement
-cfg.postProcessBeanFactory(factory);</programlisting>
+cfg.postProcessBeanFactory(factory);]]></programlisting>
         </para>
         <para><anchor id="beans-factory-autodetect-beanfactorypostprocessors" />An
     <interfacename>ApplicationContext</interfacename> will detect any beans which are deployed into it which
@@ -2641,10 +3018,10 @@ jdbc.password=root]]></programlisting>
 				To use this with a <interfacename>BeanFactory</interfacename>, the bean
 				factory post-processor is manually executed on it:
 			</para>
-            <programlisting>XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
+            <programlisting><![CDATA[XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
 PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
 cfg.setLocation(new FileSystemResource("jdbc.properties"));
-cfg.postProcessBeanFactory(factory);</programlisting>
+cfg.postProcessBeanFactory(factory);]]></programlisting>
             <para>
 				Note that <interfacename>ApplicationContext</interfacename> instances are able to automatically recognize
 				and apply beans deployed in them which implement
@@ -2670,18 +3047,18 @@ cfg.postProcessBeanFactory(factory);</programlisting>
         <section id="beans-factory-overrideconfigurer">
             <title>The <literal>PropertyOverrideConfigurer</literal></title>
             <para>The <literal>PropertyOverrideConfigurer</literal>, another bean
-      factory post-processor, is similar to the
-      <interfacename>PropertyPlaceholderConfigurer</interfacename>, but in contrast to the
-      latter, the original definitions can have default values or no values at
-      all for bean properties. If an overriding Properties file does not have
-      an entry for a certain bean property, the default context definition is
-      used.</para>
+            factory post-processor, is similar to the
+            <interfacename>PropertyPlaceholderConfigurer</interfacename>, but in contrast to the
+            latter, the original definitions can have default values or no values at
+            all for bean properties. If an overriding Properties file does not have
+            an entry for a certain bean property, the default context definition is
+            used.</para>
             <para>Note that the bean factory definition is <emphasis>not</emphasis>
-      aware of being overridden, so it is not immediately obvious when looking
-      at the XML definition file that the override configurer is being used.
-      In case that there are multiple <classname>PropertyOverrideConfigurer</classname> instances that define
-      different values for the same bean property, the last one will win (due
-      to the overriding mechanism).</para>
+            aware of being overridden, so it is not immediately obvious when looking
+            at the XML definition file that the override configurer is being used.
+            In case that there are multiple <classname>PropertyOverrideConfigurer</classname> instances that define
+            different values for the same bean property, the last one will win (due
+            to the overriding mechanism).</para>
             <para>
 				Properties file configuration lines are expected to be in the format:
 			</para>
@@ -2692,79 +3069,79 @@ cfg.postProcessBeanFactory(factory);</programlisting>
 			<programlisting><![CDATA[dataSource.driverClassName=com.mysql.jdbc.Driver
 dataSource.url=jdbc:mysql:mydb]]></programlisting>
             <para>This example file would be usable against a <interfacename>BeanFactory</interfacename> definition
-      which contains a bean in it called <emphasis>dataSource</emphasis>,
-      which has <emphasis>driver</emphasis> and <emphasis>url</emphasis>
-      properties.</para>
+            which contains a bean in it called <emphasis>dataSource</emphasis>,
+            which has <emphasis>driver</emphasis> and <emphasis>url</emphasis>
+            properties.</para>
             <para>Note that compound property names are also supported, as long as
-      every component of the path except the final property being overriden is
-      already non-null (presumably initialized by the constructors). In this
-      example:</para>
+            every component of the path except the final property being overriden is
+            already non-null (presumably initialized by the constructors). In this
+            example:</para>
             <para><programlisting>foo.fred.bob.sammy=123</programlisting>the
-      <literal>sammy</literal> property of the <literal>bob</literal> property
-      of the <literal>fred</literal> property of the <literal>foo</literal>
-      bean is being set to the scalar value 123.</para>
+            <literal>sammy</literal> property of the <literal>bob</literal> property
+            of the <literal>fred</literal> property of the <literal>foo</literal>
+            bean is being set to the scalar value <literal>123</literal>.</para>
         </section>
     </section>
     <section id="beans-beanfactory-customeditors">
         <title>Registering additional custom PropertyEditors</title>
         <para>When setting bean properties as a string value, a BeanFactory
-    ultimately uses standard JavaBeans PropertyEditors to convert these
-    Strings to the complex type of the property. Spring pre-registers a number
-    of custom PropertyEditors (for example, to convert a classname expressed
-    as a string into a real <classname>Class</classname> object). Additionally, Java's standard
-    JavaBeans <interfacename>PropertyEditor</interfacename> lookup mechanism allows a PropertyEditor for a
-    class to be simply named appropriately and placed in the same package as
-    the class it provides support for, to be found automatically.</para>
+        ultimately uses standard JavaBeans PropertyEditors to convert these
+        Strings to the complex type of the property. Spring pre-registers a number
+        of custom PropertyEditors (for example, to convert a classname expressed
+        as a string into a real <classname>Class</classname> object). Additionally, Java's standard
+        JavaBeans <interfacename>PropertyEditor</interfacename> lookup mechanism allows a PropertyEditor for a
+        class to be simply named appropriately and placed in the same package as
+        the class it provides support for, to be found automatically.</para>
         <para>If there is a need to register other custom PropertyEditors, there
-    are several mechanisms available.</para>
+        are several mechanisms available.</para>
         <para>The most manual approach, which is not normally convenient or
-    recommended, is to simply use the
-    <literal>registerCustomEditor()</literal> method of the
-    <interfacename>ConfigurableBeanFactory</interfacename> interface, assuming you have a
-    <interfacename>BeanFactory</interfacename> reference.</para>
+        recommended, is to simply use the
+        <literal>registerCustomEditor()</literal> method of the
+        <interfacename>ConfigurableBeanFactory</interfacename> interface, assuming you have a
+        <interfacename>BeanFactory</interfacename> reference.</para>
         <para>The more convenient mechanism is to use a special bean factory
-    post-processor called <classname>CustomEditorConfigurer</classname>. Although
-    bean factory post-processors can be used semi-manually with <interfacename>BeanFactory</interfacename> implementations,
-    this one has a nested property setup, so it is strongly recommended that,
-    as described <link linkend="beans-applicationcontext-customeditors">here</link>, it is used
-    with the <interfacename>ApplicationContext</interfacename>, where it may be deployed in similar fashion
-    to any other bean, and automatically detected and applied.</para>
+        post-processor called <classname>CustomEditorConfigurer</classname>. Although
+        bean factory post-processors can be used semi-manually with <interfacename>BeanFactory</interfacename> implementations,
+        this one has a nested property setup, so it is strongly recommended that,
+        as described <link linkend="beans-applicationcontext-customeditors">here</link>, it is used
+        with the <interfacename>ApplicationContext</interfacename>, where it may be deployed in similar fashion
+        to any other bean, and automatically detected and applied.</para>
         <para>Note that all bean factories and application contexts automatically
-    use a number of built-in property editors, through their use of something
-    called a <interfacename>BeanWrapper</interfacename> to handle property conversions.
-    The standard property editors that the <interfacename>BeanWrapper</interfacename> registers are listed in
-    the next chapter. Additionally, ApplicationContexts also override or add
-    an additional number of editors to handle resource lookups in a manner appropriate
-    to the specific application context type; these include:
-    <classname>InputStreamEditor</classname>, <classname>ResourceEditor</classname>
-    and <classname>URLEditor</classname>.</para>
+        use a number of built-in property editors, through their use of something
+        called a <interfacename>BeanWrapper</interfacename> to handle property conversions.
+        The standard property editors that the <interfacename>BeanWrapper</interfacename> registers are listed in
+        the next chapter. Additionally, ApplicationContexts also override or add
+        an additional number of editors to handle resource lookups in a manner appropriate
+        to the specific application context type; these include:
+        <classname>InputStreamEditor</classname>, <classname>ResourceEditor</classname>
+        and <classname>URLEditor</classname>.</para>
     </section>
     <section id="beans-beanfactory-alias">
         <title>Using the alias element to add aliases to existing beans</title>
         <para>In a bean definition itself, you may supply more than one name for
-    the bean, by using a combination of up to one name specified via the
-    <literal>id</literal> attribute, and any number of other names via the
-    <literal>alias</literal> attribute. All these names can be considered
-    equivalent aliases to the same bean, and are useful for some situations,
-    such as allowing each component used in an application to refer to a
-    common dependency using a bean name that is specific to that component
-    itself.</para>
+        the bean, by using a combination of up to one name specified via the
+        <literal>id</literal> attribute, and any number of other names via the
+        <literal>alias</literal> attribute. All these names can be considered
+        equivalent aliases to the same bean, and are useful for some situations,
+        such as allowing each component used in an application to refer to a
+        common dependency using a bean name that is specific to that component
+        itself.</para>
         <para>Having to specify all aliases when the bean is actually defined is not
-    always adequate however. It is sometimes desirable to introduce an alias
-    for a bean which is defined elsewhere. This may be done via a standalone
-    <literal>alias</literal> element.</para>
+        always adequate however. It is sometimes desirable to introduce an alias
+        for a bean which is defined elsewhere. This may be done via a standalone
+        <literal>alias</literal> element.</para>
         <programlisting><![CDATA[<alias name="fromName" alias="toName"/>]]></programlisting>
         <para>In this case, a bean in the same context which is named
-    <literal>fromName</literal>, may also after the use of this alias
-    definition, be referred to as <literal>toName</literal>.</para>
+        <literal>fromName</literal>, may also after the use of this alias
+        definition, be referred to as <literal>toName</literal>.</para>
         <para>As a concrete example, consider the case where component A defines a
-    DataSource bean called componentA-dataSource, in its XML fragment.
-    Component B would however like to refer to the DataSource as
-    componentB-dataSource in its XML fragment. And the main application,
-    MyApp, defines its own XML fragment and assembles the final application
-    context from all three fragments, and would like to refer to the
-    DataSource as myApp-dataSource. This scenario can be easily handled by
-    adding to the MyApp XML fragment the following standalone aliases:</para>
+        DataSource bean called componentA-dataSource, in its XML fragment.
+        Component B would however like to refer to the DataSource as
+        componentB-dataSource in its XML fragment. And the main application,
+        MyApp, defines its own XML fragment and assembles the final application
+        context from all three fragments, and would like to refer to the
+        DataSource as myApp-dataSource. This scenario can be easily handled by
+        adding to the MyApp XML fragment the following standalone aliases:</para>
         <programlisting><![CDATA[<alias name="componentA-dataSource" alias="componentB-dataSource"/>
 <alias name="componentA-dataSource" alias="myApp-dataSource" />]]></programlisting>
         <para>
