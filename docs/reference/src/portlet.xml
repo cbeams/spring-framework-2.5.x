@@ -103,6 +103,16 @@
 		    the existing renderers, such as JSP, Velocity, etc., can still be used 
 		    within the portlet.</para>
 		</section>
+
+		<section>		
+            <title>Web-scoped beans</title>
+            <para>Spring Portlet MVC supports beans whose lifecycle is scoped to the
+            current HTTP request or HTTP <interfacename>Session</interfacename> (both
+            normal and global). This is not a specific feature of Spring Portlet MVC
+            itself, but rather of the <interfacename>WebApplicationContext</interfacename>
+            container(s) that Spring Portlet MVC uses. These bean scopes are described
+            in detail in the section entitled <xref linkend="beans-factory-scopes-other"/></para>
+        </section>
 		
 		<tip>
 		    <para>The Spring distibution ships with a complete Spring Portlet MVC
