@@ -288,7 +288,7 @@ public class UrlPathHelper {
 	 */
 	public String getOriginatingQueryString(HttpServletRequest request) {
 		String queryString = (String) request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE);
-		if (queryString != null) {
+		if (queryString == null) {
 			queryString = request.getQueryString();
 		}
 		return queryString;
