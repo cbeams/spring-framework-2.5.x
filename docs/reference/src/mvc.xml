@@ -183,12 +183,20 @@
           <xref linkend="spring.tld" /></para>
         </listitem>
 
-          <listitem>
-            <para>A convenience JSP form tag library, introduced in Spring 2.0, that 
-            makes writing forms in JSP pages much easier. For information on the tag
-            library descriptor, see the appendix entitled
-            <xref linkend="spring-form.tld" /></para>
-          </listitem>
+        <listitem>
+          <para>A JSP form tag library, introduced in Spring 2.0, that makes writing
+          forms in JSP pages much easier. For information on the tag library descriptor,
+          see the appendix entitled <xref linkend="spring-form.tld" /></para>
+        </listitem>
+
+        <listitem>
+          <para>Beans whose lifecycle is scoped to the current HTTP request or HTTP
+          <interfacename>Session</interfacename>. This is not a specific feature of
+          Spring MVC itself, but rather of the <interfacename>WebApplicationContext</interfacename>
+          container(s) that Spring MVC uses. These bean scopes are described in detail in
+          the section entitled <xref linkend="beans-factory-scopes-other"/></para>
+        </listitem>
+
       </itemizedlist>
     </section>
   </section>
@@ -1103,13 +1111,13 @@ public class SampleDelegate {
             <value>
                 /*/account.form=editAccountFormController
                 /*/editaccount.form=editAccountFormController
-                /ex/view*.html=someViewController
+                /ex/view*.html=helpController
                 /**/help.html=helpController
             </value>
         </property>
     </bean>
 
-    <bean id="someViewController"
+    <bean id="helpController"
           class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
 
     <bean id="editAccountFormController"
@@ -1121,14 +1129,14 @@ public class SampleDelegate {
     </bean>
 <beans>]]></programlisting>
 
-        <para>This handler mapping routes requests for <literal>help.html</literal>
-        in any directory to the <literal>helpController</literal>, which is a
+        <para>This handler mapping routes requests for <literal>'help.html'</literal>
+        in any directory to the <literal>'helpController'</literal>, which is a
         <classname>UrlFilenameViewController</classname> (more about controllers
         can be found in the section entitled <xref linkend="mvc-controller" />).
-        Requests for a resource beginning with <literal>view</literal>, and ending
-        with <literal>.html</literal> in the directory <literal>ex</literal>, will
-        be routed to the <literal>someViewController</literal>. Two further mappings
-        are also defined for <literal>editAccountFormController</literal>.</para>
+        Requests for a resource beginning with <literal>'view'</literal>, and ending
+        with <literal>'.html'</literal> in the directory <literal>'ex'</literal> will
+        be routed to the <literal>'helpController'</literal>. Two further mappings
+        are also defined for <literal>'editAccountFormController'</literal>.</para>
     </section>
 
     <section id="mvc-handlermapping-interceptor">
