@@ -257,12 +257,13 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		return this.nativeEntityManagerFactory;
 	}
 
+	
 	/**
 	 * If no entity manager name was found, take first in the parsed array of
 	 * ContainerPersistenceUnitInfo. Otherwise check for a matching name.
 	 * @return Spring-specific PersistenceUnitInfo
 	 */
-	private SpringPersistenceUnitInfo parsePersistenceUnitInfo() {
+	protected SpringPersistenceUnitInfo parsePersistenceUnitInfo() {
 		PersistenceUnitReader reader = new PersistenceUnitReader(this.resourceLoader, this.dataSourceLookup);
 
 		SpringPersistenceUnitInfo[] infos = reader.readPersistenceUnitInfos(this.persistenceXmlLocation);
@@ -275,6 +276,9 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		if (getPersistenceUnitName() == null) {
 			// Default to the first unit.
 			pui = infos[0];
+			if (logger.isDebugEnabled())
+				logger.debug("no persistence unit name specified; choosing the first one " + pui.getPersistenceUnitName());
+
 		}
 		else {
 			// Find a unit with matching name.

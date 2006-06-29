@@ -268,7 +268,8 @@ class PersistenceUnitReader {
 	 * Try to locate the SCHEMA_NAME first on disk before using the URL
 	 * specified inside the XML.
 	 * 
-	 * @return an existing resource or null if one can't be find (or it does not exist)
+	 * @return an existing resource or null if one can't be find (or it does not
+	 *         exist)
 	 */
 	protected Resource findSchemaResource(String schemaName) throws IOException {
 		// first search the classpath root (Toplink)
@@ -279,9 +280,25 @@ class PersistenceUnitReader {
 
 		ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
+		// do a lookup for unpacked files
+		// see the warning in
+		// org.springframework.core.io.support.PathMatchingResourcePatternResolver
+		// for more info
 		Resource[] resources = resolver.getResources("classpath*:**/" + schemaName);
+		if (resources.length > 0)
+			return resources[0];
 
-		return (resources.length > 0 ? resources[0] : null);
+		// try org packages (hibernate)
+		resources = resolver.getResources("classpath*:org/**/" + schemaName);
+		if (resources.length > 0)
+			return resources[0];
+
+		// try com packages (some commercial
+		resources = resolver.getResources("classpath*:com/**/" + schemaName);
+		if (resources.length > 0)
+			return resources[0];
+
+		return null;
 	}
 
 	/**
@@ -297,11 +314,16 @@ class PersistenceUnitReader {
 
 		dbf.setAttribute(JAXP_SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		Resource schemaLocation = findSchemaResource(SCHEMA_NAME);
-		
-		// set schema location only if we found one inside the classpath 
-		if (schemaLocation != null)
+
+		// set schema location only if we found one inside the classpath
+		if (schemaLocation != null) {
+			if (logger.isDebugEnabled())
+				logger.debug("found schema location " + schemaLocation.getURL().toString());
 			dbf.setAttribute(JAXP_SCHEMA_SOURCE, schemaLocation.getURL().toString());
-		
+		}
+		else if (logger.isDebugEnabled())
+			logger.debug("no schema location found - falling back to the xml parser");
+
 		// dbf.setAttribute(XERCES_SCHEMA_LOCATION,
 		// schemaLocation.getURL().toString());
 		/*
