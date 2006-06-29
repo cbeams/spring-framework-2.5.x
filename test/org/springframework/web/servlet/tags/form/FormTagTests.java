@@ -202,7 +202,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertFormTagOpened(output);
 		assertFormTagClosed(output);
 
-		assertContainsAttribute(output, "action", getRequestUri());
+		assertContainsAttribute(output, "action", getRequestUri() + "?" + getQueryString());
 		assertContainsAttribute(output, "enctype", enctype);
 		assertContainsAttribute(output, "method", method);
 		assertContainsAttribute(output, "onsubmit", onsubmit);
@@ -230,9 +230,14 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 
 	protected void extendRequest(MockHttpServletRequest request) {
 		request.setRequestURI(getRequestUri());
+		request.setQueryString(getQueryString());
 	}
 
 	private String getRequestUri() {
 		return "/my/form";
+	}
+
+	private String getQueryString() {
+		return "foo=bar";
 	}
 }

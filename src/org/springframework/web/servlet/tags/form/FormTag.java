@@ -302,6 +302,10 @@ public class FormTag extends AbstractHtmlElementTag {
 			ServletResponse response = this.pageContext.getResponse();
 			if (response instanceof HttpServletResponse) {
 				requestUri = ((HttpServletResponse) response).encodeURL(requestUri);
+				String queryString = getRequestContext().getQueryString();
+				if(StringUtils.hasText(queryString)) {
+					requestUri += "?" + queryString;
+				}
 			}
 			if (StringUtils.hasText(requestUri)) {
 				return requestUri;
