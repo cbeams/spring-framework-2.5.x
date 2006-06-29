@@ -53,6 +53,9 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, 
 	/** The cached singleton proxy */
 	private Object proxy;
 
+	public ScopedProxyFactoryBean() {
+		setProxyTargetClass(true);
+	}
 
 	public void setTargetBeanName(String targetBeanName) {
 		this.targetBeanName = targetBeanName;
@@ -73,10 +76,8 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, 
 
 		Class beanType = beanFactory.getType(this.targetBeanName);
 		boolean isPrivate = Modifier.isPrivate(beanType.getModifiers());
-		if (isPrivate || beanType.isInterface()) {
+		if (isPrivate || beanType.isInterface() || !isProxyTargetClass()) {
 			pf.setInterfaces(ClassUtils.getAllInterfacesForClass(beanType));
-		} else {
-			pf.setProxyTargetClass(true);
 		}
 
 		// Add an introduction that implements only the methods on ScopedObject.

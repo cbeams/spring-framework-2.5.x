@@ -19,7 +19,9 @@ package org.springframework.aop.scope;
 import junit.framework.TestCase;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.ITestBean;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.aop.support.AopUtils;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -34,19 +36,31 @@ public class ScopedProxyTests extends TestCase {
 
 	protected void setUp() throws Exception {
 		this.beanFactory = new DefaultListableBeanFactory();
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-		reader.loadBeanDefinitions(new ClassPathResource("scopedMap.xml", getClass()));
 	}
 
 	public void testProxyAssignable_SPR2108() throws Exception {
+		loadBeans("scopedMap.xml");
 		Object baseMap = this.beanFactory.getBean("singletonMap");
 		assertTrue(baseMap instanceof Map);
 	}
 
 	public void testSimpleProxy() throws Exception {
+		loadBeans("scopedMap.xml");
 		Object simpleMap = this.beanFactory.getBean("simpleMap");
 		assertTrue(simpleMap instanceof Map);
 		assertTrue(simpleMap instanceof HashMap);
+	}
+
+	public void testCreateJdkScopedProxy() throws Exception {
+		loadBeans("scopedTestBean.xml");
+		ITestBean bean = (ITestBean) this.beanFactory.getBean("testBean");
+		assertNotNull(bean);
+		assertTrue(AopUtils.isJdkDynamicProxy(bean));
+	}
+
+	private void loadBeans(String path) {
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+		reader.loadBeanDefinitions(new ClassPathResource(path, getClass()));
 	}
 
 }
