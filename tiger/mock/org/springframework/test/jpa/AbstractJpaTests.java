@@ -62,7 +62,7 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactionalTests {
 
 	private static final String DEFAULT_ORM_XML_LOCATION = "META-INF/orm.xml";
-
+	
 	/**
 	 * Map from String defining unique combination of config locations, to ApplicationContext.
 	 * Values are intentionally not strongly typed, to avoid potential class cast exceptions
@@ -74,15 +74,23 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 	protected EntityManagerFactory entityManagerFactory;
 
-	private boolean shadowed;
+	/**
+	 * If this instance is in a shadow loader, this variable
+	 * will contain the parent instance of the subclass.
+	 * The class will not be the same as the class of the
+	 * shadow instance, as it was loaded by a different class loader,
+	 * but it can be invoked reflectively. The shadowParent
+	 * and the shadow loader can communicate reflectively
+	 * but not through direct invocation.
+	 */
+	private Object shadowParent;
 
 	/**
 	 * Subclasses can use this in test cases.
 	 * It will participate in any current transaction.
 	 */
 	protected EntityManager sharedEntityManager;
-
-
+	
 	public void setEntityManagerFactory(EntityManagerFactory entityManagerFactory) {
 		this.entityManagerFactory = entityManagerFactory;
 		this.sharedEntityManager = SharedEntityManagerCreator.createSharedEntityManager(
@@ -109,7 +117,29 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	protected boolean shouldUseShadowLoader() {
 		return true;
 	}
+	
+	@Override
+	public void setDirty() {
+		super.setDirty();		
+		contextCache.remove(cacheKeys());
+		classLoaderCache.remove(cacheKeys());
+		
+		// If we are a shadow loader, we need to invoke
+		// the shadow parent to set it dirty, as 
+		// it is the shadow parent that maintains the cache state,
+		// not the child
+		if (this.shadowParent != null) {			
+			try {
+				Method m = shadowParent.getClass().getMethod("setDirty", (Class[]) null);
+				m.invoke(shadowParent, (Object[]) null);
+			}
+			catch (Exception ex) {
+				throw new RuntimeException(ex);
+			}
+		}
+	}
 
+	
 	@Override
 	public void runBare() throws Throwable {
 		if (!shouldUseShadowLoader()) {
@@ -117,9 +147,9 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 			return;
 		}
 		
-		String combinationOfContextLocationsForThisTestClass = StringUtils.arrayToCommaDelimitedString(getConfigLocations()); 			
+		String combinationOfContextLocationsForThisTestClass = cacheKeys(); 			
 		ClassLoader classLoaderForThisTestClass = getClass().getClassLoader();
-		if (this.shadowed) {
+		if (this.shadowParent != null) {
 			Thread.currentThread().setContextClassLoader(classLoaderForThisTestClass);
 			super.runBare();
 		}
@@ -184,11 +214,11 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 				Class shadowedTestClass = shadowingClassLoader.loadClass(getClass().getName());
 				Object testCase = BeanUtils.instantiateClass(shadowedTestClass);
 
-				/* shadowed = true */
+				/* shadowParent = this */
 				Class thisShadowedClass = shadowingClassLoader.loadClass(AbstractJpaTests.class.getName());
-				Field shadowed = thisShadowedClass.getDeclaredField("shadowed");
+				Field shadowed = thisShadowedClass.getDeclaredField("shadowParent");
 				shadowed.setAccessible(true);
-				shadowed.set(testCase, true);
+				shadowed.set(testCase, this);
 
 				/* AbstractSpringContextTests.addContext(Object, ApplicationContext) */
 				Class applicationContextClass = shadowingClassLoader.loadClass(ConfigurableApplicationContext.class.getName());
@@ -212,6 +242,10 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 				Thread.currentThread().setContextClassLoader(classLoaderForThisTestClass);
 			}
 		}
+	}
+
+	protected String cacheKeys() {
+		return StringUtils.arrayToCommaDelimitedString(getConfigLocations());
 	}
 
 	/**
