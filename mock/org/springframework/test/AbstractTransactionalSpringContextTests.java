@@ -161,12 +161,24 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 			logger.info("No transaction manager set: tests will NOT run within a transaction");
 		}
 		else if (this.transactionDefinition == null) {
-			logger.info("Transaction definition is null: test " + getName() + " will NOT run within a transaction");
+			if(logger.isInfoEnabled()) {
+				logger.info("Transaction definition is null: test " + getName() + " will NOT run within a transaction");
+			}
 		}
 		else {
 			onSetUpBeforeTransaction();
 			startNewTransaction();
-			onSetUpInTransaction();
+			try {
+				onSetUpInTransaction();
+			} catch (Exception ex) {
+				logger.error("Exception thrown during onSetUpInTransaction(); ending transaction.");
+				endTransaction();
+				throw ex;
+			} catch (Throwable ex) {
+				logger.error("Throwable thrown during onSetUpInTransaction(); ending transaction.");
+				endTransaction();
+				throw new RuntimeException("Unexpected Throwable thrown during onSetUpInTransaction(); ending transaction.", ex);
+			}
 		}
 	}
 
@@ -189,7 +201,11 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * created by this class.
 	 * <p><b>NB:</b> Not called if there is no transaction management, due to no
 	 * transaction manager being provided in the context.
-	 * @throws Exception simply let any exception propagate
+	 * <p>If any {@link Throwable} is thrown, the transaction that has been started
+	 * prior to the execution of this method will be {@link #endTransaction() ended}
+	 * (or rather an attempt will be made to {@link #endTransaction() end it gracefully});
+	 * The offending {@link Throwable} will then be rethrown.
+	 * @throws Exception simply let any exception / error propagate
 	 */
 	protected void onSetUpInTransaction() throws Exception {
 	}
