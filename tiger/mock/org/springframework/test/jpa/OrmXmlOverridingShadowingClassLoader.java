@@ -57,7 +57,14 @@ class OrmXmlOverridingShadowingClassLoader extends ResourceOverridingShadowingCl
 				return true;
 			}
 		}
+		
+		// Also do not shadow JUnit infrastructure
+		if (className.startsWith("junit")) {
+			return true;
+		}
+		
 		return false;
 	}
+	
 	
 }

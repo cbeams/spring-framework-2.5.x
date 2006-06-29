@@ -27,6 +27,8 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
+import junit.framework.TestCase;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -212,26 +214,25 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 				}
 				// create the shadowed test
 				Class shadowedTestClass = shadowingClassLoader.loadClass(getClass().getName());
-				Object testCase = BeanUtils.instantiateClass(shadowedTestClass);
+				
+				// So long as JUnit is excluded from shadowing we
+				// can minimize reflective invocation here
+				TestCase shadowedTestCase = (TestCase) BeanUtils.instantiateClass(shadowedTestClass);
 
 				/* shadowParent = this */
 				Class thisShadowedClass = shadowingClassLoader.loadClass(AbstractJpaTests.class.getName());
 				Field shadowed = thisShadowedClass.getDeclaredField("shadowParent");
 				shadowed.setAccessible(true);
-				shadowed.set(testCase, this);
+				shadowed.set(shadowedTestCase, this);
 
 				/* AbstractSpringContextTests.addContext(Object, ApplicationContext) */
 				Class applicationContextClass = shadowingClassLoader.loadClass(ConfigurableApplicationContext.class.getName());
 				Method addContextMethod = shadowedTestClass.getMethod("addContext", Object.class, applicationContextClass);
-				addContextMethod.invoke(testCase, configLocations, cachedContext);
+				addContextMethod.invoke(shadowedTestCase, configLocations, cachedContext);
 
-				/* TestCase.setName(String) */
-				Method setNameMethod = shadowedTestClass.getMethod("setName", String.class);
-				setNameMethod.invoke(testCase, getName());
-
-				/* TestCase.runBare() */
-				Method testMethod = shadowedTestClass.getMethod("runBare");
-				testMethod.invoke(testCase, (Object[]) null);
+				// Invoke tests on shadowed test case
+				shadowedTestCase.setName(getName());
+				shadowedTestCase.runBare();
 			}
 			catch (InvocationTargetException ex) {
 				// Unwrap this for better exception reporting
@@ -254,7 +255,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	 */
 	protected ClassLoader createShadowingClassLoader(ClassLoader classLoader) {
 		OrmXmlOverridingShadowingClassLoader orxl = new OrmXmlOverridingShadowingClassLoader(classLoader, 
-				getActualOrmXmlLocation());
+				getActualOrmXmlLocation());		
 		customizeResourceOverridingShadowingClassLoader(orxl);
 		return orxl;
 	}
