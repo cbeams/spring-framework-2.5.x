@@ -846,7 +846,7 @@ public class AnnotationTestBean implements IJmxTestBean {
     <property name="age" value="100"/>
   </bean>
 
-  ]]><lineannotation>&lt;!-- (for Commons Atributes-based metadata) --&gt;</lineannotation><![CDATA[
+  ]]><lineannotation>&lt;!-- (for Commons Attributes-based metadata) --&gt;</lineannotation><![CDATA[
   <bean id="attributeSource"
         class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource">
     <property name="attributes">
@@ -854,11 +854,11 @@ public class AnnotationTestBean implements IJmxTestBean {
     </property>
   </bean>
   
-  ]]><lineannotation>&lt;!-- (for Java5+ annotations-based metadata) --&gt;</lineannotation><![CDATA[
+  ]]><lineannotation>&lt;!-- (for Java5+ annotations-based metadata) --&gt;</lineannotation><emphasis><![CDATA[
   <!--
   <bean id="attributeSource"
         class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
-  -->
+  -->]]></emphasis><![CDATA[
 
   <bean id="assembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
     <property name="attributeSource" ref="attributeSource"/>
@@ -1515,7 +1515,7 @@ public class JmxTestBean implements IJmxTestBean, NotificationPublisherAware {
     private boolean isSuperman;
     private NotificationPublisher publisher;
 
-    // other getters and setters omitted for clarity...
+    ]]><lineannotation>// other getters and setters omitted for clarity</lineannotation><![CDATA[
 
     public int add(int x, int y) {
         int answer = x + y;
