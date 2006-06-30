@@ -83,7 +83,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests
 		// Use same algorithm as JUnit itself to retrieve the test method
 		// about to be executed (the method name is returned by getName).
 		// It has to be public so we can retrieve it
-		Method testMethod = getClass().getMethod(getName(), (Class[]) null);
+		final Method testMethod = getClass().getMethod(getName(), (Class[]) null);
 		
 		if (isDisabledInThisEnvironment(testMethod)) {
 			logger.info("**** " + getClass().getName() + "." + getName() + " disabled in this environment: " +
@@ -108,7 +108,17 @@ public abstract class AbstractAnnotationAwareTransactionalTests
 		runTestTimed(
 				new TestExecutionCallback() {
 					public void run() throws Throwable {
-						AbstractAnnotationAwareTransactionalTests.super.runBare();
+						try {
+							AbstractAnnotationAwareTransactionalTests.super.runBare();
+						}
+						finally {
+							// Mark the context to be blown
+							// away if the test was annotated to result
+							// in setDirty being invoked automatically
+							if (testMethod.isAnnotationPresent(DirtiesContext.class)) {
+								AbstractAnnotationAwareTransactionalTests.this.setDirty();
+							}
+						}
 					}
 				},
 				testMethod,
