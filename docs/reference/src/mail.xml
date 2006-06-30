@@ -274,7 +274,7 @@ public class OrderManagerImpl implements OrderManager {
   	<para>
   		One of the components that comes in pretty handy when dealing with
   		JavaMail messages is the <classname>org.springframework.mail.javamail.MimeMessageHelper</classname>.
-  		It prevents you from having to use the nasty APIs the the <literal>javax.mail.internet</literal> classes.
+  		It prevents you from having to use the nasty APIs of the <literal>javax.mail.internet</literal> classes.
   		Find below a couple of possible scenarios:
   	</para>
   	<section>

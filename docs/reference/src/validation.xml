@@ -383,7 +383,7 @@ Float salary = (Float)bwComp.getPropertyValue("managingDirector.salary");</progr
 		<interfacename>PropertyEditor</interfacename> classes (without you having to register them
 		explicitly) if they are in the same package as the class they handle, and have the same name
 		as that class, with <literal>'Editor'</literal> appended; for example, one could have the
-		following class and package structure, which would be sufficent for the
+		following class and package structure, which would be sufficient for the
 		<classname>FooEditor</classname> class to be recognized and used as the
 		<interfacename>PropertyEditor</interfacename> for <classname>Foo</classname>-typed
 		properties.

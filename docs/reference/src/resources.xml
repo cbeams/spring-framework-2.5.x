@@ -13,7 +13,7 @@
 			While it is possible to register new handlers for specialized URL
 			prefixes (similar to existing handlers for prefixes such as
 			<literal>http:</literal>), this is generally quite complicated, and
-			the	URL interface still lacks some desireable functionality, such as
+			the	URL interface still lacks some desirable functionality, such as
 			a method to check for the existence of the resource	being pointed to.
 		</para>
 	</section>
@@ -239,7 +239,7 @@
 		<title>The <interfacename>ResourceLoader</interfacename></title>
 		<para>
 			The <interfacename>ResourceLoader</interfacename> interface is meant to be
-			implemented by objects that can return (i.e load)
+			implemented by objects that can return (i.e. load)
 			<interfacename>Resource</interfacename> instances.
 		</para>
 		<programlisting><![CDATA[public interface ResourceLoader {
@@ -255,7 +255,7 @@
 			application context, and the location path specified doesn't have a
 			specific prefix, you will get back a <interfacename>Resource</interfacename>
 			type that is appropriate to that particular application context. For example,
-			assue the following snippet of code was executed against a
+			assume the following snippet of code was executed against a
 			<classname>ClassPathXmlApplicationContext</classname> instance:
 		</para>
 		<programlisting><![CDATA[Resource template = ctx.getResource("some/resource/path/myTemplate.txt);]]></programlisting>
@@ -284,7 +284,7 @@
 		<programlisting><![CDATA[Resource template = ctx.getResource("file:/some/resource/path/myTemplate.txt);]]></programlisting>
 		<programlisting><![CDATA[Resource template = ctx.getResource("http://myhost.com/resource/path/myTemplate.txt);]]></programlisting>
 		<para>
-            The following table summarises the strategy for converting <classname>String</classname>s
+            The following table summarizes the strategy for converting <classname>String</classname>s
             to <interfacename>Resource</interfacename>s:
         </para>
 		<table pgwide="1">
@@ -445,7 +445,7 @@
 		<section>
 			<title>Constructing application contexts</title>
 			<para>
-				An application context constuctor (for a specific application
+				An application context constructor (for a specific application
 				context type) generally takes a string or array of strings as the
 				location path(s) of the resource(s) such as XML files that make up the
 				definition of the context.
@@ -521,7 +521,7 @@
     new ClassPathXmlApplicationContext("classpath*:conf/appContext.xml");]]></programlisting>
 			<para>
 				This special prefix specifies that all classpath resources that match the
-				gven name should be obtained (internally, this essentially happens via a
+				givem name should be obtained (internally, this essentially happens via a
 				<methodname>ClassLoader.getResources(...)</methodname> call), and then merged
 				to form the final application context definition.
 			</para>

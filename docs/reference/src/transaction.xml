@@ -308,9 +308,9 @@ xsi:schemaLocation="
     </list>
   </property>
   <property name="hibernateProperties">
-    <props>
-      <prop key="hibernate.dialect">${hibernate.dialect}</prop>
-    </props>
+    <value>
+	  hibernate.dialect=${hibernate.dialect}
+	</value>
   </property>
 </bean>
 
@@ -473,7 +473,7 @@ xsi:schemaLocation="
             that there is no longer any need to configure
             <classname>TransactionProxyFactoryBean</classname> beans.</para>
             <para>The old, pre-Spring 2.0 configuration style is still 100% 
-            valid configuration; under the covers think of the the new <literal>&lt;tx:tags/&gt;</literal>
+            valid configuration; under the covers think of the new <literal>&lt;tx:tags/&gt;</literal>
             as simply defining <classname>TransactionProxyFactoryBean</classname> beans
             on your behalf.</para>
         </sidebar>

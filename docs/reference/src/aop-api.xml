@@ -391,7 +391,7 @@
     void before(Method m, Object[] args, Object target) throws Throwable;
 }</programlisting>
 
-        <para>Note the the return type is <literal>void</literal>. Before
+        <para>Note the return type is <literal>void</literal>. Before
         advice can insert custom behavior before the join point executes, but
         cannot change the return value. If a before advice throws an
         exception, this will abort further execution of the interceptor chain.
@@ -823,7 +823,7 @@ public interface IntroductionInfo {
           <para>Specify the target you want to proxy</para>
         </listitem>
         <listitem>
-          <para>Specify whether to use CGLIB (see below and also the the section entitled
+          <para>Specify whether to use CGLIB (see below and also the section entitled
 			<xref linkend="aop-pfb-proxy-types"/>)</para>
         </listitem>
       </itemizedlist>

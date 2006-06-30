@@ -907,7 +907,7 @@ public class AfterFinallyExample {
 	actually gets to execute at all. Around advice is often used if you need to 
 	share state before and after a method execution in a thread-safe manner (starting
 	and stopping a timer for example). Always use the least powerful form of 
-	advice that meets your requirements (ie. don't use around advice if simple
+	advice that meets your requirements (i.e. don't use around advice if simple
 	before advice would do).
 	</para>
 	
@@ -1062,7 +1062,7 @@ public void audit(Auditable auditable) {
 		<orderedlist>
 		<listitem><para>If the parameter names have been specified by the user explicitly,
 		then the specified parameter names are used: both the advice and the pointcut
-		annotations have an optional "argNames"attribute which can be used to specify
+		annotations have an optional "argNames" attribute which can be used to specify
 		the argument names of the annotated method - these argument names <emphasis>are</emphasis>
 		available at runtime. For example:
 		</para>
@@ -1088,7 +1088,7 @@ public void audit(Auditable auditable) {
 		information will be present as long as the classes have been compiled with debug
 		information (<literal>'-g:vars'</literal> at a minimum). The consequences of compiling with this flag on
 		are: (1) your code will be slightly easier to understand (reverse engineer), (2) the
-		class file sizes will be very slightly bigger (inconsequential), (3) the optimisation
+		class file sizes will be very slightly bigger (inconsequential), (3) the optimization
 		to remove unused local variables will not be applied by your compiler. In other words,
 		you should encounter no difficulties building with this flag on.
 		</para>
@@ -1296,7 +1296,7 @@ public class MyAspect {
       <title>Example</title>
       
       <para>
-      Now that you've seen how all the consituent parts work, let's put them together
+      Now that you've seen how all the constituent parts work, let's put them together
       to do something useful!</para>
       <para>The execution of business services can sometimes fail
       due to optimistic locking (someone else gets in first while your transaction is running).
@@ -1676,7 +1676,7 @@ public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable {
 	actually gets to execute at all. Around advice is often used if you need to 
 	share state before and after a method execution in a thread-safe manner (starting
 	and stopping a timer for example).  Always use the least powerful form of 
-	advice that meets your requirements (ie. don't use around advice if simple
+	advice that meets your requirements (i.e. don't use around advice if simple
 	before advice would do).
 	</para>
 	

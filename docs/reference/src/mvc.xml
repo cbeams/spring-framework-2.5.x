@@ -743,7 +743,7 @@ public [ModelAndView | Map | void] anyMeaningfulName(HttpServletRequest, HttpSer
 
       <para>The <interfacename>MethodNameResolver</interfacename> is responsible for
       resolving method names based on the request coming in. Find below details about
-      the the three <interfacename>MethodNameResolver</interfacename> implementations
+      the three <interfacename>MethodNameResolver</interfacename> implementations
       that Spring provides out of the box.</para>
       
       <itemizedlist spacing="compact">
@@ -2284,7 +2284,7 @@ public class FileUploadBean {
             <interfacename>Collection</interfacename>.</para></listitem>
 
             <listitem><para>Approach Three - For any other bound value type, the <literal>input(checkbox)</literal>
-            is marked as 'checked' if the the configured <literal>setValue(Object)</literal> is equal to the
+            is marked as 'checked' if the configured <literal>setValue(Object)</literal> is equal to the
             bound value.</para></listitem>
           </itemizedlist>
       </para>

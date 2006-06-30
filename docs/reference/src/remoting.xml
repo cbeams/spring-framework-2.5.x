@@ -489,9 +489,7 @@ public class AccountServiceEndpoint extends ServletEndpointSupport implements Re
 <programlisting><![CDATA[
     <bean id="client" class="example.AccountClientImpl">
         ...
-        <property name="service">
-            <ref bean="accountWebService"/>
-        </property>
+        <property name="service" ref="accountWebService"/>
     </bean>
 ]]></programlisting>
 				And from the client code we can access the Web Service just as if it was a normal class, except that it throws RemoteException.

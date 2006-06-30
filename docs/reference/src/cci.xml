@@ -982,7 +982,7 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
 </bean>
 
 <bean id="component" class="MyDaoImpl">
-  <property name="connectionFactory"><ref local="connectionFactory"/></property>
+  <property name="connectionFactory" ref="connectionFactory"/>
 </bean>]]></programlisting>
 
 			<para>In managed mode (that is, in a J2EE environment), the configuration
@@ -1078,7 +1078,7 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
 </bean>
 
 <bean id="component" class="MyDaoImpl">
-  <property name="connectionFactory"><ref local="connectionFactory"/></property>
+  <property name="connectionFactory" ref="connectionFactory"/>
 </bean>]]></programlisting>
 
 			<para>In managed mode (that is, in a J2EE environment), the configuration

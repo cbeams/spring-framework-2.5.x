@@ -577,7 +577,7 @@ public interface SessionAwareMessageListener {
   	    Spring's asynchronous messaging support: in a nutshell, it allows you to 
   	    expose almost <emphasis>any</emphasis> class as a MDP (there are of course some constraints).</para>
   	    <note>
-  	        <para>If you are using the the JMS 1.0.2 API, you will want to use the
+  	        <para>If you are using the JMS 1.0.2 API, you will want to use the
   	        <classname>MessageListenerAdapter102</classname> class which provides the exact
   	        same functionality and value add as the <classname>MessageListenerAdapter</classname>
   	        class, but for the JMS 1.0.2 API.</para>

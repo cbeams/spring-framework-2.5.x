@@ -31,7 +31,7 @@
     this section show configuration inside a Spring
     <interfacename>ApplicationContext</interfacename>.</para>
 
-    <para>Some of the the benefits of using Spring to create your O/R mapping
+    <para>Some of the benefits of using Spring to create your O/R mapping
     DAOs include:</para>
 
     <itemizedlist>

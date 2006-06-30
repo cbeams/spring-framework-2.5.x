@@ -1039,7 +1039,7 @@ public class TitlesAndGenresStoredProcedure extends StoredProcedure {
 				method that have been used in the <classname>TitlesAndGenresStoredProcedure</classname>
 				constructor are passed <interfacename>RowMapper</interfacename> implementation
 				instances; this is a very convenient and powerful way to reuse existing
-				functionalty. (The code for the two <interfacename>RowMapper</interfacename>
+				functionality. (The code for the two <interfacename>RowMapper</interfacename>
 				implementations is provided below in the interest of completeness.)
 			</para>
 			<para>

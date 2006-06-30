@@ -983,9 +983,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 			<programlisting><![CDATA[<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
     <property name="beans">
       <map>
-        <entry key="bean:name=testBean5">
-          <ref local="testBean"/>
-        </entry>
+        <entry key="bean:name=testBean5" value-ref="testBean"/>
       </map>
     </property>
     <property name="assembler">
