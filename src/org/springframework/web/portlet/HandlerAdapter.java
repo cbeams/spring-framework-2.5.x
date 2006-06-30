@@ -80,7 +80,7 @@ public interface HandlerAdapter {
 	 * returned <code>true</code>.
 	 * @throws Exception in case of errors
 	 * @return ModelAndView object with the name of the view and the required
-	 * model data, or null if the request has been handled directly
+	 * model data, or <code>null</code> if the request has been handled directly
 	 */
 	ModelAndView handleRender(RenderRequest request, RenderResponse response, Object handler) throws Exception;
 
