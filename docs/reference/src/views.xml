@@ -60,7 +60,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
 
       <para>The InternalResourceBundleViewResolver can be configured for using
       JSPs as described above. As a best practice, we strongly encourage
-      placing your JSP files in a a directory under the WEB-INF directory, so
+      placing your JSP files in a directory under the WEB-INF directory, so
       there can be no direct access by clients.</para>
     </sect2>
 
