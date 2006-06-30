@@ -967,52 +967,53 @@ public class ExampleBean {
         <programlisting><![CDATA[<bean class="ExampleBean">
   <property name="email"><value></value></property>
 </bean>]]></programlisting>
-
                 <para>This is equivalent to the following Java code:
                 <literal>exampleBean.setEmail("")</literal>. The special
                 <literal>&lt;null&gt;</literal> element may be used to indicate a
                 <literal>null</literal> value. For example:</para>
-            
                 <programlisting><![CDATA[<bean class="ExampleBean">
   <property name="email"><null/></property>
 </bean>]]></programlisting>
-
-                <para>The above configuration is equivalent to the Java code:
+                <para>The above configuration is equivalent to the following Java code:
                 <literal>exampleBean.setEmail(null)</literal>. </para>
             </section>
             <section id="beans-inner-beans">
                 <title>Inner beans</title>
-                <para>A <literal>bean</literal> element inside the
-        <literal>property</literal> element is used to define a bean value
-        inline, instead of referring to a bean defined elsewhere in the
-        container. The inline bean definition does not need to have any id
-        defined, and it is best not to because it will be ignored.</para>
-        
+                <para>A <literal>&lt;bean/&gt;</literal> element inside the
+                <literal>&lt;property/&gt;</literal> or <literal>&lt;constructor-arg/&gt;</literal>
+                elements is used to define a so-called <firstterm>inner bean</firstterm>. An
+                inner bean definition does not need to have any id or name defined, and it is
+                best not to even specify any id or name value because said id or name value
+                will simply be ignored by the container.</para>
+                <para>Find below an example of an inner bean.</para>
                 <programlisting><![CDATA[<bean id="outer" class="...">
-  ]]><lineannotation>&lt;!-- instead of using a reference to target, just use an inner bean --&gt;</lineannotation><![CDATA[
+  ]]><lineannotation>&lt;!-- instead of using a reference to a target bean, simply define the target inline --&gt;</lineannotation><![CDATA[
   <property name="target">
-    <bean class="com.mycompany.PersonImpl">
-      <property name="name" value="Tony"/>
-      <property name="age" value="51"/>
+    <bean class="com.mycompany.Person"> ]]><lineannotation>&lt;!-- this is the inner bean --&gt;</lineannotation><![CDATA[
+      <property name="name" value="Fiona Apple"/>
+      <property name="age" value="25"/>
     </bean>
   </property>
 </bean>]]></programlisting>
-
-                <para>Note that the <literal>singleton</literal> flag and any
-                <literal>id</literal> attribute are effectively ignored. Inner beans
-                are <emphasis>always</emphasis> anonymous prototypes.</para>
+                <para>Note that in the specific case of inner beans, the <literal>'singleton'</literal>
+                flag and any <literal>'id'</literal> or <literal>'name'</literal> attribute are
+                effectively ignored. Inner beans are <emphasis>always</emphasis> anonymous and they
+                are <emphasis>always</emphasis> scoped as
+                <link linkend="beans-factory-scopes-prototype">prototypes</link>.</para>
+                <para>Please also note that it is <emphasis>not</emphasis> possible to inject
+                inner beans into collaborating beans other than into the enclosing bean.</para>
             </section>
             <section id="beans-collection-elements">
                 <title>Collections</title>
-                <para>The <literal>list</literal>, <literal>set</literal>,
-                <literal>map</literal>, and <literal>props</literal> elements allow
-                properties and arguments of Java type <interfacename>List</interfacename>,
-                <interfacename>Set</interfacename>, <interfacename>Map</interfacename>, and
-                <interfacename>Properties</interfacename>, respectively, to be defined and
-                set.</para>
+                <para>The <literal>&lt;list/&gt;</literal>, <literal>&lt;set/&gt;</literal>,
+                <literal>&lt;map/&gt;</literal>, and <literal>&lt;props/&gt;</literal> elements
+                allow properties and arguments of the Java <interfacename>Collection</interfacename>
+                type <interfacename>List</interfacename>, <interfacename>Set</interfacename>,
+                <interfacename>Map</interfacename>, and <interfacename>Properties</interfacename>,
+                respectively, to be defined and set.</para>
 
                 <programlisting><![CDATA[<bean id="moreComplexObject" class="example.ComplexObject">
-  ]]><lineannotation>&lt;!-- results in a setAdminEmails(java.util.Properties) call --&gt;</lineannotation><![CDATA[
+  ]]><lineannotation>&lt;!-- results in a setAdminEmails(<classname>java.util.Properties</classname>) call --&gt;</lineannotation><![CDATA[
   <property name="adminEmails">
     <props>
         <prop key="administrator">administrator@somecompany.org</prop>
@@ -1020,14 +1021,14 @@ public class ExampleBean {
         <prop key="development">development@somecompany.org</prop>
     </props>
   </property>
-  ]]><lineannotation>&lt;!-- results in a setSomeList(java.util.List) call --&gt;</lineannotation><![CDATA[
+  ]]><lineannotation>&lt;!-- results in a setSomeList(<interfacename>java.util.List</interfacename>) call --&gt;</lineannotation><![CDATA[
   <property name="someList">
     <list>
         <value>a list element followed by a reference</value>
         <ref bean="myDataSource" />
     </list>
   </property>
-  ]]><lineannotation>&lt;!-- results in a setSomeMap(java.util.Map) call --&gt;</lineannotation><![CDATA[
+  ]]><lineannotation>&lt;!-- results in a setSomeMap(<interfacename>java.util.Map</interfacename>) call --&gt;</lineannotation><![CDATA[
   <property name="someMap">
     <map>
         <entry>
