@@ -2,7 +2,6 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "../lib/docbook-dtd/docbookx.dtd"
 [
 <!ENTITY overview			SYSTEM "overview.xml">
-<!ENTITY background			SYSTEM "background.xml">
 <!ENTITY whats-new-in-2.0   SYSTEM "new-in-2.0.xml">
 <!ENTITY beans				SYSTEM "beans.xml">
 <!ENTITY resources			SYSTEM "resources.xml">
@@ -119,7 +118,6 @@
 	<!-- front matter -->
 	<toc />
 	&overview;
-	&background;
 	&whats-new-in-2.0;
 	<part>
 		<title>Core Technologies</title>
