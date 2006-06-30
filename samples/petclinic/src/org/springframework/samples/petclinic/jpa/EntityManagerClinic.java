@@ -11,6 +11,7 @@ import org.springframework.samples.petclinic.Clinic;
 import org.springframework.samples.petclinic.Owner;
 import org.springframework.samples.petclinic.Pet;
 import org.springframework.samples.petclinic.PetType;
+import org.springframework.samples.petclinic.Vet;
 import org.springframework.samples.petclinic.Visit;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,12 +33,12 @@ public class EntityManagerClinic implements Clinic {
 	@PersistenceContext
 	private EntityManager em;
 
-	public Collection getVets() throws DataAccessException {
+	public Collection<Vet> getVets() throws DataAccessException {
 		return em.createQuery("SELECT vet FROM Vet vet ORDER BY vet.lastName, vet.firstName").getResultList();
 	}
 
 	public Collection<PetType> getPetTypes() throws DataAccessException {
-		return em.createQuery("SELECT pt FROM PetType pt ORDER BY pt.name").getResultList();
+		return em.createQuery("SELECT ptype FROM PetType ptype ORDER BY ptype.name").getResultList();
 	}
 
 	public Collection<Owner> findOwners(String lastName) throws DataAccessException {

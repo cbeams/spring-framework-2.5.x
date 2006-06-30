@@ -39,7 +39,7 @@
 			<include name="db-ojb-*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jpa">
-			<include name="persistence.jar"/>
+			<include name="java-persistence-1_0-api.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/asm">
 			<include name="asm-*.jar"/>
@@ -232,6 +232,9 @@
 			</fileset>
 			<fileset dir="${spring.root}/lib/ojb">
 				<include name="db-ojb-*.jar"/>
+			</fileset>
+			<fileset dir="${spring.root}/lib/jpa">
+				<include name="*.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/toplink">
 				<include name="toplink-essentials.jar"/>

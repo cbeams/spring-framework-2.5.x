@@ -5,6 +5,10 @@
 
 package org.springframework.samples.petclinic.toplink;
 
+import java.io.IOException;
+import java.io.Writer;
+
+import oracle.toplink.essentials.exceptions.ValidationException;
 import oracle.toplink.essentials.platform.database.HSQLPlatform;
 import oracle.toplink.essentials.queryframework.ValueReadQuery;
 
@@ -25,7 +29,6 @@ public class EssentialsHSQLPlatformWithNativeSequence extends HSQLPlatform {
 
 	public EssentialsHSQLPlatformWithNativeSequence() {
 		//setUsesNativeSequencing(true);
-		//set
 	}
 
 	public boolean supportsNativeSequenceNumbers() {
@@ -40,4 +43,12 @@ public class EssentialsHSQLPlatformWithNativeSequence extends HSQLPlatform {
 		return new ValueReadQuery("CALL IDENTITY()");
 	}
 
+
+    public void printFieldIdentityClause(Writer writer) throws ValidationException {
+        try {
+            writer.write(" IDENTITY");
+        } catch (IOException ioException) {
+            throw ValidationException.fileError(ioException);
+        }
+    }	
 }

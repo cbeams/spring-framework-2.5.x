@@ -38,11 +38,7 @@
         </attributes>
     </mapped-superclass>
     
-    <mapped-superclass class="NamedEntity">
-        <attributes>
-            <basic name="name"/>
-        </attributes>
-    </mapped-superclass>
+    <mapped-superclass class="NamedEntity"/>
 
     <!--=================-->
     <!-- Entity mappings -->
@@ -79,16 +75,9 @@
             <basic name="lastName">
                 <column name="LAST_NAME"/>
             </basic>
-            <basic name="address">
-                <column name="ADDRESS"/>
-            </basic>            
-            <basic name="city">
-                <column name="CITY"/>
-            </basic>            
-            <basic name="telephone">
-                <column name="TELEPHONE"/>
-            </basic>            
-            
+            <basic name="address"/>
+            <basic name="city"/>
+            <basic name="telephone"/>
             <one-to-many name="petsInternal" target-entity="Pet" mapped-by="owner" fetch="EAGER">
                 <cascade><cascade-all/></cascade>
             </one-to-many>
@@ -98,17 +87,13 @@
     <entity class="Pet">
         <table name="PETS"/>
         <attributes>
-            <basic name="name">
-                <column name="NAME"/>
-            </basic>        
             <basic name="birthDate">
                 <column name="BIRTH_DATE"/>
                 <temporal>DATE</temporal>
             </basic>
-            <!--  uncomment this to enable lazy loading
-            <many-to-one name="owner" fetch="LAZY" />
-             --> 
-            <many-to-one name="owner" fetch="EAGER"/>             
+            <many-to-one name="owner" fetch="EAGER">
+                <cascade><cascade-merge/></cascade>                
+            </many-to-one>            
             <many-to-one name="type" fetch="EAGER"/>
             <one-to-many name="visitsInternal" target-entity="Visit" mapped-by="pet" fetch="EAGER">
                 <cascade><cascade-all/></cascade>
@@ -127,10 +112,9 @@
                 <column name="VISIT_DATE"/>
                 <temporal>DATE</temporal>
             </basic>
-            <basic name="description">
-                <column name="DESCRIPTION"/>
-            </basic>              
-            <many-to-one name="pet" fetch="EAGER"/>
+            <many-to-one name="pet" fetch="EAGER">
+                <cascade><cascade-merge/></cascade>                
+            </many-to-one>            
         </attributes>
     </entity>
 
