@@ -1,96 +1,77 @@
-/*
- * Copyright 2002-2006 the original author or authors.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.springframework.jdbc.core;
 
 /**
- * Subclass of SqlParameter to represent an output parameter.
- * No additional properties: instanceof will be used to check
- * for such types.
+ * Subclass of SqlOutParameter to represent an INOUT parameter.
+ * Will always return true for "isInputValueProvided" test.
  *
  * <p>Output parameters - like all stored procedure parameters -
  * must have names.
  *
- * @author Rod Johnson
  * @author Thomas Risberg
- * @author Juergen Hoeller
  */
-public class SqlOutParameter extends ResultSetSupportingSqlParameter {
-	
+public class SqlInOutParameter extends SqlOutParameter {
+
 	private SqlReturnType sqlReturnType;
 
 
 	/**
-	 * Create a new SqlOutParameter.
+	 * Create a new SqlInOutParameter.
 	 * @param name name of the parameter, as used in input and output maps
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 */
-	public SqlOutParameter(String name, int sqlType) {
+	public SqlInOutParameter(String name, int sqlType) {
 		super(name, sqlType);
 	}
 
 	/**
-	 * Create a new SqlOutParameter.
+	 * Create a new SqlInOutParameter.
 	 * @param name name of the parameter, as used in input and output maps
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param typeName the type name of the parameter (optional)
 	 */
-	public SqlOutParameter(String name, int sqlType, String typeName) {
+	public SqlInOutParameter(String name, int sqlType, String typeName) {
 		super(name, sqlType, typeName);
 	}
 
 	/**
-	 * Create a new SqlOutParameter.
+	 * Create a new SqlInOutParameter.
 	 * @param name name of the parameter, as used in input and output maps
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param typeName the type name of the parameter (optional)
 	 * @param sqlReturnType custom value handler for complex type (optional)
 	 */
-	public SqlOutParameter(String name, int sqlType, String typeName, SqlReturnType sqlReturnType) {
+	public SqlInOutParameter(String name, int sqlType, String typeName, SqlReturnType sqlReturnType) {
 		super(name, sqlType, typeName);
 		this.sqlReturnType = sqlReturnType;
 	}
 
 	/**
-	 * Create a new SqlOutParameter.
+	 * Create a new SqlInOutParameter.
 	 * @param name name of the parameter, as used in input and output maps
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param rse ResultSetExtractor to use for parsing the ResultSet
 	 */
-	public SqlOutParameter(String name, int sqlType, ResultSetExtractor rse) {
+	public SqlInOutParameter(String name, int sqlType, ResultSetExtractor rse) {
 		super(name, sqlType, rse);
 	}
 
 	/**
-	 * Create a new SqlOutParameter.
+	 * Create a new SqlInOutParameter.
 	 * @param name name of the parameter, as used in input and output maps
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param rch RowCallbackHandler to use for parsing the ResultSet
 	 */
-	public SqlOutParameter(String name, int sqlType, RowCallbackHandler rch) {
+	public SqlInOutParameter(String name, int sqlType, RowCallbackHandler rch) {
 		super(name, sqlType, rch);
 	}
 
 	/**
-	 * Create a new SqlOutParameter.
+	 * Create a new SqlInOutParameter.
 	 * @param name name of the parameter, as used in input and output maps
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param rm RowMapper to use for parsing the ResultSet
 	 */
-	public SqlOutParameter(String name, int sqlType, RowMapper rm) {
+	public SqlInOutParameter(String name, int sqlType, RowMapper rm) {
 		super(name, sqlType, rm);
 	}
 
@@ -114,7 +95,7 @@ public class SqlOutParameter extends ResultSetSupportingSqlParameter {
 	 * before execution even if they are null.
 	 */
 	public boolean isInputValueProvided() {
-		return false;
+		return true;
 	}
 
 }
