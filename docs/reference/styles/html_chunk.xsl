@@ -100,4 +100,13 @@
     <xsl:template name="header.navigation"/>
     <xsl:param name="navig.showtitles">1</xsl:param>
 
+    <!-- lets have a Powered by Interface21 banner across the bottom of each page -->
+    <xsl:template name="user.footer.navigation">
+		<div style="background-color:#31430f;border:none;height:50px;border:1px solid black;text-align:center">
+			<a style="border:none;background: url();" href="http://www.interface21.com/" title="Brought to you by Interface21">
+				<img style="border:none;" src="images/interface21.gif"/>
+			</a>
+		</div>
+	</xsl:template>
+
 </xsl:stylesheet>
