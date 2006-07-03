@@ -87,12 +87,11 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 
 
 	/**
-	 * Consider beans with the specified prefix as eligible,
-	 * if activated.
+	 * Consider Advisor beans with the specified prefix as eligible, if activated.
 	 * @see #setUsePrefix
 	 * @see #setAdvisorBeanNamePrefix
 	 */
-	protected boolean isEligibleForProxying(String beanName) {
+	protected boolean isEligibleAdvisorBean(String beanName) {
 		return (!isUsePrefix() || beanName.startsWith(getAdvisorBeanNamePrefix()));
 	}              
 

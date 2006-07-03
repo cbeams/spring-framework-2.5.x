@@ -20,8 +20,6 @@ import java.util.List;
 
 import org.springframework.aop.aspectj.AspectJProxyUtils;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
-import org.springframework.core.ControlFlow;
-import org.springframework.core.ControlFlowFactory;
 
 /**
  * Extension of {@link DefaultAdvisorAutoProxyCreator} that adds an
@@ -39,8 +37,4 @@ public class InvocationContextExposingAdvisorAutoProxyCreator extends AbstractAd
 		AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(candidateAdvisors);
 	}
 
-	protected boolean shouldSkip(Class beanClass, String name) {
-		ControlFlow cflow = ControlFlowFactory.createControlFlow();
-		return cflow.under(getClass(), "findCandidateAdvisors");
-	}
 }

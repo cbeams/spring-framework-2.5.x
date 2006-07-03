@@ -22,11 +22,9 @@ import java.util.List;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.core.ControlFlow;
-import org.springframework.core.ControlFlowFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
  * Abstract BeanPostProcessor implementation that creates AOP proxies.
@@ -50,17 +48,6 @@ import org.springframework.core.ControlFlowFactory;
  * @see org.springframework.aop.support.AopUtils
  */
 public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
-
-	/**
-	 * We override this method to ensure that all candidate advisors are materialized
-	 * under a stack trace including this bean. Otherwise, the dependencies won't
-	 * be apparent to the circular-reference prevention strategy in AbstractBeanFactory.
-	 */
-	public void setBeanFactory(BeanFactory beanFactory) {
-		super.setBeanFactory(beanFactory);
-		findCandidateAdvisors();
-	}
-
 
 	protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String name, TargetSource targetSource) {
 		List advisors = findEligibleAdvisors(beanClass);
@@ -93,31 +80,14 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
-	 * We override this to ensure that we don't get into circular reference hell
-	 * when our own infrastructure (such as this class) depends on advisors that depend
-	 * on beans... We use a ControlFlow object to check that we didn't arrived at this
-	 * call via our own <code>findCandidateAdvisors()</code> method.
-	 * @see #findCandidateAdvisors()
-	 * @see org.springframework.core.ControlFlow
-	 */
-	protected boolean shouldSkip(Class beanClass, String name) {
-		// TODO consider pulling this test into AbstractBeanFactory.applyBeanPostProcessors(),
-		// to protect all BeanPostProcessors.
-		ControlFlow cflow = ControlFlowFactory.createControlFlow();
-		return cflow.under(AbstractAdvisorAutoProxyCreator.class, "findCandidateAdvisors");
-	}
-
-
-	/**
 	 * Find all candidate advisors to use in auto-proxying.
 	 * @return list of Advisors
 	 */
 	protected List findCandidateAdvisors() {
-		if (!(getBeanFactory() instanceof ListableBeanFactory)) {
-			throw new IllegalStateException(
-					"Cannot use DefaultAdvisorAutoProxyCreator without a ListableBeanFactory");
+		if (!(getBeanFactory() instanceof ConfigurableListableBeanFactory)) {
+			throw new IllegalStateException("Cannot use AdvisorAutoProxyCreator without a ConfigurableListableBeanFactory");
 		}
-		ListableBeanFactory owningFactory = (ListableBeanFactory) getBeanFactory();
+		ConfigurableListableBeanFactory owningFactory = (ConfigurableListableBeanFactory) getBeanFactory();
 
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let the auto-proxy creator apply to them!
@@ -126,20 +96,19 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 		List candidateAdvisors = new LinkedList();
 		for (int i = 0; i < adviceNames.length; i++) {
 			String name = adviceNames[i];
-			if (isEligibleForProxying(name)) {
-				Advisor advisor = (Advisor) owningFactory.getBean(name);
-				candidateAdvisors.add(advisor);
+			if (isEligibleAdvisorBean(name) && !owningFactory.isCurrentlyInCreation(name)) {
+				candidateAdvisors.add(owningFactory.getBean(name));
 			}
 		}
 		return candidateAdvisors;
 	}
 
 	/**
-	 * Return whether the bean with the given name is eligible for proxying
-	 * in the first place.
-	 * @param beanName the name of the target bean
+	 * Return whether the Advisor bean with the given name is eligible
+	 * for proxying in the first place.
+	 * @param beanName the name of the Advisor bean
 	 */
-	protected boolean isEligibleForProxying(String beanName) {
+	protected boolean isEligibleAdvisorBean(String beanName) {
 		return true;
 	}
 
