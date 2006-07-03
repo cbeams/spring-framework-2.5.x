@@ -19,6 +19,10 @@ package org.springframework.aop.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import org.springframework.aop.aspectj.AspectJAfterAdvice;
 import org.springframework.aop.aspectj.AspectJAfterReturningAdvice;
 import org.springframework.aop.aspectj.AspectJAfterThrowingAdvice;
@@ -42,9 +46,6 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * {@link BeanDefinitionParser} for the <code>&lt;aop:config&gt;</code> tag.
@@ -348,7 +349,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			RootBeanDefinition methodDefinition = new RootBeanDefinition(MethodLocatingFactoryBean.class);
 			methodDefinition.getPropertyValues().addPropertyValue("targetBeanName", aspectName);
 			methodDefinition.getPropertyValues().addPropertyValue("methodName", adviceElement.getAttribute("method"));
-	
+			methodDefinition.setSynthetic(true);
+
 			// create instance factory definition
 			RootBeanDefinition instanceFactoryDefinition = new RootBeanDefinition(BeanFactoryAspectInstanceFactory.class);
 			instanceFactoryDefinition.getPropertyValues().addPropertyValue("aspectBeanName", aspectName);
@@ -527,7 +529,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		else {
 			parserContext.getReaderContext().error(
-							"Must define one of 'pointcut' or 'pointcut-ref' on 'advisor'.", 
+							"Must define one of 'pointcut' or 'pointcut-ref' on 'advisor'.",
 							element, 
 							this.parseState.snapshot());
 			return null;
