@@ -9,7 +9,17 @@ Changes in version 2.0 RC2 (6.7.2006)
 General
 * various documentation clarifications
 
+Package org.springframework.aop
+* Advisors used in combination with an advisor auto-proxy creator can now use beans which get adviced themselves
+* moved AbstractAutoProxyCreator's "shouldSkip" check from "isInfrastructureClass" to "postProcessAfterInitialization"
+* reworked AbstractAdvisorAutoProxyCreator to avoid fetching of all candidate Advisors on startup
+* AbstractAdvisorAutoProxyCreator performs BeanFactory-based prototype cycle check instead of control flow check
+
 Package org.springframework.beans
+* added "isCurrentlyInCreation" method to ConfigurableBeanFactory interface
+* reworked AbstractBeanFactory to allow for prototype cycle check for current thread
+* added "synthetic" flag to AbstractBeanDefinition, for marking beans as internal infrastructure beans
+* AbstractAutowireCapableBeanFactory does not apply bean post-processors to "synthetic" beans
 * AbstractAutowireCapableBeanFactory accepts null values returned from BeanPostProcessors
 * MethodInvokingFactoryBean returns "void.class" instead of "VoidType.class" for void methods
 
@@ -30,11 +40,18 @@ Package org.springframework.orm
 * refined Hib exception translation to throw InvalidDataAccessApiUsageException in case of Hibernate ObjectDeleted
 * refined Hib exception translation to throw IncorrectResultSizeDataAccessException in case of Hibernate NonUniqueResult
 
+Package org.springframework.remoting
+* JaxRpcPortClientInterceptor/JaxRpcPortProxyFactoryBean allow for direct "customPropertyMap[myKey]" access
+
+Package org.springframework.scheduling
+* Quartz SchedulerFactoryBean uses given "nonTransactionalDataSource" as default DataSource if no "dataSource" specified
+
 Package org.springframework.transaction
 * JtaTransactionManager explicitly only calls "UserTransaction.setRollbackOnly()" if the transaction is still active
 
 Package org.springframework.web
 * added/moved constants for all Servlet spec include/forward request attributes to WebUtils
+* added "getWebApplicationContext"/"getAutowireMode"/"getDependencyCheck" methods to Autowiring(Tiles)RequestProcessor
 * InternalResourceView exposes all forward request attributes (delegating to "WebUtils.exposeForwardRequestAttributes")
 * RequestContext's "getContextPath()" always exposes the context path for the originating request now
 * added "getQueryString" method to RequestContext, exposing query string for originating request (even after forward)
