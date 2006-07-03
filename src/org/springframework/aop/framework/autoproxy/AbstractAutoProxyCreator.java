@@ -202,7 +202,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 
 	public Object postProcessBeforeInstantiation(Class beanClass, String beanName) throws BeansException {
-		if (isInfrastructureClass(beanClass, beanName)) {
+		if (isInfrastructureClass(beanClass, beanName) || shouldSkip(beanClass, beanName)) {
 			return null;
 		}
 
@@ -217,7 +217,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 		return null;
 	}
-	
+
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) {
 		return true;
 	}
@@ -236,7 +236,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @see #getAdvicesAndAdvisorsForBean
 	 */
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-		if (isInfrastructureClass(bean.getClass(), beanName)) {
+		if (isInfrastructureClass(bean.getClass(), beanName) || shouldSkip(bean.getClass(), beanName)) {
 			return bean;
 		}
 
@@ -253,22 +253,28 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	/**
 	 * Return whether the given bean class and bean name represents an
 	 * infrastructure class that should never be proxied.
+	 * @deprecated in favor of <code>isInfrastructureClass(beanClass)</code>
+	 * @see #isInfrastructureClass(Class)
+	 */
+	protected boolean isInfrastructureClass(Class beanClass, String beanName) {
+		return isInfrastructureClass(beanClass);
+	}
+
+	/**
+	 * Return whether the given bean class and bean name represents an
+	 * infrastructure class that should never be proxied.
 	 * <p>Default implementation considers Advisors, MethodInterceptors
-	 * and AbstractAutoProxyCreators as infrastructure classes, and
-	 * consults the <code>shouldSkip</coide> method.
+	 * and AbstractAutoProxyCreators as infrastructure classes.
 	 * @param beanClass the class of the bean
-	 * @param beanName the name of the bean
 	 * @return whether the bean represents an infrastructure class
 	 * @see org.springframework.aop.Advisor
 	 * @see org.aopalliance.intercept.MethodInterceptor
 	 * @see #shouldSkip
 	 */
-	protected boolean isInfrastructureClass(Class beanClass, String beanName) {
+	protected boolean isInfrastructureClass(Class beanClass) {
 		boolean retVal = Advisor.class.isAssignableFrom(beanClass) ||
 				MethodInterceptor.class.isAssignableFrom(beanClass) ||
-				AbstractAutoProxyCreator.class.isAssignableFrom(beanClass) ||
-				shouldSkip(beanClass, beanName);
-
+				AbstractAutoProxyCreator.class.isAssignableFrom(beanClass);
 		if (retVal && logger.isDebugEnabled()) {
 			logger.debug("Did not attempt to autoproxy infrastructure class [" + beanClass.getName() + "]");
 		}
@@ -276,9 +282,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	}
 
 	/**
-	 * Subclasses should override this method to return true if this
-	 * bean should not be considered for auto-proxying by this post processor.
-	 * Sometimes we need to be able to avoid this happening if it will lead to
+	 * Subclasses should override this method to return <code>true</code> if the
+	 * given bean should not be considered for auto-proxying by this post-processor.
+	 * <p>Sometimes we need to be able to avoid this happening if it will lead to
 	 * a circular reference. This implementation returns <code>false</code>.
 	 * @param beanClass the class of the bean
 	 * @param beanName the name of the bean
