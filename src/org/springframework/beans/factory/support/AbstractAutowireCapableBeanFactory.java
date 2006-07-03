@@ -311,7 +311,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Object bean = null;
 
 		// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
-		if (beanClass != null) {
+		if (beanClass != null && !mergedBeanDefinition.isSynthetic()) {
 			bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
 			if (bean != null) {
 				bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
@@ -364,13 +364,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// of the bean before properties are set. This can be used, for example,
 			// to support styles of field injection.
 			boolean continueWithPropertyPopulation = true;
-			for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext(); ) {
-				BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
-				if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
-					InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) beanProcessor;
-					if (!ibp.postProcessAfterInstantiation(bean, beanName)) {
-						continueWithPropertyPopulation = false;
-						break;
+
+			if (!mergedBeanDefinition.isSynthetic()) {
+				for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext(); ) {
+					BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
+					if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
+						InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) beanProcessor;
+						if (!ibp.postProcessAfterInstantiation(bean, beanName)) {
+							continueWithPropertyPopulation = false;
+							break;
+						}
 					}
 				}
 			}
@@ -854,7 +857,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		Object wrappedBean = bean;
-		wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
+		if (mergedBeanDefinition == null || !mergedBeanDefinition.isSynthetic()) {
+			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
+		}
 
 		try {
 			invokeInitMethods(beanName, wrappedBean, mergedBeanDefinition);
@@ -865,7 +870,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					beanName, "Invocation of init method failed", ex);
 		}
 
-		wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
+		if (mergedBeanDefinition == null || !mergedBeanDefinition.isSynthetic()) {
+			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
+		}
 		return wrappedBean;
 	}
 

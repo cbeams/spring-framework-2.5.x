@@ -153,6 +153,8 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 	private boolean enforceDestroyMethod = true;
 
+	private boolean synthetic = false;
+
 	private String resourceDescription;
 
 	private Object source;
@@ -204,6 +206,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 		setDestroyMethodName(original.getDestroyMethodName());
 		setEnforceDestroyMethod(original.isEnforceDestroyMethod());
 
+		setSynthetic(original.isSynthetic());
 		setResourceDescription(original.getResourceDescription());
 
 		copyAttributesFrom(original);
@@ -256,6 +259,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 			setEnforceDestroyMethod(other.isEnforceDestroyMethod());
 		}
 
+		setSynthetic(other.isSynthetic());
 		setResourceDescription(other.getResourceDescription());
 		copyAttributesFrom(other);
 	}
@@ -667,6 +671,24 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 
 	/**
+	 * Set whether this bean definition is "synthetic", that is, not defined
+	 * by the application itself (for example, an infrastructure bean such as
+	 * helper beans for an auto-proxy creator created through
+	 * <code>&ltaop:config&gt;</code>).
+	 */
+	public void setSynthetic(boolean synthetic) {
+		this.synthetic = synthetic;
+	}
+
+	/**
+	 * Return whether this bean definition is "synthetic", that is, not defined
+	 * by the application itself.
+	 */
+	public boolean isSynthetic() {
+		return synthetic;
+	}
+
+	/**
 	 * Set a description of the resource that this bean definition
 	 * came from (for the purpose of showing context in case of errors).
 	 */
@@ -704,6 +726,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	public void setRole(int role) {
 		this.role = role;
 	}
+
 
 	/**
 	 * Return the role hint for this <code>BeanDefinition</code>.

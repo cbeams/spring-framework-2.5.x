@@ -28,7 +28,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -176,7 +175,7 @@ class BeanDefinitionValueResolver {
 			if (mergedInnerBd.isSingleton()) {
 				this.beanFactory.registerDependentBean(actualInnerBeanName, this.beanName);
 			}
-			return this.beanFactory.getObjectForBeanInstance(innerBean, actualInnerBeanName, false);
+			return this.beanFactory.getObjectForBeanInstance(innerBean, actualInnerBeanName, mergedInnerBd);
 		}
 		catch (BeansException ex) {
 			throw new BeanCreationException(
