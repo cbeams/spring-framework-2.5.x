@@ -20,7 +20,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -41,6 +40,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -134,32 +134,32 @@ public abstract class AbstractEntityManagerFactoryBean
 	/**
 	 * Specify JPA properties, to be passed into
 	 * <code>Persistence.createEntityManagerFactory</code> (if any).
+	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
+	 * or a "props" element in XML bean definitions.
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
 	 */
 	public void setJpaProperties(Properties jpaProperties) {
-		if (jpaProperties != null) {
-			// Use propertyNames enumeration to also catch default properties.
-			for (Enumeration en = jpaProperties.propertyNames(); en.hasMoreElements();) {
-				String key = (String) en.nextElement();
-				this.jpaPropertyMap.put(key, jpaProperties.getProperty(key));
-			}
-		}
+		CollectionUtils.mergePropertiesIntoMap(jpaProperties, this.jpaPropertyMap);
 	}
 
 	/**
 	 * Specify JPA properties as a Map, to be passed into
 	 * <code>Persistence.createEntityManagerFactory</code> (if any).
+	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
+	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
 	 */
-	public void setJpaPropertyMap(Map map) {
-		if (map != null) {
-			this.jpaPropertyMap.putAll(map);
+	public void setJpaPropertyMap(Map jpaProperties) {
+		if (jpaProperties != null) {
+			this.jpaPropertyMap.putAll(jpaProperties);
 		}
 	}
 	
 	/**
-	 * Return the JPA properties as a Map.
+	 * Allow Map access to the JPA properties to be passed to the persistence
+	 * provider, with the option to add or override specific entries.
+	 * <p>Useful for specifying entries directly, for example via "jpaPropertyMap[myKey]".
 	 */
-	protected Map getJpaPropertyMap() {
+	public Map getJpaPropertyMap() {
 		return jpaPropertyMap;
 	}
 
