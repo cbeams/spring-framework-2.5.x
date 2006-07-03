@@ -107,6 +107,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 */
 	private int maxRows = 0;
 
+	/**
+	 * If this variable is set to true then all results checking will be bypassed for any
+	 * callable statement processing.  This can be used to avoid a bug in some older Oracle
+	 * JDBC drivers like 10.1.0.2.
+	 */
+	private boolean skipResultsProcessing = false;
+
 
 	/**
 	 * Construct a new JdbcTemplate for bean usage.
@@ -211,6 +218,22 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return maxRows;
 	}
 
+	/**
+	 * Set whether results processing should be skipped.  Can be used to optimize callable
+	 * statement processing when we know that no results are being passed back - the processing
+	 * of out parameter will still take place.  This can be used to avoid a bug in some older
+	 * Oracle JDBC drivers like 10.1.0.2.
+	 */
+	public void setSkipResultsProcessing(boolean skipResultsProcessing) {
+		this.skipResultsProcessing = skipResultsProcessing;
+	}
+
+	/**
+	 * Return whether results processing should be skipped.
+	 */
+	public boolean isSkipResultsProcessing() {
+		return skipResultsProcessing;
+	}
 
 	//-------------------------------------------------------------------------
 	// Methods dealing with a plain java.sql.Connection
@@ -866,29 +889,31 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		Map returnedResults = new HashMap();
 		int rsIndex = 0;
 		boolean moreResults;
-		do {
-			if (updateCount == -1) {
-				Object param = null;
-				if (parameters != null && parameters.size() > rsIndex) {
-					param = parameters.get(rsIndex);
+		if (!skipResultsProcessing) {
+			do {
+				if (updateCount == -1) {
+					Object param = null;
+					if (parameters != null && parameters.size() > rsIndex) {
+						param = parameters.get(rsIndex);
+					}
+					if (param instanceof SqlReturnResultSet) {
+						SqlReturnResultSet rsParam = (SqlReturnResultSet) param;
+						returnedResults.putAll(processResultSet(cs.getResultSet(), rsParam));
+					}
+					else {
+						logger.warn("Results returned from stored procedure but a corresponding " +
+								"SqlOutParameter/SqlReturnResultSet parameter was not declared");
+					}
+					rsIndex++;
 				}
-				if (param instanceof SqlReturnResultSet) {
-					SqlReturnResultSet rsParam = (SqlReturnResultSet) param;
-					returnedResults.putAll(processResultSet(cs.getResultSet(), rsParam));
+				moreResults = cs.getMoreResults();
+				updateCount = cs.getUpdateCount();
+				if (logger.isDebugEnabled()) {
+					logger.debug("CallableStatement.getUpdateCount() returned " + updateCount);
 				}
-				else {
-					logger.warn("Results returned from stored procedure but a corresponding " +
-							"SqlOutParameter/SqlReturnResultSet parameter was not declared");
-				}
-				rsIndex++;
 			}
-			moreResults = cs.getMoreResults();
-			updateCount = cs.getUpdateCount();
-			if (logger.isDebugEnabled()) {
-				logger.debug("CallableStatement.getUpdateCount() returned " + updateCount);
-			}
+			while (moreResults || updateCount != -1);
 		}
-		while (moreResults || updateCount != -1);
 		return returnedResults;
 	}
 
