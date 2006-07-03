@@ -135,7 +135,10 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	private final Set alreadyCreated = Collections.synchronizedSet(new HashSet());
 
 	/** Names of beans that are currently in creation */
-	private final Set currentlyInCreation = Collections.synchronizedSet(new HashSet());
+	private final Set singletonsCurrentlyInCreation = Collections.synchronizedSet(new HashSet());
+
+	/** Names of beans that are currently in creation */
+	private final ThreadLocal prototypesCurrentlyInCreation = new ThreadLocal();
 
 	/** Disposable bean instances: bean name --> disposable instance */
 	private final Map disposableBeans = CollectionFactory.createLinkedMapIfPossible(16);
@@ -212,7 +215,13 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 					logger.debug("Returning cached instance of singleton bean '" + beanName + "'");
 				}
 			}
-			bean = getObjectForBeanInstance(sharedInstance, name, true);
+			if (containsBeanDefinition(beanName)) {
+				RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
+				bean = getObjectForBeanInstance(sharedInstance, name, mergedBeanDefinition);
+			}
+			else {
+				bean = getObjectForBeanInstance(sharedInstance, name, null);
+			}
 		}
 
 		else {
@@ -252,7 +261,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
 						}
-						this.currentlyInCreation.add(beanName);
+						beforeSingletonCreation(beanName);
 						try {
 							sharedInstance = createBean(beanName, mergedBeanDefinition, args);
 							addSingleton(beanName, sharedInstance);
@@ -265,17 +274,24 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 							throw ex;
 						}
 						finally {
-							this.currentlyInCreation.remove(beanName);
+							afterSingletonCreation(beanName);
 						}
 					}
 				}
-				bean = getObjectForBeanInstance(sharedInstance, name, true);
+				bean = getObjectForBeanInstance(sharedInstance, name, mergedBeanDefinition);
 			}
 
 			else if (mergedBeanDefinition.isPrototype()) {
 				// It's a prototype -> create a new instance.
-				Object prototypeInstance = createBean(beanName, mergedBeanDefinition, args);
-				bean = getObjectForBeanInstance(prototypeInstance, name, false);
+				Object prototypeInstance = null;
+				try {
+					beforePrototypeCreation(beanName);
+					prototypeInstance = createBean(beanName, mergedBeanDefinition, args);
+				}
+				finally {
+					afterPrototypeCreation(beanName);
+				}
+				bean = getObjectForBeanInstance(prototypeInstance, name, mergedBeanDefinition);
 			}
 
 			else {
@@ -287,10 +303,16 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 				try {
 					Object scopedInstance = scope.get(beanName, new ObjectFactory() {
 						public Object getObject() throws BeansException {
-							return createBean(beanName, mergedBeanDefinition, args);
+							beforePrototypeCreation(beanName);
+							try {
+								return createBean(beanName, mergedBeanDefinition, args);
+							}
+							finally {
+								afterPrototypeCreation(beanName);
+							}
 						}
 					});
-					bean = getObjectForBeanInstance(scopedInstance, name, false);
+					bean = getObjectForBeanInstance(scopedInstance, name, mergedBeanDefinition);
 				}
 				catch (IllegalStateException ex) {
 					throw new BeanCreationException(beanName, "Scope '" + scopeName + "' is not active", ex);
@@ -527,6 +549,77 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		return this.hasDestructionAwareBeanPostProcessors;
 	}
 
+
+	private void beforeSingletonCreation(String beanName) {
+		this.singletonsCurrentlyInCreation.add(beanName);
+	}
+
+	private void afterSingletonCreation(String beanName) {
+		this.singletonsCurrentlyInCreation.remove(beanName);
+	}
+
+	/**
+	 * Return whether the specified singleton bean is currently in creation
+	 * (within the entire factory).
+	 * @param beanName the name of the bean
+	 */
+	protected final boolean isSingletonCurrentlyInCreation(String beanName) {
+		return this.singletonsCurrentlyInCreation.contains(beanName);
+	}
+
+	private void beforePrototypeCreation(String beanName) {
+		Set beanNames = (Set) this.prototypesCurrentlyInCreation.get();
+		if (beanNames == null) {
+			beanNames = new HashSet();
+			this.prototypesCurrentlyInCreation.set(beanNames);
+		}
+		beanNames.add(beanName);
+	}
+
+	private void afterPrototypeCreation(String beanName) {
+		Set beanNames = (Set) this.prototypesCurrentlyInCreation.get();
+		if (beanNames != null) {
+			beanNames.remove(beanName);
+			if (beanNames.isEmpty()) {
+				this.prototypesCurrentlyInCreation.set(null);
+			}
+		}
+	}
+
+	/**
+	 * Return whether the specified prototype bean is currently in creation
+	 * (within the current thread).
+	 * @param beanName the name of the bean
+	 */
+	protected final boolean isPrototypeCurrentlyInCreation(String beanName) {
+		Set beanNames = (Set) this.prototypesCurrentlyInCreation.get();
+		if (beanNames != null) {
+			return beanNames.contains(beanName);
+		}
+		return false;
+	}
+
+	public boolean isCurrentlyInCreation(String beanName) {
+		return isSingletonCurrentlyInCreation(beanName) || isPrototypeCurrentlyInCreation(beanName);
+	}
+
+
+	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
+		Assert.hasText(beanName, "Bean name must not be empty");
+		Assert.hasText(alias, "Alias must not be empty");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
+		}
+		synchronized (this.aliasMap) {
+			Object registeredName = this.aliasMap.get(alias);
+			if (registeredName != null) {
+				throw new BeanDefinitionStoreException("Cannot register alias '" + alias + "' for bean name '" +
+						beanName + "': it's already registered for bean name '" + registeredName + "'");
+			}
+			this.aliasMap.put(alias, beanName);
+		}
+	}
+
 	public void registerScope(String scopeName, Scope scope) {
 		Assert.notNull(scopeName, "Scope identifier must not be null");
 		Assert.notNull(scope, "Scope must not be null");
@@ -555,21 +648,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		}
 	}
 
-	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
-		Assert.hasText(beanName, "Bean name must not be empty");
-		Assert.hasText(alias, "Alias must not be empty");
-		if (logger.isDebugEnabled()) {
-			logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
-		}
-		synchronized (this.aliasMap) {
-			Object registeredName = this.aliasMap.get(alias);
-			if (registeredName != null) {
-				throw new BeanDefinitionStoreException("Cannot register alias '" + alias + "' for bean name '" +
-						beanName + "': it's already registered for bean name '" + registeredName + "'");
-			}
-			this.aliasMap.put(alias, beanName);
-		}
-	}
 
 	public void registerSingleton(String beanName, Object singletonObject) throws BeanDefinitionStoreException {
 		Assert.hasText(beanName, "Bean name must not be empty");
@@ -632,14 +710,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		synchronized (this.singletonCache) {
 			return StringUtils.toStringArray(this.singletonCache.keySet());
 		}
-	}
-
-	/**
-	 * Return whether the specified singleton is currently in creation
-	 * @param beanName the name of the bean
-	 */ 
-	protected boolean isSingletonCurrentlyInCreation(String beanName) {
-		return this.currentlyInCreation.contains(beanName);
 	}
 
 	public boolean containsSingleton(String beanName) {
@@ -925,11 +995,10 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * instance itself or its created object in case of a FactoryBean.
 	 * @param beanInstance the shared bean instance
 	 * @param name name that may include factory dereference prefix
-	 * @param shared whether the given instance is a shared instance
-	 * (registered at the top level of the bean factory)
+	 * @param mbd the merged bean definition
 	 * @return the object to expose for the bean
 	 */
-	protected Object getObjectForBeanInstance(Object beanInstance, String name, boolean shared)
+	protected Object getObjectForBeanInstance(Object beanInstance, String name, RootBeanDefinition mbd)
 			throws BeansException {
 
 		String beanName = transformedBeanName(name);
@@ -940,6 +1009,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			throw new BeanIsNotAFactoryException(beanName, beanInstance.getClass());
 		}
 
+		boolean shared = (mbd == null || mbd.isSingleton());
 		Object object = beanInstance;
 
 		// Now we have the bean instance, which may be a normal bean or a FactoryBean.
@@ -957,13 +1027,13 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 					synchronized (this.factoryBeanObjectCache) {
 						object = this.factoryBeanObjectCache.get(beanName);
 						if (object == null) {
-							object = getObjectFromFactoryBean(factory, beanName);
+							object = getObjectFromFactoryBean(factory, beanName, mbd);
 							this.factoryBeanObjectCache.put(beanName, object);
 						}
 					}
 				}
 				else {
-					object = getObjectFromFactoryBean(factory, beanName);
+					object = getObjectFromFactoryBean(factory, beanName, mbd);
 				}
 			}
 			else {
@@ -985,7 +1055,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 * @throws BeanCreationException if FactoryBean object creation failed
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
-	private Object getObjectFromFactoryBean(FactoryBean factory, String beanName) throws BeanCreationException {
+	private Object getObjectFromFactoryBean(FactoryBean factory, String beanName, RootBeanDefinition mbd)
+			throws BeanCreationException {
+
 		Object object;
 		try {
 			object = factory.getObject();
@@ -993,7 +1065,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		catch (Throwable ex) {
 			throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
 		}
-		object = postProcessObjectFromFactoryBean(object, beanName);
+		if (mbd != null && !mbd.isSynthetic()) {
+			object = postProcessObjectFromFactoryBean(object, beanName);
+		}
 		return object;
 	}
 

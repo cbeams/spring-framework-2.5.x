@@ -134,17 +134,10 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	int getBeanPostProcessorCount();
 
 	/**
-	 * Register the given scope, backed by the given Scope implementation.
-	 * @param scopeName the scope identifier
-	 * @param scope the backing Scope implementation
+	 * Return whether the specified bean is currently in creation.
+	 * @param beanName the name of the bean
 	 */
-	void registerScope(String scopeName, Scope scope);
-
-	/**
-	 * Destroy the specified scoped bean in the current target scope.
-	 * @param beanName the name of the scoped bean
-	 */
-	void destroyScopedBean(String beanName);
+	boolean isCurrentlyInCreation(String beanName);
 
 	/**
 	 * Given a bean name, create an alias. We typically use this method to
@@ -159,6 +152,19 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory {
 	 * @throws BeansException if the alias is already in use
 	 */
 	void registerAlias(String beanName, String alias) throws BeansException;
+
+	/**
+	 * Register the given scope, backed by the given Scope implementation.
+	 * @param scopeName the scope identifier
+	 * @param scope the backing Scope implementation
+	 */
+	void registerScope(String scopeName, Scope scope);
+
+	/**
+	 * Destroy the specified scoped bean in the current target scope.
+	 * @param beanName the name of the scoped bean
+	 */
+	void destroyScopedBean(String beanName);
 
 	/**
 	 * Register the given existing object as singleton in the bean factory,
