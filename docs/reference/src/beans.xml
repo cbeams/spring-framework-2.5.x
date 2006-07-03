@@ -1944,7 +1944,17 @@ public class ReplacementComputeValue implements MethodReplacer {
 			</tgroup>
 		</table>
 
-		<section id="beans-factory-scopes-singleton">
+        <note>
+            <para>For backwards compatibility reasons it is still possible to specify
+            <literal>singleton="false"</literal> and <literal>singleton="true"</literal>
+            as arguments to a bean definition. However, note that specifying both the
+            <literal>singleton</literal> and <literal>scope</literal> argument on a bean
+            definition leads to unexpected behaviour. You should only specify one of the
+            two options, where the use of <literal>scope</literal> is the prefered choice.
+            </para>
+		</note>
+
+        <section id="beans-factory-scopes-singleton">
 		    <title>The singleton scope</title>
 		    <para>When a bean is a singleton, only one <emphasis>shared</emphasis>
 		    instance of the bean will be managed and all requests for beans with
@@ -1998,14 +2008,14 @@ public class ReplacementComputeValue implements MethodReplacer {
 		    <title>The prototype scope</title>
 		    <para>The non-singleton, prototype scope of bean deployment results in
 			the <emphasis>creation of a new bean instance</emphasis> every time a
-			request for that specific bean is made. This is ideal for situations
-			where for example each user needs an independent object that will be
-			populated with conversational or something similar.</para>
+			request for that specific bean is made. As a rule of thumb, you should
+            use the prototype scope for all beans that are stateful, while the
+            singleton scope should be used for stateless beans.</para>
 		    <para>The following diagram illustrates the Spring prototype scope.
 		    <emphasis>Please note that a DAO would not typically be configured as a
 		    prototype, since a typical DAO would not hold any conversational state;
 		    it was just easier for this author to reuse the core of the singleton
-		    diagram.)</emphasis></para>
+		    diagram.</emphasis></para>
 		    <para>
 			    <mediaobject>
 				    <imageobject role="fo">
@@ -2079,13 +2089,13 @@ public class ReplacementComputeValue implements MethodReplacer {
   </listener>
   ...
 </web-app>]]></programlisting>
-                <para>If you are using a Servlet 2.3+ web container, you will need to use
+                <para>If you are using an older web container (before Servlet 2.4), you will need to use
                 a (provided) <interfacename>javax.servlet.Filter</interfacename> implementation.
                 Find below a snippet of XML configuration that has to be included
                 in the <literal>'web.xml'</literal> file of your web application if you
-                want to have access to web-scoped beans. (The filter settings depend on
+                want to have access to web-scoped beans (the filter settings depend on
                 the surrounding web application configuration and so you will have to change
-                them as appropriate.)</para>
+                them as appropriate).</para>
                 <programlisting><![CDATA[<web-app>
   ..
   <filter> 
@@ -2120,7 +2130,7 @@ public class ReplacementComputeValue implements MethodReplacer {
                 off the back of the same <literal>'loginAction'</literal> bean definition
                 will not be seeing these changes in state particular to an individual
                 request. When the request is finished processing, the bean that is scoped
-                to the request will be thrown away (roughly speaking).</para>
+                to the request will be discarded.</para>
 			</section>
 
 			<section id="beans-factory-scopes-session">
@@ -2142,7 +2152,7 @@ public class ReplacementComputeValue implements MethodReplacer {
                 HTTP <interfacename>Session</interfacename>. When the HTTP
                 <interfacename>Session</interfacename> is eventually discarded, the bean
                 that is scoped to that particular HTTP <interfacename>Session</interfacename>
-                will be thrown away (in a manner of speaking).</para>
+                will also be discarded.</para>
 			</section>
 
 			<section id="beans-factory-scopes-global-session">
@@ -2171,9 +2181,9 @@ public class ReplacementComputeValue implements MethodReplacer {
 			    <para>Being able to define a bean scoped to a HTTP request or
 			    <interfacename>Session</interfacename> (or indeed
 			    <link linkend="beans-factory-scopes-custom">a custom scope</link>  of
-			    your own devising)is all very well, but one of the
-			    main value-adds of the Spring IoC container is that it manages the
-			    not only the instantiation of your objects (beans), but also
+			    your own devising) is all very well, but one of the
+			    main value-adds of the Spring IoC container is that it manages
+                not only the instantiation of your objects (beans), but also
 			    the wiring up of collaborators (or dependencies). If you want to inject
 			    a bean that, for the sake of argument is scoped at the HTTP request scope,
 			    into another bean, you will need to inject an AOP proxy in place of the
