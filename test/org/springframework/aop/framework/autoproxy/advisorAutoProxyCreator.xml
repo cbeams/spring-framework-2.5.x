@@ -39,7 +39,7 @@
 	<bean id="tas" class="org.springframework.transaction.interceptor.NameMatchTransactionAttributeSource">
 		<property name="properties">
 			<props>
-				<prop key="set*">PROPAGATION_REQUIRED</prop>
+				<prop key="setA*">PROPAGATION_REQUIRED</prop>
 				<prop key="rollbackOnly">PROPAGATION_REQUIRED</prop>
 				<prop key="echoException">PROPAGATION_REQUIRED,+javax.servlet.ServletException,-java.lang.Exception</prop>
 			</props>
@@ -51,8 +51,8 @@
 		<property name="transactionAttributeSource"><ref local="tas"/></property>
 	</bean>
 
-	<bean id="txAdvisor" class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"
-			autowire="constructor">
+	<bean id="txAdvisor" class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor">
+		<property name="transactionInterceptor"><ref local="txInterceptor"/></property>
 		<property name="order"><value>10</value></property>
 	</bean>
 
@@ -60,8 +60,7 @@
 	<!--
 		This advisor should never match and should not change how any of the tests run,
 		but it's a prototype referencing another (unused) prototype, as well as a
-		singleton, so it may pose circular reference problems, or
-		an infinite loop.
+		singleton, so it may pose circular reference problems, or an infinite loop.
 	-->
 	<bean id="neverMatchAdvisor" class="org.springframework.aop.framework.autoproxy.NeverMatchAdvisor"
 			singleton="false">

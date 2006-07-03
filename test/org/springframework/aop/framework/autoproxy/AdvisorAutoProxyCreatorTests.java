@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,9 +23,9 @@ import javax.servlet.ServletException;
 import junit.framework.TestCase;
 
 import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.framework.Lockable;
 import org.springframework.aop.framework.MethodCounter;
-import org.springframework.aop.framework.CountingBeforeAdvice;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.CommonsPoolTargetSource;
@@ -275,7 +275,8 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	public void testProgrammaticRollback() throws Exception {
 		BeanFactory bf = getBeanFactory();
 
-		assertTrue(bf.getBean(TXMANAGER_BEAN_NAME) instanceof CallCountingTransactionManager);
+		Object bean = bf.getBean(TXMANAGER_BEAN_NAME);
+		assertTrue(bean instanceof CallCountingTransactionManager);
 		CallCountingTransactionManager txMan = (CallCountingTransactionManager) bf.getBean(TXMANAGER_BEAN_NAME);
 
 		Rollback rb = (Rollback) bf.getBean("rollback");
@@ -291,7 +292,7 @@ public class AdvisorAutoProxyCreatorTests extends TestCase {
 	public void testWithOptimizedProxy() throws Exception {
 		BeanFactory beanFactory = new ClassPathXmlApplicationContext("org/springframework/aop/framework/autoproxy/optimizedAutoProxyCreator.xml");
 
-		ITestBean testBean = (ITestBean)beanFactory.getBean("optimizedTestBean");
+		ITestBean testBean = (ITestBean) beanFactory.getBean("optimizedTestBean");
 		assertTrue(AopUtils.isAopProxy(testBean));
 
 		CountingBeforeAdvice beforeAdvice = (CountingBeforeAdvice) beanFactory.getBean("countingAdvice");
