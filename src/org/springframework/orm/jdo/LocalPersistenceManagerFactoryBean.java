@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.orm.jdo;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Enumeration;
 import java.util.Properties;
 
 import javax.jdo.JDOException;
@@ -35,6 +34,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
+import org.springframework.util.CollectionUtils;
 
 /**
  * FactoryBean that creates a local JDO EntityManagerFactory instance.
@@ -170,26 +170,20 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 			throw new IllegalArgumentException("Either configLocation or jdoProperties must be set");
 		}
 
-		Properties props = new Properties();
+		Properties mergedProps = new Properties();
 
 		if (this.configLocation != null) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Loading JDO config from [" + this.configLocation + "]");
 			}
-			PropertiesLoaderUtils.fillProperties(props, this.configLocation);
+			PropertiesLoaderUtils.fillProperties(mergedProps, this.configLocation);
 		}
 
-		if (this.jdoProperties != null) {
-			// Use propertyNames enumeration to also catch default properties.
-			for (Enumeration en = this.jdoProperties.propertyNames(); en.hasMoreElements();) {
-				String key = (String) en.nextElement();
-				props.setProperty(key, this.jdoProperties.getProperty(key));
-			}
-		}
+		CollectionUtils.mergePropertiesIntoMap(this.jdoProperties, mergedProps);
 
 		// Build PersistenceManagerFactory instance.
 		logger.info("Building new JDO PersistenceManagerFactory");
-		this.persistenceManagerFactory = newPersistenceManagerFactory(props);
+		this.persistenceManagerFactory = newPersistenceManagerFactory(mergedProps);
 	}
 
 	/**

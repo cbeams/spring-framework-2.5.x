@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Base class for JavaBean-style components that need to load properties
@@ -148,12 +149,7 @@ public abstract class PropertiesLoaderSupport {
 
 		if (this.localProperties != null) {
 			for (int i = 0; i < this.localProperties.length; i++) {
-				Properties props = this.localProperties[i];
-				// Use propertyNames enumeration to also catch default properties.
-				for (Enumeration en = props.propertyNames(); en.hasMoreElements();) {
-					String key = (String) en.nextElement();
-					result.setProperty(key, props.getProperty(key));
-				}
+				CollectionUtils.mergePropertiesIntoMap(this.localProperties[i], result);
 			}
 		}
 

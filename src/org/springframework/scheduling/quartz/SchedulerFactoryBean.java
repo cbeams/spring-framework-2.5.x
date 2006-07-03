@@ -19,7 +19,6 @@ package org.springframework.scheduling.quartz;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,6 +57,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.util.CollectionUtils;
 
 /**
  * FactoryBean that sets up a Quartz Scheduler and exposes it for bean references.
@@ -522,6 +522,10 @@ public class SchedulerFactoryBean
 
 
 	public void afterPropertiesSet() throws Exception {
+		if (this.dataSource == null && this.nonTransactionalDataSource != null) {
+			this.dataSource = this.nonTransactionalDataSource;
+		}
+
 		// Create SchedulerFactory instance.
 		SchedulerFactory schedulerFactory = (SchedulerFactory)
 				BeanUtils.instantiateClass(this.schedulerFactoryClass);
@@ -586,43 +590,37 @@ public class SchedulerFactoryBean
 				throw new IllegalArgumentException("StdSchedulerFactory required for applying Quartz properties");
 			}
 
-			Properties props = new Properties();
+			Properties mergedProps = new Properties();
 
 			// Set necessary default properties here, as Quartz will not apply
 			// its default configuration when explicitly given properties.
 			if (this.taskExecutor != null) {
-				props.setProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, LocalTaskExecutorThreadPool.class.getName());
+				mergedProps.setProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, LocalTaskExecutorThreadPool.class.getName());
 			}
 			else {
-				props.setProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, SimpleThreadPool.class.getName());
-				props.setProperty(PROP_THREAD_COUNT, Integer.toString(DEFAULT_THREAD_COUNT));
+				mergedProps.setProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, SimpleThreadPool.class.getName());
+				mergedProps.setProperty(PROP_THREAD_COUNT, Integer.toString(DEFAULT_THREAD_COUNT));
 			}
 
 			if (this.configLocation != null) {
 				if (logger.isInfoEnabled()) {
 					logger.info("Loading Quartz config from [" + this.configLocation + "]");
 				}
-				PropertiesLoaderUtils.fillProperties(props, this.configLocation);
+				PropertiesLoaderUtils.fillProperties(mergedProps, this.configLocation);
 			}
 
-			if (this.quartzProperties != null) {
-				// Use propertyNames enumeration to also catch default properties.
-				for (Enumeration en = this.quartzProperties.propertyNames(); en.hasMoreElements();) {
-					String key = (String) en.nextElement();
-					props.setProperty(key, this.quartzProperties.getProperty(key));
-				}
-			}
+			CollectionUtils.mergePropertiesIntoMap(this.quartzProperties, mergedProps);
 
 			if (this.dataSource != null) {
-				props.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, LocalDataSourceJobStore.class.getName());
+				mergedProps.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, LocalDataSourceJobStore.class.getName());
 			}
 
 			// Make sure to set the scheduler name as configured in the Spring configuration.
 			if (this.schedulerName != null) {
-				props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, this.schedulerName);
+				mergedProps.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, this.schedulerName);
 			}
 
-			((StdSchedulerFactory) schedulerFactory).initialize(props);
+			((StdSchedulerFactory) schedulerFactory).initialize(mergedProps);
 		}
 	}
 

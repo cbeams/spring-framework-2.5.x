@@ -25,13 +25,12 @@ import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
 
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContext;
-import org.springframework.util.ClassUtils;
 
 /**
  * Abstract View superclass. Standard framework View implementations and
@@ -127,30 +126,27 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Format is: attname0={value1},attname1={value1}
 	 */
 	public void setAttributesCSV(String propString) throws IllegalArgumentException {
-		if (propString == null) {
-			// leave static attributes unchanged
-			return;
-		}
+		if (propString != null) {
+			StringTokenizer st = new StringTokenizer(propString, ",");
+			while (st.hasMoreTokens()) {
+				String tok = st.nextToken();
+				int eqIdx = tok.indexOf("=");
+				if (eqIdx == -1) {
+					throw new IllegalArgumentException("Expected = in attributes CSV string '" + propString + "'");
+				}
+				if (eqIdx >= tok.length() - 2) {
+					throw new IllegalArgumentException(
+							"At least 2 characters ([]) required in attributes CSV string '" + propString + "'");
+				}
+				String name = tok.substring(0, eqIdx);
+				String value = tok.substring(eqIdx + 1);
 
-		StringTokenizer st = new StringTokenizer(propString, ",");
-		while (st.hasMoreTokens()) {
-			String tok = st.nextToken();
-			int eqIdx = tok.indexOf("=");
-			if (eqIdx == -1) {
-				throw new IllegalArgumentException("Expected = in attributes CSV string '" + propString + "'");
+				// delete first and last characters of value: { and }
+				value = value.substring(1);
+				value = value.substring(0, value.length() - 1);
+
+				addStaticAttribute(name, value);
 			}
-			if (eqIdx >= tok.length() - 2) {
-				throw new IllegalArgumentException(
-						"At least 2 characters ([]) required in attributes CSV string '" + propString + "'");
-			}
-			String name = tok.substring(0, eqIdx);
-			String value = tok.substring(eqIdx + 1);
-
-			// celete first and last characters of value: { and }
-			value = value.substring(1);
-			value = value.substring(0, value.length() - 1);
-
-			addStaticAttribute(name, value);
 		}
 	}
 
@@ -164,8 +160,8 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * or a "props" element in XML bean definitions.
 	 * @see org.springframework.beans.propertyeditors.PropertiesEditor
 	 */
-	public void setAttributes(Properties props) {
-		setAttributesMap(props);
+	public void setAttributes(Properties attributes) {
+		CollectionUtils.mergePropertiesIntoMap(attributes, this.staticAttributes);
 	}
 
 	/**
@@ -237,14 +233,14 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 				" and static attributes " + this.staticAttributes);
 		}
 
-		// consolidate static and dynamic model attributes
+		// Consolidate static and dynamic model attributes.
 		Map mergedModel = new HashMap(this.staticAttributes.size() + (model != null ? model.size() : 0));
 		mergedModel.putAll(this.staticAttributes);
 		if (model != null) {
 			mergedModel.putAll(model);
 		}
 
-		// expose RequestContext?
+		// Expose RequestContext?
 		if (this.requestContextAttribute != null) {
 			mergedModel.put(this.requestContextAttribute, createRequestContext(request, mergedModel));
 		}
@@ -283,17 +279,6 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 
-	public String toString() {
-		StringBuffer sb = new StringBuffer(getClass().getName());
-		if (getBeanName() != null) {
-			sb.append(": name '").append(getBeanName()).append("'");
-		}
-		else {
-			sb.append(": unnamed");
-		}
-		return sb.toString();
-	}
-
 	/**
 	 * Expose the model objects in the given map as request attributes.
 	 * Names will be taken from the model Map.
@@ -306,7 +291,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();
 			if (!(entry.getKey() instanceof String)) {
-				throw new ServletException(
+				throw new IllegalArgumentException(
 						"Invalid key [" + entry.getKey() + "] in model Map - only Strings allowed as model keys");
 			}
 			String modelName = (String) entry.getKey();
@@ -315,16 +300,29 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 				request.setAttribute(modelName, modelValue);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Added model object '" + modelName + "' of type [" + modelValue.getClass().getName() +
-							"] to request in " + ClassUtils.getShortName(getClass()) + "'" + getBeanName() + "'");
+							"] to request in view with name '" + getBeanName() + "'");
 				}
 			}
 			else {
 				request.removeAttribute(modelName);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Removed model object '" + modelName +
-							"' from request in " + ClassUtils.getShortName(getClass()) + "'" + getBeanName() + "'");
+							"' from request in view with name '" + getBeanName() + "'");
 				}
 			}
 		}
 	}
+
+
+	public String toString() {
+		StringBuffer sb = new StringBuffer(getClass().getName());
+		if (getBeanName() != null) {
+			sb.append(": name '").append(getBeanName()).append("'");
+		}
+		else {
+			sb.append(": unnamed");
+		}
+		return sb.toString();
+	}
+
 }

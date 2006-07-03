@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jmx.export.naming;
 
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.Properties;
 
 import javax.management.MalformedObjectNameException;
@@ -30,6 +29,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.jmx.support.ObjectNameManager;
+import org.springframework.util.CollectionUtils;
 
 /**
  * <code>ObjectNamingStrategy</code> implementation that builds
@@ -111,13 +111,7 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 	public void afterPropertiesSet() throws IOException {
 		this.mergedMappings = new Properties();
 
-		if (this.mappings != null) {
-			// use propertyNames enumeration to also catch default properties
-			for (Enumeration en = this.mappings.propertyNames(); en.hasMoreElements();) {
-				String key = (String) en.nextElement();
-				this.mergedMappings.setProperty(key, this.mappings.getProperty(key));
-			}
-		}
+		CollectionUtils.mergePropertiesIntoMap(this.mappings, this.mergedMappings);
 
 		if (this.mappingLocations != null) {
 			for (int i = 0; i < this.mappingLocations.length; i++) {
