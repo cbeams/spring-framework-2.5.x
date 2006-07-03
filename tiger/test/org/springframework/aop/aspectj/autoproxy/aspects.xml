@@ -24,4 +24,8 @@
 		<property name="age" value="34"/>
 	</bean>
 
+	<bean id="adrian2Parent" class="org.springframework.beans.TestBean" abstract="true">
+		<property name="name" value="adrian"/>
+	</bean>
+
 </beans>
