@@ -97,7 +97,7 @@ public class AutowiringTilesRequestProcessor extends TilesRequestProcessor {
 
 	/**
 	 * Determine the autowire mode to use for wiring Struts Actions.
-	 * <p>Default implementation checks the "autowire" init-param of the
+	 * <p>The default implementation checks the "autowire" init-param of the
 	 * Struts ActionServlet, falling back to "AUTOWIRE_BY_TYPE" as default.
 	 * @param actionServlet the associated ActionServlet
 	 * @param moduleConfig the associated ModuleConfig
@@ -112,8 +112,8 @@ public class AutowiringTilesRequestProcessor extends TilesRequestProcessor {
 	}
 
 	/**
-	 * Determine the dependency check to use for wiring Struts Actions.
-	 * <p>Default implementation checks the "dependencyCheck" init-param of the
+	 * Determine whether to apply a dependency check after wiring Struts Actions.
+	 * <p>The default implementation checks the "dependencyCheck" init-param of the
 	 * Struts ActionServlet, falling back to no dependency check as default.
 	 * @param actionServlet the associated ActionServlet
 	 * @param moduleConfig the associated ModuleConfig
@@ -127,6 +127,28 @@ public class AutowiringTilesRequestProcessor extends TilesRequestProcessor {
 
 
 	/**
+	 * Return the current Spring WebApplicationContext.
+	 */
+	protected final WebApplicationContext getWebApplicationContext() {
+		return this.webApplicationContext;
+	}
+
+	/**
+	 * Return the autowire mode to use for wiring Struts Actions.
+	 */
+	protected final int getAutowireMode() {
+		return autowireMode;
+	}
+
+	/**
+	 * Return whether to apply a dependency check after wiring Struts Actions.
+	 */
+	protected final boolean getDependencyCheck() {
+		return dependencyCheck;
+	}
+
+
+	/**
 	 * Extend the base class method to autowire each created Action instance.
 	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#autowireBeanProperties
 	 */
@@ -135,8 +157,8 @@ public class AutowiringTilesRequestProcessor extends TilesRequestProcessor {
 			throws IOException {
 
 		Action action = super.processActionCreate(request, response, mapping);
-		this.webApplicationContext.getAutowireCapableBeanFactory().autowireBeanProperties(
-				action, this.autowireMode, this.dependencyCheck);
+		getWebApplicationContext().getAutowireCapableBeanFactory().autowireBeanProperties(
+				action, getAutowireMode(), getDependencyCheck());
 		return action;
 	}
 
