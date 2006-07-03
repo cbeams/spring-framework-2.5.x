@@ -18,7 +18,6 @@ package org.springframework.remoting.jaxrpc;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -36,6 +35,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Interceptor for accessing a specific port of a JAX-RPC service.
@@ -200,15 +200,18 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 	/**
 	 * Set custom properties to be set on the stub or call.
+	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
+	 * or a "props" element in XML bean definitions.
 	 * @see javax.xml.rpc.Stub#_setProperty
 	 * @see javax.xml.rpc.Call#setProperty
 	 */
 	public void setCustomProperties(Properties customProperties) {
-		setCustomPropertyMap(customProperties);
+		CollectionUtils.mergePropertiesIntoMap(customProperties, this.customPropertyMap);
 	}
 
 	/**
 	 * Set custom properties to be set on the stub or call.
+	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @see javax.xml.rpc.Stub#_setProperty
 	 * @see javax.xml.rpc.Call#setProperty
 	 */
@@ -227,6 +230,17 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	}
 
 	/**
+	 * Allow Map access to the custom properties to be set on the stub
+	 * or call, with the option to add or override specific entries.
+	 * <p>Useful for specifying entries directly, for example via
+	 * "customPropertyMap[myKey]". This is particularly useful for
+	 * adding or overriding entries in child bean definitions.
+	 */
+	public Map getCustomPropertyMap() {
+		return this.customPropertyMap;
+	}
+
+	/**
 	 * Add a custom property to this JAX-RPC Stub/Call.
 	 * @param name the name of the attribute to expose
 	 * @param value the attribute value to expose
@@ -235,13 +249,6 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 */
 	public void addCustomProperty(String name, Object value) {
 		this.customPropertyMap.put(name, value);
-	}
-
-	/**
-	 * Return custom properties to be set on the stub or call.
-	 */
-	public Map getCustomPropertyMap() {
-		return Collections.unmodifiableMap(this.customPropertyMap);
 	}
 
 	/**
