@@ -2008,7 +2008,9 @@ public class ReplacementComputeValue implements MethodReplacer {
 		    <title>The prototype scope</title>
 		    <para>The non-singleton, prototype scope of bean deployment results in
 			the <emphasis>creation of a new bean instance</emphasis> every time a
-			request for that specific bean is made. As a rule of thumb, you should
+			request for that specific bean is made (that is, it is injected into another
+			bean or it is requested via a programmatic <literal>getBean()</literal>
+			method call on the container). As a rule of thumb, you should
             use the prototype scope for all beans that are stateful, while the
             singleton scope should be used for stateless beans.</para>
 		    <para>The following diagram illustrates the Spring prototype scope.
@@ -2041,7 +2043,9 @@ public class ReplacementComputeValue implements MethodReplacer {
 			of prototypes any configured destruction lifecycle callbacks will <emphasis>not</emphasis>
 			be called. It is the responsibility of the client code to clean up
 			prototype scoped objects and release any expensive resources that the prototype
-			bean(s) are holding onto.</para>
+			bean(s) are holding onto. (one possible way to do this would be via the use
+			of a bean post processor which would hold onto beans which need to be cleaned
+			up)</para>
 			<para>You can in some respects think of the Spring containers role when talking
 			about a prototype-scoped bean as somewhat of a replacement for the Java
 			<literal>'new'</literal> operator. Any lifecycle aspects past that point have to
