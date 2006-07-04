@@ -18,6 +18,7 @@ package org.springframework.orm.jpa;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -83,54 +83,90 @@ class PersistenceUnitReader {
 
 	private static final String JAXP_SCHEMA_SOURCE = "http://java.sun.com/xml/jaxp/properties/schemaSource";
 
+	private static final String META_INF = "META-INF";
+
 	private final Log logger = LogFactory.getLog(getClass());
 
-	private final ResourceLoader resourceLoader;
+	private final ResourcePatternResolver resourcePatternResolver;
 
 	private final DataSourceLookup dataSourceLookup;
 
 	public PersistenceUnitReader(ResourceLoader resourceLoader, DataSourceLookup dataSourceLookup) {
-		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
+		this(new PathMatchingResourcePatternResolver(resourceLoader), dataSourceLookup);
+	}
+
+	public PersistenceUnitReader(ResourcePatternResolver resourcePatternResolver, DataSourceLookup dataSourceLookup) {
+		Assert.notNull(resourcePatternResolver, "ResourceLoader must not be null");
 		Assert.notNull(dataSourceLookup, "DataSourceLookup must not be null");
-		this.resourceLoader = resourceLoader;
+		this.resourcePatternResolver = resourcePatternResolver;
 		this.dataSourceLookup = dataSourceLookup;
 	}
 
 	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String persistenceXmlLocation) {
 		ErrorHandler handler = new SimpleSaxErrorHandler(logger);
 		List<SpringPersistenceUnitInfo> infos = new ArrayList<SpringPersistenceUnitInfo>();
-		Resource resource = this.resourceLoader.getResource(persistenceXmlLocation);
+
+		String resourceLocation = null;
 		try {
-			InputStream stream = resource.getInputStream();
-			try {
-				Document document = validateResource(handler, stream);
-				parseDocument(document, infos);
-				return infos.toArray(new SpringPersistenceUnitInfo[infos.size()]);
-			}
-			finally {
-				stream.close();
+			Resource[] resources = this.resourcePatternResolver.getResources(persistenceXmlLocation);
+			for (Resource resource : resources) {
+				resourceLocation = resource.toString();
+				InputStream stream = resource.getInputStream();
+				try {
+					Document document = validateResource(handler, stream);
+					parseDocument(resource, document, infos);
+				}
+				finally {
+					stream.close();
+				}
 			}
 		}
 		catch (IOException ex) {
-			throw new IllegalArgumentException("Cannot parse persistence unit from " + resource, ex);
+			throw new IllegalArgumentException("Cannot parse persistence unit from " + resourceLocation, ex);
 		}
 		catch (SAXException ex) {
-			throw new IllegalArgumentException("Invalid XML in persistence unit from " + resource, ex);
+			throw new IllegalArgumentException("Invalid XML in persistence unit from " + resourceLocation, ex);
 		}
 		catch (ParserConfigurationException ex) {
-			throw new IllegalArgumentException("Internal error parsing persistence unit from " + resource);
+			throw new IllegalArgumentException("Internal error parsing persistence unit from " + resourceLocation);
 		}
+
+		return infos.toArray(new SpringPersistenceUnitInfo[infos.size()]);
+	}
+
+	protected URL determineUnitRootUrl(Resource resource) throws IOException {
+		// check META-INF folder
+		URL originalURL = resource.getURL();
+		
+		String urlToString = originalURL.toExternalForm();
+		if (!urlToString.contains(META_INF)) {
+			logger.warn(resource.getFilename() + " should be located inside META-INF directory; cannot determine persistence unit root URL for "
+					+ resource.toString());
+			return null;
+		}
+		if (urlToString.lastIndexOf(META_INF) == urlToString.lastIndexOf('/') - (1 + META_INF.length())) {
+			logger.warn(resource.getFilename() + " is not located in the root of META-INF directory; cannot determine persistence unit root URL for "
+					+ resource.toString());
+			return null;
+		}
+
+		String persistenceUnitRoot = urlToString.substring(0, urlToString.lastIndexOf(META_INF));
+		return new URL(persistenceUnitRoot);
 	}
 
 	/**
-	 * Parse the validated document and populates the given unit info list.
+	 * Parse the validated document and populates(add to) the given unit info
+	 * list.
 	 */
-	protected List<SpringPersistenceUnitInfo> parseDocument(Document document, List<SpringPersistenceUnitInfo> infos)
-			throws IOException {
+	protected List<SpringPersistenceUnitInfo> parseDocument(Resource resource, Document document,
+			List<SpringPersistenceUnitInfo> infos) throws IOException {
 		Element persistence = document.getDocumentElement();
+		URL unitRootURL = determineUnitRootUrl(resource);
 		List<Element> units = (List<Element>) DomUtils.getChildElementsByTagName(persistence, PERSISTENCE_UNIT);
 		for (Element unit : units) {
-			infos.add(parsePersistenceUnitInfo(unit));
+			SpringPersistenceUnitInfo info = parsePersistenceUnitInfo(unit);
+			info.setPersistenceUnitRootUrl(unitRootURL);
+			infos.add(info);
 		}
 
 		return infos;
@@ -245,7 +281,7 @@ class PersistenceUnitReader {
 		for (Element element : jars) {
 			String value = DomUtils.getTextValue(element).trim();
 			if (StringUtils.hasText(value)) {
-				Resource resource = this.resourceLoader.getResource(value);
+				Resource resource = this.resourcePatternResolver.getResource(value);
 				unitInfo.addJarFileUrl(resource.getURL());
 			}
 		}
@@ -273,28 +309,26 @@ class PersistenceUnitReader {
 	 */
 	protected Resource findSchemaResource(String schemaName) throws IOException {
 		// first search the classpath root (Toplink)
-		Resource schemaLocation = new ClassPathResource(schemaName);
+		Resource schemaLocation = resourcePatternResolver.getResource("classpath:" + schemaName);
 
 		if (schemaLocation.exists())
 			return schemaLocation;
-
-		ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
 		// do a lookup for unpacked files
 		// see the warning in
 		// org.springframework.core.io.support.PathMatchingResourcePatternResolver
 		// for more info
-		Resource[] resources = resolver.getResources("classpath*:**/" + schemaName);
+		Resource[] resources = resourcePatternResolver.getResources("classpath*:**/" + schemaName);
 		if (resources.length > 0)
 			return resources[0];
 
 		// try org packages (hibernate)
-		resources = resolver.getResources("classpath*:org/**/" + schemaName);
+		resources = resourcePatternResolver.getResources("classpath*:org/**/" + schemaName);
 		if (resources.length > 0)
 			return resources[0];
 
 		// try com packages (some commercial
-		resources = resolver.getResources("classpath*:com/**/" + schemaName);
+		resources = resourcePatternResolver.getResources("classpath*:com/**/" + schemaName);
 		if (resources.length > 0)
 			return resources[0];
 

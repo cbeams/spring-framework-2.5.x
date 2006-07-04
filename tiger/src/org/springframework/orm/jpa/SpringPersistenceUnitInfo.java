@@ -37,6 +37,7 @@ import org.springframework.util.ClassUtils;
  * 
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Costin Leau
  * @since 2.0
  * @see #setLoadTimeWeaver
  */
@@ -200,5 +201,18 @@ class SpringPersistenceUnitInfo implements PersistenceUnitInfo {
 			return new SimpleThrowawayClassLoader(ClassUtils.getDefaultClassLoader());
 		}
 	}
+
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(getClass().getSimpleName());
+		builder.append(" [ unitName=`");
+		builder.append(persistenceUnitName);
+		builder.append("`, unitRootUrl=`");
+		builder.append(persistenceUnitRootUrl);
+		builder.append("` ]");
+		return builder.toString();
+	}
+	
+	
 
 }

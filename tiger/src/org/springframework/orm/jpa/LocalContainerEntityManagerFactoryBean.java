@@ -77,9 +77,9 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 
 	/**
 	 * Default location of the <code>persistence.xml</code> file:
-	 * "classpath:META-INF/persistence.xml".
+	 * "classpath*:META-INF/persistence.xml".
 	 */
-	public final static String DEFAULT_PERSISTENCE_XML_LOCATION = "classpath:META-INF/persistence.xml";
+	public final static String DEFAULT_PERSISTENCE_XML_LOCATION = "classpath*:META-INF/persistence.xml";
 	
 	/**
 	 * Default location of the <code>persistence.xml</code> file:
@@ -314,7 +314,6 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 			throw new PersistenceException("Unable to resolve persistence unit root URL", ex);
 		}
 	}
-
 
 	public DataSource getDataSource() {
 		return this.dataSource;
