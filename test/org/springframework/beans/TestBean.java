@@ -34,6 +34,7 @@ import java.util.Set;
 
 /**
  * Simple test bean used for testing bean factories, AOP framework etc.
+ *
  * @author Rod Johnson
  * @since 15 April 2001
  */
@@ -95,6 +96,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private List pets;
 
+
 	public TestBean() {
 	}
 
@@ -116,13 +118,6 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.someProperties = someProperties;
 	}
 
-	public Boolean getSomeBoolean() {
-		return someBoolean;
-	}
-
-	public void setSomeBoolean(Boolean someBoolean) {
-		this.someBoolean = someBoolean;
-	}
 
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
@@ -314,6 +309,14 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.favouriteColour = favouriteColour;
 	}
 
+	public Boolean getSomeBoolean() {
+		return someBoolean;
+	}
+
+	public void setSomeBoolean(Boolean someBoolean) {
+		this.someBoolean = someBoolean;
+	}
+
 	public IndexedTestBean getNestedIndexedBean() {
 		return nestedIndexedBean;
 	}
@@ -337,6 +340,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	public void setPets(List pets) {
 		this.pets = pets;
 	}
+
 
 	/**
 	 * @see ITestBean#exceptional(Throwable)
