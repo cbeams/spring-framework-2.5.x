@@ -26,9 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
@@ -90,10 +87,7 @@ import org.springframework.util.StringUtils;
  * @see AbstractAutowireCapableBeanFactory#createBean
  * @see DefaultListableBeanFactory#getBeanDefinition
  */
-public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
-
-	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
+public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory {
 
 	/** Parent bean factory, for bean inheritance support */
 	private BeanFactory parentBeanFactory;
@@ -107,7 +101,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** Custom PropertyEditors to apply to the beans of this factory */
 	private final Map customEditors = new HashMap();
 
-	/** Cusotm PropertyEditorRegistrars to apply to the beans of this factory */
+	/** Custom PropertyEditorRegistrars to apply to the beans of this factory */
 	private final Set propertyEditorRegistrars = CollectionFactory.createLinkedSetIfPossible(16);
 
 	/** BeanPostProcessors to apply in createBean */
@@ -125,26 +119,14 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	/** Map from scope identifier String to corresponding Scope */
 	private final Map scopes = new HashMap();
 
-	/** Cache of singletons: bean name --> bean instance */
-	private final Map singletonCache = new HashMap();
-
-	/** Cache of singleton objects created by FactoryBeans: FactoryBean name --> object */
-	private final Map factoryBeanObjectCache = new HashMap();
-
 	/** Names of beans that have already been created at least once */
 	private final Set alreadyCreated = Collections.synchronizedSet(new HashSet());
 
 	/** Names of beans that are currently in creation */
-	private final Set singletonsCurrentlyInCreation = Collections.synchronizedSet(new HashSet());
-
-	/** Names of beans that are currently in creation */
 	private final ThreadLocal prototypesCurrentlyInCreation = new ThreadLocal();
 
-	/** Disposable bean instances: bean name --> disposable instance */
-	private final Map disposableBeans = CollectionFactory.createLinkedMapIfPossible(16);
-
-	/** Map between dependent bean names: bean name --> dependent bean name */
-	private final Map dependentBeanMap = new HashMap();
+	/** Cache of singleton objects created by FactoryBeans: FactoryBean name --> object */
+	private final Map factoryBeanObjectCache = new HashMap();
 
 
 	/**
@@ -199,10 +181,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		Object bean = null;
 
 		// Eagerly check singleton cache for manually registered singletons.
-		Object sharedInstance = null;
-		synchronized (this.singletonCache) {
-			sharedInstance = this.singletonCache.get(beanName);
-		}
+		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null) {
 			if (isSingletonCurrentlyInCreation(beanName)) {
 				if (logger.isDebugEnabled()) {
@@ -254,30 +233,20 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 
 			// Create bean instance.
 			if (mergedBeanDefinition.isSingleton()) {
-				synchronized (this.singletonCache) {
-					// Re-check singleton cache within synchronized block.
-					sharedInstance = this.singletonCache.get(beanName);
-					if (sharedInstance == null) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
-						}
-						beforeSingletonCreation(beanName);
+				sharedInstance = getSingleton(beanName, new ObjectFactory() {
+					public Object getObject() throws BeansException {
 						try {
-							sharedInstance = createBean(beanName, mergedBeanDefinition, args);
-							addSingleton(beanName, sharedInstance);
+							return createBean(beanName, mergedBeanDefinition, args);
 						}
 						catch (BeansException ex) {
 							// Explicitly remove instance from singleton cache: It might have been put there
 							// eagerly by the creation process, to allow for circular reference resolution.
 							// Also remove any beans that received a temporary reference to the bean.
-							destroyDisposableBean(beanName);
+							destroySingleton(beanName);
 							throw ex;
 						}
-						finally {
-							afterSingletonCreation(beanName);
-						}
 					}
-				}
+				});
 				bean = getObjectForBeanInstance(sharedInstance, name, mergedBeanDefinition);
 			}
 
@@ -344,11 +313,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		Class beanClass = null;
 		boolean singleton = true;
 
-		Object beanInstance = null;
-		synchronized (this.singletonCache) {
-			beanInstance = this.singletonCache.get(beanName);
-		}
-
+		Object beanInstance = getSingleton(beanName);
 		if (beanInstance != null) {
 			beanClass = beanInstance.getClass();
 			singleton = true;
@@ -382,10 +347,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 			Class beanClass = null;
 
 			// Check manually registered singletons.
-			Object beanInstance = null;
-			synchronized (this.singletonCache) {
-				beanInstance = this.singletonCache.get(beanName);
-			}
+			Object beanInstance = getSingleton(beanName);
 			if (beanInstance != null) {
 				beanClass = beanInstance.getClass();
 			}
@@ -550,23 +512,12 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 
-	private void beforeSingletonCreation(String beanName) {
-		this.singletonsCurrentlyInCreation.add(beanName);
-	}
-
-	private void afterSingletonCreation(String beanName) {
-		this.singletonsCurrentlyInCreation.remove(beanName);
-	}
-
 	/**
-	 * Return whether the specified singleton bean is currently in creation
-	 * (within the entire factory).
-	 * @param beanName the name of the bean
+	 * Callback before prototype creation.
+	 * <p>Default implementation register the prototype as currently in creation.
+	 * @param beanName the name of the prototype about to be created
+	 * @see #isPrototypeCurrentlyInCreation
 	 */
-	protected final boolean isSingletonCurrentlyInCreation(String beanName) {
-		return this.singletonsCurrentlyInCreation.contains(beanName);
-	}
-
 	private void beforePrototypeCreation(String beanName) {
 		Set beanNames = (Set) this.prototypesCurrentlyInCreation.get();
 		if (beanNames == null) {
@@ -576,6 +527,12 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		beanNames.add(beanName);
 	}
 
+	/**
+	 * Callback after prototype creation.
+	 * <p>Default implementation marks the prototype as not in creation anymore.
+	 * @param beanName the name of the prototype that has been created
+	 * @see #isPrototypeCurrentlyInCreation
+	 */
 	private void afterPrototypeCreation(String beanName) {
 		Set beanNames = (Set) this.prototypesCurrentlyInCreation.get();
 		if (beanNames != null) {
@@ -649,92 +606,6 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 
-	public void registerSingleton(String beanName, Object singletonObject) throws BeanDefinitionStoreException {
-		Assert.hasText(beanName, "Bean name must not be empty");
-		Assert.notNull(singletonObject, "Singleton object must not be null");
-		synchronized (this.singletonCache) {
-			Object oldObject = this.singletonCache.get(beanName);
-			if (oldObject != null) {
-				throw new BeanDefinitionStoreException("Could not register object [" + singletonObject +
-						"] under bean name '" + beanName + "': there's already object [" + oldObject + " bound");
-			}
-			addSingleton(beanName, singletonObject);
-		}
-	}
-
-	/**
-	 * Add the given singleton object to the singleton cache of this factory.
-	 * <p>To be called for eager registration of singletons, e.g. to be able to
-	 * resolve circular references.
-	 * @param beanName the name of the bean
-	 * @param singletonObject the singleton object
-	 */
-	protected void addSingleton(String beanName, Object singletonObject) {
-		Assert.hasText(beanName, "Bean name must not be empty");
-		Assert.notNull(singletonObject, "Singleton object must not be null");
-		synchronized (this.singletonCache) {
-			this.singletonCache.put(beanName, singletonObject);
-		}
-	}
-
-	/**
-	 * Remove the bean with the given name from the singleton cache of this factory.
-	 * <p>To be able to clean up eager registration of a singleton if creation failed.
-	 * @param beanName the name of the bean
-	 */
-	protected void removeSingleton(String beanName) {
-		Assert.hasText(beanName, "Bean name must not be empty");
-		synchronized (this.singletonCache) {
-			this.singletonCache.remove(beanName);
-		}
-		synchronized (this.factoryBeanObjectCache) {
-			this.factoryBeanObjectCache.remove(beanName);
-		}
-	}
-
-	/**
-	 * Return the number of beans in the singleton cache.
-	 * <p>Does not consider any hierarchy this factory may participate in.
-	 */
-	public int getSingletonCount() {
-		synchronized (this.singletonCache) {
-			return this.singletonCache.size();
-		}
-	}
-
-	/**
-	 * Return the names of beans in the singleton cache.
-	 * <p>Does not consider any hierarchy this factory may participate in.
-	 */
-	public String[] getSingletonNames() {
-		synchronized (this.singletonCache) {
-			return StringUtils.toStringArray(this.singletonCache.keySet());
-		}
-	}
-
-	public boolean containsSingleton(String beanName) {
-		Assert.hasText(beanName, "Bean name must not be empty");
-		synchronized (this.singletonCache) {
-			return this.singletonCache.containsKey(beanName);
-		}
-	}
-
-	public void destroySingletons() {
-		if (logger.isInfoEnabled()) {
-			logger.info("Destroying singletons in factory {" + this + "}");
-		}
-		synchronized (this.singletonCache) {
-			synchronized (this.disposableBeans) {
-				String[] disposableBeanNames = StringUtils.toStringArray(this.disposableBeans.keySet());
-				for (int i = disposableBeanNames.length - 1; i >= 0; i--) {
-					destroyDisposableBean(disposableBeanNames[i]);
-				}
-			}
-			this.singletonCache.clear();
-		}
-	}
-
-
 	//---------------------------------------------------------------------
 	// Implementation methods
 	//---------------------------------------------------------------------
@@ -748,7 +619,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		// Handle aliasing.
 		synchronized (this.aliasMap) {
 			String canonicalName = (String) this.aliasMap.get(beanName);
-			return canonicalName != null ? canonicalName : beanName;
+			return (canonicalName != null ? canonicalName : beanName);
 		}
 	}
 
@@ -1092,11 +963,9 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	public boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
 
-		synchronized (this.singletonCache) {
-			Object beanInstance = this.singletonCache.get(beanName);
-			if (beanInstance != null) {
-				return (beanInstance instanceof FactoryBean);
-			}
+		Object beanInstance = getSingleton(beanName);
+		if (beanInstance != null) {
+			return (beanInstance instanceof FactoryBean);
 		}
 
 		// No singleton instance found -> check bean definition.
@@ -1110,6 +979,16 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 		return (FactoryBean.class.equals(beanClass));
 	}
 
+
+	/**
+	 * Return whether the given bean name is already used within this factory,
+	 * that is, whether there is a local bean registered under this name or
+	 * an inner bean created with this name.
+	 * @param beanName the name to check
+	 */
+	protected boolean isBeanNameUsed(String beanName) {
+		return containsLocalBean(beanName) || hasDependentBean(beanName);
+	}
 
 	/**
 	 * Add the given bean to the list of disposable beans in this factory,
@@ -1150,91 +1029,12 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	}
 
 	/**
-	 * Add the given bean to the list of further disposable beans in this factory.
-	 * @param beanName the name of the bean
-	 * @param bean the bean instance
+	 * Overridden to clear FactoryBean object cache as well.
 	 */
-	protected void registerDisposableBean(String beanName, DisposableBean bean) {
-		synchronized (this.disposableBeans) {
-			this.disposableBeans.put(beanName, bean);
-		}
-	}
-
-	/**
-	 * Register a dependent bean for the given bean,
-	 * to be destroyed before the given bean is destroyed.
-	 * @param beanName the name of the bean
-	 * @param dependentBeanName the name of the dependent bean
-	 */
-	protected void registerDependentBean(String beanName, String dependentBeanName) {
-		synchronized (this.dependentBeanMap) {
-			Set dependencies = (Set) this.dependentBeanMap.get(beanName);
-			if (dependencies == null) {
-				dependencies = CollectionFactory.createLinkedSetIfPossible(8);
-				this.dependentBeanMap.put(beanName, dependencies);
-			}
-			dependencies.add(dependentBeanName);
-		}
-	}
-
-	/**
-	 * Return whether the given bean name is already used within this factory,
-	 * that is, whether there is a local bean registered under this name or
-	 * an inner bean created with this name.
-	 * @param beanName the name to check
-	 */
-	protected boolean isBeanNameUsed(String beanName) {
-		return (containsLocalBean(beanName) || this.dependentBeanMap.containsKey(beanName));
-	}
-
-	/**
-	 * Destroy the given bean. Delegates to <code>destroyBean</code>
-	 * if a corresponding disposable bean instance is found.
-	 * @param beanName name of the bean
-	 * @see #destroyBean
-	 */
-	private void destroyDisposableBean(String beanName) {
-		// Remove a registered singleton of the given name, if any.
-		removeSingleton(beanName);
-
-		// Destroy the corresponding DisposableBean instance.
-		Object disposableBean = null;
-		synchronized (this.disposableBeans) {
-			disposableBean = this.disposableBeans.remove(beanName);
-		}
-		destroyBean(beanName, disposableBean);
-	}
-
-
-	/**
-	 * Destroy the given bean. Must destroy beans that depend on the given
-	 * bean before the bean itself. Should not throw any exceptions.
-	 * @param beanName name of the bean
-	 * @param bean the bean instance to destroy
-	 */
-	protected void destroyBean(String beanName, Object bean) {
-		Set dependencies = null;
-		synchronized (this.dependentBeanMap) {
-			dependencies = (Set) this.dependentBeanMap.remove(beanName);
-		}
-
-		if (dependencies != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Retrieved dependent beans for bean '" + beanName + "': " + dependencies);
-			}
-			for (Iterator it = dependencies.iterator(); it.hasNext();) {
-				String dependentBeanName = (String) it.next();
-				destroyDisposableBean(dependentBeanName);
-			}
-		}
-
-		if (bean instanceof DisposableBean) {
-			try {
-				((DisposableBean) bean).destroy();
-			}
-			catch (Throwable ex) {
-				logger.error("Destroy method on bean with name '" + beanName + "' threw an exception", ex);
-			}
+	protected void removeSingleton(String beanName) {
+		super.removeSingleton(beanName);
+		synchronized (this.factoryBeanObjectCache) {
+			this.factoryBeanObjectCache.remove(beanName);
 		}
 	}
 
