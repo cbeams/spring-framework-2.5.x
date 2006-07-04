@@ -237,7 +237,7 @@ public class SqlUpdate extends SqlOperation {
 	public int updateByNamedParam(Map paramMap) throws DataAccessException {
 		validateNamedParameters(paramMap);
 		Object[] params = NamedParameterUtils.buildValueArray(getSql(), paramMap);
-		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(params));
+		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(params, paramMap));
 		checkRowsAffected(rowsAffected);
 		return rowsAffected;
 	}

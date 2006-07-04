@@ -21,17 +21,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
+import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.util.Assert;
+import com.mchange.v2.sql.SqlUtils;
 
 /**
  * Helper class that can efficiently create multiple PreparedStatementCreator
@@ -158,6 +157,28 @@ public class PreparedStatementCreatorFactory {
 	 * @param params parameter array. May be <code>null</code>.
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
+		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.EMPTY_LIST);
+	}
+
+	/**
+	 * Return a new PreparedStatementCreator for the given parameters.
+	 * @param params parameter array. May be <code>null</code>.
+	 * @param paramMap parameter Map. The Map containing the named parameters.  Needed for expansion of
+	 * parameter placeholders when values specified in a List
+	 */
+	public PreparedStatementCreator newPreparedStatementCreator(Object[] params, Map paramMap) {
+		Iterator iter = paramMap.values().iterator();
+		boolean expandListParameter = false;
+		while (iter.hasNext()) {
+			if (iter.next() instanceof List) {
+				System.out.println("********** LIST");
+				expandListParameter = true;
+				break;
+			}
+		}
+		if (expandListParameter) {
+			sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, new MapSqlParameterSource(paramMap));
+		}
 		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.EMPTY_LIST);
 	}
 

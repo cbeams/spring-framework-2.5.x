@@ -21,10 +21,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.sql.DataSource;
 
@@ -54,6 +51,10 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		"select id, forename from custmr where id = ?";
 	private static final String SELECT_ID_FORENAME_WHERE_NAMED_PARAMETER_2 =
 		"select id, forename from custmr where id = :id";
+	private static final String SELECT_ID_FORENAME_WHERE_ID_IN_LIST_1 =
+		"select id, forename from custmr where id in (?, ?)";
+	private static final String SELECT_ID_FORENAME_WHERE_ID_IN_LIST_2 =
+		"select id, forename from custmr where id in (:ids)";
 	private static final String SELECT_ID_FORENAME_WHERE_ID =
 		"select id, forename from custmr where id <= ?";
 
@@ -950,6 +951,77 @@ public class SqlQueryTests extends AbstractJdbcTests {
 
 		assertTrue("Customer id was assigned correctly", cust.getId() == 1);
 		assertTrue("Customer forename was assigned correctly", cust.getForename().equals("rod"));
+	}
+
+	public void testNamedParameterInListQuery() throws SQLException {
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(1);
+		mockResultSet.getString("forename");
+		ctrlResultSet.setReturnValue("rod");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getInt("id");
+		ctrlResultSet.setReturnValue(2);
+		mockResultSet.getString("forename");
+		ctrlResultSet.setReturnValue("juergen");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		mockPreparedStatement.setObject(1, new Integer(1), Types.NUMERIC);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setObject(2, new Integer(2), Types.NUMERIC);
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeQuery();
+		ctrlPreparedStatement.setReturnValue(mockResultSet);
+		mockPreparedStatement.getWarnings();
+		ctrlPreparedStatement.setReturnValue(null);
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
+
+		mockConnection.prepareStatement(
+				SELECT_ID_FORENAME_WHERE_ID_IN_LIST_1, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
+
+		replay();
+
+		class CustomerQuery extends MappingSqlQuery {
+
+			public CustomerQuery(DataSource ds) {
+				super(ds, SELECT_ID_FORENAME_WHERE_ID_IN_LIST_2);
+				setResultSetType(ResultSet.TYPE_SCROLL_SENSITIVE);
+				declareParameter(new SqlParameter("ids", Types.NUMERIC));
+				compile();
+			}
+
+			protected Object mapRow(ResultSet rs, int rownum)
+				throws SQLException {
+				Customer cust = new Customer();
+				cust.setId(rs.getInt(COLUMN_NAMES[0]));
+				cust.setForename(rs.getString(COLUMN_NAMES[1]));
+				return cust;
+			}
+
+			public List findCustomers(List ids) {
+				Map params = new HashMap();
+				params.put("ids", ids);
+				return (List) executeByNamedParam(params);
+			}
+		}
+		CustomerQuery query = new CustomerQuery(mockDataSource);
+		List ids = new ArrayList();
+		ids.add(new Integer(1));
+		ids.add(new Integer(2));
+		List cust = query.findCustomers(ids);
+
+		assertEquals("We got two customers back", cust.size(), 2);
+		assertEquals("First customer id was assigned correctly", ((Customer)cust.get(0)).getId(), 1);
+		assertEquals("First customer forename was assigned correctly", ((Customer)cust.get(0)).getForename(), "rod");
+		assertEquals("Second customer id was assigned correctly", ((Customer)cust.get(1)).getId(), 2);
+		assertEquals("Second customer forename was assigned correctly", ((Customer)cust.get(1)).getForename(), "juergen");
 	}
 
 

@@ -215,7 +215,7 @@ public abstract class SqlQuery extends SqlOperation {
 		validateNamedParameters(paramMap);
 		Object[] parameters = NamedParameterUtils.buildValueArray(getSql(), paramMap);
 		RowMapper rowMapper = newRowMapper(parameters, context);
-		return getJdbcTemplate().query(newPreparedStatementCreator(parameters), rowMapper);
+ 		return getJdbcTemplate().query(newPreparedStatementCreator(parameters, paramMap), rowMapper);
 	}
 
 	/**
