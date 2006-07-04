@@ -16,6 +16,8 @@
 
 package org.springframework.orm.jpa;
 
+import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -28,7 +30,11 @@ import junit.framework.TestCase;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
@@ -249,6 +255,27 @@ public class PersistenceXmlParsingTests extends TestCase {
 		res = reader.findSchemaResource("white-horse.xml");
 		assertNull(res);
 
+	}
+
+	public void testDetermineUnitRootUrl() throws Exception {
+		PersistenceUnitReader reader = new PersistenceUnitReader(new DefaultResourceLoader(),
+				new JndiDataSourceLookup());
+		URL url = null;
+
+		url = reader.determineUnitRootUrl(new ClassPathResource(
+				"/org/springframework/orm/jpa/persistence-no-schema.xml"));
+
+		assertNull(url);
+
+		url = reader.determineUnitRootUrl(new ClassPathResource("/org/springframework/orm/jpa/META-INF/persistence.xml"));
+		Resource root = new ClassPathResource("/org/springframework/orm/jpa/");
+		assertTrue(root.getURL().sameFile(url));
+
+		ClassPathResource archive = new ClassPathResource("/org/springframework/orm/jpa/jpa-archive.jar");
+		String newRoot = "jar:" + archive.getURL().toExternalForm() + "!/META-INF/persistence.xml";
+		Resource insideArchive = new UrlResource(newRoot);
+		url = reader.determineUnitRootUrl(insideArchive);
+		System.out.println(url);
 	}
 
 }
