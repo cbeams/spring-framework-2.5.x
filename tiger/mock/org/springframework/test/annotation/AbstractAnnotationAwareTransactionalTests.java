@@ -187,7 +187,9 @@ public abstract class AbstractAnnotationAwareTransactionalTests
 					// Ok
 				}
 				else {
-					fail("Expected throwable of class " + ee.value() + "; got " + t);
+					//fail("Expected throwable of class " + ee.value() + "; got " + t);
+					// Throw the unexpected problem throwable
+					throw t;
 				}
 			}
 		}
