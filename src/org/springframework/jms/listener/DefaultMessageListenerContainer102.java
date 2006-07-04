@@ -70,8 +70,14 @@ public class DefaultMessageListenerContainer102 extends DefaultMessageListenerCo
 	 */
 	protected MessageConsumer createConsumer(Session session, Destination destination) throws JMSException {
 		if (isPubSubDomain()) {
-			return ((TopicSession) session).createSubscriber(
-					(Topic) destination, getMessageSelector(), isPubSubNoLocal());
+			if (getDurableSubscriptionName() != null) {
+				return ((TopicSession) session).createDurableSubscriber(
+						(Topic) destination, getDurableSubscriptionName(), getMessageSelector(), isPubSubNoLocal());
+			}
+			else {
+				return ((TopicSession) session).createSubscriber(
+						(Topic) destination, getMessageSelector(), isPubSubNoLocal());
+			}
 		}
 		else {
 			return ((QueueSession) session).createReceiver((Queue) destination, getMessageSelector());

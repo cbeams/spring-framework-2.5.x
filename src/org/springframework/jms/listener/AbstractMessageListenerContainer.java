@@ -118,6 +118,8 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	private Object destination;
 
+	private String durableSubscriptionName;
+
 	private String messageSelector;
 
 	private Object messageListener;
@@ -187,6 +189,23 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 */
 	protected String getDestinationName() {
 		return (this.destination instanceof String ? (String) this.destination : null);
+	}
+
+	/**
+	 * Set the name of a durable subscription to create.
+	 * To be applied in case of a topic (pub-sub domain).
+	 * <p>Note: Only 1 concurrent consumer (which is the default of this
+	 * message listener container) is allowed for a durable subscription.
+	 */
+	public void setDurableSubscriptionName(String durableSubscriptionName) {
+		this.durableSubscriptionName = durableSubscriptionName;
+	}
+
+	/**
+	 * Return the name of a durable subscription to create.
+	 */
+	protected String getDurableSubscriptionName() {
+		return durableSubscriptionName;
 	}
 
 	/**

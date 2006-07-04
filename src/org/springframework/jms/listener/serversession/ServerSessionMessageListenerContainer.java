@@ -25,6 +25,7 @@ import javax.jms.MessageListener;
 import javax.jms.ServerSession;
 import javax.jms.ServerSessionPool;
 import javax.jms.Session;
+import javax.jms.Topic;
 
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.support.JmsUtils;
@@ -228,7 +229,13 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 	protected ConnectionConsumer createConsumer(Connection con, Destination destination, ServerSessionPool pool)
 			throws JMSException {
 
-		return con.createConnectionConsumer(destination, getMessageSelector(), pool, getMaxMessagesPerTask());
+		if (getDurableSubscriptionName() != null && destination instanceof Topic) {
+			return con.createDurableConnectionConsumer(
+					(Topic) destination, getDurableSubscriptionName(), getMessageSelector(), pool, getMaxMessagesPerTask());
+		}
+		else {
+			return con.createConnectionConsumer(destination, getMessageSelector(), pool, getMaxMessagesPerTask());
+		}
 	}
 
 }

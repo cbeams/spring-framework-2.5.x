@@ -59,8 +59,14 @@ public class ServerSessionMessageListenerContainer102 extends ServerSessionMessa
 			throws JMSException {
 
 		if (isPubSubDomain()) {
-			return ((TopicConnection) con).createConnectionConsumer(
-					(Topic) destination, getMessageSelector(), pool, getMaxMessagesPerTask());
+			if (getDurableSubscriptionName() != null) {
+				return ((TopicConnection) con).createDurableConnectionConsumer(
+						(Topic) destination, getDurableSubscriptionName(), getMessageSelector(), pool, getMaxMessagesPerTask());
+			}
+			else {
+				return ((TopicConnection) con).createConnectionConsumer(
+						(Topic) destination, getMessageSelector(), pool, getMaxMessagesPerTask());
+			}
 		}
 		else {
 			return ((QueueConnection) con).createConnectionConsumer(
