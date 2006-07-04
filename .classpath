@@ -124,6 +124,6 @@
 	<classpathentry kind="lib" path="lib/hibernate/hibernate-entitymanager.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/jboss-archive-browsing.jar"/>
 	<classpathentry kind="lib" path="lib/tomcat/catalina.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jpa/java-persistence-1_0-api.jar"/>
+	<classpathentry kind="lib" path="lib/jpa/persistence.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
