@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,19 +54,8 @@ public class DelegatingEntityResolver implements EntityResolver {
 	/**
 	 * Create a new DelegatingEntityResolver that delegates to
 	 * a default BeansDtdResolver and a default PluggableSchemaResolver.
-	 * Configures the {@link PluggableSchemaResolver} with the context
-	 * {@link ClassLoader}
-	 */
-	public DelegatingEntityResolver() {
-		this.dtdResolver = new BeansDtdResolver();
-		this.schemaResolver = new PluggableSchemaResolver(Thread.currentThread().getContextClassLoader());
-	}
-
-	/**
-	 * Create a new DelegatingEntityResolver that delegates to
-	 * a default BeansDtdResolver and a default PluggableSchemaResolver.
-	 * Configures the {@link PluggableSchemaResolver} with the supplied
-	 * {@link ClassLoader}
+	 * <p>Configures the PluggableSchemaResolver with the supplied ClassLoader.
+	 * @param classLoader the ClassLoader to use for loading
 	 */
 	public DelegatingEntityResolver(ClassLoader classLoader) {
 		this.dtdResolver = new BeansDtdResolver();
@@ -89,15 +78,15 @@ public class DelegatingEntityResolver implements EntityResolver {
 		if (systemId != null) {
 			if (systemId.endsWith(DTD_SUFFIX)) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Attempting to resolve DTD [" + systemId + "] using ["
-							+ this.dtdResolver.getClass().getName() + "].");
+					logger.debug("Attempting to resolve DTD [" + systemId + "] using [" +
+							this.dtdResolver.getClass().getName() + "]");
 				}
 				return this.dtdResolver.resolveEntity(publicId, systemId);
 			}
 			else if (systemId.endsWith(XSD_SUFFIX)) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Attempting to resolve XML Schema [" + systemId + "] using ["
-							+ this.schemaResolver.getClass().getName() + "].");
+					logger.debug("Attempting to resolve XML Schema [" + systemId + "] using [" +
+							this.schemaResolver.getClass().getName() + "]");
 				}
 				return this.schemaResolver.resolveEntity(publicId, systemId);
 			}

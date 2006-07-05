@@ -44,6 +44,7 @@ import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.xml.SimpleSaxErrorHandler;
 import org.springframework.util.xml.XmlValidationModeDetector;
 
@@ -153,6 +154,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	private XmlValidationModeDetector validationModeDetector = new XmlValidationModeDetector();
 
+
 	/**
 	 * Create new XmlBeanDefinitionReader for the given bean factory.
 	 */
@@ -164,7 +166,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			this.entityResolver = new ResourceEntityResolver(getResourceLoader());
 		}
 		else {
-			this.entityResolver = new DelegatingEntityResolver();
+			this.entityResolver = new DelegatingEntityResolver(ClassUtils.getDefaultClassLoader());
 		}
 	}
 
@@ -502,7 +504,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * Default implementation returns an instance of {@link DefaultNamespaceHandlerResolver}.
 	 */
 	protected NamespaceHandlerResolver createDefaultNamespaceHandlerResolver() {
-		return new DefaultNamespaceHandlerResolver(getBeanClassLoader());
+		return new DefaultNamespaceHandlerResolver(getResourceLoader().getClassLoader());
 	}
 
 

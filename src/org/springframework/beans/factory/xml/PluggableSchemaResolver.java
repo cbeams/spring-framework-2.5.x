@@ -19,6 +19,8 @@ package org.springframework.beans.factory.xml;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
@@ -27,8 +29,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.Assert;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * {@link EntityResolver} implementation that attempts to resolve schema URLs into
@@ -60,17 +60,18 @@ public class PluggableSchemaResolver implements EntityResolver {
 	public static final String DEFAULT_SCHEMA_MAPPINGS_LOCATION = "META-INF/spring.schemas";
 
 
-	/**
-	 * Stores the mapping of schema URL -> local schema path.
-	 */
-	private Properties schemaMappings;
+	private final Log logger = LogFactory.getLog(getClass());
 
-  	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
+	private final ClassLoader classLoader;
+
+	/** Stores the mapping of schema URL -> local schema path */
+	private final Properties schemaMappings;
+
 
 	/**
 	 * Loads the schema URL -> schema file location mappings using the default
 	 * mapping file pattern "META-INF/spring.schemas".
+	 * @param classLoader the ClassLoader to use for loading
 	 * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)
 	 */
 	public PluggableSchemaResolver(ClassLoader classLoader) {
@@ -83,15 +84,18 @@ public class PluggableSchemaResolver implements EntityResolver {
 	 * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)
 	 */
 	public PluggableSchemaResolver(ClassLoader classLoader, String schemaMappingsLocation) {
-		Assert.notNull(classLoader, "'classLoader' cannot be null");
-		Assert.hasText(schemaMappingsLocation, "'schemaMappingsLocation' cannot be null or empty");
+		Assert.notNull(classLoader, "ClassLoader must not be null");
+		Assert.hasText(schemaMappingsLocation, "Schema mappings location must not be empty");
+		this.classLoader = classLoader;
 		if (logger.isDebugEnabled()) {
 			logger.debug("Loading schema mappings from [" + schemaMappingsLocation + "].");
 		}
-
 		try {
 			this.schemaMappings =
 					PropertiesLoaderUtils.loadAllProperties(schemaMappingsLocation, classLoader);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loaded schema mappings: " + this.schemaMappings);
+			}
 		}
 		catch (IOException e) {
 			throw new FatalBeanException(
@@ -102,10 +106,9 @@ public class PluggableSchemaResolver implements EntityResolver {
 
 	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
 		if (systemId != null) {
-
 			String resourceLocation = this.schemaMappings.getProperty(systemId);
 			if (resourceLocation != null) {
-				Resource resource = new ClassPathResource(resourceLocation);
+				Resource resource = new ClassPathResource(resourceLocation, this.classLoader);
 				InputSource source = new InputSource(resource.getInputStream());
 				source.setPublicId(publicId);
 				source.setSystemId(systemId);
