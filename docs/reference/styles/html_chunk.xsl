@@ -103,9 +103,16 @@
     <!-- lets have a Powered by Interface21 banner across the bottom of each page -->
     <xsl:template name="user.footer.navigation">
 		<div style="background-color:#31430f;border:none;height:50px;border:1px solid black;text-align:center">
-			<a style="border:none;background: url();" href="http://www.interface21.com/" title="Brought to you by Interface21">
-				<img style="border:none;" src="images/interface21.gif"/>
-			</a>
+			<table cellspacing="0" cellpadding="0" width="100%" style="margin: 0px; padding: 0px">
+        		<tr>
+        			<td width="50%" style="font-size: 110%; color: white; vertical-align: center; text-align: right">
+        				Sponsored by
+        			</td>
+        			<td width="50%" style="padding: 0px">
+        				<a style="border:none;background: url();" href="http://www.interface21.com/" title="Brought to you by Interface21"><img style="border: none" src="images/interface21.gif"/></a>
+        			</td>
+        		</tr>
+        	</table>
 		</div>
 	</xsl:template>
 
