@@ -69,7 +69,7 @@
   
   <section id="overview-application-overview">
     <title>The application; or what we are building</title>
-    <para>The application that we will be builing from scratch over the course of
+    <para>The application that we will be building from scratch over the course of
     this tutorial is a <emphasis>very basic</emphasis> inventory management system.
     This inventory management system is severely constrained in terms of scope; find
     below a use case diagram illustrating the simple use cases that we will be

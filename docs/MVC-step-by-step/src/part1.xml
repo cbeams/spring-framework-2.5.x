@@ -88,10 +88,9 @@
     <title>Deploying the application to Tomcat</title>
 
     <para>Let's now write the Ant build script that we are going to use
-    throughout this document. This Ant build script will contain targets
-    that we can use throughout the rest of this tutorial; for example, there
-    are targets for compiling, building and deploying the application. A
-    separate build script contains the application server specific targets,
+    throughout this document. This Ant build script will contain
+    targets for compiling, building and deploying the application. A
+    separate build script will be used for application server specific targets,
     such as targets for controlling the application under Tomcat.</para>
 
     <para><filename>'springapp/build.xml'</filename>:</para>
@@ -273,11 +272,23 @@ tomcat.manager.password=tomcat]]></programlisting>
         must create a new directory named <filename class="directory">'springapp'</filename>
         in the <filename class="directory">'webapps'</filename> directory of the
         Tomcat installation directory, and also give you full rights to deploy to
-        this newly created directory. On Linux I run the command
+        this newly created directory. On Linux, I run the command
         <command>chmod a+rwx springapp</command> to give everybody full rights to this
         directory.</para>
+        <para>To set up a Tomcat user named 'admin' with 'tomcat' as their password,
+        go to Tomcat users file <filename class="libraryfile">
+        'appserver.home'/conf/tomcat_users.xml'</filename> and add the user entry.
+        </para>
     </remark>
-
+    <programlisting><![CDATA[<?xml version='1.0' encoding='utf-8'?>
+<tomcat-users>
+  <user username="tomcat" password="tomcat" roles="tomcat"/>
+  <user username="both" password="tomcat" roles="tomcat,role1"/>
+  <user username="role1" password="tomcat" roles="role1"/>
+  <!-- new user added -->
+  <user username="admin" password="tomcat" roles="manager"/>
+</tomcat-users>]]></programlisting>        
+      
     <para>Now we run Ant to make sure that everything is working okay. You must
     have your current directory set to the
     <filename class="directory">'springapp'</filename> directory.</para>
