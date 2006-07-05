@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Costin Leau
  * @since 1.2
  * @see org.w3c.dom.Node
  * @see org.w3c.dom.Element
@@ -64,8 +65,50 @@ public abstract class DomUtils {
 	}
 
 	/**
-	 * Extract the text value from the given DOM element,
-	 * ignoring XML comments.
+	 * Utility method that returns the first child element
+	 * identified by its name.
+	 * @param ele the DOM element to analyze
+	 * @param childEleName the child element name to look for
+	 * @return the <code>org.w3c.dom.Element</code> instance,
+	 * or <code>null</code> if none found
+	 */
+	public static Element getChildElementByTagName(Element ele, String childEleName) {
+		NodeList nl = ele.getChildNodes();
+		for (int i = 0; i < nl.getLength(); i++) {
+			Node node = nl.item(i);
+			if (node instanceof Element && nodeNameEquals(node, childEleName)) {
+				return (Element) node;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Utility method that returns the first child element value
+	 * identified by its name.
+	 * @param ele the DOM element to analyze
+	 * @param childEleName the child element name to look for
+	 * @return the extracted text value,
+	 * or <code>null</code> if no child element found
+	 */
+	public static String getChildElementValueByTagName(Element ele, String childEleName) {
+		Element child = getChildElementByTagName(ele, childEleName);
+		return (child != null ? getTextValue(child) : null);
+	}
+
+	/**
+	 * Namespace-aware equals comparison. Returns <code>true</code> if either
+	 * {@link Node#getLocalName} or {@link Node#getNodeName} equals <code>desiredName</code>,
+	 * otherwise returns <code>false</code>.
+	 */
+	public static boolean nodeNameEquals(Node node, String desiredName) {
+		Assert.notNull(node, "Node must not be null");
+		Assert.notNull(desiredName, "Desired name must not be null");
+		return desiredName.equals(node.getNodeName()) || desiredName.equals(node.getLocalName());
+	}
+
+	/**
+	 * Extract the text value from the given DOM element, ignoring XML comments.
 	 * <p>Appends all CharacterData nodes and EntityReference nodes
 	 * into a single String value, excluding Comment nodes.
 	 * @see CharacterData
@@ -83,17 +126,6 @@ public abstract class DomUtils {
 			}
 		}
 		return value.toString();
-	}
-
-	/**
-	 * Namespace-aware equals comparison. Returns <code>true</code> if either
-	 * {@link Node#getLocalName} or {@link Node#getNodeName} equals <code>desiredName</code>,
-	 * otherwise returns <code>false</code>.
-	 */
-	public static boolean nodeNameEquals(Node node, String desiredName) {
-		Assert.notNull(node, "Node must not be null");
-		Assert.notNull(desiredName, "Desired name must not be null");
-		return desiredName.equals(node.getNodeName()) || desiredName.equals(node.getLocalName());
 	}
 
 }
