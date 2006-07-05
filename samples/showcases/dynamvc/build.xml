@@ -40,7 +40,7 @@
             <include name="groovy-1.0-jsr-04.jar"/>
         </fileset>
         <fileset dir="${spring.root}/lib/asm">
-            <include name="asm-2.2.1.jar"/>
+            <include name="asm-2.2.2.jar"/>
         </fileset>
         <fileset dir="${spring.root}/lib/antlr">
             <include name="antlr-2.7.6.jar"/>
@@ -115,7 +115,7 @@
 				<include name="groovy-1.0-jsr-04.jar"/>
 			</fileset>
 			<fileset dir="${spring.root}/lib/asm">
-				<include name="asm-2.2.1.jar"/>
+				<include name="asm-2.2.2.jar"/>
 			</fileset>
             <fileset dir="${spring.root}/lib/antlr">
                 <include name="antlr-2.7.6.jar"/>

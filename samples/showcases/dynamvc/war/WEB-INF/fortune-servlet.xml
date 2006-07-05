@@ -9,13 +9,25 @@
         <property name="suffix" value=".jsp"/>
     </bean>
 
-	<lang:groovy id="fortune"
+    <!--
+            This XML tag loads the FortuneController Groovy script and makes
+            it available in the ApplicationContext as a regular Java bean.
+
+            Properties can be injected using the lang:property tag as shown
+            below.
+    -->
+    <lang:groovy id="fortune"
 				 refresh-check-delay="3000"
 				 script-source="/WEB-INF/groovy/FortuneController.groovy">
-		<lang:property name="fortuneService" ref="fortuneService"/>
+        <lang:property name="fortuneService" ref="fortuneService"/>
 	</lang:groovy>
 
     <bean id="home" class="org.springframework.web.servlet.mvc.ParameterizableViewController">
+        <description>
+            ParameterizableViewController delegates a request URI to a view name, in this
+            case to a JSP file. It can be used to hide the underlying view technology to
+            visitors in case you want to access views directly.
+        </description>
         <property name="viewName" value="home"/>
     </bean>
 
