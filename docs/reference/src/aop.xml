@@ -919,8 +919,8 @@ public class AfterFinallyExample {
 	to the method execution when it proceeds.
 	</para>
 	
-	<remark>The behaviour of proceed when called with an <classname>Object[]</classname> is a little different
-	than the behaviour of proceed for around advice compiled by the AspectJ compiler. For
+	<remark>The behavior of proceed when called with an <classname>Object[]</classname> is a little different
+	than the behavior of proceed for around advice compiled by the AspectJ compiler. For
 	around advice written using the traditional AspectJ language, the number of arguments 
 	passed to proceed must match the number of arguments passed to the around advice (not the 
 	number of arguments taken by the underlying join point), and the value passed to proceed
@@ -1424,7 +1424,7 @@ public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable {
       <title>Declaring an aspect</title>
 
 	<para>Using the schema support, an aspect is simply a regular Java object 
-	defined as a bean in your spring application context. The state and behaviour is
+	defined as a bean in your spring application context. The state and behavior is
 	captured in the fields and methods of the object, and the pointcut and advice 
 	information is captured in the XML.</para>
 	

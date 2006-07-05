@@ -4,16 +4,13 @@
 
   <section>
     <title>Introduction</title>
-
     <para>If you have been using the Spring Framework for some time, you will
     be aware that Spring has just undergone a major revision.</para>
 
     <sidebar>
       <title>Backported features</title>
-
       <para>Some of the new and improved functionality described below has
       been (or will be) backported into the Spring 1.2.x release line.</para>
-
       <para>Please do consult the changelogs for the 1.2.x releases to see if
       a feature has been backported.</para>
     </sidebar>
@@ -34,7 +31,6 @@
 
   <section id="new-in-2-ioc">
     <title>IoC</title>
-
     <para>One of the areas that contains a considerable number of 2.0 improvements
     is Spring's IoC container.</para>
 
@@ -53,14 +49,12 @@
       <title>Extensible XML authoring</title>
 
       <para>Not only is XML configuration easier to write, it is now also extensible.</para>
-
       <para>What 'extensible' means in this context is that you, as an
       application developer, or (more likely) as a third party framework or
       product vendor, can write custom tags that other developers can then
       plug into their own Spring configuration files. This allows you to have
       your own domain specific language (the term is used loosely here) of
       sorts be reflected in the specific configuration of your own components.</para>
-      
       <para>Implementing custom Spring tags may not be of interest to every single 
       application developer or enterprise architect using Spring in their own projects.
       We expect third-party vendors to be highly interested in developing
@@ -312,15 +306,36 @@
     </section>
   </section>
 
-  <section id="new-in-2-other-finally">
-    <title>Finally...</title>
+  <section id="new-in-2-other-applications">
+    <title>Updated sample applications</title>
 
-    <para>The reference documentation has been markedly improved, and now
-    sports a host of fleshed out examples and (hopefully) clearer
-    explanations. A number of the sample applications that ship with the full
-    Spring distribution also have been updated to showcase the new and
-    improved features and functionality of Spring 2.0, so do check them out...
-    the aforementioned sample applications can be found in the
-    <literal>samples</literal> directory of the full Spring distribution.</para>
+    <para>A number of the sample applications have also been updated to showcase the new and
+    improved features of Spring 2.0, so do take the time to investigate them. The aforementioned
+    sample applications can be found in the <filename class="directory">'samples'</filename>
+    directory of the full Spring distribution
+    (<filename>'spring-with-dependecies.[zip|tar.gz]'</filename>).</para>
+
+    <para>Said distribution also ships with a number of so-called
+    <emphasis>showcase</emphasis> applications. These showcase applications are severely
+    limited in scope, and serve only as fully working examples of exactly one new feature
+    in Spring 2.0. The idea is that you can take the code in these showcases and play around
+    with it, as opposed to having to create your own small project to test out some new
+    Spring 2.0 feature. Please be advised that the scope of these showcase applications is
+    deliberately small; the domain model (if there even is one) is maybe one or two classes,
+    and typical enterprise concerns such as security and transactional integrity are
+    conspicuously absent.</para>
+  
   </section>
+
+  <section id="new-in-2-other-documentation">
+    <title>Improved documentation</title>
+    <para>The Spring reference documentation (you're reading it!) has of course been
+    substantially updated to reflect all of the above features new in Spring 2.0.</para>
+    <para>While every effort has been made to ensure that there are no errors in this
+    documentation, some errors may nevertheless have crept in. If you do spot any typos
+    or even more serious errors, and you can spare a few cycles during lunch, please do
+    bring the error to the attention of the Spring team via the
+    <ulink url="http://opensource.atlassian.com/projects/spring/">Spring Framework's JIRA site.</ulink></para>
+  </section>
+
 </chapter>

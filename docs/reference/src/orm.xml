@@ -479,7 +479,7 @@
 
       <para>In summary: DAOs can be implemented based on the plain Hibernate3
       API, while still being able to participate in Spring-managed
-      transactions. This might in particular appeal to people already familar
+      transactions. This might in particular appeal to people already familiar
       with Hibernate, feeling more natural to them. However, such DAOs will
       throw plain <classname>HibernateException</classname>; conversion to
       Spring's <classname>DataAccessException</classname> would have to happen
@@ -789,7 +789,7 @@
 
       <para>Spring's resource management allows for simple switching between a
       JNDI <interfacename>SessionFactory</interfacename> and a local one,
-      without having to change a single line of application code. Th decision
+      without having to change a single line of application code. The decision
       as to whether to keep the resource definitions in the container or
       locally within the application, is mainly a matter of the transaction
       strategy being used. Compared to a Spring-defined local
@@ -850,7 +850,7 @@
       implementations -- currently only some WebLogic and WebSphere versions
       -- when using Hibernate configured without any awareness of the JTA
       <interfacename>PlatformTransactionManager</interfacename> object for
-      that environment, it is is possible for spurious warning or exceptions
+      that environment, it is possible for spurious warning or exceptions
       to show up in the application server log. These warnings or exceptions
       will say something to the effect that the connection being accessed is
       no longer valid, or JDBC access is no longer valid, possibly because the
@@ -950,7 +950,7 @@
         <listitem>
           <para>Spring is aware that Hibernate itself is synchronized to the
           JTA Transaction, and behaves differently than in the previous
-          senario. Assuming the Hibernate
+          scenario. Assuming the Hibernate
           <interfacename>Session</interfacename> needs to be closed at all,
           Spring will close it now.</para>
         </listitem>
@@ -1113,7 +1113,7 @@
 
       <para>As alternative to working with Spring's
       <classname>JdoTemplate</classname>, you can also code Spring-based DAOs
-      at the JDO API level, explictly opening and closing a
+      at the JDO API level, explicitly opening and closing a
       <interfacename>PersistenceManager</interfacename>. As elaborated in the
       corresponding Hibernate section, the main advantage of this approach is
       that your data access code is able to throw checked exceptions.
@@ -1260,7 +1260,7 @@
 
       <para>In summary: DAOs can be implemented based on plain JDO API, while
       still being able to participate in Spring-managed transactions. This
-      might in particular appeal to people already familar with JDO, feeling
+      might in particular appeal to people already familiar with JDO, feeling
       more natural to them. However, such DAOs will throw plain
       <classname>JDOException</classname>; conversion to Spring's
       <classname>DataAccessException</classname> would have to happen
@@ -1553,7 +1553,7 @@
 
       <para>As alternative to working with Spring's
       <literal>TopLinkTemplate</literal>, you can also code your TopLink data
-      access based on the raw TopLink API, explictly opening and closing a
+      access based on the raw TopLink API, explicitly opening and closing a
       <interfacename>Session</interfacename>. As elaborated in the
       corresponding Hibernate section, the main advantage of this approach is
       that your data access code is able to throw checked exceptions.
@@ -1666,7 +1666,7 @@
 
       <para>In summary: DAOs can be implemented based on plain TopLink API,
       while still being able to participate in Spring-managed transactions.
-      This might in particular appeal to people already familar with TopLink,
+      This might in particular appeal to people already familiar with TopLink,
       feeling more natural to them. However, such DAOs will throw plain
       <literal>TopLinkException</literal>; conversion to Spring's
       <classname>DataAccessException</classname> would have to happen
@@ -1755,7 +1755,7 @@
 
     <para>Apache OJB (<ulink url="http://db.apache.org/ojb"></ulink>) offers
     multiple API levels, such as ODMG and JDO. Aside from supporting OJB
-    through JDO, Spring also supports OJB's lowe-level
+    through JDO, Spring also supports OJB's lower-level
     <interfacename>PersistenceBroker </interfacename>API as data access
     strategy. The corresponding integration classes reside in the
     <literal>org.springframework.orm.ojb</literal> package.</para>
@@ -1886,7 +1886,7 @@
 
       <para>As alternative to working with Spring's
       <classname>PersistenceBrokerTemplate</classname>, you can also code your
-      OJB data access against plain OJB API, explictly opening and closing a
+      OJB data access against plain OJB API, explicitly opening and closing a
       <interfacename>PersistenceBroker</interfacename>. As elaborated in the
       corresponding Hibernate section, the main advantage of this approach is
       that your data access code is able to throw checked exceptions.

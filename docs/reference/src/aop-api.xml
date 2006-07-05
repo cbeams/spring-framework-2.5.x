@@ -941,7 +941,7 @@ public interface IntroductionInfo {
         </para>
         <note>
 			<para>
-				The behaviour of the <classname>ProxyFactoryBean</classname> with regard
+				The behavior of the <classname>ProxyFactoryBean</classname> with regard
 				to creating JDK- or CGLIB-based proxies changed between versions 1.2.x and
 				2.0 of Spring. The <classname>ProxyFactoryBean</classname> now
 				exhibits similar semantics with regard to auto-detecting interfaces

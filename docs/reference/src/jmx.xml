@@ -213,10 +213,10 @@ public class JmxTestBean implements IJmxTestBean {
 			<para>
 				It is possible to control the behavior of exactly what happens when an
 				<classname>MBean</classname> is registered with an <classname>MBeanServer</classname>.
-				Spring's JMX support allows for three different registration behaviours to control the
+				Spring's JMX support allows for three different registration behaviors to control the
 				registration behavior when the registration process finds that an
 				<classname>MBean</classname> has already been registered under the same
-				<classname>ObjectName</classname>; these registration behaviours are summarized on the
+				<classname>ObjectName</classname>; these registration behaviors are summarized on the
 				following table:
 			</para>
 			<para>

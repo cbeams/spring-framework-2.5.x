@@ -684,7 +684,7 @@ public class DefaultFooService implements FooService {
             <para><emphasis>(This example assumes that all your service interfaces are defined
             in the <literal>'x.y.service'</literal> package, again, see the chapter entitled
             <xref linkend="aop"/> for more details.)</emphasis></para>
-            <para>Now that we've analysed the configuration, you may be asking
+            <para>Now that we've analyzed the configuration, you may be asking
             yourself, <quote><emphasis>Okay... but what does all this configuration actually
             <emphasis role="bold">do</emphasis>?</emphasis></quote>.</para>
             <para>What the above configuration is going to do is create
@@ -844,7 +844,7 @@ public interface FooService {
   ]]><lineannotation>&lt;!-- this is the service object that we want to make transactional --&gt;</lineannotation><![CDATA[
   <bean id="fooService" class="x.y.service.DefaultFooService"/>
 
-  ]]><lineannotation>&lt;!-- enable the configuration of transactional behaviour based on annotations --&gt;</lineannotation><![CDATA[
+  ]]><lineannotation>&lt;!-- enable the configuration of transactional behavior based on annotations --&gt;</lineannotation><![CDATA[
   ]]><emphasis role="bold"><![CDATA[<tx:annotation-driven/>]]></emphasis><![CDATA[
 
   ]]><lineannotation>&lt;!-- a <interfacename>PlatformTransactionManager</interfacename> is still required --&gt;</lineannotation><![CDATA[
@@ -861,14 +861,14 @@ public interface FooService {
             class definition, or a method on a class.</para>
             <note>
                 <para>The mere presence of the <interfacename>@Transactional</interfacename>
-                annotation is not enough to actually turn on the transactional behaviour - the
+                annotation is not enough to actually turn on the transactional behavior - the
                 <interfacename>@Transactional</interfacename> annotation is simply metadata
                 that can be consumed by something that is
                 <interfacename>@Transactional</interfacename>-aware and that can use the
-                transactional metadata to apply transactional behaviour.</para>
+                transactional metadata to apply transactional behavior.</para>
                 <para>In the case of the above example, it is the presence of the
                 <literal>&lt;tx:annotation-driven/&gt;</literal> element that
-                <emphasis>switches on</emphasis> the transactional behaviour.</para>
+                <emphasis>switches on</emphasis> the transactional behavior.</para>
             </note>
             <para>In keeping with one of the Spring framework's central tenets, namely 'do
             the intuitive thing', Spring's treatment of the <interfacename>@Transactional</interfacename>

@@ -50,7 +50,7 @@
 			</listitem>
 		</itemizedlist>
 		<para>Spring provides first class support for integration testing. This first class
-		support is captured in a numbe rof classes in the <literal>spring-mock.jar</literal>
+		support is captured in a number of classes in the <literal>spring-mock.jar</literal>
 		file that ships with the Spring distribution. The classes in this library can be
 		thought of as a significantly superior alternative to in-container testing using
 		tools such as Cactus.</para>
@@ -248,7 +248,7 @@
 				test case ends, through calling the <literal>endTransaction()</literal> method.
 				This will roll back the transaction by default, and commit it only if
 				<literal>setComplete()</literal> had previously been called. This
-				functionality is useful if you want to test the behaviour of
+				functionality is useful if you want to test the behavior of
 				'disconnected' data objects, such as Hibernate-mapped objects
 				that will be used in a web or remoting tier outside a transaction.
 				Often, lazy loading errors are discovered only through UI testing; if
@@ -327,7 +327,7 @@
 					<para>This test case extends the
 					<classname>AbstractTransactionalDataSourceSpringContextTests</classname>
 					class, from which it inherits Dependency Injection and transactional
-					behaviour.</para>
+					behavior.</para>
 				</listitem>
 				<listitem>
 					<para>The <literal>clinic</literal> instance variable - the application object
@@ -338,7 +338,7 @@
 					<para>
 						The <literal>testGetVets()</literal> method illustrates how the
 						inherited <literal>JdbcTemplate</literal> variable can be used to verify
-						correct behaviour of the application code being tested. This allows
+						correct behavior of the application code being tested. This allows
 						for stronger tests, and lessens dependency on the exact test data.
 						For example, you can add additional rows in the database without
 						breaking tests.
@@ -398,7 +398,7 @@
 				tests, so you should use a combination like the Commons DBCP
 				<classname>BasicDataSource</classname> and <classname>DataSourceTransactionManager</classname>
 				or <classname>HibernateTransactionManager</classname> for them. You can
-				factor out this variant behaviour into a single XML file, having the
+				factor out this variant behavior into a single XML file, having the
 				choice between application server and 'local' configuration
 				separated from all other configuration, which will not vary between the
 				test and production environments.

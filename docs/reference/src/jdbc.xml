@@ -120,7 +120,7 @@
 			</para>
 			<para>
 				This class can be used within a service implementation via direct
-				instantiation with a<interfacename>DataSource</interfacename>reference,
+				instantiation with a <interfacename>DataSource</interfacename> reference,
 				or get prepared in an application context and given to services as a
 				bean reference. Note: the <interfacename>DataSource</interfacename> should
 				always be configured as a bean in the application context, in the first
@@ -251,7 +251,7 @@ public int countOfActors(Actor exampleActor) {
     return template.queryForInt(sql, namedParameters);
 }]]></programlisting>
 			<para>
-				Rememeber that the <classname>NamedParameterJdbcTemplate</classname> class
+				Remember that the <classname>NamedParameterJdbcTemplate</classname> class
 				<emphasis>wraps</emphasis> a classic <classname>JdbcTemplate</classname>
 				template... if you need access to the wrapped
 				<classname>JdbcTemplate</classname> instance (to access some of the
