@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,6 +43,7 @@ public interface ResourceLoader {
 	/** Pseudo URL prefix for loading from the class path: "classpath:" */
 	String CLASSPATH_URL_PREFIX = ResourceUtils.CLASSPATH_URL_PREFIX;
 
+
 	/**
 	 * Return a Resource handle for the specified resource.
 	 * The handle should always be a reusable resource descriptor,
@@ -63,5 +64,14 @@ public interface ResourceLoader {
 	 * @see org.springframework.core.io.Resource#getInputStream
 	 */
 	Resource getResource(String location);
+
+	/**
+	 * Expose the ClassLoader used by this ResourceLoader.
+	 * <p>Clients who need to access the ClassLoader directly
+	 * can do so in a uniform manner with the ResourceLoader,
+	 * rather than relying on the thread context ClassLoader.
+	 * @return the ClassLoader (never <code>null</code>)
+	 */
+	ClassLoader getClassLoader();
 
 }

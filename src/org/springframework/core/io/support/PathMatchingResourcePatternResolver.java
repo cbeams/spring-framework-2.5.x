@@ -38,7 +38,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
@@ -111,8 +110,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	private final ResourceLoader resourceLoader;
 
-	private ClassLoader classLoader;
-
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
 
@@ -122,7 +119,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
 	public PathMatchingResourcePatternResolver() {
-		this(new DefaultResourceLoader(), null);
+		this(new DefaultResourceLoader());
 	}
 
 	/**
@@ -132,7 +129,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
 	public PathMatchingResourcePatternResolver(ClassLoader classLoader) {
-		this(new DefaultResourceLoader(classLoader), classLoader);
+		this(new DefaultResourceLoader(classLoader));
 	}
 
 	/**
@@ -142,20 +139,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * actual resources with
 	 */
 	public PathMatchingResourcePatternResolver(ResourceLoader resourceLoader) {
-		this(resourceLoader, null);
-	}
-
-	/**
-	 * Create a new PathMatchingResourcePatternResolver.
-	 * @param resourceLoader the ResourceLoader to load root directories and
-	 * actual resources with
-	 * @param classLoader the ClassLoader to load classpath resources with,
-	 * or <code>null</code> for using the thread context class loader
-	 */
-	public PathMatchingResourcePatternResolver(ResourceLoader resourceLoader, ClassLoader classLoader) {
-		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
-		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 	}
 
 
@@ -171,7 +155,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * (never <code>null</code>).
 	 */
 	public ClassLoader getClassLoader() {
-		return classLoader;
+		return getResourceLoader().getClassLoader();
 	}
 
 	/**
