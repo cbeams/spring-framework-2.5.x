@@ -2841,15 +2841,15 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
 </bean>]]></programlisting>
 
         <para>The parent bean cannot get instantiated on its own since it is
-        incomplete, and it's also considered abstract. When a definition is
-        considered abstract like this (explicitly or implicitly), it's usable just
-        as a pure template or abstract bean definition that will serve as parent
+        incomplete, and it is also defined as abstract. When a definition is
+        defined to be abstract like this (explicitly or implicitly), it is
+        usable only as a pure template bean definition that will serve as parent
         definition for child definitions. Trying to use such an abstract parent
         bean on its own (by referring to it as a ref property of another bean, or
         doing an explicit <methodname>getBean()</methodname> call with the parent
-        bean id, will result in an error. Similarly, the container's internal
-        <emphasis>preInstantiateSingletons</emphasis> method will completely
-        ignore bean definitions which are considered abstract.</para>
+        bean id), will result in an error. Similarly, the container's internal
+        <methodname>preInstantiateSingletons()</methodname> method will completely
+        ignore bean definitions which are defined as abstract.</para>
         
         <note>
             <para><literal>ApplicationContexts</literal> (but <emphasis>not</emphasis>
@@ -3056,8 +3056,9 @@ org.springframework.scripting.groovy.GroovyMessenger@272961]]></programlisting>
             execute by setting the <literal>'order'</literal> property (you can only set this property 
             if the <interfacename>BeanFactoryPostProcessor</interfacename>
             implements the <interfacename>Ordered</interfacename> interface; if you write your own
-            BeanFactoryPostProcessor you should consider implementing the <interfacename>Ordered</interfacename>
-            interface too); consult the Javadocs for the <interfacename>BeanFactoryPostProcessor</interfacename>
+            <interfacename>BeanFactoryPostProcessor</interfacename> you should consider
+            implementing the <interfacename>Ordered</interfacename> interface too); consult
+            the Javadocs for the <interfacename>BeanFactoryPostProcessor</interfacename>
             and <interfacename>Ordered</interfacename> interfaces for more details.</para>
             <note>
                 <para>If you want to change the actual bean <emphasis>instances</emphasis>
@@ -3090,11 +3091,11 @@ org.springframework.scripting.groovy.GroovyMessenger@272961]]></programlisting>
             similar to this:</para>
             <programlisting><![CDATA[XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
 
-]]><lineannotation>// bring in some property values from a <classname>Properties</classname> file<![CDATA[
+]]><lineannotation>// bring in some property values from a <classname>Properties</classname> file</lineannotation><![CDATA[
 PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
 cfg.setLocation(new FileSystemResource("jdbc.properties"));
 
-]]>// now actually do the replacement</lineannotation><![CDATA[
+]]><lineannotation>// now actually do the replacement</lineannotation><![CDATA[
 cfg.postProcessBeanFactory(factory);]]></programlisting>
             <anchor id="beans-factory-autodetect-beanfactorypostprocessors"/>
             <para>An <interfacename>ApplicationContext</interfacename> will detect any beans which
@@ -3194,7 +3195,7 @@ dataSource.url=jdbc:mysql:mydb]]></programlisting>
             </section>
         </section>
         <section id="beans-factory-extension-factorybean">
-            <title>Customising instantiation logic using <literal>FactoryBeans</literal></title>
+            <title>Customizing instantiation logic using <literal>FactoryBeans</literal></title>
             <para>The <interfacename>org.springframework.beans.factory.FactoryBean</interfacename>
             interface is to be implemented by objects that <emphasis>are themselves
             factories</emphasis>.</para>
