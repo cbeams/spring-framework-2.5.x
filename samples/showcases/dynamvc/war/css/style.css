@@ -52,12 +52,17 @@ h1 {
 p {
 	margin: 0px;
 }
+
+p.paragraph {
+    margin-bottom: 1em;
+}
+
 #footer {
 	text-align: center;
 	margin: 0px;
 	margin-top: 15px;
 	padding: 5px;
-	background: #EBEBEB 
+	background: #EBEBEB
 	no-repeat bottom left;
 	clear: both;
 }

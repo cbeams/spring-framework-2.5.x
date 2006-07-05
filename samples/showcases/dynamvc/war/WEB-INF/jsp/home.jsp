@@ -22,9 +22,10 @@
 	  <a href="http://www.springframework.org">Spring home</a> -
 	  <a href="http://forum.springframework.org">Spring Forum</a> -
 	  <a href="http://www.dzone.com">Dzone.com</a> -
-	  <a href="http://www.infoq.com">Infoq.com</a>
+	  <a href="http://www.infoq.com">Infoq.com</a> -
+      <a href="about.htm">About</a>
 
-	 </p>
+     </p>
 	</dd>
  </dl>
 
@@ -34,7 +35,7 @@
  </div>
 
  <dl id="footer">
-	<dd>If you likes these cookies you may also like <a href="http://www.youtube.com/watch?search=ice+age&v=ZYzJybb3_Ew">this</a>.</dd>
+	<dd>If you like these cookies you may also like <a href="http://www.youtube.com/watch?search=ice+age&v=ZYzJybb3_Ew">this</a>.</dd>
  </dl>
 
 </div>

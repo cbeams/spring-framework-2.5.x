@@ -31,11 +31,16 @@
         <property name="viewName" value="home"/>
     </bean>
 
+    <bean id="about" class="org.springframework.web.servlet.mvc.ParameterizableViewController">
+        <property name="viewName" value="about"/>
+    </bean>
+
     <bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
         <property name="mappings">
             <value>
                 /fortune.htm=fortune
                 /home.htm=home
+                /about.htm=about
             </value>
         </property>
     </bean>
