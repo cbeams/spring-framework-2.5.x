@@ -100,7 +100,7 @@
     <xsl:template name="header.navigation"/>
     <xsl:param name="navig.showtitles">1</xsl:param>
 
-    <!-- lets have a Powered by Interface21 banner across the bottom of each page -->
+    <!-- let's have a Powered by Interface21 banner across the bottom of each page -->
     <xsl:template name="user.footer.navigation">
 		<div style="background-color:#31430f;border:none;height:50px;border:1px solid black;text-align:center">
 			<table cellspacing="0" cellpadding="0" width="100%" style="margin: 0px; padding: 0px">
@@ -114,6 +114,6 @@
         		</tr>
         	</table>
 		</div>
-	</xsl:template>
+     </xsl:template>
 
 </xsl:stylesheet>
