@@ -1633,6 +1633,7 @@
 				<include name="samples/imagedb/**"/>
 				<include name="samples/jpetstore/**"/>
 				<include name="samples/petclinic/**"/>
+				<include name="samples/showcases/**"/>
 			</zipfileset>
 		</zip>
 
