@@ -19,6 +19,8 @@ package org.springframework.web.bind;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+
 /**
  * Parameter extraction methods, for an approach distinct from data binding,
  * in which parameters of specific types are required.
@@ -30,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author Juergen Hoeller
  * @author Keith Donald
  * @deprecated since Spring 2.0: use ServletRequestUtils instead
+ * @see ServletRequestUtils
  */
 public abstract class RequestUtils {
 
@@ -41,7 +44,7 @@ public abstract class RequestUtils {
 	 */
 	public static void rejectRequestMethod(HttpServletRequest request, String method) throws ServletException {
 		if (request.getMethod().equals(method)) {
-			throw new ServletException("This resource does not support request method '" + method + "'");
+			throw new HttpRequestMethodNotSupportedException(method);
 		}
 	}
 
