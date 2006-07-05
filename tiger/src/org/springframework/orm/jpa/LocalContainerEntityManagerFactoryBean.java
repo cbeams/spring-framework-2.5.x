@@ -30,9 +30,11 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
@@ -104,7 +106,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 
 	private DataSourceLookup dataSourceLookup = new JndiDataSourceLookup();
 
-	private ResourceLoader resourceLoader = new DefaultResourceLoader();
+	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
 	private SpringPersistenceUnitInfo persistenceUnitInfo;
 
@@ -204,7 +206,9 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
+		this.resourcePatternResolver = (resourceLoader != null ?
+				ResourcePatternUtils.getResourcePatternResolver(resourceLoader) :
+				new PathMatchingResourcePatternResolver());
 	}
 
 
@@ -226,12 +230,14 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		}
 		entityManagerFactoryNamesDeployed.add(unitName);
 
+		this.persistenceUnitInfo.setLoadTimeWeaver(this.loadTimeWeaver);
+
 		if (this.persistenceUnitInfo.getNonJtaDataSource() == null) {
 			this.persistenceUnitInfo.setNonJtaDataSource(this.dataSource);
 		}
-		this.persistenceUnitInfo.setLoadTimeWeaver(this.loadTimeWeaver);
-
-		this.persistenceUnitInfo.setPersistenceUnitRootUrl(findPersistenceUnitRootUrl());
+		if (this.persistenceUnitInfo.getPersistenceUnitRootUrl() == null) {
+			this.persistenceUnitInfo.setPersistenceUnitRootUrl(determinePersistenceUnitRootUrl());
+		}
 
 		Class persistenceProviderClass = getPersistenceProviderClass();
 		String puiProviderClassName = this.persistenceUnitInfo.getPersistenceProviderClassName();
@@ -243,13 +249,13 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 				throw new IllegalArgumentException("Cannot resolve provider class name '" + puiProviderClassName + "'", ex);
 			}
 		}
-		
 		if (persistenceProviderClass == null) {
 			throw new IllegalStateException("Unable to determine persistence provider class. " +
 					"Please check configuration of " + getClass().getName() + "; " +
 					"ideally specify the appropriate JpaVendorAdapter class for this provider");
 		}
 		PersistenceProvider pp = (PersistenceProvider) BeanUtils.instantiateClass(persistenceProviderClass);
+
 		this.nativeEntityManagerFactory =
 				pp.createContainerEntityManagerFactory(this.persistenceUnitInfo, getJpaPropertyMap());
 		postProcessEntityManagerFactory(this.nativeEntityManagerFactory, this.persistenceUnitInfo);
@@ -264,7 +270,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * @return Spring-specific PersistenceUnitInfo
 	 */
 	protected SpringPersistenceUnitInfo parsePersistenceUnitInfo() {
-		PersistenceUnitReader reader = new PersistenceUnitReader(this.resourceLoader, this.dataSourceLookup);
+		PersistenceUnitReader reader = new PersistenceUnitReader(this.resourcePatternResolver, this.dataSourceLookup);
 
 		SpringPersistenceUnitInfo[] infos = reader.readPersistenceUnitInfos(this.persistenceXmlLocation);
 		if (infos.length == 0) {
@@ -299,12 +305,14 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 	/**
-	 * Try to deduce the persistence unit root URL using multiple strategies.
+	 * Try to determine the persistence unit root URL based on the given
+	 * "persistenceUnitRootLocation".
 	 * @return the persistence unit root URL to pass to the JPA PersistenceProvider
+	 * @see #setPersistenceUnitRootLocation
 	 */
-	private URL findPersistenceUnitRootUrl() {
+	private URL determinePersistenceUnitRootUrl() {
 		try {
-			Resource res = this.resourceLoader.getResource(this.persistenceUnitRootLocation);
+			Resource res = this.resourcePatternResolver.getResource(this.persistenceUnitRootLocation);
 			if (logger.isInfoEnabled()) {
 				logger.info("Using persistence unit root location: " + res);
 			}
@@ -314,6 +322,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 			throw new PersistenceException("Unable to resolve persistence unit root URL", ex);
 		}
 	}
+
 
 	public DataSource getDataSource() {
 		return this.dataSource;
