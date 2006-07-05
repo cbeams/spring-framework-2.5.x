@@ -16,6 +16,7 @@ a:hover {
 #body {
 	width: 750px;
 	margin: auto;
+	text-align: justify;
 }
 #header {
 	margin: 0px;
