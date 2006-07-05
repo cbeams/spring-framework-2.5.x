@@ -18,8 +18,10 @@ package org.springframework.aop.config;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.BeansException;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Mark Fisher
@@ -32,21 +34,21 @@ public class AopNamespaceHandlerPointcutErrorTests extends TestCase {
 
 	public void testDuplicatePointcutConfig() {
 		try {
-			new ClassPathXmlApplicationContext(duplicatePointcutConfigLocation);
-			fail("parsing should have caused a BeansException");
+			new XmlBeanFactory(new ClassPathResource(duplicatePointcutConfigLocation));
+			fail("parsing should have caused a BeanDefinitionStoreException");
 		}
-		catch (BeansException ex) {
-			// expected
+		catch (BeanDefinitionStoreException ex) {
+			assertTrue(ex.contains(BeanDefinitionParsingException.class));
 		}
 	}
 	
 	public void testMissingPointcutConfig() {
 		try {
-			new ClassPathXmlApplicationContext(missingPointcutConfigLocation);
-			fail("parsing should have caused a BeansException");
+			new XmlBeanFactory(new ClassPathResource(missingPointcutConfigLocation));
+			fail("parsing should have caused a BeanDefinitionStoreException");
 		}
-		catch (BeansException ex) {
-			// expected
+		catch (BeanDefinitionStoreException ex) {
+			assertTrue(ex.contains(BeanDefinitionParsingException.class));
 		}
 	}
 
