@@ -1005,6 +1005,14 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testExistingTransactionWithPropagationNested() throws Exception {
+		doTestExistingTransactionWithPropagationNested(1);
+	}
+
+	public void testExistingTransactionWithPropagationNestedTwice() throws Exception {
+		doTestExistingTransactionWithPropagationNested(2);
+	}
+
+	private void doTestExistingTransactionWithPropagationNested(final int count) throws Exception {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
 		}
@@ -1024,10 +1032,12 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		mdControl.setReturnValue(true, 1);
 		con.getMetaData();
 		conControl.setReturnValue(md, 1);
-		con.setSavepoint();
-		conControl.setReturnValue(sp, 1);
-		con.releaseSavepoint(sp);
-		conControl.setVoidCallable(1);
+		for (int i = 1; i <= count; i++) {
+			con.setSavepoint(ConnectionHolder.SAVEPOINT_NAME_PREFIX + i);
+			conControl.setReturnValue(sp, 1);
+			con.releaseSavepoint(sp);
+			conControl.setVoidCallable(1);
+		}
 		con.commit();
 		conControl.setVoidCallable(1);
 		con.isReadOnly();
@@ -1052,14 +1062,16 @@ public class DataSourceTransactionManagerTests extends TestCase {
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Is new transaction", status.isNewTransaction());
 				assertTrue("Isn't nested transaction", !status.hasSavepoint());
-				tt.execute(new TransactionCallbackWithoutResult() {
-					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
-						assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
-						assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
-						assertTrue("Isn't new transaction", !status.isNewTransaction());
-						assertTrue("Is nested transaction", status.hasSavepoint());
-					}
-				});
+				for (int i = 0; i < count; i++) {
+					tt.execute(new TransactionCallbackWithoutResult() {
+						protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+							assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+							assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
+							assertTrue("Isn't new transaction", !status.isNewTransaction());
+							assertTrue("Is nested transaction", status.hasSavepoint());
+						}
+					});
+				}
 				assertTrue("Is new transaction", status.isNewTransaction());
 				assertTrue("Isn't nested transaction", !status.hasSavepoint());
 			}
@@ -1094,7 +1106,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		mdControl.setReturnValue(true, 1);
 		con.getMetaData();
 		conControl.setReturnValue(md, 1);
-		con.setSavepoint();
+		con.setSavepoint("SAVEPOINT_1");
 		conControl.setReturnValue(sp, 1);
 		con.rollback(sp);
 		conControl.setVoidCallable(1);
@@ -1161,7 +1173,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		mdControl.setReturnValue(true, 1);
 		con.getMetaData();
 		conControl.setReturnValue(md, 1);
-		con.setSavepoint();
+		con.setSavepoint("SAVEPOINT_1");
 		conControl.setReturnValue(sp, 1);
 		con.releaseSavepoint(sp);
 		conControl.setVoidCallable(1);
@@ -1223,7 +1235,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		mdControl.setReturnValue(true, 1);
 		con.getMetaData();
 		conControl.setReturnValue(md, 1);
-		con.setSavepoint();
+		con.setSavepoint("SAVEPOINT_1");
 		conControl.setReturnValue(sp, 1);
 		con.rollback(sp);
 		conControl.setVoidCallable(1);

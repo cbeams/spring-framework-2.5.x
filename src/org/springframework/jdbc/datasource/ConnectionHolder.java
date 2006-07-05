@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,7 @@
 package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
@@ -38,11 +39,18 @@ import org.springframework.util.Assert;
  */
 public class ConnectionHolder extends ResourceHolderSupport {
 
+	public static final String SAVEPOINT_NAME_PREFIX = "SAVEPOINT_";
+
+
 	private ConnectionHandle connectionHandle;
 
 	private Connection currentConnection;
 
 	private boolean transactionActive = false;
+
+	private Boolean savepointsSupported;
+
+	private int savepointCounter = 0;
 
 
 	/**
@@ -130,6 +138,29 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	}
 
 	/**
+	 * Return whether JDBC 3.0 Savepoints are supported.
+	 * Caches the flag for the lifetime of this ConnectionHolder.
+	 * @throws SQLException if thrown by the JDBC driver
+	 */
+	public boolean supportsSavepoints() throws SQLException {
+		if (this.savepointsSupported == null) {
+			this.savepointsSupported = new Boolean(getConnection().getMetaData().supportsSavepoints());
+		}
+		return this.savepointsSupported.booleanValue();
+	}
+
+	/**
+	 * Create a new JDBC 3.0 Savepoint for the current Connection,
+	 * using generated savepoint names that are unique for the Connection.
+	 * @return the new Savepoint (typed as Object for JDK 1.3 compatibility)
+	 * @throws SQLException if thrown by the JDBC driver
+	 */
+	public Object createSavepoint() throws SQLException {
+		this.savepointCounter++;
+		return getConnection().setSavepoint(SAVEPOINT_NAME_PREFIX + this.savepointCounter);
+	}
+
+	/**
 	 * Releases the current Connection held by this ConnectionHolder.
 	 * <p>This is necessary for ConnectionHandles that expect "Connection borrowing",
 	 * where each returned Connection is only temporarily leased and needs to be
@@ -150,6 +181,8 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	public void clear() {
 		super.clear();
 		this.transactionActive = false;
+		this.savepointsSupported = null;
+		this.savepointCounter = 0;
 	}
 
 }
