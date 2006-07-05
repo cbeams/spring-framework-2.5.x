@@ -35,6 +35,7 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
@@ -314,6 +315,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// Make sure bean class is actually resolved at this point.
 		Class beanClass = resolveBeanClass(mergedBeanDefinition, beanName);
+
+		// Prepare method overrides.
+		try {
+			mergedBeanDefinition.prepareMethodOverrides();
+		}
+		catch (BeanDefinitionValidationException ex) {
+			throw new BeanDefinitionStoreException(mergedBeanDefinition.getResourceDescription(),
+					beanName, "Validation of method overrides failed", ex);
+		}
 
 		Object bean = null;
 

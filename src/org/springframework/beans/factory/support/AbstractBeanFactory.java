@@ -228,8 +228,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			}
 
 			this.alreadyCreated.add(beanName);
+
 			final RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
-			checkMergedBeanDefinition(mergedBeanDefinition, beanName, requiredType, args);
+			checkMergedBeanDefinition(mergedBeanDefinition, beanName, args);
 
 			// Create bean instance.
 			if (mergedBeanDefinition.isSingleton()) {
@@ -792,34 +793,15 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * potentially throwing validation exceptions.
 	 * @param mergedBeanDefinition the bean definition to check
 	 * @param beanName the name of the bean
-	 * @param requiredType the required type of the bean
 	 * @param args the arguments for bean creation, if any
 	 * @throws BeansException in case of validation failure
 	 */
-	protected void checkMergedBeanDefinition(
-			RootBeanDefinition mergedBeanDefinition, String beanName, Class requiredType, Object[] args)
+	protected void checkMergedBeanDefinition(RootBeanDefinition mergedBeanDefinition, String beanName, Object[] args)
 			throws BeansException {
 
 		// check if bean definition is not abstract
 		if (mergedBeanDefinition.isAbstract()) {
 			throw new BeanIsAbstractException(beanName);
-		}
-
-		Class beanClass = resolveBeanClass(mergedBeanDefinition, beanName);
-		if (beanClass != null) {
-			// Check if required type can match according to the bean definition.
-			if (requiredType != null && mergedBeanDefinition.getFactoryMethodName() == null &&
-					FactoryBean.class.isAssignableFrom(beanClass) && !requiredType.isAssignableFrom(beanClass)) {
-				throw new BeanNotOfRequiredTypeException(beanName, requiredType, beanClass);
-			}
-			// Prepare method overrides.
-			try {
-				mergedBeanDefinition.prepareMethodOverrides();
-			}
-			catch (BeanDefinitionValidationException ex) {
-				throw new BeanDefinitionStoreException(mergedBeanDefinition.getResourceDescription(),
-						beanName, "Validation of method overrides failed", ex);
-			}
 		}
 
 		// Check validity of the usage of the args parameter. This can
