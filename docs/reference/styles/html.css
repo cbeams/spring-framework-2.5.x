@@ -282,3 +282,7 @@ div.note * td, div.tip * td, div.warning * td {
 	text-align: justify;
 	font-size: 100%;
 }
+
+.programlisting * .lineannotation {
+	color: green;
+}
