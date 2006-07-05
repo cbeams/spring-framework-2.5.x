@@ -119,7 +119,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
 	public PathMatchingResourcePatternResolver() {
-		this(new DefaultResourceLoader());
+		this.resourceLoader = new DefaultResourceLoader();
 	}
 
 	/**
@@ -129,7 +129,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
 	public PathMatchingResourcePatternResolver(ClassLoader classLoader) {
-		this(new DefaultResourceLoader(classLoader));
+		this.resourceLoader = new DefaultResourceLoader(classLoader);
 	}
 
 	/**
@@ -139,6 +139,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * actual resources with
 	 */
 	public PathMatchingResourcePatternResolver(ResourceLoader resourceLoader) {
+		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
 	}
 
