@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.Assert;
 
 /**
  * Generic ApplicationContext implementation that holds a single internal
@@ -97,7 +98,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @see #refresh
 	 */
 	public GenericApplicationContext() {
-		this(new DefaultListableBeanFactory());
+		this.beanFactory = new DefaultListableBeanFactory();
 	}
 
 	/**
@@ -107,6 +108,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @see #refresh
 	 */
 	public GenericApplicationContext(DefaultListableBeanFactory beanFactory) {
+		Assert.notNull(beanFactory, "BeanFactory must not be null");
 		this.beanFactory = beanFactory;
 	}
 
@@ -117,7 +119,8 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @see #refresh
 	 */
 	public GenericApplicationContext(ApplicationContext parent) {
-		this(new DefaultListableBeanFactory(), parent);
+		this();
+		setParent(parent);
 	}
 
 	/**
@@ -128,7 +131,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * @see #refresh
 	 */
 	public GenericApplicationContext(DefaultListableBeanFactory beanFactory, ApplicationContext parent) {
-		this.beanFactory = beanFactory;
+		this(beanFactory);
 		setParent(parent);
 	}
 
@@ -140,6 +143,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 */
 	public void setParent(ApplicationContext parent) {
 		super.setParent(parent);
+		Assert.state(this.beanFactory != null, "BeanFactory not initialized yet");
 		this.beanFactory.setParentBeanFactory(getInternalParentBeanFactory());
 	}
 
