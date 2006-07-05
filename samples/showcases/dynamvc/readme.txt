@@ -28,7 +28,7 @@ If you deploy the application to Tomcat (for example), you can then go into
 the exploded '/WEB-INF/groovy' folder and edit the 'FortuneController.groovy'
 file directly. Any such changes that you make will be automatically picked up
 and the 'fortune' bean will be reconfigured... all without having to stop,
-redeply and restart the application. Try it yourself... now admittedly
+redeploy and restart the application. Try it yourself... now admittedly
 there is not a lot of complex logic in the 'FortuneController.groovy' file
 (which is good because Controllers in Spring MVC should be as thin as possible).
 
