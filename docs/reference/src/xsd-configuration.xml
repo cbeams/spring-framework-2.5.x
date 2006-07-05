@@ -354,6 +354,23 @@ public class Client {
     <value>stavrogin@gov.org</value>
     <value>porfiry@gov.org</value>
 </util:list>]]></programlisting>
+                <para>You can also explicitly control the exact type of <interfacename>List</interfacename>
+                that will be instantiated and populated via the use of the <literal>'list-class'</literal>
+                attribute on the <literal>&lt;util:list/&gt;</literal> element. For example, if we
+                really need a <classname>java.util.LinkedList</classname> to be instantiated, we could
+                use the following configuration:</para>
+                <programlisting><![CDATA[<util:list id="emails" list-class="java.util.LinkedList">
+    <value>jackshaftoe@vagabond.org</value>
+    <value>eliza@thinkingmanscrumpet.org</value>
+    <value>vanhoek@pirate.org</value>
+    <value>d'Arcachon@nemesis.org</value>
+</util:list>]]></programlisting>
+                <para>If no <literal>'list-class'</literal> attribute is supplied, a
+                <interfacename>List</interfacename> implementation will be chosen by the container.</para>
+                <para>Finally, you can also control the merging behavior using the
+                <literal>'merge'</literal> attribute of the <literal>&lt;util:list/&gt;</literal>
+                element; collection merging is described in more detail in the section entitled
+                <xref linkend="beans-collection-elements-merging"/></para>
             </section>
             <section>
                 <title><literal>&lt;util:map/&gt;</literal></title>
@@ -382,6 +399,23 @@ public class Client {
     <entry key="stavrogin" value="stavrogin@gov.org"/>
     <entry key="porfiry" value="porfiry@gov.org"/>
 </util:map>]]></programlisting>
+                <para>You can also explicitly control the exact type of <interfacename>Map</interfacename>
+                that will be instantiated and populated via the use of the <literal>'map-class'</literal>
+                attribute on the <literal>&lt;util:map/&gt;</literal> element. For example, if we
+                really need a <classname>java.util.TreeMap</classname> to be instantiated, we could
+                use the following configuration:</para>
+                <programlisting><![CDATA[<util:map id="emails" map-type="java.util.TreeMap">
+    <entry key="pechorin" value="pechorin@hero.org"/>
+    <entry key="raskolnikov" value="raskolnikov@slums.org"/>
+    <entry key="stavrogin" value="stavrogin@gov.org"/>
+    <entry key="porfiry" value="porfiry@gov.org"/>
+</util:map>]]></programlisting>
+                <para>If no <literal>'map-class'</literal> attribute is supplied, a
+                <interfacename>Map</interfacename> implementation will be chosen by the container.</para>
+                <para>Finally, you can also control the merging behavior using the
+                <literal>'merge'</literal> attribute of the <literal>&lt;util:map/&gt;</literal>
+                element; collection merging is described in more detail in the section entitled
+                <xref linkend="beans-collection-elements-merging"/></para>
             </section>
             <section>
                 <title><literal>&lt;util:set/&gt;</literal></title>
@@ -410,6 +444,23 @@ public class Client {
     <value>stavrogin@gov.org</value>
     <value>porfiry@gov.org</value>
 </util:set>]]></programlisting>
+                <para>You can also explicitly control the exact type of <interfacename>Set</interfacename>
+                that will be instantiated and populated via the use of the <literal>'set-class'</literal>
+                attribute on the <literal>&lt;util:set/&gt;</literal> element. For example, if we
+                really need a <classname>java.util.TreeSet</classname> to be instantiated, we could
+                use the following configuration:</para>
+                <programlisting><![CDATA[<util:set id="emails" set-class="java.util.TreeSet">
+    <value>pechorin@hero.org</value>
+    <value>raskolnikov@slums.org</value>
+    <value>stavrogin@gov.org</value>
+    <value>porfiry@gov.org</value>
+</util:set>]]></programlisting>
+                <para>If no <literal>'set-class'</literal> attribute is supplied, a
+                <interfacename>Set</interfacename> implementation will be chosen by the container.</para>
+                <para>Finally, you can also control the merging behavior using the
+                <literal>'merge'</literal> attribute of the <literal>&lt;util:set/&gt;</literal>
+                element; collection merging is described in more detail in the section entitled
+                <xref linkend="beans-collection-elements-merging"/></para>
             </section>
         </section>
         <section id="xsd-config-body-schemas-jee">
