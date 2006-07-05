@@ -56,6 +56,7 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.util.NestedServletException;
+import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -950,7 +951,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	protected void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		if (pageNotFoundLogger.isWarnEnabled()) {
-			pageNotFoundLogger.warn("No mapping for [" + request.getRequestURI() +
+			String requestUri = new UrlPathHelper().getRequestUri(request);
+			pageNotFoundLogger.warn("No mapping for [" + requestUri +
 					"] in DispatcherServlet with name '" + getServletName() + "'");
 		}
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
