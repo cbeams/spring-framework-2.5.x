@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,11 @@
 
 package org.springframework.beans.factory.xml.support;
 
+import java.io.IOException;
+
 import junit.framework.TestCase;
+import org.xml.sax.InputSource;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.DebugInterceptor;
@@ -32,9 +36,6 @@ import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.xml.sax.InputSource;
-
-import java.io.IOException;
 
 /**
  * @author Rob Harrop
@@ -45,7 +46,7 @@ public class CustomNamespaceHandlerTests extends TestCase {
 
 	protected void setUp() throws Exception {
 		String location = "org/springframework/beans/factory/xml/support/customNamespace.properties";
-		NamespaceHandlerResolver resolver = new DefaultNamespaceHandlerResolver(location, getClass().getClassLoader());
+		NamespaceHandlerResolver resolver = new DefaultNamespaceHandlerResolver(getClass().getClassLoader(), location);
 		this.beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setNamespaceHandlerResolver(resolver);
@@ -97,6 +98,7 @@ public class CustomNamespaceHandlerTests extends TestCase {
 		return new ClassPathResource("customNamespace.xml", getClass());
 	}
 
+
 	private class DummySchemaResolver extends PluggableSchemaResolver {
 
 		public DummySchemaResolver() {
@@ -105,15 +107,14 @@ public class CustomNamespaceHandlerTests extends TestCase {
 
 		public InputSource resolveEntity(String publicId, String systemId) throws IOException {
 			InputSource source = super.resolveEntity(publicId, systemId);
-
 			if (source == null) {
 				Resource resource = new ClassPathResource("org/springframework/beans/factory/xml/support/spring-test.xsd");
 				source = new InputSource(resource.getInputStream());
 				source.setPublicId(publicId);
 				source.setSystemId(systemId);
 			}
-
 			return source;
 		}
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,18 +37,18 @@ public class DefaultNamespaceHandlerResolverTests extends TestCase {
 	public void testNonExistentHandlerClass() throws Exception {
 		String mappingPath = "org/springframework/beans/factory/xml/support/nonExistent.properties";
 		try {
-			new DefaultNamespaceHandlerResolver(mappingPath, getClass().getClassLoader());
+			new DefaultNamespaceHandlerResolver(getClass().getClassLoader(), mappingPath);
 			// pass
 		}
-		catch (Throwable t) {
-			fail("Non-existent handler classes should be ignored");
+		catch (Throwable ex) {
+			fail("Non-existent handler classes should be ignored: " + ex);
 		}
 	}
 
 	public void testResolveInvalidHandler() throws Exception {
 		String mappingPath = "org/springframework/beans/factory/xml/support/invalid.properties";
 		try {
-			new DefaultNamespaceHandlerResolver(mappingPath, getClass().getClassLoader());
+			new DefaultNamespaceHandlerResolver(getClass().getClassLoader(), mappingPath);
 			fail("Should not be able to map a class that doesn't implement NamespaceHandler");
 		}
 		catch (Throwable ex) {
