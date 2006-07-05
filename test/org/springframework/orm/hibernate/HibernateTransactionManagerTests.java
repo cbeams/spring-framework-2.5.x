@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,6 +40,7 @@ import org.easymock.MockControl;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.JdkVersion;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
@@ -1177,7 +1178,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		mdControl.setReturnValue(true, 1);
 		con.getMetaData();
 		conControl.setReturnValue(md, 1);
-		con.setSavepoint();
+		con.setSavepoint(ConnectionHolder.SAVEPOINT_NAME_PREFIX + 1);
 		conControl.setReturnValue(sp, 1);
 		con.rollback(sp);
 		conControl.setVoidCallable(1);

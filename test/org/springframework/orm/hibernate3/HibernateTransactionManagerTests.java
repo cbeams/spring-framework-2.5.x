@@ -45,6 +45,7 @@ import org.springframework.core.JdkVersion;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
+import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -1257,7 +1258,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		mdControl.setReturnValue(true, 1);
 		con.getMetaData();
 		conControl.setReturnValue(md, 1);
-		con.setSavepoint();
+		con.setSavepoint(ConnectionHolder.SAVEPOINT_NAME_PREFIX + 1);
 		conControl.setReturnValue(sp, 1);
 		con.rollback(sp);
 		conControl.setVoidCallable(1);
