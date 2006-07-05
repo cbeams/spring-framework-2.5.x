@@ -43,10 +43,10 @@ import org.springframework.jdbc.UncategorizedSQLException;
  */
 public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 	
-	/** Set of String 2-digit codes that indicate bad SQL */
-	private static final Set BAD_SQL_CODES = new HashSet(4);
+	/** Set of well-known String 2-digit codes that indicate bad SQL */
+	private static final Set BAD_SQL_CODES = new HashSet(3);
 
-	/** Set of String 2-digit codes that indicate RDBMS integrity violation */
+	/** Set of well-known String 2-digit codes that indicate RDBMS integrity violation */
 	private static final Set INTEGRITY_VIOLATION_CODES = new HashSet(4);
 
 
@@ -54,8 +54,7 @@ public class SQLStateSQLExceptionTranslator implements SQLExceptionTranslator {
 	static {
 		BAD_SQL_CODES.add("07");
 		BAD_SQL_CODES.add("42");
-		BAD_SQL_CODES.add("65");	// Oracle throws on unknown identifier
-		BAD_SQL_CODES.add("S0");  // MySQL uses this - from ODBC error codes?
+		BAD_SQL_CODES.add("65");	// Oracle throws this on unknown identifier
 
 		INTEGRITY_VIOLATION_CODES.add("22");	// Integrity constraint violation
 		INTEGRITY_VIOLATION_CODES.add("23");	// Integrity constraint violation
