@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.core.io.support;
 
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -47,5 +49,24 @@ public abstract class ResourcePatternUtils {
 		return ResourceUtils.isUrl(resourceLocation);
 	}
 
+	/**
+	 * Return a default ResourcePatternResolver for the given ResourceLoader.
+	 * <p>This might be the ResourceLoader itself, if it implements the
+	 * ResourcePatternResolver extension, or a PathMatchingResourcePatternResolver
+	 * built on the given ResourceLoader.
+	 * @param resourceLoader the ResourceLoader to build a pattern resolver for
+	 * (not <code>null</code>)
+	 * @return the ResourcePatternResolver
+	 * @see PathMatchingResourcePatternResolver
+	 */
+	public static ResourcePatternResolver getResourcePatternResolver(ResourceLoader resourceLoader) {
+		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
+		if (resourceLoader instanceof ResourcePatternResolver) {
+			return (ResourcePatternResolver) resourceLoader;
+		}
+		else {
+			return new PathMatchingResourcePatternResolver(resourceLoader);
+		}
+	}
 
 }
