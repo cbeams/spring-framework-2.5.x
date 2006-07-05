@@ -39,6 +39,9 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+/**
+ * @author Costin Leau
+ */
 public class JpaTransactionManagerTests extends TestCase {
 
 	private MockControl factoryControl, managerControl, txControl;

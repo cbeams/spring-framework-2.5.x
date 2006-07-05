@@ -1,49 +1,38 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.orm.jpa;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
-import java.sql.SQLException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.FlushModeType;
 import javax.persistence.PersistenceException;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.intercept.Interceptor;
 import org.aopalliance.intercept.Invocation;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
-import org.hibernate.FlushMode;
-import org.hibernate.HibernateException;
-import org.hibernate.JDBCException;
-import org.hibernate.SessionFactory;
-import org.hibernate.classic.Session;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.orm.hibernate3.HibernateInterceptor;
-import org.springframework.orm.hibernate3.SessionHolder;
+
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * @author Costin Leau
- * 
  */
 public class JpaInterceptorTests extends TestCase {
 
