@@ -23,7 +23,7 @@
 	  <a href="http://forum.springframework.org">Spring Forum</a> -
 	  <a href="http://www.dzone.com">Dzone.com</a> -
 	  <a href="http://www.infoq.com">Infoq.com</a> -
-      <a href="home.htm">Home</a>
+      <a href="<c:url value='/home.htm'/>">Home</a>
 
      </p>
 	</dd>
