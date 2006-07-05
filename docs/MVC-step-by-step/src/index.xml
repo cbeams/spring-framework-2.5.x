@@ -1,10 +1,11 @@
 <?xml version='1.0' encoding="iso-8859-1" ?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "../../reference/lib/docbook-dtd/docbookx.dtd"
 [
-<!ENTITY part1			SYSTEM "part1.xml">
-<!ENTITY part2			SYSTEM "part2.xml">
-<!ENTITY part3			SYSTEM "part3.xml">
-<!ENTITY part4			SYSTEM "part4.xml">
+<!ENTITY overview       SYSTEM "overview.xml">
+<!ENTITY part1          SYSTEM "part1.xml">
+<!ENTITY part2          SYSTEM "part2.xml">
+<!ENTITY part3          SYSTEM "part3.xml">
+<!ENTITY part4          SYSTEM "part4.xml">
 ]>
 <book>
 	<bookinfo>
@@ -19,6 +20,10 @@
 				<firstname>Portia</firstname>
 				<surname>Tung</surname>
 			</author>
+			<author>
+				<firstname>Rick</firstname>
+				<surname>Evans</surname>
+			</author>
 		</authorgroup>
 		<legalnotice>
 			Copies of this document may be made for your own use and for
@@ -28,8 +33,8 @@
 			or electronically.
 		</legalnotice>
 	</bookinfo>
-	<!-- front matter -->
 	<toc />
+    &overview;
     &part1;
 	&part2;
 	&part3;

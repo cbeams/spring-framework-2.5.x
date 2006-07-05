@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preface id="overview">
+  <title>Overview</title>
+
+  <para>This document is a step-by-step account of how to develop a web application
+  from scratch using the Spring Framework.</para>
+  
+  <para>Only perfunctory knowledge of Spring itself is assumed, and as such this
+  tutorial is ideal if you are learning or investigating Spring. Hopefully by the
+  time you have worked your way through the tutorial material you will see how the
+  constituent parts of the Spring Framework, namely Inversion of Control (IoC),
+  Aspect-Oriented Programming (AOP), and the various Spring service libraries (such
+  as the JDBC library) all fit together in the context of a Spring MVC web
+  application.</para>
+
+  <para>Please note that we are not going to cover any background information or
+  theory in this tutorial; there are plenty of books available that covers said
+  areas in depth; whenever a new class or feature is used in the tutorial, forward
+  pointers to the relevant section(s) of the Spring reference documentation where
+  the class or feature is covered in depth are supplied.</para>
+  
+  <section id="overview-whats-covered">
+    <title>What's covered</title>  
+    <para>The following list details all of the various parts of the Spring Framework
+    that are covered over the course of the tutorial.</para>
+    <itemizedlist>
+        <listitem>
+            <para>Inversion of Control (IoC)</para>
+        </listitem>
+        <listitem>
+            <para>The Spring Web MVC framework</para>
+        </listitem>
+        <listitem>
+            <para>Data access with JDBC</para>
+        </listitem>
+        <listitem>
+            <para>Data access with the Java Persistence API (JPA)</para>
+        </listitem>
+        <listitem>
+            <para>Unit and integration testing</para>
+        </listitem>
+        <listitem>
+            <para>Transaction management</para>
+        </listitem>
+    </itemizedlist>
+  </section>
+  
+  <section id="overview-prerequisite-software">
+    <title>Prerequisite software</title>  
+    <para>The following prerequisite software and environment setup is assumed.
+    You should also be reasonably comfortable using the following technologies.</para>
+    <itemizedlist>
+        <listitem>
+            <para>Java SDK (We are currently using version 1.5)</para>
+        </listitem>
+        <listitem>
+            <para>Ant (using version 1.6.3)</para>
+        </listitem>
+        <listitem>
+            <para>Apache Tomcat (using version 5.5.17)</para>
+        </listitem>
+    </itemizedlist>
+    <para>You may of course use pretty much any variation or version of the above
+    software. If you want to use Jetty instead of Tomcat, then go right ahead: just
+    be advised that the tutorial steps will all be explained using the above
+    software (so if you chose to use Jetty instead of Tomcat you will have to
+    skip over the Tomcat bits).</para>
+  </section>
+  
+  <section id="overview-application-overview">
+    <title>The application; or what we are building</title>
+    <para>The application that we will be builing from scratch over the course of
+    this tutorial is a <emphasis>very basic</emphasis> inventory management system.
+    This inventory management system is severely constrained in terms of scope; find
+    below a use case diagram illustrating the simple use cases that we will be
+    implementing. The reason why the application is so constrained is so that you
+    can concentrate on the specifics of Spring Web MVC and Spring, and not the finer
+    details of inventory management.</para>
+
+	<mediaobject>
+		<imageobject role="fo">
+			<imagedata fileref="images/usecase.svg" format="SVG" align="center" />
+		</imageobject>
+		<imageobject role="html">
+			<imagedata fileref="images/usecase.png" format="PNG" align="center" />
+		</imageobject>
+		<caption>
+			<para>Use case diagram for the inventory management system</para>
+		</caption>
+	</mediaobject>
+    
+    <para>We will <link linkend="part1">start</link> by setting up the basic
+    project directory structure for our application. downloading the required
+    libraries, setting up our Ant build scripts, etc. The first step merely gives
+    us a solid foundation on which to develop the application proper in parts
+    <link linkend="part2">2</link>, <link linkend="part3">3</link>, and
+    <link linkend="part4">4</link>.</para>
+    <para>Once the basic setup is out of the way, Spring itself will be introduced,
+    starting with the Spring Web MVC framework. We will use Spring Web MVC to display
+    the inventoried stock, which will involve writing some simple Java classes and
+    some JSPs. We will then move onto introducing persistent data access into our
+    application, using your choice of either JDBC or JPA.</para>
+    <para>By the time we have finished all of the steps in the tutorial, we will
+    have an application that does basic inventory management, including listing
+    stock and permitting the price increase of such stock.</para>
+  </section>
+  
+</preface>

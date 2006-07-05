@@ -1,28 +1,599 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <chapter id="part3">
-  <title>Adding Unit Tests and a Form to the Application</title>
+    <title>Adding Unit Tests and a Form to the Application</title>
+    <para>This is Part 3 of a step-by-step account of how to develop a web application from
+    scratch using the Spring Framework. In <link linkend="part1">Part 1</link> we configured
+    the environment and set up a basic application that we will build upon.
+    <link linkend="part2">Part 2</link> improved the application in several ways. We are now
+    going to add some unit tests to the application.</para>
 
-  <para>This is Chapter 3 of a step-by-step account of how to develop a web application from scratch using the Spring Framework. 
-	In Chapter 1 we configured the environment and set up a basic application that we will build upon. Chapter 2  
-	improved the application in several ways. We are now going to add some unit tests to the application.</para>
+    <section id="step3.1">
+        <title>Add unit test for the <classname>SpringappController</classname> class</title>
+        <para>Before we create any unit tests, we want to prepare Ant and our build script to be
+        able to handle this. Ant has a built in JUnit target, but we need to add
+        <filename class="libraryfile">junit.jar</filename> to Ant's
+        <filename class="directory">'lib'</filename> directory. I used the one that came with the
+        Spring distribution (<filename class="libraryfile">spring-framework-1.2/lib/junit/junit.jar</filename>).
+        Just copy this file to the <filename class="directory">'lib'</filename> directory in your
+        Ant installation. I also added the following target to our build script.</para>
+        
+        <para><filename>'build.xml'</filename>:</para>
+        <programlisting><![CDATA[    <target name="junit" depends="build" description="Run JUnit Tests">
+        <junit printsummary="on"
+               fork="false"
+               haltonfailure="false"
+               failureproperty="tests.failed"
+               showoutput="true">
+            <classpath refid="master-classpath"/>
+            <formatter type="brief" usefile="false"/>
 
-  <section id="step3.1">
-    <title>Add unit test for the SpringappController</title>
+            <batchtest>
+                <fileset dir="${build.dir}">
+                    <include name="**/Test*.*"/>
+                </fileset>
+            </batchtest>
 
-    <para>Before we create any unit tests, we want to prepare Ant and our build script to be able to handle this. Ant has a built
-    in JUnit target, but we need to add junit.jar to Ant's lib directory. I used the one that came with the Spring distribution
-    spring-framework-1.2/lib/junit/junit.jar. Just copy this file to the lib directory in your Ant installation. I also added the
-    following target to our build script.</para>
-  
-  </section>
+        </junit>
 
-  <section id="step3.2">
-  
-      <title>Add unit test and new functionality for ProductManager</title>
+        <fail if="tests.failed">
+        tests.failed=${tests.failed}
+        ***********************************************************
+        ***********************************************************
+        ****  One or more tests failed!  Check the output ...  ****
+        ***********************************************************
+        ***********************************************************
+        </fail>
+    </target>]]></programlisting>
+    
+        <para>Now I add a new sub-directory in the <filename class="directory">'src'</filename>
+        directory that I name <filename class="directory">'tests'</filename>. This directory will,
+        as you might have guessed, contain all the unit test fixture classes.</para>
+        
+        <para>After all this, we are ready to start writing the first unit test. The
+        <classname>SpringappController</classname> depends on both the
+        <interfacename>HttpServletRequest</interfacename> and <interfacename>HttpServletResponse</interfacename>
+        interfaces. Since the controller does not use the request or the response, we can simply
+        pass in <literal>null</literal> for these objects. If that was not the case, we
+        could create some mock objects using EasyMock that we would pass in during our test.</para>
+        
+        <para><filename>'springapp/src/tests/TestSpringappController.java'</filename>:</para>
+        <programlisting><![CDATA[package tests;
 
-      <para>Next I add a test case for the ProductManager, and I also add a test for a new method to increase the prices that I
-      am planning on adding to the ProductManager.</para>
-      
-  </section>
-  
+import java.util.Map;
+import java.util.List;
+import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
+import junit.framework.TestCase;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.springframework.web.servlet.ModelAndView;
+import web.SpringappController;
+import bus.Product;
+
+public class TestSpringappController extends TestCase {
+
+    private ApplicationContext ac;
+
+    public void setUp() throws IOException {
+        ac = new FileSystemXmlApplicationContext("src/tests/WEB-INF/springapp-servlet.xml");
+    }
+
+    public void testHandleRequest() throws ServletException, IOException {
+        SpringappController sc = (SpringappController) ac.getBean("springappController");
+        ModelAndView mav = sc.handleRequest((HttpServletRequest) null, (HttpServletResponse) null);
+        Map m = mav.getModel();
+        List pl = (List) ((Map) m.get("model")).get("products");
+        Product p1 = (Product) pl.get(0);
+        assertEquals("Lamp", p1.getDescription());
+        Product p2 = (Product) pl.get(1);
+        assertEquals("Table", p2.getDescription());
+        Product p3 = (Product) pl.get(2);
+        assertEquals("Chair", p3.getDescription());
+    }
+
+}]]></programlisting>
+
+        <para>The only test is a call to the <methodname>handleRequest(..)</methodname> method,
+        and we check the products that are returned in the model. In the
+        <methodname>setUp()</methodname> method, we load the application context that I have
+        copied into a <filename class="directory">'WEB-INF'</filename> directory in the
+        <filename class="directory">'src/tests'</filename> directory. I create a copy just so
+        this file will work during tests with a small set of beans necessary for running the
+        tests. So, copy <filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename> to
+        the <filename class="directory">'springapp/src/tests/WEB-INF'</filename> directory. You
+        can then remove the <literal>'messageSource'</literal>, <literal>'urlMapping'</literal>
+        and <literal>'viewResolver'</literal> bean entries since they are not needed for this test.</para>
+        
+        <para><filename>'springapp/src/tests/WEB-INF/springapp-servlet.xml'</filename>:</para>
+        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+]]><lineannotation>&lt;!-- the application context definition for the springapp <classname>DispatcherServlet</classname> --&gt;</lineannotation><![CDATA[
+
+<beans>
+    <bean id="springappController" class="web.SpringappController">
+        <property name="productManager" ref="prodMan"/>
+    </bean>
+
+    <bean id="prodMan" class="bus.ProductManager">
+        <property name="products">
+            <list>
+                <ref bean="product1"/>
+                <ref bean="product2"/>
+                <ref bean="product3"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="product1" class="bus.Product">
+        <property name="description" value="Lamp"/>
+        <property name="price" value="5.75"/>
+    </bean>
+        
+    <bean id="product2" class="bus.Product">
+        <property name="description" value="Table"/>
+        <property name="price" value="75.25"/>
+    </bean>
+
+    <bean id="product3" class="bus.Product">
+        <property name="description" value="Chair"/>
+        <property name="price" value="22.79"/>
+    </bean>
+
+</beans>]]></programlisting>
+
+        <para>When you run this test, you should see a lot of log messages from the loading
+        of the application context.</para>
+        
+    </section>
+
+    <section id="step3.2">
+        <title>Add unit test and new functionality for the <classname>ProductManager</classname> class</title>
+        <para>Next I add a test case for the <classname>ProductManager</classname> class, and
+        I also add a test for a new method to increase the prices that I am planning on adding
+        to the <classname>ProductManager</classname> class.</para>
+        
+        <para><filename>'springapp/src/tests/TestProductManager.java'</filename>:</para>
+        <programlisting><![CDATA[package tests;
+
+import java.util.List;
+import java.util.ArrayList;
+import junit.framework.TestCase;
+import bus.ProductManager;
+import bus.Product;
+
+public class TestProductManager extends TestCase {
+
+    private ProductManager pm;
+
+    public void setUp() {
+        pm = new ProductManager();
+        Product p = new Product();
+        p.setDescription("Chair");
+        p.setPrice(new Double("20.50"));
+        ArrayList al = new ArrayList();
+        al.add(p);
+        p = new Product();
+        p.setDescription("Table");
+        p.setPrice(new Double("150.10"));
+        al.add(p);
+        pm.setProducts(al);
+    }
+
+    public void testGetProducs() {
+        List l = pm.getProducts();
+        Product p1 = (Product) l.get(0);
+        assertEquals("Chair", p1.getDescription());
+        Product p2 = (Product) l.get(1);
+        assertEquals("Table", p2.getDescription());
+    }
+
+    public void testIncreasePrice() {
+        pm.increasePrice(10);
+        List l = pm.getProducts();
+        Product p = (Product) l.get(0);
+        assertEquals(new Double("22.55"), p.getPrice());
+        p = (Product) l.get(1);
+        assertEquals(new Double("165.11"), p.getPrice());
+    }
+
+}]]></programlisting>
+
+        <para>For this test, there is no need to create an application context. I just create a
+        couple of products in the <methodname>setUp()</methodname> method and add them to the
+        product manager. I add tests for both the <methodname>getProducts()</methodname> and
+        <methodname>increasePrice(..)</methodname> methods. The <methodname>increasePrice(..)</methodname>
+        method is an across-the-board increase based on the percentage passed in to the method.
+        I modify the <classname>ProductManager</classname> class to implement this new method.</para>
+        
+        <para><filename>'springapp/src/bus/ProductManager.java'</filename>:</para>
+        <programlisting><![CDATA[package bus;
+
+import java.io.Serializable;
+import java.util.ListIterator;
+import java.util.List;
+
+public class ProductManager implements Serializable {
+
+    private List products;
+
+    public void setProducts(List p) {
+        products = p;
+    }
+
+    public List getProducts() {
+        return products;
+    }
+
+    public void increasePrice(int pct) {
+        ListIterator li = products.listIterator();
+        while (li.hasNext()) {
+            Product p = (Product) li.next();
+            double newPrice = p.getPrice().doubleValue() * (100 + pct)/100;
+            p.setPrice(new Double(newPrice));
+        }
+        
+    }
+
+}]]></programlisting>
+
+        <para>Next I build and run the tests. As you can see, this test is just like any regular test –
+        the business classes don't depend on any of the servlet classes so these classes are very
+        easy to test.</para>
+        
+    </section>
+    
+    <section id="step3.3">
+        <title>Adding a form</title>
+        <para>To provide an interface in the web application to expose the price increase functionality,
+        I add a form that will allow the user to enter a percentage value. This form uses a tag library
+        named <literal>'spring-form'</literal> that is provided with the Spring Framework. We have to
+        copy this file from the Spring distribution
+        (<filename>'spring-framework-1.2/dist/spring-form.tld '</filename>)to the
+        <filename class="directory">'springapp/war/WEB-INF'</filename> directory. Now we must also add
+        a <literal>&lt;taglib/&gt;</literal> entry to the <filename>'web.xml'</filename> file.</para>
+        
+        <para><filename>'springapp/war/WEB-INF/web.xml'</filename>:</para>
+        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app PUBLIC '-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN' 'http://java.sun.com/dtd/web-app_2_3.dtd'>
+
+<web-app>
+
+  <servlet>
+    <servlet-name>springapp</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>springapp</servlet-name>
+    <url-pattern>*.htm</url-pattern>
+  </servlet-mapping>
+
+  <welcome-file-list>
+    <welcome-file>
+      index.jsp
+    </welcome-file>
+  </welcome-file-list>
+]]><emphasis><![CDATA[
+  <taglib>
+    <taglib-uri>/spring</taglib-uri>
+    <taglib-location>/WEB-INF/tld/spring-form.tld</taglib-location>
+  </taglib>
+]]></emphasis><![CDATA[
+</web-app>]]></programlisting>
+
+        <para>We also have to declare this taglib in a page directive in the jsp file, and then start using
+        the tags we have thus imported.</para>
+        
+        <para><filename>'springapp/war/WEB-INF/jsp/priceincrease.jsp'</filename>:</para>
+        <programlisting><![CDATA[<%@ include file="/WEB-INF/jsp/include.jsp" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+
+<html>
+<head>
+	<title><fmt:message key="title"/></title>
+	<style>
+		.error { color: red; }
+	</style>	
+</head>
+<body>
+<h1><fmt:message key="priceincrease.heading"/></h1>
+<form:form method="post" commandName="priceIncrease">
+  <table width="95%" bgcolor="f8f8ff" border="0" cellspacing="0" cellpadding="5">
+    <tr>
+      <td alignment="right" width="20%">Increase (%):</td>
+        <td width="20%">
+          <form:input path="percentage"/>
+        </td>
+        <td width="60%">
+			<form:errors path="percentage" cssClass="error"/>
+        </td>
+    </tr>
+  </table>
+  <br>
+  <form:errors path="*" cssClass="error"/>
+  <br><br>
+  <input type="submit" alignment="center" value="Execute">
+</form:form>
+<a href="<c:url value="hello.htm"/>">Home</a>
+</body>
+</html>]]></programlisting>
+
+        <para>This next class is a very simple JavaBean class, and in our case there is a single
+        property with a getter and setter. This is the object that the form will populate and
+        that our business logic will extract the price increase percentage from.</para>
+
+        <para><filename>'springapp/src/bus/PriceIncrease.java'</filename>:</para>
+        <programlisting><![CDATA[package bus;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+public class PriceIncrease {
+
+    /** Logger for this class and subclasses */
+    protected final Log logger = LogFactory.getLog(getClass());
+
+    private int percentage;
+
+    public void setPercentage(int i) {
+        percentage = i;
+        logger.info("Percentage set to " + i);
+    }
+
+    public int getPercentage() {
+        return percentage;
+    }
+
+}]]></programlisting>
+
+        <para>The following validator class gets control after the user presses submit. The values
+        entered in the form will be set on the command object by the framework. The
+        <methodname>validate(..)</methodname> method is called and the command object
+        (<classname>PriceIncrease</classname>) and a contextual object to hold any errors are
+        passed in.</para>
+        
+        <para><filename>'springapp/src/bus/PriceIncreaseValidator.java'</filename>:</para>
+        <programlisting><![CDATA[package bus;
+
+import java.io.Serializable;
+import org.springframework.validation.Validator;
+import org.springframework.validation.Errors;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+public class PriceIncreaseValidator implements Validator {
+    private int DEFAULT_MIN_PERCENTAGE = 0;
+    private int DEFAULT_MAX_PERCENTAGE = 50;
+    private int minPercentage = DEFAULT_MIN_PERCENTAGE;
+    private int maxPercentage = DEFAULT_MAX_PERCENTAGE;
+
+    /** Logger for this class and subclasses */
+    protected final Log logger = LogFactory.getLog(getClass());
+
+    public boolean supports(Class clazz) {
+        return PriceIncrease.class.equals(clazz);
+    }
+
+    public void validate(Object obj, Errors errors) {
+        PriceIncrease pi = (PriceIncrease) obj;
+        if (pi == null) {
+            errors.rejectValue("percentage", "error.not-specified", null, "Value required.");
+        }
+        else {
+            logger.info("Validating with " + pi + ": " + pi.getPercentage());
+            if (pi.getPercentage() > maxPercentage) {
+                errors.rejectValue("percentage", "error.too-high",
+                    new Object[] {new Integer(maxPercentage)}, "Value too high.");
+            }
+            if (pi.getPercentage() <= minPercentage) {
+                errors.rejectValue("percentage", "error.too-low",
+                    new Object[] {new Integer(minPercentage)}, "Value too low.");
+            }
+        }
+    }
+
+    public void setMinPercentage(int i) {
+        minPercentage = i;
+    }
+
+    public int getMinPercentage() {
+        return minPercentage;
+    }
+
+    public void setMaxPercentage(int i) {
+        maxPercentage = i;
+    }
+
+    public int getMaxPercentage() {
+        return maxPercentage;
+    }
+
+}]]></programlisting>
+
+        <para>Now we need to add an entry in the <filename>'springapp-servlet.xml'</filename> file to
+        define the new form and controller. We define properties for command object and validator. We
+        also specify two views, one that is used for the form and one that we will go to after successful
+        form processing. The latter which is called the success view can be of two types. It can be a
+        regular view reference that is forwarded to one of our JSP pages. One disadvantage with this
+        approach is, that if the user refreshes the page, the form data is submitted again, and you
+        would end up with a double priceincrease. An alternative way is to use a redirect, where a response
+        is sent back to the users browser instructing it to redirect to a new url. The url we use in this
+        case can't be one of our JSP pages, since they are hidden from direct access. It has to be a url
+        that is externally reachable. I have choosen to use <filename>'hello.htm'</filename> as my redirect
+        url. This url maps to the <filename>'hello.jsp'</filename> page, so this should work nicely.</para>
+        
+        <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
+        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+]]><lineannotation>&lt;!-- the application context definition for the springapp <classname>DispatcherServlet</classname> --&gt;</lineannotation><![CDATA[
+
+<beans>
+
+    <bean id="springappController" class="web.SpringappController">
+        <property name="productManager" ref="prodMan"/>
+    </bean>
+
+    ]]><lineannotation>&lt;!-- Validator and Form Controller for the "Price Increase" page --&gt;</lineannotation><![CDATA[
+    <bean id="priceIncreaseForm" class="web.PriceIncreaseFormController">
+        <property name="sessionForm" value="true"/>
+        <property name="commandName" value="priceIncrease"/>
+        <property name="commandClass" value="bus.PriceIncrease"/>
+        <property name="validator">
+            <bean class="bus.PriceIncreaseValidator"/>
+        </property>
+        <property name="formView" value="priceincrease"/>
+        <property name="successView" value="hello.htm"/>
+        <property name="productManager" ref="prodMan"/>
+    </bean>
+
+    <bean id="prodMan" class="bus.ProductManager">
+        <property name="products">
+            <list>
+                <ref bean="product1"/>
+                <ref bean="product2"/>
+                <ref bean="product3"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="product1" class="bus.Product">
+        <property name="description" value="Lamp"/>
+        <property name="price" value="5.75"/>
+    </bean>
+        
+    <bean id="product2" class="bus.Product">
+        <property name="description" value="Table"/>
+        <property name="price" value="75.25"/>
+    </bean>
+
+    <bean id="product3" class="bus.Product">
+        <property name="description" value="Chair"/>
+        <property name="price" value="22.79"/>
+    </bean>
+
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basename" value="messages"/>
+    </bean>
+
+    <bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="mappings">
+            <value>
+                /hello.htm=springappController
+                /priceincrease.htm=priceIncreaseForm
+            </value>
+        </property>
+    </bean>
+
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+</beans>]]></programlisting>
+
+        <para>Next, let's take a look at the controller for this form. The <methodname>onSubmit(..)</methodname>
+        method gets control and does some logging before it calls the <methodname>increasePrice(..)</methodname>
+        method on the <classname>ProductManager</classname> object. It then returns a
+        <classname>ModelAndView</classname> passing in a new instance of a <classname>RedirectView</classname>
+        created using the url for the success view.</para>
+        
+        <para><filename>'springapp/src/web/PriceIncreaseFormController.java'</filename>:</para>
+        <programlisting><![CDATA[package web;
+
+import org.springframework.web.servlet.mvc.SimpleFormController;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.HashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import bus.Product;
+import bus.ProductManager;
+import bus.PriceIncrease;
+
+public class PriceIncreaseFormController extends SimpleFormController {
+
+    /** Logger for this class and subclasses */
+    protected final Log logger = LogFactory.getLog(getClass());
+
+    private ProductManager prodMan;
+
+    public ModelAndView onSubmit(Object command)
+            throws ServletException {
+
+        int increase = ((PriceIncrease) command).getPercentage();
+        logger.info("Increasing prices by " + increase + "%.");
+
+        prodMan.increasePrice(increase);
+
+        String now = (new java.util.Date()).toString();
+        logger.info("returning from PriceIncreaseForm view to " + getSuccessView());
+
+        return new ModelAndView(new RedirectView(getSuccessView()));
+    }
+
+    protected Object formBackingObject(HttpServletRequest request) throws ServletException {
+        PriceIncrease priceIncrease = new PriceIncrease();
+        priceIncrease.setPercentage(20);
+        return priceIncrease;
+    }
+
+    public void setProductManager(ProductManager pm) {
+        prodMan = pm;
+    }
+
+    public ProductManager getProductManager() {
+        return prodMan;
+    }
+
+}]]></programlisting>
+
+        <para>We are also adding some messages to the <filename>'messages.properties'</filename> resource file.</para>
+        
+        <para><filename>'springapp/war/WEB-INF/classes/messages.properties'</filename>:</para>
+        <programlisting><![CDATA[title=SpringApp
+heading=Hello :: SpringApp
+greeting=Greetings, it is now
+priceincrease.heading=Price Increase :: SpringApp
+error.not-specified=Percentage not specified!!!
+error.too-low=You have to specify a percentage higher than {0}!
+error.too-high=Don't be greedy - you can't raise prices by more than {0}%!
+required=Entry required.
+typeMismatch=Invalid data.
+typeMismatch.percentage=That is not a number!!!]]></programlisting>
+
+        <para>Compile and deploy all this and after reloading the application we can test it. This is what
+        the form looks like with errors displayed.</para>
+        
+        <screenshot>
+		    <mediaobject>
+			    <imageobject role="fo">
+				    <imagedata fileref="images/screen5.png" format="PNG" align="center" />
+			    </imageobject>
+			    <imageobject role="html">
+				    <imagedata fileref="images/screen5.png" format="PNG" align="center" />
+			    </imageobject>
+			    <caption>
+				    <para>The updated application</para>
+			    </caption>
+		    </mediaobject>
+	    </screenshot>
+
+    </section>
+
 </chapter>
