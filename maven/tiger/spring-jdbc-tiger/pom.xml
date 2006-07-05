@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-parent-tiger</artifactId>
+    <version>2.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>spring-jdbc-tiger</artifactId>
+  <name>Spring JDBC tiger</name>
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>spring-jdbc</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>../../../tiger/src</directory>
+        <includes>
+            <include>org/springframework/jdbc/**</include>
+            <include>org/springframework/orm/*</include>
+            <include>org/springframework/orm/ibatis/**</include>
+        </includes>
+        <excludes>
+            <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>../../../tiger/test</directory>
+        <includes>
+            <include>org/springframework/jdbc/**</include>
+            <include>org/springframework/orm/*</include>
+            <include>org/springframework/orm/ibatis/**</include>
+        </includes>
+        <excludes>
+            <exclude>**/*.java</exclude>
+        </excludes>
+      </testResource>
+    </testResources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <includes>
+            <include>org/springframework/jdbc/**</include>
+            <include>org/springframework/orm/*</include>
+            <include>org/springframework/orm/ibatis/**</include>
+          </includes>
+          <testIncludes>
+            <include>org/springframework/jdbc/**</include>
+            <include>org/springframework/orm/*</include>
+            <include>org/springframework/orm/ibatis/**</include>
+          </testIncludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
