@@ -16,20 +16,41 @@ Package org.springframework.aop
 * AbstractAdvisorAutoProxyCreator performs BeanFactory-based prototype cycle check instead of control flow check
 
 Package org.springframework.beans
+* factored out SingletonBeanRegistry interface from ConfigurableBeanFactory interface
+* factored out DefaultSingletonBeanRegistry base class from AbstractBeanFactory
 * added "isCurrentlyInCreation" method to ConfigurableBeanFactory interface
 * reworked AbstractBeanFactory to allow for prototype cycle check for current thread
-* added "synthetic" flag to AbstractBeanDefinition, for marking beans as internal infrastructure beans
+* fixed AbstractBeanFactory's "isBeanNameUsed" to correctly synchronize access to "dependentBeanMap"
+* AbstractAutowireCapableBeanFactory creates "depends-on" beans even before resolving a bean's class
 * AbstractAutowireCapableBeanFactory does not apply bean post-processors to "synthetic" beans
 * AbstractAutowireCapableBeanFactory accepts null values returned from BeanPostProcessors
+* added "synthetic" flag to AbstractBeanDefinition, for marking beans as internal infrastructure beans
+* XmlBeanDefinitionReader uses given ResourceLoader/ApplicationContext's ClassLoader for schema resolution
 * MethodInvokingFactoryBean returns "void.class" instead of "VoidType.class" for void methods
+
+Package org.springframework.context
+* AbstractApplicationContext uses the ClassLoader of its parent ApplicationContext (if any) as default
+* turned ApplicationObjectSupport's "getApplicationContext()" method from public to protected (for consistency)
 
 Package org.springframework.core
 * NestedXxxException classes build nicer messages in case of root cause with no base exception message
+* added "getClassLoader()" method to ResourceLoader, exposing the ClassLoader for direct access
+* adapted PathMatchingResourcePatternResolver to always use the ResourceLoader's ClassLoader
+* added "getResourcePatternResolver(ResourceLoader)" utility method to ResourcePatternUtils
+
+Package org.springframework.jdbc
+* reworked JDBC 3.0 savepoint support to use self-generated savepoint names (to avoid unnamed savepoints on IBM DB2)
+* removed "S0" from default SQL state list in SQLStateSQLExceptionTranslator: it does not mean bad SQL on MS SQL Server
+
+Package org.springframework.jms
+* added support for durable subscriptions to message listener containers, driven by "durableSubscriptionName" property
 
 Package org.springframework.jmx
 * MBeanRegistrationSupport only logs a warning (no error) when an MBean does not exist anymore when trying to unregister
 
 Package org.springframework.orm
+* LocalContainerEntityManagerFactoryBean detects and reads all "META-INF/persistence.xml" files on the class path
+* LocalContainerEntityManagerFactoryBean determines persistence unit root URL based on each "persistence.xml" location
 * JdoTransactionManager uses JDO 2.0's rollback-only facility if available
 * JpaTransactionManager uses JPA's rollback-only facility now, for better integration with the persistence provider
 * JpaTransactionManager throws UnexpectedRollbackException in case of JPA RollbackException thrown from commit
@@ -52,6 +73,7 @@ Package org.springframework.transaction
 Package org.springframework.web
 * added/moved constants for all Servlet spec include/forward request attributes to WebUtils
 * added "getWebApplicationContext"/"getAutowireMode"/"getDependencyCheck" methods to Autowiring(Tiles)RequestProcessor
+* DispatcherServlet logs its page-not-found warnings with the actual lookup URL even for import requests
 * InternalResourceView exposes all forward request attributes (delegating to "WebUtils.exposeForwardRequestAttributes")
 * RequestContext's "getContextPath()" always exposes the context path for the originating request now
 * added "getQueryString" method to RequestContext, exposing query string for originating request (even after forward)
