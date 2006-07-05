@@ -3,13 +3,11 @@ package org.springframework.test.aj;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.aspectj.weaver.loadtime.ClassPreProcessorAgentAdapter;
-import org.springframework.instrument.classloading.SimpleInstrumentableClassLoader;
 import org.springframework.instrument.classloading.ShadowingClassLoader;
 import org.springframework.util.StringUtils;
 import org.springframework.util.Assert;
-
-import java.util.LinkedList;
-import java.util.List;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * <p>Class loader manipulation helper class that sets up an isolated
@@ -192,16 +190,13 @@ public class AjTestCaseLoader {
      * }
      * </pre>
      *
-     * @param classes TestCases that have to be woven
+     * @param clazz TestCase class that have to be woven
+     * @param requiredAspectNames aspect class names that must be loaded
      * @return <code>junit.framework.TestSuite</code> instance
      */
-    public static TestSuite createSuiteFor(Class... classes) {
+    public static TestSuite createSuiteFor(Class clazz, String... requiredAspectNames) {
         TestSuite suite = new TestSuite();
-        if (classes != null) {
-            for (Class clazz : classes) {
-                suite.addTestSuite(loadTestCaseClass(clazz));
-            }
-        }
+        suite.addTestSuite(loadTestCaseClass(clazz, requiredAspectNames));
         return suite;
     }
 
@@ -211,28 +206,32 @@ public class AjTestCaseLoader {
      * as the <code>TestCase</code> class and will fail if it cannot be found.
      *
      * @param clazz must be type-compatible with <code>junit.framework.TestCase</code>
+     * @param requiredAspectNames aspect class names that must be loaded
      * @return <code>Class</code> woven by the AspectJ load-time weaver
      */
-    public static Class loadTestCaseClass(Class clazz) {
+    public static Class loadTestCaseClass(Class clazz, String... requiredAspectNames) {
         Assert.notNull(clazz, "Class must not be null!");
         String packageName = clazz.getPackage().getName();
         packageName = StringUtils.replace(packageName, ".", "/");
-        return loadTestCaseClass(clazz, packageName + "/aop.xml");
+        return loadTestCaseClass(packageName + "/aop.xml", clazz, requiredAspectNames);
     }
 
     /**
      *
      * @param clazz must be type-compatible with <code>junit.framework.TestCase</code>
      * @param aopConfigLocation
+     * @param requiredAspectNames aspect class names that must be loaded
      * @return
      */
-    public static Class loadTestCaseClass(Class clazz, String aopConfigLocation) {
+    public static Class loadTestCaseClass(String aopConfigLocation, Class clazz, String... requiredAspectNames) {
         Assert.notNull(clazz, "Class must not be null!");
         Assert.hasLength(aopConfigLocation, "AOP XML configuration file location on classpath must be specified!");
         if (!(TestCase.class.isAssignableFrom(clazz))) {
             throw new RuntimeException("Cannot load class that is not type-compatible with " + TestCase.class.getName());
         }
-        return loadClassWithAspectJ(clazz, aopConfigLocation);
+        Class loadedClass = loadClassWithAspectJ(clazz, aopConfigLocation);
+        assertAspectsAreLoaded(loadedClass.getClassLoader(), requiredAspectNames);
+        return loadedClass;
     }
 
     protected static Class loadClassWithAspectJ(Class clazz, String aopConfigLocation) {
@@ -266,5 +265,27 @@ public class AjTestCaseLoader {
         protected boolean isClassNameExcludedFromShadowing(String className) {
             return className.startsWith("junit.framework.");
         }
+    }
+
+    private static void assertAspectsAreLoaded(ClassLoader classLoader, String... requiredAspects) {
+        if (requiredAspects != null) {
+            for (String requiredAspect : requiredAspects) {
+                assertAspectIsLoaded(classLoader, requiredAspect);
+            }
+        }
+    }
+
+    private static void assertAspectIsLoaded(ClassLoader classLoader, String requiredAspect) {
+        Class aspectClass;
+
+        try {
+            aspectClass = ClassUtils.forName(requiredAspect, classLoader);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException(
+                "Required aspect [" + requiredAspect + "] cannot be loaded!"
+            );
+        }
+
+        ReflectionUtils.invokeMethod("aspectOf", aspectClass, null, new Object[0], new Class[0]);
     }
 }
