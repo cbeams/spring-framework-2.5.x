@@ -90,22 +90,22 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2470 KB)
+* "spring" (~2495 KB)
 - Convenient jar file combining all standard modules (except for superseded modules)
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar, aspects jar, and spring-hibernate2 jar!
 
 MODULE JARS (dist/modules):
 
-* "spring-core" (~155 KB)
+* "spring-core" (~160 KB)
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~325 KB)
+* "spring-beans" (~335 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
-* "spring-aop" (~265 KB)
+* "spring-aop" (~270 KB)
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, (spring-beans, AOP Alliance, CGLIB, Commons Attributes)
 
@@ -129,7 +129,7 @@ MODULE JARS (dist/modules):
 - Contents: web application context, multipart resolver, web utilities
 - Dependencies: spring-context, Servlet API, (JSP API, JSTL, Commons FileUpload, COS)
 
-* "spring-webmvc" (~260 KB)
+* "spring-webmvc" (~265 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (spring-support, Tiles, iText, POI)
 
@@ -187,7 +187,7 @@ MODULE JARS (dist/modules):
 
 MOCK JAR (dist)
 
-* "spring-mock" (~90 KB)
+* "spring-mock" (~95 KB)
 - Contents: JNDI mocks, Servlet API mocks, Portlet API mocks, JUnit support
 - Dependencies: spring-core
 
@@ -222,6 +222,7 @@ Documented sample applications can be found in "samples" (depending on distribut
 * imagedb
 * jpetstore
 * petclinic
+* (showcases)
 
 PetClinic features alternative DAO implementations and application configurations for JDBC, JPA, Hibernate,
 Apache OJB and Oracle TopLink, with HSQLDB and MySQL as target databases. The default PetClinic configuration

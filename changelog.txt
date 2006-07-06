@@ -7,6 +7,7 @@ Changes in version 2.0 RC2 (6.7.2006)
 -------------------------------------
 
 General
+* added showcases to "samples" directory
 * various documentation clarifications
 * restored compatibility with IBM JDK 1.3 (with respect to referring to constants defined in implemented interfaces)
 
@@ -43,6 +44,7 @@ Package org.springframework.core
 Package org.springframework.jdbc
 * reworked JDBC 3.0 savepoint support to use self-generated savepoint names (to avoid unnamed savepoints on IBM DB2)
 * removed "S0" from default SQL state list in SQLStateSQLExceptionTranslator: it does not mean bad SQL on MS SQL Server
+* SqlQuery and SqlUpdate correctly handle a named parameter with a list of values now
 
 Package org.springframework.jms
 * added support for durable subscriptions to message listener containers, driven by "durableSubscriptionName" property
