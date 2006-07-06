@@ -8,8 +8,10 @@ Changes in version 2.0 RC2 (6.7.2006)
 
 General
 * various documentation clarifications
+* restored compatibility with IBM JDK 1.3 (with respect to referring to constants defined in implemented interfaces)
 
 Package org.springframework.aop
+* JdkDynamicAopProxy delegates "equals"/"hashCode" calls to target if "equals"/"hashCode" is defined on proxy interface
 * Advisors used in combination with an advisor auto-proxy creator can now use beans which get adviced themselves
 * moved AbstractAutoProxyCreator's "shouldSkip" check from "isInfrastructureClass" to "postProcessAfterInitialization"
 * reworked AbstractAdvisorAutoProxyCreator to avoid fetching of all candidate Advisors on startup
@@ -69,6 +71,10 @@ Package org.springframework.scheduling
 
 Package org.springframework.transaction
 * JtaTransactionManager explicitly only calls "UserTransaction.setRollbackOnly()" if the transaction is still active
+
+Package org.springframework.validation
+* clarified that "Errors.reject" always registers a global error for the entire target object
+* "Errors.rejectValue" now accepts an empty field name to indicate the current object itself rather than a field of it
 
 Package org.springframework.web
 * added/moved constants for all Servlet spec include/forward request attributes to WebUtils
