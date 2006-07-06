@@ -39,7 +39,7 @@
 			<include name="db-ojb-*.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jpa">
-			<include name="java-persistence-1_0-api.jar"/>
+			<include name="persistence.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/asm">
 			<include name="asm-*.jar"/>
