@@ -90,7 +90,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2495 KB)
+* "spring" (~2490 KB)
 - Convenient jar file combining all standard modules (except for superseded modules)
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar, aspects jar, and spring-hibernate2 jar!
