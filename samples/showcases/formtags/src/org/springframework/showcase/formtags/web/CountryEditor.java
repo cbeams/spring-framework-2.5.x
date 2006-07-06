@@ -16,9 +16,8 @@
 
 package org.springframework.showcase.formtags.web;
 
-import org.springframework.showcase.formtags.service.UserManager;
 import org.springframework.showcase.formtags.domain.Country;
-import org.springframework.showcase.formtags.validation.CountryValidator;
+import org.springframework.showcase.formtags.service.UserManager;
 
 import java.beans.PropertyEditorSupport;
 
@@ -47,6 +46,9 @@ public class CountryEditor extends PropertyEditorSupport {
     }
 
     public String getAsText() {
+        if (getValue() == null) {
+            return "";
+        }
         return ((Country) getValue()).getCode();
     }
 

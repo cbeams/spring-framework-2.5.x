@@ -66,7 +66,9 @@ public class FormController extends SimpleFormController {
     }
 
     protected Map referenceData(HttpServletRequest request, Object command, Errors errors) throws Exception {
-        return new ModelMap(this.userManager.findAllCountries()).addObject("skills", getSkills());
+        return new ModelMap(this.userManager.findAllCountries())
+            .addObject("skills", getSkills())
+            .addObject(this.userManager.findAll());
     }
 
     protected Object formBackingObject(HttpServletRequest request) throws Exception {

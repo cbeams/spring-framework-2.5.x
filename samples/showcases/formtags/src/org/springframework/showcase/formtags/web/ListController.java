@@ -35,7 +35,11 @@ public class ListController extends AbstractController {
 
 
     private UserManager userManager;
+    private String viewName;
 
+    public void setViewName(String viewName) {
+        this.viewName = viewName;
+    }
 
     /**
      * Sets the {@link UserManager} that to which this presentation component delegates
@@ -50,7 +54,7 @@ public class ListController extends AbstractController {
 
 
     protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        return new ModelAndView().addObject(this.userManager.findAll());
+        return new ModelAndView(viewName).addObject(this.userManager.findAll());
     }
 
 }
