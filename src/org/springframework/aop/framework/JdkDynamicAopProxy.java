@@ -51,6 +51,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @see java.lang.reflect.Proxy
  * @see org.springframework.aop.framework.AdvisedSupport
  * @see org.springframework.aop.framework.ProxyFactory
@@ -72,7 +73,15 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	/** Config used to configure this proxy */
 	private AdvisedSupport advised;
 
+	/**
+	 * Is the {@link #equals} method defined on the proxied interfaces?
+	 */
+	private boolean equalsDefined;
 
+	/**
+	 * Is the {@link #hashCode} method defined on the proxied interfaces?
+	 */
+	private boolean hashCodeDefined;
 	/**
 	 * Construct a new JDK proxy.
 	 * @throws AopConfigException if the config is invalid. We try
@@ -101,7 +110,31 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 					(targetClass != null ? " for [" + targetClass.getName() + "]" : ""));
 		}
 		Class[] proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised);
+		findDefinedEqualsAndHashCodeMethods(proxiedInterfaces);
 		return Proxy.newProxyInstance(classLoader, proxiedInterfaces, this);
+	}
+
+	/**
+	 * Finds any {@link #equals} or {@link #hashCode} method that may be defined
+	 * on the supplied set of interfaces.
+	 */
+	private void findDefinedEqualsAndHashCodeMethods(Class[] proxiedInterfaces) {
+		for (int i = 0; i < proxiedInterfaces.length; i++) {
+			Class proxiedInterface = proxiedInterfaces[i];
+			Method[] methods = proxiedInterface.getDeclaredMethods();
+			for (int j = 0; j < methods.length; j++) {
+				Method method = methods[j];
+				if (AopUtils.isEqualsMethod(method)) {
+					this.equalsDefined = true;
+				}
+				if (AopUtils.isHashCodeMethod(method)) {
+					this.hashCodeDefined = true;
+				}
+				if (this.equalsDefined && this.hashCodeDefined) {
+					return;
+				}
+			}
+		}
 	}
 
 
@@ -123,12 +156,12 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			// Try special rules for equals() method and implementation of the
 			// Advised AOP configuration interface.
 
-			if (AopUtils.isEqualsMethod(method)) {
+			if (!this.equalsDefined && AopUtils.isEqualsMethod(method)) {
 				// What if equals throws exception!?
 				// This class implements the equals(Object) method itself.
 				return equals(args[0]) ? Boolean.TRUE : Boolean.FALSE;
 			}
-			if (AopUtils.isHashCodeMethod(method)) {
+			if (!this.hashCodeDefined && AopUtils.isHashCodeMethod(method)) {
 				// This class implements the hashCode() method itself.
 				return new Integer(hashCode());
 			}
@@ -138,7 +171,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			}
 
 			Object retVal = null;
-			
+
 			if (this.advised.exposeProxy) {
 				// make invocation available if necessary
 				oldProxy = AopContext.setCurrentProxy(proxy);

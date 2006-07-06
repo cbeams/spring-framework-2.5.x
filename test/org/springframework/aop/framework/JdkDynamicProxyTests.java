@@ -141,6 +141,17 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 
 	}
 
+	public void testEqualsAndHashCodeDefined() throws Exception {
+		AdvisedSupport as = new AdvisedSupport(new Class[]{Named.class});
+		as.setTarget(new Person());
+		JdkDynamicAopProxy aopProxy = new JdkDynamicAopProxy(as);
+		Named proxy = (Named) aopProxy.getProxy();
+		Named named = new Person();
+		assertEquals("equals() returned false", proxy, named);
+		assertEquals("hashCode() not equal", proxy.hashCode(), named.hashCode());
+
+	}
+
 	public static interface Foo {
 		Bar getBarThis();
 		Foo getFooThis();
@@ -161,5 +172,36 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests {
 		}
 	}
 
+	public static interface Named {
 
+		String getName();
+
+		boolean equals(Object other);
+
+		int hashCode();
+	}
+
+	public static class Person implements Named {
+
+		private final String name = "Rob Harrop";
+
+		public String getName() {
+			return this.name;
+		}
+
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			final Person person = (Person) o;
+
+			if (!name.equals(person.name)) return false;
+
+			return true;
+		}
+
+		public int hashCode() {
+			return name.hashCode();
+		}
+	}
 }
