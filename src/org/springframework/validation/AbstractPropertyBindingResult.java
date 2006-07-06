@@ -43,14 +43,26 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	}
 
 
+	/**
+	 * Determines the field type from the property type.
+	 * @see #getPropertyAccessor()
+	 */
 	public Class getFieldType(String field) {
 		return getPropertyAccessor().getPropertyType(field);
 	}
 
+	/**
+	 * Fetches the field value from the PropertyAccessor.
+	 * @see #getPropertyAccessor()
+	 */
 	protected Object getActualFieldValue(String field) {
 		return getPropertyAccessor().getPropertyValue(field);
 	}
 
+	/**
+	 * Format the field value based on registered PropertyEditors.
+	 * @see #getCustomEditor
+	 */
 	protected Object formatFieldValue(String field, Object value) {
 		PropertyEditor customEditor = getCustomEditor(field);
 		if (customEditor != null) {

@@ -62,7 +62,15 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 	}
 
 	/**
-	 * Return the BeanWrapper that this instance uses.
+	 * Returns the canonical JavaBeans property name,
+	 * as understood by the BeanWrapper.
+	 */
+	protected String canonicalFieldName(String field) {
+		return BeanUtils.canonicalPropertyName(field);
+	}
+
+	/**
+	 * Returns the BeanWrapper that this instance uses.
 	 * Creates a new one if none existed before.
 	 */
 	public ConfigurablePropertyAccessor getPropertyAccessor() {
@@ -71,10 +79,6 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 			this.beanWrapper.setExtractOldValueForEditor(true);
 		}
 		return this.beanWrapper;
-	}
-
-	protected String canonicalFieldName(String field) {
-		return BeanUtils.canonicalPropertyName(field);
 	}
 
 }
