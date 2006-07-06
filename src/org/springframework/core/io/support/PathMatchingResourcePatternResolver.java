@@ -144,7 +144,7 @@ import org.springframework.util.StringUtils;
  * </pre>is used to try to resolve it, the resolver will work off the (first) URL 
  * returned by <code>getResource("com/mycompany");</code>. If this base package
  * node exists in multiple classloader locations, the actual end resource may
- * not be underneath. Therefore, preferably, use "classpath*:" with the same
+ * not be underneath. Therefore, preferably, use "<code>classpath*:<code>" with the same
  * Ant-style pattern in such a case, which will search <i>all</i> class path
  * locations that contain the root package.
  * <p>
