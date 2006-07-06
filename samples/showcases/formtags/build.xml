@@ -114,8 +114,8 @@
 			<include name="*"/>
 			<include name="docs/**"/>
 			<include name="html/**"/>
+            <include name="css/*.css"/>
 			<include name="WEB-INF/*.*"/>
-			<include name="WEB-INF/css/*.css"/>
 			<include name="WEB-INF/tld/*.tld"/>
 			<exclude name="WEB-INF/web.xml"/>
 			<include name="WEB-INF/classes/*.*"/>
