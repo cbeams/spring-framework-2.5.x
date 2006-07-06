@@ -140,8 +140,8 @@ public class BindStatus {
 
 			if (this.expression != null && !"*".equals(this.expression) && !this.expression.endsWith("*")) {
 				BeanWrapperImpl bw = new BeanWrapperImpl(target);
-                this.valueType = bw.getPropertyType(this.expression);
-                this.value = bw.getPropertyValue(this.expression);
+				this.valueType = bw.getPropertyType(this.expression);
+				this.value = bw.getPropertyValue(this.expression);
 			}
 
 			this.errorCodes = new String[0];
