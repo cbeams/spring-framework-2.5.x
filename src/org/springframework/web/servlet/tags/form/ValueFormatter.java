@@ -16,19 +16,19 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.beans.PropertyEditor;
+
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.HtmlUtils;
-
-import java.beans.PropertyEditor;
 
 /**
  * Helper class for formatting values for rendering via a form tag. Supports two styles of
  * formatting: plain and {@link PropertyEditor}-aware.
- * <p/>
- * Plain formatting simply prevents the string '<code>null</code>' from appearing, replacing
+ *
+ * <p>Plain formatting simply prevents the string '<code>null</code>' from appearing, replacing
  * it with an empty String, and adds HTML escaping as required.
- * <p/>
- * {@link PropertyEditor}-aware formatting will attempt to use the supplied {@link PropertyEditor}
+ *
+ * <p>{@link PropertyEditor}-aware formatting will attempt to use the supplied {@link PropertyEditor}
  * to render any non-String value before applying the default rules of plain formatting.
  *
  * @author Rob Harrop
@@ -39,7 +39,7 @@ final class ValueFormatter {
 	/**
 	 * Gets the display value of the supplied <code>Object</code>, HTML escaped
 	 * as required. This version is <strong>not</strong> {@link PropertyEditor}-aware.
-	 * @see #getDisplayString(Object, java.beans.PropertyEditor)
+	 * @see #getDisplayString(Object, java.beans.PropertyEditor, boolean)
 	 */
 	public String getDisplayString(Object value, boolean htmlEscape) {
 		String displayValue = ObjectUtils.getDisplayString(value);
@@ -51,7 +51,7 @@ final class ValueFormatter {
 	 * as required. If the supplied value is not a {@link String} and the supplied
 	 * {@link PropertyEditor} is not null then the {@link PropertyEditor} is used
 	 * to obtain the display value.
-	 * @see #getDisplayString(Object)
+	 * @see #getDisplayString(Object, boolean)
 	 */
 	public String getDisplayString(Object value, PropertyEditor propertyEditor, boolean htmlEscape) {
 		if (value instanceof String || propertyEditor == null) {
@@ -71,4 +71,5 @@ final class ValueFormatter {
 			propertyEditor.setValue(originalValue);
 		}
 	}
+
 }

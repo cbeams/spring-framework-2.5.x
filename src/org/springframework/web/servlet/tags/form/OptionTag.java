@@ -25,15 +25,15 @@ import org.springframework.web.util.TagUtils;
 /**
  * JSP tag for rendering an HTML '<code>option</code>' tag. Must be used nested
  * inside a {@link SelectTag}. Provides full support for databinding by marking
- * an '<code>option</code>' as 'selected' if the {@link #setValue(String) value}
+ * an '<code>option</code>' as 'selected' if the {@link #setValue value}
  * matches the value bound to the out {@link SelectTag}.
  *
- * <p>The {@link #setValue(String) value} property is required and corresponds to
+ * <p>The {@link #setValue value} property is required and corresponds to
  * the '<code>value</code>' attribute of the rendered '<code>option</code>'.
  *
  * <p>An optional {@link #setLabel label} property can be specified, the value of
  * which corresponds to inner text of the rendered '<code>option</code>' tag.
- * If no {@link #setLabel label} is specified then the {@link #setValue(String) value}
+ * If no {@link #setLabel label} is specified then the {@link #setValue value}
  * property will be used when rendering the inner text.
  *
  * @author Rob Harrop
@@ -139,9 +139,8 @@ public class OptionTag extends AbstractFormTag {
 		return SelectedValueComparator.isSelected(getBindStatus(), resolvedValue);
 	}
 
-
 	private BindStatus getBindStatus() {
-	 return  (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
+		return (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
 	}
 
 }
