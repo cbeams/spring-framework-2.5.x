@@ -22,6 +22,7 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 import org.springframework.jdbc.support.KeyHolder;
 
@@ -237,7 +238,8 @@ public class SqlUpdate extends SqlOperation {
 	public int updateByNamedParam(Map paramMap) throws DataAccessException {
 		validateNamedParameters(paramMap);
 		Object[] params = NamedParameterUtils.buildValueArray(getSql(), paramMap);
-		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(params, paramMap));
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(getSql(), new MapSqlParameterSource(paramMap));
+		int rowsAffected = getJdbcTemplate().update(newPreparedStatementCreator(sqlToUse, params));
 		checkRowsAffected(rowsAffected);
 		return rowsAffected;
 	}

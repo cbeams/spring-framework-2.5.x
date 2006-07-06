@@ -21,9 +21,6 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
-import org.springframework.jdbc.support.JdbcUtils;
-
-import java.util.Map;
 
 /**
  * RdbmsOperation using a JdbcTemplate and representing a SQL-based
@@ -79,6 +76,16 @@ public abstract class SqlOperation extends RdbmsOperation {
 	protected void onCompileInternal() {
 	}
 
+
+	/**
+	 * Return a PreparedStatementSetter to perform an operation
+	 * with the given parameters.
+	 * @param params parameter array. May be <code>null</code>.
+	 */
+	protected final PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
+		return this.preparedStatementFactory.newPreparedStatementSetter(params);
+	}
+
 	/**
 	 * Return a PreparedStatementCreator to perform an operation
 	 * with the given parameters.
@@ -91,20 +98,12 @@ public abstract class SqlOperation extends RdbmsOperation {
 	/**
 	 * Return a PreparedStatementCreator to perform an operation
 	 * with the given parameters.
-	 * @param params parameter array. May be <code>null</code>.
-	 * @param paramMap parameter Map. May be <code>null</code>.
-	 */
-	protected final PreparedStatementCreator newPreparedStatementCreator(Object[] params, Map paramMap) {
-		return this.preparedStatementFactory.newPreparedStatementCreator(params, paramMap);
-	}
-
-	/**
-	 * Return a PreparedStatementSetter to perform an operation
-	 * with the given parameters.
+	 * @param sqlToUse the actual SQL statement to use (if different from
+	 * the factory's, for example because of named parameter expanding)
 	 * @param params parameter array. May be <code>null</code>.
 	 */
-	protected final PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
-		return this.preparedStatementFactory.newPreparedStatementSetter(params);
+	protected final PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, Object[] params) {
+		return this.preparedStatementFactory.newPreparedStatementCreator(sqlToUse, params);
 	}
 
 }

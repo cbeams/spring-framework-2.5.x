@@ -21,16 +21,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
-import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.util.Assert;
-import com.mchange.v2.sql.SqlUtils;
 
 /**
  * Helper class that can efficiently create multiple PreparedStatementCreator
@@ -115,7 +116,6 @@ public class PreparedStatementCreatorFactory {
 	/**
 	 * Set whether to use prepared statements capable of returning
 	 * updatable ResultSets.
-	 * @param updatableResults Set to true for an updatable ResultSet.
 	 */
 	public void setUpdatableResults(boolean updatableResults) {
 		this.updatableResults = updatableResults;
@@ -153,40 +153,10 @@ public class PreparedStatementCreatorFactory {
 
 
 	/**
-	 * Return a new PreparedStatementCreator for the given parameters.
-	 * @param params parameter array. May be <code>null</code>.
-	 */
-	public PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
-		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.EMPTY_LIST);
-	}
-
-	/**
-	 * Return a new PreparedStatementCreator for the given parameters.
-	 * @param params parameter array. May be <code>null</code>.
-	 * @param paramMap parameter Map. The Map containing the named parameters.  Needed for expansion of
-	 * parameter placeholders when values specified in a List
-	 */
-	public PreparedStatementCreator newPreparedStatementCreator(Object[] params, Map paramMap) {
-		Iterator iter = paramMap.values().iterator();
-		boolean expandListParameter = false;
-		while (iter.hasNext()) {
-			if (iter.next() instanceof List) {
-				System.out.println("********** LIST");
-				expandListParameter = true;
-				break;
-			}
-		}
-		if (expandListParameter) {
-			sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, new MapSqlParameterSource(paramMap));
-		}
-		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.EMPTY_LIST);
-	}
-
-	/**
-	 * Return a new PreparedStatementCreator for the given parameters.
+	 * Return a new PreparedStatementSetter for the given parameters.
 	 * @param params List of parameters. May be <code>null</code>.
 	 */
-	public PreparedStatementCreator newPreparedStatementCreator(List params) {
+	public PreparedStatementSetter newPreparedStatementSetter(List params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : Collections.EMPTY_LIST);
 	}
 
@@ -199,11 +169,30 @@ public class PreparedStatementCreatorFactory {
 	}
 
 	/**
-	 * Return a new PreparedStatementSetter for the given parameters.
+	 * Return a new PreparedStatementCreator for the given parameters.
 	 * @param params List of parameters. May be <code>null</code>.
 	 */
-	public PreparedStatementSetter newPreparedStatementSetter(List params) {
+	public PreparedStatementCreator newPreparedStatementCreator(List params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : Collections.EMPTY_LIST);
+	}
+
+	/**
+	 * Return a new PreparedStatementCreator for the given parameters.
+	 * @param params parameter array. May be <code>null</code>.
+	 */
+	public PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
+		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.EMPTY_LIST);
+	}
+
+	/**
+	 * Return a new PreparedStatementCreator for the given parameters.
+	 * @param sqlToUse the actual SQL statement to use (if different from
+	 * the factory's, for example because of named parameter expanding)
+	 * @param params parameter array. May be <code>null</code>.
+	 */
+	public PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, Object[] params) {
+		return new PreparedStatementCreatorImpl(
+				sqlToUse, params != null ? Arrays.asList(params) : Collections.EMPTY_LIST);
 	}
 
 
@@ -213,13 +202,16 @@ public class PreparedStatementCreatorFactory {
 	private class PreparedStatementCreatorImpl
 			implements PreparedStatementCreator, PreparedStatementSetter, SqlProvider, ParameterDisposer {
 
+		private final String actualSql;
+
 		private final List parameters;
 
-		/**
-		 * Create a new PreparedStatementCreatorImpl.
-		 * @param parameters list of parameter objects
-		 */
 		public PreparedStatementCreatorImpl(List parameters) {
+			this((sqlToUse != null ? sqlToUse : sql), parameters);
+		}
+
+		public PreparedStatementCreatorImpl(String actualSql, List parameters) {
+			this.actualSql = actualSql;
 			Assert.notNull(parameters, "Parameters List must not be null");
 			this.parameters = parameters;
 			if (this.parameters.size() != declaredParameters.size())
@@ -230,16 +222,13 @@ public class PreparedStatementCreatorFactory {
 
 		public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 			PreparedStatement ps = null;
-			if (sqlToUse == null) {
-				sqlToUse = sql;
-			}
 			if (generatedKeysColumnNames != null || returnGeneratedKeys) {
 				try {
 					if (generatedKeysColumnNames != null) {
-						ps = con.prepareStatement(sqlToUse, generatedKeysColumnNames);
+						ps = con.prepareStatement(this.actualSql, generatedKeysColumnNames);
 					}
 					else {
-						ps = con.prepareStatement(sqlToUse, PreparedStatement.RETURN_GENERATED_KEYS);
+						ps = con.prepareStatement(this.actualSql, PreparedStatement.RETURN_GENERATED_KEYS);
 					}
 				}
 				catch (AbstractMethodError ex) {
@@ -249,13 +238,12 @@ public class PreparedStatementCreatorFactory {
 				}
 			}
 			else if (resultSetType == ResultSet.TYPE_FORWARD_ONLY && !updatableResults) {
-				ps = con.prepareStatement(sqlToUse);
+				ps = con.prepareStatement(this.actualSql);
 			}
 			else {
-				ps = con.prepareStatement(sqlToUse, resultSetType,
+				ps = con.prepareStatement(this.actualSql, resultSetType,
 					updatableResults ? ResultSet.CONCUR_UPDATABLE : ResultSet.CONCUR_READ_ONLY);
 			}
-
 			setValues(ps);
 			return ps;
 		}

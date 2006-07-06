@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 
 /**
@@ -215,7 +216,8 @@ public abstract class SqlQuery extends SqlOperation {
 		validateNamedParameters(paramMap);
 		Object[] parameters = NamedParameterUtils.buildValueArray(getSql(), paramMap);
 		RowMapper rowMapper = newRowMapper(parameters, context);
- 		return getJdbcTemplate().query(newPreparedStatementCreator(parameters, paramMap), rowMapper);
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(getSql(), new MapSqlParameterSource(paramMap));
+ 		return getJdbcTemplate().query(newPreparedStatementCreator(sqlToUse, parameters), rowMapper);
 	}
 
 	/**
