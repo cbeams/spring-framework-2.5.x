@@ -317,29 +317,6 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		assertEquals(1, advice.getCalls("add"));
 	}
 
-	public void testTryToProxyFinalMethod() throws Exception {
-		ProxyFactory proxyFactory = new ProxyFactory();
-		proxyFactory.addAdvice(new NopInterceptor());
-		proxyFactory.setTarget(new HasFinalMethod());
-		proxyFactory.setProxyTargetClass(true);
-
-		try {
-			proxyFactory.getProxy();
-			fail("Should not be able to proxy with a final method");
-		}
-		catch (AspectException ex) {
-			// success
-		}
-
-		try {
-			proxyFactory.getProxy();
-			fail("Should not be able to proxy with a final method");
-		}
-		catch (AspectException ex) {
-			// success
-		}
-	}
-
 	public static class MyBean {
 
 		private String name;

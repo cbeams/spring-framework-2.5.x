@@ -228,12 +228,14 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 	 * validates it if not.
 	 */
 	private void validateClassIfNecessary(Class proxySuperClass) {
+		if (logger.isWarnEnabled()) {
 			synchronized (validatedClasses) {
 				if (!validatedClasses.contains(proxySuperClass)) {
 					doValidateClass(proxySuperClass);
 					validatedClasses.add(proxySuperClass);
 				}
 			}
+		}
 	}
 
 	/**
@@ -245,7 +247,8 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		for (int i = 0; i < methods.length; i++) {
 			Method method = methods[i];
 			if (!Object.class.equals(method.getDeclaringClass()) && Modifier.isFinal(method.getModifiers())) {
-				throw new AspectException("Cannot proxy class '" + proxySuperClass.getName() + "' since it has one or more public final methods.");
+				logger.warn("Unable to proxy method [" + method + "] because it is final: " +
+						"All calls to this method via a proxy will be routed directly to the proxy.");
 			}
 		}
 	}
