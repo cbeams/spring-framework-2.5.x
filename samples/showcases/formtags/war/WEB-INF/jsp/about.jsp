@@ -30,11 +30,13 @@
 
     <div id="content">
        <div id="block">
-           <p>Welcome to this Spring 2.0 showcase application that demonstrates
-           the use of new JSP tags for creating form elements.</p>
+          <p>
+The Spring MVC form tags application showcases the new form
+tag library introduced in Spring 2.0.</p>
 
-           <p>Choose an apprentice magician on the left-hand side to continue.</p>
-
+<p>The web application is *very* simplistic, because the intent is
+to convey the essence of the new form tags themselves and nothing
+else.</p>
 
       </div>
 
@@ -49,7 +51,7 @@
     </div>
     <p>New JSP tags in Spring 2.0 make building forms with Spring MVC much easier</p>
     <div class="menu">
-       <a href="<c:url value="/about.htm"/>">About</a>
+       <a href="<c:url value="/list.htm"/>">Home</a>
     </div>
   </div>
 

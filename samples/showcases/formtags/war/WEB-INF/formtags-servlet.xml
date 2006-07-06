@@ -19,6 +19,15 @@
         <property name="validators" ref="userValidator"/>
     </bean>
 
-    <bean id="userValidator" class="org.springframework.showcase.formtags.validation.UserValidator"/>
+    <bean name="/about.htm" class="org.springframework.showcase.formtags.web.ListController">
+        <property name="userManager" ref="userManager"/>
+        <property name="viewName" value="about"/>
+    </bean>
+
+    <bean id="userValidator" class="org.springframework.showcase.formtags.validation.UserValidator">
+        <property name="countryValidator">
+            <bean class="org.springframework.showcase.formtags.validation.CountryValidator"/>
+        </property>
+    </bean>
 
 </beans>
