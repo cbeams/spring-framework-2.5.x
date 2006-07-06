@@ -51,7 +51,7 @@ public interface Errors {
 
 
 	/**
-	 * Return the name of the bound object.
+	 * Return the name of the bound root object.
 	 */
 	String getObjectName();
 
@@ -95,20 +95,23 @@ public interface Errors {
 
 
 	/**
-	 * Reject the current object, using the given error description.
+	 * Register a global error for the entire target object,
+	 * using the given error description.
 	 * @param errorCode error code, interpretable as message key
 	 */
 	void reject(String errorCode);
 
 	/**
-	 * Reject the current object, using the given error description.
+	 * Register a global error for the entire target object,
+	 * using the given error description.
 	 * @param errorCode error code, interpretable as message key
 	 * @param defaultMessage fallback default message
 	 */
 	void reject(String errorCode, String defaultMessage);
 
 	/**
-	 * Reject the current object, using the given error description.
+	 * Register a global error for the entire target object,
+	 * using the given error description.
 	 * @param errorCode error code, interpretable as message key
 	 * @param errorArgs error arguments, for argument binding via MessageFormat
 	 * (can be <code>null</code>)
@@ -117,27 +120,48 @@ public interface Errors {
 	void reject(String errorCode, Object[] errorArgs, String defaultMessage);
 
 	/**
-	 * Reject the given field of the current object, using the given error description.
-	 * @param field the field name
+	 * Register a field error for the specified field of the current object
+	 * (respecting the current nested path, if any), using the given error
+	 * description.
+	 * <p>The field name may be <code>null</code> or empty String to indicate
+	 * the current object itself rather than a field of it. This may result
+	 * in a corresponding field error within the nested object graph or a
+	 * global error if the current object is the top object.
+	 * @param field the field name (may be <code>null</code> or empty String)
 	 * @param errorCode error code, interpretable as message key
+	 * @see #getNestedPath()
 	 */
 	void rejectValue(String field, String errorCode);
 
 	/**
-	 * Reject the given field of the current object, using the given error description.
-	 * @param field the field name
+	 * Register a field error for the specified field of the current object
+	 * (respecting the current nested path, if any), using the given error
+	 * description.
+	 * <p>The field name may be <code>null</code> or empty String to indicate
+	 * the current object itself rather than a field of it. This may result
+	 * in a corresponding field error within the nested object graph or a
+	 * global error if the current object is the top object.
+	 * @param field the field name (may be <code>null</code> or empty String)
 	 * @param errorCode error code, interpretable as message key
 	 * @param defaultMessage fallback default message
+	 * @see #getNestedPath()
 	 */
 	void rejectValue(String field, String errorCode, String defaultMessage);
 
 	/**
-	 * Reject the given field of the current object, using the given error description.
-	 * @param field the field name
+	 * Register a field error for the specified field of the current object
+	 * (respecting the current nested path, if any), using the given error
+	 * description.
+	 * <p>The field name may be <code>null</code> or empty String to indicate
+	 * the current object itself rather than a field of it. This may result
+	 * in a corresponding field error within the nested object graph or a
+	 * global error if the current object is the top object.
+	 * @param field the field name (may be <code>null</code> or empty String)
 	 * @param errorCode error code, interpretable as message key
 	 * @param errorArgs error arguments, for argument binding via MessageFormat
 	 * (can be <code>null</code>)
 	 * @param defaultMessage fallback default message
+	 * @see #getNestedPath()
 	 */
 	void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage);
 
@@ -246,6 +270,7 @@ public interface Errors {
 	 */
 	FieldError getFieldError(String field);
 
+
 	/**
 	 * Return the current value of the given field, either the current
 	 * bean property value or a rejected update from the last binding.
@@ -257,8 +282,12 @@ public interface Errors {
 	Object getFieldValue(String field);
 
 	/**
-	 * Returns the '<code>Class</code>' type of a given field. Works even when
-	 * the field value is '<code>null</code>'.
+	 * Return the type of a given field.
+	 * <p>Should be able to determine the type even when the field
+	 * value is <code>null</code>, for example from some descriptor.
+	 * @param field the field name
+	 * @return the type of the field, or <code>null</code> if not determinable
 	 */
 	Class getFieldType(String field);
+
 }

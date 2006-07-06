@@ -64,10 +64,6 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 		this.objectName = objectName;
 	}
 
-	public String getObjectName() {
-		return objectName;
-	}
-
 	/**
 	 * Set the strategy to use for resolving errors into message codes.
 	 * Default is DefaultMessageCodesResolver.
@@ -84,6 +80,14 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 		return messageCodesResolver;
 	}
 
+
+	//---------------------------------------------------------------------
+	// Implementation of Errors interface
+	//---------------------------------------------------------------------
+
+	public String getObjectName() {
+		return objectName;
+	}
 
 	public void setNestedPath(String nestedPath) {
 		doSetNestedPath(nestedPath);
@@ -129,7 +133,14 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	 * regarding the nested path of this instance.
 	 */
 	protected String fixedField(String field) {
-		return getNestedPath() + canonicalFieldName(field);
+		if (StringUtils.hasLength(field)) {
+			return getNestedPath() + canonicalFieldName(field);
+		}
+		else {
+			String path = getNestedPath();
+			return (path.endsWith(Errors.NESTED_PATH_SEPARATOR) ?
+					path.substring(0, path.length() - NESTED_PATH_SEPARATOR.length()) : path);
+		}
 	}
 
 
@@ -154,6 +165,13 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	}
 
 	public void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage) {
+		if ("".equals(getNestedPath()) && !StringUtils.hasLength(field)) {
+			// We're at the top of the nested object hierarchy,
+			// so the present level is not a field but rather the top object.
+			// The best we can do is register a global error here...
+			reject(errorCode, errorArgs, defaultMessage);
+			return;
+		}
 		String fixedField = fixedField(field);
 		Object newVal = getActualFieldValue(fixedField);
 		FieldError fe = new FieldError(
@@ -303,6 +321,7 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 				(field.endsWith("*") && fieldError.getField().startsWith(field.substring(0, field.length() - 1))));
 	}
 
+
 	public Object getFieldValue(String field) {
 		FieldError fe = getFieldError(field);
 		// Use rejected value in case of error, current bean property value else.
@@ -320,7 +339,24 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 		return value;
 	}
 
+	/**
+	 * This default implementation determines the type based on the actual
+	 * field value, if any. Subclasses should override this to determine
+	 * the type from a descriptor, even for <code>null</code> values.
+	 * @see #getActualFieldValue
+	 */
+	public Class getFieldType(String field) {
+		Object value = getActualFieldValue(field);
+		if (value != null) {
+			return value.getClass();
+		}
+		return null;
+	}
 
+
+	//---------------------------------------------------------------------
+	// Implementation of BindingResult interface
+	//---------------------------------------------------------------------
 
 	/**
 	 * Return a model Map for the obtained state, exposing an Errors
@@ -349,7 +385,6 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 		return model;
 	}
 
-
 	/**
 	 * Mark the specified disallowed field as suppressed.
 	 * <p>The data binder invokes this for each field value that was
@@ -371,23 +406,23 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	}
 
 
+	//---------------------------------------------------------------------
+	// Template methods to be implemented/overridden by subclasses
+	//---------------------------------------------------------------------
+
+	/**
+	 * Return the wrapped target object.
+	 */
+	public abstract Object getTarget();
+
 	/**
 	 * Determine the canonical field name for the given field.
-	 * The default implementation simply returns the field name as-is.
+	 * <p>The default implementation simply returns the field name as-is.
 	 * @param field the original field name
 	 * @return the canonical field name
 	 */
 	protected String canonicalFieldName(String field) {
 		return field;
-	}
-
-	/**
-	 * Determine the type of the given field.
-	 * @param field the field to check
-	 * @return the type of the field, or <code>null</code> if not determinable
-	 */
-	public Class getFieldType(String field) {
-		return null;
 	}
 
 	/**
@@ -399,6 +434,7 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 
 	/**
 	 * Format the given value for the specified field.
+	 * <p>The default implementation simply returns the field value as-is.
 	 * @param field the field to check
 	 * @param value the value of the field (either a rejected value
 	 * other than from a binding error, or an actual field value)
