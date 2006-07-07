@@ -82,7 +82,7 @@ import org.springframework.util.ClassUtils;
  * either within a Spring-driven transaction (with JpaTransactionManager or
  * JtaTransactionManager) or within OpenEntityManagerInViewFilter/Interceptor.
  * Furthermore, some operations just make sense within transactions,
- * for example: <code>evict</code>, <code>evictAll</code>, <code>flush</code>.
+ * for example: <code>flush</code>.
  *
  * @author Juergen Hoeller
  * @since 2.0
