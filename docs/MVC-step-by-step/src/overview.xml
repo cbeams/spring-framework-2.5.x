@@ -2,7 +2,7 @@
 <preface id="overview">
   <title>Overview</title>
 
-  <para>This document is a step-by-step account of how to develop a web application
+  <para>This document is a step-by-step guide on how to develop a web application
   from scratch using the Spring Framework.</para>
   
   <para>Only perfunctory knowledge of Spring itself is assumed, and as such this
@@ -14,10 +14,10 @@
   application.</para>
 
   <para>Please note that we are not going to cover any background information or
-  theory in this tutorial; there are plenty of books available that covers said
+  theory in this tutorial; there are plenty of books available that cover the
   areas in depth; whenever a new class or feature is used in the tutorial, forward
-  pointers to the relevant section(s) of the Spring reference documentation where
-  the class or feature is covered in depth are supplied.</para>
+  pointers to the relevant section(s) of the Spring reference documentation
+  are provided where the class or feature is covered in depth.</para>
   
   <section id="overview-whats-covered">
     <title>What's covered</title>  
@@ -51,25 +51,25 @@
     You should also be reasonably comfortable using the following technologies.</para>
     <itemizedlist>
         <listitem>
-            <para>Java SDK (We are currently using version 1.5)</para>
+            <para>Java SDK 1.5</para>
         </listitem>
         <listitem>
-            <para>Ant (using version 1.6.3)</para>
+            <para>Ant 1.6.5</para>
         </listitem>
         <listitem>
-            <para>Apache Tomcat (using version 5.5.17)</para>
+            <para>Apache Tomcat 5.5.17</para>
         </listitem>
     </itemizedlist>
     <para>You may of course use pretty much any variation or version of the above
     software. If you want to use Jetty instead of Tomcat, then go right ahead: just
-    be advised that the tutorial steps will all be explained using the above
+    be advised that the tutorial steps will be explained using the above
     software (so if you chose to use Jetty instead of Tomcat you will have to
     skip over the Tomcat bits).</para>
   </section>
   
   <section id="overview-application-overview">
-    <title>The application; or what we are building</title>
-    <para>The application that we will be building from scratch over the course of
+    <title>The application we are building</title>
+    <para>The application we will be building from scratch over the course of
     this tutorial is a <emphasis>very basic</emphasis> inventory management system.
     This inventory management system is severely constrained in terms of scope; find
     below a use case diagram illustrating the simple use cases that we will be
@@ -85,13 +85,13 @@
 			<imagedata fileref="images/usecase.png" format="PNG" align="center" />
 		</imageobject>
 		<caption>
-			<para>Use case diagram for the inventory management system</para>
+			<para>Use case diagram of the inventory management system</para>
 		</caption>
 	</mediaobject>
     
     <para>We will <link linkend="part1">start</link> by setting up the basic
-    project directory structure for our application. downloading the required
-    libraries, setting up our Ant build scripts, etc. The first step merely gives
+    project directory structure for our application, downloading the required
+    libraries, setting up our Ant build scripts, etc. The first step gives
     us a solid foundation on which to develop the application proper in parts
     <link linkend="part2">2</link>, <link linkend="part3">3</link>, and
     <link linkend="part4">4</link>.</para>

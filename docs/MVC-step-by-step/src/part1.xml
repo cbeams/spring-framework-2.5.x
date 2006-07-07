@@ -88,7 +88,7 @@
     <title>Deploying the application to Tomcat</title>
 
     <para>Let's now write the Ant build script that we are going to use
-    throughout this document. This Ant build script will contain
+    throughout the tutorial. This Ant build script will contain
     targets for compiling, building and deploying the application. A
     separate build script will be used for application server specific targets,
     such as targets for controlling the application under Tomcat.</para>
@@ -285,9 +285,9 @@ tomcat.manager.password=tomcat]]></programlisting>
   <user username="tomcat" password="tomcat" roles="tomcat"/>
   <user username="both" password="tomcat" roles="tomcat,role1"/>
   <user username="role1" password="tomcat" roles="role1"/>
-  <!-- new user added -->
-  <user username="admin" password="tomcat" roles="manager"/>
-</tomcat-users>]]></programlisting>        
+  <!-- new user added -->]]>  
+  <emphasis role="bold"><![CDATA[<user username="admin" password="tomcat" roles="manager"/>]]></emphasis>  
+<![CDATA[<?xml version='1.0' encoding='utf-8'?></tomcat-users>]]></programlisting>        
       
     <para>Now we run Ant to make sure that everything is working okay. You must
     have your current directory set to the
@@ -319,7 +319,7 @@ usage:
 BUILD SUCCESSFUL
 Total time: 2 seconds]]></screen>
 
-    <para>The last thing we need to do here is to do the actual deployment. Just run
+    <para>The last thing we need to do here is to build and deploy the application. Just run
     Ant and specify <literal>'deploy'</literal> or <literal>'deploywar'</literal> as
     the target.</para>
 
@@ -335,14 +335,20 @@ deploy:
 BUILD SUCCESSFUL
 Total time: 4 seconds]]></screen>
 
+      <remark>
+          <para>If you run <command>ant deploywar</command>, Ant issues the following false warning. You can safely ignore this bug in Ant.
+          </para>
+      </remark>
+      <screen><![CDATA[[war] Warning: selected war files include a WEB-INF/web.xml which will be ignored (please use webxml attribute to war task)]]></screen>
+      
   </section>
-
+    
   <section id="step1.4">
     <title>Test the application</title>
 
-    <para>Let's just quickly start Tomcat and make sure that we can access the
-    application. Use the <literal>'list'</literal> task from our build file to
-    see if Tomcat has picked up the new application.</para>
+      <para>Let's just quickly start Tomcat by running <command>${appserver.home}/bin/startup.bat</command>.
+      To make sure that we can access the application, run the <literal>'list'</literal> task from our build file to
+      see if Tomcat has picked up the new application.</para>
 
     <screen><![CDATA[samoa:~/Projects/springapp trisberg$ ant list
 Buildfile: build.xml
