@@ -295,7 +295,7 @@ tomcat.manager.password=tomcat]]></programlisting>
     
     <para>Open up a command shell (or prompt) and execute <command>ant</command> .</para>
 
-    <screen><![CDATA[samoa:~/Projects/springapp trisberg$ ant
+    <screen><![CDATA[$ ant
 Buildfile: build.xml
 
 usage:
@@ -323,7 +323,7 @@ Total time: 2 seconds]]></screen>
     Ant and specify <literal>'deploy'</literal> or <literal>'deploywar'</literal> as
     the target.</para>
 
-    <screen><![CDATA[samoa:~/Projects/springapp trisberg$ ant deploy
+    <screen><![CDATA[$ ant deploy
 Buildfile: build.xml
 
 build:
@@ -346,11 +346,11 @@ Total time: 4 seconds]]></screen>
   <section id="step1.4">
     <title>Test the application</title>
 
-      <para>Let's just quickly start Tomcat by running <command>${appserver.home}/bin/startup.bat</command>.
+      <para>Let's just quickly start Tomcat by running <filename>'${appserver.home}/bin/startup.bat'</filename>.
       To make sure that we can access the application, run the <literal>'list'</literal> task from our build file to
       see if Tomcat has picked up the new application.</para>
 
-    <screen><![CDATA[samoa:~/Projects/springapp trisberg$ ant list
+    <screen><![CDATA[$ ant list
 Buildfile: build.xml
 
 list:
@@ -407,16 +407,17 @@ Total time: 3 seconds]]></screen>
   <section>
     <title>Modify <filename>'web.xml'</filename> in the <filename class="directory">'WEB-INF'</filename> directory</title>
 
-    <para>Go to the <filename class="directory">''springapp/war/WEB-INF''</filename>
+    <para>Go to the <filename class="directory">'springapp/war/WEB-INF'</filename>
     directory. Modify the minimal <filename>'web.xml'</filename> file that we
     created earlier. Now we will modify it to suit our needs. We are going to
-    define a <classname>DispatcherServlet</classname> that is going to control
-    where all our request are routed based on information we will enter at a
+    define a <classname>DispatcherServlet</classname> (also known as a 
+    <literal>'Front Controller'</literal> (Crupi et al)). It is going to control
+    where all our requests are routed based on information we will enter at a
     later point. This servlet definition also has an attendant
     <literal>&lt;servlet-mapping/&gt;</literal> entry that maps to the URL
     patterns that we will be using. I have decided to let any URL with an
     <literal>'.htm'</literal> extension be routed to the <literal>'springapp'</literal>
-    servlet (the <classname>DispatcherServlet</classname>.</para>
+    servlet (the <classname>DispatcherServlet</classname>).</para> 
 
     <para><filename>'springapp/war/WEB-INF/web.xml'</filename>:</para>
     
@@ -427,7 +428,7 @@ Total time: 3 seconds]]></screen>
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
          http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" >
-]]><emphasis><![CDATA[
+]]><emphasis role="bold"><![CDATA[
   <servlet>
     <servlet-name>springapp</servlet-name>
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
@@ -449,24 +450,29 @@ Total time: 3 seconds]]></screen>
 
     <para>Next, create a file called <filename>'springapp-servlet.xml'</filename>
     in the <filename class="directory">'springapp/war/WEB-INF'</filename> directory.
-    This is the file where bean definitions used by the
-    <classname>DispatcherServlet</classname> should be entered. The name of this
-    file is determined by the value of the <literal>&lt;servlet-name//&gt;</literal>
+    This file contains the bean definitions (plain old Java objects) used by the
+    <classname>DispatcherServlet</classname>. It is the 
+    <classname>WebApplicationContext</classname> where all web-related components go.
+    The name of this file is determined by the value of the <literal>&lt;servlet-name/&gt;</literal>
     element from the <filename>'web.xml'</filename>, with <literal>'-servlet'</literal>
     appended to it (hence <filename>'springapp-servlet.xml'</filename>). This
     is the standard naming convention used with Spring's Web MVC framework.
     Now, add a bean entry named <literal>'/hello.htm'</literal> and specify the
     class as <classname>springapp.web.HelloController</classname>. This defines the
-    controller that our application will be using and the URL mapping used to
-    invoke it. The Spring Web MVC framework makes uses implementation of an interface
+    controller that our application will be using to service a request with the 
+    corresponding URL mapping of <literal>'/hello.htm'</literal>.
+    The Spring Web MVC framework uses an implementation class of the interface
     called <interfacename>HandlerMapping</interfacename> to define the mapping between
-    a request URL and the object that is going to handle that request (the handler.
-    The default <interfacename>HandlerMapping</interfacename> that the
+    a request URL and the object that is going to handle that request (the handler).
+    Unlike the <classname>DispatcherServlet</classname>, the 
+    <classname>HelloController</classname> is responsible for handling a request for a
+    particular page of the website and is also known as a <literal>'Page Controller'</literal>
+    (Fowler). The default <interfacename>HandlerMapping</interfacename> that the
     <classname>DispatcherServlet</classname> uses is the
     <classname>BeanNameUrlHandlerMapping</classname>; this class will use the bean
     name to map to the URL in the request so that the
     <classname>DispatcherServlet</classname> knows which controller must be invoked
-    for different URLs.</para>
+    for handling different URLs.</para>
 
     <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
     
@@ -491,10 +497,10 @@ Total time: 3 seconds]]></screen>
     <para>First create a <filename class="directory">'lib'</filename> directory in
     the <filename class="directory">'war/WEB-INF'</filename> directory. Then, from
     the Spring distribution, copy <filename class="libraryfile">spring.jar</filename>
-    (<filename class="libraryfile">spring-framework-2.0/dist/spring.jar</filename>)
+    (from <filename class="libraryfile">spring-framework-2.0/dist</filename>)
     to the new <filename class="directory">'war/WEB-INF/lib'</filename> directory.
-    Also copy <filename class="libraryfile">commons-logging jar</filename>
-    (<filename class="libraryfile">spring-framework-2.0/lib/jakarta-commons/commons-logging.jar</filename>)
+    Also, copy <filename class="libraryfile">commons-logging.jar</filename>
+    (from <filename class="libraryfile">spring-framework-2.0/lib/jakarta-commons</filename>)
     to the <filename class="directory">'war/WEB-INF/lib'</filename> directory.
     These jars will be deployed to the server and they are also used during the build
     process.</para>
@@ -531,7 +537,6 @@ public class HelloController implements Controller {
 
     protected final Log logger = LogFactory.getLog(getClass());
 
-
     public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -543,29 +548,28 @@ public class HelloController implements Controller {
 }]]></programlisting>
 
     <para>This is a very basic <interfacename>Controller</interfacename>
-    implementation. We will be expanding this later on, and we will also
-    later on extend some provided base implementations. In Spring Web MVC,
+    implementation. We will be expanding this later on as well as extending
+    some of the base controller implementations provided by Spring. In Spring Web MVC,
     the <interfacename>Controller</interfacename> <emphasis>handles</emphasis>
-    the request and returns a <classname>ModelAndView</classname> named
+    the request and returns a <classname>ModelAndView</classname> - in this case, one named
     <filename>'hello.jsp'</filename> which is also the name of the JSP file
     we will create next. The model that this class returns is actually resolved
     via a <interfacename>ViewResolver</interfacename>. Since we have not explicitly
     defined a <interfacename>ViewResolver</interfacename>, we are going to
-    get a default one that just forwards to a URL matching the name of the
+    get given a default one by Spring that simply forwards to a URL matching the name of the
     view specified. We will modify this later on. We have also specified a
-    logger so we can verify that we actually got here. Using Tomcat these log
+    logger so we can verify that we actually got into the handler. Using Tomcat, these log
     messages should show up in the <filename>'catalina.out'</filename> log
-    file which can be found in the <filename class="directory">'log'</filename>
+        file which can be found in the <filename class="directory">'${appserver.home}/log'</filename>
     directory of your Tomcat installation. </para>
   </section>
 
   <section>
     <title>Create the <interfacename>View</interfacename></title>
 
-    <para>Now it is time to create our first view. Like we mentioned earlier
+    <para>Now it is time to create our first view. As we mentioned earlier,
     we are forwarding to a JSP page named <filename>'hello.jsp'</filename>.
-    We'll put it in the <filename class="directory">'war'</filename> directory
-    to begin with.</para>
+    To begin with, we'll put it in the <filename class="directory">'war'</filename> directory.</para>
 
     <para><filename>'springapp/war/hello.jsp'</filename>:</para>
     
@@ -585,13 +589,13 @@ public class HelloController implements Controller {
     <para>Run the <literal>'build'</literal> and <literal>'deploy'</literal>
     Ant targets, and then run the <literal>'reload'</literal> task of the
     <filename>'build.xml'</filename> file. This will force a build and
-    reload of the application. We have to check the Ant output and the
-    Tomcat logs for any deployment errors – there could be typos in the
+    reload of the application in Tomcat. We have to check the Ant output and the
+    Tomcat logs for any possible deployment errors – such as typos in the
     above files or there could be missing classes or jar files. </para>
 
     <para>Here is a sample output from the Ant build:</para>
 
-    <screen><![CDATA[samoa:~/Projects/springapp trisberg$ ant deploy
+      <screen><![CDATA[$ ant deploy reload
 Buildfile: build.xml
 
 build:
@@ -599,11 +603,11 @@ build:
     [javac] Compiling 1 source file to /Users/trisberg/Projects/springapp/war/WEB-INF/classes
 
 deploy:
-     [copy] Copying 7 files to /Users/trisberg/apache-tomcat-5.5.17/webapps/springapp
+     [copy] Copying 6 files to /Users/trisberg/apache-tomcat-5.5.17/webapps/springapp
 
 BUILD SUCCESSFUL
 Total time: 3 seconds
-samoa:~/Projects/springapp trisberg$ ant reload
+$ ant reload
 Buildfile: build.xml
 
 reload:
@@ -612,7 +616,7 @@ reload:
 BUILD SUCCESSFUL
 Total time: 2 seconds]]></screen>
 
-    <para>And here is a portion from the Tomcat <filename>'catalina.out'</filename>
+    <para>And here is an exerpt from the Tomcat <filename>'catalina.out'</filename>
     log file.</para>
 
     <screen><![CDATA[Jun 25, 2006 8:03:57 PM org.springframework.web.servlet.HttpServletBean init
@@ -666,26 +670,26 @@ INFO: Servlet 'springapp' configured successfully]]></screen>
 
     <orderedlist>
       <listitem>
-        <para>An introduction page, <filename>'index.jsp'</filename>, that does
-        not do anything useful. It was just used to test our setup. We will later
+        <para>An introduction page, <filename>'index.jsp'</filename>, the welcome page
+        of the application. It was used to test our setup was correct. We will later
         change this to actually provide a link into our application.</para>
       </listitem>
 
       <listitem>
-        <para>A <classname>DispatcherServlet</classname> with a corresponding
+        <para>A <classname>DispatcherServlet</classname> (front controller) with a corresponding
         <filename>'springapp-servlet.xml'</filename> configuration file.</para>
       </listitem>
 
       <listitem>
-        <para>A controller, <classname>HelloController</classname>, with limited
+        <para>A page controller, <classname>HelloController</classname>, with limited
         functionality – it just forwards a <classname>ModelAndView</classname> to
-        the <interfacename>ViewResolver</interfacename>. Actually, we only
-        have an empty model so far, but we will address this later.</para>
+        the <interfacename>ViewResolver</interfacename>. We only
+        have an empty model so far, but this will be provided later.</para>
       </listitem>
 
       <listitem>
         <para>A view, <filename>'hello.jsp'</filename>, that again is extremely
-        basic. But the whole setup works and we are now ready to add more
+        basic. The good news is the whole setup works and we are now ready to add more
         functionality.</para>
       </listitem>
     </orderedlist>
