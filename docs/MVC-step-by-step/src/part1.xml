@@ -276,7 +276,7 @@ tomcat.manager.password=tomcat]]></programlisting>
         <command>chmod a+rwx springapp</command> to give everybody full rights to this
         directory.</para>
         <para>To set up a Tomcat user named 'admin' with 'tomcat' as their password,
-        go to Tomcat users file <filename class="libraryfile">
+        go to the Tomcat users file <filename class="libraryfile">
         'appserver.home'/conf/tomcat_users.xml'</filename> and add the user entry.
         </para>
     </remark>
