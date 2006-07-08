@@ -142,6 +142,16 @@ public abstract class JdbcUtils {
 		else if (obj != null && obj.getClass().getName().startsWith("oracle.sql.TIMESTAMP")) {
 			obj = rs.getTimestamp(index);
 		}
+		else if (obj != null && obj.getClass().getName().startsWith("oracle.sql.DATE")) {
+			String metaDataClassName = rs.getMetaData().getColumnClassName(index);
+			if ("java.sql.Timestamp".equals(metaDataClassName) ||
+					"oracle.sql.TIMESTAMP".equals(metaDataClassName)) {
+				obj = rs.getTimestamp(index);
+			}
+			else {
+				obj = rs.getDate(index);
+			}
+		}
 		else if (obj != null && obj instanceof java.sql.Date) {
 			if ("java.sql.Timestamp".equals(rs.getMetaData().getColumnClassName(index))) {
 				obj = rs.getTimestamp(index);
