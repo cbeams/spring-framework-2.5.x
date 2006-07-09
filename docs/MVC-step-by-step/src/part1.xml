@@ -244,6 +244,13 @@
         and start your application manually.</para>
     </remark>
 
+    <remark>
+        <para>If you are using an IDE, you may find a number of errors reported
+        by the IDE in the <filename class="libraryfile">build.xml</filename>
+        such as the Tomcat targets. You can ignore these. The file listing above
+        is correct.</para>
+    </remark>
+      
     <para>The above Ant build script now contains all the targets that we are
     going to need to make our development efforts easier. We are not going to
     cover this script in detail, since most if not all of it is pretty much
@@ -275,7 +282,7 @@ tomcat.manager.password=tomcat]]></programlisting>
         this newly created directory. On Linux, I run the command
         <command>chmod a+rwx springapp</command> to give everybody full rights to this
         directory.</para>
-        <para>To set up a Tomcat user named 'admin' with 'tomcat' as their password,
+        <para>To create Tomcat user named 'admin' with 'tomcat' as their password,
         go to the Tomcat users file <filename class="libraryfile">
         'appserver.home'/conf/tomcat_users.xml'</filename> and add the user entry.
         </para>
@@ -339,7 +346,8 @@ Total time: 4 seconds]]></screen>
           <para>If you run <command>ant deploywar</command>, Ant issues the following false warning. You can safely ignore this bug in Ant.
           </para>
       </remark>
-      <screen><![CDATA[[war] Warning: selected war files include a WEB-INF/web.xml which will be ignored (please use webxml attribute to war task)]]></screen>
+      <screen><![CDATA[[war] Warning: selected war files include a WEB-INF/web.xml which will be ignored 
+      (please use webxml attribute to war task)]]></screen>
       
   </section>
     
@@ -409,8 +417,8 @@ Total time: 3 seconds]]></screen>
 
     <para>Go to the <filename class="directory">'springapp/war/WEB-INF'</filename>
     directory. Modify the minimal <filename>'web.xml'</filename> file that we
-    created earlier. Now we will modify it to suit our needs. We are going to
-    define a <classname>DispatcherServlet</classname> (also known as a 
+    created earlier. Now we will modify it by defining
+    a <classname>DispatcherServlet</classname> (also known as a 
     <literal>'Front Controller'</literal> (Crupi et al)). It is going to control
     where all our requests are routed based on information we will enter at a
     later point. This servlet definition also has an attendant
@@ -562,6 +570,16 @@ public class HelloController implements Controller {
     messages should show up in the <filename>'catalina.out'</filename> log
         file which can be found in the <filename class="directory">'${appserver.home}/log'</filename>
     directory of your Tomcat installation. </para>
+    
+    <remark>
+      <para>If you are using an IDE, you will want to configure your project's build path by adding the 
+      jars from the <filename class="directory">'lib'</filename> directory. You will also want to
+      add <filename class="libraryfile">servlet-api.jar</filename> from your
+      <filename class="directory">'${appserver.home}/common/lib'</filename>. Adding these to your build path
+      should successfully resolve all the import statements in the <filename class="libraryfile">
+      HelloController.java</filename> file.</para>
+    </remark>
+      
   </section>
 
   <section>
@@ -586,12 +604,12 @@ public class HelloController implements Controller {
   <section>
     <title>Compile and deploy the application</title>
 
-    <para>Run the <literal>'build'</literal> and <literal>'deploy'</literal>
-    Ant targets, and then run the <literal>'reload'</literal> task of the
-    <filename>'build.xml'</filename> file. This will force a build and
+    <para>Run the <literal>'deploy'</literal> Ant target (which invokes the
+    <literal>'build'</literal> target), and then run the <literal>'reload'</literal> task
+    of the <filename>'build.xml'</filename> file. This will force a build and
     reload of the application in Tomcat. We have to check the Ant output and the
     Tomcat logs for any possible deployment errors – such as typos in the
-    above files or there could be missing classes or jar files. </para>
+    above files or missing classes or jar files. </para>
 
     <para>Here is a sample output from the Ant build:</para>
 
@@ -603,7 +621,7 @@ build:
     [javac] Compiling 1 source file to /Users/trisberg/Projects/springapp/war/WEB-INF/classes
 
 deploy:
-     [copy] Copying 6 files to /Users/trisberg/apache-tomcat-5.5.17/webapps/springapp
+     [copy] Copying 7 files to /Users/trisberg/apache-tomcat-5.5.17/webapps/springapp
 
 BUILD SUCCESSFUL
 Total time: 3 seconds
@@ -683,8 +701,8 @@ INFO: Servlet 'springapp' configured successfully]]></screen>
       <listitem>
         <para>A page controller, <classname>HelloController</classname>, with limited
         functionality – it just forwards a <classname>ModelAndView</classname> to
-        the <interfacename>ViewResolver</interfacename>. We only
-        have an empty model so far, but this will be provided later.</para>
+        the <interfacename>ViewResolver</interfacename>. We currently
+        have an empty model and will be providing a full model later on.</para>
       </listitem>
 
       <listitem>
