@@ -3,7 +3,7 @@
   <title>Basic Application and Environment Setup</title>
 
   <section id="step1.1">
-    <title>Creating the project directory structure</title>
+    <title>Create the project directory structure</title>
 
     <para>We are going to need a place to keep all the source and other files
     we will be creating, so let's create a directory named
@@ -42,7 +42,7 @@
   </section>
 
   <section id="step1.2">
-    <title>Creating <filename>'index.jsp'</filename></title>
+    <title>Create <filename>'index.jsp'</filename></title>
 
     <para>Since we are creating a web application, let's start by creating a
     a very simple JSP page named <filename>'index.jsp'</filename> in the
@@ -85,7 +85,7 @@
   </section>
 
   <section id="step1.3">
-    <title>Deploying the application to Tomcat</title>
+    <title>Deploy the application to Tomcat</title>
 
     <para>Let's now write the Ant build script that we are going to use
     throughout the tutorial. This Ant build script will contain

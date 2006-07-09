@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8" ?>
 <chapter id="part2">
     <title>Developing and Configuring the Application</title>
     <para>This is Part 2 of a step-by-step tutorial on how to develop a web
@@ -15,14 +14,14 @@
             <filename>'springapp-servlet.xml'</filename> configuration file</para>
         </listitem>
         <listitem>
-            <para>A controller, <classname>SpringappController</classname></para>
+            <para>A controller, <classname>HelloController</classname></para>
         </listitem>
         <listitem>
             <para>A view, <filename>'hello.jsp'</filename>.</para>
         </listitem>
     </itemizedlist>
     <section id="step2.1">
-        <title>Improve <filename>'index.jsp'</filename></title>
+        <title>Configure JSTL</title>
         <para>We will be using the JSP Standard Tag Library (JSTL), so let's start by
         copying the JSTL files we need to our
         <filename class="directory">'WEB-INF/lib'</filename> directory. Copy
@@ -31,7 +30,53 @@
         <filename class="libraryfile">standard.jar</filename> from the
         <filename class="directory">'spring-framework-2.0/lib/jakarta-taglibs'</filename>
         directory to the <filename class="directory">'springapp/war/WEB-INF/lib'</filename>
-        directory. We will be creating a 'header' file that will be included in every JSP
+        directory.</para>
+        <para>Create a <filename class="directory">'tld'</filename> directory below the
+        <filename class="directory">WEB-INF</filename> directory. Then copy the tag library
+        descriptors <filename class="libraryfile">'c.tld'</filename> and
+        <filename class="libraryfile">'fmt.tld'</filename> from the Jakarta Commons tag library
+        jar <filename class="libraryfile">'WEB-INF/lib/standard.jar'</filename>.</para>
+        <para>Next, define the tag libraries in <filename class="libraryfile">'WEB-INF/web.xml'</filename>
+        so that they can be used in your JSPs.</para>
+        <para><filename>'WEB-INF/web.xml'</filename>:</para>
+        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.4"
+         xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
+         http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" >
+
+  <servlet>
+    <servlet-name>springapp</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>springapp</servlet-name>
+    <url-pattern>*.htm</url-pattern>
+  </servlet-mapping>
+
+  <welcome-file-list>
+    <welcome-file>
+      index.jsp
+    </welcome-file>
+  </welcome-file-list>
+]]>
+  <emphasis role="bold"><![CDATA[<jsp-config>
+    <taglib>
+      <taglib-uri>http://java.sun.com/jsp/jstl/core</taglib-uri>
+      <taglib-location>/WEB-INF/tld/c.tld</taglib-location>
+    </taglib>
+    <taglib>
+      <taglib-uri>http://java.sun.com/jsp/jstl/fmt</taglib-uri>
+      <taglib-location>/WEB-INF/tld/fmt.tld</taglib-location>
+    </taglib>
+  </jsp-config>]]></emphasis>
+  
+<![CDATA[</web-app>]]></programlisting>
+        
+        <para>We will be creating a 'header' file that will be included in every JSP
         page that we're going to write. We ensure the same definitions are included in all
         our JSPs simply by including the header file. We're also going to put all JSPs in
         a directory named <filename class="directory">'jsp'</filename> under the
@@ -43,22 +88,18 @@
 	    <filename class="directory">'springapp/war/jsp'</filename> as the directory instead of
 	    <filename class="directory">'springapp/war/WEB-INF/jsp'</filename> in all the code
 	    examples that will follow.</para>
+        
     </section>
     <section id="step2.2">
         <title>Improve the view and the controller</title>
-        <para>Next, we move the view <filename>hello.jsp</filename> to the
-        <filename class="directory">'WEB-INF/jsp'</filename> directory. The same include that
-        was added to <filename>index.jsp</filename> gets added to <filename>hello.jsp</filename>. 
-	    I also add the current date and time as output that I will retrieve from the model,
-	    passed to the view, using the JSTL &lt;c:out/&gt; tag.</para>
-	    <para><filename>'springapp/war/WEB-INF/jsp/include.jsp'</filename>:</para>
-	    <programlisting><![CDATA[<%@ page session="false"%>
-
+        <para>First we create the header file for inclusion in all the JSPs we create.</para>
+        <para><filename>'springapp/war/WEB-INF/jsp/include.jsp'</filename>:</para>
+        <programlisting><![CDATA[<%@ page session="false"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jstl/fmt" %>]]></programlisting>
         <para>Now we can change <filename>'index.jsp'</filename> to use this include file
-        and since we are using JSTL we can use the <literal>&lt;c:redirect/&gt;</literal>
-        tag for redirecting to our <interfacename>Controller</interfacename>. This ties
+        and since we are using JSTL, we can use the <literal>&lt;c:redirect/&gt;</literal>
+        tag for redirecting to our front <interfacename>Controller</interfacename>. This ties
         the <filename>'index.jsp'</filename> into our application framework.</para>
         
         <para><filename>'springapp/war/index.jsp'</filename>:</para>
@@ -66,17 +107,16 @@
 
 ]]><lineannotation>&lt;%-- Redirected because we can't set the welcome page to a virtual URL. --%&gt;</lineannotation><![CDATA[
 <c:redirect url="/hello.htm"/>]]></programlisting>
-
+        
     </section>
     
     <section id="step2.3">
         <title>Improve the view and the controller</title>
-        <para>I am going to move the view <filename>'hello.jsp'</filename> to
-        the <filename class="directory">'WEB-INF/jsp'</filename> directory. The
-        same include that was added to <filename>'index.jsp'</filename> gets added
-        to <filename>'hello.jsp'</filename>. I also add the current date and time
-        as output that I will retrieve from the model, passed to the view, using the
-        JSTL <literal>&lt;c:out/&gt;</literal> tag.</para>
+        <para>Next, we move the view <filename>hello.jsp</filename> to the
+        <filename class="directory">'WEB-INF/jsp'</filename> directory. Add the same include directive
+        we added to <filename>index.jsp</filename> to <filename>hello.jsp</filename>. 
+        Now we also add the current date and time as output to be retrieved from the model,
+        passed to the view, using the JSTL &lt;c:out/&gt; tag.</para>
         <para><filename>'springapp/war/WEB-INF/jsp/hello.jsp'</filename>:</para>
         <programlisting><![CDATA[<%@ include file="/WEB-INF/jsp/include.jsp" %>
 
@@ -89,64 +129,51 @@
 </body>
 </html>]]></programlisting>
     
-        <para>For <classname>SpringappController</classname> there are a few changes
-        we need to make. Change the view to <filename>'WEB-INF/jsp/hello.jsp'</filename>
-        since we moved the file to this new location. Also add a string containing the
-        current data and time as the model.</para>
+        <para>There are a few changes we need to make to the <classname>HelloController</classname>.
+        Update the view's resource reference to its new location <filename>'WEB-INF/jsp/hello.jsp'</filename>.
+        Next, set the key/value pair for the current data and time value in the model to
+        the key identifier: <literal>"now"</literal> and the string value: <literal>'now'</literal>.</para>
 
-        <para><filename>'springapp/src/SpringappController.java'</filename></para>
+        <para><filename>'springapp/src/HelloController.java'</filename></para>
         
-        <programlisting><![CDATA[import org.springframework.web.servlet.mvc.Controller;
+        <programlisting><![CDATA[package springapp.web;
+
+import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.io.IOException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class SpringappController implements Controller {
+import java.io.IOException;
+import java.util.Date;
+
+public class HelloController implements Controller {
 
     protected final Log logger = LogFactory.getLog(getClass());
-
 
     public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String now = (new java.util.Date()).toString(); 
-        logger.info("returning hello view with " + now);
+    	String now = (new Date()).toString();
+        logger.info("Returning hello view with " + now);
 
         return new ModelAndView("WEB-INF/jsp/hello.jsp", "now", now);
     }
 
 }]]></programlisting>
 
-        <para>This <interfacename>Controller</interfacename> now needs to be
-        configured in the <filename>'springapp-servlet.xml'</filename> file.</para>
-        
-        <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
-        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd">
-
-  ]]><lineannotation>&lt;!-- the application context definition for the springapp <classname>DispatcherServlet</classname> --&gt;</lineannotation><![CDATA[
-
-  <bean name="/hello.htm" class="SpringappController"/>
-
-</beans>
-]]></programlisting>
-
-        <para>Now we are ready to try this after we build and deploy this new code. We
+        <para>Remember that the <interfacename>Controller</interfacename> has already been
+        configured in <filename>'springapp-servlet.xml'</filename> file, so we are ready
+        to try out our enhanced application  after we build and deploy this new code. When we
         enter <ulink url="http://localhost:8080/springapp/">http://localhost:8080/springapp/</ulink>
-        in a browser and that should pull up <filename>'index.jsp'</filename>, which should
-        redirect to <filename>'hello.htm'</filename>, which in turn gets us to the controller
-        that sends the data and time to the view.</para>
+        in a browser, it should pull up <filename>'index.jsp'</filename>, which should
+        redirect to <filename>'hello.htm'</filename>, which in turn delegates our request to
+        the controller that sets the date and time in the model and then makes the model available
+        to the view.</para>
         
         <screenshot>
 		    <mediaobject>
