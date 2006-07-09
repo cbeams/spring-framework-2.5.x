@@ -3,6 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.0 RC3 (20.7.2006)
+--------------------------------------
+
+Package org.springframework.jdbc
+* worked around "oracle.sql.DATE" problem on certain Oracle driver versions, extracting it as timestamp when appropriate
+
+
 Changes in version 2.0 RC2 (6.7.2006)
 -------------------------------------
 
