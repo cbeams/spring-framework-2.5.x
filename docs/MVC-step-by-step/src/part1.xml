@@ -634,7 +634,7 @@ reload:
 BUILD SUCCESSFUL
 Total time: 2 seconds]]></screen>
 
-    <para>And here is an exerpt from the Tomcat <filename>'catalina.out'</filename>
+    <para>And here is an excerpt from the Tomcat <filename>'catalina.out'</filename>
     log file.</para>
 
     <screen><![CDATA[Jun 25, 2006 8:03:57 PM org.springframework.web.servlet.HttpServletBean init
