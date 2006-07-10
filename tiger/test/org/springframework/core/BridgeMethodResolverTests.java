@@ -22,6 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Rob Harrop
@@ -99,10 +103,26 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(loadFromParent, BridgeMethodResolver.findBridgedMethod(loadFromParentBridge));
 	}
 
+	public void testWithSingleBoundParameterizedOnInstaniate() throws Exception {
+		Method bridgeMethod = DelayQueue.class.getMethod("add", Object.class);
+		assertTrue(bridgeMethod.isBridge());
+		Method actualMethod = DelayQueue.class.getMethod("add", Delayed.class);
+		assertFalse(actualMethod.isBridge());
+		assertEquals(actualMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+	}
+
+	public void testWithDoubleBoundParameterizedOnInstantiate() throws Exception {
+		Method bridgeMethod = SerializableBounded.class.getMethod("boundedOperation", Object.class);
+		assertTrue(bridgeMethod.isBridge());
+		Method actualMethod = SerializableBounded.class.getMethod("boundedOperation", HashMap.class);
+		assertFalse(actualMethod.isBridge());
+		assertEquals(actualMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+	}
+
 	private Method findMethodWithReturnType(String name, Class returnType, Class targetType) {
 		Method[] methods = targetType.getMethods();
-		for(Method m : methods) {
-			if(m.getName().equals(name) && m.getReturnType().equals(returnType)) {
+		for (Method m : methods) {
+			if (m.getName().equals(name) && m.getReturnType().equals(returnType)) {
 				return m;
 			}
 		}
@@ -250,6 +270,32 @@ public class BridgeMethodResolverTests extends TestCase {
 		@Transactional(readOnly = true)
 		public ConcreteSettings load() {
 			return super.object;
+		}
+	}
+
+	private static class MyDelayed implements Delayed {
+
+		public long getDelay(TimeUnit unit) {
+			throw new UnsupportedOperationException();
+		}
+
+		public int compareTo(Delayed o) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	private static interface Bounded<E> {
+		boolean boundedOperation(E e);
+	}
+	private static class AbstractBounded<E> implements Bounded<E> {
+		public boolean boundedOperation(E myE) {
+			return true;
+		}
+	}
+
+	private static class SerializableBounded<E extends HashMap & Delayed> extends AbstractBounded<E> {
+		public boolean boundedOperation(E myE) {
+			return false;
 		}
 	}
 }

@@ -257,6 +257,15 @@ public abstract class BridgeMethodResolver {
 			if (actualTypeArgument instanceof Class) {
 				typeVariableMap.put(typeVariables[i].getName(), (Class) actualTypeArgument);
 			}
+			else if (actualTypeArgument instanceof TypeVariable) {
+				// we have a type that is parameterized at instantiation time
+				// the nearest match on the bridge method will be the bounded type
+				TypeVariable typeVariableArgument = (TypeVariable) actualTypeArgument;
+				Type[] bounds = typeVariableArgument.getBounds();
+				if (bounds.length > 0) {
+					typeVariableMap.put(typeVariables[i].getName(), (Class) bounds[0]);
+				}
+			}
 		}
 	}
 
