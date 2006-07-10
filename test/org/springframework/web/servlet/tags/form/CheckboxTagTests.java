@@ -60,7 +60,9 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
-		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		Element rootElement = document.getRootElement();
+		assertEquals("Both tag and hidden element not rendered", 2, rootElement.elements().size());
+		Element checkboxElement = (Element) rootElement.elements().get(0);
 		assertEquals("input", checkboxElement.getName());
 		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
 		assertEquals("someBoolean", checkboxElement.attribute("name").getValue());
@@ -418,6 +420,27 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		}
 	}
 
+	public void testHiddenElementOmittedOnDisabled() throws Exception {
+		this.tag.setPath("someBoolean");
+		this.tag.setDisabled("true");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+		String output = getWriter().toString();
+
+		// wrap the output so it is valid XML
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		assertEquals("Both tag and hidden element rendered incorrectly", 1, rootElement.elements().size());
+		Element checkboxElement = (Element) rootElement.elements().get(0);
+		assertEquals("input", checkboxElement.getName());
+		assertEquals("checkbox", checkboxElement.attribute("type").getValue());
+		assertEquals("someBoolean", checkboxElement.attribute("name").getValue());
+		assertEquals("checked", checkboxElement.attribute("checked").getValue());
+		assertEquals("true", checkboxElement.attribute("value").getValue());
+	}
 	private Date getDate() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.YEAR, 10);

@@ -115,12 +115,14 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 
 		tagWriter.endTag();
 
-		// write out the marker field
-		tagWriter.startTag("input");
-		tagWriter.writeAttribute("type", "hidden");
-		tagWriter.writeAttribute("value", "1");
-		tagWriter.writeAttribute("name", "_" + getName());
-		tagWriter.endTag();
+		if (!isDisabled()) {
+			// write out the marker field
+			tagWriter.startTag("input");
+			tagWriter.writeAttribute("type", "hidden");
+			tagWriter.writeAttribute("value", "1");
+			tagWriter.writeAttribute("name", "_" + getName());
+			tagWriter.endTag();
+		}
 
 		return EVAL_PAGE;
 	}
