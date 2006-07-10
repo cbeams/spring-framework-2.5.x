@@ -108,11 +108,11 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 		else {
 			writeOptionalAttribute(tagWriter, ID_ATTRIBUTE, autogenerateId());
 		}
-		tagWriter.writeAttribute("name", getName());
+		writeOptionalAttribute(tagWriter, "name", getName());
 	}
 
 	/**
-	 * Autogenerate the '<code>id</code>' attribute value for this tag. The deafault
+	 * Autogenerate the '<code>id</code>' attribute value for this tag. The default
 	 * implementation simply delegates to {@link #getName}.
 	 */
 	protected String autogenerateId() throws JspException {
