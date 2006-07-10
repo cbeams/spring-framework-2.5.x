@@ -69,8 +69,13 @@ public abstract aspect AbstractTransactionAspect extends TransactionAspectSuppor
 	
 	@SuppressAjWarnings("adviceDidNotMatch")
 	after(Object txObject) throwing(Throwable t) : transactionalMethodExecution(txObject) {
-		doCloseTransactionAfterThrowing(TransactionAspectSupport.currentTransactionInfo(), t);
-	}
+    try {
+      doCloseTransactionAfterThrowing(TransactionAspectSupport.currentTransactionInfo(), t);
+    }
+    catch (Throwable th) {
+      logger.error("Failed to close transaction after throwing in a Transactional method", th);
+    }
+  }
 	
 	@SuppressAjWarnings("adviceDidNotMatch")
 	after(Object txObject) returning() : transactionalMethodExecution(txObject) {
