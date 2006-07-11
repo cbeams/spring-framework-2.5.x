@@ -68,6 +68,8 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	/**
 	 * Create a new <code>DefaultNamespaceHandlerResolver</code> using the
 	 * default mapping file location.
+	 * @param classLoader the {@link ClassLoader} instance used to load mapping resources (may be <code>null</code>, in
+	 * which case the thread context ClassLoader will be used) 
 	 * @see #SPRING_HANDLER_MAPPINGS_LOCATION
 	 */
 	public DefaultNamespaceHandlerResolver(ClassLoader classLoader) {
@@ -77,12 +79,34 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	/**
 	 * Create a new <code>DefaultNamespaceHandlerResolver</code> using the
 	 * supplied mapping file location.
+	 * @param classLoader the {@link ClassLoader} instance used to load mapping resources (may be <code>null</code>, in
+	 * which case the thread context ClassLoader will be used)
+	 * @param handlerMappingsLocation the mapping file location
+	 * @see #SPRING_HANDLER_MAPPINGS_LOCATION
 	 */
 	public DefaultNamespaceHandlerResolver(ClassLoader classLoader, String handlerMappingsLocation) {
 		Assert.notNull(handlerMappingsLocation, "Handler mappings location must not be null");
 		this.classLoader = (classLoader == null ? ClassUtils.getDefaultClassLoader() : classLoader);
 		this.handlerMappingsLocation = handlerMappingsLocation;
 		initHandlerMappings();
+	}
+
+
+	/**
+	 * Locate the {@link NamespaceHandler} for the supplied namespace URI from the
+	 * configured mappings.
+	 * @param namespaceUri the relevant namespace URI
+	 * @return the located {@link NamespaceHandler} (never <code>null</code>)
+	 * @throws IllegalArgumentException if no {@link NamespaceHandler} can be
+	 * found for the supplied namespace URI
+	 */
+	public NamespaceHandler resolve(String namespaceUri) {
+		NamespaceHandler namespaceHandler = (NamespaceHandler) this.handlerMappings.get(namespaceUri);
+		if (namespaceHandler == null) {
+			throw new IllegalArgumentException(
+					"Unable to locate NamespaceHandler for namespace URI [" + namespaceUri + "]");
+		}
+		return namespaceHandler;
 	}
 
 
@@ -128,18 +152,6 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 			throw new FatalBeanException("Unable to load NamespaceHandler mappings using mapping location ["
 					+ this.handlerMappingsLocation + "].", ex);
 		}
-	}
-
-	/**
-	 * Locate the {@link NamespaceHandler} for the supplied namespace URI from the configured mappings.
-	 */
-	public NamespaceHandler resolve(String namespaceUri) {
-		NamespaceHandler namespaceHandler = (NamespaceHandler) this.handlerMappings.get(namespaceUri);
-		if (namespaceHandler == null) {
-			throw new IllegalArgumentException(
-					"Unable to locate NamespaceHandler for namespace URI [" + namespaceUri + "]");
-		}
-		return namespaceHandler;
 	}
 
 }
