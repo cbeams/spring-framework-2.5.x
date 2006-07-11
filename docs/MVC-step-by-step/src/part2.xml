@@ -35,9 +35,11 @@
         <filename class="directory">WEB-INF</filename> directory. Then copy the tag library
         descriptors <filename class="libraryfile">'c.tld'</filename> and
         <filename class="libraryfile">'fmt.tld'</filename> from the Jakarta Commons tag library
-        jar <filename class="libraryfile">'WEB-INF/lib/standard.jar'</filename>.</para>
-        <para>Next, define the tag libraries in <filename class="libraryfile">'WEB-INF/web.xml'</filename>
-        so that they can be used in your JSPs.</para>
+        jar <filename class="libraryfile">'WEB-INF/lib/standard.jar'</filename> into the new
+        directory called <filename class="directory">'WEB-INF/tld'</filename>.</para>
+        <para>Next, we define the location of the tag libraries in 
+        <filename class="libraryfile">'WEB-INF/web.xml'</filename> so that they can be used
+        in the JSPs.</para>
         <para><filename>'WEB-INF/web.xml'</filename>:</para>
         <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <web-app version="2.4"
@@ -80,27 +82,27 @@
         page that we're going to write. We ensure the same definitions are included in all
         our JSPs simply by including the header file. We're also going to put all JSPs in
         a directory named <filename class="directory">'jsp'</filename> under the
-	    <filename class="directory">'WEB-INF'</filename> directory. This will ensure that only
-	    the controller has access to the views since it will not be not possible to access these 
-	    pages directly via a URL in the browser. This strategy might not work in
-	    all application servers and if this is the case with the one you are using, move
-	    the <filename class="directory">'jsp'</filename> directory up a level. You would then use
+	    <filename class="directory">'WEB-INF'</filename> directory. This will ensure that views
+	    can only be accessed via the controller since it will not be not possible to access these 
+	    pages directly via a URL. This strategy might not work in all application servers and if
+	    this is the case with the one you are using, move the
+	    <filename class="directory">'jsp'</filename> directory up a level. You would then use
 	    <filename class="directory">'springapp/war/jsp'</filename> as the directory instead of
 	    <filename class="directory">'springapp/war/WEB-INF/jsp'</filename> in all the code
 	    examples that will follow.</para>
         
     </section>
     <section id="step2.2">
-        <title>Improve the view and the controller</title>
+        <title>Update the view to use a header file</title>
         <para>First we create the header file for inclusion in all the JSPs we create.</para>
         <para><filename>'springapp/war/WEB-INF/jsp/include.jsp'</filename>:</para>
         <programlisting><![CDATA[<%@ page session="false"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jstl/fmt" %>]]></programlisting>
-        <para>Now we can change <filename>'index.jsp'</filename> to use this include file
+        <para>Now we can update <filename>'index.jsp'</filename> to use this include file
         and since we are using JSTL, we can use the <literal>&lt;c:redirect/&gt;</literal>
-        tag for redirecting to our front <interfacename>Controller</interfacename>. This ties
-        the <filename>'index.jsp'</filename> into our application framework.</para>
+        tag for redirecting to our front <interfacename>Controller</interfacename>. This means
+        all requests for <filename>'index.jsp'</filename> will go through our application framework.</para>
         
         <para><filename>'springapp/war/index.jsp'</filename>:</para>
         <programlisting><![CDATA[<%@ include file="/WEB-INF/jsp/include.jsp" %>
@@ -115,8 +117,8 @@
         <para>Next, we move the view <filename>hello.jsp</filename> to the
         <filename class="directory">'WEB-INF/jsp'</filename> directory. Add the same include directive
         we added to <filename>index.jsp</filename> to <filename>hello.jsp</filename>. 
-        Now we also add the current date and time as output to be retrieved from the model,
-        passed to the view, using the JSTL &lt;c:out/&gt; tag.</para>
+        Now we also add the current date and time as output to be retrieved from the model
+        passed to the view which will be rendered using the JSTL &lt;c:out/&gt; tag.</para>
         <para><filename>'springapp/war/WEB-INF/jsp/hello.jsp'</filename>:</para>
         <programlisting><![CDATA[<%@ include file="/WEB-INF/jsp/include.jsp" %>
 
@@ -124,17 +126,16 @@
 <head><title>Hello :: Spring Application</title></head>
 <body>
 <h1>Hello - Spring Application</h1>
-<p>Greetings, it is now <c:out value="${now}"/>
-</p>
+<p>Greetings, it is now <c:out value="${now}"/></p>
 </body>
 </html>]]></programlisting>
     
         <para>There are a few changes we need to make to the <classname>HelloController</classname>.
-        Update the view's resource reference to its new location <filename>'WEB-INF/jsp/hello.jsp'</filename>.
-        Next, set the key/value pair for the current data and time value in the model to
+        First, let's update the view's resource reference to its new location <filename>'WEB-INF/jsp/hello.jsp'</filename>.
+        Next, set the key/value pair for the current data and time value in the model with
         the key identifier: <literal>"now"</literal> and the string value: <literal>'now'</literal>.</para>
 
-        <para><filename>'springapp/src/HelloController.java'</filename></para>
+        <para><filename>'springapp/src/springapp/web/HelloController.java'</filename></para>
         
         <programlisting><![CDATA[package springapp.web;
 
@@ -168,12 +169,13 @@ public class HelloController implements Controller {
 
         <para>Remember that the <interfacename>Controller</interfacename> has already been
         configured in <filename>'springapp-servlet.xml'</filename> file, so we are ready
-        to try out our enhanced application  after we build and deploy this new code. When we
+        to try out our enhancements after we build and deploy this new code. When we
         enter <ulink url="http://localhost:8080/springapp/">http://localhost:8080/springapp/</ulink>
-        in a browser, it should pull up <filename>'index.jsp'</filename>, which should
-        redirect to <filename>'hello.htm'</filename>, which in turn delegates our request to
-        the controller that sets the date and time in the model and then makes the model available
-        to the view.</para>
+        in a browser, it should pull up the welcome file <filename>'index.jsp'</filename>, which should
+        redirect to <filename>'hello.htm'</filename> and is handled by the
+        <literal>DispatcherServlet</literal>, which in turn delegates our request to
+        the page controller that puts the date and time in the model and then makes the model available
+        to the view <filename>'hello.jsp'</filename>.</para>
         
         <screenshot>
 		    <mediaobject>
@@ -192,77 +194,76 @@ public class HelloController implements Controller {
     </section>
     
     <section id="step2.4">
-        <title>Decouple the view and the controller</title>
+        <title>Decouple the view from the controller</title>
         <para>Right now the controller specifies the full path of the view, which creates an
         unnecessary dependency between the controller and the view. Ideally we would like to
         map to the view using a logical name, allowing us to switch the view without having
         to change the controller. You can set this mapping in a properties file if you like
         using a <classname>ResourceBundleViewResolver</classname> and a
-        <classname>SimpleUrlHandlerMapping</classname> class. If your mapping needs are simple
-        it is easier to just set a prefix and a suffix on the
-        <classname>InternalResourceViewResolver</classname>. The latter approach is the one that
-        I will implement now, so I modify the <filename>'springapp-servlet.xml'</filename> and
-        include this <literal>'viewResolver'</literal> entry. I have elected to use a
-        <classname>JstlView</classname> which will enable us to use JSTL in combination with
-        message resource bundles and it will also support internationalization.</para>
+        <classname>SimpleUrlHandlerMapping</classname> class. For basic mapping of a view to
+        a location, simply set a prefix and a suffix on the
+        <classname>InternalResourceViewResolver</classname>. This second approach is the one that
+        we will implement now, so we modify the <filename>'springapp-servlet.xml'</filename> and
+        declare a <literal>'viewResolver'</literal> entry. By choosing the 
+        <classname>JstlView</classname>, it will enable us to use JSTL in combination with
+        message resource bundles as well as provide us with the support for internationalization.</para>
         <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
         <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
-]]><lineannotation>&lt;!-- the application context definition for the springapp <classname>DispatcherServlet</classname> --&gt;</lineannotation><![CDATA[
-
-<beans>
-
-    <bean id="springappController" class="SpringappController"/>
-]]><emphasis><![CDATA[
-    <bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-        <property name="mappings">
-            <value>
-                /hello.htm=springappController
-            </value>
-        </property>
-    </bean>
-
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd">]]>
+    
+    <lineannotation>&lt;!-- the application context definition for the springapp DispatcherServlet --&gt;</lineannotation>
+            
+    <![CDATA[
+    <bean name="/hello.htm" class="springapp.web.HelloController"/>]]>
+    
+    <emphasis role="bold"><![CDATA[
     <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
-        <property name="prefix" value="/WEB-INF/jsp/"/>
-        <property name="suffix" value=".jsp"/>
-    </bean>
-]]></emphasis><![CDATA[
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"></property>
+        <property name="prefix" value="/WEB-INF/jsp/"></property>
+        <property name="suffix" value=".jsp"></property>        
+    </bean>]]></emphasis><![CDATA[
+            
 </beans>]]></programlisting>
-
-        <para>So now I can remove the prefix and suffix from the view name in the controller.</para>
+                
+        <para>Now we can remove the prefix and suffix from the view name in the controller, leaving the
+        controller to reference the view by its logical name <literal>"hello".</literal></para>
         
-        <para><filename>'springapp/src/SpringappController.java'</filename>:</para>
-        <programlisting><![CDATA[import org.springframework.web.servlet.mvc.Controller;
+        <para><filename>'springapp/src/springapp/web/HelloController.java'</filename>:</para>
+        <programlisting><![CDATA[package springapp.web;
+
+import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.io.IOException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class SpringappController implements Controller {
+import java.io.IOException;
+import java.util.Date;
+
+public class HelloController implements Controller {
 
     protected final Log logger = LogFactory.getLog(getClass());
 
-
     public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException {
+            throws ServletException, IOException {
 
-        String now = (new java.util.Date()).toString();
-        logger.info("returning hello view with " + now);
+    	String now = (new Date()).toString();
+        logger.info("Returning hello view with " + now);
 
         return new ModelAndView("hello", "now", now);
     }
 
 }]]></programlisting>
 
-        <para>Compile and deploy and the application should still work.</para>
+        <para>Let's compile and deploy the application and verify the application still works.</para>
 
     </section>
     
