@@ -11,9 +11,9 @@
             is still fully supported.</para>
             <para>Nothing will break if you forego the use of the new XML Schema-based
             approach to authoring Spring XML configuration files. All that you lose
-            out on is more succinct and clearer configuration. In the end, all of the
-            XML configuration, be it DTD- or Schema-based, all boils down to the same
-            object model in the container.</para>
+            out on is the opportunity to have more succinct and clearer configuration.
+            In the end, all of the XML configuration, be it DTD- or Schema-based, all
+            boils down to the same object model in the container.</para>
         </sidebar>
         <para>The central motivation for moving to XML Schema based configuration files was
         to make Spring XML configuration easier. The <emphasis>'classic'</emphasis>
@@ -31,13 +31,11 @@
         style of Spring XML configuration using only <literal>&lt;bean/&gt;</literal>
         elements. The new XML Schema-based configuration does, however, make
         Spring XML configuration files substantially clearer to read. In addition, it allows
-        you to express the intent of a bean definition.
-        </para>
+        you to express the intent of a bean definition.</para>
         <para>The key thing to remember is that the new custom tags work best for infrastructure
         or integration beans: for example, AOP, collections, transactions, integration with
-        3rd-party frameworks such as Mule, etc, while the existing bean tags are best suited to
-        application-specific beans, such as DAOs, service layer objects, validators, etc.
-        </para>
+        3rd-party frameworks such as Mule, etc., while the existing bean tags are best suited to
+        application-specific beans, such as DAOs, service layer objects, validators, etc.</para>
         <para>The examples included below will hopefully convince you that the inclusion
         of XML Schema support in Spring 2.0 was a good idea. The reception in the community
         has been encouraging; something that is not covered in this section (at least
@@ -96,8 +94,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             <title>The <literal>util</literal> schema</title>
             <para>First up is coverage of the <literal>util</literal> tags. As the name
             implies, the <literal>util</literal> tags deal with common, <emphasis>utility</emphasis>
-            configuration issues, such as configuring collections and suchlike.
-            </para>
+            configuration issues, such as configuring collections, referencing constants,
+            and suchlike.</para>
             <para>To use the tags in the <literal>util</literal> schema, you need to have
             the following preamble at the top of your Spring XML configuration file;
             the emboldened text in the snippet below references the correct schema so that
@@ -699,6 +697,38 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             <literal>'src/org/springframework/beans/factory/xml'</literal> directory of the
             Spring source distribution.</para>
         </section>
+        <section id="xsd-config-body-schemas-beans">
+            <title>The <literal>beans</literal> schema</title>
+            <para>Last but not least we have the tags in the <literal>beans</literal> schema.
+            These are the same tags that have been in Spring since the very dawn of the framework.
+            Examples of the various tags in the <literal>beans</literal> schema are not shown here
+            because they are quite comprehensively covered in the section entitled <xref linkend="beans-factory-properties-detailed"/>
+            (and indeed in that entire <link linkend="beans">chapter</link>).</para>
+            <para>One thing that is new to the beans tags themselves in Spring 2.0 is the idea
+            of arbitrary bean metadata. In Spring 2.0 it is now possible to add zero or more
+            key / value pairs to <literal>&lt;bean/&gt;</literal> XML definitions. What, if
+            anything, is done with this extra metadata is totally up to your own custom logic (and
+            so is typically only of use if you are writing your own custom tags as described in
+            the appendix entitled <xref linkend="extensible-xml"/>).</para>
+            <para>Find below an example of the <literal>&lt;meta/&gt;</literal> tag in the context
+            of a surrounding <literal>&lt;bean/&gt;</literal> (please note that without any logic
+            to interpret it said metadata is effectively useless as-is).</para>
+            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="foo" class="x.y.Foo">
+        ]]><emphasis role="bold"><![CDATA[<meta key="cacheName" value="foo"/>]]></emphasis><![CDATA[
+        <property name="name" value="Rick"/>
+    </bean>
+
+</beans>]]></programlisting>
+            <para>In the case of the above example, one would assume that there is some
+            logic that will consume the bean definition and setup some caching infrastructure
+            using the supplied metadata.</para>
+        </section>
     </section>
     <section id="xsd-config-setup">
         <title>Setting up your IDE</title>
@@ -792,19 +822,18 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                     and <emphasis>may</emphasis> may be featured in the next release.</para>
                 </sidebar>
                 <para>Unfortunately, precisely because there is no standard XML editor for Eclipse,
-                there are no further steps showing you how to configure XML Schema support in Eclipse...
-                each XML editor plugin would require its very own dedicated section, and this
-                is <emphasis>Spring</emphasis> reference documentation, not Eclipse XML editor
-                documentation. You will have to read the documentation that comes with your XML
-                editor plugin (good luck there) and figure it out for yourself. (The author
-                is not trying to be cavalier, it's just that writing step-by-step setups for
+                there are (bar the one below) no further steps showing you how to configure XML
+                Schema support in Eclipse... each XML editor plugin would require its very own
+                dedicated section, and this is <emphasis>Spring</emphasis> reference documentation,
+                not Eclipse XML editor documentation. You will have to read the documentation that
+                comes with your XML editor plugin (good luck there) and figure it out for yourself.
+                (The author is not trying to be cavalier, it's just that writing step-by-step setups for
                 loads of Eclipse XML editor plugins would probably not be worth the effort
                 precisely because there is no standard and there are so many different editors.)</para>
-                <para>Having said that...</para>
             </step>
             <step>
                 <title>Step Three</title>
-                <para>If you are using the Web Tools Platform (WTP) for Eclipse, you don't need to
+                <para>However, if you are using the Web Tools Platform (WTP) for Eclipse, you don't need to
                 do anything other than open a Spring XML configuration file using the WTP platform's
                 XML editor. As can be seen in the screenshot below, you immediately get some slick
                 IDE-level support for autocompleting tags and suchlike. The moral of this story
@@ -825,17 +854,15 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         </procedure>
         <procedure id="xsd-config-setup-idea">
             <title>Setting up IntelliJ IDEA</title>
-            <para>The following steps illustrate how setting up
-            <ulink url="http://www.jetbrains.com/idea/">IntelliJ IDEA</ulink> to be XSD-aware. It
-            is very simple to do so.</para>
-            <para>The assumption in the following steps is that you already have an IDEA project
+            <para>The following steps illustrate setting up the
+            <ulink url="http://www.jetbrains.com/idea/">IntelliJ IDEA</ulink> IDE to be XSD-aware.
+            The assumption in the following steps is that you already have an IDEA project
             open (either a brand new project or an already existing one).</para>
             <step>
                 <title>Step One</title>
-                <para>Create a new XML file. You can name this file whatever you want. In the
-                example below, the file is named <literal>'context.xml'</literal>.
-                Copy and paste the following text into the file so that it matches
-                the attendant screenshot.</para>
+                <para>Create a new XML file (you can name this file whatever you want). In the
+                example below, the file is named <literal>'context.xml'</literal>. Copy and paste
+                the following text into the file so that it matches the attendant screenshot.</para>
                 <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
