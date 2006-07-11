@@ -38,6 +38,13 @@ public class DefaultNamespaceHandlerResolverTests extends TestCase {
 		assertEquals("Incorrect handler loaded", UtilNamespaceHandler.class, handler.getClass());
 	}
 
+	public void testResolvedMappedHandlerWithNoArgCtor() {
+		DefaultNamespaceHandlerResolver resolver = new DefaultNamespaceHandlerResolver();
+		NamespaceHandler handler = resolver.resolve("http://www.springframework.org/schema/util");
+		assertNotNull("Handler should not be null.", handler);
+		assertEquals("Incorrect handler loaded", UtilNamespaceHandler.class, handler.getClass());
+	}
+
 	public void testNonExistentHandlerClass() throws Exception {
 		String mappingPath = "org/springframework/beans/factory/xml/support/nonExistent.properties";
 		try {
