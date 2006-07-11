@@ -352,7 +352,7 @@ Total time: 4 seconds]]></screen>
   </section>
     
   <section id="step1.4">
-    <title>Test the application</title>
+    <title>Check the application works</title>
 
       <para>Let's just quickly start Tomcat by running <filename>'${appserver.home}/bin/startup.bat'</filename>.
       To make sure that we can access the application, run the <literal>'list'</literal> task from our build file to
@@ -412,7 +412,7 @@ Total time: 3 seconds]]></screen>
 
   </section>
 
-  <section>
+    <section id="step1.6">
     <title>Modify <filename>'web.xml'</filename> in the <filename class="directory">'WEB-INF'</filename> directory</title>
 
     <para>Go to the <filename class="directory">'springapp/war/WEB-INF'</filename>
@@ -499,7 +499,7 @@ Total time: 3 seconds]]></screen>
     
   </section>
 
-  <section>
+    <section id="step1.7">
     <title>Copy libraries to <filename class="directory">'WEB-INF/lib'</filename></title>
 
     <para>First create a <filename class="directory">'lib'</filename> directory in
@@ -515,8 +515,8 @@ Total time: 3 seconds]]></screen>
 
   </section>
 
-  <section>
-    <title>Create your <interfacename>Controller</interfacename></title>
+  <section id="step1.8">
+    <title>Create the <interfacename>Controller</interfacename></title>
 
     <para>Create your <interfacename>Controller</interfacename> class – we are
     naming it <classname>HelloController</classname>, and it is defined in the
@@ -582,7 +582,131 @@ public class HelloController implements Controller {
       
   </section>
 
-  <section>
+  <section id="step1.9">
+    <title>Write a test for the <interfacename>Controller</interfacename></title>
+
+    <para>Testing is a vital part of software development. It is also a core practice in Agile
+    development. We have found that the best time to write tests is during development, not after, so
+    even though our controller doesn't contain complex logic, we're going to write a test. This will
+    allow us to make changes to it in the future with confidence. Let's create a new directory under
+    <filename class="directory">'springapp'</filename> called <filename class="directory">'test'</filename>.
+    This is where all our tests will go in a package structure that will mirror the source tree in
+    <filename class="directory">'springapp/src</filename>.</para>
+        
+    <para>Create a test class called <filename class="libraryfile">'HelloControllerTests'</filename> and
+    make it extend JUnit's test class <classname>TestCase</classname>. It is a unit test that
+    verifies the view name returned by <classname>handleRequest()</classname> matches the name of
+    the view we expect: <filename>'hello.jsp'</filename>.</para>
+    
+    <para><filename>'springapp/test/springapp/web/HelloControllerTests'</filename>:</para>
+    
+      <programlisting><![CDATA[package springapp.web;
+
+import org.springframework.web.servlet.ModelAndView;
+
+import springapp.web.HelloController;
+
+import junit.framework.TestCase;
+
+public class HelloWorldControllerTests extends TestCase {
+
+  public void testHandleRequestView() throws Exception{		
+      HelloController controller = new HelloController();
+      ModelAndView modelAndView = controller.handleRequest(null, null);		
+      assertEquals("hello.jsp", modelAndView.getViewName());
+  }
+  
+}]]></programlisting>    
+        
+    <remark><para>If you are using an IDE, you will may want to run your tests within your IDE.
+    Configure your project's build path by adding the <filename class="libraryfile">
+    spring-framework-2.0/lib/junit/junit.jar</filename> to it.</para></remark>        
+    
+    <para>To run the test (and all the tests we're going to write), we need to add an Ant test task to our
+    build script <filename class="libraryfile">'build.xml'</filename>. First, we copy the
+    <filename class="libraryfile">junit.jar</filename> from <filename class="libraryfile">
+    'spring-framework-2.0/lib/junit'</filename> to <filename class="directory">'war/WEB-INF/lib'</filename>.
+    Instead of creating a single task for compiling the tests and then running them,
+    let's break them down into two distinct tasks: <literal>'buildtests'</literal> and
+    <literal>'tests'</literal> which depends on <literal>'buildtests'</literal>.</para>
+    
+    <para><filename>'springapp/build.xml'</filename>:</para>
+    
+      <programlisting><![CDATA[    <property name="test.dir" value="test"/>
+        
+    <target name="buildtests" description="Compile test tree java files">
+        <mkdir dir="${build.dir}"/>
+        <javac destdir="${build.dir}" source="1.5" target="1.5" debug="true"
+            deprecation="false" optimize="false" failonerror="true">
+            <src path="${test.dir}"/>
+            <classpath refid="master-classpath"/>
+        </javac>
+    </target>
+    
+    <target name="tests" depends="build, buildtests" description="Run tests">
+        <junit printsummary="on"
+            fork="false"
+            haltonfailure="false"
+            failureproperty="tests.failed"
+            showoutput="true">
+            <classpath refid="master-classpath"/>
+            <formatter type="brief" usefile="false"/>
+            
+            <batchtest>
+                <fileset dir="${build.dir}">
+                    <include name="**/*Tests.*"/>
+                </fileset>
+            </batchtest>
+            
+        </junit>
+        
+        <fail if="tests.failed">
+            tests.failed=${tests.failed}
+            ***********************************************************
+            ***********************************************************
+            ****  One or more tests failed!  Check the output ...  ****
+            ***********************************************************
+            ***********************************************************
+        </fail>
+    </target>]]></programlisting>    
+    
+    <para>Now run the Ant <literal>'tests'</literal> task and the test should pass.</para>
+    <para></para>
+    
+      <programlisting><![CDATA[$ ant tests
+Buildfile: build.xml
+
+build:
+
+buildtests:
+    [javac] Compiling 1 source file to D:\Documents and Settings\portia\workspace\springdev\springapp-part1\war\WEB-INF\classes
+
+tests:
+    [junit] Running springapp.web.HelloWorldControllerTests
+    [junit] 11-Jul-2006 14:55:53 springapp.web.HelloController handleRequest
+    [junit] INFO: Returning hello view
+    [junit] Tests run: 1, Failures: 0, Errors: 0, Time elapsed: 0.03 sec
+    [junit] Testsuite: springapp.web.HelloWorldControllerTests
+    [junit] Tests run: 1, Failures: 0, Errors: 0, Time elapsed: 0.03 sec
+
+    [junit] ------------- Standard Error -----------------
+    [junit] 11-Jul-2006 14:55:53 springapp.web.HelloController handleRequest
+    [junit] INFO: Returning hello view
+    [junit] ------------- ---------------- ---------------
+
+BUILD SUCCESSFUL
+Total time: 2 seconds
+    ]]></programlisting>
+    
+    
+    <para>Another of the best pratices of Agile development is <emphasis>Continuous Integration</emphasis>.
+    It's a good idea to ensure your tests are run with every build (ideally as automated project builds)
+    so that you know your application logic is behaving as expected as the code evolves.
+    </para>
+            
+  </section>
+  
+  <section id="step1.10">
     <title>Create the <interfacename>View</interfacename></title>
 
     <para>Now it is time to create our first view. As we mentioned earlier,
@@ -601,7 +725,7 @@ public class HelloController implements Controller {
 
   </section>
 
-  <section>
+  <section id="step1.11">
     <title>Compile and deploy the application</title>
 
     <para>Run the <literal>'deploy'</literal> Ant target (which invokes the
@@ -656,8 +780,8 @@ INFO: Servlet 'springapp' configured successfully]]></screen>
     
   </section>
 
-  <section id="step1.11">
-    <title>Test the new version</title>
+  <section id="step1.12">
+    <title>Try out the application</title>
 
     <para>Let's try this new version of the application.</para>
 
@@ -706,6 +830,11 @@ INFO: Servlet 'springapp' configured successfully]]></screen>
       </listitem>
 
       <listitem>
+       <para>A test class for the page controller, <classname>HelloControllerTests</classname>,
+       to verify the name of the view is the one we expect.</para>
+      </listitem>
+        
+      <listitem>
         <para>A view, <filename>'hello.jsp'</filename>, that again is extremely
         basic. The good news is the whole setup works and we are now ready to add more
         functionality.</para>
@@ -718,6 +847,7 @@ INFO: Servlet 'springapp' configured successfully]]></screen>
 		<mediaobject>
 			<imageobject role="fo">
 				<imagedata fileref="images/dir-structure-endp1.png" format="PNG" align="center" />
+				<imagedata fileref="images/bob2.png" format="PNG" align="center" />				
 			</imageobject>
 			<imageobject role="html">
 				<imagedata fileref="images/dir-structure-endp1.png" format="PNG" align="center" />
