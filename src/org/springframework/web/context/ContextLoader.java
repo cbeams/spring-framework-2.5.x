@@ -229,12 +229,8 @@ public class ContextLoader {
 
 		Class contextClass = determineContextClass(servletContext);
 		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
-			if (ConfigurableWebApplicationContext.class.getClassLoader() != contextClass.getClassLoader()) {
-			}
 			throw new ApplicationContextException("Custom context class [" + contextClass.getName() +
-					"] is not of type ConfigurableWebApplicationContext" + (ConfigurableWebApplicationContext.class.getClassLoader() != contextClass.getClassLoader() ?
-			    " this could be because they are loaded from different classloaders: [" + (contextClass.getClassLoader().toString() + " and "
-			    + ConfigurableWebApplicationContext.class.getClassLoader().toString()) + "]" : ""));
+					"] is not of type ConfigurableWebApplicationContext");
 		}
 
 		ConfigurableWebApplicationContext wac =
