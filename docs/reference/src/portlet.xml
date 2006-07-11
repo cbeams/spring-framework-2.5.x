@@ -5,6 +5,15 @@
 	<section id="portlet-introduction">
 
 		<title>Introduction</title>
+		
+		<sidebar>
+		    <title>JSR-168 The Java Portlet Specification</title>
+		    <para>For more general information about portlet development, please
+		    review a whitepaper from Sun entitled 
+		    <ulink url="http://developers.sun.com/prodtech/portalserver/reference/techart/jsr168/">"Introduction to JSR 168"</ulink>,
+		    and of course the
+		    <ulink url="http://jcp.org/aboutJava/communityprocess/final/jsr168/">JSR-168 Specification</ulink> itself.</para>
+		</sidebar>
 
 		<para>In addition to supporting conventional (servlet-based) Web development,
 		Spring also supports JSR-168 Portlet development. As much as possible, the
@@ -18,15 +27,6 @@
 		    same in Spring Portlet MVC, there are some notable differences
 		    created by the unique workflow of JSR-168 portlets.</para>
 		</note>
-		
-		<sidebar>
-		    <title>JSR-168 The Java Portlet Specification</title>
-		    <para>For more general information about portlet development, please
-		    review a whitepaper from Sun entitled 
-		    <ulink url="http://developers.sun.com/prodtech/portalserver/reference/techart/jsr168/">"Introduction to JSR 168"</ulink>,
-		    and of course the
-		    <ulink url="http://jcp.org/aboutJava/communityprocess/final/jsr168/">JSR-168 Specification</ulink> itself.</para>
-		</sidebar>
 
 		<para>The main way in which portlet workflow differs from servlet 
 		workflow is that the request to the portlet can have two distinct 
@@ -39,6 +39,9 @@
 		multiple times. This provides (and requires) a clean separation between
 		the activities that modify the persistent state of your system and the 
 		activities that generate what is displayed to the user.</para>
+      
+        <!-- insert some content about Spring WebFlow here -->
+        &swf-sidebar;
 
 		<para>The dual phases of portlet requests are one of the real strengths 
 		of the JSR-168 specification. For example, dynamic search results can be
@@ -114,13 +117,13 @@
             in detail in the section entitled <xref linkend="beans-factory-scopes-other"/></para>
         </section>
 		
-		<tip>
+		<note>
 		    <para>The Spring distibution ships with a complete Spring Portlet MVC
 		    sample application that demonstrates all of the features and functionality
-		    of the Spring Portlet MVC framework.</para>
-		    <para>This 'petportal' application can be found in the
-		    <literal>samples/petportal'</literal> directory of the Spring distribution.</para>
-		</tip>
+		    of the Spring Portlet MVC framework. This 'petportal' application can be found
+		    in the <filename class="directory">'samples/petportal'</filename> directory of
+		    the full Spring distribution.</para>
+		</note>
 
 	</section>
 
