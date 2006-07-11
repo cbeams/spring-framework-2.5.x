@@ -2059,6 +2059,9 @@
 			<param name="spring-module" value="spring-jca"/>
 		</antcall>
 		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-jdo"/>
+		</antcall>
+		<antcall target="mvn.install">
 			<param name="spring-module" value="spring-ojb"/>
 		</antcall>
 		<antcall target="mvn.install">
@@ -2070,10 +2073,6 @@
 		<antcall target="mvn.install">
 			<param name="spring-module" value="spring-struts"/>
 		</antcall>
-		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-tomcat-weaver"/>
-		</antcall>
-
 	</target>
 
 
