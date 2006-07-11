@@ -155,9 +155,8 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJInvocationCon
 
 		// Safety of cast is already enforced by superclass
 		String[] beanDefinitionNames = BeanFactoryUtils.beanNamesIncludingAncestors((ListableBeanFactory) beanFactory);		
-		
 		for (String beanName : beanDefinitionNames) {
-			if (!isIncluded(beanName)) {
+			if (!isIncluded(beanName) || isAbstract(beanName, beanFactory)) {
 				continue;
 			}
 			
@@ -199,8 +198,21 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJInvocationCon
 		return advisors;
 	}
 
-	// TODO: consider creating intermediate OrderedPointcutAdvisor interface between
-	// PointcutAdvisor and InstantiationModelAwarePointcutAdvisor
+	/**
+	 * Is the bean definition identifed by the supplied bean abstract?
+	 */
+	private boolean isAbstract(String beanName, BeanFactory beanFactory) {
+		if(beanFactory instanceof ConfigurableListableBeanFactory) {
+			ConfigurableListableBeanFactory clbf = (ConfigurableListableBeanFactory) beanFactory;
+			if(clbf.containsBeanDefinition(beanName)) {
+			  BeanDefinition beanDefinition = clbf.getBeanDefinition(beanName);
+				return beanDefinition.isAbstract();
+			}
+		}
+		// cannot get the bean definition or it doesn't exist - assume not abstract.
+		return false;
+	}
+
 	private void setAdvisorOrderIfNecessary(List<Advisor> advisors, Object beanInstance) {
 		if (beanInstance instanceof Ordered) {
 			int order = ((Ordered)beanInstance).getOrder();
