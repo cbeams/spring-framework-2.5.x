@@ -1377,8 +1377,8 @@ public class OptimisticOperationExecutor implements Ordered {
        
 	<programlisting><![CDATA[@Retention(RetentionPolicy.RUNTIME)
 public @interface Idempotent {
-  // marker annotation
-}]]></programlisting>
+  ]]><lineannotation>// marker annotation</lineannotation>
+}</programlisting>
        
        <para>and use the annotation to annotate the implementation of service operations.
        The change to the aspect to only retry idempotent operations simply involves
@@ -1706,9 +1706,9 @@ public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable {
 	</para>
 
      <programlisting><![CDATA[public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
-    // start stopwatch
+    ]]><lineannotation>// start stopwatch</lineannotation><![CDATA[
     Object retVal = pjp.proceed();
-    // stop stopwatch
+    ]]><lineannotation>// stop stopwatch</lineannotation><![CDATA[
     return retVal;
 }]]></programlisting>
 	
@@ -1840,7 +1840,7 @@ public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable {
 </aop:config>
 
 <tx:advice id="tx-advice">
-<tx:attributes>
+  <tx:attributes>
     <tx:method name="*" propagation="REQUIRED"/>
   </tx:attributes>
 </tx:advice>]]></programlisting>
@@ -1956,8 +1956,8 @@ public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable {
        
 	<programlisting><![CDATA[@Retention(RetentionPolicy.RUNTIME)
 public @interface Idempotent {
-  // marker annotation
-}]]></programlisting>
+  ]]><lineannotation>// marker annotation</lineannotation>
+}</programlisting>
        
        <para>and using the annotation to annotate the implementation of service operations.
        The change to the aspect to only retry idempotent operations simply involves
@@ -2020,12 +2020,6 @@ public @interface Idempotent {
 	...
 	
 </aop:config>]]></programlisting>
- 
-	<para>
-	 Note that this setting applies on a <emphasis>per <literal>&lt;aop-config/&gt;</literal></emphasis> basis; 
-	 i.e. you can have multiple <literal>&lt;aop-config/&gt;</literal> elements,
-	 with some configured to force CGLIB-based proxying and some not to.
-	</para>
 	
   	<para>
   	 To force CGLIB proxying when using the @AspectJ autoproxy support, set the 
@@ -2040,32 +2034,28 @@ public @interface Idempotent {
   <section id="aop-aspectj-programmatic">
   	<title>Programmatic creation of @AspectJ Proxies</title>
 
-	<para>
-	In addition to declaring aspects in your configuration using either &lt;aop:config&gt;
-	or &lt;aop:aspectj-autoproxy&gt; it is also possible to create programmatically create
-	proxies that advise target objects. For the full details of Spring's AOP API, see the
-	next chapter. Here we want to focus on the ability to automatically create proxies
-	using @AspectJ aspects.
-	</para>
+	<para>In addition to declaring aspects in your configuration using either
+	<literal>&lt;aop:config&gt;</literal> or <literal>&lt;aop:aspectj-autoproxy&gt;</literal>
+	it is also possible programmatically to create proxies that advise target objects. For the
+	full details of Spring's AOP API, see the next chapter. Here we want to focus on the ability
+	to automatically create proxies	using @AspectJ aspects.</para>
 	
 	<para>The class <classname>org.springframework.aop.aspectj.annotation.AspectJProxyFactory</classname>
 	can be used to create a proxy for a target object that is advised by one or more
 	@AspectJ aspects. Basic usage for this class is very simple, as illustrated below. See 
-	the Javadoc for full information.
-	</para>
+	the Javadocs for full information.</para>
 
-	<programlisting><![CDATA[// create a factory that can generate a proxy for the given target object
+	<programlisting><lineannotation>// create a factory that can generate a proxy for the given target object</lineannotation><![CDATA[
 AspectJProxyFactory factory = new AspectJProxyFactory(targetObject); 
 
-// add an aspect, the class must be an @AspectJ aspect
-// you can call this as many times as you need with different aspects
+]]><lineannotation>// add an aspect, the class must be an @AspectJ aspect
+// you can call this as many times as you need with different aspects</lineannotation><![CDATA[
 factory.addAspect(SecurityManager.class);
 
-// you can also add existing aspect instances, the type of the object
-// supplied must be an @AspectJ aspect
+]]><lineannotation>// you can also add existing aspect instances, the type of the object supplied must be an @AspectJ aspect</lineannotation><![CDATA[
 factory.addAspect(usageTracker);	
 
-// now get the proxy object...
+]]><lineannotation>// now get the proxy object...</lineannotation><![CDATA[
 MyInterfaceType proxy = factory.getProxy();]]></programlisting>
 	
   </section>
@@ -2105,23 +2095,21 @@ MyInterfaceType proxy = factory.getProxy();]]></programlisting>
 		  <literal>new</literal> operator, or by an ORM tool as a result of a database query.
 		</para>
 		
-		<remark>
-		    <para>
-		        The <classname>DependencyInjectionInterceptorFactoryBean</classname>
-		        in the <literal>org.springframework.orm.hibernate.support</literal> package
-		        can be used to have Spring create and configure prototype domain objects for 
-		        Hibernate (using either autowiring or named prototype bean definitions).
-		        The interceptor does not of course support 
-		        configuration of objects that you create yourself programmatically rather than
-	            retrieve from the database. Similar techniques may be possible with other
-		        frameworks. As ever, be pragramatic and choose the simplest thing
-		        that meets your requirements. Please note that the aforementioned class does
-		        <emphasis role="bold">not</emphasis> ship with the Spring distribution. If you
-		        want to make use of it, you will have to download it from the Spring CVS repository
-		        and compile it yourself; the file itself can be found in the <literal>'sandbox'</literal>
-		        directory of the Spring CVS repository tree.
-		    </para>
-		</remark>
+		<para>
+			The <classname>DependencyInjectionInterceptorFactoryBean</classname>
+			in the <literal>org.springframework.orm.hibernate.support</literal> package
+			can be used to have Spring create and configure prototype domain objects for 
+			Hibernate (using either autowiring or named prototype bean definitions).
+			The interceptor does not of course support 
+			configuration of objects that you create yourself programmatically rather than
+			retrieve from the database. Similar techniques may be possible with other
+			frameworks. As ever, be pragramatic and choose the simplest thing
+			that meets your requirements. Please note that the aforementioned class does
+			<emphasis role="bold">not</emphasis> ship with the Spring distribution. If you
+			want to make use of it, you will have to download it from the Spring CVS repository
+			and compile it yourself; the file itself can be found in the <literal>'sandbox'</literal>
+			directory of the Spring CVS repository tree.
+		</para>
 		  
 		<para>
 		  The <interfacename>@Configurable</interfacename> annotation marks a class as eligible for
@@ -2297,9 +2285,7 @@ public class Account {
     setBeanWiringInfoResolver(new ClassNameBeanWiringInfoResolver());
   }
 
-  /**
-   * The creation of a new bean (any object in the domain model)
-   */
+  ]]><lineannotation>// the creation of a new bean (any object in the domain model)</lineannotation><![CDATA[
   protected pointcut beanCreation(Object beanInstance) :
     initialization(new(..)) &&
     SystemArchitecture.inDomainModel() && 
@@ -2320,7 +2306,7 @@ public class Account {
 		<para>The majority of AspectJ aspects are
 		<emphasis>singleton</emphasis> aspects. Configuration of these aspects is very
 		easy, simply create a bean definition referencing the aspect type as normal, and 
-		include the bean attribute <literal>factory-method="aspectOf"</literal>. This
+		include the bean attribute <literal>'factory-method="aspectOf"'</literal>. This
 		ensures that Spring obtains the aspect instance by asking AspectJ for it rather
 		than trying to create an instance itself. For example:</para>
 
@@ -2339,8 +2325,8 @@ public class Account {
 	   aspects that you want to use with Spring AOP, and these aspects are all configured
 	   using Spring then you'll need to tell the Spring AOP @AspectJ autoproxying support
 	   which subset of the @AspectJ aspects defined in the configuration should be used
-	   for autoproxying. You can do this by using one or more <literal>include</literal>
-	   elements inside the <literal>&lt;aop:aspectj-autoproxy&gt;</literal> declaration.
+	   for autoproxying. You can do this by using one or more <literal>&lt;include/&gt;</literal>
+	   elements inside the <literal>&lt;aop:aspectj-autoproxy/&gt;</literal> declaration.
 	   Each include element specifies a name pattern, and only beans with names matched
 	   by at least one of the patterns will be used for Spring AOP autoproxy configuration:</para>
 
@@ -2383,7 +2369,7 @@ public class Account {
 </aspectj>]]></programlisting>
 		  		  
 		<para>
-			The '<literal>include</literal>' element tells AspectJ what set of types
+			The <literal>&lt;include/&gt;</literal>' element tells AspectJ what set of types
 			should be included in the weaving process. Use the package prefix for your
 			application followed by "..*" (meaning '... and any type defined in a subpackage
 			of this') as a good default. Using the include element is important as otherwise
