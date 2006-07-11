@@ -16,12 +16,6 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 import org.quartz.CronTrigger;
@@ -39,11 +33,17 @@ import org.quartz.SchedulerListener;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.TriggerListener;
-
 import org.springframework.beans.TestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.TestMethodInvokingTask;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Juergen Hoeller
@@ -128,9 +128,9 @@ public class QuartzSupportTests extends TestCase {
 		schedulerContext.put("otherTestBean", tb);
 		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
 		if (explicitJobDetail) {
-			schedulerFactoryBean.setJobDetails(new JobDetail[] {jobDetail0});
+			schedulerFactoryBean.setJobDetails(new JobDetail[]{jobDetail0});
 		}
-		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
+		schedulerFactoryBean.setTriggers(new Trigger[]{trigger0, trigger1});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
 		}
@@ -217,7 +217,7 @@ public class QuartzSupportTests extends TestCase {
 		Map schedulerContext = new HashMap();
 		schedulerContext.put("otherTestBean", tb);
 		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
-		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
+		schedulerFactoryBean.setTriggers(new Trigger[]{trigger0, trigger1});
 		if (overwrite) {
 			schedulerFactoryBean.setOverwriteExistingJobs(true);
 		}
@@ -311,7 +311,7 @@ public class QuartzSupportTests extends TestCase {
 		Map schedulerContext = new HashMap();
 		schedulerContext.put("otherTestBean", tb);
 		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
-		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
+		schedulerFactoryBean.setTriggers(new Trigger[]{trigger0, trigger1});
 		if (overwrite) {
 			schedulerFactoryBean.setOverwriteExistingJobs(true);
 		}
@@ -374,7 +374,7 @@ public class QuartzSupportTests extends TestCase {
 	/*public void testMethodInvocationWithConcurrency() throws Exception {
 		methodInvokingConcurrency(true);
 	}*/
-	
+
 	// We can't test both since Quartz somehow seems to keep things in memory
 	// enable both and one of them will fail (order doesn't matter).
 	/*public void testMethodInvocationWithoutConcurrency() throws Exception {
@@ -414,10 +414,10 @@ public class QuartzSupportTests extends TestCase {
 		trigger1.afterPropertiesSet();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
-		schedulerFactoryBean.setJobDetails(new JobDetail[] {jobDetail1});
-		schedulerFactoryBean.setTriggers(new Trigger[] {trigger1, trigger0});
+		schedulerFactoryBean.setJobDetails(new JobDetail[]{jobDetail1});
+		schedulerFactoryBean.setTriggers(new Trigger[]{trigger1, trigger0});
 		schedulerFactoryBean.afterPropertiesSet();
-		
+
 		// ok scheduler is set up... let's wait for like 4 seconds
 		try {
 			Thread.sleep(4000);
@@ -447,7 +447,7 @@ public class QuartzSupportTests extends TestCase {
 
 		task1.stop();
 		assertEquals(2, task1.counter);
-		
+
 		// Although we're destroying the scheduler, it does seem to keep things in memory:
 		// When executing both tests (concurrent and non-concurrent), the second test always
 		// fails.
@@ -518,8 +518,8 @@ public class QuartzSupportTests extends TestCase {
 				return scheduler;
 			}
 		};
-		schedulerFactoryBean.setJobDetails(new JobDetail[] {jobDetail0, jobDetail1});
-		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
+		schedulerFactoryBean.setJobDetails(new JobDetail[]{jobDetail0, jobDetail1});
+		schedulerFactoryBean.setTriggers(new Trigger[]{trigger0, trigger1});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
 		}
@@ -589,7 +589,7 @@ public class QuartzSupportTests extends TestCase {
 	public void testMethodInvokingJobDetailFactoryBeanWithListenerNames() throws Exception {
 		TestMethodInvokingTask task = new TestMethodInvokingTask();
 		MethodInvokingJobDetailFactoryBean mijdfb = new MethodInvokingJobDetailFactoryBean();
-		String[] names = new String[] {"test1", "test2"};
+		String[] names = new String[]{"test1", "test2"};
 		mijdfb.setName("myJob1");
 		mijdfb.setGroup(Scheduler.DEFAULT_GROUP);
 		mijdfb.setTargetObject(task);
@@ -603,7 +603,7 @@ public class QuartzSupportTests extends TestCase {
 
 	public void testJobDetailBeanWithListenerNames() {
 		JobDetailBean jobDetail = new JobDetailBean();
-		String[] names = new String[] {"test1", "test2"};
+		String[] names = new String[]{"test1", "test2"};
 		jobDetail.setJobListenerNames(names);
 		List result = Arrays.asList(jobDetail.getJobListenerNames());
 		assertEquals(Arrays.asList(names), result);
@@ -611,7 +611,7 @@ public class QuartzSupportTests extends TestCase {
 
 	public void testCronTriggerBeanWithListenerNames() {
 		CronTriggerBean trigger = new CronTriggerBean();
-		String[] names = new String[] {"test1", "test2"};
+		String[] names = new String[]{"test1", "test2"};
 		trigger.setTriggerListenerNames(names);
 		List result = Arrays.asList(trigger.getTriggerListenerNames());
 		assertEquals(Arrays.asList(names), result);
@@ -619,7 +619,7 @@ public class QuartzSupportTests extends TestCase {
 
 	public void testSimpleTriggerBeanWithListenerNames() {
 		SimpleTriggerBean trigger = new SimpleTriggerBean();
-		String[] names = new String[] {"test1", "test2"};
+		String[] names = new String[]{"test1", "test2"};
 		trigger.setTriggerListenerNames(names);
 		List result = Arrays.asList(trigger.getTriggerListenerNames());
 		assertEquals(Arrays.asList(names), result);
@@ -630,7 +630,7 @@ public class QuartzSupportTests extends TestCase {
 	 */
 	public void testMultipleSchedulers() throws Exception {
 		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleSchedulers.xml");
+						new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleSchedulers.xml");
 
 		try {
 			Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
@@ -644,9 +644,35 @@ public class QuartzSupportTests extends TestCase {
 		}
 	}
 
+	public void testSchedulerWithTaskExecutor() throws Exception {
+		CountingTaskExecutor taskExecutor = new CountingTaskExecutor();
+
+		JobDetail jobDetail = new JobDetail();
+		jobDetail.setJobClass(DummyJob.class);
+		jobDetail.setName("myJob");
+
+		SimpleTriggerBean trigger = new SimpleTriggerBean();
+		trigger.setName("myTrigger");
+		trigger.setJobDetail(jobDetail);
+		trigger.setStartDelay(1);
+		trigger.setRepeatInterval(500);
+		trigger.setRepeatCount(1);
+		trigger.afterPropertiesSet();
+
+		SchedulerFactoryBean bean = new SchedulerFactoryBean();
+		bean.setTaskExecutor(taskExecutor);
+		bean.setTriggers(new Trigger[]{trigger});
+		bean.setJobDetails(new JobDetail[]{jobDetail});
+		bean.afterPropertiesSet();
+
+		Thread.sleep(1000);
+		assertTrue(DummyJob.getCount() > 0);
+		assertEquals(DummyJob.getCount(), taskExecutor.getCount());
+	}
+
 	public void testWithTwoAnonymousMethodInvokingJobDetailFactoryBeans() throws InterruptedException {
 		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleAnonymousMethodInvokingJobDetailFB.xml");
+						new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleAnonymousMethodInvokingJobDetailFB.xml");
 		Thread.sleep(3000);
 		try {
 			QuartzTestBean exportService = (QuartzTestBean) ctx.getBean("exportService");
@@ -731,4 +757,30 @@ public class QuartzSupportTests extends TestCase {
 		}
 	}
 
+	public static class DummyJob implements Job {
+
+		private static int count;
+
+		public synchronized void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+			count++;
+		}
+
+		public static int getCount() {
+			return count;
+		}
+	}
+
+	public static class CountingTaskExecutor implements TaskExecutor {
+
+		private int count;
+
+		public void execute(Runnable task) {
+			this.count++;
+			task.run();
+		}
+
+		public int getCount() {
+			return count;
+		}
+	}
 }

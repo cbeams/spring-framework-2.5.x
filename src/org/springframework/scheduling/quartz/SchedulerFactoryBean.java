@@ -584,7 +584,7 @@ public class SchedulerFactoryBean
 			throws SchedulerException, IOException {
 
 		if (this.configLocation != null || this.quartzProperties != null ||
-				this.dataSource != null || this.schedulerName != null) {
+				this.dataSource != null || this.schedulerName != null || this.taskExecutor != null) {
 
 			if (!(schedulerFactory instanceof StdSchedulerFactory)) {
 				throw new IllegalArgumentException("StdSchedulerFactory required for applying Quartz properties");
