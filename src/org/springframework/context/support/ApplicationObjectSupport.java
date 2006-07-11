@@ -119,7 +119,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	/**
 	 * Return the ApplicationContext instance used by this object.
 	 */
-	protected final ApplicationContext getApplicationContext() throws IllegalStateException {
+	public final ApplicationContext getApplicationContext() throws IllegalStateException {
 		if (this.applicationContext == null && isContextRequired()) {
 			throw new IllegalStateException(
 					"ApplicationObjectSupport instance [" + this + "] does not run in an ApplicationContext");
