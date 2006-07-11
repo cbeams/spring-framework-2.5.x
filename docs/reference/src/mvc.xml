@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding="iso-8859-1" ?>
 <chapter id="mvc">
   <title>Web MVC framework</title>
 
@@ -114,6 +114,9 @@
 
     <section id="mvc-features">
       <title>Features of Spring Web MVC</title>
+      
+      <!-- insert some content about Spring WebFlow here -->
+      &swf-sidebar;
 
       <para>Spring's web module provides a wealth of unique web support
       features, including:</para>

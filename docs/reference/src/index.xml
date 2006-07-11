@@ -32,6 +32,7 @@
 <!ENTITY dtd				SYSTEM "dtd.xml">
 <!ENTITY spring.tld         SYSTEM "spring.tld.xml">
 <!ENTITY spring-form.tld    SYSTEM "spring-form.tld.xml">
+<!ENTITY swf-sidebar        SYSTEM "swf-sidebar.xml">
 ]>
 <book>
 	<bookinfo>

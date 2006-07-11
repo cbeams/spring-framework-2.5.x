@@ -10,6 +10,10 @@
             <ulink url="http://jakarta.apache.org/tapestry/">Tapestry</ulink>, and
             <ulink url="http://www.opensymphony.com/webwork/">WebWork</ulink>.
         </para>
+      
+        <!-- insert some content about Spring WebFlow here -->
+        &swf-sidebar;
+
         <para>
             One of the core value propositions of the Spring Framework is that of
             enabling <emphasis>choice</emphasis>. In a general sense, Spring does not
