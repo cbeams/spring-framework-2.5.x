@@ -124,7 +124,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	}
 
 	public final Object[] getArguments() {
-		return this.arguments;
+		return (this.arguments == null ? new Object[0] : this.arguments);
 	}
 
 	/**
