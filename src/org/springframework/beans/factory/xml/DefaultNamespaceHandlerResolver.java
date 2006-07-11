@@ -68,6 +68,18 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	/**
 	 * Create a new <code>DefaultNamespaceHandlerResolver</code> using the
 	 * default mapping file location.
+	 * <p>This constructor will result in the thread context ClassLoader being used
+	 * to load resources.
+	 * @see #SPRING_HANDLER_MAPPINGS_LOCATION
+	 */
+	public DefaultNamespaceHandlerResolver() {
+		this(null, SPRING_HANDLER_MAPPINGS_LOCATION);
+	}
+
+
+	/**
+	 * Create a new <code>DefaultNamespaceHandlerResolver</code> using the
+	 * default mapping file location.
 	 * @param classLoader the {@link ClassLoader} instance used to load mapping resources (may be <code>null</code>, in
 	 * which case the thread context ClassLoader will be used) 
 	 * @see #SPRING_HANDLER_MAPPINGS_LOCATION
