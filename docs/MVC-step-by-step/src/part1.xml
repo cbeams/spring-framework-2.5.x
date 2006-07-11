@@ -847,7 +847,6 @@ INFO: Servlet 'springapp' configured successfully]]></screen>
 		<mediaobject>
 			<imageobject role="fo">
 				<imagedata fileref="images/dir-structure-endp1.png" format="PNG" align="center" />
-				<imagedata fileref="images/bob2.png" format="PNG" align="center" />				
 			</imageobject>
 			<imageobject role="html">
 				<imagedata fileref="images/dir-structure-endp1.png" format="PNG" align="center" />
