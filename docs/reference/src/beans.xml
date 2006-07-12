@@ -1984,11 +1984,11 @@ public class ReplacementComputeValue implements MethodReplacer {
         <note>
             <para>For backwards compatibility reasons it is still possible to specify
             <literal>singleton="false"</literal> and <literal>singleton="true"</literal>
-            as arguments to a bean definition. However, note that specifying both the
-            <literal>singleton</literal> and <literal>scope</literal> argument on a bean
-            definition leads to unexpected behaviour. You should only specify one of the
-            two options, where the use of <literal>scope</literal> is the prefered choice.
-            </para>
+            as attributes of an XML-based bean definition. However, note that specifying
+            both the <literal>singleton</literal> and <literal>scope</literal> attribute
+            on a bean definition leads to unexpected behavior. You should only specify
+            one of the two attributes, with the use of <literal>scope</literal> being the
+            recommended choice.</para>
 		</note>
 
         <section id="beans-factory-scopes-singleton">
