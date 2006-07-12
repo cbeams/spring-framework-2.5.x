@@ -17,8 +17,8 @@
 package org.springframework.beans.factory.config;
 
 import junit.framework.TestCase;
-import org.easymock.ArgumentsMatcher;
 import org.easymock.MockControl;
+import org.easymock.AbstractMatcher;
 import org.springframework.AbstractScalarMockTemplate;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.ObjectFactory;
@@ -324,7 +324,8 @@ public final class CustomScopeConfigurerTests extends TestCase {
 	}
 
 
-	private static final class RegisterScopeArgumentsMatcher implements ArgumentsMatcher {
+	private static final class RegisterScopeArgumentsMatcher extends AbstractMatcher {
+		
 		public boolean matches(Object[] expectedArguments, Object[] actualArguments) {
 			assertNotNull(actualArguments);
 			assertEquals(2, actualArguments.length);
@@ -337,9 +338,6 @@ public final class CustomScopeConfigurerTests extends TestCase {
 			return true;
 		}
 
-		public String toString(Object[] objects) {
-			return "" + objects;
-		}
 	}
 
 }
