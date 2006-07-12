@@ -196,12 +196,13 @@ public class JmxTestBean implements IJmxTestBean {
     <section>
       <title>Reusing an existing MBeanServer</title>
 
-      <para>If no server is specified, the MBeanExporter tries to
-      automatically detect a running MBeanServer. This works in most
-      environment where only one MBeanServer instance is used, however when
-      multiple instances exist, the exporter might pick the wrong server. In
-      such cases, one should use the MBeanServer agentId to indicate which
-      instance to be used:</para>
+      <para>If no server is specified, the <literal>MBeanExporter</literal>
+      tries to automatically detect a running <literal>MBeanServer</literal>.
+      This works in most environment where only one
+      <literal>MBeanServer</literal> instance is used, however when multiple
+      instances exist, the exporter might pick the wrong server. In such
+      cases, one should use the <literal>MBeanServer</literal>
+      <literal>agentId</literal> to indicate which instance to be used:</para>
 
       <programlisting>&lt;beans&gt;
    &lt;bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean"&gt;
@@ -217,9 +218,11 @@ public class JmxTestBean implements IJmxTestBean {
    &lt;/bean&gt;
 &lt;/beans&gt;</programlisting>
 
-      <para>For platforms/cases where the existing MBeanServer has a
-      dynamic/unknown agentId and it is retrieved through a lookup methods,
-      one should use Spring factory-method:</para>
+      <para>For platforms/cases where the existing
+      <literal>MBeanServer</literal> have a dynamic/unknown
+      <literal>agentId</literal> which is retrieved through lookup methods,
+      one should use <link
+      linkend="beans-factory-class-static-factory-method">factory-method</link>:</para>
 
       <programlisting>&lt;beans&gt;
    &lt;bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"&gt;
