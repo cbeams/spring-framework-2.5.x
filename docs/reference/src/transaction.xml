@@ -655,7 +655,7 @@ public class DefaultFooService implements FooService {
             case the <literal>'txManager'</literal> bean).</para>
             <tip>
                 <para>You can actually omit the <literal>'transaction-manager'</literal>
-                attribute in the transactional advice (&lt;tx:advice/&gt;) 
+                attribute in the transactional advice (<literal>&lt;tx:advice/&gt;</literal>) 
                 if the bean name of the <interfacename>PlatformTransactionManager</interfacename>
                 that you want to wire in has the name <literal>'transactionManager'</literal>.
                 If the <interfacename>PlatformTransactionManager</interfacename> bean
@@ -798,12 +798,9 @@ Exception in thread "main" java.lang.UnsupportedOperationException
         <section id="transaction-declarative-annotations">
             <title>Using <interfacename>@Transactional</interfacename></title>
 			<note>
-				<para>
-					<emphasis>Please be aware that the functionality offered by the
-					<interfacename>@Transactional</interfacename> annotation and the
-					attendant support classes is only available to you if you are using
-					at least Java 5 (Tiger).</emphasis>
-				</para>
+				<para>The functionality offered by the <interfacename>@Transactional</interfacename>
+				annotation and the attendant support classes is only available to you if you
+				are using at least Java 5 (Tiger).</para>
 			</note>
             <para>In addition to the XML-based declarative approach to transaction configuration,
             you can also use an annotation-based declarative approach to transaction configuration
@@ -906,12 +903,14 @@ public interface FooService {
         ]]><lineannotation>// do something</lineannotation><![CDATA[
     }
 }]]></programlisting>
-            <note>Please note that this 'plain common sense' approach to inheriting
-            <interfacename>@Transactional</interfacename> settings <emphasis>only</emphasis>
-            applies in the case of SpringAOP-driven transaction management. If you are
-            using another transaction management strategy, such as AspectJ-driven transactions,
-            then the usual Java rules with regard to annotations apply
-            (i.e. there is no inheritance).</note>
+            <note>
+                <para>Please note that this 'plain common sense' approach to inheriting
+                <interfacename>@Transactional</interfacename> settings <emphasis>only</emphasis>
+                applies in the case of SpringAOP-driven transaction management. If you are
+                using another transaction management strategy, such as AspectJ-driven transactions,
+                then the usual Java rules with regard to annotations apply
+                (i.e. there is no inheritance).</para>
+            </note>
             <section>
                 <title><interfacename>@Transactional</interfacename> settings</title>
                 <para>Used in its simplest form, the <interfacename>@Transactional</interfacename> annotation
@@ -1007,7 +1006,7 @@ public interface FooService {
             <para>Consider the situation where you have an instance of a class, and
             you would like to execute <emphasis>both</emphasis> transactional
             <emphasis>and</emphasis> (to keep things simple) some basic profiling
-            advice . So how do you effect this in the context of using
+            advice. So how do you effect this in the context of using
             <literal>&lt;tx:annotation-driven/&gt;</literal>?</para>
             <para>What we want to see when we invoke the
             <literal>updateFoo(Foo)</literal> method is a) some
@@ -1019,10 +1018,9 @@ public interface FooService {
             how long the whole method invocation took.</para>
             <note>
                 <para>This chapter is not concerned with explaining AOP (except as it
-                applies to transactions). Please see the chapter
-                entitled <xref linkend="aop"/> for detailed coverage of the
-                various bits and pieces of the following AOP configuration (and AOP
-                in general).</para>
+                applies to transactions). Please see the chapter entitled
+                <xref linkend="aop"/> for detailed coverage of the various bits and pieces
+                of the following AOP configuration (and AOP in general).</para>
             </note>
             <para>Here is the code for a (naively) simple profiling aspect.
             <emphasis>(Please note that the ordering of advice is controlled via the
@@ -1039,6 +1037,7 @@ public class SimpleProfiler implements Ordered {
 
     private int order;
 
+    ]]><lineannotation>// allows us to control the ordering of advice</lineannotation><![CDATA[
     public int getOrder() {
         return this.order;
     }
@@ -1047,6 +1046,7 @@ public class SimpleProfiler implements Ordered {
         this.order = order;
     }
 
+    ]]><lineannotation>// this method <emphasis>is</emphasis> the around advice</lineannotation><![CDATA[
     public Object profile(ProceedingJoinPoint call) throws Throwable {
         Object returnValue;
         StopWatch clock = new StopWatch(getClass().getName());
@@ -1063,12 +1063,58 @@ public class SimpleProfiler implements Ordered {
 ]]></programlisting>
             <para>Here is the attendant configuration that will effect what we want.</para>
             <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<beans
-        xmlns="http://www.springframework.org/schema/beans"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:aop="http://www.springframework.org/schema/aop"
-        xmlns:tx="http://www.springframework.org/schema/tx"
-        xsi:schemaLocation="
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+   http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+   http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <bean id="fooService" class="x.y.service.DefaultFooService"/>
+
+    ]]><lineannotation>&lt;!--  --&gt;</lineannotation><![CDATA[
+    <bean id="profiler" class="x.y.SimpleProfiler">
+        ]]><lineannotation>&lt;!-- execute before the transactional advice (hence the lower order number) --&gt;</lineannotation><![CDATA[
+        <property name="order" value="1"/>
+    </bean>
+    
+    <tx:annotation-driven transaction-manager="txManager"/>
+
+    <aop:config>
+        ]]><lineannotation>&lt;!-- this advice will execute <emphasis role="bold">around</emphasis> the transactional advice --&gt;</lineannotation><![CDATA[
+        <aop:aspect id="profilingAspect" ref="profiler">
+            <aop:pointcut id="serviceMethodWithReturnValue"
+                          expression="execution(!void x.y..*Service.*(..))"/>
+            <aop:around method="profile" pointcut-ref="serviceMethodWithReturnValue"/>
+        </aop:aspect>
+    </aop:config>
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
+        <property name="url" value="jdbc:oracle:thin:@rj-t42:1521:elvis"/>
+        <property name="username" value="scott"/>
+        <property name="password" value="tiger"/>
+    </bean>
+
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+</beans>]]></programlisting>
+            <para>The result of the above configuration will be a <literal>'fooService'</literal>
+            bean that has profiling and transactional aspects applied to it
+            <emphasis>in that order</emphasis>. The configuration of any number of additional
+            aspects is effected in a similar fashion.</para>
+            <para>Finally, find below some example configuration for effecting the same
+            setup as above, but using the purely XML declarative approach.</para>
+            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
@@ -1078,7 +1124,7 @@ public class SimpleProfiler implements Ordered {
     ]]><lineannotation>&lt;!-- the profiling advice --&gt;</lineannotation><![CDATA[
     <bean id="profiler" class="x.y.SimpleProfiler">
         ]]><lineannotation>&lt;!-- execute before the transactional advice (hence the lower order number) --&gt;</lineannotation><![CDATA[
-        <property name="order" value="1"/>
+        ]]><emphasis role="bold">&lt;property name="order" value="1</emphasis><![CDATA["/>
     </bean>
 
     <aop:config>
@@ -1089,7 +1135,7 @@ public class SimpleProfiler implements Ordered {
         <aop:advisor
                 advice-ref="txAdvice"
                 pointcut-ref="entryPointMethod"
-                order="2"/> ]]><lineannotation>&lt;!-- order value is higher than the profiling aspects --&gt;</lineannotation><![CDATA[
+                ]]><emphasis role="bold">order="2</emphasis>"/&gt; <lineannotation>&lt;!-- order value is higher than the profiling aspect --&gt;</lineannotation><![CDATA[
 
         <aop:aspect id="profilingAspect" ref="profiler">
             <aop:pointcut id="serviceMethodWithReturnValue"
@@ -1111,8 +1157,8 @@ public class SimpleProfiler implements Ordered {
 </beans>]]></programlisting>
             <para>The result of the above configuration will be a <literal>'fooService'</literal>
             bean that has profiling and transactional aspects applied to it
-            <emphasis>in that order</emphasis>. If we wanted the profiling advice to
-            execute <emphasis>after</emphasis> the transactional advice on the way in, and
+            <emphasis>in that order</emphasis>. If we wanted the profiling advice to execute
+            <emphasis>after</emphasis> the transactional advice on the way in, and
             <emphasis>before</emphasis> the transactional advice on the way out, then we would
             simply swap the value of the profiling aspect bean's <literal>'order'</literal>
             property such that it was higher than the transactional advice's order value.</para>
@@ -1139,18 +1185,19 @@ public class SimpleProfiler implements Ordered {
             <programlisting><lineannotation>// construct an appropriate transaction manager </lineannotation><![CDATA[
 DataSourceTransactionManager txManager = new  DataSourceTransactionManager(getDataSource());
 
-]]><lineannotation>// configure the <classname>AnnotationTransactionAspect</classname> to use it, this must be done before executing any transactional methods</lineannotation><![CDATA[
+]]><lineannotation>// configure the <classname>AnnotationTransactionAspect</classname> to use it; this must be done before executing any transactional methods</lineannotation><![CDATA[
 AnnotationTransactionAspect.aspectOf().setTransactionManager (txManager); ]]></programlisting>
             <para>When using this aspect the <interfacename>@Transactional</interfacename> annotation
             can be used to annotate a type or interface as transactional, and subsequently the execution
-            of any <emphasis role="bold">public</emphasis> operation defined by that type will
-            have transactional semantics. Transactional semantics for an individual <emphasis role="bold">public</emphasis>
-            method can be defined by annotating the corresponding method definition. Note that if
-            annotating interface members (as opposed to methods implementing the interface), the
-            interface itself should also be annotated as <interfacename>@Transactional</interfacename>.</para>
-            <para>To weave your applications with the
-            <classname>AnnotationTransactionAspect</classname> you must either build your
-            application with AspectJ (see the <ulink url="http://www.eclipse.org/aspectj/doc/ released/devguide/index.html">AspectJ Development Guide</ulink>)
+            of any <emphasis role="bold"><literal>public</literal></emphasis> operation defined by that
+            type will have transactional semantics. Transactional semantics for an individual
+            <emphasis role="bold"><literal>public</literal></emphasis> method can be defined by annotating
+            the corresponding method definition. Note that if annotating interface members (as opposed to
+            methods implementing the interface), the interface itself should also be annotated as
+            <interfacename>@Transactional</interfacename>.</para>
+            <para>To weave your applications with the <classname>AnnotationTransactionAspect</classname>
+            you must either build your application with AspectJ (see the
+            <ulink url="http://www.eclipse.org/aspectj/doc/ released/devguide/index.html">AspectJ Development Guide</ulink>)
             or use load-time weaving. See <xref linkend="aop-aj-ltw"/> for a discussion of load-time weaving with AspectJ.</para>
         </section>
     </section>
@@ -1207,19 +1254,23 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager (txManager); ]]></p
             like this. Note that the <interfacename>TransactionCallback</interfacename> can be
             used to return a value:</para>
             <programlisting><![CDATA[Object result = tt.execute(new TransactionCallback() {
+
     public Object doInTransaction(TransactionStatus status) {
         updateOperation1();
         return resultOfUpdateOperation2();
     }
+
 });]]></programlisting>
             <para>If there is no return value, use the convenient
-            <classname>TransactionCallbackWithoutResult</classname> class via a
-            Java anonymous class like so:</para>
-                <programlisting><![CDATA[tt.execute(new TransactionCallbackWithoutResult() {
+            <classname>TransactionCallbackWithoutResult</classname> class via an
+            anonymous class like so:</para>
+            <programlisting><![CDATA[tt.execute(new TransactionCallbackWithoutResult() {
+    
     protected void doInTransactionWithoutResult(TransactionStatus status) {
         updateOperation1();
         updateOperation2();
     }
+
 });]]></programlisting>
             <para>Code within the callback can roll the transaction back by calling
             the <literal>setRollbackOnly()</literal> method on the supplied
@@ -1248,7 +1299,7 @@ def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
 TransactionStatus status = txManager.getTransaction(def);
 try {
-    // execute your business logic here
+    ]]><lineannotation>// execute your business logic here</lineannotation><![CDATA[
 }
 catch (MyException ex) {
     txManager.rollback(status);
@@ -1302,13 +1353,13 @@ txManager.commit(status);]]></programlisting>
             class. This is a factory bean which retrieves the JTA
             <literal>TransactionManager</literal> in a WebSphere environment, which
             is done via WebSphere's <literal>static</literal> access methods.
-            (These methods are different for each version of WebSphere.)</para>
-            <para>Once the JTA <interfacename>TransactionManager</interfacename> instance has
+            (These methods are different for each version of WebSphere.)
+            Once the JTA <interfacename>TransactionManager</interfacename> instance has
             been obtained via this factory bean, Spring's
             <classname>JtaTransactionManager</classname> may be configured with a
             reference to it, for enhanced transaction semantics over the use of only
-            the JTA <interfacename>UserTransaction</interfacename> object.</para>
-            <para>Please see the Javadocs for full details.</para>
+            the JTA <interfacename>UserTransaction</interfacename> object.
+            Please see the Javadocs for full details.</para>
         </section>
     </section>
     <section>
