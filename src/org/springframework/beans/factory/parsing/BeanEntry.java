@@ -24,19 +24,20 @@ package org.springframework.beans.factory.parsing;
  */
 public class BeanEntry implements ParseState.Entry {
 
+	private String beanDefinitionName;
+
+
 	/**
-	 * The name of the bean definition.
+	 * Creates a new instance of {@link BeanEntry} class.
+	 * @param beanDefinitionName the name of the associated bean definition
 	 */
-	private String name;
-
-
-	public BeanEntry(String name) {
-		this.name = name;
+	public BeanEntry(String beanDefinitionName) {
+		this.beanDefinitionName = beanDefinitionName;
 	}
 
 
 	public String toString() {
-		return "Bean '" + this.name + "'";
+		return "Bean '" + this.beanDefinitionName + "'";
 	}
 
 }
