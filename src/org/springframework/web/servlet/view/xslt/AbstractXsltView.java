@@ -143,6 +143,8 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * as well. Set this flag to <code>false</code> if you want to pass in a single
 	 * model object while still using the root element name configured
 	 * through the {@link #setRoot(String) "root" property}.
+     * @param useSingleModelNameAsRoot <code>true</code> if the name of a given single
+     * model object is to be used as the document root element name
 	 * @see #setRoot
 	 */
 	public void setUseSingleModelNameAsRoot(boolean useSingleModelNameAsRoot) {
@@ -166,6 +168,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * {@link org.springframework.util.xml.SimpleTransformErrorListener} is
 	 * used that simply logs warnings using the logger instance of the view class,
 	 * and rethrows errors to discontinue the XML transformation.
+     * @param errorListener the {@link javax.xml.transform.ErrorListener} to be used (can be <code>null</code>)
 	 * @see org.springframework.util.xml.SimpleTransformErrorListener
 	 */
 	public void setErrorListener(ErrorListener errorListener) {
@@ -177,6 +180,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * outputting the result tree.
 	 * <p>Default is <code>true</code> (on); set this to <code>false</code> (off)
 	 * to not specify an "indent" key, leaving the choice up to the stylesheet.
+     * @param indent <code>true</code> if indenting is to be switched on
 	 * @see javax.xml.transform.OutputKeys#INDENT
 	 */
 	public void setIndent(boolean indent) {
@@ -242,6 +246,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * Load the stylesheet.
 	 * @param stylesheetLocation the stylesheet resource to be loaded
 	 * @return the stylesheet source
+     * @throws ApplicationContextException if the stylesheet resource could not be loaded
 	 */
 	protected Source getStylesheetSource(Resource stylesheetLocation) throws ApplicationContextException {
 		if (logger.isDebugEnabled()) {
@@ -359,6 +364,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @param source the Source to transform
 	 * @param parameters a Map of parameters to be applied to the stylesheet
 	 * @param result the result to write to
+     * @param encoding the preferred character encoding that the underlying Transformer should use
 	 * @throws Exception if an error occurs
 	 */
 	protected void doTransform(Source source, Map parameters, Result result, String encoding)
@@ -388,10 +394,8 @@ public abstract class AbstractXsltView extends AbstractView {
 			// Specify default output properties.
 			trans.setOutputProperty(OutputKeys.ENCODING, encoding);
 			if (this.indent) {
-				trans.setOutputProperty(OutputKeys.INDENT, "yes");
+				TransformerUtils.enableIndenting(trans);
 			}
-			// Xalan-specific, but won't do any harm in other XSLT engines.
-			trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 
 			// Apply any arbitrary output properties, if specified.
 			if (this.outputProperties != null) {

@@ -127,6 +127,7 @@ public class XsltView extends AbstractUrlBasedView {
 		return this.transformerFactory;
 	}
 
+
 	protected void initApplicationContext() throws BeansException {
 		this.getTransformerFactory().setErrorListener(this.errorListener);
 
@@ -253,15 +254,17 @@ public class XsltView extends AbstractUrlBasedView {
 
 	/**
 	 * Configures the indentation settings for the supplied {@link Transformer}.
+	 * @param transformer the target transformer
+	 * @throws IllegalArgumentException if the supplied {@link Transformer} is <code>null</code>
+	 * @see TransformerUtils#enableIndenting(javax.xml.transform.Transformer) 
+	 * @see TransformerUtils#disableIndenting(javax.xml.transform.Transformer)
 	 */
 	protected final void configureIndentation(Transformer transformer) {
 		if (this.indent) {
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			// Xalan-specific but doesn't interfere with other processors.
-			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+			TransformerUtils.enableIndenting(transformer);
 		}
 		else {
-			transformer.setOutputProperty(OutputKeys.INDENT, "no");
+			TransformerUtils.disableIndenting(transformer);
 		}
 	}
 
@@ -389,4 +392,5 @@ public class XsltView extends AbstractUrlBasedView {
 			}
 		}
 	}
+
 }
