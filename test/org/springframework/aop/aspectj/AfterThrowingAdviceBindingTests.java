@@ -131,7 +131,6 @@ public class AfterThrowingAdviceBindingTests extends
 	}
 	
 	protected void onSetUp() throws Exception {
-		super.onSetUp();
 		mockControl = MockControl.createNiceControl(AfterThrowingAdviceBindingCollaborator.class);
 		mockCollaborator = (AfterThrowingAdviceBindingCollaborator) mockControl.getMock();
 		afterThrowingAdviceAspect.setCollaborator(mockCollaborator);

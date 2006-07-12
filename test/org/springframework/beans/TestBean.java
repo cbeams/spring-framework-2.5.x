@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.io.IOException;
 
 /**
  * Simple test bean used for testing bean factories, AOP framework etc.
@@ -351,6 +352,9 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		}
 	}
 
+	public void unreliableFileOperation() throws IOException {
+		throw new IOException();
+	}
 	/**
 	 * @see ITestBean#returnsThis()
 	 */

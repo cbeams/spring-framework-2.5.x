@@ -496,16 +496,16 @@ public abstract class ClassUtils {
 		}
 		return interfaces;
 	}
-    
 
-    private static String getQualifiedNameForArray(Class clazz) {
-        StringBuffer buffer = new StringBuffer();
-        while (clazz.isArray()) {
-            clazz = clazz.getComponentType();
-            buffer.append(ClassUtils.ARRAY_SUFFIX);
-        }
-        buffer.insert(0, clazz.getName());
-        return buffer.toString();
-    }
+
+	private static String getQualifiedNameForArray(Class clazz) {
+		StringBuffer buffer = new StringBuffer();
+		while (clazz.isArray()) {
+			clazz = clazz.getComponentType();
+			buffer.append(ClassUtils.ARRAY_SUFFIX);
+		}
+		buffer.insert(0, clazz.getName());
+		return buffer.toString();
+	}
 
 }

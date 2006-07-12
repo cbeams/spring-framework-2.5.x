@@ -18,12 +18,10 @@ package org.springframework.aop.aspectj.annotation;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.aopalliance.aop.Advice;
-import org.aopalliance.aop.AspectException;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;

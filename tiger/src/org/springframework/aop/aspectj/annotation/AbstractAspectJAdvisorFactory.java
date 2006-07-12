@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -42,6 +43,7 @@ import org.springframework.aop.framework.AopConfigException;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Abstract base class for factories that can create Spring AOP Advisors
@@ -212,6 +214,8 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 		private static Map<Class,AspectJAnnotationType> annotationTypes = new HashMap<Class,AspectJAnnotationType>();
 
+		private static final String[] EXPRESSION_PROPERTIES = new String[]{"value", "pointcut"};
+
 		static {
 			annotationTypes.put(Pointcut.class,AspectJAnnotationType.AtPointcut);
 			annotationTypes.put(After.class,AspectJAnnotationType.AtAfter);
@@ -241,14 +245,36 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 			// We know these methods exist with the same name on each object,
 			// but need to invoke them reflectively as there isn't a common interfaces
 			try {
-				this.expression = (String) annotation.getClass().getMethod("value", (Class[]) null).
-					invoke(this.annotation);
+				this.expression = resolveExpression();
 				this.argNames = (String) annotation.getClass().getMethod("argNames", (Class[]) null).
 					invoke(this.annotation);
 			}
 			catch (Exception ex) {
 				throw new IllegalArgumentException(aspectjAnnotation + " cannot be an AspectJ annotation", ex);
 			}
+		}
+
+		private String resolveExpression() throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+			String expression = null;
+			for (int i = 0; i < EXPRESSION_PROPERTIES.length; i++) {
+				String methodName = EXPRESSION_PROPERTIES[i];
+				Method method;
+				try {
+					method = annotation.getClass().getDeclaredMethod(methodName);
+				}
+				catch (NoSuchMethodException ex) {
+					method = null;
+				}
+
+				if (method != null) {
+					String candidate = (String) method.invoke(this.annotation);
+
+					if (StringUtils.hasText(candidate)) {
+						expression = candidate;
+					}
+				}
+			}
+			return expression;
 		}
 
 		public AspectJAnnotationType getAnnotationType() {

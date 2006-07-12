@@ -17,6 +17,8 @@
 
 package org.springframework.beans;
 
+import java.io.IOException;
+
 /**
  * Interface used for test beans.
  * Two methods are the same as on Person, but if this
@@ -58,4 +60,5 @@ public interface ITestBean {
 	 */
 	int haveBirthday();
 
+	void unreliableFileOperation() throws IOException;
 }
