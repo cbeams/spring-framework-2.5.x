@@ -18,11 +18,12 @@ package org.springframework.beans.factory.parsing;
 
 /**
  * Simple implementation of the {@link SourceExtractor} that simply passes
- * the candidate source metadata object through for attachment. Using this
- * implementation means that tools will get raw access to the underlying
- * configuration source metadata provided by the tool.
- * <p/>
- * This implementation <strong>should not</strong> be used in a production
+ * the candidate source metadata object through for attachment.
+ * 
+ * <p>Using this implementation means that tools will get raw access to the
+ * underlying configuration source metadata provided by the tool.
+ * 
+ * <p>This implementation <strong>should not</strong> be used in a production
  * application since it is likely to keep too much metadata in memory
  * unnecessarily.
  *
@@ -32,7 +33,9 @@ package org.springframework.beans.factory.parsing;
 public class PassThroughSourceExtractor implements SourceExtractor {
 
 	/**
-	 * Returns the supplied <code>sourceCandidate</code>.
+	 * Simply returns the supplied <code>sourceCandidate</code> as-is.
+	 * @param sourceCandidate the source metatada
+	 * @return the supplied <code>sourceCandidate</code>
 	 */
 	public Object extract(Object sourceCandidate) {
 		return sourceCandidate;

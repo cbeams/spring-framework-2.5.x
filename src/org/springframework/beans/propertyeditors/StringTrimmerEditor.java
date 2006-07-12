@@ -22,7 +22,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * Property editor that trims Strings.
- * Optionally allows transforming an empty string into a null value.
+ * 
+ * <p>Optionally allows transforming an empty string into a <code>null</code> value.
  * Needs to be explictly registered, e.g. for command binding.
  *
  * @author Juergen Hoeller
@@ -38,7 +39,7 @@ public class StringTrimmerEditor extends PropertyEditorSupport {
 
 	/**
 	 * Create a new StringTrimmerEditor instance.
-	 * @param emptyAsNull whether to transform an empty string to null
+	 * @param emptyAsNull <code>true</code> if an empty string is to be transformed into <code>null</code>
 	 */
 	public StringTrimmerEditor(boolean emptyAsNull) {
 		this.charsToDelete = null;
@@ -50,7 +51,7 @@ public class StringTrimmerEditor extends PropertyEditorSupport {
 	 * @param charsToDelete a set of characters to delete, in addition to
 	 * trimming an input String. Useful for deleting unwanted line breaks.
 	 * E.g. "\r\n\f" will delete all new lines and line feeds in a String.
-	 * @param emptyAsNull whether to transform an empty string to null
+	 * @param emptyAsNull <code>true</code> if an empty string is to be transformed into <code>null</code> 
 	 */
 	public StringTrimmerEditor(String charsToDelete, boolean emptyAsNull) {
 		this.charsToDelete = charsToDelete;

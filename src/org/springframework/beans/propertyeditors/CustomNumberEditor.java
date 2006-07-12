@@ -58,7 +58,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 * <code>valueOf</code> methods for parsing and <code>toString</code>
 	 * methods for rendering.
 	 * <p>The "allowEmpty" parameter states if an empty String should
-	 * be allowed for parsing, i.e. get interpreted as null value.
+	 * be allowed for parsing, i.e. get interpreted as <code>null</code>  value.
 	 * Else, an IllegalArgumentException gets thrown in that case.
 	 * @param numberClass Number subclass to generate
 	 * @param allowEmpty if empty strings should be allowed
@@ -67,21 +67,15 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 * @see Integer#valueOf
 	 * @see Integer#toString
 	 */
-	public CustomNumberEditor(Class numberClass, boolean allowEmpty)
-	    throws IllegalArgumentException {
-		if (numberClass == null || !Number.class.isAssignableFrom(numberClass)) {
-			throw new IllegalArgumentException("Property class must be a subclass of Number");
-		}
-		this.numberClass = numberClass;
-		this.numberFormat = null;
-		this.allowEmpty = allowEmpty;
+	public CustomNumberEditor(Class numberClass, boolean allowEmpty) throws IllegalArgumentException {
+		this(numberClass, null, allowEmpty);
 	}
 
 	/**
 	 * Create a new CustomNumberEditor instance, using the given NumberFormat
 	 * for parsing and rendering.
 	 * <p>The allowEmpty parameter states if an empty String should
-	 * be allowed for parsing, i.e. get interpreted as null value.
+	 * be allowed for parsing, i.e. get interpreted as <code>null</code>  value.
 	 * Else, an IllegalArgumentException gets thrown in that case.
 	 * @param numberClass Number subclass to generate
 	 * @param numberFormat NumberFormat to use for parsing and rendering
@@ -93,7 +87,6 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 */
 	public CustomNumberEditor(Class numberClass, NumberFormat numberFormat, boolean allowEmpty)
 	    throws IllegalArgumentException {
-
 		if (numberClass == null || !Number.class.isAssignableFrom(numberClass)) {
 			throw new IllegalArgumentException("Property class must be a subclass of Number");
 		}

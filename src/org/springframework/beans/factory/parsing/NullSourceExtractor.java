@@ -18,8 +18,10 @@ package org.springframework.beans.factory.parsing;
 
 /**
  * Simple implementation of {@link SourceExtractor} that returns <code>null</code>
- * as the source metadata. This is the default implementation and prevents to much
- * metadata from being held in memory during normal (non-tooled) runtime usage.
+ * as the source metadata.
+ * 
+ * <p>This is the default implementation and prevents too much metadata from being
+ * held in memory during normal (non-tooled) runtime usage.
  *
  * @author Rob Harrop
  * @since 2.0
@@ -27,9 +29,12 @@ package org.springframework.beans.factory.parsing;
 public class NullSourceExtractor implements SourceExtractor {
 
 	/**
-	 * Returns <code>null</code>.
+	 * This default implementation returns <code>null</code>.
+	 * @param sourceCandidate the source metatada
+	 * @return <code>null</code> 
 	 */
 	public Object extract(Object sourceCandidate) {
 		return null;
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,18 @@
 package org.springframework.beans.propertyeditors;
 
 import java.util.Properties;
+import java.util.Map;
+import java.util.HashMap;
 
 import junit.framework.TestCase;
 
 /**
- * Test the conversion of Strings to java.util.Properties objects,
+ * Test the conversion of Strings to {@link java.util.Properties} objects,
  * and other property editors.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rick Evans
  */
 public class PropertiesEditorTests extends TestCase {
 
@@ -126,10 +129,9 @@ public class PropertiesEditorTests extends TestCase {
 		PropertiesEditor pe= new PropertiesEditor();
 		try {
 			pe.setAsText(null);
-			fail("Should reject null");
+			fail("Must reject null");
 		}
-		catch (IllegalArgumentException ex) {
-			// OK
+		catch (IllegalArgumentException expected) {
 		}
 	}
 	
@@ -138,6 +140,23 @@ public class PropertiesEditorTests extends TestCase {
 		pe.setAsText("");
 		Properties p= (Properties) pe.getValue();
 		assertTrue("empty string means empty properties", p.isEmpty());
+	}
+
+	public void testUsingMapAsValueSource() throws Exception {
+		Map map = new HashMap();
+		map.put("one", "1");
+		map.put("two", "2");
+		map.put("three", "3");
+		PropertiesEditor pe = new PropertiesEditor();
+		pe.setValue(map);
+		Object value = pe.getValue();
+		assertNotNull(value);
+		assertTrue(value instanceof Properties);
+		Properties props = (Properties) value;
+		assertEquals(3, props.size());
+		assertEquals("1", props.getProperty("one"));
+		assertEquals("2", props.getProperty("two"));
+		assertEquals("3", props.getProperty("three"));
 	}
 
 }

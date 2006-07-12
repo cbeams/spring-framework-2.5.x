@@ -20,25 +20,37 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Simple implementation of the {@link ProblemReporter} that exhibits fail-fast
- * behaviour when errors are encountered. The first error encountered results in
- * a {@link BeanDefinitionParsingException} being thrown.
+ * Simple {@link ProblemReporter} implementation that exhibits fail-fast
+ * behaviour when errors are encountered.
+ * 
+ * <p>The first error encountered results in a {@link BeanDefinitionParsingException}
+ * being thrown.
  *
  * <p>Warnings are written to the log for this class.
  *
  * @author Rob Harrop
+ * @author Rick Evans
  * @since 2.0
  */
 public class FailFastProblemReporter implements ProblemReporter {
 
+	private Log logger = LogFactory.getLog(getClass());
+
+
 	/**
-	 * {@link Log} instance for this class.
+	 * Sets the {@link Log logger} that is to be used to report warnings.
+	 * <p>If set to <code>null</code> then a default {@link Log logger} set to
+	 * the name of the instance class will be used.
+	 * @param logger the {@link Log logger} that is to be used to report warnings
 	 */
-	private static final Log logger = LogFactory.getLog(FailFastProblemReporter.class);
+	public void setLogger(Log logger) {
+		this.logger = (logger == null) ? LogFactory.getLog(getClass()) : logger;
+	}
 
 
 	/**
 	 * Throws a {@link BeanDefinitionParsingException} detailing the error that occured.
+	 * @param problem the source of the error
 	 */
 	public void error(Problem problem) {
 		throw new BeanDefinitionParsingException(problem.getResourceDescription(),
@@ -49,10 +61,11 @@ public class FailFastProblemReporter implements ProblemReporter {
 
 	/**
 	 * Writes the supplied {@link Problem} to the {@link Log} at <code>WARN</code> level.
+	 * @param problem the source of the warning
 	 */
 	public void warning(Problem problem) {
-		if (logger.isWarnEnabled()) {
-			logger.warn(problem, problem.getRootCause());
+		if (this.logger.isWarnEnabled()) {
+			this.logger.warn(problem, problem.getRootCause());
 		}
 	}
 

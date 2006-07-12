@@ -276,6 +276,27 @@ public class CustomEditorTests extends TestCase {
         assertTrue("Correct bool2 value", tb.getBool2() == null);
     }
 
+	public void testCustomBooleanEditorWithSpecialTrueAndFalseStrings() throws Exception {
+		final String trueString = "pechorin";
+		final String falseString = "nash";
+		
+		CustomBooleanEditor editor = new CustomBooleanEditor(trueString, falseString, false);
+		
+		editor.setAsText(trueString);
+		assertTrue(((Boolean) editor.getValue()).booleanValue());
+		assertEquals(trueString, editor.getAsText());
+		editor.setAsText(falseString);
+		assertFalse(((Boolean) editor.getValue()).booleanValue());
+		assertEquals(falseString, editor.getAsText());
+		
+		editor.setAsText(trueString.toUpperCase());
+		assertTrue(((Boolean) editor.getValue()).booleanValue());
+		assertEquals(trueString, editor.getAsText());
+		editor.setAsText(falseString.toUpperCase());
+		assertFalse(((Boolean) editor.getValue()).booleanValue());
+		assertEquals(falseString, editor.getAsText());
+	}
+
     public void testDefaultNumberEditor() {
         NumberTestBean tb = new NumberTestBean();
         BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -375,6 +396,22 @@ public class CustomEditorTests extends TestCase {
         assertTrue("Correct bigDecimal value", new BigDecimal("4.5").equals(tb.getBigDecimal()));
     }
 
+	public void testCustomNumberEditorCtorWithNullNumberType() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				new CustomNumberEditor(null, true);
+			}
+		}.runTest();
+	}
+
+	public void testCustomNumberEditorCtorWithNonNumberType() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				new CustomNumberEditor(String.class, true);
+			}
+		}.runTest();
+	}
+
     public void testCustomNumberEditorWithAllowEmpty() {
         NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMAN);
         NumberTestBean tb = new NumberTestBean();
@@ -462,12 +499,60 @@ public class CustomEditorTests extends TestCase {
         assertNull(cb.getMyCharacter());
     }
 
+	public void testCharacterEditorSetAsTextWithStringLongerThanOneCharacter() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				PropertyEditor charEditor = new CharacterEditor(false);
+				charEditor.setAsText("ColdWaterCanyon");
+			}
+		}.runTest();
+	}
+
+	public void testCharacterEditorGetAsTextReturnsEmptyStringIfValueIsNull() throws Exception {
+		PropertyEditor charEditor = new CharacterEditor(false);
+		assertEquals("", charEditor.getAsText());
+		charEditor = new CharacterEditor(true);
+		charEditor.setAsText(null);
+		assertEquals("", charEditor.getAsText());
+		charEditor.setAsText("");
+		assertEquals("", charEditor.getAsText());
+		charEditor.setAsText(" ");
+		assertEquals("", charEditor.getAsText());
+		charEditor.setAsText(" \t  \n ");
+		assertEquals("", charEditor.getAsText());
+	}
+
+	public void testCharacterEditorSetAsTextWithNullNotAllowingEmptyAsNull() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				PropertyEditor charEditor = new CharacterEditor(false);
+				charEditor.setAsText(null);
+			}
+		}.runTest();		
+	}
+
     public void testClassEditor() {
         PropertyEditor classEditor = new ClassEditor();
         classEditor.setAsText("org.springframework.beans.TestBean");
         assertEquals(TestBean.class, classEditor.getValue());
         assertEquals("org.springframework.beans.TestBean", classEditor.getAsText());
-    }
+		
+		classEditor.setAsText(null);
+		assertEquals("", classEditor.getAsText());
+		classEditor.setAsText("");
+		assertEquals("", classEditor.getAsText());
+		classEditor.setAsText("\t  ");
+		assertEquals("", classEditor.getAsText());
+	}
+
+	public void testClassEditorWithNonExistentClass() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				PropertyEditor classEditor = new ClassEditor();
+				classEditor.setAsText("hairdresser.on.Fire");
+			}
+		}.runTest();
+	}
 
     public void testClassEditorWithArray() {
         PropertyEditor classEditor = new ClassEditor();
@@ -533,7 +618,10 @@ public class CustomEditorTests extends TestCase {
         localeEditor.setAsText("en_CA");
         assertEquals(Locale.CANADA, localeEditor.getValue());
         assertEquals("en_CA", localeEditor.getAsText());
-    }
+		
+		localeEditor = new LocaleEditor();
+		assertEquals("", localeEditor.getAsText());
+	}
 
     public void testCustomBooleanEditor() {
         CustomBooleanEditor editor = new CustomBooleanEditor(false);
@@ -643,6 +731,8 @@ public class CustomEditorTests extends TestCase {
         assertEquals("", editor.getValue());
         assertEquals("", editor.getAsText());
         editor.setValue(null);
+        assertEquals("", editor.getAsText());
+        editor.setAsText(null);
         assertEquals("", editor.getAsText());
     }
 
