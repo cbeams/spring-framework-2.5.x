@@ -23,7 +23,7 @@ package org.springframework.beans.factory.parsing;
  * <p>Configuration parsers <strong>may</strong> provide the ability
  * to attach source metadata during the parse phase. They will offer
  * this metadata in a generic format which can be further modified by
- * a <code>SourceExtractor</code> before being attached to the bean
+ * a {@link SourceExtractor} before being attached to the bean
  * definition metadata.
  *
  * @author Rob Harrop
@@ -34,6 +34,7 @@ public interface SourceExtractor {
 	/**
 	 * Extract the source metadata from the candidate object supplied
 	 * by the configuration parser.
+	 * @param sourceCandidate the source metatada
 	 */
 	Object extract(Object sourceCandidate);
 

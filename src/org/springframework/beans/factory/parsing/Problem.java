@@ -16,11 +16,10 @@
 
 package org.springframework.beans.factory.parsing;
 
-
-
 /**
- * Represents a problem with a bean definition configuration. May be a
- * potential fatal problem (an error) or simply just a warning.
+ * Represents a problem with a bean definition configuration.
+ * 
+ * <p>May be a potential fatal problem (an error) or simply just a warning.
  *
  * @author Rob Harrop
  * @since 2.0
@@ -36,6 +35,13 @@ public class Problem {
 	private final Location location;
 
 
+	/**
+	 * Creates a new instance of the {@link Problem} class.
+	 * @param message	 a message detailing the problem
+	 * @param parseState the {@link ParseState} at the time of the error
+	 * @param rootCause  the underlying expection that caused the error (may be <code>null</code>)
+	 * @param location   the location within a bean configuration source that triggered the error
+	 */
 	public Problem(String message, ParseState parseState, Throwable rootCause, Location location) {
 		this.message = message;
 		this.parseState = parseState;
@@ -44,22 +50,42 @@ public class Problem {
 	}
 
 
+	/**
+	 * Gets the {@link ParseState} at the time of the error.
+	 * @return the {@link ParseState} at the time of the error
+	 */
 	public ParseState getParseState() {
 		return this.parseState;
 	}
 
+	/**
+	 * Gets the message detailing the problem.
+	 * @return the message detailing the problem
+	 */
 	public String getMessage() {
 		return message;
 	}
 
+	/**
+	 * Gets the underlying expection that caused the error (may be <code>null</code>).
+	 * @return the underlying expection that caused the error (may be <code>null</code>)
+	 */
 	public Throwable getRootCause() {
 		return rootCause;
 	}
 
+	/**
+	 * Gets the location within a bean configuration source that triggered the error
+	 * @return the location within a bean configuration source that triggered the error
+	 */
 	public Location getLocation() {
 		return location;
 	}
 
+	/**
+	 * Gets the description of the bean configuration source that triggered the error
+	 * @return the description of the bean configuration source that triggered the error
+	 */
 	public String getResourceDescription() {
 		return getLocation().getResource().toString();
 	}
