@@ -38,9 +38,9 @@ public interface ViewResolver {
 	/** 
 	 * Resolve the given view by name.
 	 * <p>Note: To allow for ViewResolver chaining, a ViewResolver should
-	 * return null if a view with the given name is not defined in it.
+	 * return <code>null</code>  if a view with the given name is not defined in it.
 	 * However, this is not required: Some ViewResolvers will always attempt
-	 * to build View objects with the given name, unable to return null
+	 * to build View objects with the given name, unable to return <code>null</code> 
 	 * (rather throwing an exception when View creation failed).
 	 * @param viewName name of the view to resolve
 	 * @param locale Locale in which to resolve the view.
