@@ -262,6 +262,10 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
   <property name="cache" value="true"/>
   <property name="prefix" value=""/>
   <property name="suffix" value=".vm"/>
+  
+  ]]><lineannotation>&lt;!-- if you want to use the Spring Velocity macros, set this property to true --&gt;</lineannotation><![CDATA[
+  <property name="exposeSpringMacroHelpers" value="true"/>
+
 </bean>]]></programlisting>
 
       <programlisting><lineannotation>&lt;!-- freemarker config --&gt;</lineannotation><![CDATA[
@@ -279,6 +283,10 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
   <property name="cache" value="true"/>
   <property name="prefix" value=""/>
   <property name="suffix" value=".ftl"/>
+  
+  ]]><lineannotation>&lt;!-- if you want to use the Spring FreeMarker macros, set this property to true --&gt;</lineannotation><![CDATA[
+  <property name="exposeSpringMacroHelpers" value="true"/>
+
 </bean>]]></programlisting>
 
       <note><para>For non web-apps add a <classname>VelocityConfigurationFactoryBean</classname> or a
@@ -290,8 +298,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
       <title>Creating templates</title>
 
       <para>Your templates need to be stored in the directory specified by the
-      <literal>*Configurer</literal> bean shown above in <xref
-      linkend="view-velocity-contextconfig" /> This document does not cover
+      <literal>*Configurer</literal> bean shown above. This document does not cover
       details of creating templates for the two languages - please see their
       relevant websites for information. If you use the view resolvers
       highlighted, then the logical view names relate to the template file
@@ -328,24 +335,24 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
         the bean definition for the Velocity config bean by replacing the
         "configLocation" property with the following inline properties.</para>
 
-        <programlisting>&lt;bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer"&gt;
-  &lt;property name="velocityProperties"&gt;
-    &lt;props&gt;
-      &lt;prop key="resource.loader"&gt;file&lt;/prop&gt;
-      &lt;prop key="file.resource.loader.class"&gt;
+        <programlisting><![CDATA[<bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
+  <property name="velocityProperties">
+    <props>
+      <prop key="resource.loader">file</prop>
+      <prop key="file.resource.loader.class">
         org.apache.velocity.runtime.resource.loader.FileResourceLoader
-      &lt;/prop&gt;
-      &lt;prop key="file.resource.loader.path"&gt;${webapp.root}/WEB-INF/velocity&lt;/prop&gt;
-      &lt;prop key="file.resource.loader.cache"&gt;false&lt;/prop&gt;
-    &lt;/props&gt;
-  &lt;/property&gt;
-&lt;/bean&gt;</programlisting>
+      </prop>
+      <prop key="file.resource.loader.path">${webapp.root}/WEB-INF/velocity</prop>
+      <prop key="file.resource.loader.cache">false</prop>
+    </props>
+  </property>
+</bean>]]></programlisting>
 
         <para>Refer to the <ulink
         url="http://www.springframework.org/docs/api/org/springframework/ui/velocity/VelocityEngineFactory.html">API
         documentation</ulink> for Spring configuration of Velocity, or the
         Velocity documentation for examples and definitions of the
-        <literal>velocity.properties</literal> file itself.</para>
+        <filename>'velocity.properties'</filename> file itself.</para>
       </section>
 
       <section>
@@ -372,7 +379,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
 <bean id="fmXmlEscape" class="freemarker.template.utility.XmlEscape"/>]]></programlisting>
 
         <para>See the FreeMarker documentation for details of settings and
-        variables as they apply to the <literal>Configuration</literal>
+        variables as they apply to the <classname>Configuration</classname>
         object.</para>
       </section>
     </section>
@@ -381,7 +388,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
       <title>Bind support and form handling</title>
 
       <para>Spring provides a tag library for use in JSP's that contains
-      (amongst other things) a <literal>&lt;spring:bind&gt;</literal> tag.
+      (amongst other things) a <literal>&lt;spring:bind/&gt;</literal> tag.
       This tag primarily enables forms to display values from form backing
       objects and to show the results of failed validations from a
       <literal>Validator</literal> in the web or business tier. From version
@@ -390,16 +397,17 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
       input elements themselves.</para>
 
       <section id="view-velocity-validation">
-        <title>the bind macros</title>
+        <title>The bind macros</title>
 
         <para>A standard set of macros are maintained within the
         <literal>spring.jar</literal> file for both languages, so they are
         always available to a suitably configured application. However they
         can only be used if your view sets the bean property
-        <literal>exposeSpringMacroHelpers</literal> to <literal>true</literal>
-        . The same property can be set on
-        <literal>VelocityViewResolver</literal> or
-        <literal>FreeMarkerViewResolver</literal> too if you happen to be
+        <literal>exposeSpringMacroHelpers</literal> to <literal>'true'</literal>
+        on your <classname>VelocityView</classname> / <classname>FreeMarkerView</classname>
+        beans. By way of a shortcut, you can also configure this property on
+        <classname>VelocityViewResolver</classname> or
+        <classname>FreeMarkerViewResolver</classname> too if you happen to be
         using it, in which case all of your views will inherit the value from
         it. Note that this property is <emphasis role="bold">not
         required</emphasis> for any aspect of HTML form handling <emphasis
@@ -414,6 +422,45 @@ personFormV.exposeSpringMacroHelpers=true</programlisting>
         <programlisting>personFormF.class=org.springframework.web.servlet.view.freemarker.FreeMarkerView
 personFormF.url=personForm.ftl
 personFormF.exposeSpringMacroHelpers=true</programlisting>
+
+        <para>Find below an example of a complete (albeit trivial) Spring Web MVC
+        configuration file that exposes the Velocity macros to every (Velocity) view.</para>
+        
+        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+    <bean name="helloController" class="info.wilhelms.springwebapp.SampleController">
+        <property name="commandName" value="command"/>
+        <property name="commandClass" value="info.wilhelms.springwebapp.Message"/>
+        <property name="formView" value="foo"/>
+        <property name="successView" value="banjo"/>
+        <property name="bindOnNewForm" value="true"/>
+        <property name="sessionForm" value="true"/>
+    </bean>
+
+    <bean id="velocityConfig"
+          class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
+        <property name="resourceLoaderPath" value="/WEB-INF/velocity/"/>
+    </bean>
+
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
+        <property name="cache" value="false"/>
+        <property name="prefix" value=""/>
+        <property name="suffix" value=".vm"/>
+        ]]><lineannotation><emphasis role="bold">&lt;property name="exposeSpringMacroHelpers" value="true"/&gt;</emphasis></lineannotation><![CDATA[
+    </bean>
+
+    <bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="mappings">
+            <value>
+                **/hello.htm=helloController
+            </value>
+        </property>
+    </bean>
+
+</beans>]]></programlisting>
 
         <para>Some of the macros defined in the Spring libraries are
         considered internal (private) but no such scoping exists in the macro
