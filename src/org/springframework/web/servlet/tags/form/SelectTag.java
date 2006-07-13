@@ -197,6 +197,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 			optionWriter.writeOptions(tagWriter);
 
 			tagWriter.endTag();
+			writeHiddenTagIfNecessary(tagWriter);
 			return EVAL_PAGE;
 		}
 		else {
@@ -205,6 +206,21 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 			this.tagWriter = tagWriter;
 			this.pageContext.setAttribute(LIST_VALUE_PAGE_ATTRIBUTE, getBindStatus());
 			return EVAL_BODY_INCLUDE;
+		}
+	}
+
+	/**
+	 * If using a multi select, a hidden element is needed to make sure all
+	 * items are correctly unselected on the server-side in response to a
+	 * null post.
+	 */
+	private void writeHiddenTagIfNecessary(TagWriter tagWriter) throws JspException {
+		if (isMultiple()) {
+			tagWriter.startTag("input");
+			tagWriter.writeAttribute("type", "hidden");
+			tagWriter.writeAttribute("name", "_" + getName());
+			tagWriter.writeAttribute("value", "1");
+			tagWriter.endTag();
 		}
 	}
 
@@ -230,8 +246,8 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 */
 	private boolean forceMultiple() throws JspException {
 		BindStatus bindStatus = getBindStatus();
-		Object statusValue = bindStatus.getValue();
-		if (statusValue != null && typeRequiresMultiple(statusValue.getClass())) {
+		Class valueType = bindStatus.getValueType();
+		if (valueType != null && typeRequiresMultiple(valueType)) {
 			return true;
 		}
 		else if (bindStatus.getEditor() != null) {
@@ -257,6 +273,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	public int doEndTag() throws JspException {
 		if (this.tagWriter != null) {
 			this.tagWriter.endTag();
+			writeHiddenTagIfNecessary(tagWriter);
 		}
 		return EVAL_PAGE;
 	}

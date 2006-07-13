@@ -28,13 +28,6 @@
 		</attribute>
 
 		<attribute>
-			<name>name</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description>HTML Optional Attribute</description>
-		</attribute>
-
-		<attribute>
 			<name>htmlEscape</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1537,8 +1530,13 @@
 	<tag>
 		<name>errors</name>
 		<tag-class>org.springframework.web.servlet.tags.form.ErrorsTag</tag-class>
-		<body-content>empty</body-content>
+		<body-content>JSP</body-content>
 		<description>Renders field errors in an HTML 'span' tag.</description>
+
+		<variable>
+			<name-given>messages</name-given>
+			<variable-class>java.util.List</variable-class>
+		</variable>
 
 		<attribute>
 			<name>path</name>

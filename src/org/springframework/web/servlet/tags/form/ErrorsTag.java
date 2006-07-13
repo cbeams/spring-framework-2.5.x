@@ -16,30 +16,42 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.jsp.JspException;
-
 import org.springframework.util.ObjectUtils;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.BodyContent;
+import javax.servlet.jsp.tagext.BodyTag;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Form tag for displaying errors for a particular field or object.
  * <p/>
  * This tag supports three main usage patterns:
  * <ol>
- *  <li>Field only - set '<code>path</code>' to the field name (or path)</li>
- *  <li>Object errors only - omit '<code>path</code>'</li>
- *  <li>All errors - set '<code>path</code>' to '<code>*</code>'</li>
+ * <li>Field only - set '<code>path</code>' to the field name (or path)</li>
+ * <li>Object errors only - omit '<code>path</code>'</li>
+ * <li>All errors - set '<code>path</code>' to '<code>*</code>'</li>
  * </ol>
  *
  * @author Rob Harrop
  * @since 2.0
  */
-public class ErrorsTag extends AbstractHtmlElementTag {
+public class ErrorsTag extends AbstractHtmlElementTag implements BodyTag {
 
-	/** The HTML '<code>span</code>' tag */
+	/**
+	 * The HTML '<code>span</code>' tag
+	 */
 	public static final String SPAN_TAG = "span";
 
 
 	private String delimiter = "<br/>";
+
+	private TagWriter tagWriter;
+
+	private BodyContent bodyContent;
 
 	/**
 	 * What delimiter should be used between error messages. Default to an HTML
@@ -64,21 +76,74 @@ public class ErrorsTag extends AbstractHtmlElementTag {
 	}
 
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
+		this.tagWriter = tagWriter;
+		List errorMessages = new ArrayList();
+		Collections.addAll(errorMessages, getBindStatus().getErrorMessages());
+		this.pageContext.setAttribute("messages", errorMessages);
+		return shouldRender() ? EVAL_BODY_BUFFERED : EVAL_PAGE;
+	}
+
+	public int doEndTag() throws JspException {
 		if (shouldRender()) {
-			tagWriter.startTag(SPAN_TAG);
-			writeDefaultAttributes(tagWriter);
-			String delimiter = ObjectUtils.getDisplayString(evaluate("delimiter", this.delimiter));
-			String[] errorMessages = getBindStatus().getErrorMessages();
-			for (int i = 0; i < errorMessages.length; i++) {
-				String errorMessage = errorMessages[i];
-				if (i > 0) {
-					tagWriter.appendValue(delimiter);
-				}
-				tagWriter.appendValue(errorMessage);
+			if (this.bodyContent != null) {
+				flushBufferedBodyContent();
 			}
-			tagWriter.endTag();
+			else {
+				renderDefaultContent();
+			}
 		}
+
 		return EVAL_PAGE;
 	}
 
+	/**
+	 * Renders the default content for error messages. Used when the
+	 * user creates an empty errors tag.
+	 */
+	protected void renderDefaultContent() throws JspException {
+		tagWriter.startTag(SPAN_TAG);
+		writeDefaultAttributes(tagWriter);
+		String delimiter = ObjectUtils.getDisplayString(evaluate("delimiter", this.delimiter));
+		String[] errorMessages = getBindStatus().getErrorMessages();
+		for (int i = 0; i < errorMessages.length; i++) {
+			String errorMessage = errorMessages[i];
+			if (i > 0) {
+				tagWriter.appendValue(delimiter);
+			}
+			tagWriter.appendValue(errorMessage);
+		}
+		tagWriter.endTag();
+	}
+
+	/**
+	 * The user customised the output of the error messages - flush the
+	 * buffered content into the main {@link JspWriter}.
+	 */
+	private void flushBufferedBodyContent() throws JspException {
+		String bufferedBodyContent = this.bodyContent.getString();
+		try {
+			this.bodyContent.writeOut(this.bodyContent.getEnclosingWriter());
+		}
+		catch (IOException e) {
+			throw new JspException("Unable to write buffered body content.", e);
+		}
+	}
+
+	//---------------------------------------------------------------------
+	// BodyTag implementation
+	//---------------------------------------------------------------------
+
+	public void doInitBody() throws JspException {
+		// no-op for now
+	}
+
+	public void setBodyContent(BodyContent bodyContent) {
+		this.bodyContent = bodyContent;
+	}
+
+	public void doFinally() {
+		super.doFinally();
+		this.tagWriter = null;
+		this.bodyContent = null;
+	}
 }

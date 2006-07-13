@@ -25,8 +25,14 @@ import org.springframework.web.servlet.tags.RequestContextAwareTag;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.tagext.Tag;
+import javax.servlet.jsp.tagext.BodyTag;
+import javax.servlet.jsp.tagext.BodyContent;
+import javax.servlet.jsp.JspWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.Reader;
+import java.io.Writer;
+import java.io.IOException;
 
 /**
  * @author Rob Harrop
@@ -59,6 +65,9 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		exposeErrors(errors);
 
 		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+
+		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
@@ -77,8 +86,25 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
 		String output = getWriter().toString();
 		assertEquals(0, output.length());
+	}
+
+	public void testAsBodyTag() throws Exception {
+		Errors errors = new BindException(new TestBean(), "COMMAND_NAME");
+		errors.rejectValue("name", "some.code", "Default Message");
+		errors.rejectValue("name", "too.short", "Too Short");
+		exposeErrors(errors);
+		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		String bodyContent = "Foo";
+		this.tag.setBodyContent(new MockBodyContent(null, bodyContent, getWriter()));
+		this.tag.doEndTag();
+		assertEquals(bodyContent, getWriter().toString());
+
 	}
 
 	private void assertSpanTagOpened(String output) {
@@ -104,4 +130,128 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		pageContext.setAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME, COMMAND_NAME);
 	}
 
+	private static class MockBodyContent extends BodyContent {
+
+		private final String mockContent;
+
+		private final Writer realWriter;
+
+		public MockBodyContent(JspWriter jspWriter, String mockContent, Writer realWriter) {
+			super(jspWriter);
+			this.mockContent = mockContent;
+			this.realWriter = realWriter;
+		}
+
+		public Reader getReader() {
+			throw new UnsupportedOperationException();
+		}
+
+		public String getString() {
+			return this.mockContent;
+		}
+
+		public void writeOut(Writer writer) throws IOException {
+			this.realWriter.write(mockContent);
+		}
+
+		public void clear() throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void clearBuffer() throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void close() throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public int getRemaining() {
+			throw new UnsupportedOperationException();
+		}
+
+		public void newLine() throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void print(boolean b) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void print(char c) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void print(char[] chars) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void print(double v) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void print(float v) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void print(int i) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void print(long l) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void print(Object object) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void print(String string) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void println() throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void println(boolean b) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void println(char c) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void println(char[] chars) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void println(double v) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void println(float v) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void println(int i) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void println(long l) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void println(Object object) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void println(String string) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		public void write(char cbuf[], int off, int len) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+	}
 }

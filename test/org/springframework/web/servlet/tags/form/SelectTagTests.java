@@ -16,27 +16,24 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import org.dom4j.Attribute;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+import org.springframework.beans.TestBean;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.web.servlet.support.BindStatus;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.Tag;
+import java.beans.PropertyEditor;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.beans.PropertyEditor;
-import java.beans.PropertyEditorSupport;
-
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.Tag;
-
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.Attribute;
-import org.dom4j.io.SAXReader;
-
-import org.springframework.beans.TestBean;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.web.servlet.support.BindStatus;
-import org.springframework.validation.BeanPropertyBindingResult;
 
 /**
  * @author Rob Harrop
@@ -157,22 +154,24 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
-		assertTrue(output.startsWith("<select "));
-		assertTrue(output.endsWith("</select>"));
+		output = "<doc>" + output + "</doc>";
 
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertEquals("select", rootElement.getName());
-		assertEquals("someIntegerArray", rootElement.attribute("name").getValue());
+		assertEquals(2, rootElement.elements().size());
 
-		List children = rootElement.elements();
+		Element selectElement = rootElement.element("select");
+		assertEquals("select", selectElement.getName());
+		assertEquals("someIntegerArray", selectElement.attribute("name").getValue());
+
+		List children = selectElement.elements();
 		assertEquals("Incorrect number of children", array.length, children.size());
 
-		Element e = (Element) rootElement.selectSingleNode("option[text() = '12']");
+		Element e = (Element) selectElement.selectSingleNode("option[text() = '12']");
 		assertEquals("'12' node not selected", "selected", e.attribute("selected").getValue());
 
-		e = (Element) rootElement.selectSingleNode("option[text() = '34']");
+		e = (Element) selectElement.selectSingleNode("option[text() = '34']");
 		assertEquals("'34' node not selected", "selected", e.attribute("selected").getValue());
 	}
 
@@ -185,7 +184,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 
 		this.tag.setPath("myFloat");
 
-		Float[] array = new Float[] {
+		Float[] array = new Float[]{
 						new Float("12.30"), new Float("12.32"), new Float("12.34"), new Float("12.36"),
 						new Float("12.38"), new Float("12.40"), new Float("12.42"), new Float("12.44"),
 						new Float("12.46"), new Float("12.48")
@@ -227,22 +226,24 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
-		assertTrue(output.startsWith("<select "));
-		assertTrue(output.endsWith("</select>"));
+		output = "<doc>" + output + "</doc>";
 
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertEquals("select", rootElement.getName());
-		assertEquals("someList", rootElement.attribute("name").getValue());
+		assertEquals(2, rootElement.elements().size());
 
-		List children = rootElement.elements();
+		Element selectElement = rootElement.element("select");
+		assertEquals("select", selectElement.getName());
+		assertEquals("someList", selectElement.attribute("name").getValue());
+
+		List children = selectElement.elements();
 		assertEquals("Incorrect number of children", 4, children.size());
 
-		Element e = (Element) rootElement.selectSingleNode("option[@value = 'UK']");
+		Element e = (Element) selectElement.selectSingleNode("option[@value = 'UK']");
 		assertEquals("UK node not selected", "selected", e.attribute("selected").getValue());
 
-		e = (Element) rootElement.selectSingleNode("option[@value = 'AT']");
+		e = (Element) selectElement.selectSingleNode("option[@value = 'AT']");
 		assertEquals("AT node not selected", "selected", e.attribute("selected").getValue());
 	}
 
@@ -259,24 +260,56 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
-
-		assertTrue(output.startsWith("<select "));
-		assertTrue(output.endsWith("</select>"));
+		output = "<doc>" + output + "</doc>";
 
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertEquals("select", rootElement.getName());
-		assertEquals("someMap", rootElement.attribute("name").getValue());
+		assertEquals(2, rootElement.elements().size());
 
-		List children = rootElement.elements();
+		Element selectElement = rootElement.element("select");
+		assertEquals("select", selectElement.getName());
+		assertEquals("someMap", selectElement.attribute("name").getValue());
+
+		List children = selectElement.elements();
 		assertEquals("Incorrect number of children", 2, children.size());
 
-		Element e = (Element) rootElement.selectSingleNode("option[@value = 'M']");
+		Element e = (Element) selectElement.selectSingleNode("option[@value = 'M']");
 		assertEquals("M node not selected", "selected", e.attribute("selected").getValue());
 
-		e = (Element) rootElement.selectSingleNode("option[@value = 'F']");
+		e = (Element) selectElement.selectSingleNode("option[@value = 'F']");
 		assertEquals("F node not selected", "selected", e.attribute("selected").getValue());
+	}
+
+	public void testMultiWithEmptyCollection() throws Exception {
+
+		this.bean.setSomeList(new ArrayList());
+
+		this.tag.setPath("someList");
+		this.tag.setItems("${countries}");
+		this.tag.setItemValue("isoCode");
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		output = "<doc>" + output + "</doc>";
+
+		SAXReader reader = new SAXReader();
+		Document document = reader.read(new StringReader(output));
+		Element rootElement = document.getRootElement();
+		assertEquals(2, rootElement.elements().size());
+
+		Element selectElement = rootElement.element("select");
+		assertEquals("select", selectElement.getName());
+		assertEquals("someList", selectElement.attribute("name").getValue());
+		assertEquals("true", selectElement.attribute("multiple").getValue());
+
+		List children = selectElement.elements();
+		assertEquals("Incorrect number of children", 4, children.size());
+
+		Element inputElement = rootElement.element("input");
+		assertNotNull(inputElement);
+
 	}
 
 	private void assertStringArray() throws JspException, DocumentException {
