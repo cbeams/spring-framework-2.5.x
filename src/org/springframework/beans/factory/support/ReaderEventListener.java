@@ -16,11 +16,13 @@
 
 package org.springframework.beans.factory.support;
 
+import java.util.EventListener;
+
 /**
  * @author Rob Harrop
  * @since 2.0
  */
-public interface ReaderEventListener {
+public interface ReaderEventListener extends EventListener {
 
 	void componentRegistered(ComponentDefinition componentDefinition);
 

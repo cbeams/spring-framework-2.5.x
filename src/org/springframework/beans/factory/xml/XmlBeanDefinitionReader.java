@@ -244,6 +244,18 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
+	 * Gets the current {@link NamespaceHandlerResolver}. Creates the default implementation
+	 * if necessary.
+	 * @see #createDefaultNamespaceHandlerResolver() 
+	 */
+	public NamespaceHandlerResolver getNamespaceHandlerResolver() {
+		if(this.namespaceHandlerResolver == null) {
+			this.namespaceHandlerResolver = createDefaultNamespaceHandlerResolver();
+		}
+		return this.namespaceHandlerResolver;
+	}
+
+	/**
 	 * Specify the {@link DocumentLoader} to use. The default implementation is
 	 * {@link DefaultDocumentLoader} which loads {@link Document} instances using JAXP.
 	 */
@@ -272,6 +284,14 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	public void setEntityResolver(EntityResolver entityResolver) {
 		this.entityResolver = entityResolver;
+	}
+
+
+	/**
+	 * Gets the SAX {@link EntityResolver}.
+	 */
+	public EntityResolver getEntityResolver() {
+		return entityResolver;
 	}
 
 	/**
