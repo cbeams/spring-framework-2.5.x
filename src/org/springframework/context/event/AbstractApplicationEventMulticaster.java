@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import org.springframework.core.CollectionFactory;
  * <p>Implementing ApplicationEventMulticaster's actual <code>multicastEvent</code>
  * method is left to subclasses. SimpleApplicationEventMulticaster simply multicasts
  * all events to all registered listeners, invoking them in the calling thread.
- * Alternative implementations could me more sophisticated in those respects.
+ * Alternative implementations could be more sophisticated in those respects.
  *
  * @author Juergen Hoeller
  * @since 1.2.3
