@@ -63,6 +63,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  *
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Rick Evans
  * @since 1.1.1
  * @see #setDirty
  * @see #contextKey
@@ -112,6 +113,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 
 	/**
 	 * Constructor for AbstractDependencyInjectionSpringContextTests with a JUnit name.
+	 * @param name the name of this text fixture
 	 */
 	public AbstractDependencyInjectionSpringContextTests(String name) {
 		super(name);
@@ -190,7 +192,27 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 
 	protected final void setUp() throws Exception {
 		this.applicationContext = getContext(contextKey());
+		injectDependencies();
+		try {
+			onSetUp();
+		}
+		catch (Exception ex) {
+			logger.error("Setup error", ex);
+			throw ex;
+		}
+	}
 
+	/**
+	 * Inject dependencies into 'this' instance (that is, this test instance).
+	 * <p>The default implementation populates protected variables if the
+	 * {@link #populateProtectedVariables() appropriate flag is set}, else
+	 * uses autowiring if autowiring is switched on (which it is by default).
+	 * <p>You can certainly override this method if you want to totally control
+	 * how dependencies are injected into 'this' instance.
+	 * @throws Exception in the case of any errors
+	 * @see #populateProtectedVariables() 
+	 */
+	protected void injectDependencies() throws Exception {
 		if (isPopulateProtectedVariables()) {
 			if (this.managedVariableNames == null) {
 				initManagedVariableNames();
@@ -199,15 +221,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 		}
 		else if (getAutowireMode() != AUTOWIRE_NO) {
 			this.applicationContext.getBeanFactory().autowireBeanProperties(
-			    this, getAutowireMode(), isDependencyCheck());
-		}
-
-		try {
-			onSetUp();
-		}
-		catch (Exception ex) {
-			logger.error("Setup error", ex);
-			throw ex;
+				this, getAutowireMode(), isDependencyCheck());
 		}
 	}
 
@@ -240,7 +254,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 				if (logger.isDebugEnabled()) {
 					logger.debug("Candidate field: " + field);
 				}
-				if (!Modifier.isStatic(field.getModifiers()) && Modifier.isProtected(field.getModifiers())) {
+				if (isProtectedInstanceField(field)) {
 					Object oldValue = field.get(this);
 					if (oldValue == null) {
 						managedVarNames.add(field.getName());
@@ -260,6 +274,11 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 		while (!clazz.equals(AbstractDependencyInjectionSpringContextTests.class));
 
 		this.managedVariableNames = (String[]) managedVarNames.toArray(new String[managedVarNames.size()]);
+	}
+
+	private static boolean isProtectedInstanceField(Field field) {
+		int modifiers = field.getModifiers();
+		return !Modifier.isStatic(modifiers) && Modifier.isProtected(modifiers);
 	}
 
 	protected void populateProtectedVariables() throws IllegalAccessException {
