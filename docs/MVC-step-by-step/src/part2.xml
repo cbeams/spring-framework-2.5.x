@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <chapter id="part2">
     <title>Developing and Configuring the Application</title>
     <para>This is Part 2 of a step-by-step tutorial on how to develop a web
@@ -7,19 +6,34 @@
     environment and set up a basic application that we will now flesh out.</para>
     <para>This is what we have implemented so far:</para>
     <itemizedlist>
-        <listitem>
-            <para>An introduction page, <filename>'index.jsp'</filename></para>
-        </listitem>
-        <listitem>
-            <para>A <classname>DispatcherServlet</classname> defined in its corresponding
-            <filename>'springapp-servlet.xml'</filename> configuration file</para>
-        </listitem>
-        <listitem>
-            <para>A controller, <classname>HelloController</classname></para>
-        </listitem>
-        <listitem>
-            <para>A view, <filename>'hello.jsp'</filename>.</para>
-        </listitem>
+		<listitem>
+		<para>An introduction page, <filename>'index.jsp'</filename>, the welcome page
+		of the application. It was used to test our setup was correct. We will later
+		change this to actually provide a link into our application.</para>
+		</listitem>
+
+		<listitem>
+		  <para>A <classname>DispatcherServlet</classname> (front controller) with a corresponding
+		  <filename>'springapp-servlet.xml'</filename> configuration file.</para>
+		</listitem>
+
+		<listitem>
+		  <para>A page controller, <classname>HelloController</classname>, with limited
+		  functionality – it just forwards a <classname>ModelAndView</classname> to
+		  the <interfacename>ViewResolver</interfacename>. We currently
+		  have an empty model and will be providing a full model later on.</para>
+		</listitem>
+
+		<listitem>
+		 <para>A test class for the page controller, <classname>HelloControllerTests</classname>,
+		 to verify the name of the view is the one we expect.</para>
+		</listitem>
+		  
+		<listitem>
+		  <para>A view, <filename>'hello.jsp'</filename>, that again is extremely
+		  basic. The good news is the whole setup works and we are now ready to add more
+		  functionality.</para>
+		</listitem>
     </itemizedlist>
     <section id="step2.1">
         <title>Configure JSTL</title>
@@ -158,6 +172,45 @@ public class HelloControllerTests extends TestCase {
 	}
 }]]></programlisting>
     	
+		<para>Next, we run the Ant <literal>'tests'</literal> target and our test should fail.</para>
+		
+		<programlisting><![CDATA[$ ant tests
+Buildfile: build.xml
+
+build:
+
+buildtests:
+
+tests:
+    [junit] Running springapp.web.HelloControllerTests
+    [junit] 14-Jul-2006 19:29:57 springapp.web.HelloController handleRequest
+    [junit] INFO: Returning hello view with Fri Jul 14 19:29:57 BST 2006
+    [junit] Tests run: 1, Failures: 1, Errors: 0, Time elapsed: 0.04 sec
+    [junit] Testsuite: springapp.web.HelloControllerTests
+    [junit] Tests run: 1, Failures: 1, Errors: 0, Time elapsed: 0.04 sec
+
+    [junit] ------------- Standard Error -----------------
+    [junit] 14-Jul-2006 19:29:57 springapp.web.HelloController handleRequest
+    [junit] INFO: Returning hello view with Fri Jul 14 19:29:57 BST 2006
+    [junit] ------------- ---------------- ---------------
+    [junit] Testcase: testHandleRequestView(springapp.web.HelloControllerTests):        FAILED
+    [junit] expected:<WEB-INF/jsp/...> but was:<...>
+    [junit] junit.framework.ComparisonFailure: expected:<WEB-INF/jsp/...> but was:<...>
+    [junit]     at springapp.web.HelloControllerTests.testHandleRequestView(HelloControllerTests.java:14)
+
+
+    [junit] Test springapp.web.HelloControllerTests FAILED
+
+BUILD FAILED
+D:\Documents and Settings\Portia\workspace\springdev\springapp-part2\build.xml:102: tests.failed=true
+            ***********************************************************
+            ***********************************************************
+            ****  One or more tests failed!  Check the output ...  ****
+            ***********************************************************
+            ***********************************************************
+
+Total time: 1 second]]></programlisting>
+		
         <para>There are a few changes we need to make to the <classname>HelloController</classname>.
         First, let's update the view's resource reference to its new location <filename>'WEB-INF/jsp/hello.jsp'</filename>.
         Next, set the key/value pair for the current data and time value in the model with
@@ -583,5 +636,4 @@ greeting=Greetings, it is now]]></programlisting>
 	    </screenshot>
 
     </section>
-    
 </chapter>
