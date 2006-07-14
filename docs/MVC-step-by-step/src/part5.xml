@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id="part5">
+  <title>Implementing Database Persistence</title>
+
+  <para>This is Chapter 4 of a step-by-step account of how to develop a web application from scratch using the Spring Framework.
+  In Chapter 1 we configured the environment and set up a basic application that we will build upon. Chapter 2 improved the
+  application in several ways. Chapter 3 added some unit tests to the application and we also added a Form for
+  performing a price increase. In Chapter 4 it is time to deal with database persistence. We saw in the earlier parts how we
+  loaded some business objects using bean definitions in a configuration file. It is obvious that this would never work in real
+  life – whenever we re-start the server we are back to the original prices. We need to add code to actually persist these
+  changes to a database.</para>
+
+  <section id="step5.1">
+    <title>Add Ant tasks to create and load test data</title>
+
+    <para>Before we can start developing the persistence code, we should create the database tables that we need for our
+    development and testing. We also need a database. I am planning on using HSQL, which is a good open source database written
+    in Java. This database is distributed with Spring, so we can just copy the jar file to the web apps lib directory. Copy
+    spring-framework-1.2/lib/hsqldb/hsqldb.jar to springapp/war/WEB-INF/lib/. I am planning on using HSQL in a standalone mode to
+    begin with. That way we don't have to worry about starting up a separate database server every time we use it. The URL we
+    specify for connecting to HSQL controls the mode that the database is running in. To be able to run some Ant tasks for the
+    database we have to add some database properties to the build properties file.</para>
+  
+  </section>
+
+  <section id="step5.2">
+  
+      <title>Create a Data Access Object (DAO) implementation for JDBC</title>
+
+      <para>I begin with creating a new 'springapp/src/db' directory to contain any classes that are used for database access. In
+      this directory I create a new interface called 'ProductManagerDao.java'. This will be the interface that defines the
+      functionality that the DAO implementation classes will provide – we could choose to have more than one
+      implementation.</para>
+      
+  </section>
+  
+</chapter>
