@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <chapter id="part2">
     <title>Developing and Configuring the Application</title>
     <para>This is Part 2 of a step-by-step tutorial on how to develop a web
@@ -93,7 +94,7 @@
         
     </section>
     <section id="step2.2">
-        <title>Update the view to use a header file</title>
+        <title>Update the views to use a header file</title>
         <para>First we create the header file for inclusion in all the JSPs we create.</para>
         <para><filename>'springapp/war/WEB-INF/jsp/include.jsp'</filename>:</para>
         <programlisting><![CDATA[<%@ page session="false"%>
@@ -109,15 +110,11 @@
 
 ]]><lineannotation>&lt;%-- Redirected because we can't set the welcome page to a virtual URL. --%&gt;</lineannotation><![CDATA[
 <c:redirect url="/hello.htm"/>]]></programlisting>
-        
-    </section>
-    
-    <section id="step2.3">
-        <title>Improve the view and the controller</title>
+
         <para>Next, we move the view <filename>hello.jsp</filename> to the
         <filename class="directory">'WEB-INF/jsp'</filename> directory. Add the same include directive
         we added to <filename>index.jsp</filename> to <filename>hello.jsp</filename>. 
-        Now we also add the current date and time as output to be retrieved from the model
+        We also add the current date and time as output to be retrieved from the model
         passed to the view which will be rendered using the JSTL &lt;c:out/&gt; tag.</para>
         <para><filename>'springapp/war/WEB-INF/jsp/hello.jsp'</filename>:</para>
         <programlisting><![CDATA[<%@ include file="/WEB-INF/jsp/include.jsp" %>
@@ -129,7 +126,38 @@
 <p>Greetings, it is now <c:out value="${now}"/></p>
 </body>
 </html>]]></programlisting>
+        
+    </section>
     
+    <section id="step2.3">
+        <title>Improve the controller</title>
+    
+    	<para>Before we update the location of the JSP in our controller, let's update our test class first.
+    	We know we need to update the view's resource reference with its new location
+    	<filename>'WEB-INF/jsp/hello.jsp'</filename>. We also know there should be an object in the model
+		mapped to the key <literal>'now'</literal>.</para>
+    	
+    	<para><filename>'springapp/tests/HelloControllerTests.java'</filename>:</para>
+    	<programlisting><![CDATA[package springapp.web;
+
+import org.springframework.web.servlet.ModelAndView;
+
+import springapp.web.HelloController;
+
+import junit.framework.TestCase;
+
+public class HelloControllerTests extends TestCase {
+
+	public void testHandleRequestView() throws Exception{		
+		HelloController controller = new HelloController();
+		ModelAndView modelAndView = controller.handleRequest(null, null);		
+		assertEquals("WEB-INF/jsp/hello.jsp", modelAndView.getViewName());
+		assertNotNull(modelAndView.getModel());
+		String nowValue = (String) modelAndView.getModel().get("now");
+		assertNotNull(nowValue);		
+	}
+}]]></programlisting>
+    	
         <para>There are a few changes we need to make to the <classname>HelloController</classname>.
         First, let's update the view's resource reference to its new location <filename>'WEB-INF/jsp/hello.jsp'</filename>.
         Next, set the key/value pair for the current data and time value in the model with
