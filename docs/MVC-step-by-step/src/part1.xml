@@ -822,11 +822,10 @@ INFO: Servlet 'springapp' configured successfully]]></screen>
       </listitem>
 
       <listitem>
-        <para>A page controller, <classname>HelloController</classname>, with limited
-        functionality – it just forwards a <classname>ModelAndView</classname> to
-        the <interfacename>ViewResolver</interfacename>. We currently
-        have an empty model and will be providing a full model later on.</para>
-      </listitem>
+		<para>A page controller, <classname>HelloController</classname>, with limited
+	    functionality – it just returns a <classname>ModelAndView</classname>.
+		We currently have an empty model and will be providing a full model later on.</para>
+	  </listitem>
 
       <listitem>
        <para>A test class for the page controller, <classname>HelloControllerTests</classname>,

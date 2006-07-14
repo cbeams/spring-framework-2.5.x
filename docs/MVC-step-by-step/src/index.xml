@@ -6,6 +6,7 @@
 <!ENTITY part2          SYSTEM "part2.xml">
 <!ENTITY part3          SYSTEM "part3.xml">
 <!ENTITY part4          SYSTEM "part4.xml">
+<!ENTITY part5          SYSTEM "part5.xml">	
 ]>
 <book>
 	<bookinfo>
@@ -39,4 +40,5 @@
 	&part2;
 	&part3;
 	&part4;
+	&part5;	
 </book>
