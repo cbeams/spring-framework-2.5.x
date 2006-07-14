@@ -608,14 +608,13 @@ import springapp.web.HelloController;
 
 import junit.framework.TestCase;
 
-public class HelloWorldControllerTests extends TestCase {
+public class HelloControllerTests extends TestCase {
 
-  public void testHandleRequestView() throws Exception{		
-      HelloController controller = new HelloController();
-      ModelAndView modelAndView = controller.handleRequest(null, null);		
-      assertEquals("hello.jsp", modelAndView.getViewName());
-  }
-  
+	public void testHandleRequestView() throws Exception{		
+		HelloController controller = new HelloController();
+		ModelAndView modelAndView = controller.handleRequest(null, null);		
+		assertEquals("hello.jsp", modelAndView.getViewName());
+	}
 }]]></programlisting>    
         
     <remark><para>If you are using an IDE, you will may want to run your tests within your IDE.
