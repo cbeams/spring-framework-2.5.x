@@ -100,20 +100,26 @@ import junit.framework.TestCase;
 
 public class ProductTests extends TestCase {
 
-  public void testDescription() {
-    String testDescription = "aDescription";
-    Product product = new Product();
-    product.setDescription(testDescription);
-    assertEquals(testDescription, product.getDescription());
-  }
-	
-  public void testPrice() {
-    double testPrice = 100.00;
-    Product product = new Product();
-    product.setPrice(testPrice);
-    assertEquals(testPrice, product.getPrice(), 0);
-  }
-				
+    private Product product;
+
+    protected void setUp() throws Exception {
+        product = new Product();
+    }
+
+    public void testSetAndGetDescription() {
+        String testDescription = "aDescription";
+        assertNull(product.getDescription());
+        product.setDescription(testDescription);
+        assertEquals(testDescription, product.getDescription());
+    }
+
+    public void testSetAndGetPrice() {
+        double testPrice = 100.00;
+        assertEquals(0, 0, 0);    
+        product.setPrice(testPrice);
+        assertEquals(testPrice, product.getPrice(), 0);
+    }
+  
 }]]></programlisting>			
 			
 				<para><filename>'springapp/test/springapp/domain/Product.java'</filename>:</para>
