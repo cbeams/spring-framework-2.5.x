@@ -1,12 +1,229 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <chapter id="part4">
-    <title>Adding Unit Tests and a Form to the Application</title>
+    <title>UNDER CONSTRUCTION</title>
     <para>This is Part 4 of a step-by-step account of how to develop a web application from
     scratch using the Spring Framework. In <link linkend="part1">Part 1</link> we configured
     the environment and set up a basic application that we will build upon.
     <link linkend="part2">Part 3</link> improved the application in several ways. We are now
     going to add some unit tests to the application.</para>
 
+	
+		<section id="step4.1">
+        <para>Next, I modify the <classname>SpringappController</classname> to hold a reference
+        to this <classname>ProductManager</classname> class. As you can see, it is now in a
+        separate package called <literal>'web'</literal> – remember to move the source to this
+        new location. I also add code to have the controller pass some product information to
+        the view. The <methodname>getModelAndView()</methodname> method now returns a
+        <interfacename>Map</interfacename> with both the date and time and the products
+        list obtained from the manager reference.</para>
+        
+        <para><filename>'springapp/src/web/SpringappController.java'</filename>:</para>
+        <programlisting><![CDATA[package web;
+
+import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.HashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import bus.Product;
+import bus.ProductManager;
+
+public class SpringappController implements Controller {
+
+    protected final Log logger = LogFactory.getLog(getClass());
+
+    private ProductManager productManager;
+
+
+    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String now = (new java.util.Date()).toString();
+        logger.info("returning hello view with " + now);
+
+        Map myModel = new HashMap();
+        myModel.put("now", now);
+        myModel.put("products", this.productManager.getProducts());
+
+        return new ModelAndView("hello", "model", myModel);
+    }
+
+
+    public void setProductManager(ProductManager productManager) {
+        this.productManager = productManager;
+    }
+
+}]]></programlisting>
+
+    </section>
+    	
+    <section id="step4.2">
+        <title>Modify the view to display business data and add support for message bundle</title>
+        <para>Using the JSTL <literal>&lt;c:forEach/&gt;</literal> tag, I add a section
+        that displays product information. I have also replaced the title, heading and
+        greeting text with a JSTL <literal>&lt;fmt:message/&gt;</literal> tag that pulls
+        the text to display from a provided <literal>'message'</literal> source – I will
+        show this source in a later step.</para>
+        
+        <para><filename>'springapp/war/WEB-INF/jsp/hello.jsp'</filename>:</para>
+        <programlisting><![CDATA[<%@ include file="/WEB-INF/jsp/include.jsp" %>
+
+<html>
+<head><title><fmt:message key="title"/></title></head>
+<body>
+<h1><fmt:message key="heading"/></h1>
+<p><fmt:message key="greeting"/> <c:out value="${model.now}"/>
+</p>
+<h3>Products</h3>
+<c:forEach items="${model.products}" var="prod">
+  <c:out value="${prod.description}"/> <i>$<c:out value="${prod.price}"/></i><br><br>
+</c:forEach>
+</body>
+</html>]]></programlisting>
+        
+    </section>
+    
+    <section id="step2.7">
+        <title>Add some test data to automatically populate some business objects</title>
+        <para>I am not going to add any code to load the business objects from a database
+        just yet. Instead, we can stub a couple of <classname>Product</classname> instances
+        using Spring's bean and application context support. I will simply put the data I
+        need as a couple of bean entries in <filename>'springapp-servlet.xml'</filename>.
+        I will also add the <literal>'messageSource'</literal> bean entry that will pull
+        in the messages resource bundle (<filename>'messages.properties'</filename>) that
+        I will create in the next step.</para>
+        <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
+        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+]]><lineannotation>&lt;!-- the application context definition for the springapp <classname>DispatcherServlet</classname> --&gt;</lineannotation><![CDATA[
+
+<beans>
+
+    <bean id="springappController" class="web.SpringappController">
+        <property name="productManager" ref="prodMan"/>
+    </bean>
+
+    <bean id="prodMan" class="bus.ProductManager">
+        <property name="products">
+            <list>
+                <ref bean="product1"/>
+                <ref bean="product2"/>
+                <ref bean="product3"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="product1" class="bus.Product">
+        <property name="description" value="Lamp"/>
+        <property name="price" value="5.75"/>
+    </bean>
+        
+    <bean id="product2" class="bus.Product">
+        <property name="description" value="Table"/>
+        <property name="price" value="75.25"/>
+    </bean>
+
+    <bean id="product3" class="bus.Product">
+        <property name="description" value="Chair"/>
+        <property name="price" value="22.79"/>
+    </bean>
+
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basename" value="messages"/>
+    </bean>
+
+    <bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="mappings">
+            <value>
+                /hello.htm=springappController
+            </value>
+        </property>
+    </bean>
+
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+</beans>]]></programlisting>
+    </section>
+    
+    <section id="step2.8">
+        <title>Add the message bundle and a <literal>'clean'</literal> target to <filename>'build.xml'</filename></title>
+        <para>I create a <filename>'messages.properties'</filename> file in the
+        <filename class="directory">'war/WEB-INF/classes'</filename> directory. This properties bundle
+        so far has three entries matching the keys specified in the <literal>&lt;fmt:message/&gt;</literal>
+        tags that we added to <filename>'hello.jsp'</filename>.</para>    
+        <para><filename>'springapp/war/WEB-INF/classes/messages.properties'</filename>:</para>
+        <programlisting><![CDATA[title=SpringApp
+heading=Hello :: SpringApp
+greeting=Greetings, it is now]]></programlisting>
+        <para>Since we moved some source files around, it makes sense to add a <literal>'clean'</literal>
+        and an <literal>'undeploy'</literal> target to the build script. I add the following entries to
+        the <filename>'build.xml'</filename> file.</para>
+        <para><filename>'build.xml'</filename>:</para>
+        <programlisting><![CDATA[    <target name="clean" description="Clean output directories">
+        <delete>
+            <fileset dir="${build.dir}">
+                <include name="**/*.class"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <target name="undeploy" description="Un-Deploy application">
+        <delete>
+            <fileset dir="${deploy.path}/${name}">
+                <include name="**/*.*"/>
+            </fileset>
+        </delete>
+    </target>]]></programlisting>
+    
+        <para>Now stop the Tomcat server, run the <literal>'clean'</literal>, <literal>'undeploy'</literal>
+        and <literal>'deploy'</literal> targets. This will remove all old class files, re-build
+        the application and deploy it. Start up Tomcat again and you should see the following:</para>
+        
+        <screenshot>
+		    <mediaobject>
+			    <imageobject role="fo">
+				    <imagedata fileref="images/screen3.png" format="PNG" align="center" />
+			    </imageobject>
+			    <imageobject role="html">
+				    <imagedata fileref="images/screen3.png" format="PNG" align="center" />
+			    </imageobject>
+			    <caption>
+				    <para>The updated application</para>
+			    </caption>
+		    </mediaobject>
+	    </screenshot>
+    
+        <para>Find below a screenshot of what your project directory structure
+        must look like after following the above instructions.</para>
+        <screenshot>
+		    <mediaobject>
+			    <imageobject role="fo">
+				    <imagedata fileref="images/dir-structure-endp3.png" format="PNG" align="center" />
+			    </imageobject>
+			    <imageobject role="html">
+				    <imagedata fileref="images/dir-structure-endp3.png" format="PNG" align="center" />
+			    </imageobject>
+			    <caption>
+				    <para>The project directory structure at the end of part 3</para>
+			    </caption>
+		    </mediaobject>
+	    </screenshot>
+    </section>
+		
     <section id="step4.1">
         <title>Add unit test for the <classname>SpringappController</classname> class</title>
         <para>Before we create any unit tests, we want to prepare Ant and our build script to be

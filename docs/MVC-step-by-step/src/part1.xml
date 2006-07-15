@@ -828,7 +828,7 @@ INFO: Servlet 'springapp' configured successfully]]></screen>
 	  </listitem>
 
       <listitem>
-       <para>A test class for the page controller, <classname>HelloControllerTests</classname>,
+       <para>A unit test class for the page controller, <classname>HelloControllerTests</classname>,
        to verify the name of the view is the one we expect.</para>
       </listitem>
         

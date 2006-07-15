@@ -25,7 +25,7 @@
 		</listitem>
 
 		<listitem>
-		 <para>A test class for the page controller, <classname>HelloControllerTests</classname>,
+		 <para>A unit test class for the page controller, <classname>HelloControllerTests</classname>,
 		 to verify the name of the view is the one we expect.</para>
 		</listitem>
 		  
@@ -148,7 +148,7 @@
     <section id="step2.3">
         <title>Improve the controller</title>
     
-    	<para>Before we update the location of the JSP in our controller, let's update our test class first.
+    	<para>Before we update the location of the JSP in our controller, let's update our unit test class first.
     	We know we need to update the view's resource reference with its new location
     	<filename>'WEB-INF/jsp/hello.jsp'</filename>. We also know there should be an object in the model
 		mapped to the key <literal>"now"</literal>.</para>

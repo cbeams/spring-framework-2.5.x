@@ -2,7 +2,7 @@
 <chapter id="part3">
     <title>Developing the Application</title>
     <para>This is Part 3 of a step-by-step tutorial on how to develop a Spring application.
-		In this section, we will adopt a pragmatic Test Driven Development (TDD) approach for
+		In this section, we will adopt a pragmatic Test-Driven Development (TDD) approach for
 		creating the domain objects and implementing the business logic for our
 		<link linkend="overview-application-overview">inventory management system</link>. This means
 		we'll "code a little, test a little, code some more then test some more".
@@ -12,26 +12,33 @@
 		controller.</para>
 		
 		<para>Spring is about making simple things easy and the hard things possible. The fundamental
-		construct that makes this possible is Spring's use of <literal>Plain Old Java Objects (POJOs)
-		</literal>. POJOs are essentially plain old Java classes free from any contract usually
-		specified by a framework or component architecture through subclassing or the implementation
+		construct that makes this possible is Spring's use of <literal>Plain Old Java Objects (POJOs).
+		</literal> POJOs are essentially plain old Java classes free from any contract usually
+		enforced by a framework or component architecture through subclassing or the implementation
 		of interfaces. POJOs are plain old objects that are free from such constraints, making object-oriented
 		programming possible once again. When you are working with Spring, the domain objects
 		and services you implement will be POJOs. In fact, almost everything you implement should be
 		a POJO. If it's not, you should be sure to ask yourself why that is. In this section,
-		we will demonstrate the simplicity and power of Spring.</para>
+		we will begin to see the simplicity and power of Spring.</para>
 	
-    <section id="step2.5">
-			<title>Add some classes for business logic</title>
-						
-			<para>Let's now add some business logic in the form of a <classname>Product</classname>
-			class and a service called <interfacename>ProductManager</interfacename> service that
-			will manage all the products. In order to separate the web dependent logic from the
-			business logic, we will place classes related to the web tier in the
-			<literal>'web'</literal> package and create two new packages: one for service objects
-			called <literal>'service'</literal> and another for domain objects called
-			<literal>'domain'</literal>.</para>
+		<section id="step3.1">
+			<title>Review the business case of the Inventory Management System</title>
+
+			<para>In our inventory management system, we have the concept of a product and a service
+			for handling them. In particular, the business has requested the ability to increase
+			or decrease prices across all products. The validation rules for price increase are:</para>
+				
+			<itemizedlist>
+				<listitem><para>The maximum increase amount is 100%.</para></listitem>
+				<listitem><para>The minimum increase amount is 1%.</para></listitem>				
+				<listitem><para>The maximum decrease amount 100%.</para></listitem>
+				<listitem><para>The minimum decrease amount is 1%.</para></listitem>				
+			</itemizedlist>
 		
+			<para>The business has also said that they want to syndicate the system to several
+			large supermarkets, with one website for each company so that a company can specify
+			the discounts they want to set for the products.</para>
+			
 			<para>Find below a class diagram of our inventory management system.</para>
 			<screenshot>
 			<mediaobject>
@@ -45,8 +52,21 @@
 					<para>The class diagram for the inventory management system</para>
 				</caption>
 			</mediaobject>
-			</screenshot>		
-					
+			</screenshot>							
+
+		</section>
+	
+    <section id="step3.2">
+			<title>Add some classes for business logic</title>
+												
+			<para>Let's now add some business logic in the form of a <classname>Product</classname>
+			class and a service called <interfacename>ProductManager</interfacename> service that
+			will manage all the products. In order to separate the web dependent logic from the
+			business logic, we will place classes related to the web tier in the
+			<literal>'web'</literal> package and create two new packages: one for service objects
+			called <literal>'service'</literal> and another for domain objects called
+			<literal>'domain'</literal>.</para>
+						
 			<para>First we implement the <classname>Product</classname> class as a POJO
 			with a default constructor (automatically provided if we don't specify
 			any constructors) and getters and setters for its properties <literal>'description'</literal>
@@ -62,24 +82,30 @@ import java.io.Serializable;
 public class Product implements Serializable{
 
     private String description;
-    private double price;
-	
+    private Double price;
+    
     public String getDescription() {
         return description;
     }
-	
+    
     public void setDescription(String description) {
         this.description = description;
     }
-	
-    public double getPrice() {
+    
+    public Double getPrice() {
         return price;
     }
-	
-    public void setPrice(double price) {
+    
+    public void setPrice(Double price) {
         this.price = price;
     }
-		
+    
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("Description: " + description + ";");
+        buffer.append("Price: " + price);
+        return buffer.toString();
+    }
 }]]></programlisting>
 
 				<para>Now we write the unit tests for our <classname>Product</classname> class. Some developers
@@ -91,7 +117,7 @@ public class Product implements Serializable{
 			  c) they improve test coverage. We create a <classname>Product</classname> stub and test
 				each getter and setter as a pair in a single test. Usually, you will write one or more
 				test methods per class method, with each test method testing a particular condition in a class
-				method such as checking for a null value of an argument passed into the method.</para>
+				method such as checking for a <methodname>null</methodname> value of an argument passed into the method.</para>
 			
 				<para><filename>'springapp/test/springapp/domain/ProductTests.java'</filename>:</para>			
 				<programlisting><![CDATA[package springapp.domain;
@@ -122,244 +148,415 @@ public class ProductTests extends TestCase {
   
 }]]></programlisting>			
 			
-				<para><filename>'springapp/test/springapp/domain/Product.java'</filename>:</para>
-									
-				<para>The <classname>ProductManager</classname> holds a <interfacename>List</interfacename>
-				of <classname>Product</classname> instances, and again this this class is implemented
-				as a JavaBean.</para>
-				
-				<para><filename>'springapp/src/bus/ProductManager.java'</filename>:</para>
-				<programlisting><![CDATA[package bus;
+				<para>Next we create the <interfacename>ProductManager</interfacename>. This is the service
+				responsible for handling products. It contains two methods: a business method <methodname>
+				increasePrice()</methodname> that increases prices for all products
+			  and a getter method <methodname>getProducts()</methodname> for retrieving all products.
+				We have chosen to make it an interface instead of a concrete class for an number of
+				reasons. First of all, it makes writing unit tests for <literal>Controllers</literal>
+				easier (as we'll see in the next chapter). Secondly, the use of interfaces means
+				JDK proxying (a Java language feature) can be used to make the service
+				transactional instead of CGLIB (a code generation library).</para>
+						
+				<para><filename>'springapp/src/springapp/service/ProductManager.java'</filename>:</para>
+				<programlisting><![CDATA[package springapp.service;
 
 import java.io.Serializable;
 import java.util.List;
 
-public class ProductManager implements Serializable {
+import springapp.domain.Product;
 
-    private List products;
+public interface ProductManager extends Serializable{
 
-    public void setProducts(List products) {
-        this.products = products;
+    public void increasePrice(int percentage);
+    
+    public List<Product> getProducts();
+    
+    public void setProducts(List<Product> products);    
+    
+}]]></programlisting>						
+			
+				<para>Let's create the <classname>SimpleProductManager</classname> class that
+				implements the <classname>ProductManager</classname> interface.</para>			
+			
+				<para><filename>'springapp/src/springapp/service/SimpleProductManager.java'</filename>:</para>
+				<programlisting><![CDATA[package springapp.service;
+
+import java.util.List;
+
+import springapp.domain.Product;
+
+public class SimpleProductManager implements ProductManager {
+
+    public List<Product> getProducts() {
+        // TODO Auto-generated method stub
+				throw new UnsupportedOperationException();
     }
 
-    public List getProducts() {
-        return this.products;
+    public void increasePrice(int percentage) {
+        // TODO Auto-generated method stub
+				throw new UnsupportedOperationException();        
+    }
+
+    public void setProducts(List<Product> products) {
+        // TODO Auto-generated method stub
+				throw new UnsupportedOperationException();        
     }
 
 }]]></programlisting>
+			
+				<para>Before we implement the methods in <classname>SimpleProductManager</classname>,
+				we're going to define some tests first. The strictest definition of <literal>Test Driven Development
+				</literal> is to always write the tests first, then the code. A looser interpretation
+				of it is more akin to <literal>Test Oriented Development</literal>, where we alternate between
+				writing code and tests as part of the development process. The most important thing is for
+				a codebase to have as complete a set of unit tests as possible, so how you achieve it becomes
+				somewhat academic. Most TDD developers, however, do agree that the quality of tests is always
+				higher when they are written at around the same time as the code that is being developed,
+				so that's the approach we're going to take.</para>
+			
+				<para>To write effective tests, you have to consider all the possible pre- and post-conditions of
+				a method being tested as well as what happens within the method. Let's start by testing
+				a call to <methodname>getProducts()</methodname> returns <methodname>null</methodname>.</para>
+						
+				<para><filename>'springapp/test/springapp/service/SimpleProductManagerTests.java'</filename>:</para>			
+				<programlisting><![CDATA[package springapp.service;
 
-        <para>Next, I modify the <classname>SpringappController</classname> to hold a reference
-        to this <classname>ProductManager</classname> class. As you can see, it is now in a
-        separate package called <literal>'web'</literal> – remember to move the source to this
-        new location. I also add code to have the controller pass some product information to
-        the view. The <methodname>getModelAndView()</methodname> method now returns a
-        <interfacename>Map</interfacename> with both the date and time and the products
-        list obtained from the manager reference.</para>
-        
-        <para><filename>'springapp/src/web/SpringappController.java'</filename>:</para>
-        <programlisting><![CDATA[package web;
+import junit.framework.TestCase;
 
-import org.springframework.web.servlet.mvc.Controller;
-import org.springframework.web.servlet.ModelAndView;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.util.Map;
-import java.util.HashMap;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import bus.Product;
-import bus.ProductManager;
-
-public class SpringappController implements Controller {
-
-    protected final Log logger = LogFactory.getLog(getClass());
+public class SimpleProductManagerTests extends TestCase {
 
     private ProductManager productManager;
-
-
-    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        String now = (new java.util.Date()).toString();
-        logger.info("returning hello view with " + now);
-
-        Map myModel = new HashMap();
-        myModel.put("now", now);
-        myModel.put("products", this.productManager.getProducts());
-
-        return new ModelAndView("hello", "model", myModel);
+        
+    protected void setUp() throws Exception {
+        productManager = new SimpleProductManager();
     }
 
+    public void testGetProductsWithNoProducts() {
+        productManager = new SimpleProductManager();
+        assertNull(productManager.getProducts());
+    }
+    
+}]]></programlisting>			
+			
+				<para>Rerun all the Ant <literal>tests</literal> target and the test should fail as
+				<methodname>getProducts()</methodname> has yet to be implemented. It's usually a good
+				idea to mark unimplemented methods by getting them to throw an
+				<classname>UnsupportedOperationException</classname>.</para>
+				
+				<para>Next we implement a test for retrieving a list of stub products populated with test data. We know
+				that we'll need to populate the products list in the majority of our test methods in
+				<classname>SimpleProductManagerTests</classname>, so we define the stub list in JUnit's
+				<methodname>setUp()</methodname>, a method that is invoked before each test method is called.</para>
+				
+				<para><filename>'springapp/test/springapp/service/SimpleProductManagerTests.java'</filename>:</para>			
+				<programlisting><![CDATA[package springapp.service;
 
-    public void setProductManager(ProductManager productManager) {
-        this.productManager = productManager;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import springapp.domain.Product;
+
+import junit.framework.TestCase;
+
+public class SimpleProductManagerTests extends TestCase {
+
+    private ProductManager productManager;
+    private List<Product> products;
+    
+    private static int PRODUCT_COUNT = 2;
+    
+    private static Double CHAIR_PRICE = new Double(20.50);
+    private static String CHAIR_DESCRIPTION = "Chair";
+    
+    private static String TABLE_DESCRIPTION = "Table";
+    private static Double TABLE_PRICE = new Double(150.10);         
+        
+    protected void setUp() throws Exception {
+        productManager = new SimpleProductManager();
+        products = new ArrayList<Product>();
+        
+        // stub up a list of products
+        Product product = new Product();
+        product.setDescription("Chair");
+        product.setPrice(CHAIR_PRICE);
+        products.add(product);
+        
+        product = new Product();
+        product.setDescription("Table");
+        product.setPrice(TABLE_PRICE);
+        products.add(product);
+        
+        productManager.setProducts(products);
     }
 
+    public void testGetProductsWithNoProducts() {
+        productManager = new SimpleProductManager();
+        assertNull(productManager.getProducts());
+    }
+    
+    public void testGetProducts() {
+        List<Product> products = productManager.getProducts();
+        assertNotNull(products);        
+        assertEquals(PRODUCT_COUNT, productManager.getProducts().size());
+    
+        Product product = products.get(0);
+        assertEquals(CHAIR_DESCRIPTION, product.getDescription());
+        assertEquals(CHAIR_PRICE, product.getPrice());
+        
+        product = products.get(1);
+        assertEquals(TABLE_DESCRIPTION, product.getDescription());
+        assertEquals(TABLE_PRICE, product.getPrice());      
+    }   
+}]]></programlisting>			
+			
+				<para>Rerun all the Ant <literal>tests</literal> target and our two tests should fail.</para>			
+				
+				<para>We go back to the <classname>SimpleProductManager</classname> and implement the getter and
+				setter methods for the <classname>products</classname> property.</para>
+			
+				<para><filename>'springapp/src/springapp/service/SimpleProductManager.java'</filename>:</para>			
+				<programlisting><![CDATA[package springapp.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import springapp.domain.Product;
+
+public class SimpleProductManager implements ProductManager {
+
+    private List<Product> products;
+    
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void increasePrice(int percentage) {
+        // TODO Auto-generated method stub      
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
+    }
+    
 }]]></programlisting>
+			
+				<para>Rerun the Ant <literal>tests</literal> target and all our tests should pass.</para>			
+			
+				<para>We proceed by implementing the following tests for the
+				<methodname>increasePrice()</methodname> method:</para>						
+			
+				<itemizedlist>
+					<listitem><para>The list of products is null and the method executes gracefully.</para></listitem>
+					<listitem><para>The list of products is empty and the method executes gracefully.</para></listitem>
+					<listitem><para>Set a price increase of 10% and check the increase is
+					reflected in the prices of all the products in the list.</para></listitem>								
+					<listitem><para>Set a price decrease of 10% and check the increase is
+					reflected in the prices of all the products in the list.</para></listitem>								
+				</itemizedlist>
+			
+				<para><filename>'springapp/test/springapp/service/SimpleProductManagerTests.java'</filename>:</para>			 
+				<programlisting><![CDATA[package springapp.service;
 
-    </section>
+import java.util.ArrayList;
+import java.util.List;
+
+import springapp.domain.Product;
+
+import junit.framework.TestCase;
+
+public class SimpleProductManagerTests extends TestCase {
+
+    private ProductManager productManager;
+    private List<Product> products;
     
-    <section id="step2.6">
-        <title>Modify the view to display business data and add support for message bundle</title>
-        <para>Using the JSTL <literal>&lt;c:forEach/&gt;</literal> tag, I add a section
-        that displays product information. I have also replaced the title, heading and
-        greeting text with a JSTL <literal>&lt;fmt:message/&gt;</literal> tag that pulls
-        the text to display from a provided <literal>'message'</literal> source – I will
-        show this source in a later step.</para>
+    private static int PRODUCT_COUNT = 2;
+    
+    private static Double CHAIR_PRICE = new Double(20.50);
+    private static String CHAIR_DESCRIPTION = "Chair";
+    
+    private static String TABLE_DESCRIPTION = "Table";
+    private static Double TABLE_PRICE = new Double(150.10);         
+    
+    private static int POSITIVE_PRICE_INCREASE = 10;
+    private static int NEGATIVE_PRICE_INCREASE = -10;
+    
+    protected void setUp() throws Exception {
+        productManager = new SimpleProductManager();
+        products = new ArrayList<Product>();
         
-        <para><filename>'springapp/war/WEB-INF/jsp/hello.jsp'</filename>:</para>
-        <programlisting><![CDATA[<%@ include file="/WEB-INF/jsp/include.jsp" %>
-
-<html>
-<head><title><fmt:message key="title"/></title></head>
-<body>
-<h1><fmt:message key="heading"/></h1>
-<p><fmt:message key="greeting"/> <c:out value="${model.now}"/>
-</p>
-<h3>Products</h3>
-<c:forEach items="${model.products}" var="prod">
-  <c:out value="${prod.description}"/> <i>$<c:out value="${prod.price}"/></i><br><br>
-</c:forEach>
-</body>
-</html>]]></programlisting>
+        // stub up a list of products
+        Product product = new Product();
+        product.setDescription("Chair");
+        product.setPrice(CHAIR_PRICE);
+        products.add(product);
         
-    </section>
-    
-    <section id="step2.7">
-        <title>Add some test data to automatically populate some business objects</title>
-        <para>I am not going to add any code to load the business objects from a database
-        just yet. Instead, we can stub a couple of <classname>Product</classname> instances
-        using Spring's bean and application context support. I will simply put the data I
-        need as a couple of bean entries in <filename>'springapp-servlet.xml'</filename>.
-        I will also add the <literal>'messageSource'</literal> bean entry that will pull
-        in the messages resource bundle (<filename>'messages.properties'</filename>) that
-        I will create in the next step.</para>
-        <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
-        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
-
-]]><lineannotation>&lt;!-- the application context definition for the springapp <classname>DispatcherServlet</classname> --&gt;</lineannotation><![CDATA[
-
-<beans>
-
-    <bean id="springappController" class="web.SpringappController">
-        <property name="productManager" ref="prodMan"/>
-    </bean>
-
-    <bean id="prodMan" class="bus.ProductManager">
-        <property name="products">
-            <list>
-                <ref bean="product1"/>
-                <ref bean="product2"/>
-                <ref bean="product3"/>
-            </list>
-        </property>
-    </bean>
-
-    <bean id="product1" class="bus.Product">
-        <property name="description" value="Lamp"/>
-        <property name="price" value="5.75"/>
-    </bean>
+        product = new Product();
+        product.setDescription("Table");
+        product.setPrice(TABLE_PRICE);
+        products.add(product);
         
-    <bean id="product2" class="bus.Product">
-        <property name="description" value="Table"/>
-        <property name="price" value="75.25"/>
-    </bean>
+        productManager.setProducts(products);
+    }
 
-    <bean id="product3" class="bus.Product">
-        <property name="description" value="Chair"/>
-        <property name="price" value="22.79"/>
-    </bean>
-
-    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
-        <property name="basename" value="messages"/>
-    </bean>
-
-    <bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-        <property name="mappings">
-            <value>
-                /hello.htm=springappController
-            </value>
-        </property>
-    </bean>
-
-    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
-        <property name="prefix" value="/WEB-INF/jsp/"/>
-        <property name="suffix" value=".jsp"/>
-    </bean>
-
-</beans>]]></programlisting>
-    </section>
+    public void testGetProductsWithNoProducts() {
+        productManager = new SimpleProductManager();
+        assertNull(productManager.getProducts());
+    }
     
-    <section id="step2.8">
-        <title>Add the message bundle and a <literal>'clean'</literal> target to <filename>'build.xml'</filename></title>
-        <para>I create a <filename>'messages.properties'</filename> file in the
-        <filename class="directory">'war/WEB-INF/classes'</filename> directory. This properties bundle
-        so far has three entries matching the keys specified in the <literal>&lt;fmt:message/&gt;</literal>
-        tags that we added to <filename>'hello.jsp'</filename>.</para>    
-        <para><filename>'springapp/war/WEB-INF/classes/messages.properties'</filename>:</para>
-        <programlisting><![CDATA[title=SpringApp
-heading=Hello :: SpringApp
-greeting=Greetings, it is now]]></programlisting>
-        <para>Since we moved some source files around, it makes sense to add a <literal>'clean'</literal>
-        and an <literal>'undeploy'</literal> target to the build script. I add the following entries to
-        the <filename>'build.xml'</filename> file.</para>
-        <para><filename>'build.xml'</filename>:</para>
-        <programlisting><![CDATA[    <target name="clean" description="Clean output directories">
-        <delete>
-            <fileset dir="${build.dir}">
-                <include name="**/*.class"/>
-            </fileset>
-        </delete>
-    </target>
-
-    <target name="undeploy" description="Un-Deploy application">
-        <delete>
-            <fileset dir="${deploy.path}/${name}">
-                <include name="**/*.*"/>
-            </fileset>
-        </delete>
-    </target>]]></programlisting>
+    public void testGetProducts() {
+        List<Product> products = productManager.getProducts();
+        assertNotNull(products);        
+        assertEquals(PRODUCT_COUNT, productManager.getProducts().size());
     
-        <para>Now stop the Tomcat server, run the <literal>'clean'</literal>, <literal>'undeploy'</literal>
-        and <literal>'deploy'</literal> targets. This will remove all old class files, re-build
-        the application and deploy it. Start up Tomcat again and you should see the following:</para>
+        Product product = products.get(0);
+        assertEquals(CHAIR_DESCRIPTION, product.getDescription());
+        assertEquals(CHAIR_PRICE, product.getPrice());
         
-        <screenshot>
-		    <mediaobject>
-			    <imageobject role="fo">
-				    <imagedata fileref="images/screen3.png" format="PNG" align="center" />
-			    </imageobject>
-			    <imageobject role="html">
-				    <imagedata fileref="images/screen3.png" format="PNG" align="center" />
-			    </imageobject>
-			    <caption>
-				    <para>The updated application</para>
-			    </caption>
-		    </mediaobject>
-	    </screenshot>
+        product = products.get(1);
+        assertEquals(TABLE_DESCRIPTION, product.getDescription());
+        assertEquals(TABLE_PRICE, product.getPrice());      
+    }   
     
-        <para>Find below a screenshot of what your project directory structure
-        must look like after following the above instructions.</para>
-        <screenshot>
-		    <mediaobject>
-			    <imageobject role="fo">
-				    <imagedata fileref="images/dir-structure-endp2.png" format="PNG" align="center" />
-			    </imageobject>
-			    <imageobject role="html">
-				    <imagedata fileref="images/dir-structure-endp2.png" format="PNG" align="center" />
-			    </imageobject>
-			    <caption>
-				    <para>The project directory structure at the end of part 2</para>
-			    </caption>
-		    </mediaobject>
-	    </screenshot>
-    </section>
+    public void testIncreasePriceWithNullListOfProducts() {
+        try {
+            productManager = new SimpleProductManager();
+            productManager.increasePrice(POSITIVE_PRICE_INCREASE);
+        }
+        catch(NullPointerException ex) {
+            fail("Products list is null.");
+        }
+    }
+    
+    public void testIncreasePriceWithEmptyListOfProducts() {
+        try {
+            productManager = new SimpleProductManager();
+            productManager.setProducts(new ArrayList<Product>());
+            productManager.increasePrice(POSITIVE_PRICE_INCREASE);
+        }
+        catch(Exception ex) {
+            fail("Products list is empty.");
+        }           
+    }
+    
+    public void testIncreasePriceWithPositivePercentage() {
+        productManager.increasePrice(POSITIVE_PRICE_INCREASE);
+        double expectedChairPriceWithIncrease = 22.55;
+        double expectedTablePriceWithIncrease = 165.11;
+        
+        List<Product> products = productManager.getProducts();      
+        Product product = products.get(0);
+        assertEquals(expectedChairPriceWithIncrease, product.getPrice());
+        
+        product = products.get(1);      
+        assertEquals(expectedTablePriceWithIncrease, product.getPrice());       
+    }
+    
+    public void testIncreasePriceWithNegativePercentage() {     
+        productManager.increasePrice(NEGATIVE_PRICE_INCREASE);
+        double expectedChairPriceWithDecrease = 18.45;
+        double expectedTablePriceWithDecrease = 135.09;
+        
+        List<Product> products = productManager.getProducts();      
+        Product product = products.get(0);
+        assertEquals(expectedChairPriceWithDecrease, product.getPrice());
+        
+        product = products.get(1);      
+        assertEquals(expectedTablePriceWithDecrease, product.getPrice());       
+    }
+    
+}]]></programlisting>			
+			
+				<para>We return to <classname>SimpleProductManager</classname> to implement
+				<methodname>increasePrice()</methodname>.</para>
+			
+				<para><filename>'springapp/src/springapp/service/SimpleProductManager.java'</filename>:</para>
+			
+				<programlisting><![CDATA[package springapp.service;
+
+import java.util.List;
+
+import springapp.domain.Product;
+
+public class SimpleProductManager implements ProductManager {
+
+    private List<Product> products;
+    
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void increasePrice(int percentage) {
+        if (products != null) {
+            for (Product product : products) {
+                double newPrice = product.getPrice().doubleValue() * 
+                                    (100 + percentage)/100;
+                product.setPrice(newPrice);
+            }
+        }
+    }
+    
+    public void setProducts(List<Product> products) {
+        this.products = products;
+    }
+    
+}]]></programlisting>			
+			
+				<para>Rerun the Ant <literal>tests</literal> target and all our tests should pass. *HURRAH*
+				JUnit has a saying: <quote>keep the bar green to keep the code clean.</quote> For those of
+				you running the tests in an IDE and are new to unit testing, we hope you're feeling imbued
+				with a sense of greater sense of confidence and certainty that the code is truly working
+				as specified in the business rules specification and as you intend. I know I do.</para>
+			
+				<para>We're now ready to move back into the web layer to put a list of products into our
+				<classname>Controller</classname> model.</para>			
+		</section>
+		
+		<section>
+			<title>Summary</title>
+	
+			<para>Let's take quick look at what we did in Part 3. </para>
+	
+			<orderedlist>			
+				<listitem>
+					<para>We implemented a domain object <classname>Product</classname>
+					and a service interface <interfacename>ProductManager</interfacename> and
+					concrete class <classname>SimpleProductManager </classname> all as POJOs.</para>
+				</listitem>
+		
+				<listitem>
+					<para>We wrote unit tests for all the classes we implemented.</para>
+				</listitem>
+				
+				<listitem>
+					<para>We didn't write a line of code to do with Spring. This is an example of
+					how non-invasive the Spring Framework really is. One of its core aims is
+					to enable developers to focus on tackling the most important task of all:
+					to deliver value by modelling and implementing business requirements. Another
+					of its aims is to make following best practices easy, such as implementing
+					services using interfaces and unit testing as much as is pragmatic given project
+					constraints. Over the course of this tutorial, you'll see the benefits of
+					designing to interfaces come to life.</para>
+				</listitem>				
+			</orderedlist>
+			
+			<para>Find below a screenshot of what your project directory structure
+			must look like after following the above instructions.</para>
+			<screenshot>
+			<mediaobject>
+				<imageobject role="fo">
+					<imagedata fileref="images/dir-structure-endp3.png" format="PNG" align="center" />
+				</imageobject>
+				<imageobject role="html">
+					<imagedata fileref="images/dir-structure-endp3.png" format="PNG" align="center" />
+				</imageobject>
+				<caption>
+					<para>The project directory structure at the end of part 2</para>
+				</caption>
+			</mediaobject>
+		</screenshot>
+			
+		</section>			
+
 </chapter>
