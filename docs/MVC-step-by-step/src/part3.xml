@@ -1,62 +1,129 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <chapter id="part3">
-    <title>Adding Unit Tests and a Form to the Application</title>
-    <para>This is Part 3 of a step-by-step account of how to develop a Spring application. </para>
+    <title>Developing the Application</title>
+    <para>This is Part 3 of a step-by-step tutorial on how to develop a Spring application.
+		In this section, we will adopt a pragmatic Test Driven Development (TDD) approach for
+		creating the domain objects and implementing the business logic for our
+		<link linkend="overview-application-overview">inventory management system</link>. This means
+		we'll "code a little, test a little, code some more then test some more".
+		In <link linkend="part1">Part 1 (Steps 1 – 12)</link> we configured the environment
+    and set up a basic application. In <link linkend="part2">Part 2
+		(Steps 1 – 5)</link> we refined the application by decoupling the view from the
+		controller.</para>
 		
+		<para>Spring is about making simple things easy and the hard things possible. The fundamental
+		construct that makes this possible is Spring's use of <literal>Plain Old Java Objects (POJOs)
+		</literal>. POJOs are essentially plain old Java classes free from any contract usually
+		specified by a framework or component architecture through subclassing or the implementation
+		of interfaces. POJOs are plain old objects that are free from such constraints, making object-oriented
+		programming possible once again. When you are working with Spring, the domain objects
+		and services you implement will be POJOs. In fact, almost everything you implement should be
+		a POJO. If it's not, you should be sure to ask yourself why that is. In this section,
+		we will demonstrate the simplicity and power of Spring.</para>
+	
     <section id="step2.5">
-        <title>Add some classes for business logic</title>
-        <para>So far our application is not very useful. I would like to add a little
-        bit of business logic in form of a <classname>Product</classname> class and a
-        class that will manage all the products. I name this management class
-        <classname>ProductManager</classname>. In order to separate the web dependent
-        logic from the business logic I will create two separate packages for the
-        Java source – <literal>'web'</literal> and <literal>'bus'</literal>. If this
-        was an application for a real company I would name the packages something like
-        <literal>'com.mycompany.web'</literal> and <literal>'com.mycompany.bus'</literal>,
-        but since this is just a demo application I will keep the package names real
-        short. The <classname>Product</classname> class is implemented as a JavaBean
-        – it has the default constructor (automatically provided if we don't specify
-        any constructors) and getters and setters for the two instance variables
-        <literal>'description'</literal> and <literal>'price'</literal>. I also make
-        it <interfacename>Serializable</interfacename>, not necessary for our application,
-        but could come in handy later on if we have to pass this class between
-        different application layers.</para>
-        
-        <para><filename>'springapp/src/bus/Product.java'</filename>:</para>
-        <programlisting><![CDATA[package bus;
+			<title>Add some classes for business logic</title>
+						
+			<para>Let's now add some business logic in the form of a <classname>Product</classname>
+			class and a service called <interfacename>ProductManager</interfacename> service that
+			will manage all the products. In order to separate the web dependent logic from the
+			business logic, we will place classes related to the web tier in the
+			<literal>'web'</literal> package and create two new packages: one for service objects
+			called <literal>'service'</literal> and another for domain objects called
+			<literal>'domain'</literal>.</para>
+		
+			<para>Find below a class diagram of our inventory management system.</para>
+			<screenshot>
+			<mediaobject>
+				<imageobject role="fo">
+					<imagedata fileref="images/inventory-system-classdiagram.png" format="PNG" align="center" />
+				</imageobject>
+				<imageobject role="html">
+					<imagedata fileref="images/inventory-system-classdiagram.png" format="PNG" align="center" />
+				</imageobject>
+				<caption>
+					<para>The class diagram for the inventory management system</para>
+				</caption>
+			</mediaobject>
+			</screenshot>		
+					
+			<para>First we implement the <classname>Product</classname> class as a POJO
+			with a default constructor (automatically provided if we don't specify
+			any constructors) and getters and setters for its properties <literal>'description'</literal>
+			and <literal>'price'</literal>. Let's also make it <interfacename>Serializable</interfacename>,
+			not necessary for our application, but could come in handy later on when we persist and store its
+			state. The class is a domain object, so it belongs in the <literal>'domain'</literal> package.</para>
+				
+			<para><filename>'springapp/src/springapp/domain/Product.java'</filename>:</para>
+			<programlisting><![CDATA[package springapp.domain;
 
 import java.io.Serializable;
 
-public class Product implements Serializable {
+public class Product implements Serializable{
 
     private String description;
-    private Double price;
-
-
+    private double price;
+	
+    public String getDescription() {
+        return description;
+    }
+	
     public void setDescription(String description) {
         this.description = description;
     }
-
-    public String getDescription() {
-        return this.description;
+	
+    public double getPrice() {
+        return price;
     }
-
-    public void setPrice(Double price) {
+	
+    public void setPrice(double price) {
         this.price = price;
     }
-
-    public Double getPrice() {
-        return this.price;
-    }
-
+		
 }]]></programlisting>
 
-        <para>The <classname>ProductManager</classname> holds a <interfacename>List</interfacename>
-        of <classname>Product</classname> instances, and again this this class is implemented
-        as a JavaBean.</para>
-        
-        <para><filename>'springapp/src/bus/ProductManager.java'</filename>:</para>
-        <programlisting><![CDATA[package bus;
+				<para>Now we write the unit tests for our <classname>Product</classname> class. Some developers
+				don't bother writing tests for getters and setters or so-called 'auto-generated' code. It usually
+				takes much longer to engage in the debate (as this paragraph demonstrates) on whether or not 
+				getters and setters need to be unit tested as they're so 'trivial'. We write them 
+				because: a) they are trivial to write; b) having the tests pays dividends in terms of the time
+				saved for the one time out of a hundred you may be caught out by a dodgy getter or setter; and
+			  c) they improve test coverage. We create a <classname>Product</classname> stub and test
+				each getter and setter as a pair in a single test. Usually, you will write one or more
+				test methods per class method, with each test method testing a particular condition in a class
+				method such as checking for a null value of an argument passed into the method.</para>
+			
+				<para><filename>'springapp/test/springapp/domain/ProductTests.java'</filename>:</para>			
+				<programlisting><![CDATA[package springapp.domain;
+
+import junit.framework.TestCase;
+
+public class ProductTests extends TestCase {
+
+  public void testDescription() {
+    String testDescription = "aDescription";
+    Product product = new Product();
+    product.setDescription(testDescription);
+    assertEquals(testDescription, product.getDescription());
+  }
+	
+  public void testPrice() {
+    double testPrice = 100.00;
+    Product product = new Product();
+    product.setPrice(testPrice);
+    assertEquals(testPrice, product.getPrice(), 0);
+  }
+				
+}]]></programlisting>			
+			
+				<para><filename>'springapp/test/springapp/domain/Product.java'</filename>:</para>
+									
+				<para>The <classname>ProductManager</classname> holds a <interfacename>List</interfacename>
+				of <classname>Product</classname> instances, and again this this class is implemented
+				as a JavaBean.</para>
+				
+				<para><filename>'springapp/src/bus/ProductManager.java'</filename>:</para>
+				<programlisting><![CDATA[package bus;
 
 import java.io.Serializable;
 import java.util.List;
@@ -64,7 +131,6 @@ import java.util.List;
 public class ProductManager implements Serializable {
 
     private List products;
-
 
     public void setProducts(List products) {
         this.products = products;

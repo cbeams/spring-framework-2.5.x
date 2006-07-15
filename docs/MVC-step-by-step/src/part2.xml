@@ -133,7 +133,7 @@
 		&lt;c:out/&gt; tag.</para> 
 		
 		<para><filename>'springapp/war/WEB-INF/jsp/hello.jsp'</filename>:</para>
-        <programlisting><![CDATA[<%@ include file="/WEB-INF/jsp/include.jsp" %>
+<programlisting><![CDATA[<%@ include file="/WEB-INF/jsp/include.jsp" %>
 
 <html>
 <head><title>Hello :: Spring Application</title></head>
@@ -250,7 +250,7 @@ public class HelloController implements Controller {
 
 }]]></programlisting>
 
-		<para>We rerun our <literal>'tests'</literal> target and the test passes.</para>
+        <para>We rerun our <literal>'tests'</literal> target and the test passes.</para>
 				
         <para>Remember that the <interfacename>Controller</interfacename> has already been
         configured in <filename>'springapp-servlet.xml'</filename> file, so we are ready
