@@ -1136,7 +1136,7 @@ public class ExampleBean {
                 there are 3 variations on how the id/name of the other object may be
                 specified, which determines how scoping and validation is handled.</para>
                 <para>Specifying the target bean by using the <literal>bean</literal>
-                attribute of the <literal>ref</literal> tag is the most general form,
+                attribute of the <literal>&lt;ref/&gt;</literal> tag is the most general form,
                 and will allow creating a reference to any bean in the same
                 container (whether or not in the same XML file), or parent container.
                 The value of the <literal>'bean'</literal> attribute may be the same as either the
@@ -1160,11 +1160,25 @@ public class ExampleBean {
                 <literal>'id'</literal> attribute of the target bean, or one of the
                 values in the <literal>'name'</literal> attribute of the target bean,
                 and the target bean must be in a parent container to the current one.
-                The main use of this bean reference variant is when there is a need
-                to wrap an existing bean in a parent context with some sort of proxy
-                (which may have the same name as the parent), and needs the original
-                object so it may wrap it.</para>
-                <programlisting><![CDATA[<ref parent="someBean"/>]]></programlisting>
+                The main use of this bean reference variant is when one has a hierarchy
+                of containers and one wants to wrap an existing bean in a parent container
+                with some sort of proxy which will have the same name as the parent bean
+                (i.e. the bean definition in the child context is overriding the parent
+                bean).</para>
+                <programlisting><lineannotation>&lt;!-- in the parent context --&gt;</lineannotation><![CDATA[
+<bean id="accountService" class="com.foo.SimpleAccountService">
+    ]]><lineannotation>&lt;!-- insert dependencies as required as here --&gt;</lineannotation><![CDATA[
+</bean>]]></programlisting>
+                <programlisting><lineannotation>&lt;!-- in the child (descendant) context --&gt;</lineannotation><![CDATA[
+<bean id="accountService"  ]]><lineannotation>&lt;-- notice that the name of this bean is the <emphasis role="bold">same</emphasis> as the name of the <literal>'parent'</literal> bean</lineannotation><![CDATA[
+      class="org.springframework.aop.framework.ProxyFactoryBean">
+      <property name="target">
+          <ref parent="accountService"/>  ]]><lineannotation>&lt;-- notice how we refer to the <emphasis role="bold">parent</emphasis> bean</lineannotation><![CDATA[
+      </property>
+    ]]><lineannotation>&lt;!-- insert other configuration and dependencies as required as here --&gt;</lineannotation><![CDATA[
+</bean>]]></programlisting>
+                <para>(In all honesty the usage of the <literal>'parent'</literal> attribute
+                is not at all common.)</para>
             </section>
             <section id="beans-inner-beans">
                 <title>Inner beans</title>
@@ -1247,15 +1261,16 @@ public class ExampleBean {
                 <programlisting><![CDATA[bean | ref | idref | list | set | map | props | value | null]]></programlisting>
                 <section id="beans-collection-elements-merging">
                     <title>Collection merging</title>
-                    <para>
-                    As of Spring 2.0, the container also supports the <emphasis>merging</emphasis> of collections. This allows
-                    an application developer to define a parent-style <literal>list</literal>, <literal>map</literal>,
-                    <literal>set</literal> or <literal>props</literal> element, and have child-style
-                    <literal>list</literal>, <literal>map</literal>, <literal>set</literal> or <literal>props</literal> elements
-                    inherit and override values from the parent collection; i.e. the child collection's values will be the
-                    result obtained from the merging of the elements of the parent and child collections, with the child's
-                    collection elements overriding values specified in the parent collection.
-                    </para>
+                    <para>As of Spring 2.0, the container also supports the <emphasis>merging</emphasis>
+                    of collections. This allows an application developer to define a parent-style
+                    <literal>&lt;list/&gt;</literal>, <literal>&lt;map/&gt;</literal>,
+                    <literal>&lt;set/&gt;</literal> or <literal>&lt;props/&gt;</literal> element, and
+                    have child-style <literal>&lt;list/&gt;</literal>, <literal>&lt;map/&gt;</literal>,
+                    <literal>&lt;set/&gt;</literal> or <literal>&lt;props/&gt;</literal> elements
+                    inherit and override values from the parent collection; i.e. the child collection's
+                    values will be the result obtained from the merging of the elements of the parent
+                    and child collections, with the child's collection elements overriding values
+                    specified in the parent collection.</para>
                     <para><emphasis>Please note that this section on merging makes use of the
                     parent-child bean mechanism. This concept has not yet been introduced, so
                     readers unfamiliar with the concept of parent and child bean definitions
@@ -1281,60 +1296,61 @@ public class ExampleBean {
     </property>
 </bean>
 <beans>]]></programlisting>
-                <para>Notice the use of the <literal>merge=true</literal> attribute on the
-                <literal><![CDATA[<props/>]]></literal> element of the
-                <literal>adminEmails</literal> property of the <literal>child</literal>
-                bean definition. When the <literal>child</literal> bean is actually resolved
-                and instantiated by the container, the resulting instance will have an
-                <literal>adminEmails</literal> <classname>Properties</classname> collection
-                that contains the result of the merging of the child's
-                <literal>adminEmails</literal> collection with the parent's
-                <literal>adminEmails</literal> collection.</para>
-                <programlisting><![CDATA[administrator=administrator@somecompany.com
+                    <para>Notice the use of the <literal>merge=true</literal> attribute on the
+                    <literal><![CDATA[<props/>]]></literal> element of the
+                    <literal>adminEmails</literal> property of the <literal>child</literal>
+                    bean definition. When the <literal>child</literal> bean is actually resolved
+                    and instantiated by the container, the resulting instance will have an
+                    <literal>adminEmails</literal> <classname>Properties</classname> collection
+                    that contains the result of the merging of the child's
+                    <literal>adminEmails</literal> collection with the parent's
+                    <literal>adminEmails</literal> collection.</para>
+                    <programlisting><![CDATA[administrator=administrator@somecompany.com
 sales=sales@somecompany.com
 support=support@somecompany.co.uk]]></programlisting>
-                <para>Notice how the child <classname>Properties</classname> collection's
-                value set will have inherited all the property elements from the parent
-                <literal>&lt;props/&gt;</literal>. Notice also how the child's value for
-                the <literal>support</literal> value overrides the attendant value in the
-                parent collection.</para>
-                <para>This merging behavior applies similarly to the <literal>list</literal>,
-                <literal>map</literal>, and <literal>set</literal> collection types. In
-                the specific case of the <literal>list</literal> element, the semantics
-                associated with the <classname>List</classname> collection type, i.e. the
-                notion of an <literal>ordered</literal> collection of values, is maintained;
-                the  parent's values will precede all of the child list's values. In the
-                case of the <literal>map</literal>, <literal>set</literal>, and
-                <literal>props</literal> collection types, there is no notion of ordering
-                and hence no ordering semantics are in effect for the collection types that
-                underlie the associated <classname>Map</classname>, <classname>Set</classname>
-                and <classname>Properties</classname> implementation types used internally
-                by the container.</para>
-                <para>Finally, some minor notes about the merging support are in order; one
-                cannot merge different collection types (e.g. a <literal>map</literal> and
-                a <literal>list</literal>), and if one does attempt to do so an appropriate
-                <classname>Exception</classname> will be thrown; and in case it is not
-                immediately obvious, the <literal>'merge'</literal> attribute must be specified
-                on the lower level, inherited, child definition; specifying the
-                <literal>'merge'</literal> attribute on a parent collection definition is
-                redundant and will not result in the desired merging; and (lastly), please
-                note that this merging feature is only available in Spring 2.0 (and later
-                versions).</para>
-            </section>
-            <section>
-                <title>Strongly-typed collection (Java5+ only)</title>
-                <para>If you are one of the lucky few to be using Java5 (Tiger), you will be aware
-                that it is possible (and I daresay recommended) to have strongly typed collections.
-                That is, it is possible to declare a <interfacename>Collection</interfacename> type
-                such that it can only contain <classname>String</classname> elements (for example).</para>
-                <para>If you are using Spring to dependency inject a strongly-typed
-                <interfacename>Collection</interfacename> into a bean, you can take advantage
-                of Spring's type-conversion support such that the elements of your strongly-typed
-                <interfacename>Collection</interfacename> instances will be converted to the
-                appropriate type prior to being added to the <interfacename>Collection</interfacename>.</para>
-                <para>An example will make this clear; consider the following class definition, and
-                it's attendant (XML) configuration...</para>
-                <programlisting><![CDATA[public class Foo {
+                    <para>Notice how the child <classname>Properties</classname> collection's
+                    value set will have inherited all the property elements from the parent
+                    <literal>&lt;props/&gt;</literal>. Notice also how the child's value for
+                    the <literal>support</literal> value overrides the attendant value in the
+                    parent collection.</para>
+                    <para>This merging behavior applies similarly to the <literal>&lt;list/&gt;</literal>,
+                    <literal>&lt;map/&gt;</literal>, and <literal>&lt;set/&gt;</literal> collection
+                    types. In the specific case of the <literal>&lt;list/&gt;</literal> element, the
+                    semantics associated with the <classname>List</classname> collection type, i.e. the
+                    notion of an <literal>ordered</literal> collection of values, is maintained;
+                    the parent's values will precede all of the child list's values. In the
+                    case of the <interfacename>Map</interfacename>, <interfacename>Set</interfacename>,
+                    and <interfacename>Properties</interfacename> collection types, there is no notion
+                    of ordering and hence no ordering semantics are in effect for the collection types that
+                    underlie the associated <interfacename>Map</interfacename>,
+                    <interfacename>Set</interfacename> and <interfacename>Properties</interfacename>
+                    implementation types used internally by the container.</para>
+                    <para>Finally, some minor notes about the merging support are in order; one
+                    cannot merge different collection types (e.g. a <interfacename>Map</interfacename> and
+                    a <interfacename>List</interfacename>), and if one does attempt to do so an appropriate
+                    <classname>Exception</classname> will be thrown; and in case it is not
+                    immediately obvious, the <literal>'merge'</literal> attribute must be specified
+                    on the lower level, inherited, child definition; specifying the
+                    <literal>'merge'</literal> attribute on a parent collection definition is
+                    redundant and will not result in the desired merging; and (lastly), please
+                    note that this merging feature is only available in Spring 2.0 (and later
+                    versions).</para>
+                </section>
+                <section>
+                    <title>Strongly-typed collection (Java5+ only)</title>
+                    <para>If you are one of the lucky few to be using Java5 (Tiger), you will be aware
+                    that it is possible (and I daresay recommended) to have strongly typed collections.
+                    That is, it is possible to declare a <interfacename>Collection</interfacename> type
+                    such that it can only contain <classname>String</classname> elements (for example).</para>
+                    <para>If you are using Spring to dependency inject a strongly-typed
+                    <interfacename>Collection</interfacename> into a bean, you can take advantage
+                    of Spring's type-conversion support such that the elements of your strongly-typed
+                    <interfacename>Collection</interfacename> instances will be converted to the
+                    appropriate type prior to being added to the
+                    <interfacename>Collection</interfacename>.</para>
+                    <para>An example will make this clear; consider the following class definition, and
+                    it's attendant (XML) configuration...</para>
+                    <programlisting><![CDATA[public class Foo {
                 
     private Map<String, Float> accounts;
     
@@ -1344,9 +1360,7 @@ support=support@somecompany.co.uk]]></programlisting>
 
 }]]></programlisting>
                 <programlisting><![CDATA[<beans>
-    
     <bean id="foo" class="x.y.Foo">
-        
         <property name="accounts">
             <map>
                 <entry key="one" value="9.99"/>
@@ -1354,18 +1368,17 @@ support=support@somecompany.co.uk]]></programlisting>
                 <entry key="six" value="3.99"/>
             </map>
         </property>
-
     </bean>
-
 </beans>]]></programlisting>
-                <para>When the <literal>'accounts'</literal> property of the <literal>'foo'</literal>
-                bean is being prepared for injection, the generics information about the element
-                type of the strongly-typed <classname>Map&lt;String, Float&gt;</classname> is
-                actually available via reflection, and so Spring's type conversion infrastructure
-                will actually recognize the various value elements as being of type <classname>Float</classname>
-                and so the string values <literal>'9.99', '2.75'</literal>, and <literal>'3.99'</literal>
-                will be converted into an actual <classname>Float</classname> type.</para>
-            </section>
+                    <para>When the <literal>'accounts'</literal> property of the <literal>'foo'</literal>
+                    bean is being prepared for injection, the generics information about the element
+                    type of the strongly-typed <classname>Map&lt;String, Float&gt;</classname> is
+                    actually available via reflection, and so Spring's type conversion infrastructure
+                    will actually recognize the various value elements as being of type
+                    <classname>Float</classname>
+                    and so the string values <literal>'9.99', '2.75'</literal>, and <literal>'3.99'</literal>
+                    will be converted into an actual <classname>Float</classname> type.</para>
+                </section>
             </section>
             <section id="beans-null-element">
                 <title><literal>Nulls</literal></title>
@@ -1385,7 +1398,7 @@ support=support@somecompany.co.uk]]></programlisting>
   <property name="email"><null/></property>
 </bean>]]></programlisting>
                 <para>The above configuration is equivalent to the following Java code:
-                <literal>exampleBean.setEmail(null)</literal>. </para>
+                <literal>exampleBean.setEmail(null)</literal>.</para>
             </section>
             <section>
                 <title id="beans-value-ref-shortcuts">XML-based configuration metadata shortcuts</title>
