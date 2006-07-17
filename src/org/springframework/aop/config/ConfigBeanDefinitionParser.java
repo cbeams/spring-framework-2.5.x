@@ -354,6 +354,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			// create instance factory definition
 			RootBeanDefinition instanceFactoryDefinition = new RootBeanDefinition(BeanFactoryAspectInstanceFactory.class);
 			instanceFactoryDefinition.getPropertyValues().addPropertyValue("aspectBeanName", aspectName);
+			instanceFactoryDefinition.setSynthetic(true);
 	
 			// register the pointcut
 			AbstractBeanDefinition adviceDefinition = createAdviceDefinition(adviceElement, advisorProperties,
@@ -544,6 +545,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition();
 		beanDefinition.setBeanClass(AspectJExpressionPointcut.class);
 		beanDefinition.setSingleton(false);
+		beanDefinition.setSynthetic(true);
 		beanDefinition.getPropertyValues().addPropertyValue(EXPRESSION, expression);
 		return beanDefinition;
 	}
