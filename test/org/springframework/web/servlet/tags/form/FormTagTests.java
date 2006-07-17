@@ -19,6 +19,7 @@ package org.springframework.web.servlet.tags.form;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.jsp.tagext.Tag;
+import javax.servlet.jsp.PageContext;
 
 /**
  * @author Rob Harrop
@@ -58,13 +59,13 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, result);
-		assertEquals("Command name not exposed", commandName, getPageContext().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME));
+		assertEquals("Command name not exposed", commandName, getPageContext().getRequest().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME));
 
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		this.tag.doFinally();
-		assertNull("Command name not cleared after tag ends", getPageContext().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME));
+		assertNull("Command name not cleared after tag ends", getPageContext().getRequest().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME));
 
 		String output = getWriter().toString();
 		assertFormTagOpened(output);
@@ -96,13 +97,13 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_BODY_INCLUDE, result);
-		assertEquals("Command name not exposed", commandName, getPageContext().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME));
+		assertEquals("Command name not exposed", commandName, getPageContext().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 
 		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		this.tag.doFinally();
-		assertNull("Command name not cleared after tag ends", getPageContext().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME));
+		assertNull("Command name not cleared after tag ends", getPageContext().getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 
 		String output = getWriter().toString();
 		assertFormTagOpened(output);

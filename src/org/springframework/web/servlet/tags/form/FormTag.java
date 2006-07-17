@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
@@ -253,7 +254,7 @@ public class FormTag extends AbstractHtmlElementTag {
 		this.tagWriter.forceBlock();
 
 		// expose the command name for nested tags
-		this.pageContext.setAttribute(COMMAND_NAME_VARIABLE_NAME, resolveCommandName());
+		this.pageContext.setAttribute(COMMAND_NAME_VARIABLE_NAME, resolveCommandName(), PageContext.REQUEST_SCOPE);
 		return EVAL_BODY_INCLUDE;
 	}
 
@@ -319,7 +320,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	 */
 	public int doEndTag() throws JspException {
 		this.tagWriter.endTag();
-		this.pageContext.removeAttribute(COMMAND_NAME_VARIABLE_NAME);
+		this.pageContext.getRequest().removeAttribute(COMMAND_NAME_VARIABLE_NAME);
 		return EVAL_PAGE;
 	}
 

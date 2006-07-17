@@ -18,6 +18,7 @@ package org.springframework.web.servlet.tags;
 
 import javax.servlet.ServletException;
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
 
 import org.springframework.validation.Errors;
 import org.springframework.web.util.ExpressionEvaluationUtils;
@@ -60,7 +61,7 @@ public class BindErrorsTag extends HtmlEscapingAwareTag {
 		String resolvedName = ExpressionEvaluationUtils.evaluateString("name", this.name, pageContext);
 		this.errors = getRequestContext().getErrors(resolvedName, isHtmlEscape());
 		if (this.errors != null && this.errors.hasErrors()) {
-			this.pageContext.setAttribute(ERRORS_VARIABLE_NAME, this.errors);
+			this.pageContext.setAttribute(ERRORS_VARIABLE_NAME, this.errors, PageContext.REQUEST_SCOPE);
 			return EVAL_BODY_INCLUDE;
 		}
 		else {
@@ -69,7 +70,7 @@ public class BindErrorsTag extends HtmlEscapingAwareTag {
 	}
 
 	public int doEndTag() {
-		this.pageContext.removeAttribute(ERRORS_VARIABLE_NAME);
+		this.pageContext.removeAttribute(ERRORS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		return EVAL_PAGE;
 	}
 

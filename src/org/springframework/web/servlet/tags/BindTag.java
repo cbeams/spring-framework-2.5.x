@@ -119,11 +119,11 @@ public class BindTag extends HtmlEscapingAwareTag {
 		}
 
 		// Save previous status value, for re-exposure at the end of this tag.
-		this.previousStatus = pageContext.getAttribute(STATUS_VARIABLE_NAME);
+		this.previousStatus = pageContext.getAttribute(STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 
 		// Expose this tag's status object as PageContext attribute,
 		// making it available for JSP EL.
-		pageContext.setAttribute(STATUS_VARIABLE_NAME, this.status);
+		pageContext.setAttribute(STATUS_VARIABLE_NAME, this.status, PageContext.REQUEST_SCOPE);
 
 		return EVAL_BODY_INCLUDE;
 	}
@@ -131,11 +131,11 @@ public class BindTag extends HtmlEscapingAwareTag {
 	public int doEndTag() {
 		if (this.previousStatus != null) {
 			// Reset previous status value.
-			pageContext.setAttribute(STATUS_VARIABLE_NAME, this.previousStatus);
+			pageContext.setAttribute(STATUS_VARIABLE_NAME, this.previousStatus, PageContext.REQUEST_SCOPE);
 		}
 		else {
 			// Remove exposed status value.
-			pageContext.removeAttribute(STATUS_VARIABLE_NAME);
+			pageContext.removeAttribute(STATUS_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 		}
 
 		return EVAL_PAGE;

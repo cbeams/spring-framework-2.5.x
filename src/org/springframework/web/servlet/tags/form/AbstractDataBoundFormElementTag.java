@@ -191,7 +191,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	}
 
 	private String getCommandName() {
-		return (String) this.pageContext.getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME);
+		return (String) this.pageContext.getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 	}
 
 	public void doFinally() {
