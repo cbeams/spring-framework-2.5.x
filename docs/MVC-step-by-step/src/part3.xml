@@ -189,26 +189,23 @@ import springapp.domain.Product;
 public class SimpleProductManager implements ProductManager {
 
     public List<Product> getProducts() {
-        // TODO Auto-generated method stub
-				throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     public void increasePrice(int percentage) {
-        // TODO Auto-generated method stub
-				throw new UnsupportedOperationException();        
+        throw new UnsupportedOperationException();        
     }
 
     public void setProducts(List<Product> products) {
-        // TODO Auto-generated method stub
-				throw new UnsupportedOperationException();        
+        throw new UnsupportedOperationException();        
     }
 
 }]]></programlisting>
 			
 				<para>Before we implement the methods in <classname>SimpleProductManager</classname>,
 				we're going to define some tests first. The strictest definition of <literal>Test Driven Development
-				</literal> is to always write the tests first, then the code. A looser interpretation
-				of it is more akin to <literal>Test Oriented Development</literal>, where we alternate between
+				</literal> (TDD) is to always write the tests first, then the code. A looser interpretation
+				of it is more akin to <literal>Test Oriented Development</literal> (TOD), where we alternate between
 				writing code and tests as part of the development process. The most important thing is for
 				a codebase to have as complete a set of unit tests as possible, so how you achieve it becomes
 				somewhat academic. Most TDD developers, however, do agree that the quality of tests is always
@@ -217,7 +214,7 @@ public class SimpleProductManager implements ProductManager {
 			
 				<para>To write effective tests, you have to consider all the possible pre- and post-conditions of
 				a method being tested as well as what happens within the method. Let's start by testing
-				a call to <methodname>getProducts()</methodname> returns <methodname>null</methodname>.</para>
+				a call to <methodname>getProducts()</methodname> returns <literal>null</literal>.</para>
 						
 				<para><filename>'springapp/test/springapp/service/SimpleProductManagerTests.java'</filename>:</para>			
 				<programlisting><![CDATA[package springapp.service;
@@ -236,7 +233,7 @@ public class SimpleProductManagerTests extends TestCase {
         productManager = new SimpleProductManager();
         assertNull(productManager.getProducts());
     }
-    
+
 }]]></programlisting>			
 			
 				<para>Rerun all the Ant <literal>tests</literal> target and the test should fail as

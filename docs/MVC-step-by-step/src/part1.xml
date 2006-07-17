@@ -284,7 +284,7 @@ tomcat.manager.password=tomcat]]></programlisting>
         directory.</para>
         <para>To create Tomcat user named 'admin' with 'tomcat' as their password,
         go to the Tomcat users file <filename class="libraryfile">
-        'appserver.home'/conf/tomcat_users.xml'</filename> and add the user entry.
+        'appserver.home'/conf/tomcat-users.xml'</filename> and add the user entry.
         </para>
     </remark>
     <programlisting><![CDATA[<?xml version='1.0' encoding='utf-8'?>
@@ -294,7 +294,7 @@ tomcat.manager.password=tomcat]]></programlisting>
   <user username="role1" password="tomcat" roles="role1"/>
   <!-- new user added -->]]>  
   <emphasis role="bold"><![CDATA[<user username="admin" password="tomcat" roles="manager"/>]]></emphasis>  
-<![CDATA[<?xml version='1.0' encoding='utf-8'?></tomcat-users>]]></programlisting>        
+<![CDATA[</tomcat-users>]]></programlisting>        
       
     <para>Now we run Ant to make sure that everything is working okay. You must
     have your current directory set to the
