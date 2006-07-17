@@ -258,7 +258,7 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
 					limit.</para>
                 </listitem>
                 <listitem>
-                    <para>other beans a bean needs to do its work, i.e.
+                    <para>other beans which are needed for the bean to do its work, i.e.
                     <emphasis>collaborators</emphasis> (also called dependencies).</para>
                 </listitem>
             </itemizedlist>
@@ -368,7 +368,7 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
 				the container the bean is hosted in. A bean will almost always have only one
 				id, but if a bean has more than one id, the extra ones can essentially be
 				considered aliases.</para>
-                <para>When using XM-based configuration metadata, you use the <literal>'id'</literal>
+                <para>When using XML-based configuration metadata, you use the <literal>'id'</literal>
 				or <literal>'name'</literal> attributes to specify the bean identifier(s). The
 				<literal>'id'</literal> attribute allows you to specify exactly one id, and as
 				it is a real XML element ID attribute, the XML parser is able to do
@@ -797,8 +797,8 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 			    <classname>BeanCurrentlyInCreationException</classname>.</para>
 			    <para>One possible solution to this issue is to edit the source code of
 			    some of your classes to be configured via setters instead of via
-			    constructors. Another solution is to totally forego the use of
-			    constructor injection.</para>
+			    constructors. Another solution is not to use constructor injection
+			    and stick to setter injection only.</para>
 			</sidebar>
             <para>
 				You can generally trust Spring to do the right thing. It
@@ -847,7 +847,7 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
   <property name="beanOne"><ref bean="anotherExampleBean"/></property>
 
   ]]><lineannotation>&lt;!-- setter injection using the neater 'ref' attribute --&gt;</lineannotation><![CDATA[
-  <property name="beanTwo"><ref bean="yetAnotherBean"/></property>
+  <property name="beanTwo" ref="yetAnotherBean"/>
   <property name="integerProperty" value="1"/>
 </bean>
 
@@ -948,7 +948,7 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 				in this example it is. An instance (non-static) factory method would
 				be used in an essentially identical fashion (aside from the use of the
 				<literal>factory-bean</literal> attribute instead of the
-				<literal>class</literal> attribute), so will not be detailed here.
+				<literal>class</literal> attribute), so details will not be discussed here.
 			</para>
         </section>
 		</section>
@@ -1043,7 +1043,7 @@ public class ExampleBean {
             <title>Bean properties and constructor arguments detailed</title>
             <para>As mentioned in the previous section, bean properties and
             constructor arguments can be defined as either references to other
-            managed beans (collaborators), or values defined inline. Springs XML-based
+            managed beans (collaborators), or values defined inline. Spring's XML-based
             configuration metadata supports a number of sub-element types
             within its <literal>&lt;property/&gt;</literal> and
             <literal>&lt;constructor-arg/&gt;</literal> elements for just this purpose.</para>
