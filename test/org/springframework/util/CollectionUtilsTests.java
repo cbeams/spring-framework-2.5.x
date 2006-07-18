@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.ArrayList;
 
 import junit.framework.TestCase;
 
@@ -97,4 +98,35 @@ public class CollectionUtilsTests extends TestCase {
 		assertFalse(CollectionUtils.hasUniqueObject(list));
 	}
 
+	public void testFindFirstMatch() throws Exception {
+		List source = new ArrayList();
+		source.add("abc");
+		source.add("def");
+		source.add("ghi");
+
+		List candidates = new ArrayList();
+		candidates.add("xyz");
+		candidates.add("def");
+		candidates.add("abc");
+
+		assertEquals("def", CollectionUtils.findFirstMatch(source, candidates));
+	}
+
+	public void testContainsAny() throws Exception {
+		List source = new ArrayList();
+		source.add("abc");
+		source.add("def");
+		source.add("ghi");
+
+		List candidates = new ArrayList();
+		candidates.add("xyz");
+		candidates.add("def");
+		candidates.add("abc");
+
+		assertTrue(CollectionUtils.containsAny(source, candidates));
+		candidates.remove("def");
+		assertTrue(CollectionUtils.containsAny(source, candidates));
+		candidates.remove("abc");
+		assertFalse(CollectionUtils.containsAny(source, candidates));
+	}
 }
