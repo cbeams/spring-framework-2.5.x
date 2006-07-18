@@ -38,7 +38,6 @@ import org.springframework.osgi.context.support.OsgiBundleXmlApplicationContext;
 import org.springframework.osgi.context.support.OsgiBundleXmlApplicationContextFactory;
 import org.springframework.osgi.service.OsgiServiceUtils;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ClassUtilsTests;
 import org.springframework.util.StringUtils;
 
 /**
@@ -200,7 +199,7 @@ public class ContextLoaderBundleActivator implements BundleActivator {
 	 */
 	private String[] addBundlePrefixTo(String[] resourcePaths) {
 		for (int i = 0; i < resourcePaths.length; i++) {
-			resourcePaths[i] = OsgiBundleXmlApplicationContext.BUNDLE_URL_PREFIX + resourcePaths[i];
+			resourcePaths[i] = OsgiBundleResourceLoader.BUNDLE_URL_PREFIX + resourcePaths[i];
 		}
 		return resourcePaths;
 	}

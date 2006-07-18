@@ -39,13 +39,7 @@ import org.springframework.osgi.context.BundleContextAware;
 import org.springframework.util.Assert;
 
 /**
- * Application context backed by an OSGi bundle. Will use the
- * bundle classpath for resource loading for any unqualified resource string.
- * 
- * Also understands the "bundle:" resource prefix for explicit loading
- * of resources from the bundle. When the bundle prefix is used the 
- * target resource must be contained within the bundle (or attached 
- * fragments), the classpath is not searched.
+ * Application context backed by an OSGi bundle.
  * 
  * This application context will publish itself as a service using the
  * service name "&lt;bundle-symbolic-name&gt-springApplicationContext".
@@ -70,11 +64,8 @@ import org.springframework.util.Assert;
 public class OsgiBundleXmlApplicationContext extends
 		AbstractXmlApplicationContext {
 	
-	public  static final String BUNDLE_URL_PREFIX = "bundle:";
 	public  static final String APPLICATION_CONTEXT_SERVICE_NAME_HEADER = "org.springframework.context.service.name";
 	private static final String APPLICATION_CONTEXT_SERVICE_POSTFIX = "-springApplicationContext";
-	private static final char   PREFIX_SEPARATOR = ':';
-	private static final String ABSOLUTE_PATH_PREFIX = "/";
 	private static final String OSGI_SPRING_HANDLERS_LOCATION = "org/springframework/osgi/handlers/spring.handlers";
 	
 	private Bundle osgiBundle;
@@ -151,53 +142,6 @@ public class OsgiBundleXmlApplicationContext extends
 		}		
 	}
 	
-	/**
-	 * Implementation of getResource that delegates to the bundle for
-	 * any unqualified resource reference or a reference starting with
-	 * "bundle:"
-	 */
-	public Resource getResource(String location) {
-		Assert.notNull(location, "location is required");
-		if (location.startsWith(BUNDLE_URL_PREFIX)) {
-			return getResourceFromBundle(location.substring(BUNDLE_URL_PREFIX.length()));
-		} 
-		else if (location.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX)) {
-			return getResourceFromBundleClasspath(location.substring(ResourceLoader.CLASSPATH_URL_PREFIX.length()));
-		}
-		else if (isRelativePath(location)){ 
-			return getResourceFromBundleClasspath(location);
-		}
-		else {
-			return super.getResource(location);			
-		}
-	}
-
-	/**
-	 * Resolves a resource from *this bundle only*. Only the bundle and its
-	 * attached fragments are searched for the given resource.
-	 * 
-	 * @param bundleRelativePath
-	 * @return
-	 */
-	protected Resource getResourceFromBundle(String bundleRelativePath) {
-		return new UrlResource(this.osgiBundle.getEntry(bundleRelativePath));
-	}
-
-	/**
-	 * Resolves a resource from the bundle's classpath. This will find resources
-	 * in this bundle and also in imported packages from other bundles.
-	 * 
-	 * @param bundleRelativePath
-	 * @return
-	 */
-	protected Resource getResourceFromBundleClasspath(String bundleRelativePath) {
-		return new UrlResource(this.osgiBundle.getResource(bundleRelativePath));
-	}
-
-	protected boolean isRelativePath(String locationPath) {
-		return ((locationPath.indexOf(PREFIX_SEPARATOR) == -1) &&
-				 !locationPath.startsWith(ABSOLUTE_PATH_PREFIX));
-	}
 	
 	/* (non-Javadoc)
 	 * @see org.springframework.context.support.AbstractApplicationContext#postProcessBeanFactory(org.springframework.beans.factory.config.ConfigurableListableBeanFactory)
