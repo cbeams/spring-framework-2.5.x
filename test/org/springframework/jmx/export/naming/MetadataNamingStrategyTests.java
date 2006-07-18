@@ -20,6 +20,10 @@ import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.metadata.AttributesJmxAttributeSource;
 import org.springframework.jmx.export.JmxTestUtils;
 import org.springframework.metadata.commons.CommonsAttributes;
+import org.springframework.beans.ITestBean;
+import org.springframework.beans.TestBean;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.target.SingletonTargetSource;
 
 /**
  * @author Rob Harrop
@@ -38,6 +42,16 @@ public class MetadataNamingStrategyTests extends AbstractNamingStrategyTests {
 		return mns;
 	}
 
+	public void testWithJdkProxy() throws Exception {
+		ITestBean proxy = (ITestBean) ProxyFactory.getProxy(ITestBean.class, new SingletonTargetSource(new TestBean()));
+		MetadataNamingStrategy namingStrategy = new MetadataNamingStrategy();
+		try {
+			namingStrategy.getObjectName(proxy, "foo");
+			fail("Cannot use MetadataNamingStrategy with JDK proxies.");
+		} catch (IllegalArgumentException ex) {
+			 // success
+		}
+	}
 	protected Object getManagedResource() throws Exception {
 		return new JmxTestBean();
 	}

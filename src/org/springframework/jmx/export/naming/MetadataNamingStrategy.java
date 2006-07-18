@@ -24,6 +24,7 @@ import org.springframework.jmx.export.metadata.ManagedResource;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.jmx.support.JmxUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.aop.support.AopUtils;
 
 /**
  * An implementation of the <code>ObjectNamingStrategy</code> interface
@@ -55,6 +56,11 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy {
 	 * with the managed resource's <code>Class</code>.
 	 */
 	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
+		if (AopUtils.isJdkDynamicProxy(managedBean)) {
+			throw new IllegalArgumentException(
+							"MetadataNamingStrategy does not support JDK dynamic proxies - " +
+											"export the target beans directly or use CGLIB proxies instead");
+		}
 		Class managedClass = JmxUtils.getClassToExpose(managedBean);
 		ManagedResource mr = this.attributeSource.getManagedResource(managedClass);
 
