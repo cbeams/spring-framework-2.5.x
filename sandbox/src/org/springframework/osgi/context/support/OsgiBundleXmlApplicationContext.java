@@ -62,7 +62,7 @@ import org.springframework.util.Assert;
  * TODO: think about whether restricting config files to bundle: is the right
  * thing to do
  * TODO: listen to parent application context service, automatically rebind and
- * refresh if it goes away and comes back
+ * refresh if it goes away and comes back (the logic can be placed inside the lookupParentAppContext proxy).
  * 
  * @author Adrian Colyer
  * @since 2.0
@@ -116,7 +116,7 @@ public class OsgiBundleXmlApplicationContext extends
 	 */
 	protected void initBeanDefinitionReader(XmlBeanDefinitionReader beanDefinitionReader) {
 		beanDefinitionReader.setNamespaceHandlerResolver(
-				new DefaultNamespaceHandlerResolver(OSGI_SPRING_HANDLERS_LOCATION,getClassLoader()));
+				new DefaultNamespaceHandlerResolver(getClassLoader(),OSGI_SPRING_HANDLERS_LOCATION));
 	}
 
 	protected void publishContextAsOsgiService() {
