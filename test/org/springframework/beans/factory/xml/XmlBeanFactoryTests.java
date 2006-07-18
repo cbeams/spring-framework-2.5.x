@@ -42,6 +42,7 @@ import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.ResourceTestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -1433,6 +1434,25 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals(Boolean.TRUE, bean.boolean2);
 	}
 
+	public void testWithDuplicateName() throws Exception {
+		try {
+			new XmlBeanFactory(new ClassPathResource("testWithDuplicateNames.xml", getClass()));
+			fail("Duplicate name not detected");
+		}
+		catch (BeansException e) {
+			assertTrue(e.getMessage().indexOf("Bean name 'foo'") > -1);
+		}
+	}
+
+	public void testWithDuplicateNameInAlias() throws Exception {
+		try {
+			new XmlBeanFactory(new ClassPathResource("testWithDuplicateNameInAlias.xml", getClass()));
+			fail("Duplicate name not detected");
+		}
+		catch (BeansException e) {
+			assertTrue(e.getMessage().indexOf("Bean name 'foo'") > -1);
+		}
+	}
 
 	public static class DoSomethingReplacer implements MethodReplacer {
 

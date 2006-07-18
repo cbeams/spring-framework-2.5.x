@@ -191,4 +191,33 @@ public abstract class CollectionUtils {
 		}
 	}
 
+	/**
+	 * Returns '<code>true</code>' if any element in '<code>candidates</code>' is
+	 * contained in '<code>source</code>' otherwise returns false.
+	 */
+	public static boolean containsAny(Collection source, Collection candidates) {
+		for (Iterator iterator = candidates.iterator(); iterator.hasNext();) {
+			if(source.contains(iterator.next())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns the first element in '<code>candidates</code>' that is contained in
+	 * '<code>source</code>'. If no element in '<code>candidates</code>' is present in
+	 * '<code>source</code>' returns '<code>null</code>'. Iteration order is
+	 * {@link Collection} implementation specific.
+	 */
+	public static Object findFirstMatch(Collection source, Collection candidates) {
+		for (Iterator iterator = candidates.iterator(); iterator.hasNext();) {
+			Object candidate = iterator.next();
+			if(source.contains(candidate)) {
+				return candidate;
+			}
+		}
+		return null;
+	}
+
 }

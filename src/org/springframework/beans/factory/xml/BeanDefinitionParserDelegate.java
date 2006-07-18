@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.HashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,6 +57,7 @@ import org.springframework.core.AttributeAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
@@ -233,6 +235,10 @@ public class BeanDefinitionParserDelegate {
 
 	private String defaultMerge;
 
+	/**
+	 * Stores all used bean names so we can enforce uniqueness on a per file basis.
+	 */
+	private final Set usedNames = new HashSet();
 
 	/**
 	 * Create a new <code>XmlBeanDefinitionParserHelper</code> associated with the
@@ -377,6 +383,10 @@ public class BeanDefinitionParserDelegate {
 			}
 		}
 
+		if (!isInnerBean) {
+			checkNameUniqueness(beanName, aliases, ele);
+		}
+
 		BeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName);
 
 		if (beanDefinition != null) {
@@ -393,6 +403,24 @@ public class BeanDefinitionParserDelegate {
 			return new BeanDefinitionHolder(beanDefinition, beanName, aliasesArray);
 		}
 		return null;
+	}
+
+	private void checkNameUniqueness(String beanName, List aliases, Element beanElement) {
+		String foundName = null;
+
+		if (StringUtils.hasText(beanName) && this.usedNames.contains(beanName)) {
+			foundName = beanName;
+		}
+		this.usedNames.add(beanName);
+
+		if (foundName == null) {
+			foundName = (String) CollectionUtils.findFirstMatch(this.usedNames, aliases);
+		}
+		this.usedNames.addAll(aliases);
+
+		if (foundName != null) {
+			getReaderContext().error("Bean name '" + foundName + "' is already used in this file.", beanElement);
+		}
 	}
 
 	/**
