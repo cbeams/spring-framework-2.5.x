@@ -230,6 +230,10 @@ distribution/website before using any of them in your own applications.
 - Commons IO 1.1 (http://jakarta.apache.org/commons/io)
 - required at runtime when using Spring's CommonsMultipartResolver (by Commons FileUpload)
 
+* jakarta-commons/commons-javaflow.jar
+- Commons JavaFlow 20060411 (taken from JasperReports 1.2.5 distribution)
+- required at runtime when using Spring's JasperReports support (by JasperReports)
+
 * jakarta-commons/commons-lang.jar
 - Commons Lang 2.1 (http://jakarta.apache.org/commons/lang)
 - required for building the framework (by OJB)
@@ -257,8 +261,8 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's JamonPerformanceMonitorInterceptor
 
-* jasperreports/jasperreports-1.1.1.jar
-- JasperReports 1.1.1 (http://jasperreports.sourceforge.net)
+* jasperreports/jasperreports-1.2.5.jar
+- JasperReports 1.2.5 (http://jasperreports.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 
