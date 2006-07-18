@@ -25,6 +25,7 @@ import org.easymock.MockControl;
 import org.easymock.internal.ArrayMatcher;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -112,15 +113,23 @@ public class ContextLoaderBundleActivatorTests extends TestCase {
 		ServiceReference sRef = getServiceReference();
 		this.mockContextControl.setReturnValue(new ServiceReference[] {sRef});
 		this.bundleContext.getService(sRef);
-		ApplicationContext appContext = (ApplicationContext) MockControl.createControl(ApplicationContext.class).getMock();
+		final ApplicationContext appContext = (ApplicationContext) MockControl.createControl(ApplicationContext.class).getMock();
 		this.mockContextControl.setReturnValue(appContext);
+		
 		this.mockContextControl.replay();
 		this.mockBundleControl.replay();
+		
 		
 		ApplicationContext ret = new ContextLoaderBundleActivator() {
 			public  ApplicationContext getParentApplicationContext(BundleContext context) {
 				return super.getParentApplicationContext(context);
+			}
+
+			protected ApplicationContext createApplicationContextProxy(BundleContext context, ServiceReference serviceReference) {
+				return (ApplicationContext) context.getService(serviceReference);
 			};
+			
+			
 		}.getParentApplicationContext(this.bundleContext);
 		
 		this.mockContextControl.verify();
@@ -161,6 +170,11 @@ public class ContextLoaderBundleActivatorTests extends TestCase {
 
 		this.bundleContext.getBundle();
 		this.mockContextControl.setReturnValue(this.bundle);
+		
+		// used for logging
+		this.mockBundleControl.expectAndReturn(this.bundle.getBundleId(), 123l);
+		this.mockBundleControl.expectAndReturn(this.bundle.getSymbolicName(), "symbolic-name");
+		
 		this.bundle.getHeaders();
 		this.mockBundleControl.setReturnValue(new Properties());
 
@@ -189,6 +203,10 @@ public class ContextLoaderBundleActivatorTests extends TestCase {
 	
 	private ServiceReference getServiceReference() {
 		MockControl sRefControl = MockControl.createNiceControl(ServiceReference.class);
-		return (ServiceReference) sRefControl.getMock();
+		ServiceReference mock = (ServiceReference) sRefControl.getMock();
+		sRefControl.expectAndReturn(mock.getProperty(Constants.SERVICE_ID), "123");
+		sRefControl.replay();
+		
+		return mock;
 	}
 }
