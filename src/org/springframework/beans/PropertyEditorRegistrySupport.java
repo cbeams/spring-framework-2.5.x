@@ -45,6 +45,7 @@ import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.LocaleEditor;
 import org.springframework.beans.propertyeditors.PropertiesEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
+import org.springframework.beans.propertyeditors.ClassArrayEditor;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceArrayPropertyEditor;
@@ -107,6 +108,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		// Simple editors, without parameterization capabilities.
 		// The JDK does not contain a default editor for any of these target types.
 		this.defaultEditors.put(Class.class, new ClassEditor());
+		this.defaultEditors.put(Class[].class, new ClassArrayEditor());
 		this.defaultEditors.put(File.class, new FileEditor());
 		this.defaultEditors.put(InputStream.class, new InputStreamEditor());
 		this.defaultEditors.put(Locale.class, new LocaleEditor());

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
+import java.util.HashMap;
 
 import junit.framework.TestCase;
 
@@ -48,6 +49,7 @@ import org.springframework.test.AssertThrows;
  * 
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Rob Harrop
  * @since 10.06.2003
  */
 public class CustomEditorTests extends TestCase {
@@ -1275,8 +1277,16 @@ public class CustomEditorTests extends TestCase {
         assertEquals("-a,b-", tb.getName());
     }
 
-
-    private static class TestBeanEditor extends PropertyEditorSupport {
+	  public void testClassArrayEditor() throws Exception {
+			ClassArrayEditor classArrayEditor = new ClassArrayEditor();
+			classArrayEditor.setAsText("java.lang.String,java.util.HashMap");
+			Class[] classes = (Class[]) classArrayEditor.getValue();
+			assertEquals(2, classes.length);
+			assertEquals(String.class, classes[0]);
+			assertEquals(HashMap.class, classes[1]);
+		}
+	
+		private static class TestBeanEditor extends PropertyEditorSupport {
 
         public void setAsText(String text) {
             TestBean tb = new TestBean();
