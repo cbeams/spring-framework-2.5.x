@@ -28,8 +28,9 @@ import org.springframework.jdbc.core.SqlParameter;
 
 /**
  * Superclass for object abstractions of RDBMS stored procedures.
- * This class is abstract and its execute methods are protected,
- * preventing use other than through a subclass that offers tighter typing.
+ * This class is abstract and it is intended that subclasses will provide
+ * a typed method for invocation that delegates to the supplied
+ * {@link #execute} method.
  *
  * <p>The inherited <code>sql</code> property is the name of the stored
  * procedure in the RDBMS. Note that JDBC 3.0 introduces named parameters,
