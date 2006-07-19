@@ -22,7 +22,6 @@ import org.springframework.web.servlet.tags.NestedPathTag;
 
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
-import java.beans.PropertyEditorSupport;
 import java.io.StringWriter;
 
 /**
@@ -191,7 +190,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(this.rob, COMMAND_NAME);
 		errors.rejectValue("name", "some.code", "Default Message");
 		errors.rejectValue("name", "too.short", "Too Short");
-		exposeErrors(errors);
+		exposeBindingResult(errors);
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 
@@ -217,7 +216,7 @@ public class InputTagTests extends AbstractFormTagTests {
 
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(this.rob, COMMAND_NAME);
 		errors.getPropertyAccessor().registerCustomEditor(Float.class, new SimpleFloatEditor());
-		exposeErrors(errors);
+		exposeBindingResult(errors);
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 

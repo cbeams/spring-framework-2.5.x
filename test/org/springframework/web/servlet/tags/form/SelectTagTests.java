@@ -180,7 +180,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		PropertyEditor propertyEditor = new SimpleFloatEditor();
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(getTestBean(), COMMAND_NAME);
 		errors.getPropertyAccessor().registerCustomEditor(Float.class, propertyEditor);
-		exposeErrors(errors);
+		exposeBindingResult(errors);
 
 		this.tag.setPath("myFloat");
 

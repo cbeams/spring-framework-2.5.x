@@ -22,10 +22,15 @@ import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.validation.BeanPropertyBindingResult;
 
 import javax.servlet.jsp.tagext.Tag;
+import javax.servlet.jsp.tagext.BodyTag;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
+import java.io.Serializable;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * @author Rob Harrop
@@ -53,6 +58,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setValue("bar");
 		this.tag.setLabel("Bar");
 		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
@@ -68,6 +75,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setValue("foo");
 		this.tag.setLabel("Foo");
 		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
@@ -83,6 +92,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.name", false));
 		this.tag.setValue("bar");
 		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
@@ -116,6 +127,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setLabel(label);
 
 		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
@@ -137,6 +150,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setLabel(label);
 
 		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
@@ -160,6 +175,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setLabel("someArray");
 
 		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
@@ -185,6 +202,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setValue("Sally");
 
 		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
@@ -200,6 +219,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setValue("${myNumber}");
 		this.tag.setLabel("GBP ${myNumber}");
 		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
@@ -216,6 +237,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setValue("${myOtherNumber}");
 		this.tag.setLabel("GBP ${myOtherNumber}");
 		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
@@ -241,6 +264,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setLabel("${myNumber}");
 
 		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
@@ -263,6 +288,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setLabel("${myOtherNumber}");
 
 		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		result = this.tag.doEndTag();
 		assertEquals(Tag.EVAL_PAGE, result);
 
 		String output = getWriter().toString();
@@ -270,6 +297,101 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertOptionTagClosed(output);
 		assertAttributeNotPresent(output, "selected");
 		assertBlockTagContains(output, "12.35f");
+	}
+
+	public void testAsBodyTag() throws Exception {
+		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.name", false);
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
+
+		String bodyContent = "some content";
+
+		this.tag.setValue("foo");
+		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		this.tag.setBodyContent(new MockBodyContent(bodyContent, getWriter()));
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		assertOptionTagOpened(output);
+		assertOptionTagClosed(output);
+		assertContainsAttribute(output, "selected", "selected");
+		assertBlockTagContains(output, bodyContent);
+	}
+
+	public void testAsBodyTagSelected() throws Exception {
+		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.name", false);
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
+
+		String bodyContent = "some content";
+
+		this.tag.setValue("Rob Harrop");
+		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		this.tag.setBodyContent(new MockBodyContent(bodyContent, getWriter()));
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		assertOptionTagOpened(output);
+		assertOptionTagClosed(output);
+		assertBlockTagContains(output, bodyContent);
+	}
+
+	public void testAsBodyTagCollapsed() throws Exception {
+		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.name", false);
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
+
+		String bodyContent = "some content";
+
+		this.tag.setValue(bodyContent);
+		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		this.tag.setBodyContent(new MockBodyContent(bodyContent, getWriter()));
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		assertOptionTagOpened(output);
+		assertOptionTagClosed(output);
+		assertAttributeNotPresent(output, "value");
+		assertBlockTagContains(output, bodyContent);
+	}
+
+	public void testAsBodyTagWithEditor() throws Exception {
+		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.stringArray", false) {
+			public PropertyEditor getEditor() {
+				return new RulesVariantEditor();
+			}
+		};
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
+
+		RulesVariant rulesVariant = new RulesVariant("someRules", "someVariant");
+		getPageContext().getRequest().setAttribute("rule", rulesVariant);
+
+		this.tag.setValue("${rule}");
+
+		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+
+		assertEquals(rulesVariant, getPageContext().getAttribute("value"));
+		assertEquals(rulesVariant.toId(), getPageContext().getAttribute("displayValue"));
+
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+	}
+
+	public void xtestMultiBind() throws Exception {
+		BeanPropertyBindingResult result = new BeanPropertyBindingResult(new TestBean(), "testBean");
+		result.getPropertyAccessor().registerCustomEditor(List.class, "friends", new FriendEditor());
+		exposeBindingResult(result);
+
+		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.friends", false);
+
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
+		this.tag.setValue(new TestBean("foo"));
+		this.tag.doStartTag();
+		this.tag.doEndTag();
 	}
 
 	private void assertOptionTagOpened(String output) {
@@ -288,6 +410,11 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		bean.setSpouse(new TestBean("Sally"));
 		bean.setSomeNumber(new Float("12.34"));
 
+		List friends = new ArrayList();
+		friends.add(new TestBean("bar"));
+		friends.add(new TestBean("penc"));
+		bean.setFriends(friends);
+
 		request.setAttribute("testBean", bean);
 		request.setAttribute("myNumber", new Float(12.34));
 		request.setAttribute("myOtherNumber", new Float(12.35));
@@ -301,6 +428,84 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 
 		public String getAsText() {
 			return ((TestBean) getValue()).getName();
+		}
+	}
+
+	public static class RulesVariant implements Serializable {
+
+		private String rules;
+
+		private String variant;
+
+		public RulesVariant(String rules, String variant) {
+			this.setRules(rules);
+			this.setVariant(variant);
+		}
+
+		private void setRules(String rules) {
+			this.rules = rules;
+		}
+
+		public String getRules() {
+			return rules;
+		}
+
+		private void setVariant(String variant) {
+			this.variant = variant;
+		}
+
+		public String getVariant() {
+			return variant;
+		}
+
+		public String toId() {
+			if (variant == null)
+				return rules;
+			else
+				return rules + "-" + variant;
+		}
+
+		public static RulesVariant fromId(String id) {
+			String[] s = id.split("-", 2);
+			String rules = s[0];
+			String variant = s.length > 1 ? s[1] : null;
+			return new RulesVariant(rules, variant);
+		}
+
+		public boolean equals(Object obj) {
+			if (obj instanceof RulesVariant) {
+				RulesVariant other = (RulesVariant) obj;
+				return this.toId().equals(other.toId());
+			}
+			return false;
+		}
+
+		public int hashCode() {
+			return this.toId().hashCode();
+		}
+	}
+
+	public class RulesVariantEditor extends PropertyEditorSupport {
+
+		public void setAsText(String text) throws IllegalArgumentException {
+			setValue(RulesVariant.fromId(text));
+		}
+
+		public String getAsText() {
+			RulesVariant rulesVariant = (RulesVariant) getValue();
+			return rulesVariant.toId();
+		}
+	}
+
+	private static class FriendEditor extends PropertyEditorSupport {
+
+		public void setAsText(String text) throws IllegalArgumentException {
+			setValue(new TestBean(text));
+		}
+
+
+		public String getAsText() {
+			return ((TestBean)getValue()).getName();
 		}
 	}
 }

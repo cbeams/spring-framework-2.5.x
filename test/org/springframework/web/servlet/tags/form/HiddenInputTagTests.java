@@ -59,7 +59,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
 		errors.getPropertyAccessor().registerCustomEditor(Float.class, new SimpleFloatEditor());
-		exposeErrors(errors);
+		exposeBindingResult(errors);
 
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 

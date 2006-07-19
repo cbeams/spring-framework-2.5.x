@@ -39,7 +39,7 @@ import java.util.List;
  * @author Rob Harrop
  * @since 2.0
  */
-public class ErrorsTag extends AbstractHtmlElementTag implements BodyTag {
+public class ErrorsTag extends AbstractHtmlElementBodyTag {
 
 	/**
 	 * The HTML '<code>span</code>' tag
@@ -53,6 +53,8 @@ public class ErrorsTag extends AbstractHtmlElementTag implements BodyTag {
 
 	private BodyContent bodyContent;
 
+	private static final String MESSAGES_ATTRIBUTE = "messages";
+
 	/**
 	 * What delimiter should be used between error messages. Default to an HTML
 	 * '<code>&lt;br/&gt;</code>' tag.
@@ -62,45 +64,20 @@ public class ErrorsTag extends AbstractHtmlElementTag implements BodyTag {
 	}
 
 	/**
+	 * Appends '<code>.errors</code>' to the value returned by {@link #getPath()}.
+	 */
+	protected String getName() throws JspException {
+		return getPath() + ".errors";
+	}
+	
+	/**
 	 * Only renders output when there are errors for the configured {@link #setPath path}.
 	 */
 	protected boolean shouldRender() throws JspException {
 		return getBindStatus().isError();
 	}
 
-	/**
-	 * Appends '<code>.errors</code>' to the value returned by {@link #getPath()}.
-	 */
-	protected String getName() throws JspException {
-		return getPath() + ".errors";
-	}
-
-	protected int writeTagContent(TagWriter tagWriter) throws JspException {
-		this.tagWriter = tagWriter;
-		List errorMessages = new ArrayList();
-		Collections.addAll(errorMessages, getBindStatus().getErrorMessages());
-		this.pageContext.setAttribute("messages", errorMessages);
-		return shouldRender() ? EVAL_BODY_BUFFERED : EVAL_PAGE;
-	}
-
-	public int doEndTag() throws JspException {
-		if (shouldRender()) {
-			if (this.bodyContent != null) {
-				flushBufferedBodyContent();
-			}
-			else {
-				renderDefaultContent();
-			}
-		}
-
-		return EVAL_PAGE;
-	}
-
-	/**
-	 * Renders the default content for error messages. Used when the
-	 * user creates an empty errors tag.
-	 */
-	protected void renderDefaultContent() throws JspException {
+	protected void renderDefaultContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag(SPAN_TAG);
 		writeDefaultAttributes(tagWriter);
 		String delimiter = ObjectUtils.getDisplayString(evaluate("delimiter", this.delimiter));
@@ -115,35 +92,13 @@ public class ErrorsTag extends AbstractHtmlElementTag implements BodyTag {
 		tagWriter.endTag();
 	}
 
-	/**
-	 * The user customised the output of the error messages - flush the
-	 * buffered content into the main {@link JspWriter}.
-	 */
-	private void flushBufferedBodyContent() throws JspException {
-		String bufferedBodyContent = this.bodyContent.getString();
-		try {
-			this.bodyContent.writeOut(this.bodyContent.getEnclosingWriter());
-		}
-		catch (IOException e) {
-			throw new JspException("Unable to write buffered body content.", e);
-		}
+	protected void exposeAttributes() throws JspException {
+		List errorMessages = new ArrayList();
+		Collections.addAll(errorMessages, getBindStatus().getErrorMessages());
+		this.pageContext.setAttribute(MESSAGES_ATTRIBUTE, errorMessages);
 	}
 
-	//---------------------------------------------------------------------
-	// BodyTag implementation
-	//---------------------------------------------------------------------
-
-	public void doInitBody() throws JspException {
-		// no-op for now
-	}
-
-	public void setBodyContent(BodyContent bodyContent) {
-		this.bodyContent = bodyContent;
-	}
-
-	public void doFinally() {
-		super.doFinally();
-		this.tagWriter = null;
-		this.bodyContent = null;
+	protected void removeAttributes() {
+		this.pageContext.removeAttribute(MESSAGES_ATTRIBUTE);
 	}
 }

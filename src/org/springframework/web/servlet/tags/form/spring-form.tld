@@ -876,8 +876,21 @@
 	<tag>
 		<name>option</name>
 		<tag-class>org.springframework.web.servlet.tags.form.OptionTag</tag-class>
-		<body-content>empty</body-content>
+		<body-content>JSP</body-content>
 		<description>Renders an HTML 'option'. Sets 'selected' as appropriate based on bound value.</description>
+
+		<variable>
+			<name-given>value</name-given>
+			<variable-class>java.lang.Object</variable-class>
+			<description>The actual value bound to the 'value' attribute</description>
+		</variable>
+
+		<variable>
+			<name-given>displayValue</name-given>
+			<variable-class>java.lang.String</variable-class>
+			<description>The String representation of thr value bound to the 'value' attribute, taking into consideration
+			any PropertyEditor associated with the enclosing 'select' tag.</description>
+		</variable>
 
 		<attribute>
 			<name>value</name>

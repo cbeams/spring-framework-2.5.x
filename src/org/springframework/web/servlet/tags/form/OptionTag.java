@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.BodyContent;
 
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.support.BindStatus;
@@ -39,7 +40,28 @@ import org.springframework.web.util.TagUtils;
  * @author Rob Harrop
  * @since 2.0
  */
-public class OptionTag extends AbstractFormTag {
+public class OptionTag extends AbstractHtmlElementBodyTag {
+
+	/**
+	 * The name of the JSP variable used to expose the value for this tag.
+	 */
+	public static final String VALUE_VARIABLE_NAME = "value";
+
+	/**
+	 * The name of the JSP variable used to expose the display value for this tag.
+	 */
+	public static final String DISPLAY_VALUE_VARIABLE_NAME = "displayValue";
+
+	/**
+	 * The name of the '<code>selected</code>' attribute.
+	 */
+	private static final String SELECTED_ATTRIBUTE = "selected";
+
+	/**
+	 * The name of the '<code>value</code>' attribute.
+	 */
+	private static final String VALUE_ATTRIBUTE = VALUE_VARIABLE_NAME;
+
 
 	/**
 	 * The 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
@@ -86,35 +108,61 @@ public class OptionTag extends AbstractFormTag {
 		return this.label;
 	}
 
+	protected void renderDefaultContent(TagWriter tagWriter) throws JspException {
+		Object value = this.pageContext.getAttribute(VALUE_VARIABLE_NAME);
+		String label = getLabelValue(value);
+		renderOption(value,  label, tagWriter);
+	}
+
+
+	protected void renderFromBodyContent(BodyContent bodyContent, TagWriter tagWriter) throws JspException {
+		Object value = this.pageContext.getAttribute(VALUE_VARIABLE_NAME);
+		String label = bodyContent.getString();
+		renderOption(value, label, tagWriter);
+	}
 
 	/**
-	 * Renders an HTML <code>&lt;option&gt;</code> using configured
-	 * {@link #setValue value} and {@link #setLabel label} values.
-	 * <p/>
-	 * If the resolved value is equal to the value exposed by the containing
-	 * {@link SelectTag} then the '<code>selected</code>' attribute is written
-	 * with the value of <code>true</code>.
+	 * Returns the supplied value to attach to this tag. Evaluates EL expressions
+	 * as required.
 	 */
-	protected int writeTagContent(TagWriter tagWriter) throws JspException {
+	private Object resolveValue() throws JspException {
+		return evaluate(VALUE_VARIABLE_NAME, getValue());
+	}
+
+	/**
+	 * Make sure we are under a '<code>select</code>' tag before proceeding.
+	 */
+	protected void onWriteTagContent() {
 		assertUnderSelectTag();
+	}
+
+	protected void exposeAttributes() throws JspException {
+		Object value = resolveValue();
+		this.pageContext.setAttribute(VALUE_VARIABLE_NAME, value);
+		this.pageContext.setAttribute(DISPLAY_VALUE_VARIABLE_NAME, getDisplayString(value, getBindStatus().getEditor()));
+	}
+
+
+	protected void removeAttributes() {
+		this.pageContext.removeAttribute(VALUE_VARIABLE_NAME);
+		this.pageContext.removeAttribute(DISPLAY_VALUE_VARIABLE_NAME);
+	}
+
+	private void renderOption(Object value, String label, TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("option");
 
-		Object resolvedValue = evaluate("value", getValue());
-		String renderedValue = getDisplayString(resolvedValue, getBindStatus().getEditor());
-		String labelValue = getLabelValue(resolvedValue);
+		String renderedValue = getDisplayString(value, getBindStatus().getEditor());
 
-		if (!renderedValue.equals(labelValue)) {
-			tagWriter.writeAttribute("value", renderedValue);
+		if (!renderedValue.equals(label)) {
+			tagWriter.writeAttribute(VALUE_ATTRIBUTE, renderedValue);
 		}
 
-		if (isSelected(resolvedValue)) {
-			tagWriter.writeAttribute("selected", "selected");
+		if (isSelected(value)) {
+			tagWriter.writeAttribute(SELECTED_ATTRIBUTE, SELECTED_ATTRIBUTE);
 		}
-		tagWriter.appendValue(labelValue);
+		tagWriter.appendValue(label);
 
 		tagWriter.endTag();
-
-		return EVAL_PAGE;
 	}
 
 	/**
@@ -139,7 +187,7 @@ public class OptionTag extends AbstractFormTag {
 		return SelectedValueComparator.isSelected(getBindStatus(), resolvedValue);
 	}
 
-	private BindStatus getBindStatus() {
+	protected BindStatus getBindStatus() {
 		return (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
 	}
 

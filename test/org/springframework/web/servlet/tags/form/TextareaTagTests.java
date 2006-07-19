@@ -20,7 +20,6 @@ import org.springframework.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 
 import javax.servlet.jsp.tagext.Tag;
-import java.beans.PropertyEditorSupport;
 
 /**
  * @author Rob Harrop
@@ -50,7 +49,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 	public void testCustomBind() throws Exception {
 		BeanPropertyBindingResult result = new BeanPropertyBindingResult(createTestBean(), "testBean");
 		result.getPropertyAccessor().registerCustomEditor(Float.class, new SimpleFloatEditor());
-		exposeErrors(result);
+		exposeBindingResult(result);
 		this.tag.setPath("myFloat");
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 		String output = getWriter().toString();

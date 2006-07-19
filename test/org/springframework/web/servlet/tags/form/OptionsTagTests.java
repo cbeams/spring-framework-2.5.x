@@ -88,7 +88,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(target, COMMAND_NAME);
 		errors.getPropertyAccessor().registerCustomEditor(Float.class, propertyEditor);
-		exposeErrors(errors);
+		exposeBindingResult(errors);
 
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.myFloat", false));
 
@@ -134,7 +134,7 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 		request.setAttribute("floats", floats);
 	}
 
-	protected void exposeErrors(Errors errors) {
+	protected void exposeBindingResult(Errors errors) {
 		// wrap errors in a Model
 		Map model = new HashMap();
 		model.put(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, errors);
