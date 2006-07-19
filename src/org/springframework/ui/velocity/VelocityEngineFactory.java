@@ -52,8 +52,9 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
  * configured to log via Commons Logging, i.e. using CommonsLoggingLogSystem
  * as log system.
  *
- * <p>The simplest way to use this class is to specify a "resourceLoaderPath";
- * the VelocityEngine does not need any further configuration then.
+ * <p>The simplest way to use this class is to specify a
+ * {@link #setResourceLoaderPath(String) "resourceLoaderPath"}; the
+ * VelocityEngine typically then does not need any further configuration.
  *
  * @author Juergen Hoeller
  * @see #setConfigLocation
@@ -162,7 +163,7 @@ public class VelocityEngineFactory {
 	}
 
 	/**
-	 * Return the Spring ResourceLoader to use for loading FreeMarker template files.
+	 * Return the Spring ResourceLoader to use for loading Velocity template files.
 	 */
 	protected ResourceLoader getResourceLoader() {
 		return resourceLoader;
