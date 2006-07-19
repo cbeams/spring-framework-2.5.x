@@ -67,7 +67,8 @@ public class ManagedList extends ArrayList implements Mergeable {
 		}
 		Assert.notNull(parent);
 		if (parent instanceof List) {
-			List temp = new ArrayList((List) parent);
+			List temp = new ManagedList();
+			temp.addAll((List) parent);
 			temp.addAll(this);
 			return temp;
 		}

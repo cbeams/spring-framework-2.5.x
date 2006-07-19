@@ -81,7 +81,7 @@ public class ManagedMap implements Map, Mergeable {
 		Assert.notNull(parent);
 		if (parent instanceof Map) {
 			Map parentMap = (Map) parent;
-			Map temp = CollectionFactory.createLinkedMapIfPossible(parentMap.size() + this.size());
+			Map temp = new ManagedMap();
 			temp.putAll(parentMap);
 			temp.putAll(this);
 			return temp;

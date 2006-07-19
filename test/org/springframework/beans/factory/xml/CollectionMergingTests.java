@@ -21,10 +21,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * @author Rob Harrop
@@ -41,12 +38,45 @@ public class CollectionMergingTests extends TestCase {
 		this.reader.loadBeanDefinitions(new ClassPathResource("collectionMerging.xml", getClass()));
 	}
 
+
+	public void testMergeListWithInnerBeanAsListElement() throws Exception {
+		TestBean bean = (TestBean) this.beanFactory.getBean("childWithListOfRefs");
+		List list = bean.getSomeList();
+		assertNotNull(list);
+		assertEquals(3, list.size());
+		assertNotNull(list.get(2));
+		assertTrue(list.get(2) instanceof TestBean);
+	}
+
 	public void testMergeSet() {
 		TestBean bean = (TestBean)this.beanFactory.getBean("childWithSet");
 		Set set = bean.getSomeSet();
 		assertEquals("Incorrect size", 2, set.size());
 		assertTrue(set.contains("Rob Harrop"));
 		assertTrue(set.contains("Sally Greenwood"));
+	}
+
+	public void testMergeSetWithInnerBeanAsSetElement() throws Exception {
+		TestBean bean = (TestBean) this.beanFactory.getBean("childWithSetOfRefs");
+		Set set = bean.getSomeSet();
+		assertNotNull(set);
+		assertEquals(2, set.size());
+		Iterator it = set.iterator();
+		it.next();
+		Object o = it.next();
+		assertNotNull(o);
+		assertTrue(o instanceof TestBean);
+		assertEquals("Sally", ((TestBean) o).getName());
+	}
+
+	public void testMergeMapWithInnerBeanAsMapEntryValue() throws Exception {
+		TestBean bean = (TestBean) this.beanFactory.getBean("childWithMapOfRefs");
+		Map map = bean.getSomeMap();
+		assertNotNull(map);
+		assertEquals(2, map.size());
+		assertNotNull(map.get("Rob"));
+		assertTrue(map.get("Rob") instanceof TestBean);
+		assertEquals("Sally", ((TestBean)map.get("Rob")).getName());
 	}
 
 	public void testMergeMap() throws Exception {

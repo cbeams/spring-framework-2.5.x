@@ -81,7 +81,7 @@ public class ManagedSet implements Set, Mergeable {
 		Assert.notNull(parent);
 		if (parent instanceof Set) {
 			Set otherSet = (Set) parent;
-			Set temp = CollectionFactory.createLinkedSetIfPossible(otherSet.size() + this.size());
+			Set temp = new ManagedSet();
 			temp.addAll(otherSet);
 			temp.addAll(this);
 			return temp;
