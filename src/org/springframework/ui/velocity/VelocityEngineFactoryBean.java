@@ -35,9 +35,8 @@ import org.springframework.context.ResourceLoaderAware;
  * you do not need any further configuration then. For example, in a web
  * application context:
  *
- * <pre>
- * &lt;bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean"&gt;
- *   &lt;property name="resourceLoaderPath"&gt;&lt;value&gt;/WEB-INF/velocity/&lt;/value&gt;lt;/property&gt;
+ * <pre class="code"> &lt;bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean"&gt;
+ *   &lt;property name="resourceLoaderPath" value="/WEB-INF/velocity/"/&gt;
  * &lt;/bean&gt;</pre>
  *
  * See the base class VelocityEngineFactory for configuration details.

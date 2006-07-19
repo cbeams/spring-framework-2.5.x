@@ -35,9 +35,8 @@ import org.springframework.context.ResourceLoaderAware;
  * you do not need any further configuration then. For example, in a web
  * application context:
  *
- * <pre>
- * &lt;bean id="freemarkerConfiguration" class="org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean"&gt;
- *   &lt;property name="templateLoaderPath"&gt;&lt;value&gt;/WEB-INF/freemarker/&lt;/value>&lt;/property&gt;
+ * <pre class="code"> &lt;bean id="freemarkerConfiguration" class="org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean"&gt;
+ *   &lt;property name="templateLoaderPath" value="/WEB-INF/freemarker/"/&gt;
  * &lt;/bean&gt;</pre>
 
  * See the base class FreeMarkerConfigurationFactory for configuration details.
