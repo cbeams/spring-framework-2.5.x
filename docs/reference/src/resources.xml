@@ -521,7 +521,7 @@
     new ClassPathXmlApplicationContext("classpath*:conf/appContext.xml");]]></programlisting>
 			<para>
 				This special prefix specifies that all classpath resources that match the
-				givem name should be obtained (internally, this essentially happens via a
+				given name must be obtained (internally, this essentially happens via a
 				<methodname>ClassLoader.getResources(...)</methodname> call), and then merged
 				to form the final application context definition.
 			</para>
@@ -530,14 +530,14 @@
 				application assembly. All components can 'publish' context definition
 				fragments to a well-known location path, and when the final application
 				context is created using the same path prefixed via
-				<literal>classpath*</literal>:, all component fragments will be picked
+				<literal>classpath*:</literal>, all component fragments will be picked
 				up automatically.
 			</para>
 			<para>
 				Note that this special prefix is specific to application contexts,
 				and is resolved at construction time. It has nothing to do with the
 				<interfacename>Resource</interfacename> type itself. It's not possible to use the
-				<literal>classpath*</literal>: prefix to construct an actual
+				<literal>classpath*:</literal> prefix to construct an actual
 				<interfacename>Resource</interfacename>, as a resource points to just one resource
 				at a time.
 			</para>
