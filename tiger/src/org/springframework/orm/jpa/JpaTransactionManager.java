@@ -252,10 +252,6 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 					"on a single DataSource, no matter whether JPA or JDBC access.");
 		}
 
-		if (definition.isReadOnly()) {
-			logger.debug("JpaTransactionManager does not support read-only transactions: ignoring 'readOnly' hint");
-		}
-
 		EntityManager em = null;
 
 		try {
@@ -326,9 +322,12 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 
 	/**
 	 * Create a JPA EntityManager to be used for a transaction.
-	 * If the EntityManagerFactory is a Spring proxy, unwrap it first.
+	 * <p>The default implementation checks whether the EntityManagerFactory
+	 * is a Spring proxy and unwraps it first.
+	 * @see javax.persistence.EntityManagerFactory#createEntityManager()
+	 * @see EntityManagerFactoryInfo#getNativeEntityManagerFactory()
 	 */
-	private EntityManager createEntityManagerForTransaction() {
+	protected EntityManager createEntityManagerForTransaction() {
 		EntityManagerFactory emfToUse = getEntityManagerFactory();
 		if (emfToUse instanceof EntityManagerFactoryInfo) {
 			emfToUse = ((EntityManagerFactoryInfo) emfToUse).getNativeEntityManagerFactory();

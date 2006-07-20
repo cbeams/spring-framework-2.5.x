@@ -17,7 +17,6 @@
 package org.springframework.orm.jdo;
 
 import javax.jdo.JDOException;
-import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Transaction;
@@ -34,7 +33,6 @@ import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -292,10 +290,6 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 					"running within DataSourceTransactionManager if told to manage the DataSource itself. " +
 					"It is recommended to use a single JdoTransactionManager for all transactions " +
 					"on a single DataSource, no matter whether JDO or JDBC access.");
-		}
-
-		if (definition.isReadOnly()) {
-			logger.debug("JdoTransactionManager does not support read-only transactions: ignoring 'readOnly' hint");
 		}
 
 		PersistenceManager pm = null;
