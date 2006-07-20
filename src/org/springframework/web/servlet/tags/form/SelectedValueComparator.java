@@ -65,11 +65,10 @@ abstract class SelectedValueComparator {
 	 * is described in more detail <a href="#equality-contract">here</a>.
 	 */
 	public static boolean isSelected(BindStatus bindStatus, Object candidateValue) {
-		Assert.notNull(candidateValue, "'candidateValue' cannot be null.");
 		Object boundValue = getBoundValue(bindStatus);
 
 		if (boundValue == null) {
-			return false;
+			return (candidateValue == null);
 		}
 
 		boolean selected = false;

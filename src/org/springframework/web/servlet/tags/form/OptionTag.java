@@ -79,7 +79,6 @@ public class OptionTag extends AbstractHtmlElementBodyTag {
 	 * May be a runtime expression.
 	 */
 	public void setValue(Object value) {
-		Assert.notNull(value, "'value' cannot be null.");
 		this.value = value;
 	}
 
