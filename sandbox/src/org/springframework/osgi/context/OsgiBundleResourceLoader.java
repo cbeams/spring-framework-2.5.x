@@ -15,13 +15,9 @@
  */
 package org.springframework.osgi.context;
 
-import java.lang.ref.WeakReference;
-
 import org.osgi.framework.Bundle;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.UrlResource;
 import org.springframework.util.Assert;
 
 /**
@@ -34,6 +30,8 @@ import org.springframework.util.Assert;
  * must be contained within the bundle (or attached fragments), the classpath is
  * not searched.
  * 
+ * @see org.osgi.framework.Bundle
+ * @see org.springframework.osgi.context.OsgiBundleResource
  * 
  * @author Adrian Colyer
  * @author Costin Leau
@@ -41,30 +39,19 @@ import org.springframework.util.Assert;
  */
 public class OsgiBundleResourceLoader extends DefaultResourceLoader {
 
-	public static final String BUNDLE_URL_PREFIX = "bundle:";
-	private static final char PREFIX_SEPARATOR = ':';
-	private static final String ABSOLUTE_PATH_PREFIX = "/";
+	private Bundle bundle;
 
 	/**
-	 * Weak reference to the bundle (in case the bundle gets stopped and the
-	 * loader is still used).
+	 * Creates a OSGi aware ResourceLoader using the given bundle.
+	 * @param bundle
 	 */
-	private WeakReference bundle;
-
 	public OsgiBundleResourceLoader(Bundle bundle) {
-		this.bundle = new WeakReference(bundle);
+		this.bundle = bundle;
 	}
 
 	protected Resource getResourceByPath(String path) {
-		return super.getResourceByPath(path);
-	}
-
-	protected Bundle getBundleReference() {
-		Bundle b = (Bundle) bundle.get();
-		if (b == null)
-			throw new IllegalStateException("bundle has been undeployed");
-		
-		return b;
+		Assert.notNull(path, "Path is required");
+		return new OsgiBundleResource(this.bundle, path);
 	}
 
 	/**
@@ -73,44 +60,7 @@ public class OsgiBundleResourceLoader extends DefaultResourceLoader {
 	 */
 	public Resource getResource(String location) {
 		Assert.notNull(location, "location is required");
-		if (location.startsWith(BUNDLE_URL_PREFIX)) {
-			return getResourceFromBundle(location.substring(BUNDLE_URL_PREFIX.length()));
-		}
-		else if (location.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX)) {
-			return getResourceFromBundleClasspath(location.substring(ResourceLoader.CLASSPATH_URL_PREFIX.length()));
-		}
-		else if (isRelativePath(location)) {
-			return getResourceFromBundleClasspath(location);
-		}
-		else {
-			return super.getResource(location);
-		}
-	}
-
-	/**
-	 * Resolves a resource from *this bundle only*. Only the bundle and its
-	 * attached fragments are searched for the given resource.
-	 * 
-	 * @param bundleRelativePath
-	 * @return
-	 */
-	protected Resource getResourceFromBundle(String bundleRelativePath) {
-		return new UrlResource(getBundleReference().getEntry(bundleRelativePath));
-	}
-
-	/**
-	 * Resolves a resource from the bundle's classpath. This will find resources
-	 * in this bundle and also in imported packages from other bundles.
-	 * 
-	 * @param bundleRelativePath
-	 * @return
-	 */
-	protected Resource getResourceFromBundleClasspath(String bundleRelativePath) {
-		return new UrlResource(getBundleReference().getResource(bundleRelativePath));
-	}
-
-	protected boolean isRelativePath(String locationPath) {
-		return ((locationPath.indexOf(PREFIX_SEPARATOR) == -1) && !locationPath.startsWith(ABSOLUTE_PATH_PREFIX));
+		return new OsgiBundleResource(bundle, location);
 	}
 
 }

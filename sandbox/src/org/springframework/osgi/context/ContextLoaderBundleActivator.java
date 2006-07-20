@@ -199,7 +199,7 @@ public class ContextLoaderBundleActivator implements BundleActivator {
 	 */
 	private String[] addBundlePrefixTo(String[] resourcePaths) {
 		for (int i = 0; i < resourcePaths.length; i++) {
-			resourcePaths[i] = OsgiBundleResourceLoader.BUNDLE_URL_PREFIX + resourcePaths[i];
+			resourcePaths[i] = OsgiBundleResource.BUNDLE_URL_PREFIX + resourcePaths[i];
 		}
 		return resourcePaths;
 	}
