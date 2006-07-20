@@ -17,10 +17,17 @@
 package org.springframework.util;
 
 /**
+ * Factory interface for creating elements for an index-based access
+ * data structure such as a {@link java.util.List}.
+ *
  * @author Rob Harrop
  * @since 2.0
+ * @see AutoPopulatingList
  */
 public interface ElementFactory {
 
+	/**
+	 * Create the element for the supplied index.
+	 */
 	Object createElement(int index);
 }
