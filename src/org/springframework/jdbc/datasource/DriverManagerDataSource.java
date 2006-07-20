@@ -143,7 +143,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 		if (!StringUtils.hasText(driverClassName)) {
 			throw new IllegalArgumentException("driverClassName must not be empty");
 		}
-		this.driverClassName = driverClassName;
+		this.driverClassName = driverClassName.trim();
 		try {
 			ClassUtils.forName(this.driverClassName);
 		}
@@ -171,7 +171,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 		if (!StringUtils.hasText(url)) {
 			throw new IllegalArgumentException("url must not be empty");
 		}
-		this.url = url;
+		this.url = url.trim();
 	}
 
 	/**
