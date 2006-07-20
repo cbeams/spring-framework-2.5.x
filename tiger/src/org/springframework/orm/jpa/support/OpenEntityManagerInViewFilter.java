@@ -99,13 +99,13 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 			participate = true;
 		}
 		else {
-			logger.debug("Opening JPA persistence manager in OpenEntityManagerInViewFilter");
+			logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewFilter");
 			try {
-				em = emf.createEntityManager();
+				em = createEntityManager(emf);
 				TransactionSynchronizationManager.bindResource(emf, new EntityManagerHolder(em));
 			}
 			catch (PersistenceException ex) {
-				throw new DataAccessResourceFailureException("Could not open JPA EntityManager", ex);
+				throw new DataAccessResourceFailureException("Could not create JPA EntityManager", ex);
 			}
 		}
 
@@ -116,7 +116,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 		finally {
 			if (!participate) {
 				TransactionSynchronizationManager.unbindResource(emf);
-				logger.debug("Closing JPA persistence manager in OpenEntityManagerInViewFilter");
+				logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewFilter");
 				em.close();
 			}
 		}
@@ -143,13 +143,23 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	 */
 	protected EntityManagerFactory lookupEntityManagerFactory() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Using persistence manager factory '" + getEntityManagerFactoryBeanName() +
+			logger.debug("Using EntityManagerFactory '" + getEntityManagerFactoryBeanName() +
 					"' for OpenEntityManagerInViewFilter");
 		}
 		WebApplicationContext wac =
 				WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
 		return (EntityManagerFactory)
 				wac.getBean(getEntityManagerFactoryBeanName(), EntityManagerFactory.class);
+	}
+
+	/**
+	 * Create a JPA EntityManager to be bound to a request.
+	 * <p>Can be overridden in subclasses.
+	 * @param emf the EntityManagerFactory to use
+	 * @see javax.persistence.EntityManagerFactory#createEntityManager()
+	 */
+	protected EntityManager createEntityManager(EntityManagerFactory emf) {
+		return emf.createEntityManager();
 	}
 
 }

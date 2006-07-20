@@ -61,7 +61,7 @@ public class OpenEntityManagerInViewInterceptor extends HandlerInterceptorAdapte
 
 	/**
 	 * Suffix that gets appended to the EntityManagerFactory toString
-	 * representation for the "participate in existing persistence manager
+	 * representation for the "participate in existing entity manager
 	 * handling" request attribute.
 	 * @see #getParticipateAttributeName
 	 */
@@ -102,13 +102,13 @@ public class OpenEntityManagerInViewInterceptor extends HandlerInterceptorAdapte
 		}
 
 		else {
-			logger.debug("Opening JPA persistence manager in OpenEntityManagerInViewInterceptor");
+			logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewInterceptor");
 			try {
-				EntityManager em = getEntityManagerFactory().createEntityManager();
+				EntityManager em = createEntityManager();
 				TransactionSynchronizationManager.bindResource(getEntityManagerFactory(), new EntityManagerHolder(em));
 			}
 			catch (PersistenceException ex) {
-				throw new DataAccessResourceFailureException("Could not open JPA EntityManager", ex);
+				throw new DataAccessResourceFailureException("Could not create JPA EntityManager", ex);
 			}
 		}
 
@@ -134,7 +134,7 @@ public class OpenEntityManagerInViewInterceptor extends HandlerInterceptorAdapte
 		else {
 			EntityManagerHolder emHolder = (EntityManagerHolder)
 					TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
-			logger.debug("Closing JPA persistence manager in OpenEntityManagerInViewInterceptor");
+			logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewInterceptor");
 			emHolder.getEntityManager().close();
 		}
 	}
@@ -147,6 +147,16 @@ public class OpenEntityManagerInViewInterceptor extends HandlerInterceptorAdapte
 	 */
 	protected String getParticipateAttributeName() {
 		return getEntityManagerFactory().toString() + PARTICIPATE_SUFFIX;
+	}
+
+	/**
+	 * Create a JPA EntityManager to be bound to a request.
+	 * <p>Can be overridden in subclasses.
+	 * @see javax.persistence.EntityManagerFactory#createEntityManager()
+	 * @see #getEntityManagerFactory()
+	 */
+	protected EntityManager createEntityManager() {
+		return getEntityManagerFactory().createEntityManager();
 	}
 
 }
