@@ -96,7 +96,7 @@ public class PortletOpenPersistenceManagerInViewInterceptor extends HandlerInter
 		}
 
 		else {
-			logger.debug("Opening JDO persistence manager in OpenPersistenceManagerInViewInterceptor");
+			logger.debug("Opening JDO PersistenceManager in OpenPersistenceManagerInViewInterceptor");
 			PersistenceManager pm =
 					PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(), true);
 			TransactionSynchronizationManager.bindResource(
@@ -125,7 +125,7 @@ public class PortletOpenPersistenceManagerInViewInterceptor extends HandlerInter
 		else {
 			PersistenceManagerHolder pmHolder = (PersistenceManagerHolder)
 					TransactionSynchronizationManager.unbindResource(getPersistenceManagerFactory());
-			logger.debug("Closing JDO persistence manager in OpenPersistenceManagerInViewInterceptor");
+			logger.debug("Closing JDO PersistenceManager in OpenPersistenceManagerInViewInterceptor");
 			PersistenceManagerFactoryUtils.releasePersistenceManager(
 					pmHolder.getPersistenceManager(), getPersistenceManagerFactory());
 		}

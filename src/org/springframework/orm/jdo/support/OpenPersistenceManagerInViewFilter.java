@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 			participate = true;
 		}
 		else {
-			logger.debug("Opening JDO persistence manager in OpenPersistenceManagerInViewFilter");
+			logger.debug("Opening JDO PersistenceManager in OpenPersistenceManagerInViewFilter");
 			pm = PersistenceManagerFactoryUtils.getPersistenceManager(pmf, true);
 			TransactionSynchronizationManager.bindResource(pmf, new PersistenceManagerHolder(pm));
 		}
@@ -109,7 +109,7 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 		finally {
 			if (!participate) {
 				TransactionSynchronizationManager.unbindResource(pmf);
-				logger.debug("Closing JDO persistence manager in OpenPersistenceManagerInViewFilter");
+				logger.debug("Closing JDO PersistenceManager in OpenPersistenceManagerInViewFilter");
 				PersistenceManagerFactoryUtils.releasePersistenceManager(pm, pmf);
 			}
 		}
@@ -136,7 +136,7 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 	 */
 	protected PersistenceManagerFactory lookupPersistenceManagerFactory() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Using persistence manager factory '" + getPersistenceManagerFactoryBeanName() +
+			logger.debug("Using PersistenceManagerFactory '" + getPersistenceManagerFactoryBeanName() +
 					"' for OpenPersistenceManagerInViewFilter");
 		}
 		WebApplicationContext wac =

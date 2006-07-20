@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ public class OpenPersistenceManagerInViewInterceptor extends HandlerInterceptorA
 		}
 
 		else {
-			logger.debug("Opening JDO persistence manager in OpenPersistenceManagerInViewInterceptor");
+			logger.debug("Opening JDO PersistenceManager in OpenPersistenceManagerInViewInterceptor");
 			PersistenceManager pm =
 					PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(), true);
 			TransactionSynchronizationManager.bindResource(
@@ -129,7 +129,7 @@ public class OpenPersistenceManagerInViewInterceptor extends HandlerInterceptorA
 		else {
 			PersistenceManagerHolder pmHolder = (PersistenceManagerHolder)
 					TransactionSynchronizationManager.unbindResource(getPersistenceManagerFactory());
-			logger.debug("Closing JDO persistence manager in OpenPersistenceManagerInViewInterceptor");
+			logger.debug("Closing JDO PersistenceManager in OpenPersistenceManagerInViewInterceptor");
 			PersistenceManagerFactoryUtils.releasePersistenceManager(
 					pmHolder.getPersistenceManager(), getPersistenceManagerFactory());
 		}
