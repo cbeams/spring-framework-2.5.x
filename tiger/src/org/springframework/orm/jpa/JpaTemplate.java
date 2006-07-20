@@ -171,7 +171,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	 * EntityManager.
 	 * @param action callback object that specifies the JPA action
 	 * @param exposeNativeEntityManager whether to expose the native
-	 * JPA persistence manager to callback code
+	 * JPA entity manager to callback code
 	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of JPA errors
 	 */
