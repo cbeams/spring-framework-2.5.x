@@ -51,13 +51,14 @@ public class ManagedProperties extends Properties implements Mergeable {
 		return source;
 	}
 
+
 	public synchronized Object merge(Object parent) {
 		if (!this.mergeEnabled) {
 			throw new IllegalStateException("Cannot merge when the mergeEnabled property is false");
 		}
 		Assert.notNull(parent);
 		if (parent instanceof Properties) {
-			Properties temp = new Properties();
+			Properties temp = new ManagedProperties();
 			temp.putAll((Properties) parent);
 			temp.putAll(this);
 			return temp;
