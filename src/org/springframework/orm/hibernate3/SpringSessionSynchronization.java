@@ -218,13 +218,6 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 				// Necessary for pre-bound Sessions, to avoid inconsistent state.
 				session.clear();
 			}
-			if (!session.isConnected()) {
-				// We're running against Hibernate 3.1 RC1, where Hibernate will
-				// automatically disconnect the Session after a transaction.
-				// We'll reconnect it here, as the Session is likely gonna be
-				// used for lazy loading during an "open session in view" phase.
-				session.reconnect();
-			}
 		}
 		if (this.sessionHolder.doesNotHoldNonDefaultSession()) {
 			this.sessionHolder.setSynchronizedWithTransaction(false);
