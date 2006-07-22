@@ -3,11 +3,36 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 RC3 (20.7.2006)
+Changes in version 2.0 RC3 (24.7.2006)
 --------------------------------------
+
+Package org.springframework.aop
+* fixed AbstractAdvisorAutoProxyCreator to ignore Advisors for which "getBean" throws a BeanCurrentlyInCreationException
+
+Package org.springframework.beans
+* introduced TypeConverter interface, implemented by BeanWrapperImpl, plus separate SimpleTypeConverter implementation
+* reworked ArgumentConvertingMethodInvoker to use a TypeConverter and allow the converter to be accessed/overridden
+* added default type conversion of any type to String target type via a "toString()" call
+* fixed AbstractBeanFactory to only invoke BeanPostProcessor for objects returned from FactoryBeans if non-null
+* fixed AbstractBeanFactory to throw BeanCurrentlyInCreationException on null from non-fully-initialized FactoryBean
 
 Package org.springframework.jdbc
 * worked around "oracle.sql.DATE" problem on certain Oracle driver versions, extracting it as timestamp when appropriate
+* check for ResultSetSupportingSqlParameter superclass instead of SqlOutParameter and SqlReturnResultSet subclasses
+* factored out Spring/JtaLobCreatorSynchronization classes from Hibernate AbstractLobType to "jdbc.support.lob" package
+
+Package org.springframework.orm
+* refined iBATIS SqlMapClientTemplate to allow for nested calls to same SqlMapSession (checking "getCurrentConnection")
+* reworked Hibernate JTA synch to expose beforeCompletion exceptions to the caller (via SpringJtaSynchronizationAdapter)
+* removed warning for read-only from JdoTransactionManager/JpaTransactionManager, since a vendor dialect may support it
+* factored out overridable "createEntityManager" template methods in OpenEntityManagerInViewFilter/Interceptor
+* SpringPersistenceUnitInfo is public and allows for post-processing in LocalContainerEntityManagerFactoryBean subclass
+
+Package org.springframework.transaction
+* added SpringJtaSynchronizationAdapter, exposing JTA Synchronization ifc on top of a Spring TransactionSynchronization
+
+Package org.springframework.util
+* optimized "ObjectUtils.nullSafeToString" implementation to return a given String right away
 
 
 Changes in version 2.0 RC2 (6.7.2006)
