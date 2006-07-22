@@ -72,7 +72,7 @@ import org.springframework.util.StringUtils;
  * @see BeanWrapper
  * @see PropertyEditorRegistrySupport
  */
-public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWrapper {
+public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWrapper, TypeConverter {
 
 	/**
 	 * We'll create a lot of these objects, so we don't want a new logger every time.
@@ -87,7 +87,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	private Object rootObject;
 
-	private PropertyTypeConverter propertyTypeConverter;
+	private TypeConverterDelegate typeConverterDelegate;
 
 	/**
 	 * Cached introspections results for this object, to prevent encountering
@@ -120,7 +120,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		if (registerDefaultEditors) {
 			registerDefaultEditors();
 		}
-		this.propertyTypeConverter = new PropertyTypeConverter(this);
+		this.typeConverterDelegate = new TypeConverterDelegate(this);
 	}
 
 	/**
@@ -192,7 +192,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		this.nestedPath = (nestedPath != null ? nestedPath : "");
 		this.rootObject = (!"".equals(this.nestedPath) ? rootObject : object);
 		this.nestedBeanWrappers = null;
-		this.propertyTypeConverter = new PropertyTypeConverter(this, object);
+		this.typeConverterDelegate = new TypeConverterDelegate(this, object);
 		setIntrospectionClass(object.getClass());
 	}
 
@@ -334,6 +334,37 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return null;
 	}
 
+
+	//---------------------------------------------------------------------
+	// Implementation of TypeConverter interface
+	//---------------------------------------------------------------------
+
+	/**
+	 * @deprecated in favor of <code>convertIfNecessary</code>
+	 * @see #convertIfNecessary(Object, Class)
+	 */
+	public Object doTypeConversionIfNecessary(Object value, Class requiredType) throws TypeMismatchException {
+		return convertIfNecessary(value, requiredType, null);
+	}
+
+	public Object convertIfNecessary(Object value, Class requiredType) throws TypeMismatchException {
+		return convertIfNecessary(value, requiredType, null);
+	}
+
+	public Object convertIfNecessary(
+			Object value, Class requiredType, MethodParameter methodParam) throws TypeMismatchException {
+		try {
+			return this.typeConverterDelegate.convertIfNecessary(value, requiredType, methodParam);
+		}
+		catch (IllegalArgumentException ex) {
+			throw new TypeMismatchException(value, requiredType, ex);
+		}
+	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation methods
+	//---------------------------------------------------------------------
 
 	/**
 	 * Get the last component of the path. Also works if not nested.
@@ -529,7 +560,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						}
 						// IMPORTANT: Do not pass full property name in here - property editors
 						// must not kick in for map keys but rather only for map values.
-						Object convertedMapKey = this.propertyTypeConverter.convertIfNecessary(
+						Object convertedMapKey = this.typeConverterDelegate.convertIfNecessary(
 								null, null, key, mapKeyType);
 						// Pass full property name and old value in here, since we want full
 						// conversion ability for map values.
@@ -609,7 +640,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					if (isExtractOldValueForEditor()) {
 						oldValue = Array.get(propValue, arrayIndex);
 					}
-					Object convertedValue = this.propertyTypeConverter.convertIfNecessary(
+					Object convertedValue = this.typeConverterDelegate.convertIfNecessary(
 							propertyName, oldValue, newValue, requiredType);
 					Array.set(propValue, Integer.parseInt(key), convertedValue);
 				}
@@ -636,7 +667,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					oldValue = list.get(index);
 				}
 				try {
-					Object convertedValue = this.propertyTypeConverter.convertIfNecessary(
+					Object convertedValue = this.typeConverterDelegate.convertIfNecessary(
 							propertyName, oldValue, newValue, requiredType);
 					if (index < list.size()) {
 						list.set(index, convertedValue);
@@ -677,11 +708,11 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 				// IMPORTANT: Do not pass full property name in here - property editors
 				// must not kick in for map keys but rather only for map values.
-				Object convertedMapKey = this.propertyTypeConverter.convertIfNecessary(
+				Object convertedMapKey = this.typeConverterDelegate.convertIfNecessary(
 						null, null, key, mapKeyType);
 				// Pass full property name and old value in here, since we want full
 				// conversion ability for map values.
-				Object convertedMapValue = this.propertyTypeConverter.convertIfNecessary(
+				Object convertedMapValue = this.typeConverterDelegate.convertIfNecessary(
 						propertyName, oldValue, newValue, mapValueType);
 				map.put(convertedMapKey, convertedMapValue);
 			}
@@ -720,7 +751,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			}
 
 			try {
-				Object convertedValue = this.propertyTypeConverter.convertIfNecessary(oldValue, newValue, pd);
+				Object convertedValue = this.typeConverterDelegate.convertIfNecessary(oldValue, newValue, pd);
 
 				if (pd.getPropertyType().isPrimitive() && (convertedValue == null || "".equals(convertedValue))) {
 					throw new IllegalArgumentException("Invalid value [" + newValue + "] for property '" +
@@ -760,49 +791,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
 				throw new MethodInvocationException(pce, ex);
 			}
-		}
-	}
-
-
-	/**
-	 * Convert the value to the required type (if necessary from a String).
-	 * <p>Conversions from String to any type use the <code>setAsText</code> method
-	 * of the PropertyEditor class. Note that a PropertyEditor must be registered
-	 * for the given class for this to work; this is a standard JavaBeans API.
-	 * A number of PropertyEditors are automatically registered by BeanWrapperImpl.
-	 * @param value the value to convert
-	 * @param requiredType the type we must convert to
-	 * @return the new value, possibly the result of type conversion
-	 * @throws TypeMismatchException if type conversion failed
-	 * @see java.beans.PropertyEditor#setAsText(String)
-	 * @see java.beans.PropertyEditor#getValue()
-	 */
-	public Object doTypeConversionIfNecessary(Object value, Class requiredType) throws TypeMismatchException {
-		return doTypeConversionIfNecessary(value, requiredType, null);
-	}
-
-	/**
-	 * Convert the value to the required type (if necessary from a String).
-	 * <p>Conversions from String to any type use the <code>setAsText</code> method
-	 * of the PropertyEditor class. Note that a PropertyEditor must be registered
-	 * for the given class for this to work; this is a standard JavaBeans API.
-	 * A number of PropertyEditors are automatically registered by BeanWrapperImpl.
-	 * @param value the value to convert
-	 * @param requiredType the type we must convert to
-	 * @param methodParam the method parameter that is the target of the conversion
-	 * (may be <code>null</code>)
-	 * @return the new value, possibly the result of type conversion
-	 * @throws TypeMismatchException if type conversion failed
-	 * @see java.beans.PropertyEditor#setAsText(String)
-	 * @see java.beans.PropertyEditor#getValue()
-	 */
-	public Object doTypeConversionIfNecessary(
-			Object value, Class requiredType, MethodParameter methodParam) throws TypeMismatchException {
-		try {
-			return this.propertyTypeConverter.convertIfNecessary(value, requiredType, methodParam);
-		}
-		catch (IllegalArgumentException ex) {
-			throw new TypeMismatchException(value, requiredType, ex);
 		}
 	}
 

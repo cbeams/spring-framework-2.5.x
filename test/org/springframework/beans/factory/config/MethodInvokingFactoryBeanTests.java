@@ -22,8 +22,8 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.util.MethodInvoker;
 
 /**
@@ -147,13 +147,15 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 
 		// fail on improper argument types at afterPropertiesSet
 		mcfb = new MethodInvokingFactoryBean();
+		mcfb.registerCustomEditor(String.class, new StringTrimmerEditor(false));
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new Object[] {"1", "2", "3"});
+		mcfb.setArguments(new Object[] {"1", new Object()});
 		try {
 			mcfb.afterPropertiesSet();
+			fail("Should have thrown NoSuchMethodException");
 		}
-		catch (TypeMismatchException ex) {
+		catch (NoSuchMethodException ex) {
 			// expected
 		}
 	}
@@ -236,10 +238,10 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new Object[] {new Integer(1), new Integer(2), new Integer(3)});
+		mcfb.setArguments(new Object[] {new Integer(1), new Object()});
 		try {
 			mcfb.afterPropertiesSet();
-			Object x = mcfb.getObject();
+			mcfb.getObject();
 			fail("Should have failed on getObject with mismatched argument types");
 		}
 		catch (NoSuchMethodException ex) {
@@ -256,7 +258,7 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes2");
-		mcfb.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello", new ArrayList()});
+		mcfb.setArguments(new Object[] {new ArrayList(), new ArrayList(), new Object()});
 		try {
 			mcfb.afterPropertiesSet();
 			fail("Matched method when shouldn't have matched");
@@ -354,8 +356,16 @@ public class MethodInvokingFactoryBeanTests extends TestCase {
 		public static void intArgument(int arg) {
 		}
 
+		public static String supertypes(Collection c, Integer i) {
+			return i.toString();
+		}
+
 		public static String supertypes(Collection c, List l, String s) {
 			return s;
+		}
+
+		public static String supertypes2(Collection c, List l, Integer i) {
+			return i.toString();
 		}
 
 		public static String supertypes2(Collection c, List l, String s, Integer i) {

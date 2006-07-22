@@ -34,22 +34,26 @@ import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Helper class for converting to property target types.
+ * Internal jelper class for converting property values to target types.
  *
- * <p>Works on a PropertyEditorRegistrySupport. Used by BeanWrapperImpl.
+ * <p>Works on a given PropertyEditorRegistrySupport instance.
+ * Used as a delegate by BeanWrapperImpl and SimpleTypeConverter.
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see BeanWrapperImpl
+ * @see SimpleTypeConverter
  */
-class PropertyTypeConverter {
+class TypeConverterDelegate {
 
 	/**
 	 * We'll create a lot of these objects, so we don't want a new logger every time.
 	 */
-	private static final Log logger = LogFactory.getLog(PropertyTypeConverter.class);
+	private static final Log logger = LogFactory.getLog(TypeConverterDelegate.class);
 
 	private final PropertyEditorRegistrySupport propertyEditorRegistry;
 
@@ -57,24 +61,40 @@ class PropertyTypeConverter {
 
 
 	/**
-	 * Create a new PropertyTypeConverter for the given editor registry.
+	 * Create a new TypeConverterDelegate for the given editor registry.
 	 * @param propertyEditorRegistry the editor registry to use
 	 */
-	public PropertyTypeConverter(PropertyEditorRegistrySupport propertyEditorRegistry) {
+	public TypeConverterDelegate(PropertyEditorRegistrySupport propertyEditorRegistry) {
 		this(propertyEditorRegistry, null);
 	}
 
 	/**
-	 * Create a new PropertyTypeConverter for the given editor registry and bean instance.
+	 * Create a new TypeConverterDelegate for the given editor registry and bean instance.
 	 * @param propertyEditorRegistry the editor registry to use
 	 * @param targetObject the target object to work on (as context that can be passed to editors)
 	 */
-	public PropertyTypeConverter(PropertyEditorRegistrySupport propertyEditorRegistry, Object targetObject) {
+	public TypeConverterDelegate(PropertyEditorRegistrySupport propertyEditorRegistry, Object targetObject) {
 		Assert.notNull(propertyEditorRegistry, "Property editor registry must not be null");
 		this.propertyEditorRegistry = propertyEditorRegistry;
 		this.targetObject = targetObject;
 	}
 
+
+	/**
+	 * Convert the value to the specified required type.
+	 * @param newValue proposed change value
+	 * @param requiredType the type we must convert to
+	 * (or <code>null</code> if not known, for example in case of a collection element)
+	 * @param methodParam the method parameter that is the target of the conversion
+	 * (may be <code>null</code>)
+	 * @return the new value, possibly the result of type conversion
+	 * @throws IllegalArgumentException if type conversion failed
+	 */
+	public Object convertIfNecessary(Object newValue, Class requiredType, MethodParameter methodParam)
+			throws IllegalArgumentException {
+
+		return convertIfNecessary(null, null, newValue, requiredType, null, methodParam);
+	}
 
 	/**
 	 * Convert the value to the required type for the specified property.
@@ -108,22 +128,6 @@ class PropertyTypeConverter {
 		return convertIfNecessary(
 				descriptor.getName(), oldValue, newValue, descriptor.getPropertyType(), descriptor,
 				new MethodParameter(descriptor.getWriteMethod(), 0));
-	}
-
-	/**
-	 * Convert the value to the specified required type.
-	 * @param newValue proposed change value
-	 * @param requiredType the type we must convert to
-	 * (or <code>null</code> if not known, for example in case of a collection element)
-	 * @param methodParam the method parameter that is the target of the conversion
-	 * (may be <code>null</code>)
-	 * @return the new value, possibly the result of type conversion
-	 * @throws IllegalArgumentException if type conversion failed
-	 */
-	public Object convertIfNecessary(Object newValue, Class requiredType, MethodParameter methodParam)
-			throws IllegalArgumentException {
-
-		return convertIfNecessary(null, null, newValue, requiredType, null, methodParam);
 	}
 
 
@@ -188,6 +192,10 @@ class PropertyTypeConverter {
 			else if (convertedValue instanceof Map && Map.class.isAssignableFrom(requiredType)) {
 				// Convert keys and values to respective target type, if determined.
 				return convertToTypedMap((Map) convertedValue, propertyName, methodParam);
+			}
+			else if (convertedValue != null && String.class.equals(requiredType)) {
+				// If nothing else worked and we need a String - call toString.
+				convertedValue = ObjectUtils.nullSafeToString(convertedValue);
 			}
 			else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
 				// Try field lookup as fallback: for JDK 1.5 enum or custom enum

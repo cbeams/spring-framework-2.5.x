@@ -19,8 +19,11 @@ package org.springframework.beans.support;
 import java.beans.PropertyEditor;
 import java.lang.reflect.Method;
 
-import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.beans.SimpleTypeConverter;
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
 
@@ -33,23 +36,54 @@ import org.springframework.util.MethodInvoker;
  *
  * @author Juergen Hoeller
  * @since 1.1
- * @see org.springframework.beans.BeanWrapperImpl#doTypeConversionIfNecessary
+ * @see org.springframework.beans.BeanWrapperImpl#convertIfNecessary
  */
 public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 
-	private final BeanWrapperImpl beanWrapper = new BeanWrapperImpl();
-	
+	private TypeConverter typeConverter = new BeanWrapperImpl();
+
+
+	/**
+	 * Set a TypeConverter to use for argument type conversion.
+	 * <p>Default is a SimpleTypeConverter. Can be overridden with any
+	 * TypeConverter implementation, typically a pre-configured
+	 * SimpleTypeConverter or a BeanWrapperImpl instance.
+	 * @see org.springframework.beans.SimpleTypeConverter
+	 * @see org.springframework.beans.BeanWrapperImpl
+	 */
+	public void setTypeConverter(TypeConverter typeConverter) {
+		this.typeConverter = typeConverter;
+	}
+
+	/**
+	 * Return the TypeConverter used for argument type conversion.
+	 * <p>Can be cast to PropertyEditorRegistry if direct access to the
+	 * underlying PropertyEditors is desired (provided that the present
+	 * TypeConverter actually implements the PropertyEditorRegistry interface).
+	 */
+	public TypeConverter getTypeConverter() {
+		return typeConverter;
+	}
 
 	/**
 	 * Register the given custom property editor for all properties
 	 * of the given type.
+	 * <p>Typically used in conjunction with the default SimpleTypeConverter,
+	 * but will work with any TypeConverter that implements the
+	 * PropertyEditorRegistry interface as well.
 	 * @param requiredType type of the property
 	 * @param propertyEditor editor to register
-	 * @see org.springframework.beans.BeanWrapper#registerCustomEditor
+	 * @see #setTypeConverter
+	 * @see org.springframework.beans.PropertyEditorRegistry#registerCustomEditor
 	 */
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
-		this.beanWrapper.registerCustomEditor(requiredType, propertyEditor);
+		if (!(this.typeConverter instanceof PropertyEditorRegistry)) {
+			throw new IllegalStateException(
+					"TypeConverter does not implement PropertyEditorRegistry interface: " + this.typeConverter);
+		}
+		((PropertyEditorRegistry) this.typeConverter).registerCustomEditor(requiredType, propertyEditor);
 	}
+
 
 	/**
 	 * This implementation looks for a method with matching parameter types:
@@ -81,26 +115,28 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 		}
 
 		// Second pass: look for method where arguments can be converted to parameter types.
-		for (int i = 0; i < candidates.length; i++) {
-			if (candidates[i].getName().equals(getTargetMethod())) {
-				// Check if the inspected method has the correct number of parameters.
-				Class[] paramTypes = candidates[i].getParameterTypes();
-				if (paramTypes.length == argCount) {
-					Object[] argumentsToUse = new Object[argCount];
-					int numberOfCorrectArguments = 0;
-					for (int j = 0; j < argCount; j++) {
-						// Verify that the supplied argument is assignable to the method parameter.
-						try {
-							argumentsToUse[j] = this.beanWrapper.doTypeConversionIfNecessary(arguments[j], paramTypes[j]);
-							numberOfCorrectArguments++;
+		if (this.typeConverter != null) {
+			for (int i = 0; i < candidates.length; i++) {
+				if (candidates[i].getName().equals(getTargetMethod())) {
+					// Check if the inspected method has the correct number of parameters.
+					Class[] paramTypes = candidates[i].getParameterTypes();
+					if (paramTypes.length == argCount) {
+						Object[] argumentsToUse = new Object[argCount];
+						int numberOfCorrectArguments = 0;
+						for (int j = 0; j < argCount; j++) {
+							// Verify that the supplied argument is assignable to the method parameter.
+							try {
+								argumentsToUse[j] = this.typeConverter.convertIfNecessary(arguments[j], paramTypes[j]);
+								numberOfCorrectArguments++;
+							}
+							catch (TypeMismatchException ex) {
+								// Ignore -> simply doesn't match.
+							}
 						}
-						catch (TypeMismatchException ex) {
-							// Ignore -> simply doesn't match.
+						if (numberOfCorrectArguments == argumentsToUse.length) {
+							setArguments(argumentsToUse);
+							return candidates[i];
 						}
-					}
-					if (numberOfCorrectArguments == argumentsToUse.length) {
-						setArguments(argumentsToUse);
-						return candidates[i];
 					}
 				}
 			}

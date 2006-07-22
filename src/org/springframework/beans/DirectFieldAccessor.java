@@ -43,7 +43,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 
 	private final Map fieldMap = new HashMap();
 
-	private final PropertyTypeConverter propertyTypeConverter;
+	private final TypeConverterDelegate typeConverterDelegate;
 
 
 	/**
@@ -58,7 +58,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 				fieldMap.put(field.getName(), field);
 			}
 		});
-		this.propertyTypeConverter = new PropertyTypeConverter(this, target);
+		this.typeConverterDelegate = new TypeConverterDelegate(this, target);
 		setExtractOldValueForEditor(true);
 	}
 
@@ -105,7 +105,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 			ReflectionUtils.makeAccessible(field);
 			oldValue = field.get(this.target);
 			Object convertedValue =
-					this.propertyTypeConverter.convertIfNecessary(propertyName, oldValue, newValue, field.getType());
+					this.typeConverterDelegate.convertIfNecessary(propertyName, oldValue, newValue, field.getType());
 			field.set(this.target, convertedValue);
 		}
 		catch (IllegalAccessException ex) {
