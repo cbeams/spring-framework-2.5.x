@@ -201,7 +201,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			catch (BeanCreationException ex) {
 				if (ex.contains(BeanCurrentlyInCreationException.class)) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Ignoring match to currently created bean '" + beanName + "':" + ex.getMessage());
+						logger.debug("Ignoring match to currently created bean '" + beanName + "': " + ex.getMessage());
 					}
 					// Ignore: indicates a circular reference when autowiring constructors.
 					// We want to find matches other than the currently created bean itself.

@@ -104,10 +104,10 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 				catch (BeanCreationException ex) {
 					if (ex.contains(BeanCurrentlyInCreationException.class)) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Ignoring match to currently created bean '" + name + "':" + ex.getMessage());
+							logger.debug("Ignoring currently created advisor '" + name + "': " + ex.getMessage());
 						}
 						// Ignore: indicates a reference back to the bean we're trying to advise.
-						// We want to find matches other than the currently created bean itself.
+						// We want to find advisors other than the currently created bean itself.
 					}
 					else {
 						throw ex;
