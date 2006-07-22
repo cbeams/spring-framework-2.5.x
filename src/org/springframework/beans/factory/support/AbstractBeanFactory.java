@@ -26,12 +26,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
-import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -382,10 +382,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		}
 
 		catch (BeanCreationException ex) {
-			if (ex.contains(BeanCurrentlyInCreationException.class) ||
-					ex.contains(FactoryBeanNotInitializedException.class)) {
+			if (ex.contains(BeanCurrentlyInCreationException.class)) {
 				// Can only happen when checking a FactoryBean.
-				logger.debug("Ignoring BeanCreationException on FactoryBean type check", ex);
+				logger.debug("Ignoring bean creation exception on FactoryBean type check", ex);
 				return null;
 			}
 			throw ex;
@@ -914,15 +913,28 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			throws BeanCreationException {
 
 		Object object;
+
 		try {
 			object = factory.getObject();
+		}
+		catch (FactoryBeanNotInitializedException ex) {
+			throw new BeanCurrentlyInCreationException(beanName, ex.toString());
 		}
 		catch (Throwable ex) {
 			throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
 		}
-		if (mbd != null && !mbd.isSynthetic()) {
+
+		// Do not accept a null value for a FactoryBean that's not fully
+		// initialized yet: Many FactoryBeans just return null then.
+		if (object == null && isSingletonCurrentlyInCreation(beanName)) {
+			throw new BeanCurrentlyInCreationException(
+					beanName, "FactoryBean which is currently in creation returned null from getObject");
+		}
+
+		if (object != null && (mbd == null || !mbd.isSynthetic())) {
 			object = postProcessObjectFromFactoryBean(object, beanName);
 		}
+
 		return object;
 	}
 

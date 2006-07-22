@@ -95,4 +95,13 @@
 
 	<bean id="rollback" class="org.springframework.aop.framework.autoproxy.Rollback"/>
 
+	<!-- The following beans test whether auto-proxying falls over for a null value -->
+
+	<bean id="tb" class="org.springframework.beans.TestBean"/>
+
+	<bean id="nullValueReturned" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject" ref="tb"/>
+		<property name="targetMethod" value="getSpouse"/>
+	</bean>
+
 </beans>		

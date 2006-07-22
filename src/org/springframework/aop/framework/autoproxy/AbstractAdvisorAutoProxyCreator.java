@@ -22,8 +22,9 @@ import java.util.List;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
@@ -97,7 +98,21 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 		for (int i = 0; i < adviceNames.length; i++) {
 			String name = adviceNames[i];
 			if (isEligibleAdvisorBean(name) && !owningFactory.isCurrentlyInCreation(name)) {
-				candidateAdvisors.add(owningFactory.getBean(name));
+				try {
+					candidateAdvisors.add(owningFactory.getBean(name));
+				}
+				catch (BeanCreationException ex) {
+					if (ex.contains(BeanCurrentlyInCreationException.class)) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Ignoring match to currently created bean '" + name + "':" + ex.getMessage());
+						}
+						// Ignore: indicates a reference back to the bean we're trying to advise.
+						// We want to find matches other than the currently created bean itself.
+					}
+					else {
+						throw ex;
+					}
+				}
 			}
 		}
 		return candidateAdvisors;
