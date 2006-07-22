@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -65,6 +66,8 @@ class BeanDefinitionValueResolver {
 
 	private final BeanDefinition beanDefinition;
 
+	private final SimpleTypeConverter typeConverter = new SimpleTypeConverter();
+
 
 	/**
 	 * Create a new BeanDefinitionValueResolver for the given BeanFactory
@@ -79,6 +82,7 @@ class BeanDefinitionValueResolver {
 		this.beanName = beanName;
 		this.beanDefinition = beanDefinition;
 		this.beanFactory = beanFactory;
+		beanFactory.registerCustomEditors(this.typeConverter);
 	}
 
 	/**
@@ -135,7 +139,8 @@ class BeanDefinitionValueResolver {
 			TypedStringValue typedStringValue = (TypedStringValue) value;
 			try {
 				Class resolvedTargetType = resolveTargetType(typedStringValue);
-				return this.beanFactory.doTypeConversionIfNecessary(typedStringValue.getValue(), resolvedTargetType);
+				return this.beanFactory.doTypeConversionIfNecessary(
+						this.typeConverter, typedStringValue.getValue(), resolvedTargetType, null);
 			}
 			catch (Throwable ex) {
 				// Improve the message by showing the context.

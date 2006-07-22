@@ -26,11 +26,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyEditorRegistrar;
+import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -628,59 +629,60 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * Initialize the given BeanWrapper with the custom editors registered
 	 * with this factory. To be called for BeanWrappers that will create
 	 * and populate bean instances.
+	 * <p>The default implementation delegates to <code>registerCustomEditors</code>.
+	 * Can be overridden in subclasses.
 	 * @param bw the BeanWrapper to initialize
+	 * @see #registerCustomEditors
 	 */
 	protected void initBeanWrapper(BeanWrapper bw) {
-		bw.registerCustomEditor(String[].class, new StringArrayPropertyEditor());
+		registerCustomEditors(bw);
+	}
+
+	/**
+	 * Initialize the given PropertyEditorRegistry with the custom editors
+	 * registered with this BeanFactory.
+	 * <p>To be called for BeanWrappers that will create and populate bean
+	 * instances, and for SimpleTypeConverter used for constructor argument
+	 * and factory method type conversion.
+	 * @param registry the PropertyEditorRegistry to initialize
+	 */
+	protected void registerCustomEditors(PropertyEditorRegistry registry) {
+		registry.registerCustomEditor(String[].class, new StringArrayPropertyEditor());
 		for (Iterator it = getPropertyEditorRegistrars().iterator(); it.hasNext();) {
 			PropertyEditorRegistrar registrar = (PropertyEditorRegistrar) it.next();
-			registrar.registerCustomEditors(bw);
+			registrar.registerCustomEditors(registry);
 		}
 		for (Iterator it = getCustomEditors().entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			Class clazz = (Class) entry.getKey();
 			PropertyEditor editor = (PropertyEditor) entry.getValue();
-			bw.registerCustomEditor(clazz, editor);
+			registry.registerCustomEditor(clazz, editor);
 		}
 	}
 
 	/**
 	 * Convert the given value into the specified target type,
-	 * using a default BeanWrapper instance.
-	 * @param value the original value
-	 * @param targetType the target type
-	 * @return the converted value, matching the target type
-	 * @throws org.springframework.beans.TypeMismatchException if type conversion failed
-	 */
-	protected Object doTypeConversionIfNecessary(Object value, Class targetType) throws TypeMismatchException {
-		BeanWrapperImpl bw = new BeanWrapperImpl();
-		initBeanWrapper(bw);
-		return doTypeConversionIfNecessary(bw, value, targetType, null);
-	}
-
-	/**
-	 * Convert the given value into the specified target type,
 	 * using the specified BeanWrapper.
+	 * @param converter the TypeConverter to work on
 	 * @param value the original value
 	 * @param targetType the target type
-	 * @param bw the BeanWrapper to work on
 	 * @return the converted value, matching the target type
 	 * @throws org.springframework.beans.TypeMismatchException if type conversion failed
-	 * @see org.springframework.beans.BeanWrapperImpl#doTypeConversionIfNecessary(Object, Class)
+	 * @see org.springframework.beans.BeanWrapperImpl#convertIfNecessary(Object, Class)
 	 */
 	protected Object doTypeConversionIfNecessary(
-			BeanWrapperImpl bw, Object value, Class targetType, MethodParameter methodParam)
+			TypeConverter converter, Object value, Class targetType, MethodParameter methodParam)
 			throws TypeMismatchException {
 
 		// Synchronize if custom editors are registered.
 		// Necessary because PropertyEditors are not thread-safe.
 		if (!getCustomEditors().isEmpty()) {
 			synchronized (getCustomEditors()) {
-				return bw.doTypeConversionIfNecessary(value, targetType, methodParam);
+				return converter.convertIfNecessary(value, targetType, methodParam);
 			}
 		}
 		else {
-			return bw.doTypeConversionIfNecessary(value, targetType, methodParam);
+			return converter.convertIfNecessary(value, targetType, methodParam);
 		}
 	}
 
