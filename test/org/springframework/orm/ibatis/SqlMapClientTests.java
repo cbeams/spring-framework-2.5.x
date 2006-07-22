@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class SqlMapClientTests extends TestCase {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource ds = (DataSource) dsControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
-		final Connection con = (Connection) conControl.getMock();
+		Connection con = (Connection) conControl.getMock();
 		ds.getConnection();
 		dsControl.setReturnValue(con, 1);
 		con.close();
@@ -72,34 +72,72 @@ public class SqlMapClientTests extends TestCase {
 		dsControl.replay();
 		conControl.replay();
 
-		MockControl smsControl = MockControl.createControl(SqlMapSession.class);
-		final SqlMapSession sms = (SqlMapSession) smsControl.getMock();
-		MockControl smcControl = MockControl.createControl(SqlMapClient.class);
-		SqlMapClient smc = (SqlMapClient) smcControl.getMock();
-		smc.openSession();
-		smcControl.setReturnValue(sms);
-		sms.setUserConnection(con);
-		smsControl.setVoidCallable();
-		sms.close();
-		smsControl.setVoidCallable();
-		smsControl.replay();
-		smcControl.replay();
+		MockControl sessionControl = MockControl.createControl(SqlMapSession.class);
+		final SqlMapSession session = (SqlMapSession) sessionControl.getMock();
+		MockControl clientControl = MockControl.createControl(SqlMapClient.class);
+		SqlMapClient client = (SqlMapClient) clientControl.getMock();
+		client.openSession();
+		clientControl.setReturnValue(session, 1);
+		session.getCurrentConnection();
+		sessionControl.setReturnValue(null, 1);
+		session.setUserConnection(con);
+		sessionControl.setVoidCallable(1);
+		session.close();
+		sessionControl.setVoidCallable(1);
+		sessionControl.replay();
+		clientControl.replay();
 
 		SqlMapClientTemplate template = new SqlMapClientTemplate();
 		template.setDataSource(ds);
-		template.setSqlMapClient(smc);
+		template.setSqlMapClient(client);
 		template.afterPropertiesSet();
 		Object result = template.execute(new SqlMapClientCallback() {
 			public Object doInSqlMapClient(SqlMapExecutor executor) {
-				assertTrue(executor == sms);
+				assertTrue(executor == session);
 				return "done";
 			}
 		});
 		assertEquals("done", result);
 		dsControl.verify();
 		conControl.verify();
-		smsControl.verify();
-		smcControl.verify();
+		sessionControl.verify();
+		clientControl.verify();
+	}
+
+	public void testSqlMapClientTemplateWithNestedSqlMapSession() throws SQLException {
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		DataSource ds = (DataSource) dsControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		final Connection con = (Connection) conControl.getMock();
+		dsControl.replay();
+		conControl.replay();
+
+		MockControl sessionControl = MockControl.createControl(SqlMapSession.class);
+		final SqlMapSession session = (SqlMapSession) sessionControl.getMock();
+		MockControl clientControl = MockControl.createControl(SqlMapClient.class);
+		SqlMapClient client = (SqlMapClient) clientControl.getMock();
+		client.openSession();
+		clientControl.setReturnValue(session, 1);
+		session.getCurrentConnection();
+		sessionControl.setReturnValue(con, 1);
+		sessionControl.replay();
+		clientControl.replay();
+
+		SqlMapClientTemplate template = new SqlMapClientTemplate();
+		template.setDataSource(ds);
+		template.setSqlMapClient(client);
+		template.afterPropertiesSet();
+		Object result = template.execute(new SqlMapClientCallback() {
+			public Object doInSqlMapClient(SqlMapExecutor executor) {
+				assertTrue(executor == session);
+				return "done";
+			}
+		});
+		assertEquals("done", result);
+		dsControl.verify();
+		conControl.verify();
+		sessionControl.verify();
+		clientControl.verify();
 	}
 
 	public void testQueryForObjectOnSqlMapSession() throws SQLException {
@@ -117,9 +155,11 @@ public class SqlMapClientTests extends TestCase {
 		con.close();
 		conControl.setVoidCallable(1);
 		client.getDataSource();
-		clientControl.setReturnValue(ds, 2);
+		clientControl.setReturnValue(ds, 3);
 		client.openSession();
 		clientControl.setReturnValue(session, 1);
+		session.getCurrentConnection();
+		sessionControl.setReturnValue(null, 1);
 		session.setUserConnection(con);
 		sessionControl.setVoidCallable(1);
 		session.queryForObject("myStatement", "myParameter");
@@ -134,6 +174,7 @@ public class SqlMapClientTests extends TestCase {
 
 		SqlMapClientTemplate template = new SqlMapClientTemplate();
 		template.setSqlMapClient(client);
+		template.afterPropertiesSet();
 		assertEquals("myResult", template.queryForObject("myStatement", "myParameter"));
 
 		dsControl.verify();
@@ -308,16 +349,16 @@ public class SqlMapClientTests extends TestCase {
 		testDao.setDataSource(ds);
 		assertEquals(ds, testDao.getDataSource());
 
-		MockControl smcControl = MockControl.createControl(SqlMapClient.class);
-		SqlMapClient smc = (SqlMapClient) smcControl.getMock();
-		smcControl.replay();
+		MockControl clientControl = MockControl.createControl(SqlMapClient.class);
+		SqlMapClient client = (SqlMapClient) clientControl.getMock();
+		clientControl.replay();
 
-		testDao.setSqlMapClient(smc);
-		assertEquals(smc, testDao.getSqlMapClient());
+		testDao.setSqlMapClient(client);
+		assertEquals(client, testDao.getSqlMapClient());
 
 		SqlMapClientTemplate template = new SqlMapClientTemplate();
 		template.setDataSource(ds);
-		template.setSqlMapClient(smc);
+		template.setSqlMapClient(client);
 		testDao.setSqlMapClientTemplate(template);
 		assertEquals(template, testDao.getSqlMapClientTemplate());
 

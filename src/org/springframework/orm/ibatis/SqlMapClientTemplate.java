@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -83,6 +83,8 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 
 	private SqlMapClient sqlMapClient;
 
+	private boolean lazyLoadingAvailable = true;
+
 
 	/**
 	 * Create a new SqlMapClientTemplate.
@@ -137,6 +139,11 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		if (this.sqlMapClient == null) {
 			throw new IllegalArgumentException("sqlMapClient is required");
 		}
+		if (this.sqlMapClient instanceof ExtendedSqlMapClient) {
+			// Check whether iBATIS lazy loading is available, that is,
+			// whether a DataSource was specified on the SqlMapClient itself.
+			this.lazyLoadingAvailable = (((ExtendedSqlMapClient) this.sqlMapClient).getDelegate().getTxManager() != null);
+		}
 		super.afterPropertiesSet();
 	}
 
@@ -158,21 +165,41 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		// batch for every single statement...
 
 		SqlMapSession session = this.sqlMapClient.openSession();
+		Connection ibatisCon = null;
 		try {
-			Connection con = DataSourceUtils.getConnection(getDataSource());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Opened SqlMapSession [" + session + "] for iBATIS operation");
+			}
+			Connection springCon = null;
 			try {
-				session.setUserConnection(con);
+				ibatisCon = session.getCurrentConnection();
+				if (ibatisCon == null) {
+					springCon = DataSourceUtils.getConnection(getDataSource());
+					session.setUserConnection(springCon);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Obtained JDBC Connection [" + springCon + "] for iBATIS operation");
+					}
+				}
+				else {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Reusing JDBC Connection [" + ibatisCon + "] for iBATIS operation");
+					}
+				}
 				return action.doInSqlMapClient(session);
 			}
 			catch (SQLException ex) {
 				throw getExceptionTranslator().translate("SqlMapClient operation", null, ex);
 			}
 			finally {
-				DataSourceUtils.releaseConnection(con, getDataSource());
+				DataSourceUtils.releaseConnection(springCon, getDataSource());
 			}
 		}
 		finally {
-			session.close();
+			// Only close SqlMapSession if we know we've actually opened it
+			// at the present level.
+			if (ibatisCon == null) {
+				session.close();
+			}
 		}
 	}
 
@@ -257,9 +284,8 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 			final String statementName, final Object parameterObject, final int pageSize)
 			throws DataAccessException {
 
-		// throw exception if lazy loading will not work
-		if (this.sqlMapClient instanceof ExtendedSqlMapClient &&
-				((ExtendedSqlMapClient) this.sqlMapClient).getDelegate().getTxManager() == null) {
+		// Throw exception if lazy loading will not work.
+		if (!this.lazyLoadingAvailable) {
 			throw new InvalidDataAccessApiUsageException(
 					"SqlMapClient needs to have DataSource to allow for lazy loading" +
 					" - specify SqlMapClientFactoryBean's 'dataSource' property");
