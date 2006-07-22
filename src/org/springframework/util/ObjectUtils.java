@@ -427,19 +427,19 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Return a String representation of the specified Object.
-     * <p>Returns {@link #NULL_STRING the String 'null'} if <code>obj</code> is
-     * <code>null</code>.
-	 * @param obj the object whose String representation to return.
-	 * @return a String representation of <code>obj</code>.
+	 * <p>Returns {@link #NULL_STRING the String 'null'} if <code>obj</code> is
+	 * <code>null</code>.
+	 * @param obj the object whose String representation to return
+	 * @return a String representation of <code>obj</code>
 	 */
 	public static String nullSafeToString(Object obj) {
 		if (obj == null) {
 			return NULL_STRING;
 		}
-        if(obj instanceof String) {
-            return (String) obj;
-        }
-        if (obj instanceof Object[]) {
+		if (obj instanceof String) {
+			return (String) obj;
+		}
+		if (obj instanceof Object[]) {
 			return nullSafeToString((Object[]) obj);
 		}
 		if (obj instanceof boolean[]) {
@@ -475,8 +475,8 @@ public abstract class ObjectUtils {
 	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
 	 * the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
-	 * @param array the array whose String representation to return.
-	 * @return a String representation of <code>array</code>.
+	 * @param array the array whose String representation to return
+	 * @return a String representation of <code>array</code>
 	 */
 	public static String nullSafeToString(Object[] array) {
 		if (array == null) {
@@ -506,8 +506,8 @@ public abstract class ObjectUtils {
 	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
 	 * the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
-	 * @param array the array whose String representation to return.
-	 * @return a String representation of <code>array</code>.
+	 * @param array the array whose String representation to return
+	 * @return a String representation of <code>array</code>
 	 */
 	public static String nullSafeToString(boolean[] array) {
 		if (array == null) {
@@ -538,8 +538,8 @@ public abstract class ObjectUtils {
 	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
 	 * the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
-	 * @param array the array whose String representation to return.
-	 * @return a String representation of <code>array</code>.
+	 * @param array the array whose String representation to return
+	 * @return a String representation of <code>array</code>
 	 */
 	public static String nullSafeToString(byte[] array) {
 		if (array == null) {
@@ -569,8 +569,8 @@ public abstract class ObjectUtils {
 	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
 	 * the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
-	 * @param array the array whose String representation to return.
-	 * @return a String representation of <code>array</code>.
+	 * @param array the array whose String representation to return
+	 * @return a String representation of <code>array</code>
 	 */
 	public static String nullSafeToString(char[] array) {
 		if (array == null) {
@@ -600,8 +600,8 @@ public abstract class ObjectUtils {
 	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
 	 * the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
-	 * @param array the array whose String representation to return.
-	 * @return a String representation of <code>array</code>.
+	 * @param array the array whose String representation to return
+	 * @return a String representation of <code>array</code>
 	 */
 	public static String nullSafeToString(double[] array) {
 		if (array == null) {
@@ -632,8 +632,8 @@ public abstract class ObjectUtils {
 	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
 	 * the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
-	 * @param array the array whose String representation to return.
-	 * @return a String representation of <code>array</code>.
+	 * @param array the array whose String representation to return
+	 * @return a String representation of <code>array</code>
 	 */
 	public static String nullSafeToString(float[] array) {
 		if (array == null) {
@@ -664,8 +664,8 @@ public abstract class ObjectUtils {
 	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
 	 * the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
-	 * @param array the array whose String representation to return.
-	 * @return a String representation of <code>array</code>.
+	 * @param array the array whose String representation to return
+	 * @return a String representation of <code>array</code>
 	 */
 	public static String nullSafeToString(int[] array) {
 		if (array == null) {
@@ -695,8 +695,8 @@ public abstract class ObjectUtils {
 	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
 	 * the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
-	 * @param array the array whose String representation to return.
-	 * @return a String representation of <code>array</code>.
+	 * @param array the array whose String representation to return
+	 * @return a String representation of <code>array</code>
 	 */
 	public static String nullSafeToString(long[] array) {
 		if (array == null) {
@@ -726,8 +726,8 @@ public abstract class ObjectUtils {
 	 * in curly braces (<code>"{}"</code>). Adjacent elements are separated by
 	 * the characters <code>", "</code> (a comma followed by a space). Returns
 	 * <code>"null"</code> if <code>array</code> is <code>null</code>.
-	 * @param array the array whose String representation to return.
-	 * @return a String representation of <code>array</code>.
+	 * @param array the array whose String representation to return
+	 * @return a String representation of <code>array</code>
 	 */
 	public static String nullSafeToString(short[] array) {
 		if (array == null) {
