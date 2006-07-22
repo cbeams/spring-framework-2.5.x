@@ -214,7 +214,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 
 	@Override
 	protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {
-		this.persistenceUnitInfo = parsePersistenceUnitInfo();
+		this.persistenceUnitInfo = determinePersistenceUnitInfo();
 		String unitName = this.persistenceUnitInfo.getPersistenceUnitName();
 
 		if (!this.allowRedeploymentWithSameName) {
@@ -263,16 +263,19 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		return this.nativeEntityManagerFactory;
 	}
 
-	
-	/**
-	 * If no entity manager name was found, take first in the parsed array of
-	 * ContainerPersistenceUnitInfo. Otherwise check for a matching name.
-	 * @return Spring-specific PersistenceUnitInfo
-	 */
-	protected SpringPersistenceUnitInfo parsePersistenceUnitInfo() {
-		PersistenceUnitReader reader = new PersistenceUnitReader(this.resourcePatternResolver, this.dataSourceLookup);
 
-		SpringPersistenceUnitInfo[] infos = reader.readPersistenceUnitInfos(this.persistenceXmlLocation);
+	/**
+	 * Determine the PersistenceUnitInfo to use for the EntityManagerFactory
+	 * created by this bean.
+	 * <p>The default implementation reads in all persistence unit infos from
+	 * <code>persistence.xml</code>, as defined in the JPA specification.
+	 * If no entity manager name was specified, it takes the first info in the
+	 * array as returned by the reader. Otherwise, it checks for a matching name.
+	 * @return the chosen PersistenceUnitInfo
+	 * @see #readPersistenceUnitInfos()
+	 */
+	protected SpringPersistenceUnitInfo determinePersistenceUnitInfo() {
+		SpringPersistenceUnitInfo[] infos = readPersistenceUnitInfos();
 		if (infos.length == 0) {
 			throw new IllegalArgumentException(
 					"No persistence units parsed from [" + this.persistenceXmlLocation + "]");
@@ -282,9 +285,9 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		if (getPersistenceUnitName() == null) {
 			// Default to the first unit.
 			pui = infos[0];
-			if (logger.isDebugEnabled())
-				logger.debug("no persistence unit name specified; choosing the first one " + pui.getPersistenceUnitName());
-
+			if (logger.isDebugEnabled()) {
+				logger.debug("No persistence unit name specified; choosing the first one " + pui.getPersistenceUnitName());
+			}
 		}
 		else {
 			// Find a unit with matching name.
@@ -302,6 +305,15 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		}
 
 		return pui;
+	}
+
+	/**
+	 * Read all persistence unit infos from <code>persistence.xml</code>,
+	 * as defined in the JPA specification.
+	 */
+	protected SpringPersistenceUnitInfo[] readPersistenceUnitInfos() {
+		PersistenceUnitReader reader = new PersistenceUnitReader(this.resourcePatternResolver, this.dataSourceLookup);
+		return reader.readPersistenceUnitInfos(this.persistenceXmlLocation);
 	}
 
 	/**

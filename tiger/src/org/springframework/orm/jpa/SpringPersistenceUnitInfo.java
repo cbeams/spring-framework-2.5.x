@@ -31,17 +31,20 @@ import org.springframework.instrument.classloading.SimpleThrowawayClassLoader;
 import org.springframework.util.ClassUtils;
 
 /**
- * Implementation of PersistenceUnitInfo interface used to
- * bootstrap an EntityManagerFactory in a container.
- * Largely a JavaBean, with some instrumentation hooks.
- * 
+ * Spring's implementation of the JPA PersistenceUnitInfo interface
+ * used to bootstrap an EntityManagerFactory in a container.
+ *
+ * <p>This implementation is largely a JavaBean, with some instrumentation
+ * hooks based on Spring's LoadTimeWeaver abstraction.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Costin Leau
  * @since 2.0
  * @see #setLoadTimeWeaver
+ * @see LocalContainerEntityManagerFactoryBean#determinePersistenceUnitInfo()
  */
-class SpringPersistenceUnitInfo implements PersistenceUnitInfo {
+public class SpringPersistenceUnitInfo implements PersistenceUnitInfo {
 	
 	private String persistenceUnitName;
 	
@@ -61,8 +64,8 @@ class SpringPersistenceUnitInfo implements PersistenceUnitInfo {
 
 	private LoadTimeWeaver loadTimeWeaver;
 	
-	// When this is false, will load from Jar
-	// TODO: should the default be false ?
+	// When this is false, will load from jar.
+	// TODO: Should the default be false?
 	private boolean excludeUnlistedClasses = false;
 
 	private Properties properties = new Properties();
@@ -202,17 +205,15 @@ class SpringPersistenceUnitInfo implements PersistenceUnitInfo {
 		}
 	}
 
+
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append(getClass().getSimpleName());
-		builder.append(" [ unitName=`");
-		builder.append(persistenceUnitName);
-		builder.append("`, unitRootUrl=`");
-		builder.append(persistenceUnitRootUrl);
-		builder.append("` ]");
+		builder.append("SpringPersistenceUnitInfo: unitName='");
+		builder.append(this.persistenceUnitName);
+		builder.append("', unitRootUrl=[");
+		builder.append(this.persistenceUnitRootUrl);
+		builder.append("]");
 		return builder.toString();
 	}
-	
-	
 
 }
