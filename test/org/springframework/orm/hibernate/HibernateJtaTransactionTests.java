@@ -1199,7 +1199,13 @@ public class HibernateJtaTransactionTests extends TestCase {
 
 		Synchronization synchronization = transaction.getSynchronization();
 		assertTrue("JTA synchronization registered", synchronization != null);
-		synchronization.beforeCompletion();
+		try {
+			synchronization.beforeCompletion();
+			fail("Should have thrown HibernateSystemException");
+		}
+		catch (HibernateSystemException ex) {
+			assertSame(flushEx, ex.getCause());
+		}
 		synchronization.afterCompletion(Status.STATUS_COMMITTED);
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));

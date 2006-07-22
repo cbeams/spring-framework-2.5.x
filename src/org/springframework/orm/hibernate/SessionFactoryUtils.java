@@ -56,6 +56,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
+import org.springframework.transaction.jta.SpringJtaSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
@@ -371,9 +372,8 @@ public abstract class SessionFactoryUtils {
 							logger.debug("Registering JTA transaction synchronization for existing Hibernate Session");
 							sessionHolder.addSession(jtaTx, session);
 							jtaTx.registerSynchronization(
-									new JtaSessionSynchronization(
-											new SpringSessionSynchronization(
-													sessionHolder, sessionFactory, jdbcExceptionTranslator, false),
+									new SpringJtaSynchronizationAdapter(
+											new SpringSessionSynchronization(sessionHolder, sessionFactory, jdbcExceptionTranslator, false),
 											jtaTm));
 							sessionHolder.setSynchronizedWithTransaction(true);
 							// Switch to FlushMode.AUTO if we're not within a read-only transaction.
@@ -434,9 +434,8 @@ public abstract class SessionFactoryUtils {
 						holderToUse.addSession(jtaTx, session);
 					}
 					jtaTx.registerSynchronization(
-							new JtaSessionSynchronization(
-									new SpringSessionSynchronization(
-											holderToUse, sessionFactory, jdbcExceptionTranslator, true),
+							new SpringJtaSynchronizationAdapter(
+									new SpringSessionSynchronization(holderToUse, sessionFactory, jdbcExceptionTranslator, true),
 									jtaTm));
 					holderToUse.setSynchronizedWithTransaction(true);
 					if (holderToUse != sessionHolder) {
