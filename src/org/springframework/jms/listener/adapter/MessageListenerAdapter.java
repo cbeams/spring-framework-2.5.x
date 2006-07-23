@@ -36,6 +36,7 @@ import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.MethodInvoker;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Message listener adapter that delegates the handling of messages to target
@@ -84,10 +85,8 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	public static final String ORIGINAL_DEFAULT_LISTENER_METHOD = "handleMessage";
 
 
-    /**
-     * Logger available to subclasses.
-     */
-    protected final Log logger = LogFactory.getLog(getClass());
+	/** Logger available to subclasses */
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Object delegate;
 
@@ -231,7 +230,8 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 					"No listener method for message [" + convertedMessage +
 					"] - specify a 'defaultListenerMethod' or override 'getListenerMethodName'");
 		}
-		Object result = invokeListenerMethod(methodName, convertedMessage);
+		Object[] listenerArguments = buildListenerArguments(convertedMessage);
+		Object result = invokeListenerMethod(methodName, listenerArguments);
 		if (result != null) {
 			handleResult(result, message, session);
 		}
@@ -264,7 +264,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 		logger.error("Listener execution failed", ex);
 	}
 
-    /**
+	/**
 	 * Extract the message body from the given JMS message.
 	 * @param message the JMS Message
 	 * @return the content of the message, to be passed into the
@@ -299,18 +299,39 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	}
 
 	/**
+	 * Build an array of arguments to be passed into the target listener method.
+	 * Allows for multiple method arguments to be built from a single message object.
+	 * <p>The default implementation builds an array with the given message object
+	 * as sole element. This means that the extracted message will always be passed
+	 * into a <i>single</i> method argument, even if it is an array, with the target
+	 * method having a corresponding single argument of the array's type declared.
+	 * <p>This can be overridden to treat special message content such as arrays
+	 * differently, for example passing in each element of the message array
+	 * as distinct method argument.
+	 * @param extractedMessage the content of the message
+	 * @return the array of arguments to be passed into the
+	 * listener method (each element of the array corresponding
+	 * to a distinct method argument)
+	 */
+	protected Object[] buildListenerArguments(Object extractedMessage) {
+		return new Object[] {extractedMessage};
+	}
+
+	/**
 	 * Invoke the specified listener method.
 	 * @param methodName the name of the listener method
-	 * @param message the message to pass in as argument
+	 * @param arguments the message arguments to be passed in
 	 * @return the result returned from the listener method
 	 * @throws JMSException if thrown by JMS API methods
+	 * @see #getListenerMethodName
+	 * @see #buildListenerArguments
 	 */
-	protected Object invokeListenerMethod(String methodName, Object message) throws JMSException {
+	protected Object invokeListenerMethod(String methodName, Object[] arguments) throws JMSException {
 		try {
 			MethodInvoker methodInvoker = new MethodInvoker();
 			methodInvoker.setTargetObject(getDelegate());
 			methodInvoker.setTargetMethod(methodName);
-			methodInvoker.setArguments(new Object[] {message});
+			methodInvoker.setArguments(arguments);
 			methodInvoker.prepare();
 			return methodInvoker.invoke();
 		}
@@ -319,8 +340,8 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 					"Listener method '" + methodName + "' threw exception", ex.getTargetException());
 		}
 		catch (Throwable ex) {
-			throw new ListenerExecutionFailedException(
-					"Failed to invoke target method '" + methodName + "' with message [" + message + "]", ex);
+			throw new ListenerExecutionFailedException("Failed to invoke target method '" + methodName +
+					"' with arguments " + ObjectUtils.nullSafeToString(arguments), ex);
 		}
 	}
 
@@ -393,17 +414,17 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 
 	/**
 	 * Determine a response destination for the given message.
-     * <p>The default implementation first checks the JMS Reply-To
-     * {@link Destination} of the supplied request; if that is not <code>null</code>
-     * it is returned; if it is <code>null</code>, then the configured
-     * {@link #getDefaultResponseDestination() default response destination}
-     * is returned; if this too is <code>null</code>, then an
-     * {@link InvalidDestinationException} is thrown. 
+	 * <p>The default implementation first checks the JMS Reply-To
+	 * {@link Destination} of the supplied request; if that is not <code>null</code>
+	 * it is returned; if it is <code>null</code>, then the configured
+	 * {@link #getDefaultResponseDestination() default response destination}
+	 * is returned; if this too is <code>null</code>, then an
+	 * {@link InvalidDestinationException} is thrown.
 	 * @param request the original incoming JMS message
 	 * @param response the outgoing JMS message about to be sent
 	 * @return the response destination (never <code>null</code>)
 	 * @throws JMSException if thrown by JMS API methods
-     * @throws InvalidDestinationException if no {@link Destination} can be determined
+	 * @throws InvalidDestinationException if no {@link Destination} can be determined
 	 * @see #setDefaultResponseDestination
 	 * @see javax.jms.Message#getJMSReplyTo()
 	 */
