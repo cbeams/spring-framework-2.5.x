@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ public class RemoteInvocationTraceInterceptor implements MethodInterceptor {
 
 	private final String exporterName;
 
+
 	/**
 	 * Create a new RemoteInvocationTraceInterceptor.
 	 * @param protocolName the name of the remoting protocol
@@ -57,6 +58,7 @@ public class RemoteInvocationTraceInterceptor implements MethodInterceptor {
 	public RemoteInvocationTraceInterceptor(String protocolName) {
 		this.exporterName = protocolName;
 	}
+
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Method method = invocation.getMethod();
