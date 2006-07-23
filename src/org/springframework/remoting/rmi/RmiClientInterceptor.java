@@ -16,10 +16,18 @@
 
 package org.springframework.remoting.rmi;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import java.rmi.Naming;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.RMIClientSocketFactory;
 
 import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -67,6 +75,8 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 
 	private boolean refreshStubOnConnectFailure = false;
 
+	private RMIClientSocketFactory registryClientSocketFactory;
+
 	private Remote cachedStub;
 
 
@@ -104,6 +114,15 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	 */
 	public void setRefreshStubOnConnectFailure(boolean refreshStubOnConnectFailure) {
 		this.refreshStubOnConnectFailure = refreshStubOnConnectFailure;
+	}
+
+	/**
+	 * Set a custom RMI client socket factory to use for accessing the RMI registry.
+	 * @see java.rmi.server.RMIClientSocketFactory
+	 * @see java.rmi.registry.LocateRegistry#getRegistry(String, int, RMIClientSocketFactory)
+	 */
+	public void setRegistryClientSocketFactory(RMIClientSocketFactory registryClientSocketFactory) {
+		this.registryClientSocketFactory = registryClientSocketFactory;
 	}
 
 
@@ -154,7 +173,30 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	 * @see java.rmi.Naming#lookup
 	 */
 	protected Remote lookupStub() throws Exception {
-		Remote stub = Naming.lookup(getServiceUrl());
+		Remote stub = null;
+		if (this.registryClientSocketFactory != null) {
+			// RMIClientSocketFactory specified for registry access.
+			// Unfortunately, due to RMI API limitations, this means
+			// that we need to parse the RMI URL ourselves and perform
+			// straight LocateRegistry.getRegistry/Registry.lookup calls.
+			URL url = new URL(null, getServiceUrl(), new DummyURLStreamHandler());
+			String protocol = url.getProtocol();
+			if (protocol != null && !"rmi".equals(protocol)) {
+				throw new MalformedURLException("Invalid URL scheme '" + protocol + "'");
+			}
+			String host = url.getHost();
+			int port = url.getPort();
+			String name = url.getPath();
+			if (name != null && name.startsWith("/")) {
+				name = name.substring(1);
+			}
+			Registry registry = LocateRegistry.getRegistry(host, port, this.registryClientSocketFactory);
+			stub = registry.lookup(name);
+		}
+		else {
+			// Can proceed with standard RMI lookup API...
+			stub = Naming.lookup(getServiceUrl());
+		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Located RMI stub with URL [" + getServiceUrl() + "]");
 		}
@@ -348,6 +390,19 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 		}
 
 		return invocationHandler.invoke(createRemoteInvocation(methodInvocation));
+	}
+
+
+	/**
+	 * Dummy URLStreamHandler that's just specified to suppress the standard
+	 * <code>java.net.URL</code> URLStreamHandler lookup, to be able to
+	 * use the standard URL class for parsing "rmi:..." URLs.
+	 */
+	private static class DummyURLStreamHandler extends URLStreamHandler {
+
+		protected URLConnection openConnection(URL url) throws IOException {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 }
