@@ -33,6 +33,8 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.IntroductionAdvisor;
+import org.springframework.aop.IntroductionAwareMethodMatcher;
+import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.core.OrderComparator;
@@ -171,8 +173,28 @@ public abstract class AopUtils {
 	 * @return whether the pointcut can apply on any method
 	 */
 	public static boolean canApply(Pointcut pc, Class targetClass) {
+		return canApply(pc,targetClass,false);
+	}
+
+	/**
+	 * Can the given pointcut apply at all on the given class?
+	 * This is an important test as it can be used to optimize
+	 * out a pointcut for a class.
+	 * @param pc pc static or dynamic pointcut to check
+	 * @param targetClass class we're testing
+	 * @param hasIntroductions whether or not the advisor chain for this bean includes
+	 * any introductions
+	 * @return whether the pointcut can apply on any method
+	 */
+	public static boolean canApply(Pointcut pc, Class targetClass, boolean hasIntroductions) {
 		if (!pc.getClassFilter().matches(targetClass)) {
 			return false;
+		}
+
+		MethodMatcher methodMatcher = pc.getMethodMatcher();
+		IntroductionAwareMethodMatcher introductionAwareMethodMatcher = null;
+		if (methodMatcher instanceof IntroductionAwareMethodMatcher) {
+			introductionAwareMethodMatcher = (IntroductionAwareMethodMatcher) methodMatcher;
 		}
 		
 		Set classes = new HashSet(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
@@ -181,7 +203,12 @@ public abstract class AopUtils {
 			Class clazz = (Class) it.next();
 			Method[] methods = clazz.getMethods();
 			for (int j = 0; j < methods.length; j++) {
-				if (pc.getMethodMatcher().matches(methods[j], targetClass)) {
+				if (introductionAwareMethodMatcher != null) {
+					if (introductionAwareMethodMatcher.matches(methods[j], targetClass, hasIntroductions)) {
+						return true;
+					}
+				}
+				else if (methodMatcher.matches(methods[j], targetClass)) {
 					return true;
 				}
 			}
@@ -189,7 +216,7 @@ public abstract class AopUtils {
 
 		return false;
 	}
-	
+
 	/**
 	 * Can the given advisor apply at all on the given class?
 	 * This is an important test as it can be used to optimize
@@ -199,18 +226,35 @@ public abstract class AopUtils {
 	 * @return whether the pointcut can apply on any method
 	 */
 	public static boolean canApply(Advisor advisor, Class targetClass) {
+		return canApply(advisor, targetClass, false);
+	}
+	
+	/**
+	 * Can the given advisor apply at all on the given class?
+	 * This is an important test as it can be used to optimize
+	 * out a advisor for a class.
+	 * This version also takes into account introductions, for
+	 * IntroductionAwareMethodMatchers
+	 * @param advisor the advisor to check
+	 * @param targetClass class we're testing
+	 * @param hasIntroductions whether or not the advisor chain for this bean includes
+	 * any introductions
+	 * @return whether the pointcut can apply on any method
+	 */
+	public static boolean canApply(Advisor advisor, Class targetClass, boolean hasIntroductions) {
 		if (advisor instanceof IntroductionAdvisor) {
 			return ((IntroductionAdvisor) advisor).getClassFilter().matches(targetClass);
 		}
 		else if (advisor instanceof PointcutAdvisor) {
 			PointcutAdvisor pca = (PointcutAdvisor) advisor;
-			return canApply(pca.getPointcut(), targetClass);
+			return canApply(pca.getPointcut(), targetClass, hasIntroductions);
 		}
 		else {
 			// It doesn't have a pointcut so we assume it applies
 			return true;
 		}
 	}
+
 	
 	/**
 	 * Convenience method to return the sublist of the candidateAdvisors list
@@ -220,10 +264,15 @@ public abstract class AopUtils {
 	 * @return sublist of advisors that could apply to an object of the given class
 	 */
 	public static List findAdvisorsThatCanApply(List candidateAdvisors, Class clazz) {
-		List eligibleAdvisors = new LinkedList();
+		List eligibleAdvisors = findIntroductionAdvisorsThatCanApply(candidateAdvisors, clazz);
+		boolean hasIntroductions = !eligibleAdvisors.isEmpty();
 		for (Iterator it = candidateAdvisors.iterator(); it.hasNext();) {
 			Advisor candidate = (Advisor) it.next();
-			if (AopUtils.canApply(candidate, clazz)) {
+			if (candidate instanceof IntroductionAdvisor) {
+				// already processed
+				continue;
+			}
+			if (AopUtils.canApply(candidate, clazz, hasIntroductions)) {
 				eligibleAdvisors.add(candidate);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Candidate advisor [" + candidate + "] accepted for class [" + clazz.getName() + "]");
@@ -236,6 +285,25 @@ public abstract class AopUtils {
 			}
 		}
 		return eligibleAdvisors;
+	}
+	
+	private static List findIntroductionAdvisorsThatCanApply(List candidateAdvisors, Class clazz) {
+		List eligibleAdvisors = new LinkedList();
+		for (Iterator it = candidateAdvisors.iterator(); it.hasNext();) {
+			Advisor candidate = (Advisor) it.next();
+			if ((candidate instanceof IntroductionAdvisor) && AopUtils.canApply(candidate, clazz)) {
+				eligibleAdvisors.add(candidate);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Candidate advisor [" + candidate + "] accepted for class [" + clazz.getName() + "]");
+				}
+			}
+			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Candidate advisor [" + candidate + "] rejected for class [" + clazz.getName() + "]");
+				}
+			}
+		}
+		return eligibleAdvisors;		
 	}
 	
 	/**

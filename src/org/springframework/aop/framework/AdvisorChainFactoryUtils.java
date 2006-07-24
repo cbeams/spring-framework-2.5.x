@@ -26,6 +26,7 @@ import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.IntroductionAdvisor;
+import org.springframework.aop.IntroductionAwareMethodMatcher;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
@@ -39,6 +40,7 @@ import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
  * Advised object.
  *
  * @author Rod Johnson
+ * @author Adrian Colyer
  */
 public abstract class AdvisorChainFactoryUtils {
 
@@ -66,7 +68,10 @@ public abstract class AdvisorChainFactoryUtils {
 	public static List calculateInterceptorsAndDynamicInterceptionAdvice(
 			Advised config, Object proxy, Method method, Class targetClass) {
 
+		// this is somewhat tricky... we have to process introductions first,
+		// but we need to preserve order in the ultimate list.
 		List interceptorList = new ArrayList(config.getAdvisors().length);
+		boolean hasIntroductions = hasMatchingIntroductions(config,targetClass);
 		AdvisorAdapterRegistry registry = GlobalAdvisorAdapterRegistry.getInstance();
 		for (int i = 0; i < config.getAdvisors().length; i++) {
 			Advisor advisor = config.getAdvisors()[i];
@@ -76,7 +81,7 @@ public abstract class AdvisorChainFactoryUtils {
 				if (pointcutAdvisor.getPointcut().getClassFilter().matches(targetClass)) {
 					Interceptor[] interceptors = registry.getInterceptors(advisor);
 					MethodMatcher mm = pointcutAdvisor.getPointcut().getMethodMatcher();
-					if (mm.matches(method, targetClass)) {
+					if (methodMatches(mm,method, targetClass,hasIntroductions)) {
 						if (mm.isRuntime()) {
 							// Creating a new object instance in the getInterceptors() method
 							// isn't a problem as we normally cache created chains.
@@ -101,4 +106,33 @@ public abstract class AdvisorChainFactoryUtils {
 		return interceptorList;
 	}
 
+	
+	/**
+	 * True if the advisors contain matching introducions
+	 */
+	private static boolean hasMatchingIntroductions(
+			Advised config, Class targetClass) {
+
+		for (int i = 0; i < config.getAdvisors().length; i++) {
+			Advisor advisor = config.getAdvisors()[i];
+			if (advisor instanceof IntroductionAdvisor) {
+				IntroductionAdvisor ia = (IntroductionAdvisor) advisor;
+				if (ia.getClassFilter().matches(targetClass)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private static boolean methodMatches(MethodMatcher matcher, Method method, Class targetClass, boolean hasIntroductions) {
+		if (matcher instanceof IntroductionAwareMethodMatcher) {
+			IntroductionAwareMethodMatcher introductionAwareMatcher = 
+				(IntroductionAwareMethodMatcher) matcher;
+			return introductionAwareMatcher.matches(method, targetClass,hasIntroductions);
+		}
+		else {
+			return matcher.matches(method, targetClass);
+		}
+	}
 }
