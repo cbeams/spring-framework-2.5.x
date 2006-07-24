@@ -7,10 +7,10 @@ package org.springframework.samples.petclinic.toplink;
 
 import java.io.IOException;
 import java.io.Writer;
-
 import oracle.toplink.exceptions.ValidationException;
-import oracle.toplink.internal.databaseaccess.HSQLPlatform;
+import oracle.toplink.platform.database.HSQLPlatform;
 import oracle.toplink.queryframework.ValueReadQuery;
+import oracle.toplink.sequencing.NativeSequence;
 
 /**
  * Subclass of TopLink's default HSQLPlatform class, using native HSQLDB
@@ -28,10 +28,6 @@ import oracle.toplink.queryframework.ValueReadQuery;
  */
 public class HSQLPlatformWithNativeSequence extends HSQLPlatform {
 
-	public HSQLPlatformWithNativeSequence() {
-		setUsesNativeSequencing(true);
-	}
-
 	public boolean supportsNativeSequenceNumbers() {
 		return true;
 	}
@@ -39,6 +35,10 @@ public class HSQLPlatformWithNativeSequence extends HSQLPlatform {
 	public boolean shouldNativeSequenceAcquireValueAfterInsert() {
 		return true;
 	}
+    
+    public boolean shouldUseJDBCOuterJoinSyntax() {
+        return false;
+    }
 
 	public ValueReadQuery buildSelectQueryForNativeSequence() {
 		return new ValueReadQuery("CALL IDENTITY()");
