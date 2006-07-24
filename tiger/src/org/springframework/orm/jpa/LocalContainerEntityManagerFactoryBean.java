@@ -215,6 +215,8 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	@Override
 	protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {
 		this.persistenceUnitInfo = determinePersistenceUnitInfo();
+		postProcessPersistenceUnitInfo(this.persistenceUnitInfo);
+
 		String unitName = this.persistenceUnitInfo.getPersistenceUnitName();
 
 		if (!this.allowRedeploymentWithSameName) {
@@ -336,6 +338,29 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 
+	/**
+	 * Hook method allowing subclasses to customize the PersistenceUnitInfo.
+	 * <p>The default implementation is empty; hence, the PersistenceUnitInfo
+	 * will be used as read from <code>persistence.xml</code>. This method
+	 * can be overridden to register further entity classes, jar files, etc.
+	 * @param pui the chosen PersistenceUnitInfo, as read from <code>persistence.xml</code>.
+	 * Passed in as mutable SpringPersistenceUnitInfo.
+	 */
+	protected void postProcessPersistenceUnitInfo(SpringPersistenceUnitInfo pui) {
+	}
+
+	/**
+	 * Hook method allowing subclasses to customize the EntityManagerFactory
+	 * after its creation via the PersistenceProvider.
+	 * <p>The default implementation is empty.
+	 * @param emf the newly created EntityManagerFactory we are working with
+	 * @param pui the PersistenceUnitInfo used to configure the EntityManagerFactory
+	 * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory
+	 */
+	protected void postProcessEntityManagerFactory(EntityManagerFactory emf, PersistenceUnitInfo pui) {
+	}
+
+
 	public DataSource getDataSource() {
 		return this.dataSource;
 	}
@@ -349,16 +374,6 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 			return this.persistenceUnitInfo.getPersistenceUnitName();
 		}
 		return super.getPersistenceUnitName();
-	}
-
-
-	/**
-	 * Hook method allowing subclasses to customize the EntityManagerFactory.
-	 * <p>The default implementation is empty.
-	 * @param emf EntityManagerFactory we are working with
-	 * @param pui PersistenceUnitInfo used to configure the EntityManagerFactory
-	 */
-	protected void postProcessEntityManagerFactory(EntityManagerFactory emf, PersistenceUnitInfo pui) {
 	}
 
 }
