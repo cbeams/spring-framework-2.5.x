@@ -30,8 +30,8 @@ import org.aspectj.weaver.tools.PointcutParameter;
 import org.aspectj.weaver.tools.PointcutParser;
 import org.aspectj.weaver.tools.PointcutPrimitive;
 import org.aspectj.weaver.tools.ShadowMatch;
-
 import org.springframework.aop.ClassFilter;
+import org.springframework.aop.IntroductionAwareMethodMatcher;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
@@ -52,7 +52,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @since 2.0
  */
-public class AspectJExpressionPointcut extends AbstractExpressionPointcut implements ClassFilter, MethodMatcher {
+public class AspectJExpressionPointcut extends AbstractExpressionPointcut implements ClassFilter, IntroductionAwareMethodMatcher {
 
 	private static final Set DEFAULT_SUPPORTED_PRIMITIVES = new HashSet();
 
@@ -69,7 +69,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_TARGET);
 	}
 
-
 	private final Map shadowMapCache = new HashMap();
 
 	private PointcutParser pointcutParser;
@@ -81,8 +80,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 	private Class[] pointcutParameterTypes = new Class[0];
 
 	private PointcutExpression pointcutExpression;
-
-
+	
 	public AspectJExpressionPointcut() {
 		this.pointcutParser =
 				PointcutParser.getPointcutParserSupportingSpecifiedPrimitivesAndUsingContextClassloaderForResolution(
@@ -161,18 +159,20 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 			throw new IllegalStateException("Must set property [expression] before attempting to match.");
 		}
 		if (this.pointcutExpression == null) {
-			// we need to build it now...
-			PointcutParameter[] pointcutParameters = new PointcutParameter[this.pointcutParameterNames.length];
-			for (int i = 0; i < pointcutParameters.length; i++) {
-				pointcutParameters[i] = this.pointcutParser.createPointcutParameter(
-						this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
-			}
-			this.pointcutExpression =
-				this.pointcutParser.parsePointcutExpression(
-						replaceBooleanOperators(getExpression()), pointcutDeclarationScope, pointcutParameters);
+			buildPointcutExpression();
 		}
 	}
 
+	private void buildPointcutExpression() {
+		PointcutParameter[] pointcutParameters = new PointcutParameter[this.pointcutParameterNames.length];
+		for (int i = 0; i < pointcutParameters.length; i++) {
+			pointcutParameters[i] = this.pointcutParser.createPointcutParameter(
+					this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
+		}
+		this.pointcutExpression =
+			this.pointcutParser.parsePointcutExpression(
+					replaceBooleanOperators(getExpression()), pointcutDeclarationScope, pointcutParameters);
+	}
 
 	public boolean matches(Class targetClass) {
 		checkReadyToMatch();
@@ -184,15 +184,82 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		return this.pointcutExpression.mayNeedDynamicTest();
 	}
 
-	public boolean matches(Method method, Class targetClass) {
+	public boolean matches(Method method, Class targetClass, boolean beanHasIntroductions) {
 		checkReadyToMatch();
-		ShadowMatch shadowMatch = getShadowMatch(method);
-		return shadowMatch.maybeMatches();
+		Method methodToMatch = findMethodToMatchAgainst(method,targetClass);
+		ShadowMatch shadowMatch = getShadowMatch(methodToMatch);
+		// special handling for this, target, @this, @target, @annotation
+		// in Spring - we can optimize since we know we have exactly this class,
+		// and there will never be matching subclass at runtime.
+		if (shadowMatch.alwaysMatches()) {
+			return true;
+		}
+		else if (shadowMatch.neverMatches()) {
+			return false;
+		}
+		else {
+		  // the maybe case
+		  if (!beanHasIntroductions) {
+			  return matchesIgnoringSubtypes(shadowMatch);
+		  }
+		  else {
+			  return true;
+		  }
+		}
+	}
+
+	public boolean matches(Method method, Class targetClass) {
+		return matches(method,targetClass,false);
+	}
+
+	/**
+	 * If we are proxying an interface, the declaring type of the
+	 * method may not match the declaring type of the targetClass -
+	 * because we got the method from a proxy. We need to find the
+	 * corresponding targetClass method and match on that instead.
+	 * @param method
+	 * @param targetClass
+	 * @return
+	 */
+	private Method findMethodToMatchAgainst(Method method, Class targetClass) {
+		Class originalTargetClass = targetClass;
+		Class declaredClass = method.getDeclaringClass();
+		if (declaredClass.isInterface()) {
+			// find the *implementing* method and match on that instead.
+			Class[] ptypes = method.getParameterTypes();
+			String name = method.getName();
+			do {
+				try {
+					return targetClass.getDeclaredMethod(name, ptypes);
+				}
+				catch (NoSuchMethodException ex) {
+					targetClass = targetClass.getSuperclass();
+				}
+			}
+			while (targetClass != null);
+			// this odd situation can arise as a result of declare parents
+			// statements.
+			return method;
+		} else {
+			return method;
+		}
+	}
+
+	/**
+	 * A match test returned maybe - if there are any subtype sensitive variables
+	 * involved in the test (this, target, at_this, at_target, at_annotation) then
+	 * we say this is not a match as in Spring there will never be a different 
+	 * runtime subtype.
+	 * @return
+	 */
+	private boolean matchesIgnoringSubtypes(ShadowMatch shadowMatch) {
+		return !(new RuntimeTestWalker(shadowMatch).testsSubtypeSensitiveVars());
 	}
 
 	public boolean matches(Method method, Class targetClass, Object[] args) {
 		checkReadyToMatch();
-		ShadowMatch shadowMatch = getShadowMatch(method);
+		Method methodToMatch = findMethodToMatchAgainst(method,targetClass);
+		ShadowMatch shadowMatch = getShadowMatch(methodToMatch);
 
 		// Bind Spring AOP proxy to AspectJ "this" and Spring AOP target to AspectJ target,
 		// consistent with return of MethodInvocationProceedingJoinPoint
@@ -218,7 +285,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		}
 		return joinPointMatch.matches();
 	}
-
+	
 	private void bindParameters(ReflectiveMethodInvocation invocation, JoinPointMatch jpm) {
 		Map userAttributes = invocation.getUserAttributes();
 		// note - can't use JoinPointMatch.getClass().getName() as the key, since
@@ -312,4 +379,5 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		}
 		return true;
 	}
+
 }
