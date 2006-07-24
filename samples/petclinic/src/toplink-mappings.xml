@@ -1,583 +1,332 @@
-<?xml version = '1.0' encoding = 'UTF-8'?>
-<project>
-   <project-name>toplink-project</project-name>
-   <descriptors>
-      <descriptor>
-         <java-class>org.springframework.samples.petclinic.Owner</java-class>
-         <tables>
-            <table>OWNERS</table>
-         </tables>
-         <primary-key-fields>
-            <field>OWNERS.ID</field>
-         </primary-key-fields>
-         <descriptor-type-value>Normal</descriptor-type-value>
-         <sequence-number-field>OWNERS.ID</sequence-number-field>
-         <sequence-number-name>OWNERS_SEQ</sequence-number-name>
-         <identity-map-class>oracle.toplink.internal.identitymaps.SoftCacheWeakIdentityMap</identity-map-class>
-         <remote-identity-map-class>oracle.toplink.internal.identitymaps.SoftCacheWeakIdentityMap</remote-identity-map-class>
-         <identity-map-size>100</identity-map-size>
-         <remote-identity-map-size>100</remote-identity-map-size>
-         <should-always-refresh-cache>false</should-always-refresh-cache>
-         <should-always-refresh-cache-on-remote>false</should-always-refresh-cache-on-remote>
-         <should-only-refresh-cache-if-newer-version>false</should-only-refresh-cache-if-newer-version>
-         <should-disable-cache-hits>false</should-disable-cache-hits>
-         <should-disable-cache-hits-on-remote>false</should-disable-cache-hits-on-remote>
-         <alias>Owner</alias>
-         <copy-policy>
-            <descriptor-copy-policy>
-               <type>oracle.toplink.internal.descriptors.CopyPolicy</type>
-            </descriptor-copy-policy>
-         </copy-policy>
-         <instantiation-policy>
-            <descriptor-instantiation-policy>
-               <type>oracle.toplink.internal.descriptors.InstantiationPolicy</type>
-            </descriptor-instantiation-policy>
-         </instantiation-policy>
-         <query-manager>
-            <descriptor-query-manager>
-               <existence-check>Check database</existence-check>
-            </descriptor-query-manager>
-         </query-manager>
-         <event-manager>
-            <descriptor-event-manager empty-aggregate="true"/>
-         </event-manager>
-         <mappings>
-            <database-mapping>
-               <attribute-name>address</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getAddress</get-method-name>
-               <set-method-name>setAddress</set-method-name>
-               <field-name>OWNERS.ADDRESS</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>city</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getCity</get-method-name>
-               <set-method-name>setCity</set-method-name>
-               <field-name>OWNERS.CITY</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>firstName</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getFirstName</get-method-name>
-               <set-method-name>setFirstName</set-method-name>
-               <field-name>OWNERS.FIRST_NAME</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>id</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getId</get-method-name>
-               <set-method-name>setId</set-method-name>
-               <field-name>OWNERS.ID</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>lastName</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getLastName</get-method-name>
-               <set-method-name>setLastName</set-method-name>
-               <field-name>OWNERS.LAST_NAME</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>pets</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getPetsInternal</get-method-name>
-               <set-method-name>setPetsInternal</set-method-name>
-               <reference-class>org.springframework.samples.petclinic.Pet</reference-class>
-               <relationship-partner-attribute-name>owner</relationship-partner-attribute-name>
-               <is-private-owned>true</is-private-owned>
-               <uses-batch-reading>false</uses-batch-reading>
-               <indirection-policy>
-                  <mapping-indirection-policy>
-                     <type>oracle.toplink.internal.indirection.NoIndirectionPolicy</type>
-                  </mapping-indirection-policy>
-               </indirection-policy>
-               <container-policy>
-                  <mapping-container-policy>
-                     <container-class>java.util.HashSet</container-class>
-                     <type>oracle.toplink.internal.queryframework.CollectionContainerPolicy</type>
-                  </mapping-container-policy>
-               </container-policy>
-               <source-key-fields>
-                  <field>OWNERS.ID</field>
-               </source-key-fields>
-               <target-foreign-key-fields>
-                  <field>PETS.OWNER_ID</field>
-               </target-foreign-key-fields>
-               <type>oracle.toplink.mappings.OneToManyMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>telephone</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getTelephone</get-method-name>
-               <set-method-name>setTelephone</set-method-name>
-               <field-name>OWNERS.TELEPHONE</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-         </mappings>
-         <type>oracle.toplink.publicinterface.Descriptor</type>
-      </descriptor>
-      <descriptor>
-         <java-class>org.springframework.samples.petclinic.Pet</java-class>
-         <tables>
-            <table>PETS</table>
-         </tables>
-         <primary-key-fields>
-            <field>PETS.ID</field>
-         </primary-key-fields>
-         <descriptor-type-value>Normal</descriptor-type-value>
-         <sequence-number-field>PETS.ID</sequence-number-field>
-         <sequence-number-name>PETS_SEQ</sequence-number-name>
-         <identity-map-class>oracle.toplink.internal.identitymaps.SoftCacheWeakIdentityMap</identity-map-class>
-         <remote-identity-map-class>oracle.toplink.internal.identitymaps.SoftCacheWeakIdentityMap</remote-identity-map-class>
-         <identity-map-size>100</identity-map-size>
-         <remote-identity-map-size>100</remote-identity-map-size>
-         <should-always-refresh-cache>false</should-always-refresh-cache>
-         <should-always-refresh-cache-on-remote>false</should-always-refresh-cache-on-remote>
-         <should-only-refresh-cache-if-newer-version>false</should-only-refresh-cache-if-newer-version>
-         <should-disable-cache-hits>false</should-disable-cache-hits>
-         <should-disable-cache-hits-on-remote>false</should-disable-cache-hits-on-remote>
-         <alias>Pet</alias>
-         <copy-policy>
-            <descriptor-copy-policy>
-               <type>oracle.toplink.internal.descriptors.CopyPolicy</type>
-            </descriptor-copy-policy>
-         </copy-policy>
-         <instantiation-policy>
-            <descriptor-instantiation-policy>
-               <type>oracle.toplink.internal.descriptors.InstantiationPolicy</type>
-            </descriptor-instantiation-policy>
-         </instantiation-policy>
-         <query-manager>
-            <descriptor-query-manager>
-               <existence-check>Check database</existence-check>
-            </descriptor-query-manager>
-         </query-manager>
-         <event-manager>
-            <descriptor-event-manager empty-aggregate="true"/>
-         </event-manager>
-         <mappings>
-            <database-mapping>
-               <attribute-name>birthDate</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getBirthDate</get-method-name>
-               <set-method-name>setBirthDate</set-method-name>
-               <field-name>PETS.BIRTH_DATE</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>id</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getId</get-method-name>
-               <set-method-name>setId</set-method-name>
-               <field-name>PETS.ID</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>name</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getName</get-method-name>
-               <set-method-name>setName</set-method-name>
-               <field-name>PETS.NAME</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>owner</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getOwner</get-method-name>
-               <set-method-name>setOwner</set-method-name>
-               <reference-class>org.springframework.samples.petclinic.Owner</reference-class>
-               <relationship-partner-attribute-name>pets</relationship-partner-attribute-name>
-               <is-private-owned>false</is-private-owned>
-               <uses-batch-reading>false</uses-batch-reading>
-               <indirection-policy>
-                  <mapping-indirection-policy>
-                     <type>oracle.toplink.internal.indirection.NoIndirectionPolicy</type>
-                  </mapping-indirection-policy>
-               </indirection-policy>
-               <uses-joining>false</uses-joining>
-               <foreign-key-fields>
-                  <field>PETS.OWNER_ID</field>
-               </foreign-key-fields>
-               <source-to-target-key-field-associations>
-                  <association>
-                     <association-key>PETS.OWNER_ID</association-key>
-                     <association-value>OWNERS.ID</association-value>
-                  </association>
-               </source-to-target-key-field-associations>
-               <type>oracle.toplink.mappings.OneToOneMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>type</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getType</get-method-name>
-               <set-method-name>setType</set-method-name>
-               <reference-class>org.springframework.samples.petclinic.PetType</reference-class>
-               <is-private-owned>false</is-private-owned>
-               <uses-batch-reading>false</uses-batch-reading>
-               <indirection-policy>
-                  <mapping-indirection-policy>
-                     <type>oracle.toplink.internal.indirection.NoIndirectionPolicy</type>
-                  </mapping-indirection-policy>
-               </indirection-policy>
-               <uses-joining>false</uses-joining>
-               <foreign-key-fields>
-                  <field>PETS.TYPE_ID</field>
-               </foreign-key-fields>
-               <source-to-target-key-field-associations>
-                  <association>
-                     <association-key>PETS.TYPE_ID</association-key>
-                     <association-value>TYPES.ID</association-value>
-                  </association>
-               </source-to-target-key-field-associations>
-               <type>oracle.toplink.mappings.OneToOneMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>visits</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getVisitsInternal</get-method-name>
-               <set-method-name>setVisitsInternal</set-method-name>
-               <reference-class>org.springframework.samples.petclinic.Visit</reference-class>
-               <relationship-partner-attribute-name>pet</relationship-partner-attribute-name>
-               <is-private-owned>false</is-private-owned>
-               <uses-batch-reading>false</uses-batch-reading>
-               <indirection-policy>
-                  <mapping-indirection-policy>
-                     <type>oracle.toplink.internal.indirection.NoIndirectionPolicy</type>
-                  </mapping-indirection-policy>
-               </indirection-policy>
-               <container-policy>
-                  <mapping-container-policy>
-                     <container-class>java.util.HashSet</container-class>
-                     <type>oracle.toplink.internal.queryframework.CollectionContainerPolicy</type>
-                  </mapping-container-policy>
-               </container-policy>
-               <source-key-fields>
-                  <field>PETS.ID</field>
-               </source-key-fields>
-               <target-foreign-key-fields>
-                  <field>VISITS.PET_ID</field>
-               </target-foreign-key-fields>
-               <type>oracle.toplink.mappings.OneToManyMapping</type>
-            </database-mapping>
-         </mappings>
-         <type>oracle.toplink.publicinterface.Descriptor</type>
-      </descriptor>
-      <descriptor>
-         <java-class>org.springframework.samples.petclinic.PetType</java-class>
-         <tables>
-            <table>TYPES</table>
-         </tables>
-         <primary-key-fields>
-            <field>TYPES.ID</field>
-         </primary-key-fields>
-         <descriptor-type-value>Normal</descriptor-type-value>
-         <sequence-number-field>TYPES.ID</sequence-number-field>
-         <sequence-number-name>TYPES_SEQ</sequence-number-name>
-         <identity-map-class>oracle.toplink.internal.identitymaps.SoftCacheWeakIdentityMap</identity-map-class>
-         <remote-identity-map-class>oracle.toplink.internal.identitymaps.SoftCacheWeakIdentityMap</remote-identity-map-class>
-         <identity-map-size>100</identity-map-size>
-         <remote-identity-map-size>100</remote-identity-map-size>
-         <should-always-refresh-cache>false</should-always-refresh-cache>
-         <should-always-refresh-cache-on-remote>false</should-always-refresh-cache-on-remote>
-         <should-only-refresh-cache-if-newer-version>false</should-only-refresh-cache-if-newer-version>
-         <should-disable-cache-hits>false</should-disable-cache-hits>
-         <should-disable-cache-hits-on-remote>false</should-disable-cache-hits-on-remote>
-         <alias>PetType</alias>
-         <copy-policy>
-            <descriptor-copy-policy>
-               <type>oracle.toplink.internal.descriptors.CopyPolicy</type>
-            </descriptor-copy-policy>
-         </copy-policy>
-         <instantiation-policy>
-            <descriptor-instantiation-policy>
-               <type>oracle.toplink.internal.descriptors.InstantiationPolicy</type>
-            </descriptor-instantiation-policy>
-         </instantiation-policy>
-         <query-manager>
-            <descriptor-query-manager>
-               <existence-check>Check database</existence-check>
-            </descriptor-query-manager>
-         </query-manager>
-         <event-manager>
-            <descriptor-event-manager empty-aggregate="true"/>
-         </event-manager>
-         <mappings>
-            <database-mapping>
-               <attribute-name>id</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getId</get-method-name>
-               <set-method-name>setId</set-method-name>
-               <field-name>TYPES.ID</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>name</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getName</get-method-name>
-               <set-method-name>setName</set-method-name>
-               <field-name>TYPES.NAME</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-         </mappings>
-         <type>oracle.toplink.publicinterface.Descriptor</type>
-      </descriptor>
-      <descriptor>
-         <java-class>org.springframework.samples.petclinic.Specialty</java-class>
-         <tables>
-            <table>SPECIALTIES</table>
-         </tables>
-         <primary-key-fields>
-            <field>SPECIALTIES.ID</field>
-         </primary-key-fields>
-         <descriptor-type-value>Normal</descriptor-type-value>
-         <sequence-number-field>SPECIALTIES.ID</sequence-number-field>
-         <sequence-number-name>SPECIALITIES_SEQ</sequence-number-name>
-         <identity-map-class>oracle.toplink.internal.identitymaps.SoftCacheWeakIdentityMap</identity-map-class>
-         <remote-identity-map-class>oracle.toplink.internal.identitymaps.SoftCacheWeakIdentityMap</remote-identity-map-class>
-         <identity-map-size>100</identity-map-size>
-         <remote-identity-map-size>100</remote-identity-map-size>
-         <should-always-refresh-cache>false</should-always-refresh-cache>
-         <should-always-refresh-cache-on-remote>false</should-always-refresh-cache-on-remote>
-         <should-only-refresh-cache-if-newer-version>false</should-only-refresh-cache-if-newer-version>
-         <should-disable-cache-hits>false</should-disable-cache-hits>
-         <should-disable-cache-hits-on-remote>false</should-disable-cache-hits-on-remote>
-         <alias>Specialty</alias>
-         <copy-policy>
-            <descriptor-copy-policy>
-               <type>oracle.toplink.internal.descriptors.CopyPolicy</type>
-            </descriptor-copy-policy>
-         </copy-policy>
-         <instantiation-policy>
-            <descriptor-instantiation-policy>
-               <type>oracle.toplink.internal.descriptors.InstantiationPolicy</type>
-            </descriptor-instantiation-policy>
-         </instantiation-policy>
-         <query-manager>
-            <descriptor-query-manager>
-               <existence-check>Check database</existence-check>
-            </descriptor-query-manager>
-         </query-manager>
-         <event-manager>
-            <descriptor-event-manager empty-aggregate="true"/>
-         </event-manager>
-         <mappings>
-            <database-mapping>
-               <attribute-name>id</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getId</get-method-name>
-               <set-method-name>setId</set-method-name>
-               <field-name>SPECIALTIES.ID</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>name</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getName</get-method-name>
-               <set-method-name>setName</set-method-name>
-               <field-name>SPECIALTIES.NAME</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-         </mappings>
-         <type>oracle.toplink.publicinterface.Descriptor</type>
-      </descriptor>
-      <descriptor>
-         <java-class>org.springframework.samples.petclinic.Vet</java-class>
-         <tables>
-            <table>VETS</table>
-         </tables>
-         <primary-key-fields>
-            <field>VETS.ID</field>
-         </primary-key-fields>
-         <descriptor-type-value>Normal</descriptor-type-value>
-         <sequence-number-field>VETS.ID</sequence-number-field>
-         <sequence-number-name>VETS_SEQ</sequence-number-name>
-         <identity-map-class>oracle.toplink.internal.identitymaps.SoftCacheWeakIdentityMap</identity-map-class>
-         <remote-identity-map-class>oracle.toplink.internal.identitymaps.SoftCacheWeakIdentityMap</remote-identity-map-class>
-         <identity-map-size>100</identity-map-size>
-         <remote-identity-map-size>100</remote-identity-map-size>
-         <should-always-refresh-cache>false</should-always-refresh-cache>
-         <should-always-refresh-cache-on-remote>false</should-always-refresh-cache-on-remote>
-         <should-only-refresh-cache-if-newer-version>false</should-only-refresh-cache-if-newer-version>
-         <should-disable-cache-hits>false</should-disable-cache-hits>
-         <should-disable-cache-hits-on-remote>false</should-disable-cache-hits-on-remote>
-         <alias>Vet</alias>
-         <copy-policy>
-            <descriptor-copy-policy>
-               <type>oracle.toplink.internal.descriptors.CopyPolicy</type>
-            </descriptor-copy-policy>
-         </copy-policy>
-         <instantiation-policy>
-            <descriptor-instantiation-policy>
-               <type>oracle.toplink.internal.descriptors.InstantiationPolicy</type>
-            </descriptor-instantiation-policy>
-         </instantiation-policy>
-         <query-manager>
-            <descriptor-query-manager>
-               <existence-check>Check database</existence-check>
-            </descriptor-query-manager>
-         </query-manager>
-         <event-manager>
-            <descriptor-event-manager empty-aggregate="true"/>
-         </event-manager>
-         <mappings>
-            <database-mapping>
-               <attribute-name>firstName</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getFirstName</get-method-name>
-               <set-method-name>setFirstName</set-method-name>
-               <field-name>VETS.FIRST_NAME</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>id</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getId</get-method-name>
-               <set-method-name>setId</set-method-name>
-               <field-name>VETS.ID</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>lastName</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getLastName</get-method-name>
-               <set-method-name>setLastName</set-method-name>
-               <field-name>VETS.LAST_NAME</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>specialties</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getSpecialtiesInternal</get-method-name>
-               <set-method-name>setSpecialtiesInternal</set-method-name>
-               <reference-class>org.springframework.samples.petclinic.Specialty</reference-class>
-               <is-private-owned>false</is-private-owned>
-               <uses-batch-reading>false</uses-batch-reading>
-               <indirection-policy>
-                  <mapping-indirection-policy>
-                     <type>oracle.toplink.internal.indirection.NoIndirectionPolicy</type>
-                  </mapping-indirection-policy>
-               </indirection-policy>
-               <container-policy>
-                  <mapping-container-policy>
-                     <container-class>java.util.HashSet</container-class>
-                     <type>oracle.toplink.internal.queryframework.CollectionContainerPolicy</type>
-                  </mapping-container-policy>
-               </container-policy>
-               <relation-table>VET_SPECIALTIES</relation-table>
-               <source-key-fields>
-                  <field>VETS.ID</field>
-               </source-key-fields>
-               <source-relation-key-fields>
-                  <field>VET_SPECIALTIES.VET_ID</field>
-               </source-relation-key-fields>
-               <target-key-fields>
-                  <field>SPECIALTIES.ID</field>
-               </target-key-fields>
-               <target-relation-key-fields>
-                  <field>VET_SPECIALTIES.SPECIALTY_ID</field>
-               </target-relation-key-fields>
-               <type>oracle.toplink.mappings.ManyToManyMapping</type>
-            </database-mapping>
-         </mappings>
-         <type>oracle.toplink.publicinterface.Descriptor</type>
-      </descriptor>
-      <descriptor>
-         <java-class>org.springframework.samples.petclinic.Visit</java-class>
-         <tables>
-            <table>VISITS</table>
-         </tables>
-         <primary-key-fields>
-            <field>VISITS.ID</field>
-         </primary-key-fields>
-         <descriptor-type-value>Normal</descriptor-type-value>
-         <sequence-number-field>VISITS.ID</sequence-number-field>
-         <sequence-number-name>VISITS_SEQ</sequence-number-name>
-         <identity-map-class>oracle.toplink.internal.identitymaps.SoftCacheWeakIdentityMap</identity-map-class>
-         <remote-identity-map-class>oracle.toplink.internal.identitymaps.SoftCacheWeakIdentityMap</remote-identity-map-class>
-         <identity-map-size>100</identity-map-size>
-         <remote-identity-map-size>100</remote-identity-map-size>
-         <should-always-refresh-cache>false</should-always-refresh-cache>
-         <should-always-refresh-cache-on-remote>false</should-always-refresh-cache-on-remote>
-         <should-only-refresh-cache-if-newer-version>false</should-only-refresh-cache-if-newer-version>
-         <should-disable-cache-hits>false</should-disable-cache-hits>
-         <should-disable-cache-hits-on-remote>false</should-disable-cache-hits-on-remote>
-         <alias>Visit</alias>
-         <copy-policy>
-            <descriptor-copy-policy>
-               <type>oracle.toplink.internal.descriptors.CopyPolicy</type>
-            </descriptor-copy-policy>
-         </copy-policy>
-         <instantiation-policy>
-            <descriptor-instantiation-policy>
-               <type>oracle.toplink.internal.descriptors.InstantiationPolicy</type>
-            </descriptor-instantiation-policy>
-         </instantiation-policy>
-         <query-manager>
-            <descriptor-query-manager>
-               <existence-check>Check database</existence-check>
-            </descriptor-query-manager>
-         </query-manager>
-         <event-manager>
-            <descriptor-event-manager empty-aggregate="true"/>
-         </event-manager>
-         <mappings>
-            <database-mapping>
-               <attribute-name>date</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getDate</get-method-name>
-               <set-method-name>setDate</set-method-name>
-               <field-name>VISITS.VISIT_DATE</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>description</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getDescription</get-method-name>
-               <set-method-name>setDescription</set-method-name>
-               <field-name>VISITS.DESCRIPTION</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>id</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getId</get-method-name>
-               <set-method-name>setId</set-method-name>
-               <field-name>VISITS.ID</field-name>
-               <type>oracle.toplink.mappings.DirectToFieldMapping</type>
-            </database-mapping>
-            <database-mapping>
-               <attribute-name>pet</attribute-name>
-               <read-only>false</read-only>
-               <get-method-name>getPet</get-method-name>
-               <set-method-name>setPet</set-method-name>
-               <reference-class>org.springframework.samples.petclinic.Pet</reference-class>
-               <relationship-partner-attribute-name>visits</relationship-partner-attribute-name>
-               <is-private-owned>false</is-private-owned>
-               <uses-batch-reading>false</uses-batch-reading>
-               <indirection-policy>
-                  <mapping-indirection-policy>
-                     <type>oracle.toplink.internal.indirection.NoIndirectionPolicy</type>
-                  </mapping-indirection-policy>
-               </indirection-policy>
-               <uses-joining>false</uses-joining>
-               <foreign-key-fields>
-                  <field>VISITS.PET_ID</field>
-               </foreign-key-fields>
-               <source-to-target-key-field-associations>
-                  <association>
-                     <association-key>VISITS.PET_ID</association-key>
-                     <association-value>PETS.ID</association-value>
-                  </association>
-               </source-to-target-key-field-associations>
-               <type>oracle.toplink.mappings.OneToOneMapping</type>
-            </database-mapping>
-         </mappings>
-         <type>oracle.toplink.publicinterface.Descriptor</type>
-      </descriptor>
-   </descriptors>
-</project>
+<?xml version="1.0" encoding="UTF-8"?>
+<toplink:object-persistence version="Oracle TopLink - 10g Release 3 (10.1.3.0.0) (Build 060118)" xmlns:opm="http://xmlns.oracle.com/ias/xsds/opm" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:toplink="http://xmlns.oracle.com/ias/xsds/toplink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <opm:name>toplink-project</opm:name>
+   <opm:class-mapping-descriptors>
+      <opm:class-mapping-descriptor xsi:type="toplink:relational-class-mapping-descriptor">
+         <opm:class>org.springframework.samples.petclinic.Owner</opm:class>
+         <opm:alias>Owner</opm:alias>
+         <opm:primary-key>
+            <opm:field table="OWNERS" name="ID" xsi:type="opm:column"/>
+         </opm:primary-key>
+         <opm:events xsi:type="toplink:event-policy"/>
+         <opm:querying xsi:type="toplink:query-policy"/>
+         <opm:attribute-mappings>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>address</opm:attribute-name>
+               <opm:field table="OWNERS" name="ADDRESS" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>city</opm:attribute-name>
+               <opm:field table="OWNERS" name="CITY" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>firstName</opm:attribute-name>
+               <opm:field table="OWNERS" name="FIRST_NAME" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>id</opm:attribute-name>
+               <opm:field table="OWNERS" name="ID" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>lastName</opm:attribute-name>
+               <opm:field table="OWNERS" name="LAST_NAME" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:one-to-many-mapping">
+               <opm:attribute-name>pets</opm:attribute-name>
+               <opm:reference-class>org.springframework.samples.petclinic.Pet</opm:reference-class>
+               <opm:target-foreign-key>
+                  <opm:field-reference>
+                     <opm:source-field table="PETS" name="OWNER_ID" xsi:type="opm:column"/>
+                     <opm:target-field table="OWNERS" name="ID" xsi:type="opm:column"/>
+                  </opm:field-reference>
+               </opm:target-foreign-key>
+               <toplink:container xsi:type="toplink:container-policy">
+                  <toplink:collection-type>oracle.toplink.indirection.IndirectSet</toplink:collection-type>
+               </toplink:container>
+               <toplink:indirection xsi:type="toplink:transparent-collection-indirection-policy"/>
+               <toplink:selection-query xsi:type="toplink:read-all-query">
+                  <toplink:container xsi:type="toplink:container-policy">
+                     <toplink:collection-type>oracle.toplink.indirection.IndirectSet</toplink:collection-type>
+                  </toplink:container>
+               </toplink:selection-query>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>telephone</opm:attribute-name>
+               <opm:field table="OWNERS" name="TELEPHONE" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+         </opm:attribute-mappings>
+         <toplink:descriptor-type>independent</toplink:descriptor-type>
+         <toplink:sequencing>
+            <toplink:sequence-name>SEQ</toplink:sequence-name>
+            <toplink:sequence-field table="OWNERS" name="ID" xsi:type="opm:column"/>
+         </toplink:sequencing>
+         <toplink:instantiation/>
+         <toplink:copying xsi:type="toplink:instantiation-copy-policy"/>
+         <toplink:change-policy xsi:type="toplink:deferred-detection-change-policy"/>
+         <toplink:tables>
+            <toplink:table name="OWNERS"/>
+         </toplink:tables>
+      </opm:class-mapping-descriptor>
+      <opm:class-mapping-descriptor xsi:type="toplink:relational-class-mapping-descriptor">
+         <opm:class>org.springframework.samples.petclinic.Pet</opm:class>
+         <opm:alias>Pet</opm:alias>
+         <opm:primary-key>
+            <opm:field table="PETS" name="ID" xsi:type="opm:column"/>
+         </opm:primary-key>
+         <opm:events xsi:type="toplink:event-policy"/>
+         <opm:querying xsi:type="toplink:query-policy"/>
+         <opm:attribute-mappings>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>birthDate</opm:attribute-name>
+               <opm:field table="PETS" name="BIRTH_DATE" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>id</opm:attribute-name>
+               <opm:field table="PETS" name="ID" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>name</opm:attribute-name>
+               <opm:field table="PETS" name="NAME" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:one-to-one-mapping">
+               <opm:attribute-name>owner</opm:attribute-name>
+               <opm:reference-class>org.springframework.samples.petclinic.Owner</opm:reference-class>
+               <opm:foreign-key>
+                  <opm:field-reference>
+                     <opm:source-field table="PETS" name="OWNER_ID" xsi:type="opm:column"/>
+                     <opm:target-field table="OWNERS" name="ID" xsi:type="opm:column"/>
+                  </opm:field-reference>
+               </opm:foreign-key>
+               <opm:foreign-key-fields>
+                  <opm:field table="PETS" name="OWNER_ID" xsi:type="opm:column"/>
+               </opm:foreign-key-fields>
+               <toplink:selection-query xsi:type="toplink:read-object-query"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:one-to-one-mapping">
+               <opm:attribute-name>type</opm:attribute-name>
+               <opm:reference-class>org.springframework.samples.petclinic.PetType</opm:reference-class>
+               <opm:foreign-key>
+                  <opm:field-reference>
+                     <opm:source-field table="PETS" name="TYPE_ID" xsi:type="opm:column"/>
+                     <opm:target-field table="TYPES" name="ID" xsi:type="opm:column"/>
+                  </opm:field-reference>
+               </opm:foreign-key>
+               <opm:foreign-key-fields>
+                  <opm:field table="PETS" name="TYPE_ID" xsi:type="opm:column"/>
+               </opm:foreign-key-fields>
+               <toplink:selection-query xsi:type="toplink:read-object-query"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:one-to-many-mapping">
+               <opm:attribute-name>visits</opm:attribute-name>
+               <opm:reference-class>org.springframework.samples.petclinic.Visit</opm:reference-class>
+               <opm:target-foreign-key>
+                  <opm:field-reference>
+                     <opm:source-field table="VISITS" name="PET_ID" xsi:type="opm:column"/>
+                     <opm:target-field table="PETS" name="ID" xsi:type="opm:column"/>
+                  </opm:field-reference>
+               </opm:target-foreign-key>
+               <toplink:container xsi:type="toplink:container-policy">
+                  <toplink:collection-type>oracle.toplink.indirection.IndirectSet</toplink:collection-type>
+               </toplink:container>
+               <toplink:indirection xsi:type="toplink:transparent-collection-indirection-policy"/>
+               <toplink:selection-query xsi:type="toplink:read-all-query">
+                  <toplink:container xsi:type="toplink:container-policy">
+                     <toplink:collection-type>oracle.toplink.indirection.IndirectSet</toplink:collection-type>
+                  </toplink:container>
+               </toplink:selection-query>
+            </opm:attribute-mapping>
+         </opm:attribute-mappings>
+         <toplink:descriptor-type>independent</toplink:descriptor-type>
+         <toplink:sequencing>
+            <toplink:sequence-name>SEQ</toplink:sequence-name>
+            <toplink:sequence-field table="PETS" name="ID" xsi:type="opm:column"/>
+         </toplink:sequencing>
+         <toplink:instantiation/>
+         <toplink:copying xsi:type="toplink:instantiation-copy-policy"/>
+         <toplink:change-policy xsi:type="toplink:deferred-detection-change-policy"/>
+         <toplink:tables>
+            <toplink:table name="PETS"/>
+         </toplink:tables>
+      </opm:class-mapping-descriptor>
+      <opm:class-mapping-descriptor xsi:type="toplink:relational-class-mapping-descriptor">
+         <opm:class>org.springframework.samples.petclinic.PetType</opm:class>
+         <opm:alias>PetType</opm:alias>
+         <opm:primary-key>
+            <opm:field table="TYPES" name="ID" xsi:type="opm:column"/>
+         </opm:primary-key>
+         <opm:events xsi:type="toplink:event-policy"/>
+         <opm:querying xsi:type="toplink:query-policy"/>
+         <opm:attribute-mappings>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>id</opm:attribute-name>
+               <opm:field table="TYPES" name="ID" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>name</opm:attribute-name>
+               <opm:field table="TYPES" name="NAME" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+         </opm:attribute-mappings>
+         <toplink:descriptor-type>independent</toplink:descriptor-type>
+         <toplink:sequencing>
+            <toplink:sequence-name>SEQ</toplink:sequence-name>
+            <toplink:sequence-field table="TYPES" name="ID" xsi:type="opm:column"/>
+         </toplink:sequencing>
+         <toplink:instantiation/>
+         <toplink:copying xsi:type="toplink:instantiation-copy-policy"/>
+         <toplink:change-policy xsi:type="toplink:deferred-detection-change-policy"/>
+         <toplink:tables>
+            <toplink:table name="TYPES"/>
+         </toplink:tables>
+      </opm:class-mapping-descriptor>
+      <opm:class-mapping-descriptor xsi:type="toplink:relational-class-mapping-descriptor">
+         <opm:class>org.springframework.samples.petclinic.Specialty</opm:class>
+         <opm:alias>Specialty</opm:alias>
+         <opm:primary-key>
+            <opm:field table="SPECIALTIES" name="ID" xsi:type="opm:column"/>
+         </opm:primary-key>
+         <opm:events xsi:type="toplink:event-policy"/>
+         <opm:querying xsi:type="toplink:query-policy"/>
+         <opm:attribute-mappings>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>id</opm:attribute-name>
+               <opm:field table="SPECIALTIES" name="ID" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>name</opm:attribute-name>
+               <opm:field table="SPECIALTIES" name="NAME" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+         </opm:attribute-mappings>
+         <toplink:descriptor-type>independent</toplink:descriptor-type>
+         <toplink:sequencing>
+            <toplink:sequence-name>SEQ</toplink:sequence-name>
+            <toplink:sequence-field table="SPECIALTIES" name="ID" xsi:type="opm:column"/>
+         </toplink:sequencing>
+         <toplink:instantiation/>
+         <toplink:copying xsi:type="toplink:instantiation-copy-policy"/>
+         <toplink:change-policy xsi:type="toplink:deferred-detection-change-policy"/>
+         <toplink:tables>
+            <toplink:table name="SPECIALTIES"/>
+         </toplink:tables>
+      </opm:class-mapping-descriptor>
+      <opm:class-mapping-descriptor xsi:type="toplink:relational-class-mapping-descriptor">
+         <opm:class>org.springframework.samples.petclinic.Vet</opm:class>
+         <opm:alias>Vet</opm:alias>
+         <opm:primary-key>
+            <opm:field table="VETS" name="ID" xsi:type="opm:column"/>
+         </opm:primary-key>
+         <opm:events xsi:type="toplink:event-policy"/>
+         <opm:querying xsi:type="toplink:query-policy"/>
+         <opm:attribute-mappings>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>firstName</opm:attribute-name>
+               <opm:field table="VETS" name="FIRST_NAME" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>id</opm:attribute-name>
+               <opm:field table="VETS" name="ID" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>lastName</opm:attribute-name>
+               <opm:field table="VETS" name="LAST_NAME" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:many-to-many-mapping">
+               <opm:attribute-name>specialties</opm:attribute-name>
+               <opm:reference-class>org.springframework.samples.petclinic.Specialty</opm:reference-class>
+               <opm:relation-table>VET_SPECIALTIES</opm:relation-table>
+               <opm:source-relation-foreign-key>
+                  <opm:field-reference>
+                     <opm:source-field table="VET_SPECIALTIES" name="VET_ID" xsi:type="opm:column"/>
+                     <opm:target-field table="VETS" name="ID" xsi:type="opm:column"/>
+                  </opm:field-reference>
+               </opm:source-relation-foreign-key>
+               <opm:target-relation-foreign-key>
+                  <opm:field-reference>
+                     <opm:source-field table="VET_SPECIALTIES" name="SPECIALTY_ID" xsi:type="opm:column"/>
+                     <opm:target-field table="SPECIALTIES" name="ID" xsi:type="opm:column"/>
+                  </opm:field-reference>
+               </opm:target-relation-foreign-key>
+               <toplink:container xsi:type="toplink:container-policy">
+                  <toplink:collection-type>oracle.toplink.indirection.IndirectSet</toplink:collection-type>
+               </toplink:container>
+               <toplink:indirection xsi:type="toplink:transparent-collection-indirection-policy"/>
+               <toplink:selection-query xsi:type="toplink:read-all-query">
+                  <toplink:container xsi:type="toplink:container-policy">
+                     <toplink:collection-type>oracle.toplink.indirection.IndirectSet</toplink:collection-type>
+                  </toplink:container>
+               </toplink:selection-query>
+               <toplink:insert-query xsi:type="toplink:data-modify-query"/>
+               <toplink:delete-query xsi:type="toplink:data-modify-query"/>
+               <toplink:delete-all-query xsi:type="toplink:data-modify-query"/>
+            </opm:attribute-mapping>
+         </opm:attribute-mappings>
+         <toplink:descriptor-type>independent</toplink:descriptor-type>
+         <toplink:sequencing>
+            <toplink:sequence-name>SEQ</toplink:sequence-name>
+            <toplink:sequence-field table="VETS" name="ID" xsi:type="opm:column"/>
+         </toplink:sequencing>
+         <toplink:instantiation/>
+         <toplink:copying xsi:type="toplink:instantiation-copy-policy"/>
+         <toplink:change-policy xsi:type="toplink:deferred-detection-change-policy"/>
+         <toplink:tables>
+            <toplink:table name="VETS"/>
+         </toplink:tables>
+      </opm:class-mapping-descriptor>
+      <opm:class-mapping-descriptor xsi:type="toplink:relational-class-mapping-descriptor">
+         <opm:class>org.springframework.samples.petclinic.Visit</opm:class>
+         <opm:alias>Visit</opm:alias>
+         <opm:primary-key>
+            <opm:field table="VISITS" name="ID" xsi:type="opm:column"/>
+         </opm:primary-key>
+         <opm:events xsi:type="toplink:event-policy"/>
+         <opm:querying xsi:type="toplink:query-policy"/>
+         <opm:attribute-mappings>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>date</opm:attribute-name>
+               <opm:field table="VISITS" name="VISIT_DATE" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>description</opm:attribute-name>
+               <opm:field table="VISITS" name="DESCRIPTION" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:direct-mapping">
+               <opm:attribute-name>id</opm:attribute-name>
+               <opm:field table="VISITS" name="ID" xsi:type="opm:column"/>
+            </opm:attribute-mapping>
+            <opm:attribute-mapping xsi:type="toplink:one-to-one-mapping">
+               <opm:attribute-name>pet</opm:attribute-name>
+               <opm:reference-class>org.springframework.samples.petclinic.Pet</opm:reference-class>
+               <opm:foreign-key>
+                  <opm:field-reference>
+                     <opm:source-field table="VISITS" name="PET_ID" xsi:type="opm:column"/>
+                     <opm:target-field table="PETS" name="ID" xsi:type="opm:column"/>
+                  </opm:field-reference>
+               </opm:foreign-key>
+               <opm:foreign-key-fields>
+                  <opm:field table="VISITS" name="PET_ID" xsi:type="opm:column"/>
+               </opm:foreign-key-fields>
+               <toplink:selection-query xsi:type="toplink:read-object-query"/>
+            </opm:attribute-mapping>
+         </opm:attribute-mappings>
+         <toplink:descriptor-type>independent</toplink:descriptor-type>
+         <toplink:sequencing>
+            <toplink:sequence-name>SEQ</toplink:sequence-name>
+            <toplink:sequence-field table="VISITS" name="ID" xsi:type="opm:column"/>
+         </toplink:sequencing>
+         <toplink:instantiation/>
+         <toplink:copying xsi:type="toplink:instantiation-copy-policy"/>
+         <toplink:change-policy xsi:type="toplink:deferred-detection-change-policy"/>
+         <toplink:tables>
+            <toplink:table name="VISITS"/>
+         </toplink:tables>
+      </opm:class-mapping-descriptor>
+   </opm:class-mapping-descriptors>
+   <toplink:login xsi:type="toplink:database-login">
+      <toplink:platform-class>oracle.toplink.platform.database.HSQLPlatform</toplink:platform-class>
+      <toplink:user-name>sa</toplink:user-name>
+      <toplink:sequencing>
+         <toplink:default-sequence xsi:type="toplink:native-sequence"/>
+      </toplink:sequencing>
+      <toplink:driver-class>org.hsqldb.jdbcDriver</toplink:driver-class>
+      <toplink:connection-url>jdbc:hsqldb:hsql://localhost:9001</toplink:connection-url>
+   </toplink:login>
+</toplink:object-persistence>
