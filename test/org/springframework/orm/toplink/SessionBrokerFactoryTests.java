@@ -20,7 +20,6 @@ import junit.framework.TestCase;
 import oracle.toplink.exceptions.ValidationException;
 import oracle.toplink.publicinterface.UnitOfWork;
 import oracle.toplink.sessionbroker.SessionBroker;
-import oracle.toplink.sessions.Project;
 import oracle.toplink.sessions.Session;
 
 /**
@@ -48,6 +47,10 @@ public class SessionBrokerFactoryTests extends TestCase {
 		}
 	}
 
+    /**
+     * Insure that the managed TopLink Session proxy is behaving correctly
+     * when it has been initialized with a SessionBroker.  
+     */
 	public void testManagedSessionBroker() {
 		SessionBroker client = new MockClientSessionBroker();
 		SessionBroker broker = new MockServerSessionBroker(client);
@@ -57,6 +60,7 @@ public class SessionBrokerFactoryTests extends TestCase {
 
 		Session session = factory.createManagedClientSession();
 		assertEquals(client, session.getActiveSession());
+        assertNotNull(session.getActiveUnitOfWork());
 		assertEquals(session.getActiveUnitOfWork(), session.getActiveUnitOfWork());
 	}
 
@@ -64,7 +68,6 @@ public class SessionBrokerFactoryTests extends TestCase {
 	private class MockSingleSessionBroker extends SessionBroker {
 
 		public MockSingleSessionBroker() {
-			super(new Project());
 		}
 
 		public SessionBroker acquireClientSessionBroker() {
@@ -78,7 +81,6 @@ public class SessionBrokerFactoryTests extends TestCase {
 		private SessionBroker client;
 
 		public MockServerSessionBroker(SessionBroker client) {
-			super(new Project());
 			this.client = client;
 		}
 
@@ -91,12 +93,10 @@ public class SessionBrokerFactoryTests extends TestCase {
 	private class MockClientSessionBroker extends SessionBroker {
 
 		public MockClientSessionBroker() {
-			super(new Project());
 		}
 
 		public UnitOfWork acquireUnitOfWork() {
-			return new UnitOfWork();
+			return new UnitOfWork(this);
 		}
 	}
-
 }
