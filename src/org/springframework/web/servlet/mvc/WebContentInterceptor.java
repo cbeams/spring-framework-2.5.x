@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	/**
 	 * Map specific URL paths to specific cache seconds.
 	 * <p>Overrides the default cache seconds setting of this interceptor.
-	 * Can specify "-1" to exclude an URL path from default caching.
+	 * Can specify "-1" to exclude a URL path from default caching.
 	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
 	 * and a various Ant-style pattern matches, e.g. a registered "/t*" matches
 	 * both "/test" and "/team". For details, see the AntPathMatcher javadoc.
