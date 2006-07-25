@@ -17,6 +17,7 @@
 package org.springframework.jms.listener;
 
 import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
@@ -27,9 +28,11 @@ import javax.jms.Session;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.Lifecycle;
 import org.springframework.jms.JmsException;
+import org.springframework.jms.connection.ConnectionHolder;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Abstract base class for message listener containers. Can either host
@@ -504,14 +507,56 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @param message the received JMS Message
 	 * @throws JMSException if thrown by JMS API methods
 	 * @see #setMessageListener
-	 * @see #invokeListener(javax.jms.MessageListener, javax.jms.Message)
 	 */
 	protected void invokeListener(Session session, Message message) throws JMSException {
-		if (getMessageListener() instanceof SessionAwareMessageListener) {
-			invokeListener((SessionAwareMessageListener) getMessageListener(), session, message);
+		Session sessionToExpose = session;
+		Connection con = getConnection();
+		ConnectionFactory cf = getConnectionFactory();
+		ConnectionHolder conHolder = null;
+		try {
+			if (!isExposeListenerSession()) {
+				// We need to expose a separate Session.
+				con = createConnection();
+				sessionToExpose = createSession(con);
+			}
+			// Bind the Session to the thread for JmsTemplate access.
+			conHolder = new ConnectionHolder(con, sessionToExpose);
+			TransactionSynchronizationManager.bindResource(cf, conHolder);
+			// Actually invoke the message listener...
+			doInvokeListener(sessionToExpose, message);
+			// Clean up specially exposed Session, if any.
+			if (sessionToExpose != session) {
+				if (sessionToExpose.getTransacted() && isSessionTransacted()) {
+					// Transacted session created by this container -> commit.
+					JmsUtils.commitIfNecessary(sessionToExpose);
+				}
+			}
 		}
-		else if (getMessageListener() instanceof MessageListener) {
-			((MessageListener) getMessageListener()).onMessage(message);
+		finally {
+			if (conHolder != null) {
+				TransactionSynchronizationManager.unbindResource(cf);
+			}
+			if (sessionToExpose != session) {
+				JmsUtils.closeSession(sessionToExpose);
+				JmsUtils.closeConnection(con);
+			}
+		}
+	}
+
+	/**
+	 * Invoke the specified listener: either as standard JMS MessageListener
+	 * or (preferably) as Spring SessionAwareMessageListener.
+	 * @param session the JMS Session to work on
+	 * @param message the received JMS Message
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see #setMessageListener
+	 */
+	protected void doInvokeListener(Session session, Message message) throws JMSException {
+		if (getMessageListener() instanceof MessageListener) {
+			doInvokeListener((MessageListener) getMessageListener(), message);
+		}
+		else if (getMessageListener() instanceof SessionAwareMessageListener) {
+			doInvokeListener((SessionAwareMessageListener) getMessageListener(), session, message);
 		}
 		else {
 			throw new IllegalArgumentException("Only MessageListener and SessionAwareMessageListener supported");
@@ -527,7 +572,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @throws JMSException if thrown by JMS API methods
 	 * @see javax.jms.MessageListener#onMessage
 	 */
-	protected void invokeListener(MessageListener listener, Message message) throws JMSException {
+	protected void doInvokeListener(MessageListener listener, Message message) throws JMSException {
 		listener.onMessage(message);
 	}
 
@@ -542,30 +587,10 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @see SessionAwareMessageListener
 	 * @see #setExposeListenerSession
 	 */
-	protected void invokeListener(SessionAwareMessageListener listener, Session session, Message message)
+	protected void doInvokeListener(SessionAwareMessageListener listener, Session session, Message message)
 			throws JMSException {
 
-		Session sessionToExpose = session;
-		Connection con = null;
-		try {
-			if (!isExposeListenerSession()) {
-				con = createConnection();
-				sessionToExpose = createSession(con);
-			}
-			((SessionAwareMessageListener) getMessageListener()).onMessage(message, sessionToExpose);
-			if (sessionToExpose != session) {
-				if (sessionToExpose.getTransacted() && isSessionTransacted()) {
-					// Transacted session created by this container -> commit.
-					JmsUtils.commitIfNecessary(sessionToExpose);
-				}
-			}
-		}
-		finally {
-			if (sessionToExpose != session) {
-				JmsUtils.closeSession(sessionToExpose);
-				JmsUtils.closeConnection(con);
-			}
-		}
+		listener.onMessage(message, session);
 	}
 
 	/**

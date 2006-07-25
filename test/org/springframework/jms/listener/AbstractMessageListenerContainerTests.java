@@ -17,6 +17,7 @@
 package org.springframework.jms.listener;
 
 import junit.framework.TestCase;
+
 import org.springframework.test.AssertThrows;
 
 /**
@@ -26,23 +27,23 @@ import org.springframework.test.AssertThrows;
  */
 public abstract class AbstractMessageListenerContainerTests extends TestCase {
 
-    protected abstract AbstractMessageListenerContainer getContainer();
+	protected abstract AbstractMessageListenerContainer getContainer();
 
 
-    public void testSettingMessageListenerToANullType() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                getContainer().setMessageListener(null);
-            }
-        }.runTest();
-    }
+	public void testSettingMessageListenerToANullType() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				getContainer().setMessageListener(null);
+			}
+		}.runTest();
+	}
 
-    public void testSettingMessageListenerToAnUnsupportedType() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                getContainer().setMessageListener("Bingo");
-            }
-        }.runTest();
-    }
+	public void testSettingMessageListenerToAnUnsupportedType() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				getContainer().setMessageListener("Bingo");
+			}
+		}.runTest();
+	}
 
 }
