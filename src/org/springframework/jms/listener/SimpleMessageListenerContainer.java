@@ -28,6 +28,7 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.jms.Topic;
 
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.support.JmsUtils;
 
 /**
@@ -69,6 +70,8 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 
 	private int concurrentConsumers = 1;
 
+	private TaskExecutor taskExecutor;
+
 	private Set sessions;
 
 	private Set consumers;
@@ -97,7 +100,22 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	public void setConcurrentConsumers(int concurrentConsumers) {
 		this.concurrentConsumers = concurrentConsumers;
 	}
-    
+
+	/**
+	 * Set the Spring TaskExecutor to use for executing the listeners.
+	 * Default is none, that is, to run in the JMS provider's own receive thread,
+	 * blocking the provider's receive endpoint while executing the listener.
+	 * <p>Specify a TaskExecutor for integration with an existing thread pool,
+	 * executing the listener with a received message in a different thread -
+	 * taken from the thread pool, rather than blocking the JMS provider.
+	 * @see #setConcurrentConsumers
+	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
+	 * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
+	 */
+	public void setTaskExecutor(TaskExecutor taskExecutor) {
+		this.taskExecutor = taskExecutor;
+	}
+
 
 	/**
 	 * Validates this instance's configuration.
@@ -148,13 +166,24 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 			destination = resolveDestinationName(session, getDestinationName());
 		}
 		MessageConsumer consumer = createConsumer(session, destination);
-
-		consumer.setMessageListener(new MessageListener() {
-			public void onMessage(Message message) {
-				executeListener(session, message);
-			}
-		});
-
+		if (this.taskExecutor != null) {
+			consumer.setMessageListener(new MessageListener() {
+				public void onMessage(final Message message) {
+					taskExecutor.execute(new Runnable() {
+						public void run() {
+							executeListener(session, message);
+						}
+					});
+				}
+			});
+		}
+		else {
+			consumer.setMessageListener(new MessageListener() {
+				public void onMessage(Message message) {
+					executeListener(session, message);
+				}
+			});
+		}
 		return consumer;
 	}
 
