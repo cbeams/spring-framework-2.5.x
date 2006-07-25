@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,19 @@ import org.springframework.context.ApplicationContextException;
  */
 public class VelocityLayoutView extends VelocityToolboxView {
 
+	/**
+	 * The default {@link #setLayoutUrl(String) layout url}.
+	 */
 	public static final String DEFAULT_LAYOUT_URL = "layout.vm";
 
+	/**
+	 * The default {@link #setLayoutKey(String) layout key}.
+	 */
 	public static final String DEFAULT_LAYOUT_KEY = "layout";
 
+	/**
+	 * The default {@link #setScreenContentKey(String) screen content key}.
+	 */
 	public static final String DEFAULT_SCREEN_CONTENT_KEY = "screen_content";
 
 
@@ -68,7 +77,7 @@ public class VelocityLayoutView extends VelocityToolboxView {
 
 
 	/**
-	 * Set the layout template to use. Default is "layout.vm".
+	 * Set the layout template to use. Default is {@link #DEFAULT_LAYOUT_URL "layout.vm"}.
 	 * @param layoutUrl the template location (relative to the template
 	 * root directory)
 	 */
@@ -82,7 +91,7 @@ public class VelocityLayoutView extends VelocityToolboxView {
 	 * template that they wish to be wrapped with by setting this value in the
 	 * template, for example:<br>
 	 * <code>#set( $layout = "MyLayout.vm" )</code>
-	 * <p>The default key is "layout", as illustrated above.
+	 * <p>Default key is {@link #DEFAULT_LAYOUT_KEY "layout"}, as illustrated above.
 	 * @param layoutKey the name of the key you wish to use in your
 	 * screen content templates to override the layout template
 	 */
@@ -94,8 +103,8 @@ public class VelocityLayoutView extends VelocityToolboxView {
 	 * Set the name of the context key that will hold the content of
 	 * the screen within the layout template. This key must be present
 	 * in the layout template for the current screen to be rendered.
-	 * <p>Default is "screen_content": accessed in VTL as
-	 * <code>$screen_content</code>.
+	 * <p>Default is {@link #DEFAULT_SCREEN_CONTENT_KEY "screen_content"}:
+	 * accessed in VTL as <code>$screen_content</code>.
 	 * @param screenContentKey the name of the screen content key to use
 	 */
 	public void setScreenContentKey(String screenContentKey) {
