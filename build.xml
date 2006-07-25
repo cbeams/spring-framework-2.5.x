@@ -741,16 +741,18 @@
 		<delete dir="${javadoc.dir}" failonerror="false"/>
 		<mkdir dir="${javadoc.dir}"/>
 
-		<javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" windowtitle="Spring Framework"
+		<javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" windowtitle="Spring Framework API 2.0"
 						 source="1.5" access="package" author="true" version="true" use="true"
-						 defaultexcludes="true" stylesheetfile="${doc.dir}/stylesheet.css">
+						 defaultexcludes="true" stylesheetfile="${doc.dir}/stylesheet.css"
+						 overview="${doc.dir}/overview.html"
+						 header='&lt;a href=\"http://www.springframework.org/\" target=\"_top\"&gt;The Spring Framework&lt;/a&gt;'>
 			<arg value="-breakiterator"/>
 			<arg value="-J-Xmx128m"/>
 			<arg value="-J-XX:MaxPermSize=128m"/>
 			<arg value="${javadoc.proxyhost}"/>
 			<arg value="${javadoc.proxyport}"/>
-			<doctitle><![CDATA[<h1>Spring Framework</h1>]]></doctitle>
-			<bottom><![CDATA[<i>Copyright (c) 2002-2006 The Spring Framework Project.</i>]]></bottom>
+			<doctitle><![CDATA[<h1>Spring Framework API 2.0</h1>]]></doctitle>
+			<bottom><![CDATA[<i>Copyright &copy; 2002-2006 <a href="http://www.springframework.org/" target="_top">The Spring Framework</a>.</i>]]></bottom>
 			<classpath refid="all-libs"/>
 			<packageset dir="${src.dir}">
 				<include name="org/springframework/**"/>
@@ -1192,7 +1194,6 @@
 		</fail>
 
 		<antcall target="tld.to.docbook"/>
-		<antcall target="xsd.to.docbook"/>
 
 	</target>
 
@@ -1323,42 +1324,6 @@
 	</target>
 
 	<!-- End of TLD => DocBook targets -->
-
-
-	<!-- Start of Schema => DocBook targets -->
-
-	<target name="xsd.to.docbook" depends="beans.xsd.to.docbook"/>
-
-
-	<target name="beans.xsd.to.docbook">
-
-		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans.xsd"
-					tofile="${doc.ref.dir}/src/spring-beans.xsd"/>
-
-		<antcall target="private.xsd.to.docbook">
-			<param name="input.xsd" value="spring-beans.xsd"/>
-			<param name="input.xsd.file" value="${doc.ref.dir}/src/spring-beans.xsd"/>
-		</antcall>
-
-	</target>
-
-
-	<target name="private.xsd.to.docbook" if="input.xsd">
-
-		<property name="out.file" value="${doc.ref.dir}/src/${input.xsd}.xml"/>
-
-		<xslt processor="trax" in="${input.xsd.file}" out="${out.file}"
-					style="${doc.ref.dir}/styles/xsd.to.docbook.xsl">
-			<param name="title" expression="${input.xsd}"/>
-		</xslt>
-
-		<antcall target="hack.CDATA">
-			<param name="target.file" value="${out.file}"/>
-		</antcall>
-
-	</target>
-    
-	<!-- End of Schema => DocBook targets -->
 
 
 	<target name="doc.html" depends="doc.prepare" description="Compile reference documentation to chunked html">

@@ -300,3 +300,7 @@ div.note * td, div.tip * td, div.warning * td {
 .programlisting * .lineannotation .bold {
 	color: green;
 }
+
+.programlisting * .lineannotation .emphasis {
+	color: green;
+}
