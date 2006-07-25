@@ -50,27 +50,46 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Mock implementation of the HttpServletRequest interface.
+ * Stub implementation of the {@link HttpServletRequest} interface.
  *
- * <p>Used for testing the web framework; also useful
- * for testing application controllers.
+ * <p>Used for testing the web framework; also useful for testing
+ * application controllers.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rick Evans
  * @since 1.0.2
  */
 public class MockHttpServletRequest implements HttpServletRequest {
 
+	/**
+	 * The default protocol: 'http'.
+	 */
 	public static final String DEFAULT_PROTOCOL = "http";
 
+	/**
+	 * The default server address: '127.0.0.1'.
+	 */
 	public static final String DEFAULT_SERVER_ADDR = "127.0.0.1";
 
+	/**
+	 * The default server name: 'localhost'.
+	 */
 	public static final String DEFAULT_SERVER_NAME = "localhost";
 
+	/**
+	 * The default server port: '80'.
+	 */
 	public static final int DEFAULT_SERVER_PORT = 80;
 
+	/**
+	 * The default remote address: '127.0.0.1'.
+	 */
 	public static final String DEFAULT_REMOTE_ADDR = "127.0.0.1";
 
+	/**
+	 * The default remote host: 'localhost'.
+	 */
 	public static final String DEFAULT_REMOTE_HOST = "localhost";
 
 
@@ -159,7 +178,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * Create a new MockHttpServletRequest.
-	 * @param servletContext the ServletContext that the request runs in
+	 * @param servletContext the ServletContext that the request runs in (can be <code>null</code>) 
 	 */
 	public MockHttpServletRequest(ServletContext servletContext) {
 		this.locales.add(Locale.ENGLISH);
@@ -168,7 +187,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * Create a new MockHttpServletRequest.
-	 * @param servletContext the ServletContext that the request runs in
+	 * @param servletContext the ServletContext that the request runs in (can be <code>null</code>)
 	 * @param method the request method
 	 * @param requestURI the request URI
 	 * @see #setMethod
@@ -181,7 +200,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Create a new MockHttpServletRequest with a MockServletContext.
+	 * Create a new MockHttpServletRequest with a {@link MockServletContext}.
 	 * @see MockServletContext
 	 */
 	public MockHttpServletRequest() {
