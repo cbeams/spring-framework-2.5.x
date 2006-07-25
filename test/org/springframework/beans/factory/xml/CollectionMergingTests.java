@@ -17,25 +17,29 @@
 package org.springframework.beans.factory.xml;
 
 import junit.framework.TestCase;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 
 import java.util.*;
 
 /**
+ * Unit and integration tests for the collection merging support.
+ * 
  * @author Rob Harrop
+ * @author Rick Evans
  * @since 2.0M2
  */
 public class CollectionMergingTests extends TestCase {
 
 	private DefaultListableBeanFactory beanFactory;
-	private XmlBeanDefinitionReader reader;
+
 
 	protected void setUp() throws Exception {
 		this.beanFactory = new DefaultListableBeanFactory();
-		this.reader = new XmlBeanDefinitionReader(this.beanFactory);
-		this.reader.loadBeanDefinitions(new ClassPathResource("collectionMerging.xml", getClass()));
+		BeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
+		reader.loadBeanDefinitions(new ClassPathResource("collectionMerging.xml", getClass()));
 	}
 
 
@@ -49,7 +53,7 @@ public class CollectionMergingTests extends TestCase {
 	}
 
 	public void testMergeSet() {
-		TestBean bean = (TestBean)this.beanFactory.getBean("childWithSet");
+		TestBean bean = (TestBean) this.beanFactory.getBean("childWithSet");
 		Set set = bean.getSomeSet();
 		assertEquals("Incorrect size", 2, set.size());
 		assertTrue(set.contains("Rob Harrop"));
@@ -76,11 +80,11 @@ public class CollectionMergingTests extends TestCase {
 		assertEquals(2, map.size());
 		assertNotNull(map.get("Rob"));
 		assertTrue(map.get("Rob") instanceof TestBean);
-		assertEquals("Sally", ((TestBean)map.get("Rob")).getName());
+		assertEquals("Sally", ((TestBean) map.get("Rob")).getName());
 	}
 
 	public void testMergeMap() throws Exception {
-		TestBean bean = (TestBean)this.beanFactory.getBean("childWithMap");
+		TestBean bean = (TestBean) this.beanFactory.getBean("childWithMap");
 		Map map = bean.getSomeMap();
 		assertEquals("Incorrect size", 3, map.size());
 		assertEquals(map.get("Rob"), "Sally");
@@ -89,7 +93,7 @@ public class CollectionMergingTests extends TestCase {
 	}
 
 	public void testMergeList() throws Exception {
-		TestBean bean = (TestBean)this.beanFactory.getBean("childWithList");
+		TestBean bean = (TestBean) this.beanFactory.getBean("childWithList");
 		List list = bean.getSomeList();
 		assertEquals("Incorrect size", 3, list.size());
 		assertEquals(list.get(0), "Rob Harrop");
@@ -98,11 +102,12 @@ public class CollectionMergingTests extends TestCase {
 	}
 
 	public void testMergeProperties() throws Exception {
-		TestBean bean = (TestBean)this.beanFactory.getBean("childWithProps");
+		TestBean bean = (TestBean) this.beanFactory.getBean("childWithProps");
 		Properties props = bean.getSomeProperties();
 		assertEquals("Incorrect size", 3, props.size());
 		assertEquals(props.getProperty("Rob"), "Sally");
 		assertEquals(props.getProperty("Rod"), "Kerry");
 		assertEquals(props.getProperty("Juergen"), "Eva");
 	}
+
 }
