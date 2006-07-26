@@ -16,12 +16,9 @@
 
 package org.springframework.beans.factory;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.util.Assert;
@@ -39,6 +36,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 04.07.2003
+ * @see ListableBeanFactory
  */
 public abstract class BeanFactoryUtils {
 
@@ -65,8 +63,8 @@ public abstract class BeanFactoryUtils {
 
 
 	/**
-	 * Count all bean definitions in any hierarchy in which this factory
-	 * participates. Includes counts of ancestor bean factories.
+	 * Count all beans in any hierarchy in which this factory participates.
+	 * Includes counts of ancestor bean factories.
 	 * <p>Beans that are "overridden" (specified in a descendant factory
 	 * with the same name) are only counted once.
 	 * @param lbf the bean factory
@@ -80,20 +78,10 @@ public abstract class BeanFactoryUtils {
 	 * Return all bean names in the factory, including ancestor factories.
 	 * @param lbf the bean factory
 	 * @return the array of matching bean names, or an empty array if none
+	 * @see #beanNamesForTypeIncludingAncestors
 	 */
 	public static String[] beanNamesIncludingAncestors(ListableBeanFactory lbf) {
-		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		Set result = new HashSet();
-		result.addAll(Arrays.asList(lbf.getBeanDefinitionNames()));
-		if (lbf instanceof HierarchicalBeanFactory) {
-			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
-			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
-				String[] parentResult = beanNamesIncludingAncestors(
-						(ListableBeanFactory) hbf.getParentBeanFactory());
-				result.addAll(Arrays.asList(parentResult));
-			}
-		}
-		return StringUtils.toStringArray(result);
+		return beanNamesForTypeIncludingAncestors(lbf, Object.class);
 	}
 
 
@@ -111,17 +99,16 @@ public abstract class BeanFactoryUtils {
 	 */
 	public static String[] beanNamesForTypeIncludingAncestors(ListableBeanFactory lbf, Class type) {
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		Set result = new HashSet();
-		result.addAll(Arrays.asList(lbf.getBeanNamesForType(type)));
+		String[] result = lbf.getBeanNamesForType(type);
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				result.addAll(Arrays.asList(parentResult));
+				result = StringUtils.mergeStringArrays(result, parentResult);
 			}
 		}
-		return StringUtils.toStringArray(result);
+		return result;
 	}
 
 	/**
@@ -148,17 +135,16 @@ public abstract class BeanFactoryUtils {
 			ListableBeanFactory lbf, Class type, boolean includePrototypes, boolean allowEagerInit) {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		Set result = new HashSet();
-		result.addAll(Arrays.asList(lbf.getBeanNamesForType(type, includePrototypes, allowEagerInit)));
+		String[] result = lbf.getBeanNamesForType(type, includePrototypes, allowEagerInit);
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includePrototypes, allowEagerInit);
-				result.addAll(Arrays.asList(parentResult));
+				result = StringUtils.mergeStringArrays(result, parentResult);
 			}
 		}
-		return StringUtils.toStringArray(result);
+		return result;
 	}
 
 	/**

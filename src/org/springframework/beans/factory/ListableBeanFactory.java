@@ -57,9 +57,8 @@ public interface ListableBeanFactory extends BeanFactory {
 
 	/**
 	 * Check if this bean factory contains a bean definition with the given name.
-	 * <p>Does not consider any hierarchy this factory may participate in.
-	 * Use <code>containsBean</code> to check ancestor factories too.
-	 * <p>Note: Ignores any singleton beans that have been registered by
+	 * <p>Does not consider any hierarchy this factory may participate in,
+	 * and ignores any singleton beans that have been registered by
 	 * other means than bean definitions.
 	 * @param beanName the name of the bean to look for
 	 * @return if this bean factory contains a bean definition with the given name
@@ -69,26 +68,20 @@ public interface ListableBeanFactory extends BeanFactory {
 
 	/**
 	 * Return the number of beans defined in the factory.
-	 * <p>Does not consider any hierarchy this factory may participate in.
-	 * Use BeanFactoryUtils' <code>countBeansIncludingAncestors</code>
-	 * to include beans in ancestor factories too.
-	 * <p>Note: Ignores any singleton beans that have been registered by
+	 * <p>Does not consider any hierarchy this factory may participate in,
+	 * and ignores any singleton beans that have been registered by
 	 * other means than bean definitions.
 	 * @return the number of beans defined in the factory
-	 * @see BeanFactoryUtils#countBeansIncludingAncestors
 	 */
 	int getBeanDefinitionCount();
 
 	/**
 	 * Return the names of all beans defined in this factory.
-	 * <p>Does not consider any hierarchy this factory may participate in.
-	 * Use BeanFactoryUtils' <code>beanNamesIncludingAncestors</code>
-	 * to include beans in ancestor factories too.
-	 * <p>Note: Ignores any singleton beans that have been registered by
+	 * <p>Does not consider any hierarchy this factory may participate in,
+	 * and ignores any singleton beans that have been registered by
 	 * other means than bean definitions.
 	 * @return the names of all beans defined in this factory,
 	 * or an empty array if none defined
-	 * @see BeanFactoryUtils#beanNamesIncludingAncestors(ListableBeanFactory)
 	 */
 	String[] getBeanDefinitionNames();
 	
