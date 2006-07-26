@@ -16,14 +16,15 @@
 
 package org.springframework.util;
 
-import org.springframework.beans.BeanUtils;
-
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.io.PrintStream;
 
 /**
  * Simple {@link List} wrapper class that allows for elements to be
@@ -211,7 +212,6 @@ public class AutoPopulatingList implements List {
 		return backingList.toArray(a);
 	}
 
-
 	private static class ReflectiveElementFactory implements ElementFactory {
 
 		private final Class elementClass;
@@ -224,7 +224,65 @@ public class AutoPopulatingList implements List {
 		}
 
 		public Object createElement(int index) {
-			return BeanUtils.instantiateClass(this.elementClass);
+			try {
+				Constructor ctor = this.elementClass.getDeclaredConstructor((Class[]) null);
+
+				if (!Modifier.isPublic(ctor.getModifiers()) ||
+								!Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) {
+					ctor.setAccessible(true);
+				}
+				return ctor.newInstance((Object[]) null);
+			}
+			catch (InstantiationException ex) {
+				throw new ElementInstantiationException("Unable to instantiate element class '"
+								+ this.elementClass.getName() + "'. Is it an abstract class?", ex);
+			}
+			catch (IllegalAccessException ex) {
+				throw new ElementInstantiationException("Cannot access element class '" + this.elementClass.getName() +
+								". 'Has the class definition changed? Is the constructor accessible?", ex);
+			}
+			catch (IllegalArgumentException ex) {
+				throw new ElementInstantiationException("Illegal arguments for constructor on element class '"
+								+ this.elementClass.getName() + "'", ex);
+			}
+			catch (InvocationTargetException ex) {
+				throw new ElementInstantiationException("Constructor for element class '"
+								+ this.elementClass.getName() + "' threw exception", ex.getTargetException());
+			}
+			catch (NoSuchMethodException ex) {
+				throw new ElementInstantiationException("Element class '" + this.elementClass.getName()
+								+ "' has no public no-arg constructor.", ex);
+			}
+		}
+	}
+
+	private static class ElementInstantiationException extends RuntimeException {
+
+		private Throwable rootCause;
+
+		public ElementInstantiationException(String msg) {
+			super(msg);
+		}
+
+		public ElementInstantiationException(String msg, Throwable ex) {
+			super(msg);
+			this.rootCause = ex;
+		}
+
+		/**
+		 * Print the composite message and the embedded stack trace to the specified stream.
+		 *
+		 * @param ps the print stream
+		 */
+		public void printStackTrace(PrintStream ps) {
+			if (getCause() == null) {
+				super.printStackTrace(ps);
+			}
+			else {
+				ps.println(this);
+				ps.print("Caused by: ");
+				getCause().printStackTrace(ps);
+			}
 		}
 	}
 }
