@@ -198,9 +198,9 @@ public class ModelAndView {
 	}
 
 	/**
-	 * Returns the internal <code>ModelMap</code> instance. Will not be null.
+	 * Return the underlying <code>ModelMap</code> instance (never <code>null</code>).
 	 */
-	protected ModelMap getModelMap() {
+	public ModelMap getModelMap() {
 		if (this.model == null) {
 			this.model = new ModelMap();
 		}
