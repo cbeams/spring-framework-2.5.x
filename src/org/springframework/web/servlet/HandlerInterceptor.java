@@ -93,7 +93,8 @@ public interface HandlerInterceptor {
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler chosen handler to execute, for type and/or instance examination
-	 * @param modelAndView the ModelAndView that the handler returned, can also be <code>null</code>
+	 * @param modelAndView the <code>ModelAndView</code> that the handler returned
+	 * (can also be <code>null</code>)
 	 * @throws Exception in case of errors
 	 */
 	void postHandle(

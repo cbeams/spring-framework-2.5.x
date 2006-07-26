@@ -171,7 +171,8 @@ public interface HandlerInterceptor {
 	 * @param request current portlet render request
 	 * @param response current portlet render response
 	 * @param handler chosen handler to execute, for type and/or instance examination
-	 * @param modelAndView the <code>ModelAndView</code> that the handler returned, can also be <code>null</code> 
+	 * @param modelAndView the <code>ModelAndView</code> that the handler returned
+	 * (can also be <code>null</code>)
 	 * @throws Exception in case of errors
 	 */
 	void postHandleRender(
