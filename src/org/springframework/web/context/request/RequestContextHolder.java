@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.web.context.scope;
+package org.springframework.web.context.request;
+
+import org.springframework.web.context.request.RequestAttributes;
 
 /**
  * Helper class to manage a thread-bound HttpServletRequest.

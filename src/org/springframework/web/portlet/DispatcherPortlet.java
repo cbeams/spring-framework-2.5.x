@@ -49,7 +49,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.scope.RequestContextHolder;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.portlet.context.PortletRequestAttributes;
 import org.springframework.web.portlet.multipart.MultipartActionRequest;

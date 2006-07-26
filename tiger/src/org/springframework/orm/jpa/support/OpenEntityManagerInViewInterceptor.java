@@ -19,8 +19,6 @@ package org.springframework.orm.jpa.support;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,7 +27,9 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.WebRequestInterceptor;
 
 /**
  * Spring web HandlerInterceptor that binds a JPA EntityManager to the
@@ -57,7 +57,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  * @see org.springframework.orm.jpa.SharedEntityManagerCreator
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
-public class OpenEntityManagerInViewInterceptor extends HandlerInterceptorAdapter {
+public class OpenEntityManagerInViewInterceptor implements WebRequestInterceptor {
 
 	/**
 	 * Suffix that gets appended to the EntityManagerFactory toString
@@ -90,17 +90,14 @@ public class OpenEntityManagerInViewInterceptor extends HandlerInterceptorAdapte
 	}
 
 
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-	    throws DataAccessException {
-
+	public void preHandle(WebRequest request) throws DataAccessException {
 		if (TransactionSynchronizationManager.hasResource(getEntityManagerFactory())) {
 			// do not modify the EntityManager: just mark the request accordingly
 			String participateAttributeName = getParticipateAttributeName();
-			Integer count = (Integer) request.getAttribute(participateAttributeName);
+			Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 			int newCount = (count != null) ? count.intValue() + 1 : 1;
-			request.setAttribute(getParticipateAttributeName(), new Integer(newCount));
+			request.setAttribute(getParticipateAttributeName(), new Integer(newCount), WebRequest.SCOPE_REQUEST);
 		}
-
 		else {
 			logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewInterceptor");
 			try {
@@ -111,26 +108,25 @@ public class OpenEntityManagerInViewInterceptor extends HandlerInterceptorAdapte
 				throw new DataAccessResourceFailureException("Could not create JPA EntityManager", ex);
 			}
 		}
-
-		return true;
 	}
 
-	public void afterCompletion(
-			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+	public void postHandle(WebRequest request, ModelMap model) {
+	}
+
+	public void afterCompletion(WebRequest request, Exception ex)
 			throws DataAccessException {
 
 		String participateAttributeName = getParticipateAttributeName();
-		Integer count = (Integer) request.getAttribute(participateAttributeName);
+		Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 		if (count != null) {
 			// do not modify the EntityManager: just clear the marker
 			if (count.intValue() > 1) {
-				request.setAttribute(participateAttributeName, new Integer(count.intValue() - 1));
+				request.setAttribute(participateAttributeName, new Integer(count.intValue() - 1), WebRequest.SCOPE_REQUEST);
 			}
 			else {
-				request.removeAttribute(participateAttributeName);
+				request.removeAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 			}
 		}
-
 		else {
 			EntityManagerHolder emHolder = (EntityManagerHolder)
 					TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());

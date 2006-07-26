@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.context.scope;
+package org.springframework.web.context.request;
 
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.web.context.request.RequestContextHolder;
 
 /**
  * Listener for Servlet 2.4+ containers. Exposes the request to the current thread,
@@ -38,7 +39,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
  * @since 2.0
  * @see javax.servlet.ServletRequestListener
  * @see org.springframework.context.i18n.LocaleContextHolder
- * @see org.springframework.web.context.scope.RequestContextHolder
+ * @see org.springframework.web.context.request.RequestContextHolder
  * @see org.springframework.web.filter.RequestContextFilter
  * @see org.springframework.web.servlet.DispatcherServlet
  */

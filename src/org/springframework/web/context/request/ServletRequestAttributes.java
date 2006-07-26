@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.context.scope;
+package org.springframework.web.context.request;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -50,6 +50,13 @@ public class ServletRequestAttributes implements RequestAttributes {
 	public ServletRequestAttributes(HttpServletRequest request) {
 		Assert.notNull(request, "Request must not be null");
 		this.request = request;
+	}
+
+	/**
+	 * Expose the HttpServletRequest that we're wrapping to subclasses.
+	 */
+	protected final HttpServletRequest getRequest() {
+		return request;
 	}
 
 

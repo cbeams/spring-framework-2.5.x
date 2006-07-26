@@ -16,9 +16,6 @@
 
 package org.springframework.orm.hibernate3.support;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
@@ -27,8 +24,9 @@ import org.springframework.orm.hibernate3.HibernateAccessor;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
 import org.springframework.orm.hibernate3.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.WebRequestInterceptor;
 
 /**
  * Spring web HandlerInterceptor that binds a Hibernate Session to the thread for the
@@ -81,7 +79,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
-public class OpenSessionInViewInterceptor extends HibernateAccessor implements HandlerInterceptor {
+public class OpenSessionInViewInterceptor extends HibernateAccessor implements WebRequestInterceptor {
 
 	/**
 	 * Suffix that gets appended to the SessionFactory toString representation
@@ -130,18 +128,15 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	 * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-	    throws DataAccessException {
-
+	public void preHandle(WebRequest request) throws DataAccessException {
 		if ((isSingleSession() && TransactionSynchronizationManager.hasResource(getSessionFactory())) ||
 		    SessionFactoryUtils.isDeferredCloseActive(getSessionFactory())) {
 			// Do not modify the Session: just mark the request accordingly.
 			String participateAttributeName = getParticipateAttributeName();
-			Integer count = (Integer) request.getAttribute(participateAttributeName);
+			Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 			int newCount = (count != null) ? count.intValue() + 1 : 1;
-			request.setAttribute(getParticipateAttributeName(), new Integer(newCount));
+			request.setAttribute(getParticipateAttributeName(), new Integer(newCount), WebRequest.SCOPE_REQUEST);
 		}
-
 		else {
 			if (isSingleSession()) {
 				// single session mode
@@ -156,8 +151,6 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 				SessionFactoryUtils.initDeferredClose(getSessionFactory());
 			}
 		}
-
-		return true;
 	}
 
 	/**
@@ -167,10 +160,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	 * middle tier transactions have flushed their changes on commit.
 	 * @see #setFlushMode
 	 */
-	public void postHandle(
-			HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
-			throws DataAccessException {
-
+	public void postHandle(WebRequest request, ModelMap model) throws DataAccessException {
 		if (isSingleSession()) {
 			// only potentially flush in single session mode
 			SessionHolder sessionHolder =
@@ -191,22 +181,18 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements H
 	 * during the current request (in deferred close mode).
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
-	public void afterCompletion(
-			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
-			throws DataAccessException {
-
+	public void afterCompletion(WebRequest request, Exception ex) throws DataAccessException {
 		String participateAttributeName = getParticipateAttributeName();
-		Integer count = (Integer) request.getAttribute(participateAttributeName);
+		Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 		if (count != null) {
 			// Do not modify the Session: just clear the marker.
 			if (count.intValue() > 1) {
-				request.setAttribute(participateAttributeName, new Integer(count.intValue() - 1));
+				request.setAttribute(participateAttributeName, new Integer(count.intValue() - 1), WebRequest.SCOPE_REQUEST);
 			}
 			else {
-				request.removeAttribute(participateAttributeName);
+				request.removeAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 			}
 		}
-
 		else {
 			if (isSingleSession()) {
 				// single session mode

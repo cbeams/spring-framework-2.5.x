@@ -14,44 +14,54 @@
  * limitations under the License.
  */
 
-package org.springframework.web.context.scope;
+package org.springframework.web.context.request;
 
 import junit.framework.TestCase;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.TestBean;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.request.SessionScope;
 
 /**
  * @author Rob Harrop
  * @since 2.0
  */
-public class RequestScopeTests extends TestCase {
+public class SessionScopeTests extends TestCase {
 
 	private DefaultListableBeanFactory beanFactory;
 
 	private MockHttpServletRequest request;
 
+	private MockHttpSession session;
+
 	private RequestAttributes requestAttributes;
 
 	protected void setUp() throws Exception {
 		this.beanFactory = new DefaultListableBeanFactory();
-		this.beanFactory.registerScope("request", new RequestScope());
+		this.beanFactory.registerScope("session", new SessionScope());
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
-		reader.loadBeanDefinitions(new ClassPathResource("requestScopeTests.xml", getClass()));
+		reader.loadBeanDefinitions(new ClassPathResource("sessionScopeTests.xml", getClass()));
+
+		this.session = new MockHttpSession();
 
 		this.request = new MockHttpServletRequest();
+		this.request.setSession(this.session);
 		this.requestAttributes = new ServletRequestAttributes(this.request);
+
 		RequestContextHolder.setRequestAttributes(this.requestAttributes);
 	}
 
 	public void testGetFromScope() throws Exception {
-		String name = "requestScopedObject";
-		assertNull(request.getAttribute(name));
+		String name = "sessionScopedObject";
+		assertNull(session.getAttribute(name));
 		TestBean bean = (TestBean)this.beanFactory.getBean(name);
-		assertEquals(request.getAttribute(name), bean);
+		assertEquals(session.getAttribute(name), bean);
 		assertSame(bean, this.beanFactory.getBean(name));
 	}
-
 }

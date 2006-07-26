@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.context.scope;
+package org.springframework.web.context.request;
 
 import java.io.Serializable;
 
@@ -26,6 +26,8 @@ import org.easymock.MockControl;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.AssertThrows;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * @author Rick Evans
@@ -49,7 +51,7 @@ public final class ServletRequestAttributesTests extends TestCase {
 
 	public void testUpdateAccessedAttributes() throws Exception {
 		MockHttpSession session = new MockHttpSession();
-		session.putValue(KEY, VALUE);
+		session.setAttribute(KEY, VALUE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
@@ -68,7 +70,7 @@ public final class ServletRequestAttributesTests extends TestCase {
 
 	public void testSetSessionScopedAttribute() throws Exception {
 		MockHttpSession session = new MockHttpSession();
-		session.putValue(KEY, VALUE);
+		session.setAttribute(KEY, VALUE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
@@ -79,7 +81,7 @@ public final class ServletRequestAttributesTests extends TestCase {
 
 	public void testSetGlobalSessionScopedAttribute() throws Exception {
 		MockHttpSession session = new MockHttpSession();
-		session.putValue(KEY, VALUE);
+		session.setAttribute(KEY, VALUE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
@@ -104,7 +106,7 @@ public final class ServletRequestAttributesTests extends TestCase {
 
 	public void testRemoveSessionScopedAttribute() throws Exception {
 		MockHttpSession session = new MockHttpSession();
-		session.putValue(KEY, VALUE);
+		session.setAttribute(KEY, VALUE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);

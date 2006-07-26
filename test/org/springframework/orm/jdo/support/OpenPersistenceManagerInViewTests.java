@@ -35,6 +35,8 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 
 /**
  * @author Juergen Hoeller
@@ -48,8 +50,10 @@ public class OpenPersistenceManagerInViewTests extends TestCase {
 		MockControl pmControl = MockControl.createControl(PersistenceManager.class);
 		PersistenceManager pm = (PersistenceManager) pmControl.getMock();
 
-		OpenPersistenceManagerInViewInterceptor interceptor = new OpenPersistenceManagerInViewInterceptor();
-		interceptor.setPersistenceManagerFactory(pmf);
+		OpenPersistenceManagerInViewInterceptor rawInterceptor = new OpenPersistenceManagerInViewInterceptor();
+		rawInterceptor.setPersistenceManagerFactory(pmf);
+		HandlerInterceptor interceptor = new WebRequestHandlerInterceptorAdapter(rawInterceptor);
+
 		MockServletContext sc = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		MockHttpServletResponse response = new MockHttpServletResponse();

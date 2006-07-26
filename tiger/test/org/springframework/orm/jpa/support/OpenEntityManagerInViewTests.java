@@ -1,24 +1,23 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.orm.jpa.support;
 
 import java.io.IOException;
 
-import javax.jdo.PersistenceManager;
-import javax.jdo.PersistenceManagerFactory;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -27,37 +26,34 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import junit.framework.TestCase;
 import org.easymock.MockControl;
+
 import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.orm.jdo.support.OpenPersistenceManagerInViewFilter;
 import org.springframework.orm.jpa.JpaTemplate;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
-
-import junit.framework.TestCase;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 
 /**
  * @author Costin Leau
- *
  */
 public class OpenEntityManagerInViewTests extends TestCase {
 
-	MockControl factoryControl, managerControl, txControl;
+	private MockControl factoryControl, managerControl, txControl;
 
-	EntityManager manager;
+	private EntityManager manager;
 
-	EntityTransaction tx;
+	private EntityTransaction tx;
 
-	EntityManagerFactory factory;
+	private EntityManagerFactory factory;
 
-	JpaTemplate template;
+	private JpaTemplate template;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -72,7 +68,6 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		template.afterPropertiesSet();
 
 		factoryControl.expectAndReturn(factory.createEntityManager(), manager);
-
 	}
 
 	@Override
@@ -91,11 +86,11 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		tx = null;
 	}
 
-	public void testOpenEntityManagerInterceptorInView() throws Exception
-	{
-		OpenEntityManagerInViewInterceptor interceptor = new OpenEntityManagerInViewInterceptor();
-		interceptor.setEntityManagerFactory(factory);
-		
+	public void testOpenEntityManagerInterceptorInView() throws Exception {
+		OpenEntityManagerInViewInterceptor rawInterceptor = new OpenEntityManagerInViewInterceptor();
+		rawInterceptor.setEntityManagerFactory(factory);
+		HandlerInterceptor interceptor = new WebRequestHandlerInterceptorAdapter(rawInterceptor);
+
 		MockServletContext sc = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -105,7 +100,6 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		
 		interceptor.preHandle(request, response, "handler");
 		assertTrue(TransactionSynchronizationManager.hasResource(factory));
-		
 		
 		// check that further invocations simply participate
 		interceptor.preHandle(request, response, "handler");
@@ -134,7 +128,6 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		
 		factoryControl.verify();
 		managerControl.verify();
-		
 		
 		managerControl.reset();
 		factoryControl.reset();
@@ -168,8 +161,7 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		
 		factoryControl2.replay();
 		managerControl2.replay();
-		
-		
+
 		MockServletContext sc = new MockServletContext();
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.setServletContext(sc);
@@ -225,4 +217,5 @@ public class OpenEntityManagerInViewTests extends TestCase {
 
 		wac.close();
 	}
+
 }

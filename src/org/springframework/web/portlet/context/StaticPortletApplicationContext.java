@@ -26,8 +26,8 @@ import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.scope.RequestScope;
-import org.springframework.web.context.scope.SessionScope;
+import org.springframework.web.context.request.RequestScope;
+import org.springframework.web.context.request.SessionScope;
 
 /**
  * Static ApplicationContext for Portlet environments. This implementation is intended

@@ -48,6 +48,8 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 
 /**
  * @author Juergen Hoeller
@@ -55,14 +57,16 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
  */
 public class OpenSessionInViewTests extends TestCase {
 
-	public void testOpenSessionInViewInterceptorWithSingleSession() throws HibernateException {
+	public void testOpenSessionInViewInterceptorWithSingleSession() throws Exception {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
 
-		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
-		interceptor.setSessionFactory(sf);
+		OpenSessionInViewInterceptor rawInterceptor = new OpenSessionInViewInterceptor();
+		rawInterceptor.setSessionFactory(sf);
+		HandlerInterceptor interceptor = new WebRequestHandlerInterceptorAdapter(rawInterceptor);
+
 		MockServletContext sc = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -133,8 +137,10 @@ public class OpenSessionInViewTests extends TestCase {
 		tm.getTransaction();
 		tmControl.setReturnValue(null, 1);
 
-		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
-		interceptor.setSessionFactory(sf);
+		OpenSessionInViewInterceptor rawInterceptor = new OpenSessionInViewInterceptor();
+		rawInterceptor.setSessionFactory(sf);
+		HandlerInterceptor interceptor = new WebRequestHandlerInterceptorAdapter(rawInterceptor);
+
 		MockServletContext sc = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -197,15 +203,17 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testOpenSessionInViewInterceptorWithSingleSessionAndFlush() throws HibernateException {
+	public void testOpenSessionInViewInterceptorWithSingleSessionAndFlush() throws Exception {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
 
-		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
-		interceptor.setSessionFactory(sf);
-		interceptor.setFlushMode(HibernateAccessor.FLUSH_AUTO);
+		OpenSessionInViewInterceptor rawInterceptor = new OpenSessionInViewInterceptor();
+		rawInterceptor.setSessionFactory(sf);
+		rawInterceptor.setFlushMode(HibernateAccessor.FLUSH_AUTO);
+		HandlerInterceptor interceptor = new WebRequestHandlerInterceptorAdapter(rawInterceptor);
+
 		MockServletContext sc = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -244,15 +252,17 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testOpenSessionInViewInterceptorAndDeferredClose() throws HibernateException {
+	public void testOpenSessionInViewInterceptorAndDeferredClose() throws Exception {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
 
-		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
-		interceptor.setSessionFactory(sf);
-		interceptor.setSingleSession(false);
+		OpenSessionInViewInterceptor rawInterceptor = new OpenSessionInViewInterceptor();
+		rawInterceptor.setSessionFactory(sf);
+		rawInterceptor.setSingleSession(false);
+		HandlerInterceptor interceptor = new WebRequestHandlerInterceptorAdapter(rawInterceptor);
+
 		MockServletContext sc = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -417,8 +427,10 @@ public class OpenSessionInViewTests extends TestCase {
 		MockFilterConfig filterConfig2 = new MockFilterConfig(wac.getServletContext(), "filter2");
 		filterConfig2.addInitParameter("sessionFactoryBeanName", "mySessionFactory");
 
-		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
-		interceptor.setSessionFactory(sf);
+		OpenSessionInViewInterceptor rawInterceptor = new OpenSessionInViewInterceptor();
+		rawInterceptor.setSessionFactory(sf);
+		HandlerInterceptor interceptor = new WebRequestHandlerInterceptorAdapter(rawInterceptor);
+
 		interceptor.preHandle(request, response, "handler");
 
 		final OpenSessionInViewFilter filter = new OpenSessionInViewFilter();
@@ -605,9 +617,11 @@ public class OpenSessionInViewTests extends TestCase {
 		filterConfig2.addInitParameter("singleSession", "false");
 		filterConfig2.addInitParameter("sessionFactoryBeanName", "mySessionFactory");
 
-		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
-		interceptor.setSessionFactory(sf);
-		interceptor.setSingleSession(false);
+		OpenSessionInViewInterceptor rawInterceptor = new OpenSessionInViewInterceptor();
+		rawInterceptor.setSessionFactory(sf);
+		rawInterceptor.setSingleSession(false);
+		HandlerInterceptor interceptor = new WebRequestHandlerInterceptorAdapter(rawInterceptor);
+
 		interceptor.preHandle(request, response, "handler");
 
 		final OpenSessionInViewFilter filter = new OpenSessionInViewFilter();

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.web.context.scope;
+package org.springframework.web.context.request;
+
+import org.springframework.web.context.request.AbstractRequestAttributesScope;
+import org.springframework.web.context.request.RequestAttributes;
 
 /**
  * Request-backed Scope implementation. Relies on a thread-bound
@@ -29,9 +32,9 @@ package org.springframework.web.context.scope;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 2.0
- * @see RequestContextHolder#currentRequestAttributes()
+ * @see org.springframework.web.context.request.RequestContextHolder#currentRequestAttributes()
  * @see RequestAttributes#SCOPE_REQUEST
- * @see RequestContextListener
+ * @see org.springframework.web.context.request.RequestContextListener
  * @see org.springframework.web.filter.RequestContextFilter
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.portlet.DispatcherPortlet

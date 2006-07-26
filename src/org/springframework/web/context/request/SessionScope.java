@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.web.context.scope;
+package org.springframework.web.context.request;
 
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.web.context.request.AbstractRequestAttributesScope;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 
 /**
@@ -35,7 +38,7 @@ import org.springframework.beans.factory.ObjectFactory;
  * @see RequestContextHolder#currentRequestAttributes()
  * @see RequestAttributes#SCOPE_SESSION
  * @see RequestAttributes#SCOPE_GLOBAL_SESSION
- * @see RequestContextListener
+ * @see org.springframework.web.context.request.RequestContextListener
  * @see org.springframework.web.filter.RequestContextFilter
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.portlet.DispatcherPortlet
@@ -62,7 +65,7 @@ public class SessionScope extends AbstractRequestAttributesScope {
 	 * else they will end up in the "portlet scope" session (the typical default).
 	 * <p>In a Servlet environment, this flag is effectively ignored.
 	 * @see org.springframework.web.portlet.context.PortletRequestAttributes
-	 * @see ServletRequestAttributes
+	 * @see org.springframework.web.context.request.ServletRequestAttributes
 	 */
 	public SessionScope(boolean globalSession) {
 		this.scope = (globalSession ? RequestAttributes.SCOPE_GLOBAL_SESSION : RequestAttributes.SCOPE_SESSION);

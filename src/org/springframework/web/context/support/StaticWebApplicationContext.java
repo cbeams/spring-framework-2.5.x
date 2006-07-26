@@ -29,8 +29,8 @@ import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ServletConfigAware;
 import org.springframework.web.context.ServletContextAware;
-import org.springframework.web.context.scope.RequestScope;
-import org.springframework.web.context.scope.SessionScope;
+import org.springframework.web.context.request.RequestScope;
+import org.springframework.web.context.request.SessionScope;
 
 /**
  * Static WebApplicationContext implementation for testing.

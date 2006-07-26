@@ -18,17 +18,18 @@ package org.springframework.orm.jdo.support;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.AttributeAccessor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.jdo.PersistenceManagerFactoryUtils;
 import org.springframework.orm.jdo.PersistenceManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.context.request.WebRequestInterceptor;
+import org.springframework.web.context.request.WebRequest;
 
 /**
  * Spring web HandlerInterceptor that binds a JDO PersistenceManager to the
@@ -55,7 +56,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#getPersistenceManager
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
-public class OpenPersistenceManagerInViewInterceptor extends HandlerInterceptorAdapter {
+public class OpenPersistenceManagerInViewInterceptor implements WebRequestInterceptor {
 
 	/**
 	 * Suffix that gets appended to the PersistenceManagerFactory toString
@@ -88,17 +89,14 @@ public class OpenPersistenceManagerInViewInterceptor extends HandlerInterceptorA
 	}
 
 
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-	    throws DataAccessException {
-
+	public void preHandle(WebRequest request) throws DataAccessException {
 		if (TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory())) {
 			// Do not modify the PersistenceManager: just mark the request accordingly.
 			String participateAttributeName = getParticipateAttributeName();
-			Integer count = (Integer) request.getAttribute(participateAttributeName);
+			Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 			int newCount = (count != null) ? count.intValue() + 1 : 1;
-			request.setAttribute(getParticipateAttributeName(), new Integer(newCount));
+			request.setAttribute(getParticipateAttributeName(), new Integer(newCount), WebRequest.SCOPE_REQUEST);
 		}
-
 		else {
 			logger.debug("Opening JDO PersistenceManager in OpenPersistenceManagerInViewInterceptor");
 			PersistenceManager pm =
@@ -106,26 +104,23 @@ public class OpenPersistenceManagerInViewInterceptor extends HandlerInterceptorA
 			TransactionSynchronizationManager.bindResource(
 					getPersistenceManagerFactory(), new PersistenceManagerHolder(pm));
 		}
-
-		return true;
 	}
 
-	public void afterCompletion(
-			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
-			throws DataAccessException {
+	public void postHandle(WebRequest request, ModelMap model) {
+	}
 
+	public void afterCompletion(WebRequest request, Exception ex) throws DataAccessException {
 		String participateAttributeName = getParticipateAttributeName();
-		Integer count = (Integer) request.getAttribute(participateAttributeName);
+		Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 		if (count != null) {
 			// Do not modify the PersistenceManager: just clear the marker.
 			if (count.intValue() > 1) {
-				request.setAttribute(participateAttributeName, new Integer(count.intValue() - 1));
+				request.setAttribute(participateAttributeName, new Integer(count.intValue() - 1), WebRequest.SCOPE_REQUEST);
 			}
 			else {
-				request.removeAttribute(participateAttributeName);
+				request.removeAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 			}
 		}
-
 		else {
 			PersistenceManagerHolder pmHolder = (PersistenceManagerHolder)
 					TransactionSynchronizationManager.unbindResource(getPersistenceManagerFactory());

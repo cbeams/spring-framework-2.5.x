@@ -24,7 +24,7 @@ import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 
 import org.springframework.util.Assert;
-import org.springframework.web.context.scope.RequestAttributes;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.portlet.util.PortletUtils;
 
 /**
@@ -54,11 +54,18 @@ public class PortletRequestAttributes implements RequestAttributes {
 
 	/**
 	 * Create a new PortletRequestAttributes instance for the given request.
-	 * @param request current HTTP request
+	 * @param request current portlet request
 	 */
 	public PortletRequestAttributes(PortletRequest request) {
 		Assert.notNull(request, "Request must not be null");
 		this.request = request;
+	}
+
+	/**
+	 * Expose the PortletRequest that we're wrapping to subclasses.
+	 */
+	protected final PortletRequest getRequest() {
+		return request;
 	}
 
 

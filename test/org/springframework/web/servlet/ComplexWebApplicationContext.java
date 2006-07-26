@@ -40,6 +40,8 @@ import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.WebRequestInterceptor;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.RequestHandledEvent;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -63,6 +65,7 @@ import org.springframework.web.servlet.theme.SessionThemeResolver;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ResourceBundleViewResolver;
+import org.springframework.ui.ModelMap;
 
 /**
  * @author Juergen Hoeller
@@ -170,7 +173,8 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		interceptors.add(interceptor4);
 		interceptors.add(new MyHandlerInterceptor1());
 		interceptors.add(new MyHandlerInterceptor2());
-		myUrlMapping1.setInterceptors((HandlerInterceptor[]) interceptors.toArray(new HandlerInterceptor[interceptors.size()]));
+		interceptors.add(new MyWebRequestInterceptor());
+		myUrlMapping1.setInterceptors(interceptors.toArray(new Object[interceptors.size()]));
 	}
 
 
@@ -347,6 +351,22 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 				throw new ServletException("Wrong interceptor order");
 			}
 			request.removeAttribute("test2y");
+		}
+	}
+
+
+	public static class MyWebRequestInterceptor implements WebRequestInterceptor {
+
+		public void preHandle(WebRequest request) throws Exception {
+			request.setAttribute("test3", "test3", WebRequest.SCOPE_REQUEST);
+		}
+
+		public void postHandle(WebRequest request, ModelMap model) throws Exception {
+			request.setAttribute("test3x", "test3x", WebRequest.SCOPE_REQUEST);
+		}
+
+		public void afterCompletion(WebRequest request, Exception ex) throws Exception {
+			request.setAttribute("test3y", "test3y", WebRequest.SCOPE_REQUEST);
 		}
 	}
 

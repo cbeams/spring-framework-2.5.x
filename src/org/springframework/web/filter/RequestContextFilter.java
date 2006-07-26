@@ -24,8 +24,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.web.context.scope.RequestContextHolder;
-import org.springframework.web.context.scope.ServletRequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * Servlet filter that exposes the request to the current thread,
@@ -41,8 +41,8 @@ import org.springframework.web.context.scope.ServletRequestAttributes;
  * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.context.i18n.LocaleContextHolder
- * @see org.springframework.web.context.scope.RequestContextHolder
- * @see org.springframework.web.context.scope.RequestContextListener
+ * @see org.springframework.web.context.request.RequestContextHolder
+ * @see org.springframework.web.context.request.RequestContextListener
  * @see org.springframework.web.servlet.DispatcherServlet
  */
 public class RequestContextFilter extends OncePerRequestFilter {

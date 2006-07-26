@@ -20,6 +20,7 @@ import javax.portlet.PortletRequest;
 
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
+import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.portlet.HandlerExecutionChain;
 import org.springframework.web.portlet.HandlerInterceptor;
 import org.springframework.web.portlet.HandlerMapping;
@@ -74,12 +75,44 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	}
 
 	/**
-	 * Set the handler interceptors to apply for all handlers mapped by
-	 * this handler mapping.
-	 * @param interceptors array of handler interceptors, or null if none
+	 * Set the interceptors to apply for all handlers mapped by this handler mapping.
+	 * <p>Supported interceptor types are HandlerInterceptor and WebRequestInterceptor.
+	 * @param interceptors array of handler interceptors, or <code>null</code> if none
+	 * @see #adaptInterceptor
+	 * @see org.springframework.web.portlet.HandlerInterceptor
+	 * @see org.springframework.web.context.request.WebRequestInterceptor
 	 */
-	public final void setInterceptors(HandlerInterceptor[] interceptors) {
-		this.interceptors = interceptors;
+	public final void setInterceptors(Object[] interceptors) {
+		if (interceptors != null) {
+			this.interceptors = new HandlerInterceptor[interceptors.length];
+			for (int i = 0; i < interceptors.length; i++) {
+				this.interceptors[i] = adaptInterceptor(interceptors[i]);
+			}
+		}
+		else {
+			this.interceptors = null;
+		}
+	}
+
+	/**
+	 * Adapt the given interceptor object to the HandlerInterceptor interface.
+	 * <p>Supported interceptor types are HandlerInterceptor and WebRequestInterceptor.
+	 * Can be overridden in subclasses.
+	 * @param interceptor the specified interceptor object
+	 * @return the interceptor wrapped as HandlerInterceptor
+	 * @see org.springframework.web.portlet.HandlerInterceptor
+	 * @see org.springframework.web.context.request.WebRequestInterceptor
+	 */
+	protected HandlerInterceptor adaptInterceptor(Object interceptor) {
+		if (interceptor instanceof HandlerInterceptor) {
+			return (HandlerInterceptor) interceptor;
+		}
+		else if (interceptor instanceof WebRequestInterceptor) {
+			return new WebRequestHandlerInterceptorAdapter((WebRequestInterceptor) interceptor);
+		}
+		else {
+			throw new IllegalArgumentException("Interceptor type not supported: " + interceptor);
+		}
 	}
 
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.context.scope;
+package org.springframework.web.context.request;
 
 /**
  * Abstraction for accessing attribute objects associated with a request.
@@ -34,7 +34,7 @@ public interface RequestAttributes {
 	/**
 	 * Constant that indicates request scope.
 	 */
-	public static final int SCOPE_REQUEST = 0;
+	int SCOPE_REQUEST = 0;
 
 	/**
 	 * Constant that indicates session scope.
@@ -42,7 +42,7 @@ public interface RequestAttributes {
 	 * a distinction is available (for example, in a Portlet environment).
 	 * Else, it simply refers to the common session.
 	 */
-	public static final int SCOPE_SESSION = 1;
+	int SCOPE_SESSION = 1;
 
 	/**
 	 * Constant that indicates global session scope.
@@ -50,7 +50,7 @@ public interface RequestAttributes {
 	 * a distinction is available (for example, in a Portlet environment).
 	 * Else, it simply refers to the common session.
 	 */
-	public static final int SCOPE_GLOBAL_SESSION = 2;
+	int SCOPE_GLOBAL_SESSION = 2;
 
 
 	/**

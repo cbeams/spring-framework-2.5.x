@@ -29,8 +29,8 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.scope.RequestScope;
-import org.springframework.web.context.scope.SessionScope;
+import org.springframework.web.context.request.RequestScope;
+import org.springframework.web.context.request.SessionScope;
 import org.springframework.web.context.support.ServletContextAwareProcessor;
 
 /**

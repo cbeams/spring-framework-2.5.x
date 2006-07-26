@@ -92,7 +92,6 @@ public class OptionsTagTests extends AbstractHtmlElementTagTests {
 
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.myFloat", false));
 
-
 		this.tag.setItems("${floats}");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.EVAL_PAGE, result);

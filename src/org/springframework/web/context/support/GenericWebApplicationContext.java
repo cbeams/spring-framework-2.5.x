@@ -28,8 +28,8 @@ import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.scope.RequestScope;
-import org.springframework.web.context.scope.SessionScope;
+import org.springframework.web.context.request.RequestScope;
+import org.springframework.web.context.request.SessionScope;
 
 /**
  * Subclass of GenericApplicationContext, suitable for web environments.

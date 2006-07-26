@@ -381,9 +381,9 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertEquals(Tag.EVAL_PAGE, result);
 	}
 
-	public void xtestMultiBind() throws Exception {
+	public void testMultiBind() throws Exception {
 		BeanPropertyBindingResult result = new BeanPropertyBindingResult(new TestBean(), "testBean");
-		result.getPropertyAccessor().registerCustomEditor(List.class, "friends", new FriendEditor());
+		result.getPropertyAccessor().registerCustomEditor(TestBean.class, "friends", new FriendEditor());
 		exposeBindingResult(result);
 
 		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.friends", false);
@@ -420,6 +420,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		request.setAttribute("myOtherNumber", new Float(12.35));
 	}
 
+
 	private static class TestBeanPropertyEditor extends PropertyEditorSupport {
 
 		public void setAsText(String text) throws IllegalArgumentException {
@@ -430,6 +431,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 			return ((TestBean) getValue()).getName();
 		}
 	}
+
 
 	public static class RulesVariant implements Serializable {
 
@@ -459,10 +461,12 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		}
 
 		public String toId() {
-			if (variant == null)
+			if (this.variant != null) {
+				return this.rules + "-" + this.variant;
+			}
+			else {
 				return rules;
-			else
-				return rules + "-" + variant;
+			}
 		}
 
 		public static RulesVariant fromId(String id) {
@@ -485,6 +489,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		}
 	}
 
+
 	public class RulesVariantEditor extends PropertyEditorSupport {
 
 		public void setAsText(String text) throws IllegalArgumentException {
@@ -497,6 +502,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		}
 	}
 
+
 	private static class FriendEditor extends PropertyEditorSupport {
 
 		public void setAsText(String text) throws IllegalArgumentException {
@@ -505,7 +511,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 
 
 		public String getAsText() {
-			return ((TestBean)getValue()).getName();
+			return ((TestBean) getValue()).getName();
 		}
 	}
+
 }

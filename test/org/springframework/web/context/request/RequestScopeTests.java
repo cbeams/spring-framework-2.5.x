@@ -14,50 +14,48 @@
  * limitations under the License.
  */
 
-package org.springframework.web.context.scope;
+package org.springframework.web.context.request;
 
 import junit.framework.TestCase;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.TestBean;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpSession;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.RequestScope;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * @author Rob Harrop
  * @since 2.0
  */
-public class SessionScopeTests extends TestCase {
+public class RequestScopeTests extends TestCase {
 
 	private DefaultListableBeanFactory beanFactory;
 
 	private MockHttpServletRequest request;
 
-	private MockHttpSession session;
-
 	private RequestAttributes requestAttributes;
 
 	protected void setUp() throws Exception {
 		this.beanFactory = new DefaultListableBeanFactory();
-		this.beanFactory.registerScope("session", new SessionScope());
+		this.beanFactory.registerScope("request", new RequestScope());
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
-		reader.loadBeanDefinitions(new ClassPathResource("sessionScopeTests.xml", getClass()));
-
-		this.session = new MockHttpSession();
+		reader.loadBeanDefinitions(new ClassPathResource("requestScopeTests.xml", getClass()));
 
 		this.request = new MockHttpServletRequest();
-		this.request.setSession(this.session);
 		this.requestAttributes = new ServletRequestAttributes(this.request);
-
 		RequestContextHolder.setRequestAttributes(this.requestAttributes);
 	}
 
 	public void testGetFromScope() throws Exception {
-		String name = "sessionScopedObject";
-		assertNull(session.getAttribute(name));
+		String name = "requestScopedObject";
+		assertNull(request.getAttribute(name));
 		TestBean bean = (TestBean)this.beanFactory.getBean(name);
-		assertEquals(session.getAttribute(name), bean);
+		assertEquals(request.getAttribute(name), bean);
 		assertSame(bean, this.beanFactory.getBean(name));
 	}
+
 }
