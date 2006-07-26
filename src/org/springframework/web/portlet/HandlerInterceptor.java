@@ -23,8 +23,7 @@ import javax.portlet.RenderResponse;
 
 /**
  * Workflow interface that allows for customized handler execution chains.
- * 
- * <p>Applications can register any number of existing or custom interceptors
+ * Applications can register any number of existing or custom interceptors
  * for certain groups of handlers, to add common preprocessing behavior
  * without needing to modify each handler implementation.
  *
@@ -42,7 +41,7 @@ import javax.portlet.RenderResponse;
  * <code>HandlerMapping</code> bean. The interceptors themselves are defined as
  * beans in the application context, referenced by the mapping bean definition
  * via its
- * {@link org.springframework.web.portlet.handler.AbstractHandlerMapping#setInterceptors(HandlerInterceptor[]) "interceptors"}
+ * {@link org.springframework.web.portlet.handler.AbstractHandlerMapping#setInterceptors "interceptors"}
  * property (in XML: a &lt;list&gt; of &lt;ref&gt; elements).
  *
  * <p>A <code>HandlerInterceptor</code> is basically similar to a Servlet 2.3
@@ -189,9 +188,7 @@ public interface HandlerInterceptor {
 	 * @param request current portlet render request
 	 * @param response current portlet render response
 	 * @param handler chosen handler to execute, for type and/or instance examination
-	 * @param ex exception thrown on handler execution, if any (only included as
-	 * additional context information for the case where a handler threw an exception;
-	 * request execution may have failed even when this argument is <code>null</code>)
+	 * @param ex exception thrown on handler execution, if any
 	 * @throws Exception in case of errors
 	 */
 	void afterRenderCompletion(

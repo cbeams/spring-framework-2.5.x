@@ -110,9 +110,7 @@ public interface HandlerInterceptor {
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler chosen handler to execute, for type and/or instance examination
-	 * @param ex exception thrown on handler execution, if any (only included as
-	 * additional context information for the case where a handler threw an exception;
-	 * request execution may have failed even when this argument is <code>null</code>)
+	 * @param ex exception thrown on handler execution, if any
 	 * @throws Exception in case of errors
 	 */
 	void afterCompletion(
