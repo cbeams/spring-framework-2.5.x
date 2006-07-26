@@ -899,6 +899,38 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals(tb5, bw.getPropertyValue("map['key9']"));
 	}
 
+	public void testMapAccessWithTypeConversion() {
+		IndexedTestBean bean = new IndexedTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(bean);
+		bw.registerCustomEditor(TestBean.class, new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				if (!StringUtils.hasLength(text)) {
+					throw new IllegalArgumentException();
+				}
+				setValue(new TestBean(text));
+			}
+		});
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("map[key1]", "rod");
+		pvs.addPropertyValue("map[key2]", "rob");
+		bw.setPropertyValues(pvs);
+		assertEquals("rod", ((TestBean) bean.getMap().get("key1")).getName());
+		assertEquals("rob", ((TestBean) bean.getMap().get("key2")).getName());
+
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("map[key1]", "rod");
+		pvs.addPropertyValue("map[key2]", "");
+		try {
+			bw.setPropertyValues(pvs);
+			fail("Should have thrown TypeMismatchException");
+		}
+		catch (PropertyAccessExceptionsException ex) {
+			PropertyAccessException pae = ex.getPropertyAccessException("map[key2]");
+			assertTrue(pae instanceof TypeMismatchException);
+		}
+	}
+
 	public void testPrimitiveArray() {
 		PrimitiveArrayBean tb = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
