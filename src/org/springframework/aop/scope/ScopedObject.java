@@ -35,6 +35,6 @@ public interface ScopedObject {
 	 * afterwards (at least within the current thread, that is, with
 	 * the exact same target object in the target scope).
 	 */
-	void remove();
+	void removeFromScope();
 	
 }

@@ -47,7 +47,7 @@ public class DefaultScopedObject implements ScopedObject {
 	}
 
 
-	public void remove() {
+	public void removeFromScope() {
 		this.beanFactory.destroyScopedBean(this.targetBeanName);
 	}
 
