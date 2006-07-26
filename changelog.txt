@@ -3,36 +3,64 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 RC3 (24.7.2006)
+Changes in version 2.0 RC3 (29.7.2006)
 --------------------------------------
+
+General
+* spring.jar does not include Portlet support anymore (add spring-portlet.jar to your classpath if needed)
 
 Package org.springframework.aop
 * fixed AbstractAdvisorAutoProxyCreator to ignore Advisors for which "getBean" throws a BeanCurrentlyInCreationException
+* fixed AnnotationAwareAspectJAutoProxyCreator to explicitly ignore FactoryBeans when looking for aspect beans
+* reworked AspectJ auto-proxy creation to avoid the creation of unnecessary proxies
+* renamed ScopedObject's "remove" method to "removeFromScope", to avoid conflicts with methods on the target class
 
 Package org.springframework.beans
+* fixed BeanWrapperImpl to properly catch and wrap conversion failures for map keys/values in TypeMismatchExceptions
 * introduced TypeConverter interface, implemented by BeanWrapperImpl, plus separate SimpleTypeConverter implementation
 * reworked ArgumentConvertingMethodInvoker to use a TypeConverter and allow the converter to be accessed/overridden
 * added default type conversion of any type to String target type via a "toString()" call
 * fixed AbstractBeanFactory to only invoke BeanPostProcessor for objects returned from FactoryBeans if non-null
 * fixed AbstractBeanFactory to throw BeanCurrentlyInCreationException on null from non-fully-initialized FactoryBean
+* AbstractAutowireCapableBeanFactory detects whether it injected raw instances of beans that eventually got wrapped
+* BeanFactoryUtils returns bean names in order of definition even for merged name arrays (in case of ancestor factories)
+* redefined BeanFactoryUtils' "countBeans/beanNamesIncludingAncestors" to build on "getBeanNamesOfType(Object.class)"
 
 Package org.springframework.jdbc
 * worked around "oracle.sql.DATE" problem on certain Oracle driver versions, extracting it as timestamp when appropriate
 * check for ResultSetSupportingSqlParameter superclass instead of SqlOutParameter and SqlReturnResultSet subclasses
 * factored out Spring/JtaLobCreatorSynchronization classes from Hibernate AbstractLobType to "jdbc.support.lob" package
 
+Package org.springframework.jms
+* AbstractMessageListenerContainer exposes Connection/Session to allow JmsTemplate to participate in local transactions
+* added "taskExecutor" bean property to SimpleMessageListenerContainer, allowing to execute listener in different thread
+* added protected "buildListenerArguments" template method to MessageListenerAdapter, allowing for multiple arguments
+
 Package org.springframework.orm
 * refined iBATIS SqlMapClientTemplate to allow for nested calls to same SqlMapSession (checking "getCurrentConnection")
 * reworked Hibernate JTA synch to expose beforeCompletion exceptions to the caller (via SpringJtaSynchronizationAdapter)
 * removed warning for read-only from JdoTransactionManager/JpaTransactionManager, since a vendor dialect may support it
 * factored out overridable "createEntityManager" template methods in OpenEntityManagerInViewFilter/Interceptor
-* SpringPersistenceUnitInfo is public and allows for post-processing in LocalContainerEntityManagerFactoryBean subclass
+* SpringPersistenceUnitInfo is public to allow for post-processing in LocalContainerEntityManagerFactoryBean subclass
+* added "determinePersistenceUnitInfo/postProcessPersistenceUnitInfo" methods to LocalContainerEntityManagerFactoryBean
+* reworked OpenSession/PersistenceManager/EntityManagerInViewInterceptor to build on WebRequestInterceptor abstraction
+* dropped PortletOpenSession/PersistenceManager/EntityManagerInViewInterceptor in favor of WebRequestInterceptor model
+
+Package org.springframework.remoting
+* added "registryClientSocketFactory" bean property to RmiClientInterceptor/RmiProxyFactoryBean
+* added dedicated "prepare()" method to JndiRmiServiceExporter
 
 Package org.springframework.transaction
 * added SpringJtaSynchronizationAdapter, exposing JTA Synchronization ifc on top of a Spring TransactionSynchronization
 
 Package org.springframework.util
 * optimized "ObjectUtils.nullSafeToString" implementation to return a given String right away
+
+Package org.springframework.web
+* moved RequestScope/SessionScope and RequestContextListener from "web.context.scope" to "web.context.request"
+* added WebRequest abstraction, with ServletWebRequest and PortletWebRequest implementations
+* added WebRequestInterceptor interface, for generic request interceptors (independent of Servlet/Portlet)
+* added support for WebRequestInterceptors to Servlet/Portlet MVC HandlerMappings (through "interceptors" property)
 
 
 Changes in version 2.0 RC2 (6.7.2006)
