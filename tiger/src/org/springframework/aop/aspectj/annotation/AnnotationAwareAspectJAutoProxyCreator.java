@@ -30,6 +30,8 @@ import org.springframework.aop.aspectj.InstantiationModelAwarePointcutAdvisor;
 import org.springframework.aop.aspectj.autoproxy.AspectJInvocationContextExposingAdvisorAutoProxyCreator;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -171,14 +173,28 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJInvocationCon
 				AspectMetadata amd = new AspectMetadata(beanType, beanName);
 				if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
 					// Default singleton binding.
-					Object beanInstance = beanFactory.getBean(beanName);
-					List<Advisor> classAdvisors =
-							aspectJAdvisorFactory.getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(beanInstance,beanName));
-					setAdvisorOrderIfNecessary(classAdvisors,beanInstance);
-					if (staticLogger.isDebugEnabled()) {
-						staticLogger.debug("Found " + classAdvisors.size() + " AspectJ advice methods");
+					try {
+						Object beanInstance = beanFactory.getBean(beanName);
+						List<Advisor> classAdvisors =
+								aspectJAdvisorFactory.getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(beanInstance,beanName));
+						setAdvisorOrderIfNecessary(classAdvisors,beanInstance);
+						if (staticLogger.isDebugEnabled()) {
+							staticLogger.debug("Found " + classAdvisors.size() + " AspectJ advice methods");
+						}
+						advisors.addAll(classAdvisors);
 					}
-					advisors.addAll(classAdvisors);
+					catch (BeanCreationException ex) {
+						if (ex.contains(BeanCurrentlyInCreationException.class)) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Ignoring currently created advisor '" + beanName + "': " + ex.getMessage());
+							}
+							// Ignore: indicates a reference back to the bean we're trying to advise.
+							// We want to find advisors other than the currently created bean itself.
+						}
+						else {
+							throw ex;
+						}
+					}
 				}
 				else {
 					// Pertarget or per this
@@ -190,7 +206,10 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJInvocationCon
 					List<Advisor> classAdvisors =
 							aspectJAdvisorFactory.getAdvisors(new PrototypeAspectInstanceFactory(beanFactory, beanName));
 					setAdvisorOrderIfNecessary(classAdvisors,beanFactory,beanName);
-					staticLogger.debug("Found " + classAdvisors.size() + " AspectJ advice methods in bean with name '" + beanName + "'");
+					if (staticLogger.isDebugEnabled()) {
+						staticLogger.debug("Found " + classAdvisors.size() +
+								" AspectJ advice methods in bean with name '" + beanName + "'");
+					}
 					advisors.addAll(classAdvisors);
 				}
 			}
