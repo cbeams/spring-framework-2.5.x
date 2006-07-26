@@ -346,7 +346,6 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		}
 	}
 	
-//	 TODO fix me fails can't bind type name
 	public void testNamedPointcutFromAspectLibraryWithBinding() {
 		TestBean target = new TestBean();
 		ITestBean itb = (ITestBean) createProxy(target, 
