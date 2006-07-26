@@ -90,22 +90,22 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2490 KB)
+* "spring" (~2410 KB)
 - Convenient jar file combining all standard modules (except for superseded modules)
 - Also includes the AOP Alliance interfaces (as a convenience)
-- Note: Does not include contents of mock jar, aspects jar, and spring-hibernate2 jar!
+- Note: Does not include contents of mock jar, aspects jar, spring-portlet jar, and spring-hibernate2 jar!
 
 MODULE JARS (dist/modules):
 
-* "spring-core" (~160 KB)
+* "spring-core" (~165 KB)
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~335 KB)
+* "spring-beans" (~340 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
-* "spring-aop" (~270 KB)
+* "spring-aop" (~275 KB)
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, (spring-beans, AOP Alliance, CGLIB, Commons Attributes)
 
@@ -117,7 +117,7 @@ MODULE JARS (dist/modules):
 - Contents: DAO support, transaction infrastructure, caching support
 - Dependencies: spring-core, (spring-aop, spring-context, JTA API)
 
-* "spring-jdbc" (~205 KB)
+* "spring-jdbc" (~210 KB)
 - Contents: JDBC support
 - Dependencies: spring-dao, spring-beans
 
@@ -125,17 +125,13 @@ MODULE JARS (dist/modules):
 - Contents: UI template support, mail support, scripting, scheduling, caching
 - Dependencies: spring-context, (Velocity, FreeMarker, JasperReports, JavaMail, BSH, Groovy, JRuby, Quartz, EHCache)
 
-* "spring-web" (~140 KB)
+* "spring-web" (~145 KB)
 - Contents: web application context, multipart resolver, web utilities
 - Dependencies: spring-context, Servlet API, (JSP API, JSTL, Commons FileUpload, COS)
 
-* "spring-webmvc" (~265 KB)
+* "spring-webmvc" (~270 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (spring-support, Tiles, iText, POI)
-
-* "spring-portlet" (~110 KB)
-- Contents: framework portlets, portlet MVC framework, portlet controllers
-- Dependencies: spring-web, Portlet API, (spring-webmvc)
 
 * "spring-struts" (~25 KB)
 - Contents: Struts support
@@ -144,6 +140,10 @@ MODULE JARS (dist/modules):
 * "spring-remoting" (~100 KB)
 - Contents: remoting support, EJB support
 - Dependencies: spring-aop, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB API)
+
+* "spring-portlet" (~110 KB)
+- Contents: framework portlets, portlet MVC framework, portlet controllers
+- Dependencies: spring-web, Portlet API, (spring-webmvc)
 
 * "spring-jmx" (~85 KB)
 - Contents: JMX 1.0/1.2 support
@@ -159,19 +159,19 @@ MODULE JARS (dist/modules):
 
 * "spring-jdo" (~65 KB)
 - Contents: JDO 1.0/2.0 support
-- Dependencies: spring-dao, spring-jdbc, JDO API, (spring-webmvc, spring-portlet)
+- Dependencies: spring-dao, spring-jdbc, JDO API, (spring-web)
 
 * "spring-jpa" (~85 KB)
 - Contents: JPA 1.0 support
-- Dependencies: spring-dao, spring-jdbc, JPA API, (spring-webmvc, spring-portlet)
+- Dependencies: spring-dao, spring-jdbc, JPA API, (spring-web)
 
-* "spring-hibernate2" (~90 KB)
+* "spring-hibernate2" (~85 KB)
 - Contents: Hibernate 2.1 support (superseded)
-- Dependencies: spring-dao, spring-jdbc, Hibernate2, (spring-webmvc, spring-portlet)
+- Dependencies: spring-dao, spring-jdbc, Hibernate2, (spring-web)
 
-* "spring-hibernate3" (~110 KB)
+* "spring-hibernate3" (~105 KB)
 - Contents: Hibernate 3.0/3.1/3.2 support
-- Dependencies: spring-dao, spring-jdbc, Hibernate3, (spring-webmvc, spring-portlet)
+- Dependencies: spring-dao, spring-jdbc, Hibernate3, (spring-web)
 
 * "spring-toplink" (~55 KB)
 - Contents: TopLink support

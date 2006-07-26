@@ -246,6 +246,7 @@
 				<exclude name="org/springframework/beans/factory/aspectj/**"/>
 				<exclude name="org/springframework/transaction/aspectj/**"/>
 				<exclude name="org/springframework/orm/hibernate/**"/>
+				<exclude name="org/springframework/web/portlet/**"/>
 			</fileset>
 			<zipfileset src="lib/aopalliance/aopalliance.jar"/>
 			<manifest>
