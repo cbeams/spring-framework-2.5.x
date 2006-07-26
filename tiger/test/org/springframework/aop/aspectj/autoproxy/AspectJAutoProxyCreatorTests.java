@@ -17,6 +17,7 @@
 package org.springframework.aop.aspectj.autoproxy;
 
 import junit.framework.TestCase;
+
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.PerTargetAspect;
 import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.TwoAdviceAspect;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
@@ -27,6 +28,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -35,18 +37,17 @@ import org.springframework.context.support.GenericApplicationContext;
 /**
  * Tests for AspectJ auto proxying. Includes mixing with Spring AOP Advisors
  * to demonstrate that existing autoproxying contract is honoured.
+ *
  * @author Rod Johnson
  */
 public class AspectJAutoProxyCreatorTests extends TestCase {
 
 	public void testAspectsAreApplied() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
-						"/org/springframework/aop/aspectj/autoproxy/aspects.xml");
-
-		ITestBean adrian = (ITestBean) bf.getBean("adrian");
-
-		assertTrue(AopUtils.isAopProxy(adrian));
-		assertEquals(68, adrian.getAge());
+				"/org/springframework/aop/aspectj/autoproxy/aspects.xml");
+		MethodInvokingFactoryBean factoryBean = (MethodInvokingFactoryBean) bf.getBean("&factoryBean");
+		assertTrue(AopUtils.isAopProxy(factoryBean.getTargetObject()));
+		assertEquals(68, ((ITestBean) factoryBean.getTargetObject()).getAge());
 	}
 
 	public void testAspectsAndAdvisorAreApplied() {
@@ -158,7 +159,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 
 	private void testTwoAdviceAspectWith(String location) {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
-						"/org/springframework/aop/aspectj/autoproxy/" + location);
+				"/org/springframework/aop/aspectj/autoproxy/" + location);
 		boolean aspectSingleton = bf.isSingleton(TwoAdviceAspect.class.getName());
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
@@ -170,7 +171,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 
 	public void testAdviceUsingJoinPoint() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
-						"/org/springframework/aop/aspectj/autoproxy/usesJoinPointAspect.xml");
+				"/org/springframework/aop/aspectj/autoproxy/usesJoinPointAspect.xml");
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
 		adrian1.getAge();
@@ -182,9 +183,9 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 
 	public void testIncludeMechanism() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
-						"/org/springframework/aop/aspectj/autoproxy/usesInclude.xml");
-		ITestBean adrian = (ITestBean) bf.getBean("adrian");
+				"/org/springframework/aop/aspectj/autoproxy/usesInclude.xml");
 
+		ITestBean adrian = (ITestBean) bf.getBean("adrian");
 		assertTrue(AopUtils.isAopProxy(adrian));
 		assertEquals(68, adrian.getAge());
 	}
@@ -203,18 +204,19 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 
 	public void testForceProxyTargetClass() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
-						"/org/springframework/aop/aspectj/autoproxy/aspectsWithCGLIB.xml");
+				"/org/springframework/aop/aspectj/autoproxy/aspectsWithCGLIB.xml");
+
 		ProxyConfig pc = (ProxyConfig) bf.getBean(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		assertTrue("should be proxying classes", pc.isProxyTargetClass());
 	}
 
 	public void testWithAbstractFactoryBeanAreApplied() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
-						"/org/springframework/aop/aspectj/autoproxy/aspectsWithAbstractBean.xml");
+				"/org/springframework/aop/aspectj/autoproxy/aspectsWithAbstractBean.xml");
 
 		ITestBean adrian = (ITestBean) bf.getBean("adrian");
-
 		assertTrue(AopUtils.isAopProxy(adrian));
 		assertEquals(68, adrian.getAge());
 	}
+
 }

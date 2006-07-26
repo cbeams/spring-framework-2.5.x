@@ -6,8 +6,7 @@
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
 	<!--
-	<bean 
-		class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" />
+	<bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" />
 	-->
 	
 	<aop:aspectj-autoproxy/>
@@ -26,6 +25,11 @@
 
 	<bean id="adrian2Parent" class="org.springframework.beans.TestBean" abstract="true">
 		<property name="name" value="adrian"/>
+	</bean>
+
+	<bean id="factoryBean" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject" ref="adrian"/>
+		<property name="targetMethod" value="toString"/>
 	</bean>
 
 </beans>

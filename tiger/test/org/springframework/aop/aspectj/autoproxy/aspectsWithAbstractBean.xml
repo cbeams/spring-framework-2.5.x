@@ -3,10 +3,16 @@
        xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
-	 <aop:aspectj-autoproxy/>
+
+	<aop:aspectj-autoproxy/>
 
 	<bean class="org.springframework.aop.aspectj.autoproxy.MultiplyReturnValue">
 		<property name="multiple" value="2"/>
+	</bean>
+
+	<bean id="factoryBean" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject" ref="adrian"/>
+		<property name="targetMethod" value="toString"/>
 	</bean>
 
 	<bean id="adrianParent" abstract="true">

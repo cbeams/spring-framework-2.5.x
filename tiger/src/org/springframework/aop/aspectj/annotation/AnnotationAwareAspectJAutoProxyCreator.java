@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -85,13 +85,8 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJInvocationCon
 	}
 
 	// See comment in constructor for why we do this...
-	protected boolean isInfrastructureClass(Class beanClass, String beanName) {
-		if (this.aspectJAdvisorFactory.isAspect(beanClass)) {
-			return true;
-		}
-		else {
-			return super.isInfrastructureClass(beanClass,beanName);
-		}
+	protected boolean isInfrastructureClass(Class beanClass) {
+		return (super.isInfrastructureClass(beanClass) || this.aspectJAdvisorFactory.isAspect(beanClass));
 	}
 
 	public void setAspectJAdvisorFactory(AspectJAdvisorFactory aspectJAdvisorFactory) {
@@ -116,7 +111,7 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJInvocationCon
 			return true;
 		}
 		else {
-			for(Pattern pattern : this.includePatterns) {
+			for (Pattern pattern : this.includePatterns) {
 				if (pattern.matcher(beanName).matches()) {
 					return true;
 				}
@@ -134,7 +129,11 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJInvocationCon
 		// Add all the Spring advisors found according to superclass rules
 		advisors.addAll(super.findCandidateAdvisors());
 
-		advisors.addAll(createAspectJAdvisors(this.aspectJAdvisorFactory, getBeanFactory()));
+		// Safety of cast is already checked in superclass.
+		ListableBeanFactory lbf = (ListableBeanFactory) getBeanFactory();
+
+		advisors.addAll(createAspectJAdvisors(this.aspectJAdvisorFactory, lbf));
+
 		return advisors;
 	}
 
@@ -142,21 +141,21 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJInvocationCon
 	 * Look for AspectJ annotated aspect classes in the current bean factory,
 	 * and return to a list of Spring AOP advisors representing them.
 	 * Create a Spring Advisor for each advice method
-	 * @param aspectJAdvisorFactory AdvisorFactory to use
-	 * @param beanFactory BeanFactory to look for AspectJ annotated aspects in
+	 * @param aspectJAdvisorFactory the AdvisorFactory to use
+	 * @param beanFactory the BeanFactory to look for AspectJ annotated aspects in
 	 * @return a list of Spring AOP advisors resulting from AspectJ annotated
 	 * classes in the current Spring bean factory
 	 */
 	public List<Advisor> createAspectJAdvisors (
-			AspectJAdvisorFactory aspectJAdvisorFactory, BeanFactory beanFactory)
+			AspectJAdvisorFactory aspectJAdvisorFactory, ListableBeanFactory beanFactory)
 			throws BeansException, IllegalStateException {
 
 		List<Advisor> advisors = new LinkedList<Advisor>();
 
-		// Safety of cast is already enforced by superclass
-		String[] beanDefinitionNames = BeanFactoryUtils.beanNamesIncludingAncestors((ListableBeanFactory) beanFactory);		
-		for (String beanName : beanDefinitionNames) {
-			if (!isIncluded(beanName) || isAbstract(beanName, beanFactory)) {
+		String[] beanNames =
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Object.class, true, false);
+		for (String beanName : beanNames) {
+			if (!isIncluded(beanName)) {
 				continue;
 			}
 			
@@ -169,15 +168,16 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJInvocationCon
 			}
 
 			if (aspectJAdvisorFactory.isAspect(beanType)) {
-				//logger.debug("Found aspect bean '" + beanName + "'");
-				AspectMetadata amd = new AspectMetadata(beanType,beanName);
+				AspectMetadata amd = new AspectMetadata(beanType, beanName);
 				if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
-					// Default singleton binding
+					// Default singleton binding.
 					Object beanInstance = beanFactory.getBean(beanName);
 					List<Advisor> classAdvisors =
 							aspectJAdvisorFactory.getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(beanInstance,beanName));
 					setAdvisorOrderIfNecessary(classAdvisors,beanInstance);
-					staticLogger.debug("Found " + classAdvisors.size() + " AspectJ advice methods");
+					if (staticLogger.isDebugEnabled()) {
+						staticLogger.debug("Found " + classAdvisors.size() + " AspectJ advice methods");
+					}
 					advisors.addAll(classAdvisors);
 				}
 				else {
@@ -196,21 +196,6 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJInvocationCon
 			}
 		}
 		return advisors;
-	}
-
-	/**
-	 * Is the bean definition identifed by the supplied bean abstract?
-	 */
-	private boolean isAbstract(String beanName, BeanFactory beanFactory) {
-		if(beanFactory instanceof ConfigurableListableBeanFactory) {
-			ConfigurableListableBeanFactory clbf = (ConfigurableListableBeanFactory) beanFactory;
-			if(clbf.containsBeanDefinition(beanName)) {
-			  BeanDefinition beanDefinition = clbf.getBeanDefinition(beanName);
-				return beanDefinition.isAbstract();
-			}
-		}
-		// cannot get the bean definition or it doesn't exist - assume not abstract.
-		return false;
 	}
 
 	private void setAdvisorOrderIfNecessary(List<Advisor> advisors, Object beanInstance) {
