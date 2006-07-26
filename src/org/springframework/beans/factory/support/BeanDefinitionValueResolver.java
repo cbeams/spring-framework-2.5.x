@@ -224,10 +224,11 @@ class BeanDefinitionValueResolver {
 				return this.beanFactory.getParentBeanFactory().getBean(ref.getBeanName());
 			}
 			else {
+				Object bean = this.beanFactory.getBean(ref.getBeanName());
 				if (this.beanDefinition.isSingleton()) {
 					this.beanFactory.registerDependentBean(ref.getBeanName(), this.beanName);
 				}
-				return this.beanFactory.getBean(ref.getBeanName());
+				return bean;
 			}
 		}
 		catch (BeansException ex) {

@@ -35,6 +35,7 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -361,7 +362,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// even when triggered by lifecycle interfaces like BeanFactoryAware.
 			if (isAllowCircularReferences() && isSingletonCurrentlyInCreation(beanName)) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Eagerly caching bean with name '" + beanName +
+					logger.debug("Eagerly caching bean [" + bean + "] with name '" + beanName +
 							"' to allow for resolving potential circular references");
 				}
 				addSingleton(beanName, bean);
@@ -394,7 +395,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 			originalBean = bean;
 			bean = initializeBean(beanName, bean, mergedBeanDefinition);
+
+			if (originalBean != bean && hasDependentBean(beanName)) {
+				throw new BeanCurrentlyInCreationException(beanName,
+						"Bean with name '" + beanName + "' has been injected into other beans " +
+						getDependentBeans(beanName) + " in its raw version as part of a circular reference, " +
+						"but has eventually been wrapped (for example as part of auto-proxy creation). " +
+						"This means that said other beans do not use the final version of the bean. " +
+						"This is often the result of over-eager type matching - consider using " +
+						"'getBeanNamesOfType' with the 'allowEagerInit' flag turned off, for example.");
+			}
 		}
+
 		catch (BeanCreationException ex) {
 			throw ex;
 		}

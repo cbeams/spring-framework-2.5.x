@@ -244,6 +244,17 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 		}
 	}
 
+	/**
+	 * Return whether a dependent bean has been registered under the given name.
+	 * @param beanName the name of the bean
+	 * @return an unmodifiable Set of dependent bean names (as Strings)
+	 */
+	protected Set getDependentBeans(String beanName) {
+		synchronized (this.dependentBeanMap) {
+			return Collections.unmodifiableSet((Set) this.dependentBeanMap.get(beanName));
+		}
+	}
+
 	public void destroySingletons() {
 		if (logger.isInfoEnabled()) {
 			logger.info("Destroying singletons in {" + this + "}");
