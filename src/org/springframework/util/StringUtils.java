@@ -535,6 +535,55 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Concatenate the given String arrays into one,
+	 * with overlapping array elements included twice.
+	 * <p>The order of elements in the original arrays is preserved.
+	 * @param array1 the first array (can be <code>null</code>)
+	 * @param array2 the second array (can be <code>null</code>)
+	 * @return the new array (<code>null</code> if both given arrays were <code>null</code>)
+	 */
+	public static String[] concatenateStringArrays(String[] array1, String[] array2) {
+		if (ObjectUtils.isEmpty(array1)) {
+			return array2;
+		}
+		if (ObjectUtils.isEmpty(array2)) {
+			return array1;
+		}
+		String[] newArr = new String[array1.length + array2.length];
+		System.arraycopy(array1, 0, newArr, 0, array1.length);
+		System.arraycopy(array2, 0, newArr, array1.length, array2.length);
+		return newArr;
+	}
+
+	/**
+	 * Merge the given String arrays into one, with overlapping
+	 * array elements only included once.
+	 * <p>The order of elements in the original arrays is preserved
+	 * (with the exception of overlapping elements, which are only
+	 * included on their first occurence).
+	 * @param array1 the first array (can be <code>null</code>)
+	 * @param array2 the second array (can be <code>null</code>)
+	 * @return the new array (<code>null</code> if both given arrays were <code>null</code>)
+	 */
+	public static String[] mergeStringArrays(String[] array1, String[] array2) {
+		if (ObjectUtils.isEmpty(array1)) {
+			return array2;
+		}
+		if (ObjectUtils.isEmpty(array2)) {
+			return array1;
+		}
+		List result = new ArrayList();
+		result.addAll(Arrays.asList(array1));
+		for (int i = 0; i < array2.length; i++) {
+			String str = array2[i];
+			if (!result.contains(str)) {
+				result.add(str);
+			}
+		}
+		return toStringArray(result);
+	}
+
+	/**
 	 * Turn given source String array into sorted array.
 	 * @param array the source array
 	 * @return the sorted array (never <code>null</code>)
