@@ -59,9 +59,9 @@ public class BindStatus {
 
 	private Object value;
 
-    private Class valueType;
+	private Class valueType;
 
-    private PropertyEditor editor;
+	private PropertyEditor editor;
 
 	private List objectErrors;
 
