@@ -508,15 +508,6 @@ public class NotVeryUsefulAspect {
 	  affect pointcut <emphasis>matching</emphasis>.
 	  </para>
 
-	  <remark>A bug in AspectJ 1.5.1 (#140357) can sometimes cause the AspectJ pointcut
-	  parsing support used by Spring to fail when a named pointcut refers to another
-	  named pointcut declared in the same type. This bug is fixed in the AspectJ development
-	  builds available from the AspectJ download page, and will be incorporated in the 1.5.2
-	  release. If you run into this issue, you can download an AspectJ development build
-	  and update your copy of <literal>aspectjweaver.jar</literal> as a temporary measure
-	  until AspectJ 1.5.2 is released.
-	  </remark>
-    
     </section>
 	  
     <section id="aop-common-pointcuts">
