@@ -310,19 +310,29 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 	@Aspect
 	public static class NamedPointcutAspectFromLibrary {
 
-		@Around("org.springframework.aop.aspectj.support.CommonPointcuts.anyGetter()")
+		@Around("org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.Library.propertyAccess()")
 		public int changeReturnType(ProceedingJoinPoint pjp) {
 			return -1;
 		}
 		
-		@Around(value="org.springframework.aop.aspectj.support.CommonPointcuts.anyIntArg(x)", argNames="x")
+		@Around(value="org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.Library.integerArgOperation(x)", argNames="x")
 		public void doubleArg(ProceedingJoinPoint pjp, int x) throws Throwable {
 			pjp.proceed(new Object[]{x*2});
 		}
 	}
 
-	// TODO fix me fails can't bind type name
-	public void xtestNamedPointcutFromAspectLibrary() {
+	@Aspect
+	public static class Library {
+		
+		@Pointcut("execution(!void get*())")
+		public void propertyAccess() {}
+		
+		@Pointcut("execution(* *(..)) && args(i)")
+		public void integerArgOperation(int i) {}
+		
+	}
+	
+	public void testNamedPointcutFromAspectLibrary() {
 		testNamedPointcuts(new NamedPointcutAspectFromLibrary());
 	}
 	
@@ -330,14 +340,14 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 	@Aspect
 	public static class NamedPointcutAspectFromLibraryWithBinding {
 		
-		@Around(value="org.springframework.aop.aspectj.support.CommonPointcuts.anyIntArg(x)", argNames="x")
+		@Around(value="org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.Library.integerArgOperation(x)", argNames="x")
 		public void doubleArg(ProceedingJoinPoint pjp, int x) throws Throwable {
 			pjp.proceed(new Object[]{x*2});
 		}
 	}
 	
 //	 TODO fix me fails can't bind type name
-	public void xtestNamedPointcutFromAspectLibraryWithBinding() {
+	public void testNamedPointcutFromAspectLibraryWithBinding() {
 		TestBean target = new TestBean();
 		ITestBean itb = (ITestBean) createProxy(target, 
 				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new NamedPointcutAspectFromLibraryWithBinding(),"someBean")), 
