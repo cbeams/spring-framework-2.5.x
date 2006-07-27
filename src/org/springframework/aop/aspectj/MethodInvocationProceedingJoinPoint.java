@@ -47,6 +47,7 @@ import org.springframework.aop.framework.ReflectiveMethodInvocation;
 public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint, StaticPart {
 	
 	private final MethodInvocation methodInvocation;
+	private Object[] defensiveCopyOfArgs;
 
 	/**
 	 * Lazily initialized signature object.
@@ -107,7 +108,12 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	}
 
 	public Object[] getArgs() {
-		return methodInvocation.getArguments();
+		if (this.defensiveCopyOfArgs == null) {
+			Object[] argsSource = methodInvocation.getArguments();
+			this.defensiveCopyOfArgs = new Object[argsSource.length];
+			System.arraycopy(argsSource, 0, this.defensiveCopyOfArgs, 0, argsSource.length);
+		}
+		return this.defensiveCopyOfArgs;
 	}
 
 	public synchronized Signature getSignature() {
