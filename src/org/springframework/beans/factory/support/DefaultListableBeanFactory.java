@@ -28,6 +28,7 @@ import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -65,6 +66,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/** Whether to allow re-registration of a different definition with the same name */
 	private boolean allowBeanDefinitionOverriding = true;
+
+	private boolean allowEagerClassLoading = true;
 
 	/** Map of bean definition objects, keyed by bean name */
 	private final Map beanDefinitionMap = new HashMap();
@@ -104,6 +107,28 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return allowBeanDefinitionOverriding;
 	}
 
+	/**
+	 * Set whether the factory is allowed to eagerly load bean classes
+	 * even for bean definitions that are marked as "lazy-init".
+	 * <p>Default is "true". Turn this flag off to suppress class loading
+	 * for lazy-init beans unless such a bean is explicitly requested.
+	 * In particular, by-type lookups will then simply ignore bean definitions
+	 * without resolved class name, instead of loading the bean classes on
+	 * demand just to perform a type check.
+	 * @see AbstractBeanDefinition#setLazyInit
+	 */
+	public void setAllowEagerClassLoading(boolean allowEagerClassLoading) {
+		this.allowEagerClassLoading = allowEagerClassLoading;
+	}
+
+	/**
+	 * Return whether the factory is allowed to eagerly load bean classes
+	 * even for bean definitions that are marked as "lazy-init".
+	 */
+	public boolean isAllowEagerClassLoading() {
+		return allowEagerClassLoading;
+	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of ListableBeanFactory interface
@@ -133,27 +158,40 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			String beanName = (String) it.next();
 			RootBeanDefinition rbd = getMergedBeanDefinition(beanName, false);
 			// Only check bean definition if it is complete.
-			if (!rbd.isAbstract() && (allowEagerInit || !rbd.isLazyInit())) {
+			if (!rbd.isAbstract() &&
+					(allowEagerInit || rbd.hasBeanClass() || !rbd.isLazyInit() || isAllowEagerClassLoading())) {
 				// In case of FactoryBean, match object created by FactoryBean.
-				Class beanClass = resolveBeanClass(rbd, beanName);
-				boolean isFactoryBean = (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
-				if (isFactoryBean || rbd.getFactoryBeanName() != null) {
-					if (allowEagerInit && (includePrototypes || isSingleton(beanName)) &&
-							isBeanTypeMatch(beanName, type)) {
+				try {
+					Class beanClass = resolveBeanClass(rbd, beanName);
+					boolean isFactoryBean = (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
+					if (isFactoryBean || rbd.getFactoryBeanName() != null) {
+						if (allowEagerInit && (includePrototypes || isSingleton(beanName)) &&
+								isBeanTypeMatch(beanName, type)) {
+							result.add(beanName);
+							// Match found for this bean: do not match FactoryBean itself anymore.
+							continue;
+						}
+						// We're done for anything but a full FactoryBean.
+						if (!isFactoryBean) {
+							continue;
+						}
+						// In case of FactoryBean, try to match FactoryBean itself next.
+						beanName = FACTORY_BEAN_PREFIX + beanName;
+					}
+					// Match raw bean instance (might be raw FactoryBean).
+					if ((includePrototypes || rbd.isSingleton()) && isBeanTypeMatch(beanName, type)) {
 						result.add(beanName);
-						// Match found for this bean: do not match FactoryBean itself anymore.
-						continue;
 					}
-					// We're done for anything but a full FactoryBean.
-					if (!isFactoryBean) {
-						continue;
-					}
-					// In case of FactoryBean, try to match FactoryBean itself next.
-					beanName = FACTORY_BEAN_PREFIX + beanName;
 				}
-				// Match raw bean instance (might be raw FactoryBean).
-				if ((includePrototypes || rbd.isSingleton()) && isBeanTypeMatch(beanName, type)) {
-					result.add(beanName);
+				catch (CannotLoadBeanClassException ex) {
+					if (rbd.isLazyInit()) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Ignoring bean class loading failure for lazy-init bean '" + beanName + "'", ex);
+						}
+					}
+					else {
+						throw ex;
+					}
 				}
 			}
 		}

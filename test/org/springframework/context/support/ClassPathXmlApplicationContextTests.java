@@ -28,7 +28,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.ResourceTestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -82,9 +82,9 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		assertTrue(ctx.containsBean("someMessageSource"));
 		try {
 			ctx.getBean("someMessageSource");
-			fail("Should have thrown BeanDefinitionStoreException");
+			fail("Should have thrown CannotLoadBeanClassException");
 		}
-		catch (BeanDefinitionStoreException ex) {
+		catch (CannotLoadBeanClassException ex) {
 			assertTrue(ex.contains(ClassNotFoundException.class));
 		}
 	}
@@ -93,7 +93,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"classWithPlaceholder.xml", getClass());
 		assertTrue(ctx.containsBean("someMessageSource"));
-		ctx.getBean("someMessageSource");
+		assertTrue(ctx.getBean("someMessageSource") instanceof StaticMessageSource);
 	}
 
 	public void testMultipleConfigLocationsWithClass() {

@@ -45,6 +45,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -825,8 +826,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @param mbd the merged bean definition to determine the class for
 	 * @param beanName the name of the bean (for error handling purposes)
 	 * @return the resolved bean class (or <code>null</code> if none)
+	 * @throws CannotLoadBeanClassException if we failed to load the class
 	 */
-	protected Class resolveBeanClass(RootBeanDefinition mbd, String beanName) {
+	protected Class resolveBeanClass(RootBeanDefinition mbd, String beanName) throws CannotLoadBeanClassException {
 		if (mbd.hasBeanClass()) {
 			return mbd.getBeanClass();
 		}
@@ -834,12 +836,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			return mbd.resolveBeanClass(getBeanClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
-			throw new BeanDefinitionStoreException(mbd.getResourceDescription(),
-					beanName, "Bean class [" + mbd.getBeanClassName() + "] not found", ex);
+			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), ex);
 		}
 		catch (NoClassDefFoundError err) {
-			throw new BeanDefinitionStoreException(mbd.getResourceDescription(),
-					beanName, "Class that bean class [" + mbd.getBeanClassName() + "] depends on not found", err);
+			throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), err);
 		}
 	}
 

@@ -398,9 +398,8 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 	/**
 	 * Set whether this bean should be lazily initialized.
-	 * Only applicable to a singleton bean.
-	 * If false, it will get instantiated on startup by bean factories
-	 * that perform eager initialization of singletons.
+	 * <p>If <code>false</code>, the bean will get instantiated on startup by bean
+	 * factories that perform eager initialization of singletons.
 	 */
 	public void setLazyInit(boolean lazyInit) {
 		this.lazyInit = lazyInit;
@@ -741,11 +740,6 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	public void validate() throws BeanDefinitionValidationException {
-		if (isLazyInit() && !isSingleton()) {
-			throw new BeanDefinitionValidationException(
-					"Lazy initialization is only applicable to singleton beans");
-		}
-
 		if (!getMethodOverrides().isEmpty() && getFactoryMethodName() != null) {
 			throw new BeanDefinitionValidationException(
 					"Cannot combine static factory method with method overrides: " +
