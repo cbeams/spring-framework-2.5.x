@@ -18,12 +18,12 @@ package org.springframework.beans.factory.xml;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.HashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,15 +34,15 @@ import org.w3c.dom.NodeList;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.factory.parsing.BeanEntry;
-import org.springframework.beans.factory.parsing.ConstructorArgumentEntry;
-import org.springframework.beans.factory.parsing.ParseState;
-import org.springframework.beans.factory.parsing.PropertyEntry;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.beans.factory.parsing.BeanEntry;
+import org.springframework.beans.factory.parsing.ConstructorArgumentEntry;
+import org.springframework.beans.factory.parsing.ParseState;
+import org.springframework.beans.factory.parsing.PropertyEntry;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.LookupOverride;
@@ -56,8 +56,8 @@ import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.core.AttributeAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
@@ -601,7 +601,6 @@ public class BeanDefinitionParserDelegate {
 	 * Parse constructor-arg sub-elements of the given bean element.
 	 */
 	public ConstructorArgumentValues parseConstructorArgElements(Element beanEle) {
-
 		NodeList nl = beanEle.getChildNodes();
 		ConstructorArgumentValues cargs = new ConstructorArgumentValues();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -617,7 +616,6 @@ public class BeanDefinitionParserDelegate {
 	 * Parse property sub-elements of the given bean element.
 	 */
 	public MutablePropertyValues parsePropertyElements(Element beanEle) {
-
 		NodeList nl = beanEle.getChildNodes();
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -683,7 +681,6 @@ public class BeanDefinitionParserDelegate {
 				if (index < 0) {
 					error("'index' cannot be lower than 0", ele);
 				}
-
 				try {
 					this.parseState.push(new ConstructorArgumentEntry(index));
 					Object val = parsePropertyValue(ele, null);
@@ -730,12 +727,10 @@ public class BeanDefinitionParserDelegate {
 		}
 		this.parseState.push(new PropertyEntry(propertyName));
 		try {
-
 			if (pvs.contains(propertyName)) {
 				error("Multiple 'property' definitions for property '" + propertyName + "'", ele);
 				return;
 			}
-
 			Object val = parsePropertyValue(ele, propertyName);
 			PropertyValue pv = new PropertyValue(propertyName, val);
 			parseMetaElements(ele, pv);
@@ -763,7 +758,6 @@ public class BeanDefinitionParserDelegate {
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
 				Element candidateEle = (Element) nl.item(i);
-
 				if (DESCRIPTION_ELEMENT.equals(candidateEle.getTagName())) {
 					// Keep going: we don't use this value for now.
 				}
@@ -780,9 +774,9 @@ public class BeanDefinitionParserDelegate {
 		boolean hasRefAttribute = ele.hasAttribute(REF_ATTRIBUTE);
 		boolean hasValueAttribute = ele.hasAttribute(VALUE_ATTRIBUTE);
 		if ((hasRefAttribute && hasValueAttribute) ||
-						((hasRefAttribute || hasValueAttribute)) && subElement != null) {
+				((hasRefAttribute || hasValueAttribute)) && subElement != null) {
 			error(elementName +
-							" is only allowed to contain either 'ref' attribute OR 'value' attribute OR sub-element", ele);
+					" is only allowed to contain either 'ref' attribute OR 'value' attribute OR sub-element", ele);
 		}
 		if (hasRefAttribute) {
 			String refName = ele.getAttribute(REF_ATTRIBUTE);
@@ -1149,8 +1143,8 @@ public class BeanDefinitionParserDelegate {
 	private Object parseNestedCustomElement(Element candidateEle) {
 		BeanDefinition innerDefinition = parseCustomElement(candidateEle, true);
 		if(innerDefinition == null) {
-			error("Incorrect usage of element '" + candidateEle.getNodeName()
-							+ "' in a nested manner. This tag cannot be used nested inside <property>.", candidateEle);
+			error("Incorrect usage of element '" + candidateEle.getNodeName() + "' in a nested manner. " +
+					"This tag cannot be used nested inside <property>.", candidateEle);
 			return null;
 		}
 		return innerDefinition;
