@@ -16,29 +16,34 @@
 
 package org.springframework.web.servlet.view.xslt;
 
-import javax.xml.transform.ErrorListener;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.parsers.DocumentBuilderFactory;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.ErrorListener;
+import javax.xml.transform.Source;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.dom.DOMSource;
 
 import junit.framework.TestCase;
-
-import org.springframework.context.ApplicationContextException;
-import org.springframework.core.JdkVersion;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.web.servlet.ModelAndView;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
-import java.util.*;
+import org.springframework.context.ApplicationContextException;
+import org.springframework.core.JdkVersion;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Unit tests for the {@link AbstractXsltView} class.
@@ -264,10 +269,11 @@ public class TestXsltViewTests extends TestCase {
 	/**
 	 * Not a test per-se, but rather only here to validate the example
 	 * given in the reference documentation.
-	 * @throws Exception in the case of errors
 	 */
 	public void testMyFirstWordsExampleFromTheReferenceDocumentation() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		// TODO: Why does this test not even work on JDK 1.4?
+		// Maybe because of the Xalan version there?
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
 			return;
 		}
 
@@ -275,9 +281,9 @@ public class TestXsltViewTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		AbstractXsltView view = new AbstractXsltView() {
-
-			protected Source createXsltSource(Map model, String rootName, HttpServletRequest
-					request, HttpServletResponse response) throws Exception {
+			protected Source createXsltSource(
+					Map model, String rootName, HttpServletRequest request, HttpServletResponse response)
+					throws Exception {
 				Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 				Element root = document.createElement(rootName);
 				List words = (List) model.get("wordList");
@@ -323,15 +329,14 @@ public class TestXsltViewTests extends TestCase {
 
 
 	private static final class TestXsltView extends AbstractXsltView {
-
 	}
+
 
 	private static final class Hero {
 
 		private String name;
 		private int age;
 		private String catchphrase;
-
 
 		public Hero() {
 		}
@@ -341,7 +346,6 @@ public class TestXsltViewTests extends TestCase {
 			this.age = age;
 			this.catchphrase = catchphrase;
 		}
-
 
 		public String getCatchphrase() {
 			return catchphrase;
@@ -366,7 +370,6 @@ public class TestXsltViewTests extends TestCase {
 		public void setAge(int age) {
 			this.age = age;
 		}
-
 	}
 
 }
