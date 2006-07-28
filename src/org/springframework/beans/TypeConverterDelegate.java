@@ -34,7 +34,6 @@ import org.springframework.core.JdkVersion;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -192,10 +191,6 @@ class TypeConverterDelegate {
 			else if (convertedValue instanceof Map && Map.class.isAssignableFrom(requiredType)) {
 				// Convert keys and values to respective target type, if determined.
 				return convertToTypedMap((Map) convertedValue, propertyName, methodParam);
-			}
-			else if (convertedValue != null && String.class.equals(requiredType)) {
-				// If nothing else worked and we need a String - call toString.
-				convertedValue = ObjectUtils.nullSafeToString(convertedValue);
 			}
 			else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
 				// Try field lookup as fallback: for JDK 1.5 enum or custom enum

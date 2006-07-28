@@ -311,14 +311,6 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("Correct bigDecimal value", new BigDecimal("4.0").equals(tb.getBigDecimal()));
 	}
 
-	public void testToStringConversion() {
-		TestBean tb = new TestBean();
-		BeanWrapper bw = new BeanWrapperImpl(tb);
-
-		bw.setPropertyValue("name", new Integer(5));
-		assertEquals("5", tb.getName());
-	}
-
 	public void testEnumByFieldName() {
 		EnumTest et = new EnumTest();
 		BeanWrapper bw = new BeanWrapperImpl(et);
