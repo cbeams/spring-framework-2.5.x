@@ -16,15 +16,14 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.util.ObjectUtils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
-import javax.servlet.jsp.tagext.BodyTag;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+
+import org.springframework.util.ObjectUtils;
 
 /**
  * Form tag for displaying errors for a particular field or object.
@@ -94,11 +93,12 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag {
 
 	protected void exposeAttributes() throws JspException {
 		List errorMessages = new ArrayList();
-		Collections.addAll(errorMessages, getBindStatus().getErrorMessages());
+		errorMessages.addAll(Arrays.asList(getBindStatus().getErrorMessages()));
 		this.pageContext.setAttribute(MESSAGES_ATTRIBUTE, errorMessages);
 	}
 
 	protected void removeAttributes() {
 		this.pageContext.removeAttribute(MESSAGES_ATTRIBUTE);
 	}
+
 }
