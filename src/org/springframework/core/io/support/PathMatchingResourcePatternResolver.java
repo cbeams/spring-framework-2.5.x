@@ -260,7 +260,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 		}
 		else {
-			if (getPathMatcher().isPattern(locationPattern)) {
+			// Only look for a pattern after a prefix here
+			// (to not get fooled by a pattern symbol in a strange prefix).
+			int prefixEnd = locationPattern.indexOf(":") + 1;
+			if (getPathMatcher().isPattern(locationPattern.substring(prefixEnd))) {
 				// a file pattern
 				return findPathMatchingResources(locationPattern);
 			}
@@ -340,12 +343,12 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	/**
 	 * Determine the root directory for the given location.
 	 * <p>Used for determining the starting point for file matching,
-	 * resolving the root directory location to a java.io.File and
-	 * passing it into <code>retrieveMatchingFiles</code>, with the
+	 * resolving the root directory location to a <code>java.io.File</code>
+	 * and passing it into <code>retrieveMatchingFiles</code>, with the
 	 * remainder of the location as pattern.
 	 * <p>Will return "/WEB-INF" for the pattern "/WEB-INF/*.xml",
 	 * for example.
-	 * @param location the location to checkn
+	 * @param location the location to check
 	 * @return the part of the location that denotes the root directory
 	 * @see #retrieveMatchingFiles
 	 */
