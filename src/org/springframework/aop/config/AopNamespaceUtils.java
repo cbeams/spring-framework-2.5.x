@@ -96,8 +96,8 @@ public abstract class AopNamespaceUtils {
 	}
 
 	private static void registryOrEscalateApcAsRequired(Class cls, ParserContext parserContext) {
-		Assert.notNull(cls, "'cls' cannot be null.");
-		Assert.notNull(parserContext, "'parserContext' cannot be null.");
+		Assert.notNull(cls, "Class cannot be null");
+		Assert.notNull(parserContext, "ParserContext cannot be null");
 
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
 
@@ -145,8 +145,8 @@ public abstract class AopNamespaceUtils {
 	private static final int findPriorityForClass(String className) {
 		Assert.notNull(className, "Class name must not be null");
 		for (int i = 0; i < APC_PRIORITY_LIST.size(); i++) {
-			String s = (String) APC_PRIORITY_LIST.get(i);
-			if (className.equals(s)) {
+			String str = (String) APC_PRIORITY_LIST.get(i);
+			if (className.equals(str)) {
 				return i;
 			}
 		}
