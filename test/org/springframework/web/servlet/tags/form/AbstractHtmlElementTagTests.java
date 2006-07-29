@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import junit.framework.TestCase;
 import org.springframework.web.servlet.tags.AbstractTagTests;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 import org.springframework.web.servlet.support.JspAwareRequestContext;
