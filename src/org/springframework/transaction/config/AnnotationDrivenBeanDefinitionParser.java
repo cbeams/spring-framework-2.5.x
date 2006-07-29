@@ -27,19 +27,46 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.w3c.dom.Element;
 
 /**
+ * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} implementation that
+ * allows users to easily configure all the infrastructure beans required to enable
+ * annotation-driven transaction demarcation.
+ * <p/>
+ * By default, all proxies are created as JDK proxies. This may cause some problems if
+ * you are injecting objects as concrete classes rather than interfaces. To overcome this
+ * restriction you can set the '<code>proxy-target-class</code>' attribute to '<code>true</code>'.
+ *
  * @author Rob Harrop
  * @since 2.0
  */
 class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
-	private static final String TRANSACTION_ATTRIBUTE_SOURCE_ADVISOR_NAME = ".transactionAttributeSourceAdvisor";
+	/**
+	 * Bean property name for injecting the {@link TransactionInterceptor}.
+	 */
+	private static final String TRANSACTION_INTERCEPTOR = "transactionInterceptor";
 
-	public static final String TRANSACTION_INTERCEPTOR = "transactionInterceptor";
+	/**
+	 * The '<code>proxy-target-class</code>' attribute.
+	 */
+	private static final String PROXY_TARGET_CLASS = "proxy-target-class";
 
+	private static final String TRUE = "true";
+
+
+	/**
+	 * Parses the '<code>&lt;tx:annotation-driven/>&gt;</code>' tag. Will
+	 * {@link AopNamespaceUtils#registerAutoProxyCreatorIfNecessary register an AutoProxyCreator} in
+	 * the container as necessary.
+	 */
 	protected BeanDefinition parseInternal(Element element, ParserContext parserContext) {
 
 		// Register the APC if needed.
 		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext);
+
+		boolean proxyTargetClass = TRUE.equals(element.getAttribute(PROXY_TARGET_CLASS));
+		if (proxyTargetClass) {
+			AopNamespaceUtils.forceAutoProxyCreatorToUseClassProxying(parserContext.getRegistry());
+		}
 
 		String transactionManagerName = element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE);
 		Class sourceClass = TxNamespaceUtils.getAnnotationTransactionAttributeSourceClass();

@@ -35,6 +35,7 @@
 	<xsd:element name="annotation-driven">
 		<xsd:complexType>
 			<xsd:attribute name="transaction-manager" type="xsd:string" default="transactionManager"/>
+			<xsd:attribute name="proxy-target-class" type="xsd:boolean" default="false"/>
 		</xsd:complexType>
 	</xsd:element>
 
