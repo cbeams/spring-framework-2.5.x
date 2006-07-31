@@ -378,7 +378,7 @@ public class RequestContext {
 	 * can only work when the Servlet 2.4 'forward' request attributes are present.
 	 * For use in a Servlet 2.3- environment, you can rely on
 	 * {@link org.springframework.web.servlet.view.InternalResourceView}
-	 * to add these prior to dispatching the request.
+	 * to add these prior to dispatching the request.</b>
 	 * <p>Delegates to the UrlPathHelper for decoding.
 	 * @see #getQueryString
 	 * @see org.springframework.web.util.UrlPathHelper#getOriginatingRequestUri
@@ -397,7 +397,7 @@ public class RequestContext {
 	 * can only work when the Servlet 2.4 'forward' request attributes are present.
 	 * For use in a Servlet 2.3- environment, you can rely on
 	 * {@link org.springframework.web.servlet.view.InternalResourceView}
-	 * to add these prior to dispatching the request.
+	 * to add these prior to dispatching the request.</b>
 	 * <p>Delegates to the UrlPathHelper for decoding.
 	 * @see #getRequestUri
 	 * @see org.springframework.web.util.UrlPathHelper#getOriginatingQueryString
