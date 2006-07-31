@@ -17,7 +17,7 @@
 package org.springframework.beans.factory.parsing;
 
 /**
- * Simple implementation of the {@link SourceExtractor} that simply passes
+ * Simple {@link SourceExtractor} implementation that just passes
  * the candidate source metadata object through for attachment.
  * 
  * <p>Using this implementation means that tools will get raw access to the
@@ -25,7 +25,7 @@ package org.springframework.beans.factory.parsing;
  * 
  * <p>This implementation <strong>should not</strong> be used in a production
  * application since it is likely to keep too much metadata in memory
- * unnecessarily.
+ * (unnecessarily).
  *
  * @author Rob Harrop
  * @since 2.0
