@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.util.WebUtils;
 
 /**
- * MultipartResolver implementation for Jason Hunter's
+ * {@link MultipartResolver} implementation for Jason Hunter's
  * <a href="http://www.servlets.com/cos">COS (com.oreilly.servlet)</a>.
  * Works with a COS MultipartRequest underneath.
  *
@@ -51,9 +51,13 @@ import org.springframework.web.util.WebUtils;
  */
 public class CosMultipartResolver implements MultipartResolver, ServletContextAware {
 
+	/**
+	 * Constant identifier for the mulipart content type : 'multipart/form-data'.
+	 */
 	public static final String MULTIPART_CONTENT_TYPE = "multipart/form-data";
 
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private int maxUploadSize = Integer.MAX_VALUE;
@@ -77,7 +81,8 @@ public class CosMultipartResolver implements MultipartResolver, ServletContextAw
 	/**
 	 * Constructor for standalone usage. Determines the servlet container's
 	 * temporary directory via the given ServletContext.
-	 * @param servletContext the ServletContext to use
+	 * @param servletContext the ServletContext to use (must not be <code>null</code>)
+	 * @throws IllegalArgumentException if the supplied {@link ServletContext} is <code>null</code> 
 	 */
 	public CosMultipartResolver(ServletContext servletContext) {
 		this.uploadTempDir = WebUtils.getTempDir(servletContext);
