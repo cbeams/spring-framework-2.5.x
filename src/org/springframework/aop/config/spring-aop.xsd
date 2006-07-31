@@ -2,14 +2,13 @@
 
 <xsd:schema xmlns="http://www.springframework.org/schema/aop"
 						xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-						xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 						xmlns:beans="http://www.springframework.org/schema/beans"
 						xmlns:tool="http://www.springframework.org/schema/tool"
 						targetNamespace="http://www.springframework.org/schema/aop"
 						elementFormDefault="qualified"
 						attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
 	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
 
 	<xsd:element name="config">
@@ -45,22 +44,20 @@
 	</xsd:element>
 
 	<xsd:complexType name="aspectType">
-		<xsd:complexContent>
-			<xsd:extension base="beans:identifiedType">
-				<xsd:sequence>
-					<xsd:element name="pointcut" type="pointcutType" minOccurs="0" maxOccurs="1"/>
-					<xsd:element name="declare-parents" type="declareParentsType" minOccurs="0" maxOccurs="unbounded"/>
-					<xsd:choice minOccurs="0" maxOccurs="unbounded">
-						<xsd:element name="before" type="basicAdviceType"/>
-						<xsd:element name="after" type="basicAdviceType"/>
-						<xsd:element name="after-returning" type="afterReturningAdviceType"/>
-						<xsd:element name="after-throwing" type="afterThrowingAdviceType"/>
-						<xsd:element name="around" type="basicAdviceType"/>
-					</xsd:choice>
-				</xsd:sequence>
-				<xsd:attribute name="ref" type="xsd:string"/>
-			</xsd:extension>
-		</xsd:complexContent>
+		<xsd:sequence>
+			<xsd:element name="pointcut" type="pointcutType" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="declare-parents" type="declareParentsType" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:choice minOccurs="0" maxOccurs="unbounded">
+				<xsd:element name="before" type="basicAdviceType"/>
+				<xsd:element name="after" type="basicAdviceType"/>
+				<xsd:element name="after-returning" type="afterReturningAdviceType"/>
+				<xsd:element name="after-throwing" type="afterThrowingAdviceType"/>
+				<xsd:element name="around" type="basicAdviceType"/>
+			</xsd:choice>
+		</xsd:sequence>
+		<!-- Rick : ID type written explicitly as opposed to being imported (c.f. [SPR-2290] -->
+		<xsd:attribute name="id" type="xsd:ID"/>
+		<xsd:attribute name="ref" type="xsd:string"/>
 	</xsd:complexType>
 
 	<xsd:complexType name="includeType">
@@ -75,19 +72,17 @@
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>
-		<xsd:complexContent>
-			<xsd:extension base="beans:identifiedType">
-				<xsd:attribute name="expression" use="required" type="xsd:string"/>
-				<xsd:attribute name="type" default="aspectj">
-					<xsd:simpleType>
-						<xsd:restriction base="xsd:string">
-							<xsd:enumeration value="aspectj"/>
-							<xsd:enumeration value="regex"/>
-						</xsd:restriction>
-					</xsd:simpleType>
-				</xsd:attribute>
-			</xsd:extension>
-		</xsd:complexContent>
+		<!-- Rick : ID type written explicitly as opposed to being imported (c.f. [SPR-2290] -->
+		<xsd:attribute name="id" type="xsd:ID"/>
+		<xsd:attribute name="expression" use="required" type="xsd:string"/>
+		<xsd:attribute name="type" default="aspectj">
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="aspectj"/>
+					<xsd:enumeration value="regex"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
 	</xsd:complexType>
 
 	<xsd:complexType name="declareParentsType">
@@ -129,22 +124,20 @@
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>
-		<xsd:complexContent>
-			<xsd:extension base="beans:identifiedType">
-				<xsd:attribute name="advice-ref" type="xsd:string" use="required">
-					<xsd:annotation>
-						<xsd:appinfo>
-							<tool:annotation kind="ref">
-								<tool:expected-type type="org.springframework.aop.Advisor"/>
-							</tool:annotation>
-						</xsd:appinfo>
-					</xsd:annotation>
-				</xsd:attribute>
-				<xsd:attribute name="pointcut" type="xsd:string"/>
-				<xsd:attribute name="pointcut-ref" type="pointcutRefType"/>
-				<xsd:attribute name="order" type="xsd:int"/>
-			</xsd:extension>
-		</xsd:complexContent>
+		<!-- Rick : ID type written explicitly as opposed to being imported (c.f. [SPR-2290] -->
+		<xsd:attribute name="id" type="xsd:ID"/>
+		<xsd:attribute name="advice-ref" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:appinfo>
+					<tool:annotation kind="ref">
+						<tool:expected-type type="org.springframework.aop.Advisor"/>
+					</tool:annotation>
+				</xsd:appinfo>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="pointcut" type="xsd:string"/>
+		<xsd:attribute name="pointcut-ref" type="pointcutRefType"/>
+		<xsd:attribute name="order" type="xsd:int"/>
 	</xsd:complexType>
 
 
