@@ -29,6 +29,16 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 /**
+ * The default {@link DocumentLoader} implementation.
+ * 
+ * <p>Simply loads {@link Document documents} using the standard JAXP-configured
+ * XML parser. If you want to change the {@link DocumentBuilder} that is used to
+ * load documents then one strategy is to use a Java define when starting your
+ * application. For example, to use the Oracle {@link DocumentBuilder}, one might
+ * start one's application like so:
+ * 
+ * <pre code="class">java -Djavax.xml.parsers.DocumentBuilderFactory=oracle.xml.jaxp.JXDocumentBuilderFactory MyMainClass</pre>
+ * 
  * @author Rob Harrop
  * @since 2.0
  */
@@ -45,6 +55,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	private static final String XSD_SCHEMA_LANGUAGE = "http://www.w3.org/2001/XMLSchema";
 
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 
@@ -60,14 +71,17 @@ public class DefaultDocumentLoader implements DocumentLoader {
 		DocumentBuilderFactory factory =
 						createDocumentBuilderFactory(validationMode, namespaceAware);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Using JAXP provider [" + factory + "]");
+			logger.debug("Using JAXP provider [" + factory.getClass().getName() + "]");
 		}
 		DocumentBuilder builder = createDocumentBuilder(factory, entityResolver, errorHandler);
 		return builder.parse(inputSource);
 	}
 
+
 	/**
 	 * Create the {@link DocumentBuilderFactory} instance.
+	 * @param validationMode the type of validation ({@link XmlBeanDefinitionReader#VALIDATION_NONE none}, {@link XmlBeanDefinitionReader#VALIDATION_DTD DTD}, or {@link XmlBeanDefinitionReader#VALIDATION_XSD XSD})
+	 * @param namespaceAware <code>true</code> if the returned factory is to provide support for XML namespaces
 	 */
 	protected DocumentBuilderFactory createDocumentBuilderFactory(int validationMode, boolean namespaceAware)
 					throws ParserConfigurationException {

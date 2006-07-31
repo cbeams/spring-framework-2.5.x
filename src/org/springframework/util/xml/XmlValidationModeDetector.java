@@ -16,7 +16,6 @@
 
 package org.springframework.util.xml;
 
-
 import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
@@ -25,6 +24,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
+ * Detects whether an XML stream is using DTD- or XSD-based validation.
+ * 
  * @author Rob Harrop
  */
 public class XmlValidationModeDetector {
@@ -38,6 +39,7 @@ public class XmlValidationModeDetector {
 	 * Indicates that XSD validation should be used.
 	 */
 	public static final int VALIDATION_XSD = 3;
+
 
 	/**
 	 * The token in a XML document that declares the DTD to use for validation
@@ -55,10 +57,12 @@ public class XmlValidationModeDetector {
 	 */
 	private static final String END_COMMENT = "-->";
 
+
 	/**
 	 * Indicates whether or not the current parse position is inside an XML comment.
 	 */
 	private boolean inComment;
+
 
 	/**
 	 * Detects the validation mode for the XML document in the supplied {@link InputStream}.
@@ -93,6 +97,7 @@ public class XmlValidationModeDetector {
 			reader.close();
 		}
 	}
+
 
 	/**
 	 * Does the content contain the the DTD DOCTYPE declaration?
@@ -174,4 +179,5 @@ public class XmlValidationModeDetector {
 		}
 		return (index == -1 ? index : index + token.length());
 	}
+
 }
