@@ -22,21 +22,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
 import java.security.Principal;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -47,7 +34,6 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Stub implementation of the {@link HttpServletRequest} interface.
@@ -58,6 +44,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Tamas Szabo
  * @since 1.0.2
  */
 public class MockHttpServletRequest implements HttpServletRequest {
@@ -105,7 +92,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private String contentType;
 
-	private final Map	parameters = CollectionFactory.createLinkedMapIfPossible(16);
+	private final Map parameters = CollectionFactory.createLinkedMapIfPossible(16);
 
 	private String protocol = DEFAULT_PROTOCOL;
 
@@ -143,7 +130,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private Cookie[] cookies;
 
-	private final Hashtable headers = new Hashtable();
+	/**
+	 * The key is the lowercase header name; the value is a {@link HttpHeader} object.
+	 */
+	private final Map headers = new Hashtable();
 
 	private String method;
 
@@ -155,7 +145,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private String remoteUser;
 
-	private final Set	userRoles = new HashSet();
+	private final Set userRoles = new HashSet();
 
 	private Principal userPrincipal;
 
@@ -375,7 +365,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		if (this.content != null) {
 			InputStream sourceStream = new ByteArrayInputStream(this.content);
 			Reader sourceReader = (this.characterEncoding != null) ?
-			    new InputStreamReader(sourceStream, this.characterEncoding) : new InputStreamReader(sourceStream);
+				new InputStreamReader(sourceStream, this.characterEncoding) : new InputStreamReader(sourceStream);
 			return new BufferedReader(sourceReader);
 		}
 		else {
@@ -519,52 +509,26 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public void addHeader(String name, Object value) {
 		Assert.notNull(name, "Header name must not be null");
 		Assert.notNull(value, "Header value must not be null");
-		Object oldValue = this.headers.get(name);
-		if (oldValue instanceof List) {
-			List list = (List) oldValue;
-			addHeaderValue(list, value);
+		HttpHeader header = (HttpHeader) this.headers.get(name.toLowerCase());
+		if (header == null) {
+			header = new HttpHeader(name);
+			this.headers.put(name.toLowerCase(), header);
 		}
-		else if (oldValue != null) {
-			List list = new LinkedList();
-			list.add(oldValue);
-			addHeaderValue(list, value);
-			this.headers.put(name, list);
-		}
-		else if (value instanceof Collection || value.getClass().isArray()) {
-			List list = new LinkedList();
-			addHeaderValue(list, value);
-			this.headers.put(name, list);
-		}
-		else {
-			this.headers.put(name, value);
-		}
-	}
-
-	private void addHeaderValue(List list, Object value) {
 		if (value instanceof Collection) {
-			Collection valueColl = (Collection) value;
-			for (Iterator it = valueColl.iterator(); it.hasNext();) {
-				Object element = it.next();
-				Assert.notNull(element, "Value collection must not contain null elements");
-				list.add(element.toString());
-			}
+			header.addValues((Collection) value);
 		}
 		else if (value.getClass().isArray()) {
-			int length = Array.getLength(value);
-			for (int i = 0; i < length; i++) {
-				Object element = Array.get(value, i);
-				Assert.notNull(element, "Value collection must not contain null elements");
-				list.add(element.toString());
-			}
+			header.addValues((Object[]) value);
 		}
 		else {
-			list.add(value);
+			header.addValue(value);
 		}
 	}
 
 	public long getDateHeader(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		Object value = this.headers.get(name);
+		HttpHeader header = (HttpHeader) this.headers.get(name.toLowerCase());
+		Object value = (header == null) ? null : header.getValue();
 		if (value instanceof Date) {
 			return ((Date) value).getTime();
 		}
@@ -581,47 +545,32 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getHeader(String name) {
-		Assert.notNull(name, "Header name must not be null");
-		Object value = this.headers.get(name);
-		if (value instanceof List) {
-			return StringUtils.collectionToCommaDelimitedString((List) value);
-		}
-		else if (value != null) {
-			return value.toString();
-		}
-		else {
-			return null;
-		}
+		HttpHeader header = (HttpHeader) this.headers.get(name.toLowerCase());
+		return header == null ? null : header.getValue().toString();
 	}
 
 	public Enumeration getHeaders(String name) {
-		Assert.notNull(name, "Header name must not be null");
-		Object value = this.headers.get(name);
-		if (value instanceof List) {
-			return Collections.enumeration((List) value);
-		}
-		else if (value != null) {
-			Vector vector = new Vector(1);
-			vector.add(value.toString());
-			return vector.elements();
-		}
-		else {
-			return Collections.enumeration(Collections.EMPTY_SET);
-		}
+		HttpHeader header = (HttpHeader) this.headers.get(name.toLowerCase());
+		return Collections.enumeration(
+				(header == null) ? Collections.EMPTY_LIST : header.getValues());
 	}
 
 	public Enumeration getHeaderNames() {
-		return this.headers.keys();
+		return new HttpHeaderNamesEnumerator(this.headers.values());
 	}
 
 	public int getIntHeader(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		Object value = this.headers.get(name);
+		HttpHeader header = (HttpHeader)this.headers.get(name.toLowerCase());
+        Object value = (header == null) ? null : header.getValue();
 		if (value instanceof Number) {
 			return ((Number) value).intValue();
 		}
+		else if (value instanceof String) {
+			return Integer.parseInt((String) value);
+		}
 		else if (value != null) {
-			throw new NumberFormatException("Value for header '" + name + "' is not a Number: " + value);
+			throw new NumberFormatException("Value for header '" + name + "' is not a Number : " + value);
 		}
 		else {
 			return -1;
@@ -774,6 +723,73 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public boolean isRequestedSessionIdFromUrl() {
 		return isRequestedSessionIdFromURL();
+	}
+
+
+	private static final class HttpHeader {
+
+		private String name;
+		private List values = new LinkedList();
+
+
+		HttpHeader(String name) {
+			Assert.notNull(name, "The header name cannot be null.");
+			this.name = name;
+		}
+
+
+		void addValue(Object value) {
+			Assert.notNull(values, "Value must not be null.");
+			this.values.add(value);
+		}
+
+		void addValues(Collection values) {
+			Assert.notNull(values, "Values collection must not be null.");
+			for (Iterator it = values.iterator(); it.hasNext();) {
+				Object element = it.next();
+				Assert.notNull(element, "Value collection must not contain null elements.");
+				this.values.add(element);
+			}
+		}
+
+		void addValues(Object[] values) {
+			this.values.addAll(Arrays.asList(values));
+		}
+
+		String getName() {
+			return this.name;
+		}
+
+		List getValues() {
+			return this.values;
+		}
+
+		Object getValue() {
+			return this.values.isEmpty() ? null : this.values.get(0);
+		}
+
+	}
+
+
+	private static final class HttpHeaderNamesEnumerator implements Enumeration {
+
+		private Iterator httpHeaderIterator;
+
+
+		HttpHeaderNamesEnumerator(Collection headers) {
+			Assert.notNull("Headers must not be null.");
+			this.httpHeaderIterator = headers.iterator();
+		}
+
+
+		public boolean hasMoreElements() {
+			return this.httpHeaderIterator.hasNext();
+		}
+
+		public Object nextElement() {
+			return ((HttpHeader) this.httpHeaderIterator.next()).getName();
+		}
+
 	}
 
 }
