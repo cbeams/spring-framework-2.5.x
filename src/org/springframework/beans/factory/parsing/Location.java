@@ -19,6 +19,14 @@ package org.springframework.beans.factory.parsing;
 import org.springframework.core.io.Resource;
 
 /**
+ * Models an arbitrary location in a {@link Resource resource}.
+ * 
+ * <p>Typically used to track the location of problematic or erroneous
+ * metadata in XML configuration files. For example, a
+ * {@link #getSource() source} location might be 'The bean defined on
+ * line 76 of beans.properties has an invalid Class'; another source might
+ * be the actual DOM Element from a parsed XML {@link org.w3c.dom.Document}.
+ * 
  * @author Rob Harrop
  * @since 2.0
  */
@@ -29,20 +37,39 @@ public class Location {
 	private final Object source;
 
 
+	/**
+	 * Creates a new instance if the {@link Location} class.
+	 * @param resource the resource with which this location is associated
+	 */
 	public Location(Resource resource) {
 		this(resource, null);
 	}
 
+	/**
+	 * Creates a new instance if the {@link Location} class.
+	 * @param resource the resource with which this location is associated
+	 * @param source the actual location within the associated resource
+	 */
 	public Location(Resource resource, Object source) {
 		this.resource = resource;
 		this.source = source;
 	}
 
 
+	/**
+	 * Gets the resource with which this location is associated.
+	 * @return resource with which this location is associated
+	 */
 	public Resource getResource() {
 		return this.resource;
 	}
 
+	/**
+	 * Gets the actual location within the associated {@link #getResource() resource}.
+	 * <p>See the {@link Location class level javadoc for this class} for examples
+	 * of what the actual type of the returned object may be.
+	 * @return the actual location within the associated {@link #getResource() resource}
+	 */
 	public Object getSource() {
 		return this.source;
 	}
