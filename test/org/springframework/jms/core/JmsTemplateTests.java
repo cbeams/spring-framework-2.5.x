@@ -18,6 +18,7 @@ package org.springframework.jms.core;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.List;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -53,6 +54,8 @@ import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.JndiDestinationResolver;
 import org.springframework.jndi.JndiTemplate;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Unit tests for the JmsTemplate implemented using JMS 1.1.
@@ -259,6 +262,50 @@ public class JmsTemplateTests extends TestCase {
 				return null;
 			}
 		});
+
+		connectionFactoryControl.verify();
+		connectionControl.verify();
+		sessionControl.verify();
+	}
+
+	public void testSessionCallbackWithinSynchronizedTransaction() throws Exception {
+		JmsTemplate template = createTemplate();
+		template.setConnectionFactory(mockConnectionFactory);
+
+		// We're gonna call getTransacted twice, i.e. one more time.
+		mockConnection.start();
+		connectionControl.setVoidCallable(1);
+		mockSession.getTransacted();
+		sessionControl.setReturnValue(useTransactedSession(), 1);
+		mockSession.close();
+		sessionControl.setVoidCallable(1);
+		mockConnection.close();
+		connectionControl.setVoidCallable(1);
+		sessionControl.replay();
+		connectionControl.replay();
+
+		TransactionSynchronizationManager.initSynchronization();
+		try {
+			template.execute(new SessionCallback() {
+				public Object doInJms(Session session) throws JMSException {
+					boolean b = session.getTransacted();
+					return null;
+				}
+			});
+			template.execute(new SessionCallback() {
+				public Object doInJms(Session session) throws JMSException {
+					boolean b = session.getTransacted();
+					return null;
+				}
+			});
+			List synchs = TransactionSynchronizationManager.getSynchronizations();
+			assertEquals(1, synchs.size());
+			((TransactionSynchronization) synchs.get(0)).beforeCompletion();
+		}
+		finally {
+			TransactionSynchronizationManager.clearSynchronization();
+		}
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 
 		connectionFactoryControl.verify();
 		connectionControl.verify();
