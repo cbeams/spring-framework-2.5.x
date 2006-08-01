@@ -194,6 +194,8 @@ public final class SimpleMessageListenerContainerTests extends AbstractMessageLi
 		// an exception is thrown, so the rollback logic is being applied here...
 		session.getTransacted();
 		mockSession.setReturnValue(false);
+		session.getAcknowledgeMode();
+		mockSession.setReturnValue(Session.AUTO_ACKNOWLEDGE);
 		mockSession.replay();
 
 		MockControl mockConnection = MockControl.createControl(Connection.class);
@@ -221,83 +223,6 @@ public final class SimpleMessageListenerContainerTests extends AbstractMessageLi
 				try {
 					// Check correct Session passed into SessionAwareMessageListener.
 					assertSame(sess, session);
-					// Check correct Session bound to thread for JmsTemplate.
-					new JmsTemplate(connectionFactory).execute(new SessionCallback() {
-						public Object doInJms(Session sess2) {
-							assertSame(sess2, session);
-							return null;
-						}
-					});
-				}
-				catch (Throwable ex) {
-					failure.add("MessageListener execution failed: " + ex);
-				}
-			}
-		});
-
-		this.container.afterPropertiesSet();
-
-		MockControl mockMessage = MockControl.createControl(Message.class);
-		final Message message = (Message) mockMessage.getMock();
-		mockMessage.replay();
-		messageConsumer.sendMessage(message);
-
-		if (!failure.isEmpty()) {
-			fail(failure.iterator().next().toString());
-		}
-
-		mockMessage.verify();
-		mockSession.verify();
-		mockConnection.verify();
-		mockConnectionFactory.verify();
-	}
-
-	public void testCorrectSessionExposedForMessageListenerInvocation() throws Exception {
-		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
-
-		MockControl mockSession = MockControl.createControl(Session.class);
-		final Session session = (Session) mockSession.getMock();
-		// Queue gets created in order to create MessageConsumer for that Destination...
-		session.createQueue(DESTINATION_NAME);
-		mockSession.setReturnValue(QUEUE_DESTINATION);
-		// and then the MessageConsumer gets created...
-		session.createConsumer(QUEUE_DESTINATION, null); // no MessageSelector...
-		mockSession.setReturnValue(messageConsumer);
-		// an exception is thrown, so the rollback logic is being applied here...
-		session.getTransacted();
-		mockSession.setReturnValue(false);
-		mockSession.replay();
-
-		MockControl mockConnection = MockControl.createControl(Connection.class);
-		Connection connection = (Connection) mockConnection.getMock();
-		// session gets created in order to register MessageListener...
-		connection.createSession(this.container.isSessionTransacted(), this.container.getSessionAcknowledgeMode());
-		mockConnection.setReturnValue(session);
-		// and the connection is start()ed after the listener is registered...
-		connection.start();
-		mockConnection.setVoidCallable();
-		mockConnection.replay();
-
-		MockControl mockConnectionFactory = MockControl.createControl(ConnectionFactory.class);
-		final ConnectionFactory connectionFactory = (ConnectionFactory) mockConnectionFactory.getMock();
-		connectionFactory.createConnection();
-		mockConnectionFactory.setReturnValue(connection);
-		mockConnectionFactory.replay();
-
-		final HashSet failure = new HashSet();
-
-		this.container.setConnectionFactory(connectionFactory);
-		this.container.setDestinationName(DESTINATION_NAME);
-		this.container.setMessageListener(new MessageListener() {
-			public void onMessage(Message message) {
-				try {
-					// Check correct Session bound to thread for JmsTemplate.
-					new JmsTemplate(connectionFactory).execute(new SessionCallback() {
-						public Object doInJms(Session sess2) {
-							assertSame(sess2, session);
-							return null;
-						}
-					});
 				}
 				catch (Throwable ex) {
 					failure.add("MessageListener execution failed: " + ex);

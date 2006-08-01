@@ -113,6 +113,13 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 	//-------------------------------------------------------------------------
 
 	/**
+	 * Always use a shared JMS Connection.
+	 */
+	protected final boolean sharedConnectionEnabled() {
+		return true;
+	}
+
+	/**
 	 * Creates a JMS ServerSessionPool for the specified listener and registers
 	 * it with a JMS ConnectionConsumer for the specified destination.
 	 * @see #createServerSessionPool

@@ -137,6 +137,13 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	//-------------------------------------------------------------------------
 
 	/**
+	 * Always use a shared JMS Connection.
+	 */
+	protected final boolean sharedConnectionEnabled() {
+		return true;
+	}
+
+	/**
 	 * Creates the specified number of concurrent consumers,
 	 * in the form of a JMS Session plus associated MessageConsumer.
 	 * @see #createListenerConsumer
