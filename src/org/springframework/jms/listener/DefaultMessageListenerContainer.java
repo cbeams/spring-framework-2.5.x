@@ -16,6 +16,7 @@
 
 package org.springframework.jms.listener;
 
+import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -23,8 +24,11 @@ import javax.jms.MessageConsumer;
 import javax.jms.Session;
 import javax.jms.Topic;
 
+import org.springframework.core.Constants;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.jms.connection.ConnectionFactoryUtils;
+import org.springframework.jms.connection.JmsResourceHolder;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
@@ -74,7 +78,7 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 2.0
  * @see #setTransactionManager
- * @see #setCacheSessions
+ * @see #setCacheLevel
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see javax.jms.MessageConsumer#receive(long)
  * @see SimpleMessageListenerContainer
@@ -100,6 +104,40 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	public static final long DEFAULT_RECOVERY_INTERVAL = 5000;
 
 
+	/**
+	 * Constant that indicates to cache no JMS resources at all.
+	 * @see #setCacheLevel
+	 */
+	public static final int CACHE_NONE = 0;
+
+	/**
+	 * Constant that indicates to cache a shared JMS Connection.
+	 * @see #setCacheLevel
+	 */
+	public static final int CACHE_CONNECTION = 1;
+
+	/**
+	 * Constant that indicates to cache a shared JMS Connection
+	 * and a JMS Session for each listener thread.
+	 * @see #setCacheLevel
+	 */
+	public static final int CACHE_SESSION = 2;
+
+	/**
+	 * Constant that indicates to cache a shared JMS Connection
+	 * and a JMS Session for each listener thread, as well as
+	 * a JMS MessageConsumer for each listener thread.
+	 * @see #setCacheLevel
+	 */
+	public static final int CACHE_CONSUMER = 3;
+
+
+	private static final Constants constants = new Constants(DefaultMessageListenerContainer.class);
+
+	private final MessageListenerContainerResourceFactory transactionalResourceFactory =
+			new MessageListenerContainerResourceFactory();
+
+
 	private boolean pubSubNoLocal = false;
 
 	private TaskExecutor taskExecutor;
@@ -116,7 +154,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 	private long recoveryInterval = DEFAULT_RECOVERY_INTERVAL;
 
-	private boolean cacheSessions = true;
+	private Integer cacheLevel;
 
 
 	/**
@@ -232,18 +270,43 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	}
 
 	/**
-	 * Specify whether to cache JMS Sessions in the listener threads,
-	 * using each Session for an unlimited number of message receive attempts.
-	 * Default is "true".
-	 * <p>Turn this flag off to reobtain the JMS Sessions for each receive operation:
-	 * This is usually just worth considering in the context of XA transactions,
-	 * where the JMS provider (or J2EE server) might only register itself with an
-	 * ongoing XA transaction in case of a freshly obtained JMS Session.
-	 * <p>Currently known providers that require this flag to be turned off
-	 * for proper XA transaction participation: JBoss 4.0
+	 * Specify the level of caching that this listener container is allowed to apply,
+	 * in the form of the name of the corresponding constant: e.g. "CACHE_CONNECTION".
+	 * @see #setCacheLevel
 	 */
-	public void setCacheSessions(boolean cacheSessions) {
-		this.cacheSessions = cacheSessions;
+	public void setCacheLevelName(String constantName) throws IllegalArgumentException {
+		if (constantName == null || !constantName.startsWith("CACHE_")) {
+			throw new IllegalArgumentException("Only cache constants allowed");
+		}
+		setCacheLevel(constants.asNumber(constantName).intValue());
+	}
+
+	/**
+	 * Specify the level of caching that this listener container is allowed to apply.
+	 * <p>Default is CACHE_NONE if an external transaction manager has been specified
+	 * (to reobtain all resources freshly within the scope of the external transaction),
+	 * and CACHE_CONSUMER else (operating with local JMS resources).
+	 * <p>Some J2EE servers only register their JMS resources with an ongoing XA
+	 * transaction in case of a freshly obtained JMS Connection and Session,
+	 * which is why this listener container does by default not cache any of those.
+	 * However, if you want to optimize for a specific server, consider switching
+	 * this setting to at least CACHE_CONNECTION or CACHE_SESSION even in
+	 * conjunction with an external transaction manager.
+	 * <p>Currently known servers that absolutely require CACHE_NONE for XA
+	 * transaction processing: JBoss 4. For any others, consider raising the
+	 * cache level.
+	 * @see #CACHE_NONE
+	 * @see #CACHE_CONNECTION
+	 * @see #CACHE_SESSION
+	 * @see #CACHE_CONSUMER
+	 * @see #setTransactionManager
+	 */
+	public void setCacheLevel(int cacheLevel) {
+		this.cacheLevel = new Integer(cacheLevel);
+	}
+
+	public int getCacheLevel() {
+		return (this.cacheLevel != null ? this.cacheLevel.intValue() : CACHE_NONE);
 	}
 
 
@@ -267,6 +330,17 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	//-------------------------------------------------------------------------
 
 	public void initialize() {
+		if (this.transactionManager != null) {
+			if (this.cacheLevel == null) {
+				this.cacheLevel = new Integer(CACHE_NONE);
+			}
+		}
+		else {
+			if (this.cacheLevel == null) {
+				this.cacheLevel = new Integer(CACHE_CONSUMER);
+			}
+		}
+
 		// Prepare taskExecutor and maxMessagesPerTask.
 		if (this.taskExecutor == null) {
 			this.taskExecutor = new SimpleAsyncTaskExecutor(DEFAULT_THREAD_NAME_PREFIX);
@@ -282,6 +356,15 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 		// Proceed with actual listener initialization.
 		super.initialize();
+	}
+
+	/**
+	 * Use a shared JMS Connection depending on the "cacheLevel" setting.
+	 * @see #setCacheLevel
+	 * @see #CACHE_CONNECTION
+	 */
+	protected final boolean sharedConnectionEnabled() {
+		return (getCacheLevel() >= CACHE_CONNECTION);
 	}
 
 	/**
@@ -302,7 +385,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * @param session the JMS Session to work on
 	 * @return the MessageConsumer
 	 * @throws javax.jms.JMSException if thrown by JMS methods
-	 * @see #executeListener
+	 * @see #receiveAndExecute
 	 */
 	protected MessageConsumer createListenerConsumer(final Session session) throws JMSException {
 		Destination destination = getDestination();
@@ -313,29 +396,19 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	}
 
 	/**
-	 * Execute the listener for a message received from the given consumer.
+	 * Execute the listener for a message received from the given consumer,
+	 * wrapping the entire operation in an external transaction if demanded.
 	 * @param session the JMS Session to work on
 	 * @param consumer the MessageConsumer to work on
 	 * @throws JMSException if thrown by JMS methods
+	 * @see #doReceiveAndExecute
 	 */
-	protected void executeListener(Session session, MessageConsumer consumer) throws JMSException {
+	protected void receiveAndExecute(Session session, MessageConsumer consumer) throws JMSException {
 		if (this.transactionManager != null) {
 			// Execute receive within transaction.
 			TransactionStatus status = this.transactionManager.getTransaction(this.transactionDefinition);
 			try {
-				Message message = receiveMessage(consumer);
-				if (message != null) {
-					try {
-						doExecuteListener(session, message);
-					}
-					catch (Throwable ex) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Rolling back transaction because of listener exception thrown: " + ex);
-						}
-						status.setRollbackOnly();
-						handleListenerException(ex);
-					}
-				}
+				doReceiveAndExecute(session, consumer, status);
 			}
 			catch (JMSException ex) {
 				rollbackOnException(status, ex);
@@ -354,10 +427,76 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 		else {
 			// Execute receive outside of transaction.
-			Message message = receiveMessage(consumer);
-			if (message != null) {
-				executeListener(session, message);
+			doReceiveAndExecute(session, consumer, null);
+		}
+	}
+
+	/**
+	 * Actually execute the listener for a message received from the given consumer,
+	 * fetching all requires resources and invoking the listener.
+	 * @param session the JMS Session to work on
+	 * @param consumer the MessageConsumer to work on
+	 * @param status the TransactionStatus (may be <code>null</code>)
+	 * @throws JMSException if thrown by JMS methods
+	 * @see #doExecuteListener(javax.jms.Session, javax.jms.Message)
+	 */
+	protected void doReceiveAndExecute(Session session, MessageConsumer consumer, TransactionStatus status)
+			throws JMSException {
+
+		Connection conToClose = null;
+		Session sessionToClose = null;
+		MessageConsumer consumerToClose = null;
+		try {
+			Session sessionToUse = session;
+			boolean transactional = false;
+			if (sessionToUse == null) {
+				sessionToUse = ConnectionFactoryUtils.doGetTransactionalSession(
+						getConnectionFactory(), this.transactionalResourceFactory);
+				transactional = (sessionToUse != null);
 			}
+			if (sessionToUse == null) {
+				Connection conToUse = null;
+				if (sharedConnectionEnabled()) {
+					conToUse = getConnection();
+				}
+				else {
+					conToUse = createConnection();
+					conToClose = conToUse;
+					conToUse.start();
+				}
+				sessionToUse = createSession(conToUse);
+				sessionToClose = sessionToUse;
+			}
+			MessageConsumer consumerToUse = consumer;
+			if (consumerToUse == null) {
+				consumerToUse = createListenerConsumer(sessionToUse);
+				consumerToClose = consumerToUse;
+			}
+			Message message = receiveMessage(consumerToUse);
+			if (message != null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Received message of type [" + message.getClass() + "] from consumer [" +
+							consumerToUse + "] of " + (transactional ? "transactional " : "") + "session [" +
+							sessionToUse + "]");
+				}
+				try {
+					doExecuteListener(sessionToUse, message);
+				}
+				catch (Throwable ex) {
+					if (status != null) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Rolling back transaction because of listener exception thrown: " + ex);
+						}
+						status.setRollbackOnly();
+					}
+					handleListenerException(ex);
+				}
+			}
+		}
+		finally {
+			JmsUtils.closeMessageConsumer(consumerToClose);
+			JmsUtils.closeSession(sessionToClose);
+			JmsUtils.closeConnection(conToClose);
 		}
 	}
 
@@ -440,6 +579,28 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	//-------------------------------------------------------------------------
 
 	/**
+	 * Fetch an appropriate Connection from the given JmsResourceHolder.
+	 * <p>This implementation accepts any JMS 1.1 Connection.
+	 * @param holder the JmsResourceHolder
+	 * @return an appropriate Connection fetched from the holder,
+	 * or <code>null</code> if none found
+	 */
+	protected Connection getConnection(JmsResourceHolder holder) {
+		return holder.getConnection();
+	}
+
+	/**
+	 * Fetch an appropriate Session from the given JmsResourceHolder.
+	 * <p>This implementation accepts any JMS 1.1 Session.
+	 * @param holder the JmsResourceHolder
+	 * @return an appropriate Session fetched from the holder,
+	 * or <code>null</code> if none found
+	 */
+	protected Session getSession(JmsResourceHolder holder) {
+		return holder.getSession();
+	}
+
+	/**
 	 * Create a JMS MessageConsumer for the given Session and Destination.
 	 * <p>This implementation uses JMS 1.1 API.
 	 * @param session the JMS Session to create a MessageConsumer for
@@ -512,15 +673,14 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 		private void invokeListener() throws JMSException {
 			initResourcesIfNecessary();
-			executeListener(this.session, this.consumer);
-			if (!cacheSessions) {
-				clearResources();
-			}
+			receiveAndExecute(this.session, this.consumer);
 		}
 
 		private void initResourcesIfNecessary() throws JMSException {
-			if (this.session == null) {
+			if (this.session == null && getCacheLevel() >= CACHE_SESSION) {
 				this.session = createSession(getConnection());
+			}
+			if (this.consumer == null && getCacheLevel() >= CACHE_CONSUMER) {
 				this.consumer = createListenerConsumer(this.session);
 			}
 		}
@@ -534,6 +694,36 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 		public boolean isLongLived() {
 			return (maxMessagesPerTask < 0);
+		}
+	}
+
+
+	/**
+	 * ResourceFactory implementation that delegates to this
+	 * listener container's protected callback methods.
+	 */
+	private class MessageListenerContainerResourceFactory
+			implements ConnectionFactoryUtils.ResourceFactory {
+
+		public Connection getConnection(JmsResourceHolder holder) {
+			return DefaultMessageListenerContainer.this.getConnection(holder);
+		}
+
+		public Session getSession(JmsResourceHolder holder) {
+			return DefaultMessageListenerContainer.this.getSession(holder);
+		}
+
+		public Connection createConnection() throws JMSException {
+			if (sharedConnectionEnabled()) {
+				return DefaultMessageListenerContainer.this.getConnection();
+			}
+			else {
+				return DefaultMessageListenerContainer.this.createConnection();
+			}
+		}
+
+		public Session createSession(Connection con) throws JMSException {
+			return DefaultMessageListenerContainer.this.createSession(con);
 		}
 	}
 
