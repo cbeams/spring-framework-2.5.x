@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,6 +160,9 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 		try {
 			con = createConnection();
 			session = createSession(con);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Created JMS transaction on Session [" + session + "] from Connection [" + con + "]");
+			}
 			txObject.setConnectionHolder(new ConnectionHolder(con, session));
 			txObject.getConnectionHolder().setSynchronizedWithTransaction(true);
 			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
@@ -188,24 +191,32 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 
 	protected void doCommit(DefaultTransactionStatus status) {
 		JmsTransactionObject txObject = (JmsTransactionObject) status.getTransaction();
+		Session session = txObject.getConnectionHolder().getSession();
 		try {
-			txObject.getConnectionHolder().getSession().commit();
+			if (status.isDebug()) {
+				logger.debug("Committing JMS transaction on Session [" + session + "]");
+			}
+			session.commit();
 		}
 		catch (TransactionRolledBackException ex) {
 			throw new UnexpectedRollbackException("JMS transaction rolled back", ex);
 		}
 		catch (JMSException ex) {
-			throw new TransactionSystemException("JMS failure on commit", ex);
+			throw new TransactionSystemException("Could not commit JMS transaction", ex);
 		}
 	}
 
 	protected void doRollback(DefaultTransactionStatus status) {
 		JmsTransactionObject txObject = (JmsTransactionObject) status.getTransaction();
+		Session session = txObject.getConnectionHolder().getSession();
 		try {
-			txObject.getConnectionHolder().getSession().rollback();
+			if (status.isDebug()) {
+				logger.debug("Rolling back JMS transaction on Session [" + session + "]");
+			}
+			session.rollback();
 		}
 		catch (JMSException ex) {
-			throw new TransactionSystemException("JMS failure on rollback", ex);
+			throw new TransactionSystemException("Could not roll back JMS transaction", ex);
 		}
 	}
 
