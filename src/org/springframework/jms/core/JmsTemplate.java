@@ -28,13 +28,15 @@ import javax.jms.Session;
 import javax.jms.Topic;
 
 import org.springframework.jms.JmsException;
-import org.springframework.jms.connection.ConnectionHolder;
+import org.springframework.jms.connection.ConnectionFactoryUtils;
+import org.springframework.jms.connection.JmsResourceHolder;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 
 /**
  * Helper class that simplifies JMS access code. This class requires a
@@ -78,6 +80,10 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * -1 indicates a blocking receive without timeout.
 	 */
 	public static final long DEFAULT_RECEIVE_TIMEOUT = -1;
+
+
+	private final JmsTemplateResourceFactory transactionalResourceFactory =
+			new JmsTemplateResourceFactory();
 
 
 	private Object defaultDestination;
@@ -402,32 +408,23 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @see #receive
 	 */
 	public Object execute(SessionCallback action, boolean startConnection) throws JmsException {
-		Connection con = null;
-		Session session = null;
+		Assert.notNull(action, "Callback object must not be null");
+
+		Connection conToClose = null;
+		Session sessionToClose = null;
 		try {
-			Connection conToUse = null;
-			Session sessionToUse = null;
-			ConnectionHolder conHolder =
-					(ConnectionHolder) TransactionSynchronizationManager.getResource(getConnectionFactory());
-			if (conHolder != null) {
-				conToUse = conHolder.getConnection();
+			Session sessionToUse = ConnectionFactoryUtils.doGetTransactionalSession(
+					getConnectionFactory(), this.transactionalResourceFactory);
+			if (sessionToUse == null) {
+				conToClose = createConnection();
+				sessionToClose = createSession(conToClose);
 				if (startConnection) {
-					conToUse.start();
+					conToClose.start();
 				}
-				sessionToUse = conHolder.getSession();
-			}
-			else {
-				con = createConnection();
-				if (startConnection) {
-					con.start();
-				}
-				session = createSession(con);
-				conToUse = con;
-				sessionToUse = session;
+				sessionToUse = sessionToClose;
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Executing callback on JMS Session [" + sessionToUse +
-						"] from connection [" + conToUse + "]");
+				logger.debug("Executing callback on JMS Session [" + sessionToUse + "]");
 			}
 			return action.doInJms(sessionToUse);
 		}
@@ -435,8 +432,8 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			throw convertJmsAccessException(ex);
 		}
 		finally {
-			JmsUtils.closeSession(session);
-			JmsUtils.closeConnection(con);
+			JmsUtils.closeSession(sessionToClose);
+			JmsUtils.closeConnection(conToClose);
 		}
 	}
 
@@ -445,6 +442,8 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	}
 
 	public Object execute(final ProducerCallback action) throws JmsException {
+		Assert.notNull(action, "Callback object must not be null");
+
 		return execute(new SessionCallback() {
 			public Object doInJms(Session session) throws JMSException {
 				MessageProducer producer = createProducer(session, null);
@@ -501,6 +500,8 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 */
 	protected void doSend(Session session, Destination destination, MessageCreator messageCreator)
 			throws JMSException {
+
+		Assert.notNull(messageCreator, "MessageCreator must not be null");
 
 		MessageProducer producer = createProducer(session, destination);
 		try {
@@ -688,8 +689,8 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		try {
 			// Use transaction timeout (if available).
 			long timeout = getReceiveTimeout();
-			ConnectionHolder conHolder =
-					(ConnectionHolder) TransactionSynchronizationManager.getResource(getConnectionFactory());
+			JmsResourceHolder conHolder =
+					(JmsResourceHolder) TransactionSynchronizationManager.getResource(getConnectionFactory());
 			if (conHolder != null && conHolder.hasTimeout()) {
 				timeout = conHolder.getTimeToLiveInMillis();
 			}
@@ -783,6 +784,28 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	//-------------------------------------------------------------------------
 
 	/**
+	 * Fetch an appropriate Connection from the given JmsResourceHolder.
+	 * <p>This implementation accepts any JMS 1.1 Connection.
+	 * @param holder the JmsResourceHolder
+	 * @return an appropriate Connection fetched from the holder,
+	 * or <code>null</code> if none found
+	 */
+	protected Connection getConnection(JmsResourceHolder holder) {
+		return holder.getConnection();
+	}
+
+	/**
+	 * Fetch an appropriate Session from the given JmsResourceHolder.
+	 * <p>This implementation accepts any JMS 1.1 Session.
+	 * @param holder the JmsResourceHolder
+	 * @return an appropriate Session fetched from the holder,
+	 * or <code>null</code> if none found
+	 */
+	protected Session getSession(JmsResourceHolder holder) {
+		return holder.getSession();
+	}
+
+	/**
 	 * Create a JMS Connection via this template's ConnectionFactory.
 	 * <p>This implementation uses JMS 1.1 API.
 	 * @return the new JMS Connection
@@ -859,6 +882,31 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}
 		else {
 			return session.createConsumer(destination, messageSelector);
+		}
+	}
+
+
+	/**
+	 * ResourceFactory implementation that delegates
+	 * to this template's protected callback methods.
+	 */
+	private class JmsTemplateResourceFactory
+			implements ConnectionFactoryUtils.ResourceFactory {
+
+		public Connection getConnection(JmsResourceHolder holder) {
+			return JmsTemplate.this.getConnection(holder);
+		}
+
+		public Session getSession(JmsResourceHolder holder) {
+			return JmsTemplate.this.getSession(holder);
+		}
+
+		public Connection createConnection() throws JMSException {
+			return JmsTemplate.this.createConnection();
+		}
+
+		public Session createSession(Connection con) throws JMSException {
+			return JmsTemplate.this.createSession(con);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import javax.jms.TopicSession;
 
 import org.springframework.jms.support.converter.SimpleMessageConverter102;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
+import org.springframework.jms.connection.JmsResourceHolder;
 
 /**
  * A subclass of JmsTemplate that uses the JMS 1.0.2 specification, rather than
@@ -142,6 +143,22 @@ public class JmsTemplate102 extends JmsTemplate {
 		}
 	}
 
+
+	/**
+	 * This implementation overrides the superclass method to accept either
+	 * a QueueConnection or a TopicConnection, depending on the domain.
+	 */
+	protected Connection getConnection(JmsResourceHolder holder) {
+		return holder.getConnection(isPubSubDomain() ? (Class) TopicConnection.class : QueueConnection.class);
+	}
+
+	/**
+	 * This implementation overrides the superclass method to accept either
+	 * a QueueSession or a TopicSession, depending on the domain.
+	 */
+	protected Session getSession(JmsResourceHolder holder) {
+		return holder.getSession(isPubSubDomain() ? (Class) TopicSession.class : QueueSession.class);
+	}
 
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
