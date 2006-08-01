@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jms.connection;
 
 import javax.jms.Connection;
@@ -58,6 +59,8 @@ public class JmsTransactionManagerTests extends TestCase {
 		cfControl.setReturnValue(con, 1);
 		con.createSession(true, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(session, 1);
+		con.start();
+		conControl.setVoidCallable(1);
 		session.commit();
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -97,6 +100,8 @@ public class JmsTransactionManagerTests extends TestCase {
 		cfControl.setReturnValue(con, 1);
 		con.createSession(true, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(session, 1);
+		con.start();
+		conControl.setVoidCallable(1);
 		session.rollback();
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -136,6 +141,8 @@ public class JmsTransactionManagerTests extends TestCase {
 		cfControl.setReturnValue(con, 1);
 		con.createSession(true, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(session, 1);
+		con.start();
+		conControl.setVoidCallable(1);
 		session.commit();
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -186,6 +193,8 @@ public class JmsTransactionManagerTests extends TestCase {
 		cfControl.setReturnValue(con, 1);
 		con.createSession(true, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(session, 1);
+		con.start();
+		conControl.setVoidCallable(1);
 		session.rollback();
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -247,6 +256,8 @@ public class JmsTransactionManagerTests extends TestCase {
 		conControl.setReturnValue(session, 1);
 		con.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(session2, 1);
+		con.start();
+		conControl.setVoidCallable(1);
 		session.commit();
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -294,7 +305,7 @@ public class JmsTransactionManagerTests extends TestCase {
 		cfControl.verify();
 	}
 
-	public void testNestedTransaction() throws JMSException {
+	public void testTransactionSuspension() throws JMSException {
 		MockControl cfControl = MockControl.createControl(ConnectionFactory.class);
 		final ConnectionFactory cf = (ConnectionFactory) cfControl.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
@@ -310,6 +321,8 @@ public class JmsTransactionManagerTests extends TestCase {
 		conControl.setReturnValue(session, 1);
 		con.createSession(true, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(session2, 1);
+		con.start();
+		conControl.setVoidCallable(2);
 		session.commit();
 		sessionControl.setVoidCallable(1);
 		session2.commit();
@@ -371,6 +384,8 @@ public class JmsTransactionManagerTests extends TestCase {
 		cfControl.setReturnValue(con, 1);
 		con.createQueueSession(true, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(session, 1);
+		con.start();
+		conControl.setVoidCallable(1);
 		session.commit();
 		sessionControl.setVoidCallable(1);
 		session.close();
@@ -410,6 +425,8 @@ public class JmsTransactionManagerTests extends TestCase {
 		cfControl.setReturnValue(con, 1);
 		con.createTopicSession(true, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(session, 1);
+		con.start();
+		conControl.setVoidCallable(1);
 		session.commit();
 		sessionControl.setVoidCallable(1);
 		session.close();

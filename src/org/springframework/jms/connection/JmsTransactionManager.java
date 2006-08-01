@@ -160,6 +160,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 		try {
 			con = createConnection();
 			session = createSession(con);
+			con.start();
 			if (logger.isDebugEnabled()) {
 				logger.debug("Created JMS transaction on Session [" + session + "] from Connection [" + con + "]");
 			}
