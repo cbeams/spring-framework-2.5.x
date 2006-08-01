@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,8 @@ public class SingleConnectionFactory
 
 	private ConnectionFactory targetConnectionFactory;
 
+	private String clientId;
+
 	/** Wrapped connection */
 	private Connection target;
 
@@ -120,6 +122,27 @@ public class SingleConnectionFactory
 	}
 
 	/**
+	 * Specify a JMS client ID for the single Connection created and exposed
+	 * by this ConnectionFactory.
+	 * <p>Note that client IDs need to be unique among all active Connections
+	 * of the underlying JMS provider. Furthermore, a client ID can only be
+	 * assigned if the original ConnectionFactory hasn't already assigned one.
+	 * @see javax.jms.Connection#setClientID
+	 * @see #setTargetConnectionFactory
+	 */
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
+
+	/**
+	 * Return a JMS client ID for the single Connection created and exposed
+	 * by this ConnectionFactory, if any.
+	 */
+	public String getClientId() {
+		return clientId;
+	}
+
+	/**
 	 * Make sure a connection or connection factory has been set.
 	 */
 	public void afterPropertiesSet() {
@@ -134,10 +157,13 @@ public class SingleConnectionFactory
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
 	protected void init() throws JMSException {
-		if (this.targetConnectionFactory == null) {
+		if (getTargetConnectionFactory() == null) {
 			throw new IllegalStateException("targetConnectionFactory is required for lazily initializing a connection");
 		}
 		Connection target = doCreateConnection();
+		if (getClientId() != null) {
+			target.setClientID(getClientId());
+		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Created single connection: " + target);
 		}

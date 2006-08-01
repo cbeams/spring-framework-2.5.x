@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jms.connection;
 
 import javax.jms.Connection;
@@ -118,6 +119,38 @@ public class SingleConnectionFactoryTests extends TestCase {
 		conControl.replay();
 
 		SingleConnectionFactory scf = new SingleConnectionFactory(cf);
+		Connection con1 = scf.createConnection();
+		con1.start();
+		con1.close();  // should be ignored
+		Connection con2 = scf.createConnection();
+		con2.start();
+		con2.close();  // should be ignored
+		scf.destroy();  // should trigger actual close
+
+		cfControl.verify();
+		conControl.verify();
+	}
+
+	public void testWithConnectionFactoryAndClientId() throws JMSException {
+		MockControl cfControl = MockControl.createControl(ConnectionFactory.class);
+		ConnectionFactory cf = (ConnectionFactory) cfControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+
+		cf.createConnection();
+		cfControl.setReturnValue(con, 1);
+		con.setClientID("myId");
+		conControl.setVoidCallable(1);
+		con.start();
+		conControl.setVoidCallable(2);
+		con.close();
+		conControl.setVoidCallable(1);
+
+		cfControl.replay();
+		conControl.replay();
+
+		SingleConnectionFactory scf = new SingleConnectionFactory(cf);
+		scf.setClientId("myId");
 		Connection con1 = scf.createConnection();
 		con1.start();
 		con1.close();  // should be ignored
