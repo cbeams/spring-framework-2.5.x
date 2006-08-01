@@ -44,7 +44,7 @@ import org.springframework.jms.JmsException;
 public abstract class JmsAccessor implements InitializingBean {
 
 	/** Constants instance for javax.jms.Session */
-	private static final Constants constants = new Constants(Session.class);
+	private static final Constants sessionConstants = new Constants(Session.class);
 
 
 	/** Logger available to subclasses */
@@ -109,7 +109,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * @see javax.jms.Connection#createSession(boolean, int)
 	 */
 	public void setSessionAcknowledgeModeName(String constantName) {
-		setSessionAcknowledgeMode(constants.asNumber(constantName).intValue());
+		setSessionAcknowledgeMode(sessionConstants.asNumber(constantName).intValue());
 	}
 
 	/**
