@@ -140,14 +140,14 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 
 	protected Object doGetTransaction() {
 		JmsTransactionObject txObject = new JmsTransactionObject();
-		txObject.setConnectionHolder(
-				(ConnectionHolder) TransactionSynchronizationManager.getResource(getConnectionFactory()));
+		txObject.setResourceHolder(
+				(JmsResourceHolder) TransactionSynchronizationManager.getResource(getConnectionFactory()));
 		return txObject;
 	}
 
 	protected boolean isExistingTransaction(Object transaction) {
 		JmsTransactionObject txObject = (JmsTransactionObject) transaction;
-		return (txObject.getConnectionHolder() != null);
+		return (txObject.getResourceHolder() != null);
 	}
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
@@ -164,13 +164,13 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Created JMS transaction on Session [" + session + "] from Connection [" + con + "]");
 			}
-			txObject.setConnectionHolder(new ConnectionHolder(con, session));
-			txObject.getConnectionHolder().setSynchronizedWithTransaction(true);
+			txObject.setResourceHolder(new JmsResourceHolder(con, session));
+			txObject.getResourceHolder().setSynchronizedWithTransaction(true);
 			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-				txObject.getConnectionHolder().setTimeoutInSeconds(definition.getTimeout());
+				txObject.getResourceHolder().setTimeoutInSeconds(definition.getTimeout());
 			}
 			TransactionSynchronizationManager.bindResource(
-					getConnectionFactory(), txObject.getConnectionHolder());
+					getConnectionFactory(), txObject.getResourceHolder());
 		}
 		catch (JMSException ex) {
 			JmsUtils.closeSession(session);
@@ -181,18 +181,18 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 
 	protected Object doSuspend(Object transaction) {
 		JmsTransactionObject txObject = (JmsTransactionObject) transaction;
-		txObject.setConnectionHolder(null);
+		txObject.setResourceHolder(null);
 		return TransactionSynchronizationManager.unbindResource(getConnectionFactory());
 	}
 
 	protected void doResume(Object transaction, Object suspendedResources) {
-		ConnectionHolder conHolder = (ConnectionHolder) suspendedResources;
+		JmsResourceHolder conHolder = (JmsResourceHolder) suspendedResources;
 		TransactionSynchronizationManager.bindResource(getConnectionFactory(), conHolder);
 	}
 
 	protected void doCommit(DefaultTransactionStatus status) {
 		JmsTransactionObject txObject = (JmsTransactionObject) status.getTransaction();
-		Session session = txObject.getConnectionHolder().getSession();
+		Session session = txObject.getResourceHolder().getSession();
 		try {
 			if (status.isDebug()) {
 				logger.debug("Committing JMS transaction on Session [" + session + "]");
@@ -209,7 +209,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 
 	protected void doRollback(DefaultTransactionStatus status) {
 		JmsTransactionObject txObject = (JmsTransactionObject) status.getTransaction();
-		Session session = txObject.getConnectionHolder().getSession();
+		Session session = txObject.getResourceHolder().getSession();
 		try {
 			if (status.isDebug()) {
 				logger.debug("Rolling back JMS transaction on Session [" + session + "]");
@@ -223,37 +223,37 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		JmsTransactionObject txObject = (JmsTransactionObject) status.getTransaction();
-		txObject.getConnectionHolder().setRollbackOnly();
+		txObject.getResourceHolder().setRollbackOnly();
 	}
 
 	protected void doCleanupAfterCompletion(Object transaction) {
 		JmsTransactionObject txObject = (JmsTransactionObject) transaction;
 		TransactionSynchronizationManager.unbindResource(getConnectionFactory());
-		txObject.getConnectionHolder().clear();
-		JmsUtils.closeSession(txObject.getConnectionHolder().getSession());
-		JmsUtils.closeConnection(txObject.getConnectionHolder().getConnection());
+		txObject.getResourceHolder().clear();
+		JmsUtils.closeSession(txObject.getResourceHolder().getSession());
+		JmsUtils.closeConnection(txObject.getResourceHolder().getConnection());
 	}
 
 
 	/**
-	 * JMS transaction object, representing a ConnectionHolder.
+	 * JMS transaction object, representing a JmsResourceHolder.
 	 * Used as transaction object by JmsTransactionManager.
-	 * @see ConnectionHolder
+	 * @see JmsResourceHolder
 	 */
 	private static class JmsTransactionObject implements SmartTransactionObject {
 
-		private ConnectionHolder connectionHolder;
+		private JmsResourceHolder resourceHolder;
 
-		public void setConnectionHolder(ConnectionHolder connectionHolder) {
-			this.connectionHolder = connectionHolder;
+		public void setResourceHolder(JmsResourceHolder resourceHolder) {
+			this.resourceHolder = resourceHolder;
 		}
 
-		public ConnectionHolder getConnectionHolder() {
-			return connectionHolder;
+		public JmsResourceHolder getResourceHolder() {
+			return resourceHolder;
 		}
 
 		public boolean isRollbackOnly() {
-			return getConnectionHolder().isRollbackOnly();
+			return getResourceHolder().isRollbackOnly();
 		}
 	}
 
