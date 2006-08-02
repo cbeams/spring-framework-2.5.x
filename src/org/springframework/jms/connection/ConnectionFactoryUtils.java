@@ -163,7 +163,7 @@ public abstract class ConnectionFactoryUtils {
 		}
 		if (conHolderToUse != conHolder) {
 			TransactionSynchronizationManager.registerSynchronization(
-					new ConnectionSynchronization(resourceKey, conHolderToUse));
+					new JmsResourceSynchronization(resourceKey, conHolderToUse));
 			conHolderToUse.setSynchronizedWithTransaction(true);
 			TransactionSynchronizationManager.bindResource(resourceKey, conHolderToUse);
 		}
@@ -215,30 +215,35 @@ public abstract class ConnectionFactoryUtils {
 	 * (e.g. when participating in a JtaTransactionManager transaction).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
-	private static class ConnectionSynchronization extends TransactionSynchronizationAdapter {
+	private static class JmsResourceSynchronization extends TransactionSynchronizationAdapter {
 
 		private final Object resourceKey;
 
-		private final JmsResourceHolder jmsResourceHolder;
+		private final JmsResourceHolder resourceHolder;
 
-		public ConnectionSynchronization(Object resourceKey, JmsResourceHolder jmsResourceHolder) {
+		private boolean holderActive = true;
+
+		public JmsResourceSynchronization(Object resourceKey, JmsResourceHolder resourceHolder) {
 			this.resourceKey = resourceKey;
-			this.jmsResourceHolder = jmsResourceHolder;
+			this.resourceHolder = resourceHolder;
 		}
 
 		public void suspend() {
-			unbindAndCloseIfNecessary();
+			if (this.holderActive) {
+				TransactionSynchronizationManager.unbindResource(this.resourceKey);
+			}
+		}
+
+		public void resume() {
+			if (this.holderActive) {
+				TransactionSynchronizationManager.bindResource(this.resourceKey, this.resourceHolder);
+			}
 		}
 
 		public void beforeCompletion() {
-			unbindAndCloseIfNecessary();
-		}
-
-		private void unbindAndCloseIfNecessary() {
-			if (TransactionSynchronizationManager.hasResource(this.resourceKey)) {
-				TransactionSynchronizationManager.unbindResource(this.resourceKey);
-				this.jmsResourceHolder.closeAll();
-			}
+			TransactionSynchronizationManager.unbindResource(this.resourceKey);
+			this.holderActive = false;
+			this.resourceHolder.closeAll();
 		}
 	}
 
