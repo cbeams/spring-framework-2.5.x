@@ -31,7 +31,7 @@ import org.springframework.beans.factory.InitializingBean;
  * {@link ConnectionFactory} implementation that delegates all calls to a
  * given target {@link ConnectionFactory}.
  * 
- * <p>It is meant to be to be subclassed, with subclasses overriding only those
+ * <p>It is meant to be subclassed, with subclasses overriding only those
  * methods that must not simply delegate to the target {@link ConnectionFactory}.
  *
  * @author Juergen Hoeller
