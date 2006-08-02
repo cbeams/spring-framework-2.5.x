@@ -557,67 +557,15 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @see #setMessageListener
 	 */
 	protected void invokeListener(Session session, Message message) throws JMSException {
-		Connection conToClose = null;
-		Session sessionToClose = null;
-		try {
-			Session sessionToUse = session;
-			if (!isExposeListenerSession()) {
-				// We need to expose a separate Session.
-				conToClose = createConnection();
-				sessionToClose = createSession(conToClose);
-				sessionToUse = sessionToClose;
-			}
-			// Actually invoke the message listener...
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking listener with message of type [" + message.getClass() +
-						"] and session [" + sessionToUse + "]");
-			}
-			doInvokeListener(sessionToUse, message);
-			// Clean up specially exposed Session, if any.
-			if (sessionToUse != session) {
-				if (sessionToUse.getTransacted() && isSessionTransacted()) {
-					// Transacted session created by this container -> commit.
-					JmsUtils.commitIfNecessary(sessionToUse);
-				}
-			}
-		}
-		finally {
-			JmsUtils.closeSession(sessionToClose);
-			JmsUtils.closeConnection(conToClose);
-		}
-	}
-
-	/**
-	 * Invoke the specified listener: either as standard JMS MessageListener
-	 * or (preferably) as Spring SessionAwareMessageListener.
-	 * @param session the JMS Session to operate on
-	 * @param message the received JMS Message
-	 * @throws JMSException if thrown by JMS API methods
-	 * @see #setMessageListener
-	 */
-	protected void doInvokeListener(Session session, Message message) throws JMSException {
-		if (getMessageListener() instanceof MessageListener) {
-			doInvokeListener((MessageListener) getMessageListener(), message);
-		}
-		else if (getMessageListener() instanceof SessionAwareMessageListener) {
+		if (getMessageListener() instanceof SessionAwareMessageListener) {
 			doInvokeListener((SessionAwareMessageListener) getMessageListener(), session, message);
+		}
+		else if (getMessageListener() instanceof MessageListener) {
+			doInvokeListener((MessageListener) getMessageListener(), message);
 		}
 		else {
 			throw new IllegalArgumentException("Only MessageListener and SessionAwareMessageListener supported");
 		}
-	}
-
-	/**
-	 * Invoke the specified listener as standard JMS MessageListener.
-	 * <p>Default implementation performs a plain invocation of the
-	 * <code>onMessage</code> method.
-	 * @param listener the JMS MessageListener to invoke
-	 * @param message the received JMS Message
-	 * @throws JMSException if thrown by JMS API methods
-	 * @see javax.jms.MessageListener#onMessage
-	 */
-	protected void doInvokeListener(MessageListener listener, Message message) throws JMSException {
-		listener.onMessage(message);
 	}
 
 	/**
@@ -634,7 +582,47 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	protected void doInvokeListener(SessionAwareMessageListener listener, Session session, Message message)
 			throws JMSException {
 
-		listener.onMessage(message, session);
+		Connection conToClose = null;
+		Session sessionToClose = null;
+		try {
+			Session sessionToUse = session;
+			if (!isExposeListenerSession()) {
+				// We need to expose a separate Session.
+				conToClose = createConnection();
+				sessionToClose = createSession(conToClose);
+				sessionToUse = sessionToClose;
+			}
+			// Actually invoke the message listener...
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invoking listener with message of type [" + message.getClass() +
+						"] and session [" + sessionToUse + "]");
+			}
+			listener.onMessage(message, sessionToUse);
+			// Clean up specially exposed Session, if any.
+			if (sessionToUse != session) {
+				if (sessionToUse.getTransacted() && isSessionTransacted()) {
+					// Transacted session created by this container -> commit.
+					JmsUtils.commitIfNecessary(sessionToUse);
+				}
+			}
+		}
+		finally {
+			JmsUtils.closeSession(sessionToClose);
+			JmsUtils.closeConnection(conToClose);
+		}
+	}
+
+	/**
+	 * Invoke the specified listener as standard JMS MessageListener.
+	 * <p>Default implementation performs a plain invocation of the
+	 * <code>onMessage</code> method.
+	 * @param listener the JMS MessageListener to invoke
+	 * @param message the received JMS Message
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see javax.jms.MessageListener#onMessage
+	 */
+	protected void doInvokeListener(MessageListener listener, Message message) throws JMSException {
+		listener.onMessage(message);
 	}
 
 	/**
