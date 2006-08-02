@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,20 @@ import java.beans.PropertyDescriptor;
 
 /**
  * The central interface of Spring's low-level JavaBeans infrastructure.
- * Extends the PropertyAccessor and PropertyEditorRegistry interfaces.
  *
- * <p>The default implementation is BeanWrapperImpl. Typically not used
- * directly but rather implicitly via a BeanFactory or a DataBinder.
+ * <p>Typically not used directly but rather implicitly via a
+ * {@link org.springframework.beans.factory.BeanFactory} or a
+ * {@link org.springframework.validation.DataBinder}.
  *
  * <p>Provides operations to analyze and manipulate standard Java Beans:
  * the ability to get and set property values (individually or in bulk),
- * get property descriptors, query the readability/writability of properties.
+ * get property descriptors, and query the readability/writability of properties.
  *
  * <p>This interface supports <b>nested properties</b> enabling the setting
  * of properties on subproperties to an unlimited depth.
- *
- * <p>A BeanWrapper instance can be used repeatedly, with its target object
- * (the wrapped Java Bean instance) changing.
+ * A <code>BeanWrapper</code> instance can be used repeatedly, with its
+ * {@link #setWrappedInstance(Object) target object} (the wrapped Java Bean
+ * instance) changing as required.
  * 
  * @author Rod Johnson
  * @author Juergen Hoeller
