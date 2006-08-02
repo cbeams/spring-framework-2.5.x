@@ -47,16 +47,17 @@ import org.springframework.util.ObjectUtils;
  * <p>By default, the content of incoming JMS messages gets extracted before
  * being passed into the target listener method, to let the target method
  * operate on message content types such as String or byte array instead of
- * the raw {@link Message}.
- *
- * <p>Message type conversion is delegated to a Spring JMS {@link MessageConverter}.
- * By default, a {@link SimpleMessageConverter}
+ * the raw {@link Message}. Message type conversion is delegated to a Spring
+ * JMS {@link MessageConverter}. By default, a {@link SimpleMessageConverter}
  * {@link org.springframework.jms.support.converter.SimpleMessageConverter102 (102)}
- * will be used.
+ * will be used. (If you do not want such automatic message conversion taking
+ * place then be sure to set the
+ * {@link #setMessageConverter(org.springframework.jms.support.converter.MessageConverter) MessageConverter}
+ * to <code>null</code>.)
  *
  * <p>If a target listener method returns a non-null object (typically of a
  * message content type such as <code>String</code> or byte array), it will get
- * wrapped in a JMS <codw>Message</codw> and sent to the response destination
+ * wrapped in a JMS <code>Message</code> and sent to the response destination
  * (either the JMS "reply-to" destination or a
  * {@link #setDefaultResponseDestination(javax.jms.Destination) specified default
  * destination}).
@@ -69,6 +70,57 @@ import org.springframework.util.ObjectUtils;
  * <p>This class requires a JMS 1.1+ provider, because it builds on the
  * domain-independent API. <b>Use the {@link MessageListenerAdapter102
  * MessageListenerAdapter102} subclass for JMS 1.0.2 providers.</b>
+ * 
+ * <p>Find below some examples of method signatures compliant with this
+ * adapter class. This first example handles all <code>Message</code> types
+ * and gets passed the contents of each <code>Message</code> type as an
+ * argument. No <code>Message</code> will be sent back as all of these methods
+ * return <code>void</code>.
+ * 
+ * <pre class="code"> public interface MessageContentsDelegate {
+ *    void handleMessage(String text);
+ *    void handleMessage(Map map);
+ *    void handleMessage(byte[] bytes);
+ *    void handleMessage(Serializable obj);
+ * }</pre>
+ * 
+ * <p>This next example handles all <code>Message</code> types and gets
+ * passed the actual (raw) <code>Message</code> as an argument. Again, no
+ * <code>Message</code> will be sent back as all of these methods return
+ * <code>void</code>.
+ * 
+ * <pre class="code"> public interface RawMessageDelegate {
+ *    void handleMessage(TextMessage message);
+ *    void handleMessage(MapMessage message);
+ *    void handleMessage(BytesMessage message);
+ *    void handleMessage(ObjectMessage message);
+ * }</pre>
+ * 
+ * <p>This next example illustrates a <code>Message</code> delegate
+ * that just consumes the <code>String</code> contents of
+ * {@link javax.jms.TextMessage TextMessages}. Notice also how the
+ * name of the <code>Message</code> handling method is different from the
+ * {@link #ORIGINAL_DEFAULT_LISTENER_METHOD original} (this will have to
+ * be configured in the attandant bean definition). Again, no <code>Message</code>
+ * will be sent back as the method returns <code>void</code>.
+ * 
+ * <pre class="code"> public interface TextMessageContentDelegate {
+ *    void onMessage(String text);
+ * }</pre>
+ * 
+ * <p>This final example illustrates a <code>Message</code> delegate
+ * that just consumes the <code>String</code> contents of
+ * {@link javax.jms.TextMessage TextMessages}. Notice how the return type
+ * of this method is <code>String</code>: this will result in the configured
+ * {@link MessageListenerAdapter} sending a {@link javax.jms.TextMessage} in response.
+ * 
+ * <pre class="code"> public interface ResponsiveTextMessageContentDelegate {
+ *    String handleMessage(String text);
+ * }</pre>
+ * 
+ * For further examples and discussion please do refer to the Spring
+ * reference documentation which describes this class (and it's attendant XML
+ * configuration) in detail.
  *
  * @author Juergen Hoeller
  * @since 2.0
