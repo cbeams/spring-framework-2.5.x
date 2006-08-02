@@ -40,8 +40,10 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Message listener container that uses plain JMS client API, specifically
- * looped <code>MessageConsumer.receive()</code> calls that also allow for
+ * a loop of <code>MessageConsumer.receive()</code> calls that also allow for
  * transactional reception of messages (registering them with XA transactions).
+ * Designed to work in a native JMS environment as well as in a J2EE environment,
+ * with only minimal differences in configuration.
  *
  * <p>This is a simple but nevertheless powerful form of a message listener container.
  * It creates a fixed number of JMS Sessions to invoke the listener, not allowing
@@ -53,17 +55,22 @@ import org.springframework.util.ClassUtils;
  * created through Spring's TaskExecutor abstraction. By default, the appropriate
  * number of threads are created on startup, according to the "concurrentConsumers"
  * setting. Specify an alternative TaskExecutor to integrate with an existing
- * thread pool facility, for example.
+ * thread pool facility, for example. With a native JMS setup, each of those
+ * listener threads is gonna use a cached JMS Session and MessageConsumer
+ * (only refreshed in case of failure), using the JMS provider's resources
+ * as efficiently as possible.
  *
  * <p>Message reception and listener execution can automatically be wrapped
  * in transactions through passing a Spring PlatformTransactionManager into the
- * "transactionManager" property. This will usually be a JtaTransactionManager,
- * in combination with a JTA-aware ConnectionFactory that this message listener
- * container fetches its Connections from.
- *
- * <p><b>NOTE:</b> Turn off the "cacheSessions" flag on JBoss 4.0 to make JMS
- * message reception properly participate in XA transactions, where JBoss requires
- * each listener thread to reobtain its JMS Session for each receive attempt.
+ * "transactionManager" property. This will usually be a JtaTransactionManager
+ * in a J2EE enviroment, in combination with a JTA-aware JMS ConnectionFactory
+ * that this message listener container fetches its Connections from (check
+ * your J2EE server's documentation). Note that this listener container will
+ * automatically reobtain all JMS handles for each transaction in case of an
+ * external transaction manager specified, for compatibility with all J2EE servers
+ * (in particular JBoss). This non-caching behavior can be overridden through the
+ * "cacheLevel"/"cacheLevelName" property, enforcing caching of the Connection (or
+ * also Session and MessageConsumer) even in case of an external transaction manager.
  *
  * <p>See the {@link AbstractMessageListenerContainer AbstractMessageListenerContainer}
  * javadoc for details on acknowledge modes and transaction options.
@@ -79,6 +86,7 @@ import org.springframework.util.ClassUtils;
  * @since 2.0
  * @see #setTransactionManager
  * @see #setCacheLevel
+ * @see #setCacheLevelName
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see javax.jms.MessageConsumer#receive(long)
  * @see SimpleMessageListenerContainer
@@ -214,7 +222,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * pools will usually prefer short-lived tasks.
 	 * @see #setTaskExecutor
 	 * @see #setReceiveTimeout
-	 * @see org.springframework.scheduling.SchedulingTaskExecutor#isShortLivedPreferred()
+	 * @see org.springframework.scheduling.SchedulingTaskExecutor#prefersShortLivedTasks()
 	 */
 	public void setMaxMessagesPerTask(int maxMessagesPerTask) {
 		Assert.isTrue(maxMessagesPerTask != 0, "maxMessagesPerTask must not be 0");
@@ -346,7 +354,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 			this.taskExecutor = new SimpleAsyncTaskExecutor(DEFAULT_THREAD_NAME_PREFIX);
 		}
 		else if (this.taskExecutor instanceof SchedulingTaskExecutor &&
-				((SchedulingTaskExecutor) this.taskExecutor).isShortLivedPreferred() &&
+				((SchedulingTaskExecutor) this.taskExecutor).prefersShortLivedTasks() &&
 				this.maxMessagesPerTask == Integer.MIN_VALUE) {
 			// TaskExecutor indicated a preference for short-lived tasks. According to
 			// setMaxMessagesPerTask javadoc, we'll use 1 message per task in this case
@@ -628,7 +636,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 
 	//-------------------------------------------------------------------------
-	// Inner class that serves as loop in a separate thread
+	// Inner classes used as internal adapters
 	//-------------------------------------------------------------------------
 
 	/**

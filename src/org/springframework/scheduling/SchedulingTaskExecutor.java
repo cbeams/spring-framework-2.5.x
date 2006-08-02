@@ -34,17 +34,17 @@ import org.springframework.core.task.TaskExecutor;
 public interface SchedulingTaskExecutor extends TaskExecutor {
 
 	/**
-	 * Return whether this TaskExecutor prefers short-lived operations
+	 * Return whether this TaskExecutor prefers short-lived tasks
 	 * (<code>true</code>) over long-lived ones (<code>false</code>).
-	 * <p>A SchedulingTaskExecutor implementation can indicate whether it prefers submitted
-	 * tasks to perform as little work as they can within a single task execution.
-	 * For example, submitted tasks might break a repeated loop into individual
-	 * subtasks which submit a follow-up task afterwards (if feasible).
+	 * <p>A SchedulingTaskExecutor implementation can indicate whether it prefers
+	 * submitted tasks to perform as little work as they can within a single task
+	 * execution. For example, submitted tasks might break a repeated loop into
+	 * individual subtasks which submit a follow-up task afterwards (if feasible).
 	 * <p>This should be considered a hint. Of course TaskExecutor clients are
 	 * free to ignore this flag and hence the SchedulingTaskExecutor interface overall.
 	 * However, thread pools will usually indicated a preference for short-lived
 	 * tasks, to be able to perform more fine-grained scheduling.
 	 */
-	boolean isShortLivedPreferred();
+	boolean prefersShortLivedTasks();
 
 }

@@ -126,11 +126,10 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, InitializingBe
 		this.timer.schedule(new DelegatingTimerTask(task), this.delay);
 	}
 
-    /**
-     * This {@link TimerTaskExecutor} prefers short lived operations.
-     * @return <code>true</code> 
-     */
-    public boolean isShortLivedPreferred() {
+	/**
+	 * This task executor prefers short-lived work units.
+	 */
+	public boolean prefersShortLivedTasks() {
 		return true;
 	}
 

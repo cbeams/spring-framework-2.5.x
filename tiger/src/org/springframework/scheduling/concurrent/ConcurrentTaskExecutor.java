@@ -78,7 +78,10 @@ public class ConcurrentTaskExecutor implements SchedulingTaskExecutor, Executor 
 		this.concurrentExecutor.execute(task);
 	}
 
-	public boolean isShortLivedPreferred() {
+	/**
+	 * This task executor prefers short-lived work units.
+	 */
+	public boolean prefersShortLivedTasks() {
 		return true;
 	}
 

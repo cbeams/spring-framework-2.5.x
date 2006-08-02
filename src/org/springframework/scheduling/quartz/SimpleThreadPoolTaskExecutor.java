@@ -63,7 +63,10 @@ public class SimpleThreadPoolTaskExecutor extends SimpleThreadPool
 		runInThread(task);
 	}
 
-	public boolean isShortLivedPreferred() {
+	/**
+	 * This task executor prefers short-lived work units.
+	 */
+	public boolean prefersShortLivedTasks() {
 		return true;
 	}
 

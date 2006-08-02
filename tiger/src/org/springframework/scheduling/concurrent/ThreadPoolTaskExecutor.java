@@ -181,7 +181,10 @@ public class ThreadPoolTaskExecutor implements SchedulingTaskExecutor, Executor,
 		this.executorService.execute(task);
 	}
 
-	public boolean isShortLivedPreferred() {
+	/**
+	 * This task executor prefers short-lived work units.
+	 */
+	public boolean prefersShortLivedTasks() {
 		return true;
 	}
 

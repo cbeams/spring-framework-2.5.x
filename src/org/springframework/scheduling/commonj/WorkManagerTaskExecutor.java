@@ -47,6 +47,32 @@ import org.springframework.util.Assert;
  * <p>The CommonJ WorkManager will usually be retrieved from the application
  * server's JNDI environment, as defined in the server's management console.
  *
+ * <p><b>Note: At the time of this writing, the CommonJ WorkManager facility
+ * is only supported on IBM WebSphere 6.0+ and BEA WebLogic 9.0+,
+ * despite being such a crucial API for an application server.</b>
+ * (There is a similar facility available on WebSphere 5.0 Enterprise,
+ * though, which we will discuss below.)
+ *
+ * <p>A similar facility is available on WebSphere 5.0/5.1, under the name
+ * "Asynch Beans". Its central interface is called WorkManager too and is
+ * also obtained from JNDI, just like a standard CommonJ WorkManager.
+ * However, this WorkManager variant is notably different: The central
+ * execution method is called "doWork" instead of "schedule", and takes a
+ * slightly different Work interface as parameter.
+ *
+ * <p>Support for this WebSphere 5 variant can be built with this class
+ * and its helper DelegatingWork as template: Call the WorkManager's
+ * <code>startWork(Work)</code> instead of <code>schedule(Work)</code>
+ * in the <code>execute(Runnable)</code> implementation. Furthermore,
+ * for simplicity's sake, drop the entire "Implementation of the CommonJ
+ * WorkManager interface" section (and the corresponding
+ * <code>implements WorkManager</code> clause at the class level).
+ * Of course, you also need to change all <code>commonj.work</code> imports in
+ * your WorkManagerTaskExecutor and DelegatingWork variants to the corresponding
+ * WebSphere API imports (<code>com.ibm.websphere.asynchbeans.WorkManager</code>
+ * and <code>com.ibm.websphere.asynchbeans.Work</code>, respectively).
+ * This should be sufficient to get a TaskExecutor adapter for WebSphere 5.
+ *
  * @author Juergen Hoeller
  * @since 2.0
  */
@@ -104,7 +130,10 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		}
 	}
 
-	public boolean isShortLivedPreferred() {
+	/**
+	 * This task executor prefers short-lived work units.
+	 */
+	public boolean prefersShortLivedTasks() {
 		return true;
 	}
 
