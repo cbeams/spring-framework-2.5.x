@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,21 +36,24 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.View;
 
 /**
- * Implementation of ViewResolver that uses bean definitions in a
- * ResourceBundle, specified by the bundle basename. The bundle is
- * typically defined in a properties file, located in the class path.
- * The default bundle basename is "views".
+ * {@link org.springframework.web.servlet.ViewResolver} implementation 
+ * that uses bean definitions in a {@link ResourceBundle}, specified by
+ * the bundle basename.
+ * 
+ * <p>The bundle is typically defined in a properties file, located in
+ * the class path. The default bundle basename is "views".
  *
- * <p>This ViewResolver supports localized view definitions, using the
- * default support of <code>java.util.PropertyResourceBundle</code>.
+ * <p>This <code>ViewResolver</code> supports localized view definitions,
+ * using the default support of {@link java.util.PropertyResourceBundle}.
  * For example, the basename "views" will be resolved as class path resources
  * "views_de_AT.properties", "views_de.properties", "views.properties" -
  * for a given Locale "de_AT".
  *
- * <p>Note: This ViewResolver implements the Ordered interface to allow for
- * flexible participation in ViewResolver chaining. For example, some special
- * views could be defined via this ViewResolver (giving it 0 as "order" value),
- * while all remaining views could be resolved by a UrlBasedViewResolver.
+ * <p>Note: this <code>ViewResolver</code> implements the {@link Ordered}
+ * interface to allow for flexible participation in <code>ViewResolver</code>
+ * chaining. For example, some special views could be defined via this
+ * <code>ViewResolver</code> (giving it 0 as "order" value), while all
+ * remaining views could be resolved by a {@link UrlBasedViewResolver}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -60,7 +63,7 @@ import org.springframework.web.servlet.View;
  */
 public class ResourceBundleViewResolver extends AbstractCachingViewResolver implements Ordered, DisposableBean {
 
-	/** Default if no other basename is supplied */
+	/** The default basename if no other basename is supplied. */
 	public final static String DEFAULT_BASENAME = "views";
 
 
@@ -88,11 +91,13 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	}
 
 	/**
-	 * Set the basename, as defined in the java.util.ResourceBundle documentation.
-	 * ResourceBundle supports different suffixes. For example, a base name of
-	 * "views" might map to ResourceBundle files "views", "views_en_au" and "views_de".
+	 * Set the basename, as defined in the {@link java.util.ResourceBundle}
+	 * documentation.
+	 * <p><code>ResourceBundle</code> supports different suffixes. For example,
+	 * a base name of "views" might map to <code>ResourceBundle</code> files
+	 * "views", "views_en_au" and "views_de".
 	 * <p>The default is "views".
-	 * @param basename the ResourceBundle basename
+	 * @param basename the <code>ResourceBundle</code> basename
 	 * @see #setBasenames
 	 * @see java.util.ResourceBundle
 	 */
@@ -101,8 +106,8 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	}
 
 	/**
-	 * Set multiple ResourceBundle basenames.
-	 * @param basenames multiple ResourceBundle basenames
+	 * Set multiple <code>ResourceBundle</code> basenames.
+	 * @param basenames multiple <code>ResourceBundle</code> basenames
 	 * @see #setBasename
 	 */
 	public void setBasenames(String[] basenames) {
@@ -110,24 +115,27 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	}
 
 	/**
-	 * Set the ClassLoader to load resource bundles with.
-	 * Default is the thread context ClassLoader.
+	 * Set the {@link ClassLoader} to load resource bundles with.
+	 * Default is the thread context <code>ClassLoader</code>.
+	 * @param classLoader the <code>ClassLoader</code> to load resource bundles with
 	 */
 	public void setBundleClassLoader(ClassLoader classLoader) {
 		this.bundleClassLoader = classLoader;
 	}
 
 	/**
-	 * Return the ClassLoader to load resource bundles with. Default is the
-	 * specified bundle ClassLoader, usually the thread context ClassLoader.
+	 * Return the {@link ClassLoader} to load resource bundles with.
+	 * <p>Default is the specified bundle <code>ClassLoader</code>,
+	 * usually the thread context <code>ClassLoader</code>.
+	 * @return the <code>ClassLoader</code> to load resource bundles with
 	 */
 	protected ClassLoader getBundleClassLoader() {
 		return bundleClassLoader;
 	}
 
 	/**
-	 * Set the default parent for views defined in the ResourceBundle.
-	 * This avoids repeated "yyy1.parent=xxx", "yyy2.parent=xxx" definitions
+	 * Set the default parent for views defined in the <code>ResourceBundle</code>.
+	 * <p>This avoids repeated "yyy1.(parent)=xxx", "yyy2.(parent)=xxx" definitions
 	 * in the bundle, especially if all defined views share the same parent.
 	 * <p>The parent will typically define the view class and common attributes.
 	 * Concrete views might simply consist of an URL definition then:
@@ -156,8 +164,10 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	}
 
 	/**
-	 * Initialize the BeanFactory from the ResourceBundle, for the given locale.
-	 * Synchronized because of access by parallel threads.
+	 * Initialize the {@link BeanFactory} from the <code>ResourceBundle</code>,
+	 * for the given {@link Locale locale}.
+	 * <p>Synchronized because of access by parallel threads.
+	 * @param locale the target <code>Locale</code>
 	 */
 	protected synchronized BeanFactory initFactory(Locale locale) throws Exception {
 		// Try to find cached factory for Locale:
@@ -211,10 +221,10 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver impl
 	}
 
 	/**
-	 * Obtain the resource bundle for the given basename and Locale.
+	 * Obtain the resource bundle for the given basename and {@link Locale}.
 	 * @param basename the basename to look for
-	 * @param locale the Locale to look for
-	 * @return the corresponding ResourceBundle
+	 * @param locale the <code>Locale</code> to look for
+	 * @return the corresponding <code>ResourceBundle</code>
 	 * @throws MissingResourceException if no matching bundle could be found
 	 * @see java.util.ResourceBundle#getBundle(String, java.util.Locale, ClassLoader)
 	 */
