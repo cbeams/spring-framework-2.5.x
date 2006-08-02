@@ -25,9 +25,12 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * DataSource implementation that delegates all calls to a given target DataSource.
- * Abstract because it is meant to be to be subclassed, overriding specific methods
- * (such as <code>getConnection()</code> that should not simply delegate to the target.
+ * {@link DataSource} implementation that delegates all calls to a given
+ * target {@link DataSource}
+ * 
+ * <p>It is meant to be subclassed, with subclasses overriding only
+ * those methods (such as {@link #getConnection()}) that must not simply
+ * delegate to the target {@link DataSource} .
  *
  * @author Juergen Hoeller
  * @since 1.1
