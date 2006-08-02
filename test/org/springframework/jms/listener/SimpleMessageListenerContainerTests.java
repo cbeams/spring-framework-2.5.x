@@ -32,14 +32,13 @@ import org.easymock.internal.AlwaysMatcher;
 
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.StubQueue;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.SessionCallback;
 import org.springframework.test.AssertThrows;
 
 /**
  * Unit tests for the {@link SimpleMessageListenerContainer} class.
  *
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
 public final class SimpleMessageListenerContainerTests extends AbstractMessageListenerContainerTests {
 
