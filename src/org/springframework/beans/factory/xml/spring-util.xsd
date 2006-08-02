@@ -136,7 +136,7 @@
 					<xsd:annotation>
 						<xsd:appinfo>
 							<tool:annotation>
-								<tool:exports type="java.util.Map"/>
+								<tool:exports type="java.util.Set"/>
 							</tool:annotation>
 						</xsd:appinfo>
 					</xsd:annotation>
