@@ -121,10 +121,13 @@
 			<value>true</value>
 		</property>
 		<property name="badSqlGrammarCodes">
-			<value>03000,42000,42601,42803,42602,42622,42939,42804,42P18,42809,42703,42883,42P01,42P02,42704</value>
+			<value>03000</value>
 		</property>
-		<property name="dataIntegrityViolationCodes">
-			<value>23000,23001,23502,23503,23505,23514</value>
+		<property name="cannotSerializeTransactionCodes">
+			<value>40001</value>
+		</property>
+		<property name="deadlockLoserCodes">
+			<value>40P01</value>
 		</property>
 	</bean>
 
@@ -140,6 +143,9 @@
 		</property>
 		<property name="dataIntegrityViolationCodes">
 			<value>423,511,515,530,547,2601,2615,2714</value>
+		</property>
+		<property name="deadlockLoserCodes">
+			<value>1205</value>
 		</property>
 	</bean>
 
