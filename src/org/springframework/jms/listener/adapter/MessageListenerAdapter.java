@@ -47,20 +47,23 @@ import org.springframework.util.ObjectUtils;
  * <p>By default, the content of incoming JMS messages gets extracted before
  * being passed into the target listener method, to let the target method
  * operate on message content types such as String or byte array instead of
- * the raw <code>javax.jms.Message</code>.
+ * the raw {@link Message}.
  *
- * <p>Message type conversion is delegated to a Spring JMS MessageConverter.
- * By default, a SimpleMessageConverter(102) will be used.
+ * <p>Message type conversion is delegated to a Spring JMS {@link MessageConverter}.
+ * By default, a {@link SimpleMessageConverter}
+ * {@link org.springframework.jms.support.converter.SimpleMessageConverter102 (102)}
+ * will be used.
  *
  * <p>If a target listener method returns a non-null object (typically of a
- * message content type such as String or byte array), it will get wrapped
- * in a JMS Message and sent to the response destination (either the JMS
- * "reply-to" destination or a
- * {@link #setDefaultResponseDestination(javax.jms.Destination) specified default destination}).
+ * message content type such as <code>String</code> or byte array), it will get
+ * wrapped in a JMS <codw>Message</codw> and sent to the response destination
+ * (either the JMS "reply-to" destination or a
+ * {@link #setDefaultResponseDestination(javax.jms.Destination) specified default
+ * destination}).
  *
  * <p><b>Note:</b> The sending of response messages is only available when
- * using the SessionAwareMessageListener entry point (typically through a
- * Spring message listener container). Usage as standard JMS MessageListener
+ * using the {@link SessionAwareMessageListener} entry point (typically through a
+ * Spring message listener container). Usage as standard JMS {@link MessageListener}
  * does <i>not</i> support the generation of response messages.
  *
  * <p>This class requires a JMS 1.1+ provider, because it builds on the
@@ -98,7 +101,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 
 
 	/**
-	 * Create a new MessageListenerAdapter with default settings.
+	 * Create a new {@link MessageListenerAdapter} with default settings.
 	 */
 	public MessageListenerAdapter() {
 		initDefaultStrategies();
@@ -106,7 +109,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	}
 
 	/**
-	 * Create a new MessageListenerAdapter for the given delegate.
+	 * Create a new {@link MessageListenerAdapter} for the given delegate.
 	 */
 	public MessageListenerAdapter(Object delegate) {
 		initDefaultStrategies();
@@ -136,7 +139,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	/**
 	 * Specify the name of the default listener method to delegate to,
 	 * for the case where no specific listener method has been determined.
-	 * Out-of-the-box value is "handleMessage".
+	 * Out-of-the-box value is {@link #ORIGINAL_DEFAULT_LISTENER_METHOD "handleMessage"}.
 	 * @see #getListenerMethodName
 	 */
 	public void setDefaultListenerMethod(String defaultListenerMethod) {
@@ -174,8 +177,10 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	 * Set the converter that will convert incoming JMS messages to
 	 * listener method arguments, and objects returned from listener
 	 * methods back to JMS messages.
-	 * <p>The default converter is a SimpleMessageConverter, which is able
-	 * to handle BytesMessages, TextMessages and ObjectMessages.
+	 * <p>The default converter is a {@link SimpleMessageConverter}, which is able
+	 * to handle {@link javax.jms.BytesMessage BytesMessages},
+	 * {@link javax.jms.TextMessage TextMessages} and
+	 * {@link javax.jms.ObjectMessage ObjectMessages}.
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
 		this.messageConverter = messageConverter;
@@ -192,13 +197,13 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 
 
 	/**
-	 * Standard JMS MessageListener entry point.
+	 * Standard JMS {@link MessageListener} entry point.
 	 * <p>Delegates the message to the target listener method, with appropriate
 	 * conversion of the message argument. In case of an exception, the
-	 * <code>handleListenerException</code> method will be invoked.
+	 * {@link #handleListenerException(Throwable)} method will be invoked.
 	 * <p><b>Note:</b> Does not support sending response messages based on
 	 * result objects returned from listener methods. Use the
-	 * SessionAwareMessageListener entry point (typically through a Spring
+	 * {@link SessionAwareMessageListener} entry point (typically through a Spring
 	 * message listener container) for handling result objects as well.
 	 * @param message the incoming JMS message
 	 * @see #handleListenerException
@@ -214,7 +219,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	}
 
 	/**
-	 * Spring SessionAwareMessageListener entry point.
+	 * Spring {@link SessionAwareMessageListener} entry point.
 	 * <p>Delegates the message to the target listener method, with appropriate
 	 * conversion of the message argument. If the target method returns a
 	 * non-null object, wrap in a JMS message and send it back.
@@ -242,8 +247,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 
 
     /**
-	 * Initialize the default implementations for the adapter's strategies:
-	 * SimpleMessageConverter.
+	 * Initialize the default implementations for the adapter's strategies.
 	 * @see #setMessageConverter
 	 * @see org.springframework.jms.support.converter.SimpleMessageConverter
 	 */
@@ -254,8 +258,8 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
     /**
 	 * Handle the given exception that arose during listener execution.
 	 * The default implementation logs the exception at error level.
-	 * <p>This method only applies when used as standard JMS MessageListener.
-	 * In case of the Spring SessionAwareMessageListener mechanism,
+	 * <p>This method only applies when used as standard JMS {@link MessageListener}.
+	 * In case of the Spring {@link SessionAwareMessageListener} mechanism,
 	 * exceptions get handled by the caller instead.
 	 * @param ex the exception to handle
 	 * @see #onMessage(javax.jms.Message)
@@ -266,7 +270,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 
 	/**
 	 * Extract the message body from the given JMS message.
-	 * @param message the JMS Message
+	 * @param message the JMS <code>Message</code>
 	 * @return the content of the message, to be passed into the
 	 * listener method as argument
 	 * @throws JMSException if thrown by JMS API methods
@@ -381,7 +385,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	 * Build a JMS message to be sent as response based on the given result object.
 	 * @param session the JMS session to operate on
 	 * @param result the content of the message, as returned from the listener method
-	 * @return the JMS Message (never <code>null</code>)
+	 * @return the JMS <code>Message</code> (never <code>null</code>)
 	 * @throws JMSException if thrown by JMS API methods
 	 * @see #setMessageConverter
 	 */
