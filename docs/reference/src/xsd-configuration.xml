@@ -132,9 +132,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 value'</emphasis>), and it just reads better.
                 </para>
                 <programlisting><![CDATA[<bean id="..." class="...">
-    <property name="isolation">
-        <util:constant static-field="java.sql.Connection.TRANSACTION_SERIALIZABLE"/>
-    </property>
+  <property name="isolation">
+    <util:constant static-field="java.sql.Connection.TRANSACTION_SERIALIZABLE"/>
+  </property>
 </bean>]]></programlisting>
                 <section>
                     <title>Setting a bean property or constructor arg from a field value</title>
@@ -155,7 +155,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
   <property name="staticField">
     <value>java.sql.Connection.TRANSACTION_SERIALIZABLE</value>
-</property>
+  </property>
 </bean>]]></programlisting>
                     <para>
 			            There is also a convenience usage form where the <literal>static</literal> field is
@@ -183,8 +183,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			            class.
 		            </para>
                     <para>
-			            Injecting enum values into beans as either property or constructor arguments is a
-			            cinch in Spring, in that one doesn't actually have to <emphasis>do</emphasis>
+			            Injecting enum values into beans as either property or constructor arguments is very
+			            easy to do in Spring, in that one doesn't actually have to <emphasis>do</emphasis>
 			            anything or know anything about the Spring internals (or even about classes such
 			            as the <classname>FieldRetrievingFactoryBean</classname>). Let's look at an example
 			            to see how easy injecting an enum value is; consider this JDK 5 enum:
