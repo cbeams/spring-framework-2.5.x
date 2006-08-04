@@ -84,35 +84,26 @@
                      Headers and Footers
     ################################################### --> 
     
-    <!-- lets have a Spring and I21 banner across the top of each page -->
+    <!-- let's have a Spring and I21 banner across the top of each page -->
     <xsl:template name="user.header.navigation">
-		<div style="background-color:#31430f;border:none;height:110px;border:1px solid black;">
-			<a style="border:none;background: url();" href="http://www.springframework.org/" title="The Spring Framework">
-				<img style="border:none;" src="images/banner4.jpg"/>
+		<div style="background-color:white;border:none;height:73px;border:1px solid black;">
+			<a style="border:none;" href="http://www.springframework.org/" title="The Spring Framework">
+				<img style="border:none;" src="images/xdev-spring_logo.jpg"/>
 			</a>
-			<a style="border:none;background: url();" href="http://www.interface21.com/" title="Interface21 - Spring from the Source">
-				<img style="border:none;position:absolute;right:32px;" src="images/bannerR.gif"/>
+			<a style="border:none;" href="http://www.interface21.com/" title="Interface21 - Spring from the Source">
+				<img style="border:none;position:absolute;padding-top:5px;right:42px;" src="images/i21-banner-rhs.jpg"/>
 			</a>
 		</div>
 	</xsl:template> 
 	
-	<!-- no header navigation -->
+	<!-- no other header navigation (prev, next, etc.) -->
     <xsl:template name="header.navigation"/>
     <xsl:param name="navig.showtitles">1</xsl:param>
 
-    <!-- let's have a Powered by Interface21 banner across the bottom of each page -->
+    <!-- let's have a 'Sponsored by Interface21' strapline (or somesuch) across the bottom of each page -->
     <xsl:template name="user.footer.navigation">
-		<div style="background-color:#31430f;border:none;height:50px;border:1px solid black;text-align:center">
-			<table cellspacing="0" cellpadding="0" width="100%" style="margin: 0px; padding: 0px">
-        		<tr>
-        			<td width="50%" style="font-size: 110%; color: white; vertical-align: center; text-align: right">
-        				Sponsored by
-        			</td>
-        			<td width="50%" style="padding: 0px">
-        				<a style="border:none;background: url();" href="http://www.interface21.com/" title="Brought to you by Interface21"><img style="border: none" src="images/interface21.gif"/></a>
-        			</td>
-        		</tr>
-        	</table>
+		<div style="background-color:#31430f;border:1px solid black;text-align:center;padding: 5px 0px 5px 0px;">
+			<span style="color:white;font-size:90%;"><a href="http://www.interface21.com/" title="Interface21 - Spring from the Source" style="font-family: Verdana, Arial, helvetica, sans-serif;text-decoration:none;color:white">Sponsored by Interface21</a></span>
 		</div>
      </xsl:template>
 
