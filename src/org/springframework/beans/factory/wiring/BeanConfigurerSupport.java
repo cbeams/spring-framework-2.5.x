@@ -43,11 +43,14 @@ import org.springframework.util.Assert;
  */
 public abstract class BeanConfigurerSupport implements BeanFactoryAware, DisposableBean  {
 
+	/** Logger available to subclasses */
 	protected Log logger = LogFactory.getLog(getClass());
+
 
 	private BeanWiringInfoResolver beanWiringInfoResolver = new ClassNameBeanWiringInfoResolver();
 
 	private AutowireCapableBeanFactory beanFactory;
+
 
 	/**
 	 * Set the BeanWiringInfoResolver to use. Default behavior will be to look
@@ -81,6 +84,7 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Disposa
 		this.beanWiringInfoResolver = null;
 	}
 
+
 	/**
 	 * Configure the bean instance using the given bean name.
 	 * Subclasses can override this to provide custom configuration logic.
@@ -97,7 +101,7 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Disposa
 
 		if (this.beanFactory == null) {
 			if(logger.isWarnEnabled()) {
-				logger.warn("BeanFactory has not be set on [" + getClass().getName() + "]: " +
+				logger.warn("BeanFactory has not been set on [" + getClass().getName() + "]: " +
 					"Make sure this configurer runs in a Spring container. " +
 					"For example, add it to a Spring application context as an XML bean definition.");
 			}

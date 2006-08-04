@@ -22,8 +22,9 @@ import javax.servlet.jsp.tagext.Tag;
 import org.springframework.util.Assert;
 
 /**
- * Utility class to transform Strings to scopes:
+ * Utility class to translate {@link String Strings} to web scopes.
  *
+ * <p>
  * <ul>
  * <li><code>page</code> will be transformed to
  * {@link javax.servlet.jsp.PageContext#PAGE_SCOPE PageContext.PAGE_SCOPE}
@@ -54,12 +55,11 @@ public abstract class TagUtils {
 
 
 	/**
-	 * Determines the scope for a given input String. If the String
-	 * does not match 'request', 'session', 'page' or 'application',
-	 * the method will return <code>PageContext.PAGE_SCOPE</code>.
-	 * @param scope the String to inspect
-	 * @return the scope found, or <code>PageContext.PAGE_SCOPE</code>
-	 * if no scope matched
+	 * Determines the scope for a given input <code>String</code>.
+	 * <p>If the <code>String</code> does not match 'request', 'session',
+	 * 'page' or 'application', the method will return {@link PageContext#PAGE_SCOPE}.
+	 * @param scope the <code>String</code> to inspect
+	 * @return the scope found, or {@link PageContext#PAGE_SCOPE} if no scope matched
 	 */
 	public static int getScope(String scope) {
 		Assert.notNull(scope, "Scope to search for cannot be null");
@@ -80,6 +80,8 @@ public abstract class TagUtils {
 	/**
 	 * Determine whether the supplied {@link Tag} has any ancestor tag
 	 * of the supplied type.
+	 * @return <code>true</code> if the supplied {@link Tag} has any ancestor tag
+	 * of the supplied type
 	 */
 	public static boolean hasAncestorOfType(Tag tag, Class parentTagClass) {
 		Assert.notNull(tag, "Tag cannot be null");
