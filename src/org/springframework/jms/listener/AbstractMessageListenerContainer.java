@@ -16,6 +16,10 @@
 
 package org.springframework.jms.listener;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.ExceptionListener;
@@ -30,6 +34,8 @@ import org.springframework.jms.JmsException;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Abstract base class for message listener containers. Can either host
@@ -135,11 +141,17 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	private boolean autoStartup = true;
 
-	private Connection connection;
+	private Connection sharedConnection;
+
+	private final Object sharedConnectionMonitor = new Object();
+
+	private volatile boolean active = false;
 
 	private boolean running = false;
 
-	private volatile boolean active = false;
+	private final List pausedTasks = new LinkedList();
+
+	private final Object lifecycleMonitor = new Object();
 
 
 	/**
@@ -280,10 +292,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	protected void checkMessageListener(Object messageListener) {
 		if (!(messageListener instanceof MessageListener ||
 				messageListener instanceof SessionAwareMessageListener)) {
-            throw new IllegalArgumentException(
-								"messageListener needs to be of type [" +
-								MessageListener.class.getName() + "] or [" +
-								SessionAwareMessageListener.class.getName() + "]");
+			throw new IllegalArgumentException(
+					"messageListener needs to be of type [" + MessageListener.class.getName() +
+					"] or [" + SessionAwareMessageListener.class.getName() + "]");
 		}
 	}
 
@@ -367,68 +378,123 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 */
 	public void initialize() throws JmsException {
 		try {
-			this.active = true;
+			synchronized (this.lifecycleMonitor) {
+				this.active = true;
+				this.lifecycleMonitor.notifyAll();
+			}
 
 			if (sharedConnectionEnabled()) {
-				this.connection = createConnection();
-				if (getClientId() != null) {
-					this.connection.setClientID(getClientId());
-				}
+				establishSharedConnection();
+			}
+
+			if (this.autoStartup) {
+				doStart();
 			}
 
 			registerListener();
-
-			if (this.autoStartup) {
-				if (this.connection != null) {
-					this.connection.start();
-				}
-				this.running = true;
-			}
 		}
 		catch (JMSException ex) {
-			JmsUtils.closeConnection(this.connection);
-			this.active = false;
+			synchronized (this.sharedConnectionMonitor) {
+				JmsUtils.closeConnection(this.sharedConnection);
+			}
 			throw convertJmsAccessException(ex);
 		}
 	}
 
+
 	/**
-	 * Return the JMS Connection used by this message listener container.
+	 * Establish a shared Connection for this message listener container.
+	 * <p>The default implementation delegates to <code>refreshSharedConnection</code>,
+	 * which does one immediate attempt and throws an exception if it fails.
+	 * Can be overridden to have a recovery proces in place, retrying
+	 * until a Connection can be successfully established.
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see #refreshSharedConnection()
+	 */
+	protected void establishSharedConnection() throws JMSException {
+		refreshSharedConnection();
+	}
+
+	/**
+	 * Refresh the shared Connection that this listener container holds.
+	 * <p>Called on startup and also after an infrastructure exception
+	 * that occured during listener setup and/or execution.
+	 * @throws JMSException if thrown by JMS API methods
+	 */
+	protected final void refreshSharedConnection() throws JMSException {
+		synchronized (this.sharedConnectionMonitor) {
+			JmsUtils.closeConnection(this.sharedConnection);
+			this.sharedConnection = createConnection();
+			if (getClientId() != null) {
+				this.sharedConnection.setClientID(getClientId());
+			}
+		}
+	}
+
+	/**
+	 * Return the shared JMS Connection maintained by this message listener container.
 	 * Available after initialization.
 	 * @throws IllegalStateException if this listener container does not maintain a
 	 * shared Connection, or if the Connection hasn't been initialized yet
 	 * @see #sharedConnectionEnabled()
 	 */
-	protected final Connection getConnection() {
+	protected final Connection getSharedConnection() {
 		if (!sharedConnectionEnabled()) {
 			throw new IllegalStateException(
 					"This message listener container does not maintain a shared Connection");
 		}
-		if (this.connection == null) {
-			throw new IllegalStateException(
-					"This message listener container's shared Connection has not been initialized yet");
+		synchronized (this.sharedConnectionMonitor) {
+			if (this.sharedConnection == null) {
+				throw new IllegalStateException(
+						"This message listener container's shared Connection has not been initialized yet");
+			}
+			return this.sharedConnection;
 		}
-		return this.connection;
+	}
+
+
+	/**
+	 * Calls <code>shutdown</code> when the BeanFactory destroys
+	 * the message listener container instance.
+	 * @see #shutdown()
+	 */
+	public void destroy() {
+		shutdown();
 	}
 
 	/**
-	 * Destroy the registered listener object and close this
+	 * Shut down the registered listeners and close this
 	 * listener container.
-	 * <p>The underlying JMS Connection will receive a <code>close</code> call.
 	 * @throws JmsException if shutdown failed
 	 * @see #destroyListener()
-	 * @see javax.jms.Connection#close()
 	 */
-	public synchronized void destroy() throws JmsException {
-		try {
+	public void shutdown() throws JmsException {
+		logger.debug("Shutting down message listener container");
+		synchronized (this.lifecycleMonitor) {
+			this.running = false;
 			this.active = false;
+			this.lifecycleMonitor.notifyAll();
+		}
+		try {
 			destroyListener();
 		}
 		catch (JMSException ex) {
 			throw convertJmsAccessException(ex);
 		}
 		finally {
-			JmsUtils.closeConnection(this.connection);
+			synchronized (this.sharedConnectionMonitor) {
+				JmsUtils.closeConnection(this.sharedConnection);
+			}
+		}
+	}
+
+	/**
+	 * Return whether this listener container is currently active,
+	 * that is, whether it has been set up but not shut down yet.
+	 */
+	public final boolean isActive() {
+		synchronized (this.lifecycleMonitor) {
+			return this.active;
 		}
 	}
 
@@ -439,40 +505,98 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	/**
 	 * Start this listener container.
-	 * <p>The underlying JMS Connection will receive a <code>start</code> call.
 	 * @throws JmsException if starting failed
+	 * @see #doStart
+	 */
+	public void start() throws JmsException {
+		try {
+			doStart();
+		}
+		catch (JMSException ex) {
+			throw convertJmsAccessException(ex);
+		}
+	}
+
+	/**
+	 * Start the shared Connection, if any, and notify all listener tasks.
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see #startSharedConnection
+	 */
+	protected void doStart() throws JMSException {
+		synchronized (this.lifecycleMonitor) {
+			this.running = true;
+			this.lifecycleMonitor.notifyAll();
+			for (Iterator it = this.pausedTasks.iterator(); it.hasNext();) {
+				doRescheduleTask(it.next());
+				it.remove();
+			}
+		}
+
+		if (sharedConnectionEnabled()) {
+			startSharedConnection();
+		}
+	}
+
+	/**
+	 * Start the shared Connection.
+	 * @throws JMSException if thrown by JMS API methods
 	 * @see javax.jms.Connection#start()
 	 */
-	public synchronized void start() throws JmsException {
-		this.running = true;
-		if (this.connection != null) {
+	protected void startSharedConnection() throws JMSException {
+		synchronized (this.sharedConnectionMonitor) {
+			Assert.notNull(this.sharedConnection, "Shared Connection not initialized");
 			try {
-				this.connection.start();
+				this.sharedConnection.start();
 			}
-			catch (javax.jms.IllegalStateException ignoreSinceAlreadyStarted) {
-			}
-			catch (JMSException ex) {
-				throw convertJmsAccessException(ex);
+			catch (javax.jms.IllegalStateException ex) {
+				logger.debug("Ignoring Connection start exception - assuming already started", ex);
 			}
 		}
 	}
 
 	/**
 	 * Stop this listener container.
-	 * <p>The underlying JMS Connection will receive a <code>stop</code> call.
 	 * @throws JmsException if stopping failed
-	 * @see javax.jms.Connection#stop()
+	 * @see #doStop
 	 */
-	public synchronized void stop() throws JmsException {
-		this.running = false;
-		if (this.connection != null) {
+	public void stop() throws JmsException {
+		try {
+			doStop();
+		}
+		catch (JMSException ex) {
+			throw convertJmsAccessException(ex);
+		}
+	}
+
+	/**
+	 * Notify all listener tasks and stop the shared Connection, if any.
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see #stopSharedConnection
+	 */
+	protected void doStop() throws JMSException {
+		synchronized (this.lifecycleMonitor) {
+			this.running = false;
+			this.lifecycleMonitor.notifyAll();
+		}
+
+		if (sharedConnectionEnabled()) {
+			stopSharedConnection();
+		}
+	}
+
+	/**
+	 * Stop the shared Connection.
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see javax.jms.Connection#start()
+	 */
+	protected void stopSharedConnection() throws JMSException {
+		synchronized (this.sharedConnectionMonitor) {
 			try {
-				this.connection.stop();
+				Assert.notNull(this.sharedConnection, "Shared Connection not initialized");
+				this.sharedConnection.stop();
 			}
-			catch (javax.jms.IllegalStateException ignoreSinceNotYetStarted) {
-			}
-			catch (JMSException ex) {
-				throw convertJmsAccessException(ex);
+			catch (javax.jms.IllegalStateException ex) {
+				logger.debug("Ignoring Connection stop exception - assuming already stopped", ex);
 			}
 		}
 	}
@@ -481,18 +605,71 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * Return whether this listener container is currently running,
 	 * that is, whether it has been started and not stopped yet.
 	 */
-	public final synchronized boolean isRunning() {
-		return this.running;
+	public final boolean isRunning() {
+		synchronized (this.lifecycleMonitor) {
+			return this.running;
+		}
 	}
 
 	/**
-	 * Return whether this listener container is currently active,
-	 * that is, whether it has been set up and not destroyed yet.
+	 * Wait while this listener container is not running.
+	 * <p>To be called by asynchronous tasks that want to block
+	 * while the listener container is in stopped state.
 	 */
-	public final synchronized boolean isActive() {
-		return this.active;
+	protected final void waitWhileNotRunning() {
+		synchronized (this.lifecycleMonitor) {
+			while (this.active && !this.running) {
+				try {
+					this.lifecycleMonitor.wait();
+				}
+				catch (InterruptedException ex) {
+					// Re-interrupt current thread, to allow other threads to react.
+					Thread.currentThread().interrupt();
+				}
+			}
+		}
 	}
 
+	/**
+	 * Take the given task object and reschedule it,
+	 * either immediately if this listener container is currently running,
+	 * or later once this listener container has been restarted.
+	 * <p>If this listener container has already been shut down,
+	 * the task will not get rescheduled at all.
+	 * @param task the task object to reschedule
+	 * @return whether the task has been rescheduled
+	 * (either immediately or for a restart of this container)
+	 * @see #doRescheduleTask
+	 */
+	protected final boolean rescheduleTaskIfNecessary(Object task) {
+		Assert.notNull(task, "Task object must bot be null");
+		synchronized (this.lifecycleMonitor) {
+			if (this.running) {
+				doRescheduleTask(task);
+				return true;
+			}
+			else if (this.active) {
+				this.pausedTasks.add(task);
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+	}
+
+	/**
+	 * Reschedule the given task object immediately.
+	 * To be implemented by subclasses if they ever call
+	 * <code>rescheduleTaskIfNecessary</code>.
+	 * <p>This implementation throws an UnsupportedOperationException.
+	 * @param task the task object to reschedule
+	 * @see #rescheduleTaskIfNecessary
+	 */
+	protected void doRescheduleTask(Object task) {
+		throw new UnsupportedOperationException(
+				ClassUtils.getShortName(getClass()) + " does not support rescheduling of tasks");
+	}
 
 
 	//-------------------------------------------------------------------------
@@ -661,6 +838,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 				JmsUtils.rollbackIfNecessary(session);
 			}
 		}
+		catch (IllegalStateException ex2) {
+			logger.debug("Could not roll back because Session already closed", ex2);
+		}
 		catch (JMSException ex2) {
 			logger.error("Application exception overridden by rollback exception", ex);
 			throw ex2;
@@ -719,7 +899,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	/**
 	 * Return whether a shared JMS Connection should be maintained
 	 * by this listener container base class.
-	 * @see #getConnection()
+	 * @see #getSharedConnection()
 	 */
 	protected abstract boolean sharedConnectionEnabled();
 
@@ -729,7 +909,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * listener management process.
 	 * @throws JMSException if registration failed
 	 * @see #getMessageListener()
-	 * @see #getConnection()
+	 * @see #getSharedConnection()
 	 */
 	protected abstract void registerListener() throws JMSException;
 

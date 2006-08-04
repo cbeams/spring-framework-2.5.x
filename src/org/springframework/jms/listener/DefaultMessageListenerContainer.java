@@ -164,6 +164,14 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 	private Integer cacheLevel;
 
+	private Object currentRecoveryMarker = new Object();
+
+	private final Object recoveryMonitor = new Object();
+
+	private int activeInvokerCount = 0;
+
+	private final Object activeInvokerMonitor = new Object();
+
 
 	/**
 	 * Set whether to inhibit the delivery of messages published by its own connection.
@@ -313,6 +321,9 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		this.cacheLevel = new Integer(cacheLevel);
 	}
 
+	/**
+	 * Return the level of caching that this listener container is allowed to apply.
+	 */
 	public int getCacheLevel() {
 		return (this.cacheLevel != null ? this.cacheLevel.intValue() : CACHE_NONE);
 	}
@@ -386,6 +397,15 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 			this.taskExecutor.execute(new AsyncMessageListenerInvoker());
 		}
 	}
+
+	/**
+	 * Executes the given task via this listener container's TaskExecutor.
+	 * @see #setTaskExecutor
+	 */
+	protected void doRescheduleTask(Object task) {
+		this.taskExecutor.execute((Runnable) task);
+	}
+
 
 	/**
 	 * Create a MessageConsumer for the given JMS Session,
@@ -465,7 +485,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 			if (sessionToUse == null) {
 				Connection conToUse = null;
 				if (sharedConnectionEnabled()) {
-					conToUse = getConnection();
+					conToUse = getSharedConnection();
 				}
 				else {
 					conToUse = createConnection();
@@ -538,45 +558,144 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		return (this.receiveTimeout < 0 ? consumer.receive() : consumer.receive(this.receiveTimeout));
 	}
 
+
+	/**
+	 * Overridden to delegate to DefaultMessageListenerContainer's
+	 * recovery-capable <code>refreshConnectionUntilSuccessful</code> method.
+	 * @see #refreshConnectionUntilSuccessful()
+	 */
+	protected void establishSharedConnection() {
+		refreshConnectionUntilSuccessful();
+	}
+
+	/**
+	 * This implementations proceeds even after an exception thrown from
+	 * <code>Connection.start()</code>, relying on listeners to perform
+	 * appropriate recovery.
+	 */
+	protected void startSharedConnection() {
+		try {
+			super.startSharedConnection();
+		}
+		catch (JMSException ex) {
+			logger.debug("Connection start failed - relying on listeners to perform recovery", ex);
+		}
+	}
+
+	/**
+	 * This implementations proceeds even after an exception thrown from
+	 * <code>Connection.stop()</code>, relying on listeners to perform
+	 * appropriate recovery after a restart.
+	 */
+	protected void stopSharedConnection() {
+		try {
+			super.stopSharedConnection();
+		}
+		catch (JMSException ex) {
+			logger.debug("Connection stop failed - relying on listeners to perform recovery after restart", ex);
+		}
+	}
+
 	/**
 	 * Handle the given exception that arose during setup of a listener.
+	 * Called for every such exception in every concurrent listener.
 	 * <p>The default implementation logs the exception at error level
-	 * and lets the calling thread wait for the configured recovery interval;
-	 * the calling thread is excepted to attempt a retry afterwards.
-	 * This can be overridden in subclasses.
+	 * if not recovered yet, and at debug level if already recovered.
+	 * Can be overridden in subclasses.
 	 * @param ex the exception to handle
-	 * @see #setRecoveryInterval
+	 * @param alreadyRecovered whether a previously executing listener
+	 * already recovered from the present listener setup failure
+	 * (this usually indicates a follow-up failure than be ignored
+	 * other than for debug log purposes)
+	 * @see #recoverAfterListenerSetupFailure()
 	 */
-	protected void handleListenerSetupFailure(Throwable ex) {
+	protected void handleListenerSetupFailure(Throwable ex, boolean alreadyRecovered) {
 		if (ex instanceof JMSException) {
 			invokeExceptionListener((JMSException) ex);
 		}
-		logger.error("Setup of JMS message listener invoker failed", ex);
-		// Give the JMS provider some time to recover.
-		if (this.recoveryInterval > 0) {
+		if (alreadyRecovered) {
+			logger.debug("Setup of JMS message listener invoker failed - already recovered by other invoker", ex);
+		}
+		else {
+			logger.error("Setup of JMS message listener invoker failed - trying to recover", ex);
+		}
+	}
+
+	/**
+	 * Recover this listener container after a listener failed to set itself up,
+	 * for example reestablishing the underlying Connection.
+	 * <p>The default implementation delegates to DefaultMessageListenerContainer's
+	 * recovery-capable <code>refreshConnectionUntilSuccessful</code> method, which will try
+	 * to reestablish a Connection to the JMS provider both for the shared
+	 * and the non-shared Connection case.
+	 * @see #refreshConnectionUntilSuccessful()
+	 */
+	protected void recoverAfterListenerSetupFailure() {
+		refreshConnectionUntilSuccessful();
+	}
+
+	/**
+	 * Refresh the underlying Connection, not returning before an attempt has been
+	 * successful. Called in case of a shared Connection as well as without shared
+	 * Connection, so either needs to operate on the shared Connection or on a
+	 * temporary Connection that just gets established for validation purposes.
+	 * <p>The default implementation retries until it successfully established a
+	 * Connection, for as long as this message listener container is active.
+	 * Applies the specified recovery interval between retries.
+	 * @see #setRecoveryInterval
+	 */
+	protected void refreshConnectionUntilSuccessful() {
+		while (isActive()) {
 			try {
-				Thread.sleep(this.recoveryInterval);
+				if (sharedConnectionEnabled()) {
+					refreshSharedConnection();
+					if (isRunning()) {
+						startSharedConnection();
+					}
+				}
+				else {
+					Connection con = createConnection();
+					JmsUtils.closeConnection(con);
+				}
+				logger.info("Successfully refreshed JMS Connection");
+				break;
 			}
-			catch (InterruptedException interEx) {
-				// Re-interrupt current thread, to allow other threads to react.
-				Thread.currentThread().interrupt();
+			catch (JMSException ex) {
+				if (logger.isInfoEnabled()) {
+					logger.info("Could not refresh JMS Connection - retrying in " + this.recoveryInterval + " ms", ex);
+				}
+			}
+			if (this.recoveryInterval > 0) {
+				try {
+					Thread.sleep(this.recoveryInterval);
+				}
+				catch (InterruptedException interEx) {
+					// Re-interrupt current thread, to allow other threads to react.
+					Thread.currentThread().interrupt();
+				}
 			}
 		}
 	}
+
 
 	/**
 	 * Destroy the registered JMS Sessions and associated MessageConsumers.
 	 */
 	protected void destroyListener() throws JMSException {
-		logger.debug("Shutting down JMS message listener invokers");
-		// Give the async receive tasks a typical time to finish.
-		if (this.receiveTimeout > 0) {
-			try {
-				Thread.sleep(this.receiveTimeout);
-			}
-			catch (InterruptedException ex) {
-				// Re-interrupt current thread, to allow other threads to react.
-				Thread.currentThread().interrupt();
+		logger.debug("Waiting for shutdown of message listener invokers");
+		synchronized (this.activeInvokerMonitor) {
+			while (this.activeInvokerCount > 0) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
+							" message listener invokers");
+				}
+				try {
+					this.activeInvokerMonitor.wait();
+				}
+				catch (InterruptedException interEx) {
+					// Re-interrupt current thread, to allow other threads to react.
+					Thread.currentThread().interrupt();
+				}
 			}
 		}
 	}
@@ -648,16 +767,25 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 		private MessageConsumer consumer;
 
+		private Object lastRecoveryMarker;
+
 		public void run() {
+			synchronized (activeInvokerMonitor) {
+				activeInvokerCount++;
+				activeInvokerMonitor.notifyAll();
+			}
 			try {
 				if (maxMessagesPerTask < 0) {
 					while (isActive()) {
-						invokeListener();
+						waitWhileNotRunning();
+						if (isActive()) {
+							invokeListener();
+						}
 					}
 				}
 				else {
 					int messageCount = 0;
-					while (isActive() && messageCount < maxMessagesPerTask) {
+					while (isRunning() && messageCount < maxMessagesPerTask) {
 						invokeListener();
 						messageCount++;
 					}
@@ -665,15 +793,26 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 			}
 			catch (Throwable ex) {
 				clearResources();
-				handleListenerSetupFailure(ex);
+				boolean alreadyRecovered = false;
+				synchronized (recoveryMonitor) {
+					if (this.lastRecoveryMarker == currentRecoveryMarker) {
+						handleListenerSetupFailure(ex, false);
+						recoverAfterListenerSetupFailure();
+						currentRecoveryMarker = new Object();
+					}
+					else {
+						alreadyRecovered = true;
+					}
+				}
+				if (alreadyRecovered) {
+					handleListenerSetupFailure(ex, true);
+				}
 			}
-			if (isActive()) {
-				// Reschedule this Runnable for receiving another message.
-				// Reuses the Session and MessageConsumer unless an infrastructure
-				// exception was raised during the last attempt.
-				taskExecutor.execute(this);
+			synchronized (activeInvokerMonitor) {
+				activeInvokerCount--;
+				activeInvokerMonitor.notifyAll();
 			}
-			else {
+			if (!rescheduleTaskIfNecessary(this)) {
 				// We're shutting down completely.
 				clearResources();
 			}
@@ -685,11 +824,23 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		}
 
 		private void initResourcesIfNecessary() throws JMSException {
-			if (this.session == null && getCacheLevel() >= CACHE_SESSION) {
-				this.session = createSession(getConnection());
+			if (getCacheLevel() <= CACHE_CONNECTION) {
+				updateRecoveryMarker();
 			}
-			if (this.consumer == null && getCacheLevel() >= CACHE_CONSUMER) {
-				this.consumer = createListenerConsumer(this.session);
+			else {
+				if (this.session == null && getCacheLevel() >= CACHE_SESSION) {
+					updateRecoveryMarker();
+					this.session = createSession(getSharedConnection());
+				}
+				if (this.consumer == null && getCacheLevel() >= CACHE_CONSUMER) {
+					this.consumer = createListenerConsumer(this.session);
+				}
+			}
+		}
+
+		private void updateRecoveryMarker() {
+			synchronized (recoveryMonitor) {
+				this.lastRecoveryMarker = currentRecoveryMarker;
 			}
 		}
 
@@ -723,7 +874,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 		public Connection createConnection() throws JMSException {
 			if (sharedConnectionEnabled()) {
-				return DefaultMessageListenerContainer.this.getConnection();
+				return DefaultMessageListenerContainer.this.getSharedConnection();
 			}
 			else {
 				return DefaultMessageListenerContainer.this.createConnection();
