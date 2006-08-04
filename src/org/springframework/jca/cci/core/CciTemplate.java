@@ -362,7 +362,11 @@ public class CciTemplate implements CciOperations {
 				interaction.close();
 			}
 			catch (ResourceException ex) {
-				logger.warn("Could not close Interaction", ex);
+				logger.debug("Could not close CCI Interaction", ex);
+			}
+			catch (Throwable ex) {
+				// We don't trust the CCI driver: It might throw RuntimeException or Error.
+				logger.debug("Unexpected exception on closing CCI Interaction", ex);
 			}
 		}
 	}
@@ -379,7 +383,11 @@ public class CciTemplate implements CciOperations {
 				resultSet.close();
 			}
 			catch (SQLException ex) {
-				logger.warn("Could not close ResultSet", ex);
+				logger.debug("Could not close CCI ResultSet", ex);
+			}
+			catch (Throwable ex) {
+				// We don't trust the CCI driver: It might throw RuntimeException or Error.
+				logger.debug("Unexpected exception on closing CCI ResultSet", ex);
 			}
 		}
 	}
