@@ -33,11 +33,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NestedTestBean;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.config.*;
 import org.springframework.beans.factory.support.*;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
 import org.springframework.beans.factory.xml.DependenciesBean;
@@ -261,7 +257,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		TestBean kerry1 = (TestBean) lbf.getBean("kerry");
 		TestBean kerry2 = (TestBean) lbf.getBean("kerry");
 		assertEquals("kerry", kerry1.getName());
-		assertTrue("Non null", kerry1 != null);
+		assertNotNull("Non null", kerry1);
 		assertTrue("Singletons equal", kerry1 == kerry2);
 
 		lbf = new DefaultListableBeanFactory();
@@ -365,7 +361,6 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 	public void testBeanReferenceWithNewSyntax() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		lbf = new DefaultListableBeanFactory();
 		Properties p = new Properties();
 		p.setProperty("r.(class)", TestBean.class.getName());
 		p.setProperty("r.name", "rod");
@@ -381,7 +376,6 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 	public void testCanEscapeBeanReferenceSyntax() {
 		String name = "*name";
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		lbf = new DefaultListableBeanFactory();
 		Properties p = new Properties();
 		p.setProperty("r.(class)", TestBean.class.getName());
 		p.setProperty("r.name", "*" + name);
@@ -669,8 +663,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			lbf.autowireBeanProperties(existingBean, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
 			fail("Should have thrown UnsatisfiedDependencyException");
 		}
-		catch (UnsatisfiedDependencyException ex) {
-			// expected
+		catch (UnsatisfiedDependencyException expected) {
 		}
 	}
 
@@ -687,8 +680,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			lbf.autowireBeanProperties(new TestBean(), 0, false);
 			fail("Should have thrown IllegalArgumentException");
 		}
-		catch (IllegalArgumentException ex) {
-			// expected
+		catch (IllegalArgumentException expected) {
 		}
 	}
 
@@ -766,8 +758,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		try {
 			lbf.preInstantiateSingletons();
 		}
-		catch (UnsatisfiedDependencyException ex) {
-			// expected
+		catch (UnsatisfiedDependencyException expected) {
 		}
 	}
 
@@ -777,8 +768,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		try {
 			lbf.preInstantiateSingletons();
 		}
-		catch (UnsatisfiedDependencyException ex) {
-			// expected
+		catch (UnsatisfiedDependencyException expected) {
 		}
 	}
 
@@ -972,6 +962,41 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 				factory.getBean("testBean");
 			}
 		}.runTest();
+	}
+
+	public void testExplicitScopeInheritanceForChildBeanDefinitions() throws Exception {
+		String theChildScope = "bonanza!";
+
+		RootBeanDefinition parent = new RootBeanDefinition();
+		parent.setSingleton(false);
+		
+		AbstractBeanDefinition child = BeanDefinitionBuilder
+				.childBeanDefinition("parent").getBeanDefinition();
+		child.setBeanClass(TestBean.class);
+		child.setScope(theChildScope);
+		
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition("parent", parent);
+		factory.registerBeanDefinition("child", child);
+
+		AbstractBeanDefinition def = (AbstractBeanDefinition) factory.getBeanDefinition("child");
+		assertEquals("Child 'scope' not overriding parent scope (it must).", theChildScope, def.getScope());
+	}	
+
+	public void testImplicitScopeInheritanceForChildBeanDefinitions() throws Exception {
+		RootBeanDefinition parent = new RootBeanDefinition();
+		parent.setScope("bonanza!");
+		
+		AbstractBeanDefinition child = BeanDefinitionBuilder
+				.childBeanDefinition("parent").getBeanDefinition();
+		child.setBeanClass(TestBean.class);
+		
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition("parent", parent);
+		factory.registerBeanDefinition("child", child);
+
+		AbstractBeanDefinition def = (AbstractBeanDefinition) factory.getBeanDefinition("child");
+		assertTrue("Child 'scope' not overriding parent scope (it must).", def.isSingleton());
 	}
 
 
