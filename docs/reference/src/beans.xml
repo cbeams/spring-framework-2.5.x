@@ -612,7 +612,7 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 				constructed or returned from a factory method. Then, it is the job of
 				the container to actually <emphasis>inject</emphasis> those dependencies
 				when it creates the bean. This is fundamentally the inverse, hence the
-				name <emphasis>Inversion of Control</emphasis> (IoC), of the bean itsel
+				name <emphasis>Inversion of Control</emphasis> (IoC), of the bean itself
 				 being in control of instantiating or locating its dependencies on its
 				 own using direct construction of classes, or something like the
 				<emphasis>Service Locator</emphasis> pattern.
@@ -806,13 +806,12 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 				non-existent beans and circular dependencies, at container
 				load-time. It will actually set properties and resolve
 				dependencies (i.e. create those dependencies if needed) as late as
-				possible, which is when the bean is actually created. This does
-				mean that a Spring container which has loaded correctly, can later
-				generate an exception when you request a bean, if there is a
-				problem creating that bean or one of its dependencies. This could
-				happen if the bean throws an exception as a result of a missing or
-				invalid property, for example. This potentially delayed visibility
-				of some configuration issues is why
+				possible, which is when the bean is actually created. This means that
+				a Spring container which has loaded correctly can later generate an
+				exception when you request a bean if there is a problem creating that
+				bean or one of its dependencies. This could happen if the bean throws
+				an exception as a result of a missing or invalid property, for example.
+				This potentially delayed visibility of some configuration issues is why
 				<interfacename>ApplicationContext</interfacename> implementations by default
 				pre-instantiate singleton beans. At the cost of some upfront time
 				and memory to create these beans before they are actually needed,
@@ -913,9 +912,9 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 			</para>
 			<programlisting><![CDATA[<bean id="exampleBean" class="examples.ExampleBean"
       factory-method="createInstance">
-  <constructor-arg><ref bean="anotherExampleBean"/></constructor-arg>
-  <constructor-arg><ref bean="yetAnotherBean"/></constructor-arg>
-  <constructor-arg><value>1</value></constructor-arg>
+  <constructor-arg ref="anotherExampleBean"/>
+  <constructor-arg ref="yetAnotherBean"/>
+  <constructor-arg value="1"/> 
 </bean>
 
 <bean id="anotherExampleBean" class="examples.AnotherBean"/>
@@ -1018,8 +1017,8 @@ public class ExampleBean {
 				with simple types by explicitly specifying the type of the constructor
 				argument using the <literal>'type'</literal> attribute. For example:</para>
 				<programlisting><![CDATA[<bean id="exampleBean" class="examples.ExampleBean">
-  <constructor-arg type="int"><value>7500000</value></constructor-arg>
-  <constructor-arg type="java.lang.String"><value>42</value></constructor-arg>
+  <constructor-arg type="int" value="7500000"/>
+  <constructor-arg type="java.lang.String" value="42"/>
 </bean>]]></programlisting>
             </section>
             <section>
@@ -1100,8 +1099,8 @@ public class ExampleBean {
         no validation is performed on the value that is passed to the
         <literal>'targetName'</literal> property of the <literal>'client'</literal>
         bean. Any typo will only be discovered (with most likely fatal results)
-        when the <literal>'client'</literal> bean is actually instantiated...
-        if the <literal>'client'</literal> bean is a
+        when the <literal>'client'</literal> bean is actually instantiated.
+        If the <literal>'client'</literal> bean is a
         <link linkend="beans-factory-scopes">prototype</link> bean, this typo
         (and the resulting exception) may only be discovered long after the
         container is actually deployed.</para>
@@ -1626,9 +1625,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 			force one or more beans to be initialized before the bean using this
 			element is initialized. Find below an example of using the
 			<literal>'depends-on'</literal> attribute to express a dependency on a single bean.</para>
-            <programlisting><![CDATA[<bean id="beanOne" class="ExampleBean" depends-on="manager">
-  <property name="manager" ref="manager" />
-</bean>
+            <programlisting><![CDATA[<bean id="beanOne" class="ExampleBean" depends-on="manager"/>
 
 <bean id="manager" class="ManagerBean" />]]></programlisting>
             <para>If you need to express a dependency on multiple beans, you can supply a
@@ -1661,7 +1658,7 @@ public class ReplacementComputeValue implements MethodReplacer {
             is first requested.</para>
             <para>When one is configuring beans via XML, this lazy loading is controlled by the
             <literal>'lazy-init'</literal> attribute on the <literal>&lt;bean/&gt;</literal>
-            element; to wit...</para>
+            element; to wit:</para>
             <programlisting><![CDATA[<bean id="lazy" class="com.foo.ExpensiveToCreateBean" ]]><emphasis role="bold">lazy-init="true"</emphasis><![CDATA[>
     ]]><lineannotation>&lt;!-- various properties here... --&gt;</lineannotation><![CDATA[
 </bean>
@@ -2033,16 +2030,12 @@ public class ReplacementComputeValue implements MethodReplacer {
 			Four (GoF) patterns book. The classic GoF Singleton hardcodes the scope of
 			an object such that one <emphasis>and only one</emphasis> instance of a
 			particular class will ever be created<emphasis> per
-			<classname>ClassLoader</classname></emphasis>.</para>
-			<para>The scope of the Spring singleton is best described as
-			<emphasis>per <interfacename>container</interfacename> and per bean</emphasis>.
-			This means that if you define one bean for a particular class in a single
-			Spring container, then the Spring container will create one
+			<classname>ClassLoader</classname></emphasis>. The scope of the Spring singleton
+			is best described as <emphasis>per <interfacename>container</interfacename>
+			and per bean</emphasis>. This means that if you define one bean for a particular
+			class in a single Spring container, then the Spring container will create one
 			<emphasis>and only one</emphasis> instance of the class defined by that
-			bean definition. This also means that you can define more than one bean
-			definition for a single class, and then Spring will create exactly two
-			instances of that particular class, each with their own particular
-			configuration.</para>
+			bean definition.</para>
 		    <para><emphasis>The singleton scope is the default scope in Spring</emphasis>.
 		    To define a bean as a singleton in XML, you would write configuration like so:</para>
 		    <programlisting><![CDATA[<bean id="accountService" class="com.foo.DefaultAccountService"/>
@@ -2520,11 +2513,10 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
                         and <interfacename>DisposableBean</interfacename> callback interfaces,
                         one (in the experience of this author) typically finds oneself writing
                         methods with names such as <literal>init()</literal>,
-                        <literal>initialize()</literal>, <literal>dispose()</literal>,
-                        <literal>destroy()</literal>, etc. The names of such lifecycle callback
-                        methods are (hopefully!) standardized across a project so that developers
-                        on a team all use the same method names and thus ensure some level of
-                        consistency.
+                        <literal>initialize()</literal>, <literal>dispose()</literal>, etc. The
+                        names of such lifecycle callback methods are (hopefully!) standardized
+                        across a project so that developers on a team all use the same method
+                        names and thus ensure some level of consistency.
                     </para>
                     <para>
                         The Spring container can now be configured to <literal>'look'</literal>
@@ -2836,8 +2828,9 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
         <para>The remaining settings will <emphasis>always</emphasis> be taken
         from the child definition: <emphasis>depends on</emphasis>,
         <emphasis>autowire mode</emphasis>, <emphasis>dependency check</emphasis>,
-        <emphasis>singleton</emphasis>, <emphasis>lazy init</emphasis>.</para>
-        <para>Note that in the example above, we have explicitly marked the parent
+        <emphasis>singleton</emphasis>, <emphasis>scope</emphasis>,
+		<emphasis>lazy init</emphasis>.</para>
+		<para>Note that in the example above, we have explicitly marked the parent
         bean definition as <emphasis>abstract</emphasis> by using the
         <emphasis>abstract</emphasis> attribute. In the case that the parent
         definition does not specify a class:</para>
@@ -2854,10 +2847,11 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
 </bean>]]></programlisting>
 
         <para>The parent bean cannot get instantiated on its own since it is
-        incomplete, and it is also defined as abstract. When a definition is
-        defined to be abstract like this (explicitly or implicitly), it is
-        usable only as a pure template bean definition that will serve as parent
-        definition for child definitions. Trying to use such an abstract parent
+        incomplete, and it is also implicitly <literal>abstract</literal>. When a
+		definition is defined to be <literal>abstract</literal> like this
+		(explicitly or implicitly), it is usable only as a pure template bean
+		definition that will serve as parent definition for child definitions.
+		Trying to use such an <literal>abstract</literal> parent
         bean on its own (by referring to it as a ref property of another bean, or
         doing an explicit <methodname>getBean()</methodname> call with the parent
         bean id), will result in an error. Similarly, the container's internal
@@ -2940,7 +2934,7 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
             as post-processors, to be then called appropriately by the container on bean creation. Nothing
             else needs to be done other than deploying the post-processor in a similar fashion to any
             other bean. On the other hand, when using a <interfacename>BeanFactory</interfacename>
-            implementation, bean post-processors explcitly have to be registered, with code like this:</para>
+            implementation, bean post-processors explicitly have to be registered, with code like this:</para>
             <programlisting><![CDATA[ConfigurableBeanFactory factory = new XmlBeanFactory(...);
             
     ]]><lineannotation>// now register any needed <interfacename>BeanPostProcessor</interfacename> instances</lineannotation><![CDATA[
@@ -3278,7 +3272,7 @@ dataSource.url=jdbc:mysql:mydb]]></programlisting>
         <itemizedlist>
                 <listitem>
                     <para><interfacename>MessageSource</interfacename>, providing access to
-                    messages in, i18n-style</para>
+                    messages in i18n-style</para>
                 </listitem>
                 <listitem>
                     <para><emphasis>Access to resources</emphasis>, such as URLs and files</para>
@@ -3305,7 +3299,7 @@ dataSource.url=jdbc:mysql:mydb]]></programlisting>
             <para>The <interfacename>ApplicationContext</interfacename> interface extends an interface called
             <interfacename>MessageSource</interfacename>, and therefore provides messaging (i18n
             or internationalization) functionality. Together with the
-            <classname>NestingMessageSource</classname>, capable of resolving
+            <classname>HierarchicalMessageSource</classname>, capable of resolving
             hierarchical messages, these are the basic interfaces Spring provides to
             do message resolution. Let's quickly review the methods defined there:</para>
             <itemizedlist>
@@ -3401,13 +3395,36 @@ argument.required=The '{0}' argument is required.]]></programlisting>
         to the message lookup; these arguments will be converted into strings and inserted
         into placeholders in the lookup message. This is perhaps best explained with an
         example:</para>
-            <programlisting><![CDATA[public static void main(final String[] args) {
-    MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
-    String message = resources.getMessage("argument.required",
-        new Object [] {"userDao"}, "Required", null);
-    System.out.println(message);
+            <programlisting><![CDATA[<beans>
+
+    ]]><lineannotation>&lt;!-- this <interfacename>MessageSource</interfacename> is being used in a web application --&gt;</lineannotation><![CDATA[
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="baseName" value="WEB-INF/test-messages"/>
+    </bean>
+    
+    ]]><lineannotation>&lt;!-- let's inject the above <interfacename>MessageSource</interfacename> into this POJO --&gt;</lineannotation><![CDATA[
+    <bean id="example" class="com.foo.Example">
+        <property name="messages" ref="messageSource"/>
+    </bean>
+
+</beans>]]></programlisting>
+            <programlisting><![CDATA[public class Example {
+
+    private MessageSource messages;
+
+    public void setMessages(MessageSource messages) {
+        this.messages = messages;
+    }
+
+    public void execute() {
+        String message = this.messages.getMessage("argument.required",
+            new Object [] {"userDao"}, "Required", null);
+        System.out.println(message);
+    }
+
 }]]></programlisting>
-            <para>The resulting output from the running of the above program will be...</para>
+            <para>The resulting output from the invocation of the <methodname>execute()</methodname>
+            method will be...</para>
             <programlisting><![CDATA[The 'userDao' argument is required.]]></programlisting>
             <para>With regard to internationalization (i18n), Spring's various
         <classname>MessageResource</classname> implementations follow the same locale resolution
@@ -3646,7 +3663,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 			<literal>contextConfigLocation</literal> parameter. If it doesn't exist,
 			it'll use <literal>/WEB-INF/applicationContext.xml</literal> as a default.
 			When it <emphasis>does</emphasis> exist, it'll separate the String using
-			predefined delimiters (comma, semi-colon and space) and use the values as
+			predefined delimiters (comma, semi-colon and whitespace) and use the values as
 			locations where application contexts will be searched for. The
 			<classname>ContextLoaderServlet</classname> can - as said - be used
 			instead of the <classname>ContextLoaderListener</classname>. The servlet
