@@ -48,7 +48,7 @@ public abstract class JmsUtils {
 
 	/**
 	 * Close the given JMS Connection and ignore any thrown exception.
-	 * This is useful for typical finally blocks in manual JMS code.
+	 * This is useful for typical <code>finally</code> blocks in manual JMS code.
 	 * @param con the JMS Connection to close (may be <code>null</code>)
 	 */
 	public static void closeConnection(Connection con) {
@@ -57,14 +57,18 @@ public abstract class JmsUtils {
 				con.close();
 			}
 			catch (JMSException ex) {
-				logger.warn("Could not close JMS Connection", ex);
+				logger.debug("Could not close JMS Connection", ex);
+			}
+			catch (Throwable ex) {
+				// We don't trust the JMS provider: It might throw RuntimeException or Error.
+				logger.debug("Unexpected exception on closing JMS Connection", ex);
 			}
 		}
 	}
 
 	/**
 	 * Close the given JMS Session and ignore any thrown exception.
-	 * This is useful for typical finally blocks in manual JMS code.
+	 * This is useful for typical <code>finally</code> blocks in manual JMS code.
 	 * @param session the JMS Session to close (may be <code>null</code>)
 	 */
 	public static void closeSession(Session session) {
@@ -73,14 +77,18 @@ public abstract class JmsUtils {
 				session.close();
 			}
 			catch (JMSException ex) {
-				logger.warn("Could not close JMS Session", ex);
+				logger.debug("Could not close JMS Session", ex);
+			}
+			catch (Throwable ex) {
+				// We don't trust the JMS provider: It might throw RuntimeException or Error.
+				logger.debug("Unexpected exception on closing JMS Session", ex);
 			}
 		}
 	}
 
 	/**
 	 * Close the given JMS MessageProducer and ignore any thrown exception.
-	 * This is useful for typical finally blocks in manual JMS code.
+	 * This is useful for typical <code>finally</code> blocks in manual JMS code.
 	 * @param producer the JMS MessageProducer to close (may be <code>null</code>)
 	 */
 	public static void closeMessageProducer(MessageProducer producer) {
@@ -89,14 +97,18 @@ public abstract class JmsUtils {
 				producer.close();
 			}
 			catch (JMSException ex) {
-				logger.warn("Could not close JMS MessageProducer", ex);
+				logger.debug("Could not close JMS MessageProducer", ex);
+			}
+			catch (Throwable ex) {
+				// We don't trust the JMS provider: It might throw RuntimeException or Error.
+				logger.debug("Unexpected exception on closing JMS MessageProducer", ex);
 			}
 		}
 	}
 
 	/**
 	 * Close the given JMS MessageConsumer and ignore any thrown exception.
-	 * This is useful for typical finally blocks in manual JMS code.
+	 * This is useful for typical <code>finally</code> blocks in manual JMS code.
 	 * @param consumer the JMS MessageConsumer to close (may be <code>null</code>)
 	 */
 	public static void closeMessageConsumer(MessageConsumer consumer) {
@@ -105,7 +117,11 @@ public abstract class JmsUtils {
 				consumer.close();
 			}
 			catch (JMSException ex) {
-				logger.warn("Could not close JMS MessageConsumer", ex);
+				logger.debug("Could not close JMS MessageConsumer", ex);
+			}
+			catch (Throwable ex) {
+				// We don't trust the JMS provider: It might throw RuntimeException or Error.
+				logger.debug("Unexpected exception on closing JMS MessageConsumer", ex);
 			}
 		}
 	}
