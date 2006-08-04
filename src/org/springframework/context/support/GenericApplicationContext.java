@@ -143,7 +143,6 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 */
 	public void setParent(ApplicationContext parent) {
 		super.setParent(parent);
-		Assert.state(this.beanFactory != null, "BeanFactory not initialized yet");
 		this.beanFactory.setParentBeanFactory(getInternalParentBeanFactory());
 	}
 
@@ -217,6 +216,10 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * Return the single internal BeanFactory held by this context.
 	 */
 	public ConfigurableListableBeanFactory getBeanFactory() {
+		if (!isActive()) {
+			throw new IllegalStateException("BeanFactory not initialized or already closed - " +
+					"call 'refresh' before accessing beans via the ApplicationContext");
+		}
 		return this.beanFactory;
 	}
 

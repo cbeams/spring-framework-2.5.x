@@ -524,6 +524,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 
+	public synchronized boolean isActive() {
+		return this.active;
+	}
+
 	/**
 	 * Register a shutdown hook with the JVM runtime, closing this context
 	 * on JVM shutdown unless it has already been closed at that time.
@@ -564,7 +568,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #doClose()
 	 * @see #registerShutdownHook()
 	 */
-	public void close() {
+	public synchronized void close() {
 		doClose();
 		// If we registered a JVM shutdown hook, we don't need it anymore now:
 		// We've already explicitly closed the context.
@@ -601,6 +605,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 			this.active = false;
 		}
+	}
+
+	/**
+	 * Template method which can be overridden to add context-specific shutdown work.
+	 * Called at the end of <code>doClose</code>'s shutdown procedure.
+	 * @see #doClose
+	 */
+	protected void onClose() {
+		// For subclasses: do nothing by default.
 	}
 
 
