@@ -748,7 +748,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
             and you want to apply <emphasis>totally different</emphasis> transactional semantics
             to each group of those objects. You can effect this in Spring by defining
             any number of distinct <literal>&lt;aop:advisor/&gt;</literal> elements
-            with differing <literal>'pointcut'</literal> and <emphasis>'advice-ref'</emphasis>
+            with differing <literal>'pointcut'</literal> and <literal>'advice-ref'</literal>
             attribute values.</para>
             <para>By way of an example, let's assume that all of your service layer classes
             are defined in a root <literal>'x.y.service'</literal> package. To make all
@@ -1074,7 +1074,7 @@ public class SimpleProfiler implements Ordered {
 
     <bean id="fooService" class="x.y.service.DefaultFooService"/>
 
-    ]]><lineannotation>&lt;!--  --&gt;</lineannotation><![CDATA[
+    ]]><lineannotation>&lt;!-- this is the aspect --&gt;</lineannotation><![CDATA[
     <bean id="profiler" class="x.y.SimpleProfiler">
         ]]><lineannotation>&lt;!-- execute before the transactional advice (hence the lower order number) --&gt;</lineannotation><![CDATA[
         <property name="order" value="1"/>
