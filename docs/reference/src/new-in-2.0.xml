@@ -8,11 +8,12 @@
     be aware that Spring has just undergone a major revision.</para>
 
     <sidebar>
-      <title>Backported features</title>
-      <para>Some of the new and improved functionality described below has
-      been (or will be) backported into the Spring 1.2.x release line.</para>
-      <para>Please do consult the changelogs for the 1.2.x releases to see if
-      a feature has been backported.</para>
+      <title>JDK Support</title>
+      <para>Please be advised that the Spring Framework continues to be
+      totally compatible with all versions of Java since (and including)
+      Java 1.3. This means that 1.3, 1.4, and 1.5 are supported, although
+      some advanced functionality of the Spring Framework may not be
+      available to you if you are (for example) committed to using Java 1.3.</para>
     </sidebar>
 
     <para>This revision includes a host of new features, and a lot of the
@@ -27,6 +28,11 @@
     architects and developers can become immediately familiar with the new Spring 2.0 
     functionality. For more in-depth information on the features, please refer to the
     corresponding sections hyperlinked from within this chapter.</para>
+    
+    <para>Some of the new and improved functionality described below has
+    been (or will be) backported into the Spring 1.2.x release line.</para>
+    <para>Please do consult the changelogs for the 1.2.x releases to see if
+    a feature has been backported.</para>
   </section>
 
   <section id="new-in-2-ioc">
