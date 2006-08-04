@@ -3,8 +3,8 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 RC3 (29.7.2006)
---------------------------------------
+Changes in version 2.0 RC3 (7.8.2006)
+-------------------------------------
 
 General
 * spring.jar does not include Portlet support anymore (add spring-portlet.jar to your classpath if needed)
@@ -19,12 +19,21 @@ Package org.springframework.beans
 * fixed BeanWrapperImpl to properly catch and wrap conversion failures for map keys/values in TypeMismatchExceptions
 * introduced TypeConverter interface, implemented by BeanWrapperImpl, plus separate SimpleTypeConverter implementation
 * reworked ArgumentConvertingMethodInvoker to use a TypeConverter and allow the converter to be accessed/overridden
-* added default type conversion of any type to String target type via a "toString()" call
+* BeanFactoryUtils returns bean names in order of definition even for merged name arrays (in case of ancestor factories)
+* redefined BeanFactoryUtils' "countBeans/beanNamesIncludingAncestors" to build on "getBeanNamesOfType(Object.class)"
 * fixed AbstractBeanFactory to only invoke BeanPostProcessor for objects returned from FactoryBeans if non-null
 * fixed AbstractBeanFactory to throw BeanCurrentlyInCreationException on null from non-fully-initialized FactoryBean
 * AbstractAutowireCapableBeanFactory detects whether it injected raw instances of beans that eventually got wrapped
-* BeanFactoryUtils returns bean names in order of definition even for merged name arrays (in case of ancestor factories)
-* redefined BeanFactoryUtils' "countBeans/beanNamesIncludingAncestors" to build on "getBeanNamesOfType(Object.class)"
+* DefaultListableBeanFactory's non-eager lookup by type finds matches for lazy-init beans as long as class is loadable
+* added "setAllowEagerClassLoading" method to DefaultLisableBeanFactory, to allow for turning off eager class loading
+* restored Spring 1.2 compatibility for default-lazy-init="true", with respect to detection of special beans by type
+
+Package org.springframework.context
+* added "isActive()" method to the ConfigurableApplicationContext interface
+* ApplicationContexts forbid access to the underlying BeanFactory before "refresh()" and after "close()"
+
+Package org.springframework.core
+* fixed PathMatchingResourcePatternResolver to prevent eternal recursion in case of invalid prefix with pattern symbols
 
 Package org.springframework.jdbc
 * worked around "oracle.sql.DATE" problem on certain Oracle driver versions, extracting it as timestamp when appropriate
@@ -32,13 +41,22 @@ Package org.springframework.jdbc
 * factored out Spring/JtaLobCreatorSynchronization classes from Hibernate AbstractLobType to "jdbc.support.lob" package
 
 Package org.springframework.jms
-* AbstractMessageListenerContainer exposes Connection/Session to allow JmsTemplate to participate in local transactions
-* added "taskExecutor" bean property to SimpleMessageListenerContainer, allowing to execute listener in different thread
+* JmsTransactionManager starts the transactional Session's Connection early (at transaction begin) rather than on demand
+* optimized JmsTemplate's resource handling to reuse the obtained JMS Connection/Session within a JTA transaction
+* added "clientId" property to SingleConnectionFactory(102), for assigning a client id to the underlying Connection
+* added "clientId" property to AbstractMessageListenerContainer, for assigning a client id to the underlying Connection
+* AbstractMessageListenerContainer supports individual Connections per listener as alternative to a shared Connection
+* DefaultMessageListenerContainer obtains all JMS resources fresh by default in case of "transactionManager" specified
+* added "cacheLevel"/"cacheLevelName" property to DefaultMessageListenerContainer, for overriding the default caching
+* DefaultMessageListenerContainer is able to recover from a broken Connection (both with and without cached Connection)
+* DefaultMessageListenerContainer waits until all listener tasks have completed before returning from "destroy"
+* added "taskExecutor" property to SimpleMessageListenerContainer, allowing to execute listener in different thread
 * added protected "buildListenerArguments" template method to MessageListenerAdapter, allowing for multiple arguments
 
 Package org.springframework.orm
 * refined iBATIS SqlMapClientTemplate to allow for nested calls to same SqlMapSession (checking "getCurrentConnection")
 * reworked Hibernate JTA synch to expose beforeCompletion exceptions to the caller (via SpringJtaSynchronizationAdapter)
+* Hibernate3 LocalSessionFactoryBean implements the PersistenceExceptionTranslator interface now
 * removed warning for read-only from JdoTransactionManager/JpaTransactionManager, since a vendor dialect may support it
 * factored out overridable "createEntityManager" template methods in OpenEntityManagerInViewFilter/Interceptor
 * SpringPersistenceUnitInfo is public to allow for post-processing in LocalContainerEntityManagerFactoryBean subclass
@@ -49,6 +67,9 @@ Package org.springframework.orm
 Package org.springframework.remoting
 * added "registryClientSocketFactory" bean property to RmiClientInterceptor/RmiProxyFactoryBean
 * added dedicated "prepare()" method to JndiRmiServiceExporter
+
+Package org.springframework.scheduling
+* renamed SchedulingTaskExecutor's "isShortLivedPreferred" method to "prefersShortLivedTasks"
 
 Package org.springframework.transaction
 * added SpringJtaSynchronizationAdapter, exposing JTA Synchronization ifc on top of a Spring TransactionSynchronization
