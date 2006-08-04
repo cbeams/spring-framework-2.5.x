@@ -2122,7 +2122,7 @@ public class Account {
 			prototypical bean definition with the same name as the fully-qualified
 			type name (<classname>com.xyz.myapp.domain.Account</classname>). Since the
 			default name for a bean is the fully-qualified name of its type, a 
-			convenient way to declare the protoype definition is simply to omit the
+			convenient way to declare the prototype definition is simply to omit the
 			id attribute:
 		</para>  
 		  
