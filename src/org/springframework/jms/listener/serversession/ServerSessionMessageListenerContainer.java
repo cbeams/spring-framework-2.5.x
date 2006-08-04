@@ -126,7 +126,7 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 	 * @see #createConsumer
 	 */
 	protected void registerListener() throws JMSException {
-		Connection con = getConnection();
+		Connection con = getSharedConnection();
 		Destination destination = getDestination();
 		if (destination == null) {
 			Session session = createSession(con);
@@ -198,7 +198,7 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 	 * @see #executeListener
 	 */
 	public Session createListenerSession() throws JMSException {
-		final Session session = createSession(getConnection());
+		final Session session = createSession(getSharedConnection());
 
 		session.setMessageListener(new MessageListener() {
 			public void onMessage(Message message) {

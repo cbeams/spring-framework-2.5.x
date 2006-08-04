@@ -152,7 +152,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		this.sessions = new HashSet(this.concurrentConsumers);
 		this.consumers = new HashSet(this.concurrentConsumers);
 		for (int i = 0; i < this.concurrentConsumers; i++) {
-			Session session = createSession(getConnection());
+			Session session = createSession(getSharedConnection());
 			MessageConsumer consumer = createListenerConsumer(session);
 			this.sessions.add(session);
 			this.consumers.add(consumer);
