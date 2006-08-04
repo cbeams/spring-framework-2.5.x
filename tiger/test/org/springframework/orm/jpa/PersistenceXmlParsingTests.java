@@ -16,31 +16,27 @@
 
 package org.springframework.orm.jpa;
 
-import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.persistence.spi.PersistenceUnitInfo;
-import javax.persistence.spi.PersistenceUnitTransactionType;
-import javax.sql.DataSource;
-
 import junit.framework.TestCase;
-
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
+import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.PersistenceUnitTransactionType;
+import javax.sql.DataSource;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 /**
+ * Unit and integration tests for the JPA XML resource parsing support.
+ * 
  * @author Costin Leau
  */
 public class PersistenceXmlParsingTests extends TestCase {
@@ -98,8 +94,7 @@ public class PersistenceXmlParsingTests extends TestCase {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
 		String resource = "/org/springframework/orm/jpa/persistence-example4.xml";
-		PersistenceUnitInfo[] info = null;
-		info = reader.readPersistenceUnitInfos(resource);
+		PersistenceUnitInfo[] info = reader.readPersistenceUnitInfos(resource);
 
 		assertNotNull(info);
 		assertEquals(1, info.length);
@@ -226,8 +221,7 @@ public class PersistenceXmlParsingTests extends TestCase {
 			reader.readPersistenceUnitInfos(resource);
 			fail("expected invalid document exception");
 		}
-		catch (RuntimeException ex) {
-			// okay
+		catch (RuntimeException expected) {
 		}
 	}
 
@@ -239,8 +233,7 @@ public class PersistenceXmlParsingTests extends TestCase {
 			reader.readPersistenceUnitInfos(resource);
 			fail("expected invalid document exception");
 		}
-		catch (RuntimeException ex) {
-			// okay
+		catch (RuntimeException expected) {
 		}
 	}
 
@@ -261,11 +254,9 @@ public class PersistenceXmlParsingTests extends TestCase {
 	public void testDetermineUnitRootUrl() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
-		URL url = null;
 
-		url = reader.determineUnitRootUrl(new ClassPathResource(
+		URL url = reader.determineUnitRootUrl(new ClassPathResource(
 				"/org/springframework/orm/jpa/persistence-no-schema.xml"));
-
 		assertNull(url);
 
 		url = reader.determineUnitRootUrl(new ClassPathResource("/org/springframework/orm/jpa/META-INF/persistence.xml"));
@@ -275,8 +266,7 @@ public class PersistenceXmlParsingTests extends TestCase {
 		ClassPathResource archive = new ClassPathResource("/org/springframework/orm/jpa/jpa-archive.jar");
 		String newRoot = "jar:" + archive.getURL().toExternalForm() + "!/META-INF/persistence.xml";
 		Resource insideArchive = new UrlResource(newRoot);
-		url = reader.determineUnitRootUrl(insideArchive);
-		System.out.println(url);
+		reader.determineUnitRootUrl(insideArchive);
 	}
 
 }
