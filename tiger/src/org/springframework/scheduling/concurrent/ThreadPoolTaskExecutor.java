@@ -190,13 +190,21 @@ public class ThreadPoolTaskExecutor implements SchedulingTaskExecutor, Executor,
 
 
 	/**
+	 * Calls <code>shutdown</code> when the BeanFactory destroys
+	 * the task executor instance.
+	 * @see #shutdown()
+	 */
+	public void destroy() {
+		shutdown();
+	}
+
+	/**
 	 * Perform a shutdown on the ThreadPoolExecutor.
 	 * @see java.util.concurrent.ThreadPoolExecutor#shutdown()
 	 */
-	public void destroy() {
+	public void shutdown() {
 		logger.info("Shutting down ThreadPoolExecutor");
 		this.executorService.shutdown();
 	}
 
 }
-
