@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,13 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.springframework.dao.DataAccessException;
 
 /**
- * Interface that specifies a basic set of Hibernate operations.
- * Implemented by HibernateTemplate. Not often used, but a useful option
- * to enhance testability, as it can easily be mocked or stubbed.
+ * Specifies a basic set of Hibernate operations, implemented by HibernateTemplate.
+ * Not often used, but a useful option to enhance testability, as it can
+ * easily be mocked or stubbed.
  *
  * <p>Provides HibernateTemplate's data access methods that mirror
- * various Session methods. See the Hibernate Session javadocs
- * for details on those methods.
+ * various Session methods. Users are strongly encouraged to read the
+ * Hibernate Session javadocs for details on those methods.
  *
  * <p>Note that operations that return an Iterator (i.e. <code>iterate</code>)
  * are supposed to be used within Spring-driven or JTA-driven transactions
@@ -99,6 +99,10 @@ public interface HibernateOperations {
 	/**
 	 * Return the persistent instance of the given entity class
 	 * with the given identifier, or <code>null</code> if not found.
+	 * <p>This method is a thin wrapper around
+	 * {@link org.hibernate.Session#get(Class, java.io.Serializable)} for convenience.
+	 * For an explanation of the exact semantics of this method, please do refer to
+	 * the Hibernate API documentation in the first instance.
 	 * @param entityClass a persistent class
 	 * @param id an identifier of the persistent instance
 	 * @return the persistent instance, or <code>null</code> if not found
@@ -110,7 +114,11 @@ public interface HibernateOperations {
 	/**
 	 * Return the persistent instance of the given entity class
 	 * with the given identifier, or <code>null</code> if not found.
-	 * Obtains the specified lock mode if the instance exists.
+	 * <p>Obtains the specified lock mode if the instance exists.
+	 * <p>This method is a thin wrapper around
+	 * {@link org.hibernate.Session#get(Class, java.io.Serializable, LockMode)} for convenience.
+	 * For an explanation of the exact semantics of this method, please do refer to
+	 * the Hibernate API documentation in the first instance.
 	 * @param entityClass a persistent class
 	 * @param id an identifier of the persistent instance
 	 * @param lockMode the lock mode to obtain
@@ -124,6 +132,10 @@ public interface HibernateOperations {
 	/**
 	 * Return the persistent instance of the given entity class
 	 * with the given identifier, or <code>null</code> if not found.
+	 * <p>This method is a thin wrapper around
+	 * {@link org.hibernate.Session#get(String, java.io.Serializable)} for convenience.
+	 * For an explanation of the exact semantics of this method, please do refer to
+	 * the Hibernate API documentation in the first instance.
 	 * @param entityName the name of a persistent entity
 	 * @param id an identifier of the persistent instance
 	 * @return the persistent instance, or <code>null</code> if not found
@@ -136,6 +148,10 @@ public interface HibernateOperations {
 	 * Return the persistent instance of the given entity class
 	 * with the given identifier, or <code>null</code> if not found.
 	 * Obtains the specified lock mode if the instance exists.
+	 * <p>This method is a thin wrapper around
+	 * {@link org.hibernate.Session#get(String, java.io.Serializable, LockMode)} for convenience.
+	 * For an explanation of the exact semantics of this method, please do refer to
+	 * the Hibernate API documentation in the first instance.
 	 * @param entityName the name of a persistent entity
 	 * @param id an identifier of the persistent instance
 	 * @param lockMode the lock mode to obtain
@@ -149,6 +165,10 @@ public interface HibernateOperations {
 	/**
 	 * Return the persistent instance of the given entity class
 	 * with the given identifier, throwing an exception if not found.
+	 * <p>This method is a thin wrapper around
+	 * {@link org.hibernate.Session#load(Class, java.io.Serializable)} for convenience.
+	 * For an explanation of the exact semantics of this method, please do refer to
+	 * the Hibernate API documentation in the first instance.
 	 * @param entityClass a persistent class
 	 * @param id an identifier of the persistent instance
 	 * @return the persistent instance
@@ -162,6 +182,10 @@ public interface HibernateOperations {
 	 * Return the persistent instance of the given entity class
 	 * with the given identifier, throwing an exception if not found.
 	 * Obtains the specified lock mode if the instance exists.
+	 * <p>This method is a thin wrapper around
+	 * {@link org.hibernate.Session#load(Class, java.io.Serializable, LockMode)} for convenience.
+	 * For an explanation of the exact semantics of this method, please do refer to
+	 * the Hibernate API documentation in the first instance.
 	 * @param entityClass a persistent class
 	 * @param id an identifier of the persistent instance
 	 * @param lockMode the lock mode to obtain
@@ -176,6 +200,10 @@ public interface HibernateOperations {
 	/**
 	 * Return the persistent instance of the given entity class
 	 * with the given identifier, throwing an exception if not found.
+	 * <p>This method is a thin wrapper around
+	 * {@link org.hibernate.Session#load(String, java.io.Serializable)} for convenience.
+	 * For an explanation of the exact semantics of this method, please do refer to
+	 * the Hibernate API documentation in the first instance.
 	 * @param entityName the name of a persistent entity
 	 * @param id an identifier of the persistent instance
 	 * @return the persistent instance
@@ -188,7 +216,11 @@ public interface HibernateOperations {
 	/**
 	 * Return the persistent instance of the given entity class
 	 * with the given identifier, throwing an exception if not found.
-	 * Obtains the specified lock mode if the instance exists.
+	 * <p>Obtains the specified lock mode if the instance exists.
+	 * <p>This method is a thin wrapper around
+	 * {@link org.hibernate.Session#load(String, java.io.Serializable, LockMode)} for convenience.
+	 * For an explanation of the exact semantics of this method, please do refer to
+	 * the Hibernate API documentation in the first instance.
 	 * @param entityName the name of a persistent entity
 	 * @param id an identifier of the persistent instance
 	 * @param lockMode the lock mode to obtain
@@ -213,6 +245,10 @@ public interface HibernateOperations {
 	/**
 	 * Load the persistent instance with the given identifier
 	 * into the given object, throwing an exception if not found.
+	 * <p>This method is a thin wrapper around
+	 * {@link org.hibernate.Session#load(Object, java.io.Serializable)} for convenience.
+	 * For an explanation of the exact semantics of this method, please do refer to
+	 * the Hibernate API documentation in the first instance.
 	 * @param entity the object (of the target class) to load into
 	 * @param id an identifier of the persistent instance
 	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
