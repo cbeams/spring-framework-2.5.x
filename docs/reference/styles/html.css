@@ -202,12 +202,8 @@ TT {
 
 div.navfooter table {
 	border: dashed gray;
-	border-width: 1px 1px 0px 1px;
+	border-width: 1px 1px 1px 1px;
 	background-color: #cde48d;
-}
-
-div.navfooter hr {
-	/**display: none;*/
 }
 
 PRE {

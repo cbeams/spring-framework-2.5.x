@@ -3,14 +3,10 @@
 	<title>Annotations and Source Level Metadata Support</title>
 	<section id="metadata-concepts">
 		<title>Introduction</title>
-		<para>
-			Source-level metadata is the addition of <emphasis>attributes</emphasis> or
-			<emphasis>annotations</emphasis> to program elements - usually, classes
-			and/or methods.
-		</para>
-		<para>
-			For example, we might add metadata to a class as follows:
-		</para>
+		<para>Source-level metadata is the addition of <emphasis>attributes</emphasis> or
+		<emphasis>annotations</emphasis> to program elements - usually, classes
+		and/or methods.</para>
+		<para>For example, we might add metadata to a class as follows:</para>
 		<programlisting><![CDATA[/**
  * Normal comments here
  * @@org.springframework.transaction.interceptor.DefaultTransactionAttribute()
@@ -56,78 +52,66 @@ public void echoException(Exception ex) throws Exception {
 		<itemizedlist>
 			<listitem>
 				<para><emphasis role="bold">Standard Java Annotations</emphasis>: the
-        standard Java metadata implementation (developed as JSR-175 and
-        available in Java 5. Spring already supports specific Java 5
-        Annotations for transactional demarcation and for JMX. However, we need a
-        solution for Java 1.4 and even 1.3, too. Spring metadata support provides such a solution.</para>
+                standard Java metadata implementation (developed as JSR-175 and available
+                in Java 5). Spring has specific Java 5 annotations for transactional
+                demarcation, JMX, and aspects (to be precise they are AspectJ annotations).
+                However, since Spring supports both Java 1.3 and 1.4 a solution for said
+                JVM versions is needed too. Spring metadata support provides such a
+                solution.</para>
 			</listitem>
 			<listitem>
 				<para><emphasis role="bold">XDoclet</emphasis>: well-established
-        solution, primarily intended for code generation.</para>
+                solution, primarily intended for code generation.</para>
 			</listitem>
 			<listitem>
 				<para>Various <emphasis role="bold">open source attribute
-        implementations</emphasis>, for Java 1.3 and 1.4, of which Commons
-        Attributes appears to be the most promising. All these require a
-        special pre- or post-compilation step.</para>
+                implementations</emphasis>, for Java 1.3 and 1.4, of which Commons
+                Attributes is the most complete implementation. All these require a
+                special pre- or post-compilation step.</para>
 			</listitem>
 		</itemizedlist>
 	</section>
 	<section id="metadata-spring">
 		<title>Spring's metadata support</title>
-		<para>
-			In keeping with its provision of abstractions over important
-			concepts, Spring provides a facade to metadata implementations, in the
-			form of the <interfacename>org.springframework.metadata.Attributes</interfacename>
-			interface.
-		</para>
-		<para>
-			Such a facade adds value for several reasons:
-		</para>
+		<para>In keeping with its provision of abstractions over important
+		concepts, Spring provides a facade to metadata implementations, in the
+		form of the <interfacename>org.springframework.metadata.Attributes</interfacename>
+		interface. Such a facade adds value for several reasons:</para>
 		<itemizedlist>
 			<listitem>
-				<para>
-					Even though Java 5 provides metadata support at language level, there will
-					still be value in providing such an abstraction:
+				<para>Even though Java 5 provides metadata support at language level, there will
+                still be value in providing such an abstraction:
 				</para>
 				<itemizedlist>
 					<listitem>
-						<para>
-							Java 5 metadata is static. It is associated with a class
-							at compile time, and cannot be changed in a deployed
-							environment. There is a need for hierarchical metadata,
-							providing the ability to override certain attribute values in
-							deployment - for example, in an XML file.
-						</para>
+						<para>Java 5 metadata is static. It is associated with a class
+						at compile time, and cannot be changed in a deployed
+						environment (annotation state can actually be changed
+						at runtime using reflection, but doing so would really be
+						a bad practice). There is a need for hierarchical metadata,
+						providing the ability to override certain attribute values in
+						deployment - for example, in an XML file.</para>
 					</listitem>
 					<listitem>
-						<para>
-							Java 5 metadata is returned through the Java reflection
-							API. This makes it impossible to mock during test time. Spring
-							provides a simple interface to allow this.
-						</para>
+						<para>Java 5 metadata is returned through the Java reflection
+						API. This makes it impossible to mock during test time. Spring
+						provides a simple interface to allow this.</para>
 					</listitem>
 					<listitem>
-						<para>
-							There will be a need for metadata support in 1.3 and 1.4
-							applications for at least two years. Spring aims to provide
-							working solutions <emphasis>now</emphasis>; forcing the use of
-							Java 5 is not an option in such an important area.
-						</para>
+						<para>There will be a need for metadata support in 1.3 and 1.4
+						applications for at least two years. Spring aims to provide
+						working solutions <emphasis>now</emphasis>; forcing the use of
+						Java 5 is not an option in such an important area.</para>
 					</listitem>
 				</itemizedlist>
 			</listitem>
 			<listitem>
-				<para>
-					Current metadata APIs, such as Commons Attributes (used by
-					Spring 1.0-1.2) are hard to test. Spring provides a simple metadata
-					interface that is much easier to mock.
-				</para>
+				<para>Current metadata APIs, such as Commons Attributes (used by
+				Spring 1.0-1.2) are hard to test. Spring provides a simple metadata
+				interface that is much easier to mock.</para>
 			</listitem>
 		</itemizedlist>
-		<para>
-			The Spring <interfacename>Attributes</interfacename> interface looks like this:
-		</para>
+		<para>The Spring <interfacename>Attributes</interfacename> interface looks like this:</para>
 		<programlisting><![CDATA[public interface Attributes {
 
     Collection getAttributes(Class targetClass);
@@ -146,34 +130,31 @@ public void echoException(Exception ex) throws Exception {
 			This is a lowest common denominator interface. JSR-175 offers more
 			capabilities than this, such as attributes on method arguments. As of
 			Spring 1.0, Spring aimed to provide the subset of metadata required to
-			provide effective declarative enterprise services a la EJB or .NET, on
-			Java 1.3+. As of Spring 1.2, analogous JSR-175 annotations are supported
-			on JDK 1.5, as a direct alternative to Commons Attributes.
+			provide effective declarative enterprise services in the vein of EJB
+			or .NET, on Java 1.3+. As of Spring 1.2, analogous Java 5 annotations
+			are also supported, as a direct alternative to Commons Attributes.
 		</para>
 		<para>
 			Note that this interface offers <classname>Object</classname>
 			attributes, like .NET. This distinguishes it from attribute systems such
 			as that of Nanning Aspects, which offer only <classname>String</classname>
 			attributes. There is a significant advantage in supporting
-			<classname>Object</classname> attributes. It enables attributes to
-			participate in class hierarchies and allows such attributes to react
-			intelligently to their configuration parameters.
+			<classname>Object</classname> attributes, namely that it enables
+			attributes to participate in class hierarchies and allows such
+			attributes to react intelligently to their configuration parameters.
 		</para>
 		<para>
 			With most attribute providers, attribute classes are configured
 			via constructor arguments or JavaBean properties. Commons Attributes
 			supports both.
 		</para>
-		<para>
-			As with all Spring abstraction APIs, <interfacename>Attributes</interfacename>
-			is an interface. This makes it easy to mock attribute implementations for
-			unit tests.
-		</para>
+		<para>As with all Spring abstraction APIs, <interfacename>Attributes</interfacename>
+		is an interface. This makes it easy to mock attribute implementations for unit tests.</para>
 	</section>
 	<section id="metadata-annotations">
 		<title>Annotations</title>
 		<para>
-			Spring has a number of custom <interfacename>Annotations</interfacename>.
+			Spring has a number of custom (Java5+) annotations.
 		</para>
 		<section id="metadata-annotations-required">
 			<title>@<interfacename>Required</interfacename></title>
@@ -187,10 +168,7 @@ public void echoException(Exception ex) throws Exception {
 				<classname>Exception</classname> must (and will) be thrown by
 				the container at runtime.
 			</para>
-			<para>
-				The best way to illustrate the usage of this annotation is to
-				simply show an example:
-			</para>
+			<para>The best way to illustrate the usage of this annotation is simply to show an example:</para>
 			<programlisting><![CDATA[public class SimpleMovieLister {
 
     ]]><lineannotation>// the <classname>SimpleMovieLister</classname> has a dependency on the <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
@@ -217,7 +195,7 @@ public void echoException(Exception ex) throws Exception {
 				<emphasis role="bold">not</emphasis> pass validation.
 			</para>
 			<programlisting><![CDATA[<bean id="movieLister" class="x.y.SimpleMovieLister">
-    ]]><lineannotation>&lt;!-- whoops, no MovieFinder is set (and this property is '@Required') --&gt;</lineannotation><![CDATA[
+    ]]><lineannotation>&lt;!-- whoops, no MovieFinder is set (and this property is @<interfacename>Required</interfacename>) --&gt;</lineannotation><![CDATA[
 </bean>]]></programlisting>
 			<para>
 				At runtime the following message will be generated by the Spring container
@@ -433,9 +411,6 @@ public void echoException(Exception ex) throws Exception {
 			supported out of the box by the framework, as in the case of declarative
 			transaction management, or can be custom.
 		</para>
-		<para>
-			It is a widely held belief that there exists a synergy between AOP and metadata attributes.
-		</para>
 		<section>
 			<title>Fundamentals</title>
 			<para>
@@ -480,7 +455,7 @@ public void echoException(Exception ex) throws Exception {
 				transaction management based on attributes.
 			</para>
 			<para>
-				It's possible to add arbitrary custom advisor implementations as
+				It is possible to add arbitrary custom advisor implementations as
 				well, and they will also be evaluated and applied automatically. (You
 				can use advisors whose pointcuts match on criteria besides attributes in
 				the same autoproxy configuration, if necessary.)
@@ -497,28 +472,23 @@ public void echoException(Exception ex) throws Exception {
 			<title>Declarative transaction management</title>
 			<para>
 				The most common use of source-level attributes is to provide
-				declarative transaction management a la .NET. Once the bean definitions
+				declarative transaction management. Once the bean definitions
 				shown above are in place, you can define any number of application
 				objects requiring declarative transactions. Only those classes or
 				methods with transaction attributes will be given transaction advice.
 				You need to do nothing except define the required transaction
 				attributes.
 			</para>
-			<para>
-				<emphasis>Unlike</emphasis> in .NET, you can specify transaction
-				attributes at either class or method level. Class-level attributes, if
-				specified, will be "inherited" by all methods. Method attributes will
-				wholly override any class-level attributes.
-			</para>
+			<para>Please note that you can specify transaction attributes at either class
+			or method level. Class-level attributes, if specified, will be "inherited"
+			by all methods whereas method attributes will wholly override any
+			class-level attributes.</para>
 		</section>
 		<section id="metadata-pool">
 			<title>Pooling</title>
-			<para>
-				Again, as with .NET, you can enable pooling behavior via
-				class-level attributes. Spring can apply this behavior to any POJO. You
-				simply need to specify a pooling attribute, as follows, in the business
-				object to be pooled:
-			</para>
+			<para>You can also enable pooling behavior via class-level attributes. Spring
+			can apply this behavior to any POJO. You simply need to specify a pooling
+			attribute, as follows, in the business object to be pooled:</para>
 			<programlisting><![CDATA[ /** 
  * @@org.springframework.aop.framework.autoproxy.target.PoolingAttribute(10)
  */

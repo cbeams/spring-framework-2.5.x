@@ -832,7 +832,7 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 				all of its dependencies will be set, and the relevant lifecycle methods (such as
 				a <link linkend="beans-factory-lifecycle-initializingbean">configured init method</link>
 				or the
-				<link linkend="beans-factory-lifecycle-initializingbean">IntializingBean callback method</link>
+				<link linkend="beans-factory-lifecycle-initializingbean">IntializingBean callback method</link>)
 				will all be invoked.
 			</para>
 		<section id="beans-some-examples">
