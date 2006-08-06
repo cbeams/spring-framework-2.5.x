@@ -26,6 +26,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.BeanCreationNotAllowedException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
@@ -71,6 +72,9 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
 	/** Names of beans that are currently in creation */
 	private final Set singletonsCurrentlyInCreation = Collections.synchronizedSet(new HashSet());
+
+	/** Flag that indicates whether we're currently within destroySingletons */
+	private boolean singletonsCurrentlyInDestruction = false;
 
 	/** Disposable bean instances: bean name --> disposable instance */
 	private final Map disposableBeans = CollectionFactory.createLinkedMapIfPossible(16);
@@ -124,6 +128,11 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 			// Re-check singleton cache within synchronized block.
 			Object sharedInstance = this.singletonCache.get(beanName);
 			if (sharedInstance == null) {
+				if (this.singletonsCurrentlyInDestruction) {
+					throw new BeanCreationNotAllowedException(beanName,
+							"Singleton bean creation not allowed while the singletons of this factory are in destruction " +
+							"(Do not request a bean from a BeanFactory in a destroy method implementation!)");
+				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
 				}
@@ -260,13 +269,17 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 			logger.info("Destroying singletons in {" + this + "}");
 		}
 		synchronized (this.singletonCache) {
-			synchronized (this.disposableBeans) {
-				String[] disposableBeanNames = StringUtils.toStringArray(this.disposableBeans.keySet());
-				for (int i = disposableBeanNames.length - 1; i >= 0; i--) {
-					destroySingleton(disposableBeanNames[i]);
-				}
+			this.singletonsCurrentlyInDestruction = true;
+		}
+		synchronized (this.disposableBeans) {
+			String[] disposableBeanNames = StringUtils.toStringArray(this.disposableBeans.keySet());
+			for (int i = disposableBeanNames.length - 1; i >= 0; i--) {
+				destroySingleton(disposableBeanNames[i]);
 			}
+		}
+		synchronized (this.singletonCache) {
 			this.singletonCache.clear();
+			this.singletonsCurrentlyInDestruction = false;
 		}
 	}
 
