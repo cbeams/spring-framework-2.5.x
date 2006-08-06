@@ -178,13 +178,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 </bean>]]></programlisting>
                     <para>
 			            It is also possible to access a non-static (instance) field of another bean,
-			            as described in the
-			            <ulink url="http://www.springframework.org/docs/api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html">API documentation for the <classname>FieldRetrievingFactoryBean</classname></ulink>
+			            as described in the API documentation for the 
+			            <ulink url="http://www.springframework.org/docs/api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html"><classname>FieldRetrievingFactoryBean</classname></ulink>
 			            class.
 		            </para>
                     <para>
 			            Injecting enum values into beans as either property or constructor arguments is very
-			            easy to do in Spring, in that one doesn't actually have to <emphasis>do</emphasis>
+			            easy to do in Spring, in that you don't actually have to <emphasis>do</emphasis>
 			            anything or know anything about the Spring internals (or even about classes such
 			            as the <classname>FieldRetrievingFactoryBean</classname>). Let's look at an example
 			            to see how easy injecting an enum value is; consider this JDK 5 enum:
@@ -294,8 +294,8 @@ public class Client {
 		            <programlisting><lineannotation>&lt;!-- will result in 10, which is the value of property 'age' of bean 'person' --&gt;</lineannotation><![CDATA[
 <bean id="person.age"
     class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>]]></programlisting>
-                    <para>This form does mean that there is no choice in the name of the bean,
-		            any reference to it will also have to use the same id, which is the path.
+                <para>This form does mean that there is no choice in the name of the bean.
+		            Any reference to it will also have to use the same id, which is the path.
 		            Of course, if used as an inner bean, there is no need to refer to it at
 		            all:</para>
                     <programlisting><![CDATA[<bean id="..." class="...">
@@ -368,7 +368,7 @@ public class Client {
                 <para>Finally, you can also control the merging behavior using the
                 <literal>'merge'</literal> attribute of the <literal>&lt;util:list/&gt;</literal>
                 element; collection merging is described in more detail in the section entitled
-                <xref linkend="beans-collection-elements-merging"/></para>
+                <xref linkend="beans-collection-elements-merging"/>.</para>
             </section>
             <section>
                 <title><literal>&lt;util:map/&gt;</literal></title>
@@ -402,7 +402,7 @@ public class Client {
                 attribute on the <literal>&lt;util:map/&gt;</literal> element. For example, if we
                 really need a <classname>java.util.TreeMap</classname> to be instantiated, we could
                 use the following configuration:</para>
-                <programlisting><![CDATA[<util:map id="emails" map-type="java.util.TreeMap">
+                <programlisting><![CDATA[<util:map id="emails" map-class="java.util.TreeMap">
     <entry key="pechorin" value="pechorin@hero.org"/>
     <entry key="raskolnikov" value="raskolnikov@slums.org"/>
     <entry key="stavrogin" value="stavrogin@gov.org"/>
@@ -413,7 +413,7 @@ public class Client {
                 <para>Finally, you can also control the merging behavior using the
                 <literal>'merge'</literal> attribute of the <literal>&lt;util:map/&gt;</literal>
                 element; collection merging is described in more detail in the section entitled
-                <xref linkend="beans-collection-elements-merging"/></para>
+                <xref linkend="beans-collection-elements-merging"/>.</para>
             </section>
             <section>
                 <title><literal>&lt;util:set/&gt;</literal></title>
@@ -458,7 +458,7 @@ public class Client {
                 <para>Finally, you can also control the merging behavior using the
                 <literal>'merge'</literal> attribute of the <literal>&lt;util:set/&gt;</literal>
                 element; collection merging is described in more detail in the section entitled
-                <xref linkend="beans-collection-elements-merging"/></para>
+                <xref linkend="beans-collection-elements-merging"/>.</para>
             </section>
         </section>
         <section id="xsd-config-body-schemas-jee">
@@ -490,7 +490,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 <programlisting><![CDATA[<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource"/>]]></programlisting>
             </section>
             <section>
-                <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (with JNDI environment setting)</title>
+                <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (with single JNDI environment setting)</title>
                 <para>Before...</para>
                 <programlisting><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
     <property name="jndiName" value="jdbc/MyDataSource"/>
@@ -506,7 +506,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 </jee:jndi-lookup>]]></programlisting>
             </section>
             <section>
-                <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (with JNDI environment settings)</title>
+                <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (with multiple JNDI environment settings)</title>
                 <para>Before...</para>
                 <programlisting><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
     <property name="jndiName" value="jdbc/MyDataSource"/>
@@ -725,8 +725,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     </bean>
 
 </beans>]]></programlisting>
-            <para>In the case of the above example, one would assume that there is some
-            logic that will consume the bean definition and setup some caching infrastructure
+            <para>In the case of the above example, you would assume that there is some
+            logic that will consume the bean definition and set up some caching infrastructure
             using the supplied metadata.</para>
         </section>
     </section>
@@ -826,10 +826,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 Schema support in Eclipse... each XML editor plugin would require its very own
                 dedicated section, and this is <emphasis>Spring</emphasis> reference documentation,
                 not Eclipse XML editor documentation. You will have to read the documentation that
-                comes with your XML editor plugin (good luck there) and figure it out for yourself.
-                (The author is not trying to be cavalier, it's just that writing step-by-step setups for
-                loads of Eclipse XML editor plugins would probably not be worth the effort
-                precisely because there is no standard and there are so many different editors.)</para>
+                comes with your XML editor plugin (good luck there) and figure it out for yourself.</para>
             </step>
             <step>
                 <title>Step Three</title>
