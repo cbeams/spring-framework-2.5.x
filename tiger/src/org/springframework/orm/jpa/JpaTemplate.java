@@ -32,70 +32,59 @@ import javax.persistence.Query;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.Assert;
 
 /**
- * Helper class that simplifies JPA data access code, and converts
- * PersistenceExceptions into Spring DataAccessExceptions, following the
- * <code>org.springframework.dao</code> exception hierarchy.
+ * Helper class that allows for writing JPA data access code in the same style
+ * as with Spring's well-known JdoTemplate and HibernateTemplate classes.
+ * Automatically converts PersistenceExceptions into Spring DataAccessExceptions,
+ * following the <code>org.springframework.dao</code> exception hierarchy.
  *
- * <p>The central method is "execute", supporting JPA code implementing
- * the JpaCallback interface. It provides JPA EntityManager handling
- * such that neither the JpaCallback implementation nor the calling code
- * needs to explicitly care about retrieving/closing EntityManagers,
- * or handling JPA lifecycle exceptions.
+ * <p><b>NOTE: JpaTemplate mainly exists as a sibling of JdoTemplate and
+ * HibernateTemplate, to offer the same style for people used to it. For newly
+ * started projects, consider adopting the standard JPA style of coding data
+ * access objects instead, based on a "shared EntityManager" reference injected
+ * via a Spring bean definition or the JPA PersistenceContext annotation.</b>
+ * (Using Spring's SharedEntityManagerBean / PersistenceAnnotationBeanPostProcessor,
+ * or using a direct JNDI lookup for an EntityManager on a Java EE 5 server.)
  *
- * <p>Typically used to implement data access or business logic services that
- * use JPA within their implementation but are JPA-agnostic in their interface.
- * The latter or code calling the latter only have to deal with business
- * objects, query objects, and <code>org.springframework.dao</code> exceptions.
+ * <p>The central method is of this template is "execute", supporting JPA code
+ * implementing the JpaCallback interface. It provides JPA EntityManager handling
+ * such that neither the JpaCallback implementation nor the calling code needs
+ * to explicitly care about retrieving/closing EntityManagers, or handling
+ * JPA lifecycle exceptions.
  *
- * <p>Can be used within a service implementation via direct instantiation
- * with a EntityManagerFactory reference, or get prepared in an
- * application context and given to services as bean reference.
- * Note: The EntityManagerFactory should always be configured as bean in
- * the application context, in the first case given to the service directly,
- * in the second case to the prepared template.
+ * <p>Can be used within a service implementation via direct instantiation with
+ * a EntityManagerFactory reference, or get prepared in an application context
+ * and given to services as bean reference. Note: The EntityManagerFactory should
+ * always be configured as bean in the application context, in the first case
+ * given to the service directly, in the second case to the prepared template.
  *
- * <p>This class can be considered as direct alternative to working with the
- * raw JPA EntityManager API (through a shared EntityManager reference).
- * The major advantage is its automatic conversion to DataAccessExceptions,
- * the major disadvantage that no checked application exceptions can get thrown
- * from within data access code. Corresponding checks and the actual throwing
- * of such exceptions can often be deferred to after callback execution, though.
+ * <p>JpaTemplate can be considered as direct alternative to working with the
+ * raw JPA EntityManager API (through a shared EntityManager reference,
+ * as outlined above). The major advantage is its automatic conversion to
+ * DataAccessExceptions, the major disadvantage is that it introduces
+ * another thin layer on top of the target API.
  *
- * <p>Note that even if JpaTransactionManager is used for transaction
- * demarcation in higher-level services, all those services above the data
- * access layer don't need to be JPA-aware. Setting such a special
- * PlatformTransactionManager is a configuration issue, without introducing
- * code dependencies: For example, switching to JTA is just a matter of
- * Spring configuration (use JtaTransactionManager instead) and JPA provider
- * configuration, neither affecting application code.
- *
- * <p>LocalEntityManagerFactoryBean and LocalContainerEntityManagerFactoryBean are
- * the preferred ways of obtaining a reference to an EntityManagerFactory
+ * <p>LocalEntityManagerFactoryBean and LocalContainerEntityManagerFactoryBean
+ * are the preferred ways of obtaining a reference to an EntityManagerFactory
  * outside of a full Java EE 5 environment. Within a Java EE 5 environment,
  * you will typically work with either an EntityManagerFactory obtained from
  * JNDI or a shared EntityManager proxy obtained from JNDI (via Spring's
  * JndiObjectFactoryBean).
  *
- * <p>Note that lazy loading will just work with an open JPA EntityManager,
- * either within a Spring-driven transaction (with JpaTransactionManager or
- * JtaTransactionManager) or within OpenEntityManagerInViewFilter/Interceptor.
- * Furthermore, some operations just make sense within transactions,
- * for example: <code>flush</code>.
- *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see org.springframework.orm.jdo.JdoTemplate
+ * @see org.springframework.orm.hibernate3.HibernateTemplate
+ * @see org.springframework.orm.jpa.support.SharedEntityManagerBean
+ * @see org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor
  * @see #setEntityManagerFactory
- * @see JpaCallback
+ * @see #execute(JpaCallback)
  * @see javax.persistence.EntityManager
- * @see JpaInterceptor
  * @see LocalEntityManagerFactoryBean
+ * @see LocalContainerEntityManagerFactoryBean
  * @see org.springframework.jndi.JndiObjectFactoryBean
- * @see JpaTransactionManager
- * @see org.springframework.transaction.jta.JtaTransactionManager
- * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter
- * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor
  */
 public class JpaTemplate extends JpaAccessor implements JpaOperations {
 
@@ -176,12 +165,14 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of JPA errors
 	 */
 	public Object execute(JpaCallback action, boolean exposeNativeEntityManager) throws DataAccessException {
+		Assert.notNull(action, "Callback object must not be null");
+
 		EntityManager em = getEntityManager();
 		boolean isNewEm = false;
 		if (em == null) {
 			em = EntityManagerFactoryUtils.getTransactionalEntityManager(getEntityManagerFactory());
 			if (em == null) {
-				logger.debug("Creating new EntityManager for JPA template execution");
+				logger.debug("Creating new EntityManager for JpaTemplate execution");
 				em = getEntityManagerFactory().createEntityManager();
 				isNewEm = true;
 			}

@@ -44,15 +44,16 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.util.Assert;
 
 /**
- * Helper class that simplifies Hibernate data access code, and converts
- * checked HibernateExceptions into unchecked DataAccessExceptions,
- * following the <code>org.springframework.dao</code> exception hierarchy.
- * Uses the same SQLExceptionTranslator mechanism as JdbcTemplate.
+ * Helper class that simplifies Hibernate data access code. Automatically
+ * converts HibernateExceptions into DataAccessExceptions, following the
+ * <code>org.springframework.dao</code> exception hierarchy.
  *
- * <p>Typically used to implement data access or business logic services that
- * use Hibernate within their implementation but are Hibernate-agnostic in their
- * interface. The latter or code calling the latter only have to deal with
- * domain objects, query objects, and <code>org.springframework.dao</code> exceptions.
+ * <p><b>NOTE: As of Hibernate 3.0.1, transactional Hibernate access code can
+ * also be coded in plain Hibernate style. Hence, for newly started projects,
+ * consider adopting the standard Hibernate3 style of coding data access objects
+ * instead, based on <code>SessionFactory.getCurrentSession()</code>.</b>
+ * (Spring's LocalSessionFactoryBean automatically supports Spring transaction
+ * management for the Hibernate3 <code>getCurrentSession()</code> method.)
  *
  * <p>The central method is <code>execute</code>, supporting Hibernate code
  * implementing the HibernateCallback interface. It provides Hibernate Session
@@ -81,11 +82,6 @@ import org.springframework.util.Assert;
  * switching to JTA is just a matter of Spring configuration (use
  * JtaTransactionManager instead) that does not affect application code.
  *
- * <p>LocalSessionFactoryBean is the preferred way of obtaining a reference
- * to a specific Hibernate SessionFactory, at least in a non-EJB environment.
- * Alternatively, use a JndiObjectFactoryBean to fetch a SessionFactory
- * from JNDI (possibly set up via a JCA Connector).
- *
  * <p>Note that operations that return an Iterator (i.e. <code>iterate</code>)
  * are supposed to be used within Spring-driven or JTA-driven transactions
  * (with HibernateTransactionManager, JtaTransactionManager, or EJB CMT).
@@ -100,14 +96,11 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 1.2
+ * @see org.hibernate.SessionFactory#getCurrentSession()
  * @see #setSessionFactory
- * @see #setJdbcExceptionTranslator
  * @see HibernateCallback
  * @see org.hibernate.Session
- * @see HibernateInterceptor
  * @see LocalSessionFactoryBean
- * @see org.springframework.jndi.JndiObjectFactoryBean
- * @see org.springframework.jdbc.support.SQLExceptionTranslator
  * @see HibernateTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.orm.hibernate3.support.OpenSessionInViewFilter
@@ -352,6 +345,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 */
 	public Object execute(HibernateCallback action, boolean exposeNativeSession) throws DataAccessException {
+		Assert.notNull(action, "Callback object must not be null");
+
 		Session session = getSession();
 		boolean existingTransaction = SessionFactoryUtils.isSessionTransactional(session, getSessionFactory());
 		if (existingTransaction) {
