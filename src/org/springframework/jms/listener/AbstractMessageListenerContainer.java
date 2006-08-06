@@ -32,7 +32,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.Lifecycle;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.support.JmsUtils;
-import org.springframework.jms.support.destination.DynamicDestinationResolver;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -152,16 +151,6 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	private final List pausedTasks = new LinkedList();
 
 	private final Object lifecycleMonitor = new Object();
-
-
-	/**
-	 * Create a new {@link AbstractMessageListenerContainer} ,
-	 * using a {@link DynamicDestinationResolver} as the default
-	 * {@link org.springframework.jms.support.destination.DestinationResolver}.
-	 */
-	public AbstractMessageListenerContainer() {
-		setDestinationResolver(new DynamicDestinationResolver());
-	}
 
 
 	/**
