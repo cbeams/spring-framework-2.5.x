@@ -39,6 +39,7 @@ import net.sf.hibernate.type.Type;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.util.Assert;
 
 /**
  * Helper class that simplifies Hibernate data access code, and converts
@@ -351,6 +352,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 */
 	public Object execute(HibernateCallback action, boolean exposeNativeSession) throws DataAccessException {
+		Assert.notNull(action, "Callback object must not be null");
+
 		Session session = getSession();
 		boolean existingTransaction = SessionFactoryUtils.isSessionTransactional(session, getSessionFactory());
 		if (existingTransaction) {

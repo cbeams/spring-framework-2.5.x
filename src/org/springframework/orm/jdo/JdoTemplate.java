@@ -33,6 +33,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.Assert;
 
 /**
  * Helper class that simplifies JDO data access code, and converts
@@ -250,6 +251,8 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 */
 	public Object execute(JdoCallback action, boolean exposeNativePersistenceManager) throws DataAccessException {
+		Assert.notNull(action, "Callback object must not be null");
+
 		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(
 		    getPersistenceManagerFactory(), isAllowCreate());
 		boolean existingTransaction =

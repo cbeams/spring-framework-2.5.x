@@ -147,6 +147,8 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 
 
 	public Object execute(TopLinkCallback action) throws DataAccessException {
+		Assert.notNull(action, "Callback object must not be null");
+
 		Session session = SessionFactoryUtils.getSession(getSessionFactory(), this.allowCreate);
 		try {
 			return action.doInTopLink(session);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.orm.ObjectRetrievalFailureException;
+import org.springframework.util.Assert;
 
 /**
  * Helper class that simplifies OJB PersistenceBroker data access code,
@@ -133,6 +134,8 @@ public class PersistenceBrokerTemplate extends OjbAccessor implements Persistenc
 
 
 	public Object execute(PersistenceBrokerCallback action) throws DataAccessException {
+		Assert.notNull(action, "Callback object must not be null");
+
 		PersistenceBroker pb = getPersistenceBroker();
 		try {
 			return action.doInPersistenceBroker(pb);
