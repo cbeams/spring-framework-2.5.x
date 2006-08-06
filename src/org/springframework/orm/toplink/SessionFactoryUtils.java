@@ -209,10 +209,10 @@ public abstract class SessionFactoryUtils {
 				session.release();
 			}
 			catch (TopLinkException ex) {
-				logger.error("Could not close TopLink Session", ex);
+				logger.debug("Could not close TopLink Session", ex);
 			}
-			catch (RuntimeException ex) {
-				logger.error("Unexpected exception on closing TopLink Session", ex);
+			catch (Throwable ex) {
+				logger.debug("Unexpected exception on closing TopLink Session", ex);
 			}
 		}
 	}

@@ -254,10 +254,10 @@ public abstract class PersistenceManagerFactoryUtils {
 			doReleasePersistenceManager(pm, pmf);
 		}
 		catch (JDOException ex) {
-			logger.error("Could not close JDO PersistenceManager", ex);
+			logger.debug("Could not close JDO PersistenceManager", ex);
 		}
-		catch (RuntimeException ex) {
-			logger.error("Unexpected exception on closing JDO PersistenceManager", ex);
+		catch (Throwable ex) {
+			logger.debug("Unexpected exception on closing JDO PersistenceManager", ex);
 		}
 	}
 

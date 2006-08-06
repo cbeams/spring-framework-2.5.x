@@ -719,10 +719,10 @@ public abstract class SessionFactoryUtils {
 				session.close();
 			}
 			catch (HibernateException ex) {
-				logger.error("Could not close Hibernate Session", ex);
+				logger.debug("Could not close Hibernate Session", ex);
 			}
 			catch (Throwable ex) {
-				logger.error("Unexpected exception on closing Hibernate Session", ex);
+				logger.debug("Unexpected exception on closing Hibernate Session", ex);
 			}
 		}
 	}
