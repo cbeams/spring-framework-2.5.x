@@ -443,15 +443,14 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 				getJdoDialect().releaseJdbcConnection(txObject.getConnectionHolder().getConnectionHandle(),
 						txObject.getPersistenceManagerHolder().getPersistenceManager());
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				// Just log it, to keep a transaction-related exception.
-				logger.error("Could not close JDBC connection after transaction", ex);
+				logger.debug("Could not release JDBC connection after transaction", ex);
 			}
 		}
 
 		getJdoDialect().cleanupTransaction(txObject.getTransactionData());
 
-		// Remove the persistence manager holder from the thread.
 		if (txObject.isNewPersistenceManagerHolder()) {
 			PersistenceManager pm = txObject.getPersistenceManagerHolder().getPersistenceManager();
 			if (logger.isDebugEnabled()) {
