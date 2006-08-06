@@ -26,6 +26,7 @@ import javax.jms.Session;
 import javax.naming.NamingException;
 
 import org.springframework.jndi.JndiLocatorSupport;
+import org.springframework.util.Assert;
 
 /**
  * {@link DestinationResolver} implementation which interprets destination names
@@ -51,7 +52,7 @@ import org.springframework.jndi.JndiLocatorSupport;
  * @see #setCache
  * @see #setFallbackToDynamicDestination
  */
-public class JndiDestinationResolver extends JndiLocatorSupport implements DestinationResolver {
+public class JndiDestinationResolver extends JndiLocatorSupport implements CachingDestinationResolver {
 
 	private boolean cache = true;
 
@@ -103,6 +104,7 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Desti
 	public Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException {
 
+		Assert.notNull(destinationName, "Destination name must not be null");
 		Destination dest = (Destination) this.destinationCache.get(destinationName);
 		if (dest == null) {
 			try {
@@ -125,6 +127,14 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Desti
 			}
 		}
 		return dest;
+	}
+
+	public void removeFromCache(String destinationName) {
+		this.destinationCache.remove(destinationName);
+	}
+
+	public void clearCache() {
+		this.destinationCache.clear();
 	}
 
 }
