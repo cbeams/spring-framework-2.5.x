@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,18 @@ package org.springframework.jndi;
 
 import javax.naming.NamingException;
 
+import org.springframework.util.Assert;
+
 /**
  * Convenient superclass for classes that can locate any number of JNDI objects.
- * Derives from JndiAccessor to inherit jndiTemplate and jndiEnvironment properties.
+ * Derives from JndiAccessor to inherit the "jndiTemplate" and "jndiEnvironment"
+ * bean properties.
  *
  * <p>JNDI names may or may not include the "java:comp/env/" prefix expected
  * by J2EE applications when accessing a locally mapped (ENC - Environmental
  * Naming Context) resource. If it doesn't, the "java:comp/env/" prefix will
  * be prepended if the "resourceRef" property is true (the default is
- * <strong>false</strong>) and no other scheme like "java:" is given.
+ * <strong>false</strong>) and no other scheme (e.g. "java:") is given.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -82,6 +85,7 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	 * @see #setResourceRef
 	 */
 	protected Object lookup(String jndiName, Class requiredType) throws NamingException {
+		Assert.notNull(jndiName, "JNDI name must not be null");
 		String jndiNameToUse = convertJndiName(jndiName);
 		Object jndiObject = getJndiTemplate().lookup(jndiNameToUse, requiredType);
 		if (logger.isDebugEnabled()) {
@@ -100,7 +104,7 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	 * @see #setResourceRef
 	 */
 	protected String convertJndiName(String jndiName) {
-		// prepend container prefix if not already specified and no other scheme given
+		// Prepend container prefix if not already specified and no other scheme given.
 		if (isResourceRef() && !jndiName.startsWith(CONTAINER_PREFIX) && jndiName.indexOf(':') == -1) {
 			jndiName = CONTAINER_PREFIX + jndiName;
 		}

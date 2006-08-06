@@ -24,6 +24,8 @@ import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicSession;
 
+import org.springframework.util.Assert;
+
 /**
  * Simple {@link DestinationResolver} implementation resolving destination names
  * as dynamic destinations.
@@ -54,6 +56,8 @@ public class DynamicDestinationResolver implements DestinationResolver {
 	 */
 	public Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException {
+
+		Assert.notNull(destinationName, "Destination name must not be null");
 		if (pubSubDomain) {
 			return resolveTopic(session, destinationName);
 		}
