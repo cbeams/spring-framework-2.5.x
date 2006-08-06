@@ -65,30 +65,42 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	void refresh() throws BeansException, IllegalStateException;
 
 	/**
+	 * Close this application context, releasing all resources and locks that the
+	 * implementation might hold. This includes destroying all cached singleton beans.
+	 * <p>Note: Does <i>not</i> invoke <code>close</code> on a parent context;
+	 * parent contexts have their own, independent lifecycle.
+	 * <p>This method can be called multiple times without side effects: Subsequent
+	 * <code>close</code> calls on an already closed context will be ignored.
+	 */
+	void close();
+
+	/**
 	 * Return whether this application context is active, that is,
 	 * whether it has been refreshed at least once and not closed yet.
+	 * @see #refresh()
+	 * @see #close()
+	 * @see #getBeanFactory()
 	 */
 	boolean isActive();
 
 	/**
 	 * Return the internal bean factory of this application context.
-	 * Can be used to access specific functionality of the factory.
+	 * Can be used to access specific functionality of the underlying factory.
 	 * <p>Note: Do not use this to post-process the bean factory; singletons
 	 * will already have been instantiated before. Use a BeanFactoryPostProcessor
-	 * to intercept the bean factory setup process before beans get touched.
+	 * to intercept the BeanFactory setup process before beans get touched.
+	 * <p>Generally, this internal factory will only be accessible while the
+	 * context is active, that is, inbetween <code>refresh()</code> and
+	 * <code>close()</code>. The <code>isActive</code> flag can be used to
+	 * check whether the context is in an appropriate state.
 	 * @throws IllegalStateException if the context does not hold an internal
-	 * bean factory yet (usually if <code>refresh()</code> has never been called)
+	 * bean factory yet (usually if <code>refresh()</code> has never been called
+	 * or if <code>close()</code> has already been called)
+	 * @see #isActive() ()
 	 * @see #refresh()
+	 * @see #close()
 	 * @see #addBeanFactoryPostProcessor
 	 */
 	ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException;
-
-	/**
-	 * Close this application context, releasing all resources and locks that the
-	 * implementation might hold. This includes destroying all cached singleton beans.
-	 * <p>Note: Does <i>not</i> invoke <code>close</code> on a parent context;
-	 * parent contexts have their own, independent lifecycle.
-	 */
-	void close();
 
 }

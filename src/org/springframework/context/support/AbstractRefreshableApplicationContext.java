@@ -60,6 +60,9 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	/** Bean factory for this context */
 	private DefaultListableBeanFactory beanFactory;
 
+	/** Synchronization monitor for the internal BeanFactory */
+	private final Object beanFactoryMonitor = new Object();
+
 
 	/**
 	 * Create a new AbstractRefreshableApplicationContext with no parent.
@@ -76,18 +79,23 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	}
 
 
-	protected final synchronized void refreshBeanFactory() throws BeansException {
+	protected final void refreshBeanFactory() throws BeansException {
 		// Shut down previous bean factory, if any.
-		if (this.beanFactory != null) {
-			this.beanFactory.destroySingletons();
-			this.beanFactory = null;
+		synchronized (this.beanFactoryMonitor) {
+			if (this.beanFactory != null) {
+				this.beanFactory.destroySingletons();
+				this.beanFactory = null;
+			}
 		}
 
 		// Initialize fresh bean factory.
 		try {
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
 			loadBeanDefinitions(beanFactory);
-			this.beanFactory = beanFactory;
+
+			synchronized (this.beanFactoryMonitor) {
+				this.beanFactory = beanFactory;
+			}
 			if (logger.isInfoEnabled()) {
 				logger.info("Bean factory for application context [" + getDisplayName() + "]: " + beanFactory);
 			}
@@ -98,26 +106,32 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		}
 	}
 
-	public final synchronized ConfigurableListableBeanFactory getBeanFactory() {
-		if (this.beanFactory == null) {
-			throw new IllegalStateException("BeanFactory not initialized or already closed - " +
-					"call 'refresh' before accessing beans via the ApplicationContext");
+	protected final void closeBeanFactory() {
+		synchronized (this.beanFactoryMonitor) {
+			this.beanFactory = null;
 		}
-		return this.beanFactory;
 	}
 
-	protected void onClose() {
-		this.beanFactory = null;
+	public final ConfigurableListableBeanFactory getBeanFactory() {
+		synchronized (this.beanFactoryMonitor) {
+			if (this.beanFactory == null) {
+				throw new IllegalStateException("BeanFactory not initialized or already closed - " +
+						"call 'refresh' before accessing beans via the ApplicationContext");
+			}
+			return this.beanFactory;
+		}
 	}
 
 
 	/**
-	 * Create the bean factory for this context.
-	 * <p>Default implementation creates a DefaultListableBeanFactory with the
+	 * Create an internal bean factory for this context.
+	 * Called for each refresh attempt.
+	 * <p>The default implementation creates a DefaultListableBeanFactory with the
 	 * internal bean factory of this context's parent as parent bean factory.
-	 * <p>Can be overridden in subclasses.
+	 * Can be overridden in subclasses.
 	 * @return the bean factory for this context
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
+	 * @see #refresh()
 	 * @see #getInternalParentBeanFactory
 	 */
 	protected DefaultListableBeanFactory createBeanFactory() {

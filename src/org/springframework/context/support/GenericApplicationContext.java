@@ -204,7 +204,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * to register beans through our public methods (or the BeanFactory's).
 	 * @see #registerBeanDefinition
 	 */
-	protected void refreshBeanFactory() throws IllegalStateException {
+	protected final void refreshBeanFactory() throws IllegalStateException {
 		if (this.refreshed) {
 			throw new IllegalStateException(
 					"GenericApplicationContext does not support multiple refresh attempts: just call 'refresh' once");
@@ -213,13 +213,16 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	}
 
 	/**
+	 * Do nothing: We hold a single internal BeanFactory that will never
+	 * get released.
+	 */
+	protected final void closeBeanFactory() {
+	}
+
+	/**
 	 * Return the single internal BeanFactory held by this context.
 	 */
-	public ConfigurableListableBeanFactory getBeanFactory() {
-		if (!isActive()) {
-			throw new IllegalStateException("BeanFactory not initialized or already closed - " +
-					"call 'refresh' before accessing beans via the ApplicationContext");
-		}
+	public final ConfigurableListableBeanFactory getBeanFactory() {
 		return this.beanFactory;
 	}
 
@@ -231,7 +234,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * (autodetecting BeanFactoryPostProcessors, etc).
 	 * @see #refresh()
 	 */
-	public DefaultListableBeanFactory getDefaultListableBeanFactory() {
+	public final DefaultListableBeanFactory getDefaultListableBeanFactory() {
 		return this.beanFactory;
 	}
 

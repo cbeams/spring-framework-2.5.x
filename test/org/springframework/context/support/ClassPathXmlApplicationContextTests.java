@@ -49,6 +49,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"/org/springframework/context/support/simpleContext.xml");
 		assertTrue(ctx.containsBean("someMessageSource"));
+		ctx.close();
 	}
 
 	public void testMultipleConfigLocations() {
@@ -60,6 +61,9 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		assertTrue(ctx.containsBean("service"));
 		assertTrue(ctx.containsBean("logicOne"));
 		assertTrue(ctx.containsBean("logicTwo"));
+		Service service = (Service) ctx.getBean("service");
+		ctx.close();
+		assertTrue(service.isProperlyDestroyed());
 	}
 
 	public void testConfigLocationPattern() {
@@ -68,12 +72,16 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		assertTrue(ctx.containsBean("service"));
 		assertTrue(ctx.containsBean("logicOne"));
 		assertTrue(ctx.containsBean("logicTwo"));
+		Service service = (Service) ctx.getBean("service");
+		ctx.close();
+		assertTrue(service.isProperlyDestroyed());
 	}
 
 	public void testSingleConfigLocationWithClass() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"simpleContext.xml", getClass());
 		assertTrue(ctx.containsBean("someMessageSource"));
+		ctx.close();
 	}
 
 	public void testContextWithInvalidLazyClass() {
@@ -87,6 +95,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		catch (CannotLoadBeanClassException ex) {
 			assertTrue(ex.contains(ClassNotFoundException.class));
 		}
+		ctx.close();
 	}
 
 	public void testContextWithClassNameThatContainsPlaceholder() {
@@ -94,6 +103,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 				"classWithPlaceholder.xml", getClass());
 		assertTrue(ctx.containsBean("someMessageSource"));
 		assertTrue(ctx.getBean("someMessageSource") instanceof StaticMessageSource);
+		ctx.close();
 	}
 
 	public void testMultipleConfigLocationsWithClass() {
@@ -102,6 +112,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		assertTrue(ctx.containsBean("service"));
 		assertTrue(ctx.containsBean("logicOne"));
 		assertTrue(ctx.containsBean("logicTwo"));
+		ctx.close();
 	}
 
 	public void testFactoryBeanAndApplicationListener() {
@@ -109,6 +120,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 				"/org/springframework/context/support/context*.xml");
 		ctx.getBeanFactory().registerSingleton("manualFBAAL", new FactoryBeanAndApplicationListener());
 		assertEquals(2, ctx.getBeansOfType(ApplicationListener.class).size());
+		ctx.close();
 	}
 
 	public void testMessageSourceAware() {
@@ -123,6 +135,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		assertEquals(messageSource, autowiredService1.getMessageSource());
 		AutowiredService autowiredService2 = (AutowiredService) ctx.getBean("autowiredService2");
 		assertEquals(messageSource, autowiredService2.getMessageSource());
+		ctx.close();
 	}
 
 	public void testResourceArrayPropertyEditor() throws IOException {
@@ -137,6 +150,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		    new FileSystemResource(new ClassPathResource("/org/springframework/context/support/contextB.xml").getFile())));
 		assertTrue(resources.contains(
 		    new FileSystemResource(new ClassPathResource("/org/springframework/context/support/contextC.xml").getFile())));
+		ctx.close();
 	}
 
 	public void testChildWithProxy() throws Exception {
@@ -146,6 +160,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 				new String[] {"/org/springframework/context/support/childWithProxy.xml"}, ctx);
 		assertTrue(AopUtils.isAopProxy(child.getBean("assemblerOne")));
 		assertTrue(AopUtils.isAopProxy(child.getBean("assemblerTwo")));
+		ctx.close();
 	}
 
 	public void testSelfReference() {
@@ -182,6 +197,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		writer = new StringWriter();
 		FileCopyUtils.copy(new InputStreamReader(resource2.getInputStream()), writer);
 		assertEquals("contexttest", writer.toString());
+		ctx.close();
 	}
 
 	public void testGenericApplicationContextWithXmlBeanDefinitions() {
@@ -194,6 +210,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		assertTrue(ctx.containsBean("service"));
 		assertTrue(ctx.containsBean("logicOne"));
 		assertTrue(ctx.containsBean("logicTwo"));
+		ctx.close();
 	}
 
 }

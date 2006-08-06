@@ -14,7 +14,7 @@
 		<property name="resources"><value>/org/springframework/context/support/context*.xml</value></property>
   </bean>
 
-	<bean name="service2" class="org.springframework.context.support.Service" autowire="byName">
+	<bean name="service2" class="org.springframework.context.support.Service" autowire="byName" depends-on="service">
 		<property name="resources"><value>/org/springframework/context/support/context*.xml</value></property>
   </bean>
 

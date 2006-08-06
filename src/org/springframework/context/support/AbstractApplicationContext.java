@@ -143,7 +143,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private long startupTime;
 
 	/** Flag that indicates whether this context is currently active */
-	private boolean active = true;
+	private boolean active = false;
+
+	/** Synchronization monitor for the "active" flag */
+	private final Object activeMonitor = new Object();
+
+	/** Synchronization monitor for the "refresh" and "destroy" */
+	private final Object startupShutdownMonitor = new Object();
 
 	/** Reference to the JVM shutdown hook, if registered */
 	private Thread shutdownHook;
@@ -276,76 +282,80 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 
-	public synchronized void refresh() throws BeansException, IllegalStateException {
-		this.startupTime = System.currentTimeMillis();
+	public void refresh() throws BeansException, IllegalStateException {
+		synchronized (this.startupShutdownMonitor) {
+			this.startupTime = System.currentTimeMillis();
 
-		// Tell subclass to refresh the internal bean factory.
-		refreshBeanFactory();
-		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-
-		// Tell the internal bean factory to use the context's class loader.
-		beanFactory.setBeanClassLoader(getClassLoader());
-
-		// Populate the bean factory with context-specific resource editors.
-		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this));
-
-		// Configure the bean factory with context semantics.
-		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
-		beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
-		beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
-		beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
-		beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
-
-		// Allows post-processing of the bean factory in context subclasses.
-		postProcessBeanFactory(beanFactory);
-
-		// Invoke factory processors registered with the context instance.
-		for (Iterator it = getBeanFactoryPostProcessors().iterator(); it.hasNext();) {
-			BeanFactoryPostProcessor factoryProcessor = (BeanFactoryPostProcessor) it.next();
-			factoryProcessor.postProcessBeanFactory(beanFactory);
-		}
-
-		if (logger.isInfoEnabled()) {
-			if (getBeanDefinitionCount() == 0) {
-				logger.info("No beans defined in application context [" + getDisplayName() + "]");
+			synchronized (this.activeMonitor) {
+				this.active = true;
 			}
-			else {
-				logger.info(getBeanDefinitionCount() + " beans defined in application context [" + getDisplayName() + "]");
+
+			// Tell subclass to refresh the internal bean factory.
+			refreshBeanFactory();
+			ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+
+			// Tell the internal bean factory to use the context's class loader.
+			beanFactory.setBeanClassLoader(getClassLoader());
+
+			// Populate the bean factory with context-specific resource editors.
+			beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this));
+
+			// Configure the bean factory with context semantics.
+			beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+			beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
+			beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
+			beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
+			beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
+
+			// Allows post-processing of the bean factory in context subclasses.
+			postProcessBeanFactory(beanFactory);
+
+			// Invoke factory processors registered with the context instance.
+			for (Iterator it = getBeanFactoryPostProcessors().iterator(); it.hasNext();) {
+				BeanFactoryPostProcessor factoryProcessor = (BeanFactoryPostProcessor) it.next();
+				factoryProcessor.postProcessBeanFactory(beanFactory);
 			}
-		}
 
-		try {
-			// Invoke factory processors registered as beans in the context.
-			invokeBeanFactoryPostProcessors();
+			if (logger.isInfoEnabled()) {
+				if (getBeanDefinitionCount() == 0) {
+					logger.info("No beans defined in application context [" + getDisplayName() + "]");
+				}
+				else {
+					logger.info(getBeanDefinitionCount() + " beans defined in application context [" + getDisplayName() + "]");
+				}
+			}
 
-			// Register bean processors that intercept bean creation.
-			registerBeanPostProcessors();
+			try {
+				// Invoke factory processors registered as beans in the context.
+				invokeBeanFactoryPostProcessors();
 
-			// Initialize message source for this context.
-			initMessageSource();
+				// Register bean processors that intercept bean creation.
+				registerBeanPostProcessors();
 
-			// Initialize event multicaster for this context.
-			initApplicationEventMulticaster();
+				// Initialize message source for this context.
+				initMessageSource();
 
-			// Initialize other special beans in specific context subclasses.
-			onRefresh();
+				// Initialize event multicaster for this context.
+				initApplicationEventMulticaster();
 
-			// Check for listener beans and register them.
-			registerListeners();
+				// Initialize other special beans in specific context subclasses.
+				onRefresh();
 
-			// Instantiate singletons this late to allow them to access the message source.
-			beanFactory.preInstantiateSingletons();
+				// Check for listener beans and register them.
+				registerListeners();
 
-			// Last step: publish corresponding event.
-			publishEvent(new ContextRefreshedEvent(this));
+				// Instantiate singletons this late to allow them to access the message source.
+				beanFactory.preInstantiateSingletons();
 
-			this.active = true;
-		}
+				// Last step: publish corresponding event.
+				publishEvent(new ContextRefreshedEvent(this));
+			}
 
-		catch (BeansException ex) {
-			// Destroy already created singletons to avoid dangling resources.
-			beanFactory.destroySingletons();
-			throw ex;
+			catch (BeansException ex) {
+				// Destroy already created singletons to avoid dangling resources.
+				beanFactory.destroySingletons();
+				throw ex;
+			}
 		}
 	}
 
@@ -524,10 +534,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 
-	public synchronized boolean isActive() {
-		return this.active;
-	}
-
 	/**
 	 * Register a shutdown hook with the JVM runtime, closing this context
 	 * on JVM shutdown unless it has already been closed at that time.
@@ -568,12 +574,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #doClose()
 	 * @see #registerShutdownHook()
 	 */
-	public synchronized void close() {
-		doClose();
-		// If we registered a JVM shutdown hook, we don't need it anymore now:
-		// We've already explicitly closed the context.
-		if (this.shutdownHook != null) {
-			Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
+	public void close() {
+		synchronized (this.startupShutdownMonitor) {
+			doClose();
+			// If we registered a JVM shutdown hook, we don't need it anymore now:
+			// We've already explicitly closed the context.
+			if (this.shutdownHook != null) {
+				Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
+			}
 		}
 	}
 
@@ -587,7 +595,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #registerShutdownHook()
 	 */
 	protected void doClose() {
-		if (this.active) {
+		if (isActive()) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Closing application context [" + getDisplayName() + "]");
 			}
@@ -595,15 +603,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// Publish shutdown event.
 				publishEvent(new ContextClosedEvent(this));
 			}
-			finally {
-				// Destroy all cached singletons in this context, invoking
-				// DisposableBean.destroy and/or the specified "destroy-method".
-				ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-				if (beanFactory != null) {
-					beanFactory.destroySingletons();
-				}
+			catch (Throwable ex) {
+				logger.error("Exception thrown from ApplicationListener handling ContextClosedEvent", ex);
 			}
-			this.active = false;
+			// Destroy all cached singletons in this context, invoking
+			// DisposableBean.destroy and/or the specified "destroy-method".
+			getBeanFactory().destroySingletons();
+			closeBeanFactory();
+			onClose();
+			synchronized (this.activeMonitor) {
+				this.active = false;
+			}
 		}
 	}
 
@@ -614,6 +624,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void onClose() {
 		// For subclasses: do nothing by default.
+	}
+
+	public boolean isActive() {
+		synchronized (this.activeMonitor) {
+			return this.active;
+		}
 	}
 
 
@@ -802,13 +818,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Subclasses must implement this method to perform the actual configuration load.
-	 * The method is invoked by <code>refresh</code> before any other initialization work.
+	 * The method is invoked by <code>refresh()</code> before any other initialization work.
 	 * <p>A subclass will either create a new bean factory and hold a reference to it,
-	 * or return a single bean factory instance that it holds. In the latter case, it will
+	 * or return a single BeanFactory instance that it holds. In the latter case, it will
 	 * usually throw an IllegalStateException if refreshing the context more than once.
-	 * <p>Subclasses will usually declare this method as <code>synchronized</code> if they
-	 * support hot-refreshing of the BeanFactory instance at runtime. However, the entire
-	 * <code>refresh</code> operation will be synchronized on the context instance anyway.
 	 * @throws BeansException if initialization of the bean factory failed
 	 * @throws IllegalStateException if already initialized and multiple refresh
 	 * attempts are not supported
@@ -817,13 +830,23 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected abstract void refreshBeanFactory() throws BeansException, IllegalStateException;
 
 	/**
+	 * Subclasses must implement this method to release their internal bean factory.
+	 * The method is invoked by <code>close()</code> after all other shutdown work.
+	 * <p>Should never throw an exception but rather log shutdown failures.
+	 * @see #refresh()
+	 */
+	protected abstract void closeBeanFactory();
+
+	/**
 	 * Subclasses must return their internal bean factory here. They should implement the
 	 * lookup efficiently, so that it can be called repeatedly without a performance penalty.
-	 * <p>Note: Subclasses should implement this method as <code>synchronized</code> on the
-	 * context instance if they will not always return the same BeanFactory instance at runtime.
-	 * @return this application context's internal bean factory
+	 * <p>Note: Subclasses should check whether the context is still active before
+	 * returning the internal bean factory. The internal factory should generally be
+	 * considered unavailable once the context has been closed.
+	 * @return this application context's internal bean factory (never <code>null</code>)
 	 * @throws IllegalStateException if the context does not hold an internal bean factory yet
-	 * (usually if <code>refresh</code> has never been called)
+	 * (usually if <code>refresh</code> has never been called) or if the context has been
+	 * closed already
 	 * @see #refresh()
 	 */
 	public abstract ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException;
