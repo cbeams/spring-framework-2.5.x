@@ -83,9 +83,11 @@
       <literal>isRuntime()</literal> method returns false. In this case, the
       3-argument matches method will never be invoked.</para>
 
-      <remark>If possible, try to make pointcuts static, allowing the AOP
-      framework to cache the results of pointcut evaluation when an AOP proxy
-      is created.</remark>
+			<tip>
+				<para>If possible, try to make pointcuts static, allowing the AOP
+				framework to cache the results of pointcut evaluation when an AOP proxy
+				is created.</para>
+			</tip>				
     </section>
 
     <section>
@@ -94,17 +96,25 @@
       <para>Spring supports operations on pointcuts: notably,
       <emphasis>union</emphasis> and <emphasis>intersection</emphasis>.</para>
 
-      <para>Union means the methods that either pointcut matches.</para>
+			<itemizedlist>
+				<listitem>
+					<para>Union means the methods that either pointcut matches.</para>					
+				</listitem>
+				<listitem>
+					<para>Intersection means the methods that both pointcuts match.</para>					
+				</listitem>
+				<listitem>
+					<para>Union is usually more useful.</para>
+				</listitem>
+				<listitem>
+					<para>Pointcuts can be composed using the static methods in the
+					<emphasis>org.springframework.aop.support.Pointcuts</emphasis> class, or
+					using the <emphasis>ComposablePointcut</emphasis> class in the same
+					package. However, using AspectJ pointcut expressions is usually a
+					simpler approach.</para>
+				</listitem>				
+			</itemizedlist>
 
-      <para>Intersection means the methods that both pointcuts match.</para>
-
-      <para>Union is usually more useful.</para>
-
-      <para>Pointcuts can be composed using the static methods in the
-      <emphasis>org.springframework.aop.support.Pointcuts</emphasis> class, or
-      using the <emphasis>ComposablePointcut</emphasis> class in the same
-      package. However, using AspectJ pointcut expressions is usually a
-      simpler approach.</para>
     </section>
 
     <section>
@@ -132,7 +142,7 @@
 
         <para>Static pointcuts are based on method and target class, and
         cannot take into account the method's arguments. Static pointcuts are
-        sufficient--and best--for most usages. It's possible for Spring to
+        sufficient - <emphasis>and best</emphasis> - for most usages. It's possible for Spring to
         evaluate a static pointcut only once, when a method is first invoked:
         after that, there is no need to evaluate the pointcut again with each
         method invocation.</para>
@@ -143,12 +153,12 @@
         <section>
           <title>Regular expression pointcuts</title>
 
-          <para>One obvious way to specific static pointcuts is regular
+          <para>One obvious way to specify static pointcuts is regular
           expressions. Several AOP frameworks besides Spring make this
           possible.
           <literal>org.springframework.aop.support.Perl5RegexpMethodPointcut</literal>
           is a generic regular expression pointcut, using Perl 5 regular
-          expression syntax. the <literal>Perl5RegexpMethodPointcut</literal>
+          expression syntax. The <literal>Perl5RegexpMethodPointcut</literal>
           class depends on Jakarta ORO for regular expression matching. Spring
           also provides the <literal>JdkRegexpMethodPointcut</literal> class
           that uses the regular expression support in JDK 1.4+.</para>
@@ -172,7 +182,7 @@
 
           <para>Spring provides a convenience class,
           <literal>RegexpMethodPointcutAdvisor</literal>, that allows us to
-          reference an Advice also (Remember that an Advice can be an
+          also reference an Advice (remember that an Advice can be an
           interceptor, before advice, throws advice etc.). Behind the scenes,
           Spring will use the <literal>JdkRegexpMethodPointcut</literal> on
           J2SE 1.4 or above, and will fall back to
@@ -180,7 +190,7 @@
           of <literal>Perl5RegexpMethodPointcut</literal> can be forced by
           setting the <literal>perl5</literal> property to true. Using
           <literal>RegexpMethodPointcutAdvisor</literal> simplifies wiring, as
-          the one bean serves as both pointcut and advisor, as shown
+          the one bean encapsulates both pointcut and advice, as shown
           below:</para>
 
           <para><programlisting>&lt;bean id="settersAndAbsquatulateAdvisor" 
@@ -251,7 +261,7 @@
       implement your own pointcuts.</para>
 
       <para>Because static pointcuts are most useful, you'll probably subclass
-      StaticMethodMatcherPointcut, as shown below. This requires implemented
+      StaticMethodMatcherPointcut, as shown below. This requires implementing
       just one abstract method (although it's possible to override other
       methods to customize behavior):</para>
 
@@ -275,9 +285,11 @@
       arbitrarily complex. However, using the AspectJ pointcut expression
       language is recommended if possible.</para>
 
-      <remark>Later versions of Spring may offer support for "semantic
-      pointcuts" as offered by JAC: for example, "all methods that change
-      instance variables in the target object."</remark>
+      <note>
+				<para>Later versions of Spring may offer support for "semantic
+				pointcuts" as offered by JAC: for example, "all methods that change
+				instance variables in the target object."</para>
+			</note>
     </section>
   </section>
 
@@ -330,13 +342,13 @@
     Object invoke(MethodInvocation invocation) throws Throwable;
 }</programlisting>
 
-        <para>The <emphasis>MethodInvocation</emphasis> argument to the
-        <emphasis>invoke()</emphasis> method exposes the method being invoked;
+        <para>The <classname>MethodInvocation</classname> argument to the
+        <methodname>invoke()</methodname> method exposes the method being invoked;
         the target join point; the AOP proxy; and the arguments to the method.
-        The <emphasis>invoke()</emphasis> method should return the
+        The <methodname>invoke()</methodname> method should return the
         invocation's result: the return value of the join point.</para>
 
-        <para>A simple <emphasis>MethodInterceptor</emphasis> implementation
+        <para>A simple <classname>MethodInterceptor</classname> implementation
         looks as follows:</para>
 
         <programlisting>public class DebugInterceptor implements MethodInterceptor {
@@ -350,14 +362,14 @@
 }</programlisting>
 
         <para>Note the call to the MethodInvocation's
-        <emphasis>proceed()</emphasis> method. This proceeds down the
+        <methodname>proceed()</methodname> method. This proceeds down the
         interceptor chain towards the join point. Most interceptors will invoke
         this method, and return its return value. However, a
         MethodInterceptor, like any around advice, can return a different
         value or throw an exception rather than invoke the proceed method.
         However, you don't want to do this without good reason!</para>
 
-        <remark>MethodInterceptors offer interoperability with other AOP
+        <note><para>MethodInterceptors offer interoperability with other AOP
         Alliance-compliant AOP implementations. The other advice types
         discussed in the remainder of this section implement common AOP
         concepts, but in a Spring-specific way. While there is an advantage in
@@ -365,7 +377,7 @@
         around advice if you are likely to want to run the aspect in another
         AOP framework. Note that pointcuts are not currently interoperable
         between frameworks, and the AOP Alliance does not currently define
-        pointcut interfaces.</remark>
+        pointcut interfaces.</para></note>
       </section>
 
       <section>
@@ -416,7 +428,7 @@
     }
 }</programlisting>
 
-        <remark>Before advice can be used with any pointcut.</remark>
+        <tip><para>Before advice can be used with any pointcut.</para></tip>
       </section>
 
       <section>
@@ -428,16 +440,16 @@
         <literal>org.springframework.aop.ThrowsAdvice</literal> interface does
         not contain any methods: it is a tag interface identifying that the
         given object implements one or more typed throws advice methods. These
-        should be of form</para>
+        should be in the form of:</para>
 
         <programlisting>afterThrowing([Method], [args], [target], subclassOfThrowable) </programlisting>
 
-        <para>Only the last argument is required. Thus there from one to four
+        <para>Only the last argument is required. The method signatures vary from having one to four
         arguments, depending on whether the advice method is interested in the
         method and arguments. The following are examples of throws
-        advices.</para>
+        advice.</para>
 
-        <para>This advice will be invoked if a
+        <para>The advice below is invoked if a
         <literal>RemoteException</literal> is thrown (including
         subclasses):</para>
 
@@ -477,7 +489,7 @@
     }
 }</programlisting>
 
-        <remark>Throws advice can be used with any pointcut.</remark>
+				<tip><para>Throws advice can be used with any pointcut.</para></tip>        
       </section>
 
       <section>
@@ -518,7 +530,7 @@
         exception, this will be thrown up the interceptor chain instead of the
         return value.</para>
 
-        <remark>After returning advice can be used with any pointcut.</remark>
+				<tip><para>After returning advice can be used with any pointcut.</para></tip>
       </section>
 
       <section>
@@ -639,13 +651,13 @@ public interface IntroductionInfo {
         is this. Thus in the example below, the delegate is the
         <literal>LockMixin</literal> subclass of
         <literal>DelegatingIntroductionInterceptor</literal>. Given a delegate
-        (by default itself) a
+        (by default itself), a
         <literal>DelegatingIntroductionInterceptor</literal> instance looks
         for all interfaces implemented by the delegate (other than
         IntroductionInterceptor), and will support introductions against any
         of them. It's possible for subclasses such as
         <literal>LockMixin</literal> to call the
-        <literal>suppressInterflace(Class intf) </literal>method to suppress
+        <literal>suppressInterface(Class intf) </literal>method to suppress
         interfaces that should not be exposed. However, no matter how many
         interfaces an <literal>IntroductionInterceptor</literal> is prepared
         to support, the <literal>IntroductionAdvisor</literal> used will
@@ -701,8 +713,8 @@ public interface IntroductionInfo {
         <para>Often it isn't necessary to override the <literal>invoke()
         </literal>method: the
         <literal>DelegatingIntroductionInterceptor</literal>
-        implementation--which calls the delegate method if the method is
-        introduced, otherwise proceeds towards the join point--is usually
+        implementation - which calls the delegate method if the method is
+        introduced, otherwise proceeds towards the join point - is usually
         sufficient. In the present case, we need to add a check: no setter
         method can be invoked if in locked mode.</para>
 
