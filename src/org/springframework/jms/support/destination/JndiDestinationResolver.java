@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.jms.support.destination;
 
 import java.util.Collections;
@@ -66,9 +67,9 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Desti
 	 * <p>Can be turned off to re-lookup a destination for each operation,
 	 * which allows for hot restarting of destinations. This is mainly
 	 * useful during development.
-     * <p>Please note that dynamic queues and topics get cached by destination name.
-     * Thus, use unique destination names across both queues and topics.
-     * @param cache <code>true</code> if resolved destinations are to be cached 
+	 * <p>Please note that dynamic queues and topics get cached by destination name.
+	 * Thus, use unique destination names across both queues and topics.
+	 * @param cache <code>true</code> if resolved destinations are to be cached
 	 */
 	public void setCache(boolean cache) {
 		this.cache = cache;
@@ -77,9 +78,9 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Desti
 	/**
 	 * Set the ability of {@link JndiDestinationResolver} to create dynamic destinations
 	 * if the destination name is not found in JNDI. Default is <code>false</code>.
-     * @param fallbackToDynamicDestination <code>true</code> if this {@link JndiDestinationResolver} instance is to
-     * fallback to resolving destinations dynamically
-     * @see #setDynamicDestinationResolver(DestinationResolver)  
+	 * @param fallbackToDynamicDestination <code>true</code> if this {@link JndiDestinationResolver} instance is to
+	 * fallback to resolving destinations dynamically
+	 * @see #setDynamicDestinationResolver(DestinationResolver)
 	 */
 	public void setFallbackToDynamicDestination(boolean fallbackToDynamicDestination) {
 		this.fallbackToDynamicDestination = fallbackToDynamicDestination;
@@ -87,9 +88,10 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Desti
 
 	/**
 	 * Set the {@link DestinationResolver} to use when falling back to dynamic
-     * destinations.
+	 * destinations.
 	 * <p>The default is a {@link DynamicDestinationResolver}.
-     * @param dynamicDestinationResolver the {@link DestinationResolver} to use when falling back to dynamic destinations
+	 * @param dynamicDestinationResolver the {@link DestinationResolver} to use
+	 * when falling back to dynamic destinations
 	 * @see #setFallbackToDynamicDestination
 	 * @see DynamicDestinationResolver
 	 */
