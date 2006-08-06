@@ -112,7 +112,7 @@
 					configuration metadata that is allowed. The Spring IoC container itself
 					is <emphasis>totally</emphasis> decoupled from the format in which this
 					configuration metadata is actually written.</para>
-					<para>At the time of writing, one can supply this configuration metadata
+					<para>At the time of writing, you can supply this configuration metadata
 					using either XML, the Java properties format, or programmatically (using
 					Spring's public API). The XML-based configuration metadata format really is
 					simple though, and so the remainder of this chapter will use the XML format
@@ -148,8 +148,8 @@
 			these beans are configured as one or more <literal>&lt;bean/&gt;</literal> elements
 			inside a top-level <literal>&lt;beans/&gt;</literal> element.</para>
 			<para>These bean definitions correspond to the actual objects that make up your
-			application(s). Typically one will have bean definitions for one's service layer
-			objects, one's data access objects (DAOs), presentation objects such as Struts
+			application(s). Typically you will have bean definitions for your service layer
+			objects, your data access objects (DAOs), presentation objects such as Struts
 			<interfacename>Action</interfacename> instances, infrastructure objects such as
 			Hibernate <interfacename>SessionFactory</interfacename> instances, JMS
 			<interfacename>Queue</interfacename> references, etc. (the possibilities are of
@@ -704,7 +704,7 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 				<para>
 					There is no hard and fast rule here. Use whatever type of DI makes
 					the most sense for a particular class; sometimes, when dealing with
-					third party classes to which one does not have the source, the choice
+					third party classes to which you do not have the source, the choice
 					will already have been made for you - a legacy class may not expose
 					any setter methods, and so constructor injection will be the only type
 					of DI available to you.
@@ -973,9 +973,9 @@ public class Foo {
 			<para>
 				There is no potential for ambiguity here (assuming of course that <classname>Bar</classname>
 				and <classname>Baz</classname> classes are not related in an inheritance hierarchy).
-				Thus the following configuration will work just fine, and one does not need to
+				Thus the following configuration will work just fine, and you do not need to
 				specify the constructor argument indexes and / or types explicitly... it just plain
-				works as one would expect it to.
+				works as you would expect it to.
 			</para>
 			<programlisting><![CDATA[<beans>
     <bean name="foo" class="x.y.Foo">
@@ -1115,7 +1115,7 @@ public class ExampleBean {
         <para>By way of an example, one common place (at least in pre-Spring 2.0
         configuration) where the &lt;idref/&gt; element brings value is in the
         configuration of <link linkend="aop-pfb-1">AOP interceptors</link> in a
-        <classname>ProxyFactoryBean</classname> bean definition. If one uses
+        <classname>ProxyFactoryBean</classname> bean definition. If you use
         &lt;idref/&gt; elements when specifying the interceptor names, there is
         no chance of inadvertently misspelling an interceptor id.</para>
             </section>
@@ -1159,8 +1159,8 @@ public class ExampleBean {
                 <literal>'id'</literal> attribute of the target bean, or one of the
                 values in the <literal>'name'</literal> attribute of the target bean,
                 and the target bean must be in a parent container to the current one.
-                The main use of this bean reference variant is when one has a hierarchy
-                of containers and one wants to wrap an existing bean in a parent container
+                The main use of this bean reference variant is when you have a hierarchy
+                of containers and you want to wrap an existing bean in a parent container
                 with some sort of proxy which will have the same name as the parent bean
                 (i.e. the bean definition in the child context is overriding the parent
                 bean).</para>
@@ -1324,9 +1324,9 @@ support=support@somecompany.co.uk]]></programlisting>
                     underlie the associated <interfacename>Map</interfacename>,
                     <interfacename>Set</interfacename> and <interfacename>Properties</interfacename>
                     implementation types used internally by the container.</para>
-                    <para>Finally, some minor notes about the merging support are in order; one
+                    <para>Finally, some minor notes about the merging support are in order; you
                     cannot merge different collection types (e.g. a <interfacename>Map</interfacename> and
-                    a <interfacename>List</interfacename>), and if one does attempt to do so an appropriate
+                    a <interfacename>List</interfacename>), and if you do attempt to do so an appropriate
                     <classname>Exception</classname> will be thrown; and in case it is not
                     immediately obvious, the <literal>'merge'</literal> attribute must be specified
                     on the lower level, inherited, child definition; specifying the
@@ -1656,7 +1656,7 @@ public class ReplacementComputeValue implements MethodReplacer {
             bean definition as lazy-initialized. A lazily-initialized bean indicates to the
             IoC container whether or not a bean instance should be created at startup or when it
             is first requested.</para>
-            <para>When one is configuring beans via XML, this lazy loading is controlled by the
+            <para>When configuring beans via XML, this lazy loading is controlled by the
             <literal>'lazy-init'</literal> attribute on the <literal>&lt;bean/&gt;</literal>
             element; to wit:</para>
             <programlisting><![CDATA[<bean id="lazy" class="com.foo.ExpensiveToCreateBean" ]]><emphasis role="bold">lazy-init="true"</emphasis><![CDATA[>
@@ -1827,15 +1827,15 @@ public class ReplacementComputeValue implements MethodReplacer {
             to wire one or two bean definitions.</para>
             <section id="beans-factory-autowire-candidate">
                 <title>Excluding a bean from being available for autowiring</title>
-                <para>One can also (on a per bean basis) totally exclude a bean from being an
+                <para>You can also (on a per bean basis) totally exclude a bean from being an
                 autowire candidate. When configuring beans using Spring's XML format, the
                 <literal>'autowire-candidate'</literal> attribute of the
                 <literal>&lt;bean/&gt;</literal> element can be set to
                 <literal>'false'</literal>; this has the effect of making the container
                 totally exclude that specific bean definition from being available
                 to the autowiring infrastructure.</para>
-                <para>This can be useful when one has a bean that one absolutely never ever
-                wants to have injected into other beans via autowiring. It does not
+                <para>This can be useful when you have a bean that you absolutely never ever
+                want to have injected into other beans via autowiring. It does not
                 mean that the excluded bean cannot itself be configured using autowiring...
                 it can, it is rather that it itself will not be considered as a candidate
                 for autowiring other beans.</para>
@@ -1909,21 +1909,22 @@ public class ReplacementComputeValue implements MethodReplacer {
     </section>
     <section id="beans-factory-scopes">
         <title>Bean scopes</title>
-        <para>When you create a bean definition (typically via an XML configuration file)
+        <para>When you create a bean definition (typically in an XML configuration file)
         what you are actually creating is (loosely speaking) a <emphasis>recipe</emphasis>
         or template for creating actual instances of the objects defined by that
         bean definition. The fact that a bean definition is a recipe is important,
         because it means that, just like a class, you can potentially have many object
-        instances created off the back of a single recipe.</para>
+        instances created from a single recipe.</para>
         <para>You can control not only the various dependencies and
         configuration values that are to be plugged into an object that is created
         from a particular bean definition, but also the <firstterm>scope</firstterm>
         of the objects created from a particular bean definition. This approach is very
         powerful and gives you the flexibility to <emphasis>choose</emphasis> the scope
-        of the objects you create, and not have to 'bake in' such scope at the Java
-        class level. Beans can be defined to be deployed in one of a number of scopes:
-        out of the box, the Spring Framework supports exactly five scopes (although
-        three of those scopes are only available if you are using a web-aware Spring
+        of the objects you create through configuration instead of having to 'bake in' 
+        the scope of an object at the Java class level. Beans can be defined to be 
+        deployed in one of a number of scopes:
+        out of the box, the Spring Framework supports exactly five scopes (of which 
+        three are available only if you are using a web-aware Spring
         <interfacename>ApplicationContext</interfacename>).</para>
 		<para>The scopes supported out of the box are listed below:</para>
 		<table>
@@ -1959,7 +1960,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 						<entry>
 							<para>Scopes a single bean definition to the lifecycle of
 							a single HTTP request; i.e. each and every HTTP request will
-							have it's own instance of a bean created off the back of a
+							have its own instance of a bean created off the back of a
 							single bean definition. Only valid in the context of a
 							web-aware Spring <interfacename>ApplicationContext</interfacename>.</para>
 						</entry>
@@ -1992,7 +1993,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 		</table>
 
         <note>
-            <para>For backwards compatibility reasons it is still possible to specify
+            <para>For backwards compatibility reasons, it is still possible to specify
             <literal>singleton="false"</literal> and <literal>singleton="true"</literal>
             as attributes of an XML-based bean definition. However, note that specifying
             both the <literal>singleton</literal> and <literal>scope</literal> attribute
@@ -2006,7 +2007,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 		    <para>When a bean is a singleton, only one <emphasis>shared</emphasis>
 		    instance of the bean will be managed and all requests for beans with
 		    an id or ids matching that bean definition will result in that one
-		    specific bean instance being returned.</para>
+		    specific bean instance being returned by the Spring container.</para>
 		    <para>To put it another way, when you define a bean definition and it
 		    is scoped as a singleton, then the Spring IoC container will create
 		    <emphasis>exactly one</emphasis> instance of the object defined by
@@ -2083,13 +2084,14 @@ public class ReplacementComputeValue implements MethodReplacer {
 			prototype object, hands it to the client and then has no further knowledge of that
 			prototype instance. This means that while initialization lifecycle callback
 			methods will be (and are) called on all objects regardless of scope, in the case
-			of prototypes any configured destruction lifecycle callbacks will <emphasis>not</emphasis>
+			of prototypes, any configured destruction lifecycle callbacks will <emphasis>not</emphasis>
 			be called. It is the responsibility of the client code to clean up
 			prototype scoped objects and release any expensive resources that the prototype
-			bean(s) are holding onto. (one possible way to do this would be via the use
-			of a bean post processor which would hold onto beans which need to be cleaned
-			up)</para>
-			<para>You can in some respects think of the Spring containers role when talking
+			bean(s) are holding onto. (One possible way to get the Spring container
+		  to release resources used by singleton-scoped beans is through the use
+			of a bean post processor which would hold a reference to the beans that need to be cleaned
+			up.)</para>
+			<para>In some respects, you can think of the Spring container's role when talking
 			about a prototype-scoped bean as somewhat of a replacement for the Java
 			<literal>'new'</literal> operator. Any lifecycle aspects past that point have to
 			be handled by the client. The lifecycle of a bean in a Spring IoC container is
@@ -2120,10 +2122,10 @@ public class ReplacementComputeValue implements MethodReplacer {
 			    <title>Initial web configuration</title>
                 <para>In order to effect the scoping of beans at the <literal>request</literal>,
                 <literal>session</literal>, and <literal>global session</literal> level
-                (i.e. web-scoped beans), some initial (small) configuration is required
+                (i.e. web-scoped beans), some minor initial configuration is required
                 before you can set about defining your bean definitions. Please note that
-                this extra setup is <emphasis>not</emphasis> required if you just want the
-                'normal' (for want of a better word) scopes; i.e. singleton and prototype.</para>
+                this extra setup is <emphasis>not</emphasis> required if you just want to use the
+                'standard' scopes; i.e. singleton and prototype.</para>
                 <para>Now as things stand, there are a couple of ways to effect this
                 initial setup depending on your particular servlet environment. If you are
                 using a Servlet 2.4+ web container, then you need only add the following
@@ -2175,7 +2177,7 @@ public class ReplacementComputeValue implements MethodReplacer {
                 the internal state of the instance that is created as much as you want,
                 safe in the knowledge that other requests that are also using instances created
                 off the back of the same <literal>'loginAction'</literal> bean definition
-                will not be seeing these changes in state particular to an individual
+                will not be seeing these changes in state since they are particular to an individual
                 request. When the request is finished processing, the bean that is scoped
                 to the request will be discarded.</para>
 			</section>
@@ -2190,12 +2192,12 @@ public class ReplacementComputeValue implements MethodReplacer {
                 lifetime of a single HTTP <interfacename>Session</interfacename>.
                 In other words, the <literal>'userPreferences'</literal> bean will be
                 effectively scoped at the HTTP <interfacename>Session</interfacename> level.
-                Just like <literal>request-scoped</literal> beans you can change the internal
+                Just like <literal>request-scoped</literal> beans, you can change the internal
                 state of the instance that is created as much as you want, safe in the
                 knowledge that other HTTP <interfacename>Session</interfacename> instances
                 that are also using instances created off the back of the same
                 <literal>'userPreferences'</literal> bean definition
-                will not be seeing these changes in state particular to an individual
+                will not be seeing these changes in state since they are particular to an individual
                 HTTP <interfacename>Session</interfacename>. When the HTTP
                 <interfacename>Session</interfacename> is eventually discarded, the bean
                 that is scoped to that particular HTTP <interfacename>Session</interfacename>
@@ -2249,9 +2251,9 @@ public class ReplacementComputeValue implements MethodReplacer {
 			        you straight in this regard).</para>
 			    </note>
                 <para>Let's look at the configuration that is required to effect this;
-                it (the configuration) is not hugely difficult (just one line), but it
+                the configuration is not hugely complex (it takes just one line), but it
                 is important to understand the <quote>why</quote> as well as the
-                <quote>how</quote>.</para>
+                <quote>how</quote> behind it.</para>
                     <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -2276,39 +2278,38 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     </bean>
 </beans>
 ]]></programlisting>
-                <para>To create a proxy to a scoped bean using XML-based configuration, one need
-                only insert a child <literal>&lt;aop:scoped-proxy/&gt;</literal> element into a
+                <para>To create a proxy to a scoped bean using XML-based configuration, you need
+                only to insert a child <literal>&lt;aop:scoped-proxy/&gt;</literal> element into a
                 scoped bean definition (you may also need the CGLIB library on your classpath
                 so that the container can effect class-based proxying). The above XML configuration
                 demonstrated the <quote>how</quote>; now for the <quote>why</quote>. So, just why
-                does one need this <literal>&lt;aop:scoped-proxy/&gt;</literal> element in the
+                do you need this <literal>&lt;aop:scoped-proxy/&gt;</literal> element in the
                 definition of beans scoped at the <literal>request</literal>,
                 <literal>session</literal>, and <literal>globalSession</literal> level? The
-                reason why <literal>&lt;aop:scoped-proxy/&gt;</literal> is required is best
-                explained by picking apart the following bean definition (please note that the
-                following <literal>'userPreferences'</literal> bean definition as it stands is
-                <emphasis>incomplete</emphasis>):</para>
+                reason is best explained by picking apart the following bean definition 
+								(please note that the following <literal>'userPreferences'</literal> bean 
+								definition as it stands is <emphasis>incomplete</emphasis>):</para>
                 <programlisting><![CDATA[<bean id="userPreferences" class="com.foo.UserPreferences" scope="session"/>
 
 <bean id="userManager" class="com.foo.UserManager">
     <property name="userPreferences" ref="userPreferences"/>
 </bean>]]></programlisting>
-                <para>From the above configuration it is evident to see that the singleton bean
+                <para>From the above configuration it is evident that the singleton bean
                 <literal>'userManager'</literal> is being injected with a reference to the HTTP
                 <interfacename>Session</interfacename>-scoped bean <literal>'userPreferences'</literal>.
                 The salient point here is that the <literal>'userManager'</literal> bean is a
                 singleton... it will be instantiated <emphasis>exactly once</emphasis> per container,
-                and it's dependencies (in this case only one, the <literal>'userPreferences'</literal>
+                and its dependencies (in this case only one, the <literal>'userPreferences'</literal>
                 bean) will also only be injected once. This means that the
                 <literal>'userManager'</literal> will (conceptually) only ever operate on the exact
                 same <literal>'userPreferences'</literal> object, i.e. the one that it was originally
-                injected with. This is not what one wants when one is injecting a HTTP
+                injected with. This is not what you want when you inject a HTTP
                 <interfacename>Session</interfacename>-scoped bean as a dependency into a
                 collaborating object. What we do want is a single <literal>'userManager'</literal> object,
                 and then, for the lifetime of a HTTP <interfacename>Session</interfacename>, we want to
                 see and use a <literal>'userPreferences'</literal> object that is specific to said
                 HTTP <interfacename>Session</interfacename>.</para>
-                <para>Rather what one needs then is to inject some sort of object that exposes the
+                <para>Rather what you need then is to inject some sort of object that exposes the
                 exact same public interface as the <classname>UserPreferences</classname> class (ideally
                 an object that <emphasis>is a</emphasis> <classname>UserPreferences</classname> instance)
                 and that is smart enough to be able to go off and fetch the
@@ -2351,7 +2352,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 			an underlying storage mechanism respectively. Possible custom scopes are
 			beyond the scope of this reference manual. You may wish to look at the
 			<interfacename>Scope</interfacename> implementations that are supplied with
-			Spring for an idea of how to go about writing your own implementation.</para>
+			Spring for an idea of how to go about implementing your own.</para>
 			<para>The remainder of this section details how, after you have written and
 			tested one or more custom <interfacename>Scope</interfacename> implementations,
 			you then go about making the Spring container aware of your new scope. The
@@ -2369,7 +2370,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 			<para>Let's assume that you have written your own custom
 			<interfacename>Scope</interfacename> implementation, and you have registered it
 			like so:</para>
-			    <programlisting><lineannotation>// note: the <classname>ThreadScope</classname> class does <emphasis role="bold">not</emphasis> exist; I just made it up for the sake of this example</lineannotation><![CDATA[
+			    <programlisting><lineannotation>// note: the <classname>ThreadScope</classname> class does <emphasis role="bold">not</emphasis> exist; I made it up for the sake of this example</lineannotation><![CDATA[
 Scope customScope = new ThreadScope();
 beanFactory.registerScope("]]><emphasis role="bold">thread</emphasis><![CDATA[", scope);]]></programlisting>
             <para>You can then create bean definitions that adhere to the scoping rules of your
@@ -2508,7 +2509,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
                 <section id="beans-factory-lifecycle-default-init-destroy-methods">
                     <title>Default initialization &amp; destroy methods</title>
                     <para>
-                        When one is writing initialization and destroy method callbacks that do not
+                        When you are writing initialization and destroy method callbacks that do not
                         use the Spring-specific <interfacename>InitializingBean</interfacename>
                         and <interfacename>DisposableBean</interfacename> callback interfaces,
                         one (in the experience of this author) typically finds oneself writing
@@ -2676,7 +2677,7 @@ public final class Boot {
                 <methodname>getObject()</methodname> method to effect the bean lookup (under the hood the
                 <interfacename>ObjectFactory</interfacename> implementation instance that is returned
                 simply delegates down to a <interfacename>BeanFactory</interfacename> to actually
-                lookup a bean by name). All that one need do is supply
+                lookup a bean by name). All that you need to do is supply
                 the <classname>ObjectFactoryCreatingFactoryBean</classname> with the name of the
                 bean that is to be looked up. Let's look at an example:</para>
                 <programlisting><![CDATA[package x.y;
@@ -2761,8 +2762,8 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
             The interested reader may also find the <classname>ServiceLocatorFactoryBean</classname>
             (in the <literal>org.springframework.beans.factory.config</literal> package) to be
             of use... the approach is similar to that of the
-            <classname>ObjectFactoryCreatingFactoryBean</classname>, but it allows one
-            to specify one's own lookup interface as opposed to having to use a Spring-specific
+            <classname>ObjectFactoryCreatingFactoryBean</classname>, but it allows you
+            to specify your own lookup interface as opposed to having to use a Spring-specific
             lookup interface such as the <interfacename>ObjectFactory</interfacename>.
             Consult the (copious) Javadocs for the <classname>ServiceLocatorFactoryBean</classname>
             for a full treatment of this alternative approach (that <emphasis>does</emphasis>
@@ -3430,7 +3431,7 @@ argument.required=The '{0}' argument is required.]]></programlisting>
         <classname>MessageResource</classname> implementations follow the same locale resolution
         and fallback rules as the standard JDK ResourceBundle. In short, and continuing with
         the example <literal>'messageSource'</literal> defined previously, if you want to resolve
-        messages against the British (en-GB) locale, one would create files called
+        messages against the British (en-GB) locale, you would create files called
         <literal>format_en_GB.properties</literal>, <literal>exceptions_en_GB.properties</literal>,
         and <literal>windows_en_GB.properties</literal> respectively.</para>
             <para>Locale resolution is typically going to be managed by the surrounding environment
@@ -3720,7 +3721,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
         loaded only as needed, and loaded only once.</para>
         <section>
             <title>Using the Singleton-helper classes</title>
-            <para>One can see a detailed example of using
+            <para>You can see a detailed example of their usage in
             <ulink url="http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLocator</ulink>
             and
             <ulink url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink>
