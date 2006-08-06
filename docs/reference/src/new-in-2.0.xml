@@ -131,17 +131,17 @@
       significantly. The previous 1.2.x style of configuration continues to be valid
       (and supported), but the new style is markedly less verbose and is the
       recommended style. Spring 2.0 also ships with an AspectJ aspects library that
-      you can use to make pretty much any object - even objects not created by the
-      Spring container - transactional.</para>
+      you can use to make pretty much any object transactional - even objects not created by the
+      Spring container.</para>
       <para>The chapter entitled <xref linkend="transaction"/> contains all of the details.</para>
     </section>
 
     <section id="new-in-2-middle-tier-jpa">
       <title>JPA</title>
 
-      <para>Spring 2.0 ships with a JPA abstraction layer, that is similar in intent
-      to Spring's JDBC abstraction layer in the scope of what it addresses and in its
-      general usage patterns.</para>
+      <para>Spring 2.0 ships with a JPA abstraction layer that is similar in intent
+      to Spring's JDBC abstraction layer in terms of scope and general 
+      usage patterns.</para>
 
       <para>If you are interested in using a JPA-implementation as the
       backbone of your persistence layer, the section entitled <xref
@@ -217,7 +217,7 @@
       <title>Sensible defaulting in Spring MVC</title>
 
       <para>For a lot of projects, sticking to established conventions and
-      having reasonable defaults is just what they (the projects) need...
+      having reasonable defaults is just what the projects need...
       this theme of convention-over-configuration now has explicit support in
       Spring MVC. What this means is that if you establish a set of naming
       conventions and suchlike, you can <emphasis>substantially</emphasis> cut
@@ -234,8 +234,8 @@
     <section id="new-in-2-web-portlet">
       <title>Portlet framework</title>
 
-      <para>Spring 2.0 ships with a Portlet framework that is similar in
-      spirit to the Spring MVC framework. Detailed coverage of the Spring
+      <para>Spring 2.0 ships with a Portlet framework that is conceptually similar 
+			to the Spring MVC framework. Detailed coverage of the Spring
       Portlet framework can be found in the section entitled
       <xref linkend="portlet" />.</para>
     </section>
@@ -244,16 +244,15 @@
   <section id="new-in-2-other">
     <title>Everything else...</title>
 
-    <para>This final section contains all of the new and improved Spring 2.0
-    features and functionality that didn't fit neatly into any of the above
-    sections.</para>
+    <para>This final section outlines all of the other new and improved Spring 2.0
+    features and functionality.</para>
 
     <section id="new-in-2-other-dynamic-language-support">
       <title>Dynamic language support</title>
 
-      <para>Spring 2.0 now has support for beans that have been written in a
-      language other than Java. The dynamic languages that are supported
-      currently include JRuby, Groovy and BeanShell. This dynamic language
+      <para>Spring 2.0 now has support for beans written in 
+      languages other than Java. The supported dynamic languages 
+      include JRuby, Groovy and BeanShell. This dynamic language
       support is comprehensively detailed in the section entitled
       <xref linkend="dynamic-language" />.</para>
     </section>
@@ -289,8 +288,8 @@
 
       <para>If you are one of the lucky few to be developing projects using
       Java 5 (Tiger), you will be pleased to know that Spring 2.0 now has some
-      quite compelling support for Tiger. (What follows is a set of pointers
-      to Spring Java 5-only features.)</para>
+      quite compelling support for Tiger. Below is a set of pointers
+      to Spring Java 5-only features.</para>
 
       <itemizedlist>
 		<listitem>
@@ -322,25 +321,25 @@
     (<filename>'spring-with-dependecies.[zip|tar.gz]'</filename>).</para>
 
     <para>Said distribution also ships with a number of so-called
-    <emphasis>showcase</emphasis> applications. These showcase applications are severely
-    limited in scope, and serve only as fully working examples of exactly one new feature
-    in Spring 2.0. The idea is that you can take the code in these showcases and play around
-    with it, as opposed to having to create your own small project to test out some new
+    <emphasis>showcase</emphasis> applications. Each showcase application provides
+		fully working examples, focussed on demonstrating exactly one new Spring 2.0 feature
+    at a time. The idea is that you can take the code in these showcases and experiment
+    with it, as opposed to having to create your own small project to test out each new
     Spring 2.0 feature. Please be advised that the scope of these showcase applications is
-    deliberately small; the domain model (if there even is one) is maybe one or two classes,
-    and typical enterprise concerns such as security and transactional integrity are
-    conspicuously absent.</para>
+    deliberately limited; the domain model (if there is one) consists of maybe one or two classes,
+    and typical enterprise concerns such as security and transactional integrity are deliberately
+		omitted.</para>
   
   </section>
 
   <section id="new-in-2-other-documentation">
     <title>Improved documentation</title>
-    <para>The Spring reference documentation (you're reading it!) has of course been
+    <para>The Spring reference documentation has also been
     substantially updated to reflect all of the above features new in Spring 2.0.</para>
     <para>While every effort has been made to ensure that there are no errors in this
     documentation, some errors may nevertheless have crept in. If you do spot any typos
     or even more serious errors, and you can spare a few cycles during lunch, please do
-    bring the error to the attention of the Spring team via the
+    bring the error to the attention of the Spring team by raising an issue on the
     <ulink url="http://opensource.atlassian.com/projects/spring/">Spring Framework's JIRA site.</ulink></para>
   </section>
 
