@@ -21,6 +21,7 @@ import javax.jms.JMSException;
 import javax.jms.Session;
 
 import org.springframework.jms.support.JmsAccessor;
+import org.springframework.util.Assert;
 
 /**
  * Base class for {@link org.springframework.jms.core.JmsTemplate} and other
@@ -36,10 +37,32 @@ import org.springframework.jms.support.JmsAccessor;
  */
 public class JmsDestinationAccessor extends JmsAccessor {
 
-	private boolean pubSubDomain = false;
-
 	private DestinationResolver destinationResolver = new DynamicDestinationResolver();
 
+	private boolean pubSubDomain = false;
+
+
+	/**
+	 * Set the destination resolver that is to be used to resolve
+	 * {@link Destination Destinations} for this accessor.
+	 * <p>The default resolver is a {@link DynamicDestinationResolver}. Specify a
+	 * {@link JndiDestinationResolver} for resolving destination names as JNDI locations.
+	 * @param destinationResolver the destination resolver that is to be used
+	 * @see org.springframework.jms.support.destination.DynamicDestinationResolver
+	 * @see org.springframework.jms.support.destination.JndiDestinationResolver
+	 */
+	public void setDestinationResolver(DestinationResolver destinationResolver) {
+		Assert.notNull(destinationResolver, "DestinationResolver must not be null");
+		this.destinationResolver = destinationResolver;
+	}
+
+	/**
+	 * Return the destination resolver for this accessor.
+	 * @return the destination resolver for this accessor
+	 */
+	public DestinationResolver getDestinationResolver() {
+		return destinationResolver;
+	}
 
 	/**
 	 * Configure the destination accessor with knowledge of the JMS domain used.
@@ -64,27 +87,6 @@ public class JmsDestinationAccessor extends JmsAccessor {
 		return pubSubDomain;
 	}
 
-	/**
-	 * Set the destination resolver that is to be used to resolve
-     * {@link Destination Destinations} for this accessor.
-	 * <p>The default resolver is a {@link DynamicDestinationResolver}. Specify a
-	 * {@link JndiDestinationResolver} for resolving destination names as JNDI locations.
-     * @param destinationResolver the destination resolver that is to be used
-	 * @see org.springframework.jms.support.destination.DynamicDestinationResolver
-	 * @see org.springframework.jms.support.destination.JndiDestinationResolver
-	 */
-	public void setDestinationResolver(DestinationResolver destinationResolver) {
-		this.destinationResolver = destinationResolver;
-	}
-
-	/**
-	 * Return the destination resolver for this accessor.
-     * @return the destination resolver for this accessor
-	 */
-	public DestinationResolver getDestinationResolver() {
-		return destinationResolver;
-	}
-
 
 	/**
 	 * Resolve the given destination name into a JMS {@link Destination},
@@ -94,22 +96,10 @@ public class JmsDestinationAccessor extends JmsAccessor {
 	 * @return the located {@link Destination}
 	 * @throws javax.jms.JMSException if resolution failed
 	 * @see #setDestinationResolver
-     * @see #getDestinationResolver() 
+	 * @see #getDestinationResolver()
 	 */
 	protected Destination resolveDestinationName(Session session, String destinationName) throws JMSException {
 		return getDestinationResolver().resolveDestinationName(session, destinationName, isPubSubDomain());
-	}
-
-
-    /**
-	 * Validate configuration.
-	 */
-	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
-
-		if (this.destinationResolver == null) {
-			throw new IllegalArgumentException("destinationResolver is required");
-		}
 	}
 
 }
