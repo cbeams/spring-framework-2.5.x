@@ -525,10 +525,71 @@
       Spring's <classname>PathMatcher</classname> utility). Both of the latter
       are effectively wildcards</para>
 
+      <para>One use for this mechanism is when doing component-style
+      application assembly. All components can 'publish' context definition
+      fragments to a well-known location path, and when the final application
+      context is created using the same path prefixed via
+      <literal>classpath*:</literal>, all component fragments will be picked
+      up automatically.</para>
+
+      <para>Note that this wildcarding is specific to use of resource paths in
+      application context constructors (or when using the
+      <classname>PathMatcher</classname> utility class directly), and is
+      resolved at construction time. It has nothing to do with the
+      <interfacename>Resource</interfacename> type itself. It's not possible
+      to use the <literal>classpath*:</literal> prefix to construct an actual
+      <interfacename>Resource</interfacename>, as a resource points to just
+      one resource at a time.</para>
+
       <section>
         <title>Ant-style Patterns</title>
 
-        <para></para>
+        <para>When the path location contains an Ant-style pattern,
+        e.g.:</para>
+
+        <para><programlisting>     /WEB-INF/*-context.xml
+     com/mycompany/**/applicationContext.xml
+     file:C:/some/path/*-context.xml
+     classpath:com/mycompany/**/applicationContext.xml</programlisting>the
+        resolver follows a more complex but defined procedure to try to
+        resolve the wildcard. It produces a Resource for the path up to the
+        last non-wildcard segment and obtains a URL from it. If this URL is
+        not a "jar:" URL or container-specific variant (e.g. "zip:" in
+        WebLogic, "wsjar" in WebSphere", etc.), then a java.io.File is
+        obtained from it, and used to resolve the wildcard by walking the
+        filesystem. In the case of a jar URL, the resolver either gets a
+        code&gt;java.net.JarURLConnection from it, or manually parse the jar
+        URL, and then traverse the contents of the jar file, to resolve the
+        wildcards.</para>
+
+        <section>
+          <title>Implications on portability</title>
+
+          <para>If the specified path is already a file URL (either
+          explicitly, or implicitly because the base ResourceLoader is a
+          filesystem one, then wildcarding is guaranteed to work in a
+          completely poratable fashion.</para>
+
+          <para>If the specified path is a classpath location, then the
+          resolver must obtain the last non-wildcard path segment URL via a
+          Classloader.getResource() call. Since this is just a node of the
+          path (not the file at the end) it is actually undefined (in the
+          ClassLoader Javadocs) exactly what sort of a URL is returned in this
+          case. In practice, it is always a java.io.File representing the
+          directory, where the classpath resource resolves to a filesystem
+          location, or a jar URL of some sort, where the classpath resource
+          resolves to a jar location. Still, there is a portability concern on
+          this operation.</para>
+
+          <para>If a jar URL is obtained for the last non-wildcard segment,
+          the resolver must be able to get a java.net.JarURLConnection from
+          it, or manually parse the jar URL, to be able to walk the contents
+          of the jar, and resolve the wildcard. This will work in most
+          environments, but will fail in others, and it is strongly
+          recommended that the wildcard resolution of resources coming from
+          jars be thoroughly tested in your specific environment before you
+          rely on it.</para>
+        </section>
       </section>
 
       <section>
@@ -547,19 +608,14 @@
         call), and then merged to form the final application context
         definition.</para>
 
-        <para>One use for this mechanism is when doing component-style
-        application assembly. All components can 'publish' context definition
-        fragments to a well-known location path, and when the final
-        application context is created using the same path prefixed via
-        <literal>classpath*:</literal>, all component fragments will be picked
-        up automatically.</para>
-
-        <para>Note that this special prefix is specific to application
-        contexts, and is resolved at construction time. It has nothing to do
-        with the <interfacename>Resource</interfacename> type itself. It's not
-        possible to use the <literal>classpath*:</literal> prefix to construct
-        an actual <interfacename>Resource</interfacename>, as a resource
-        points to just one resource at a time.</para>
+        <para>The "classpath*:" prefix can also be combined with a PathMatcher
+        pattern in the rest of the location path, for example
+        "classpath*:META-INF/*-beans.xml". In this case, the resolution
+        strategy is fairly simple: a ClassLoader.getResources() call is used
+        on the last non-wildcard path segment to get all the matching
+        resources in the class loader hierarchy, and then off each resource
+        the same PathMatcher resoltion strategy described above is used for
+        the wildcard subpath.</para>
       </section>
     </section>
 
