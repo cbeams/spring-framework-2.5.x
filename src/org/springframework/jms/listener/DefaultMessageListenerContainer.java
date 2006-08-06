@@ -30,6 +30,8 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.connection.JmsResourceHolder;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.jms.support.destination.CachingDestinationResolver;
+import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -412,10 +414,10 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * registering a MessageListener for the specified listener.
 	 * @param session the JMS Session to work on
 	 * @return the MessageConsumer
-	 * @throws javax.jms.JMSException if thrown by JMS methods
+	 * @throws JMSException if thrown by JMS methods
 	 * @see #receiveAndExecute
 	 */
-	protected MessageConsumer createListenerConsumer(final Session session) throws JMSException {
+	protected MessageConsumer createListenerConsumer(Session session) throws JMSException {
 		Destination destination = getDestination();
 		if (destination == null) {
 			destination = resolveDestinationName(session, getDestinationName());
@@ -629,9 +631,11 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * to reestablish a Connection to the JMS provider both for the shared
 	 * and the non-shared Connection case.
 	 * @see #refreshConnectionUntilSuccessful()
+	 * @see #refreshDestination()
 	 */
 	protected void recoverAfterListenerSetupFailure() {
 		refreshConnectionUntilSuccessful();
+		refreshDestination();
 	}
 
 	/**
@@ -673,6 +677,25 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 					// Re-interrupt current thread, to allow other threads to react.
 					Thread.currentThread().interrupt();
 				}
+			}
+		}
+	}
+
+	/**
+	 * Refresh the JMS destination that this listener container operates on.
+	 * <p>Called after listener setup failure, assuming that a cached Destination
+	 * object might have become invalid (a typical case on WebLogic JMS).
+	 * <p>The default implementation removes the destination from a
+	 * DestinationResolver's cache, in case of a CachingDestinationResolver.
+	 * @see #setDestinationName
+	 * @see org.springframework.jms.support.destination.CachingDestinationResolver
+	 */
+	protected void refreshDestination() {
+		String destName = getDestinationName();
+		if (destName != null) {
+			DestinationResolver destResolver = getDestinationResolver();
+			if (destResolver instanceof CachingDestinationResolver) {
+				((CachingDestinationResolver) destResolver).removeFromCache(destName);
 			}
 		}
 	}
