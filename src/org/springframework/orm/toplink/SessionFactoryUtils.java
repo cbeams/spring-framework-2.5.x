@@ -37,22 +37,13 @@ import org.springframework.util.Assert;
 /**
  * Helper class featuring methods for TopLink Session handling,
  * allowing for reuse of TopLink Session instances within transactions.
+ * Also provides support for exception translation.
  *
- * <p>Supports synchronization with both Spring-managed JTA transactions
- * (i.e. JtaTransactionManager) and non-Spring JTA transactions (i.e. plain JTA
- * or EJB CMT). See the <code>getSession</code> version with all parameters
- * for details.
- *
- * <p>Used internally by TopLinkTemplate and TopLinkInterceptor. Can also be used
- * directly in application code, e.g. in combination with TopLinkInterceptor.
+ * <p>Mainly intended for internal use within the framework.
  *
  * @author Juergen Hoeller
  * @author <a href="mailto:james.x.clark@oracle.com">James Clark</a>
  * @since 1.2
- * @see TopLinkTemplate
- * @see TopLinkInterceptor
- * @see TopLinkTransactionManager
- * @see org.springframework.transaction.jta.JtaTransactionManager
  */
 public abstract class SessionFactoryUtils {
 
