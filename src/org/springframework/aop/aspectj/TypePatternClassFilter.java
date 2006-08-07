@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.support;
+package org.springframework.aop.aspectj;
 
 import org.aspectj.weaver.tools.PointcutParser;
 import org.aspectj.weaver.tools.TypePatternMatcher;
+
 import org.springframework.aop.ClassFilter;
 
 /**
  * Spring AOP ClassFilter implementation using AspectJ type matching.
+ *
  * @author Rod Johnson
  * @since 2.0
  */
@@ -30,7 +32,8 @@ public class TypePatternClassFilter implements ClassFilter {
 	private String typePattern;
 	
 	private TypePatternMatcher aspectJTypePatternMatcher;
-	
+
+
 	/**
 	 * JavaBean constructor. Be sure to set the
 	 * typePattern property.
@@ -47,9 +50,6 @@ public class TypePatternClassFilter implements ClassFilter {
 		setTypePattern(typePattern);
 	}
 
-	public String getTypePattern() {
-		return typePattern;
-	}
 
 	/**
 	 * Set the AspectJ type pattern to match. Examples include
@@ -67,9 +67,15 @@ public class TypePatternClassFilter implements ClassFilter {
 	 */
 	public void setTypePattern(String typePattern) {
 		this.typePattern = typePattern;
-		this.aspectJTypePatternMatcher = PointcutParser.getPointcutParserSupportingAllPrimitivesAndUsingContextClassloaderForResolution().
+		this.aspectJTypePatternMatcher =
+				PointcutParser.getPointcutParserSupportingAllPrimitivesAndUsingContextClassloaderForResolution().
 				parseTypePattern(typePattern);
 	}
+
+	public String getTypePattern() {
+		return typePattern;
+	}
+
 
 	public boolean matches(Class clazz) {
 		return this.aspectJTypePatternMatcher.matches(clazz);

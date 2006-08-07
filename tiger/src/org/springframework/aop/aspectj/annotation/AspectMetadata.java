@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,19 +20,21 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
+
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
+import org.springframework.aop.aspectj.TypePatternClassFilter;
 import org.springframework.aop.framework.AopConfigException;
-import org.springframework.aop.support.TypePatternClassFilter;
 
 /**
- * Metadata for an AspectJ aspect class, with an
- * additional Spring AOP pointcut for the per clause.
- * Uses AspectJ 5 AJType reflection API, so is only supported on
- * Java 5. Enables us to work with different AspectJ instantiation
- * models such as singleton, pertarget and perthis.
+ * Metadata for an AspectJ aspect class, with an additional Spring AOP pointcut
+ * for the per clause.
+ *
+ * <p>Uses AspectJ 5 AJType reflection API, so is only supported on Java 5.
+ * Enables us to work with different AspectJ instantiation models such as
+ * "singleton", "pertarget" and "perthis".
  *
  * @author Rod Johnson
  * @since 2.0
@@ -55,6 +57,7 @@ public class AspectMetadata {
 	 * same aspect and hence their relative precedence.
 	 */
 	private String aspectName;
+
 
 	public AspectMetadata(Class<?> aspectClass, String aspectName) {
 		this.aspectName = aspectName;
@@ -96,7 +99,8 @@ public class AspectMetadata {
 						aspectClass.getName());
 		}
 	}
-	
+
+
 	private void validate() throws IllegalArgumentException {
 		if (this.ajType.getDeclarePrecedence().length > 0) {
 			throw new IllegalArgumentException("DeclarePrecendence not presently supported in Spring AOP");
@@ -154,6 +158,5 @@ public class AspectMetadata {
 	public Pointcut getPerClausePointcut() {
 		return this.perClausePointcut;
 	}
-
 
 }

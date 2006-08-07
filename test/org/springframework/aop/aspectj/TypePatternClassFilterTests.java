@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.support;
+package org.springframework.aop.aspectj;
 
 import junit.framework.TestCase;
 
@@ -58,4 +58,5 @@ public class TypePatternClassFilterTests extends TestCase {
 		assertFalse("Should be excluded: not subclass", tpcf.matches(IOther.class));
 		assertFalse("Should be excluded: not subclass", tpcf.matches(DefaultListableBeanFactory.class));
 	}
+
 }
