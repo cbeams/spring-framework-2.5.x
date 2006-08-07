@@ -42,7 +42,7 @@
 	<classpathentry kind="lib" path="lib/cos/cos.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/activation.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-pool.jar"/>
-	<classpathentry kind="lib" path="lib/qdox/qdox-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/qdox/qdox-1.5.jar"/>
 	<classpathentry kind="lib" path="lib/ant/ant.jar"/>
 	<classpathentry kind="lib" path="lib/httpunit/httpunit.jar"/>
 	<classpathentry kind="lib" path="lib/httpunit/Tidy.jar"/>
