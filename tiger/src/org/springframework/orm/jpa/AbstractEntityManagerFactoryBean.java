@@ -39,6 +39,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -60,7 +61,8 @@ import org.springframework.util.ObjectUtils;
  * @see org.springframework.jndi.JndiObjectFactoryBean
  */
 public abstract class AbstractEntityManagerFactoryBean
-		implements FactoryBean, InitializingBean, DisposableBean, EntityManagerFactoryInfo {
+		implements FactoryBean, InitializingBean, DisposableBean,
+		EntityManagerFactoryInfo, PersistenceExceptionTranslator {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -194,18 +196,6 @@ public abstract class AbstractEntityManagerFactoryBean
 		return jpaDialect;
 	}
 
-	/**
-	 * Use the dialect's conversion if possible: otherwise fall back
-	 * to generic excepton conversion.
-	 * @see JpaDialect#translateExceptionIfPossible
-	 * @see EntityManagerFactoryUtils#convertJpaAccessExceptionIfPossible
-	 */
-	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
-		return (this.jpaDialect != null ?
-				this.jpaDialect.translateExceptionIfPossible(ex) :
-				EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex));
-	}
-
 
 	public final void afterPropertiesSet() throws PersistenceException {
 		if (this.jpaVendorAdapter != null) {
@@ -275,6 +265,21 @@ public abstract class AbstractEntityManagerFactoryBean
 				new ManagedEntityManagerFactoryInvocationHandler(emf, this, plusOperations));
 	}
 
+
+	/**
+	 * Implementation of the PersistenceExceptionTranslator interface,
+	 * as autodetected by Spring's PersistenceExceptionTranslationPostProcessor.
+	 * <p>Uses the dialect's conversion if possible; otherwise falls back
+	 * to standard JPA exception conversion.
+	 * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
+	 * @see JpaDialect#translateExceptionIfPossible
+	 * @see EntityManagerFactoryUtils#convertJpaAccessExceptionIfPossible
+	 */
+	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
+		return (this.jpaDialect != null ?
+				this.jpaDialect.translateExceptionIfPossible(ex) :
+				EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex));
+	}
 
 	public EntityManagerFactory getNativeEntityManagerFactory() {
 		return this.nativeEntityManagerFactory;

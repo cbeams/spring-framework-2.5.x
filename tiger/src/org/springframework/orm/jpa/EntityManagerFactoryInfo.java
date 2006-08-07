@@ -32,7 +32,7 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public interface EntityManagerFactoryInfo extends PersistenceExceptionTranslator {
+public interface EntityManagerFactoryInfo {
 	
 	/**
 	 * Return the raw underlying EntityManagerFactory.

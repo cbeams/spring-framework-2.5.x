@@ -25,6 +25,7 @@ import javax.persistence.TransactionRequiredException;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.orm.jpa.domain.Person;
 import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.annotation.NotTransactional;
@@ -39,21 +40,22 @@ public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntit
 	
 	@NotTransactional
 	public void testExceptionTranslationWithDialectFoundOnIntroducedEntityManagerInfo() throws Exception {		
-		doTestExceptionTranslationWithDialectFound((EntityManagerFactoryInfo) entityManagerFactory);
+		doTestExceptionTranslationWithDialectFound(((EntityManagerFactoryInfo) entityManagerFactory).getJpaDialect());
 	}
 	
 	@NotTransactional
 	public void testExceptionTranslationWithDialectFoundOnEntityManagerFactoryBean() throws Exception {
-		AbstractEntityManagerFactoryBean aefb = (AbstractEntityManagerFactoryBean) applicationContext.getBean("&entityManagerFactory");
+		AbstractEntityManagerFactoryBean aefb =
+				(AbstractEntityManagerFactoryBean) applicationContext.getBean("&entityManagerFactory");
 		assertNotNull("Dialect must have been set", aefb.getJpaDialect());
 		doTestExceptionTranslationWithDialectFound(aefb);
 	}
 		
-	protected void doTestExceptionTranslationWithDialectFound(EntityManagerFactoryInfo emfi) throws Exception {		
+	protected void doTestExceptionTranslationWithDialectFound(PersistenceExceptionTranslator pet) throws Exception {
 		RuntimeException in1 = new RuntimeException("in1");
 		PersistenceException in2 = new PersistenceException();
-		assertNull("No translation here", emfi.translateExceptionIfPossible(in1));
-		DataAccessException dex = emfi.translateExceptionIfPossible(in2);
+		assertNull("No translation here", pet.translateExceptionIfPossible(in1));
+		DataAccessException dex = pet.translateExceptionIfPossible(in2);
 		assertNotNull(dex);
 		assertSame(in2, dex.getCause());
 	}
@@ -156,19 +158,20 @@ public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntit
 		// Now clean up the database
 		deleteFromTables(new String[] { "person" });
 	}
-	
-	
-	// This displays incorrect behaviour in TopLink,
-	// which throws some exceptions that are not subclasses of PersistenceException
-//	public void testEntityManagerProxyException() {
-//		EntityManager em = entityManagerFactory.createEntityManager();
-//		try {
-//			em.createQuery("select p from Person p where p.o=0").getResultList();
-//			fail("Semantic nonsense should be rejected");
-//		}
-//		catch (PersistenceException ex) {
-//			
-//		}
-//	}
+
+	/*
+	 * TODO: This displays incorrect behavior in TopLink because of its EJBQLException -
+	 * which is not a subclass of PersistenceException but rather of TopLinkException!
+	public void testEntityManagerProxyException() {
+		EntityManager em = entityManagerFactory.createEntityManager();
+		try {
+			em.createQuery("select p from Person p where p.o=0").getResultList();
+			fail("Semantic nonsense should be rejected");
+		}
+		catch (PersistenceException ex) {
+			// expected
+		}
+	}
+	*/
 
 }
