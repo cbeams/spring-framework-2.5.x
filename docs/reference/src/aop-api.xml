@@ -562,7 +562,7 @@
         Alliance <literal>MethodInterceptor</literal> interface must implement
         the introduction: that is, if the invoked method is on an introduced
         interface, the introduction interceptor is responsible for handling
-        the method call--it cannot invoke <literal>proceed()</literal>.</para>
+        the method call - it cannot invoke <literal>proceed()</literal>.</para>
 
          
 
@@ -722,7 +722,7 @@ public interface IntroductionInfo {
 
         <para>The introduction advisor required is simple. All it needs to do
         is hold a distinct <literal>LockMixin</literal> instance, and specify
-        the introduced interfaces--in this case, just
+        the introduced interfaces - in this case, just
         <literal>Lockable</literal>. A more complex example might take a
         reference to the introduction interceptor (which would be defined as a
         prototype): in this case, there's no configuration relevant for a
@@ -787,13 +787,15 @@ public interface IntroductionInfo {
     <title>Using the ProxyFactoryBean to create AOP proxies</title>
 
     <para>If you're using the Spring IoC container (an ApplicationContext or
-    BeanFactory) for your business objects--and you should be!--you will want
+    BeanFactory) for your business objects - and you should be! - you will want
     to use one of Spring's AOP FactoryBeans. (Remember that a factory bean
     introduces a layer of indirection, enabling it to create objects of a
     different type).</para>
     
-    <remark>The Spring 2.0 AOP support also uses factory beans under the covers.</remark>
-
+		<note>
+			<para>The Spring 2.0 AOP support also uses factory beans under the covers.</para>
+	</note>
+		
     <para>The basic way to create an AOP proxy in Spring is to use the
     <emphasis>org.springframework.aop.framework.ProxyFactoryBean</emphasis>.
     This gives complete control over the pointcuts and advice that will apply,
@@ -809,12 +811,12 @@ public interface IntroductionInfo {
       name <literal>foo</literal>, what objects referencing
       <literal>foo</literal> see is not the
       <literal>ProxyFactoryBean</literal> instance itself, but an object
-      created by the <literal>ProxyFactoryBean's</literal> implementation of
+      created by the <literal>ProxyFactoryBean</literal>'s implementation of
       the <literal>getObject() </literal>method. This method will create an
       AOP proxy wrapping a target object.</para>
 
       <para>One of the most important benefits of using a
-      <literal>ProxyFactoryBean</literal> or other IoC-aware class to create
+      <literal>ProxyFactoryBean</literal> or another IoC-aware class to create
       AOP proxies, is that it means that advices and pointcuts can also be
       managed by IoC. This is a powerful feature, enabling certain approaches
       that are hard to achieve with other AOP frameworks. For example, an
@@ -849,7 +851,7 @@ public interface IntroductionInfo {
         <listitem>
           <para>
 			<literal>proxyTargetClass</literal>: <literal>true</literal> if the
-			target class is to be proxied, rather than the target class' interfaces.
+			target class is to be proxied, rather than the target class's interfaces.
 			If this property value is set to <literal>true</literal>, then CGLIB proxies
 			will be created (but see also below the section entitled
 			<xref linkend="aop-pfb-proxy-types"/>).
@@ -935,8 +937,8 @@ public interface IntroductionInfo {
 			object, no matter how often the <literal>getObject()</literal>
 			method is called. Several <interfacename>FactoryBean</interfacename>
 			implementations offer such a method. The default value is
-			<literal>true</literal>. If you	want to use stateful advice --
-			for example, for stateful mixins -- use	prototype advices along
+			<literal>true</literal>. If you	want to use stateful advice - 
+			for example, for stateful mixins - use	prototype advices along
 			with a singleton value of <literal>false</literal>.
           </para>
         </listitem>
@@ -964,8 +966,8 @@ public interface IntroductionInfo {
 			If the class of a target object that is to be proxied (hereafter simply
 			referred to as the target class) doesn't implement any interfaces, then
 			a CGLIB-based proxy will be created. This is the easiest scenario, because
-			JDK proxies are interface based, and no interfaces means no JDK proxying
-			is even possible. One simply plugs in the target bean, and specifies the
+			JDK proxies are interface based, and no interfaces means JDK proxying
+			isn't even possible. One simply plugs in the target bean, and specifies the
 			list of interceptors via the <literal>interceptorNames</literal> property.
 			Note that a CGLIB-based proxy will be created even if the
 			<literal>proxyTargetClass</literal> property of the
@@ -1073,14 +1075,16 @@ public interface IntroductionInfo {
       throws advice objects can be used. The ordering of advisors is
       significant.</para>
 
-      <remark>You might be wondering why the list doesn't hold bean
-      references. The reason for this is that if the ProxyFactoryBean's
-      singleton property is set to false, it must be able to return
-      independent proxy instances. If any of the advisors is itself a
-      prototype, an independent instance would need to be returned, so it's
-      necessary to be able to obtain an instance of the prototype from the
-      factory; holding a reference isn't sufficient.</remark>
-
+			<note>
+				<para>You might be wondering why the list doesn't hold bean
+				references. The reason for this is that if the ProxyFactoryBean's
+				singleton property is set to false, it must be able to return
+				independent proxy instances. If any of the advisors is itself a
+				prototype, an independent instance would need to be returned, so it's
+				necessary to be able to obtain an instance of the prototype from the
+				factory; holding a reference isn't sufficient.</para>
+			</note>
+			
       <para>The "person" bean definition above can be used in place of a
       Person implementation, as follows:</para>
 
@@ -1176,7 +1180,7 @@ public interface IntroductionInfo {
 
         <listitem>
           <para>You'll need the CGLIB 2 binaries on your classpath; dynamic
-          proxies are available with the JDK</para>
+          proxies are available with the JDK.</para>
         </listitem>
       </itemizedlist>
 
@@ -1233,7 +1237,7 @@ public interface IntroductionInfo {
     incomplete. Then each proxy which needs to be created is just a child bean
     definition, which to wraps the target of the proxy as an inner bean
     definition, since the target will never be used on its own
-    anyways.<programlisting>&lt;bean id="myService" parent="txProxyTemplate"&gt;
+    anyway.<programlisting>&lt;bean id="myService" parent="txProxyTemplate"&gt;
   &lt;property name="target"&gt;
     &lt;bean class="org.springframework.samples.MyServiceImpl"&gt;
     &lt;/bean&gt;
@@ -1286,7 +1290,7 @@ factory.addInterceptor(myMethodInterceptor);
 factory.addAdvisor(myAdvisor);
 MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();</programlisting></para>
 
-    <para>The first step is to construct a object of type
+    <para>The first step is to construct an object of type
     <literal>org.springframework.aop.framework.ProxyFactory</literal>. You can
     create this with a target object, as in the above example, or specify the
     interfaces to be proxied in an alternate constructor.</para>
@@ -1297,13 +1301,15 @@ MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();</programlisti
     additional interfaces.</para>
 
     <para>There are also convenience methods on ProxyFactory (inherited from
-    AdvisedSupport) allowing you to add other advice types such as before and
-    throws advice. AdvisedSupport is the superclass of both ProxyFactory and
-    ProxyFactoryBean.</para>
+    <classname>AdvisedSupport</classname>) allowing you to add other advice types 
+		such as before and throws advice. AdvisedSupport is the superclass of both 
+    ProxyFactory and ProxyFactoryBean.</para>
 
-    <remark>Integrating AOP proxy creation with the IoC framework is best
-    practice in most applications. We recommend that you externalize
-    configuration from Java code with AOP, as in general.</remark>
+		<tip>
+			<para>Integrating AOP proxy creation with the IoC framework is best
+			practice in most applications. We recommend that you externalize
+			configuration from Java code with AOP, as in general.</para>
+		</tip>			
   </section>
 
   <section>
@@ -1349,7 +1355,7 @@ boolean isFrozen();</programlisting>
     <para>The <literal>addAdvisor()</literal> methods can be used to add any
     Advisor. Usually the advisor holding pointcut and advice will be the
     generic <literal>DefaultPointcutAdvisor</literal>, which can be used with
-    any advice or pointcut (but not for introduction).</para>
+    any advice or pointcut (but not for introductions).</para>
 
     <para>By default, it's possible to add or remove advisors or interceptors
     even once a proxy has been created. The only restriction is that it's
@@ -1377,22 +1383,24 @@ advised.addAdvisor(new DefaultPointcutAdvisor(mySpecialPointcut, myAdvice));
 assertEquals("Added two advisors",
      oldAdvisorCount + 2, advised.getAdvisors().length);</programlisting></para>
 
-    <remark>It's questionable whether it's advisable (no pun intended) to
-    modify advice on a business object in production, although there are no
-    doubt legitimate usage cases. However, it can be very useful in
-    development: for example, in tests. I have sometimes found it very useful
-    to be able to add test code in the form of an interceptor or other advice,
-    getting inside a method invocation I want to test. (For example, the
-    advice can get inside a transaction created for that method: for example,
-    to run SQL to check that a database was correctly updated, before marking
-    the transaction for roll back.)</remark>
-
+		<note>
+			<para>It's questionable whether it's advisable (no pun intended) to
+			modify advice on a business object in production, although there are no
+			doubt legitimate usage cases. However, it can be very useful in
+			development: for example, in tests. I have sometimes found it very useful
+			to be able to add test code in the form of an interceptor or other advice,
+			getting inside a method invocation I want to test. (For example, the
+			advice can get inside a transaction created for that method: for example,
+			to run SQL to check that a database was correctly updated, before marking
+			the transaction for roll back.)</para>
+		</note>
+		
     <para>Depending on how you created the proxy, you can usually set a
     <literal>frozen</literal> flag, in which case the
     <literal>Advised</literal> <literal>isFrozen()</literal> method will
     return true, and any attempts to modify advice through addition or removal
     will result in an <literal>AopConfigException</literal>. The ability to
-    freeze the state of an advised object is useful in some cases: For
+    freeze the state of an advised object is useful in some cases
     example, to prevent calling code removing a security interceptor. It may
     also be used in Spring 1.1 to allow aggressive optimization if runtime
     advice modification is known not to be required.</para>
@@ -1419,13 +1427,13 @@ assertEquals("Added two advisors",
     <itemizedlist>
       <listitem>
         <para>Using an autoproxy creator that refers to specific beans in the
-        current context</para>
+        current context.</para>
       </listitem>
 
       <listitem>
         <para>A special case of autoproxy creation that deserves to be
         considered separately; autoproxy creation driven by source-level
-        metadata attributes</para>
+        metadata attributes.</para>
       </listitem>
     </itemizedlist>
 
@@ -1451,7 +1459,7 @@ assertEquals("Added two advisors",
 &lt;/bean&gt;</programlisting></para>
 
         <para>As with <literal>ProxyFactoryBean</literal>, there is an
-        interceptorNames property rather than a list of interceptor, to allow
+        <literal>interceptorNames</literal> property rather than a list of interceptor, to allow
         correct behavior for prototype advisors. Named "interceptors" can be
         advisors or any advice type.</para>
 
@@ -1487,7 +1495,7 @@ assertEquals("Added two advisors",
           <listitem>
             <para>Specifying a
             <literal>DefaultAdvisorAutoProxyCreator</literal> bean
-            definition</para>
+            definition.</para>
           </listitem>
 
           <listitem>
@@ -1536,7 +1544,7 @@ assertEquals("Added two advisors",
         business objects. Once the infrastructure definitions are in place,
         you can simply add new business objects without including specific
         proxy configuration. You can also drop in additional aspects very
-        easily--for example, tracing or performance monitoring aspects--with
+        easily - for example, tracing or performance monitoring aspects - with
         minimal change to configuration.</para>
 
         <para>The DefaultAdvisorAutoProxyCreator offers support for filtering
@@ -1546,7 +1554,7 @@ assertEquals("Added two advisors",
         can implement the <literal>org.springframework.core.Ordered</literal>
         interface to ensure correct ordering if this is an issue. The
         TransactionAttributeSourceAdvisor used in the above example has a
-        configurable order value; default is unordered.</para>
+        configurable order value; the default setting is unordered.</para>
       </section>
 
       <section>
@@ -1653,12 +1661,14 @@ assertEquals("Added two advisors",
       <programlisting>&lt;bean id="transactionManager" 
     class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;</programlisting>
 
-      <remark>If you require only declarative transaction management, using
-      these generic XML definitions will result in Spring automatically
-      proxying all classes or methods with transaction attributes. You won't
-      need to work directly with AOP, and the programming model is similar to
-      that of .NET ServicedComponents.</remark>
-
+			<tip>
+				<para>If you require only declarative transaction management, using
+				these generic XML definitions will result in Spring automatically
+				proxying all classes or methods with transaction attributes. You won't
+				need to work directly with AOP, and the programming model is similar to
+				that of .NET ServicedComponents.</para>
+			</tip>
+			
       <para>This mechanism is extensible. It's possible to do autoproxying
       based on custom attributes. You need to:</para>
 
@@ -1729,10 +1739,12 @@ assertEquals("Added two advisors",
     <para>Let's look at the standard target sources provided with Spring, and
     how you can use them.</para>
 
-    <remark>When using a custom target source, your target will usually need
-    to be a prototype rather than a singleton bean definition. This allows
-    Spring to create a new target instance when required.</remark>
-
+		<tip>
+			<para>When using a custom target source, your target will usually need
+			to be a prototype rather than a singleton bean definition. This allows
+			Spring to create a new target instance when required.</para>
+		</tip>
+		
     <section id="aop-ts-swap">
       <title>Hot swappable target sources</title>
 
@@ -1768,8 +1780,8 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
       unaware of the change, but will immediately start hitting the new
       target.</para>
 
-      <para>Although this example doesn't add any advice--and it's not
-      necessary to add advice to use a <literal>TargetSource</literal>--of
+      <para>Although this example doesn't add any advice - and it's not
+      necessary to add advice to use a <literal>TargetSource</literal> - of
       course any <literal>TargetSource</literal> can be used in conjunction
       with arbitrary advice.</para>
     </section>
@@ -1810,8 +1822,8 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
   &lt;property name="interceptorNames" value="myInterceptor"/&gt;
 &lt;/bean&gt;</programlisting></para>
 
-      <para>Note that the target object--"businessObjectTarget" in the
-      example--<emphasis>must</emphasis> be a prototype. This allows the
+      <para>Note that the target object - "businessObjectTarget" in the
+      example - <emphasis>must</emphasis> be a prototype. This allows the
       <literal>PoolingTargetSource</literal> implementation to create new
       instances of the target to grow the pool as necessary. See the Javadoc
       for <literal>AbstractPoolingTargetSource</literal> and the concrete
@@ -1847,11 +1859,13 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
       <programlisting><![CDATA[PoolingConfig conf = (PoolingConfig) beanFactory.getBean("businessObject");
 System.out.println("Max pool size is " + conf.getMaxSize());]]></programlisting>
 
-      <remark>Pooling stateless service objects is not usually necessary. We
-      don't believe it should be the default choice, as most stateless objects
-      are naturally thread safe, and instance pooling is problematic if
-      resources are cached.</remark>
-
+			<note>
+				<para>Pooling stateless service objects is not usually necessary. We
+				don't believe it should be the default choice, as most stateless objects
+				are naturally thread safe, and instance pooling is problematic if
+				resources are cached.</para>
+			</note>
+			
       <para>Simpler pooling is available using autoproxying. It's possible to
       set the TargetSources used by any autoproxy creator.</para>
     </section>
@@ -1894,18 +1908,20 @@ System.out.println("Max pool size is " + conf.getMaxSize());]]></programlisting>
   <property name="targetBeanName" value="businessObjectTarget"/>
 </bean>]]></programlisting>
 
-      <para><emphasis>ThreadLocals come with serious issues (potentially
-      resulting in memory leaks) when incorrectly using them in a
-      multi-threaded and multi-classloader environments. One should always
-      consider wrapping a threadlocal in some other class and never directly
-      use the <classname>ThreadLocal</classname> itself (except of course in the wrapper class).
-      Also, one should always remember to correctly set and unset (where the
-      latter simply involved a call to <literal>ThreadLocal.set(null)</literal>) the resource
-      local to the thread. Unsetting should be done in any case since not
-      unsetting it might result in problematic behavior. Spring's ThreadLocal
-      support is doing this for you and should always be considered in favor
-      of using ThreadLocals without other proper handling
-      code.</emphasis></para>
+			<note>
+				<para>ThreadLocals come with serious issues (potentially
+				resulting in memory leaks) when incorrectly using them in a
+				multi-threaded and multi-classloader environments. One should always
+				consider wrapping a threadlocal in some other class and never directly
+				use the <classname>ThreadLocal</classname> itself (except of course in the wrapper class).
+				Also, one should always remember to correctly set and unset (where the
+				latter simply involved a call to <literal>ThreadLocal.set(null)</literal>) the resource
+				local to the thread. Unsetting should be done in any case since not
+				unsetting it might result in problematic behavior. Spring's ThreadLocal
+				support does this for you and should always be considered in favor
+				of using ThreadLocals without other proper handling
+				code.</para>
+			</note>				
     </section>
   </section>
 
@@ -1926,7 +1942,7 @@ System.out.println("Max pool size is " + conf.getMaxSize());]]></programlisting>
 
     <para>Please refer to the
     <literal>org.springframework.aop.framework.adapter</literal> package's
-    Javadocs for further information</para>
+    Javadocs for further information.</para>
   </section>
 
   <section>
@@ -1939,12 +1955,12 @@ System.out.println("Max pool size is " + conf.getMaxSize());]]></programlisting>
       <listitem>
         <para>The JPetStore's default configuration illustrates the use of the
         <classname>TransactionProxyFactoryBean</classname> for declarative transaction
-        management</para>
+        management.</para>
       </listitem>
 
       <listitem>
         <para>The <literal>/attributes</literal> directory of the JPetStore
-        illustrates the use of attribute-driven declarative transaction management</para>
+        illustrates the use of attribute-driven declarative transaction management.</para>
       </listitem>
     </itemizedlist>
 
