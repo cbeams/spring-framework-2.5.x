@@ -534,8 +534,8 @@
 
       <para>Note that this wildcarding is specific to use of resource paths in
       application context constructors (or when using the
-      <classname>PathMatcher</classname> utility class directly), and is
-      resolved at construction time. It has nothing to do with the
+      <classname>PathMatcher</classname> utility class hierarchy directly),
+      and is resolved at construction time. It has nothing to do with the
       <interfacename>Resource</interfacename> type itself. It's not possible
       to use the <literal>classpath*:</literal> prefix to construct an actual
       <interfacename>Resource</interfacename>, as a resource points to just
@@ -554,13 +554,14 @@
         resolver follows a more complex but defined procedure to try to
         resolve the wildcard. It produces a Resource for the path up to the
         last non-wildcard segment and obtains a URL from it. If this URL is
-        not a "jar:" URL or container-specific variant (e.g. "zip:" in
-        WebLogic, "wsjar" in WebSphere", etc.), then a java.io.File is
+        not a "jar:" URL or container-specific variant (e.g.
+        "<literal>zip:</literal>" in WebLogic, "<literal>wsjar</literal>" in
+        WebSphere", etc.), then a <methodname>java.io.File</methodname> is
         obtained from it, and used to resolve the wildcard by walking the
         filesystem. In the case of a jar URL, the resolver either gets a
-        code&gt;java.net.JarURLConnection from it, or manually parse the jar
-        URL, and then traverse the contents of the jar file, to resolve the
-        wildcards.</para>
+        <classname>java.net.JarURLConnection</classname> from it, or manually
+        parse the jar URL, and then traverse the contents of the jar file, to
+        resolve the wildcards.</para>
 
         <section>
           <title>Implications on portability</title>
@@ -572,23 +573,24 @@
 
           <para>If the specified path is a classpath location, then the
           resolver must obtain the last non-wildcard path segment URL via a
-          Classloader.getResource() call. Since this is just a node of the
-          path (not the file at the end) it is actually undefined (in the
-          ClassLoader Javadocs) exactly what sort of a URL is returned in this
-          case. In practice, it is always a java.io.File representing the
-          directory, where the classpath resource resolves to a filesystem
-          location, or a jar URL of some sort, where the classpath resource
-          resolves to a jar location. Still, there is a portability concern on
-          this operation.</para>
+          <methodname>Classloader.getResource()</methodname> call. Since this
+          is just a node of the path (not the file at the end) it is actually
+          undefined (in the <classname>ClassLoader</classname> Javadocs)
+          exactly what sort of a URL is returned in this case. In practice, it
+          is always a java.io.File representing the directory, where the
+          classpath resource resolves to a filesystem location, or a jar URL
+          of some sort, where the classpath resource resolves to a jar
+          location. Still, there is a portability concern on this
+          operation.</para>
 
           <para>If a jar URL is obtained for the last non-wildcard segment,
-          the resolver must be able to get a java.net.JarURLConnection from
-          it, or manually parse the jar URL, to be able to walk the contents
-          of the jar, and resolve the wildcard. This will work in most
-          environments, but will fail in others, and it is strongly
-          recommended that the wildcard resolution of resources coming from
-          jars be thoroughly tested in your specific environment before you
-          rely on it.</para>
+          the resolver must be able to get a
+          <classname>java.net.JarURLConnection</classname> from it, or
+          manually parse the jar URL, to be able to walk the contents of the
+          jar, and resolve the wildcard. This will work in most environments,
+          but will fail in others, and it is strongly recommended that the
+          wildcard resolution of resources coming from jars be thoroughly
+          tested in your specific environment before you rely on it.</para>
         </section>
       </section>
 
@@ -608,14 +610,47 @@
         call), and then merged to form the final application context
         definition.</para>
 
-        <para>The "classpath*:" prefix can also be combined with a PathMatcher
-        pattern in the rest of the location path, for example
-        "classpath*:META-INF/*-beans.xml". In this case, the resolution
-        strategy is fairly simple: a ClassLoader.getResources() call is used
-        on the last non-wildcard path segment to get all the matching
-        resources in the class loader hierarchy, and then off each resource
-        the same PathMatcher resoltion strategy described above is used for
-        the wildcard subpath.</para>
+        <para>The "<literal>classpath*:</literal>" prefix can also be combined
+        with a PathMatcher pattern in the rest of the location path, for
+        example "<literal>classpath*:META-INF/*-beans.xml</literal>". In this
+        case, the resolution strategy is fairly simple: a
+        ClassLoader.getResources() call is used on the last non-wildcard path
+        segment to get all the matching resources in the class loader
+        hierarchy, and then off each resource the same PathMatcher resoltion
+        strategy described above is used for the wildcard subpath.</para>
+      </section>
+
+      <section>
+        <title>Other notes relating to wildcards</title>
+
+        <para>WARNING: Note that "<literal>classpath*:</literal>" when
+        combined with Ant-style patterns will only work reliably with at least
+        one root directory before the pattern starts, unless the actual target
+        files reside in the file system. This means that a pattern like
+        "<literal>classpath*:*.xml</literal>" will not retrieve files from the
+        root of jar files but rather only from the root of expanded
+        directories. This originates from a limitation in the JDK's
+        <methodname>ClassLoader.getResources()</methodname> method which only
+        returns file system locations for a passed-in empty String (indicating
+        potential roots to search).</para>
+
+        <para>WARNING: Ant-style patterns with "<literal>classpath:</literal>"
+        resources are not guaranteed to find matching resources if the root
+        package to search is available in multiple class path locations. This
+        is because a resource such as</para>
+
+        <programlisting>    com/mycompany/package1/service-context.xml</programlisting>
+
+        <para>may be in only one location, but when a path such as</para>
+
+        <para><programlisting>    classpath:com/mycompany/**/service-context.xml</programlisting>is
+        used to try to resolve it, the resolver will work off the (first) URL
+        returned by <methodname>getResource("com/mycompany")</methodname>;. If
+        this base package node exists in multiple classloader locations, the
+        actual end resource may not be underneath. Therefore, preferably, use
+        "<literal>classpath*:</literal>" with the same Ant-style pattern in
+        such a case, which will search all class path locations that contain
+        the root package.</para>
       </section>
     </section>
 
