@@ -63,6 +63,7 @@ import org.springframework.util.Assert;
 /**
  * Helper class featuring methods for Hibernate Session handling,
  * allowing for reuse of Hibernate Session instances within transactions.
+ * Also provides support for exception translation.
  *
  * <p>Supports synchronization with both Spring-managed JTA transactions
  * (i.e. JtaTransactionManager) and non-Spring JTA transactions (i.e. plain JTA

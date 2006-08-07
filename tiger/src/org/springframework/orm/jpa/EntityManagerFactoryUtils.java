@@ -43,16 +43,12 @@ import org.springframework.util.Assert;
 /**
  * Helper class featuring methods for JPA EntityManager handling,
  * allowing for reuse of EntityManager instances within transactions.
+ * Also provides support for exception translation.
  *
- * <p>Used by JpaTemplate, JpaInterceptor, and JpaTransactionManager.
- * Can also be used directly in application code, e.g. in combination
- * with JpaInterceptor.
+ * <p>Mainly intended for internal use within the framework.
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see JpaTemplate
- * @see JpaInterceptor
- * @see JpaTransactionManager
  */
 public abstract class EntityManagerFactoryUtils {
 
@@ -78,7 +74,8 @@ public abstract class EntityManagerFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained
 	 * @see JpaTransactionManager
 	 */
-	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf) throws DataAccessResourceFailureException {
+	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf)
+			throws DataAccessResourceFailureException {
 		try {
 			return doGetTransactionalEntityManager(emf);
 		}
