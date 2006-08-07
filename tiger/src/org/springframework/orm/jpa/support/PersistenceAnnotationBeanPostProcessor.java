@@ -49,14 +49,16 @@ import org.springframework.util.ReflectionUtils;
  * annotations for injection of JPA interfaces. Any such annotated fields
  * or methods in any Spring-managed object will automatically be injected.
  * Will inject subinterfaces of EntityManager and EntityManagerFactory if possible.
- * 
- * <p>May align with JSR-250 (Common Annotations for JavaPlatform) subproject in 
+ *
+ * <p>May align with JSR-250 (Common Annotations for the Java Platform) in the
  * future. Note that this support can be used along with that support, as there
  * should be no conflict in implementation.
- * 
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 2.0
+ * @see javax.persistence.PersistenceUnit
+ * @see javax.persistence.PersistenceContext
  */
 public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
 		implements ApplicationContextAware {
