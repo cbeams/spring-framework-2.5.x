@@ -185,10 +185,10 @@ distribution/website before using any of them in your own applications.
 
 * j2ee/xml-apis.jar
 - JAXP, DOM and SAX APIs (taken from Xerces 2.6 distribution; http://xml.apache.org/xerces2-j)
-- required at runtime when using Spring's XmlBeanFactory on JDK < 1.4
+- required at runtime when using Spring's XML bean definition support on JDK <1.4
 
 * jakarta-commons/commons-attributes-api.jar, jakarta-commons/commons-attributes-compiler.jar
-- Commons Attributes 2.1 (http://jakarta.apache.org/commons/attributes)
+- Commons Attributes 2.2 (http://jakarta.apache.org/commons/attributes)
 - required for building the framework
 - required at runtime when using Spring's Commons Attributes support
 
@@ -345,6 +345,11 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's Portlet support
 
+* qdox/qdox-1.5.jar
+- QDox 1.5 (http://qdox.codehaus.org)
+- used by Commons Attributes 2.2 to parse source-level metadata in the build process
+- required for building the framework and the attributes version of JPetStore
+
 * quartz/quartz-1.5.2.jar
 - Quartz 1.5.2 (http://www.opensymphony.com/quartz)
 - required for building the framework
@@ -366,7 +371,7 @@ distribution/website before using any of them in your own applications.
 - replaced with full toplink.jar at runtime when using Spring's TopLink support
 
 * toplink/toplink-essentials.jar
-- Oracle TopLink Essentials v2 b03 (http://www.oracle.com/technology/products/ias/toplink/jpa)
+- Oracle TopLink Essentials v2 b11 (http://www.oracle.com/technology/products/ias/toplink/jpa)
 - required for building the framework
 - required at runtime when using Spring's JPA TopLink support
 
@@ -379,8 +384,3 @@ distribution/website before using any of them in your own applications.
 - Velocity Tools 1.2 (http://jakarta.apache.org/velocity/tools)
 - required for building the framework
 - required at runtime when using VelocityView's support for Velocity Tools
-
-* xdoclet/xjavadoc-1.1.jar
-- XDoclet 1.1 (http://xdoclet.sourceforge.net)
-- used by Commons Attributes to parse source-level metadata in the build process
-- required for building the framework and the attributes version of JPetStore
