@@ -22,13 +22,13 @@
         <title>Spring 2.0 AOP</title>
         <para>Spring 2.0 introduces a simpler and more powerful
         way of writing custom aspects using either a schema-based approach
-        or the @AspectJ annotation style. For new applications, we recommend
-        users use the @AspectJ style for applications written to Java 5, and
-        the schema-based style otherwise. Both of these styles offer fully
+        or the @AspectJ annotation style. Both of these styles offer fully
         typed advice and use of the AspectJ pointcut language, while still using
         Spring AOP for weaving.</para>
         <para>The Spring 2.0 schema and @AspectJ based AOP support
-        is discussed in this chapter. Spring 2.0 remains fully backwards compatible
+        is discussed in this chapter. See <link linkend="aop-choosing">
+        choosing which AOP declaration style to use</link> for advice on choosing the
+        appropriate style for your application. Spring 2.0 remains fully backwards compatible
         with Spring 1.2 and the lower-level AOP support offered by the Spring 1.2
         APIs is discussed in <link linkend="aop-api">the next chapter</link>.</para>
     </sidebar>
@@ -281,9 +281,7 @@
   <section id="aop-ataspectj">
     <title>@AspectJ support</title>
 
-    <para>If you are able to use Java 5, then Spring's support for @AspectJ aspects
-    is the recommended approach for declaring aspects for use with the Spring AOP
-	framework. "@AspectJ"
+    <para>"@AspectJ"
     refers to a style of declaring aspects as regular Java classes annotated with
     Java 5 annotations. The @AspectJ style was introduced by the 
     <ulink url="http://www.eclipse.org/aspectj">AspectJ project</ulink> as part of
@@ -1290,12 +1288,12 @@ public class MyAspect {
       Now that you've seen how all the constituent parts work, let's put them together
       to do something useful!</para>
       <para>The execution of business services can sometimes fail
-      due to optimistic locking (someone else gets in first while your transaction is running).
+      due to concurrency issues (for example, deadlock loser).
       If the operation is retried, it is quite likely it will succeed next time round. For
       business services where it is appropriate to retry in such conditions (idempotent
       operations that don't need to go back to the user for conflict resolution), we'd like
-      to transparently retry the operation to avoid the client seeing an 
-      <classname>OptimisticLockingFailureException</classname>. This is a requirement that clearly cuts across
+      to transparently retry the operation to avoid the client seeing a 
+      <classname>PessimisticLockingFailureException</classname>. This is a requirement that clearly cuts across
       multiple services in the service layer, and hence is ideal for implementing via an aspect.
       </para>
       
@@ -1305,7 +1303,7 @@ public class MyAspect {
       </para>
       
 	<programlisting><![CDATA[@Aspect
-public class OptimisticOperationExecutor implements Ordered {
+public class ConcurrentOperationExecutor implements Ordered {
    
    private static final int DEFAULT_MAX_RETRIES = 2;
 
@@ -1325,15 +1323,15 @@ public class OptimisticOperationExecutor implements Ordered {
    }
    
    @Around("com.xyz.myapp.SystemArchitecture.businessService()")
-   public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable { 
+   public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable { 
       int numAttempts = 0;
-      OptimisticLockingFailureException lockFailureException;
+      PessimisticLockingFailureException lockFailureException;
       do {
          numAttempts++;
          try { 
             return pjp.proceed();
          }
-         catch(OptimisticLockingFailureException ex) {
+         catch(PessimisticLockingFailureException ex) {
             lockFailureException = ex;
          }
       }
@@ -1347,9 +1345,9 @@ public class OptimisticOperationExecutor implements Ordered {
       of the aspect higher than the transaction advice (we want a fresh transaction
       each time we retry). The <literal>maxRetries</literal> and <literal>order</literal>
       properties will both be configured by Spring. The main action happens in the
-      <literal>doOptimisticOperation</literal> around advice. Notice that for the moment
+      <literal>doConcurrentOperation</literal> around advice. Notice that for the moment
       we're applying the retry logic to all <literal>businessService()s</literal>. We
-      try to proceed, and if we fail with an <classname>OptimisticLockingFailureException</classname>
+      try to proceed, and if we fail with an <classname>PessimisticLockingFailureException</classname>
       we simply try again unless we have exhausted all of our retry attempts.
       </para>
       
@@ -1357,8 +1355,8 @@ public class OptimisticOperationExecutor implements Ordered {
       
 	<programlisting><![CDATA[<aop:aspectj-autoproxy/>
 
-<bean id="optimisticOperationExecutor"
-  class="com.xyz.myapp.service.impl.OptimisticOperationExecutor">
+<bean id="concurrentOperationExecutor"
+  class="com.xyz.myapp.service.impl.ConcurrentOperationExecutor">
      <property name="maxRetries" value="3"/>
      <property name="order" value="100"/>  
 </bean>]]></programlisting>
@@ -1377,7 +1375,7 @@ public @interface Idempotent {
 
 	<programlisting><![CDATA[@Around("com.xyz.myapp.SystemArchitecture.businessService() && " + 
         "@annotation(com.xyz.myapp.service.Idempotent)")
-public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable { 
+public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable { 
   ...	
 }]]></programlisting>
 
@@ -1849,26 +1847,26 @@ public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable {
     <section>
       <title>Example</title>
 
-	<para>Let's see how the optimistic locking failure retry example from
+	<para>Let's see how the concurrent locking failure retry example from
 	<xref linkend="aop-ataspectj-example"/> looks when rewritten using the schema support. 
 	</para>
 
-      <para>The execution of business services can sometimes fail
-      due to optimistic locking (someone else gets in first while your transaction is running).
+ 	  <para>The execution of business services can sometimes fail
+      due to concurrency issues (for example, deadlock loser).
       If the operation is retried, it is quite likely it will succeed next time round. For
       business services where it is appropriate to retry in such conditions (idempotent
       operations that don't need to go back to the user for conflict resolution), we'd like
-      to transparently retry the operation to avoid the client seeing an 
-      <classname>OptimisticLockingFailureException</classname>. This is a requirement that clearly cuts across
+      to transparently retry the operation to avoid the client seeing a 
+      <classname>PessimisticLockingFailureException</classname>. This is a requirement that clearly cuts across
       multiple services in the service layer, and hence is ideal for implementing via an aspect.
       </para>
-      
+            
       <para>Because we want to retry the operation, we'll need to use around advice so
       that we can call proceed multiple times. Here's how the basic aspect implementation
       looks (it's just a regular Java class using the schema support):
       </para>
       
-	<programlisting><![CDATA[public class OptimisticOperationExecutor implements Ordered {
+	<programlisting><![CDATA[public class ConcurrentOperationExecutor implements Ordered {
    
    private static final int DEFAULT_MAX_RETRIES = 2;
 
@@ -1887,15 +1885,15 @@ public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable {
       this.order = order;
    }
    
-   public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable { 
+   public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable { 
       int numAttempts = 0;
-      OptimisticLockingFailureException lockFailureException;
+      PessimisticLockingFailureException lockFailureException;
       do {
          numAttempts++;
          try { 
             return pjp.proceed();
          }
-         catch(OptimisticLockingFailureException ex) {
+         catch(PessimisticLockingFailureException ex) {
             lockFailureException = ex;
          }
       }
@@ -1909,8 +1907,8 @@ public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable {
       of the aspect higher than the transaction advice (we want a fresh transaction
       each time we retry). The <literal>maxRetries</literal> and <literal>order</literal>
       properties will both be configured by Spring. The main action happens in the
-      <literal>doOptimisticOperation</literal> around advice method. We
-      try to proceed, and if we fail with an <classname>OptimisticLockingFailureException</classname>
+      <literal>doConcurrentOperation</literal> around advice method. We
+      try to proceed, and if we fail with a <classname>PessimisticLockingFailureException</classname>
       we simply try again unless we have exhausted all of our retry attempts.
       </para>
       
@@ -1921,21 +1919,21 @@ public Object doOptimisticOperation(ProceedingJoinPoint pjp) throws Throwable {
       
 	<programlisting><![CDATA[<aop:config>
 
-  <aop:aspect id="optimisticOperationRetry" ref="optimisticOperationExecutor">
+  <aop:aspect id="concurrentOperationRetry" ref="concurrentOperationExecutor">
 
     <aop:pointcut id="idempotentOperation"
         expression="execution(* com.xyz.myapp.service.*.*(..))"/>
        
     <aop:around
        pointcut-ref="idempotentOperation"
-       method="doOptimisticOperation"/>
+       method="doConcurrentOperation"/>
   
   </aop:aspect>
 
 </aop:config>
 
-<bean id="optimisticOperationExecutor"
-  class="com.xyz.myapp.service.impl.OptimisticOperationExecutor">
+<bean id="concurrentOperationExecutor"
+  class="com.xyz.myapp.service.impl.ConcurrentOperationExecutor">
      <property name="maxRetries" value="3"/>
      <property name="order" value="100"/>  
 </bean>]]></programlisting>
@@ -1962,6 +1960,117 @@ public @interface Idempotent {
 
   </section>
 
+  <section id="aop-choosing">
+    <title>Choosing which AOP declaration style to use</title>
+  
+    <para>
+    Once you have decided that an aspect is the best approach for implementing a 
+    given requirement, how do you decide between using Spring AOP or AspectJ, 
+    and between the Aspect language (code) style, @AspectJ declaration style, 
+    and XML? These decisions are influenced by a number of factors including 
+    application requirements, development tools, and team familiarity with AOP. 
+    </para>
+    
+    <section>
+    	<title>Spring AOP or full AspectJ?</title>
+    	
+    	<para>
+    	Use the simplest thing that can work. Spring AOP is simpler than using 
+    	full AspectJ as there is no requirement to introduce the AspectJ 
+    	compiler / weaver into your development and build processes. 
+    	If you only need to advise the execution of operations on Spring beans, 
+    	then Spring AOP is the right choice. If you need to advise domain objects, 
+    	or any other object not managed by the Spring container, then you will 
+    	need to use AspectJ. You will also need to use AspectJ if you wish to 
+    	advise join points other than simple method executions (for example, call 
+    	join points, field get or set join points, and so on). 	
+    	</para>
+    	
+    	<para>
+    	When using AspectJ, you have the choice of the AspectJ language syntax 
+    	(also known as the "code style") or the @AspectJ annotation style. 
+    	If aspects play a large role in your design, and you are able to use the 
+    	AspectJ Development Tools (AJDT) in Eclipse, then the AspectJ language 
+    	syntax is the preferred option :- it's cleaner and simpler because the 
+    	language was purposefully designed for writing aspects. If you are not using 
+    	Eclipse, or have only a few aspects that do not play a major role in your 
+    	application, then you may want to consider using the @AspectJ style and 
+    	sticking with a regular Java compilation in your IDE, and adding an aspect 
+    	weaving (linking) phase to your build scripts.
+    	</para>
+    	
+    </section>
+    <section>
+    	<title>@AspectJ or XML for Spring AOP?</title>
+    	
+    	<para>
+    	If you have chosen to use Spring AOP, then you have a choice of 
+    	@AspectJ or XML style. Clearly if you are not running on Java 5, 
+    	then the XML style is the best choice. For Java 5 projects the 
+    	trade-offs are as follows:
+    	</para>
+    	
+    	<para>
+    	The XML style will be most familiar to existing Spring users. It can be 
+    	used with any JDK level (referring to named pointcuts from within 
+    	pointcut expressions does still require Java 5 though) and is backed 
+    	by genuine POJOs. When using AOP as a tool to configure enterprise 
+    	services (a good test is whether you consider the pointcut expression 
+    	to be a part of your configuration you might want to change independently) 
+    	then XML can be a good choice. With the XML style it is arguably 
+    	clearer from your configuration what aspects are present in the system. 
+    	</para>
+    	
+    	<para>
+    	The XML style has two disadvantages. Firstly it does not fully encapsulate 
+    	the implementation of the requirement it addresses in a single place. 
+    	The DRY principle says that there should be a single, unambiguous, authoritative 
+    	representation of any piece of knowledge within a system. When using the 
+    	XML style, the knowledge of how a requirement is implemented is split across 
+    	the declaration of the backing bean class, and the XML in the configuration 
+    	file. When using the @AspectJ style there is a single module - the aspect - in 
+    	which this information is encapsulated. Secondly, the XML style is more 
+    	limited in what in can express than the @AspectJ style: only the "singleton" 
+    	aspect instantiation model is supported, and it is not possible to combine 
+    	named pointcuts declared in XML. For example, in the @AspectJ style we 
+    	can write something like:
+    	</para>
+
+	<programlisting><![CDATA[  @Pointcut(execution(* get*()))
+  public void propertyAccess() {}
+
+  @Pointcut(execution(org.xyz.Account+ *(..))
+  public void operationReturningAnAccount() {}
+
+  @Pointcut(propertyAccess() && operationReturningAnAccount())
+  public void accountPropertyAccess() {}]]></programlisting>
+  
+  	<para>In the XML style I can declare the first two pointcuts:</para>
+  	
+	<programlisting><![CDATA[  <aop:pointcut id="propertyAccess" 
+      expression="execution(* get*())"/>
+
+  <aop:pointcut id="operationReturningAnAccount" 
+      expression="execution(org.xyz.Account+ *(..))"/>]]></programlisting>
+
+	<para>
+	but I cannot define the accountPropertyAccess pointcut by combining these definitions. 
+	</para>
+	
+	<para>
+	The @AspectJ style supports additional instantiation models, and richer 
+	pointcut composition. It has the advantage of keeping the aspect as a 
+	modular unit. It also has the advantage the @AspectJ aspects can be 
+	understood both by Spring AOP and by AspectJ - so if you later decide 
+	you need the capabilities of AspectJ to implement additional requirements 
+	then it is very easy to migrate to an AspectJ based approach. 
+	On balance we prefer the @AspectJ style whenever you have aspects 
+	that do more than simple "configuration" of enterprise services.
+	</para>
+	      	
+    </section>
+  </section>
+  
   <section id="aop-mixing-styles">
     <title>Mixing aspect types</title>
 
