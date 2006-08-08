@@ -16,27 +16,25 @@
 
 package org.springframework.aop.support;
 
-import org.aopalliance.aop.Advice;
+import java.io.Serializable;
+
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.core.Ordered;
 import org.springframework.util.ObjectUtils;
 
-import java.io.Serializable;
-
 /**
  * Abstract base class for PointcutAdvisor implementations.
- * Can be subclassed for returning a specific pointcut
- * or a freely configurable pointcut.
+ * Can be subclassed for returning a specific pointcut/advice
+ * or a freely configurable pointcut/advice.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 1.1.2
+ * @see AbstractGenericPointcutAdvisor
  */
 public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordered, Serializable {
 
 	private int order = Integer.MAX_VALUE;
-
-	private Advice advice;
 
 
 	public void setOrder(int order) {
@@ -47,16 +45,8 @@ public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordere
 		return order;
 	}
 
-	public void setAdvice(Advice advice) {
-		this.advice = advice;
-	}
-
-	public Advice getAdvice() {
-		return advice;
-	}
-
 	public boolean isPerInstance() {
-		throw new UnsupportedOperationException("perInstance property of Advisor is not yet supported in Spring");
+		return true;
 	}
 
 	public boolean equals(Object other) {
