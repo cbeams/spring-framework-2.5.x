@@ -59,8 +59,8 @@
 			<include name="commons-attributes-compiler.jar"/>
 			<include name="commons-collections.jar"/>
 		</fileset>
-		<fileset dir="lib/xdoclet">
-			<include name="xjavadoc-1.1.jar"/>
+		<fileset dir="lib/qdox">
+			<include name="qdox-1.5.jar"/>
 		</fileset>
 
 	</path>
@@ -1593,12 +1593,12 @@
 				<include name="lib/oro/**"/>
 				<include name="lib/poi/**"/>
 				<include name="lib/portlet/**"/>
+				<include name="lib/qdox/**"/>
 				<include name="lib/quartz/**"/>
 				<include name="lib/struts/**"/>
 				<include name="lib/tomcat/**"/>
 				<include name="lib/toplink/**"/>
 				<include name="lib/velocity/**"/>
-				<include name="lib/xdoclet/**"/>
 				<include name="samples/countries/**"/>
 				<include name="samples/imagedb/**"/>
 				<include name="samples/jpetstore/**"/>
