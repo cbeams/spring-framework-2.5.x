@@ -422,7 +422,9 @@ public class DataSourceTransactionManagerTests extends TestCase {
 
 		DataSourceTransactionManager tm = new DataSourceTransactionManager(ds);
 		tm.setTransactionSynchronization(DataSourceTransactionManager.SYNCHRONIZATION_NEVER);
-		final DataSourceTransactionManager tm2 = new DataSourceTransactionManager(ds);
+		DataSourceTransactionManager tm2 = new DataSourceTransactionManager(ds);
+		// tm has no synch enabled (used at outer level), tm2 has synch enabled (inner level)
+
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
@@ -1418,12 +1420,10 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	protected void tearDown() {
-		/*
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
-		*/
 	}
 
 
