@@ -504,6 +504,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				throw new UnexpectedRollbackException(
 						"Transaction rolled back because it has been marked as rollback-only");
 			}
+			return;
 		}
 
 		processCommit(defStatus);

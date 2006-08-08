@@ -43,6 +43,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.support.TransactionSynchronization;
 
 /**
  * @author Juergen Hoeller
@@ -350,6 +351,9 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
+		TestTransactionSynchronization synch = new TestTransactionSynchronization();
+		TransactionSynchronizationManager.registerSynchronization(synch);
+
 		boolean outerTransactionBoundaryReached = false;
 		try {
 			assertTrue("Is new transaction", ts.isNewTransaction());
@@ -391,6 +395,73 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		}
 
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue(synch.beforeCompletionCalled);
+		assertTrue(synch.afterCompletionCalled);
+		conControl.verify();
+		dsControl.verify();
+	}
+
+	public void testParticipatingTransactionWithRollbackOnlyAndInnerSynch() throws Exception {
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		con.getAutoCommit();
+		conControl.setReturnValue(false, 1);
+		con.rollback();
+		conControl.setVoidCallable(1);
+		con.isReadOnly();
+		conControl.setReturnValue(false, 1);
+		con.close();
+		conControl.setVoidCallable(1);
+
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		final DataSource ds = (DataSource) dsControl.getMock();
+		ds.getConnection();
+		dsControl.setReturnValue(con, 1);
+		conControl.replay();
+		dsControl.replay();
+
+		DataSourceTransactionManager tm = new DataSourceTransactionManager(ds);
+		tm.setTransactionSynchronization(DataSourceTransactionManager.SYNCHRONIZATION_NEVER);
+		final DataSourceTransactionManager tm2 = new DataSourceTransactionManager(ds);
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
+
+		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
+		final TestTransactionSynchronization synch = new TestTransactionSynchronization();
+
+		try {
+			assertTrue("Is new transaction", ts.isNewTransaction());
+
+			final TransactionTemplate tt = new TransactionTemplate(tm2);
+			tt.execute(new TransactionCallbackWithoutResult() {
+				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+					assertTrue("Is existing transaction", !status.isNewTransaction());
+					assertFalse("Is not rollback-only", status.isRollbackOnly());
+					tt.execute(new TransactionCallbackWithoutResult() {
+						protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+							assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
+							assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
+							assertTrue("Is existing transaction", !status.isNewTransaction());
+							status.setRollbackOnly();
+						}
+					});
+					assertTrue("Is existing transaction", !status.isNewTransaction());
+					assertTrue("Is rollback-only", status.isRollbackOnly());
+					TransactionSynchronizationManager.registerSynchronization(synch);
+				}
+			});
+
+			tm.commit(ts);
+
+			fail("Should have thrown UnexpectedRollbackException");
+		}
+		catch (UnexpectedRollbackException ex) {
+			// expected
+		}
+
+		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
+		assertTrue(synch.beforeCompletionCalled);
+		assertTrue(synch.afterCompletionCalled);
 		conControl.verify();
 		dsControl.verify();
 	}
@@ -1347,10 +1418,38 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	protected void tearDown() {
+		/*
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
+		*/
+	}
+
+
+	private class TestTransactionSynchronization implements TransactionSynchronization {
+
+		public boolean beforeCompletionCalled;
+		public boolean afterCompletionCalled;
+
+		public void suspend() {
+			fail("Should never be called");
+		}
+		public void resume() {
+			fail("Should never be called");
+		}
+		public void beforeCommit(boolean readOnly) {
+			fail("Should never be called");
+		}
+		public void beforeCompletion() {
+			assertFalse(this.beforeCompletionCalled);
+			this.beforeCompletionCalled = true;
+		}
+		public void afterCompletion(int status) {
+			assertFalse(this.afterCompletionCalled);
+			this.afterCompletionCalled = true;
+			assertTrue(status == TransactionSynchronization.STATUS_ROLLED_BACK);
+		}
 	}
 
 }
