@@ -106,6 +106,9 @@ abstract class AutowireUtils {
 	 */
 	public static boolean isExcludedFromDependencyCheck(PropertyDescriptor pd) {
 		Method wm = pd.getWriteMethod();
+		if (wm == null) {
+			return false;
+		}
 		if (wm.getDeclaringClass().getName().indexOf("$$") == -1) {
 			// Not a CGLIB method so it's OK.
 			return false;
