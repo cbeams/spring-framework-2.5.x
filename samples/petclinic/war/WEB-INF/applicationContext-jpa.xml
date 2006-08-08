@@ -49,7 +49,11 @@
 	</bean>
 
 
-	<aop:aspectj-autoproxy />
+	<!--
+		Instruct Spring to retrieve and apply @AspectJ aspects which are defined
+		as beans in this context (such as the UsageLogAspect below).
+	-->
+	<aop:aspectj-autoproxy/>
 
 	<!--
 		Simply defining this bean will cause requests to owner names to be saved.
@@ -68,19 +72,22 @@
 	<tx:annotation-driven/>
 
 	<!--
-		PostProcessors to perform exception translation on @Repository classes
-		and injection according to the JPA specification.
-		A JPA namespace handler will simplify specification of entity manager factories
-		and remove the requirement for these bean definitions in 2.0 final.
+		PostProcessors to perform resource injection according to the JPA specification
+	  (@PersistenceContext, @PersistenceUnit).
+	-->
+	<bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor"/>
+
+	<!--
+		PostProcessors to perform exception translation on @Repository classes (from native
+		exceptions such as JPA PersistenceExceptions to Spring's DataAccessException hierarchy).
 	-->
 	<bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>
 
-	<bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor"/>
-
 
 	<!--
-		Will automatically be transactional due to annotation usage.
+		Will automatically be transactional due to @Transactional.
 		EntityManager will be auto-injected due to @PersistenceContext.
+		PersistenceExceptions will be auto-translated due to @Repository.
 	-->
 	<bean id="clinic" class="org.springframework.samples.petclinic.jpa.EntityManagerClinic"/>
 
