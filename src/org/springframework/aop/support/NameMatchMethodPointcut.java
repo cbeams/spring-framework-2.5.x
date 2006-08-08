@@ -40,8 +40,8 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 
 
 	/**
-	 * Convenience method when we have only a single method name
-	 * to match. Use either this method or setMappedNames(), not both.
+	 * Convenience method when we have only a single method name to match.
+	 * Use either this method or <code>setMappedNames</code>, not both.
 	 * @see #setMappedNames
 	 */
 	public void setMappedName(String mappedName) {
