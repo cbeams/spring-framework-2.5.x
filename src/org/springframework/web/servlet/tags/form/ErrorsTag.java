@@ -16,19 +16,17 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import org.springframework.util.ObjectUtils;
+
+import javax.servlet.jsp.JspException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.BodyContent;
-
-import org.springframework.util.ObjectUtils;
-
 /**
  * Form tag for displaying errors for a particular field or object.
- * <p/>
- * This tag supports three main usage patterns:
+ * 
+ * <p>This tag supports three main usage patterns:
  * <ol>
  * <li>Field only - set '<code>path</code>' to the field name (or path)</li>
  * <li>Object errors only - omit '<code>path</code>'</li>
@@ -40,6 +38,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class ErrorsTag extends AbstractHtmlElementBodyTag {
 
+	private static final String MESSAGES_ATTRIBUTE = "messages";
+
+
 	/**
 	 * The HTML '<code>span</code>' tag
 	 */
@@ -48,29 +49,30 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag {
 
 	private String delimiter = "<br/>";
 
-	private TagWriter tagWriter;
-
-	private BodyContent bodyContent;
-
-	private static final String MESSAGES_ATTRIBUTE = "messages";
 
 	/**
-	 * What delimiter should be used between error messages. Default to an HTML
-	 * '<code>&lt;br/&gt;</code>' tag.
+	 * Sets what delimiter must be used between error messages.
+	 * <p>Defaults to an HTML '<code>&lt;br/&gt;</code>' tag.
+	 * @param delimiter said delimeter
 	 */
 	public void setDelimiter(String delimiter) {
 		this.delimiter = delimiter;
 	}
 
 	/**
-	 * Appends '<code>.errors</code>' to the value returned by {@link #getPath()}.
+	 * Gets the value for the HTML '<code>name</code>' attribute.
+	 * <p>Appends '<code>.errors</code>' to the value returned by {@link #getPath()}.
+	 * @return the value for the HTML '<code>name</code>' attribute.
+	 * @see #getPath() 
 	 */
 	protected String getName() throws JspException {
 		return getPath() + ".errors";
 	}
-	
+
 	/**
-	 * Only renders output when there are errors for the configured {@link #setPath path}.
+	 * Should rendering of this tag proceed at all?
+	 * <p>Only renders output when there are errors for the configured {@link #setPath path}.
+	 * @return <code>true</code> only when there are errors for the configured {@link #setPath path}
 	 */
 	protected boolean shouldRender() throws JspException {
 		return getBindStatus().isError();
