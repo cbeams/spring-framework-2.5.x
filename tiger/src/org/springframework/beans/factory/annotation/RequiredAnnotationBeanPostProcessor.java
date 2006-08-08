@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -81,15 +80,14 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 	}
 
 
-	public PropertyValues postProcessPropertyValues(PropertyValues pvs, Object bean, String beanName)
+	public PropertyValues postProcessPropertyValues(
+			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName)
 			throws BeansException {
 
-		Class targetClass = bean.getClass();
-		PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(targetClass);
 		List<String> invalidProperties = new ArrayList<String>();
-		for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-			if (isRequiredProperty(propertyDescriptor) && !pvs.contains(propertyDescriptor.getName())) {
-				invalidProperties.add(propertyDescriptor.getName());
+		for (PropertyDescriptor pd : pds) {
+			if (isRequiredProperty(pd) && !pvs.contains(pd.getName())) {
+				invalidProperties.add(pd.getName());
 			}
 		}
 		if (!invalidProperties.isEmpty()) {
@@ -139,7 +137,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 		sb.append(size == 1 ? " is required" : " are required");
 		sb.append(" for bean '");
 		sb.append(beanName);
-		sb.append("'.");
+		sb.append("'");
 		return sb.toString();
 	}
 

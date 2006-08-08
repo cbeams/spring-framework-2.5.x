@@ -16,11 +16,15 @@
 
 package org.springframework.beans.factory.annotation;
 
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanNameAware;
+
 /**
  * @author Rob Harrop
  * @since 2.0
  */
-public class RequiredTestBean {
+public class RequiredTestBean implements BeanNameAware, BeanFactoryAware {
 
 	private String name;
 
@@ -29,6 +33,7 @@ public class RequiredTestBean {
 	private String favouriteColour;
 
 	private String jobTitle;
+
 
 	public int getAge() {
 		return age;
@@ -65,4 +70,13 @@ public class RequiredTestBean {
 	public void setJobTitle(String jobTitle) {
 		this.jobTitle = jobTitle;
 	}
+
+	@Required
+	public void setBeanName(String name) {
+	}
+
+	@Required
+	public void setBeanFactory(BeanFactory beanFactory) {
+	}
+
 }
