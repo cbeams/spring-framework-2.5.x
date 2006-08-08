@@ -9,7 +9,7 @@
 			technologies. The remoting support eases the development of remote-enabled
 			services, implemented by your usual (Spring) POJOs. Currently, Spring supports
 			four remoting technologies:
-			<itemizedlist spacing="compact">
+			<itemizedlist>
 				<listitem>
 					<para>
 						<emphasis>Remote Method Invocation (RMI)</emphasis>. Through the use
@@ -355,7 +355,7 @@ public class SimpleObject {
 				To expose the <literal>AccountService</literal> (mentioned above), the following
 				configuration needs to be in place:
 <programlisting><![CDATA[
-<bean name="/AccountService" class="org.sprfr.remoting.httpinvoker.HttpInvokerServiceExporter">
+<bean name="/AccountService" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
   <property name="service" ref="accountService"/>
   <property name="serviceInterface" value="example.AccountService"/>
 </bean>
@@ -370,7 +370,7 @@ public class SimpleObject {
 				translate your calls to HTTP POST requests to the URL pointing to the exported
 				service.
 <programlisting><![CDATA[
-<bean id="httpInvokerProxy" class="org.sprfr.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+<bean id="httpInvokerProxy" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
   <property name="serviceUrl" value="http://remotehost:8080/AccountService"/>
   <property name="serviceInterface" value="example.AccountService"/>
 </bean>
@@ -409,8 +409,7 @@ public class SimpleObject {
 				Spring has a convenience base class for JAX-RPC servlet endpoint implementations -
 				<literal>ServletEndpointSupport</literal>. To expose our AccountService we extend Spring's ServletEndpointSupport class
 				and implement our business logic here, usually delegating the call to the business layer.
-<programlisting><![CDATA[
-/**
+<programlisting><lineannotation>/**
  * JAX-RPC compliant RemoteAccountService implementation that simply delegates
  * to the AccountService implementation in the root web application context.
  *
@@ -423,7 +422,7 @@ public class SimpleObject {
  * In the case of Axis, this happens in "server-config.wsdd" respectively via
  * deployment calls. The Web Service tool manages the life-cycle of instances
  * of this class: A Spring application context can just be accessed here.
- */
+ */</lineannotation><![CDATA[
 public class AccountServiceEndpoint extends ServletEndpointSupport implements RemoteAccountService {
     
     private AccountService biz;
@@ -439,9 +438,8 @@ public class AccountServiceEndpoint extends ServletEndpointSupport implements Re
     public Account[] getAccounts(String name) throws RemoteException {
         return biz.getAccounts(name);
     }
-  
-}	
-]]></programlisting>
+
+}]]></programlisting>
 				Our AccountServletEndpoint needs to run in the same web application as the Spring context to allow for access
 				to Spring's facilities. In case of Axis, copy the AxisServlet definition into your web.xml, and set up
 				the endpoint in "server-config.wsdd" (or use the deploy tool).
@@ -457,26 +455,16 @@ public class AccountServiceEndpoint extends ServletEndpointSupport implements Re
 				The latter is the full fledged version that can return a proxy that implements our business service interface.
 				In this example we use the later to create a proxy for the AccountService Endpoint we exposed in the previous paragraph.
 				You will see that Spring has great support for Web Services requiring little coding efforts - most of the magic is done in
-				the spring configuration file as usual:
+				the spring configuration file as usual:</para>
 <programlisting><![CDATA[
     <bean id="accountWebService" class="org.springframework.remoting.jaxrpc.JaxRpcPortProxyFactoryBean">
-        <property name="serviceInterface">
-            <value>example.RemoteAccountService</value>
-        </property>
-        <property name="wsdlDocumentUrl">
-            <value>http://localhost:8080/account/services/accountService?WSDL</value>
-        </property>
-        <property name="namespaceUri">
-            <value>http://localhost:8080/account/services/accountService</value>
-        </property>
-        <property name="serviceName">
-            <value>AccountService</value>
-        </property>
-        <property name="portName">
-            <value>AccountPort</value>
-        </property>
-    </bean>
-]]></programlisting>
+        <property name="serviceInterface" value="example.RemoteAccountService"/>
+        <property name="wsdlDocumentUrl" value="http://localhost:8080/account/services/accountService?WSDL"/>
+        <property name="namespaceUri" value="http://localhost:8080/account/services/accountService"/>
+        <property name="serviceName" value="AccountService"/>
+        <property name="portName" value="AccountPort"/>
+    </bean>]]></programlisting>
+			<para>
 				Where <literal>serviceInterface</literal> is our remote business interface the clients will use.
 				<literal>wsdlDocumentUrl</literal> is the URL for the WSDL file. Spring needs this a startup time to create the JAX-RPC Service.
 				<literal>namespaceUri</literal> corresponds to the targetNamespace in the .wsdl file.
@@ -484,17 +472,17 @@ public class AccountServiceEndpoint extends ServletEndpointSupport implements Re
 				<literal>portName</literal> corresponds to the port name in the .wsdl file.
 			</para>
 			<para>
-				Accessing the Web Service is now very easy as we have a bean factory for it that will expose it as <literal>RemoteAccountService</literal>
-				interface. We can wire this up in Spring:
-<programlisting><![CDATA[
+				Accessing the Web Service is now very easy as we have a bean factory for it that will expose it
+				as <literal>RemoteAccountService</literal> interface. We can wire this up in Spring:</para>
+			<programlisting><![CDATA[
     <bean id="client" class="example.AccountClientImpl">
         ...
         <property name="service" ref="accountWebService"/>
     </bean>
 ]]></programlisting>
-				And from the client code we can access the Web Service just as if it was a normal class, except that it throws RemoteException.
-<programlisting><![CDATA[
-public class AccountClientImpl {
+			<para>And from the client code we can access the Web Service just as if it was a normal class,
+			except that it throws <exception>RemoteException</exception>.</para>
+<programlisting><![CDATA[public class AccountClientImpl {
 
     private RemoteAccountService service;
     
@@ -505,7 +493,7 @@ public class AccountClientImpl {
     public void foo() {
        try {
            service.insertAccount(...);
-        } catch (RemoteException e) {
+        } catch (RemoteException ex) {
            // ouch
            ...
         }
@@ -513,10 +501,9 @@ public class AccountClientImpl {
      
 }
 ]]></programlisting>
-			</para>
 			<para>
 				We can get rid of the checked RemoteException since Spring supports automatic conversion to its corresponding unchecked
-				<literal>RemoteAccessException</literal>. This requires that we provide a non RMI interface also. Our configuration is now:
+				<literal>RemoteAccessException</literal>. This requires that we provide a non RMI interface also. Our configuration is now:</para>
 <programlisting><![CDATA[
     <bean id="accountWebService" class="org.springframework.remoting.jaxrpc.JaxRpcPortProxyFactoryBean">
         <property name="serviceInterface">
@@ -528,8 +515,8 @@ public class AccountClientImpl {
         ...
     </bean>
 ]]></programlisting>
-				Where <literal>serviceInterface</literal> is changed to our non RMI interface. Our RMI interface is now defined using the property
-				<literal>portInterface</literal>. Our client code can now avoid handling <literal>java.rmi.RemoteException</literal>:
+				<para>Where <literal>serviceInterface</literal> is changed to our non RMI interface. Our RMI interface is now defined using the property
+				<literal>portInterface</literal>. Our client code can now avoid handling <literal>java.rmi.RemoteException</literal>:</para>
 <programlisting><![CDATA[
 public class AccountClientImpl {
 
@@ -545,7 +532,6 @@ public class AccountClientImpl {
      
 }
 ]]></programlisting>
-    		</para>
 		</sect2>
 		
 		<sect2>
