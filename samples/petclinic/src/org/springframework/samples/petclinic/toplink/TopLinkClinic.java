@@ -1,4 +1,3 @@
-
 package org.springframework.samples.petclinic.toplink;
 
 import java.util.Collection;

@@ -1,8 +1,3 @@
-/*
- * Created on Nov 25, 2004
- *
- */
-
 package org.springframework.samples.petclinic.toplink;
 
 import java.io.IOException;
@@ -13,9 +8,8 @@ import oracle.toplink.essentials.platform.database.HSQLPlatform;
 import oracle.toplink.essentials.queryframework.ValueReadQuery;
 
 /**
- * Subclass of TopLink's default HSQLPlatform class,
+ * Subclass of TopLink Essentials's default HSQLPlatform class,
  * using native HSQLDB identity columns for id generation.
- * <b>Only works on TopLink 10.1.3 and higher.</b>
  *
  * <p>Necessary for PetClinic's default data model, which relies on
  * identity columns: this is uniformly used across all persistence
@@ -43,12 +37,13 @@ public class EssentialsHSQLPlatformWithNativeSequence extends HSQLPlatform {
 		return new ValueReadQuery("CALL IDENTITY()");
 	}
 
+	public void printFieldIdentityClause(Writer writer) throws ValidationException {
+		try {
+			writer.write(" IDENTITY");
+		}
+		catch (IOException ex) {
+			throw ValidationException.fileError(ex);
+		}
+	}
 
-    public void printFieldIdentityClause(Writer writer) throws ValidationException {
-        try {
-            writer.write(" IDENTITY");
-        } catch (IOException ioException) {
-            throw ValidationException.fileError(ioException);
-        }
-    }	
 }
