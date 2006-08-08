@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,15 +16,16 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.lang.reflect.Method;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 
-import org.springframework.aop.framework.AopConfigException;
-import org.springframework.aop.support.StaticMethodMatcherPointcut;
-import org.springframework.aop.support.AbstractPointcutAdvisor;
-import org.springframework.aop.Pointcut;
+import org.aopalliance.aop.Advice;
+
 import org.springframework.aop.ClassFilter;
-import org.springframework.util.Assert;
+import org.springframework.aop.Pointcut;
+import org.springframework.aop.support.AbstractPointcutAdvisor;
+import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Advisor driven by a TransactionAttributeSource, used to exclude
@@ -43,6 +44,8 @@ public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 	
 	private final TransactionAttributeSourcePointcut pointcut = new TransactionAttributeSourcePointcut();
 
+	private TransactionInterceptor transactionInterceptor;
+
 
 	/**
 	 * Create a new TransactionAttributeSourceAdvisor.
@@ -58,56 +61,66 @@ public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 		setTransactionInterceptor(interceptor);
 	}
 
+
 	/**
 	 * Set the transaction interceptor to use for this advisor.
 	 */
 	public void setTransactionInterceptor(TransactionInterceptor interceptor) {
-		setAdvice(interceptor);
 		if (interceptor.getTransactionAttributeSource() == null) {
-			throw new AopConfigException(
+			throw new IllegalArgumentException(
 					"Cannot construct a TransactionAttributeSourceAdvisor using a " +
 					"TransactionInterceptor that has no TransactionAttributeSource configured");
 		}
-
-		this.pointcut.setTransactionAttributeSource(interceptor.getTransactionAttributeSource());
+		this.transactionInterceptor = interceptor;
 	}
+
+	/**
+	 * Set the {@link ClassFilter} to use for this pointcut.
+	 * Default is {@link ClassFilter#TRUE}.
+	 */
+	public void setClassFilter(ClassFilter classFilter) {
+		this.pointcut.setClassFilter(classFilter);
+	}
+
 
 	public Pointcut getPointcut() {
 		return this.pointcut;
 	}
 
-	public void setClassFilter(ClassFilter classFilter) {
-		this.pointcut.setClassFilter(classFilter);
+	public Advice getAdvice() {
+		return this.transactionInterceptor;
 	}
 
-	public static class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
 
-		private TransactionAttributeSource transactionAttributeSource;
+	/**
+	 * Inner class that implements a Pointcut that matches if the underlying
+	 * TransactionAttributeSource has an attribute for a given method.
+	 */
+	private class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
 
-		public void setTransactionAttributeSource(TransactionAttributeSource transactionAttributeSource) {
-			this.transactionAttributeSource = transactionAttributeSource;
+		private TransactionAttributeSource getTransactionAttributeSource() {
+			return transactionInterceptor.getTransactionAttributeSource();
 		}
 
 		public boolean matches(Method method, Class targetClass) {
-			Assert.notNull(this.transactionAttributeSource, "transactionAttributeSource is required");
-			return (this.transactionAttributeSource.getTransactionAttribute(method, targetClass) != null);
+			return (getTransactionAttributeSource().getTransactionAttribute(method, targetClass) != null);
 		}
 
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-
-			TransactionAttributeSourcePointcut that = (TransactionAttributeSourcePointcut) o;
-
-			if (transactionAttributeSource != null ? !transactionAttributeSource.equals(that.transactionAttributeSource) : that.transactionAttributeSource != null) {
+		public boolean equals(Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof TransactionAttributeSourcePointcut)) {
 				return false;
 			}
-
-			return true;
+			TransactionAttributeSourcePointcut otherPc = (TransactionAttributeSourcePointcut) other;
+			return ObjectUtils.nullSafeEquals(getTransactionAttributeSource(), otherPc.getTransactionAttributeSource());
 		}
 
 		public int hashCode() {
-			return (transactionAttributeSource != null ? transactionAttributeSource.hashCode() : 0);
+			TransactionAttributeSource tas = getTransactionAttributeSource();
+			return (tas != null ? tas.hashCode() : 0);
 		}
 	}
+
 }
