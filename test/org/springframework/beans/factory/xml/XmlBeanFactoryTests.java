@@ -75,6 +75,15 @@ import org.springframework.util.StopWatch;
  */
 public class XmlBeanFactoryTests extends TestCase {
 
+	/**
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2368
+	 */
+	public void testCollectionsReferredToAsRefLocals() throws Exception {
+		XmlBeanFactory factory = new XmlBeanFactory(
+				new ClassPathResource("local-collections-using-XSD.xml", getClass()));
+		factory.preInstantiateSingletons();
+	}
+
 	public void testRefToSeparatePrototypeInstances() throws Exception {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);

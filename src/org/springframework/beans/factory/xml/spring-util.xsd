@@ -52,7 +52,7 @@
 			</xsd:appinfo>
 		</xsd:annotation>
 		<xsd:complexType>
-			<xsd:attribute name="id" type="xsd:string"/>
+			<xsd:attribute name="id" type="xsd:ID"/>
 			<xsd:attribute name="static-field" type="xsd:string" use="required"/>
 		</xsd:complexType>
 	</xsd:element>
@@ -70,7 +70,7 @@
 			</xsd:appinfo>
 		</xsd:annotation>
 		<xsd:complexType>
-			<xsd:attribute name="id" type="xsd:string"/>
+			<xsd:attribute name="id" type="xsd:ID"/>
 			<xsd:attribute name="path" type="xsd:string" use="required"/>
 		</xsd:complexType>
 	</xsd:element>
@@ -86,7 +86,7 @@
 							</tool:annotation>
 						</xsd:appinfo>
 					</xsd:annotation>
-					<xsd:attribute name="id" type="xsd:string" use="required"/>
+					<xsd:attribute name="id" type="xsd:ID" use="required"/>
 					<xsd:attribute name="map-class" type="xsd:string">
 						<xsd:annotation>
 							<xsd:appinfo>
@@ -113,7 +113,7 @@
 							</tool:annotation>
 						</xsd:appinfo>
 					</xsd:annotation>
-					<xsd:attribute name="id" type="xsd:string" use="required"/>
+					<xsd:attribute name="id" type="xsd:ID" use="required"/>
 					<xsd:attribute name="list-class" type="xsd:string">
 						<xsd:annotation>
 							<xsd:appinfo>
@@ -140,7 +140,7 @@
 							</tool:annotation>
 						</xsd:appinfo>
 					</xsd:annotation>
-					<xsd:attribute name="id" type="xsd:string" use="required"/>
+					<xsd:attribute name="id" type="xsd:ID" use="required"/>
 					<xsd:attribute name="set-class" type="xsd:string">
 						<xsd:annotation>
 							<xsd:appinfo>
