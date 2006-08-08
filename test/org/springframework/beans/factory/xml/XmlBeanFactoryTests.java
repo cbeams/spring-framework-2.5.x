@@ -53,6 +53,7 @@ import org.springframework.beans.factory.DummyFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MethodReplacer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -70,6 +71,7 @@ import org.springframework.util.StopWatch;
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
+ * @author Rick Evans
  */
 public class XmlBeanFactoryTests extends TestCase {
 
@@ -350,11 +352,10 @@ public class XmlBeanFactoryTests extends TestCase {
 		XmlBeanFactory parent = new XmlBeanFactory(new ClassPathResource("parent.xml", getClass()));
 		XmlBeanFactory child = new XmlBeanFactory(new ClassPathResource("child.xml", getClass()), parent);
 		try {
-			TestBean inherits = (TestBean) child.getBean("bogusParent");
+			child.getBean("bogusParent", TestBean.class);
 			fail();
 		}
 		catch (BeanDefinitionStoreException ex) {
-			// OK
 			// check exception message contains the name
 			assertTrue(ex.getMessage().indexOf("bogusParent") != -1);
 			assertTrue(ex.getCause() instanceof NoSuchBeanDefinitionException);
@@ -436,7 +437,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		xbf.getBean("proxy2");
 		assertEquals(7, xbf.getSingletonCount());
 	}
-	
+
 	public void testNoSuchFactoryBeanMethod() {
 		try {
 			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("no-such-factory-method.xml", getClass()));
@@ -523,49 +524,39 @@ public class XmlBeanFactoryTests extends TestCase {
 
 	public void testNoSuchXmlFile() throws Exception {
 		try {
-			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("missing.xml", getClass()));
-			fail("Shouldn't create factory from missing XML");
+			new XmlBeanFactory(new ClassPathResource("missing.xml", getClass()));
+			fail("Must not create factory from missing XML");
 		}
-		catch (BeanDefinitionStoreException ex) {
-			// Ok
-			// TODO Check that the error message includes filename
+		catch (BeanDefinitionStoreException expected) {
 		}
 	}
 
 	public void testInvalidXmlFile() throws Exception {
 		try {
-			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("invalid.xml", getClass()));
-			fail("Shouldn't create factory from invalid XML");
+			new XmlBeanFactory(new ClassPathResource("invalid.xml", getClass()));
+			fail("Must not create factory from invalid XML");
 		}
-		catch (BeanDefinitionStoreException ex) {
-			// Ok
-			// TODO Check that the error message includes filename
+		catch (BeanDefinitionStoreException expected) {
 		}
 	}
 
 	public void testUnsatisfiedObjectDependencyCheck() throws Exception {
 		try {
 			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("unsatisfiedObjectDependencyCheck.xml", getClass()));
-			DependenciesBean a = (DependenciesBean) xbf.getBean("a");
-			fail();
+			xbf.getBean("a", DependenciesBean.class);
+			fail("Must have thrown an UnsatisfiedDependencyException");
 		}
 		catch (UnsatisfiedDependencyException ex) {
-			// Ok
-			// What if many dependencies are unsatisfied?
-			//assertTrue(ex.getMessage().indexOf("spouse"))
 		}
 	}
 
 	public void testUnsatisfiedSimpleDependencyCheck() throws Exception {
 		try {
 			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("unsatisfiedSimpleDependencyCheck.xml", getClass()));
-			DependenciesBean a = (DependenciesBean) xbf.getBean("a");
-			fail();
+			xbf.getBean("a", DependenciesBean.class);
+			fail("Must have thrown an UnsatisfiedDependencyException");
 		}
-		catch (UnsatisfiedDependencyException ex) {
-			// Ok
-			// What if many dependencies are unsatisfied?
-			//assertTrue(ex.getMessage().indexOf("spouse"))
+		catch (UnsatisfiedDependencyException expected) {
 		}
 	}
 
@@ -585,13 +576,10 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testUnsatisfiedAllDependencyCheck() throws Exception {
 		try {
 			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("unsatisfiedAllDependencyCheckMissingObjects.xml", getClass()));
-			DependenciesBean a = (DependenciesBean) xbf.getBean("a");
-			fail();
+			xbf.getBean("a", DependenciesBean.class);
+			fail("Must have thrown an UnsatisfiedDependencyException");
 		}
-		catch (UnsatisfiedDependencyException ex) {
-			// Ok
-			// What if many dependencies are unsatisfied?
-			//assertTrue(ex.getMessage().indexOf("spouse"))
+		catch (UnsatisfiedDependencyException expected) {
 		}
 	}
 
@@ -648,11 +636,10 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals(other, rod3a.getOther());
 
 		try {
-			ConstructorDependenciesBean rod4 = (ConstructorDependenciesBean) xbf.getBean("rod4");
-			fail("Should have thrown FatalBeanException");
+			xbf.getBean("rod4", ConstructorDependenciesBean.class);
+			fail("Must have thrown a FatalBeanException");
 		}
-		catch (FatalBeanException ex) {
-			// expected
+		catch (FatalBeanException expected) {
 		}
 
 		DependenciesBean rod5 = (DependenciesBean) xbf.getBean("rod5");
@@ -678,11 +665,10 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(rod2.getSpouse().getName().equals("Kerry"));
 
 		try {
-			DependenciesBean rod3 = (DependenciesBean) xbf.getBean("rod3");
-			fail("Should have thrown UnsatisfiedDependencyException");
+			xbf.getBean("rod3", DependenciesBean.class);
+			fail("Must have thrown UnsatisfiedDependencyException");
 		}
-		catch (UnsatisfiedDependencyException ex) {
-			// expected
+		catch (UnsatisfiedDependencyException expected) {
 		}
 	}
 
@@ -713,7 +699,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals(0, rod.getAge());
 		assertEquals(null, rod.getName());
 
-		ConstructorDependenciesBean rod4 = (ConstructorDependenciesBean) xbf.getBean("rod4");
+		xbf.getBean("rod4", ConstructorDependenciesBean.class);
 		// should have been autowired
 		assertEquals(kerry, rod.getSpouse1());
 		assertEquals(kerry, rod.getSpouse2());
@@ -795,22 +781,20 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testThrowsExceptionOnTooManyArguments() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 		try {
-			ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod7");
+			xbf.getBean("rod7", ConstructorDependenciesBean.class);
 			fail("Should have thrown BeanDefinitionStoreException");
 		}
-		catch (BeanCreationException ex) {
-			// expected
+		catch (BeanCreationException expected) {
 		}
 	}
 
 	public void testThrowsExceptionOnAmbiguousResolution() throws Exception {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 		try {
-			ConstructorDependenciesBean rod = (ConstructorDependenciesBean) xbf.getBean("rod8");
-			fail("Should have thrown UnsatisfiedDependencyException");
+			xbf.getBean("rod8", ConstructorDependenciesBean.class);
+			fail("Must have thrown UnsatisfiedDependencyException");
 		}
-		catch (UnsatisfiedDependencyException ex) {
-			// expected
+		catch (UnsatisfiedDependencyException expected) {
 		}
 	}
 
@@ -874,32 +858,33 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testClassNotFoundWithDefault() {
+	/**
+	 * When using a BeanFactory. singletons are of course not pre-instantiated.
+	 * So rubbish class names in bean defs must now not be 'resolved' when the
+	 * bean def is being parsed, 'cos everything on a bean def is now lazy, but
+	 * must rather only be picked up when the bean is instantiated.
+	 */
+	public void testClassNotFoundWithDefaultBeanClassLoader() {
+		BeanFactory factory = new XmlBeanFactory(new ClassPathResource("classNotFound.xml", getClass()));
+		// cool, no errors, so the rubbish class name in the bean def was not resolved
 		try {
-			XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("classNotFound.xml", getClass()));
-			// should have thrown BeanDefinitionStoreException
+			// let's resolve the bean definition; must blow up
+			factory.getBean("classNotFound");
+			fail("Must have thrown a CannotLoadBeanClassException");
 		}
-		catch (BeanDefinitionStoreException ex) {
+		catch (CannotLoadBeanClassException ex) {
 			assertTrue(ex.getResourceDescription().indexOf("classNotFound.xml") != -1);
-			//assertEquals("classNotFound", ex.getBeanName());
 			assertTrue(ex.getCause() instanceof ClassNotFoundException);
-			// expected
 		}
 	}
 
 	public void testClassNotFoundWithNoBeanClassLoader() {
-		try {
-			DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
-			reader.setBeanClassLoader(null);
-			reader.loadBeanDefinitions(new ClassPathResource("classNotFound.xml", getClass()));
-			assertTrue(bf.getBeanDefinition("classNotFound") instanceof RootBeanDefinition);
-			assertEquals(((RootBeanDefinition) bf.getBeanDefinition("classNotFound")).getBeanClassName(),
-					"org.springframework.beans.TestBeana");
-		}
-		catch (BeanDefinitionStoreException ex) {
-			fail("Should not have thrown BeanDefinitionStoreException");
-		}
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
+		reader.setBeanClassLoader(null);
+		reader.loadBeanDefinitions(new ClassPathResource("classNotFound.xml", getClass()));
+		assertTrue(bf.getBeanDefinition("classNotFound") instanceof RootBeanDefinition);
+		assertEquals("WhatALotOfRubbish", bf.getBeanDefinition("classNotFound").getBeanClassName());
 	}
 
 	public void testResourceAndInputStream() throws IOException {
@@ -928,27 +913,27 @@ public class XmlBeanFactoryTests extends TestCase {
 		XmlBeanFactory xbf = new XmlBeanFactory(
 				new ClassPathResource("org/springframework/beans/factory/xml/resource.xml"));
 		// comes from "resourceImport.xml"
-		ResourceTestBean resource1 = (ResourceTestBean) xbf.getBean("resource1");
+		xbf.getBean("resource1", ResourceTestBean.class);
 		// comes from "resource.xml"
-		ResourceTestBean resource2 = (ResourceTestBean) xbf.getBean("resource2");
+		xbf.getBean("resource2", ResourceTestBean.class);
 	}
 
 	public void testUrlResourceWithImport() {
 		URL url = getClass().getResource("resource.xml");
 		XmlBeanFactory xbf = new XmlBeanFactory(new UrlResource(url));
 		// comes from "resourceImport.xml"
-		ResourceTestBean resource1 = (ResourceTestBean) xbf.getBean("resource1");
+		xbf.getBean("resource1", ResourceTestBean.class);
 		// comes from "resource.xml"
-		ResourceTestBean resource2 = (ResourceTestBean) xbf.getBean("resource2");
+		xbf.getBean("resource2", ResourceTestBean.class);
 	}
 
 	public void testFileSystemResourceWithImport() {
 		String file = getClass().getResource("resource.xml").getFile();
 		XmlBeanFactory xbf = new XmlBeanFactory(new FileSystemResource(file));
 		// comes from "resourceImport.xml"
-		ResourceTestBean resource1 = (ResourceTestBean) xbf.getBean("resource1");
+		xbf.getBean("resource1", ResourceTestBean.class);
 		// comes from "resource.xml"
-		ResourceTestBean resource2 = (ResourceTestBean) xbf.getBean("resource2");
+		xbf.getBean("resource2", ResourceTestBean.class);
 	}
 
 	public void testLookupOverrideMethodsWithSetterInjection() {
@@ -1188,7 +1173,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals("gotchaAutowired", fm.getName());
 		assertEquals("Juergen", fm.getTestBean().getName());
 	}
-	
+
 	public void testProtectedFactoryMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -1198,7 +1183,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		TestBean tb = (TestBean) xbf.getBean("defaultTestBean.protected");
 		assertEquals(1, tb.getAge());
 	}
-	
+
 	public void testPrivateFactoryMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
