@@ -20,8 +20,11 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -108,6 +111,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	public AbstractAutowireCapableBeanFactory() {
 		super();
+		ignoreDependencyInterface(BeanNameAware.class);
 		ignoreDependencyInterface(BeanFactoryAware.class);
 		ignoreDependencyInterface(BeanClassLoaderAware.class);
 	}
@@ -589,18 +593,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			pvs = newPvs;
 		}
 
+		PropertyDescriptor[] filteredPds = filterPropertyDescriptorsForDependencyCheck(bw);
+
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext(); ) {
 			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
 			if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
 				InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) beanProcessor;
-				pvs = ibp.postProcessPropertyValues(pvs, bw.getWrappedInstance(), beanName);
+				pvs = ibp.postProcessPropertyValues(pvs, filteredPds, bw.getWrappedInstance(), beanName);
 				if (pvs == null) {
 					return;
 				}
 			}
 		}
 
-		checkDependencies(beanName, mergedBeanDefinition, bw, pvs);
+		checkDependencies(beanName, mergedBeanDefinition, filteredPds, pvs);
 		applyPropertyValues(beanName, mergedBeanDefinition, bw, pvs);
 	}
 
@@ -691,25 +697,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Filter the given map of matching beans for autowiring.
-	 * <p>Do not consider a bean as autowire candidate if constitutes a reference
-	 * back to the same bean or if it has been explicitly excluded from autowiring.
-	 * @param matchingBeans the map of matching beans
-	 * @param beanName the name of the bean to be autowired (may be <code>null</code>)
-	 */
-	private void filterMatchingBeans(Map matchingBeans, String beanName) {
-		for (Iterator it = matchingBeans.keySet().iterator(); it.hasNext();) {
-			String name = (String) it.next();
-			if (containsBeanDefinition(name)) {
-				RootBeanDefinition definition = getMergedBeanDefinition(name);
-				if (ObjectUtils.nullSafeEquals(beanName, name) || !definition.isAutowireCandidate()) {
-					it.remove();
-				}
-			}
-		}
-	}
-
-	/**
 	 * Return an array of non-simple bean properties that are unsatisfied.
 	 * These are probably unsatisfied references to other beans in the
 	 * factory. Does not include simple properties like primitives or Strings.
@@ -732,39 +719,41 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Perform a dependency check that all properties exposed have been set,
-	 * if desired. Dependency checks can be objects (collaborating beans),
-	 * simple (primitives and String), or all (both).
-	 * @param beanName the name of the bean
-	 * @param mergedBeanDefinition the bean definition the bean was created with
-	 * @param bw the BeanWrapper the bean was created with
-	 * @param pvs the property values to be applied to the bean
-	 * @see #isExcludedFromDependencyCheck(java.beans.PropertyDescriptor)
+	 * Filter the given map of matching beans for autowiring.
+	 * <p>Do not consider a bean as autowire candidate if constitutes a reference
+	 * back to the same bean or if it has been explicitly excluded from autowiring.
+	 * @param matchingBeans the map of matching beans
+	 * @param beanName the name of the bean to be autowired (may be <code>null</code>)
 	 */
-	protected void checkDependencies(
-			String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw, PropertyValues pvs)
-			throws UnsatisfiedDependencyException {
-
-		int dependencyCheck = mergedBeanDefinition.getDependencyCheck();
-		if (dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_NONE) {
-			return;
-		}
-
-		PropertyDescriptor[] pds = bw.getPropertyDescriptors();
-		for (int i = 0; i < pds.length; i++) {
-			if (pds[i].getWriteMethod() != null && !isExcludedFromDependencyCheck(pds[i]) &&
-					!pvs.contains(pds[i].getName())) {
-				boolean isSimple = BeanUtils.isSimpleProperty(pds[i].getPropertyType());
-				boolean unsatisfied = (dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_ALL) ||
-					(isSimple && dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_SIMPLE) ||
-					(!isSimple && dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
-				if (unsatisfied) {
-					throw new UnsatisfiedDependencyException(
-							mergedBeanDefinition.getResourceDescription(), beanName, pds[i].getName(),
-							"Set this property value or disable dependency checking for this bean.");
+	private void filterMatchingBeans(Map matchingBeans, String beanName) {
+		for (Iterator it = matchingBeans.keySet().iterator(); it.hasNext();) {
+			String name = (String) it.next();
+			if (containsBeanDefinition(name)) {
+				RootBeanDefinition definition = getMergedBeanDefinition(name);
+				if (ObjectUtils.nullSafeEquals(beanName, name) || !definition.isAutowireCandidate()) {
+					it.remove();
 				}
 			}
 		}
+	}
+
+	/**
+	 * Extract a filtered set of PropertyDescriptors from the given BeanWrapper,
+	 * excluding ignored dependency types or properties defined on ignored
+	 * dependency interfaces.
+	 * @param bw the BeanWrapper the bean was created with
+	 * @return the filtered PropertyDescriptors
+	 * @see #isExcludedFromDependencyCheck
+	 */
+	protected PropertyDescriptor[] filterPropertyDescriptorsForDependencyCheck(BeanWrapper bw) {
+		List pds = new LinkedList(Arrays.asList(bw.getPropertyDescriptors()));
+		for (Iterator it = pds.iterator(); it.hasNext();) {
+			PropertyDescriptor pd = (PropertyDescriptor) it.next();
+			if (isExcludedFromDependencyCheck(pd)) {
+				it.remove();
+			}
+		}
+		return (PropertyDescriptor[]) pds.toArray(new PropertyDescriptor[pds.size()]);
 	}
 
 	/**
@@ -784,6 +773,40 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return (AutowireUtils.isExcludedFromDependencyCheck(pd) ||
 				getIgnoredDependencyTypes().contains(pd.getPropertyType()) ||
 				AutowireUtils.isSetterDefinedInInterface(pd, getIgnoredDependencyInterfaces()));
+	}
+
+	/**
+	 * Perform a dependency check that all properties exposed have been set,
+	 * if desired. Dependency checks can be objects (collaborating beans),
+	 * simple (primitives and String), or all (both).
+	 * @param beanName the name of the bean
+	 * @param mergedBeanDefinition the bean definition the bean was created with
+	 * @param pds the relevant property descriptors for the target bean
+	 * @param pvs the property values to be applied to the bean
+	 * @see #isExcludedFromDependencyCheck(java.beans.PropertyDescriptor)
+	 */
+	protected void checkDependencies(
+			String beanName, RootBeanDefinition mergedBeanDefinition, PropertyDescriptor[] pds, PropertyValues pvs)
+			throws UnsatisfiedDependencyException {
+
+		int dependencyCheck = mergedBeanDefinition.getDependencyCheck();
+		if (dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_NONE) {
+			return;
+		}
+
+		for (int i = 0; i < pds.length; i++) {
+			if (pds[i].getWriteMethod() != null && !pvs.contains(pds[i].getName())) {
+				boolean isSimple = BeanUtils.isSimpleProperty(pds[i].getPropertyType());
+				boolean unsatisfied = (dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_ALL) ||
+					(isSimple && dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_SIMPLE) ||
+					(!isSimple && dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
+				if (unsatisfied) {
+					throw new UnsatisfiedDependencyException(
+							mergedBeanDefinition.getResourceDescription(), beanName, pds[i].getName(),
+							"Set this property value or disable dependency checking for this bean.");
+				}
+			}
+		}
 	}
 
 	/**

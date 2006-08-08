@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.config;
 
+import java.beans.PropertyDescriptor;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 
@@ -61,7 +63,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	/**
 	 * Perform operations after the bean has been instantiated, via a constructor or factory method,
 	 * but before Spring property population (from explicit properties or autowiring) occurs.
-	 * @param bean bean instance created, but whose properties have not yet been set
+	 * @param bean the bean instance created, but whose properties have not yet been set
 	 * @param beanName the name of the bean
 	 * @return <code>true</code> if properties should be set on the bean; <code>false</code>
 	 * if property population should be skipped. Normal implementations should return <code>true</code>.
@@ -79,15 +81,18 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * creating a new MutablePropertyValues instance based on the original PropertyValues,
 	 * adding or removing specific values.
 	 * @param pvs the property values that the factory is about to apply (never <code>null</code>)
-	 * @param bean instantiated bean whose properties have not yet been set
+	 * @param pds the relevant property descriptors for the target bean (with ignored
+	 * dependency types - which the factory handles specifically - already filtered out)
+	 * @param bean the bean instance created, but whose properties have not yet been set
 	 * @param beanName the name of the bean
 	 * @return the actual property values to apply to to the given bean
 	 * (can be the passed-in PropertyValues instance), or <code>null</code>
-	 * to skip property population.
+	 * to skip property population
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see org.springframework.beans.MutablePropertyValues
 	 */
-	PropertyValues postProcessPropertyValues(PropertyValues pvs, Object bean, String beanName)
+	PropertyValues postProcessPropertyValues(
+			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName)
 			throws BeansException;
 
 }

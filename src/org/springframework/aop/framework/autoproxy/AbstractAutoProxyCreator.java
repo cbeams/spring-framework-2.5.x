@@ -16,6 +16,7 @@
 
 package org.springframework.aop.framework.autoproxy;
 
+import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -222,7 +223,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		return true;
 	}
 
-	public PropertyValues postProcessPropertyValues(PropertyValues pvs, Object bean, String beanName) {
+	public PropertyValues postProcessPropertyValues(
+			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
+
 		return pvs;
 	}
 

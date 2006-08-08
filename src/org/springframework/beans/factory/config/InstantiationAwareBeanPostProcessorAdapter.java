@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory.config;
 
+import java.beans.PropertyDescriptor;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 
@@ -39,7 +41,8 @@ public class InstantiationAwareBeanPostProcessorAdapter implements Instantiation
 		return true;
 	}
 
-	public PropertyValues postProcessPropertyValues(PropertyValues pvs, Object bean, String beanName)
+	public PropertyValues postProcessPropertyValues(
+			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName)
 			throws BeansException {
 
 		return pvs;
