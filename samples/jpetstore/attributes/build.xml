@@ -30,8 +30,8 @@
 			<include name="commons-attributes-compiler.jar"/>
 			<include name="commons-collections.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/lib/xdoclet">
-			<include name="xjavadoc-1.1.jar"/>
+		<fileset dir="${spring.root}/lib/qdox">
+			<include name="qdox-1.5.jar"/>
 		</fileset>
 
 	</path>
