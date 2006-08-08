@@ -24,14 +24,14 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Editor for <code>java.util.Properties</code> objects.
- * Handles conversion from content String to Properties object.
- * Also handles Map to Properties conversion, for populating
- * a Properties object via XML "map" entries.
+ * Custom {@link java.beans.PropertyEditor} for {@link Properties} objects.
+ * 
+ * <p>Handles conversion from content {@link String} to <code>Properties</code> object.
+ * Also handles {@link Map} to <code>Properties</code> conversion, for populating
+ * a <code>Properties</code> object via XML "map" entries.
  *
- * <p>The required format is defined in the standard
- * <code>java.util.Properties</code> documentation.
- * Each property must be on a new line.
+ * <p>The required format is defined in the standard <code>Properties</code>
+ * documentation. Each property must be on a new line.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -47,7 +47,9 @@ public class PropertiesEditor extends PropertyEditorSupport {
 
 
 	/**
-	 * Convert String into Properties, considering it as properties content.
+	 * Convert {@link String} into {@link Properties}, considering it as
+	 * properties content.
+	 * @param text the text to be so converted
 	 */
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (text == null) {
@@ -55,7 +57,8 @@ public class PropertiesEditor extends PropertyEditorSupport {
 		}
 		Properties props = new Properties();
 		try {
-			props.load(new ByteArrayInputStream(text.getBytes()));
+			// must use the ISO-8859-1 encosing because Properties.load(stream) does
+			props.load(new ByteArrayInputStream(text.getBytes("ISO-8859-1")));
 			dropComments(props);
 		}
 		catch (IOException ex) {
@@ -67,7 +70,7 @@ public class PropertiesEditor extends PropertyEditorSupport {
 	}
 
 	/**
-	 * Take Properties as-is; convert <code>java.util.Map</code> into Properties.
+	 * Take {@link Properties} as-is; convert {@link Map} into <code>Properties</code>.
 	 */
 	public void setValue(Object value) {
 		if (!(value instanceof Properties) && value instanceof Map) {
