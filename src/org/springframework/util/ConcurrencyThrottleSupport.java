@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
  * should usually be called in a finally block!.
  *
  * <p>The default concurrency limit of this support class is -1.
- * Subclasses may override this default; check the concrete class's javadoc.
+ * Subclasses may override this default; check the concrete class' javadoc.
  *
  * <p>This class is designed for serializability, to allow for serializing
  * interceptors that derive from it. Note that the subclass needs to explicitly
@@ -94,7 +94,7 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 	 * Return whether this throttle is currently active.
 	 * @return <code>true</code> if the concurrency limit for this instance is active
 	 * @see #getConcurrencyLimit()
-	 * @see #setConcurrencyLimit(int) 
+	 * @see #setConcurrencyLimit
 	 */
 	public boolean isThrottleActive() {
 		return (this.concurrencyLimit > 0);
