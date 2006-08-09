@@ -42,7 +42,7 @@ public class SyncTaskExecutor implements TaskExecutor, Serializable {
 	 * through direct invocation of its <code>run()</code> method.
 	 */
 	public void execute(Runnable task) {
-		Assert.notNull("Runnable must not be null");
+		Assert.notNull(task, "Runnable must not be null");
 		task.run();
 	}
 

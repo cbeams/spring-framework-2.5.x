@@ -61,7 +61,7 @@ public class SimpleThreadPoolTaskExecutor extends SimpleThreadPool
 
 
 	public void execute(Runnable task) {
-		Assert.notNull("Runnable must not be null");
+		Assert.notNull(task, "Runnable must not be null");
 		runInThread(task);
 	}
 

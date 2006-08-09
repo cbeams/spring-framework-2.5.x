@@ -177,7 +177,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	 * on a custom subclass of this adapter, defining listener methods.
 	 */
 	public void setDelegate(Object delegate) {
-		Assert.notNull("Delegate must not be null");
+		Assert.notNull(delegate, "Delegate must not be null");
 		this.delegate = delegate;
 	}
 

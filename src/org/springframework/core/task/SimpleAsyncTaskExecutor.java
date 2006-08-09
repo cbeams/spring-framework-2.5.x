@@ -139,7 +139,7 @@ public class SimpleAsyncTaskExecutor extends ConcurrencyThrottleSupport
 	 * @see #afterAccess()
 	 */
 	public final void execute(Runnable task) {
-		Assert.notNull("Runnable must not be null");
+		Assert.notNull(task, "Runnable must not be null");
 		beforeAccess();
 		doExecute(new ConcurrencyThrottlingRunnable(task));
 	}
