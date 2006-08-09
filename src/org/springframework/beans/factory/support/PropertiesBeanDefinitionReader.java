@@ -29,7 +29,6 @@ import java.util.ResourceBundle;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessor;
-import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -408,8 +407,9 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 		boolean singleton = true;
 		boolean lazyInit = false;
 
+		ConstructorArgumentValues cas = new ConstructorArgumentValues();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		ConstructorArgumentValues cvs = new ConstructorArgumentValues();
+
 		for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			String key = StringUtils.trimWhitespace((String) entry.getKey());
@@ -436,11 +436,11 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				else if (property.startsWith(CONSTRUCTOR_ARG_PREFIX)) {
 					if (property.endsWith(REF_SUFFIX)) {
 						int index = Integer.parseInt(property.substring(1, property.length() - REF_SUFFIX.length()));
-						cvs.addIndexedArgumentValue(index, new RuntimeBeanReference(entry.getValue().toString()));
+						cas.addIndexedArgumentValue(index, new RuntimeBeanReference(entry.getValue().toString()));
 					}
 					else {
 						int index = Integer.parseInt(property.substring(1));
-						cvs.addIndexedArgumentValue(index, readValue(entry));
+						cas.addIndexedArgumentValue(index, readValue(entry));
 					}
 				}
 				else if (property.endsWith(REF_SUFFIX)) {
@@ -452,11 +452,11 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 					// It doesn't matter if the referenced bean hasn't yet been registered:
 					// this will ensure that the reference is resolved at runtime.
 					Object val = new RuntimeBeanReference(ref);
-					pvs.addPropertyValue(new PropertyValue(property, val));
+					pvs.addPropertyValue(property, val);
 				}
 				else{
 					// It's a normal bean property.
-					pvs.addPropertyValue(new PropertyValue(property, readValue(entry)));
+					pvs.addPropertyValue(property, readValue(entry));
 				}
 			}
 		}
@@ -474,10 +474,12 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 		try {
 			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
-					className, parent, cvs, pvs, getBeanClassLoader());
+					parent, className, getBeanClassLoader());
 			bd.setAbstract(isAbstract);
 			bd.setSingleton(singleton);
 			bd.setLazyInit(lazyInit);
+			bd.setConstructorArgumentValues(cas);
+			bd.setPropertyValues(pvs);
 			getBeanFactory().registerBeanDefinition(beanName, bd);
 		}
 		catch (ClassNotFoundException ex) {

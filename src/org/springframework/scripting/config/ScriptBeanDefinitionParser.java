@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.w3c.dom.Element;
 
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -28,8 +27,8 @@ import org.springframework.beans.factory.support.ReaderContext;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 import org.springframework.scripting.ScriptFactory;
+import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
@@ -112,8 +111,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		}
 
 		// Add any property definitions that need adding.
-		MutablePropertyValues mutablePropertyValues = parserContext.getDelegate().parsePropertyElements(element);
-		beanDefinition.setPropertyValues(mutablePropertyValues);
+		parserContext.getDelegate().parsePropertyElements(element, beanDefinition);
 
 		return beanDefinition;
 	}
@@ -126,7 +124,8 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private void parseRefreshMetadata(Element element, RootBeanDefinition beanDefinition) {
 		String refreshCheckDelay = element.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
 		if (StringUtils.hasText(refreshCheckDelay)) {
-			beanDefinition.setAttribute(ScriptFactoryPostProcessor.REFRESH_CHECK_DELAY_ATTRIBUTE, new Long(refreshCheckDelay));
+			beanDefinition.setAttribute(
+					ScriptFactoryPostProcessor.REFRESH_CHECK_DELAY_ATTRIBUTE, new Long(refreshCheckDelay));
 		}
 	}
 

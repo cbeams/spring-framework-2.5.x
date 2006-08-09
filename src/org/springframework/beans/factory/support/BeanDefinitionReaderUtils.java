@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Utility methods that are useful for bean definition readers implementations.
+ * Mainly intended for internal use.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -54,33 +55,50 @@ public class BeanDefinitionReaderUtils {
 	 * (can be <code>null</code> to just register bean classes by name)
 	 * @return the bean definition
 	 * @throws ClassNotFoundException if the bean class could not be loaded
+	 * @deprecated in favor of <code>createBeanDefinition(String, String, ClassLoader)</code>
+	 * @see #createBeanDefinition(String, String, ClassLoader)
 	 */
 	public static AbstractBeanDefinition createBeanDefinition(
 			String className, String parent, ConstructorArgumentValues cargs,
 			MutablePropertyValues pvs, ClassLoader classLoader)
 			throws ClassNotFoundException {
 
-		Class beanClass = null;
-		if (className != null && classLoader != null) {
-			beanClass = ClassUtils.forName(className, classLoader);
-		}
+		AbstractBeanDefinition bd = createBeanDefinition(parent, className, classLoader);
+		bd.setConstructorArgumentValues(cargs);
+		bd.setPropertyValues(pvs);
+		return bd;
+	}
 
-		if (parent == null) {
-			if (beanClass != null) {
-				return new RootBeanDefinition(beanClass, cargs, pvs);
-			}
-			else {
-				return new RootBeanDefinition(className, cargs, pvs);
-			}
+	/**
+	 * Create a new RootBeanDefinition or ChildBeanDefinition for the given
+	 * class name, parent, constructor arguments, and property values.
+	 * @param parent the name of the parent bean, if any
+	 * @param className the name of the bean class, if any
+	 * @param classLoader the ClassLoader to use for loading bean classes
+	 * (can be <code>null</code> to just register bean classes by name)
+	 * @return the bean definition
+	 * @throws ClassNotFoundException if the bean class could not be loaded
+	 */
+	public static AbstractBeanDefinition createBeanDefinition(
+			String parent, String className, ClassLoader classLoader)
+			throws ClassNotFoundException {
+
+		AbstractBeanDefinition bd = null;
+		if (parent != null) {
+			bd = new ChildBeanDefinition(parent);
 		}
 		else {
-			if (beanClass != null) {
-				return new ChildBeanDefinition(parent, beanClass, cargs, pvs);
+			bd = new RootBeanDefinition();
+		}
+		if (className != null) {
+			if (classLoader != null) {
+				bd.setBeanClass(ClassUtils.forName(className, classLoader));
 			}
 			else {
-				return new ChildBeanDefinition(parent, className, cargs, pvs);
+				bd.setBeanClassName(className);
 			}
 		}
+		return bd;
 	}
 
 	/**

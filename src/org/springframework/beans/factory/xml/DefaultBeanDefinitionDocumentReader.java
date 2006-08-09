@@ -159,7 +159,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			getReaderContext().fireAliasRegistered(name, alias, source);
 		}
 		else if (DomUtils.nodeNameEquals(ele, BEAN_ELEMENT)) {
-			BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele, false);
+			BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
 			if (bdHolder != null) {
 				bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 				// Register the final decorated instance.

@@ -16,19 +16,20 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
-import org.springframework.beans.factory.config.PropertiesFactoryBean;
-import org.springframework.beans.factory.config.MapFactoryBean;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.SetFactoryBean;
-import org.springframework.beans.factory.config.ListFactoryBean;
-import org.springframework.util.StringUtils;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.w3c.dom.Element;
 
-import java.util.Map;
-import java.util.List;
-import java.util.Set;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
+import org.springframework.beans.factory.config.ListFactoryBean;
+import org.springframework.beans.factory.config.MapFactoryBean;
+import org.springframework.beans.factory.config.PropertiesFactoryBean;
+import org.springframework.beans.factory.config.SetFactoryBean;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link NamespaceHandler} for the <code>util</code> namespace.
@@ -47,12 +48,14 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 		registerBeanDefinitionParser("set", new SetBeanDefinitionParser());
 	}
 
+
 	public static class PropertiesBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
 		protected Class getBeanClass(Element element) {
 			return PropertiesFactoryBean.class;
 		}
 	}
+
 
 	public static class ConstantBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
@@ -64,14 +67,13 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
 		protected String extractId(Element element) {
 			String id = super.extractId(element);
-
 			if(!StringUtils.hasText(id)) {
 				id = element.getAttribute(STATIC_FIELD_ATTRIBUTE);
 			}
-
 			return id;
 		}
 	}
+
 
 	public static class MapBeanDefinitionParser implements BeanDefinitionParser {
 
@@ -79,7 +81,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			String id = element.getAttribute("id");
 			String mapClass = element.getAttribute("map-class");
 
-			Map parsedMap = parserContext.getDelegate().parseMapElement(element);
+			Map parsedMap = parserContext.getDelegate().parseMapElement(element, null);
 			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(MapFactoryBean.class);
 			builder.addPropertyValue("sourceMap", parsedMap);
 			if (StringUtils.hasText(mapClass)) {
@@ -91,12 +93,14 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 		}
 	}
 
+
 	public static class ListBeanDefinitionParser implements BeanDefinitionParser {
+
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			String id = element.getAttribute("id");
 			String listClass = element.getAttribute("list-class");
 
-			List parsedList = parserContext.getDelegate().parseListElement(element);
+			List parsedList = parserContext.getDelegate().parseListElement(element, null);
 			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ListFactoryBean.class);
 			builder.addPropertyValue("sourceList", parsedList);
 			if (StringUtils.hasText(listClass)) {
@@ -108,12 +112,14 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 		}
 	}
 
+
 	public static class SetBeanDefinitionParser implements BeanDefinitionParser {
+
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			String id = element.getAttribute("id");
 			String setClass = element.getAttribute("set-class");
 
-			Set parsedSet = parserContext.getDelegate().parseSetElement(element);
+			Set parsedSet = parserContext.getDelegate().parseSetElement(element, null);
 			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(SetFactoryBean.class);
 			builder.addPropertyValue("sourceSet", parsedSet);
 			if (StringUtils.hasText(setClass)) {
@@ -124,4 +130,5 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			return null;
 		}
 	}
+
 }

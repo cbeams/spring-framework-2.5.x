@@ -32,11 +32,9 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -365,7 +363,16 @@ public class BeanDefinitionParserDelegate {
 	 * if there were errors during parse. Errors are reported to the
 	 * {@link org.springframework.beans.factory.parsing.ProblemReporter}.
 	 */
-	public BeanDefinitionHolder parseBeanDefinitionElement(Element ele, boolean isInnerBean) {
+	public BeanDefinitionHolder parseBeanDefinitionElement(Element ele) {
+		return parseBeanDefinitionElement(ele, null);
+	}
+
+	/**
+	 * Parses the supplied <code>&lt;bean&gt;</code> element. May return <code>null</code>
+	 * if there were errors during parse. Errors are reported to the
+	 * {@link org.springframework.beans.factory.parsing.ProblemReporter}.
+	 */
+	public BeanDefinitionHolder parseBeanDefinitionElement(Element ele, BeanDefinition containingBean) {
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 
@@ -380,23 +387,24 @@ public class BeanDefinitionParserDelegate {
 			beanName = (String) aliases.remove(0);
 			if (logger.isDebugEnabled()) {
 				logger.debug("No XML 'id' specified - using '" + beanName +
-								"' as bean name and " + aliases + " as aliases");
+						"' as bean name and " + aliases + " as aliases");
 			}
 		}
 
-		if (!isInnerBean) {
+		if (containingBean == null) {
 			checkNameUniqueness(beanName, aliases, ele);
 		}
 
-		BeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName);
+		BeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
 
 		if (beanDefinition != null) {
 			if (!StringUtils.hasText(beanName) && beanDefinition instanceof AbstractBeanDefinition) {
 				beanName = BeanDefinitionReaderUtils.generateBeanName(
-								(AbstractBeanDefinition) beanDefinition, getReaderContext().getReader().getBeanFactory(), isInnerBean);
+						(AbstractBeanDefinition) beanDefinition, getReaderContext().getReader().getBeanFactory(),
+						(containingBean != null));
 				if (logger.isDebugEnabled()) {
 					logger.debug("Neither XML 'id' nor 'name' specified - " +
-									"using generated bean name [" + beanName + "]");
+							"using generated bean name [" + beanName + "]");
 				}
 			}
 
@@ -428,7 +436,7 @@ public class BeanDefinitionParserDelegate {
 	 * Parse the BeanDefinition itself, without regard to name or aliases. May return
 	 * <code>null</code> if problems occured during the parse of the bean definition.
 	 */
-	public BeanDefinition parseBeanDefinitionElement(Element ele, String beanName) {
+	public BeanDefinition parseBeanDefinitionElement(Element ele, String beanName, BeanDefinition containingBean) {
 		String className = null;
 		if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
 			className = ele.getAttribute(CLASS_ATTRIBUTE);
@@ -440,19 +448,24 @@ public class BeanDefinitionParserDelegate {
 
 		try {
 			this.parseState.push(new BeanEntry(beanName));
-			ConstructorArgumentValues cargs = parseConstructorArgElements(ele);
-			MutablePropertyValues pvs = parsePropertyElements(ele);
 
 			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
-							className, parent, cargs, pvs, getReaderContext().getReader().getBeanClassLoader());
-
-			parseMetaElements(ele, bd);
+					parent, className, getReaderContext().getReader().getBeanClassLoader());
 
 			if (ele.hasAttribute(SCOPE_ATTRIBUTE)) {
+				// Spring 2.0 "scope" attribute
 				bd.setScope(ele.getAttribute(SCOPE_ATTRIBUTE));
+				if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
+					error("Specify either 'scope' or 'singleton', not both", ele);
+				}
 			}
-			if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
+			else if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
+				// Spring 1.x "singleton" attribute
 				bd.setSingleton(TRUE_VALUE.equals(ele.getAttribute(SINGLETON_ATTRIBUTE)));
+			}
+			else if (containingBean != null) {
+				// Take default from containing bean in case of an inner bean definition.
+				bd.setSingleton(containingBean.isSingleton());
 			}
 
 			if (ele.hasAttribute(ABSTRACT_ATTRIBUTE)) {
@@ -520,8 +533,12 @@ public class BeanDefinitionParserDelegate {
 				}
 			}
 
+			parseMetaElements(ele, bd);
 			parseLookupOverrideSubElements(ele, bd.getMethodOverrides());
 			parseReplacedMethodSubElements(ele, bd.getMethodOverrides());
+
+			parseConstructorArgElements(ele, bd);
+			parsePropertyElements(ele, bd);
 
 			bd.setResourceDescription(getReaderContext().getResource().getDescription());
 			bd.setSource(extractSource(ele));
@@ -529,7 +546,7 @@ public class BeanDefinitionParserDelegate {
 			return bd;
 		}
 		catch (ClassNotFoundException ex) {
-			error("Bean class [" + className + "] not found", ele,ex);
+			error("Bean class [" + className + "] not found", ele, ex);
 		}
 		catch (NoClassDefFoundError err) {
 			error("Class that bean class [" + className + "] depends on not found", ele, err);
@@ -601,31 +618,27 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse constructor-arg sub-elements of the given bean element.
 	 */
-	public ConstructorArgumentValues parseConstructorArgElements(Element beanEle) {
+	public void parseConstructorArgElements(Element beanEle, BeanDefinition bd) {
 		NodeList nl = beanEle.getChildNodes();
-		ConstructorArgumentValues cargs = new ConstructorArgumentValues();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element && DomUtils.nodeNameEquals(node, CONSTRUCTOR_ARG_ELEMENT)) {
-				parseConstructorArgElement((Element) node, cargs);
+				parseConstructorArgElement((Element) node, bd);
 			}
 		}
-		return cargs;
 	}
 
 	/**
 	 * Parse property sub-elements of the given bean element.
 	 */
-	public MutablePropertyValues parsePropertyElements(Element beanEle) {
+	public void parsePropertyElements(Element beanEle, BeanDefinition bd) {
 		NodeList nl = beanEle.getChildNodes();
-		MutablePropertyValues pvs = new MutablePropertyValues();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			if (node instanceof Element && DomUtils.nodeNameEquals(node, PROPERTY_ELEMENT)) {
-				parsePropertyElement((Element) node, pvs);
+				parsePropertyElement((Element) node, bd);
 			}
 		}
-		return pvs;
 	}
 
 	/**
@@ -673,7 +686,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse a constructor-arg element.
 	 */
-	public void parseConstructorArgElement(Element ele, ConstructorArgumentValues cargs) {
+	public void parseConstructorArgElement(Element ele, BeanDefinition bd) {
 		String indexAttr = ele.getAttribute(INDEX_ATTRIBUTE);
 		String typeAttr = ele.getAttribute(TYPE_ATTRIBUTE);
 		if (StringUtils.hasLength(indexAttr)) {
@@ -684,12 +697,12 @@ public class BeanDefinitionParserDelegate {
 				}
 				try {
 					this.parseState.push(new ConstructorArgumentEntry(index));
-					Object val = parsePropertyValue(ele, null);
+					Object val = parsePropertyValue(ele, bd, null);
 					if (StringUtils.hasLength(typeAttr)) {
-						cargs.addIndexedArgumentValue(index, val, typeAttr);
+						bd.getConstructorArgumentValues().addIndexedArgumentValue(index, val, typeAttr);
 					}
 					else {
-						cargs.addIndexedArgumentValue(index, val);
+						bd.getConstructorArgumentValues().addIndexedArgumentValue(index, val);
 					}
 				}
 				finally {
@@ -703,12 +716,12 @@ public class BeanDefinitionParserDelegate {
 		else {
 			try {
 				this.parseState.push(new ConstructorArgumentEntry());
-				Object val = parsePropertyValue(ele, null);
+				Object val = parsePropertyValue(ele, bd, null);
 				if (StringUtils.hasLength(typeAttr)) {
-					cargs.addGenericArgumentValue(val, typeAttr);
+					bd.getConstructorArgumentValues().addGenericArgumentValue(val, typeAttr);
 				}
 				else {
-					cargs.addGenericArgumentValue(val);
+					bd.getConstructorArgumentValues().addGenericArgumentValue(val);
 				}
 			}
 			finally {
@@ -720,7 +733,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse a property element.
 	 */
-	public void parsePropertyElement(Element ele, MutablePropertyValues pvs) {
+	public void parsePropertyElement(Element ele, BeanDefinition bd) {
 		String propertyName = ele.getAttribute(NAME_ATTRIBUTE);
 		if (!StringUtils.hasLength(propertyName)) {
 			error("Tag 'property' must have a 'name' attribute", ele);
@@ -728,15 +741,15 @@ public class BeanDefinitionParserDelegate {
 		}
 		this.parseState.push(new PropertyEntry(propertyName));
 		try {
-			if (pvs.contains(propertyName)) {
+			if (bd.getPropertyValues().contains(propertyName)) {
 				error("Multiple 'property' definitions for property '" + propertyName + "'", ele);
 				return;
 			}
-			Object val = parsePropertyValue(ele, propertyName);
+			Object val = parsePropertyValue(ele, bd, propertyName);
 			PropertyValue pv = new PropertyValue(propertyName, val);
 			parseMetaElements(ele, pv);
 			pv.setSource(extractSource(ele));
-			pvs.addPropertyValue(pv);
+			bd.getPropertyValues().addPropertyValue(pv);
 		}
 		finally {
 			this.parseState.pop();
@@ -748,7 +761,7 @@ public class BeanDefinitionParserDelegate {
 	 * Get the value of a property element. May be a list etc.
 	 * Also used for constructor arguments, "propertyName" being null in this case.
 	 */
-	public Object parsePropertyValue(Element ele, String propertyName) {
+	public Object parsePropertyValue(Element ele, BeanDefinition bd, String propertyName) {
 		String elementName = (propertyName != null) ?
 						"<property> element for property '" + propertyName + "'" :
 						"<constructor-arg> element";
@@ -795,11 +808,11 @@ public class BeanDefinitionParserDelegate {
 			error(elementName + " must specify a ref or value", ele);
 		}
 
-		return parsePropertySubElement(subElement);
+		return parsePropertySubElement(subElement, bd);
 	}
 
-	public Object parsePropertySubElement(Element ele) {
-		return parsePropertySubElement(ele, null);
+	public Object parsePropertySubElement(Element ele, BeanDefinition bd) {
+		return parsePropertySubElement(ele, bd, null);
 	}
 
 	/**
@@ -809,12 +822,12 @@ public class BeanDefinitionParserDelegate {
 	 * @param defaultTypeClassName the default type (class name) for any
 	 * <code>&lt;value&gt;</code> tag that might be created
 	 */
-	public Object parsePropertySubElement(Element ele, String defaultTypeClassName) {
+	public Object parsePropertySubElement(Element ele, BeanDefinition bd, String defaultTypeClassName) {
 		if (!isDefaultNamespace(ele.getNamespaceURI())) {
 			return parseNestedCustomElement(ele);
 		}
 		else if (DomUtils.nodeNameEquals(ele, BEAN_ELEMENT)) {
-			return parseBeanDefinitionElement(ele, true);
+			return parseBeanDefinitionElement(ele, bd);
 		}
 		else if (DomUtils.nodeNameEquals(ele, REF_ELEMENT)) {
 			// A generic reference to any name of any bean.
@@ -871,13 +884,13 @@ public class BeanDefinitionParserDelegate {
 			return null;
 		}
 		else if (DomUtils.nodeNameEquals(ele, LIST_ELEMENT)) {
-			return parseListElement(ele);
+			return parseListElement(ele, bd);
 		}
 		else if (DomUtils.nodeNameEquals(ele, SET_ELEMENT)) {
-			return parseSetElement(ele);
+			return parseSetElement(ele, bd);
 		}
 		else if (DomUtils.nodeNameEquals(ele, MAP_ELEMENT)) {
-			return parseMapElement(ele);
+			return parseMapElement(ele, bd);
 		}
 		else if (DomUtils.nodeNameEquals(ele, PROPS_ELEMENT)) {
 			return parsePropsElement(ele);
@@ -889,7 +902,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse a list element.
 	 */
-	public List parseListElement(Element collectionEle) {
+	public List parseListElement(Element collectionEle, BeanDefinition bd) {
 		String defaultTypeClassName = collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedList list = new ManagedList(nl.getLength());
@@ -898,7 +911,7 @@ public class BeanDefinitionParserDelegate {
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
 				Element ele = (Element) nl.item(i);
-				list.add(parsePropertySubElement(ele, defaultTypeClassName));
+				list.add(parsePropertySubElement(ele, bd, defaultTypeClassName));
 			}
 		}
 		return list;
@@ -907,7 +920,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse a set element.
 	 */
-	public Set parseSetElement(Element collectionEle) {
+	public Set parseSetElement(Element collectionEle, BeanDefinition bd) {
 		String defaultTypeClassName = collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedSet set = new ManagedSet(nl.getLength());
@@ -916,7 +929,7 @@ public class BeanDefinitionParserDelegate {
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i) instanceof Element) {
 				Element ele = (Element) nl.item(i);
-				set.add(parsePropertySubElement(ele, defaultTypeClassName));
+				set.add(parsePropertySubElement(ele, bd, defaultTypeClassName));
 			}
 		}
 		return set;
@@ -925,7 +938,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse a map element.
 	 */
-	public Map parseMapElement(Element mapEle) {
+	public Map parseMapElement(Element mapEle, BeanDefinition bd) {
 		String defaultKeyTypeClassName = mapEle.getAttribute(KEY_TYPE_ATTRIBUTE);
 		String defaultValueTypeClassName = mapEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 
@@ -982,7 +995,7 @@ public class BeanDefinitionParserDelegate {
 				key = new RuntimeBeanReference(refName);
 			}
 			else if (keyEle != null) {
-				key = parseKeyElement(keyEle, defaultKeyTypeClassName);
+				key = parseKeyElement(keyEle, bd, defaultKeyTypeClassName);
 			}
 			else {
 				error("<entry> element must specify a key", entryEle);
@@ -1009,7 +1022,7 @@ public class BeanDefinitionParserDelegate {
 				value = new RuntimeBeanReference(refName);
 			}
 			else if (valueEle != null) {
-				value = parsePropertySubElement(valueEle, defaultValueTypeClassName);
+				value = parsePropertySubElement(valueEle, bd, defaultValueTypeClassName);
 			}
 			else {
 				error("<entry> element must specify a value", entryEle);
@@ -1048,7 +1061,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse a key sub-element of a map element.
 	 */
-	public Object parseKeyElement(Element keyEle, String defaultKeyTypeClassName) {
+	public Object parseKeyElement(Element keyEle, BeanDefinition bd, String defaultKeyTypeClassName) {
 		NodeList nl = keyEle.getChildNodes();
 		Element subElement = null;
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -1062,7 +1075,7 @@ public class BeanDefinitionParserDelegate {
 				subElement = candidateEle;
 			}
 		}
-		return parsePropertySubElement(subElement, defaultKeyTypeClassName);
+		return parsePropertySubElement(subElement, bd, defaultKeyTypeClassName);
 	}
 
 	/**
@@ -1098,12 +1111,10 @@ public class BeanDefinitionParserDelegate {
 	public BeanDefinition parseCustomElement(Element ele, boolean nested) {
 		String namespaceUri = ele.getNamespaceURI();
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
-
 		if (handler == null) {
 			getReaderContext().error("Unable to locate NamespaceHandler for namespace [" + namespaceUri + "].", ele);
 			return null;
 		}
-
 		return handler.parse(ele, new ParserContext(getReaderContext(), this, nested));
 	}
 
@@ -1143,7 +1154,7 @@ public class BeanDefinitionParserDelegate {
 
 	private Object parseNestedCustomElement(Element candidateEle) {
 		BeanDefinition innerDefinition = parseCustomElement(candidateEle, true);
-		if(innerDefinition == null) {
+		if (innerDefinition == null) {
 			error("Incorrect usage of element '" + candidateEle.getNodeName() + "' in a nested manner. " +
 					"This tag cannot be used nested inside <property>.", candidateEle);
 			return null;
