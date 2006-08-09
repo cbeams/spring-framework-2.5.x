@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,34 +21,25 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.web.servlet.LocaleResolver;
-
 /**
- * Implementation of LocaleResolver that always returns a fixed default Locale.
+ * Implementation of LocaleResolver that always returns a fixed default locale.
+ * Default is the current JVM's default locale.
  *
- * <p>Note: Does not support <code>setLocale</code>, as the fixed Locale
+ * <p>Note: Does not support <code>setLocale</code>, as the fixed locale
  * cannot be changed.
  *
  * @author Juergen Hoeller
  * @since 1.1
+ * @see #setDefaultLocale
  */
-public class FixedLocaleResolver implements LocaleResolver {
-
-	private Locale defaultLocale = Locale.getDefault();
-
-
-	/**
-	 * Set the fixed Locale that this resolver will return.
-	 * Default is the current JVM's default Locale.
-	 * @see java.util.Locale#getDefault()
-	 */
-	public void setDefaultLocale(Locale defaultLocale) {
-		this.defaultLocale = (defaultLocale != null ? defaultLocale : Locale.getDefault());
-	}
-
+public class FixedLocaleResolver extends AbstractLocaleResolver {
 
 	public Locale resolveLocale(HttpServletRequest request) {
-		return this.defaultLocale;
+		Locale locale = getDefaultLocale();
+		if (locale == null) {
+			locale = Locale.getDefault();
+		}
+		return locale;
 	}
 
 	public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
