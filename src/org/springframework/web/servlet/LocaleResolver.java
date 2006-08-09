@@ -43,15 +43,15 @@ public interface LocaleResolver {
   /**
    * Resolve the current locale via the given request.
    * Should return a default locale as fallback in any case.
-   * @param request request to be used for resolution
-   * @return the current locale
+   * @param request the request to resolve the locale for
+   * @return the current locale (never <code>null</code>)
    */
 	Locale resolveLocale(HttpServletRequest request);
 
   /**
    * Set the current locale to the given one.
-   * @param request request to be used for locale modification
-   * @param response response to be used for locale modification
+   * @param request the request to be used for locale modification
+   * @param response the response to be used for locale modification
    * @param locale the new locale, or <code>null</code> to clear the locale
 	 * @throws UnsupportedOperationException if the LocaleResolver implementation
 	 * does not support dynamic changing of the theme
