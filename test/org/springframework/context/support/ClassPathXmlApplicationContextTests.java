@@ -16,8 +16,11 @@
 
 package org.springframework.context.support;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
@@ -26,8 +29,10 @@ import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyAccessExceptionsException;
 import org.springframework.beans.ResourceTestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -82,6 +87,31 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 				"simpleContext.xml", getClass());
 		assertTrue(ctx.containsBean("someMessageSource"));
 		ctx.close();
+	}
+
+	public void testContextWithInvalidValueType() throws IOException {
+		try {
+			new ClassPathXmlApplicationContext("invalidValueType.xml", getClass());
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getCause() instanceof PropertyAccessExceptionsException);
+			assertTrue(ex.toString().indexOf("someMessageSource") != -1);
+			assertTrue(ex.toString().indexOf("useCodeAsDefaultMessage") != -1);
+			assertTrue(ex.toString().indexOf("alwaysUseMessageFormat") != -1);
+			checkExceptionFromInvalidValueType(ex);
+			checkExceptionFromInvalidValueType(new ExceptionInInitializerError(ex));
+		}
+	}
+
+	private void checkExceptionFromInvalidValueType(Throwable ex) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ex.printStackTrace(new PrintStream(baos));
+		String dump = FileCopyUtils.copyToString(
+				new InputStreamReader(new ByteArrayInputStream(baos.toByteArray())));
+		assertTrue(dump.indexOf("someMessageSource") != -1);
+		assertTrue(dump.indexOf("useCodeAsDefaultMessage") != -1);
+		assertTrue(dump.indexOf("alwaysUseMessageFormat") != -1);
 	}
 
 	public void testContextWithInvalidLazyClass() {
