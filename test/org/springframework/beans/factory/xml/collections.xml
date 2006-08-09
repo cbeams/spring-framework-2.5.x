@@ -78,13 +78,25 @@
 			<list>
 				<ref local="david"/>
 				<value>literal</value>
-				<ref local="jenny" />
-				<idref local="rod" />
+				<ref local="jenny"/>
+				<idref local="rod"/>
 			</list>
 		</property>
 	</bean>
 	
-	<bean id="verbose" class="org.springframework.beans.TestBean">	
+	<bean id="jumble2" class="org.springframework.beans.factory.xml.MixedCollectionBean" lazy-init="true">
+		<property name="jumble">
+			<list>
+				<ref local="david"/>
+				<value>literal</value>
+				<ref local="jenny"/>
+				<idref bean="rod"/>
+				<idref bean="rod2"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="verbose" class="org.springframework.beans.TestBean">
 		<property name="name"><value>verbose</value></property>
 	</bean>
 	

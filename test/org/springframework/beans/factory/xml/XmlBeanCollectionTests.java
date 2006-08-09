@@ -29,18 +29,19 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import junit.framework.TestCase;
+import net.sf.hibernate.FlushMode;
 import org.apache.commons.collections.map.LinkedMap;
 import org.apache.commons.collections.set.ListOrderedSet;
 
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.HasMap;
 import org.springframework.beans.factory.config.ListFactoryBean;
 import org.springframework.beans.factory.config.MapFactoryBean;
 import org.springframework.beans.factory.config.SetFactoryBean;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.io.ClassPathResource;
-
-import net.sf.hibernate.FlushMode;
 
 /**
  * Tests for collections in XML bean definitions.
@@ -153,19 +154,27 @@ public class XmlBeanCollectionTests extends TestCase {
 	}
 
 	public void testBuildCollectionFromMixtureOfReferencesAndValues() throws Exception {
-		// Ensure that a test runner like Eclipse, that keeps the same JVM up,
-		// will get fresh static values.
-		MixedCollectionBean.resetStaticState();
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
 		MixedCollectionBean jumble = (MixedCollectionBean) xbf.getBean("jumble");
-		assertEquals(1, MixedCollectionBean.nrOfInstances);
-		assertTrue("Expected 3 elements, not " + jumble.getJumble().size(),
+		assertTrue("Expected 4 elements, not " + jumble.getJumble().size(),
 				jumble.getJumble().size() == 4);
 		List l = (List) jumble.getJumble();
 		assertTrue(l.get(0).equals(xbf.getBean("david")));
 		assertTrue(l.get(1).equals("literal"));
 		assertTrue(l.get(2).equals(xbf.getBean("jenny")));
 		assertTrue(l.get(3).equals("rod"));
+	}
+
+	public void testInvalidBeanNameReference() throws Exception {
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("collections.xml", getClass()));
+		try {
+			xbf.getBean("jumble2");
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getCause() instanceof BeanDefinitionStoreException);
+			assertTrue(ex.getCause().getMessage().indexOf("rod2") != -1);
+		}
 	}
 
 	public void testEmptyMap() throws Exception {

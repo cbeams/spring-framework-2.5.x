@@ -30,8 +30,10 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.core.CollectionFactory;
@@ -112,6 +114,14 @@ class BeanDefinitionValueResolver {
 			// Resolve plain BeanDefinition, without contained name: use dummy name.
 			BeanDefinition bd = (BeanDefinition) value;
 			return resolveInnerBeanDefinition(argName, "(inner bean)", bd);
+		}
+		else if (value instanceof RuntimeBeanNameReference) {
+			String ref = ((RuntimeBeanNameReference) value).getBeanName();
+			if (!this.beanFactory.containsBean(ref)) {
+				throw new BeanDefinitionStoreException(
+						"Invalid bean name '" + ref + "' in bean reference for " + argName);
+			}
+			return ref;
 		}
 		else if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;

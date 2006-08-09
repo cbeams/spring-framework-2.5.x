@@ -37,6 +37,7 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.parsing.BeanEntry;
@@ -846,7 +847,7 @@ public class BeanDefinitionParserDelegate {
 					error("Either 'bean' or 'local' is required for <idref> element", ele);
 				}
 			}
-			return beanRef;
+			return new RuntimeBeanNameReference(beanRef);
 		}
 		else if (DomUtils.nodeNameEquals(ele, VALUE_ELEMENT)) {
 			// It's a literal value.
