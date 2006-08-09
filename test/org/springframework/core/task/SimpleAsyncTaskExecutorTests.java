@@ -17,11 +17,10 @@
 package org.springframework.core.task;
 
 import junit.framework.TestCase;
+
 import org.springframework.util.ConcurrencyThrottleSupport;
 
 /**
- * Unit tests for the SimpleAsyncTaskExecutor class.
- *
  * @author Rick Evans
  */
 public final class SimpleAsyncTaskExecutorTests extends TestCase {
@@ -59,13 +58,12 @@ public final class SimpleAsyncTaskExecutorTests extends TestCase {
 		assertTrue(task.getThreadName().startsWith(SimpleAsyncTaskExecutor.DEFAULT_THREAD_NAME_PREFIX));
 	}
 
-	public void testThrowsNPEWhenSuppliedWithNullRunnable() throws Exception {
+	public void testThrowsExceptionWhenSuppliedWithNullRunnable() throws Exception {
 		try {
 			new SimpleAsyncTaskExecutor().execute(null);
-			fail("Must throw a NullPointerException if supplied with a null " +
-					"Runnable (as per the per the java.util.concurrent.Executor.execute(..) contract");
+			fail("Should have thrown IllegalArgumentException");
 		}
-		catch (NullPointerException expected) {
+		catch (IllegalArgumentException expected) {
 		}
 	}
 
