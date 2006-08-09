@@ -42,7 +42,7 @@ public class DelegatingWork implements Work {
 	 * @see #isDaemon()
 	 */
 	public DelegatingWork(Runnable work) {
-		Assert.notNull(work, "Runnable is required");
+		Assert.notNull(work, "Runnable must not be null");
 		this.runnable = work;
 	}
 

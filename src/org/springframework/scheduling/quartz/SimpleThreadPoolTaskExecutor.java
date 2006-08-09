@@ -22,6 +22,7 @@ import org.quartz.simpl.SimpleThreadPool;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.scheduling.SchedulingTaskExecutor;
+import org.springframework.util.Assert;
 
 /**
  * Subclass of Quartz's SimpleThreadPool that implements Spring's
@@ -60,6 +61,7 @@ public class SimpleThreadPoolTaskExecutor extends SimpleThreadPool
 
 
 	public void execute(Runnable task) {
+		Assert.notNull("Runnable must not be null");
 		runInThread(task);
 	}
 

@@ -18,6 +18,7 @@ package org.springframework.core.task;
 
 import java.io.Serializable;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrencyThrottleSupport;
 
@@ -28,8 +29,9 @@ import org.springframework.util.ConcurrencyThrottleSupport;
  * <p>Supports limiting concurrent threads through the "concurrencyLimit"
  * bean property. By default, the number of concurrent threads is unlimited.
  *
- * <p>Does not reuse threads: Consider a thread-pooling TaskExecutor
- * implementation instead.
+ * <p><b>NOTE:</b> Does not reuse threads! Consider a thread-pooling TaskExecutor
+ * implementation instead, in particular for executing a large number of
+ * short-lived tasks.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -137,9 +139,7 @@ public class SimpleAsyncTaskExecutor extends ConcurrencyThrottleSupport
 	 * @see #afterAccess()
 	 */
 	public final void execute(Runnable task) {
-		if (task == null) {
-			throw new NullPointerException("A Runnable instance is required.");
-		}
+		Assert.notNull("Runnable must not be null");
 		beforeAccess();
 		doExecute(new ConcurrencyThrottlingRunnable(task));
 	}
