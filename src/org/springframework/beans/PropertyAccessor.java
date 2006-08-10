@@ -123,14 +123,31 @@ public interface PropertyAccessor {
 	 * PropertyAccessExceptionsException containing all the individual errors.
 	 * This exception can be examined later to see all binding errors.
 	 * Properties that were successfully updated stay changed.
-	 * <p>Does not allow unknown fields.
-	 * Equivalent to setPropertyValues(pvs, false).
+	 * <p>Does not allow unknown fields or invalid fields.
 	 * @param pvs PropertyValues to set on the target object
 	 * @throws FatalBeanException if there is no such property, if the property
 	 * isn't writable, or if the property setter throws an exception.
-	 * @see #setPropertyValues(PropertyValues, boolean)
+	 * @see #setPropertyValues(PropertyValues, boolean, boolean)
 	 */
 	void setPropertyValues(PropertyValues pvs) throws BeansException;
+
+	/**
+	 * Perform a bulk update with more control over behavior.
+	 * <p>Note that performing a bulk update differs from performing a single update,
+	 * in that an implementation of this class will continue to update properties
+	 * if a <b>recoverable</b> error (such as a type mismatch, but <b>not</b> an
+	 * invalid field name or the like) is encountered, throwing a
+	 * PropertyAccessExceptionsException containing all the individual errors.
+	 * This exception can be examined later to see all binding errors.
+	 * Properties that were successfully updated stay changed.
+	 * @param pvs PropertyValues to set on the target object
+	 * @param ignoreUnknown should we ignore unknown properties (not found in the bean)
+	 * @throws FatalBeanException if there is no such property, if the property
+	 * isn't writable, or if the property setter throws an exception.
+	 * @see #setPropertyValues(PropertyValues, boolean, boolean)
+	 */
+	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown)
+	    throws BeansException;
 
 	/**
 	 * Perform a bulk update with full control over behavior.
@@ -142,11 +159,12 @@ public interface PropertyAccessor {
 	 * This exception can be examined later to see all binding errors.
 	 * Properties that were successfully updated stay changed.
 	 * @param pvs PropertyValues to set on the target object
-	 * @param ignoreUnknown should we ignore unknown values (not found in the bean)
+	 * @param ignoreUnknown should we ignore unknown properties (not found in the bean)
+	 * @param ignoreInvalid should we ignore invalid properties (found but not accessible)
 	 * @throws FatalBeanException if there is no such property, if the property
 	 * isn't writable, or if the property setter throws an exception.
 	 */
-	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown)
+	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid)
 	    throws BeansException;
 
 }

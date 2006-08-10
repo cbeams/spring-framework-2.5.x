@@ -54,21 +54,33 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 	}
 
 	public void setPropertyValues(PropertyValues pvs) throws BeansException {
-		setPropertyValues(pvs, false);
+		setPropertyValues(pvs, false, false);
 	}
 
-	public void setPropertyValues(PropertyValues propertyValues, boolean ignoreUnknown) throws BeansException {
+	public void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown) throws BeansException {
+		setPropertyValues(pvs, ignoreUnknown, false);
+	}
+
+	public void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid)
+			throws BeansException {
+
 		List propertyAccessExceptions = new LinkedList();
-		PropertyValue[] pvs = propertyValues.getPropertyValues();
-		for (int i = 0; i < pvs.length; i++) {
+		PropertyValue[] pvArray = pvs.getPropertyValues();
+		for (int i = 0; i < pvArray.length; i++) {
 			try {
 				// This method may throw any BeansException, which won't be caught
 				// here, if there is a critical failure such as no matching field.
 				// We can attempt to deal only with less serious exceptions.
-				setPropertyValue(pvs[i]);
+				setPropertyValue(pvArray[i]);
 			}
 			catch (NotWritablePropertyException ex) {
 				if (!ignoreUnknown) {
+					throw ex;
+				}
+				// Otherwise, just ignore it and continue...
+			}
+			catch (NullValueInNestedPathException ex) {
+				if (!ignoreInvalid) {
 					throw ex;
 				}
 				// Otherwise, just ignore it and continue...
