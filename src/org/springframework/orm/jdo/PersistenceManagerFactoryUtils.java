@@ -26,7 +26,6 @@ import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
-import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,9 +33,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
-import org.springframework.jdbc.support.SQLExceptionTranslator;
-import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -44,6 +40,7 @@ import org.springframework.util.Assert;
 /**
  * Helper class featuring methods for JDO PersistenceManager handling,
  * allowing for reuse of PersistenceManager instances within transactions.
+ * Also provides support for exception translation.
  *
  * <p>Used by JdoTemplate, JdoInterceptor, and JdoTransactionManager.
  * Can also be used directly in application code, e.g. in combination
@@ -70,37 +67,17 @@ public abstract class PersistenceManagerFactoryUtils {
 
 
 	/**
-	 * Create an appropriate SQLExceptionTranslator for the given PersistenceManagerFactory.
-	 * If a DataSource is found, create a SQLErrorCodeSQLExceptionTranslator for the
-	 * DataSource; else, fall back to a SQLStateSQLExceptionTranslator.
-	 * @param pmf the PersistenceManagerFactory to create the translator for
-	 * @return the SQLExceptionTranslator
-	 * @see javax.jdo.PersistenceManagerFactory#getConnectionFactory
-	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
-	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
-	 */
-	public static SQLExceptionTranslator newJdbcExceptionTranslator(PersistenceManagerFactory pmf) {
-		if (pmf != null) {
-			// Check for PersistenceManagerFactory's DataSource.
-			Object cf = pmf.getConnectionFactory();
-			if (cf instanceof DataSource) {
-				return new SQLErrorCodeSQLExceptionTranslator((DataSource) cf);
-			}
-		}
-		return new SQLStateSQLExceptionTranslator();
-	}
-
-	/**
 	 * Obtain a JDO PersistenceManager via the given factory. Is aware of a
 	 * corresponding PersistenceManager bound to the current thread,
 	 * for example when using JdoTransactionManager. Will create a new
-	 * PersistenceManager else, if allowCreate is true.
+	 * PersistenceManager else, if "allowCreate" is <code>true</code>.
 	 * @param pmf PersistenceManagerFactory to create the PersistenceManager with
 	 * @param allowCreate if a non-transactional PersistenceManager should be created
 	 * when no transactional PersistenceManager can be found for the current thread
 	 * @return the PersistenceManager
 	 * @throws DataAccessResourceFailureException if the PersistenceManager couldn't be obtained
-	 * @throws IllegalStateException if no thread-bound PersistenceManager found and allowCreate false
+	 * @throws IllegalStateException if no thread-bound PersistenceManager found and
+	 * "allowCreate" is <code>false</code>
 	 * @see JdoTransactionManager
 	 */
 	public static PersistenceManager getPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate)
@@ -118,14 +95,15 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * Obtain a JDO PersistenceManager via the given factory. Is aware of a
 	 * corresponding PersistenceManager bound to the current thread,
 	 * for example when using JdoTransactionManager. Will create a new
-	 * PersistenceManager else, if allowCreate is true.
+	 * PersistenceManager else, if "allowCreate" is <code>true</code>.
 	 * <p>Same as <code>getPersistenceManager</code>, but throwing the original JDOException.
 	 * @param pmf PersistenceManagerFactory to create the PersistenceManager with
 	 * @param allowCreate if a non-transactional PersistenceManager should be created
 	 * when no transactional PersistenceManager can be found for the current thread
 	 * @return the PersistenceManager
 	 * @throws JDOException if the PersistenceManager couldn't be created
-	 * @throws IllegalStateException if no thread-bound PersistenceManager found and allowCreate false
+	 * @throws IllegalStateException if no thread-bound PersistenceManager found and
+	 * "allowCreate" is <code>false</code>
 	 * @see #getPersistenceManager(javax.jdo.PersistenceManagerFactory, boolean)
 	 * @see JdoTransactionManager
 	 */

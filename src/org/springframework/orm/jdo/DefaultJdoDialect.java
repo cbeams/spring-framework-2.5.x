@@ -22,7 +22,6 @@ import java.util.Collection;
 
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
-import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
 import javax.jdo.Transaction;
 
@@ -30,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
@@ -54,62 +54,33 @@ import org.springframework.transaction.TransactionException;
  * Furthermore, vendor-specific subclasses are encouraged to expose the native JDBC
  * Connection on <code>getJdbcConnection</code>, rather than JDO2's wrapper handle.
  *
+ * <p>This class also implements the PersistenceExceptionTranslator interface,
+ * as autodetected by Spring's PersistenceExceptionTranslationPostProcessor,
+ * for AOP-based translation of native exceptions to Spring DataAccessExceptions.
+ * Hence, the presence of a standard DefaultJdoDialect bean automatically enables
+ * a PersistenceExceptionTranslationPostProcessor to translate JDO exceptions.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  * @see #setJdbcExceptionTranslator
  * @see JdoAccessor#setJdoDialect
  * @see JdoTransactionManager#setJdoDialect
+ * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
  */
-public class DefaultJdoDialect implements JdoDialect {
+public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTranslator {
 
-	protected Log logger = LogFactory.getLog(getClass());
-
-	private PersistenceManagerFactory persistenceManagerFactory;
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private SQLExceptionTranslator jdbcExceptionTranslator;
 
 
 	/**
-	 * Create a new DefaultJdoDialect.
-	 */
-	public DefaultJdoDialect() {
-	}
-
-	/**
-	 * Create a new DefaultJdoDialect.
-	 * @param pmf the JDO PersistenceManagerFactory, which is used
-	 * to initialize the default JDBC exception translator
-	 */
-	public DefaultJdoDialect(PersistenceManagerFactory pmf) {
-		setPersistenceManagerFactory(pmf);
-	}
-
-	/**
-	 * Set the JDO PersistenceManagerFactory, which is used to initialize
-	 * the default JDBC exception translator if none specified.
-	 * @see #setJdbcExceptionTranslator
-	 */
-	public void setPersistenceManagerFactory(PersistenceManagerFactory pmf) {
-		this.persistenceManagerFactory = pmf;
-	}
-
-	/**
-	 * Return the JDO PersistenceManagerFactory that should be used to create
-	 * PersistenceManagers.
-	 */
-	public PersistenceManagerFactory getPersistenceManagerFactory() {
-		return persistenceManagerFactory;
-	}
-
-	/**
 	 * Set the JDBC exception translator for this dialect.
-	 * Applied to SQLExceptions that are the cause of JDOExceptions.
-	 * <p>The default exception translator is either a SQLErrorCodeSQLExceptionTranslator
-	 * if a DataSource is available, or a SQLStateSQLExceptionTranslator else.
+	 * <p>Applied to any SQLException root cause of a JDOException, if specified.
+	 * The default is to rely on the JDO provider's native exception translation.
 	 * @param jdbcExceptionTranslator exception translator
 	 * @see java.sql.SQLException
-	 * @see javax.jdo.JDOException#getCause
-	 * @see PersistenceManagerFactoryUtils#newJdbcExceptionTranslator
+	 * @see javax.jdo.JDOException#getCause()
 	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
 	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
 	 */
@@ -118,15 +89,9 @@ public class DefaultJdoDialect implements JdoDialect {
 	}
 
 	/**
-	 * Return the JDBC exception translator for this instance.
-	 * <p>Creates a default SQLErrorCodeSQLExceptionTranslator or SQLStateSQLExceptionTranslator
-	 * for the specified PersistenceManagerFactory, if no exception translator explicitly specified.
+	 * Return the JDBC exception translator for this dialect, if any.
 	 */
 	public SQLExceptionTranslator getJdbcExceptionTranslator() {
-		if (this.jdbcExceptionTranslator == null) {
-			this.jdbcExceptionTranslator =
-					PersistenceManagerFactoryUtils.newJdbcExceptionTranslator(this.persistenceManagerFactory);
-		}
 		return this.jdbcExceptionTranslator;
 	}
 
@@ -289,11 +254,26 @@ public class DefaultJdoDialect implements JdoDialect {
 	//-----------------------------------------------------------------------------------
 
 	/**
+	 * Implementation of the PersistenceExceptionTranslator interface,
+	 * as autodetected by Spring's PersistenceExceptionTranslationPostProcessor.
+	 * <p>Converts the exception if it is a JDOException, using this JdoDialect.
+	 * Else returns <code>null</code> to indicate an unknown exception.
+	 * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
+	 * @see #translateException
+	 */
+	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
+		if (ex instanceof JDOException) {
+			return translateException((JDOException) ex);
+		}
+		return null;
+	}
+
+	/**
 	 * This implementation delegates to PersistenceManagerFactoryUtils.
 	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException
 	 */
 	public DataAccessException translateException(JDOException ex) {
-		if (ex.getCause() instanceof SQLException) {
+		if (getJdbcExceptionTranslator() != null && ex.getCause() instanceof SQLException) {
 			return getJdbcExceptionTranslator().translate("JDO operation: " + ex.getMessage(),
 					extractSqlStringFromException(ex), (SQLException) ex.getCause());
 		}

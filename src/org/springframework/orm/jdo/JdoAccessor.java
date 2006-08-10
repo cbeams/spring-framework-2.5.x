@@ -90,7 +90,7 @@ public abstract class JdoAccessor implements InitializingBean {
 	 */
 	public JdoDialect getJdoDialect() {
 		if (this.jdoDialect == null) {
-			this.jdoDialect = new DefaultJdoDialect(getPersistenceManagerFactory());
+			this.jdoDialect = new DefaultJdoDialect();
 		}
 		return this.jdoDialect;
 	}

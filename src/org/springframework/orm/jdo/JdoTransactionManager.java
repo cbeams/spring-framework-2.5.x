@@ -226,7 +226,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	 */
 	public JdoDialect getJdoDialect() {
 		if (this.jdoDialect == null) {
-			this.jdoDialect = new DefaultJdoDialect(getPersistenceManagerFactory());
+			this.jdoDialect = new DefaultJdoDialect();
 		}
 		return this.jdoDialect;
 	}
