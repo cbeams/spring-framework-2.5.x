@@ -2134,7 +2134,7 @@ public class ReplacementComputeValue implements MethodReplacer {
                 <programlisting><![CDATA[<web-app>
   ...
   <listener>
-    <listener-class>org.springframework.web.context.scope.RequestContextListener</listener-class>
+    <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
   </listener>
   ...
 </web-app>]]></programlisting>
