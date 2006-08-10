@@ -49,7 +49,6 @@ import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
-import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -90,7 +89,15 @@ public class DispatcherServletTests extends TestCase {
 		return servletConfig.getServletContext();
 	}
 
-	public void testDispatcherServlets() {
+
+	public void testDispatcherServletGetServletNameDoesNotFailWithoutConfig() {
+		DispatcherServlet ds = new DispatcherServlet();
+		assertEquals(null, ds.getServletConfig());
+		assertEquals(null, ds.getServletName());
+		assertEquals(null, ds.getServletContext());
+	}
+
+	public void testConfiguredDispatcherServlets() {
 		assertTrue("Correct namespace",
 				("simple" + FrameworkServlet.DEFAULT_NAMESPACE_SUFFIX).equals(simpleDispatcherServlet.getNamespace()));
 		assertTrue("Correct attribute",

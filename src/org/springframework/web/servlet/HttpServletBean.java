@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
@@ -127,6 +128,25 @@ public abstract class HttpServletBean extends HttpServlet {
 	 * @see org.springframework.beans.BeanWrapper#registerCustomEditor
 	 */
 	protected void initBeanWrapper(BeanWrapper bw) throws BeansException {
+	}
+
+
+	/**
+	 * Overridden method that simply returns <code>null</code> when no
+	 * ServletConfig set yet.
+	 * @see #getServletConfig()
+	 */
+	public final String getServletName() {
+		return (getServletConfig() != null ? getServletConfig().getServletName() : null);
+	}
+
+	/**
+	 * Overridden method that simply returns <code>null</code> when no
+	 * ServletConfig set yet.
+	 * @see #getServletConfig()
+	 */
+	public final ServletContext getServletContext() {
+		return (getServletConfig() != null ? getServletConfig().getServletContext() : null);
 	}
 
 
