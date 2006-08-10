@@ -27,6 +27,7 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
@@ -173,6 +174,9 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 		// Required so that references (up container hierarchies) are correctly resolved.
 		this.scriptBeanFactory.setParentBeanFactory(this.beanFactory);
+
+		// Required so that all BeanPostProcessors, Scopes, etc become available.
+		this.scriptBeanFactory.copyConfigurationFrom(this.beanFactory);
 	}
 
 	public void setResourceLoader(ResourceLoader resourceLoader) {
@@ -229,19 +233,29 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	}
 
 	/**
-	 * Gets the refresh check delay for the given {@link ScriptFactory} {@link BeanDefinition}.
-	 * If the {@link BeanDefinition} has a {@link org.springframework.core.AttributeAccessor metadata attribute}
-	 * under the key {@link #REFRESH_CHECK_DELAY_ATTRIBUTE} which is a valid {@link Number} type, then this value
-	 * is used. Otherwise, the the {@link #defaultRefreshCheckDelay} value is used.
-     * @return the refresh check delay
+	 * Get the refresh check delay for the given {@link ScriptFactory} {@link BeanDefinition}.
+	 * If the {@link BeanDefinition} has a
+	 * {@link org.springframework.core.AttributeAccessor metadata attribute}
+	 * under the key {@link #REFRESH_CHECK_DELAY_ATTRIBUTE} which is a valid {@link Number}
+	 * type, then this value is used. Otherwise, the the {@link #defaultRefreshCheckDelay}
+	 * value is used.
+	 * @return the refresh check delay
 	 */
 	protected long resolveRefreshCheckDelay(BeanDefinition bd) {
-        Object attributeValue = bd.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
-        long refreshCheckDelay = this.defaultRefreshCheckDelay;
-        if (attributeValue instanceof Number) {
+		long refreshCheckDelay = this.defaultRefreshCheckDelay;
+		Object attributeValue = bd.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
+		if (attributeValue instanceof Number) {
 			refreshCheckDelay = ((Number) attributeValue).longValue();
 		}
-        return refreshCheckDelay;
+		else if (attributeValue instanceof String) {
+			refreshCheckDelay = Long.parseLong((String) attributeValue);
+		}
+		else if (attributeValue != null) {
+			throw new BeanDefinitionStoreException(
+					"Invalid refresh check delay attribute [" + REFRESH_CHECK_DELAY_ATTRIBUTE +
+					"] with value [" + attributeValue + "]: needs to be of type Number or String");
+		}
+		return refreshCheckDelay;
 	}
 
 	/**

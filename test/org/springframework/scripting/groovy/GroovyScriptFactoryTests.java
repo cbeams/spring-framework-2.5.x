@@ -16,8 +16,11 @@
 
 package org.springframework.scripting.groovy;
 
+import java.io.FileNotFoundException;
+
 import junit.framework.TestCase;
 import org.easymock.MockControl;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.beans.factory.BeanCreationException;
@@ -25,14 +28,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.JdkVersion;
 import org.springframework.core.NestedRuntimeException;
-import org.springframework.scripting.*;
+import org.springframework.scripting.Calculator;
+import org.springframework.scripting.ContextScriptBean;
+import org.springframework.scripting.Messenger;
+import org.springframework.scripting.ScriptCompilationException;
+import org.springframework.scripting.ScriptSource;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 
-import java.io.FileNotFoundException;
-
 /**
- * Unit tests for the GroovyScriptFactory class.
- *
  * @author Rob Harrop
  * @author Rick Evans
  */
@@ -283,19 +286,20 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
 	}
 
-    /**
-     * Tests the SPR-2098 bug whereby no more than 1 property element could be
-     * passed to a scripted bean :(
-     */
-    public void testCanPassInMoreThanOneProperty_SPR_2098() {
-        if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+	/**
+	 * Tests the SPR-2098 bug whereby no more than 1 property element could be
+	 * passed to a scripted bean :(
+	 */
+	public void testCanPassInMoreThanOneProperty() {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
 		}
 
-        ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-multiple-properties.xml", getClass());
-		ScriptBean bean = (ScriptBean) ctx.getBean("bean");
-        assertEquals("The first property ain't bein' injected.", "Sophie Marceau", bean.getName());
-        assertEquals("The second property ain't bein' injected.", 31, bean.getAge());
-    }
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-multiple-properties.xml", getClass());
+		ContextScriptBean bean = (ContextScriptBean) ctx.getBean("bean");
+		assertEquals("The first property ain't bein' injected.", "Sophie Marceau", bean.getName());
+		assertEquals("The second property ain't bein' injected.", 31, bean.getAge());
+		assertEquals(ctx, bean.getApplicationContext());
+	}
     
 }

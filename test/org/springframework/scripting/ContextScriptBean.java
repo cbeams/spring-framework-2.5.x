@@ -16,19 +16,14 @@
 
 package org.springframework.scripting;
 
+import org.springframework.context.ApplicationContext;
+
 /**
- * Simple interface used in testing the scripted beans support.
- * 
- * @author Rick Evans
+ * @author Juergen Hoeller
+ * @since 08.08.2006
  */
-public interface ScriptBean {
-    
-	String getName();
+public interface ContextScriptBean extends ScriptBean {
 
-	void setName(String name);
+	ApplicationContext getApplicationContext();
 
-	int getAge();
-
-	void setAge(int age);
-    
 }

@@ -1,6 +1,8 @@
-import org.springframework.scripting.ScriptBean
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
+import org.springframework.scripting.ContextScriptBean
 
-class GroovyScriptBean implements ScriptBean {
+class GroovyScriptBean implements ContextScriptBean, ApplicationContextAware {
 
     private int age
 
@@ -13,4 +15,6 @@ class GroovyScriptBean implements ScriptBean {
     }
 
     @Property String name
+
+    @Property ApplicationContext applicationContext
 }
