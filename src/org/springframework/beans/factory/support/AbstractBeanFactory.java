@@ -40,12 +40,12 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.beans.factory.BeanIsNotAFactoryException;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
+import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -346,50 +346,53 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 	public Class getType(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
-		try {
-			Class beanClass = null;
+		Class beanClass = null;
 
-			// Check manually registered singletons.
-			Object beanInstance = getSingleton(beanName);
-			if (beanInstance != null) {
-				beanClass = beanInstance.getClass();
+		// Check manually registered singletons.
+		Object beanInstance = getSingleton(beanName);
+		if (beanInstance != null) {
+			beanClass = beanInstance.getClass();
+		}
+
+		else {
+			// No singleton instance found -> check bean definition.
+			if (getParentBeanFactory() != null && !containsBeanDefinition(beanName)) {
+				// No bean definition found in this factory -> delegate to parent.
+				return getParentBeanFactory().getType(name);
 			}
 
-			else {
-				// No singleton instance found -> check bean definition.
-				if (getParentBeanFactory() != null && !containsBeanDefinition(beanName)) {
-					// No bean definition found in this factory -> delegate to parent.
-					return getParentBeanFactory().getType(name);
-				}
+			RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
 
-				RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
-
-				// Delegate to getTypeForFactoryMethod in case of factory method.
-				if (mergedBeanDefinition.getFactoryMethodName() != null) {
-					return getTypeForFactoryMethod(name, mergedBeanDefinition);
-				}
-
-				beanClass = resolveBeanClass(mergedBeanDefinition, beanName);
+			// Delegate to getTypeForFactoryMethod in case of factory method.
+			if (mergedBeanDefinition.getFactoryMethodName() != null) {
+				return getTypeForFactoryMethod(name, mergedBeanDefinition);
 			}
 
-			// Check bean class whether we're dealing with a FactoryBean.
-			if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass) &&
-					!BeanFactoryUtils.isFactoryDereference(name)) {
-				// If it's a FactoryBean, we want to look at what it creates, not the factory class.
+			beanClass = resolveBeanClass(mergedBeanDefinition, beanName);
+		}
+
+		// Check bean class whether we're dealing with a FactoryBean.
+		if (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass) &&
+				!BeanFactoryUtils.isFactoryDereference(name)) {
+			// If it's a FactoryBean, we want to look at what it creates, not the factory class.
+			try {
 				FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
 				return factoryBean.getObjectType();
 			}
-			return beanClass;
-		}
-
-		catch (BeanCreationException ex) {
-			if (ex.contains(BeanCurrentlyInCreationException.class)) {
-				// Can only happen when checking a FactoryBean.
+			catch (BeanCreationException ex) {
+				// Can only happen when getting a FactoryBean.
 				logger.debug("Ignoring bean creation exception on FactoryBean type check", ex);
 				return null;
 			}
-			throw ex;
+			catch (Throwable ex) {
+				// Thrown from the FactoryBean's getObjectType implementation.
+				logger.warn("FactoryBean threw exception from getObjectType, despite the contract saying " +
+						"that it should return null if the type of its object cannot be determined yet", ex);
+				return null;
+			}
 		}
+
+		return beanClass;
 	}
 
 	public String[] getAliases(String name) throws NoSuchBeanDefinitionException {
