@@ -158,26 +158,20 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 		this.complete = !this.defaultRollback;
 
 		if (this.transactionManager == null) {
-			logger.info("No transaction manager set: tests will NOT run within a transaction");
+			logger.info("No transaction manager set: test will NOT run within a transaction");
 		}
 		else if (this.transactionDefinition == null) {
-			if(logger.isInfoEnabled()) {
-				logger.info("Transaction definition is null: test " + getName() + " will NOT run within a transaction");
-			}
+			logger.info("No transaction definition set: test will NOT run within a transaction");
 		}
 		else {
 			onSetUpBeforeTransaction();
 			startNewTransaction();
 			try {
 				onSetUpInTransaction();
-			} catch (Exception ex) {
-				logger.error("Exception thrown during onSetUpInTransaction(); ending transaction.");
+			}
+			catch (Exception ex) {
 				endTransaction();
 				throw ex;
-			} catch (Throwable ex) {
-				logger.error("Throwable thrown during onSetUpInTransaction(); ending transaction.");
-				endTransaction();
-				throw new RuntimeException("Unexpected Throwable thrown during onSetUpInTransaction(); ending transaction.", ex);
 			}
 		}
 	}
@@ -220,14 +214,15 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * @see #onTearDownAfterTransaction()
 	 */
 	protected final void onTearDown() throws Exception {
-		try {
-			onTearDownInTransaction();
+		if (this.transactionStatus != null && !this.transactionStatus.isCompleted()) {
+			try {
+				onTearDownInTransaction();
+			}
+			finally {
+				endTransaction();
+			}
+			onTearDownAfterTransaction();
 		}
-		finally {
-			endTransaction();
-		}
-
-		onTearDownAfterTransaction();
 	}
 
 	/**
@@ -254,12 +249,12 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	/**
 	 * Cause the transaction to commit for this test method,
 	 * even if default is set to rollback.
-	 * @throws UnsupportedOperationException if the operation cannot be set to
+	 * @throws IllegalStateException if the operation cannot be set to
 	 * complete as no transaction manager was provided
 	 */
 	protected void setComplete() throws UnsupportedOperationException {
 		if (this.transactionManager == null) {
-			throw new UnsupportedOperationException("Cannot set complete: no transaction manager");
+			throw new IllegalStateException("No transaction manager set");
 		}
 		this.complete = true;
 	}
@@ -269,7 +264,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * according to the complete flag.
 	 * <p>Can be used to explicitly let the transaction end early,
 	 * for example to check whether lazy associations of persistent objects
-	 * work outside of a transaction (i.e. have been initialized properly).
+	 * work outside of a transaction (that is, have been initialized properly).
 	 * @see #setComplete()
 	 */
 	protected void endTransaction() {
@@ -301,6 +296,9 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 		if (this.transactionStatus != null) {
 			throw new IllegalStateException("Cannot start new transaction without ending existing transaction:" +
 					"Invoke endTransaction() before startNewTransaction()");
+		}
+		if (this.transactionManager == null) {
+			throw new IllegalStateException("No transaction manager set");
 		}
 
 		this.transactionStatus = this.transactionManager.getTransaction(this.transactionDefinition);
