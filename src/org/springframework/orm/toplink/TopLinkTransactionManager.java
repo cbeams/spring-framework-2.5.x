@@ -32,9 +32,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
-import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
-import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
@@ -215,10 +213,10 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 	}
 
 	/**
-	 * Set the JDBC exception translator for this instance.
-	 * Applied to TopLink DatabaseExceptions thrown on commit.
-	 * <p>The default exception translator is either a SQLErrorCodeSQLExceptionTranslator
-	 * if a DataSource is available, or a SQLStateSQLExceptionTranslator else.
+	 * Set the JDBC exception translator for this transaction manager.
+	 * <p>Applied to any SQLException root cause of a TopLink DatabaseException
+	 * that is thrown on commit. The default is to rely on TopLink's native
+	 * exception translation.
 	 * @param jdbcExceptionTranslator the exception translator
 	 * @see oracle.toplink.exceptions.DatabaseException
 	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
@@ -230,20 +228,9 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 	}
 
 	/**
-	 * Return the JDBC exception translator for this transaction manager.
-	 * <p>Creates a default SQLErrorCodeSQLExceptionTranslator or SQLStateSQLExceptionTranslator
-	 * for the specified SessionFactory, if no exception translator explicitly specified.
-	 * @see #setJdbcExceptionTranslator
+	 * Return the JDBC exception translator for this transaction manager, if any.
 	 */
 	public SQLExceptionTranslator getJdbcExceptionTranslator() {
-		if (this.jdbcExceptionTranslator == null) {
-			if (getDataSource() != null) {
-				this.jdbcExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(getDataSource());
-			}
-			else {
-				this.jdbcExceptionTranslator = new SQLStateSQLExceptionTranslator();
-			}
-		}
 		return this.jdbcExceptionTranslator;
 	}
 
@@ -400,9 +387,6 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 			}
 			txObject.getSessionHolder().clear();
 		}
-		catch (DatabaseException ex) {
-			throw convertJdbcAccessException((SQLException) ex.getInternalException());
-		}
 		catch (TopLinkException ex) {
 			throw convertTopLinkAccessException(ex);
 		}
@@ -451,25 +435,25 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 	}
 
 	/**
-	 * Convert the given TopLinkException to an appropriate exception from
-	 * the org.springframework.dao hierarchy. Can be overridden in subclasses.
+	 * Convert the given TopLinkException to an appropriate exception from the
+	 * <code>org.springframework.dao</code> hierarchy.
+	 * <p>Will automatically apply a specified SQLExceptionTranslator to a
+	 * TopLink DatabaseException, else rely on TopLink's default translation.
 	 * @param ex TopLinkException that occured
-	 * @return the corresponding DataAccessException instance
-	 */
-	protected DataAccessException convertTopLinkAccessException(TopLinkException ex) {
-		return SessionFactoryUtils.convertTopLinkAccessException(ex);
-	}
-
-	/**
-	 * Convert the given SQLException to an appropriate exception from the
-	 * org.springframework.dao hierarchy. Uses a JDBC exception translater if set,
-	 * and a generic TopLinkJdbcException else. Can be overridden in subclasses.
-	 * @param ex SQLException that occured
-	 * @return the corresponding DataAccessException instance
+	 * @return a corresponding DataAccessException
+	 * @see SessionFactoryUtils#convertTopLinkAccessException
 	 * @see #setJdbcExceptionTranslator
 	 */
-	protected DataAccessException convertJdbcAccessException(SQLException ex) {
-		return getJdbcExceptionTranslator().translate("TopLinkTransactionManager", null, ex);
+	protected DataAccessException convertTopLinkAccessException(TopLinkException ex) {
+		if (getJdbcExceptionTranslator() != null && ex instanceof DatabaseException) {
+			Throwable internalEx = ex.getInternalException();
+			// Should always be a SQLException inside a DatabaseException.
+			if (internalEx instanceof SQLException) {
+				return getJdbcExceptionTranslator().translate(
+						"TopLink commit: " + ex.getMessage(), null, (SQLException) internalEx);
+			}
+		}
+		return SessionFactoryUtils.convertTopLinkAccessException(ex);
 	}
 
 
