@@ -3,37 +3,56 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 RC3 (7.8.2006)
--------------------------------------
+Changes in version 2.0 RC3 (10.8.2006)
+--------------------------------------
 
 General
 * spring.jar does not include Portlet support anymore (add spring-portlet.jar to your classpath if needed)
 
 Package org.springframework.aop
+* factored out AbstractGenericPointcutAdvisor (with a configurable Advice) as subclass of AbstractPointcutAdvisor
 * fixed AbstractAdvisorAutoProxyCreator to ignore Advisors for which "getBean" throws a BeanCurrentlyInCreationException
 * fixed AnnotationAwareAspectJAutoProxyCreator to explicitly ignore FactoryBeans when looking for aspect beans
 * reworked AspectJ auto-proxy creation to avoid the creation of unnecessary proxies
 * renamed ScopedObject's "remove" method to "removeFromScope", to avoid conflicts with methods on the target class
 
 Package org.springframework.beans
+* added overloaded "setPropertyValues" variant with additional "ignoreInvalidFields" flag to PropertyAccessor
 * fixed BeanWrapperImpl to properly catch and wrap conversion failures for map keys/values in TypeMismatchExceptions
 * introduced TypeConverter interface, implemented by BeanWrapperImpl, plus separate SimpleTypeConverter implementation
+* refined PropertyAccessExceptionsException to show nested details even when wrapped in a standard JDK exception
 * reworked ArgumentConvertingMethodInvoker to use a TypeConverter and allow the converter to be accessed/overridden
 * BeanFactoryUtils returns bean names in order of definition even for merged name arrays (in case of ancestor factories)
 * redefined BeanFactoryUtils' "countBeans/beanNamesIncludingAncestors" to build on "getBeanNamesOfType(Object.class)"
+* reworked InstantiationAwareBeanPostProcessor's "postProcessPropertyValues" method to take a PropertyDescriptor array
+* RequiredAnnotationBeanPostProcessor explicitly ignores special setter methods (such as "setBeanName"/"setBeanFactory")
+* added "copyConfigurationFrom" method to ConfigurableBeanFactory, allowing to create a factory with same configuration
+* exposed "getScope" and "setScope" methods on BeanDefinition interface, allowing a post-processor to override the scope
+* DefaultSingletonBeanRegistry disallows the creation (or recreation) of singletons during "destroySingletons()" phase
 * fixed AbstractBeanFactory to only invoke BeanPostProcessor for objects returned from FactoryBeans if non-null
 * fixed AbstractBeanFactory to throw BeanCurrentlyInCreationException on null from non-fully-initialized FactoryBean
+* AbstractBeanFactory's "getType" catches BeanCreationExceptions for a FactoryBean, treating it as "type unknown"
+* AbstractBeanFactory catches an exception thrown from a FactoryBean's "getObjectType", treating it as "type unknown"
 * AbstractAutowireCapableBeanFactory detects whether it injected raw instances of beans that eventually got wrapped
+* refined AbstractAutowireCapableBeanFactory to only adapt inner bean names for uniqueness in case of a singleton
+* refined AbstractAutowireCapableBeanFactory to reject an inner bean marked as singleton contained in a non-singleton
 * DefaultListableBeanFactory's non-eager lookup by type finds matches for lazy-init beans as long as class is loadable
-* added "setAllowEagerClassLoading" method to DefaultLisableBeanFactory, to allow for turning off eager class loading
+* added "setAllowEagerClassLoading" method to DefaultListableBeanFactory, to allow for turning off eager class loading
 * restored Spring 1.2 compatibility for default-lazy-init="true", with respect to detection of special beans by type
+* "idref" tag in XML bean definitions gets turned into a RuntimeBeanNameReference, which gets validated on bean creation
+* XML definitions for inner beans receive a default scope based on their containing bean (prototype for a non-singleton)
+* DefaultBeanDefinitionDocumentReader does not accept bean definitions with both "scope" and "singleton" values anymore
 
 Package org.springframework.context
 * added "isActive()" method to the ConfigurableApplicationContext interface
-* ApplicationContexts forbid access to the underlying BeanFactory before "refresh()" and after "close()"
+* AbstractRefreshableApplicationContext disallows access to underlying BeanFactory after a "close()" call
+* avoid AbstractRefreshableApplicationContext deadlock in case of BeanFactory access in a multi-threaded destroy method
 
 Package org.springframework.core
 * fixed PathMatchingResourcePatternResolver to prevent eternal recursion in case of invalid prefix with pattern symbols
+
+Package org.springframework.dao
+* factored out reusable PersistenceExceptionTranslationInterceptor from PersistenceExceptionTranslationAdvisor
 
 Package org.springframework.jdbc
 * worked around "oracle.sql.DATE" problem on certain Oracle driver versions, extracting it as timestamp when appropriate
@@ -41,6 +60,7 @@ Package org.springframework.jdbc
 * factored out Spring/JtaLobCreatorSynchronization classes from Hibernate AbstractLobType to "jdbc.support.lob" package
 
 Package org.springframework.jms
+* introduced CachingDestinationResolver interface, implemented by JndiDestinationResolver (allowing to clear the cache)
 * JmsTransactionManager starts the transactional Session's Connection early (at transaction begin) rather than on demand
 * optimized JmsTemplate's resource handling to reuse the obtained JMS Connection/Session within a JTA transaction
 * added "clientId" property to SingleConnectionFactory(102), for assigning a client id to the underlying Connection
@@ -49,6 +69,7 @@ Package org.springframework.jms
 * DefaultMessageListenerContainer obtains all JMS resources fresh by default in case of "transactionManager" specified
 * added "cacheLevel"/"cacheLevelName" property to DefaultMessageListenerContainer, for overriding the default caching
 * DefaultMessageListenerContainer is able to recover from a broken Connection (both with and without cached Connection)
+* DefaultMessageListenerContainer is able to recover from a broken Destination if obtained via JndiDestinationResolver
 * DefaultMessageListenerContainer waits until all listener tasks have completed before returning from "destroy"
 * added "taskExecutor" property to SimpleMessageListenerContainer, allowing to execute listener in different thread
 * added protected "buildListenerArguments" template method to MessageListenerAdapter, allowing for multiple arguments
@@ -56,9 +77,14 @@ Package org.springframework.jms
 Package org.springframework.orm
 * refined iBATIS SqlMapClientTemplate to allow for nested calls to same SqlMapSession (checking "getCurrentConnection")
 * reworked Hibernate JTA synch to expose beforeCompletion exceptions to the caller (via SpringJtaSynchronizationAdapter)
-* Hibernate3 LocalSessionFactoryBean implements the PersistenceExceptionTranslator interface now
+* updated TopLink API jar to be fully compatible with the official TopLink 10.1.3 release jar (can be replaced with it)
+* Hibernate3 and TopLink LocalSessionFactoryBeans implement the PersistenceExceptionTranslator interface now
+* reworked Hibernate3 and TopLink exception translation to only apply a SQLExceptionTranslator if explicitly specified
+* JDO LocalPersistenceManagerFactoryBean implements the PersistenceExceptionTranslator interface now
+* DefaultJdoDialect only applies a SQLExceptionTranslator if explicitly specified (rely on default JDO translation else)
 * removed warning for read-only from JdoTransactionManager/JpaTransactionManager, since a vendor dialect may support it
 * factored out overridable "createEntityManager" template methods in OpenEntityManagerInViewFilter/Interceptor
+* EntityManagerFactoryInfo interface does not extend PersistenceExceptionTranslator anymore (only JpaDialect does)
 * SpringPersistenceUnitInfo is public to allow for post-processing in LocalContainerEntityManagerFactoryBean subclass
 * added "determinePersistenceUnitInfo/postProcessPersistenceUnitInfo" methods to LocalContainerEntityManagerFactoryBean
 * reworked OpenSession/PersistenceManager/EntityManagerInViewInterceptor to build on WebRequestInterceptor abstraction
@@ -71,17 +97,32 @@ Package org.springframework.remoting
 Package org.springframework.scheduling
 * renamed SchedulingTaskExecutor's "isShortLivedPreferred" method to "prefersShortLivedTasks"
 
+Package org.springframework.scripting
+* ScriptFactoryPostProcessor supports all callbacks that containing BeanFactory supports (e.g. ApplicationContextAware)
+
+Package org.springframework.test
+* AbstractTransactionalSpringContextTests only tries to end transaction on "tearDown" if the transaction is still active
+
 Package org.springframework.transaction
+* fixed AbstractPlatformTransactionManager to not invoke commit synchronization in case of propagated rollback-only flag
 * added SpringJtaSynchronizationAdapter, exposing JTA Synchronization ifc on top of a Spring TransactionSynchronization
+* added "timeout" attribute to Transactional annotation, allowing to specify a timeout in seconds within the annotation
 
 Package org.springframework.util
 * optimized "ObjectUtils.nullSafeToString" implementation to return a given String right away
 
+Package org.springframework.validation
+* added "ignoreInvalidFields" flag to DataBinder, allowing to ignore inaccessible fields (null value in nested path)
+
 Package org.springframework.web
+* redefined Servlet/PortletRequestUtils to treat empty parameter values as valid for Strings ("") and booleans (false)
 * moved RequestScope/SessionScope and RequestContextListener from "web.context.scope" to "web.context.request"
 * added WebRequest abstraction, with ServletWebRequest and PortletWebRequest implementations
 * added WebRequestInterceptor interface, for generic request interceptors (independent of Servlet/Portlet)
 * added support for WebRequestInterceptors to Servlet/Portlet MVC HandlerMappings (through "interceptors" property)
+* renamed PortletBean to GenericPortletBean
+* HttpServletBean/GenericPortletBean override "getXXXXletName"/"getXXXXletContext" to return null when no config set yet
+* added "defaultLocale" property to CookieLocaleResolver and SessionLocaleResolver, for fallback to an explicit locale
 
 
 Changes in version 2.0 RC2 (6.7.2006)
@@ -151,6 +192,9 @@ Package org.springframework.remoting
 
 Package org.springframework.scheduling
 * Quartz SchedulerFactoryBean uses given "nonTransactionalDataSource" as default DataSource if no "dataSource" specified
+
+Package org.springframework.test
+* AbstractTransactionalSpringContextTests properly ends a started transaction early if "onSetupInTransaction" fails
 
 Package org.springframework.transaction
 * JtaTransactionManager explicitly only calls "UserTransaction.setRollbackOnly()" if the transaction is still active
