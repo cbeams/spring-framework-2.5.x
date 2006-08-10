@@ -52,7 +52,7 @@ import org.springframework.web.portlet.context.XmlPortletApplicationContext;
  * </ul>
  *
  * <p>Subclasses must implement <code>doActionService</code> and <code>doRenderService</code>
- * to handle action and render requests. Because this extends PortletBean rather
+ * to handle action and render requests. Because this extends GenericPortletBean rather
  * than Portlet directly, bean properties are mapped onto it. Subclasses can override
  * initFrameworkPortlet() for custom initialization.
  *
@@ -88,7 +88,7 @@ import org.springframework.web.portlet.context.XmlPortletApplicationContext;
  * @see #setContextConfigLocation
  * @see #setNamespace
  */
-public abstract class FrameworkPortlet extends PortletBean {
+public abstract class FrameworkPortlet extends GenericPortletBean {
 
 	/**
 	 * Default context class for FrameworkPortlet.
@@ -256,7 +256,7 @@ public abstract class FrameworkPortlet extends PortletBean {
 
 
 	/**
-	 * Overridden method of PortletBean, invoked after any bean properties
+	 * Overridden method of GenericPortletBean, invoked after any bean properties
 	 * have been set. Creates this portlet's ApplicationContext.
 	 */
 	protected final void initPortletBean() throws PortletException, BeansException {

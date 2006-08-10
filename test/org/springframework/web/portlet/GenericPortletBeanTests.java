@@ -27,7 +27,7 @@ import org.springframework.mock.web.portlet.MockPortletContext;
 /**
  * @author Mark Fisher
  */
-public class PortletBeanTests extends TestCase {
+public class GenericPortletBeanTests extends TestCase {
 
 	public void testInitParameterSet() throws Exception {
 		PortletContext portletContext = new MockPortletContext();
@@ -151,7 +151,8 @@ public class PortletBeanTests extends TestCase {
 		assertNull(portletBean.getTestParam());
 	}
 
-	private static class TestPortletBean extends PortletBean {
+
+	private static class TestPortletBean extends GenericPortletBean {
 		
 		private String testParam; 
 		private String anotherParam;
@@ -172,4 +173,5 @@ public class PortletBeanTests extends TestCase {
 			return this.anotherParam;
 		}
 	}
+
 }

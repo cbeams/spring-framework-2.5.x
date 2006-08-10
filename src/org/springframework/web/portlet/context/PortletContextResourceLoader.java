@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.core.io.Resource;
 /**
  * ResourceLoader implementation that resolves paths as PortletContext
  * resources, for use outside a Portlet ApplicationContext (for example,
- * in a PortletBean subclass).
+ * in a GenericPortletBean subclass).
  *
  * <p>Within a WebApplicationContext, resource paths are automatically
  * resolved as PortletContext resources by the context implementation.
@@ -34,7 +34,7 @@ import org.springframework.core.io.Resource;
  * @since 2.0
  * @see #getResourceByPath
  * @see PortletContextResource
- * @see org.springframework.web.portlet.PortletBean
+ * @see org.springframework.web.portlet.GenericPortletBean
  */
 public class PortletContextResourceLoader extends DefaultResourceLoader {
 

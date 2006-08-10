@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.springframework.web.portlet.context.PortletContextAware;
  * constructor arguments or bean properties.
  *
  * <p>For reuse of a Portlet implementation in a plain Portlet container and as
- * a bean in a Spring context, consider deriving from Spring's PortletBean
+ * a bean in a Spring context, consider deriving from Spring's GenericPortletBean
  * base class that applies Portlet initialization parameters as bean properties,
  * supporting both initialization styles.
  *
@@ -64,7 +64,7 @@ import org.springframework.web.portlet.context.PortletContextAware;
  * @see javax.portlet.Portlet
  * @see javax.portlet.PortletConfig
  * @see SimplePortletHandlerAdapter
- * @see org.springframework.web.portlet.PortletBean
+ * @see org.springframework.web.portlet.GenericPortletBean
  * @see org.springframework.web.portlet.mvc.PortletWrappingController
  */
 public class SimplePortletPostProcessor
