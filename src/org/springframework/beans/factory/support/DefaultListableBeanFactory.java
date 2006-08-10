@@ -33,6 +33,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -67,6 +68,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/** Whether to allow re-registration of a different definition with the same name */
 	private boolean allowBeanDefinitionOverriding = true;
 
+	/** Whether to allow eager class loading even for lazy-init beans */
 	private boolean allowEagerClassLoading = true;
 
 	/** Map of bean definition objects, keyed by bean name */
@@ -127,6 +129,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	public boolean isAllowEagerClassLoading() {
 		return allowEagerClassLoading;
+	}
+
+	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
+		super.copyConfigurationFrom(otherFactory);
+		if (otherFactory instanceof DefaultListableBeanFactory) {
+			DefaultListableBeanFactory otherListableFactory = (DefaultListableBeanFactory) otherFactory;
+			this.allowBeanDefinitionOverriding = otherListableFactory.allowBeanDefinitionOverriding;
+			this.allowEagerClassLoading = otherListableFactory.allowEagerClassLoading;
+		}
 	}
 
 

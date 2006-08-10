@@ -47,6 +47,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -125,6 +126,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		setParentBeanFactory(parentBeanFactory);
 	}
 
+
 	/**
 	 * Set the instantiation strategy to use for creating bean instances.
 	 * Default is CglibSubclassingInstantiationStrategy.
@@ -198,6 +200,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	public Set getIgnoredDependencyInterfaces() {
 		return ignoredDependencyInterfaces;
+	}
+
+	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
+		super.copyConfigurationFrom(otherFactory);
+		if (otherFactory instanceof AbstractAutowireCapableBeanFactory) {
+			AbstractAutowireCapableBeanFactory otherAutowireFactory =
+					(AbstractAutowireCapableBeanFactory) otherFactory;
+			this.instantiationStrategy = otherAutowireFactory.instantiationStrategy;
+			this.allowCircularReferences = otherAutowireFactory.allowCircularReferences;
+			this.ignoredDependencyTypes.addAll(otherAutowireFactory.ignoredDependencyTypes);
+			this.ignoredDependencyInterfaces.addAll(otherAutowireFactory.ignoredDependencyInterfaces);
+		}
 	}
 
 

@@ -112,14 +112,14 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	/** Indicates whether any DestructionAwareBeanPostProcessors have been registered */
 	private boolean hasDestructionAwareBeanPostProcessors;
 
+	/** Map from scope identifier String to corresponding Scope */
+	private final Map scopes = new HashMap();
+
 	/** Map from alias to canonical bean name */
 	private final Map aliasMap = new HashMap();
 
 	/** Map from ChildBeanDefinition to merged RootBeanDefinition */
 	private final Map mergedBeanDefinitions = new HashMap();
-
-	/** Map from scope identifier String to corresponding Scope */
-	private final Map scopes = new HashMap();
 
 	/** Names of beans that have already been created at least once */
 	private final Set alreadyCreated = Collections.synchronizedSet(new HashSet());
@@ -513,6 +513,43 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		return this.hasDestructionAwareBeanPostProcessors;
 	}
 
+	public void registerScope(String scopeName, Scope scope) {
+		Assert.notNull(scopeName, "Scope identifier must not be null");
+		Assert.notNull(scope, "Scope must not be null");
+		this.scopes.put(scopeName, scope);
+	}
+
+	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
+		Assert.notNull(otherFactory, "BeanFactory must not be null");
+		setBeanClassLoader(otherFactory.getBeanClassLoader());
+		setCacheBeanMetadata(otherFactory.isCacheBeanMetadata());
+		if (otherFactory instanceof AbstractBeanFactory) {
+			AbstractBeanFactory otherAbstractFactory = (AbstractBeanFactory) otherFactory;
+			this.customEditors.putAll(otherAbstractFactory.customEditors);
+			this.propertyEditorRegistrars.addAll(otherAbstractFactory.propertyEditorRegistrars);
+			this.beanPostProcessors.addAll(otherAbstractFactory.beanPostProcessors);
+			this.hasDestructionAwareBeanPostProcessors = this.hasDestructionAwareBeanPostProcessors ||
+					otherAbstractFactory.hasDestructionAwareBeanPostProcessors;
+			this.scopes.putAll(otherAbstractFactory.scopes);
+		}
+	}
+
+
+	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
+		Assert.hasText(beanName, "Bean name must not be empty");
+		Assert.hasText(alias, "Alias must not be empty");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
+		}
+		synchronized (this.aliasMap) {
+			Object registeredName = this.aliasMap.get(alias);
+			if (registeredName != null) {
+				throw new BeanDefinitionStoreException("Cannot register alias '" + alias + "' for bean name '" +
+						beanName + "': it's already registered for bean name '" + registeredName + "'");
+			}
+			this.aliasMap.put(alias, beanName);
+		}
+	}
 
 	/**
 	 * Callback before prototype creation.
@@ -560,29 +597,6 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 	public boolean isCurrentlyInCreation(String beanName) {
 		return isSingletonCurrentlyInCreation(beanName) || isPrototypeCurrentlyInCreation(beanName);
-	}
-
-
-	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
-		Assert.hasText(beanName, "Bean name must not be empty");
-		Assert.hasText(alias, "Alias must not be empty");
-		if (logger.isDebugEnabled()) {
-			logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
-		}
-		synchronized (this.aliasMap) {
-			Object registeredName = this.aliasMap.get(alias);
-			if (registeredName != null) {
-				throw new BeanDefinitionStoreException("Cannot register alias '" + alias + "' for bean name '" +
-						beanName + "': it's already registered for bean name '" + registeredName + "'");
-			}
-			this.aliasMap.put(alias, beanName);
-		}
-	}
-
-	public void registerScope(String scopeName, Scope scope) {
-		Assert.notNull(scopeName, "Scope identifier must not be null");
-		Assert.notNull(scope, "Scope must not be null");
-		this.scopes.put(scopeName, scope);
 	}
 
 	public void destroyScopedBean(String beanName) {
