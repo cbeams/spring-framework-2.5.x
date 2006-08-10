@@ -16,15 +16,16 @@
 
 package org.springframework.web.servlet.view.xslt;
 
-import org.springframework.util.Assert;
-
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 
+import org.springframework.util.Assert;
+
 /**
- * Contains common behaviour relating to {@link Transformer Transformers}.
+ * Contains common behavior relating to {@link Transformer Transformers}.
  *
  * @author Rick Evans
+ * @since 2.0
  */
 public abstract class TransformerUtils {
 
@@ -37,30 +38,29 @@ public abstract class TransformerUtils {
 
 
 	/**
-	 * Enables indenting for the supplied {@link Transformer}.
+	 * Enable indenting for the supplied {@link Transformer}.
 	 * <p>If the underlying XSLT engine is Xalan, then the special output
 	 * key <code>indent-amount</code> will be also be set to a value
 	 * of {@link #DEFAULT_INDENT_AMOUNT} characters.
 	 * @param transformer the target transformer
 	 * @throws IllegalArgumentException if the supplied {@link Transformer} is <code>null</code>
-	 * @see {@link Transformer#setOutputProperty(String, String)}
+	 * @see Transformer#setOutputProperty(String, String)
 	 * @see OutputKeys#INDENT
 	 */
 	public static void enableIndenting(Transformer transformer) {
-		TransformerUtils.enableIndenting(transformer, DEFAULT_INDENT_AMOUNT);
+		enableIndenting(transformer, DEFAULT_INDENT_AMOUNT);
 	}
 
-
 	/**
-	 * Enables indenting for the supplied {@link Transformer}.
+	 * Enable indenting for the supplied {@link Transformer}.
 	 * <p>If the underlying XSLT engine is Xalan, then the special output
 	 * key <code>indent-amount</code> will be also be set to a value
 	 * of {@link #DEFAULT_INDENT_AMOUNT} characters.
 	 * @param transformer  the target transformer
 	 * @param indentAmount the size of the indent (2 characters, 3 characters, etc.)
 	 * @throws IllegalArgumentException if the supplied {@link Transformer} is <code>null</code>
-	 *                                  or if the supplied indent amount is less than zero (that is, negative)
-	 * @see {@link Transformer#setOutputProperty(String, String)}
+	 * or if the supplied indent amount is less than zero (that is, negative)
+	 * @see Transformer#setOutputProperty(String, String)
 	 * @see OutputKeys#INDENT
 	 */
 	public static void enableIndenting(Transformer transformer, int indentAmount) {
@@ -70,12 +70,13 @@ public abstract class TransformerUtils {
 		try {
 			// Xalan-specific, but this is the most common XSLT engine in any case
 			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", String.valueOf(indentAmount));
-		} catch (IllegalArgumentException ignored) {
+		}
+		catch (IllegalArgumentException ignored) {
 		}
 	}
 
 	/**
-	 * Disables indenting for the supplied {@link Transformer}.
+	 * Disable indenting for the supplied {@link Transformer}.
 	 * @param transformer the target transformer
 	 * @throws IllegalArgumentException if the supplied {@link Transformer} is <code>null</code>
 	 * @see OutputKeys#INDENT

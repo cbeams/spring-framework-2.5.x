@@ -16,10 +16,11 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.io.IOException;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTag;
-import java.io.IOException;
 
 /**
  * @author Rob Harrop
@@ -47,9 +48,6 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 	/**
 	 * If {@link #shouldRender rendering}, flush any buffered {@link BodyContent} or, if
 	 * no {@link BodyContent} is supplied, {@link #renderDefaultContent render the default content}.
-	 *
-	 * @return
-	 * @throws JspException
 	 */
 	public int doEndTag() throws JspException {
 		if (shouldRender()) {
@@ -83,6 +81,7 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 		this.tagWriter = null;
 		this.bodyContent = null;
 	}
+
 
 	//---------------------------------------------------------------------
 	// Strategy methods
@@ -134,6 +133,7 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 
 	protected abstract void renderDefaultContent(TagWriter tagWriter) throws JspException;
 
+
 	//---------------------------------------------------------------------
 	// BodyTag implementation
 	//---------------------------------------------------------------------
@@ -145,4 +145,5 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 	public void setBodyContent(BodyContent bodyContent) {
 		this.bodyContent = bodyContent;
 	}
+
 }
