@@ -168,7 +168,7 @@ public abstract class SessionFactoryUtils {
 	 * Get a Hibernate Session for the given SessionFactory. Is aware of and will
 	 * return any existing corresponding Session bound to the current thread, for
 	 * example when using HibernateTransactionManager. Will create a new Session
-	 * otherwise, if allowCreate is true.
+	 * otherwise, if "allowCreate" is <code>true</code>.
 	 * <p>This is the <code>getSession</code> method used by typical data access code,
 	 * in combination with <code>releaseSession</code> called when done with
 	 * the Session. Note that HibernateTemplate allows to write data access code
@@ -182,7 +182,8 @@ public abstract class SessionFactoryUtils {
 	 * transactional Session can be found for the current thread
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
-	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
+	 * @throws IllegalStateException if no thread-bound Session found and
+	 * "allowCreate" is <code>false</code>
 	 * @see #releaseSession
 	 * @see HibernateTemplate
 	 */
@@ -236,7 +237,7 @@ public abstract class SessionFactoryUtils {
 	 * Get a Hibernate Session for the given SessionFactory. Is aware of and will
 	 * return any existing corresponding Session bound to the current thread, for
 	 * example when using HibernateTransactionManager. Will create a new Session
-	 * otherwise, if allowCreate is true.
+	 * otherwise, if "allowCreate" is <code>true</code>.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
 	 * @param entityInterceptor Hibernate entity interceptor, or <code>null</code> if none
 	 * @param jdbcExceptionTranslator SQLExceptionTranslator to use for flushing the
@@ -245,7 +246,8 @@ public abstract class SessionFactoryUtils {
 	 * transactional Session can be found for the current thread
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
-	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
+	 * @throws IllegalStateException if no thread-bound Session found and
+	 * "allowCreate" is <code>false</code>
 	 */
 	private static Session getSession(
 			SessionFactory sessionFactory, Interceptor entityInterceptor,

@@ -54,7 +54,7 @@ public abstract class SessionFactoryUtils {
 	 * Get a TopLink Session for the given SessionFactory. Is aware of and will
 	 * return any existing corresponding Session bound to the current thread, for
 	 * example when using TopLinkTransactionManager. Will create a new Session
-	 * otherwise, if allowCreate is true.
+	 * otherwise, if "allowCreate" is <code>true</code>.
 	 * <p>This is the <code>getSession</code> method used by typical data access code,
 	 * in combination with <code>releaseSession</code> called when done with
 	 * the Session. Note that TopLinkTemplate allows to write data access code
@@ -64,7 +64,8 @@ public abstract class SessionFactoryUtils {
 	 * transactional Session can be found for the current thread
 	 * @return the TopLink Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
-	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
+	 * @throws IllegalStateException if no thread-bound Session found and
+	 * "allowCreate" is <code>false</code>
 	 * @see #releaseSession
 	 * @see TopLinkTemplate
 	 */
@@ -83,14 +84,15 @@ public abstract class SessionFactoryUtils {
 	 * Get a TopLink Session for the given SessionFactory. Is aware of and will
 	 * return any existing corresponding Session bound to the current thread, for
 	 * example when using TopLinkTransactionManager. Will create a new Session
-	 * otherwise, if allowCreate is true.
+	 * otherwise, if "allowCreate" is <code>true</code>.
 	 * <p>Same as <code>getSession</code>, but throwing the original TopLinkException.
 	 * @param sessionFactory TopLink SessionFactory to create the session with
 	 * @param allowCreate if a non-transactional Session should be created when no
 	 * transactional Session can be found for the current thread
 	 * @return the TopLink Session
 	 * @throws TopLinkException if the Session couldn't be created
-	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
+	 * @throws IllegalStateException if no thread-bound Session found and
+	 * "allowCreate" is <code>false</code>
 	 * @see #releaseSession
 	 * @see TopLinkTemplate
 	 */
