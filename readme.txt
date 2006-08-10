@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.0 RC3 (July 2006)
--------------------------------------------------
+THE SPRING FRAMEWORK, release 2.0 RC3 (August 2006)
+---------------------------------------------------
 http://www.springframework.org
 
 
@@ -55,10 +55,10 @@ The Spring Framework requires J2SE 1.3 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1
 required for building the framework; for the full build including all aspects, AspectJ is required as well.
 J2EE 1.2 (Servlet 2.2, JSP 1.1) is sufficient when not using Spring's JSP tag libraries or the EJB support.
 
-Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1, JMX 1.0/1.2, JCA 1.0,
+Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1/2.2, JMX 1.0/1.2, JCA 1.0,
 Hibernate 2.1/3.0/3.1/3.2, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, JPA 1.0, Apache OJB 1.0, iBATIS SQL Maps 2.0/2.1,
 Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.4/1.5, EHCache 1.1, JSTL 1.0, Velocity 1.4,
-FreeMarker 2.3, JasperReports 1.0/1.1, Struts/Tiles 1.1/1.2, JSF 1.1, Jakarta Commons FileUpload 1.1, etc.
+FreeMarker 2.3, JasperReports 1.1/1.2, Struts/Tiles 1.1/1.2, JSF 1.1/1.2, Jakarta Commons FileUpload 1.1, etc.
 
 Release contents:
 * "src" contains the Java source files for the framework
@@ -90,7 +90,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2410 KB)
+* "spring" (~2435 KB)
 - Convenient jar file combining all standard modules (except for superseded modules)
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar, aspects jar, spring-portlet jar, and spring-hibernate2 jar!
@@ -101,7 +101,7 @@ MODULE JARS (dist/modules):
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~340 KB)
+* "spring-beans" (~345 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
@@ -149,7 +149,7 @@ MODULE JARS (dist/modules):
 - Contents: JMX 1.0/1.2 support
 - Dependencies: spring-aop, JMX API
 
-* "spring-jms" (~90 KB)
+* "spring-jms" (~105 KB)
 - Contents: JMS 1.0.2/1.1 support
 - Dependencies: spring-dao, JMS API
 
