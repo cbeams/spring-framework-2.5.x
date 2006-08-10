@@ -528,10 +528,6 @@ public abstract class PortletRequestUtils {
 				throw new PortletRequestBindingException(
 						"Required " + getType() + " parameter '" + name + "' is not present");
 			}
-			if ("".equals(parameter)) {
-				throw new PortletRequestBindingException(
-						"Required " + getType() + " parameter '" + name + "' contains no value");
-			}
 		}
 
 		protected abstract String getType();

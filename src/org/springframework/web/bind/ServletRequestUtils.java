@@ -433,7 +433,6 @@ public abstract class ServletRequestUtils {
 
 	/**
 	 * Get a String parameter, or <code>null</code> if not present.
-	 * Throws an exception if it the parameter value is empty.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @return the String value, or <code>null</code> if not present
@@ -480,7 +479,7 @@ public abstract class ServletRequestUtils {
 	}
 
 	/**
-	 * Get a String parameter, throwing an exception if it isn't found or is empty.
+	 * Get a String parameter, throwing an exception if it isn't found.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @throws ServletRequestBindingException a subclass of ServletException,
@@ -493,7 +492,7 @@ public abstract class ServletRequestUtils {
 	}
 
 	/**
-	 * Get an array of String parameters, throwing an exception if not found or one is empty.
+	 * Get an array of String parameters, throwing an exception if not found.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
 	 * @throws ServletRequestBindingException a subclass of ServletException,
@@ -526,10 +525,6 @@ public abstract class ServletRequestUtils {
 			if (parameter == null) {
 				throw new ServletRequestBindingException(
 						"Required " + getType() + " parameter '" + name + "' is not present");
-			}
-			if ("".equals(parameter)) {
-				throw new ServletRequestBindingException(
-						"Required " + getType() + " parameter '" + name + "' contains no value");
 			}
 		}
 

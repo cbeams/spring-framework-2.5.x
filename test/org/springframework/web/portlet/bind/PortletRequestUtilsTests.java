@@ -312,13 +312,7 @@ public class PortletRequestUtilsTests extends TestCase {
 
 		assertTrue(PortletRequestUtils.getBooleanParameter(request, "param5", false));
 		assertTrue(PortletRequestUtils.getRequiredBooleanParameter(request, "param5"));
-		try {
-			PortletRequestUtils.getRequiredBooleanParameter(request, "paramEmpty");
-			fail("Should have thrown PortletRequestBindingException");
-		}
-		catch (PortletRequestBindingException ex) {
-			// expected
-		}
+		assertFalse(PortletRequestUtils.getRequiredBooleanParameter(request, "paramEmpty"));
 	}
 
 	public void testBooleanParameters() throws PortletRequestBindingException {
@@ -336,12 +330,11 @@ public class PortletRequestUtilsTests extends TestCase {
 			assertEquals(array[i], values[i]);
 		}
 
-		try {
-			PortletRequestUtils.getRequiredBooleanParameters(request, "param2");
-			fail("Should have thrown PortletRequestBindingException");
-		}
-		catch (PortletRequestBindingException ex) {
-			// expected
+		array = new boolean[] { false, true, false };
+		values = PortletRequestUtils.getRequiredBooleanParameters(request, "param2");
+		assertEquals(array.length, values.length);
+		for (int i = 0; i < array.length; i++) {
+			assertEquals(array[i], values[i]);
 		}
 	}
 
@@ -350,12 +343,12 @@ public class PortletRequestUtilsTests extends TestCase {
 		request.addParameter("param1", "str");
 		request.addParameter("paramEmpty", "");
 
-		assertEquals(PortletRequestUtils.getStringParameter(request, "param1"), "str");
-		assertEquals(PortletRequestUtils.getStringParameter(request, "param1", "string"), "str");
-		assertEquals(PortletRequestUtils.getRequiredStringParameter(request, "param1"), "str");
+		assertEquals("str", PortletRequestUtils.getStringParameter(request, "param1"));
+		assertEquals("str", PortletRequestUtils.getStringParameter(request, "param1", "string"));
+		assertEquals("str", PortletRequestUtils.getRequiredStringParameter(request, "param1"));
 
-		assertEquals(PortletRequestUtils.getStringParameter(request, "param3"), null);
-		assertEquals(PortletRequestUtils.getStringParameter(request, "param3", "string"), "string");
+		assertEquals(null, PortletRequestUtils.getStringParameter(request, "param3"));
+		assertEquals("string", PortletRequestUtils.getStringParameter(request, "param3", "string"));
 		try {
 			PortletRequestUtils.getRequiredStringParameter(request, "param3");
 			fail("Should have thrown PortletRequestBindingException");
@@ -364,20 +357,8 @@ public class PortletRequestUtilsTests extends TestCase {
 			// expected
 		}
 
-		try {
-			PortletRequestUtils.getStringParameter(request, "paramEmpty");
-			fail("Should have thrown PortletRequestBindingException");
-		}
-		catch (PortletRequestBindingException ex) {
-			// expected
-		}
-		try {
-			PortletRequestUtils.getRequiredStringParameter(request, "paramEmpty");
-			fail("Should have thrown PortletRequestBindingException");
-		}
-		catch (PortletRequestBindingException ex) {
-			// expected
-		}
+		assertEquals("", PortletRequestUtils.getStringParameter(request, "paramEmpty"));
+		assertEquals("", PortletRequestUtils.getRequiredStringParameter(request, "paramEmpty"));
 	}
 
 }
