@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.transaction.TransactionDefinition;
 /**
  * @author Rod Johnson
  */
-public class AttributesTransactionAttributeSourceTests extends TestCase {
+public class CommonsAttributesTransactionAttributeSourceTests extends TestCase {
 
 	public void testNullOrEmpty() throws Exception {
 		Method method = ITestBean.class.getMethod("getAge", (Class[]) null);
@@ -180,12 +180,10 @@ public class AttributesTransactionAttributeSourceTests extends TestCase {
 		assertEquals(txAtt, actual);
 	}
 
-	public void testSPR418UnboundedCacheSizeGrowth() throws Exception {
+	public void testUnboundedCacheSizeGrowth() throws Exception {
 		Attributes attributes = new CommonsAttributes();
-		AttributesTransactionAttributeSource attributeSource =
-				new AttributesTransactionAttributeSource(attributes);
+		AttributesTransactionAttributeSource attributeSource = new AttributesTransactionAttributeSource(attributes);
 
-		//Method m = PrototypeBean.class.getMethod("doNothing", new Class[0]);
 		for (int i = 0; i < 100; i++) {
 			PrototypeBean bean = new PrototypeBean();
 			Method m = bean.getClass().getMethod("doNothing", new Class[0]);

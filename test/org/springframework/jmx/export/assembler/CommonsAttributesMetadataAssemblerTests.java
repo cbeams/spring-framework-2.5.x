@@ -44,4 +44,6 @@ public class CommonsAttributesMetadataAssemblerTests extends AbstractMetadataAss
 		return "org/springframework/jmx/export/assembler/metadataAssembler.xml";
 	}
 
+
+
 }
