@@ -40,6 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.ConnectionReleaseMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
+import org.hibernate.JDBCException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -59,8 +60,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -104,6 +107,12 @@ import org.springframework.util.StringUtils;
  * <code>getCurrentSession()</code> will also seamlessly work with
  * a request-scoped Session managed by OpenSessionInViewFilter/Interceptor.
  *
+ * <p>This class also implements the PersistenceExceptionTranslator interface,
+ * as autodetected by Spring's PersistenceExceptionTranslationPostProcessor,
+ * for AOP-based translation of native exceptions to Spring DataAccessExceptions.
+ * Hence, the presence of a LocalSessionFactoryBean automatically enables a
+ * PersistenceExceptionTranslationPostProcessor to translate Hibernate exceptions.
+ *
  * <p>Requires Hibernate 3.0.3 or later. Note that this factory will always use
  * "on_close" as default Hibernate connection release mode, for the reason that
  * this is appropriate for most Spring-based applications (in particular when
@@ -119,8 +128,10 @@ import org.springframework.util.StringUtils;
  * @see #setExposeTransactionAwareSessionFactory
  * @see org.hibernate.SessionFactory#getCurrentSession()
  * @see HibernateTransactionManager
+ * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
  */
-public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
+public class LocalSessionFactoryBean
+		implements FactoryBean, InitializingBean, DisposableBean, PersistenceExceptionTranslator {
 
 	private static ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
 
@@ -195,6 +206,8 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	private TransactionManager jtaTransactionManager;
 
 	private LobHandler lobHandler;
+
+	private SQLExceptionTranslator jdbcExceptionTranslator;
 
 	private Interceptor entityInterceptor;
 
@@ -477,6 +490,23 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 */
 	public void setLobHandler(LobHandler lobHandler) {
 		this.lobHandler = lobHandler;
+	}
+
+	/**
+	 * Set the JDBC exception translator for the SessionFactory,
+	 * exposed via the PersistenceExceptionTranslator interface.
+	 * <p>Applied to any SQLException root cause of a Hibernate JDBCException,
+	 * overriding Hibernate's default SQLException translation (which is
+	 * based on Hibernate's Dialect for a specific target database).
+	 * @param jdbcExceptionTranslator the exception translator
+	 * @see java.sql.SQLException
+	 * @see org.hibernate.JDBCException
+	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
+	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
+	 * @see org.springframework.dao.support.PersistenceExceptionTranslator
+	 */
+	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
+		this.jdbcExceptionTranslator = jdbcExceptionTranslator;
 	}
 
 	/**
@@ -1061,6 +1091,41 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 
 	public boolean isSingleton() {
 		return true;
+	}
+
+
+	/**
+	 * Implementation of the PersistenceExceptionTranslator interface,
+	 * as autodetected by Spring's PersistenceExceptionTranslationPostProcessor.
+	 * <p>Converts the exception if it is a HibernateException;
+	 * else returns <code>null</code> to indicate an unknown exception.
+	 * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
+	 * @see #convertHibernateAccessException
+	 */
+	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
+		if (ex instanceof HibernateException) {
+			return convertHibernateAccessException((HibernateException) ex);
+		}
+		return null;
+	}
+
+	/**
+	 * Convert the given HibernateException to an appropriate exception from the
+	 * <code>org.springframework.dao</code> hierarchy.
+	 * <p>Will automatically apply a specified SQLExceptionTranslator to a
+	 * Hibernate JDBCException, else rely on Hibernate's default translation.
+	 * @param ex HibernateException that occured
+	 * @return a corresponding DataAccessException
+	 * @see SessionFactoryUtils#convertHibernateAccessException
+	 * @see #setJdbcExceptionTranslator
+	 */
+	protected DataAccessException convertHibernateAccessException(HibernateException ex) {
+		if (this.jdbcExceptionTranslator != null && ex instanceof JDBCException) {
+			JDBCException jdbcEx = (JDBCException) ex;
+			return this.jdbcExceptionTranslator.translate(
+					"Hibernate operation: " + jdbcEx.getMessage(), jdbcEx.getSQL(), jdbcEx.getSQLException());
+		}
+		return SessionFactoryUtils.convertHibernateAccessException(ex);
 	}
 
 
