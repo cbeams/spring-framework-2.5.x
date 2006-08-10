@@ -47,10 +47,15 @@ import org.hibernate.UnresolvableObjectException;
 import org.hibernate.WrongClassException;
 import org.hibernate.connection.ConnectionProvider;
 import org.hibernate.engine.SessionFactoryImplementor;
+import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.JDBCConnectionException;
+import org.hibernate.exception.LockAcquisitionException;
 
 import org.springframework.core.CollectionFactory;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -64,6 +69,7 @@ import org.springframework.util.Assert;
 /**
  * Helper class featuring methods for Hibernate Session handling,
  * allowing for reuse of Hibernate Session instances within transactions.
+ * Also provides support for exception translation.
  *
  * <p>Supports synchronization with both Spring-managed JTA transactions
  * (i.e. JtaTransactionManager) and non-Spring JTA transactions (i.e. plain JTA
@@ -164,7 +170,7 @@ public abstract class SessionFactoryUtils {
 	 * Get a Hibernate Session for the given SessionFactory. Is aware of and will
 	 * return any existing corresponding Session bound to the current thread, for
 	 * example when using HibernateTransactionManager. Will create a new Session
-	 * otherwise, if allowCreate is true.
+	 * otherwise, if "allowCreate" is <code>true</code>.
 	 * <p>This is the <code>getSession</code> method used by typical data access code,
 	 * in combination with <code>releaseSession</code> called when done with
 	 * the Session. Note that HibernateTemplate allows to write data access code
@@ -178,7 +184,8 @@ public abstract class SessionFactoryUtils {
 	 * transactional Session can be found for the current thread
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
-	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
+	 * @throws IllegalStateException if no thread-bound Session found and
+	 * "allowCreate" is <code>false</code>
 	 * @see #getSession(SessionFactory, Interceptor, SQLExceptionTranslator)
 	 * @see #releaseSession
 	 * @see HibernateTemplate
@@ -269,7 +276,7 @@ public abstract class SessionFactoryUtils {
 	 * Get a Hibernate Session for the given SessionFactory. Is aware of and will
 	 * return any existing corresponding Session bound to the current thread, for
 	 * example when using HibernateTransactionManager. Will create a new Session
-	 * otherwise, if allowCreate is true.
+	 * otherwise, if "allowCreate" is <code>true</code>.
 	 * <p>Same as <code>getSession</code>, but throwing the original HibernateException.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
 	 * @param entityInterceptor Hibernate entity interceptor, or <code>null</code> if none
@@ -279,7 +286,8 @@ public abstract class SessionFactoryUtils {
 	 * transactional Session can be found for the current thread
 	 * @return the Hibernate Session
 	 * @throws HibernateException if the Session couldn't be created
-	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
+	 * @throws IllegalStateException if no thread-bound Session found and
+	 * "allowCreate" is <code>false</code>
 	 */
 	private static Session doGetSession(
 			SessionFactory sessionFactory, Interceptor entityInterceptor,
@@ -605,25 +613,25 @@ public abstract class SessionFactoryUtils {
 
 	/**
 	 * Convert the given HibernateException to an appropriate exception from the
-	 * <code>org.springframework.dao</code> hierarchy. Note that it is advisable to
-	 * handle JDBCException specifically by using a SQLExceptionTranslator for the
-	 * underlying SQLException.
+	 * <code>org.springframework.dao</code> hierarchy.
 	 * @param ex HibernateException that occured
 	 * @return the corresponding DataAccessException instance
 	 * @see HibernateAccessor#convertHibernateAccessException
-	 * @see HibernateAccessor#convertJdbcAccessException
 	 * @see HibernateTransactionManager#convertHibernateAccessException
-	 * @see HibernateTransactionManager#convertJdbcAccessException
-	 * @see org.hibernate.JDBCException#getSQLException
-	 * @see org.springframework.jdbc.support.SQLExceptionTranslator
 	 */
 	public static DataAccessException convertHibernateAccessException(HibernateException ex) {
+		if (ex instanceof JDBCConnectionException) {
+			return new DataAccessResourceFailureException(ex.getMessage(), ex);
+		}
+		if (ex instanceof ConstraintViolationException) {
+			return new DataIntegrityViolationException(ex.getMessage(), ex);
+		}
+		if (ex instanceof LockAcquisitionException) {
+			return new CannotAcquireLockException(ex.getMessage(), ex);
+		}
 		if (ex instanceof JDBCException) {
-			// SQLException during Hibernate access: only passed in here from custom code,
-			// as HibernateTemplate etc will use SQLExceptionTranslator-based handling.
 			return new HibernateJdbcException((JDBCException) ex);
 		}
-
 		if (ex instanceof PersistentObjectException) {
 			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
