@@ -33,7 +33,9 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
+import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -62,6 +64,12 @@ import org.springframework.util.CollectionUtils;
  * method with either a <code>Properties</code> or a <code>Map</code> argument).
  * Make sure that the JDO API jar on your class path matches the one that
  * your JDO provider has been compiled against!
+ *
+ * <p>This class also implements the PersistenceExceptionTranslator interface,
+ * as autodetected by Spring's PersistenceExceptionTranslationPostProcessor,
+ * for AOP-based translation of native exceptions to Spring DataAccessExceptions.
+ * Hence, the presence of a LocalPersistenceManagerFactoryBean automatically enables
+ * a PersistenceExceptionTranslationPostProcessor to translate JDO exceptions.
  *
  * <p>As alternative to the properties-driven approach that this FactoryBean offers
  * (which is analogous to using the standard JDOHelper class with a Properties
@@ -100,9 +108,11 @@ import org.springframework.util.CollectionUtils;
  * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see javax.jdo.JDOHelper#getPersistenceManagerFactory
  * @see javax.jdo.PersistenceManagerFactory#setConnectionFactory
- * @see javax.jdo.PersistenceManagerFactory#close
+ * @see javax.jdo.PersistenceManagerFactory#close()
+ * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
  */
-public class LocalPersistenceManagerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
+public class LocalPersistenceManagerFactoryBean
+		implements FactoryBean, InitializingBean, DisposableBean, PersistenceExceptionTranslator {
 
 	private static Method getPersistenceManagerFactoryMethod;
 
@@ -126,6 +136,8 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	private Properties jdoProperties;
 
 	private PersistenceManagerFactory persistenceManagerFactory;
+
+	private JdoDialect jdoDialect;
 
 
 	/**
@@ -156,6 +168,17 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 			this.jdoProperties = new Properties();
 		}
 		return this.jdoProperties;
+	}
+
+	/**
+	 * Set the JDO dialect to use for the PersistenceExceptionTranslator functionality
+	 * of this factory. The default is to rely on standard JDO exception translation.
+	 * @see JdoDialect#translateException
+	 * @see #translateExceptionIfPossible
+	 * @see org.springframework.dao.support.PersistenceExceptionTranslator
+	 */
+	public void setJdoDialect(JdoDialect jdoDialect) {
+		this.jdoDialect = jdoDialect;
 	}
 
 
@@ -200,7 +223,6 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	 * detected through reflection.
 	 * @param props the merged Properties prepared by this LocalPersistenceManagerFactoryBean
 	 * @return the PersistenceManagerFactory instance
-	 * @see javax.jdo.JDOHelper#getPersistenceManagerFactory(java.util.Properties)
 	 * @see javax.jdo.JDOHelper#getPersistenceManagerFactory(java.util.Map)
 	 */
 	protected PersistenceManagerFactory newPersistenceManagerFactory(Properties props) {
@@ -238,6 +260,28 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 
 	public boolean isSingleton() {
 		return true;
+	}
+
+
+	/**
+	 * Implementation of the PersistenceExceptionTranslator interface,
+	 * as autodetected by Spring's PersistenceExceptionTranslationPostProcessor.
+	 * <p>Converts the exception if it is a JDOException, preferably using a specified
+	 * JdoDialect. Else returns <code>null</code> to indicate an unknown exception.
+	 * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
+	 * @see JdoDialect#translateException
+	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException
+	 */
+	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
+		if (ex instanceof JDOException) {
+			if (this.jdoDialect != null) {
+				return this.jdoDialect.translateException((JDOException) ex);
+			}
+			else {
+				return PersistenceManagerFactoryUtils.convertJdoAccessException((JDOException) ex);
+			}
+		}
+		return null;
 	}
 
 
