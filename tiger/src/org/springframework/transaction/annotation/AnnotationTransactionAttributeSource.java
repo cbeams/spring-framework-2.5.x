@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,13 +22,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.transaction.interceptor.AbstractFallbackTransactionAttributeSource;
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
-import org.springframework.util.ClassUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * <p>Implementation of <code>TransactionAttributeSource</code> for working
@@ -90,6 +89,7 @@ public class AnnotationTransactionAttributeSource
 				RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 				rbta.setPropagationBehavior(ruleBasedTx.propagation().value());
 				rbta.setIsolationLevel(ruleBasedTx.isolation().value());
+				rbta.setTimeout(ruleBasedTx.timeout());
 				rbta.setReadOnly(ruleBasedTx.readOnly());
 
 				ArrayList<RollbackRuleAttribute> rollBackRules = new ArrayList<RollbackRuleAttribute>();

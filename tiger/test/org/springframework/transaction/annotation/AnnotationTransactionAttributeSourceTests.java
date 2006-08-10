@@ -19,7 +19,6 @@ package org.springframework.transaction.annotation;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.Collection;
 
 import junit.framework.TestCase;
 
@@ -109,6 +108,9 @@ public class AnnotationTransactionAttributeSourceTests extends TestCase {
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute actual = atas.getTransactionAttribute(interfaceMethod, TestBean3.class);
 		assertEquals(TransactionAttribute.PROPAGATION_REQUIRES_NEW, actual.getPropagationBehavior());
+		assertEquals(TransactionAttribute.ISOLATION_REPEATABLE_READ, actual.getIsolationLevel());
+		assertEquals(5, actual.getTimeout());
+		assertTrue(actual.isReadOnly());
 
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
@@ -159,19 +161,6 @@ public class AnnotationTransactionAttributeSourceTests extends TestCase {
 	}
 
 
-	public void testWithGenericMethod() throws Exception {
-		Method normal = MyFoo.class.getMethod("doSomething", String.class);
-		Method synthetic = MyFoo.class.getMethod("doSomething", Object.class);
-		AnnotationTransactionAttributeSource source = new AnnotationTransactionAttributeSource();
-		Collection normalAttributes = source.findAllAttributes(normal);
-		Collection syntheticAttributes = source.findAllAttributes(synthetic);
-
-		Method[] methods = MyFoo.class.getMethods();
-		for (int i = 0; i < methods.length; i++) {
-			Method method = methods[i];
-			//System.out.println(method.isSynthetic() + " " + method.isBridge() + " " + method);
-		}
-	}
 	public interface ITestBean {
 		
 		int getAge();
@@ -329,7 +318,8 @@ public class AnnotationTransactionAttributeSourceTests extends TestCase {
 			this.name = name;
 		}
 
-		@Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor=Exception.class, noRollbackFor={IOException.class})
+		@Transactional(propagation=Propagation.REQUIRES_NEW, isolation=Isolation.REPEATABLE_READ, timeout=5,
+				readOnly=true, rollbackFor=Exception.class, noRollbackFor={IOException.class})
 		public int getAge() {
 			return age;
 		}
