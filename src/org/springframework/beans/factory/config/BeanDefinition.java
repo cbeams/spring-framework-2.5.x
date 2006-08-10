@@ -40,6 +40,21 @@ import org.springframework.core.AttributeAccessor;
 public interface BeanDefinition extends AttributeAccessor {
 
 	/**
+	 * Scope identifier for the standard singleton scope: "singleton".
+	 * <p>Note that extended bean factories might support further scopes.
+	 * @see #setScope
+	 */
+	String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
+
+	/**
+	 * Scope identifier for the standard prototype scope: "prototype".
+	 * <p>Note that extended bean factories might support further scopes.
+	 * @see #setScope
+	 */
+	String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;
+
+
+	/**
 	 * Role hint indicating that a <code>BeanDefinition</code> is a major part
 	 * of the application. Typically corresponds to a user-defined bean.
 	 */
@@ -66,7 +81,7 @@ public interface BeanDefinition extends AttributeAccessor {
 
 
 	/**
-	 * Return the bean class name of this bean definition.
+	 * Return the current bean class name of this bean definition.
 	 * <p>Note that this does not have to be the actual class name used at runtime,
 	 * in case of a child definition overriding/inheriting the class name from its parent.
 	 * Hence, do <i>not</i> consider this to be the definitive bean type at runtime but
@@ -75,7 +90,7 @@ public interface BeanDefinition extends AttributeAccessor {
 	String getBeanClassName();
 
 	/**
-	 * Set a bean class name for this bean definition.
+	 * Override the bean class name of this bean definition.
 	 * <p>The class name can be modified during bean factory post-processing,
 	 * typically replacing the original class name with a parsed variant of it.
 	 */
@@ -97,9 +112,16 @@ public interface BeanDefinition extends AttributeAccessor {
 
 
 	/**
-	 * Return whether this bean is "abstract", that is, not meant to be instantiated.
+	 * Return the name of the current target scope for this bean.
 	 */
-	boolean isAbstract();
+	String getScope();
+
+	/**
+	 * Override the target scope of this bean, specifying a new scope name.
+	 * @see #SCOPE_SINGLETON
+	 * @see #SCOPE_PROTOTYPE
+	 */
+	void setScope(String scope);
 
 	/**
 	 * Return whether this a <b>Singleton</b>, with a single, shared instance
@@ -108,8 +130,13 @@ public interface BeanDefinition extends AttributeAccessor {
 	boolean isSingleton();
 
 	/**
+	 * Return whether this bean is "abstract", that is, not meant to be instantiated.
+	 */
+	boolean isAbstract();
+
+	/**
 	 * Return whether this bean should be lazily initialized, that is, not
-	 * eagerly instantiated on startup. Only applicable to a singleton bean.
+	 * eagerly instantiated on startup.
 	 */
 	boolean isLazyInit();
 
@@ -136,26 +163,5 @@ public interface BeanDefinition extends AttributeAccessor {
 	 * @see #ROLE_SUPPORT
 	 */
 	int getRole();
-
-
-	/**
-	 * Attach a generic, keyed metadata attribute to this bean definition.
-	 * <p>Users should take care to prevent overlaps with other metadata attributes by
-	 * using fully-qualified names, perhaps using class or package names as prefix.
-	 * @param key the unique attribute key
-	 * @param value the attribute value to be attached
-	 */
-	void setAttribute(String key, Object value);
-
-	/**
-	 * Get the metadata attribute for the given key, if any.
-	 * @return the attribute value, or <code>null</code> if none
-	 */
-	Object getAttribute(String key);
-
-	/**
-	 * Return the names of all registered attributes as String array.
-	 */
-	String[] attributeNames();
 
 }

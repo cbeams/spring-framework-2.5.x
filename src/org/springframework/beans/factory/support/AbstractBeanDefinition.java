@@ -23,7 +23,6 @@ import java.util.Iterator;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.util.Assert;
@@ -44,21 +43,6 @@ import org.springframework.util.ObjectUtils;
  * @see ChildBeanDefinition
  */
 public abstract class AbstractBeanDefinition extends AttributeAccessorSupport implements BeanDefinition {
-
-	/**
-	 * Scope identifier for the standard singleton scope: "singleton".
-	 * <p>Note that extended bean factories might support further scopes.
-	 * @see #setScope
-	 */
-	public static final String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
-
-	/**
-	 * Scope identifier for the standard prototype scope: "prototype".
-	 * <p>Note that extended bean factories might support further scopes.
-	 * @see #setScope
-	 */
-	public static final String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;
-
 
 	/**
 	 * Constant that indicates no autowiring at all.
