@@ -928,7 +928,7 @@
 					description="Compile main, JDK 1.5, and AspectJ test sources"/>
 
 
-	<target name="maintests" depends="buildtests" description="Run main tests">
+	<target name="maintests" description="Run main tests">
 
 		<mkdir dir="${target.junit.reports.dir}"/>
 
@@ -957,7 +957,7 @@
 	</target>
 
 
-	<target name="tigertests" depends="buildtests" if="tiger.available" description="Run JDK 1.5 tests">
+	<target name="tigertests" if="tiger.available" description="Run JDK 1.5 tests">
 
 		<mkdir dir="${target.junit.reports.dir}"/>
 
@@ -994,7 +994,7 @@
 		command line, as below:
 			ant tests -Dtest.includes=org/springframework/jdbc/**/*Test*
 	-->
-	<target name="tests" depends="maintests,tigertests" description="Run tests"/>
+	<target name="tests" depends="buildtests,maintests,tigertests" description="Run tests"/>
 
 
 	<!--
