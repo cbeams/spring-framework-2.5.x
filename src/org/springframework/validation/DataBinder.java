@@ -108,6 +108,8 @@ public class DataBinder implements PropertyEditorRegistry {
 
 	private boolean ignoreUnknownFields = true;
 
+	private boolean ignoreInvalidFields = false;
+
 	private String[] allowedFields;
 
 	private String[] disallowedFields;
@@ -219,19 +221,38 @@ public class DataBinder implements PropertyEditorRegistry {
 
 
 	/**
-	 * Set whether to ignore unknown fields, i.e. whether to ignore request
-	 * parameters that don't have corresponding fields in the target object.
+	 * Set whether to ignore unknown fields, that is, whether to ignore bind
+	 * parameters that do not have corresponding fields in the target object.
+	 * <p>Default is "true". Turn this off to enforce that all bind parameters
+	 * must have a matching field in the target object.
 	 */
 	public void setIgnoreUnknownFields(boolean ignoreUnknownFields) {
 		this.ignoreUnknownFields = ignoreUnknownFields;
 	}
 
 	/**
-	 * Return whether to ignore unknown fields, i.e. whether to ignore request
-	 * parameters that don't have corresponding fields in the target object.
+	 * Return whether to ignore unknown fields.
 	 */
 	public boolean isIgnoreUnknownFields() {
 		return ignoreUnknownFields;
+	}
+
+	/**
+	 * Set whether to ignore invalid fields, that is, whether to ignore bind
+	 * parameters that have corresponding fields in the target object which are
+	 * not accessible (for example because of null values in the nested path).
+	 * <p>Default is "false". Turn this on to ignore bind parameters for
+	 * nested objects in non-existing parts of the target object graph.
+	 */
+	public void setIgnoreInvalidFields(boolean ignoreInvalidFields) {
+		this.ignoreInvalidFields = ignoreInvalidFields;
+	}
+
+	/**
+	 * Return whether to ignore invalid fields.
+	 */
+	public boolean isIgnoreInvalidFields() {
+		return ignoreInvalidFields;
 	}
 
 	/**
@@ -475,7 +496,7 @@ public class DataBinder implements PropertyEditorRegistry {
 	protected void applyPropertyValues(MutablePropertyValues mpvs) {
 		try {
 			// Bind request parameters onto target object.
-			getPropertyAccessor().setPropertyValues(mpvs, isIgnoreUnknownFields());
+			getPropertyAccessor().setPropertyValues(mpvs, isIgnoreUnknownFields(), isIgnoreInvalidFields());
 		}
 		catch (PropertyAccessExceptionsException ex) {
 			// Use bind error processor to create FieldErrors.

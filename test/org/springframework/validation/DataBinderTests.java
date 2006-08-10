@@ -34,6 +34,7 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
+import org.springframework.beans.NullValueInNestedPathException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.TestBean;
@@ -87,6 +88,33 @@ public class DataBinderTests extends TestCase {
 		catch (NotWritablePropertyException ex) {
 			// expected
 		}
+	}
+
+	public void testBindingNoErrorsWithInvalidField() throws Exception {
+		TestBean rod = new TestBean();
+		DataBinder binder = new DataBinder(rod, "person");
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
+		pvs.addPropertyValue(new PropertyValue("spouse.age", new Integer(32)));
+
+		try {
+			binder.bind(pvs);
+			fail("Should have thrown NullValueInNestedPathException");
+		}
+		catch (NullValueInNestedPathException ex) {
+			// expected
+		}
+	}
+
+	public void testBindingNoErrorsWithIgnoreInvalid() throws Exception {
+		TestBean rod = new TestBean();
+		DataBinder binder = new DataBinder(rod, "person");
+		binder.setIgnoreInvalidFields(true);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
+		pvs.addPropertyValue(new PropertyValue("spouse.age", new Integer(32)));
+
+		binder.bind(pvs);
 	}
 
 	public void testBindingWithErrors() throws Exception {
