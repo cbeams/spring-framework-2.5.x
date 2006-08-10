@@ -128,16 +128,12 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 					SessionFactoryUtils.logger.debug("Flushing Hibernate Session on transaction synchronization");
 					session.flush();
 				}
-				catch (JDBCException ex) {
-					if (this.jdbcExceptionTranslator != null) {
-						throw this.jdbcExceptionTranslator.translate(
-								"Hibernate transaction synchronization: " + ex.getMessage(), ex.getSQL(), ex.getSQLException());
-					}
-					else {
-						throw new HibernateJdbcException(ex);
-					}
-				}
 				catch (HibernateException ex) {
+					if (this.jdbcExceptionTranslator != null && ex instanceof JDBCException) {
+						JDBCException jdbcEx = (JDBCException) ex;
+						throw this.jdbcExceptionTranslator.translate(
+								"Hibernate flushing: " + jdbcEx.getMessage(), jdbcEx.getSQL(), jdbcEx.getSQLException());
+					}
 					throw SessionFactoryUtils.convertHibernateAccessException(ex);
 				}
 			}

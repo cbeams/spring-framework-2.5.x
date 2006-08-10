@@ -39,7 +39,6 @@ import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
-import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
@@ -336,14 +335,12 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Set the JDBC exception translator for this transaction manager.
-	 * Applied to SQLExceptions (wrapped by Hibernate's JDBCException)
-	 * thrown by flushing on commit.
-	 * <p>The default exception translator is either a SQLErrorCodeSQLExceptionTranslator
-	 * if a DataSource is available, or a SQLStateSQLExceptionTranslator else.
+	 * <p>Applied to any SQLException root cause of a Hibernate JDBCException that
+	 * is thrown on flush, overriding Hibernate's default SQLException translation
+	 * (which is based on Hibernate's Dialect for a specific target database).
 	 * @param jdbcExceptionTranslator the exception translator
 	 * @see java.sql.SQLException
 	 * @see org.hibernate.JDBCException
-	 * @see SessionFactoryUtils#newJdbcExceptionTranslator
 	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
 	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
 	 */
@@ -352,20 +349,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	/**
-	 * Return the JDBC exception translator for this transaction manager.
-	 * <p>Creates a default SQLErrorCodeSQLExceptionTranslator or SQLStateSQLExceptionTranslator
-	 * for the specified SessionFactory, if no exception translator explicitly specified.
-	 * @see #setJdbcExceptionTranslator
+	 * Return the JDBC exception translator for this transaction manager, if any.
 	 */
 	public SQLExceptionTranslator getJdbcExceptionTranslator() {
-		if (this.jdbcExceptionTranslator == null) {
-			if (getDataSource() != null) {
-				this.jdbcExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(getDataSource());
-			}
-			else {
-				this.jdbcExceptionTranslator = SessionFactoryUtils.newJdbcExceptionTranslator(getSessionFactory());
-			}
-		}
 		return this.jdbcExceptionTranslator;
 	}
 
@@ -699,30 +685,22 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	/**
-	 * Convert the given HibernateException to an appropriate exception from
-	 * the org.springframework.dao hierarchy. Can be overridden in subclasses.
-	 * @param ex HibernateException that occured
-	 * @return the corresponding DataAccessException instance
-	 * @see #convertJdbcAccessException(org.hibernate.JDBCException)
-	 */
-	protected DataAccessException convertHibernateAccessException(HibernateException ex) {
-		if (ex instanceof JDBCException) {
-			return convertJdbcAccessException((JDBCException) ex);
-		}
-		return SessionFactoryUtils.convertHibernateAccessException(ex);
-	}
-
-	/**
-	 * Convert the given JDBCException to an appropriate exception from the
+	 * Convert the given HibernateException to an appropriate exception from the
 	 * <code>org.springframework.dao</code> hierarchy.
-	 * Uses a JDBC exception translator. Can be overridden in subclasses.
-	 * @param ex JDBCException that occured, wrapping a SQLException
-	 * @return the corresponding DataAccessException instance
+	 * <p>Will automatically apply a specified SQLExceptionTranslator to a
+	 * Hibernate JDBCException, else rely on Hibernate's default translation.
+	 * @param ex HibernateException that occured
+	 * @return a corresponding DataAccessException
+	 * @see SessionFactoryUtils#convertHibernateAccessException
 	 * @see #setJdbcExceptionTranslator
 	 */
-	protected DataAccessException convertJdbcAccessException(JDBCException ex) {
-		return getJdbcExceptionTranslator().translate(
-				"Hibernate operation: " + ex.getMessage(), ex.getSQL(), ex.getSQLException());
+	protected DataAccessException convertHibernateAccessException(HibernateException ex) {
+		if (getJdbcExceptionTranslator() != null && ex instanceof JDBCException) {
+			JDBCException jdbcEx = (JDBCException) ex;
+			return getJdbcExceptionTranslator().translate(
+					"Hibernate flushing: " + jdbcEx.getMessage(), jdbcEx.getSQL(), jdbcEx.getSQLException());
+		}
+		return SessionFactoryUtils.convertHibernateAccessException(ex);
 	}
 
 
