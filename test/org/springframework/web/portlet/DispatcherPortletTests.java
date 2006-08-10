@@ -48,6 +48,7 @@ import org.springframework.web.servlet.view.InternalResourceView;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
 public class DispatcherPortletTests extends TestCase {
 
@@ -58,6 +59,7 @@ public class DispatcherPortletTests extends TestCase {
 	private DispatcherPortlet simpleDispatcherPortlet;
 
 	private DispatcherPortlet complexDispatcherPortlet;
+
 
 	protected void setUp() throws PortletException {
 		simplePortletConfig = new MockPortletConfig(new MockPortletContext(), "simple");
@@ -77,6 +79,14 @@ public class DispatcherPortletTests extends TestCase {
 
 	private PortletContext getPortletContext() {
 		return complexPortletConfig.getPortletContext();
+	}
+
+
+	public void testDispatcherPortletGetPortletNameDoesNotFailWithoutConfig() {
+		DispatcherPortlet dp = new DispatcherPortlet();
+		assertEquals(null, dp.getPortletConfig());
+		assertEquals(null, dp.getPortletName());
+		assertEquals(null, dp.getPortletContext());
 	}
 
 	public void testDispatcherPortlets() {
