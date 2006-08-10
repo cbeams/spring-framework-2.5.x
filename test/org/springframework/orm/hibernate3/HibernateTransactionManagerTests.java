@@ -31,7 +31,6 @@ import org.easymock.MockControl;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
-import org.hibernate.JDBCException;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -39,13 +38,14 @@ import org.hibernate.cache.NoCacheProvider;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.classic.Session;
 import org.hibernate.dialect.HSQLDialect;
+import org.hibernate.exception.ConstraintViolationException;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.JdkVersion;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
-import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -948,7 +948,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(true, 1);
 		tx.commit();
 		SQLException sqlEx = new SQLException("argh", "27");
-		txControl.setThrowable(new JDBCException("mymsg", sqlEx), 1);
+		ConstraintViolationException jdbcEx = new ConstraintViolationException("mymsg", sqlEx, null);
+		txControl.setThrowable(jdbcEx, 1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		tx.rollback();
@@ -988,7 +989,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		}
 		catch (DataIntegrityViolationException ex) {
 			// expected
-			assertEquals(sqlEx, ex.getCause());
+			assertEquals(jdbcEx, ex.getCause());
 			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
 		}
 

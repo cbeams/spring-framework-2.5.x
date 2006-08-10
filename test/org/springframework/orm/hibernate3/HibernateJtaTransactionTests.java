@@ -207,8 +207,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
 		final MockControl sessionControl = MockControl.createControl(Session.class);
 		final Session session = (Session) sessionControl.getMock();
-		sf.getConnectionProvider();
-		sfControl.setReturnValue(null, 2);
 		sf.getTransactionManager();
 		sfControl.setReturnValue(tm, 1);
 		sf.openSession();
@@ -503,8 +501,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
 		final MockControl sessionControl = MockControl.createControl(ExtendedSession.class);
 		final ExtendedSession session = (ExtendedSession) sessionControl.getMock();
-		sf.getConnectionProvider();
-		sfControl.setReturnValue(null, 1);
 		sf.getTransactionManager();
 		sfControl.setReturnValue((jtaTm ? tm : null), 1);
 		session.isOpen();
@@ -868,8 +864,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		}
 		utControl.setVoidCallable(2);
 
-		sf.getConnectionProvider();
-		sfControl.setReturnValue(null, 1);
 		sf.getTransactionManager();
 		sfControl.setReturnValue(tm, 2);
 		sf.openSession();
@@ -974,8 +968,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
 		final MockControl sessionControl = MockControl.createControl(Session.class);
 		final Session session = (Session) sessionControl.getMock();
-		sf.getConnectionProvider();
-		sfControl.setReturnValue(null, 1);
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		sf.getTransactionManager();
@@ -1032,8 +1024,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
 		final MockControl sessionControl = MockControl.createControl(Session.class);
 		final Session session = (Session) sessionControl.getMock();
-		sf.getConnectionProvider();
-		sfControl.setReturnValue(null, 1);
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		sf.getTransactionManager();
@@ -1087,8 +1077,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
 		final MockControl sessionControl = MockControl.createControl(Session.class);
 		final Session session = (Session) sessionControl.getMock();
-		sf.getConnectionProvider();
-		sfControl.setReturnValue(null, 1);
 		sf.openSession();
 		sfControl.setReturnValue(session, 2);
 		sf.getTransactionManager();
@@ -1172,8 +1160,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
 		final MockControl sessionControl = MockControl.createControl(Session.class);
 		final Session session = (Session) sessionControl.getMock();
-		sf.getConnectionProvider();
-		sfControl.setReturnValue(null, 1);
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		sf.getTransactionManager();
@@ -1241,8 +1227,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		final Session session1 = (Session) session1Control.getMock();
 		final MockControl session2Control = MockControl.createControl(Session.class);
 		final Session session2 = (Session) session2Control.getMock();
-		sf.getConnectionProvider();
-		sfControl.setReturnValue(null, 1);
 		sf.openSession();
 		sfControl.setReturnValue(session1, 1);
 		sf.openSession();
@@ -1383,8 +1367,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
 		final MockControl sessionControl = MockControl.createControl(Session.class);
 		final Session session = (Session) sessionControl.getMock();
-		sf.getConnectionProvider();
-		sfControl.setReturnValue(null, 1);
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
 		sf.getTransactionManager();
@@ -1466,8 +1448,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 		final SessionFactoryImplementor sf = (SessionFactoryImplementor) sfControl.getMock();
 		final MockControl sessionControl = MockControl.createControl(Session.class);
 		final Session session = (Session) sessionControl.getMock();
-		sf.getConnectionProvider();
-		sfControl.setReturnValue(null, 1);
 		sf.getTransactionManager();
 		sfControl.setReturnValue(tm, 6);
 		session.isOpen();
@@ -1550,8 +1530,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 			tm.getTransaction();
 			tmControl.setReturnValue(transaction, 6);
 
-			sf.getConnectionProvider();
-			sfControl.setReturnValue(null, 1);
 			sf.openSession();
 			sfControl.setReturnValue(session, 1);
 			sf.getTransactionManager();

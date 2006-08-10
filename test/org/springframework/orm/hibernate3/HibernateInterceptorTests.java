@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,9 +27,9 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
-import org.hibernate.JDBCException;
 import org.hibernate.SessionFactory;
 import org.hibernate.classic.Session;
+import org.hibernate.exception.ConstraintViolationException;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -386,9 +386,10 @@ public class HibernateInterceptorTests extends TestCase {
 		sfControl.setReturnValue(session, 1);
 		session.getSessionFactory();
 		sessionControl.setReturnValue(sf, 1);
-		SQLException sqlex = new SQLException("argh", "27");
+		SQLException sqlEx = new SQLException("argh", "27");
 		session.flush();
-		sessionControl.setThrowable(new JDBCException("", sqlex), 1);
+		ConstraintViolationException jdbcEx = new ConstraintViolationException("", sqlEx, null);
+		sessionControl.setThrowable(jdbcEx, 1);
 		session.close();
 		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
@@ -402,7 +403,7 @@ public class HibernateInterceptorTests extends TestCase {
 		}
 		catch (DataIntegrityViolationException ex) {
 			// expected
-			assertEquals(sqlex, ex.getCause());
+			assertEquals(jdbcEx, ex.getCause());
 		}
 
 		sfControl.verify();

@@ -145,8 +145,6 @@ public class OpenSessionInViewTests extends TestCase {
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		sf.getConnectionProvider();
-		sfControl.setReturnValue(null, 1);
 		sf.getTransactionManager();
 		sfControl.setReturnValue(tm, 2);
 		sf.openSession();
