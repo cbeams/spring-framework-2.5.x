@@ -1517,7 +1517,7 @@ support=support@somecompany.co.uk]]></programlisting>
                 form:</para>
                 <programlisting><![CDATA[protected abstract SingleShotHelper createSingleShotHelper();]]></programlisting>
                 <para>If the method is not abstract, Spring will simply override the
-                existing implementation. In the case of XML-based cnfiguration metadata,
+                existing implementation. In the case of XML-based configuration metadata,
                 you instruct Spring to inject/override this method to return a particular
                 bean from the container, by using the <literal>lookup-method</literal>
                 element inside the bean definition. For example:</para>
@@ -2281,7 +2281,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
                 <para>To create a proxy to a scoped bean using XML-based configuration, you need
                 only to insert a child <literal>&lt;aop:scoped-proxy/&gt;</literal> element into a
                 scoped bean definition (you may also need the CGLIB library on your classpath
-                so that the container can effect class-based proxying). The above XML configuration
+                so that the container can effect class-based proxying; you will also need to be
+				using XSD based configuration). The above XML configuration
                 demonstrated the <quote>how</quote>; now for the <quote>why</quote>. So, just why
                 do you need this <literal>&lt;aop:scoped-proxy/&gt;</literal> element in the
                 definition of beans scoped at the <literal>request</literal>,

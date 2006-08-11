@@ -165,9 +165,9 @@
       supports resolution as <classname>java.io.File</classname> if the class
       path resource resides in the file system, but not for classpath
       resources which reside in a jar and have not been expanded (by the
-      servlet engine, or whatever the environment is) to the filesystem. It
-      always supports resolution as a
-      <classname>java.net.URL</classname>.</para>
+      servlet engine, or whatever the environment is) to the filesystem.
+      To address this the various <interfacename>Resource</interfacename> implementations
+      always support resolution as a <classname>java.net.URL</classname>.</para>
 
       <para>A <classname>ClassPathResource</classname> is created by Java code
       explicitly using the <classname>ClassPathResource</classname>
@@ -472,53 +472,52 @@
       <interfacename>Resource</interfacename> created to load the definition.
       So this <classname>FileSystemXmlApplicationContext</classname>...</para>
 
-      <programlisting>ApplicationContext ctx =
-    new FileSystemXmlApplicationContext("classpath:conf/appContext.xml");</programlisting>
+      <programlisting><![CDATA[ApplicationContext ctx =
+    new FileSystemXmlApplicationContext("classpath:conf/appContext.xml");]]></programlisting>
 
       <para>... will actually load it's bean definitions from the classpath.
-      However, it's still a
-      <classname>FileSystemXmlApplicationContext</classname>. If it's
-      subsequently used as a <interfacename>ResourceLoader</interfacename>,
+      However, it is still a <classname>FileSystemXmlApplicationContext</classname>. If
+      it is subsequently used as a <interfacename>ResourceLoader</interfacename>,
       any unprefixed paths will still be treated as filesystem paths.</para>
 
       <section>
-        <title>Constructing
-        <classname>ClassPathXmlApplicationContext</classname> instances -
-        shortcuts</title>
+        <title>Constructing <classname>ClassPathXmlApplicationContext</classname> instances -  shortcuts</title>
 
         <para>The <classname>ClassPathXmlApplicationContext</classname>
         exposes a number of constructors to enable convenient instantiation.
         The basic idea is that one supplies merely a string array containing
         just the filenames of the XML files themselves (without the leading
         path information), and one <emphasis>also</emphasis> supplies a
-        <classname>Class</classname>; the
-        <classname>ClassPathXmlApplicationContext</classname> will derive the
-        path information from the supplied class.</para>
+        <classname>Class</classname>; the <classname>ClassPathXmlApplicationContext</classname>
+        will derive the path information from the supplied class.</para>
 
         <para>An example will hopefully make this clear. Consider a directory
-        layout like so...</para>
+        layout that looks like this:</para>
 
-        <programlisting>com/
+        <programlisting><![CDATA[com/
   foo/
     services.xml
     daos.xml
-    MessengerService.class</programlisting>
-      </section>
+    MessengerService.class]]></programlisting>
 
-      <para>A <classname>ClassPathXmlApplicationContext</classname> instance
-      composed of the beans defined in the <literal>'services.xml'</literal>
-      and <literal>'daos.xml'</literal> could be instantiated like
-      so...</para>
+        <para>A <classname>ClassPathXmlApplicationContext</classname> instance
+        composed of the beans defined in the <literal>'services.xml'</literal>
+        and <literal>'daos.xml'</literal> could be instantiated like
+        so...</para>
 
-      <programlisting>ApplicationContext ctx = new ClassPathXmlApplicationContext(
-    new String[] {"services.xml", "daos.xml"}, MessengerService.class);</programlisting>
+        <programlisting><![CDATA[ApplicationContext ctx = new ClassPathXmlApplicationContext(
+    new String[] {"services.xml", "daos.xml"}, MessengerService.class);]]></programlisting>
+        
+        <para>Please do consult the Javadocs for the <classname>ClassPathXmlApplicationContext</classname>
+        class for details of the various constructors.</para>
+        
+        </section>
     </section>
 
     <section>
-      <title>Wildcards in Application Context Constructor Resource
-      Paths</title>
+      <title>Wildcards in application context constructor resource paths</title>
 
-      <para>A Resource paths in application context constructor values may be
+      <para>The resource paths in application context constructor values may be
       a simple path (as shown above) which has a one-to-one mapping to a
       target Resource, or alternately may contain the special "classpath*:"
       prefix and/or internal Ant-style regular expressions (matched using
@@ -544,14 +543,14 @@
       <section>
         <title>Ant-style Patterns</title>
 
-        <para>When the path location contains an Ant-style pattern,
-        e.g.:</para>
+        <para>When the path location contains an Ant-style pattern, e.g. ...</para>
 
-        <para><programlisting>     /WEB-INF/*-context.xml
+        <programlisting><![CDATA[     /WEB-INF/*-context.xml
      com/mycompany/**/applicationContext.xml
      file:C:/some/path/*-context.xml
-     classpath:com/mycompany/**/applicationContext.xml</programlisting>the
-        resolver follows a more complex but defined procedure to try to
+     classpath:com/mycompany/**/applicationContext.xml]]></programlisting>
+     
+        <para>... the resolver follows a more complex but defined procedure to try to
         resolve the wildcard. It produces a Resource for the path up to the
         last non-wildcard segment and obtains a URL from it. If this URL is
         not a "jar:" URL or container-specific variant (e.g.
@@ -577,7 +576,7 @@
           is just a node of the path (not the file at the end) it is actually
           undefined (in the <classname>ClassLoader</classname> Javadocs)
           exactly what sort of a URL is returned in this case. In practice, it
-          is always a java.io.File representing the directory, where the
+          is always a <classname>java.io.File</classname> representing the directory, where the
           classpath resource resolves to a filesystem location, or a jar URL
           of some sort, where the classpath resource resolves to a jar
           location. Still, there is a portability concern on this
@@ -601,8 +600,8 @@
         string may use the special <literal>classpath*:</literal>
         prefix:</para>
 
-        <programlisting>ApplicationContext ctx =
-    new ClassPathXmlApplicationContext("classpath*:conf/appContext.xml");</programlisting>
+        <programlisting><![CDATA[ApplicationContext ctx =
+    new ClassPathXmlApplicationContext("classpath*:conf/appContext.xml");]]></programlisting>
 
         <para>This special prefix specifies that all classpath resources that
         match the given name must be obtained (internally, this essentially
