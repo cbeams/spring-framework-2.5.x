@@ -47,22 +47,20 @@ import org.springframework.aop.PointcutAdvisor;
 import org.springframework.util.ObjectUtils;
 
 /**
- * CGLIB2-based AopProxy implementation for the Spring AOP framework.
- * Requires CGLIB2 on the class path.
+ * CGLIB2-based {@link AopProxy} implementation for the Spring AOP framework.
+ * 
+ * <p><i>Requires CGLIB2 on the class path</i>.
  *
  * <p>Objects of this type should be obtained through proxy factories,
- * configured by an AdvisedSupport object. This class is internal to the
+ * configured by an {@link AdvisedSupport} object. This class is internal to the
  * Spring AOP framework and need not be used directly by client code.
- *
- * <p>DefaultAopProxyFactory will automatically create CGLIB2-based proxies
- * if necessary, for example in case of proxying a target class. See
- * DefaultAopProxyFactory's javadoc for details.
+ * {@link DefaultAopProxyFactory} will automatically create CGLIB2-based proxies
+ * if necessary, for example in case of proxying a target class (see the
+ * {@link DefaultAopProxyFactory attendant javadoc} for details).
  *
  * <p>Proxies created using this class are thread-safe if the underlying
- * (target) class is thread-safe.
- *
- * <p>Built and tested against CGLIB 2.1, as of Spring 2.0.
- * Earlier CGLIB versions are not supported anymore.
+ * (target) class is thread-safe. Built and tested against CGLIB 2.1, as
+ * of Spring 2.0. Earlier CGLIB versions are not supported anymore.
  *
  * @author Rod Johnson
  * @author Rob Harrop
@@ -86,14 +84,14 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 	private static final int INVOKE_EQUALS = 5;
 
 
-	/** Static to optimize serialization */
+	/** Logger available to subclasses; static to optimize serialization */
 	protected final static Log logger = LogFactory.getLog(Cglib2AopProxy.class);
 
 	/** Keeps track of the Classes that we have validated for final methods */
 	private static final Set validatedClasses = new HashSet();
 
 
-	/** Config used to configure this proxy */
+	/** The configuration used to configure this proxy */
 	protected final AdvisedSupport advised;
 
 	private Object[] constructorArgs;
@@ -296,10 +294,8 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		// then we can make some optimisations by sending the AOP calls
 		// direct to the target using the fixed chain for that method.
 		if (isStatic && isFrozen) {
-			Callback[] fixedCallbacks = null;
-
 			Method[] methods = rootClass.getMethods();
-			fixedCallbacks = new Callback[methods.length];
+			Callback[] fixedCallbacks = new Callback[methods.length];
 
 			this.fixedInterceptorMap = new HashMap();
 
