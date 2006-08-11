@@ -176,7 +176,7 @@ public void echoException(Exception ex) throws Exception {
 
     ]]><lineannotation>// a setter method so that the Spring container can 'inject' a <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
     @Required
-    public void setMoveFinder(MovieFinder movieFinder) {
+    public void setMovieFinder(MovieFinder movieFinder) {
         this.movieFinder = movieFinder;
     }
     
