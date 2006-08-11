@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.tags.form;
 
 import org.springframework.core.enums.LabeledEnum;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.support.BindStatus;
@@ -31,24 +30,24 @@ import java.util.Map;
  * Utility class for testing whether a candidate value matches a {@link BindStatus#getValue data bound value}.
  * Eagerly attempts to prove a comparison through a number of avenues to deal with issues such as instance
  * inequality, logical (String-representation-based) equality and {@link PropertyEditor}-based comparison.
- * <p/>
- * <p>Full supports is provided for comparing arrays, {@link Collection Collections} and {@link Map Maps}.
- * <p/>
+ *
+ * <p>Full support is provided for comparing arrays, {@link Collection Collections} and {@link Map Maps}.
+ * 
  * <p><h1><a name="equality-contract">Equality Contract</a></h1>
  * For single-valued objects equality is first tested using standard {@link Object#equals Java equality}. As
  * such, user code should endeavour to implement {@link Object#equals} to speed up the comparison process. If
  * {@link Object#equals} returns <code>false</code> then an attempt is made at an
  * {@link #exhaustiveCompare exhaustive comparison} with the aim being to <strong>prove</strong> equality rather
  * than disprove it.
- * <p/>
+ * 
  * <p>Special support is given for instances of {@link LabeledEnum} with a <code>String</code>-based
  * comparison of the candidate value against the code of the {@link LabeledEnum}. This can be useful when a
  * {@link LabeledEnum} is used to define a list of '<code>&lt;option&gt;</code>' elements in HTML.
- * <p/>
+ *
  * <p>Next, an attempt is made to compare the <code>String</code> representations of both the candidate and bound
  * values. This may result in <code>true</code> in a number of cases due to the fact both values will be represented
  * as <code>Strings</code> when shown to the user.
- * <p/>
+ * 
  * <p>Next, if the candidate value is a <code>String</code>, an attempt is made to compare the bound value to
  * result of applying the corresponding {@link PropertyEditor} to the candidate. This comparison may be
  * executed twice, once against the direct <code>String</code> instances, and then against the <code>String</code>
@@ -94,6 +93,7 @@ abstract class SelectedValueComparator {
 
 		return selected;
 	}
+
 
 	private static boolean mapCompare(Map boundMap, Object candidateValue, BindStatus bindStatus) {
 		if (boundMap.containsKey(candidateValue)) {
@@ -175,4 +175,5 @@ abstract class SelectedValueComparator {
 		}
 		return false;
 	}
+
 }
