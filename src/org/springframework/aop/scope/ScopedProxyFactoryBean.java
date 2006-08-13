@@ -36,7 +36,7 @@ import org.springframework.util.ClassUtils;
  * and may be injected, with transparent scoping behavior.
  *
  * <p>Proxies returned by this class implement the ScopedObject interface.
- * This presently allows to remove the corresponding object from the scope,
+ * This presently allows removing corresponding object from the scope,
  * seamlessly creating a new instance in the scope on next access.
  *
  * @author Rod Johnson
