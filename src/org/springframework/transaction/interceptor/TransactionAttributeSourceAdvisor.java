@@ -42,9 +42,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 	
-	private final TransactionAttributeSourcePointcut pointcut = new TransactionAttributeSourcePointcut();
-
 	private TransactionInterceptor transactionInterceptor;
+
+	private final TransactionAttributeSourcePointcut pointcut = new TransactionAttributeSourcePointcut();
 
 
 	/**
@@ -66,11 +66,6 @@ public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 	 * Set the transaction interceptor to use for this advisor.
 	 */
 	public void setTransactionInterceptor(TransactionInterceptor interceptor) {
-		if (interceptor.getTransactionAttributeSource() == null) {
-			throw new IllegalArgumentException(
-					"Cannot construct a TransactionAttributeSourceAdvisor using a " +
-					"TransactionInterceptor that has no TransactionAttributeSource configured");
-		}
 		this.transactionInterceptor = interceptor;
 	}
 
@@ -83,12 +78,12 @@ public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 	}
 
 
-	public Pointcut getPointcut() {
-		return this.pointcut;
-	}
-
 	public Advice getAdvice() {
 		return this.transactionInterceptor;
+	}
+
+	public Pointcut getPointcut() {
+		return this.pointcut;
 	}
 
 
@@ -99,11 +94,12 @@ public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 	private class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
 
 		private TransactionAttributeSource getTransactionAttributeSource() {
-			return transactionInterceptor.getTransactionAttributeSource();
+			return (transactionInterceptor != null ? transactionInterceptor.getTransactionAttributeSource() : null);
 		}
 
 		public boolean matches(Method method, Class targetClass) {
-			return (getTransactionAttributeSource().getTransactionAttribute(method, targetClass) != null);
+			TransactionAttributeSource tas = getTransactionAttributeSource();
+			return (tas != null && tas.getTransactionAttribute(method, targetClass) != null);
 		}
 
 		public boolean equals(Object other) {
@@ -118,8 +114,11 @@ public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 		}
 
 		public int hashCode() {
-			TransactionAttributeSource tas = getTransactionAttributeSource();
-			return (tas != null ? tas.hashCode() : 0);
+			return TransactionAttributeSourcePointcut.class.hashCode();
+		}
+
+		public String toString() {
+			return getClass().getName() + ": " + getTransactionAttributeSource();
 		}
 	}
 
