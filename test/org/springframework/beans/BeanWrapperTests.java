@@ -22,9 +22,12 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
@@ -752,7 +755,7 @@ public class BeanWrapperTests extends TestCase {
 
 	public void testNullObject() {
 		try {
-			BeanWrapper bw = new BeanWrapperImpl((Object) null);
+			new BeanWrapperImpl((Object) null);
 			fail("Must throw an exception when constructed with null object");
 		}
 		catch (IllegalArgumentException ex) {
@@ -921,6 +924,50 @@ public class BeanWrapperTests extends TestCase {
 			PropertyAccessException pae = ex.getPropertyAccessException("map[key2]");
 			assertTrue(pae instanceof TypeMismatchException);
 		}
+	}
+
+	public void testMapAccessWithUnmodifiableMap() {
+		IndexedTestBean bean = new IndexedTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(bean);
+		bw.registerCustomEditor(TestBean.class, "map", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				if (!StringUtils.hasLength(text)) {
+					throw new IllegalArgumentException();
+				}
+				setValue(new TestBean(text));
+			}
+		});
+
+		Map inputMap = new HashMap();
+		inputMap.put(new Integer(1), "rod");
+		inputMap.put(new Integer(2), "rob");
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("map", Collections.unmodifiableMap(inputMap));
+		bw.setPropertyValues(pvs);
+		assertEquals("rod", ((TestBean) bean.getMap().get(new Integer(1))).getName());
+		assertEquals("rob", ((TestBean) bean.getMap().get(new Integer(2))).getName());
+	}
+
+	public void testMapAccessWithCustomUnmodifiableMap() {
+		IndexedTestBean bean = new IndexedTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(bean);
+		bw.registerCustomEditor(TestBean.class, "map", new PropertyEditorSupport() {
+			public void setAsText(String text) throws IllegalArgumentException {
+				if (!StringUtils.hasLength(text)) {
+					throw new IllegalArgumentException();
+				}
+				setValue(new TestBean(text));
+			}
+		});
+
+		Map inputMap = new HashMap();
+		inputMap.put(new Integer(1), "rod");
+		inputMap.put(new Integer(2), "rob");
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("map", new ReadOnlyMap(inputMap));
+		bw.setPropertyValues(pvs);
+		assertEquals("rod", ((TestBean) bean.getMap().get(new Integer(1))).getName());
+		assertEquals("rob", ((TestBean) bean.getMap().get(new Integer(2))).getName());
 	}
 
 	public void testPrimitiveArray() {
@@ -1413,6 +1460,21 @@ public class BeanWrapperTests extends TestCase {
 		public void setMyStriNg(String string) {}
 
 		public void setMyStringss(String string) {}
+	}
+
+
+	public static class ReadOnlyMap extends HashMap {
+
+		public ReadOnlyMap() {
+		}
+
+		public ReadOnlyMap(Map map) {
+			super(map);
+		}
+
+		public Object put(Object key, Object value) {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 }

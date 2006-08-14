@@ -184,9 +184,8 @@ public class CollectionFactory {
 
 	/**
 	 * Create the most approximate collection for the given collection class.
-	 * <p>Tries to create the given collection class. If that fails,
-	 * an ArrayList, TreeSet or linked Set will be used as fallback for
-	 * a List, SortedSet or Set, respectively.
+	 * <p>Creates an ArrayList, TreeSet or linked Set for a List, SortedSet
+	 * or Set, respectively.
 	 * @param collectionClass the original collection class
 	 * @param initialCapacity the initial capacity
 	 * @return the new collection instance
@@ -196,17 +195,6 @@ public class CollectionFactory {
 	 */
 	public static Collection createApproximateCollection(Class collectionClass, int initialCapacity) {
 		Assert.notNull(collectionClass, "Collection class must not be null");
-		if (!collectionClass.isInterface()) {
-			try {
-				return (Collection) collectionClass.newInstance();
-			}
-			catch (Exception ex) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(
-							"Could not instantiate collection type [" + collectionClass.getName() + "]: " + ex.getMessage());
-				}
-			}
-		}
 		if (List.class.isAssignableFrom(collectionClass)) {
 			return new ArrayList(initialCapacity);
 		}
@@ -220,8 +208,7 @@ public class CollectionFactory {
 
 	/**
 	 * Create the most approximate map for the given map class.
-	 * <p>Tries to create the given map class. If that fails, a TreeMap or
-	 * linked Map will be used as fallback for a SortedMap or Map, respectively.
+	 * <p>Creates a TreeMap or linked Map for a SortedMap or Map, respectively.
 	 * @param mapClass the original map class
 	 * @param initialCapacity the initial capacity
 	 * @return the new collection instance
@@ -231,17 +218,6 @@ public class CollectionFactory {
 	 */
 	public static Map createApproximateMap(Class mapClass, int initialCapacity) {
 		Assert.notNull(mapClass, "Map class must not be null");
-		if (!mapClass.isInterface()) {
-			try {
-				return (Map) mapClass.newInstance();
-			}
-			catch (Exception ex) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(
-							"Could not instantiate map type [" + mapClass.getName() + "]: " + ex.getMessage());
-				}
-			}
-		}
 		if (SortedMap.class.isAssignableFrom(mapClass)) {
 			return new TreeMap();
 		}
