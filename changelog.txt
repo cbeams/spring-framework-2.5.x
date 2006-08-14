@@ -3,6 +3,19 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.0 final (30.8.2006)
+----------------------------------------
+
+Package org.springframework.beans
+* fixed BeanWrapperImpl to always use a valid read-write type for a converted collection/map (never use original class)
+
+Package org.springframework.scripting
+* fixed JRubyScriptFactory to handle "toString()" invocations locally on the JRuby object proxy
+
+Package org.springframework.transaction
+* fixed TransactionAttributeSourceAdvisor to avoid potential NPE in TransactionAttributeSourcePointcut's "hashCode"
+
+
 Changes in version 2.0 RC3 (10.8.2006)
 --------------------------------------
 
