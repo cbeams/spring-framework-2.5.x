@@ -21,19 +21,20 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
 
+import org.jruby.IRuby;
 import org.jruby.Ruby;
 import org.jruby.RubyNil;
-import org.jruby.IRuby;
-import org.jruby.ast.Node;
 import org.jruby.ast.ClassNode;
-import org.jruby.ast.NewlineNode;
 import org.jruby.ast.Colon2Node;
+import org.jruby.ast.NewlineNode;
+import org.jruby.ast.Node;
 import org.jruby.exceptions.JumpException;
 import org.jruby.javasupport.JavaUtil;
 import org.jruby.runtime.builtin.IRubyObject;
 
-import org.springframework.util.ClassUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.scripting.ScriptCompilationException;
+import org.springframework.util.ClassUtils;
 
 /**
  * Utility methods for handling JRuby-scripted objects.
@@ -62,11 +63,11 @@ public abstract class JRubyScriptUtils {
 			String className = findClassName(scriptRootNode);
 			rubyObject = ruby.evalScript("\n" + className + ".new");
 		}
-
 		// still null?
 		if (rubyObject instanceof RubyNil) {
 			throw new ScriptCompilationException("Compilation of JRuby script returned '" + rubyObject + "'");
 		}
+
 		return Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(),
 						interfaces, new RubyObjectInvocationHandler(rubyObject, ruby));
 	}
@@ -135,6 +136,10 @@ public abstract class JRubyScriptUtils {
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			if (AopUtils.isToStringMethod(method)) {
+				return "JRuby object [" + this.rubyObject + "]";
+			}
+
 			IRubyObject[] rubyArgs = convertToRuby(args);
 			IRubyObject result = this.rubyObject.callMethod(method.getName(), rubyArgs);
 			return JavaUtil.convertRubyToJava(result);
@@ -147,6 +152,5 @@ public abstract class JRubyScriptUtils {
 			return JavaUtil.convertJavaArrayToRuby(this.ruby, javaArgs);
 		}
 	}
-
 
 }
