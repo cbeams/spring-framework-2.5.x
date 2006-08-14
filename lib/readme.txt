@@ -144,10 +144,6 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's JAX-RPC support
 
-* j2ee/jdbc2_0-stdext.jar
-- JDBC 2.0 Standard Extensions (http://java.sun.com/products/jdbc)
-- required at runtime when using Spring's JDBC support on J2SE 1.3
-
 * j2ee/jms.jar
 - Java Message Service API 1.1 (java.sun.com/products/jms)
 - required for building the framework
@@ -183,12 +179,9 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using Spring's web support
 
-* j2ee/xml-apis.jar
-- JAXP, DOM and SAX APIs (taken from Xerces 2.6 distribution; http://xml.apache.org/xerces2-j)
-- required at runtime when using Spring's XML bean definition support on JDK <1.4
-
 * jakarta-commons/commons-attributes-api.jar, jakarta-commons/commons-attributes-compiler.jar
 - Commons Attributes 2.2 (http://jakarta.apache.org/commons/attributes)
+- commons-attributes-api.jar has a patched manifest (not declaring QDox and Ant as required extensions)
 - required for building the framework
 - required at runtime when using Spring's Commons Attributes support
 
