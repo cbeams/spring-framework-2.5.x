@@ -47,12 +47,12 @@ public class ModelMBeanNotificationPublisher implements NotificationPublisher {
 	/**
 	 * The {@link ObjectName} associated with the {@link ModelMBean modelMBean}.
 	 */
-	private ObjectName objectName;
+	private final ObjectName objectName;
 
 	/**
 	 * The managed resource associated with the {@link ModelMBean modelMBean}.
 	 */
-	private Object managedResource;
+	private final Object managedResource;
 
 
 	/**
