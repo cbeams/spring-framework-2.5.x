@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,11 @@ package org.springframework.jmx.export.notification;
 import org.springframework.jmx.JmxException;
 
 /**
- * Exception thrown when we are unable to send a JMX notification.
+ * Thrown when a JMX {@link javax.management.Notification} is unable to be sent.
+ * 
+ * <p>The root cause of just why a particular notification could not
+ * be sent will <i>typically</i> be available via the {@link #getCause()}
+ * property. 
  *
  * @author Rob Harrop
  * @since 2.0
@@ -28,8 +32,8 @@ import org.springframework.jmx.JmxException;
 public class UnableToSendNotificationException extends JmxException {
 
 	/**
-	 * Create a new <code>UnableToSendNotificationException</code> with the
-	 * specified error message.
+	 * Creates a new instance of the {@link UnableToSendNotificationException}
+	 * class with the specified error message.
 	 * @param msg the error message
 	 */
 	public UnableToSendNotificationException(String msg) {
@@ -37,8 +41,8 @@ public class UnableToSendNotificationException extends JmxException {
 	}
 
 	/**
-	 * Create a new <code>UnableToSendNotificationException</code> with the
-	 * specified error message and root cause.
+	 * Creates a new instance of the {@link UnableToSendNotificationException}
+	 * with the specified error message and root cause.
 	 * @param msg the error message
 	 * @param ex the root cause
 	 */
