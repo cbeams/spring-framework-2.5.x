@@ -42,10 +42,8 @@ public class NotificationPublisherTests extends AbstractMBeanServerTests {
 		// start the MBeanExporter
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/notificationPublisherTests.xml");
 
-		// register test listener
 		registerListener();
 
-		// test
 		MyNotificationPublisher publisher = (MyNotificationPublisher) ctx.getBean("publisher");
 		assertNotNull("NotificationPublisher should not be null", publisher.getNotificationPublisher());
 		publisher.sendNotification();
@@ -58,13 +56,11 @@ public class NotificationPublisherTests extends AbstractMBeanServerTests {
 
 		assertFalse("Should not have instantiated the bean yet", ctx.getBeanFactory().containsSingleton("publisher"));
 
-		// need touch the MBean proxy
+		// need to touch the MBean proxy
 		server.getAttribute(getObjectName(), "Name");
 
-		// register test listener
 		registerListener();
 
-		// test
 		MyNotificationPublisher publisher = (MyNotificationPublisher) ctx.getBean("publisher");
 		assertNotNull("NotificationPublisher should not be null", publisher.getNotificationPublisher());
 		publisher.sendNotification();
