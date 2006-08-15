@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,13 @@ package org.springframework.transaction.support;
 import org.springframework.core.Ordered;
 
 /**
- * Adapter for the TransactionSynchronization interface.
- * Contains empty implementations of all interface methods,
- * for easy overriding of single methods.
+ * Simple {@link TransactionSynchronization} adapter containing empty
+ * method implementations, for easier overriding of single methods.
  *
- * <p>Also implements the Ordered interface to allow for
- * influencing the execution order of synchronizations.
- * Default is Integer.MAX_VALUE, indicating late execution;
- * return a lower value for earlier execution.
+ * <p>Also implements the {@link Ordered} interface to enable the execution
+ * order of synchronizations to be controlled declaratively. The default
+ * {@link #getOrder() order} is {@link Integer#MAX_VALUE}, indicating late
+ * execution; return a lower value for earlier execution.
  *
  * @author Juergen Hoeller
  * @since 22.01.2004
