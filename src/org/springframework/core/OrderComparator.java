@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,29 +19,31 @@ package org.springframework.core;
 import java.util.Comparator;
 
 /**
- * Comparator implementation for Ordered objects,
+ * {@link Comparator} implementation for {@link Ordered} objects,
  * sorting by order value ascending (resp. by priority descending).
  *
- * <p>Non-Ordered objects are treated as greatest order values,
- * thus ending up at the end of the list, in arbitrary order
- * (just like same order values of Ordered objects).
+ * <p>Non-<code>Ordered</code> objects are treated as greatest order
+ * values, thus ending up at the end of the list, in arbitrary order
+ * (just like same order values of <code>Ordered</code> objects).
  *
  * @author Juergen Hoeller
- * @since 07.04.2003
  * @see Ordered
+ * @since 07.04.2003
  */
 public class OrderComparator implements Comparator {
 
-  public int compare(Object o1, Object o2) {
-    int i1 = (o1 instanceof Ordered ? ((Ordered) o1).getOrder() : Integer.MAX_VALUE);
-	  int i2 = (o2 instanceof Ordered ? ((Ordered) o2).getOrder() : Integer.MAX_VALUE);
+	public int compare(Object o1, Object o2) {
+		int i1 = getOrder(o1);
+		int i2 = getOrder(o2);
 
-	  // direct evaluation instead of Integer.compareTo to avoid unnecessary object creation
-	  if (i1 < i2)
-			return -1;
-	  else if (i1 > i2)
-		  return 1;
-	  else
-		  return 0;
-  }
+		// direct evaluation instead of Integer.compareTo to avoid unnecessary object creation
+		return (i1 < i2) ? -1 : (i1 > i2) ? 1 : 0;
+	}
+
+
+	private static int getOrder(Object o) {
+		return (o instanceof Ordered)
+				? ((Ordered) o).getOrder() : Ordered.LOWEST_PRECEDENCE;
+	}
+
 }
