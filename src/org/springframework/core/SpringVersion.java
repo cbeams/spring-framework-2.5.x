@@ -26,11 +26,13 @@ package org.springframework.core;
 public class SpringVersion {
 
 	/**
-	 * Return the full Spring version string.
-	 * @see java.lang.Package#getImplementationVersion
+	 * Return the full version string of the present Spring codebase,
+	 * or <code>null</code> if it cannot be determined.
+	 * @see java.lang.Package#getImplementationVersion()
 	 */
 	public static String getVersion() {
-		return SpringVersion.class.getPackage().getImplementationVersion();
+		Package pkg = SpringVersion.class.getPackage();
+		return (pkg != null ? pkg.getImplementationVersion() : null);
 	}
 
 }
