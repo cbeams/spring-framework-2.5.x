@@ -21,7 +21,6 @@ import javax.servlet.jsp.JspException;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.tags.HtmlEscapingAwareTag;
 import org.springframework.web.util.ExpressionEvaluationUtils;
-import org.springframework.web.util.HtmlUtils;
 
 import java.beans.PropertyEditor;
 
