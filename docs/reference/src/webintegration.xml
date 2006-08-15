@@ -161,8 +161,7 @@
 				<literal>&lt;faces-config/&gt;</literal> element, add an <literal>&lt;application/&gt;</literal> 
 				element and a <literal>&lt;variable-resolver/&gt;</literal> element within it.  
 				The value of the variable resolver should reference Spring's 
-				<classname>DelegatingVariableResolver</classname>; to wit...
-			</para>
+				<classname>DelegatingVariableResolver</classname>; for example:	</para>
 			<programlisting><![CDATA[<faces-config>
   <application>
     <variable-resolver>org.springframework.web.jsf.DelegatingVariableResolver</variable-resolver>
@@ -887,8 +886,7 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
 			<para>
 				We are almost done... all that remains is the HiveMind configuration that exposes the
 				Spring container stored in the <interfacename>ServletContext</interfacename> as a
-				HiveMind service; to wit...
-			</para>
+				HiveMind service; for example:</para>
 			<programlisting><![CDATA[<?xml version="1.0"?>
 <module id="com.javaforge.tapestry.spring" version="0.1.1">
 
@@ -918,9 +916,9 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
 				<para>
 		            If you are not using Java5, then one obviously doesn't annotate one's
 		            Tapestry page classes with annotations; instead, one simply uses
-		            good old fashioned XML to declare the dependency injection; to wit,
+		            good old fashioned XML to declare the dependency injection; for example,
 		            inside the <literal>.page</literal> or <literal>.jwc</literal> file
-		            for the <classname>Login</classname> page (or component)...
+		            for the <classname>Login</classname> page (or component):
 				</para>
 				<programlisting><![CDATA[<inject property="userService" object="spring:userService"/>
 <inject property="authenticationService" object="spring:authenticationService"/>]]></programlisting>

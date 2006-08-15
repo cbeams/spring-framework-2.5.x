@@ -1658,7 +1658,7 @@ public class ReplacementComputeValue implements MethodReplacer {
             is first requested.</para>
             <para>When configuring beans via XML, this lazy loading is controlled by the
             <literal>'lazy-init'</literal> attribute on the <literal>&lt;bean/&gt;</literal>
-            element; to wit:</para>
+            element; for example:</para>
             <programlisting><![CDATA[<bean id="lazy" class="com.foo.ExpensiveToCreateBean" ]]><emphasis role="bold">lazy-init="true"</emphasis><![CDATA[>
     ]]><lineannotation>&lt;!-- various properties here... --&gt;</lineannotation><![CDATA[
 </bean>
@@ -1683,7 +1683,7 @@ public class ReplacementComputeValue implements MethodReplacer {
             in your configuration.</para>
             <para>It is also possible to control lazy-initialization at the container level by using
             the <literal>'default-lazy-init'</literal> attribute on the <literal>&lt;beans/&gt;</literal>
-            element; to wit:</para>
+            element; for example:</para>
             <programlisting><![CDATA[<beans default-lazy-init="true">
     ]]><lineannotation>&lt;!-- no beans will be eagerly pre-instantiated... --&gt;</lineannotation><![CDATA[
 </beans>]]></programlisting>
@@ -3438,7 +3438,7 @@ argument.required=The '{0}' argument is required.]]></programlisting>
             <para>Locale resolution is typically going to be managed by the surrounding environment
         of the application. For the purpose of this example though, we'll just manually
         specify the locale that we want to resolve our (British) messages against.</para>
-            <programlisting><![CDATA[# in 'exceptions_en_GB.properties'
+            <programlisting><lineannotation># in 'exceptions_en_GB.properties'</lineannotation><![CDATA[
 argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]></programlisting>
             <programlisting><![CDATA[public static void main(final String[] args) {
     MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");

@@ -1086,8 +1086,7 @@ public final class GenreMapper implements RowMapper {
 				parameters in its definition in the RDBMS), one would code a
 				strongly typed <literal>execute(..)</literal> method which would delegate
 				to the superclass' (untyped) <literal>execute(Map parameters)</literal>
-				(which has <literal>protected</literal> access); to wit...
-			</para>
+				(which has <literal>protected</literal> access); for example:</para>
 		<programlisting><![CDATA[import oracle.jdbc.driver.OracleTypes;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.object.StoredProcedure;

@@ -157,7 +157,7 @@ public class JmxTestBean implements IJmxTestBean {
       <classname>MBeanServer</classname> is used by setting the value of the
       <classname>MBeanExporter</classname>'s <literal>server</literal>
       property to the <classname>MBeanServer</classname> value returned by an
-      <classname>MBeanServerFactoryBean</classname>; to wit:</para>
+      <classname>MBeanServerFactoryBean</classname>; for example:</para>
 
       <programlisting>&lt;beans&gt;
 
@@ -1455,8 +1455,7 @@ public class ConsoleLoggingNotificationListener
       beans that the enclosing <classname>MBeanExporter</classname> is
       exporting, one can use the special wildcard <literal>'*'</literal> (sans
       quotes) as the key for an entry in the
-      <literal>notificationListenerMappings</literal> property map; to wit
-      this snippet...</para>
+      <literal>notificationListenerMappings</literal> property map; for example:</para>
 
       <programlisting>    &lt;property name="notificationListenerMappings"&gt;
         &lt;map&gt;
