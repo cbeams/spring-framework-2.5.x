@@ -2322,8 +2322,7 @@ public class Account {
 			id attribute:
 		</para>  
 		  
-	<programlisting><![CDATA[<bean class="com.xyz.myapp.domain.Account" 
-      singleton="false">
+	<programlisting><![CDATA[<bean class="com.xyz.myapp.domain.Account" scope="prototype">
   <property name="fundsTransferService" ref="fundsTransferService"/>
   ...
 </bean>]]></programlisting>

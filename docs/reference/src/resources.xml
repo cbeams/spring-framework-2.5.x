@@ -149,9 +149,8 @@
       path string contains a few well-known (to it, that is) prefixes such as
       <literal>classpath:</literal>, it will create an appropriate specialized
       <interfacename>Resource</interfacename> for that prefix. However, if it
-      doesn't recognize the prefiix, it will assume the this is just a
-      standard URL string, and will create a
-      <classname>UrlResource</classname>.</para>
+      doesn't recognize the prefix, it will assume the this is just a
+      standard URL string, and will create a <classname>UrlResource</classname>.</para>
     </section>
 
     <section>
@@ -389,19 +388,17 @@
   </section>
 
   <section>
-    <title>Setting <interfacename>Resource</interfacename>s as
-    properties</title>
+    <title>Setting <interfacename>Resource</interfacename>s as properties</title>
 
     <para>If the bean itself is going to determine and supply the resource
-    path through some sort of dynamic process it probably makes sense for the
+    path through some sort of dynamic process, it probably makes sense for the
     bean to use the <interfacename>ResourceLoader</interfacename> interface to
     load resources. Consider as an example the loading of a template of some
-    sort, where the specific one needed that depends on the role of the user.
-    If on the other hand the resources are static, it makes sense to eliminate
-    the use of the <interfacename>ResourceLoader</interfacename> interface
-    completely, and just have the bean expose the
-    <interfacename>Resource</interfacename> properties it needs, and expect
-    that they will be injected into it.</para>
+    sort, where the specific resource that is needed depends on the role of the user.
+    If the resources are static, it makes sense to eliminate the use of the
+	<interfacename>ResourceLoader</interfacename> interface completely, and just
+	have the bean expose the <interfacename>Resource</interfacename> properties
+	it needs, and expect that they will be injected into it.</para>
 
     <para>What makes it trivial to then inject these properties, is that all
     application contexts register and use a special JavaBeans
@@ -412,33 +409,28 @@
     <interfacename>Resource</interfacename>, it can be configured with a
     simple string for that resource, as follows:</para>
 
-    <programlisting>bean id="myBean" class="..."&gt;
-  &lt;property name="template" value="some/resource/path/myTemplate.txt" /&gt;
-&lt;/bean&gt;</programlisting>
+    <programlisting><![CDATA[bean id="myBean" class="...">
+  <property name="template" value="some/resource/path/myTemplate.txt"/>
+</bean>]]></programlisting>
 
-    <para>Note that the resource path has no prefix, so because the
-    application context itself is going to be used as the
-    <interfacename>ResourceLoader</interfacename>, the resource itself will be
-    loaded via a <classname>ClassPathResource</classname>,
-    <literal>FileSystemResource</literal>,
-    <classname>ServletContextResource</classname>, etc. as appropriate
-    depending on the type of the context.</para>
+    <para>Note that the resource path has no prefix, so because the application context
+	itself is going to be used as the <interfacename>ResourceLoader</interfacename>,
+	the resource itself will be loaded via a <classname>ClassPathResource</classname>,
+    <literal>FileSystemResource</literal>, <classname>ServletContextResource</classname>,
+	etc. as appropriate depending on the type of the context.</para>
 
-    <para>If there is a need to force a specific
-    <interfacename>Resource</interfacename> type to be used, then a prefix may
-    be used. The following two examples show how to force a
-    <classname>ClassPathResource</classname> and a
-    <classname>UrlResource</classname> (the latter being used to access a
-    filesystem file).</para>
+    <para>If there is a need to force a specific <interfacename>Resource</interfacename>
+	type to be used, then a prefix may be used. The following two examples show how to
+	force a <classname>ClassPathResource</classname> and a <classname>UrlResource</classname>
+	(the latter being used to access a filesystem file).</para>
 
-    <programlisting>&lt;property name="template" value="classpath:some/resource/path/myTemplate.txt"/&gt;</programlisting>
+    <programlisting><![CDATA[<property name="template" value="classpath:some/resource/path/myTemplate.txt">]]></programlisting>
 
-    <programlisting>&lt;property name="template" value="file:/some/resource/path/myTemplate.txt"/&gt;</programlisting>
+    <programlisting><![CDATA[<property name="template" value="file:/some/resource/path/myTemplate.txt"/>]]></programlisting>
   </section>
 
   <section>
-    <title>Application contexts and <interfacename>Resource</interfacename>
-    paths</title>
+    <title>Application contexts and <interfacename>Resource</interfacename> paths</title>
 
     <section>
       <title>Constructing application contexts</title>

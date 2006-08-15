@@ -223,7 +223,7 @@ public class Client {
                 <title><literal>&lt;util:property-path/&gt;</literal></title>
                 <para>Before...</para>    
                 <programlisting><lineannotation>&lt;!-- target bean to be referenced by name --&gt;</lineannotation><![CDATA[
-<bean id="testBean" class="org.springframework.beans.TestBean" singleton="false">
+<bean id="testBean" class="org.springframework.beans.TestBean" scope="prototype">
   <property name="age" value="10"/>
   <property name="spouse">
     <bean class="org.springframework.beans.TestBean">
@@ -242,7 +242,7 @@ public class Client {
                 </para>
                 <para>After...</para>
                 <programlisting><lineannotation>&lt;!-- target bean to be referenced by name --&gt;</lineannotation><![CDATA[
-<bean id="testBean" class="org.springframework.beans.TestBean" singleton="false">
+<bean id="testBean" class="org.springframework.beans.TestBean" scope="prototype">
   <property name="age" value="10"/>
   <property name="spouse">
     <bean class="org.springframework.beans.TestBean">
@@ -264,7 +264,7 @@ public class Client {
 			        value or constructor argument.</para>
                     <para>Here's an example where a path is used against another bean, by name:</para>
 		            <programlisting><![CDATA[// target bean to be referenced by name
-<bean id="person" class="org.springframework.beans.TestBean" singleton="false">
+<bean id="person" class="org.springframework.beans.TestBean" scope="prototype">
   <property name="age"><value>10</value></property>
   <property name="spouse">
     <bean class="org.springframework.beans.TestBean">

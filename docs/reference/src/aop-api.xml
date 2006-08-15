@@ -1696,10 +1696,10 @@ assertEquals("Added two advisors",
       JavaBean properties:</para>
 
       <para><programlisting>&lt;bean id="lockMixin" class="org.springframework.aop.LockMixin"
-    singleton="false"/&gt;
+    scope="prototype"/&gt;
 
 &lt;bean id="lockableAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor"
-    singleton="false"&gt;
+    scope="prototype"&gt;
   &lt;property name="pointcut" ref="myAttributeAwarePointcut"/&gt;
   &lt;property name="advice" ref="lockMixin"/&gt;
 &lt;/bean&gt;
@@ -1808,7 +1808,7 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
       <para>Sample configuration is shown below:</para>
 
       <para><programlisting>&lt;bean id="businessObjectTarget" class="com.mycompany.MyBusinessObject" 
-    singleton="false"&gt;
+    scope="prototype"&gt;
   ... properties omitted
 &lt;/bean&gt;
 

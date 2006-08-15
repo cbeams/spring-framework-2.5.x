@@ -379,9 +379,9 @@
 					full feature set of Spring's bean container will be available for it:
 					dependency injection as well as the option to instantiate a new
 					<classname>Action</classname> instance for each request. To activate the latter,
-					add <emphasis>singleton="false"</emphasis> to your Action's bean definition.
+					add <emphasis>scope="prototype"</emphasis> to your Action's bean definition.
 				</para>
-				<programlisting><![CDATA[<bean name="/user" singleton="false" autowire="byName"
+				<programlisting><![CDATA[<bean name="/user" scope="prototype" autowire="byName"
     class="org.example.web.UserAction"/>]]></programlisting>
 			</section>
 		</section>

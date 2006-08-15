@@ -1522,7 +1522,7 @@ support=support@somecompany.co.uk]]></programlisting>
                 bean from the container, by using the <literal>lookup-method</literal>
                 element inside the bean definition. For example:</para>
                 <programlisting><lineannotation>&lt;!-- a stateful bean deployed as a prototype (non-singleton) --&gt;</lineannotation><![CDATA[
-<bean id="singleShotHelper" class="..." singleton="false"/>
+<bean id="singleShotHelper" class="..." scope="prototype"/>
 
 ]]><lineannotation>&lt;!-- myBean uses singleShotHelper --&gt;</lineannotation><![CDATA[
 <bean id="myBean" class="...">
@@ -1629,7 +1629,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 
 <bean id="manager" class="ManagerBean" />]]></programlisting>
             <para>If you need to express a dependency on multiple beans, you can supply a
-            delimited list of beans names as the value of the <literal>&lt;depends-on/&gt;</literal>
+            delimited list of bean names as the value of the <literal>'depends-on'</literal>
             attribute, with commas, whitespace and semi-colons all valid delimiters. Find
             below an example of using <literal>'depends-on'</literal> to express a dependency
             on a number of beans.</para>
@@ -2349,7 +2349,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 			<interfacename>org.springframework.beans.factory.config.Scope</interfacename>
 			interface. This is the interface that you will need to implement in order
 			to integrate your own custom scope(s) into the Spring container. The interface
-			itself is quite simple, with two methods to get and remove an object from/to
+			itself is quite simple, with two methods to get and remove an object from
 			an underlying storage mechanism respectively. Possible custom scopes are
 			beyond the scope of this reference manual. You may wish to look at the
 			<interfacename>Scope</interfacename> implementations that are supplied with
@@ -2729,7 +2729,7 @@ class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean
             </bean>
         </property>
     </bean>
-    <bean id="newsFeed" class="x.y.NewsFeed" singleton="false">
+    <bean id="newsFeed" class="x.y.NewsFeed" scope="prototype">
         <property name="news" value="... that's fit to print!" />
     </bean>
 </beans>]]></programlisting>
@@ -3054,7 +3054,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961]]></programlisting>
             <title>Customizing configuration metadata with <literal>BeanFactoryPostProcessors</literal></title>
             <para>The next extension point that we will look at is the
             <interfacename>org.springframework.beans.factory.config.BeanFactoryPostProcessor</interfacename>.
-            This semantics of this interface are similar to the <interfacename>BeanPostProcessor</interfacename>,
+            The semantics of this interface are similar to the <interfacename>BeanPostProcessor</interfacename>,
             with one major difference. <literal>BeanFactoryPostProcessors</literal> operate on
             bean definitions (i.e. the configuration metadata that is supplied to a container); that is to say,
             the Spring IoC container will allow <literal>BeanFactoryPostProcessors</literal> to read the
@@ -3090,7 +3090,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961]]></programlisting>
             some sort to the configuration metadata that defines a container. Spring
             includes a number of pre-existing bean factory post-processors, such as
             <classname>PropertyResourceConfigurer</classname> and
-            <classname>PropertyPlaceHolderConfigurer</classname>, both described below,
+            <classname>PropertyPlaceholderConfigurer</classname>, both described below,
             and <classname>BeanNameAutoProxyCreator</classname>, which is very useful for wrapping
             other beans transactionally or with any other kind of proxy, as described
             later in this manual. The <interfacename>BeanFactoryPostProcessor</interfacename>
@@ -3106,17 +3106,17 @@ cfg.setLocation(new FileSystemResource("jdbc.properties"));
 
 ]]><lineannotation>// now actually do the replacement</lineannotation><![CDATA[
 cfg.postProcessBeanFactory(factory);]]></programlisting>
+            <para>This explicit registration step is not convenient, and this is one of the
+            reasons why the various <interfacename>ApplicationContext</interfacename>
+            implementations are preferred above plain <interfacename>BeanFactory</interfacename>
+            implementations in the vast majority of Spring-backed applications, especially
+            when using <literal>BeanFactoryPostProcessors</literal>.</para>
             <anchor id="beans-factory-autodetect-beanfactorypostprocessors"/>
             <para>An <interfacename>ApplicationContext</interfacename> will detect any beans which
             are deployed into it which implement the <interfacename>BeanFactoryPostProcessor</interfacename>
             interface, and automatically use them as bean factory post-processors, at the appropriate
             time. Nothing else needs to be done other than deploying these post-processor in a similar
             fashion to any other bean.</para>
-            <para>This explicit registration step is not convenient, and this is one of the
-            reasons why the various <interfacename>ApplicationContext</interfacename>
-            implementations are preferred above plain <interfacename>BeanFactory</interfacename>
-            implementations in the vast majority of Spring-backed applications, especially
-            when using <literal>BeanFactoryPostProcessors</literal>.</para>
             <note>
                 <para>Just as in the case of <literal>BeanPostProcessors</literal>, you typically
                 don't want to have <literal>BeanFactoryPostProcessors</literal>
@@ -3158,7 +3158,7 @@ cfg.postProcessBeanFactory(factory);]]></programlisting>
 jdbc.url=jdbc:hsqldb:hsql://production:9002
 jdbc.username=sa
 jdbc.password=root]]></programlisting>
-                <para>The <classname>PropertyPlaceHolderConfigurer</classname> doesn't only
+                <para>The <classname>PropertyPlaceholderConfigurer</classname> doesn't only
 				look for properties in the <classname>Properties</classname> file you
 				specify, but also checks against the Java <classname>System</classname>
 				properties if it cannot find a property you are trying to use. This
@@ -3190,7 +3190,7 @@ jdbc.password=root]]></programlisting>
 			    <programlisting><![CDATA[dataSource.driverClassName=com.mysql.jdbc.Driver
 dataSource.url=jdbc:mysql:mydb]]></programlisting>
                 <para>This example file would be usable against a container definition
-                which contains a bean in it called <emphasis>dataSource</emphasis>,
+                which contains a bean called <emphasis>dataSource</emphasis>,
                 which has <emphasis>driver</emphasis> and <emphasis>url</emphasis>
                 properties.</para>
                 <para>Note that compound property names are also supported, as long as
@@ -3293,8 +3293,8 @@ dataSource.url=jdbc:mysql:mydb]]></programlisting>
         <interfacename>BeanFactory</interfacename>, it is generally recommended that it be used over the
         <interfacename>BeanFactory</interfacename>, except for a few limited situations such as perhaps in an
         <classname>Applet</classname>, where memory consumption might be critical, and a few extra
-        kilobytes might make a difference. The following sections described
-        functionality which <interfacename>ApplicationContext</interfacename> adds to basic <interfacename>BeanFactory</interfacename>
+        kilobytes might make a difference. The following sections describe
+        functionality that <interfacename>ApplicationContext</interfacename> adds to basic <interfacename>BeanFactory</interfacename>
         capabilities.</para>
         <section id="context-functionality-messagesource">
             <title>Internationalization using <literal>MessageSources</literal></title>
@@ -3306,7 +3306,7 @@ dataSource.url=jdbc:mysql:mydb]]></programlisting>
             do message resolution. Let's quickly review the methods defined there:</para>
             <itemizedlist>
                     <listitem>
-                        <para><literal>String getMessage (String code, Object[] args,
+                        <para><literal>String getMessage(String code, Object[] args,
                         String default, Locale loc)</literal>: the basic method used to
                         retrieve a message from the <interfacename>MessageSource</interfacename>. When no message is
                         found for the specified locale, the default message is used. Any
@@ -3315,7 +3315,7 @@ dataSource.url=jdbc:mysql:mydb]]></programlisting>
                         standard library.</para>
                     </listitem>
                     <listitem>
-                        <para><literal>String getMessage (String code, Object[] args,
+                        <para><literal>String getMessage(String code, Object[] args,
                         Locale loc)</literal>: essentially the same as the previous
                         method, but with one difference: no default message can be
                         specified; if the message cannot be found, a
@@ -3371,7 +3371,7 @@ dataSource.url=jdbc:mysql:mydb]]></programlisting>
       lets assume the contents of two of the above resource bundle files are...</para>
             <programlisting><lineannotation># in 'format.properties'</lineannotation><![CDATA[
 message=Alligators rock!]]></programlisting>
-            <programlisting><![CDATA[# in 'exceptions.properties'
+            <programlisting><lineannotation># in 'exceptions.properties'</lineannotation><![CDATA[
 argument.required=The '{0}' argument is required.]]></programlisting>
             <para>Some (admittedly trivial) driver code to exercise the
         <classname>MessageSource</classname> functionality can be found below. Remember
@@ -3544,15 +3544,16 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 			<programlisting><![CDATA[public class EmailBean implements ApplicationContextAware {
 
     private List blackList;
-    
+	private ApplicationContext ctx;
+
     public void setBlackList(List blackList) {
         this.blackList = blackList;
     }
-    
+
     public void setApplicationContext(ApplicationContext ctx) {
         this.ctx = ctx;
     }
-    
+
     public void sendEmail(String address, String text) {
         if (blackList.contains(address)) {
             BlackListEvent evt = new BlackListEvent(address, text);
@@ -3610,8 +3611,8 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 				expect that they will be injected into it like any other properties. The
 				person deploying the bean may specify those <interfacename>Resource</interfacename>
 				properties as simple String paths, and rely on a special JavaBean
-				<interfacename>PropertyEditor</interfacename> that is automatically registerd by the context, to
-				convert those text strings to actual <interfacename>Resource</interfacename>
+				<interfacename>PropertyEditor</interfacename> that is automatically registered
+				by the context, to convert those text strings to actual <interfacename>Resource</interfacename>
 				objects.
 			</para>
             <para>The location path or paths supplied to an <interfacename>ApplicationContext</interfacename>
@@ -3715,7 +3716,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
         <literal><ulink url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink></literal>
         or
         <literal><ulink url="http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLocator</ulink></literal>
-        may be used to demand load multiple hierarchical (i.e. one is a parent of
+        may be used to demand-load multiple hierarchical (i.e. one is a parent of
         another) Spring IoC container instances in an effectively singleton fashion,
         which may then be used as the parents of the web-application Spring IoC
         container instances. The result is that bean definitions for lower layers are
