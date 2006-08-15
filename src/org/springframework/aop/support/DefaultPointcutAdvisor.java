@@ -31,6 +31,7 @@ import org.springframework.aop.Pointcut;
  * custom Advisors.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class DefaultPointcutAdvisor extends AbstractGenericPointcutAdvisor implements Serializable {
 
@@ -72,6 +73,11 @@ public class DefaultPointcutAdvisor extends AbstractGenericPointcutAdvisor imple
 
 	public Pointcut getPointcut() {
 		return pointcut;
+	}
+
+
+	public String toString() {
+		return getClass().getName() + ": advice [" + getAdvice() + "], pointcut [" + getPointcut()  + "]";
 	}
 
 }
