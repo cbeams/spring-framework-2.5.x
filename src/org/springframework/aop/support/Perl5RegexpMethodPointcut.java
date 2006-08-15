@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -72,12 +72,7 @@ public class Perl5RegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	 * matches the supplied candidate <code>String</code>.
 	 */
 	protected boolean matches(String pattern, int patternIndex) {
-		boolean matched = this.matcher.matches(pattern, this.compiledPatterns[patternIndex]);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Candidate is [" + pattern + "]; pattern is [" +
-							this.compiledPatterns[patternIndex].getPattern() + "]; matched=" + matched);
-		}
-		return matched;
+		return this.matcher.matches(pattern, this.compiledPatterns[patternIndex]);
 	}
 
 	/**
@@ -92,12 +87,7 @@ public class Perl5RegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 	 * matches the supplied candidate <code>String</code>.
 	 */
 	protected boolean matchesExclusion(String pattern, int patternIndex) {
-		boolean matched = this.matcher.matches(pattern, this.compiledExclusionPatterns[patternIndex]);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Candidate is [" + pattern + "]; pattern is [" +
-							this.compiledExclusionPatterns[patternIndex].getPattern() + "]; matched=" + matched);
-		}
-		return matched;
+		return this.matcher.matches(pattern, this.compiledExclusionPatterns[patternIndex]);
 	}
 
 	/**
@@ -117,4 +107,5 @@ public class Perl5RegexpMethodPointcut extends AbstractRegexpMethodPointcut {
 		}
 		return destination;
 	}
+
 }

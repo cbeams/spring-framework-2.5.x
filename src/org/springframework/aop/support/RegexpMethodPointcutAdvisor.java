@@ -16,12 +16,13 @@
 
 package org.springframework.aop.support;
 
+import java.io.Serializable;
+
 import org.aopalliance.aop.Advice;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.Pointcut;
 import org.springframework.core.JdkVersion;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Convenient class for regexp method pointcuts that hold an Advice,
@@ -53,13 +54,13 @@ import org.springframework.core.JdkVersion;
  */
 public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor {
 
-	protected transient Log logger = LogFactory.getLog(getClass());
-
 	private String[] patterns;
 
 	private boolean perl5 = false;
 
 	private AbstractRegexpMethodPointcut pointcut;
+
+	private final Object pointcutMonitor = new SerializableMonitor();
 
 
 	/**
@@ -144,12 +145,14 @@ public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor 
 	/**
 	 * Initialize the singleton pointcut held within this advisor.
 	 */
-	public synchronized Pointcut getPointcut() {
-		if (this.pointcut == null) {
-			this.pointcut = createPointcut();
-			this.pointcut.setPatterns(this.patterns);
+	public Pointcut getPointcut() {
+		synchronized (this.pointcutMonitor) {
+			if (this.pointcut == null) {
+				this.pointcut = createPointcut();
+				this.pointcut.setPatterns(this.patterns);
+			}
+			return pointcut;
 		}
-		return pointcut;
 	}
 
 	/**
@@ -162,15 +165,23 @@ public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor 
 	 */
 	protected AbstractRegexpMethodPointcut createPointcut() {
 		if (this.perl5 || JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
-			logger.debug("Creating Perl5RegexpMethodPointcut (Jakarta ORO needs to be available)");
 			// needs Jakarta ORO on the classpath
 			return new Perl5RegexpMethodPointcut();
 		}
 		else {
-			logger.debug("Creating JdkRegexpMethodPointcut");
 			// needs to run on JDK >= 1.4
 			return new JdkRegexpMethodPointcut();
 		}
+	}
+
+
+	public String toString() {
+		return getClass().getName() + ": advice [" + getAdvice() +
+				"], pointcut patterns " + ObjectUtils.nullSafeToString(this.patterns);
+	}
+
+
+	private static class SerializableMonitor implements Serializable {
 	}
 
 }

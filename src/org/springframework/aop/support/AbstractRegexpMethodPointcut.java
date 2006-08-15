@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,10 +22,8 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Abstract base regular expression pointcut bean. JavaBean properties are:
@@ -54,14 +52,12 @@ import org.springframework.util.Assert;
 public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPointcut
 		implements Serializable {
 
-	/** Transient as it's reinitialized on deserialization */
-	protected transient Log logger = LogFactory.getLog(getClass());
-
 	/** Regular expressions to match */
 	private String[] patterns = new String[0];
 
 	/** Regaular expressions <strong>not</strong> to match */
 	private String[] excludedPatterns = new String[0];
+
 
 	/**
 	 * Convenience method when we have only a single pattern.
@@ -107,7 +103,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * @param excludedPatterns regular expressions describing methods to match for exclusion
 	 */
 	public void setExcludedPatterns(String[] excludedPatterns) {
-		Assert.notEmpty(excludedPatterns, "'excludedPatterns' cannot be null or empty.");
+		Assert.notEmpty(excludedPatterns, "excludedPatterns must not be empty");
 		this.excludedPatterns = excludedPatterns;
 		initExcludedPatternRepresentation(excludedPatterns);
 	}
@@ -118,6 +114,34 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	public String[] getExcludedPatterns() {
 		return this.excludedPatterns;
 	}
+
+
+	/**
+	 * Try to match the regular expression against the fully qualified name
+	 * of the method's declaring class, plus the name of the method.
+	 * Note that the declaring class is that class that originally declared
+	 * the method, not necessarily the class that's currently exposing it.
+	 * <p>For example, "java.lang.Object.hashCode" matches any subclass
+	 * of Object's <code>hashCode()</code> method.
+	 */
+	public final boolean matches(Method method, Class targetClass) {
+		// TODO use target class here?
+		String patt = method.getDeclaringClass().getName() + "." + method.getName();
+		for (int i = 0; i < this.patterns.length; i++) {
+			boolean matched = matches(patt, i);
+			if (matched) {
+				for (int j = 0; j < this.excludedPatterns.length; j++) {
+					boolean excluded = matchesExclusion(patt, j);
+					if(excluded) {
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	/**
 	 * Subclasses must implement this to initialize regexp pointcuts.
@@ -147,57 +171,38 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 */
 	protected abstract boolean matchesExclusion(String pattern, int patternIndex);
 
-	/**
-	 * Try to match the regular expression against the fully qualified name
-	 * of the method's declaring class, plus the name of the method.
-	 * Note that the declaring class is that class that originally declared
-	 * the method, not necessarily the class that's currently exposing it.
-	 * <p>For example, "java.lang.Object.hashCode" matches any subclass
-	 * of Object's <code>hashCode()</code> method.
-	 */
-	public final boolean matches(Method method, Class targetClass) {
-		// TODO use target class here?
-		String patt = method.getDeclaringClass().getName() + "." + method.getName();
-		for (int i = 0; i < this.patterns.length; i++) {
-			boolean matched = matches(patt, i);
-			if (matched) {
-				for (int j = 0; j < this.excludedPatterns.length; j++) {
-					boolean excluded = matchesExclusion(patt, j);
-					if(excluded) {
-						return false;
-					}
-				}
-				return true;
-			}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
 		}
-		return false;
-	}
-
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		AbstractRegexpMethodPointcut that = (AbstractRegexpMethodPointcut) o;
-
-		if (!Arrays.equals(excludedPatterns, that.excludedPatterns)) return false;
-		if (!Arrays.equals(patterns, that.patterns)) return false;
-
-		return true;
+		if (!(other instanceof AbstractRegexpMethodPointcut)) {
+			return false;
+		}
+		AbstractRegexpMethodPointcut otherPointcut = (AbstractRegexpMethodPointcut) other;
+		return (Arrays.equals(this.patterns, otherPointcut.patterns) &&
+				Arrays.equals(this.excludedPatterns, otherPointcut.excludedPatterns));
 	}
 
 	public int hashCode() {
 		int result = 27;
-		for (int i = 0; i < patterns.length; i++) {
-			String pattern = patterns[i];
+		for (int i = 0; i < this.patterns.length; i++) {
+			String pattern = this.patterns[i];
 			result = 13 * result + pattern.hashCode();
 		}
-		for (int i = 0; i < excludedPatterns.length; i++) {
-			String excludedPattern = excludedPatterns[i];
+		for (int i = 0; i < this.excludedPatterns.length; i++) {
+			String excludedPattern = this.excludedPatterns[i];
 			result = 13 * result + excludedPattern.hashCode();
 		}
 		return result;
 	}
-	
+
+	public String toString() {
+		return getClass().getName() + ": patterns " + ObjectUtils.nullSafeToString(this.patterns) +
+				", excluded patterns " + ObjectUtils.nullSafeToString(this.excludedPatterns);
+	}
+
+
 	//---------------------------------------------------------------------
 	// Serialization support
 	//---------------------------------------------------------------------
@@ -205,9 +210,6 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
 		// Rely on default serialization; just initialize state after deserialization.
 		ois.defaultReadObject();
-
-		// Initialize transient fields.
-		this.logger = LogFactory.getLog(getClass());
 
 		// Ask subclass to reinitialize.
 		initPatternRepresentation(this.patterns);
