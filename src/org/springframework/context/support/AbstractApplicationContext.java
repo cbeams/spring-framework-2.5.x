@@ -264,9 +264,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	public void setParent(ApplicationContext parent) {
 		this.parent = parent;
-		if (parent != null) {
-			setClassLoader(parent.getClassLoader());
-		}
 	}
 
 	public void addBeanFactoryPostProcessor(BeanFactoryPostProcessor beanFactoryPostProcessor) {
