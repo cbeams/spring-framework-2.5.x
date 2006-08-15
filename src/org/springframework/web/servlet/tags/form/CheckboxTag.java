@@ -17,13 +17,11 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import javax.servlet.jsp.JspException;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Databinding-aware JSP tag for rendering an HTML '<code>input</code>'
