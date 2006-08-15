@@ -27,10 +27,12 @@ import javax.servlet.jsp.PageContext;
 import java.beans.PropertyEditor;
 
 /**
- * Base tag for all data-binding aware JSP form tags. Provides the common
- * {@link #setPath path} and {@link #setId id} properties. Provides sub-classes
- * with utility methods for accessing the {@link BindStatus} of their bound value
- * and also for {@link #writeOptionalAttribute interacting} with the {@link TagWriter}.
+ * Base tag for all data-binding aware JSP form tags.
+ * 
+ * <p>Provides the common {@link #setPath path} and {@link #setId id} properties.
+ * Provides sub-classes with utility methods for accessing the {@link BindStatus}
+ * of their bound value and also for {@link #writeOptionalAttribute interacting}
+ * with the {@link TagWriter}.
  *
  * @author Rob Harrop
  * @since 2.0
@@ -60,6 +62,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	/**
 	 * Sets the property path from the {@link FormTag#setCommandName command object}.
 	 * May be a runtime expression. Required.
+	 * @throws IllegalArgumentException if the supplied path is <code>null</code> or composed wholly of whitespace 
 	 */
 	public void setPath(String path) {
 		Assert.hasText(path, "'path' cannot be null or zero length.");
@@ -67,9 +70,10 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	}
 
 	/**
-	 * Sets the value of the '<code>id</code>' attribute. Defaults to the value of
-	 * {@link #getName}. May be a runtime expression.
-	 * <p/>Note that the default value may not be valid for certain tags
+	 * Sets the value of the '<code>id</code>' attribute.
+	 * <p>Defaults to the value of {@link #getName}; may be a runtime expression.
+	 * <p>Note that the default value may not be valid for certain tags.
+	 * @param id the value of the '<code>id</code>' attribute
 	 */
 	public void setId(String id) {
 		Assert.notNull(id, "'id' cannot be null.");
@@ -78,7 +82,8 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 
 	/**
 	 * Gets the value of the '<code>id</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
+	 * @return the value of the '<code>id</code>' attribute
 	 */
 	public String getId() {
 		return this.id;
@@ -97,8 +102,9 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 * Further abstract sub-classes should override this method to add in
 	 * any additional default attributes but <strong>must</strong> remember
 	 * to call the <code>super</code> method.
-	 * <p/>Concrete sub-classes should call this method when/if they want
+	 * <p>Concrete sub-classes should call this method when/if they want
 	 * to render default attributes.
+	 * @param tagWriter the {@link TagWriter} to which any attributes are to be {@link TagWriter#writeAttribute(String, String) written}
 	 */
 	protected void writeDefaultAttributes(TagWriter tagWriter) throws JspException {
 		String id = getId();
@@ -194,6 +200,9 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 		return (String) this.pageContext.getAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 	}
 
+	/**
+	 * Disposes of the {@link BindStatus} instance.
+	 */
 	public void doFinally() {
 		super.doFinally();
 		this.bindStatus = null;

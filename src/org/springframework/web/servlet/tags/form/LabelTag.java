@@ -17,12 +17,19 @@
 package org.springframework.web.servlet.tags.form;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.jsp.JspException;
 
 /**
+ * Databinding-aware JSP tag for rendering an HTML '<code>label</code>' element
+ * that defines text that is associated with a single form element.
+ * 
+ * <p>The {@link #setFor(String) 'for'} attribute is required.
+ * 
+ * <p>See the formTags showcase application that ships with the
+ * full Spring distribution for an example of this class in action.
+ * 
  * @author Rob Harrop
  * @since 2.0
  */
@@ -40,8 +47,8 @@ public class LabelTag extends AbstractHtmlElementTag {
 
 
 	/**
-	 * Tha {@link TagWriter} instance being used. Stored so we can close the tag on
-	 * {@link #doEndTag()}.
+	 * The {@link TagWriter} instance being used.
+	 * <p>Stored so we can close the tag on {@link #doEndTag()}.
 	 */
 	private TagWriter tagWriter;
 
@@ -51,8 +58,9 @@ public class LabelTag extends AbstractHtmlElementTag {
 	private String forId;
 
 	/**
-	 * Sets the value of the '<code>for</code>' attribute. Defaults to the value of
-	 * {@link #getPath}. May be a runtime expression.
+	 * Sets the value of the '<code>for</code>' attribute.
+	 * <p>Defaults to the value of {@link #getPath}; may be a runtime expression.
+	 * @throws IllegalArgumentException if the supplied value is <code>null</code> 
 	 */
 	public void setFor(String forId) {
 		Assert.notNull(forId, "'forId' cannot be null.");
@@ -61,7 +69,8 @@ public class LabelTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Gets the value of the '<code>id</code>' attribute.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
+	 * @return the value of the '<code>id</code>' attribute
 	 */
 	public String getFor() {
 		return this.forId;
@@ -70,6 +79,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	/**
 	 * Writes the opening '<code>label</code>' tag and forces a block tag so
 	 * that body content is written correctly.
+	 * @return {@link javax.servlet.jsp.tagext.Tag#EVAL_BODY_INCLUDE}
 	 */
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		tagWriter.startTag(LABEL_TAG);
@@ -81,15 +91,17 @@ public class LabelTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Overrides {@link #getName()} to use the value of {@link #resolveFor} with'<code>.label</code>'
-	 * appended to the end.
+	 * Overrides {@link #getName()} to use the value of {@link #resolveFor} with
+	 * '<code>.label</code>' appended to the end.
+	 * @return the value for the HTML '<code>name</code>' attribute
 	 */
 	protected String getName() throws JspException {
 		return resolveFor() + ".label";
 	}
 
 	/**
-	 * Returns the value that should be used for '<code>for</code>' attribute.
+	 * Returns the value that must be used for '<code>for</code>' attribute.
+	 * @return the value that must be used for '<code>for</code>' attribute
 	 */
 	protected final String resolveFor() throws JspException {
 		if (StringUtils.hasText(this.forId)) {
@@ -102,6 +114,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Close the '<code>label</code>' tag.
+	 * @return {@link javax.servlet.jsp.tagext.Tag#EVAL_PAGE}
 	 */
 	public int doEndTag() throws JspException {
 		this.tagWriter.endTag();
@@ -109,10 +122,11 @@ public class LabelTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Clean the {@link TagWriter} instance.
+	 * Disposes of the {@link TagWriter} instance.
 	 */
 	public void doFinally() {
         super.doFinally();
         this.tagWriter = null;
 	}
+
 }
