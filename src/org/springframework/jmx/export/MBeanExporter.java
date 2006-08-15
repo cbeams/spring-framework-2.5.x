@@ -63,7 +63,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * A bean that allows for any Spring-managed bean to be exposed to a JMX
+ * Effects the exporting of any <i>Spring-managed bean</i> to a JMX
  * <code>MBeanServer</code>, without the need to define any JMX-specific
  * information in the bean classes.
  *
@@ -73,14 +73,17 @@ import org.springframework.util.ObjectUtils;
  *
  * <p>If the bean does not implement one of the JMX management interfaces then
  * <code>MBeanExporter</code> will create the management information using the
- * supplied <code>MBeanInfoAssembler</code> implementation.
+ * supplied {@link MBeanInfoAssembler} implementation.
  *
- * <p>A list of <code>MBeanExporterListener</code>s can be registered via the
- * <code>listeners</code> property, allowing application code to be notified
- * of MBean registration and unregistration events.
+ * <p>A list of {@link MBeanExporterListener MBeanExporterListeners} can
+ * be registered via the
+ * {@link #setListeners(MBeanExporterListener[]) listeners} property,
+ * allowing application code to be notified of MBean registration and
+ * unregistration events.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Rick Evans
  * @since 1.2
  * @see #setBeans
  * @see #setAutodetect
@@ -637,7 +640,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		}
 		ModelMBean mbean = createAndConfigureMBean(bean, beanKey);
 		doRegister(mbean, objectName);
-		injectNotificationPublisherIfNecessary(bean, mbean);
+		injectNotificationPublisherIfNecessary(bean, mbean, objectName);
 		return objectName;
 	}
 
@@ -667,6 +670,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 
 		ModelMBean mbean = createAndConfigureMBean(proxy, beanKey);
 		targetSource.setModelMBean(mbean);
+		targetSource.setObjectName(objectName);
 
 		doRegister(mbean, objectName);
 		return objectName;
@@ -827,10 +831,11 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * If the supplied managed resource implements the {@link NotificationPublisherAware} an instance of
 	 * {@link org.springframework.jmx.export.notification.NotificationPublisher} is injected.
 	 */
-	private void injectNotificationPublisherIfNecessary(Object managedResource, ModelMBean modelMBean) {
+	private void injectNotificationPublisherIfNecessary(
+			Object managedResource, ModelMBean modelMBean, ObjectName objectName) {
 		if (managedResource instanceof NotificationPublisherAware) {
 			((NotificationPublisherAware) managedResource).setNotificationPublisher(
-					new ModelMBeanNotificationPublisher(modelMBean));
+					new ModelMBeanNotificationPublisher(modelMBean, objectName, managedResource));
 		}
 	}
 
@@ -968,14 +973,22 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	private class NotificationPublisherAwareLazyTargetSource extends LazyInitTargetSource {
 
 		private ModelMBean modelMBean;
+		
+		private ObjectName objectName;
 
+		
 		public void setModelMBean(ModelMBean modelMBean) {
 			this.modelMBean = modelMBean;
 		}
 
-		protected void postProcessTargetObject(Object targetObject) {
-			injectNotificationPublisherIfNecessary(targetObject, this.modelMBean);
+		public void setObjectName(ObjectName objectName) {
+			this.objectName = objectName;
 		}
+
+		protected void postProcessTargetObject(Object targetObject) {
+			injectNotificationPublisherIfNecessary(targetObject, this.modelMBean, this.objectName);
+		}
+
 	}
 
 }
