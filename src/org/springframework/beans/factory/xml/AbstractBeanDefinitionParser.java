@@ -21,6 +21,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
@@ -31,6 +32,7 @@ import org.w3c.dom.Element;
  * that subclasses must override to provide the actual parsing logic.
  *
  * @author Rob Harrop
+ * @author Rick Evans
  * @since 2.0
  */
 public abstract class AbstractBeanDefinitionParser implements BeanDefinitionParser {
@@ -43,10 +45,10 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 
 	public final BeanDefinition parse(Element element, ParserContext parserContext) {
 		BeanDefinition definition = parseInternal(element, parserContext);
-		String id =resolveId(definition, parserContext, element);
+		String id = resolveId(definition, parserContext, element);
 		if (StringUtils.hasText(id)) {
 			BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
-			BeanDefinitionReaderUtils.registerBeanDefinition(holder, parserContext.getRegistry());
+			registerBeanDefinition(holder, parserContext.getRegistry(), parserContext.isNested());
 			if (shouldFireEvents()) {
 				BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
 				postProcessComponentDefinition(componentDefinition);
@@ -60,19 +62,27 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 		return definition;
 	}
 
+
 	/**
-	 * Resolves the ID for the supplied {@link BeanDefinition}. When using {@link #autogenerateId autogeneration}
-	 * a name is generated automatically, otherwise the ID is extracted by delegating to {@link #extractId}.
+	 * Register the supplied {@link BeanDefinitionHolder bean} with the supplied
+	 * {@link BeanDefinitionRegistry registry}.
+	 * <p>Subclasses can override this method to control whether or not the supplied
+	 * {@link BeanDefinitionHolder bean} is actually even registered, or to
+	 * register even more beans.
+	 * <p>The default implementation registers the supplied {@link BeanDefinitionHolder bean} with the supplied
+	 * {@link BeanDefinitionRegistry registry} only if the <code>isNested</code>
+	 * parameter is <code>false</code>, because one typically does not want
+	 * inner beans to be registered as top level beans.
+	 * @param bean the bean to be registered
+	 * @param registry the registry that the bean is to be registered with 
+	 * @param isNested <code>true</code> if the supplied {@link BeanDefinitionHolder bean} was created from a nested element  
+	 * @see BeanDefinitionReaderUtils#registerBeanDefinition(org.springframework.beans.factory.config.BeanDefinitionHolder, org.springframework.beans.factory.support.BeanDefinitionRegistry) 
 	 */
-	private String resolveId(BeanDefinition definition, ParserContext parserContext, Element element) {
-		if (autogenerateId()) {
-			return BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) definition, parserContext.getRegistry(), parserContext.isNested());
-		}
-		else {
-			return extractId(element);
+	protected void registerBeanDefinition(BeanDefinitionHolder bean, BeanDefinitionRegistry registry, boolean isNested) {
+		if (!isNested) {
+			BeanDefinitionReaderUtils.registerBeanDefinition(bean, registry);
 		}
 	}
-
 
 	/**
 	 * Central template method to actually parse the supplied {@link Element}
@@ -133,6 +143,20 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	 */
 	protected boolean autogenerateId() {
 		return false;
+	}
+	
+
+	/**
+	 * Resolves the ID for the supplied {@link BeanDefinition}. When using {@link #autogenerateId autogeneration}
+	 * a name is generated automatically, otherwise the ID is extracted by delegating to {@link #extractId}.
+	 */
+	private String resolveId(BeanDefinition definition, ParserContext parserContext, Element element) {
+		if (autogenerateId()) {
+			return BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) definition, parserContext.getRegistry(), parserContext.isNested());
+		}
+		else {
+			return extractId(element);
+		}
 	}
 
 }
