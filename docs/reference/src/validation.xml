@@ -344,8 +344,7 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
                 <entry><literal>StringArrayPropertyEditor</literal></entry>
 
                 <entry>Capable of resolving a comma-delimited list of String
-                to a String-array and vice versa. Registered by default by
-                <classname>BeanWrapperImpl</classname>.</entry>
+                to a String-array and vice versa.</entry>
               </row>
 
               <row>

@@ -97,7 +97,6 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @see org.springframework.beans.PropertyValuesEditor
 	 * @see org.springframework.core.io.support.ResourceArrayPropertyEditor
 	 * @see org.springframework.core.io.ResourceEditor
-	 * @see org.springframework.beans.propertyeditors.StringArrayPropertyEditor
 	 * @see org.springframework.transaction.interceptor.TransactionAttributeEditor
 	 * @see org.springframework.transaction.interceptor.TransactionAttributeSourceEditor
 	 * @see org.springframework.beans.propertyeditors.URLEditor

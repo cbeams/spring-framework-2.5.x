@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ import java.beans.PropertyEditorSupport;
 import org.springframework.util.StringUtils;
 
 /**
- * Editor for String arrays. Strings must be in CSV format,
- * with customizable separator.
+ * Custom {@link java.beans.PropertyEditor} for {@link String String[]} arrays.
+ * 
+ * <p>Strings must be in CSV format, with a customizable separator.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -40,16 +41,17 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 
 
 	/**
-	 * Create a new StringArrayPropertyEditor with the default separator:
-	 * a comma (",")
+	 * Creates a new instance of the {@link StringArrayPropertyEditor} with the
+	 * {@link #DEFAULT_SEPARATOR}.
 	 */
 	public StringArrayPropertyEditor() {
 		this.separator = DEFAULT_SEPARATOR;
 	}
 
 	/**
-	 * Create a new StringArrayPropertyEditor with the given separator.
-	 * @param separator the separator to use for splitting a String
+	 * Creates a new instance of the {@link StringArrayPropertyEditor} with
+	 * the given separator.
+	 * @param separator the separator to use for splitting a {@link String}
 	 */
 	public StringArrayPropertyEditor(String separator) {
 		this.separator = separator;
