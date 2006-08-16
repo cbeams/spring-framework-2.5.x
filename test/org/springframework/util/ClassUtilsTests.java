@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -47,8 +48,7 @@ public class ClassUtilsTests extends TestCase {
 		InnerClass.overloadedCalled = false;
 	}
 
-
-    public void testForName() throws ClassNotFoundException {
+	public void testForName() throws ClassNotFoundException {
 		assertEquals(String.class, ClassUtils.forName("java.lang.String"));
 		assertEquals(String[].class, ClassUtils.forName("java.lang.String[]"));
 		assertEquals(TestBean.class, ClassUtils.forName("org.springframework.beans.TestBean"));
@@ -204,6 +204,26 @@ public class ClassUtilsTests extends TestCase {
 	public void testIsPresent() throws Exception {
 		assertTrue(ClassUtils.isPresent("java.lang.String"));
 		assertFalse(ClassUtils.isPresent("java.lang.MySpecialString"));
+	}
+
+	public void testHasMethod() throws Exception {
+		assertTrue(ClassUtils.hasMethod(Collection.class, "size", null));
+		assertTrue(ClassUtils.hasMethod(Collection.class, "remove", new Class[] {Object.class}));
+		assertFalse(ClassUtils.hasMethod(Collection.class, "remove", null));
+		assertFalse(ClassUtils.hasMethod(Collection.class, "someOtherMethod", null));
+	}
+
+	public void testGetMethodIfAvailable() throws Exception {
+		Method method = ClassUtils.getMethodIfAvailable(Collection.class, "size", null);
+		assertNotNull(method);
+		assertEquals("size", method.getName());
+
+		method = ClassUtils.getMethodIfAvailable(Collection.class, "remove", new Class[] {Object.class});
+		assertNotNull(method);
+		assertEquals("remove", method.getName());
+
+		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "remove", null));
+		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "someOtherMethod", null));
 	}
 
 
