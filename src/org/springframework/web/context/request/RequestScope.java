@@ -16,9 +16,6 @@
 
 package org.springframework.web.context.request;
 
-import org.springframework.web.context.request.AbstractRequestAttributesScope;
-import org.springframework.web.context.request.RequestAttributes;
-
 /**
  * Request-backed Scope implementation. Relies on a thread-bound
  * RequestAttributes instance, which can be exported through

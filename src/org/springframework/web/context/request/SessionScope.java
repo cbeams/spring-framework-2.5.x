@@ -17,10 +17,6 @@
 package org.springframework.web.context.request;
 
 import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.web.context.request.AbstractRequestAttributesScope;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-
 
 /**
  * Session-backed Scope implementation. Relies on a thread-bound
