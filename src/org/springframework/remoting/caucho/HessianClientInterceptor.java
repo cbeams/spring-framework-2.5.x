@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,12 +23,16 @@ import java.net.MalformedURLException;
 
 import com.caucho.hessian.client.HessianProxyFactory;
 import com.caucho.hessian.client.HessianRuntimeException;
-import org.aopalliance.aop.AspectException;
+import com.caucho.hessian.io.SerializerFactory;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
+import org.springframework.remoting.RemoteLookupFailureException;
+import org.springframework.remoting.RemoteProxyFailureException;
+import org.springframework.remoting.support.UrlBasedRemoteAccessor;
+import org.springframework.util.Assert;
 
 /**
  * Interceptor for accessing a Hessian service.
@@ -54,9 +58,9 @@ import org.springframework.remoting.RemoteConnectFailureException;
  * @see HessianProxyFactoryBean
  * @see com.caucho.hessian.client.HessianProxyFactory
  */
-public class HessianClientInterceptor extends CauchoRemoteAccessor implements MethodInterceptor {
+public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor {
 
-	private HessianProxyFactory proxyFactory;
+	private HessianProxyFactory proxyFactory = new HessianProxyFactory();
 
 	private Object hessianProxy;
 
@@ -68,29 +72,72 @@ public class HessianClientInterceptor extends CauchoRemoteAccessor implements Me
 	 * in particular a custom HessianProxyFactory subclass.
 	 */
 	public void setProxyFactory(HessianProxyFactory proxyFactory) {
-		this.proxyFactory = proxyFactory;
+		this.proxyFactory = (proxyFactory != null ? proxyFactory : new HessianProxyFactory());
+	}
+
+	/**
+	 * Specify the Hessian SerializerFactory to use.
+	 * <p>This will typically be passed in as an inner bean definition
+	 * of type <code>com.caucho.hessian.io.SerializerFactory</code>,
+	 * with custom bean property values applied.
+	 */
+	public void setSerializerFactory(SerializerFactory serializerFactory) {
+		this.proxyFactory.setSerializerFactory(serializerFactory);
+	}
+
+	/**
+	 * Set whether to send the Java collection type for each serialized
+	 * collection. Default is "true".
+	 */
+	public void setSendCollectionType(boolean sendCollectionType) {
+		this.proxyFactory.getSerializerFactory().setSendCollectionType(sendCollectionType);
+	}
+	/**
+	 * Set the username that this factory should use to access the remote service.
+	 * Default is none.
+	 * <p>The username will be sent by Hessian via HTTP Basic Authentication.
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setUser
+	 */
+	public void setUsername(String username) {
+		this.proxyFactory.setUser(username);
+	}
+
+	/**
+	 * Set the password that this factory should use to access the remote service.
+	 * Default is none.
+	 * <p>The password will be sent by Hessian via HTTP Basic Authentication.
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setPassword
+	 */
+	public void setPassword(String password) {
+		this.proxyFactory.setPassword(password);
+	}
+
+	/**
+	 * Set whether overloaded methods should be enabled for remote invocations.
+	 * Default is "false".
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setOverloadEnabled
+	 */
+	public void setOverloadEnabled(boolean overloadEnabled) {
+		this.proxyFactory.setOverloadEnabled(overloadEnabled);
+	}
+
+
+	public void afterPropertiesSet() {
+		super.afterPropertiesSet();
+		prepare();
 	}
 
 	/**
 	 * Initialize the Hessian proxy for this interceptor.
+	 * @throws RemoteLookupFailureException if the service URL is invalid
 	 */
-	public void prepare() throws MalformedURLException {
-		super.prepare();
-
-		if (this.proxyFactory == null) {
-			this.proxyFactory = new HessianProxyFactory();
+	public void prepare() throws RemoteLookupFailureException {
+		try {
+			this.hessianProxy = createHessianProxy(this.proxyFactory);
 		}
-		if (getUsername() != null) {
-			this.proxyFactory.setUser(getUsername());
+		catch (MalformedURLException ex) {
+			throw new RemoteLookupFailureException("Service URL [" + getServiceUrl() + "] is invalid", ex);
 		}
-		if (getPassword() != null) {
-			this.proxyFactory.setPassword(getPassword());
-		}
-		if (isOverloadEnabled()) {
-			this.proxyFactory.setOverloadEnabled(isOverloadEnabled());
-		}
-
-		this.hessianProxy = createHessianProxy(this.proxyFactory);
 	}
 
 	/**
@@ -101,6 +148,7 @@ public class HessianClientInterceptor extends CauchoRemoteAccessor implements Me
 	 * @see com.caucho.hessian.client.HessianProxyFactory#create
 	 */
 	protected Object createHessianProxy(HessianProxyFactory proxyFactory) throws MalformedURLException {
+		Assert.notNull(getServiceInterface(), "serviceInterface is required");
 		return proxyFactory.create(getServiceInterface(), getServiceUrl());
 	}
 
@@ -127,7 +175,8 @@ public class HessianClientInterceptor extends CauchoRemoteAccessor implements Me
 			throw ex.getTargetException();
 		}
 		catch (Throwable ex) {
-			throw new AspectException("Failed to invoke Hessian remote service [" + getServiceUrl() + "]", ex);
+			throw new RemoteProxyFailureException(
+					"Failed to invoke Hessian proxy for remote service [" + getServiceUrl() + "]", ex);
 		}
 	}
 
