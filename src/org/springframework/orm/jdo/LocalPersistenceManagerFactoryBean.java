@@ -36,6 +36,7 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -114,18 +115,13 @@ import org.springframework.util.CollectionUtils;
 public class LocalPersistenceManagerFactoryBean
 		implements FactoryBean, InitializingBean, DisposableBean, PersistenceExceptionTranslator {
 
-	private static Method getPersistenceManagerFactoryMethod;
+	private final static Method getPersistenceManagerFactoryMethod;
 
 	static {
 		// Determine whether the JDO 1.0 getPersistenceManagerFactory(Properties) method
 		// is available, for use in the "newPersistenceManagerFactory" implementation.
-		try {
-			getPersistenceManagerFactoryMethod = JDOHelper.class.getMethod(
-					"getPersistenceManagerFactory", new Class[] {Properties.class});
-		}
-		catch (NoSuchMethodException ex) {
-			getPersistenceManagerFactoryMethod = null;
-		}
+		getPersistenceManagerFactoryMethod = ClassUtils.getMethodIfAvailable(
+				JDOHelper.class, "getPersistenceManagerFactory", new Class[] {Properties.class});
 	}
 
 

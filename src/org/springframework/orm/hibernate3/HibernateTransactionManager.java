@@ -48,6 +48,7 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.ClassUtils;
 
 /**
  * PlatformTransactionManager implementation for a single Hibernate SessionFactory.
@@ -130,18 +131,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
 		implements BeanFactoryAware, InitializingBean {
 
-	private static boolean hibernateSetTimeoutAvailable;
+	private final static boolean hibernateSetTimeoutAvailable;
 
 	static {
 		// Determine whether the Hibernate 3.1 Transaction.setTimeout(int) method
 		// is available, for use in this HibernateTransactionManager's doBegin.
-		try {
-			Transaction.class.getMethod("setTimeout", new Class[] {int.class});
-			hibernateSetTimeoutAvailable = true;
-		}
-		catch (NoSuchMethodException ex) {
-			hibernateSetTimeoutAvailable = false;
-		}
+		hibernateSetTimeoutAvailable = ClassUtils.hasMethod(Transaction.class, "setTimeout", new Class[] {int.class});
 	}
 
 
