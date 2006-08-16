@@ -41,15 +41,10 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's C3P0NativeJdbcExtractor
 - required for running Image Database
 
-* caucho/burlap-2.1.12.jar
-- Burlap 2.1.12 (http://www.caucho.com/burlap)
+* caucho/hessian-3.0.20.jar
+- Hessian/Burlap 3.0.20 (http://www.caucho.com/hessian)
 - required for building the framework
-- required at runtime when using Spring's Burlap remoting support
-
-* caucho/hessian-2.1.12.jar
-- Hessian 2.1.12 (http://www.caucho.com/hessian)
-- required for building the framework
-- required at runtime when using Spring's Hessian remoting support
+- required at runtime when using Spring's Hessian/Burlap remoting support
 
 * cglib/cglib-nodep-2.1_3.jar
 - CGLIB 2.1_3 with ObjectWeb ASM 1.5.3 (http://cglib.sourceforge.net)
