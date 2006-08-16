@@ -54,6 +54,8 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 */
 	private Method createMethod;
 
+	private final Object homeMonitor = new Object();
+
 
 	/**
 	 * Set whether to look up the EJB home object on startup.
@@ -99,10 +101,12 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 * @see #getCreateMethod
 	 */
 	protected void refreshHome() throws NamingException {
-		Object home = lookup();
-		if (this.cacheHome) {
-			this.cachedHome = home;
-			this.createMethod = getCreateMethod(home);
+		synchronized (this.homeMonitor) {
+			Object home = lookup();
+			if (this.cacheHome) {
+				this.cachedHome = home;
+				this.createMethod = getCreateMethod(home);
+			}
 		}
 	}
 
@@ -139,7 +143,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 			return (this.cachedHome != null ? this.cachedHome : lookup());
 		}
 		else {
-			synchronized (this) {
+			synchronized (this.homeMonitor) {
 				if (this.cachedHome == null) {
 					this.cachedHome = lookup();
 					this.createMethod = getCreateMethod(this.cachedHome);

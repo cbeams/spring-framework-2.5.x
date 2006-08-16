@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.rmi.RemoteException;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -32,6 +31,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiObjectLocator;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
+import org.springframework.remoting.RemoteProxyFailureException;
 import org.springframework.remoting.support.DefaultRemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationFactory;
@@ -86,6 +86,8 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	private boolean refreshStubOnConnectFailure = false;
 
 	private Remote cachedStub;
+
+	private final Object stubMonitor = new Object();
 
 
 	/**
@@ -162,10 +164,6 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	}
 
 
-	/**
-	 * Fetch the RMI stub on startup, if necessary.
-	 * @see #prepare()
-	 */
 	public void afterPropertiesSet() throws NamingException {
 		super.afterPropertiesSet();
 		prepare();
@@ -173,11 +171,12 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 
 	/**
 	 * Fetches RMI stub on startup, if necessary.
-	 * @throws NamingException if thrown by JNDI API
+	 * @throws NamingException if the JNDI lookup failed
+	 * @throws RemoteLookupFailureException if RMI stub creation failed
 	 * @see #setLookupStubOnStartup
 	 * @see #lookupStub
 	 */
-	public void prepare() throws NamingException {
+	public void prepare() throws NamingException, RemoteLookupFailureException {
 		// Cache RMI stub on initialization?
 		if (this.lookupStubOnStartup) {
 			Remote stub = lookupStub();
@@ -194,21 +193,27 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	 * <p>Default implementation looks up the service URL via java.rmi.Naming.
 	 * Can be overridden in subclasses.
 	 * @return the RMI stub to store in this interceptor
-	 * @throws NamingException if stub creation failed
+	 * @throws NamingException if the JNDI lookup failed
+	 * @throws RemoteLookupFailureException if RMI stub creation failed
 	 * @see #setCacheStub
 	 * @see #getStub()
 	 * @see java.rmi.Naming#lookup
 	 */
-	protected Remote lookupStub() throws NamingException {
+	protected Remote lookupStub() throws NamingException, RemoteLookupFailureException {
 		Object stub = lookup();
 		if (getServiceInterface() != null && Remote.class.isAssignableFrom(getServiceInterface())) {
-			stub = PortableRemoteObject.narrow(stub, getServiceInterface());
+			try {
+				stub = PortableRemoteObject.narrow(stub, getServiceInterface());
+			}
+			catch (ClassCastException ex) {
+				throw new RemoteLookupFailureException(
+						"Could not narrow RMI stub to service interface [" + getServiceInterface().getName() + "]", ex);
+			}
 		}
 		if (!(stub instanceof Remote)) {
-			throw new NamingException("Located RMI stub of class [" + stub.getClass().getName() +
+			throw new RemoteLookupFailureException("Located RMI stub of class [" + stub.getClass().getName() +
 					"], with JNDI name [" + getJndiName() + "], does not implement interface [java.rmi.Remote]");
 		}
-		// TODO: narrow to RmiInvocationHandler?
 		return (Remote) stub;
 	}
 
@@ -221,14 +226,15 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	 * whether it is still alive.
 	 * @return the RMI stub to use for an invocation
 	 * @throws NamingException if stub creation failed
+	 * @throws RemoteLookupFailureException if RMI stub creation failed
 	 * @see #lookupStub
 	 */
-	protected Remote getStub() throws NamingException {
+	protected Remote getStub() throws NamingException, RemoteLookupFailureException {
 		if (!this.cacheStub || (this.lookupStubOnStartup && !this.refreshStubOnConnectFailure)) {
 			return (this.cachedStub != null ? this.cachedStub : lookupStub());
 		}
 		else {
-			synchronized (this) {
+			synchronized (this.stubMonitor) {
 				if (this.cachedStub == null) {
 					this.cachedStub = lookupStub();
 				}
@@ -254,8 +260,8 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 		try {
 			stub = getStub();
 		}
-		catch (Throwable ex) {
-			throw new RemoteLookupFailureException("RMI lookup for service [" + getJndiName() + "] failed", ex);
+		catch (NamingException ex) {
+			throw new RemoteLookupFailureException("JNDI lookup for RMI service [" + getJndiName() + "] failed", ex);
 		}
 		try {
 			return doInvoke(invocation, stub);
@@ -309,7 +315,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 	 */
 	protected Object refreshAndRetry(MethodInvocation invocation) throws Throwable {
 		Remote freshStub = null;
-		synchronized (this) {
+		synchronized (this.stubMonitor) {
 			try {
 				freshStub = lookupStub();
 				if (this.cacheStub) {
@@ -344,7 +350,8 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 				throw ex.getTargetException();
 			}
 			catch (Throwable ex) {
-				throw new AspectException("Failed to invoke remote service [" + getJndiName() + "]", ex);
+				throw new RemoteProxyFailureException(
+						"Failed to invoke RMI stub for remote service [" + getJndiName() + "]", ex);
 			}
 		}
 		else {

@@ -97,6 +97,8 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 	private Remote portStub;
 
+	private final Object preparationMonitor = new Object();
+
 
 	/**
 	 * Set a reference to an existing JAX-RPC Service instance,
@@ -348,52 +350,54 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 			throw new IllegalArgumentException("portName is required");
 		}
 
-		// Cache the QName for the port.
-		this.portQName = getQName(this.portName);
+		synchronized (this.preparationMonitor) {
+			// Cache the QName for the port.
+			this.portQName = getQName(this.portName);
 
-		if (this.jaxRpcService == null) {
-			this.jaxRpcService = createJaxRpcService();
-		}
-		else {
-			postProcessJaxRpcService(this.jaxRpcService);
-		}
-
-		if (this.portInterface != null && !alwaysUseJaxRpcCall()) {
-			// JAX-RPC-compliant port interface -> using JAX-RPC stub for port.
-
-			if (logger.isInfoEnabled()) {
-				logger.info("Creating JAX-RPC proxy for JAX-RPC port [" + this.portQName +
-						"], using port interface [" + this.portInterface.getName() + "]");
+			if (this.jaxRpcService == null) {
+				this.jaxRpcService = createJaxRpcService();
 			}
-			Remote remoteObj = this.jaxRpcService.getPort(this.portQName, this.portInterface);
+			else {
+				postProcessJaxRpcService(this.jaxRpcService);
+			}
 
-			if (logger.isInfoEnabled()) {
-				if (this.serviceInterface != null) {
-					boolean isImpl = this.serviceInterface.isInstance(remoteObj);
-					logger.info("Using service interface [" + this.serviceInterface.getName() + "] for JAX-RPC port [" +
-							this.portQName + "] - " + (!isImpl ? "not" : "") + " directly implemented");
+			if (this.portInterface != null && !alwaysUseJaxRpcCall()) {
+				// JAX-RPC-compliant port interface -> using JAX-RPC stub for port.
+
+				if (logger.isInfoEnabled()) {
+					logger.info("Creating JAX-RPC proxy for JAX-RPC port [" + this.portQName +
+							"], using port interface [" + this.portInterface.getName() + "]");
 				}
+				Remote remoteObj = this.jaxRpcService.getPort(this.portQName, this.portInterface);
+
+				if (logger.isInfoEnabled()) {
+					if (this.serviceInterface != null) {
+						boolean isImpl = this.serviceInterface.isInstance(remoteObj);
+						logger.info("Using service interface [" + this.serviceInterface.getName() + "] for JAX-RPC port [" +
+								this.portQName + "] - " + (!isImpl ? "not" : "") + " directly implemented");
+					}
+				}
+
+				if (!(remoteObj instanceof Stub)) {
+					throw new ServiceException("Port stub of class [" + remoteObj.getClass().getName() +
+							"] is not a valid JAX-RPC stub: it does not implement interface [javax.xml.rpc.Stub]");
+				}
+				Stub stub = (Stub) remoteObj;
+
+				// Apply properties to JAX-RPC stub.
+				preparePortStub(stub);
+
+				// Allow for custom post-processing in subclasses.
+				postProcessPortStub(stub);
+
+				this.portStub = remoteObj;
 			}
 
-			if (!(remoteObj instanceof Stub)) {
-				throw new ServiceException("Port stub of class [" + remoteObj.getClass().getName() +
-						"] is not a valid JAX-RPC stub: it does not implement interface [javax.xml.rpc.Stub]");
-			}
-			Stub stub = (Stub) remoteObj;
-
-			// Apply properties to JAX-RPC stub.
-			preparePortStub(stub);
-
-			// Allow for custom post-processing in subclasses.
-			postProcessPortStub(stub);
-
-			this.portStub = remoteObj;
-		}
-
-		else {
-			// No JAX-RPC-compliant port interface -> using JAX-RPC dynamic calls.
-			if (logger.isInfoEnabled()) {
-				logger.info("Using JAX-RPC dynamic calls for JAX-RPC port [" + this.portQName + "]");
+			else {
+				// No JAX-RPC-compliant port interface -> using JAX-RPC dynamic calls.
+				if (logger.isInfoEnabled()) {
+					logger.info("Using JAX-RPC dynamic calls for JAX-RPC port [" + this.portQName + "]");
+				}
 			}
 		}
 	}
@@ -403,7 +407,9 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * i.e. has already looked up the JAX-RPC service and port.
 	 */
 	protected boolean isPrepared() {
-		return (this.portQName != null);
+		synchronized (this.preparationMonitor) {
+			return (this.portQName != null);
+		}
 	}
 
 	/**
@@ -508,7 +514,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 		// Lazily prepare service and stub if appropriate.
 		if (!this.lookupServiceOnStartup) {
-			synchronized (this) {
+			synchronized (this.preparationMonitor) {
 				if (!isPrepared()) {
 					try {
 						prepare();

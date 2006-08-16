@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,6 @@ import javax.ejb.EJBObject;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.remoting.RemoteConnectFailureException;
@@ -92,7 +91,13 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	protected Object lookup() throws NamingException {
 		Object homeObject = super.lookup();
 		if (this.homeInterface != null) {
-			homeObject = PortableRemoteObject.narrow(homeObject, this.homeInterface);
+			try {
+				homeObject = PortableRemoteObject.narrow(homeObject, this.homeInterface);
+			}
+			catch (ClassCastException ex) {
+				throw new RemoteLookupFailureException(
+						"Could not narrow EJB home stub to home interface [" + this.homeInterface.getName() + "]", ex);
+			}
 		}
 		return homeObject;
 	}
@@ -161,13 +166,11 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @see #invoke
 	 */
 	protected Object refreshAndRetry(MethodInvocation invocation) throws Throwable {
-		synchronized (this) {
-			try {
-				refreshHome();
-			}
-			catch (Throwable ex) {
-				throw new RemoteLookupFailureException("Failed to locate remote EJB [" + getJndiName() + "]", ex);
-			}
+		try {
+			refreshHome();
+		}
+		catch (NamingException ex) {
+			throw new RemoteLookupFailureException("Failed to locate remote EJB [" + getJndiName() + "]", ex);
 		}
 		return doInvoke(invocation);
 	}
@@ -201,7 +204,8 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 		// invoke the superclass' generic create method
 		Object ejbInstance = create();
 		if (!(ejbInstance instanceof EJBObject)) {
-			throw new AspectException("EJB instance [" + ejbInstance + "] is not a remote SLSB");
+			throw new RemoteLookupFailureException(
+					"EJB instance [" + ejbInstance + "] is not a Remote Stateless Session Bean");
 		}
 		// if it throws remote exception (wrapped in InvocationTargetException), retry?
 

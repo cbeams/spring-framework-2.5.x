@@ -376,7 +376,7 @@ public class RmiSupportTests extends TestCase {
 	public void testRmiInvokerWithSpecialLocalMethods() throws Exception {
 		String serviceUrl = "rmi://localhost:1090/test";
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
-			protected Remote lookupStub() throws Exception {
+			protected Remote lookupStub() {
 				return new RmiInvocationHandler() {
 					public Object invoke(RemoteInvocation invocation) throws RemoteException {
 						throw new RemoteException();

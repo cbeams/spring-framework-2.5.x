@@ -23,20 +23,20 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
+import org.springframework.remoting.RemoteProxyFailureException;
 import org.springframework.remoting.support.RemoteInvocationBasedAccessor;
 import org.springframework.remoting.support.RemoteInvocationUtils;
 
@@ -67,7 +67,7 @@ import org.springframework.remoting.support.RemoteInvocationUtils;
  * @see java.rmi.Remote
  */
 public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
-		implements MethodInterceptor, InitializingBean {
+		implements MethodInterceptor {
 
 	private boolean lookupStubOnStartup = true;
 
@@ -78,6 +78,8 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	private RMIClientSocketFactory registryClientSocketFactory;
 
 	private Remote cachedStub;
+
+	private final Object stubMonitor = new Object();
 
 
 	/**
@@ -126,20 +128,18 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	}
 
 
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
+		super.afterPropertiesSet();
 		prepare();
 	}
 
 	/**
 	 * Fetches RMI stub on startup, if necessary.
-	 * @throws Exception if thrown by RMI API
+	 * @throws RemoteLookupFailureException if RMI stub creation failed
 	 * @see #setLookupStubOnStartup
 	 * @see #lookupStub
 	 */
-	public void prepare() throws Exception {
-		if (getServiceUrl() == null) {
-			throw new IllegalArgumentException("serviceUrl is required");
-		}
+	public void prepare() throws RemoteLookupFailureException {
 		// Cache RMI stub on initialization?
 		if (this.lookupStubOnStartup) {
 			Remote remoteObj = lookupStub();
@@ -167,59 +167,72 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	 * <p>Default implementation looks up the service URL via java.rmi.Naming.
 	 * Can be overridden in subclasses.
 	 * @return the RMI stub to store in this interceptor
-	 * @throws Exception if proxy creation failed
+	 * @throws RemoteLookupFailureException if RMI stub creation failed
 	 * @see #setCacheStub
 	 * @see #getStub()
 	 * @see java.rmi.Naming#lookup
 	 */
-	protected Remote lookupStub() throws Exception {
-		Remote stub = null;
-		if (this.registryClientSocketFactory != null) {
-			// RMIClientSocketFactory specified for registry access.
-			// Unfortunately, due to RMI API limitations, this means
-			// that we need to parse the RMI URL ourselves and perform
-			// straight LocateRegistry.getRegistry/Registry.lookup calls.
-			URL url = new URL(null, getServiceUrl(), new DummyURLStreamHandler());
-			String protocol = url.getProtocol();
-			if (protocol != null && !"rmi".equals(protocol)) {
-				throw new MalformedURLException("Invalid URL scheme '" + protocol + "'");
+	protected Remote lookupStub() throws RemoteLookupFailureException {
+		try {
+			Remote stub = null;
+			if (this.registryClientSocketFactory != null) {
+				// RMIClientSocketFactory specified for registry access.
+				// Unfortunately, due to RMI API limitations, this means
+				// that we need to parse the RMI URL ourselves and perform
+				// straight LocateRegistry.getRegistry/Registry.lookup calls.
+				URL url = new URL(null, getServiceUrl(), new DummyURLStreamHandler());
+				String protocol = url.getProtocol();
+				if (protocol != null && !"rmi".equals(protocol)) {
+					throw new MalformedURLException("Invalid URL scheme '" + protocol + "'");
+				}
+				String host = url.getHost();
+				int port = url.getPort();
+				String name = url.getPath();
+				if (name != null && name.startsWith("/")) {
+					name = name.substring(1);
+				}
+				Registry registry = LocateRegistry.getRegistry(host, port, this.registryClientSocketFactory);
+				stub = registry.lookup(name);
 			}
-			String host = url.getHost();
-			int port = url.getPort();
-			String name = url.getPath();
-			if (name != null && name.startsWith("/")) {
-				name = name.substring(1);
+			else {
+				// Can proceed with standard RMI lookup API...
+				stub = Naming.lookup(getServiceUrl());
 			}
-			Registry registry = LocateRegistry.getRegistry(host, port, this.registryClientSocketFactory);
-			stub = registry.lookup(name);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Located RMI stub with URL [" + getServiceUrl() + "]");
+			}
+			return stub;
 		}
-		else {
-			// Can proceed with standard RMI lookup API...
-			stub = Naming.lookup(getServiceUrl());
+		catch (MalformedURLException ex) {
+			throw new RemoteLookupFailureException("Service URL [" + getServiceUrl() + "] is invalid", ex);
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Located RMI stub with URL [" + getServiceUrl() + "]");
+		catch (NotBoundException ex) {
+			throw new RemoteLookupFailureException(
+					"Could not find RMI service [" + getServiceUrl() + "] in RMI registry", ex);
 		}
-		return stub;
+		catch (RemoteException ex) {
+			throw new RemoteLookupFailureException("Lookup of RMI stub failed", ex);
+		}
 	}
 
 	/**
 	 * Return the RMI stub to use. Called for each invocation.
 	 * <p>Default implementation returns the proxy created on initialization,
-	 * if any; else, it invokes lookupStub to get a new proxy for each invocation.
+	 * if any; else, it invokes <code>lookupStub</code> to get a new proxy
+	 * for each invocation.
 	 * <p>Can be overridden in subclasses, for example to cache a proxy for
 	 * a given amount of time before recreating it, or to test the proxy
 	 * whether it is still alive.
 	 * @return the RMI stub to use for an invocation
-	 * @throws Exception if proxy creation failed
+	 * @throws RemoteLookupFailureException if RMI stub creation failed
 	 * @see #lookupStub
 	 */
-	protected Remote getStub() throws Exception {
+	protected Remote getStub() throws RemoteLookupFailureException {
 		if (!this.cacheStub || (this.lookupStubOnStartup && !this.refreshStubOnConnectFailure)) {
 			return (this.cachedStub != null ? this.cachedStub : lookupStub());
 		}
 		else {
-			synchronized (this) {
+			synchronized (this.stubMonitor) {
 				if (this.cachedStub == null) {
 					this.cachedStub = lookupStub();
 				}
@@ -241,13 +254,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	 * @see java.rmi.NoSuchObjectException
 	 */
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		Remote stub = null;
-		try {
-			stub = getStub();
-		}
-		catch (Throwable ex) {
-			throw new RemoteLookupFailureException("RMI lookup for service [" + getServiceUrl() + "] failed", ex);
-		}
+		Remote stub = getStub();
 		try {
 			return doInvoke(invocation, stub);
 		}
@@ -309,7 +316,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	 */
 	protected Object refreshAndRetry(MethodInvocation invocation) throws Throwable {
 		Remote freshStub = null;
-		synchronized (this) {
+		synchronized (this.stubMonitor) {
 			try {
 				freshStub = lookupStub();
 				if (this.cacheStub) {
@@ -346,7 +353,8 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 				throw exToThrow;
 			}
 			catch (Throwable ex) {
-				throw new AspectException("Failed to invoke remote service [" + getServiceUrl() + "]", ex);
+				throw new RemoteProxyFailureException(
+						"Failed to invoke RMI stub for remote service [" + getServiceUrl() + "]", ex);
 			}
 		}
 		else {
