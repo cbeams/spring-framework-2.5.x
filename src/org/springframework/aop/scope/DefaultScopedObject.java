@@ -20,11 +20,12 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.util.Assert;
 
 /**
- * Simple implementation of the ScopedObject interface that simply delegates the
- * <code>remove()</code> call to the underlying BeanFactory's <code>destroyScopedBean</code>.
+ * Default implementation of the ScopedObject interface. Simply delegates the calls
+ * to the underlying BeanFactory (<code>getBean</code>/<code>destroyScopedBean</code>).
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see org.springframework.beans.factory.BeanFactory#getBean
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#destroyScopedBean
  */
 public class DefaultScopedObject implements ScopedObject {
@@ -46,6 +47,10 @@ public class DefaultScopedObject implements ScopedObject {
 		this.targetBeanName = targetBeanName;
 	}
 
+
+	public Object getTargetObject() {
+		return this.beanFactory.getBean(this.targetBeanName);
+	}
 
 	public void removeFromScope() {
 		this.beanFactory.destroyScopedBean(this.targetBeanName);
