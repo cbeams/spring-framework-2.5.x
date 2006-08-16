@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,8 +16,8 @@
 
 package org.springframework.remoting.caucho;
 
-import com.caucho.hessian.client.HessianProxyFactory;
 import com.caucho.burlap.client.BurlapProxyFactory;
+import com.caucho.hessian.client.HessianProxyFactory;
 import junit.framework.TestCase;
 
 import org.springframework.beans.ITestBean;
@@ -90,9 +90,9 @@ public class CauchoRemotingTests extends TestCase {
 		HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
 		factory.setServiceInterface(ITestBean.class);
 		factory.setServiceUrl("http://localhosta/testbean");
+		factory.setProxyFactory(proxyFactory);
 		factory.setUsername("test");
 		factory.setPassword("bean");
-		factory.setProxyFactory(proxyFactory);
 		factory.setOverloadEnabled(true);
 		factory.afterPropertiesSet();
 		assertTrue("Correct singleton value", factory.isSingleton());
@@ -158,9 +158,9 @@ public class CauchoRemotingTests extends TestCase {
 		BurlapProxyFactoryBean factory = new BurlapProxyFactoryBean();
 		factory.setServiceInterface(ITestBean.class);
 		factory.setServiceUrl("http://localhosta/testbean");
+		factory.setProxyFactory(proxyFactory);
 		factory.setUsername("test");
 		factory.setPassword("bean");
-		factory.setProxyFactory(proxyFactory);
 		factory.setOverloadEnabled(true);
 		factory.afterPropertiesSet();
 
