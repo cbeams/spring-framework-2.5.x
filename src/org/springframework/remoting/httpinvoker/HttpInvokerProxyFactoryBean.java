@@ -16,11 +16,8 @@
 
 package org.springframework.remoting.httpinvoker;
 
-import java.net.MalformedURLException;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Factory bean for HTTP invoker proxies. Behaves like the proxied service when
@@ -51,12 +48,13 @@ import org.springframework.beans.factory.InitializingBean;
  * @see org.springframework.remoting.caucho.BurlapProxyFactoryBean
  */
 public class HttpInvokerProxyFactoryBean extends HttpInvokerClientInterceptor
-		implements FactoryBean, InitializingBean {
+		implements FactoryBean {
 
 	private Object serviceProxy;
 
 
-	public void afterPropertiesSet() throws MalformedURLException {
+	public void afterPropertiesSet() {
+		super.afterPropertiesSet();
 		if (getServiceInterface() == null) {
 			throw new IllegalArgumentException("serviceInterface is required");
 		}
