@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * Callback for resource cleanup at the end of a Spring-managed JTA transaction,
- * i.e. when participating in a JtaTransactionManager transaction.
+ * that is, when participating in a JtaTransactionManager transaction.
  *
  * @author Juergen Hoeller
  * @see SessionFactoryUtils
@@ -182,7 +182,7 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 			this.holderActive = false;
 			if (this.hibernateTransactionCompletion) {
 				// Close the Hibernate Session here in case of a Hibernate TransactionManagerLookup:
-				// Hibernate will automatically defer the actual closing to JTA transaction completion.
+				// Hibernate will automatically defer the actual closing until JTA transaction completion.
 				// Else, the Session will be closed in the afterCompletion method, to provide the
 				// correct transaction status for releasing the Session's cache locks.
 				SessionFactoryUtils.closeSessionOrRegisterDeferredClose(this.sessionHolder.getSession(), this.sessionFactory);
