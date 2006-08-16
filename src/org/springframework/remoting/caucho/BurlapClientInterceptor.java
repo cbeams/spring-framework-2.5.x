@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,12 +23,15 @@ import java.net.MalformedURLException;
 
 import com.caucho.burlap.client.BurlapProxyFactory;
 import com.caucho.burlap.client.BurlapRuntimeException;
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
+import org.springframework.remoting.RemoteLookupFailureException;
+import org.springframework.remoting.RemoteProxyFailureException;
+import org.springframework.remoting.support.UrlBasedRemoteAccessor;
+import org.springframework.util.Assert;
 
 /**
  * Interceptor for accessing a Burlap service.
@@ -54,9 +57,9 @@ import org.springframework.remoting.RemoteConnectFailureException;
  * @see BurlapProxyFactoryBean
  * @see com.caucho.burlap.client.BurlapProxyFactory
  */
-public class BurlapClientInterceptor extends CauchoRemoteAccessor implements MethodInterceptor {
+public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor {
 
-	private BurlapProxyFactory proxyFactory;
+	private BurlapProxyFactory proxyFactory = new BurlapProxyFactory();
 
 	private Object burlapProxy;
 
@@ -68,29 +71,55 @@ public class BurlapClientInterceptor extends CauchoRemoteAccessor implements Met
 	 * in particular a custom BurlapProxyFactory subclass.
 	 */
 	public void setProxyFactory(BurlapProxyFactory proxyFactory) {
-		this.proxyFactory = proxyFactory;
+		this.proxyFactory = (proxyFactory != null ? proxyFactory : new BurlapProxyFactory());
+	}
+
+	/**
+	 * Set the username that this factory should use to access the remote service.
+	 * Default is none.
+	 * <p>The username will be sent by Hessian via HTTP Basic Authentication.
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setUser
+	 */
+	public void setUsername(String username) {
+		this.proxyFactory.setUser(username);
+	}
+
+	/**
+	 * Set the password that this factory should use to access the remote service.
+	 * Default is none.
+	 * <p>The password will be sent by Hessian via HTTP Basic Authentication.
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setPassword
+	 */
+	public void setPassword(String password) {
+		this.proxyFactory.setPassword(password);
+	}
+
+	/**
+	 * Set whether overloaded methods should be enabled for remote invocations.
+	 * Default is "false".
+	 * @see com.caucho.hessian.client.HessianProxyFactory#setOverloadEnabled
+	 */
+	public void setOverloadEnabled(boolean overloadEnabled) {
+		this.proxyFactory.setOverloadEnabled(overloadEnabled);
+	}
+
+
+	public void afterPropertiesSet() {
+		super.afterPropertiesSet();
+		prepare();
 	}
 
 	/**
 	 * Initialize the Burlap proxy for this interceptor.
+	 * @throws RemoteLookupFailureException if the service URL is invalid
 	 */
-	public void prepare() throws MalformedURLException {
-		super.prepare();
-
-		if (this.proxyFactory == null) {
-			this.proxyFactory = new BurlapProxyFactory();
+	public void prepare() throws RemoteLookupFailureException {
+		try {
+			this.burlapProxy = createBurlapProxy(this.proxyFactory);
 		}
-		if (getUsername() != null) {
-			this.proxyFactory.setUser(getUsername());
+		catch (MalformedURLException ex) {
+			throw new RemoteLookupFailureException("Service URL [" + getServiceUrl() + "] is invalid", ex);
 		}
-		if (getPassword() != null) {
-			this.proxyFactory.setPassword(getPassword());
-		}
-		if (isOverloadEnabled()) {
-			this.proxyFactory.setOverloadEnabled(isOverloadEnabled());
-		}
-
-		this.burlapProxy = createBurlapProxy(this.proxyFactory);
 	}
 
 	/**
@@ -101,6 +130,7 @@ public class BurlapClientInterceptor extends CauchoRemoteAccessor implements Met
 	 * @see com.caucho.burlap.client.BurlapProxyFactory#create
 	 */
 	protected Object createBurlapProxy(BurlapProxyFactory proxyFactory) throws MalformedURLException {
+		Assert.notNull(getServiceInterface(), "serviceInterface is required");
 		return proxyFactory.create(getServiceInterface(), getServiceUrl());
 	}
 
@@ -127,7 +157,8 @@ public class BurlapClientInterceptor extends CauchoRemoteAccessor implements Met
 			throw ex.getTargetException();
 		}
 		catch (Throwable ex) {
-			throw new AspectException("Failed to invoke Burlap remote service [" + getServiceUrl() + "]", ex);
+			throw new RemoteProxyFailureException(
+					"Failed to invoke Burlap proxy for remote service [" + getServiceUrl() + "]", ex);
 		}
 	}
 
