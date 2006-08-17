@@ -30,6 +30,7 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.TransactionUsageException;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 
 /**
@@ -212,6 +213,26 @@ public class MethodMapTransactionAttributeSource
 			initMethodMap();
 		}
 		return (TransactionAttribute) this.transactionAttributeMap.get(method);
+	}
+
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof MethodMapTransactionAttributeSource)) {
+			return false;
+		}
+		MethodMapTransactionAttributeSource otherTas = (MethodMapTransactionAttributeSource) other;
+		return ObjectUtils.nullSafeEquals(this.methodMap, otherTas.methodMap);
+	}
+
+	public int hashCode() {
+		return MethodMapTransactionAttributeSource.class.hashCode();
+	}
+
+	public String toString() {
+		return getClass().getName() + ": " + this.methodMap;
 	}
 
 }

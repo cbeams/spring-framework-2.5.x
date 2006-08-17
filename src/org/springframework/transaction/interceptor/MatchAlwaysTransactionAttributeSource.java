@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,8 @@ package org.springframework.transaction.interceptor;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+
+import org.springframework.util.ObjectUtils;
 
 /**
  * Very simple implementation of TransactionAttributeSource which will always return
@@ -35,6 +37,7 @@ public class MatchAlwaysTransactionAttributeSource implements TransactionAttribu
   
 	private TransactionAttribute transactionAttribute = new DefaultTransactionAttribute();
 
+
 	/**
 	 * Allows a transaction attribute to be specified, using the String form, for
 	 * example, "PROPAGATION_REQUIRED".
@@ -45,8 +48,29 @@ public class MatchAlwaysTransactionAttributeSource implements TransactionAttribu
 		this.transactionAttribute = transactionAttribute;
 	}
 
+
 	public TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
-		return transactionAttribute;
+		return this.transactionAttribute;
+	}
+
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof MatchAlwaysTransactionAttributeSource)) {
+			return false;
+		}
+		MatchAlwaysTransactionAttributeSource otherTas = (MatchAlwaysTransactionAttributeSource) other;
+		return ObjectUtils.nullSafeEquals(this.transactionAttribute, otherTas.transactionAttribute);
+	}
+
+	public int hashCode() {
+		return MatchAlwaysTransactionAttributeSource.class.hashCode();
+	}
+
+	public String toString() {
+		return getClass().getName() + ": " + this.transactionAttribute;
 	}
 
 }

@@ -26,6 +26,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 
 /**
@@ -138,6 +139,26 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	 */
 	protected boolean isMatch(String methodName, String mappedName) {
 		return PatternMatchUtils.simpleMatch(mappedName, methodName);
+	}
+
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof NameMatchTransactionAttributeSource)) {
+			return false;
+		}
+		NameMatchTransactionAttributeSource otherTas = (NameMatchTransactionAttributeSource) other;
+		return ObjectUtils.nullSafeEquals(this.nameMap, otherTas.nameMap);
+	}
+
+	public int hashCode() {
+		return NameMatchTransactionAttributeSource.class.hashCode();
+	}
+
+	public String toString() {
+		return getClass().getName() + ": " + this.nameMap;
 	}
 
 }

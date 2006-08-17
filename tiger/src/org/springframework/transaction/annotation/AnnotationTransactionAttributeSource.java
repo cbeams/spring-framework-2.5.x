@@ -127,4 +127,13 @@ public class AnnotationTransactionAttributeSource
 		return null;
 	}
 
+
+	public boolean equals(Object other) {
+		return (other == this || other instanceof AnnotationTransactionAttributeSource);
+	}
+
+	public int hashCode() {
+		return AnnotationTransactionAttributeSource.class.hashCode();
+	}
+
 }
