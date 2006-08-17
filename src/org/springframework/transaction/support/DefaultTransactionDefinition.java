@@ -215,16 +215,16 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 
 	/**
-	 * This implementation of equals compares the toString results.
-	 * @see #toString
+	 * This implementation compares the <code>toString()</code> results.
+	 * @see #toString()
 	 */
 	public boolean equals(Object other) {
-		return (other instanceof TransactionDefinition) && toString().equals(other.toString());
+		return (other instanceof TransactionDefinition && toString().equals(other.toString()));
 	}
 
 	/**
-	 * This implementation of hashCode returns toString's hash code.
-	 * @see #toString
+	 * This implementation returns <code>toString()</code>'s hash code.
+	 * @see #toString()
 	 */
 	public int hashCode() {
 		return toString().hashCode();
@@ -244,7 +244,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 	/**
 	 * Return an identifying description of this transaction definition.
-	 * Available for subclasses.
+	 * <p>Available to subclasses, for inclusion in their <code>toString()</code> result.
 	 */
 	protected final StringBuffer getDefinitionDescription() {
 		StringBuffer desc = new StringBuffer();
