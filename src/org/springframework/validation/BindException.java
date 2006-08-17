@@ -16,7 +16,6 @@
 
 package org.springframework.validation;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -231,13 +230,15 @@ public class BindException extends Exception implements BindingResult {
 	 * Returns diagnostic information about the errors held in this object.
 	 */
 	public String getMessage() {
-		StringBuffer sb = new StringBuffer("BindException: ");
-		sb.append(getErrorCount()).append(" errors");
-		Iterator it = this.bindingResult.getAllErrors().iterator();
-		while (it.hasNext()) {
-			sb.append("; ").append(it.next());
-		}
-		return sb.toString();
+		return this.bindingResult.toString();
+	}
+
+	public boolean equals(Object other) {
+		return (this == other || this.bindingResult.equals(other));
+	}
+
+	public int hashCode() {
+		return this.bindingResult.hashCode();
 	}
 
 }

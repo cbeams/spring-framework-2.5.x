@@ -406,6 +406,34 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	}
 
 
+	public String toString() {
+		StringBuffer sb = new StringBuffer(getClass().getName());
+		sb.append(": ").append(getErrorCount()).append(" errors");
+		Iterator it = getAllErrors().iterator();
+		while (it.hasNext()) {
+			sb.append('\n').append(it.next());
+		}
+		return sb.toString();
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof BindingResult)) {
+			return false;
+		}
+		BindingResult otherResult = (BindingResult) other;
+		return (getObjectName().equals(otherResult.getObjectName()) &&
+				getTarget().equals(otherResult.getTarget()) &&
+				getAllErrors().equals(otherResult.getAllErrors()));
+	}
+
+	public int hashCode() {
+		return getObjectName().hashCode() * 29 + getTarget().hashCode();
+	}
+
+
 	//---------------------------------------------------------------------
 	// Template methods to be implemented/overridden by subclasses
 	//---------------------------------------------------------------------

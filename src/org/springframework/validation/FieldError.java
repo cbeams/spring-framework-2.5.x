@@ -16,6 +16,8 @@
 
 package org.springframework.validation;
 
+import org.springframework.util.Assert;
+
 /**
  * Class that encapsulates a field error, that is, a reason for rejecting
  * a specific field value.
@@ -53,6 +55,7 @@ public class FieldError extends ObjectError {
 			String[] codes, Object[] arguments, String defaultMessage) {
 
 		super(objectName, codes, arguments, defaultMessage);
+		Assert.notNull(field, "Field must not be null");
 		this.field = field;
 		this.rejectedValue = rejectedValue;
 		this.bindingFailure = bindingFailure;
@@ -85,6 +88,21 @@ public class FieldError extends ObjectError {
 	public String toString() {
 		return "Field error in object '" + getObjectName() + "' on field '" + this.field +
 				"': rejected value [" + this.rejectedValue + "]; " + resolvableToString();
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!super.equals(other)) {
+			return false;
+		}
+		FieldError otherError = (FieldError) other;
+		return getField().equals(otherError.getField());
+	}
+
+	public int hashCode() {
+		return super.hashCode() * 29 + getField().hashCode();
 	}
 
 }

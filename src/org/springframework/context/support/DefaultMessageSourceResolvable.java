@@ -19,6 +19,7 @@ package org.springframework.context.support;
 import java.io.Serializable;
 
 import org.springframework.context.MessageSourceResolvable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -99,8 +100,8 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	}
 
 	/**
-	 * Return the default code of this resolvable, i.e. the last one in the
-	 * codes array.
+	 * Return the default code of this resolvable, that is,
+	 * the last one in the codes array.
 	 */
 	public String getCode() {
 		return (this.codes != null && this.codes.length > 0) ? this.codes[this.codes.length - 1] : null;
@@ -114,7 +115,12 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 		return defaultMessage;
 	}
 
-	protected String resolvableToString() {
+
+	/**
+	 * Build a default String representation for this MessageSourceResolvable:
+	 * including codes, arguments, and default message.
+	 */
+	protected final String resolvableToString() {
 		StringBuffer buf = new StringBuffer();
 		buf.append("codes [").append(StringUtils.arrayToDelimitedString(this.codes, ","));
 		buf.append("]; arguments [" + StringUtils.arrayToDelimitedString(this.arguments, ","));
@@ -122,8 +128,30 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 		return buf.toString();
 	}
 
+	/**
+	 * Default implementation exposes the attributes of this MessageSourceResolvable.
+	 * To be overridden in more specific subclasses, potentially including the
+	 * resolvable content through <code>resolvableToString()</code>.
+	 * @see #resolvableToString()
+	 */
 	public String toString() {
-		return "MessageSourceResolvable: " + resolvableToString();
+		return getClass().getName() + ": " + resolvableToString();
+	}
+
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof MessageSourceResolvable)) {
+			return false;
+		}
+		MessageSourceResolvable otherResolvable = (MessageSourceResolvable) other;
+		return ObjectUtils.nullSafeEquals(getCodes(), otherResolvable.getCodes());
+	}
+
+	public int hashCode() {
+		return ObjectUtils.nullSafeHashCode(getCodes());
 	}
 
 }

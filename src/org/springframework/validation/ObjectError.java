@@ -17,6 +17,7 @@
 package org.springframework.validation;
 
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.util.Assert;
 
 /**
  * Class that encapsulates an object error, that is, a global reason for
@@ -44,9 +45,9 @@ public class ObjectError extends DefaultMessageSourceResolvable {
    */
 	public ObjectError(String objectName, String[] codes, Object[] arguments, String defaultMessage) {
 		super(codes, arguments, defaultMessage);
+		Assert.notNull(objectName, "Object name must not be null");
 		this.objectName = objectName;
 	}
-
 
   /**
 	 * Return the name of the affected object.
@@ -58,6 +59,21 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 
 	public String toString() {
 		return "Error in object '" + this.objectName + "': " + resolvableToString();
+	}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(getClass().equals(other.getClass())) || !super.equals(other)) {
+			return false;
+		}
+		ObjectError otherError = (ObjectError) other;
+		return getObjectName().equals(otherError.getObjectName());
+	}
+
+	public int hashCode() {
+		return super.hashCode() * 29 + getObjectName().hashCode();
 	}
 
 }

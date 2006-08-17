@@ -32,12 +32,14 @@ import org.springframework.beans.BeanWithObjectProperty;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.IndexedTestBean;
+import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.NullValueInNestedPathException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.SerializablePerson;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -66,10 +68,22 @@ public class DataBinderTests extends TestCase {
 		assertTrue("changed name correctly", rod.getName().equals("Rod"));
 		assertTrue("changed age correctly", rod.getAge() == 32);
 
-		Map m = binder.getBindingResult().getModel();
-		assertTrue("There is one element in map", m.size() == 2);
-		TestBean tb = (TestBean) m.get("person");
+		Map map = binder.getBindingResult().getModel();
+		assertTrue("There is one element in map", map.size() == 2);
+		TestBean tb = (TestBean) map.get("person");
 		assertTrue("Same object", tb.equals(rod));
+
+		BindingResult other = new BeanPropertyBindingResult(rod, "person");
+		assertEquals(other, binder.getBindingResult());
+		assertEquals(binder.getBindingResult(), other);
+		BindException ex = new BindException(other);
+		assertEquals(ex, other);
+		assertEquals(other, ex);
+		assertEquals(ex, binder.getBindingResult());
+		assertEquals(binder.getBindingResult(), ex);
+
+		other.reject("xxx");
+		assertTrue(!other.equals(binder.getBindingResult()));
 	}
 
 	public void testBindingNoErrorsNotIgnoreUnknown() throws Exception {
@@ -166,6 +180,12 @@ public class DataBinderTests extends TestCase {
 			assertEquals("m.y", binder.getBindingResult().getFieldValue("touchy"));
 			assertEquals("m.y", binder.getBindingResult().getFieldError("touchy").getRejectedValue());
 			assertNull(tb.getTouchy());
+
+			BindingResult other = new BeanPropertyBindingResult(rod, "person");
+			assertTrue(!other.equals(ex));
+			other.rejectValue("age", TypeMismatchException.ERROR_CODE);
+			other.rejectValue("touchy", MethodInvocationException.ERROR_CODE);
+			assertEquals(other, ex);
 		}
 	}
 
