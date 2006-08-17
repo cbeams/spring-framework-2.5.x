@@ -171,7 +171,19 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	boolean isCurrentlyInCreation(String beanName);
 
 	/**
-	 * Destroy the specified scoped bean in the current target scope.
+	 * Destroy the given bean instance (usually a prototype instance
+	 * obtained from this factory) according to its bean definition.
+	 * <p>Any exception that arises during destruction should be caught
+	 * and logged instead of propagated to the caller of this method.
+	 * @param beanName the name of the bean definition
+	 * @param beanInstance the bean instance to destroy
+	 */
+	void destroyBean(String beanName, Object beanInstance);
+
+	/**
+	 * Destroy the specified scoped bean in the current target scope, if any.
+	 * <p>Any exception that arises during destruction should be caught
+	 * and logged instead of propagated to the caller of this method.
 	 * @param beanName the name of the scoped bean
 	 */
 	void destroyScopedBean(String beanName);
@@ -179,7 +191,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	/**
 	 * Destroy all singleton beans in this factory, including inner beans that have
 	 * been registered as disposable. To be called on shutdown of a factory.
-	 * <p>Should never throw an exception but rather log shutdown failures.
+	 * <p>Any exception that arises during destruction should be caught
+	 * and logged instead of propagated to the caller of this method.
 	 */
 	void destroySingletons();
 

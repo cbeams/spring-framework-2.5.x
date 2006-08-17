@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,8 +21,8 @@ import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.Constants;
 
 /**
@@ -208,7 +208,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	 * Creates and holds an ObjectPool instance.
 	 * @see #createObjectPool()
 	 */
-	protected final void createPool(BeanFactory beanFactory) {
+	protected final void createPool() {
 		logger.info("Creating Commons object pool");
 		this.pool = createObjectPool();
 	}
@@ -274,20 +274,23 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 		return newPrototypeInstance();
 	}
 
-	public void destroyObject(Object o) throws Exception {
-		if (o instanceof DisposableBean) {
-			((DisposableBean) o).destroy();
+	public void destroyObject(Object obj) throws Exception {
+		if (getBeanFactory() instanceof ConfigurableBeanFactory) {
+			((ConfigurableBeanFactory) getBeanFactory()).destroyBean(getTargetBeanName(), obj);
+		}
+		else if (obj instanceof DisposableBean) {
+			((DisposableBean) obj).destroy();
 		}
 	}
 
-	public boolean validateObject(Object o) {
+	public boolean validateObject(Object obj) {
 		return true;
 	}
 
-	public void activateObject(Object o) throws Exception {
+	public void activateObject(Object obj) {
 	}
 
-	public void passivateObject(Object o) throws Exception {
+	public void passivateObject(Object obj) {
 	}
 
 }
