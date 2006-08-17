@@ -56,6 +56,7 @@ public interface RequestAttributes {
 	/**
 	 * Return the value for the scoped attribute of the given name, if any.
 	 * @param name the name of the attribute
+	 * @param scope the scope identifier
 	 * @return the current attribute value, or <code>null</code> if not found
 	 */
 	Object getAttribute(String name, int scope);
@@ -64,6 +65,7 @@ public interface RequestAttributes {
 	 * Set the value for the scoped attribute of the given name.
 	 * Replaces an existing value, if any.
 	 * @param name the name of the attribute
+	 * @param scope the scope identifier
 	 * @param value the value for the attribute
 	 */
 	void setAttribute(String name, Object value, int scope);
@@ -71,8 +73,28 @@ public interface RequestAttributes {
 	/**
 	 * Remove the scoped attribute of the given name, if it exists.
 	 * @param name the name of the attribute
+	 * @param scope the scope identifier
 	 */
 	void removeAttribute(String name, int scope);
+
+	/**
+	 * Register a callback to be executed at destruction of the
+	 * specified attribute in the given scope.
+	 * <p>Implementations should do their best to execute the callback
+	 * at the appropriate time: that is, at request completion or session
+	 * termination, respectively. If such a callback is not supported
+	 * by the underlying runtime environment, the callback should be
+	 * ignored and a corresponding warning should be logged.
+	 * <p>Note that destruction usually corresponds to destruction of the
+	 * entire scope, not to the individual attribute having been removed.
+	 * If an attribute gets removed via this facade's <code>removeAttribute</code>
+	 * method, any registered destruction callback should be disabled as well
+	 * (assuming that the removed object will be reused or manually destroyed).
+	 * @param name the name of the attribute to register the callback for
+	 * @param callback the destruction callback to be executed
+	 * @param scope the scope identifier
+	 */
+	void registerDestructionCallback(String name, Runnable callback, int scope);
 
 	/**
 	 * Expose the best available mutex for the underlying session:

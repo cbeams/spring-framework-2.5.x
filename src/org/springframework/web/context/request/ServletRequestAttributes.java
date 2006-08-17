@@ -22,8 +22,14 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -36,7 +42,19 @@ import org.springframework.web.util.WebUtils;
  * @see javax.servlet.ServletRequest#getAttribute
  * @see javax.servlet.http.HttpSession#getAttribute
  */
-public class ServletRequestAttributes implements RequestAttributes {
+public class ServletRequestAttributes extends AbstractRequestAttributes {
+
+	public static final String DESTRUCTION_CALLBACK_NAME_PREFIX =
+			ServletRequestAttributes.class.getName() + ".DESTRUCTION_CALLBACK.";
+
+	/**
+	 * We'll create a lot of these objects, so we don't want a new logger every time.
+	 */
+	private static final Log logger = LogFactory.getLog(ServletRequestAttributes.class);
+
+	private final static boolean bindingListenerAvailable =
+			ClassUtils.isPresent("javax.servlet.http.HttpSessionBindingListener");
+
 
 	private final HttpServletRequest request;
 
@@ -93,13 +111,25 @@ public class ServletRequestAttributes implements RequestAttributes {
 	public void removeAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			this.request.removeAttribute(name);
+			removeRequestDestructionCallback(name);
 		}
 		else {
 			HttpSession session = this.request.getSession(false);
 			if (session != null) {
 				session.removeAttribute(name);
 				this.sessionAttributesToUpdate.remove(name);
+				// Remove any registered destruction callback as well.
+				session.removeAttribute(DESTRUCTION_CALLBACK_NAME_PREFIX + name);
 			}
+		}
+	}
+
+	public void registerDestructionCallback(String name, Runnable callback, int scope) {
+		if (scope == SCOPE_REQUEST) {
+			registerRequestDestructionCallback(name, callback);
+		}
+		else {
+			registerSessionDestructionCallback(name, callback);
 		}
 	}
 
@@ -112,7 +142,7 @@ public class ServletRequestAttributes implements RequestAttributes {
 	 * Update all accessed session attributes through <code>session.setAttribute</code>
 	 * calls, explicitly indicating to the container that they might have been modified.
 	 */
-	public void updateAccessedAttributes() {
+	protected void updateAccessedSessionAttributes() {
 		HttpSession session = this.request.getSession(false);
 		if (session != null) {
 			for (Iterator it = this.sessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
@@ -126,6 +156,46 @@ public class ServletRequestAttributes implements RequestAttributes {
 			}
 		}
 		this.sessionAttributesToUpdate.clear();
+	}
+
+	/**
+	 * Register the given callback as to be executed after session termination.
+	 * @param name the name of the attribute to register the callback for
+	 * @param callback the callback to be executed for destruction
+	 */
+	private void registerSessionDestructionCallback(String name, Runnable callback) {
+		if (bindingListenerAvailable) {
+			HttpSession session = this.request.getSession();
+			session.setAttribute(DESTRUCTION_CALLBACK_NAME_PREFIX + name,
+					new DestructionCallbackBindingListener(callback));
+		}
+		else {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not register destruction callback [" + callback + "] for attribute '" +
+						name + "' in session scope because Servlet 2.3 API is not available");
+			}
+		}
+	}
+
+
+	/**
+	 * Adapter that implements the Servlet 2.3 HttpSessionBindingListener
+	 * interface, wrapping a request destruction callback.
+	 */
+	private static class DestructionCallbackBindingListener implements HttpSessionBindingListener {
+
+		private final Runnable destructionCallback;
+
+		public DestructionCallbackBindingListener(Runnable destructionCallback) {
+			this.destructionCallback = destructionCallback;
+		}
+
+		public void valueBound(HttpSessionBindingEvent event) {
+		}
+
+		public void valueUnbound(HttpSessionBindingEvent event) {
+			this.destructionCallback.run();
+		}
 	}
 
 }

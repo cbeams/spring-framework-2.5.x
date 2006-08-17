@@ -23,7 +23,11 @@ import java.util.Map;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
+import org.springframework.web.context.request.AbstractRequestAttributes;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.portlet.util.PortletUtils;
 
@@ -43,7 +47,13 @@ import org.springframework.web.portlet.util.PortletUtils;
  * @see RequestAttributes#SCOPE_SESSION
  * @see RequestAttributes#SCOPE_GLOBAL_SESSION
  */
-public class PortletRequestAttributes implements RequestAttributes {
+public class PortletRequestAttributes extends AbstractRequestAttributes {
+
+	/**
+	 * We'll create a lot of these objects, so we don't want a new logger every time.
+	 */
+	private static final Log logger = LogFactory.getLog(PortletRequestAttributes.class);
+
 
 	private final PortletRequest request;
 
@@ -117,6 +127,7 @@ public class PortletRequestAttributes implements RequestAttributes {
 	public void removeAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			this.request.removeAttribute(name);
+			removeRequestDestructionCallback(name);
 		}
 		else {
 			PortletSession session = this.request.getPortletSession(false);
@@ -133,6 +144,15 @@ public class PortletRequestAttributes implements RequestAttributes {
 		}
 	}
 
+	public void registerDestructionCallback(String name, Runnable callback, int scope) {
+		if (scope == SCOPE_REQUEST) {
+			registerRequestDestructionCallback(name, callback);
+		}
+		else {
+			registerSessionDestructionCallback(name, callback);
+		}
+	}
+
 	public Object getSessionMutex() {
 		return PortletUtils.getSessionMutex(this.request.getPortletSession());
 	}
@@ -142,7 +162,7 @@ public class PortletRequestAttributes implements RequestAttributes {
 	 * Update all accessed session attributes through <code>session.setAttribute</code>
 	 * calls, explicitly indicating to the container that they might have been modified.
 	 */
-	public void updateAccessedAttributes() {
+	protected void updateAccessedSessionAttributes() {
 		PortletSession session = this.request.getPortletSession(false);
 		if (session != null) {
 			for (Iterator it = this.sessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
@@ -166,6 +186,18 @@ public class PortletRequestAttributes implements RequestAttributes {
 		}
 		this.sessionAttributesToUpdate.clear();
 		this.globalSessionAttributesToUpdate.clear();
+	}
+
+	/**
+	 * Register the given callback as to be executed after session termination.
+	 * @param name the name of the attribute to register the callback for
+	 * @param callback the callback to be executed for destruction
+	 */
+	private void registerSessionDestructionCallback(String name, Runnable callback) {
+		if (logger.isWarnEnabled()) {
+			logger.warn("Could not register destruction callback [" + callback + "] for attribute '" + name +
+					"' for session scope because Portlet API 1.0 does not support session attribute callbacks");
+		}
 	}
 
 }
