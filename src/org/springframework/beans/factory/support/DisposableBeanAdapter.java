@@ -45,7 +45,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor
  * @see AbstractBeanDefinition#getDestroyMethodName()
  */
-class DisposableBeanAdapter implements DisposableBean {
+class DisposableBeanAdapter implements DisposableBean, Runnable {
 
 	private static final Log logger = LogFactory.getLog(DisposableBeanAdapter.class);
 
@@ -77,7 +77,11 @@ class DisposableBeanAdapter implements DisposableBean {
 	}
 
 
-	public void destroy() throws Exception {
+	public void run() {
+		destroy();
+	}
+
+	public void destroy() {
 		if (this.beanPostProcessors != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Applying DestructionAwareBeanPostProcessors to bean with name '" + this.beanName + "'");
@@ -94,7 +98,12 @@ class DisposableBeanAdapter implements DisposableBean {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Invoking destroy() on bean with name '" + this.beanName + "'");
 			}
-			((DisposableBean) this.bean).destroy();
+			try {
+				((DisposableBean) this.bean).destroy();
+			}
+			catch (Throwable ex) {
+				logger.error("Couldn't invoke destroy method of bean with name '" + this.beanName + "'", ex);
+			}
 		}
 
 		if (this.mergedBeanDefinition != null) {

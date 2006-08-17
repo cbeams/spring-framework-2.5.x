@@ -59,4 +59,17 @@ public interface Scope {
 	 */
 	Object remove(String name);
 
+	/**
+	 * Register a callback to be executed at destruction of the specified
+	 * object (or at destruction of the entire scope, if the scope does not
+	 * destroy individual objects but rather only terminate in its entirety).
+	 * <p>Implementations should do their best to execute the callback
+	 * at the appropriate time. If such a callback is not supported
+	 * by the underlying runtime environment, the callback should be
+	 * ignored and a corresponding warning should be logged.
+	 * @param name the name of the object to execute the destruction callback for
+	 * @param callback the destruction callback to be executed
+	 */
+	void registerDestructionCallback(String name, Runnable callback);
+
 }

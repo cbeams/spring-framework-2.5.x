@@ -58,6 +58,11 @@ public abstract class AbstractRequestAttributesScope implements Scope {
 		}
 	}
 
+	public void registerDestructionCallback(String name, Runnable callback) {
+		RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
+		attributes.registerDestructionCallback(name, callback, getScope());
+	}
+
 	/**
 	 * Template method that determines the actual target scope.
 	 * To be implemented by subclasses.

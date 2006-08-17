@@ -17,16 +17,14 @@
 package org.springframework.web.context.request;
 
 import junit.framework.TestCase;
+
+import org.springframework.beans.DerivedTestBean;
+import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.beans.TestBean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.context.request.SessionScope;
 
 /**
  * @author Rob Harrop
@@ -36,32 +34,53 @@ public class SessionScopeTests extends TestCase {
 
 	private DefaultListableBeanFactory beanFactory;
 
-	private MockHttpServletRequest request;
-
-	private MockHttpSession session;
-
-	private RequestAttributes requestAttributes;
-
 	protected void setUp() throws Exception {
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.beanFactory.registerScope("session", new SessionScope());
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.loadBeanDefinitions(new ClassPathResource("sessionScopeTests.xml", getClass()));
-
-		this.session = new MockHttpSession();
-
-		this.request = new MockHttpServletRequest();
-		this.request.setSession(this.session);
-		this.requestAttributes = new ServletRequestAttributes(this.request);
-
-		RequestContextHolder.setRequestAttributes(this.requestAttributes);
 	}
 
 	public void testGetFromScope() throws Exception {
-		String name = "sessionScopedObject";
-		assertNull(session.getAttribute(name));
-		TestBean bean = (TestBean)this.beanFactory.getBean(name);
-		assertEquals(session.getAttribute(name), bean);
-		assertSame(bean, this.beanFactory.getBean(name));
+		MockHttpSession session = new MockHttpSession();
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setSession(session);
+		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
+
+		RequestContextHolder.setRequestAttributes(requestAttributes);
+		try {
+			String name = "sessionScopedObject";
+			assertNull(session.getAttribute(name));
+			TestBean bean = (TestBean) this.beanFactory.getBean(name);
+			assertEquals(session.getAttribute(name), bean);
+			assertSame(bean, this.beanFactory.getBean(name));
+		}
+		finally {
+			RequestContextHolder.setRequestAttributes(null);
+		}
 	}
+
+	public void testDestructionAtSessionTermination() throws Exception {
+		MockHttpSession session = new MockHttpSession();
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setSession(session);
+		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
+
+		RequestContextHolder.setRequestAttributes(requestAttributes);
+		try {
+			String name = "sessionScopedDisposableObject";
+			assertNull(session.getAttribute(name));
+			DerivedTestBean bean = (DerivedTestBean) this.beanFactory.getBean(name);
+			assertEquals(session.getAttribute(name), bean);
+			assertSame(bean, this.beanFactory.getBean(name));
+
+			requestAttributes.requestCompleted();
+			session.invalidate();
+			assertTrue(bean.wasDestroyed());
+		}
+		finally {
+			RequestContextHolder.setRequestAttributes(null);
+		}
+	}
+
 }

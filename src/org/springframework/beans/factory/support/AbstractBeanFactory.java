@@ -268,7 +268,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 			else {
 				String scopeName = mergedBeanDefinition.getScope();
-				Scope scope = (Scope) this.scopes.get(scopeName);
+				final Scope scope = (Scope) this.scopes.get(scopeName);
 				if (scope == null) {
 					throw new IllegalStateException("No Scope registered for scope '" + scopeName + "'");
 				}
@@ -277,7 +277,12 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 						public Object getObject() throws BeansException {
 							beforePrototypeCreation(beanName);
 							try {
-								return createBean(beanName, mergedBeanDefinition, args);
+								Object bean = createBean(beanName, mergedBeanDefinition, args);
+								if (requiresDestruction(bean, mergedBeanDefinition)) {
+									scope.registerDestructionCallback(beanName,
+											new DisposableBeanAdapter(bean, beanName, mergedBeanDefinition, getBeanPostProcessors()));
+								}
+								return bean;
 							}
 							finally {
 								afterPrototypeCreation(beanName);
@@ -602,6 +607,21 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		return isSingletonCurrentlyInCreation(beanName) || isPrototypeCurrentlyInCreation(beanName);
 	}
 
+	public void destroyBean(String beanName, Object beanInstance) {
+		destroyBean(beanName, beanInstance, getMergedBeanDefinition(beanName));
+	}
+
+	/**
+	 * Destroy the given bean instance (usually a prototype instance
+	 * obtained from this factory) according to the given bean definition.
+	 * @param beanName the name of the bean definition
+	 * @param beanInstance the bean instance to destroy
+	 * @param mergedBeanDefinition the merged bean definition
+	 */
+	protected void destroyBean(String beanName, Object beanInstance, RootBeanDefinition mergedBeanDefinition) {
+		new DisposableBeanAdapter(beanInstance, beanName, mergedBeanDefinition, getBeanPostProcessors()).destroy();
+	}
+
 	public void destroyScopedBean(String beanName) {
 		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName);
 		if (mergedBeanDefinition.isSingleton() || mergedBeanDefinition.isPrototype()) {
@@ -615,12 +635,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		}
 		Object bean = scope.remove(beanName);
 		if (bean != null) {
-			try {
-				new DisposableBeanAdapter(bean, beanName, mergedBeanDefinition, getBeanPostProcessors()).destroy();
-			}
-			catch (Throwable ex) {
-				logger.error("Destroy method on bean with name '" + beanName + "' threw an exception", ex);
-			}
+			destroyBean(beanName, bean, mergedBeanDefinition);
 		}
 	}
 
@@ -1003,6 +1018,11 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		return containsLocalBean(beanName) || hasDependentBean(beanName);
 	}
 
+	protected boolean requiresDestruction(Object bean, RootBeanDefinition mergedBeanDefinition) {
+		return (bean instanceof DisposableBean || mergedBeanDefinition.getDestroyMethodName() != null ||
+				hasDestructionAwareBeanPostProcessors());
+	}
+
 	/**
 	 * Add the given bean to the list of disposable beans in this factory,
 	 * registering its DisposableBean interface and/or the given destroy method
@@ -1020,10 +1040,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	protected void registerDisposableBeanIfNecessary(
 			String beanName, Object bean, RootBeanDefinition mergedBeanDefinition) {
 
-		if (mergedBeanDefinition.isSingleton() &&
-				((bean instanceof DisposableBean || mergedBeanDefinition.getDestroyMethodName() != null ||
-				hasDestructionAwareBeanPostProcessors()))) {
-
+		if (mergedBeanDefinition.isSingleton() && requiresDestruction(bean, mergedBeanDefinition)) {
 			// Register a DisposableBean implementation that performs all destruction
 			// work for the given bean: DestructionAwareBeanPostProcessors,
 			// DisposableBean interface, custom destroy method.

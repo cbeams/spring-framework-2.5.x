@@ -16,20 +16,19 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 import org.easymock.AbstractMatcher;
+import org.easymock.MockControl;
+
 import org.springframework.AbstractScalarMockTemplate;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.test.AssertThrows;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * Unit and integration tests for the {@link CustomScopeConfigurer} class.
- *
  * @author Rick Evans
  */
 public final class CustomScopeConfigurerTests extends TestCase {
@@ -279,6 +278,9 @@ public final class CustomScopeConfigurerTests extends TestCase {
 		public Object remove(String name) {
 			throw new UnsupportedOperationException();
 		}
+
+		public void registerDestructionCallback(String name, Runnable callback) {
+		}
 	}
 
 
@@ -289,13 +291,15 @@ public final class CustomScopeConfigurerTests extends TestCase {
 			throw new UnsupportedOperationException();
 		}
 
-
 		public Object get(String name, ObjectFactory objectFactory) {
 			throw new UnsupportedOperationException();
 		}
 
 		public Object remove(String name) {
 			throw new UnsupportedOperationException();
+		}
+
+		public void registerDestructionCallback(String name, Runnable callback) {
 		}
 	}
 

@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
-				"http://www.springframework.org/dtd/spring-beans.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
+
 	<bean id="sessionScopedObject" class="org.springframework.beans.TestBean" scope="session"/>
+
+	<bean id="sessionScopedDisposableObject" class="org.springframework.beans.DerivedTestBean" scope="session"/>
+
 </beans>

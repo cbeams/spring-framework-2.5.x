@@ -22,12 +22,13 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
- * Simple test to illustrate and verify scope usage
+ * Simple test to illustrate and verify scope usage.
+ *
  * @author Rod Johnson
  * @since 2.0
  */
@@ -37,31 +38,27 @@ public class SimpleScopeTests extends TestCase {
 	
 	protected void setUp() {
 		applicationContext = new GenericApplicationContext();
+
 		Scope scope = new Scope() {
-			
+			private int index;
 			private List objects = new LinkedList(); {
 				objects.add(new TestBean());
 				objects.add(new TestBean());
 			}
-			
-			private int index;
-
-			
 			public Object get(String name, ObjectFactory objectFactory) {
 				if (index >= objects.size()) {
 					index = 0;
 				}
 				return objects.get(index++);
 			}
-
 			public void put(String name, Object value) {
 				throw new UnsupportedOperationException();
 			}
-
 			public Object remove(String name) {
 				throw new UnsupportedOperationException();
 			}
-			
+			public void registerDestructionCallback(String name, Runnable callback) {
+			}
 		};
 		applicationContext.getBeanFactory().registerScope("myScope", scope);
 		
