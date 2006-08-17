@@ -26,8 +26,6 @@ import org.easymock.MockControl;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.AssertThrows;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * @author Rick Evans
@@ -57,7 +55,7 @@ public final class ServletRequestAttributesTests extends TestCase {
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		Object value = attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION);
 		assertSame(VALUE, value);
-		attrs.updateAccessedAttributes();
+		attrs.requestCompleted();
 	}
 
 	public void testSetRequestScopedAttribute() throws Exception {

@@ -57,7 +57,7 @@ public final class PortletRequestAttributesTests extends TestCase {
 		PortletRequestAttributes attrs = new PortletRequestAttributes(request);
 		Object value = attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION);
 		assertSame(VALUE, value);
-		attrs.updateAccessedAttributes();
+		attrs.requestCompleted();
 	}
 
 	public void testSetRequestScopedAttribute() throws Exception {

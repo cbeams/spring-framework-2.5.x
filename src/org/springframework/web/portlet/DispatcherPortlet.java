@@ -633,7 +633,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			}
 
 			// Reset thread-bound RequestAttributes.
-			requestAttributes.updateAccessedAttributes();
+			requestAttributes.requestCompleted();
 			RequestContextHolder.setRequestAttributes(null);
 
 			// Reset thread-bound LocaleContext.

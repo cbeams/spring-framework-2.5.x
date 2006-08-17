@@ -61,7 +61,7 @@ public class RequestContextFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response);
 		}
 		finally {
-			requestAttributes.updateAccessedAttributes();
+			requestAttributes.requestCompleted();
 			RequestContextHolder.setRequestAttributes(null);
 			LocaleContextHolder.setLocale(null);
 			if (logger.isDebugEnabled()) {

@@ -848,7 +848,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 
 			// Reset thread-bound RequestAttributes.
-			requestAttributes.updateAccessedAttributes();
+			requestAttributes.requestCompleted();
 			RequestContextHolder.setRequestAttributes(previousRequestAttributes);
 
 			// Reset thread-bound LocaleContext.

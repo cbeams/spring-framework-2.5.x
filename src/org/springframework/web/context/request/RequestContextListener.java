@@ -24,7 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.web.context.request.RequestContextHolder;
 
 /**
  * Listener for Servlet 2.4+ containers. Exposes the request to the current thread,
@@ -65,7 +64,7 @@ public class RequestContextListener implements ServletRequestListener {
 	public void requestDestroyed(ServletRequestEvent requestEvent) {
 		ServletRequestAttributes requestAttributes =
 				(ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-		requestAttributes.updateAccessedAttributes();
+		requestAttributes.requestCompleted();
 		RequestContextHolder.setRequestAttributes(null);
 		LocaleContextHolder.setLocale(null);
 		if (logger.isDebugEnabled()) {
