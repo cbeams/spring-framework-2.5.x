@@ -131,13 +131,10 @@ import org.springframework.util.ClassUtils;
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
 		implements BeanFactoryAware, InitializingBean {
 
-	private final static boolean hibernateSetTimeoutAvailable;
-
-	static {
-		// Determine whether the Hibernate 3.1 Transaction.setTimeout(int) method
-		// is available, for use in this HibernateTransactionManager's doBegin.
-		hibernateSetTimeoutAvailable = ClassUtils.hasMethod(Transaction.class, "setTimeout", new Class[] {int.class});
-	}
+	// Determine whether the Hibernate 3.1 Transaction.setTimeout(int) method
+	// is available, for use in this HibernateTransactionManager's doBegin.
+	private final static boolean hibernateSetTimeoutAvailable =
+			ClassUtils.hasMethod(Transaction.class, "setTimeout", new Class[] {int.class});
 
 
 	private SessionFactory sessionFactory;

@@ -115,14 +115,10 @@ import org.springframework.util.CollectionUtils;
 public class LocalPersistenceManagerFactoryBean
 		implements FactoryBean, InitializingBean, DisposableBean, PersistenceExceptionTranslator {
 
-	private final static Method getPersistenceManagerFactoryMethod;
-
-	static {
-		// Determine whether the JDO 1.0 getPersistenceManagerFactory(Properties) method
-		// is available, for use in the "newPersistenceManagerFactory" implementation.
-		getPersistenceManagerFactoryMethod = ClassUtils.getMethodIfAvailable(
-				JDOHelper.class, "getPersistenceManagerFactory", new Class[] {Properties.class});
-	}
+	// Determine whether the JDO 1.0 getPersistenceManagerFactory(Properties) method
+	// is available, for use in the "newPersistenceManagerFactory" implementation.
+	private final static Method getPersistenceManagerFactoryMethod = ClassUtils.getMethodIfAvailable(
+			JDOHelper.class, "getPersistenceManagerFactory", new Class[] {Properties.class});
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
