@@ -18,9 +18,13 @@ package org.springframework.mock.web;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionContext;
 
 import org.springframework.util.Assert;
@@ -130,9 +134,12 @@ public class MockHttpSession implements HttpSession {
 		Assert.notNull(name, "Attribute name must not be null");
 		if (value != null) {
 			this.attributes.put(name, value);
+			if (value instanceof HttpSessionBindingListener) {
+				((HttpSessionBindingListener) value).valueBound(new HttpSessionBindingEvent(this, name, value));
+			}
 		}
 		else {
-			this.attributes.remove(name);
+			removeAttribute(name);
 		}
 	}
 
@@ -142,7 +149,10 @@ public class MockHttpSession implements HttpSession {
 
 	public void removeAttribute(String name) {
 		Assert.notNull(name, "Attribute name must not be null");
-		this.attributes.remove(name);
+		Object value = this.attributes.remove(name);
+		if (value instanceof HttpSessionBindingListener) {
+			((HttpSessionBindingListener) value).valueUnbound(new HttpSessionBindingEvent(this, name, value));
+		}
 	}
 
 	public void removeValue(String name) {
@@ -151,7 +161,15 @@ public class MockHttpSession implements HttpSession {
 
 	public void invalidate() {
 		this.invalid = true;
-		this.attributes.clear();
+		for (Iterator it = this.attributes.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			String name = (String) entry.getKey();
+			Object value = entry.getValue();
+			it.remove();
+			if (value instanceof HttpSessionBindingListener) {
+				((HttpSessionBindingListener) value).valueUnbound(new HttpSessionBindingEvent(this, name, value));
+			}
+		}
 	}
 
 	public boolean isInvalid() {
