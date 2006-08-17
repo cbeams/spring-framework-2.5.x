@@ -215,7 +215,6 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	@Override
 	protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {
 		this.persistenceUnitInfo = determinePersistenceUnitInfo();
-		postProcessPersistenceUnitInfo(this.persistenceUnitInfo);
 
 		String unitName = this.persistenceUnitInfo.getPersistenceUnitName();
 
@@ -240,6 +239,8 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		if (this.persistenceUnitInfo.getPersistenceUnitRootUrl() == null) {
 			this.persistenceUnitInfo.setPersistenceUnitRootUrl(determinePersistenceUnitRootUrl());
 		}
+
+		postProcessPersistenceUnitInfo(this.persistenceUnitInfo);
 
 		Class persistenceProviderClass = getPersistenceProviderClass();
 		String puiProviderClassName = this.persistenceUnitInfo.getPersistenceProviderClassName();
