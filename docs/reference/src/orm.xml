@@ -31,8 +31,8 @@
     this section show configuration inside a Spring
     <interfacename>ApplicationContext</interfacename>.</para>
 
-    <para>Some of the benefits of using Spring to create your O/R mapping
-    DAOs include:</para>
+    <para>Some of the benefits of using Spring to create your O/R mapping DAOs
+    include:</para>
 
     <itemizedlist>
       <listitem>
@@ -850,10 +850,10 @@
       implementations -- currently only some WebLogic and WebSphere versions
       -- when using Hibernate configured without any awareness of the JTA
       <interfacename>PlatformTransactionManager</interfacename> object for
-      that environment, it is possible for spurious warning or exceptions
-      to show up in the application server log. These warnings or exceptions
-      will say something to the effect that the connection being accessed is
-      no longer valid, or JDBC access is no longer valid, possibly because the
+      that environment, it is possible for spurious warning or exceptions to
+      show up in the application server log. These warnings or exceptions will
+      say something to the effect that the connection being accessed is no
+      longer valid, or JDBC access is no longer valid, possibly because the
       transaction is no longer active. As an example, here is an actual
       exception from WebLogic:</para>
 
@@ -2506,18 +2506,26 @@
 &lt;/Context&gt;</programlisting>
 
               <para>Tomcat 5.0.x and 5.5.x series support several context
-              locations: the global one
+              locations: server configuration file
+              (<emphasis>$CATALINA_HOME/conf/server.xml</emphasis>), the
+              default context configuration
               (<emphasis>$CATALINA_HOME/conf/context.xml</emphasis>) that
               affects all deployed web applications and per-webapp
-              configuration deployed on the server
+              configurations, deployed on the server
               <emphasis>($CATALINA_HOME/conf/[enginename]/[hostname]/my-webapp-context.xml</emphasis>)
-              or along with the webapp
+              side or along with the webapp
               (<emphasis>your-webapp.war/META-INF/context.xml</emphasis>). For
-              efficiency, the latter configuration style is recommended since
-              only applications which use JPA will use the custom classloader.
-              See the Tomcat 5.x <ulink
+              efficiency, inside the web-app configuration style is
+              recommended since only applications which use JPA will use the
+              custom classloader. See the Tomcat 5.x <ulink
               url="http://tomcat.apache.org/tomcat-5.5-doc/config/context.html">documentation</ulink>
               for more details about available context locations.</para>
+
+              <para>Note that at the moment (Tomcat 5.5.17), a bug in the XML
+              configuration parsing prevents usage of <literal>Loader
+              </literal>tag inside<emphasis> server.xml </emphasis>(no matter
+              if a classloader is specified or not (be it the official or a
+              custom one).</para>
 
               <para>In Tomcat 4.x, one can use the same contex.xml and place
               it under <emphasis>$CATALINA_HOME</emphasis>/webapps or modify
@@ -2549,7 +2557,8 @@
           only at classloader level and thus, are isolated from each
           other.</para>
         </section>
-<!-- 
+
+        <!-- 
         <section>
           <title>OC4J setup</title>
 
@@ -2584,7 +2593,6 @@
         </section>
                -->
       </section>
-
     </section>
 
     <section>
@@ -2620,9 +2628,10 @@
         
             public Object doInJpa(EntityManager em) throws PersistenceException {
                 
-                Query query = em.createQuery("from Product");
-                List result = query.execute(category);
-                // do some further stuff with the result list
+                Query query = em.createQuery("from Product as p where p.category = :category");
+                query.setParameter("category", category);
+                List result = query.getResultList(); 
+                // do some further processing with the result list
                 return result;
             }
         });
@@ -2650,7 +2659,9 @@
       <programlisting>public class ProductDaoImpl extends JpaDaoSupport implements ProductDao {
   
     public Collection loadProductsByCategory(String category) throws DataAccessException {
-        return getJpaTemplate().find("from Product");
+        Map&lt;String, String&gt; params = new HashMap&lt;String, String&gt;();
+        params.put("category", category);
+        return getJpaTemplate().findByNamedParams("from Product as p where p.category = :category", params);
     }
 }</programlisting>
 
@@ -2686,8 +2697,10 @@
     public Collection loadProductsByCategory(String category) {
         EntityManager em = this.entityManagerFactory.getEntityManager();
         try {
-             Query query = em.createQuery("from Product");
-             return result = query.execute(category);
+             Query query = em.createQuery("from Product as p where p.category = ?1");
+             query.setParameter(1, category);
+             return query.getResultList();
+
         }
         finally {
             if (em != null) {
@@ -2728,10 +2741,28 @@
     }
 
     public Collection loadProductsByCategory(String category) {
-       Query query = em.createQuery("from Product");
-       return result = query.execute(category);
+       Query query = em.createQuery("from Product as p where p.category = :category");
+       query.setParameter("category", category);
+       return query.getResultList(); 
     }
 }</programlisting>
+
+      <sidebar>
+        <title> Method and Field level Injection</title>
+
+        <para>Annotations that indicate dependency injections (such as
+        @PersistenceUnit and @PersistenceContext) can be applied on field or
+        methods inside a class, therefore the expression "method/field level
+        injection". Field-level annotations concise and easier to use while
+        method-level allow for processing the injected dependency. In both
+        cases the member visibility (public, protected, private) does not
+        matter.</para>
+
+        <para> What about class level annotations? </para>
+
+        <para>On JEE 5 platform, they are used for dependency declaration and
+        not for resource injection.</para>
+      </sidebar>
 
       <para>The injected <interfacename>EntityManager</interfacename> is
       Spring-managed (aware of the ongoing transaction). It is important to
@@ -2746,6 +2777,18 @@
       automatically by the Spring container. This is of course appealing from
       a non-invasiveness perspective, and might feel more natural to JPA
       developers.</para>
+
+      <sidebar>
+        <title>EntityManager and Thread safety</title>
+
+        <para>While EntityManagerFactory instances are thread safe,
+        EntityManager instances are not. The injected JPA EntityManager behave
+        just like an EntityManager fetched from an application server's JNDI
+        environment, as defined by the JPA specification. It will delegate all
+        calls to the current transactional EntityManager, if any; else, it
+        will fall back to a newly created EntityManager per operation, making
+        it thread safe. </para>
+      </sidebar>
     </section>
 
     <section>
