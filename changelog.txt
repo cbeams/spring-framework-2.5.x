@@ -6,14 +6,44 @@ http://www.springframework.org
 Changes in version 2.0 final (30.8.2006)
 ----------------------------------------
 
+Package org.springframework.aop
+* fixed PointcutAdvisor support classes to avoid eager access to Advice and Pointcut from "hashCode()"/"toString()"
+* added "getTargetObject" method to ScopedObject interface, allowing for access to the raw object in the target scope
+
 Package org.springframework.beans
 * fixed BeanWrapperImpl to always use a valid read-write type for a converted collection/map (never use original class)
+* added "destroyBean" method to ConfigurableBeanFactory interface, for destroying a given instance based on a bean def
+* added support for destruction callbacks to Scope abstraction, driven by a BeanFactory's definition for a scoped bean
+* removed deprecated BeanFactoryBootstrap class
+
+Package org.springframework.context
+* reverted AbstractApplicationContext to not inherit ClassLoader from parent context by default (as up until 2.0 RC1)
+
+Package org.springframework.core
+* fixed SpringVersion to return null if the package is not determinable because of ClassLoader restrictions
+
+Package org.springframework.mock
+* added support for attributes which implement the Servlet 2.3 HttpSessionBindingListener interface to MockHttpSession
+
+Package org.springframework.remoting
+* added service URL check to UrlBasedRemoteAccessor, in the form of an InitializingBean implementation
+* refined cache synchronization in (Jndi)RmiClientInterceptor and JaxRpcPortClientInterceptor
+* reworked RmiClientInterceptor to throw RemoteLookupFailureException instead of MalformedURLException/RemoteException
+* reworked Hessian/BurlapClientInterceptor to throw RemoteLookupFailureException instead of MalformedURLException
+* Hessian/BurlapClientInterceptor configure a Hessian/BurlapProxyFactory directly (dropped CauchoRemoteAccessor)
+* added "serializerFactory" and "sendCollectionType" properties to HessianClientInterceptor/ProxyFactoryBean
+* added "serializerFactory" property to HessianServiceExporter, applied to HessianInput/Output objects
+* HessianServiceExporter is compatible with the Hessian 2 protocol (Hessian version 3.0.20+) as well as classic Hessian
 
 Package org.springframework.scripting
 * fixed JRubyScriptFactory to handle "toString()" invocations locally on the JRuby object proxy
 
 Package org.springframework.transaction
 * fixed TransactionAttributeSourceAdvisor to avoid potential NPE in TransactionAttributeSourcePointcut's "hashCode"
+
+Package org.springframework.web
+* added support for attribute destruction callbacks to RequestAttributes abstraction + Servlet/PortletRequestAttributes
+* introduced "requestCompleted()" method in AbstractRequestAttributes base class for Servlet/PortletRequestAttributes
 
 
 Changes in version 2.0 RC3 (10.8.2006)
