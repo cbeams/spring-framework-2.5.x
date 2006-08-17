@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,7 +29,7 @@ import org.springframework.beans.factory.DisposableBean;
  * for each method invocation. This class is independent of pooling technology.
  *
  * <p>Subclasses must implement the <code>getTarget()</code> and
- * <code_releaseTarget()</code> methods to work with their chosen pool.
+ * <code>releaseTarget()</code> methods to work with their chosen pool.
  * The <code>newPrototypeInstance()</code> method inherited from
  * AbstractPrototypeBasedTargetSource can be used to create objects to put
  * in the pool.
@@ -74,24 +74,19 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBased
 	public final void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		super.setBeanFactory(beanFactory);
 		try {
-			createPool(beanFactory);
+			createPool();
 		}
-		catch (BeansException ex) {
-			throw ex;
-		}
-		catch (Exception ex) {
-			throw new BeanInitializationException("Could not create instance pool", ex);
+		catch (Throwable ex) {
+			throw new BeanInitializationException("Could not create instance pool for TargetSource", ex);
 		}
 	}
 
 
 	/**
 	 * Create the pool.
-	 * @param beanFactory owning BeanFactory, in case we need collaborators from it
-	 * (normally our own properties are sufficient)
 	 * @throws Exception to avoid placing constraints on pooling APIs
 	 */
-	protected abstract void createPool(BeanFactory beanFactory) throws Exception;
+	protected abstract void createPool() throws Exception;
 	
 	/**
 	 * Acquire an object from the pool.
@@ -104,7 +99,7 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBased
 	/**
 	 * Return the given object to the pool.
 	 * @param target object that must have been acquired from the pool
-	 * via a call to getTarget()
+	 * via a call to <code>getTarget()</code>
 	 * @throws Exception to allow pooling APIs to throw exception
 	 * @see #getTarget
 	 */
