@@ -45,8 +45,8 @@ public class BeanReferenceFactoryBean implements FactoryBean, BeanFactoryAware {
 
 	/**
 	 * Set the name of the target bean.
-     * <p>This property is required.
-     * @param targetBeanName the name of the target bean
+	 * <p>This property is required.
+	 * @param targetBeanName the name of the target bean
 	 */
 	public void setTargetBeanName(String targetBeanName) {
 		this.targetBeanName = targetBeanName;
