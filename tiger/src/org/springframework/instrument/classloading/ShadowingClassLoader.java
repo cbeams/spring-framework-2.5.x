@@ -92,7 +92,7 @@ public class ShadowingClassLoader extends ClassLoader {
 
 	private Class doLoadClass(String name) throws ClassNotFoundException {
 		String internalName = StringUtils.replace(name, ".", "/") + ".class";
-		InputStream is = getParent().getResourceAsStream(internalName);
+		InputStream is = enclosingClassLoader.getResourceAsStream(internalName);
 		if (is == null) {
 			throw new ClassNotFoundException(name);
 		}

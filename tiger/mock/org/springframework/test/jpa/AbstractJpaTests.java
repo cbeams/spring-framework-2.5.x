@@ -151,6 +151,9 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 		
 		String combinationOfContextLocationsForThisTestClass = cacheKeys(); 			
 		ClassLoader classLoaderForThisTestClass = getClass().getClassLoader();
+		// save the TCCL
+		ClassLoader initialClassLoader = Thread.currentThread().getContextClassLoader();
+		
 		if (this.shadowParent != null) {
 			Thread.currentThread().setContextClassLoader(classLoaderForThisTestClass);
 			super.runBare();
@@ -240,7 +243,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 				throw ex.getTargetException();
 			}
 			finally {
-				Thread.currentThread().setContextClassLoader(classLoaderForThisTestClass);
+				Thread.currentThread().setContextClassLoader(initialClassLoader);
 			}
 		}
 	}
