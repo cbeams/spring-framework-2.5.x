@@ -6,6 +6,9 @@ http://www.springframework.org
 Changes in version 2.0 final (30.8.2006)
 ----------------------------------------
 
+General
+* spring-beans.dtd renamed to spring-beans_2_0.dtd, reflecting the significant changes for Spring 2.0. Update your XML!
+
 Package org.springframework.aop
 * fixed PointcutAdvisor support classes to avoid eager access to Advice and Pointcut from "hashCode()"/"toString()"
 * added "getTargetObject" method to ScopedObject interface, allowing for access to the raw object in the target scope
