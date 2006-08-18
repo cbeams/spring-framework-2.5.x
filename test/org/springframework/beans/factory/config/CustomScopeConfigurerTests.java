@@ -23,9 +23,9 @@ import junit.framework.TestCase;
 import org.easymock.AbstractMatcher;
 import org.easymock.MockControl;
 
-import org.springframework.AbstractScalarMockTemplate;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.mock.easymock.AbstractScalarMockTemplate;
 import org.springframework.test.AssertThrows;
 
 /**

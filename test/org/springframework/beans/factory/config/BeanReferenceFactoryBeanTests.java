@@ -18,130 +18,121 @@ package org.springframework.beans.factory.config;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
-import org.springframework.AbstractScalarMockTemplate;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.mock.easymock.AbstractScalarMockTemplate;
 import org.springframework.test.AssertThrows;
 
 /**
- * Unit tests for the {@link BeanReferenceFactoryBean} class.
- *
  * @author Rick Evans
  */
 public final class BeanReferenceFactoryBeanTests extends TestCase {
 
-    private static final String TARGET_BEAN_NAME = "foo";
-    private static final Class TARGET_BEAN_TYPE = String.class;
-    private static final Object TARGET_BEAN = new Object();
+	private static final String TARGET_BEAN_NAME = "foo";
+	private static final Class TARGET_BEAN_TYPE = String.class;
+	private static final Object TARGET_BEAN = new Object();
 
 
-    public void testChokesWhenMissingTargetBeanName() throws Exception {
-        new AbstractScalarMockTemplate(BeanFactory.class) {
-            public void doTest(Object mockObject) throws Exception {
-                final BeanFactory factory = (BeanFactory) mockObject;
-                new AssertThrows(IllegalArgumentException.class) {
-                    public void test() throws Exception {
-                        new BeanReferenceFactoryBean().setBeanFactory(factory);
-                    }
-                }.runTest();
-            }
-        }.test();
-    }
+	public void testChokesWhenMissingTargetBeanName() throws Exception {
+		new AbstractScalarMockTemplate(BeanFactory.class) {
+			public void doTest(Object mockObject) throws Exception {
+				final BeanFactory factory = (BeanFactory) mockObject;
+				new AssertThrows(IllegalArgumentException.class) {
+					public void test() throws Exception {
+						new BeanReferenceFactoryBean().setBeanFactory(factory);
+					}
+				}.runTest();
+			}
+		}.test();
+	}
 
-    public void testChokesWhenBeanFactoryHasNotBeenSet() throws Exception {
-        new AssertThrows(FactoryBeanNotInitializedException.class) {
-            public void test() throws Exception {
-                BeanReferenceFactoryBean bean = new BeanReferenceFactoryBean();
-                bean.setTargetBeanName(TARGET_BEAN_NAME);
-                bean.getObject();
-            }
-        }.runTest();
-    }
+	public void testChokesWhenBeanFactoryHasNotBeenSet() throws Exception {
+		new AssertThrows(FactoryBeanNotInitializedException.class) {
+			public void test() throws Exception {
+				BeanReferenceFactoryBean bean = new BeanReferenceFactoryBean();
+				bean.setTargetBeanName(TARGET_BEAN_NAME);
+				bean.getObject();
+			}
+		}.runTest();
+	}
 
-    public void testChokesWhenTargetBeanNameCannotBeFoundInTheBeanFactory() throws Exception {
-        new AbstractScalarMockTemplate(BeanFactory.class) {
+	public void testChokesWhenTargetBeanNameCannotBeFoundInTheBeanFactory() throws Exception {
+		new AbstractScalarMockTemplate(BeanFactory.class) {
+			public void setupExpectations(MockControl mockControl, Object mockObject) throws Exception {
+				BeanFactory factory = (BeanFactory) mockObject;
+				factory.containsBean(TARGET_BEAN_NAME);
+				mockControl.setReturnValue(false);
+			}
+			public void doTest(Object mockObject) throws Exception {
+				final BeanFactory factory = (BeanFactory) mockObject;
+				new AssertThrows(NoSuchBeanDefinitionException.class) {
+					public void test() throws Exception {
+						BeanReferenceFactoryBean bean = new BeanReferenceFactoryBean();
+						bean.setTargetBeanName(TARGET_BEAN_NAME);
+						bean.setBeanFactory(factory);
+					}
+				}.runTest();
+			}
+		}.test();
+	}
 
-            public void setupExpectations(MockControl mockControl, Object mockObject) throws Exception {
-                BeanFactory factory = (BeanFactory) mockObject;
-                factory.containsBean(TARGET_BEAN_NAME);
-                mockControl.setReturnValue(false);
-            }
+	public void testGetObjectTypeSimplyReturnsTheTypeOfTheNamedBeanAsReportedByTheBeanFactory() throws Exception {
+		new AbstractScalarMockTemplate(BeanFactory.class) {
+			public void setupExpectations(MockControl mockControl, Object mockObject) throws Exception {
+				BeanFactory factory = (BeanFactory) mockObject;
+				factory.containsBean(TARGET_BEAN_NAME);
+				mockControl.setReturnValue(true);
+				factory.getType(TARGET_BEAN_NAME);
+				mockControl.setReturnValue(TARGET_BEAN_TYPE);
+			}
+			public void doTest(Object mockObject) throws Exception {
+				BeanFactory factory = (BeanFactory) mockObject;
+				BeanReferenceFactoryBean bean = new BeanReferenceFactoryBean();
+				bean.setTargetBeanName(TARGET_BEAN_NAME);
+				bean.setBeanFactory(factory);
+				assertEquals(TARGET_BEAN_TYPE, bean.getObjectType());
+			}
+		}.test();
+	}
 
-            public void doTest(Object mockObject) throws Exception {
-                final BeanFactory factory = (BeanFactory) mockObject;
-                new AssertThrows(NoSuchBeanDefinitionException.class) {
-                    public void test() throws Exception {
-                        BeanReferenceFactoryBean bean = new BeanReferenceFactoryBean();
-                        bean.setTargetBeanName(TARGET_BEAN_NAME);
-                        bean.setBeanFactory(factory);
-                    }
-                }.runTest();
-            }
-        }.test();
-    }
+	public void testIsSingletonSimplyReturnsTheScopeOfTheNamedBeanAsReportedByTheBeanFactory() throws Exception {
+		new AbstractScalarMockTemplate(BeanFactory.class) {
+			public void setupExpectations(MockControl mockControl, Object mockObject) throws Exception {
+				BeanFactory factory = (BeanFactory) mockObject;
+				factory.containsBean(TARGET_BEAN_NAME);
+				mockControl.setReturnValue(true);
+				factory.isSingleton(TARGET_BEAN_NAME);
+				mockControl.setReturnValue(false);
+			}
+			public void doTest(Object mockObject) throws Exception {
+				BeanFactory factory = (BeanFactory) mockObject;
+				BeanReferenceFactoryBean bean = new BeanReferenceFactoryBean();
+				bean.setTargetBeanName(TARGET_BEAN_NAME);
+				bean.setBeanFactory(factory);
+				assertFalse(bean.isSingleton());
+			}
+		}.test();
+	}
 
-    public void testGetObjectTypeSimplyReturnsTheTypeOfTheNamedBeanAsReportedByTheBeanFactory() throws Exception {
-        new AbstractScalarMockTemplate(BeanFactory.class) {
-
-            public void setupExpectations(MockControl mockControl, Object mockObject) throws Exception {
-                BeanFactory factory = (BeanFactory) mockObject;
-                factory.containsBean(TARGET_BEAN_NAME);
-                mockControl.setReturnValue(true);
-                factory.getType(TARGET_BEAN_NAME);
-                mockControl.setReturnValue(TARGET_BEAN_TYPE);
-            }
-
-            public void doTest(Object mockObject) throws Exception {
-                BeanFactory factory = (BeanFactory) mockObject;
-                BeanReferenceFactoryBean bean = new BeanReferenceFactoryBean();
-                bean.setTargetBeanName(TARGET_BEAN_NAME);
-                bean.setBeanFactory(factory);
-                assertEquals(TARGET_BEAN_TYPE, bean.getObjectType());
-            }
-        }.test();
-    }
-
-    public void testIsSingletonSimplyReturnsTheScopeOfTheNamedBeanAsReportedByTheBeanFactory() throws Exception {
-        new AbstractScalarMockTemplate(BeanFactory.class) {
-
-            public void setupExpectations(MockControl mockControl, Object mockObject) throws Exception {
-                BeanFactory factory = (BeanFactory) mockObject;
-                factory.containsBean(TARGET_BEAN_NAME);
-                mockControl.setReturnValue(true);
-                factory.isSingleton(TARGET_BEAN_NAME);
-                mockControl.setReturnValue(false);
-            }
-
-            public void doTest(Object mockObject) throws Exception {
-                BeanFactory factory = (BeanFactory) mockObject;
-                BeanReferenceFactoryBean bean = new BeanReferenceFactoryBean();
-                bean.setTargetBeanName(TARGET_BEAN_NAME);
-                bean.setBeanFactory(factory);
-                assertFalse(bean.isSingleton());
-            }
-        }.test();
-    }
-
-    public void testGetObjectSunnyDay() throws Exception {
-        new AbstractScalarMockTemplate(BeanFactory.class) {
-
-            public void setupExpectations(MockControl mockControl, Object mockObject) throws Exception {
-                BeanFactory factory = (BeanFactory) mockObject;
-                factory.containsBean(TARGET_BEAN_NAME);
-                mockControl.setReturnValue(true);
-                factory.getBean(TARGET_BEAN_NAME);
-                mockControl.setReturnValue(TARGET_BEAN);
-            }
-
-            public void doTest(Object mockObject) throws Exception {
-                BeanFactory factory = (BeanFactory) mockObject;
-                BeanReferenceFactoryBean bean = new BeanReferenceFactoryBean();
-                bean.setTargetBeanName(TARGET_BEAN_NAME);
-                bean.setBeanFactory(factory);
-                assertSame(TARGET_BEAN, bean.getObject());
-            }
-        }.test();
-    }
+	public void testGetObjectSunnyDay() throws Exception {
+		new AbstractScalarMockTemplate(BeanFactory.class) {
+			public void setupExpectations(MockControl mockControl, Object mockObject) throws Exception {
+				BeanFactory factory = (BeanFactory) mockObject;
+				factory.containsBean(TARGET_BEAN_NAME);
+				mockControl.setReturnValue(true);
+				factory.getBean(TARGET_BEAN_NAME);
+				mockControl.setReturnValue(TARGET_BEAN);
+			}
+			public void doTest(Object mockObject) throws Exception {
+				BeanFactory factory = (BeanFactory) mockObject;
+				BeanReferenceFactoryBean bean = new BeanReferenceFactoryBean();
+				bean.setTargetBeanName(TARGET_BEAN_NAME);
+				bean.setBeanFactory(factory);
+				assertSame(TARGET_BEAN, bean.getObject());
+			}
+		}.test();
+	}
 
 }
