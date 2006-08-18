@@ -86,17 +86,21 @@ import junit.framework.Assert;
  * {@link junit.extensions.ExceptionTestCase} class.
  * 
  * @author Rick Evans
+ * @since 2.0
  */
 public abstract class AssertThrows {
 
 	private Class expectedException;
+
 	private String failureMessage;
 
 
     /**
 	 * Creates a new instance of the {@link AssertThrows} class. 
-	 * @param expectedException the {@link java.lang.Exception} expected to be thrown during the execution of the surrounding test
-	 * @throws IllegalArgumentException if the supplied <code>expectedException</code> is <code>null</code>; or if said argument is not an {@link java.lang.Exception}-derived class
+	 * @param expectedException the {@link java.lang.Exception} expected to be
+		 * thrown during the execution of the surrounding test
+	 * @throws IllegalArgumentException if the supplied <code>expectedException</code> is
+		 * <code>null</code>; or if said argument is not an {@link java.lang.Exception}-derived class
 	 */
 	public AssertThrows(Class expectedException) {
 		this(expectedException, null);
@@ -104,9 +108,12 @@ public abstract class AssertThrows {
 
 	/**
 	 * Creates a new instance of the {@link AssertThrows} class. 
-	 * @param expectedException the {@link java.lang.Exception} expected to be thrown during the execution of the surrounding test
-	 * @param failureMessage the extra, contextual failure message that will be included in the failure text if the text fails (can be <code>null</code>)
-	 * @throws IllegalArgumentException if the supplied <code>expectedException</code> is <code>null</code>; or if said argument is not an {@link java.lang.Exception}-derived class
+	 * @param expectedException the {@link java.lang.Exception} expected to be
+	 * thrown during the execution of the surrounding test
+	 * @param failureMessage the extra, contextual failure message that will be
+	 * included in the failure text if the text fails (can be <code>null</code>)
+	 * @throws IllegalArgumentException if the supplied <code>expectedException</code> is
+	 * <code>null</code>; or if said argument is not an {@link java.lang.Exception}-derived class
 	 */
 	public AssertThrows(Class expectedException, String failureMessage) {
 		if(expectedException == null) {
@@ -120,32 +127,32 @@ public abstract class AssertThrows {
 	}
 
 
-    /**
-	 * Gets the {@link java.lang.Exception} expected to be thrown during the execution of the surrounding test. 
-	 * @return the {@link java.lang.Exception} expected to be thrown during the execution of the surrounding test
+	/**
+	 * Return the {@link java.lang.Exception} expected to be thrown during
+	 * the execution of the surrounding test.
 	 */
 	protected Class getExpectedException() {
 		return expectedException;
 	}
 
 	/**
-	 * Gets the extra, contextual failure message that will be included in the failure text if the text fails.
-	 * @return the extra, contextual failure message that will be included in the failure text if the text fails (might be <code>null</code>).
-	 */
-	protected String getFailureMessage() {
-		return failureMessage;
-	}
-
-	/**
-	 * Sets the extra, contextual failure message that will be included in the failure text if the text fails.
-	 * @param failureMessage the extra, contextual failure message that will be included in the failure text if the text fails (can be <code>null</code>)
+	 * Set the extra, contextual failure message that will be included
+	 * in the failure text if the text fails.
 	 */
 	public void setFailureMessage(String failureMessage) {
 		this.failureMessage = failureMessage;
 	}
 
+	/**
+	 * Return the extra, contextual failure message that will be included
+	 * in the failure text if the text fails.
+	 */
+	protected String getFailureMessage() {
+		return failureMessage;
+	}
 
-    /**
+
+	/**
 	 * Subclass must override this <code>abstract</code> method and provide
 	 * the test logic.
 	 * @throws Exception if an error occurs during the execution of the aformentioned test logic
