@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,8 +17,7 @@
 package org.springframework.transaction;
 
 /**
- * Representation of the status of a transaction,
- * consisting of a transaction object and some status flags.
+ * Representation of the status of a transaction.
  *
  * <p>Transactional code can use this to retrieve status information,
  * and to programmatically request a rollback (instead of throwing
@@ -26,7 +25,7 @@ package org.springframework.transaction;
  *
  * <p>Derives from the SavepointManager interface to provide access
  * to savepoint management facilities. Note that savepoint management
- * is just available if the actual transaction manager supports it.
+ * is only available if supported by the underlying transaction manager.
  *
  * @author Juergen Hoeller
  * @since 27.03.2003
@@ -38,14 +37,14 @@ package org.springframework.transaction;
 public interface TransactionStatus extends SavepointManager {
 
 	/**
-	 * Return if the transaction is new,
-	 * else participating in an existing transaction.
+	 * Return whether the present transaction is new
+	 * (else participating in an existing transaction).
 	 */
 	boolean isNewTransaction();
 
 	/**
 	 * Return whether this transaction internally carries a savepoint,
-	 * i.e. has been created as nested transaction based on a savepoint.
+	 * that is, has been created as nested transaction based on a savepoint.
 	 * <p>This method is mainly here for diagnostic purposes, alongside
 	 * <code>isNewTransaction</code>. For programmatic handling of custom
 	 * savepoints, use SavepointManager's operations.
@@ -58,23 +57,24 @@ public interface TransactionStatus extends SavepointManager {
 
 	/**
 	 * Set the transaction rollback-only. This instructs the transaction manager
-	 * that the only possible outcome of the transaction may be a rollback,
-	 * proceeding with the normal application workflow though (i.e. no exception). 
-	 * <p>For transactions managed by TransactionTemplate or TransactionInterceptor.
-	 * An alternative way to trigger a rollback is throwing an application exception.
+	 * that the only possible outcome of the transaction may be a rollback, as
+	 * alternative to throwing an exception which would in turn trigger a rollback.
+	 * <p>For transactions managed by TransactionTemplate or TransactionInterceptor,
+	 * where the actual commit/rollback decision is made by the container.
 	 * @see org.springframework.transaction.support.TransactionCallback#doInTransaction
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#rollbackOn
 	 */
 	void setRollbackOnly();
 
 	/**
-	 * Return if the transaction has been set rollback-only.
+	 * Return whether the transaction has been marked as rollback-only
+	 * (either by the application or by the transaction infrastructure).
 	 */
 	boolean isRollbackOnly();
 
 	/**
 	 * Return whether this transaction is completed, that is,
-	 * has already been committed or rolled back.
+	 * whether it has already been committed or rolled back.
 	 */
 	boolean isCompleted();
 
