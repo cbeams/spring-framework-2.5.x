@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
 
 <!--
 	Tests for throws advice.
-	$Id: throwsAdvice.xml,v 1.4 2005-02-27 19:21:32 jhoeller Exp $
+	$Id: throwsAdvice.xml,v 1.5 2006-08-18 17:58:27 colins Exp $
 -->
 
 <beans>

@@ -377,7 +377,7 @@ different url:s.</p>
     </tr>
     <tr>
       <td bgcolor="#ffffcc" valign="top" width="100%">
-      <pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br>&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd"&gt;<br><br>&lt;!--<br>  - Application context definition for "springapp" DispatcherServlet.<br>  --&gt;<br><br>&lt;beans&gt;<br>    &lt;bean id="springappController" class="SpringappController"/&gt;<br><br>    &lt;bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"&gt;<br>        &lt;property name="mappings"&gt;<br>            &lt;props&gt;<br>                &lt;prop key="/hello.htm"&gt;springappController&lt;/prop&gt;<br>            &lt;/props&gt;<br>        &lt;/property&gt;<br>    &lt;/bean&gt;<br>&lt;/beans&gt;</pre>
+      <pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br>&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd"&gt;<br><br>&lt;!--<br>  - Application context definition for "springapp" DispatcherServlet.<br>  --&gt;<br><br>&lt;beans&gt;<br>    &lt;bean id="springappController" class="SpringappController"/&gt;<br><br>    &lt;bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"&gt;<br>        &lt;property name="mappings"&gt;<br>            &lt;props&gt;<br>                &lt;prop key="/hello.htm"&gt;springappController&lt;/prop&gt;<br>            &lt;/props&gt;<br>        &lt;/property&gt;<br>    &lt;/bean&gt;<br>&lt;/beans&gt;</pre>
       </td>
     </tr>
   </tbody>

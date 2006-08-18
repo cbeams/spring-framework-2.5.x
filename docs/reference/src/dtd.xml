@@ -5,7 +5,7 @@
 	Have to figure out something for that.
 	-->
 <appendix id="springbeansdtd">
-  <title><literal>spring-beans.dtd</literal></title>
+  <title><literal>spring-beans_2_0.dtd</literal></title>
 
   <para><programlisting>&lt;?xml version="1.0" encoding="UTF-8"?>
 
@@ -44,8 +44,8 @@
 
 	XML documents that conform to this DTD should declare the following doctype:
 
-	&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
-		"http://www.springframework.org/dtd/spring-beans.dtd">
+	&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+		"http://www.springframework.org/dtd/spring-beans_2_0.dtd">
 -->
 
 

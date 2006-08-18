@@ -34,7 +34,7 @@ import org.springframework.core.io.Resource;
  * <p>This class registers each bean definition with the DefaultListableBeanFactory
  * superclass, and relies on the latter's implementation of the BeanFactory interface.
  * It supports singletons, prototypes, and references to either of these kinds of bean.
- * See "spring-beans.dtd" for details on options and configuration style.
+ * See "spring-beans_2_0.dtd" for details on options and configuration style.
  *
  * <p><b>For advanced needs, consider using a DefaultListableBeanFactory with
  * an XmlBeanDefinitionReader.</b> The latter allows for reading from multiple XML

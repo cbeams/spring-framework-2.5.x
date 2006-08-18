@@ -111,7 +111,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * <code>beanRefFactory.xml</code> definition file:
  *
  * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
- * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+ * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
  * 
  * &lt;beans>
  * 
@@ -141,7 +141,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * Another relatively simple variation of the <code>beanRefFactory.xml</code> definition file could be:
  *
  * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
- * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+ * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
  * 
  * &lt;beans>
  * 
@@ -200,7 +200,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * <p><code>beanRefFactory.xml</code> file inside jar for util module:
  *
  * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
- * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+ * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
  * 
  * &lt;beans>
  *   &lt;bean id="com.mycompany.myapp.util" lazy-init="true"
@@ -215,7 +215,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * <code>beanRefFactory.xml</code> file inside jar for data-access module:<br>
  *
  * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
- * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+ * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
  * 
  * &lt;beans>
  *   &lt;!-- child of util -->
@@ -234,7 +234,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * <code>beanRefFactory.xml</code> file inside jar for services module:
  *
  * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
- * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+ * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
  * 
  * &lt;beans>
  *   &lt;!-- child of data-access -->
@@ -255,7 +255,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * a name known to this module:
  *
  * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
- * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+ * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
  * 
  * &lt;beans>
  *   &lt;!-- define an alias for "com.mycompany.myapp.services" -->

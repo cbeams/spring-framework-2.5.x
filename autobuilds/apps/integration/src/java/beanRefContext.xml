@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: beanRefContext.xml,v 1.1 2005-11-26 18:27:09 colins Exp $ -->
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!-- $Id: beanRefContext.xml,v 1.2 2006-08-18 17:58:38 colins Exp $ -->
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
 
 <!-- load a hierarchy of contexts, although there is just one here -->
 

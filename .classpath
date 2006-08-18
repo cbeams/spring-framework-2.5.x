@@ -24,8 +24,6 @@
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="lib/j2ee/jms.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/j2ee/jta.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/j2ee/jdbc2_0-stdext.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/j2ee/xml-apis.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate/hibernate2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate/hibernate3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xerces/xercesImpl.jar"/>
@@ -55,8 +53,6 @@
 	<classpathentry kind="lib" path="lib/jotm/xapool.jar"/>
 	<classpathentry kind="lib" path="lib/quartz/quartz-1.5.2.jar"/>
 	<classpathentry kind="lib" path="lib/ibatis/ibatis-sqlmap-2.jar"/>
-	<classpathentry kind="lib" path="lib/caucho/burlap-2.1.12.jar"/>
-	<classpathentry kind="lib" path="lib/caucho/hessian-2.1.12.jar"/>
 	<classpathentry kind="lib" path="lib/freemarker/freemarker.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/aopalliance/aopalliance.jar"/>
 	<classpathentry kind="lib" path="lib/axis/saaj.jar"/>
@@ -125,5 +121,6 @@
 	<classpathentry kind="lib" path="lib/hibernate/jboss-archive-browsing.jar"/>
 	<classpathentry kind="lib" path="lib/tomcat/catalina.jar"/>
 	<classpathentry kind="lib" path="lib/jpa/persistence.jar"/>
+	<classpathentry kind="lib" path="lib/caucho/hessian-3.0.20.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>

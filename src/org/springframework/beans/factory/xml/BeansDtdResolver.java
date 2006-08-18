@@ -30,18 +30,19 @@ import org.springframework.core.io.Resource;
  * EntityResolver implementation for the Spring beans DTD,
  * to load the DTD from the Spring class path (or JAR file).
  *
- * <p>Fetches "spring-beans.dtd" from the class path resource
- * "/org/springframework/beans/factory/xml/spring-beans.dtd",
+ * <p>Fetches "spring-beans_2_0.dtd" from the class path resource
+ * "/org/springframework/beans/factory/xml/spring-beans_2_0.dtd",
  * no matter whether specified as some local URL that includes "spring-beans"
- * in the DTD name or as "http://www.springframework.org/dtd/spring-beans.dtd".
+ * in the DTD name or as "http://www.springframework.org/dtd/spring-beans_2_0.dtd".
  *
  * @author Juergen Hoeller
+ * @author Colin Sampaleanu
  * @since 04.06.2003
  * @see ResourceEntityResolver
  */
 public class BeansDtdResolver implements EntityResolver {
-
-	private static final String DTD_NAME = "spring-beans";
+	
+	private static String[] DTD_NAMES = {"spring-beans_2_0", "spring-beans"}; 
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -52,29 +53,35 @@ public class BeansDtdResolver implements EntityResolver {
 			logger.debug("Trying to resolve XML entity with public ID [" + publicId +
 					"] and system ID [" + systemId + "]");
 		}
-		if (systemId != null && systemId.indexOf(DTD_NAME) > systemId.lastIndexOf("/")) {
-			String dtdFile = systemId.substring(systemId.indexOf(DTD_NAME));
-			if (logger.isDebugEnabled()) {
-				logger.debug("Trying to locate [" + dtdFile + "] in Spring jar");
-			}
-			try {
-				Resource resource = new ClassPathResource(dtdFile, getClass());
-				InputSource source = new InputSource(resource.getInputStream());
-				source.setPublicId(publicId);
-				source.setSystemId(systemId);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found beans DTD [" + systemId + "] in classpath");
-				}
-				return source;
-			}
-			catch (IOException ex) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Could not resolve beans DTD [" + systemId + "]: not found in class path", ex);
+		if (systemId != null) {
+			for (int i = 0; i < DTD_NAMES.length; ++i) {
+
+				if (systemId.indexOf(DTD_NAMES[i]) > systemId.lastIndexOf("/")) {
+					String dtdFile = systemId.substring(systemId.indexOf(DTD_NAMES[i]));
+					if (logger.isDebugEnabled()) {
+						logger.debug("Trying to locate [" + dtdFile + "] in Spring jar");
+					}
+					try {
+						Resource resource = new ClassPathResource(dtdFile, getClass());
+						InputSource source = new InputSource(resource.getInputStream());
+						source.setPublicId(publicId);
+						source.setSystemId(systemId);
+						if (logger.isDebugEnabled()) {
+							logger.debug("Found beans DTD [" + systemId + "] in classpath");
+						}
+						return source;
+					}
+					catch (IOException ex) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Could not resolve beans DTD [" + systemId + "]: not found in class path", ex);
+						}
+					}
+				
 				}
 			}
 		}
+
 		// Use the default behavior -> download from website or wherever.
 		return null;
 	}
-
 }
