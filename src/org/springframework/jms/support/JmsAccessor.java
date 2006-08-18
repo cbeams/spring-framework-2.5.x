@@ -58,27 +58,30 @@ public abstract class JmsAccessor implements InitializingBean {
 
 
 	/**
-	 * Set the connection factory used for obtaining JMS connections.
-	 * @param connectionFactory connection factory used for obtaining JMS connections
+	 * Set the connection factory used for obtaining JMS Connections.
+	 * @param connectionFactory connection factory used for obtaining JMS Connections
 	 */
 	public void setConnectionFactory(ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
 	}
 
 	/**
-	 * Return the connection factory used for obtaining JMS connections.
+	 * Return the connection factory used for obtaining JMS Connections.
 	 */
 	public ConnectionFactory getConnectionFactory() {
 		return connectionFactory;
 	}
 
 	/**
-	 * Set the transaction mode that is used when creating a JMS session to send a message.
+	 * Set the transaction mode that is used when creating a JMS Session.
 	 * Default is "false".
 	 * <p>Note that that within a JTA transaction, the parameters to
-	 * create(Queue/Topic)Session(boolean transacted, int acknowledgeMode) method are not
-	 * taken into account. Depending on the J2EE transaction context, the container
-	 * makes its own decisions on these values. See section 17.3.5 of the EJB Spec.
+	 * <code>create(Queue/Topic)Session(boolean transacted, int acknowledgeMode)</code>
+	 * method are not taken into account. Depending on the J2EE transaction context,
+	 * the container makes its own decisions on these values. See section 17.3.5
+	 * of the EJB specification. Analogously, these parameters are not taken into
+	 * account within a locally managed transaction either, since the accessor
+	 * operates on an existing JMS Session in this case.
 	 * @param sessionTransacted the transaction mode
 	 * @see javax.jms.Connection#createSession(boolean, int)
 	 */
@@ -87,9 +90,8 @@ public abstract class JmsAccessor implements InitializingBean {
 	}
 
 	/**
-	 * Return whether the JMS {@link Session sessions} used for sending
-	 * a message are transacted.
-	 * @return <code>true</code> if the JMS {@link Session sessions} used
+	 * Return whether the JMS Sessions are transacted.
+	 * @return <code>true</code> if the JMS Sessions used
 	 * for sending a message are transacted
 	 * @see #setSessionTransacted(boolean)
 	 */
