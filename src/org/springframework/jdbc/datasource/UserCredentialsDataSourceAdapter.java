@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * An adapter for a target DataSource, applying the given user credentials to
@@ -58,16 +59,16 @@ import org.springframework.util.Assert;
  */
 public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 
-	private String username = "";
+	private String username;
 
-	private String password = "";
+	private String password;
 
 	private final ThreadLocal threadBoundCredentials = new ThreadLocal();
 
 
 	/**
 	 * Set the username that this adapter should use for retrieving Connections.
-	 * Default is the empty string, i.e. no specific user.
+	 * Default is no specific user.
 	 */
 	public void setUsername(String username) {
 		this.username = username;
@@ -75,7 +76,7 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 
 	/**
 	 * Set the password that this adapter should use for retrieving Connections.
-	 * Default is the empty string, i.e. no specific password.
+	 * Default is no specific password.
 	 */
 	public void setPassword(String password) {
 		this.password = password;
@@ -135,7 +136,7 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	 */
 	protected Connection doGetConnection(String username, String password) throws SQLException {
 		Assert.state(getTargetDataSource() != null, "targetDataSource is required");
-		if (!"".equals(username)) {
+		if (StringUtils.hasLength(username)) {
 			return getTargetDataSource().getConnection(username, password);
 		}
 		else {
