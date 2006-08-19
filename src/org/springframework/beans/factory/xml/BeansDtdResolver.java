@@ -42,10 +42,11 @@ import org.springframework.core.io.Resource;
  */
 public class BeansDtdResolver implements EntityResolver {
 	
-	private static String[] DTD_NAMES = {"spring-beans_2_0", "spring-beans"}; 
+	private static final String DTD_EXTENSION = ".dtd";
 
-	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
+	private static final String[] DTD_NAMES = {"spring-beans_2_0", "spring-beans"}; 
+
+	private static final Log logger = LogFactory.getLog(BeansDtdResolver.class);
 
 
 	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
@@ -53,11 +54,12 @@ public class BeansDtdResolver implements EntityResolver {
 			logger.debug("Trying to resolve XML entity with public ID [" + publicId +
 					"] and system ID [" + systemId + "]");
 		}
-		if (systemId != null) {
+		if (systemId != null && systemId.endsWith(DTD_EXTENSION)) {
+			int lastPathSeparator = systemId.lastIndexOf("/");
 			for (int i = 0; i < DTD_NAMES.length; ++i) {
-
-				if (systemId.indexOf(DTD_NAMES[i]) > systemId.lastIndexOf("/")) {
-					String dtdFile = systemId.substring(systemId.indexOf(DTD_NAMES[i]));
+				int dtdNameStart = systemId.indexOf(DTD_NAMES[i]);
+				if (dtdNameStart > lastPathSeparator) {
+					String dtdFile = systemId.substring(dtdNameStart);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Trying to locate [" + dtdFile + "] in Spring jar");
 					}
@@ -84,4 +86,5 @@ public class BeansDtdResolver implements EntityResolver {
 		// Use the default behavior -> download from website or wherever.
 		return null;
 	}
+
 }
