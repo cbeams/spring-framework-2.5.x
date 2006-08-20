@@ -19,24 +19,22 @@ package org.springframework.instrument.classloading;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.instrument.InstrumentationSavingAgent;
+import org.springframework.util.Assert;
 
 /**
  * Load time weaver relying on Instrumentation.
  * Start with java agent, with JVM options like:
  * <code>
- * -javaagent:path/to/jpa-test-agent.jar
+ * -javaagent:path/to/spring-agent.jar
  * </code>
- * where <code>jpa-test-agent.jar</code> is a JAR file
+ * where <code>spring-agent.jar</code> is a JAR file
  * containing the InstrumentationSavingAgent class.
  *
  * <p>In Eclipse, for example, set the Run configuration's JVM
  * args to be of the form:
  * <code>
- * -javaagent:${project_loc}/lib/jpa-test-agent.jar
+ * -javaagent:${project_loc}/lib/spring-agent.jar
  * </code>
  *
  * @author Rod Johnson
@@ -45,15 +43,6 @@ import org.springframework.instrument.InstrumentationSavingAgent;
  */
 public class InstrumentationLoadTimeWeaver extends AbstractLoadTimeWeaver {
 	
-	protected final Log logger = LogFactory.getLog(getClass());
-
-
-	public InstrumentationLoadTimeWeaver() {
-		// Always do AspectJ load time weaving
-		//addTransformer(new ClassPreProcessorAgentAdapter());
-	}
-
-
 	/**
 	 * We have the ability to weave the current class loader when starting the
 	 * JVM in this way, so the instrumentable class loader will always be the
@@ -64,12 +53,10 @@ public class InstrumentationLoadTimeWeaver extends AbstractLoadTimeWeaver {
 	}
 
 	public void addTransformer(ClassFileTransformer transformer) {
-		if (logger.isInfoEnabled()) {
-			logger.info("Installing " + transformer);
-		}
+		Assert.notNull(transformer, "Transformer must not be null");
 		Instrumentation instrumentation = InstrumentationSavingAgent.getInstrumentation();
 		if (instrumentation == null) {
-			throw new UnsupportedOperationException(
+			throw new IllegalStateException(
 					"Must start with Java agent to use InstrumentationLoadTimeWeaver. See Spring documentation.");
 		}
 		instrumentation.addTransformer(transformer);
