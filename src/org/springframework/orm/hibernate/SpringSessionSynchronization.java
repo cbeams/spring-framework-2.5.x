@@ -32,7 +32,7 @@ import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
-import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -43,7 +43,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see SessionFactoryUtils
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
-class SpringSessionSynchronization implements TransactionSynchronization, Ordered {
+class SpringSessionSynchronization extends TransactionSynchronizationAdapter implements Ordered {
 
 	private final SessionHolder sessionHolder;
 
