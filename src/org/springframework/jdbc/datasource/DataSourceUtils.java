@@ -354,7 +354,7 @@ public abstract class DataSourceUtils {
 
 		public void beforeCompletion() {
 			// Release Connection early if the holder is not open anymore
-			// (i.e. not used by another resource like a Hibernate Session
+			// (that is, not used by another resource like a Hibernate Session
 			// that has its own cleanup via transaction synchronization),
 			// to avoid issues with strict JTA implementations that expect
 			// the close call before transaction completion.

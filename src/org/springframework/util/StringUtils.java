@@ -91,7 +91,7 @@ public abstract class StringUtils {
 	 * </pre>
 	 * @param str the String to check, may be <code>null</code>
 	 * @return <code>true</code> if the String is not null, length > 0,
-	 *         and not whitespace only
+	 * and not whitespace only
 	 * @see java.lang.Character#isWhitespace
 	 */
 	public static boolean hasText(String str) {

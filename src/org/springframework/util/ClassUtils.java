@@ -224,7 +224,7 @@ public abstract class ClassUtils {
 	public static String getQualifiedName(Class clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isArray()) {
-            return getQualifiedNameForArray(clazz);
+			return getQualifiedNameForArray(clazz);
 		}
 		else {
 			return clazz.getName();
@@ -262,6 +262,7 @@ public abstract class ClassUtils {
 	 * @param clazz	the clazz to analyze
 	 * @param methodName the name of the method
 	 * @param paramTypes the parameter types of the method
+	 * @return the method, or <code>null</code> if not found
 	 * @see java.lang.Class#getMethod
 	 */
 	public static Method getMethodIfAvailable(Class clazz, String methodName, Class[] paramTypes) {
@@ -394,7 +395,7 @@ public abstract class ClassUtils {
 		Assert.notNull(targetType, "Target type must not be null");
 		Assert.notNull(valueType, "Value type must not be null");
 		return (targetType.isAssignableFrom(valueType) ||
-						targetType.equals(primitiveWrapperTypeMap.get(valueType)));
+				targetType.equals(primitiveWrapperTypeMap.get(valueType)));
 	}
 
 	/**
