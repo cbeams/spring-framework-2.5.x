@@ -96,7 +96,7 @@ public abstract class SessionFactoryUtils {
 
 	static final Log logger = LogFactory.getLog(SessionFactoryUtils.class);
 
-	private static ThreadLocal deferredCloseHolder = new ThreadLocal();
+	private static final ThreadLocal deferredCloseHolder = new ThreadLocal();
 
 
 	/**

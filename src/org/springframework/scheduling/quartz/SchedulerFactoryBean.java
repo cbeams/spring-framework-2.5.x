@@ -104,11 +104,11 @@ public class SchedulerFactoryBean
 	public static final int DEFAULT_THREAD_COUNT = 10;
 
 
-	private static ThreadLocal configTimeTaskExecutorHolder = new ThreadLocal();
+	private static final ThreadLocal configTimeTaskExecutorHolder = new ThreadLocal();
 
-	private static ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
+	private static final ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
 
-	private static ThreadLocal configTimeNonTransactionalDataSourceHolder = new ThreadLocal();
+	private static final ThreadLocal configTimeNonTransactionalDataSourceHolder = new ThreadLocal();
 
 	/**
 	 * Return the TaskExecutor for the currently configured Quartz Scheduler,

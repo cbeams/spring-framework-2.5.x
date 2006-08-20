@@ -16,7 +16,7 @@
 
 package org.springframework.web.context.request;
 
-import org.springframework.web.context.request.RequestAttributes;
+
 
 /**
  * Helper class to manage a thread-bound HttpServletRequest.
@@ -29,8 +29,7 @@ import org.springframework.web.context.request.RequestAttributes;
  */
 public abstract class RequestContextHolder  {
 	
-	/** ThreadLocal that holds the current request */
-	public static ThreadLocal attributeAccessorHolder = new InheritableThreadLocal();
+	private static final ThreadLocal requestAttributesHolder = new InheritableThreadLocal();
 
 
 	/**
@@ -38,7 +37,7 @@ public abstract class RequestContextHolder  {
 	 * @param accessor the RequestAttributes to expose
 	 */
 	public static void setRequestAttributes(RequestAttributes accessor) {
-		RequestContextHolder.attributeAccessorHolder.set(accessor);
+		RequestContextHolder.requestAttributesHolder.set(accessor);
 	}
 
 	/**
@@ -47,7 +46,7 @@ public abstract class RequestContextHolder  {
 	 * or <code>null</code>
 	 */
 	public static RequestAttributes getRequestAttributes() {
-		return (RequestAttributes) attributeAccessorHolder.get();
+		return (RequestAttributes) requestAttributesHolder.get();
 	}
 
 	/**
@@ -57,7 +56,7 @@ public abstract class RequestContextHolder  {
 	 * to the current thread
 	 */
 	public static RequestAttributes currentRequestAttributes() throws IllegalStateException {
-		RequestAttributes accessor = (RequestAttributes) attributeAccessorHolder.get();
+		RequestAttributes accessor = (RequestAttributes) requestAttributesHolder.get();
 		if (accessor == null) {
 			throw new IllegalStateException("No thread-bound request: use RequestContextFilter");
 		}

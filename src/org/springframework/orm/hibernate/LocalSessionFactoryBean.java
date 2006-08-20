@@ -94,11 +94,11 @@ import org.springframework.jdbc.support.lob.LobHandler;
  */
 public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
-	private static ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
+	private static final ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
 
-	private static ThreadLocal configTimeTransactionManagerHolder = new ThreadLocal();
+	private static final ThreadLocal configTimeTransactionManagerHolder = new ThreadLocal();
 
-	private static ThreadLocal configTimeLobHandlerHolder = new ThreadLocal();
+	private static final ThreadLocal configTimeLobHandlerHolder = new ThreadLocal();
 
 	/**
 	 * Return the DataSource for the currently configured Hibernate SessionFactory,

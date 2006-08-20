@@ -66,7 +66,7 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 	 * (e.g. before and after advice) if the aspect involves more than a
 	 * single method (as will be the case for around advice).
 	 */
-	private static ThreadLocal currentTransactionInfo = new ThreadLocal();
+	private static final ThreadLocal currentTransactionInfo = new ThreadLocal();
 
 
 	/**

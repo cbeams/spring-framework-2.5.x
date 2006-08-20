@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,11 +43,11 @@ import org.aopalliance.aop.AspectException;
 public abstract class AopContext {
 	
 	/**
-	 * Threadlocal holder for AOP proxy associated with this thread. 
+	 * ThreadLocal holder for AOP proxy associated with this thread.
 	 * Will be <code>null</code> unless the
 	 * exposeInvocation property on the controlling proxy has been set to true.
 	 */
-	private static ThreadLocal currentProxy = new ThreadLocal();
+	private static final ThreadLocal currentProxy = new ThreadLocal();
 
 
 	/**
