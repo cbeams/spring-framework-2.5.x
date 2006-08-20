@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,20 +45,6 @@ public class ReflectionUtilsTests extends TestCase {
 		assertEquals("Incorrect name returned", rob, name);
 
 		ReflectionUtils.invokeMethod(setName, bean, new Object[] { juergen });
-		assertEquals("Incorrect name set", juergen, bean.getName());
-	}
-
-	public void testMethodInvocationByName() {
-		String rob = "Rob Harrop";
-		String juergen = "Juergen Hoeller";
-
-		TestBean bean = new TestBean();
-		bean.setName(rob);
-
-		Object name = ReflectionUtils.invokeMethod("getName", TestBean.class, bean, null, (Class[]) null);
-		assertEquals("Incorrect name returned", rob, name);
-
-		ReflectionUtils.invokeMethod("setName", TestBean.class, bean, new Object[] { juergen }, new Class[] { String.class });
 		assertEquals("Incorrect name set", juergen, bean.getName());
 	}
 
