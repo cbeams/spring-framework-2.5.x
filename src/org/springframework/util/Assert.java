@@ -182,9 +182,8 @@ public abstract class Assert {
 	 * @param message the exception message to use if the assertion fails
 	 */
 	public static void doesNotContain(String textToSearch, String substring, String message) {
-		if (StringUtils.hasLength(textToSearch)
-            && StringUtils.hasLength(substring)
-            && textToSearch.indexOf(substring) != -1) {
+		if (StringUtils.hasLength(textToSearch) && StringUtils.hasLength(substring) &&
+				textToSearch.indexOf(substring) != -1) {
 			throw new IllegalArgumentException(message);
 		}
 	}
@@ -210,7 +209,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object array is <code>null</code> or has no elements
 	 */
 	public static void notEmpty(Object[] array, String message) {
-		if (array == null || array.length == 0) {
+		if (ObjectUtils.isEmpty(array)) {
 			throw new IllegalArgumentException(message);
 		}
 	}
@@ -235,7 +234,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the collection is <code>null</code> or has no elements
 	 */
 	public static void notEmpty(Collection collection, String message) {
-		if (collection == null || collection.isEmpty()) {
+		if (CollectionUtils.isEmpty(collection)) {
 			throw new IllegalArgumentException(message);
 		}
 	}
@@ -261,7 +260,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the map is <code>null</code> or has no entries
 	 */
 	public static void notEmpty(Map map, String message) {
-		if (map == null || map.isEmpty()) {
+		if (CollectionUtils.isEmpty(map)) {
 			throw new IllegalArgumentException(message);
 		}
 	}
