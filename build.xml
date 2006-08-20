@@ -578,11 +578,22 @@
 			</fileset>
 		</delete>
 
+		<jar jarfile="${dist.dir}/weavers/spring-agent.jar">
+			<fileset dir="${target.classes.dir}">
+				<include name="org/springframework/instrument/InstrumentationSavingAgent.class"/>
+			</fileset>
+			<manifest>
+				<attribute name="Implementation-Title" value="${spring-title}"/>
+				<attribute name="Implementation-Version" value="${spring-version}"/>
+				<attribute name="Spring-Version" value="${spring-version}"/>
+			</manifest>
+		</jar>
+
 		<jar jarfile="${dist.dir}/weavers/spring-tomcat-weaver.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/instrument/classloading/tomcat/**"/>
 				<include name="org/springframework/instrument/ClassFileTransformerRegistry.class"/>
 				<include name="org/springframework/instrument/classloading/WeavingTransformer.class"/>
+				<include name="org/springframework/instrument/classloading/tomcat/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -684,7 +695,10 @@
 
 	<target name="distfiles" depends="initdist" description="Copy dtd, tld and suchlike to the dist directory">
 
-		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans_2_0.dtd"
+		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans.dtd"
+					todir="${dist.dir}/resources" preservelastmodified="true"/>
+
+		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans-2.0.dtd"
 					todir="${dist.dir}/resources" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans.xsd"

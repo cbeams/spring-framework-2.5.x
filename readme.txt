@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.0 (August 2006)
------------------------------------------------
+THE SPRING FRAMEWORK, release 2.0 RC4 (August 2006)
+---------------------------------------------------
 http://www.springframework.org
 
 
@@ -90,7 +90,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2435 KB)
+* "spring" (~2460 KB)
 - Convenient jar file combining all standard modules (except for superseded modules)
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar, aspects jar, spring-portlet jar, and spring-hibernate2 jar!
@@ -101,19 +101,19 @@ MODULE JARS (dist/modules):
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~345 KB)
+* "spring-beans" (~350 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
-* "spring-aop" (~275 KB)
+* "spring-aop" (~280 KB)
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, (spring-beans, AOP Alliance, CGLIB, Commons Attributes)
 
-* "spring-context" (~120 KB)
+* "spring-context" (~125 KB)
 - Contents: application context, JNDI support, instrumentation, validation
 - Dependencies: spring-beans, (spring-aop)
 
-* "spring-dao" (~110 KB)
+* "spring-dao" (~115 KB)
 - Contents: DAO support, transaction infrastructure, caching support
 - Dependencies: spring-core, (spring-aop, spring-context, JTA API)
 
@@ -137,7 +137,7 @@ MODULE JARS (dist/modules):
 - Contents: Struts support
 - Dependencies: spring-web, Struts
 
-* "spring-remoting" (~100 KB)
+* "spring-remoting" (~105 KB)
 - Contents: remoting support, EJB support
 - Dependencies: spring-aop, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB API)
 
@@ -149,7 +149,7 @@ MODULE JARS (dist/modules):
 - Contents: JMX 1.0/1.2 support
 - Dependencies: spring-aop, JMX API
 
-* "spring-jms" (~105 KB)
+* "spring-jms" (~115 KB)
 - Contents: JMS 1.0.2/1.1 support
 - Dependencies: spring-dao, JMS API
 
@@ -198,6 +198,10 @@ ASPECTS JAR (dist)
 - Dependencies: spring-aop, AspectJ, (spring-dao)
 
 WEAVER JARS (dist/weavers)
+
+* "spring-agent" (~5 KB)
+- Contents: Spring's InstrumentationSavingAgent (for InstrumentationLoadTimeWeaver)
+- Dependencies: none (for use at JVM startup: "-javaagent:spring-agent.jar")
 
 * "spring-tomcat-weaver" (~5 KB)
 - Contents: extension of Tomcat's ClassLoader, capable of class instrumentation
