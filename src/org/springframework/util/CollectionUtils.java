@@ -91,18 +91,18 @@ public abstract class CollectionUtils {
 	/**
 	 * Determine whether the given collection only contains a
 	 * single unique object.
-	 * @param coll the collection to check
+	 * @param collection the collection to check
 	 * @return <code>true</code> if the collection contains a
 	 * single reference or multiple references to the same
 	 * instance, <code>false</code> else
 	 */
-	public static boolean hasUniqueObject(Collection coll) {
-		if (coll.isEmpty()) {
+	public static boolean hasUniqueObject(Collection collection) {
+		if (isEmpty(collection)) {
 			return false;
 		}
 		boolean hasCandidate = false;
 		Object candidate = null;
-		for (Iterator it = coll.iterator(); it.hasNext();) {
+		for (Iterator it = collection.iterator(); it.hasNext();) {
 			Object elem = it.next();
 			if (!hasCandidate) {
 				hasCandidate = true;
@@ -117,19 +117,23 @@ public abstract class CollectionUtils {
 
 	/**
 	 * Find a value of the given type in the given collection.
-	 * @param coll the collection to search
+	 * @param collection the collection to search
 	 * @param type the type to look for
 	 * @return a value of the given type found, or <code>null</code> if none
 	 * @throws IllegalArgumentException if more than one value
 	 * of the given type found
 	 */
-	public static Object findValueOfType(Collection coll, Class type) throws IllegalArgumentException {
+	public static Object findValueOfType(Collection collection, Class type) throws IllegalArgumentException {
+		if (isEmpty(collection)) {
+			return null;
+		}
+		Class typeToUse = (type != null ? type : Object.class);
 		Object value = null;
-		for (Iterator it = coll.iterator(); it.hasNext();) {
+		for (Iterator it = collection.iterator(); it.hasNext();) {
 			Object obj = it.next();
-			if (type.isInstance(obj)) {
+			if (typeToUse.isInstance(obj)) {
 				if (value != null) {
-					throw new IllegalArgumentException("More than one value of type [" + type.getName() + "] found");
+					throw new IllegalArgumentException("More than one value of type [" + typeToUse.getName() + "] found");
 				}
 				value = obj;
 			}
@@ -141,15 +145,18 @@ public abstract class CollectionUtils {
 	 * Find a value of one of the given types in the given collection:
 	 * searching the collection for a value of the first type, then
 	 * searching for a value of the second type, etc.
-	 * @param coll the collection to search
+	 * @param collection the collection to search
 	 * @param types the types to look for, in prioritized order
 	 * @return a of one of the given types found, or <code>null</code> if none
 	 * @throws IllegalArgumentException if more than one value
 	 * of the given type found
 	 */
-	public static Object findValueOfType(Collection coll, Class[] types) throws IllegalArgumentException {
+	public static Object findValueOfType(Collection collection, Class[] types) throws IllegalArgumentException {
+		if (isEmpty(collection) || ObjectUtils.isEmpty(types)) {
+			return null;
+		}
 		for (int i = 0; i < types.length; i++) {
-			Object value = findValueOfType(coll, types[i]);
+			Object value = findValueOfType(collection, types[i]);
 			if (value != null) {
 				return value;
 			}
@@ -164,8 +171,7 @@ public abstract class CollectionUtils {
 	 * @return the converted List result
 	 */
 	public static List arrayToList(Object source) {
-		Assert.notNull(source, "Source array must not be null");
-		if (!source.getClass().isArray()) {
+		if (source == null || !source.getClass().isArray()) {
 			throw new IllegalArgumentException("Source is not an array: " + source);
 		}
 		boolean primitive = source.getClass().getComponentType().isPrimitive();
@@ -182,7 +188,9 @@ public abstract class CollectionUtils {
 	 * @param map the target Map to merge the properties into
 	 */
 	public static void mergePropertiesIntoMap(Properties props, Map map) {
-		Assert.notNull(map, "Map must not be null");
+		if (map == null) {
+			throw new IllegalArgumentException("Map must not be null");
+		}
 		if (props != null) {
 			for (Enumeration en = props.propertyNames(); en.hasMoreElements();) {
 				String key = (String) en.nextElement();
@@ -192,12 +200,15 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Returns '<code>true</code>' if any element in '<code>candidates</code>' is
-	 * contained in '<code>source</code>' otherwise returns false.
+	 * Return <code>true</code> if any element in '<code>candidates</code>' is
+	 * contained in '<code>source</code>'; otherwise returns <code>false</code>.
 	 */
 	public static boolean containsAny(Collection source, Collection candidates) {
+		if (isEmpty(source) || isEmpty(candidates)) {
+			return false;
+		}
 		for (Iterator iterator = candidates.iterator(); iterator.hasNext();) {
-			if(source.contains(iterator.next())) {
+			if (source.contains(iterator.next())) {
 				return true;
 			}
 		}
@@ -205,15 +216,18 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Returns the first element in '<code>candidates</code>' that is contained in
+	 * Return the first element in '<code>candidates</code>' that is contained in
 	 * '<code>source</code>'. If no element in '<code>candidates</code>' is present in
-	 * '<code>source</code>' returns '<code>null</code>'. Iteration order is
+	 * '<code>source</code>' returns <code>null</code>. Iteration order is
 	 * {@link Collection} implementation specific.
 	 */
 	public static Object findFirstMatch(Collection source, Collection candidates) {
+		if (isEmpty(source) || isEmpty(candidates)) {
+			return null;
+		}
 		for (Iterator iterator = candidates.iterator(); iterator.hasNext();) {
 			Object candidate = iterator.next();
-			if(source.contains(candidate)) {
+			if (source.contains(candidate)) {
 				return candidate;
 			}
 		}
