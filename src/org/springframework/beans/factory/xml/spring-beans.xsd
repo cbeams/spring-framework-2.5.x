@@ -89,7 +89,6 @@
 		<xsd:attribute name="class" type="xsd:string"/>
 		<xsd:attribute name="parent" type="xsd:string"/>
 		<xsd:attribute name="scope" type="xsd:string"/>
-		<xsd:attribute name="singleton" type="xsd:boolean"/>
 		<xsd:attribute name="abstract" type="xsd:boolean"/>
 		<xsd:attribute name="lazy-init" default="default" type="defaultable-boolean"/>
 		<xsd:attribute name="autowire" default="default">

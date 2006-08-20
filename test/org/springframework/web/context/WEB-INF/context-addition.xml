@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
 	<bean id="aca" class="org.springframework.context.ACATest"/>
 
-	<bean id="aca-prototype" class="org.springframework.context.ACATest" singleton="false"/>
+	<bean id="aca-prototype" class="org.springframework.context.ACATest" scope="prototype"/>
 
 	<bean id="testListener" class="org.springframework.context.TestListener"/>
 
@@ -14,7 +14,7 @@
 		<property name="age"><value>31</value></property>
 	</bean>
 
-	<bean id="kathy" class="org.springframework.beans.TestBean" singleton="false"/>
+	<bean id="kathy" class="org.springframework.beans.TestBean" scope="prototype"/>
 
 	<bean id="kerry" class="org.springframework.beans.TestBean">
 		<property name="name"><value>Kerry</value></property>
@@ -22,7 +22,7 @@
 		<property name="spouse"><ref bean="rod"/></property>
 	</bean>
 
-	<bean id="typeMismatch" class="org.springframework.beans.TestBean" singleton="false">
+	<bean id="typeMismatch" class="org.springframework.beans.TestBean" scope="prototype">
 		<property name="name"><value>typeMismatch</value></property>
 		<property name="age"><value>34x</value></property>
 		<property name="spouse"><ref bean="rod"/></property>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -51,27 +51,27 @@
 		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
 	</bean>
 
-	<bean id="rod7" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean" singleton="false">
+	<bean id="rod7" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean" scope="prototype">
 		<constructor-arg index="1"><ref bean="kerry1"/></constructor-arg>
 		<constructor-arg><ref bean="other"/></constructor-arg>
 		<constructor-arg><ref bean="other"/></constructor-arg>
 		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
 	</bean>
 
-	<bean id="rod8" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean" singleton="false">
+	<bean id="rod8" class="org.springframework.beans.factory.xml.DerivedConstructorDependenciesBean" scope="prototype">
 		<constructor-arg index="2"><ref bean="other"/></constructor-arg>
 		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
 	</bean>
 
-	<bean id="rod9" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" singleton="false">
+	<bean id="rod9" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" scope="prototype">
 		<constructor-arg type="int"><value>99</value></constructor-arg>
 	</bean>
 
-	<bean id="rod10" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" singleton="false">
+	<bean id="rod10" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" scope="prototype">
 		<constructor-arg index="0" type="java.lang.String"><null/></constructor-arg>
 	</bean>
 
-	<bean id="rod11" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" singleton="false">
+	<bean id="rod11" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" scope="prototype">
 		<constructor-arg index="0"><ref local="kerry2"/></constructor-arg>
 	</bean>
 
@@ -124,20 +124,20 @@
 		<constructor-arg><value>/test</value></constructor-arg>
 	</bean>
 
-	<bean id="beanWithBoolean" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" singleton="false">
+	<bean id="beanWithBoolean" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" scope="prototype">
 		<constructor-arg type="boolean" value="true"/>
 	</bean>
 
-	<bean id="beanWithBoolean2" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" singleton="false">
+	<bean id="beanWithBoolean2" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" scope="prototype">
 		<constructor-arg value="true"/>
 	</bean>
 
-	<bean id="beanWithBooleanAndString" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" singleton="false">
+	<bean id="beanWithBooleanAndString" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" scope="prototype">
 		<constructor-arg type="boolean"><value>true</value></constructor-arg>
 		<constructor-arg><value>A String</value></constructor-arg>
 	</bean>
 
-	<bean id="beanWithBooleanAndString2" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" singleton="false">
+	<bean id="beanWithBooleanAndString2" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" scope="prototype">
 		<constructor-arg value="A String"/>
 		<constructor-arg value="true"/>
 	</bean>
@@ -146,11 +146,11 @@
 		<constructor-arg value="false"/>
 	</bean>
 
-	<bean id="beanWithDoubleBoolean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" autowire="constructor" singleton="false">
+	<bean id="beanWithDoubleBoolean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" autowire="constructor" scope="prototype">
 		<constructor-arg type="java.lang.Boolean"><value>true</value></constructor-arg>
 	</bean>
 
-	<bean id="beanWithDoubleBooleanAndIndex" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" autowire="constructor" singleton="false">
+	<bean id="beanWithDoubleBooleanAndIndex" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DoubleBooleanConstructorBean" autowire="constructor" scope="prototype">
 		<constructor-arg index="1"><value>true</value></constructor-arg>
 	</bean>
 

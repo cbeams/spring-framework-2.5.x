@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -11,13 +11,13 @@
 	
 	</bean>
 
-	<bean id="jenny" class="org.springframework.beans.TestBean" singleton="true">	
+	<bean id="jenny" class="org.springframework.beans.TestBean" scope="singleton">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 	</bean>
 	
 	<bean id="factoryMethods"  class="org.springframework.beans.factory.xml.FactoryMethods"
-			factory-method="newInstance" singleton="false">
+			factory-method="newInstance" scope="prototype">
 		<constructor-arg index="0"><ref local="jenny"/></constructor-arg>
 	</bean>
 

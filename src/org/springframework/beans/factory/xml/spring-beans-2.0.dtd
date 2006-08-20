@@ -1,5 +1,5 @@
 <!--
-	Spring XML Beans DTD
+	Spring XML Beans DTD, version 2.0
 	Authors: Rod Johnson, Juergen Hoeller, Alef Arendsen, Colin Sampaleanu, Rob Harrop
 
 	This defines a simple and consistent way of creating a namespace
@@ -157,7 +157,7 @@
 	method are specified, they will override the corresponding parent settings.
 
 	The remaining settings will always be taken from the child definition:
-	depends on, autowire mode, dependency check, singleton, lazy init.
+	depends on, autowire mode, dependency check, scope, lazy init.
 -->
 <!ATTLIST bean parent CDATA #IMPLIED>
 
@@ -178,19 +178,6 @@
 <!ATTLIST bean scope CDATA #IMPLIED>
 
 <!--
-	Is this bean a "singleton" (one shared instance, which will be returned
-	by all calls to getBean() with the id), or a "prototype" (independent
-	instance resulting from each call to getBean(). Default is singleton.
-
-	Note that as of Spring 2.0, this flag is just an alternative way to
-	specify scope="singleton" or scope="prototype".
-
-	Note: This attribute will not be inherited by child bean definitions.
-	Hence, it needs to be specified per concrete bean definition.
--->
-<!ATTLIST bean singleton (true | false) #IMPLIED>
-
-<!--
 	Is this bean "abstract", i.e. not meant to be instantiated itself but
 	rather just serving as parent for concrete child bean definitions.
 	Default is "false". Specify "true" to tell the bean factory to not try to
@@ -205,7 +192,6 @@
 	If this bean should be lazily initialized.
 	If false, it will get instantiated on startup by bean factories
 	that perform eager initialization of singletons.
-
 
 	Note: This attribute will not be inherited by child bean definitions.
 	Hence, it needs to be specified per concrete bean definition.
@@ -300,7 +286,11 @@
 <!--
 	Optional attribute for the name of the custom destroy method to invoke
 	on bean factory shutdown. The method must have no arguments,
-	but may throw any exception. Note: Only invoked on singleton beans!
+	but may throw any exception.
+
+	Note: Only invoked on beans whose lifecycle is under full control
+	of the factory - which is always the case for singletons, but not
+	guaranteed for any other scope.
 -->
 <!ATTLIST bean destroy-method CDATA #IMPLIED>
 

@@ -14,7 +14,7 @@
 		<property name="spouse" ref="jenny"/>
 	</bean>
 	
-	<bean id="jenks" class="org.springframework.beans.TestBean" singleton="false">	
+	<bean id="jenks" class="org.springframework.beans.TestBean" scope="prototype">
 		<property name="name"><value>Andrew</value></property>
 		<property name="age"><value>36</value></property>
 		<property name="spouse"><ref local="jenny"/></property>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -55,26 +55,26 @@
 	</bean>
 
 	<bean id="defaultPrototype" class="org.springframework.beans.factory.xml.FactoryMethods"
-			singleton="false" factory-method="defaultInstance">
+			scope="prototype" factory-method="defaultInstance">
 		<!-- No constructor-arg elements -->
 		<property name="stringValue"><value>setterString</value></property>
 	</bean>
 
 	<bean id="testBeanOnlyPrototype" class="org.springframework.beans.factory.xml.FactoryMethods"
-			factory-method="newInstance" singleton="false">
+			factory-method="newInstance" scope="prototype">
 		<constructor-arg><ref local="juergen"/></constructor-arg>
 		<property name="stringValue"><value>testBeanOnlyPrototypeDISetterString</value></property>
 	</bean>
 
 	<bean id="fullPrototype" class="org.springframework.beans.factory.xml.FactoryMethods"
-			factory-method="newInstance" singleton="false">
+			factory-method="newInstance" scope="prototype">
 		<constructor-arg type="int"><value>27</value></constructor-arg>
 		<constructor-arg><value>gotcha</value></constructor-arg>
 		<constructor-arg><ref local="juergen"/></constructor-arg>
 	</bean>
 	
 	<bean id="noMatchPrototype" class="org.springframework.beans.factory.xml.FactoryMethods"
-			factory-method="newInstance" singleton="false">
+			factory-method="newInstance" scope="prototype">
 		<constructor-arg index="0"><ref local="juergen"/></constructor-arg>
 		<constructor-arg index="1"><value>27</value></constructor-arg>
 		<constructor-arg index="2"><value>gotcha</value></constructor-arg>
@@ -118,7 +118,7 @@
 		</property>
 	</bean>
 
-	<bean id="instanceFactory" class="org.springframework.beans.factory.xml.InstanceFactory" singleton="true">
+	<bean id="instanceFactory" class="org.springframework.beans.factory.xml.InstanceFactory" scope="singleton">
 		<property name="factoryBeanProperty"><value>instanceFactory</value></property>
 	</bean>
 

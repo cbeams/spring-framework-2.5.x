@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <!--
 	Common bean definitions for auto proxy creator tests.
@@ -63,7 +63,7 @@
 		singleton, so it may pose circular reference problems, or an infinite loop.
 	-->
 	<bean id="neverMatchAdvisor" class="org.springframework.aop.framework.autoproxy.NeverMatchAdvisor"
-			singleton="false">
+			scope="prototype">
 		<property name="dependencies">
 			<list>
 				<ref local="singletonDependency"/>
@@ -74,9 +74,9 @@
 	
 	<!-- These two beans would otherwise be eligible for autoproxying -->
 	
-	<bean id="singletonDependency" class="org.springframework.beans.TestBean" singleton="true"/>
+	<bean id="singletonDependency" class="org.springframework.beans.TestBean" scope="singleton"/>
 		
-	<bean id="prototypeDependency" class="org.springframework.beans.TestBean" singleton="false"/>
+	<bean id="prototypeDependency" class="org.springframework.beans.TestBean" scope="prototype"/>
 	
 	<!-- ====== End test for prototype definitions to try to provoke circular references ========================= -->
 

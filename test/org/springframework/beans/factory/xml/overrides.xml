@@ -1,60 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
 
-	<bean id="overrideOneMethod" 
-		class="org.springframework.beans.factory.xml.OverrideOneMethod">
-		
+	<bean id="overrideOneMethod"  class="org.springframework.beans.factory.xml.OverrideOneMethod">
 		<lookup-method name="getPrototypeDependency" bean="jenny" />
-		
 		<lookup-method name="protectedOverrideSingleton" bean="david" />
-		
 	</bean>
 	
 	<!--
 		Test that overrides work on an inherited method
 	-->
-	<bean id="overrideInheritedMethod" 
-		class="org.springframework.beans.factory.xml.OverrideOneMethodSubclass">
-		
+	<bean id="overrideInheritedMethod" class="org.springframework.beans.factory.xml.OverrideOneMethodSubclass">
 		<lookup-method name="getPrototypeDependency" bean="jenny" />
-		
 		<lookup-method name="protectedOverrideSingleton" bean="david" />
-		
 	</bean>
-	
 	
 	<!--
-		We can use this to test the construction cost of beans with method
-		overrides
+		We can use this to test the construction cost of beans with method overrides
 	-->
-	<bean id="overrideOnPrototype" 
-		singleton="false"
-		class="org.springframework.beans.factory.xml.OverrideOneMethod">
-		
+	<bean id="overrideOnPrototype" singleton="false"
+			class="org.springframework.beans.factory.xml.OverrideOneMethod">
 		<lookup-method name="getPrototypeDependency" bean="jenny" />
-		
 		<lookup-method name="protectedOverrideSingleton" bean="david" />
-		
 	</bean>
-	
-	
+
 	<!--
 		Effect of overrides is swapped
 	-->
-	<bean id="overrideOneMethodSwappedReturnValues" 
-		class="org.springframework.beans.factory.xml.OverrideOneMethod">
-		
+	<bean id="overrideOneMethodSwappedReturnValues"
+			class="org.springframework.beans.factory.xml.OverrideOneMethod">
 		<lookup-method name="getPrototypeDependency" bean="david" />
-		
 		<lookup-method name="protectedOverrideSingleton" bean="jenny" />
-		
 	</bean>
 	
 	
-	<bean id="jenny" class="org.springframework.beans.TestBean"
-		singleton="false">	
+	<bean id="jenny" class="org.springframework.beans.TestBean" singleton="false">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 		<property name="spouse">
@@ -63,8 +44,7 @@
 		</property>
 	</bean>
 	
-	<bean id="david" class="org.springframework.beans.TestBean"
-		singleton="true">	
+	<bean id="david" class="org.springframework.beans.TestBean" singleton="true">
 		<description>
 			Simple bean, without any collections.
 		</description>

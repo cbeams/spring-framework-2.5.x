@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -13,7 +13,7 @@
 		<property name="age"><value>1</value></property>
 	</bean>
 
-	<bean id="inheritedTestBeanPrototype" class="org.springframework.beans.TestBean" singleton="false">
+	<bean id="inheritedTestBeanPrototype" class="org.springframework.beans.TestBean" scope="prototype">
 		<property name="name"><value>parent</value></property>
 		<property name="age"><value>2</value></property>
 	</bean>

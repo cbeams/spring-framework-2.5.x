@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -35,7 +35,7 @@
 		</property>
 	</bean>
 	
-	<bean id="pJenny" class="org.springframework.beans.TestBean" singleton="false">
+	<bean id="pJenny" class="org.springframework.beans.TestBean" scope="prototype">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 		<property name="spouse">
@@ -44,12 +44,12 @@
 		</property>
 	</bean>
 
-	<bean id="pDavid" class="org.springframework.beans.TestBean" singleton="false">
+	<bean id="pDavid" class="org.springframework.beans.TestBean" scope="prototype">
 		<property name="name"><value>David</value></property>
 		<property name="age"><value>27</value></property>
 	</bean>
 
-	<bean id="pRod" class="org.springframework.beans.TestBean" singleton="false">
+	<bean id="pRod" class="org.springframework.beans.TestBean" scope="prototype">
 		<property name="name"><value>Rod</value></property>
 		<property name="age"><value>32</value></property>
 		<property name="friends">
@@ -157,7 +157,7 @@
 		<constructor-arg value="jenny"/>
 	</bean>
 
-	<bean id="pMixedMap" class="org.springframework.beans.factory.HasMap" singleton="false">
+	<bean id="pMixedMap" class="org.springframework.beans.factory.HasMap" scope="prototype">
 		<property name="map">
 			<map>
 				<entry key="foo" value="bar"/>

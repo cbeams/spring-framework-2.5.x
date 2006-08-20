@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -120,7 +120,7 @@
 	</bean>
 	-->
 	
-	<bean id="validGlobals" singleton="true" class="org.springframework.aop.framework.ProxyFactoryBean">
+	<bean id="validGlobals" scope="singleton" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="proxyInterfaces"><value>org.springframework.context.ApplicationListener</value></property>
 		<property name="interceptorNames"><value>debugInterceptor,global*,target2</value></property>
 	</bean>
@@ -135,9 +135,9 @@
 	-->
 	<bean id="global_aspectInterface" class="org.springframework.aop.framework.ProxyFactoryBeanTests$GlobalIntroductionAdvice"/>
 
-	<bean id="prototypeLockMixinAdvisor" class="org.springframework.aop.framework.LockMixinAdvisor" singleton="false"/>
+	<bean id="prototypeLockMixinAdvisor" class="org.springframework.aop.framework.LockMixinAdvisor" scope="prototype"/>
 
-	<bean id="prototypeTestBean" class="org.springframework.beans.TestBean" singleton="false"/>
+	<bean id="prototypeTestBean" class="org.springframework.beans.TestBean" scope="prototype"/>
 
 	<bean id="prototypeTestBeanProxy" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="interfaces"><value>org.springframework.beans.ITestBean</value></property>
@@ -150,7 +150,7 @@
 		</property>
 	</bean>
 
-	<bean id="prototypeLockMixinInterceptor" class="org.springframework.aop.framework.LockMixin" singleton="false"/>
+	<bean id="prototypeLockMixinInterceptor" class="org.springframework.aop.framework.LockMixin" scope="prototype"/>
 
 	<bean id="prototypeTestBeanProxySingletonTarget" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="interfaces">
