@@ -3,11 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 final (30.8.2006)
-----------------------------------------
+Changes in version 2.0 RC4 (30.8.2006)
+--------------------------------------
 
 General
+* added "spring-agent.jar" to "dist/weavers" directory, containing the agent for Spring's InstrumentationLoadTimeWeaver
 * spring-beans.dtd renamed to spring-beans_2_0.dtd, reflecting the significant changes for Spring 2.0. Update your XML!
+* spring-beans_2_0.dtd does not declare "singleton" attribute anymore. If you declare that DTD, use "scope" instead.
 
 Package org.springframework.aop
 * fixed PointcutAdvisor support classes to avoid eager access to Advice and Pointcut from "hashCode()"/"toString()"
@@ -17,13 +19,26 @@ Package org.springframework.beans
 * fixed BeanWrapperImpl to always use a valid read-write type for a converted collection/map (never use original class)
 * added "destroyBean" method to ConfigurableBeanFactory interface, for destroying a given instance based on a bean def
 * added support for destruction callbacks to Scope abstraction, driven by a BeanFactory's definition for a scoped bean
+* DefaultListableBeanFactory's "preInstantiateSingletons" only fetches the FactoryBean instance (instead of its object)
 * removed deprecated BeanFactoryBootstrap class
 
 Package org.springframework.context
 * reverted AbstractApplicationContext to not inherit ClassLoader from parent context by default (as up until 2.0 RC1)
+* added appropriate "equals"/"hashCode" implementations to DefaultMessageSourceResolvable
 
 Package org.springframework.core
 * fixed SpringVersion to return null if the package is not determinable because of ClassLoader restrictions
+
+Package org.springframework.instrument
+* removed unused AbstractLoadTimeWeaver and AspectJWeavingTransformer classes
+* reworked ReflectiveLoadTimeWeaver to cache Method references and consider "getThrowawayClassLoader" as optional
+
+Package org.springframework.jms
+* added support for synchronized local JMS transactions (alongside some other main transaction) to JmsTemplate
+* added TransactionAwareConnectionFactoryProxy, including support for synchronized local JMS transactions
+
+Package org.springframework.orm
+* LocalContainerEntityManagerFactoryBean calls "postProcessPersistenceUnitInfo" after having applied default settings
 
 Package org.springframework.mock
 * added support for attributes which implement the Servlet 2.3 HttpSessionBindingListener interface to MockHttpSession
@@ -42,7 +57,13 @@ Package org.springframework.scripting
 * fixed JRubyScriptFactory to handle "toString()" invocations locally on the JRuby object proxy
 
 Package org.springframework.transaction
+* added "afterCommit" callback to TransactionSynchronization interface
 * fixed TransactionAttributeSourceAdvisor to avoid potential NPE in TransactionAttributeSourcePointcut's "hashCode"
+
+Package org.springframework.validation
+* added appropriate "toString" implementation to AbstractBindingResult
+* added appropriate "equals"/"hashCode" implementations to AbstractBindingResult and BindException
+* added appropriate "equals"/"hashCode" implementations to ObjectError and FieldError
 
 Package org.springframework.web
 * added support for attribute destruction callbacks to RequestAttributes abstraction + Servlet/PortletRequestAttributes
