@@ -89,9 +89,9 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 	 * @param targetDataSource the target DataSource
 	 */
 	public TransactionAwareDataSourceProxy(DataSource targetDataSource) {
-		setTargetDataSource(targetDataSource);
-		afterPropertiesSet();
+		super(targetDataSource);
 	}
+
 
 	/**
 	 * Delegate to DataSourceUtils for automatically participating in Spring-managed
@@ -157,9 +157,7 @@ public class TransactionAwareDataSourceProxy extends DelegatingDataSource {
 			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: only close if not within a transaction.
-				if (this.dataSource != null) {
-					DataSourceUtils.doReleaseConnection(this.target, this.dataSource);
-				}
+				DataSourceUtils.doReleaseConnection(this.target, this.dataSource);
 				return null;
 			}
 

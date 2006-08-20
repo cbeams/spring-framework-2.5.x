@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
 
 /**
  * {@link DataSource} implementation that delegates all calls to a given
@@ -43,9 +44,26 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 
 
 	/**
+	 * Create a new DelegatingDataSource.
+	 * @see #setTargetDataSource
+	 */
+	public DelegatingDataSource() {
+	}
+
+	/**
+	 * Create a new DelegatingDataSource.
+	 * @param targetDataSource the target DataSource
+	 */
+	public DelegatingDataSource(DataSource targetDataSource) {
+		setTargetDataSource(targetDataSource);
+	}
+
+
+	/**
 	 * Set the target DataSource that this DataSource should delegate to.
 	 */
-	public void setTargetDataSource(DataSource targetDataSource) {
+	public final void setTargetDataSource(DataSource targetDataSource) {
+		Assert.notNull(targetDataSource, "targetDataSource must not be null");
 		this.targetDataSource = targetDataSource;
 	}
 
