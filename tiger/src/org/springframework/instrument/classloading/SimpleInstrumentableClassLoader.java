@@ -18,10 +18,9 @@ package org.springframework.instrument.classloading;
 
 import java.lang.instrument.ClassFileTransformer;
 
-import org.springframework.util.ClassUtils;
-
 /**
- * Simplistic implementation. Usable in tests and standalone.
+ * Simplistic implementation of an instrumentable ClassLoader.
+ * Usable in tests and standalone environments.
  *
  * @author Rod Johnson
  * @author Costin Leau
@@ -29,20 +28,24 @@ import org.springframework.util.ClassUtils;
  */
 public class SimpleInstrumentableClassLoader extends AbstractOverridingClassLoader  {
 
-	private final AspectJWeavingTransformer weavingTransformer;
+	private final WeavingTransformer weavingTransformer;
 
 
+	/**
+	 * Create a new SimpleLoadTimeWeaver for the given class loader.
+	 * @param parent the ClassLoader to build an simple instrumentable
+	 * ClassLoader for
+	 */
 	public SimpleInstrumentableClassLoader(ClassLoader parent) {
 		super(parent);
-		this.weavingTransformer = new AspectJWeavingTransformer(parent);
-	}
-
-	public SimpleInstrumentableClassLoader() {
-		super(ClassUtils.getDefaultClassLoader());
-		this.weavingTransformer = new AspectJWeavingTransformer(getParent());
+		this.weavingTransformer = new WeavingTransformer(parent);
 	}
 
 
+	/**
+	 * Add a class file transformer to be applied by this ClassLoader.
+	 * @param transformer the class file transformer to register
+	 */
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.weavingTransformer.addTransformer(transformer);
 	}
@@ -50,7 +53,7 @@ public class SimpleInstrumentableClassLoader extends AbstractOverridingClassLoad
 
 	@Override
 	public byte[] transformIfNecessary(String name, String internalName, byte[] bytes) {
-		return weavingTransformer.transformIfNecessary(name, bytes, null);
+		return this.weavingTransformer.transformIfNecessary(name, bytes);
 	}
 
 }
