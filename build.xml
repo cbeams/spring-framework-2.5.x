@@ -591,7 +591,6 @@
 
 		<jar jarfile="${dist.dir}/weavers/spring-tomcat-weaver.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/instrument/ClassFileTransformerRegistry.class"/>
 				<include name="org/springframework/instrument/classloading/WeavingTransformer.class"/>
 				<include name="org/springframework/instrument/classloading/tomcat/**"/>
 			</fileset>
