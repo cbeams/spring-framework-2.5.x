@@ -49,16 +49,21 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 	}
 
 
+	/**
+	 * Add a class file transformer to be applied by this ClassLoader.
+	 * @param transformer the class file transformer to register
+	 */
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.weavingTransformer.addTransformer(transformer);
 	}
+
 
 	@Override
 	protected ResourceEntry findResourceInternal(String name, String path) {
 		ResourceEntry entry = super.findResourceInternal(name, path);
 		// Postpone String parsing as much as possible (it is slow).
 		if (entry != null && entry.binaryContent != null && path.endsWith(".class")) {
-			byte[] transformed = weavingTransformer.transformIfNecessary(name, entry.binaryContent, null);
+			byte[] transformed = this.weavingTransformer.transformIfNecessary(name, entry.binaryContent);
 			entry.binaryContent = transformed;
 		}
 		return entry;
@@ -110,8 +115,8 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 				Field field = fields[i];
 				// Skip static and final fields (the old FieldFilter)
 				// do not copy resourceEntries - it's a cache that holds class entries.
-				if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())
-						|| field.getName().equals("resourceEntries"))) {
+				if (!(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()) ||
+						field.getName().equals("resourceEntries"))) {
 					try {
 						// copy the field (the old FieldCallback)
 						field.setAccessible(true);
@@ -132,15 +137,17 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 		Class ancestor = one;
 
 		while (ancestor != Object.class || ancestor != null) {
-			if (ancestor.isAssignableFrom(two))
+			if (ancestor.isAssignableFrom(two)) {
 				return ancestor;
+			}
 			ancestor = ancestor.getSuperclass();
 		}
 		// try the other class hierarchy
 		ancestor = two;
 		while (ancestor != Object.class || ancestor != null) {
-			if (ancestor.isAssignableFrom(one))
+			if (ancestor.isAssignableFrom(one)) {
 				return ancestor;
+			}
 			ancestor = ancestor.getSuperclass();
 		}
 		return null;
