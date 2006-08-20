@@ -60,12 +60,17 @@ public class WeavingTransformer {
 	}
 
 
+	/**
+	 * Add a class file transformer to be applied by this weaver.
+	 * @param transformer the class file transformer to register
+	 */
 	public void addTransformer(ClassFileTransformer transformer) {
 		if (transformer == null) {
 			throw new IllegalArgumentException("Transformer must not be null");
 		}
 		this.transformers.add(transformer);
 	}
+
 
 	public byte[] transformIfNecessary(String className, byte[] bytes) {
 		String internalName = className.replace(".", "/");

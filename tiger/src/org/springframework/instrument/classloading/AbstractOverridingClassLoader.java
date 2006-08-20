@@ -50,6 +50,10 @@ public abstract class AbstractOverridingClassLoader extends ClassLoader {
 	private final Set<String> namesSeen = new HashSet<String>();
 
 
+	/**
+	 * Create a new AbstractOverridingClassLoader for the given class loader.
+	 * @param parent the ClassLoader to build an overriding ClassLoader for
+	 */
 	protected AbstractOverridingClassLoader(ClassLoader parent) {
 		super(parent);
 	}
