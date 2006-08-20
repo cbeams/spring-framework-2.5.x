@@ -18,30 +18,40 @@ package org.springframework.instrument.classloading;
 
 import java.lang.instrument.ClassFileTransformer;
 
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+
 /**
- * LoadTimeWeaver that holds a narrow reference to the internal class
- * loader delegate. Such a class is useful when the container class loader
- * allows the interface to be loaded by the same class loader (the web
- * application has access to the classes loaded by the parent). This class
- * should be always used if possible instead of ReflectiveLoadTimeWeaver
- * since it avoids the reflection mechanism.
+ * LoadTimeWeaver that builds and exposes a SimpleInstrumentableClassLoader
+ * for the current context class loader.
  *
  * <p>Mainly intended for use in simple environments, such as an IDE.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 2.0
+ * @see SimpleInstrumentableClassLoader
+ * @see ReflectiveLoadTimeWeaver
  */
-public class SimpleLoadTimeWeaver extends AbstractLoadTimeWeaver {
+public class SimpleLoadTimeWeaver implements LoadTimeWeaver {
 
 	private final SimpleInstrumentableClassLoader classLoader;
 
-	
+
+	/**
+	 * Create a new SimpleLoadTimeWeaver for the current context class loader.
+	 */
 	public SimpleLoadTimeWeaver() {
-		this.classLoader = new SimpleInstrumentableClassLoader(getContextClassLoader());
+		this.classLoader = new SimpleInstrumentableClassLoader(ClassUtils.getDefaultClassLoader());
 	}
 
+	/**
+	 * Create a new SimpleLoadTimeWeaver for the given class loader.
+	 * @param classLoader the ClassLoader to build an simple instrumentable
+	 * ClassLoader on top of
+	 */
 	public SimpleLoadTimeWeaver(SimpleInstrumentableClassLoader classLoader) {
+		Assert.notNull(classLoader, "ClassLoader must not be null");
 		this.classLoader = classLoader;
 	}
 
@@ -52,6 +62,14 @@ public class SimpleLoadTimeWeaver extends AbstractLoadTimeWeaver {
 
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.classLoader;
+	}
+
+	/**
+	 * This implementation always returns a SimpleThrowawayClassLoader.
+	 * @see SimpleThrowawayClassLoader
+	 */
+	public ClassLoader getThrowawayClassLoader() {
+		return new SimpleThrowawayClassLoader(getInstrumentableClassLoader());
 	}
 
 }

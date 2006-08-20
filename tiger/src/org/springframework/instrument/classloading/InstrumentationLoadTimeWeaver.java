@@ -21,6 +21,7 @@ import java.lang.instrument.Instrumentation;
 
 import org.springframework.instrument.InstrumentationSavingAgent;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Load time weaver relying on Instrumentation.
@@ -41,16 +42,7 @@ import org.springframework.util.Assert;
  * @since 2.0
  * @see InstrumentationSavingAgent
  */
-public class InstrumentationLoadTimeWeaver extends AbstractLoadTimeWeaver {
-	
-	/**
-	 * We have the ability to weave the current class loader when starting the
-	 * JVM in this way, so the instrumentable class loader will always be the
-	 * current loader.
-	 */
-	public ClassLoader getInstrumentableClassLoader() {
-		return getContextClassLoader();
-	}
+public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "Transformer must not be null");
@@ -60,6 +52,23 @@ public class InstrumentationLoadTimeWeaver extends AbstractLoadTimeWeaver {
 					"Must start with Java agent to use InstrumentationLoadTimeWeaver. See Spring documentation.");
 		}
 		instrumentation.addTransformer(transformer);
+	}
+
+	/**
+	 * We have the ability to weave the current class loader when starting the
+	 * JVM in this way, so the instrumentable class loader will always be the
+	 * current loader.
+	 */
+	public ClassLoader getInstrumentableClassLoader() {
+		return ClassUtils.getDefaultClassLoader();
+	}
+
+	/**
+	 * This implementation always returns a SimpleThrowawayClassLoader.
+	 * @see SimpleThrowawayClassLoader
+	 */
+	public ClassLoader getThrowawayClassLoader() {
+		return new SimpleThrowawayClassLoader(getInstrumentableClassLoader());
 	}
 
 }
