@@ -110,6 +110,11 @@ public class FormTag extends AbstractHtmlElementTag {
 	private String commandName = DEFAULT_COMMAND_NAME;
 
 	/**
+	 * The value of the '<code>name</code>' attribute.
+	 */
+	private String name;
+
+	/**
 	 * The value of the '<code>action</code>' attribute.
 	 */
 	private String action;
@@ -150,6 +155,14 @@ public class FormTag extends AbstractHtmlElementTag {
 	 */
 	protected String getCommandName() {
 		return this.commandName;
+	}
+
+	/**
+	 * Sets the value of the '<code>name</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	/**
@@ -259,10 +272,11 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Name is not a valid attribute for form on XHTML 1.0.
+	 * Name is not a valid attribute for form on XHTML 1.0. However, it is sometimes needed for
+	 * backward compatibility.
 	 */
 	protected String getName() throws JspException {
-		return null;
+		return this.name;
 	}
 
 	/**

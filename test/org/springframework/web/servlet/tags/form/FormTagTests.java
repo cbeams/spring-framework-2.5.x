@@ -41,6 +41,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 	public void testWriteForm() throws Exception {
 		String action = "/form.html";
 		String commandName = "myCommand";
+		String name = "formName";
 		String enctype = "my/enctype";
 		String method = "POST";
 		String onsubmit = "onsubmit";
@@ -48,6 +49,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		String cssClass = "myClass";
 		String cssStyle = "myStyle";
 
+		this.tag.setName(name);
 		this.tag.setCssClass(cssClass);
 		this.tag.setCssStyle(cssStyle);
 		this.tag.setAction(action);
@@ -79,7 +81,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(output, "onsubmit", onsubmit);
 		assertContainsAttribute(output, "onreset", onreset);
 		assertContainsAttribute(output, "id", commandName);
-		assertAttributeNotPresent(output, "name");
+		assertContainsAttribute(output, "name", name);
 	}
 
 	public void testWithActionFromRequest() throws Exception {
@@ -114,6 +116,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(output, "method", method);
 		assertContainsAttribute(output, "onsubmit", onsubmit);
 		assertContainsAttribute(output, "onreset", onreset);
+		assertAttributeNotPresent(output, "name");
 	}
 
 	public void testWithNullResolvedCommand() throws Exception {

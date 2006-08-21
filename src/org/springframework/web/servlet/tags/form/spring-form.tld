@@ -28,6 +28,13 @@
 		</attribute>
 
 		<attribute>
+			<name>name</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>HTML Standard Attribute - added for backwards compatibility cases</description>
+		</attribute>
+
+		<attribute>
 			<name>htmlEscape</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
