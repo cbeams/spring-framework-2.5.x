@@ -166,9 +166,8 @@ final class OptionWriter {
 		String valueDisplayString = getDisplayString(value);
 		String labelDisplayString = getDisplayString(label);
 
-		if (!valueDisplayString.equals(labelDisplayString)) {
-			tagWriter.writeAttribute("value", valueDisplayString);
-		}
+		// allows render values to handle some strange browser compat issues.
+		tagWriter.writeAttribute("value", valueDisplayString);
 
 		if (isSelected(value) || isSelected(item)) {
 			tagWriter.writeAttribute("selected", "selected");

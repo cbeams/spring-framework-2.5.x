@@ -147,22 +147,21 @@ public class OptionTag extends AbstractHtmlElementBodyTag {
 		this.pageContext.removeAttribute(DISPLAY_VALUE_VARIABLE_NAME);
 	}
 
-	private void renderOption(Object value, String label, TagWriter tagWriter) throws JspException {
-		tagWriter.startTag("option");
+    private void renderOption(Object value, String label, TagWriter tagWriter) throws JspException {
+        tagWriter.startTag("option");
 
-		String renderedValue = getDisplayString(value, getBindStatus().getEditor());
+        String renderedValue = getDisplayString(value, getBindStatus().getEditor());
 
-		if (!renderedValue.equals(label)) {
-			tagWriter.writeAttribute(VALUE_ATTRIBUTE, renderedValue);
-		}
 
-		if (isSelected(value)) {
-			tagWriter.writeAttribute(SELECTED_ATTRIBUTE, SELECTED_ATTRIBUTE);
-		}
-		tagWriter.appendValue(label);
+        tagWriter.writeAttribute(VALUE_ATTRIBUTE, renderedValue);
 
-		tagWriter.endTag();
-	}
+        if (isSelected(value)) {
+            tagWriter.writeAttribute(SELECTED_ATTRIBUTE, SELECTED_ATTRIBUTE);
+        }
+        tagWriter.appendValue(label);
+
+        tagWriter.endTag();
+    }
 
 	/**
 	 * Returns the value of the label for this '<code>option</code>' element.
