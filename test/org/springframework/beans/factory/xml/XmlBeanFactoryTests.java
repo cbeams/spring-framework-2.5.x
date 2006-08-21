@@ -33,8 +33,10 @@ import javax.servlet.ServletException;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
+import org.apache.commons.logging.LogFactory;
 import org.xml.sax.InputSource;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.ITestBean;
@@ -42,18 +44,17 @@ import org.springframework.beans.IndexedTestBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.ResourceTestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanIsAbstractException;
+import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.DummyFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
-import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MethodReplacer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -966,7 +967,9 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 		sw.stop();
 		System.out.println(sw);
-		assertTrue(sw.getTotalTimeMillis() < 1000);
+		if (!LogFactory.getLog(DefaultListableBeanFactory.class).isDebugEnabled()) {
+			assertTrue(sw.getTotalTimeMillis() < 1000);
+		}
 
 		// Now test distinct bean with swapped value in factory, to ensure the two are independent
 		OverrideOneMethod swappedOom = (OverrideOneMethod) xbf.getBean("overrideOneMethodSwappedReturnValues");
