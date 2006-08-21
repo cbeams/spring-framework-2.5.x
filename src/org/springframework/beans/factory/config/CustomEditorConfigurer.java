@@ -22,8 +22,8 @@ import java.util.Map;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyEditorRegistrar;
-import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
 
@@ -83,7 +83,7 @@ import org.springframework.util.ClassUtils;
  */
 public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanClassLoaderAware, Ordered {
 
-	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
+	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
 	private PropertyEditorRegistrar[] propertyEditorRegistrars;
 

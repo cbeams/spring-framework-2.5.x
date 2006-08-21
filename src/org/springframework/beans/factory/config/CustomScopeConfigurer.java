@@ -16,6 +16,9 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.Iterator;
+import java.util.Map;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -23,9 +26,6 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Simple {@link BeanFactoryPostProcessor} implementation that effects the
@@ -40,7 +40,7 @@ import java.util.Map;
  */
 public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClassLoaderAware, Ordered {
 
-	private int order = Ordered.LOWEST_PRECEDENCE;
+	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
 	private Map scopes;
 
