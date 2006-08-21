@@ -2536,7 +2536,7 @@
             </listitem>
 
             <listitem>
-              <para>Use the approapriate <literal>LoadTimeWeaver</literal>
+              <para>Use the appropriate <literal>LoadTimeWeaver</literal>
               when configuring
               <literal>LocalContainerEntityManagerFactoryBean</literal>:</para>
 
@@ -2644,7 +2644,7 @@
       <interfacename>EntityManager</interfacename>s are properly opened and
       closed and automatically participate in transactions. Moreover, the
       <classname>JpaTemplate</classname> properly handles exceptions, making
-      sure resources are cleaned up and the approapriate transactions rolled
+      sure resources are cleaned up and the appropriate transactions rolled
       back. The template instances are thread-safe and reusable and they can
       be kept as instance variable of the enclosing class. Note that
       <classname>JpaTemplate</classname> offers single-step actions such as
@@ -2678,6 +2678,16 @@
 
     <section>
       <title>Implementing DAOs based on plain JPA</title>
+      
+      <note>
+        <para>While <interfacename>EntityManagerFactory</interfacename> instances are thread safe,
+        <interfacename>EntityManager</interfacename> instances are not. The injected JPA <interfacename>EntityManager</interfacename> behave
+        just like an <interfacename>EntityManager</interfacename> fetched from an application server's JNDI
+        environment, as defined by the JPA specification. It will delegate all
+        calls to the current transactional <interfacename>EntityManager</interfacename>, if any; else, it
+        will fall back to a newly created <interfacename>EntityManager</interfacename> per operation, making
+        it thread safe. </para>
+      </note>
 
       <para>It is possible to write code against the plain JPA without using
       any Spring dependencies, using an injected
@@ -2778,17 +2788,6 @@
       a non-invasiveness perspective, and might feel more natural to JPA
       developers.</para>
 
-      <sidebar>
-        <title>EntityManager and Thread safety</title>
-
-        <para>While EntityManagerFactory instances are thread safe,
-        EntityManager instances are not. The injected JPA EntityManager behave
-        just like an EntityManager fetched from an application server's JNDI
-        environment, as defined by the JPA specification. It will delegate all
-        calls to the current transactional EntityManager, if any; else, it
-        will fall back to a newly created EntityManager per operation, making
-        it thread safe. </para>
-      </sidebar>
     </section>
 
     <section>
@@ -2827,7 +2826,7 @@ public class ProductDaoImpl implements ProductDao {
       <interfacename>PersistenceExceptionTranslator</interfacename> interface)
       and advice all beans maked with the
       <interfacename>@Repository</interfacename> annotation so that the
-      discovered translators can intercept and apply the approapriate
+      discovered translators can intercept and apply the appropriate
       translation on the thrown exceptions.</para>
 
       <para>In summary: DAOs can be implemented based on the plain Java
@@ -2926,7 +2925,7 @@ public class ProductDaoImpl implements ProductDao {
     for advanced translation of exception. Note that the default
     implementation used (<classname>DefaultJpaDialect</classname>) doesn't
     provide any special capabilities and if the above features are required,
-    the approapriate dialect has to be specified.</para>
+    the appropriate dialect has to be specified.</para>
 
     <para>See the <interfacename>JpaDialect</interfacename> Javadoc for more
     details of its operations and how they are used within Spring's JPA
