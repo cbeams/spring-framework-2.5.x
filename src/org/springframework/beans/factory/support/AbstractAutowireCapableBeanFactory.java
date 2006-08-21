@@ -380,8 +380,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// even when triggered by lifecycle interfaces like BeanFactoryAware.
 			if (isAllowCircularReferences() && isSingletonCurrentlyInCreation(beanName)) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Eagerly caching bean [" + bean + "] with name '" + beanName +
-							"' to allow for resolving potential circular references");
+					logger.debug("Eagerly caching bean of type [" + bean.getClass().getName() +
+							"] with name '" + beanName + "' to allow for resolving potential circular references");
 				}
 				addSingleton(beanName, bean);
 			}
