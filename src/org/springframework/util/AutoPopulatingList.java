@@ -17,34 +17,31 @@
 package org.springframework.util;
 
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.io.PrintStream;
 
 /**
  * Simple {@link List} wrapper class that allows for elements to be
  * automatically populated as they are requested. This is particularly
- * useful for data binding to {@link List Lists}, allowing for
- * elements to be created and added to the {@link List} in a "just in time"
- * fashion.
- * <p/>
- * Note: This class is not threadsafe. To create a threadsafe version use the
- * {@link java.util.Collections#synchronizedList} utility methods.
- * <p/>
- * Inspired by <code>LazyList</code> from Commons Collections.
+ * useful for data binding to {@link List Lists}, allowing for elements
+ * to be created and added to the {@link List} in a "just in time" fashion.
+ *
+ * <p>Note: This class is not thread-safe. To create a thread-safe version,
+ * use the {@link java.util.Collections#synchronizedList} utility methods.
+ *
+ * <p>Inspired by <code>LazyList</code> from Commons Collections.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class AutoPopulatingList implements List {
 
 	/**
-	 * The {@link List} that all operations are finally delegated to.
+	 * The {@link List} that all operations are eventually delegated to.
 	 */
 	private final List backingList;
 
@@ -53,6 +50,7 @@ public class AutoPopulatingList implements List {
 	 * on demand.
 	 */
 	private final ElementFactory elementFactory;
+
 
 	/**
 	 * Creates a new <code>AutoPopulatingList</code> that is backed by a standard
@@ -85,47 +83,48 @@ public class AutoPopulatingList implements List {
 	 * and creates new elements on demand using the supplied {@link ElementFactory}.
 	 */
 	public AutoPopulatingList(List backingList, ElementFactory elementFactory) {
-		Assert.notNull(backingList, "'backingList' cannot be null.");
-		Assert.notNull(elementFactory, "'elementFactory' cannot be null.");
+		Assert.notNull(backingList, "Backing List must not be null");
+		Assert.notNull(elementFactory, "Element factory must not be null");
 		this.backingList = backingList;
 		this.elementFactory = elementFactory;
 	}
 
+
 	public void add(int index, Object element) {
-		backingList.add(index, element);
+		this.backingList.add(index, element);
 	}
 
 	public boolean add(Object o) {
-		return backingList.add(o);
+		return this.backingList.add(o);
 	}
 
 	public boolean addAll(Collection c) {
-		return backingList.addAll(c);
+		return this.backingList.addAll(c);
 	}
 
 	public boolean addAll(int index, Collection c) {
-		return backingList.addAll(index, c);
+		return this.backingList.addAll(index, c);
 	}
 
 	public void clear() {
-		backingList.clear();
+		this.backingList.clear();
 	}
 
 	public boolean contains(Object o) {
-		return backingList.contains(o);
+		return this.backingList.contains(o);
 	}
 
 	public boolean containsAll(Collection c) {
-		return backingList.containsAll(c);
+		return this.backingList.containsAll(c);
 	}
 
 	public boolean equals(Object o) {
-		return backingList.equals(o);
+		return this.backingList.equals(o);
 	}
 
 	/**
-	 * Gets the element at the supplied index, creating it if there is no element at
-	 * that index.
+	 * Get the element at the supplied index, creating it if there is
+	 * no element at that index.
 	 */
 	public Object get(int index) {
 		int backingListSize = this.backingList.size();
@@ -149,140 +148,126 @@ public class AutoPopulatingList implements List {
 	}
 
 	public int hashCode() {
-		return backingList.hashCode();
+		return this.backingList.hashCode();
 	}
 
 	public int indexOf(Object o) {
-		return backingList.indexOf(o);
+		return this.backingList.indexOf(o);
 	}
 
 	public boolean isEmpty() {
-		return backingList.isEmpty();
+		return this.backingList.isEmpty();
 	}
 
 	public Iterator iterator() {
-		return backingList.iterator();
+		return this.backingList.iterator();
 	}
 
 	public int lastIndexOf(Object o) {
-		return backingList.lastIndexOf(o);
+		return this.backingList.lastIndexOf(o);
 	}
 
 	public ListIterator listIterator() {
-		return backingList.listIterator();
+		return this.backingList.listIterator();
 	}
 
 	public ListIterator listIterator(int index) {
-		return backingList.listIterator(index);
+		return this.backingList.listIterator(index);
 	}
 
 	public Object remove(int index) {
-		return backingList.remove(index);
+		return this.backingList.remove(index);
 	}
 
 	public boolean remove(Object o) {
-		return backingList.remove(o);
+		return this.backingList.remove(o);
 	}
 
 	public boolean removeAll(Collection c) {
-		return backingList.removeAll(c);
+		return this.backingList.removeAll(c);
 	}
 
 	public boolean retainAll(Collection c) {
-		return backingList.retainAll(c);
+		return this.backingList.retainAll(c);
 	}
 
 	public Object set(int index, Object element) {
-		return backingList.set(index, element);
+		return this.backingList.set(index, element);
 	}
 
 	public int size() {
-		return backingList.size();
+		return this.backingList.size();
 	}
 
 	public List subList(int fromIndex, int toIndex) {
-		return backingList.subList(fromIndex, toIndex);
+		return this.backingList.subList(fromIndex, toIndex);
 	}
 
 	public Object[] toArray() {
-		return backingList.toArray();
+		return this.backingList.toArray();
 	}
 
 	public Object[] toArray(Object[] a) {
-		return backingList.toArray(a);
+		return this.backingList.toArray(a);
 	}
 
+
+	/**
+	 * Factory interface for creating elements for an index-based access
+	 * data structure such as a {@link java.util.List}.
+	 */
+	public interface ElementFactory {
+
+		/**
+		 * Create the element for the supplied index.
+		 * @return the element object
+		 * @throws ElementInstantiationException if the instantiation process failed
+		 * (any exception thrown by a target constructor should be propagated as-is)
+		 */
+		Object createElement(int index) throws ElementInstantiationException;
+	}
+
+
+	/**
+	 * Exception to be thrown from ElementFactory.
+	 */
+	public static class ElementInstantiationException extends RuntimeException {
+
+		public ElementInstantiationException(String msg) {
+			super(msg);
+		}
+	}
+
+
+	/**
+	 * Reflective implementation of the ElementFactory interface,
+	 * using <code>Class.newInstance()</code> on a given element class.
+	 * @see java.lang.Class#newInstance()
+	 */
 	private static class ReflectiveElementFactory implements ElementFactory {
 
 		private final Class elementClass;
 
 		public ReflectiveElementFactory(Class elementClass) {
-			Assert.notNull(elementClass, "'elementClass' cannot be null.");
-			Assert.state(!elementClass.isInterface(), "'elementClass' cannot be an interface type.");
-			Assert.state(!Modifier.isAbstract(elementClass.getModifiers()), "'elementClass' cannot be an abstract class.");
+			Assert.notNull(elementClass, "Element clas must not be null");
+			Assert.isTrue(!elementClass.isInterface(), "Element class must not be an interface type");
+			Assert.isTrue(!Modifier.isAbstract(elementClass.getModifiers()), "Element class cannot be an abstract class");
 			this.elementClass = elementClass;
 		}
 
 		public Object createElement(int index) {
 			try {
-				Constructor ctor = this.elementClass.getDeclaredConstructor((Class[]) null);
-
-				if (!Modifier.isPublic(ctor.getModifiers()) ||
-								!Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) {
-					ctor.setAccessible(true);
-				}
-				return ctor.newInstance((Object[]) null);
+				return this.elementClass.newInstance();
 			}
 			catch (InstantiationException ex) {
-				throw new ElementInstantiationException("Unable to instantiate element class '"
-								+ this.elementClass.getName() + "'. Is it an abstract class?", ex);
+				throw new ElementInstantiationException("Unable to instantiate element class [" +
+						this.elementClass.getName() + "]. Root cause is " + ex);
 			}
 			catch (IllegalAccessException ex) {
-				throw new ElementInstantiationException("Cannot access element class '" + this.elementClass.getName() +
-								". 'Has the class definition changed? Is the constructor accessible?", ex);
-			}
-			catch (IllegalArgumentException ex) {
-				throw new ElementInstantiationException("Illegal arguments for constructor on element class '"
-								+ this.elementClass.getName() + "'", ex);
-			}
-			catch (InvocationTargetException ex) {
-				throw new ElementInstantiationException("Constructor for element class '"
-								+ this.elementClass.getName() + "' threw exception", ex.getTargetException());
-			}
-			catch (NoSuchMethodException ex) {
-				throw new ElementInstantiationException("Element class '" + this.elementClass.getName()
-								+ "' has no public no-arg constructor.", ex);
+				throw new ElementInstantiationException("Cannot access element class [" +
+						this.elementClass.getName() + "]. Root cause is " + ex);
 			}
 		}
 	}
 
-	private static class ElementInstantiationException extends RuntimeException {
-
-		private Throwable rootCause;
-
-		public ElementInstantiationException(String msg) {
-			super(msg);
-		}
-
-		public ElementInstantiationException(String msg, Throwable ex) {
-			super(msg);
-			this.rootCause = ex;
-		}
-
-		/**
-		 * Print the composite message and the embedded stack trace to the specified stream.
-		 *
-		 * @param ps the print stream
-		 */
-		public void printStackTrace(PrintStream ps) {
-			if (getCause() == null) {
-				super.printStackTrace(ps);
-			}
-			else {
-				ps.println(this);
-				ps.print("Caused by: ");
-				getCause().printStackTrace(ps);
-			}
-		}
-	}
 }

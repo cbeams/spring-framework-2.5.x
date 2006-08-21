@@ -16,10 +16,11 @@
 
 package org.springframework.util;
 
-import junit.framework.TestCase;
-import org.springframework.beans.TestBean;
-
 import java.util.LinkedList;
+
+import junit.framework.TestCase;
+
+import org.springframework.beans.TestBean;
 
 /**
  * @author Rob Harrop
@@ -58,10 +59,10 @@ public class AutoPopulatingListTests extends TestCase {
 		list.add(11, helloWorld);
 		assertEquals(helloWorld, list.get(11));
 
-		assertTrue(list.get(10)instanceof TestBean);
-		assertTrue(list.get(12)instanceof TestBean);
-		assertTrue(list.get(13)instanceof TestBean);
-		assertTrue(list.get(20)instanceof TestBean);
+		assertTrue(list.get(10) instanceof TestBean);
+		assertTrue(list.get(12) instanceof TestBean);
+		assertTrue(list.get(13) instanceof TestBean);
+		assertTrue(list.get(20) instanceof TestBean);
 	}
 
 	private void doTestWithElementFactory(AutoPopulatingList list) {
@@ -70,12 +71,13 @@ public class AutoPopulatingListTests extends TestCase {
 		for(int x = 0; x < list.size(); x++) {
 			Object element = list.get(x);
 			if(element instanceof TestBean) {
-				assertEquals(x, ((TestBean)element).getAge());
+				assertEquals(x, ((TestBean) element).getAge());
 			}
 		}
 	}
 
-	private static class MockElementFactory implements ElementFactory {
+
+	private static class MockElementFactory implements AutoPopulatingList.ElementFactory {
 
 		public Object createElement(int index) {
 			TestBean bean = new TestBean();
@@ -83,4 +85,5 @@ public class AutoPopulatingListTests extends TestCase {
 			return bean;
 		}
 	}
+
 }
