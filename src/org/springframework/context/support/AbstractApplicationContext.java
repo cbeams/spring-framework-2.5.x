@@ -271,8 +271,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Return the list of BeanPostProcessors that will get applied
-	 * to beans created with this factory.
+	 * Return the list of BeanFactoryPostProcessors that will get applied
+	 * to the internal BeanFactory.
+	 * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor
 	 */
 	public List getBeanFactoryPostProcessors() {
 		return beanFactoryPostProcessors;
