@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,8 +27,8 @@ import java.util.Comparator;
  * (just like same order values of <code>Ordered</code> objects).
  *
  * @author Juergen Hoeller
- * @see Ordered
  * @since 07.04.2003
+ * @see Ordered
  */
 public class OrderComparator implements Comparator {
 
@@ -36,14 +36,12 @@ public class OrderComparator implements Comparator {
 		int i1 = getOrder(o1);
 		int i2 = getOrder(o2);
 
-		// direct evaluation instead of Integer.compareTo to avoid unnecessary object creation
+		// Direct evaluation instead of Integer.compareTo to avoid unnecessary object creation.
 		return (i1 < i2) ? -1 : (i1 > i2) ? 1 : 0;
 	}
 
-
-	private static int getOrder(Object o) {
-		return (o instanceof Ordered)
-				? ((Ordered) o).getOrder() : Ordered.LOWEST_PRECEDENCE;
+	private int getOrder(Object obj) {
+		return (obj instanceof Ordered ? ((Ordered) obj).getOrder() : Ordered.LOWEST_PRECEDENCE);
 	}
 
 }
