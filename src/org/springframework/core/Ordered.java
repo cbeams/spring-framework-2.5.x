@@ -30,6 +30,12 @@ package org.springframework.core;
 public interface Ordered {
 
 	/**
+	 * Useful constant for the highest precedence value.
+	 * @see java.lang.Integer#MIN_VALUE
+	 */
+	int HIGHEST_PRECEDENCE = Integer.MIN_VALUE;
+
+	/**
 	 * Useful constant for the lowest precedence value.
 	 * @see java.lang.Integer#MAX_VALUE
 	 */
@@ -45,6 +51,10 @@ public interface Ordered {
 	 * <p>Higher value can be interpreted as lower priority,
 	 * consequently the first object has highest priority
 	 * (somewhat analogous to Servlet "load-on-startup" values).
+	 * <p>Note that order values below 0 are reserved for framework
+	 * purposes. Application-specified values should always be 0 or
+	 * greater, with only framework components (internal or third-party)
+	 * supposed to use lower values.
 	 * @return the order value
 	 * @see #LOWEST_PRECEDENCE
 	 */

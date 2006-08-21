@@ -27,6 +27,7 @@ import org.springframework.beans.factory.support.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -118,7 +119,7 @@ public abstract class AopNamespaceUtils {
 			RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);
 			beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, beanDefinition);
-			beanDefinition.getPropertyValues().addPropertyValue("order",new Integer(0));
+			beanDefinition.getPropertyValues().addPropertyValue("order", new Integer(Ordered.HIGHEST_PRECEDENCE));
 			// Notify of bean registration.
 			BeanComponentDefinition componentDefinition =
 					new BeanComponentDefinition(beanDefinition, AUTO_PROXY_CREATOR_BEAN_NAME);
