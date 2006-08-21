@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -77,12 +77,16 @@ public class JmxTestBean implements IJmxTestBean {
 	 *                                                                              Name
 	 *                                                                              Attribute")
 	 */
+	public void setNickName(String nickName) {
+		this.nickName = nickName;
+	}
+
 	public String getNickName() {
 		return this.nickName;
 	}
 
-	public void setNickName(String nickName) {
-		this.nickName = nickName;
+	public void setSuperman(boolean superman) {
+		this.isSuperman = superman;
 	}
 
 	/**
@@ -90,10 +94,6 @@ public class JmxTestBean implements IJmxTestBean {
 	 *                                                                              Superman
 	 *                                                                              Attribute")
 	 */
-	public void setSuperman(boolean superman) {
-		this.isSuperman = superman;
-	}
-
 	public boolean isSuperman() {
 		return isSuperman;
 	}

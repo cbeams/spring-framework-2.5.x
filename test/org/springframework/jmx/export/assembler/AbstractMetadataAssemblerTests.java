@@ -78,7 +78,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	/**
 	 * Tests the situation where the property only has a getter.
 	 */
-	public void testWithOnlyGetter() throws Exception {
+	public void testWithOnlySetter() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = inf.getAttribute("NickName");
 		assertNotNull("Attribute should not be null", attr);
@@ -87,7 +87,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 	/**
 	 * Tests the situation where the property only has a setter.
 	 */
-	public void testWithOnlySetter() throws Exception {
+	public void testWithOnlyGetter() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute("Superman");
 		assertNotNull("Attribute should not be null", attr);
