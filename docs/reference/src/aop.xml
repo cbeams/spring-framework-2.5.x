@@ -2092,9 +2092,10 @@ public @interface Idempotent {
     	
     	<para>
     	If you have chosen to use Spring AOP, then you have a choice of 
-    	@AspectJ or XML style. Clearly if you are not running on Java 5, 
-    	then the XML style is the best choice. For Java 5 projects the 
-    	trade-offs are as follows:
+    	@AspectJ or XML style. On balance we recommend use of the @AspectJ style
+    	if you are using Java 5. Clearly if you are not running on Java 5, 
+    	then the XML style is the best choice. Details of the trade-offs between 
+    	the XML and @AspectJ styles are discussed below.
     	</para>
     	
     	<para>
