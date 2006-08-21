@@ -22,7 +22,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using parameter name discovery with AspectJ
 
 * aspectj/aspectjweaver.jar, aspectj/aspectjrt.jar, aspectj/aspectjtools.jar
-- AspectJ 1.5.2 (http://www.aspectj.org)
+- AspectJ 1.5.2a (http://www.aspectj.org)
 - required for building the framework
 - required at runtime when using Spring's AspectJ support
 
