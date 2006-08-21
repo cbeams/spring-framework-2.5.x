@@ -38,7 +38,7 @@ import java.util.List;
  */
 public class ErrorsTag extends AbstractHtmlElementBodyTag {
 
-	private static final String MESSAGES_ATTRIBUTE = "messages";
+	public static final String MESSAGES_ATTRIBUTE = "messages";
 
 
 	/**
@@ -49,6 +49,11 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag {
 
 	private String delimiter = "<br/>";
 
+
+	/**
+	 * Stores any value that existed in the 'errors messages' before the tag was started.
+	 */
+	private Object oldMessages;
 
 	/**
 	 * Sets what delimiter must be used between error messages.
@@ -96,11 +101,16 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag {
 	protected void exposeAttributes() throws JspException {
 		List errorMessages = new ArrayList();
 		errorMessages.addAll(Arrays.asList(getBindStatus().getErrorMessages()));
+		this.oldMessages = this.pageContext.getAttribute(MESSAGES_ATTRIBUTE);
 		this.pageContext.setAttribute(MESSAGES_ATTRIBUTE, errorMessages);
 	}
 
 	protected void removeAttributes() {
-		this.pageContext.removeAttribute(MESSAGES_ATTRIBUTE);
+		this.pageContext.setAttribute(MESSAGES_ATTRIBUTE, this.oldMessages);
 	}
 
+	public void doFinally() {
+		super.doFinally();
+		this.oldMessages = null;
+	}
 }

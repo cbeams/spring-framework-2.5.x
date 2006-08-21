@@ -28,6 +28,7 @@ import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.BodyTag;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 /**
  * @author Rob Harrop
@@ -95,12 +96,34 @@ public class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		exposeBindingResult(errors);
 		int result = this.tag.doStartTag();
 		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		assertNotNull(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
 		String bodyContent = "Foo";
 		this.tag.setBodyContent(new MockBodyContent(bodyContent, getWriter()));
 		this.tag.doEndTag();
+		this.tag.doFinally();
 		assertEquals(bodyContent, getWriter().toString());
-
+		assertNull(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
 	}
+
+	public void testAsBodyTagWithExistingMessagesAttribute() throws Exception {
+		String existingAttribute = "something";
+		getPageContext().setAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, existingAttribute);
+		Errors errors = new BindException(new TestBean(), "COMMAND_NAME");
+		errors.rejectValue("name", "some.code", "Default Message");
+		errors.rejectValue("name", "too.short", "Too Short");
+		exposeBindingResult(errors);
+		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		assertNotNull(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
+		assertTrue(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE) instanceof List);
+		String bodyContent = "Foo";
+		this.tag.setBodyContent(new MockBodyContent(bodyContent, getWriter()));
+		this.tag.doEndTag();
+		this.tag.doFinally();
+		assertEquals(bodyContent, getWriter().toString());
+		assertEquals(existingAttribute, getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
+	}
+
 
 	private void assertSpanTagOpened(String output) {
 		assertTrue(output.startsWith("<span "));
