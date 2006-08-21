@@ -118,6 +118,7 @@ public abstract class AopNamespaceUtils {
 			RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);
 			beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, beanDefinition);
+			beanDefinition.getPropertyValues().addPropertyValue("order",new Integer(0));
 			// Notify of bean registration.
 			BeanComponentDefinition componentDefinition =
 					new BeanComponentDefinition(beanDefinition, AUTO_PROXY_CREATOR_BEAN_NAME);
