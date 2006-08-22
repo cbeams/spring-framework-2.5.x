@@ -689,16 +689,16 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		try {
 			// Use transaction timeout (if available).
 			long timeout = getReceiveTimeout();
-			JmsResourceHolder conHolder =
+			JmsResourceHolder resourceHolder =
 					(JmsResourceHolder) TransactionSynchronizationManager.getResource(getConnectionFactory());
-			if (conHolder != null && conHolder.hasTimeout()) {
-				timeout = conHolder.getTimeToLiveInMillis();
+			if (resourceHolder != null && resourceHolder.hasTimeout()) {
+				timeout = resourceHolder.getTimeToLiveInMillis();
 			}
 			Message message = (timeout >= 0) ?
 					consumer.receive(timeout) : consumer.receive();
 			if (session.getTransacted()) {
 				// Commit necessary - but avoid commit call within a JTA transaction.
-				if (isSessionTransacted() && conHolder == null) {
+				if (isSessionTransacted() && resourceHolder == null) {
 					// Transacted session created by this template -> commit.
 					JmsUtils.commitIfNecessary(session);
 				}
@@ -907,6 +907,10 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 		public Session createSession(Connection con) throws JMSException {
 			return JmsTemplate.this.createSession(con);
+		}
+
+		public boolean isSynchedLocalTransactionAllowed() {
+			return isSessionTransacted();
 		}
 	}
 

@@ -16,11 +16,14 @@
 
 package org.springframework.jms.connection;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.jms.Connection;
+import javax.jms.JMSException;
 import javax.jms.Session;
 
 import org.springframework.jms.support.JmsUtils;
@@ -48,6 +51,8 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 
 	private final List sessions = new LinkedList();
 
+	private final Map sessionsPerConnection = new HashMap();
+
 
 	/**
 	 * Create a new JmsResourceHolder that is open for resources to be added.
@@ -65,7 +70,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	 */
 	public JmsResourceHolder(Connection connection, Session session) {
 		addConnection(connection);
-		addSession(session);
+		addSession(session, connection);
 		this.frozen = true;
 	}
 
@@ -76,13 +81,29 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	public final void addConnection(Connection connection) {
 		Assert.isTrue(!this.frozen, "Cannot add Connection because JmsResourceHolder is frozen");
 		Assert.notNull(connection, "Connection must not be null");
-		this.connections.add(connection);
+		if (!this.connections.contains(connection)) {
+			this.connections.add(connection);
+		}
 	}
 
 	public final void addSession(Session session) {
+		addSession(session, null);
+	}
+
+	public final void addSession(Session session, Connection connection) {
 		Assert.isTrue(!this.frozen, "Cannot add Session because JmsResourceHolder is frozen");
 		Assert.notNull(session, "Session must not be null");
-		this.sessions.add(session);
+		if (!this.sessions.contains(session)) {
+			this.sessions.add(session);
+			if (connection != null) {
+				List sessions = (List) this.sessionsPerConnection.get(connection);
+				if (sessions == null) {
+					sessions = new LinkedList();
+					this.sessionsPerConnection.put(connection, sessions);
+				}
+				sessions.add(session);
+			}
+		}
 	}
 
 
@@ -90,18 +111,32 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 		return (!this.connections.isEmpty() ? (Connection) this.connections.get(0) : null);
 	}
 
-	public Session getSession() {
-		return (!this.sessions.isEmpty() ? (Session)  this.sessions.get(0) : null);
-	}
-
 	public Connection getConnection(Class connectionType) {
 		return (Connection) CollectionUtils.findValueOfType(this.connections, connectionType);
 	}
 
-	public Session getSession(Class sessionType) {
-		return (Session) CollectionUtils.findValueOfType(this.sessions, sessionType);
+	public Session getSession() {
+		return (!this.sessions.isEmpty() ? (Session)  this.sessions.get(0) : null);
 	}
 
+	public Session getSession(Class sessionType) {
+		return getSession(sessionType, null);
+	}
+
+	public Session getSession(Class sessionType, Connection connection) {
+		List sessions = this.sessions;
+		if (connection != null) {
+			sessions = (List) this.sessionsPerConnection.get(connection);
+		}
+		return (Session) CollectionUtils.findValueOfType(sessions, sessionType);
+	}
+
+
+	public void commitAll() throws JMSException {
+		for (Iterator it = this.sessions.iterator(); it.hasNext();) {
+			JmsUtils.commitIfNecessary((Session) it.next());
+		}
+	}
 
 	public void closeAll() {
 		for (Iterator it = this.sessions.iterator(); it.hasNext();) {

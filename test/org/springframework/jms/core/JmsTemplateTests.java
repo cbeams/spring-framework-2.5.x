@@ -50,6 +50,9 @@ import org.springframework.jms.ResourceAllocationException;
 import org.springframework.jms.TransactionInProgressException;
 import org.springframework.jms.TransactionRolledBackException;
 import org.springframework.jms.UncategorizedJmsException;
+import org.springframework.jms.connection.ConnectionFactoryUtils;
+import org.springframework.jms.connection.TransactionAwareConnectionFactoryProxy;
+import org.springframework.jms.connection.SingleConnectionFactory;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.JndiDestinationResolver;
@@ -269,18 +272,24 @@ public class JmsTemplateTests extends TestCase {
 	}
 
 	public void testSessionCallbackWithinSynchronizedTransaction() throws Exception {
+		SingleConnectionFactory scf = new SingleConnectionFactory(mockConnectionFactory);
 		JmsTemplate template = createTemplate();
-		template.setConnectionFactory(mockConnectionFactory);
+		template.setConnectionFactory(scf);
 
-		// We're gonna call getTransacted twice, i.e. one more time.
 		mockConnection.start();
 		connectionControl.setVoidCallable(1);
+		// We're gonna call getTransacted 3 times, i.e. 2 more times.
 		mockSession.getTransacted();
-		sessionControl.setReturnValue(useTransactedSession(), 1);
+		sessionControl.setReturnValue(useTransactedSession(), 2);
+		if (useTransactedTemplate()) {
+			mockSession.commit();
+			sessionControl.setVoidCallable(1);
+		}
 		mockSession.close();
 		sessionControl.setVoidCallable(1);
 		mockConnection.close();
 		connectionControl.setVoidCallable(1);
+
 		sessionControl.replay();
 		connectionControl.replay();
 
@@ -298,12 +307,28 @@ public class JmsTemplateTests extends TestCase {
 					return null;
 				}
 			});
+
+			assertSame(mockSession, ConnectionFactoryUtils.getTransactionalSession(scf, null, false));
+			assertSame(mockSession, ConnectionFactoryUtils.getTransactionalSession(scf, scf.createConnection(), false));
+
+			TransactionAwareConnectionFactoryProxy tacf = new TransactionAwareConnectionFactoryProxy(scf);
+			Connection tac = tacf.createConnection();
+			Session tas = tac.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			boolean b = tas.getTransacted();
+			tas.close();
+			tac.close();
+
 			List synchs = TransactionSynchronizationManager.getSynchronizations();
 			assertEquals(1, synchs.size());
-			((TransactionSynchronization) synchs.get(0)).beforeCompletion();
+			TransactionSynchronization synch = (TransactionSynchronization) synchs.get(0);
+			synch.beforeCommit(false);
+			synch.beforeCompletion();
+			synch.afterCommit();
+			synch.afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
 		}
 		finally {
 			TransactionSynchronizationManager.clearSynchronization();
+			scf.destroy();
 		}
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 

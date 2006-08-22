@@ -44,22 +44,35 @@ public abstract class ConnectionFactoryUtils {
 	/**
 	 * Obtain a JMS Session that is synchronized with the current transaction, if any.
 	 * @param cf the ConnectionFactory to obtain a Session for
+	 * @param existingCon the existing JMS Connection to obtain a Session for
+	 * (may be <code>null</code>)
+	 * @param synchedLocalTransactionAllowed whether to allow for a local JMS transaction
+	 * that is synchronized with a Spring-managed transaction (where the main transaction
+	 * might be a JDBC-based one for a specific DataSource, for example), with the JMS
+	 * transaction committing right after the main transaction. If not allowed, the given
+	 * ConnectionFactory needs to handle transaction enlistment underneath the covers.
 	 * @return the transactional Session, or <code>null</code> if none found
 	 * @throws JMSException in case of JMS failure
 	 */
-	public static Session getTransactionalSession(final ConnectionFactory cf) throws JMSException {
+	public static Session getTransactionalSession(
+			final ConnectionFactory cf, final Connection existingCon, final boolean synchedLocalTransactionAllowed)
+			throws JMSException {
+
 		return doGetTransactionalSession(cf, new ResourceFactory() {
-			public Connection getConnection(JmsResourceHolder holder) {
-				return holder.getConnection();
-			}
 			public Session getSession(JmsResourceHolder holder) {
-				return holder.getSession();
+				return holder.getSession(Session.class, existingCon);
+			}
+			public Connection getConnection(JmsResourceHolder holder) {
+				return (existingCon != null ? existingCon : holder.getConnection());
 			}
 			public Connection createConnection() throws JMSException {
 				return cf.createConnection();
 			}
 			public Session createSession(Connection con) throws JMSException {
-				return con.createSession(false, Session.AUTO_ACKNOWLEDGE);
+				return con.createSession(synchedLocalTransactionAllowed, Session.AUTO_ACKNOWLEDGE);
+			}
+			public boolean isSynchedLocalTransactionAllowed() {
+				return synchedLocalTransactionAllowed;
 			}
 		});
 	}
@@ -68,22 +81,35 @@ public abstract class ConnectionFactoryUtils {
 	 * Obtain a JMS QueueSession that is synchronized with the current transaction, if any.
 	 * <p>Mainly intended for use with the JMS 1.0.2 API.
 	 * @param cf the ConnectionFactory to obtain a Session for
+	 * @param existingCon the existing JMS Connection to obtain a Session for
+	 * (may be <code>null</code>)
+	 * @param synchedLocalTransactionAllowed whether to allow for a local JMS transaction
+	 * that is synchronized with a Spring-managed transaction (where the main transaction
+	 * might be a JDBC-based one for a specific DataSource, for example), with the JMS
+	 * transaction committing right after the main transaction. If not allowed, the given
+	 * ConnectionFactory needs to handle transaction enlistment underneath the covers.
 	 * @return the transactional Session, or <code>null</code> if none found
 	 * @throws JMSException in case of JMS failure
 	 */
-	public static QueueSession getTransactionalQueueSession(final QueueConnectionFactory cf) throws JMSException {
+	public static QueueSession getTransactionalQueueSession(
+			final QueueConnectionFactory cf, final QueueConnection existingCon, final boolean synchedLocalTransactionAllowed)
+			throws JMSException {
+
 		return (QueueSession) doGetTransactionalSession(cf, new ResourceFactory() {
-			public Connection getConnection(JmsResourceHolder holder) {
-				return holder.getConnection(QueueConnection.class);
-			}
 			public Session getSession(JmsResourceHolder holder) {
-				return holder.getSession(QueueSession.class);
+				return holder.getSession(QueueSession.class, existingCon);
+			}
+			public Connection getConnection(JmsResourceHolder holder) {
+				return (existingCon != null ? existingCon : holder.getConnection(QueueConnection.class));
 			}
 			public Connection createConnection() throws JMSException {
 				return cf.createQueueConnection();
 			}
 			public Session createSession(Connection con) throws JMSException {
-				return ((QueueConnection) con).createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+				return ((QueueConnection) con).createQueueSession(synchedLocalTransactionAllowed, Session.AUTO_ACKNOWLEDGE);
+			}
+			public boolean isSynchedLocalTransactionAllowed() {
+				return synchedLocalTransactionAllowed;
 			}
 		});
 	}
@@ -92,22 +118,35 @@ public abstract class ConnectionFactoryUtils {
 	 * Obtain a JMS TopicSession that is synchronized with the current transaction, if any.
 	 * <p>Mainly intended for use with the JMS 1.0.2 API.
 	 * @param cf the ConnectionFactory to obtain a Session for
+	 * @param existingCon the existing JMS Connection to obtain a Session for
+	 * (may be <code>null</code>)
+	 * @param synchedLocalTransactionAllowed whether to allow for a local JMS transaction
+	 * that is synchronized with a Spring-managed transaction (where the main transaction
+	 * might be a JDBC-based one for a specific DataSource, for example), with the JMS
+	 * transaction committing right after the main transaction. If not allowed, the given
+	 * ConnectionFactory needs to handle transaction enlistment underneath the covers.
 	 * @return the transactional Session, or <code>null</code> if none found
 	 * @throws JMSException in case of JMS failure
 	 */
-	public static TopicSession getTransactionalTopicSession(final TopicConnectionFactory cf) throws JMSException {
+	public static TopicSession getTransactionalTopicSession(
+			final TopicConnectionFactory cf, final TopicConnection existingCon, final boolean synchedLocalTransactionAllowed)
+			throws JMSException {
+
 		return (TopicSession) doGetTransactionalSession(cf, new ResourceFactory() {
-			public Connection getConnection(JmsResourceHolder holder) {
-				return holder.getConnection(TopicConnection.class);
-			}
 			public Session getSession(JmsResourceHolder holder) {
-				return holder.getSession(TopicSession.class);
+				return holder.getSession(TopicSession.class, existingCon);
+			}
+			public Connection getConnection(JmsResourceHolder holder) {
+				return (existingCon != null ? existingCon : holder.getConnection(TopicConnection.class));
 			}
 			public Connection createConnection() throws JMSException {
 				return cf.createTopicConnection();
 			}
 			public Session createSession(Connection con) throws JMSException {
-				return ((TopicConnection) con).createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+				return ((TopicConnection) con).createTopicSession(synchedLocalTransactionAllowed, Session.AUTO_ACKNOWLEDGE);
+			}
+			public boolean isSynchedLocalTransactionAllowed() {
+				return synchedLocalTransactionAllowed;
 			}
 		});
 	}
@@ -128,17 +167,18 @@ public abstract class ConnectionFactoryUtils {
 		Assert.notNull(resourceKey, "Resource key must not be null");
 		Assert.notNull(resourceKey, "ResourceFactory must not be null");
 
-		JmsResourceHolder conHolder = (JmsResourceHolder) TransactionSynchronizationManager.getResource(resourceKey);
-		if (conHolder != null) {
-			Session session = resourceFactory.getSession(conHolder);
-			if (session != null || conHolder.isFrozen()) {
+		JmsResourceHolder resourceHolder =
+				(JmsResourceHolder) TransactionSynchronizationManager.getResource(resourceKey);
+		if (resourceHolder != null) {
+			Session session = resourceFactory.getSession(resourceHolder);
+			if (session != null || resourceHolder.isFrozen()) {
 				return session;
 			}
 		}
 		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
 			return null;
 		}
-		JmsResourceHolder conHolderToUse = conHolder;
+		JmsResourceHolder conHolderToUse = resourceHolder;
 		if (conHolderToUse == null) {
 			conHolderToUse = new JmsResourceHolder();
 		}
@@ -151,7 +191,7 @@ public abstract class ConnectionFactoryUtils {
 				conHolderToUse.addConnection(con);
 			}
 			session = resourceFactory.createSession(con);
-			conHolderToUse.addSession(session);
+			conHolderToUse.addSession(session, con);
 			if (!isExistingCon) {
 				con.start();
 			}
@@ -161,9 +201,10 @@ public abstract class ConnectionFactoryUtils {
 			JmsUtils.closeConnection(con);
 			throw ex;
 		}
-		if (conHolderToUse != conHolder) {
+		if (conHolderToUse != resourceHolder) {
 			TransactionSynchronizationManager.registerSynchronization(
-					new JmsResourceSynchronization(resourceKey, conHolderToUse));
+					new JmsResourceSynchronization(
+							resourceKey, conHolderToUse, resourceFactory.isSynchedLocalTransactionAllowed()));
 			conHolderToUse.setSynchronizedWithTransaction(true);
 			TransactionSynchronizationManager.bindResource(resourceKey, conHolderToUse);
 		}
@@ -178,20 +219,20 @@ public abstract class ConnectionFactoryUtils {
 	public interface ResourceFactory {
 
 		/**
-		 * Fetch an appropriate Connection from the given JmsResourceHolder.
-		 * @param holder the JmsResourceHolder
-		 * @return an appropriate Connection fetched from the holder,
-		 * or <code>null</code> if none found
-		 */
-		Connection getConnection(JmsResourceHolder holder);
-
-		/**
 		 * Fetch an appropriate Session from the given JmsResourceHolder.
 		 * @param holder the JmsResourceHolder
 		 * @return an appropriate Session fetched from the holder,
 		 * or <code>null</code> if none found
 		 */
 		Session getSession(JmsResourceHolder holder);
+
+		/**
+		 * Fetch an appropriate Connection from the given JmsResourceHolder.
+		 * @param holder the JmsResourceHolder
+		 * @return an appropriate Connection fetched from the holder,
+		 * or <code>null</code> if none found
+		 */
+		Connection getConnection(JmsResourceHolder holder);
 
 		/**
 		 * Create a new JMS Connection for registration with a JmsResourceHolder.
@@ -207,6 +248,14 @@ public abstract class ConnectionFactoryUtils {
 		 * @throws JMSException if thrown by JMS API methods
 		 */
 		Session createSession(Connection con) throws JMSException;
+
+		/**
+		 * Return whether to allow for a local JMS transaction that is synchronized with
+		 * a Spring-managed transaction (where the main transaction might be a JDBC-based
+		 * one for a specific DataSource, for example), with the JMS transaction
+		 * committing right after the main transaction.
+		 */
+		boolean isSynchedLocalTransactionAllowed();
 	}
 
 
@@ -221,11 +270,14 @@ public abstract class ConnectionFactoryUtils {
 
 		private final JmsResourceHolder resourceHolder;
 
+		private final boolean transacted;
+
 		private boolean holderActive = true;
 
-		public JmsResourceSynchronization(Object resourceKey, JmsResourceHolder resourceHolder) {
+		public JmsResourceSynchronization(Object resourceKey, JmsResourceHolder resourceHolder, boolean transacted) {
 			this.resourceKey = resourceKey;
 			this.resourceHolder = resourceHolder;
+			this.transacted = transacted;
 		}
 
 		public void suspend() {
@@ -243,7 +295,26 @@ public abstract class ConnectionFactoryUtils {
 		public void beforeCompletion() {
 			TransactionSynchronizationManager.unbindResource(this.resourceKey);
 			this.holderActive = false;
-			this.resourceHolder.closeAll();
+			if (!this.transacted) {
+				this.resourceHolder.closeAll();
+			}
+		}
+
+		public void afterCommit() {
+			if (this.transacted) {
+				try {
+					this.resourceHolder.commitAll();
+				}
+				catch (JMSException ex) {
+					throw JmsUtils.convertJmsAccessException(ex);
+				}
+			}
+		}
+
+		public void afterCompletion(int status) {
+			if (this.transacted) {
+				this.resourceHolder.closeAll();
+			}
 		}
 	}
 

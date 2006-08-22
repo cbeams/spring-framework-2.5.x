@@ -73,7 +73,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	}
 
 	/**
-	 * Set the transaction mode that is used when creating a JMS Session.
+	 * Set the transaction mode that is used when creating a JMS {@link Session}.
 	 * Default is "false".
 	 * <p>Note that that within a JTA transaction, the parameters to
 	 * <code>create(Queue/Topic)Session(boolean transacted, int acknowledgeMode)</code>
@@ -82,6 +82,13 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * of the EJB specification. Analogously, these parameters are not taken into
 	 * account within a locally managed transaction either, since the accessor
 	 * operates on an existing JMS Session in this case.
+	 * <p>Setting this flag to "true" will use a short local JMS transaction
+	 * when running outside of a managed transaction, and a synchronized local
+	 * JMS transaction in case of a managed transaction (other than an XA
+	 * transaction) being present. The latter has the effect of a local JMS
+	 * transaction being managed alongside the main transaction (which might
+	 * be a native JDBC transaction), with the JMS transaction committing
+	 * right after the main transaction.
 	 * @param sessionTransacted the transaction mode
 	 * @see javax.jms.Connection#createSession(boolean, int)
 	 */
@@ -90,7 +97,8 @@ public abstract class JmsAccessor implements InitializingBean {
 	}
 
 	/**
-	 * Return whether the JMS Sessions are transacted.
+	 * Return whether the JMS {@link Session sessions} used by this
+	 * accessor are supposed to be transacted.
 	 * @return <code>true</code> if the JMS Sessions used
 	 * for sending a message are transacted
 	 * @see #setSessionTransacted(boolean)
@@ -136,8 +144,6 @@ public abstract class JmsAccessor implements InitializingBean {
 
 	/**
 	 * Return the acknowledgement mode for JMS {@link Session sessions}.
-	 * @return the acknowledgement mode for JMS {@link Session sessions}.
-	 * @see #setSessionAcknowledgeMode(int)
 	 */
 	public int getSessionAcknowledgeMode() {
 		return sessionAcknowledgeMode;
