@@ -2681,9 +2681,9 @@ public class FileUploadBean {
     ]]><lineannotation>&lt;!-- inject dependencies as required... --&gt;</lineannotation><![CDATA[
 </bean>]]></programlisting>
             <para>The <classname>ControllerClassNameHandlerMapping</classname> finds all of the
-            various handler (or <interfacename>Controller</interfacename>) beans defined in it's
+            various handler (or <interfacename>Controller</interfacename>) beans defined in its
             application context and strips <literal>'Controller'</literal> off the name to
-            define it's handler mappings.</para>
+            define its handler mappings.</para>
             <para>Let's look at some more examples so that the central idea becomes immediately
             familiar.</para>
             <itemizedlist>
@@ -2712,7 +2712,7 @@ public class FileUploadBean {
             <itemizedlist>
                 <listitem>
                     <para><classname>AdminController</classname> maps to the
-                    <literal>'/welcome<emphasis role="bold">/*</emphasis>'</literal> request URL</para>
+                    <literal>'/admin<emphasis role="bold">/*</emphasis>'</literal> request URL</para>
                 </listitem>
                 <listitem>
                     <para><classname>CatalogController</classname> maps to the
