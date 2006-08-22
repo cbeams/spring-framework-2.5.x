@@ -48,6 +48,9 @@ public abstract class TransactionSynchronizationAdapter implements TransactionSy
 	public void beforeCompletion() {
 	}
 
+	public void afterCommit() {
+	}
+
 	public void afterCompletion(int status) {
 	}
 

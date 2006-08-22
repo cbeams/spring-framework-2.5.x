@@ -71,7 +71,7 @@ public interface TransactionSynchronization {
 	 * <p>Note that exceptions will get propagated to the commit caller
 	 * and cause a rollback of the transaction.
 	 * @param readOnly if the transaction is defined as read-only transaction 
-	 * @throws RuntimeException in case of errors; will be propagated to caller
+	 * @throws RuntimeException in case of errors; will be <b>propagated to the caller</b>
 	 * (note: do not throw TransactionException subclasses here!)
 	 * @see #beforeCompletion
 	 */
@@ -83,7 +83,7 @@ public interface TransactionSynchronization {
 	 * <p>This method will be invoked after <code>beforeCommit</code>, even
 	 * if <code>beforeCommit</code> threw an exception). This callback allows
 	 * for closing resources before transaction completion, for any outcome.
-	 * @throws RuntimeException in case of errors; will be logged
+	 * @throws RuntimeException in case of errors; will be <b>logged but not propagated</b>
 	 * (note: do not throw TransactionException subclasses here!)
 	 * @see #beforeCommit
 	 * @see #afterCompletion
@@ -91,10 +91,19 @@ public interface TransactionSynchronization {
 	void beforeCompletion();
 
 	/**
+	 * Invoked after transaction commit.
+	 * Can e.g. commit further operations that are supposed to follow
+	 * on a successful commit of the main transaction.
+	 * @throws RuntimeException in case of errors; will be <b>propagated to the caller</b>
+	 * (note: do not throw TransactionException subclasses here!)
+	 */
+	void afterCommit();
+
+	/**
 	 * Invoked after transaction commit/rollback.
 	 * Can e.g. perform resource cleanup, <i>after</i> transaction completion.
 	 * @param status completion status according to the STATUS_* constants
-	 * @throws RuntimeException in case of errors; will be logged
+	 * @throws RuntimeException in case of errors; will be <b>logged but not propagated</b>
 	 * (note: do not throw TransactionException subclasses here!)
 	 * @see #STATUS_COMMITTED
 	 * @see #STATUS_ROLLED_BACK

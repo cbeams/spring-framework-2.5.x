@@ -480,12 +480,12 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see #rollback
 	 */
 	public final void commit(TransactionStatus status) throws TransactionException {
-		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
-
-		if (defStatus.isCompleted()) {
+		if (status.isCompleted()) {
 			throw new IllegalTransactionStateException(
 					"Transaction is already completed - do not call commit or rollback more than once per transaction");
 		}
+
+		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
 		if (defStatus.isLocalRollbackOnly()) {
 			if (defStatus.isDebug()) {
 				logger.debug("Transactional code has requested rollback");
@@ -575,7 +575,16 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				doRollbackOnCommitException(status, err);
 				throw err;
 			}
-			triggerAfterCompletion(status, TransactionSynchronization.STATUS_COMMITTED);
+
+			// Trigger afterCommit callbacks, with an exception thrown there
+			// propagated to callers but the transaction still considered as committed.
+			try {
+				triggerAfterCommit(status);
+			}
+			finally {
+				triggerAfterCompletion(status, TransactionSynchronization.STATUS_COMMITTED);
+			}
+
 		}
 		finally {
 			cleanupAfterCompletion(status);
@@ -590,13 +599,12 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see #doSetRollbackOnly
 	 */
 	public final void rollback(TransactionStatus status) throws TransactionException {
-		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
-
-		if (defStatus.isCompleted()) {
+		if (status.isCompleted()) {
 			throw new IllegalTransactionStateException(
 					"Transaction is already completed - do not call commit or rollback more than once per transaction");
 		}
 
+		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
 		processRollback(defStatus);
 	}
 
@@ -719,6 +727,27 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				}
 				catch (Throwable tsex) {
 					logger.error("TransactionSynchronization.beforeCompletion threw exception", tsex);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Trigger afterCommit callbacks.
+	 * @param status object representing the transaction
+	 */
+	private void triggerAfterCommit(DefaultTransactionStatus status) {
+		if (status.isNewSynchronization()) {
+			if (status.isDebug()) {
+				logger.debug("Triggering afterCommit synchronization");
+			}
+			for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
+				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+				try {
+					synchronization.afterCommit();
+				}
+				catch (Throwable tsex) {
+					logger.error("TransactionSynchronization.afterCommit threw exception", tsex);
 				}
 			}
 		}

@@ -41,9 +41,9 @@ import org.springframework.transaction.TransactionTimedOutException;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.transaction.support.TransactionSynchronization;
 
 /**
  * @author Juergen Hoeller
@@ -1427,7 +1427,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 
-	private class TestTransactionSynchronization implements TransactionSynchronization {
+	private static class TestTransactionSynchronization implements TransactionSynchronization {
 
 		public boolean beforeCompletionCalled;
 		public boolean afterCompletionCalled;
@@ -1435,16 +1435,24 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		public void suspend() {
 			fail("Should never be called");
 		}
+
 		public void resume() {
 			fail("Should never be called");
 		}
+
 		public void beforeCommit(boolean readOnly) {
 			fail("Should never be called");
 		}
+
 		public void beforeCompletion() {
 			assertFalse(this.beforeCompletionCalled);
 			this.beforeCompletionCalled = true;
 		}
+
+		public void afterCommit() {
+			fail("Should never be called");
+		}
+
 		public void afterCompletion(int status) {
 			assertFalse(this.afterCompletionCalled);
 			this.afterCompletionCalled = true;
