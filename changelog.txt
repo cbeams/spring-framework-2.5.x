@@ -10,6 +10,7 @@ General
 * added "spring-agent.jar" to "dist/weavers" directory, containing the agent for Spring's InstrumentationLoadTimeWeaver
 * spring-beans.dtd renamed to spring-beans_2_0.dtd, reflecting the significant changes for Spring 2.0. Update your XML!
 * spring-beans_2_0.dtd does not declare "singleton" attribute anymore. If you declare that DTD, use "scope" instead.
+* declared all internal ThreadLocal variables as final (to avoid potential class reloading issues)
 
 Package org.springframework.aop
 * fixed PointcutAdvisor support classes to avoid eager access to Advice and Pointcut from "hashCode()"/"toString()"
@@ -19,6 +20,8 @@ Package org.springframework.beans
 * fixed BeanWrapperImpl to always use a valid read-write type for a converted collection/map (never use original class)
 * added "destroyBean" method to ConfigurableBeanFactory interface, for destroying a given instance based on a bean def
 * added support for destruction callbacks to Scope abstraction, driven by a BeanFactory's definition for a scoped bean
+* PropertyResourceConfigurer, CustomEditorConfigurer and CustomScopeConfigurer use highest Ordered precendence now
+* AbstractAutowireCapableBeanFactory only logs name and class of eagerly cached bean (does not trigger toString anymore)
 * DefaultListableBeanFactory's "preInstantiateSingletons" only fetches the FactoryBean instance (instead of its object)
 * removed deprecated BeanFactoryBootstrap class
 
@@ -36,6 +39,7 @@ Package org.springframework.instrument
 Package org.springframework.jms
 * added support for synchronized local JMS transactions (alongside some other main transaction) to JmsTemplate
 * added TransactionAwareConnectionFactoryProxy, including support for synchronized local JMS transactions
+* DefaultMessageListenerContainer does not block on startup until it can establish a shared Connection (if necessary)
 
 Package org.springframework.orm
 * LocalContainerEntityManagerFactoryBean calls "postProcessPersistenceUnitInfo" after having applied default settings
