@@ -562,12 +562,18 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 
 	/**
-	 * Overridden to delegate to DefaultMessageListenerContainer's
-	 * recovery-capable <code>refreshConnectionUntilSuccessful</code> method.
+	 * Overridden to accept a failure in the initial setup - leaving it up to the
+	 * asynchronous invokers to establish the shared Connection on first access.
 	 * @see #refreshConnectionUntilSuccessful()
 	 */
 	protected void establishSharedConnection() {
-		refreshConnectionUntilSuccessful();
+		try {
+			refreshSharedConnection();
+		}
+		catch (JMSException ex) {
+			logger.debug("Could not establish shared JMS Connection - " +
+					"leaving it up to asynchronous invokers to establish a Connection as soon as possible", ex);
+		}
 	}
 
 	/**
@@ -615,11 +621,18 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		if (ex instanceof JMSException) {
 			invokeExceptionListener((JMSException) ex);
 		}
-		if (alreadyRecovered) {
-			logger.debug("Setup of JMS message listener invoker failed - already recovered by other invoker", ex);
+		if (ex instanceof SharedConnectionNotInitializedException) {
+			if (!alreadyRecovered) {
+				logger.debug("JMS message listener invoker needs to establish shared Connection");
+			}
 		}
 		else {
-			logger.error("Setup of JMS message listener invoker failed - trying to recover", ex);
+			if (alreadyRecovered) {
+				logger.debug("Setup of JMS message listener invoker failed - already recovered by other invoker", ex);
+			}
+			else {
+				logger.error("Setup of JMS message listener invoker failed - trying to recover", ex);
+			}
 		}
 	}
 
@@ -906,6 +919,10 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 		public Session createSession(Connection con) throws JMSException {
 			return DefaultMessageListenerContainer.this.createSession(con);
+		}
+
+		public boolean isSynchedLocalTransactionAllowed() {
+			return isSessionTransacted();
 		}
 	}
 

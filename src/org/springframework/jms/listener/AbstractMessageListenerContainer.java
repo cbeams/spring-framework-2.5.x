@@ -434,7 +434,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 		}
 		synchronized (this.sharedConnectionMonitor) {
 			if (this.sharedConnection == null) {
-				throw new IllegalStateException(
+				throw new SharedConnectionNotInitializedException(
 						"This message listener container's shared Connection has not been initialized yet");
 			}
 			return this.sharedConnection;
@@ -533,12 +533,13 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 */
 	protected void startSharedConnection() throws JMSException {
 		synchronized (this.sharedConnectionMonitor) {
-			Assert.notNull(this.sharedConnection, "Shared Connection not initialized");
-			try {
-				this.sharedConnection.start();
-			}
-			catch (javax.jms.IllegalStateException ex) {
-				logger.debug("Ignoring Connection start exception - assuming already started", ex);
+			if (this.sharedConnection != null) {
+				try {
+					this.sharedConnection.start();
+				}
+				catch (javax.jms.IllegalStateException ex) {
+					logger.debug("Ignoring Connection start exception - assuming already started", ex);
+				}
 			}
 		}
 	}
@@ -580,12 +581,13 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 */
 	protected void stopSharedConnection() throws JMSException {
 		synchronized (this.sharedConnectionMonitor) {
-			try {
-				Assert.notNull(this.sharedConnection, "Shared Connection not initialized");
-				this.sharedConnection.stop();
-			}
-			catch (javax.jms.IllegalStateException ex) {
-				logger.debug("Ignoring Connection stop exception - assuming already stopped", ex);
+			if (this.sharedConnection != null) {
+				try {
+					this.sharedConnection.stop();
+				}
+				catch (javax.jms.IllegalStateException ex) {
+					logger.debug("Ignoring Connection stop exception - assuming already stopped", ex);
+				}
 			}
 		}
 	}
@@ -945,6 +947,19 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 */
 	protected boolean isClientAcknowledge(Session session) throws JMSException {
 		return (session.getAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);
+	}
+
+
+	/**
+	 * Exception that indicates that the initial setup of this listener container's
+	 * shared JMS Connection failed. This is indicating to invokers that they need
+	 * to establish the shared Connection themselves on first access.
+	 */
+	protected static class SharedConnectionNotInitializedException extends RuntimeException {
+
+		public SharedConnectionNotInitializedException(String msg) {
+			super(msg);
+		}
 	}
 
 }
