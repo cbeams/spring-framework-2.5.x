@@ -222,7 +222,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	 */
 	public static class StatefulMethodInvokingJob extends MethodInvokingJob implements StatefulJob {
 
-		// No implementation, just a addition of the tag interface StatefulJob
+		// No implementation, just an addition of the tag interface StatefulJob
 		// in order to allow stateful method invoking jobs.
 	}
 
