@@ -362,7 +362,7 @@
 				that implement the necessary protected abstract method from
 				<classname>AbstractDependencyInjectionSpringContextTests</classname>.
 			</para>
-			<para>For example, the JDBC implementation of the PetClinic tests contains
+			<para>For example, the Hibernate implementation of the PetClinic tests contains
 			the following method:</para>
 			<programlisting><![CDATA[public class HibernateClinicTests extends AbstractClinicTests {
 
