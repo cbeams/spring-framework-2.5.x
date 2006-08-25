@@ -697,8 +697,12 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	/**
-	 * Creates an MBean that is configured with the appropriate management interface
-	 * for the supplied managed resource.
+	 * Creates an MBean that is configured with the appropriate management
+	 * interface for the supplied managed resource.
+	 * @param managedResource the resource that is to be exported as an MBean
+	 * @param beanKey the key associated with the managed bean
+	 * @see #createModelMBean() 
+	 * @see #getMBeanInfo(Object, String) 
 	 */
 	protected ModelMBean createAndConfigureMBean(Object managedResource, String beanKey)
 			throws MBeanExportException {
@@ -732,8 +736,9 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 */
 	private ModelMBeanInfo getMBeanInfo(Object managedBean, String beanKey) throws JMException {
 		ModelMBeanInfo info = this.assembler.getMBeanInfo(managedBean, beanKey);
-		if (logger.isWarnEnabled() && ObjectUtils.isEmpty(info.getAttributes()) &&
-				ObjectUtils.isEmpty(info.getOperations())) {
+		if (logger.isWarnEnabled()
+				&& ObjectUtils.isEmpty(info.getAttributes())
+				&& ObjectUtils.isEmpty(info.getOperations())) {
 			logger.warn("Bean with key [" + beanKey +
 					"] has been registed as an MBean but has no exposed attributes or operations");
 		}
