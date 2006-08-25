@@ -1,6 +1,5 @@
-
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,33 +17,22 @@
 package org.springframework.context;
 
 /**
- * Add as a bean. Should also listen.
+ * A stub {@link ApplicationListener}.
  */
 public class BeanThatListens implements ApplicationListener {
 
-	private int events;
-	
-	/**
-	 * Constructor for BeanThatListeners.
-	 */
-	public BeanThatListens() {
-		super();
-	}
-	
+	private int eventCount;
+
 	public void zero() {
-		events = 0;
+		eventCount = 0;
 	}
 
-	/**
-	 * @see ApplicationListener#onApplicationEvent(ApplicationEvent)
-	 */
-	public void onApplicationEvent(ApplicationEvent e) {
-		++events;
-		//System.out.println("Bean that listens heard event");
+	public void onApplicationEvent(ApplicationEvent event) {
+		++eventCount;
 	}
-	
+
 	public int getEventCount() {
-		return events;
+		return eventCount;
 	}
 
 }
