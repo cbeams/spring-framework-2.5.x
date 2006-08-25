@@ -35,18 +35,19 @@ import org.springframework.core.JdkVersion;
 import org.springframework.jmx.support.JmxUtils;
 
 /**
- * Extends the <code>AbstractMBeanInfoAssembler</code> to add a basic
- * algorithm for building metadata based on the reflective metadata of
- * the MBean class.
+ * Builds on the {@link AbstractMBeanInfoAssembler} superclass to
+ * add a basic algorithm for building metadata based on the
+ * reflective metadata of the MBean class.
  *
- * <p>The logic for creating MBean metadata from the reflective metadata is contained
- * in this class, but this class makes no decisions as to which methods and
- * properties are to be exposed. Instead it gives subclasses a chance to 'vote'
- * on each property or method through the <code>includeXXX</code> methods.
+ * <p>The logic for creating MBean metadata from the reflective metadata
+ * is contained in this class, but this class makes no decisions as to
+ * which methods and properties are to be exposed. Instead it gives
+ * subclasses a chance to 'vote' on each property or method through
+ * the <code>includeXXX</code> methods.
  *
- * <p>Subclasses are also given the opportunity to populate attribute and operation
- * metadata with additional descriptors once the metadata is assembled through the
- * <code>populateXXXDescriptor</code> methods.
+ * <p>Subclasses are also given the opportunity to populate attribute
+ * and operation metadata with additional descriptors once the metadata
+ * is assembled through the <code>populateXXXDescriptor</code> methods.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -59,42 +60,90 @@ import org.springframework.jmx.support.JmxUtils;
  */
 public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBeanInfoAssembler {
 
+	/**
+	 * Identifies a getter method in a JMX {@link Descriptor}.
+	 */
 	protected static final String FIELD_GET_METHOD = "getMethod";
 
+	/**
+	 * Identifies a setter method in a JMX {@link Descriptor}.
+	 */
 	protected static final String FIELD_SET_METHOD = "setMethod";
 
+	/**
+	 * Constant identifier for the role field in a JMX {@link Descriptor}.
+	 */
 	protected static final String FIELD_ROLE = "role";
 
+	/**
+	 * Constant identifier for the getter role field value in a JMX {@link Descriptor}.
+	 */
 	protected static final String ROLE_GETTER = "getter";
 
+	/**
+	 * Constant identifier for the setter role field value in a JMX {@link Descriptor}.
+	 */
 	protected static final String ROLE_SETTER = "setter";
 
+	/**
+	 * Identifies an operation (method) in a JMX {@link Descriptor}.
+	 */
 	protected static final String ROLE_OPERATION = "operation";
 
+	/**
+	 * Constant identifier for the visibility field in a JMX {@link Descriptor}.
+	 */
 	protected static final String FIELD_VISIBILITY = "visibility";
 
 	/**
-	 * Lowest visibility.
-	 * Used for operations that correspond to accessors or mutators for attributes.
+	 * Lowest visibility, used for operations that correspond to
+	 * accessors or mutators for attributes.
+	 * @see #FIELD_VISIBILITY
 	 */
 	protected static final Integer ATTRIBUTE_OPERATION_VISIBILITY = new Integer(4);
 
+	/**
+	 * Constant identifier for the class field in a JMX {@link Descriptor}.
+	 */
 	protected static final String FIELD_CLASS = "class";
-
+	/**
+	 * Constant identifier for the log field in a JMX {@link Descriptor}.
+	 */
 	protected static final String FIELD_LOG = "log";
-
+	
+	/**
+	 * Constant identifier for the logfile field in a JMX {@link Descriptor}.
+	 */
 	protected static final String FIELD_LOG_FILE = "logFile";
-
+	
+	/**
+	 * Constant identifier for the currency time limit field in a JMX {@link Descriptor}.
+	 */
 	protected static final String FIELD_CURRENCY_TIME_LIMIT = "currencyTimeLimit";
 
+	/**
+	 * Constant identifier for the default field in a JMX {@link Descriptor}.
+	 */
 	protected static final String FIELD_DEFAULT = "default";
 
+	/**
+	 * Constant identifier for the persistPolicy field in a JMX {@link Descriptor}.
+	 */
 	protected static final String FIELD_PERSIST_POLICY = "persistPolicy";
 
+	/**
+	 * Constant identifier for the persistPeriod field in a JMX {@link Descriptor}.
+	 */
 	protected static final String FIELD_PERSIST_PERIOD = "persistPeriod";
 
+	/**
+	 * Constant identifier for the persistLocation field in a JMX {@link Descriptor}.
+	 */
 	protected static final String FIELD_PERSIST_LOCATION = "persistLocation";
 
+	/**
+	 * Constant identifier for the persistName field in a JMX {@link Descriptor}.
+	 */
 	protected static final String FIELD_PERSIST_NAME = "persistName";
 
 
