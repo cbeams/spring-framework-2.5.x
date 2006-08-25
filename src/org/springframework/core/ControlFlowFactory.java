@@ -33,9 +33,13 @@ import org.springframework.util.Assert;
  * @since 02.02.2004
  */
 public abstract class ControlFlowFactory {
-	
+
+	/**
+	 * Returns an appropriate {@link ControlFlow} instance.
+	 * @return an appropriate {@link ControlFlow} instance
+	 */
 	public static ControlFlow createControlFlow() {
-		return JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14 ?
+		return JdkVersion.isAtLeastJava14() ?
 				(ControlFlow) new Jdk14ControlFlow() :
 				(ControlFlow) new Jdk13ControlFlow();
 	}
