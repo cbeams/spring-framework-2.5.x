@@ -271,14 +271,19 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 			return returnValue;
 		}
 		catch (Throwable ex) {
+			if(stopWatch.isRunning()) {
+				stopWatch.stop();
+			}
 			exitThroughException = true;
 			writeToLog(logger,
 					replacePlaceholders(this.exceptionMessage, invocation, null, ex, stopWatch.getTotalTimeMillis()), ex);
 			throw ex;
 		}
 		finally {
-			stopWatch.stop();
 			if (!exitThroughException) {
+				if(stopWatch.isRunning()) {
+					stopWatch.stop();
+				}
 				writeToLog(logger,
 						replacePlaceholders(this.exitMessage, invocation, returnValue, null, stopWatch.getTotalTimeMillis()));
 			}
