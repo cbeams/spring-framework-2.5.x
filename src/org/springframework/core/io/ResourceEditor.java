@@ -21,16 +21,20 @@ import java.io.IOException;
 
 import org.springframework.util.StringUtils;
 import org.springframework.util.SystemPropertyUtils;
+import org.springframework.util.Assert;
 
 /**
- * Editor for Resource descriptors, to automatically convert String locations
- * (e.g. "file:C:/myfile.txt" or "classpath:myfile.txt") to Resource properties
- * instead of using a String location property.
+ * {@link java.beans.PropertyEditor Editor} for {@link Resource}
+ * descriptors, to automatically convert <code>String</code> locations (e.g.
+ * <code>"file:C:/myfile.txt"</code> or
+ * <code>"classpath:myfile.txt"</code>) to <code>Resource</code>
+ * properties instead of using a <code>String</code> location property.
  *
- * <p>The path may contain ${...} placeholders, to be resolved as
- * system properties: e.g. ${user.dir}.
+ * <p>The path may contain <code>${...}</code> placeholders, to be resolved
+ * as system properties: e.g. <code>${user.dir}</code>.
  *
- * <p>Delegates to a ResourceLoader, by default a DefaultResourceLoader.
+ * <p>Delegates to a {@link ResourceLoader} to do the heavy lifting,
+ * by default a {@link DefaultResourceLoader}.
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
@@ -46,18 +50,21 @@ public class ResourceEditor extends PropertyEditorSupport {
 
 
 	/**
-	 * Create a new ResourceEditor with a DefaultResourceLoader.
-	 * @see DefaultResourceLoader
+	 * Creates a new instance of the {@link ResourceEditor} class
+	 * using a {@link DefaultResourceLoader}.
 	 */
 	public ResourceEditor() {
-		this.resourceLoader = new DefaultResourceLoader();
+		this(new DefaultResourceLoader());
 	}
 
 	/**
-	 * Create a new ResourceEditor with the given ResourceLoader.
-	 * @param resourceLoader the ResourceLoader to use
+	 * Creates a new instance of the {@link ResourceEditor} class
+	 * using the given {@link ResourceLoader}.
+	 * @param resourceLoader the <code>ResourceLoader</code> to use
+	 * @throws IllegalArgumentException if the supplied <code>ResourceLoader</code> is <code>null</code> 
 	 */
 	public ResourceEditor(ResourceLoader resourceLoader) {
+		Assert.notNull(resourceLoader, "The 'resourceLoader' parameter cannot be null.");
 		this.resourceLoader = resourceLoader;
 	}
 
