@@ -18,18 +18,38 @@ package org.springframework.core;
 
 /**
  * Helper class used to find the current Java/JDK version.
- * Usually we want to find if we're in a 1.4 or higher JVM.
- * (Spring does not support 1.2 JVMs.)
+ * 
+ * <p>Please note that Spring does not support 1.2 JVMs.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rick Evans
  */
-public class JdkVersion {
-	
+public abstract class JdkVersion {
+
+	/**
+	 * Constant identifying the 1.3 JVM.
+	 */
 	public static final int JAVA_13 = 0;
+
+	/**
+	 * Constant identifying the 1.4 JVM.
+	 */
 	public static final int JAVA_14 = 1;
+
+	/**
+	 * Constant identifying the 5 (1.5) JVM.
+	 */
 	public static final int JAVA_15 = 2;
+
+	/**
+	 * Constant identifying the 1.6 JVM.
+	 */
 	public static final int JAVA_16 = 3;
+
+	/**
+	 * Constant identifying the 1.7 JVM.
+	 */
 	public static final int JAVA_17 = 4;
 
 
@@ -39,7 +59,7 @@ public class JdkVersion {
 	
 	static {
 		javaVersion = System.getProperty("java.version");
-		// Version String should look like "1.4.1_02"
+		// version String should look like "1.4.1_02"
 		if (javaVersion.indexOf("1.7.") != -1) {
 			majorJavaVersion = JAVA_17;
 		}
@@ -53,7 +73,7 @@ public class JdkVersion {
 			majorJavaVersion = JAVA_14;
 		}
 		else {
-			// Else leave 1.3 as default (it's either 1.3 or unknown).
+			// else leave 1.3 as default (it's either 1.3 or unknown)
 			majorJavaVersion = JAVA_13;
 		}
 	}
@@ -62,6 +82,8 @@ public class JdkVersion {
 	/**
 	 * Return the full Java version string, as returned by
 	 * <code>System.getProperty("java.version")</code>.
+	 * @return the full Java version string
+	 * @see System#getProperty(String) 
 	 */
 	public static String getJavaVersion() {
 		return javaVersion;
@@ -77,6 +99,27 @@ public class JdkVersion {
 	 */
 	public static int getMajorJavaVersion() {
 		return majorJavaVersion;
+	}
+
+	/**
+	 * Convenience method to determine if the current JVM is at least Java 1.4.
+	 * @return <code>true</code> if the current JVM is at least Java 1.4
+	 * @see #getMajorJavaVersion()
+	 * @see #JAVA_14
+	 */
+	public static boolean isAtLeastJava14() {
+		return getMajorJavaVersion() >= JAVA_14;
+	}
+
+	/**
+	 * Convenience method to determine if the current JVM is at least
+	 * Java 5 (1.5).
+	 * @return <code>true</code> if the current JVM is at least Java 5 (1.5)
+	 * @see #getMajorJavaVersion()
+	 * @see #JAVA_15
+	 */
+	public static boolean isAtLeastJava5() {
+		return getMajorJavaVersion() >= JAVA_15;
 	}
 
 }
