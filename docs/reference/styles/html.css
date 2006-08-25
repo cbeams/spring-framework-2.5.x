@@ -300,3 +300,15 @@ div.note * td, div.tip * td, div.warning * td {
 .programlisting * .lineannotation .emphasis {
 	color: green;
 }
+
+.programlisting * .lineannotation .literal {
+	color: green;
+}
+
+.programlisting * .lineannotation .classname {
+	color: green;
+}
+
+.programlisting * .lineannotation .interfacename{
+	color: green;
+}
