@@ -1364,8 +1364,6 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
   ...	
 }]]></programlisting>
 
-       
-       
     </section>
 
   </section>
@@ -1379,33 +1377,41 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
     using the @AspectJ style, hence in this section we will focus on the new
     <emphasis>syntax</emphasis> and refer the reader to the discussion in the previous
     section (<xref linkend="aop-ataspectj" />) for a understanding of writing pointcut
-    expressions and the binding of advice parameters etc..</para>
+    expressions and the binding of advice parameters.</para>
     
     <para>To use the aop namespace tags described in this section, you need to import
     the spring-aop schema as described in
 	<xref linkend="xsd-config" />. See <xref linkend="xsd-config-body-schemas-aop" /> 
-	for how to import the tags in the aop namespace.
-    </para>
+	for how to import the tags in the aop namespace.</para>
     
     <para>Within your Spring configurations, all aspect and advisor elements must be
-    placed within an <literal>&lt;aop:config&gt;</literal> element. You can have more
+    placed within an <literal>&lt;aop:config&gt;</literal> element (you can have more
     than one <literal>&lt;aop:config&gt;</literal> element in an application context 
-    configuration. An <literal>&lt;aop:config&gt;</literal> element can contain
-    pointcut, advisor, and aspect elements, and these must be declared in that order.
-    </para>
+    configuration). An <literal>&lt;aop:config&gt;</literal> element can contain
+    pointcut, advisor, and aspect elements (and these must be declared in that order).</para>
+    
+    <warning>
+        <para>The <literal>&lt;aop:config&gt;</literal> style of configuration makes
+        heavy use of Spring's <link linkend="aop-autoproxy">auto-proxying</link>
+        mechanism. This can cause issues (such as advice not being woven) if you are
+        already using explicit auto-proxying via the use of
+        <classname>BeanNameAutoProxyCreator</classname> or suchlike. The recommended
+        usage pattern is to use either just the <literal>&lt;aop:config&gt;</literal>
+        style, or just the <interfacename>AutoProxyCreator</interfacename> style.</para>
+    </warning>
 
     <section>
-      <title>Declaring an aspect</title>
+        <title>Declaring an aspect</title>
 
-	<para>Using the schema support, an aspect is simply a regular Java object 
-	defined as a bean in your spring application context. The state and behavior is
-	captured in the fields and methods of the object, and the pointcut and advice 
-	information is captured in the XML.</para>
-	
-	<para>An aspect is declared using the &lt;aop:aspect&gt; element, and the backing bean
-	is referenced using the <literal>ref</literal> attribute:</para>
+        <para>Using the schema support, an aspect is simply a regular Java object 
+        defined as a bean in your spring application context. The state and behavior is
+        captured in the fields and methods of the object, and the pointcut and advice 
+        information is captured in the XML.</para>
 
-	<programlisting><![CDATA[<aop:config>
+        <para>An aspect is declared using the &lt;aop:aspect&gt; element, and the backing bean
+        is referenced using the <literal>ref</literal> attribute:</para>
+
+	    <programlisting><![CDATA[<aop:config>
   <aop:aspect id="myAspect" ref="aBean">
     ...
   </aop:aspect>
@@ -1415,10 +1421,9 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
   ...
 </bean>]]></programlisting>
 
- 	<para>
- 	The bean backing the aspect ("<literal>aBean</literal>" in this case) can of course be
- 	configured and dependency injected just like any other Spring bean.
- 	</para>
+ 	    <para>
+ 	    The bean backing the aspect ("<literal>aBean</literal>" in this case) can of course be
+ 	    configured and dependency injected just like any other Spring bean.</para>
 
     </section>
 
@@ -1429,8 +1434,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 	A pointcut can be declared inside an aspect, in which case it is visible only within
 	that aspect. A pointcut can also be declared directly inside an &lt;aop:config&gt;
 	element, enabling the pointcut definition to be shared across several aspects and 
-	advisors.
-	</para>
+	advisors.</para>
 	
 	<para>A pointcut representing the execution of any business service in the service
 	layer could be defined as follows:</para>
@@ -1448,8 +1452,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 	pointcuts defined in types (@Aspects) within the pointcut expression, but this
 	feature is not available on JDK 1.4 and below (it relies on the Java 5 specific
 	AspectJ reflection APIs). On JDK 1.5 therefore, another way of defining the above
-	pointcut would be: 
-	</para>
+	pointcut would be:</para>
 
 	<programlisting><![CDATA[<aop:config>
 
@@ -1459,8 +1462,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 </aop:config>]]></programlisting>
 
 	<para>Assuming you have a <literal>SystemArchitecture</literal> aspect as described in
-	<xref linkend="aop-common-pointcuts"/>. 
-	</para>
+	<xref linkend="aop-common-pointcuts"/>.</para>
 
 	<para>Declaring a pointcut inside an aspect is very similar to declaring a top-level pointcut:</para>
 
@@ -1493,12 +1495,11 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 	<para>The same five advice kinds are supported as for the @AspectJ style, and they
 	have exactly the same semantics.</para>
 	
-	<section><title>Before advice</title>
-	  <para>
-	    Before advice runs before a matched method execution.
-	    It is declared inside an <literal>&lt;aop:aspect&gt;</literal> using
-	    the &lt;aop:before&gt; element.
-	  </para>
+	<section>
+	    <title>Before advice</title>
+        <para>Before advice runs before a matched method execution.
+        It is declared inside an <literal>&lt;aop:aspect&gt;</literal> using
+        the &lt;aop:before&gt; element.</para>
 
 	<programlisting><![CDATA[<aop:aspect id="beforeExample" ref="aBean">
 
@@ -1513,8 +1514,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 	  <para>Here <literal>dataAccessOperation</literal> is the id of a pointcut defined at 
 	  the top (<literal>&lt;aop:config&gt;</literal>) level. To define the pointcut
 	  inline instead, replace the <literal>pointcut-ref</literal> attribute with a
-	  <literal>pointcut</literal> attribute:
-	  </para>
+	  <literal>pointcut</literal> attribute:</para>
 
 	<programlisting><![CDATA[<aop:aspect id="beforeExample" ref="aBean">
 
