@@ -28,6 +28,7 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.TransactionUsageException;
 import org.springframework.transaction.support.SmartTransactionObject;
+import org.springframework.util.ClassUtils;
 
 /**
  * Convenient base class for JDBC-aware transaction objects.
@@ -54,12 +55,10 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	private static boolean savepointClassAvailable;
 
 	static {
-		try {
-			Class.forName(SAVEPOINT_CLASS_NAME);
+		if (ClassUtils.isPresent(SAVEPOINT_CLASS_NAME)) {
 			savepointClassAvailable = true;
 			logger.info("JDBC 3.0 Savepoint class is available");
-		}
-		catch (ClassNotFoundException ex) {
+		} else {
 			savepointClassAvailable = false;
 			logger.info("JDBC 3.0 Savepoint class is not available");
 		}

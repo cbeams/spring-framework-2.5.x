@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Convenience methods for easy access to the JSP 2.0 ExpressionEvaluator or
@@ -93,25 +94,15 @@ public abstract class ExpressionEvaluationUtils {
 
 
 	static {
-		try {
-			Class.forName(JSP_20_CLASS_NAME);
-			// JSP 2.0 available
+		if (ClassUtils.isPresent(JSP_20_CLASS_NAME)) {
 			helper = new Jsp20ExpressionEvaluationHelper();
 			logger.info("Using JSP 2.0 ExpressionEvaluator");
-		}
-		catch (ClassNotFoundException ex) {
-			// JSP 2.0 not available -> try Jakarta JSTL
-			try {
-				Class.forName(JAKARTA_JSTL_CLASS_NAME);
-				// JSP 2.0 available
-				helper = new JakartaExpressionEvaluationHelper();
-				logger.info("Using Jakarta JSTL ExpressionEvaluatorManager");
-			}
-			catch (ClassNotFoundException ex2) {
-				// neither JSP 2.0 nor Jakarta JSTL available -> no EL support
-				helper = new NoExpressionEvaluationHelper();
-				logger.info("JSP expression evaluation not available");
-			}
+		} else if (ClassUtils.isPresent(JAKARTA_JSTL_CLASS_NAME)) {
+			helper = new JakartaExpressionEvaluationHelper();
+			logger.info("Using Jakarta JSTL ExpressionEvaluatorManager");
+		} else {
+			helper = new NoExpressionEvaluationHelper();
+			logger.info("JSP expression evaluation not available");
 		}
 	}
 
@@ -200,7 +191,7 @@ public abstract class ExpressionEvaluationUtils {
 	 * @throws JspException in case of parsing errors
 	 */
 	public static int evaluateInteger(String attrName, String attrValue, PageContext pageContext)
-	    throws JspException {
+		throws JspException {
 
 		if (isExpressionLanguage(attrValue)) {
 			return ((Integer) doEvaluate(attrName, attrValue, Integer.class, pageContext)).intValue();
@@ -368,7 +359,7 @@ public abstract class ExpressionEvaluationUtils {
 	private static class Jsp20ExpressionEvaluationHelper implements ExpressionEvaluationHelper {
 
 		public Object evaluate(String attrName, String attrValue, Class resultClass, PageContext pageContext)
-		    throws JspException {
+			throws JspException {
 
 			try {
 				Map expressionCache = getJspExpressionCache(pageContext);

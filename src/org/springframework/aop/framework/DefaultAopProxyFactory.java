@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,18 @@ package org.springframework.aop.framework;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.ClassUtils;
 
 /**
- * Simple implementation of AopProxyFactory,
- * either creating a CGLIB proxy or a JDK dynamic proxy.
+ * Simple {@link AopProxyFactory} implementation either creating a
+ * CGLIB proxy or a JDK dynamic proxy.
  *
  * <p>Creates a CGLIB proxy if one the following is true:
  * <ul>
  * <li>the "optimize" flag is set
  * <li>the "proxyTargetClass" flag is set
  * <li>no interfaces have been specified
+ * <li>the CGLIB library classes are present on the classpath
  * </ul>
  *
  * <p>In general, specify "proxyTargetClass" to enforce a CGLIB proxy,
@@ -51,15 +53,11 @@ public class DefaultAopProxyFactory implements AopProxyFactory {
 	private static boolean cglibAvailable;
 
 	static {
-		// Determine whether CGLIB2 is available.
-		// If not, we can't create proxies for full target class.
-		try {
-			Class.forName(CGLIB_ENHANCER_CLASS_NAME);
-			cglibAvailable = true;
+		// if CGLIB is not available, then we cannot create class-based proxies
+		cglibAvailable = ClassUtils.isPresent(CGLIB_ENHANCER_CLASS_NAME);
+		if (cglibAvailable) {
 			logger.info("CGLIB2 available: proxyTargetClass feature enabled");
-		}
-		catch (ClassNotFoundException ex) {
-			cglibAvailable = false;
+		} else {
 			logger.info("CGLIB2 not available: proxyTargetClass feature disabled");
 		}
 	}
@@ -90,6 +88,7 @@ public class DefaultAopProxyFactory implements AopProxyFactory {
 		private static AopProxy createCglibProxy(AdvisedSupport advisedSupport) {
 			return new Cglib2AopProxy(advisedSupport);
 		}
+
 	}
 
 }
