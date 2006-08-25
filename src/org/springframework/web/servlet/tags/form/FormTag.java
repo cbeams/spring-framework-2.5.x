@@ -16,47 +16,43 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
-
+import org.springframework.core.Conventions;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
+
 /**
  * Data-binding aware JSP tag for rendering an HTML '<code>form</code>' whose
  * inner elements are bound to properties on a {@link #setCommandName command object}.
- *
+ * 
  * <p>Users should place the command object into the {@link org.springframework.web.servlet.ModelAndView}
  * when populating the data for their view. The name of this command object can
  * be configured using the {@link #setCommandName commandName} property.
- *
+ * 
  * <p>The default value for the {@link #setCommandName commandName} property is
  * '<code>command</code>' which corresponds to the default name when using the
  * {@link org.springframework.web.servlet.mvc.SimpleFormController}.
- *
+ * 
  * <p>Inner tags can access the name of the command object via the
  * {@link javax.servlet.jsp.PageContext}. The attribute name is defined in
  * {@link #COMMAND_NAME_VARIABLE_NAME}.
  *
  * @author Rob Harrop
- * @since 2.0
  * @see org.springframework.web.servlet.mvc.SimpleFormController
+ * @since 2.0
  */
 public class FormTag extends AbstractHtmlElementTag {
-
-	/**
-	 * The name of the {@link javax.servlet.jsp.PageContext} attribute under which the
-	 * command object name is exposed.
-	 */
-	public static final String COMMAND_NAME_VARIABLE_NAME = "org.springframework.web.servlet.tags.form.FormTag.commandName";
 
 	/**
 	 * The default HTTP method using which form values are sent to the server: "post".
 	 */
 	private static final String DEFAULT_METHOD = "post";
+
 
 	/**
 	 * The default command object name: "command".
@@ -67,6 +63,13 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * The name of the '<code>commandName</code>' attribute.
 	 */
 	public static final String COMMAND_NAME_ATTRIBUTE = "commandName";
+
+	/**
+	 * The name of the {@link javax.servlet.jsp.PageContext} attribute under which the
+	 * command object name is exposed.
+	 */
+	public static final String COMMAND_NAME_VARIABLE_NAME
+			= Conventions.getQualifiedAttributeName(FormTag.class, COMMAND_NAME_ATTRIBUTE);
 
 	/**
 	 * The name of the '<code>name</code>' attribute.
@@ -142,7 +145,9 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Sets the name of the command object.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
+	 * @param commandName the name of the command object
+	 * @throws IllegalArgumentException if the supplied name is <code>null</code> 
 	 */
 	public void setCommandName(String commandName) {
 		Assert.notNull(commandName, "'commandName' cannot be null");
@@ -253,6 +258,8 @@ public class FormTag extends AbstractHtmlElementTag {
 	/**
 	 * Writes the opening part of the block	'<code>form</code>' tag and exposes
 	 * the command name in the {@link javax.servlet.jsp.PageContext}.
+	 * @param tagWriter the {@link TagWriter} to which the form content is to be written
+	 * @return {@link javax.servlet.jsp.tagext.Tag#EVAL_BODY_INCLUDE}
 	 */
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
 		this.tagWriter = tagWriter;
@@ -287,37 +294,38 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Resolve the value of the '<code>action</code>' attribute. If the user configured
-	 * an '<code>action</code>' value then the result of evaluating this value is used.
-	 * Otherwise, the {@link org.springframework.web.servlet.support.RequestContext#getRequestUri() originating URI}
+	 * Resolve the value of the '<code>action</code>' attribute.
+	 * <p>If the user configured an '<code>action</code>' value then
+	 * the result of evaluating this value is used. Otherwise, the
+	 * {@link org.springframework.web.servlet.support.RequestContext#getRequestUri() originating URI}
 	 * is used.
+	 * @return the value that is to be used for the '<code>action</code>' attribute
 	 */
 	private String resolveAction() throws JspException {
 		if (StringUtils.hasText(this.action)) {
 			return ObjectUtils.getDisplayString(evaluate(ACTION_ATTRIBUTE, this.action));
-		}
-		else {
+		} else {
 			String requestUri = getRequestContext().getRequestUri();
 			ServletResponse response = this.pageContext.getResponse();
 			if (response instanceof HttpServletResponse) {
 				requestUri = ((HttpServletResponse) response).encodeURL(requestUri);
 				String queryString = getRequestContext().getQueryString();
-				if(StringUtils.hasText(queryString)) {
+				if (StringUtils.hasText(queryString)) {
 					requestUri += "?" + queryString;
 				}
 			}
 			if (StringUtils.hasText(requestUri)) {
 				return requestUri;
-			}
-			else {
+			} else {
 				throw new IllegalArgumentException("Attribute 'action' is required. Attempted to resolve " +
-								"against current request URI but request URI was null.");
+						"against current request URI but request URI was null.");
 			}
 		}
 	}
 
 	/**
 	 * {@link #evaluate Resolves} and returns the name of the command object.
+	 *
 	 * @throws IllegalArgumentException if the command object resolves to null.
 	 */
 	protected String resolveCommandName() throws JspException {
@@ -356,6 +364,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Unsupported for forms.
+	 * @throws UnsupportedOperationException always
 	 */
 	public void setPath(String path) {
 		throw new UnsupportedOperationException("The 'path' attribute is not supported for forms.");
@@ -363,6 +372,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Unsupported for forms.
+	 * @throws UnsupportedOperationException always
 	 */
 	public void setCssErrorClass(String cssErrorClass) {
 		throw new UnsupportedOperationException("The 'cssErrorClass' attribute is not supported for forms.");

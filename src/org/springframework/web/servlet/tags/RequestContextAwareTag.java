@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,17 @@ import org.springframework.web.servlet.support.JspAwareRequestContext;
 import org.springframework.web.servlet.support.RequestContext;
 
 /**
- * Superclass for all tags that require a RequestContext.
- * The RequestContext instance provides easy access to current
- * state like WebApplicationContext, Locale, Theme, etc.
+ * Superclass for all tags that require a {@link RequestContext}.
+ * 
+ * <p>The <code>RequestContext</code> instance provides easy access
+ * to current state like the
+ * {@link org.springframework.web.context.WebApplicationContext},
+ * the {@link java.util.Locale}, the
+ * {@link org.springframework.ui.context.Theme}, etc.
  *
- * <p>Mainly intended for DispatcherServlet requests;
- * will use fallbacks when used outside DispatcherServlet.
+ * <p>Mainly intended for
+ * {@link org.springframework.web.servlet.DispatcherServlet} requests;
+ * will use fallbacks when used outside <code>DispatcherServlet</code>.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -42,19 +47,23 @@ import org.springframework.web.servlet.support.RequestContext;
  */
 public abstract class RequestContextAwareTag extends TagSupport implements TryCatchFinally {
 
-	/** PageContext attribute for page-level RequestContext instance */
+	/** {@link javax.servlet.jsp.PageContext} attribute for page-level
+	 * {@link RequestContext} instance.
+	 * */
 	public static final String REQUEST_CONTEXT_PAGE_ATTRIBUTE =
 			"org.springframework.web.servlet.tags.REQUEST_CONTEXT";
 
+	
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
+
 
 	private RequestContext requestContext;
 
 
 	/**
 	 * Create and expose the current RequestContext.
-	 * Delegates to <code>doStartTagInternal</code> for actual work.
-	 * @see #doStartTagInternal
+	 * Delegates to {@link #doStartTagInternal()} for actual work.
 	 * @see #REQUEST_CONTEXT_PAGE_ATTRIBUTE
 	 * @see org.springframework.web.servlet.support.JspAwareRequestContext
 	 */

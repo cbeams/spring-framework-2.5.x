@@ -20,20 +20,27 @@ import junit.framework.TestCase;
 
 import java.io.StringWriter;
 
+import org.springframework.test.AssertThrows;
+
 /**
+ * Unit tests for the {@link TagWriter} class.
+ * 
  * @author Rob Harrop
+ * @author Rick Evans
  * @since 2.0
  */
-public class TagWriterTests extends TestCase {
+public final class TagWriterTests extends TestCase {
 
 	private TagWriter writer;
 
 	private StringWriter data;
 
+
 	protected void setUp() throws Exception {
 		this.data = new StringWriter();
 		this.writer = new TagWriter(this.data);
 	}
+
 
 	public void testSimpleTag() throws Exception {
 		this.writer.startTag("br");
@@ -64,6 +71,7 @@ public class TagWriterTests extends TestCase {
 		this.writer.writeAttribute("height", "20");
 		this.writer.appendValue("foobar");
 		this.writer.endTag();
+
 		assertEquals("<textarea width=\"10\" height=\"20\">foobar</textarea>", this.data.toString());
 	}
 
@@ -93,6 +101,7 @@ public class TagWriterTests extends TestCase {
 			this.writer.endTag();
 		}
 		this.writer.endTag();
+
 		assertEquals("<span class=\"highlight\"><strong>Rob</strong> <emphasis>Harrop</emphasis></span>", this.data.toString());
 	}
 
@@ -101,6 +110,7 @@ public class TagWriterTests extends TestCase {
 		this.writer.forceBlock();
 		this.data.write("Rob Harrop"); // interleaved writing
 		this.writer.endTag();
+
 		assertEquals("<span>Rob Harrop</span>", this.data.toString());
 	}
 
@@ -109,6 +119,16 @@ public class TagWriterTests extends TestCase {
 		this.writer.appendValue("Rob ");
 		this.writer.appendValue("Harrop");
 		this.writer.endTag();
+
 		assertEquals("<span>Rob Harrop</span>", this.data.toString());
 	}
+
+	public void testCtorWithNullWriter() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				new TagWriter(null);
+			}
+		}.runTest();
+	}
+
 }

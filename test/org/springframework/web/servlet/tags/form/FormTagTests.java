@@ -18,16 +18,25 @@ package org.springframework.web.servlet.tags.form;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.tagext.Tag;
 
 /**
+ * Unit tests for the {@link FormTag} class.
+ *
  * @author Rob Harrop
+ * @author Rick Evans
  * @since 2.0
  */
-public class FormTagTests extends AbstractHtmlElementTagTests {
+public final class FormTagTests extends AbstractHtmlElementTagTests {
+	
+	private static final String REQUEST_URI = "/my/form";
+
+	private static final String QUERY_STRING = "foo=bar";
+
 
 	private FormTag tag;
+
 
 	protected void onSetUp() {
 		this.tag = new FormTag() {
@@ -37,6 +46,13 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		};
 		this.tag.setPageContext(getPageContext());
 	}
+
+
+	protected void extendRequest(MockHttpServletRequest request) {
+		request.setRequestURI(REQUEST_URI);
+		request.setQueryString(QUERY_STRING);
+	}
+
 
 	public void testWriteForm() throws Exception {
 		String action = "/form.html";
@@ -111,7 +127,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertFormTagOpened(output);
 		assertFormTagClosed(output);
 
-		assertContainsAttribute(output, "action", getRequestUri() + "?" + getQueryString());
+		assertContainsAttribute(output, "action", REQUEST_URI + "?" + QUERY_STRING);
 		assertContainsAttribute(output, "enctype", enctype);
 		assertContainsAttribute(output, "method", method);
 		assertContainsAttribute(output, "onsubmit", onsubmit);
@@ -123,31 +139,19 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setCommandName("${null}");
 		try {
 			this.tag.doStartTag();
-			fail("Should not be able to have a command name that resolves to null");
+			fail("Must not be able to have a command name that resolves to null.");
 		}
-		catch (IllegalArgumentException e) {
-			// success
+		catch (IllegalArgumentException expected) {
 		}
 	}
 
-	private void assertFormTagOpened(String output) {
+
+	private static void assertFormTagOpened(String output) {
 		assertTrue(output.startsWith("<form "));
 	}
 
-	private void assertFormTagClosed(String output) {
+	private static void assertFormTagClosed(String output) {
 		assertTrue(output.endsWith("</form>"));
 	}
 
-	protected void extendRequest(MockHttpServletRequest request) {
-		request.setRequestURI(getRequestUri());
-		request.setQueryString(getQueryString());
-	}
-
-	private String getRequestUri() {
-		return "/my/form";
-	}
-
-	private String getQueryString() {
-		return "foo=bar";
-	}
 }
