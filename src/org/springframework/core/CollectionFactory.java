@@ -40,6 +40,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Factory for collections, being aware of JDK 1.4+ extended collections
@@ -58,7 +59,7 @@ import org.springframework.util.Assert;
  * @see #createLinkedCaseInsensitiveMapIfPossible
  * @see #createIdentityMapIfPossible
  */
-public class CollectionFactory {
+public abstract class CollectionFactory {
 
 	private static final String COMMONS_COLLECTIONS_CLASS_NAME =
 			"org.apache.commons.collections.map.LinkedMap";
@@ -71,15 +72,13 @@ public class CollectionFactory {
 	static {
 		// Check whether JDK 1.4+ collections and/or
 		// Commons Collections 3.x are available.
-		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
+		if (JdkVersion.isAtLeastJava14()) {
 			logger.info("JDK 1.4+ collections available");
 		}
-		try {
-			Class.forName(COMMONS_COLLECTIONS_CLASS_NAME);
+		if (ClassUtils.isPresent(COMMONS_COLLECTIONS_CLASS_NAME)) {
 			commonsCollections3xAvailable = true;
 			logger.info("Commons Collections 3.x available");
-		}
-		catch (ClassNotFoundException ex) {
+		} else {
 			commonsCollections3xAvailable = false;
 		}
 	}
@@ -95,7 +94,7 @@ public class CollectionFactory {
 	 * @see org.apache.commons.collections.set.ListOrderedSet
 	 */
 	public static Set createLinkedSetIfPossible(int initialCapacity) {
-		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
+		if (JdkVersion.isAtLeastJava14()) {
 			logger.debug("Creating [java.util.LinkedHashSet]");
 			return Jdk14CollectionFactory.createLinkedHashSet(initialCapacity);
 		}
@@ -119,7 +118,7 @@ public class CollectionFactory {
 	 * @see org.apache.commons.collections.map.LinkedMap
 	 */
 	public static Map createLinkedMapIfPossible(int initialCapacity) {
-		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
+		if (JdkVersion.isAtLeastJava14()) {
 			logger.debug("Creating [java.util.LinkedHashMap]");
 			return Jdk14CollectionFactory.createLinkedHashMap(initialCapacity);
 		}
@@ -147,7 +146,7 @@ public class CollectionFactory {
 			logger.debug("Creating [org.apache.commons.collections.map.ListOrderedMap/CaseInsensitiveMap]");
 			return CommonsCollectionFactory.createListOrderedCaseInsensitiveMap(initialCapacity);
 		}
-		else if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
+		else if (JdkVersion.isAtLeastJava14()) {
 			logger.debug("Falling back to [java.util.LinkedHashMap] for linked case-insensitive map");
 			return Jdk14CollectionFactory.createLinkedHashMap(initialCapacity);
 		}
@@ -167,7 +166,7 @@ public class CollectionFactory {
 	 * @see org.apache.commons.collections.map.IdentityMap
 	 */
 	public static Map createIdentityMapIfPossible(int initialCapacity) {
-		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
+		if (JdkVersion.isAtLeastJava14()) {
 			logger.debug("Creating [java.util.IdentityHashMap]");
 			return Jdk14CollectionFactory.createIdentityHashMap(initialCapacity);
 		}
