@@ -144,8 +144,6 @@
 				for programming JDBC statements using named parameters (as opposed to
 				programming JDBC statements using only classic placeholder
 				(<literal>'?'</literal>) arguments.
-			</para>
-			<para>
 				The <classname>NamedParameterJdbcTemplate</classname> class wraps
 				a vanilla <classname>JdbcTemplate</classname>, and delegates to the
 				wrapped <classname>JdbcTemplate</classname> to do much of its work.
@@ -155,7 +153,7 @@
 				JDBC statements using named parameters.
 			</para>
 			<para>
-				The expect usage pattern for the <classname>NamedParameterJdbcTemplate</classname>
+				The expected usage pattern for the <classname>NamedParameterJdbcTemplate</classname>
 				class is perhaps best illustrated by looking at an example (the finer
 				points will be addressed immediately thereafter).
 			</para>
