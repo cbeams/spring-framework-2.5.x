@@ -90,7 +90,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	}
 
 	/**
-	 * Sets the value of the '<code>onfocus</code>' attribute.
+	 * Gets the value of the '<code>onfocus</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	protected String getOnfocus() {
@@ -123,7 +123,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	}
 
 	/**
-	 * Sets the value of the '<code>onchange</code>' attribute.
+	 * Gets the value of the '<code>onchange</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	protected String getOnchange() {
@@ -139,7 +139,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	}
 
 	/**
-	 * Sets the value of the '<code>accesskey</code>' attribute.
+	 * Gets the value of the '<code>accesskey</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	protected String getAccesskey() {
@@ -155,7 +155,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	}
 
 	/**
-	 * Sets the value of the '<code>disabled</code>' attribute.
+	 * Gets the value of the '<code>disabled</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	protected String getDisabled() {
