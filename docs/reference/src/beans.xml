@@ -2786,7 +2786,7 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
         </section>
     </section>
     <section id="beans-child-bean-definitions">
-        <title>Abstract and child bean definitions</title>
+        <title>Bean definition inheritance</title>
         <para>A bean definition potentially contains a large amount of
         configuration information, including container specific information (i.e.
         initialization method, static factory method name, etc.) and constructor
@@ -2824,8 +2824,8 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
         must accept the parent's property values.</para>
         <para>A child bean definition will inherit constructor argument values,
         property values and method overrides from the parent, with the option to
-        add new values. If init method, destroy method and/or <literal>static</literal>
-        factory method are specified, they will override the corresponding parent
+        add new values. If any init-method, destroy-method and/or <literal>static</literal>
+        factory method settings are specified, they will override the corresponding parent
         settings.</para>
         <para>The remaining settings will <emphasis>always</emphasis> be taken
         from the child definition: <emphasis>depends on</emphasis>,
@@ -2833,11 +2833,12 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
         <emphasis>singleton</emphasis>, <emphasis>scope</emphasis>,
 		<emphasis>lazy init</emphasis>.</para>
 		<para>Note that in the example above, we have explicitly marked the parent
-        bean definition as <emphasis>abstract</emphasis> by using the
-        <emphasis>abstract</emphasis> attribute. In the case that the parent
-        definition does not specify a class:</para>
+        bean definition as abstract by using the <literal>abstract</literal>
+        attribute. In the case that the parent definition does not specify a
+        class, and so explicitly marking the parent bean definition as
+        <literal>abstract</literal> is required:</para>
     
-        <programlisting><![CDATA[<bean id="inheritedTestBeanWithoutClass">
+        <programlisting><![CDATA[<bean id="inheritedTestBeanWithoutClass" abstract="true">
     <property name="name" value="parent"/>
     <property name="age" value="1"/>
 </bean>
@@ -2849,14 +2850,14 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
 </bean>]]></programlisting>
 
         <para>The parent bean cannot get instantiated on its own since it is
-        incomplete, and it is also implicitly <literal>abstract</literal>. When a
-		definition is defined to be <literal>abstract</literal> like this
-		(explicitly or implicitly), it is usable only as a pure template bean
-		definition that will serve as parent definition for child definitions.
-		Trying to use such an <literal>abstract</literal> parent
-        bean on its own (by referring to it as a ref property of another bean, or
-        doing an explicit <methodname>getBean()</methodname> call with the parent
-        bean id), will result in an error. Similarly, the container's internal
+        incomplete, and it is also explicitly marked as <literal>abstract</literal>.
+        When a definition is defined to be <literal>abstract</literal> like this,
+        it is usable only as a pure template bean definition that will serve as a
+        parent definition for child definitions. Trying to use such an
+        <literal>abstract</literal> parent bean on its own (by referring to it as
+        a ref property of another bean, or doing an explicit
+        <methodname>getBean()</methodname> call with the parent bean id), will
+        result in an error. Similarly, the container's internal
         <methodname>preInstantiateSingletons()</methodname> method will completely
         ignore bean definitions which are defined as abstract.</para>
         
