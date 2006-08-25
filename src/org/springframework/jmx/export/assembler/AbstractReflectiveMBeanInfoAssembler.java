@@ -255,12 +255,11 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 */
 	protected ModelMBeanOperationInfo[] getOperationInfo(Object managedBean, String beanKey) {
 		Method[] methods = getClassToExpose(managedBean).getMethods();
-		boolean syntheticCheck = (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15);
 		List infos = new ArrayList();
 
 		for (int i = 0; i < methods.length; i++) {
 			Method method = methods[i];
-			if (syntheticCheck && method.isSynthetic()) {
+			if (JdkVersion.isAtLeastJava5() && method.isSynthetic()) {
 				continue;
 			}
 			if (method.getDeclaringClass().equals(Object.class)) {
