@@ -19,8 +19,6 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.JspException;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
-
 
 /**
  * Databinding-aware JSP tag for rendering an HTML '<code>input</code>'
@@ -86,6 +84,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Sets the value of the '<code>maxlength</code>' attribute.
 	 * May be a runtime expression.
+	 * @throws IllegalArgumentException if the supplied parameter value is <code>null</code> or composed wholly of whitespace
 	 */
 	public void setMaxlength(String maxlength) {
 		Assert.hasText(maxlength, "'maxlength' cannot be null or zero length.");
@@ -103,6 +102,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Sets the value of the '<code>alt</code>' attribute.
 	 * May be a runtime expression.
+	 * @throws IllegalArgumentException if the supplied parameter value is <code>null</code> or composed wholly of whitespace
 	 */
 	public void setAlt(String alt) {
 		Assert.hasText(alt, "'alt' cannot be null or zero length.");
@@ -120,6 +120,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	/**
 	 * Sets the value of the '<code>onselect</code>' attribute.
 	 * May be a runtime expression.
+	 * @throws IllegalArgumentException if the supplied parameter value is <code>null</code> or composed wholly of whitespace 
 	 */
 	public void setOnselect(String onselect) {
 		Assert.hasText(onselect, "'onselect' cannot be null or zero length.");
