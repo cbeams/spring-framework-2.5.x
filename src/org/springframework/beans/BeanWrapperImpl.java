@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of the BeanWrapper interface that should be sufficient
+ * Default {@link BeanWrapper} implementation that should be sufficient
  * for all typical use cases. Caches introspection results for efficiency.
  *
  * <p>Note: This class never tries to load a class by name, as this can pose
@@ -49,16 +49,17 @@ import org.springframework.util.StringUtils;
  * <p>Note: Auto-registers default property editors from the
  * <code>org.springframework.beans.propertyeditors</code> package, which apply
  * in addition to the JDK's standard PropertyEditors. Applications can call
- * the <code>registerCustomEditor</code> method to register an editor for a
- * particular instance (i.e. they're not shared across the application).
- * See the base class PropertyEditorRegistrySupport for details.
+ * the {@link #registerCustomEditor(Class, java.beans.PropertyEditor)} method
+ * to register an editor for a particular instance (i.e. they are not shared
+ * across the application). See the base class
+ * {@link PropertyEditorRegistrySupport} for details.
  *
- * <p>BeanWrapperImpl will convert collection and array values to the
- * corresponding target collections or arrays, if necessary. Custom property
- * editors that deal with collections or arrays can either be written via
- * PropertyEditor's <code>setValue</code>, or against a comma-delimited String
- * via <code>setAsText</code>, as String arrays are converted in such a format
- * if the array itself is not assignable.
+ * <p><code>BeanWrapperImpl</code> will convert collection and array values
+ * to the corresponding target collections or arrays, if necessary. Custom
+ * property editors that deal with collections or arrays can either be
+ * written via PropertyEditor's <code>setValue</code>, or against a
+ * comma-delimited String via <code>setAsText</code>, as String arrays are
+ * converted in such a format if the array itself is not assignable.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -555,7 +556,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					else if (value instanceof Map) {
 						Map map = (Map) value;
 						Class mapKeyType = null;
-						if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
+						if (JdkVersion.isAtLeastJava5()) {
 							mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod());
 						}
 						// IMPORTANT: Do not pass full property name in here - property editors
@@ -657,7 +658,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			else if (propValue instanceof List) {
 				PropertyDescriptor pd = getPropertyDescriptorInternal(tokens.actualName);
 				Class requiredType = null;
-				if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
+				if (JdkVersion.isAtLeastJava5()) {
 					requiredType = GenericCollectionTypeResolver.getCollectionReturnType(pd.getReadMethod());
 				}
 				List list = (List) propValue;
@@ -697,7 +698,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				PropertyDescriptor pd = getPropertyDescriptorInternal(tokens.actualName);
 				Class mapKeyType = null;
 				Class mapValueType = null;
-				if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
+				if (JdkVersion.isAtLeastJava5()) {
 					mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod());
 					mapValueType = GenericCollectionTypeResolver.getMapValueReturnType(pd.getReadMethod());
 				}

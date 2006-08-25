@@ -37,10 +37,10 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Internal jelper class for converting property values to target types.
+ * Internal helper class for converting property values to target types.
  *
- * <p>Works on a given PropertyEditorRegistrySupport instance.
- * Used as a delegate by BeanWrapperImpl and SimpleTypeConverter.
+ * <p>Works on a given {@link PropertyEditorRegistrySupport} instance.
+ * Used as a delegate by {@link BeanWrapperImpl} and {@link SimpleTypeConverter}.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -156,7 +156,7 @@ class TypeConverterDelegate {
 		// Value not of required type?
 		if (pe != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
 			if (pe == null && descriptor != null) {
-				if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
+				if (JdkVersion.isAtLeastJava5()) {
 					pe = descriptor.createPropertyEditor(this.targetObject);
 				}
 				else {
@@ -295,7 +295,7 @@ class TypeConverterDelegate {
 			Collection original, String propertyName, MethodParameter methodParam) {
 
 		Class elementType = null;
-		if (methodParam != null && JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
+		if (methodParam != null && JdkVersion.isAtLeastJava5()) {
 			elementType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
 		}
 		Collection convertedCopy =
@@ -315,7 +315,7 @@ class TypeConverterDelegate {
 	protected Map convertToTypedMap(Map original, String propertyName, MethodParameter methodParam) {
 		Class keyType = null;
 		Class valueType = null;
-		if (methodParam != null && JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
+		if (methodParam != null && JdkVersion.isAtLeastJava5()) {
 			keyType = GenericCollectionTypeResolver.getMapKeyParameterType(methodParam);
 			valueType = GenericCollectionTypeResolver.getMapValueParameterType(methodParam);
 		}
