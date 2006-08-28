@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.scheduling.quartz;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Map;
 import java.util.TimeZone;
 
 import org.quartz.CronTrigger;
@@ -62,6 +63,18 @@ public class CronTriggerBean extends CronTrigger
 
 	private String beanName;
 
+
+	/**
+	 * Register objects in the JobDataMap via a given Map.
+	 * <p>These objects will be available to this Trigger only,
+	 * in contrast to objects in the JobDetail's data map.
+	 * @param jobDataAsMap Map with String keys and any objects as values
+	 * (for example Spring-managed beans)
+	 * @see JobDetailBean#setJobDataAsMap
+	 */
+	public void setJobDataAsMap(Map jobDataAsMap) {
+		getJobDataMap().putAll(jobDataAsMap);
+	}
 
 	/**
 	 * Set the misfire instruction via the name of the corresponding
