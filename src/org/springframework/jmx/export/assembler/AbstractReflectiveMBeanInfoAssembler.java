@@ -308,7 +308,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 		for (int i = 0; i < methods.length; i++) {
 			Method method = methods[i];
-			if (JdkVersion.isAtLeastJava5() && method.isSynthetic()) {
+			if (JdkVersion.isAtLeastJava15() && method.isSynthetic()) {
 				continue;
 			}
 			if (method.getDeclaringClass().equals(Object.class)) {

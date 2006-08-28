@@ -101,7 +101,7 @@ public abstract class JmxUtils {
 			}
 			server = (MBeanServer) servers.get(0);
 		}
-		else if (JdkVersion.isAtLeastJava5()) {
+		else if (JdkVersion.isAtLeastJava15()) {
 			// Attempt to load the PlatformMBeanServer.
 			server = ManagementFactory.getPlatformMBeanServer();
 		}

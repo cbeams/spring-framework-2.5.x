@@ -19,7 +19,7 @@ package org.springframework.core;
 /**
  * Helper class used to find the current Java/JDK version.
  * 
- * <p>Please note that Spring does not support 1.2 JVMs.
+ * <p>Note that Spring does not support 1.2 JVMs.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -113,12 +113,12 @@ public abstract class JdkVersion {
 
 	/**
 	 * Convenience method to determine if the current JVM is at least
-	 * Java 5 (1.5).
-	 * @return <code>true</code> if the current JVM is at least Java 5 (1.5)
+	 * Java 1.5 (Java 5).
+	 * @return <code>true</code> if the current JVM is at least Java 1.5
 	 * @see #getMajorJavaVersion()
 	 * @see #JAVA_15
 	 */
-	public static boolean isAtLeastJava5() {
+	public static boolean isAtLeastJava15() {
 		return getMajorJavaVersion() >= JAVA_15;
 	}
 

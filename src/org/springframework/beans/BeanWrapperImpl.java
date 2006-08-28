@@ -556,7 +556,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					else if (value instanceof Map) {
 						Map map = (Map) value;
 						Class mapKeyType = null;
-						if (JdkVersion.isAtLeastJava5()) {
+						if (JdkVersion.isAtLeastJava15()) {
 							mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod());
 						}
 						// IMPORTANT: Do not pass full property name in here - property editors
@@ -658,7 +658,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			else if (propValue instanceof List) {
 				PropertyDescriptor pd = getPropertyDescriptorInternal(tokens.actualName);
 				Class requiredType = null;
-				if (JdkVersion.isAtLeastJava5()) {
+				if (JdkVersion.isAtLeastJava15()) {
 					requiredType = GenericCollectionTypeResolver.getCollectionReturnType(pd.getReadMethod());
 				}
 				List list = (List) propValue;
@@ -698,7 +698,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				PropertyDescriptor pd = getPropertyDescriptorInternal(tokens.actualName);
 				Class mapKeyType = null;
 				Class mapValueType = null;
-				if (JdkVersion.isAtLeastJava5()) {
+				if (JdkVersion.isAtLeastJava15()) {
 					mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod());
 					mapValueType = GenericCollectionTypeResolver.getMapValueReturnType(pd.getReadMethod());
 				}
