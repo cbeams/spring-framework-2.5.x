@@ -16,18 +16,22 @@
 
 package org.springframework.aop.scope;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import junit.framework.TestCase;
+
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.ITestBean;
+import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.config.Scope;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.beans.ITestBean;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.aop.support.AopUtils;
-
-import java.util.Map;
-import java.util.HashMap;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class ScopedProxyTests extends TestCase {
@@ -38,7 +42,8 @@ public class ScopedProxyTests extends TestCase {
 		this.beanFactory = new DefaultListableBeanFactory();
 	}
 
-	public void testProxyAssignable_SPR2108() throws Exception {
+	/* SPR-2108 */
+	public void testProxyAssignable() throws Exception {
 		loadBeans("scopedMap.xml");
 		Object baseMap = this.beanFactory.getBean("singletonMap");
 		assertTrue(baseMap instanceof Map);
@@ -58,8 +63,24 @@ public class ScopedProxyTests extends TestCase {
 		assertTrue(AopUtils.isJdkDynamicProxy(bean));
 	}
 
+	public void testScopedList() {
+		loadBeans("scopedList.xml");
+		this.beanFactory.registerScope("request", new Scope() {
+			public Object get(String name, ObjectFactory objectFactory) {
+				throw new UnsupportedOperationException();
+			}
+			public Object remove(String name) {
+				throw new UnsupportedOperationException();
+			}
+			public void registerDestructionCallback(String name, Runnable callback) {
+				throw new UnsupportedOperationException();
+			}
+		});
+		this.beanFactory.getBean("testBean");
+	}
+
 	private void loadBeans(String path) {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.loadBeanDefinitions(new ClassPathResource(path, getClass()));
 	}
 
