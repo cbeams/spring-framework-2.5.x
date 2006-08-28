@@ -156,7 +156,7 @@ class TypeConverterDelegate {
 		// Value not of required type?
 		if (pe != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
 			if (pe == null && descriptor != null) {
-				if (JdkVersion.isAtLeastJava5()) {
+				if (JdkVersion.isAtLeastJava15()) {
 					pe = descriptor.createPropertyEditor(this.targetObject);
 				}
 				else {
@@ -295,14 +295,26 @@ class TypeConverterDelegate {
 			Collection original, String propertyName, MethodParameter methodParam) {
 
 		Class elementType = null;
-		if (methodParam != null && JdkVersion.isAtLeastJava5()) {
+		if (methodParam != null && JdkVersion.isAtLeastJava15()) {
 			elementType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
 		}
-		Collection convertedCopy =
-				CollectionFactory.createApproximateCollection(original.getClass(), original.size());
+		Collection convertedCopy = null;
+		Iterator it = null;
+		try {
+			convertedCopy =
+					CollectionFactory.createApproximateCollection(original.getClass(), original.size());
+			it = original.iterator();
+		}
+		catch (Throwable ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Cannot access Collection of type [" + original.getClass().getName() +
+						"] - injecting original Collection as-is", ex);
+			}
+			return original;
+		}
 		boolean actuallyConverted = false;
 		int i = 0;
-		for (Iterator it = original.iterator(); it.hasNext(); i++) {
+		for (; it.hasNext(); i++) {
 			Object element = it.next();
 			String indexedPropertyName = buildIndexedPropertyName(propertyName, i);
 			Object convertedElement = convertIfNecessary(indexedPropertyName, null, element, elementType);
@@ -315,13 +327,25 @@ class TypeConverterDelegate {
 	protected Map convertToTypedMap(Map original, String propertyName, MethodParameter methodParam) {
 		Class keyType = null;
 		Class valueType = null;
-		if (methodParam != null && JdkVersion.isAtLeastJava5()) {
+		if (methodParam != null && JdkVersion.isAtLeastJava15()) {
 			keyType = GenericCollectionTypeResolver.getMapKeyParameterType(methodParam);
 			valueType = GenericCollectionTypeResolver.getMapValueParameterType(methodParam);
 		}
-		Map convertedCopy = CollectionFactory.createApproximateMap(original.getClass(), original.size());
+		Map convertedCopy = null;
+		Iterator it = null;
+		try {
+			convertedCopy = CollectionFactory.createApproximateMap(original.getClass(), original.size());
+			it = original.entrySet().iterator();
+		}
+		catch (Throwable ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Cannot access Map of type [" + original.getClass().getName() +
+						"] - injecting original Map as-is", ex);
+			}
+			return original;
+		}
 		boolean actuallyConverted = false;
-		for (Iterator it = original.entrySet().iterator(); it.hasNext();) {
+		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();
 			Object key = entry.getKey();
 			Object value = entry.getValue();
