@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,7 @@ package org.springframework.scheduling.quartz;
 
 import java.util.Map;
 
+import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 
@@ -44,12 +45,37 @@ import org.springframework.context.ApplicationContextAware;
 public class JobDetailBean extends JobDetail
     implements BeanNameAware, ApplicationContextAware, InitializingBean {
 
+	private Class actualJobClass;
+
 	private String beanName;
 
 	private ApplicationContext applicationContext;
 
 	private String applicationContextJobDataKey;
 
+
+	/**
+	 * Overridden to support any job class, to allow a custom JobFactory
+	 * to adapt the given job class to the Quartz Job interface.
+	 * @see SchedulerFactoryBean#setJobFactory
+	 */
+	public void setJobClass(Class jobClass) {
+		if (jobClass != null && !Job.class.isAssignableFrom(jobClass)) {
+			super.setJobClass(DelegatingJob.class);
+			this.actualJobClass = jobClass;
+		}
+		else {
+			super.setJobClass(jobClass);
+		}
+	}
+
+	/**
+	 * Overridden to support any job class, to allow a custom JobFactory
+	 * to adapt the given job class to the Quartz Job interface.
+	 */
+	public Class getJobClass() {
+		return (this.actualJobClass != null ? this.actualJobClass : super.getJobClass());
+	}
 
 	/**
 	 * Register objects in the JobDataMap via a given Map.
