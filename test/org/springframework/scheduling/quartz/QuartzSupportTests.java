@@ -16,6 +16,12 @@
 
 package org.springframework.scheduling.quartz;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 import org.quartz.CronTrigger;
@@ -33,17 +39,13 @@ import org.quartz.SchedulerListener;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.TriggerListener;
+import org.quartz.spi.JobFactory;
+
 import org.springframework.beans.TestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.TestMethodInvokingTask;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Juergen Hoeller
@@ -124,13 +126,14 @@ public class QuartzSupportTests extends TestCase {
 				return scheduler;
 			}
 		};
+		schedulerFactoryBean.setJobFactory(null);
 		Map schedulerContext = new HashMap();
 		schedulerContext.put("otherTestBean", tb);
 		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
 		if (explicitJobDetail) {
-			schedulerFactoryBean.setJobDetails(new JobDetail[]{jobDetail0});
+			schedulerFactoryBean.setJobDetails(new JobDetail[] {jobDetail0});
 		}
-		schedulerFactoryBean.setTriggers(new Trigger[]{trigger0, trigger1});
+		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
 		}
@@ -214,10 +217,11 @@ public class QuartzSupportTests extends TestCase {
 				return scheduler;
 			}
 		};
+		schedulerFactoryBean.setJobFactory(null);
 		Map schedulerContext = new HashMap();
 		schedulerContext.put("otherTestBean", tb);
 		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
-		schedulerFactoryBean.setTriggers(new Trigger[]{trigger0, trigger1});
+		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
 		if (overwrite) {
 			schedulerFactoryBean.setOverwriteExistingJobs(true);
 		}
@@ -308,10 +312,11 @@ public class QuartzSupportTests extends TestCase {
 				return scheduler;
 			}
 		};
+		schedulerFactoryBean.setJobFactory(null);
 		Map schedulerContext = new HashMap();
 		schedulerContext.put("otherTestBean", tb);
 		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
-		schedulerFactoryBean.setTriggers(new Trigger[]{trigger0, trigger1});
+		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
 		if (overwrite) {
 			schedulerFactoryBean.setOverwriteExistingJobs(true);
 		}
@@ -326,6 +331,8 @@ public class QuartzSupportTests extends TestCase {
 	}
 
 	public void testSchedulerFactoryBeanWithListeners() throws Exception {
+		JobFactory jobFactory = new AdaptableJobFactory();
+
 		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
 		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
 
@@ -335,6 +342,8 @@ public class QuartzSupportTests extends TestCase {
 		TriggerListener globalTriggerListener = new TestTriggerListener();
 		TriggerListener triggerListener = new TestTriggerListener();
 
+		scheduler.setJobFactory(jobFactory);
+		schedulerControl.setVoidCallable();
 		scheduler.addSchedulerListener(schedulerListener);
 		schedulerControl.setVoidCallable();
 		scheduler.addGlobalJobListener(globalJobListener);
@@ -356,11 +365,12 @@ public class QuartzSupportTests extends TestCase {
 				return scheduler;
 			}
 		};
-		schedulerFactoryBean.setSchedulerListeners(new SchedulerListener[]{schedulerListener});
-		schedulerFactoryBean.setGlobalJobListeners(new JobListener[]{globalJobListener});
-		schedulerFactoryBean.setJobListeners(new JobListener[]{jobListener});
-		schedulerFactoryBean.setGlobalTriggerListeners(new TriggerListener[]{globalTriggerListener});
-		schedulerFactoryBean.setTriggerListeners(new TriggerListener[]{triggerListener});
+		schedulerFactoryBean.setJobFactory(jobFactory);
+		schedulerFactoryBean.setSchedulerListeners(new SchedulerListener[] {schedulerListener});
+		schedulerFactoryBean.setGlobalJobListeners(new JobListener[] {globalJobListener});
+		schedulerFactoryBean.setJobListeners(new JobListener[] {jobListener});
+		schedulerFactoryBean.setGlobalTriggerListeners(new TriggerListener[] {globalTriggerListener});
+		schedulerFactoryBean.setTriggerListeners(new TriggerListener[] {triggerListener});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
 		}
@@ -414,8 +424,8 @@ public class QuartzSupportTests extends TestCase {
 		trigger1.afterPropertiesSet();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
-		schedulerFactoryBean.setJobDetails(new JobDetail[]{jobDetail1});
-		schedulerFactoryBean.setTriggers(new Trigger[]{trigger1, trigger0});
+		schedulerFactoryBean.setJobDetails(new JobDetail[] {jobDetail1});
+		schedulerFactoryBean.setTriggers(new Trigger[] {trigger1, trigger0});
 		schedulerFactoryBean.afterPropertiesSet();
 
 		// ok scheduler is set up... let's wait for like 4 seconds
@@ -455,6 +465,8 @@ public class QuartzSupportTests extends TestCase {
 	}
 
 	public void testSchedulerFactoryBeanWithPlainQuartzObjects() throws Exception {
+		JobFactory jobFactory = new AdaptableJobFactory();
+
 		TestBean tb = new TestBean("tb", 99);
 		JobDetail jobDetail0 = new JobDetail();
 		jobDetail0.setJobClass(Job.class);
@@ -491,6 +503,8 @@ public class QuartzSupportTests extends TestCase {
 
 		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
 		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
+		scheduler.setJobFactory(jobFactory);
+		schedulerControl.setVoidCallable();
 		scheduler.getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
 		schedulerControl.setReturnValue(null);
 		scheduler.getJobDetail("myJob1", Scheduler.DEFAULT_GROUP);
@@ -518,8 +532,9 @@ public class QuartzSupportTests extends TestCase {
 				return scheduler;
 			}
 		};
-		schedulerFactoryBean.setJobDetails(new JobDetail[]{jobDetail0, jobDetail1});
-		schedulerFactoryBean.setTriggers(new Trigger[]{trigger0, trigger1});
+		schedulerFactoryBean.setJobFactory(jobFactory);
+		schedulerFactoryBean.setJobDetails(new JobDetail[] {jobDetail0, jobDetail1});
+		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
 		}
@@ -550,6 +565,7 @@ public class QuartzSupportTests extends TestCase {
 				return scheduler;
 			}
 		};
+		schedulerFactoryBean.setJobFactory(null);
 		Map schedulerContextMap = new HashMap();
 		schedulerContextMap.put("testBean", tb);
 		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContextMap);
@@ -589,7 +605,7 @@ public class QuartzSupportTests extends TestCase {
 	public void testMethodInvokingJobDetailFactoryBeanWithListenerNames() throws Exception {
 		TestMethodInvokingTask task = new TestMethodInvokingTask();
 		MethodInvokingJobDetailFactoryBean mijdfb = new MethodInvokingJobDetailFactoryBean();
-		String[] names = new String[]{"test1", "test2"};
+		String[] names = new String[] {"test1", "test2"};
 		mijdfb.setName("myJob1");
 		mijdfb.setGroup(Scheduler.DEFAULT_GROUP);
 		mijdfb.setTargetObject(task);
@@ -603,7 +619,7 @@ public class QuartzSupportTests extends TestCase {
 
 	public void testJobDetailBeanWithListenerNames() {
 		JobDetailBean jobDetail = new JobDetailBean();
-		String[] names = new String[]{"test1", "test2"};
+		String[] names = new String[] {"test1", "test2"};
 		jobDetail.setJobListenerNames(names);
 		List result = Arrays.asList(jobDetail.getJobListenerNames());
 		assertEquals(Arrays.asList(names), result);
@@ -611,7 +627,7 @@ public class QuartzSupportTests extends TestCase {
 
 	public void testCronTriggerBeanWithListenerNames() {
 		CronTriggerBean trigger = new CronTriggerBean();
-		String[] names = new String[]{"test1", "test2"};
+		String[] names = new String[] {"test1", "test2"};
 		trigger.setTriggerListenerNames(names);
 		List result = Arrays.asList(trigger.getTriggerListenerNames());
 		assertEquals(Arrays.asList(names), result);
@@ -619,10 +635,184 @@ public class QuartzSupportTests extends TestCase {
 
 	public void testSimpleTriggerBeanWithListenerNames() {
 		SimpleTriggerBean trigger = new SimpleTriggerBean();
-		String[] names = new String[]{"test1", "test2"};
+		String[] names = new String[] {"test1", "test2"};
 		trigger.setTriggerListenerNames(names);
 		List result = Arrays.asList(trigger.getTriggerListenerNames());
 		assertEquals(Arrays.asList(names), result);
+	}
+
+	public void testSchedulerWithTaskExecutor() throws Exception {
+		CountingTaskExecutor taskExecutor = new CountingTaskExecutor();
+		DummyJob.count = 0;
+
+		JobDetail jobDetail = new JobDetail();
+		jobDetail.setJobClass(DummyJob.class);
+		jobDetail.setName("myJob");
+
+		SimpleTriggerBean trigger = new SimpleTriggerBean();
+		trigger.setName("myTrigger");
+		trigger.setJobDetail(jobDetail);
+		trigger.setStartDelay(1);
+		trigger.setRepeatInterval(500);
+		trigger.setRepeatCount(1);
+		trigger.afterPropertiesSet();
+
+		SchedulerFactoryBean bean = new SchedulerFactoryBean();
+		bean.setTaskExecutor(taskExecutor);
+		bean.setTriggers(new Trigger[] {trigger});
+		bean.setJobDetails(new JobDetail[] {jobDetail});
+		bean.afterPropertiesSet();
+
+		Thread.sleep(1000);
+		assertTrue(DummyJob.count > 0);
+		assertEquals(DummyJob.count, taskExecutor.count);
+
+		bean.destroy();
+	}
+
+	public void testSchedulerWithRunnable() throws Exception {
+		DummyRunnable.count = 0;
+
+		JobDetail jobDetail = new JobDetailBean();
+		jobDetail.setJobClass(DummyRunnable.class);
+		jobDetail.setName("myJob");
+
+		SimpleTriggerBean trigger = new SimpleTriggerBean();
+		trigger.setName("myTrigger");
+		trigger.setJobDetail(jobDetail);
+		trigger.setStartDelay(1);
+		trigger.setRepeatInterval(500);
+		trigger.setRepeatCount(1);
+		trigger.afterPropertiesSet();
+
+		SchedulerFactoryBean bean = new SchedulerFactoryBean();
+		bean.setTriggers(new Trigger[] {trigger});
+		bean.setJobDetails(new JobDetail[] {jobDetail});
+		bean.afterPropertiesSet();
+
+		Thread.sleep(1000);
+		assertTrue(DummyRunnable.count > 0);
+
+		bean.destroy();
+	}
+
+	public void testSchedulerWithQuartzJobBean() throws Exception {
+		DummyJob.param = 0;
+		DummyJob.count = 0;
+
+		JobDetail jobDetail = new JobDetail();
+		jobDetail.setJobClass(DummyJobBean.class);
+		jobDetail.setName("myJob");
+		jobDetail.getJobDataMap().put("param", "10");
+
+		SimpleTriggerBean trigger = new SimpleTriggerBean();
+		trigger.setName("myTrigger");
+		trigger.setJobDetail(jobDetail);
+		trigger.setStartDelay(1);
+		trigger.setRepeatInterval(500);
+		trigger.setRepeatCount(1);
+		trigger.afterPropertiesSet();
+
+		SchedulerFactoryBean bean = new SchedulerFactoryBean();
+		bean.setTriggers(new Trigger[] {trigger});
+		bean.setJobDetails(new JobDetail[] {jobDetail});
+		bean.afterPropertiesSet();
+
+		Thread.sleep(1000);
+		assertEquals(10, DummyJobBean.param);
+		assertTrue(DummyJobBean.count > 0);
+
+		bean.destroy();
+	}
+
+	public void testSchedulerWithSpringBeanJobFactory() throws Exception {
+		DummyJob.param = 0;
+		DummyJob.count = 0;
+
+		JobDetail jobDetail = new JobDetail();
+		jobDetail.setJobClass(DummyJob.class);
+		jobDetail.setName("myJob");
+		jobDetail.getJobDataMap().put("param", "10");
+
+		SimpleTriggerBean trigger = new SimpleTriggerBean();
+		trigger.setName("myTrigger");
+		trigger.setJobDetail(jobDetail);
+		trigger.setStartDelay(1);
+		trigger.setRepeatInterval(500);
+		trigger.setRepeatCount(1);
+		trigger.afterPropertiesSet();
+
+		SchedulerFactoryBean bean = new SchedulerFactoryBean();
+		bean.setJobFactory(new SpringBeanJobFactory());
+		bean.setTriggers(new Trigger[] {trigger});
+		bean.setJobDetails(new JobDetail[] {jobDetail});
+		bean.afterPropertiesSet();
+
+		Thread.sleep(1000);
+		assertEquals(10, DummyJob.param);
+		assertTrue(DummyJob.count > 0);
+
+		bean.destroy();
+	}
+
+	public void testSchedulerWithSpringBeanJobFactoryAndRunnable() throws Exception {
+		DummyJob.param = 0;
+		DummyJob.count = 0;
+
+		JobDetail jobDetail = new JobDetailBean();
+		jobDetail.setJobClass(DummyRunnable.class);
+		jobDetail.setName("myJob");
+		jobDetail.getJobDataMap().put("param", "10");
+
+		SimpleTriggerBean trigger = new SimpleTriggerBean();
+		trigger.setName("myTrigger");
+		trigger.setJobDetail(jobDetail);
+		trigger.setStartDelay(1);
+		trigger.setRepeatInterval(500);
+		trigger.setRepeatCount(1);
+		trigger.afterPropertiesSet();
+
+		SchedulerFactoryBean bean = new SchedulerFactoryBean();
+		bean.setJobFactory(new SpringBeanJobFactory());
+		bean.setTriggers(new Trigger[] {trigger});
+		bean.setJobDetails(new JobDetail[] {jobDetail});
+		bean.afterPropertiesSet();
+
+		Thread.sleep(1000);
+		assertEquals(10, DummyRunnable.param);
+		assertTrue(DummyRunnable.count > 0);
+
+		bean.destroy();
+	}
+
+	public void testSchedulerWithSpringBeanJobFactoryAndQuartzJobBean() throws Exception {
+		DummyJob.param = 0;
+		DummyJob.count = 0;
+
+		JobDetail jobDetail = new JobDetail();
+		jobDetail.setJobClass(DummyJobBean.class);
+		jobDetail.setName("myJob");
+		jobDetail.getJobDataMap().put("param", "10");
+
+		SimpleTriggerBean trigger = new SimpleTriggerBean();
+		trigger.setName("myTrigger");
+		trigger.setJobDetail(jobDetail);
+		trigger.setStartDelay(1);
+		trigger.setRepeatInterval(500);
+		trigger.setRepeatCount(1);
+		trigger.afterPropertiesSet();
+
+		SchedulerFactoryBean bean = new SchedulerFactoryBean();
+		bean.setJobFactory(new SpringBeanJobFactory());
+		bean.setTriggers(new Trigger[] {trigger});
+		bean.setJobDetails(new JobDetail[] {jobDetail});
+		bean.afterPropertiesSet();
+
+		Thread.sleep(1000);
+		assertEquals(10, DummyJobBean.param);
+		assertTrue(DummyJobBean.count > 0);
+
+		bean.destroy();
 	}
 
 	/**
@@ -642,32 +832,6 @@ public class QuartzSupportTests extends TestCase {
 		finally {
 			ctx.close();
 		}
-	}
-
-	public void testSchedulerWithTaskExecutor() throws Exception {
-		CountingTaskExecutor taskExecutor = new CountingTaskExecutor();
-
-		JobDetail jobDetail = new JobDetail();
-		jobDetail.setJobClass(DummyJob.class);
-		jobDetail.setName("myJob");
-
-		SimpleTriggerBean trigger = new SimpleTriggerBean();
-		trigger.setName("myTrigger");
-		trigger.setJobDetail(jobDetail);
-		trigger.setStartDelay(1);
-		trigger.setRepeatInterval(500);
-		trigger.setRepeatCount(1);
-		trigger.afterPropertiesSet();
-
-		SchedulerFactoryBean bean = new SchedulerFactoryBean();
-		bean.setTaskExecutor(taskExecutor);
-		bean.setTriggers(new Trigger[]{trigger});
-		bean.setJobDetails(new JobDetail[]{jobDetail});
-		bean.afterPropertiesSet();
-
-		Thread.sleep(1000);
-		assertTrue(DummyJob.getCount() > 0);
-		assertEquals(DummyJob.getCount(), taskExecutor.getCount());
 	}
 
 	public void testWithTwoAnonymousMethodInvokingJobDetailFactoryBeans() throws InterruptedException {
@@ -757,18 +921,6 @@ public class QuartzSupportTests extends TestCase {
 		}
 	}
 
-	public static class DummyJob implements Job {
-
-		private static int count;
-
-		public synchronized void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-			count++;
-		}
-
-		public static int getCount() {
-			return count;
-		}
-	}
 
 	public static class CountingTaskExecutor implements TaskExecutor {
 
@@ -778,9 +930,63 @@ public class QuartzSupportTests extends TestCase {
 			this.count++;
 			task.run();
 		}
+	}
 
-		public int getCount() {
-			return count;
+
+	public static class DummyJob implements Job {
+
+		private static int param;
+
+		private static int count;
+
+		public void setParam(int value) {
+			if (param > 0) {
+				throw new IllegalStateException("Param already set");
+			}
+			param = value;
+		}
+
+		public synchronized void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+			count++;
 		}
 	}
+
+
+	public static class DummyJobBean extends QuartzJobBean {
+
+		private static int param;
+
+		private static int count;
+
+		public void setParam(int value) {
+			if (param > 0) {
+				throw new IllegalStateException("Param already set");
+			}
+			param = value;
+		}
+
+		protected synchronized void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+			count++;
+		}
+	}
+
+
+	public static class DummyRunnable implements Runnable {
+
+		private static int param;
+
+		private static int count;
+
+		public void setParam(int value) {
+			if (param > 0) {
+				throw new IllegalStateException("Param already set");
+			}
+			param = value;
+		}
+
+		public void run() {
+			count++;
+		}
+	}
+
 }

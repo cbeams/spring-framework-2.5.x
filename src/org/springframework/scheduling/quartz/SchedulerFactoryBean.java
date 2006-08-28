@@ -41,6 +41,7 @@ import org.quartz.Trigger;
 import org.quartz.TriggerListener;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.simpl.SimpleThreadPool;
+import org.quartz.spi.JobFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
@@ -86,7 +87,7 @@ import org.springframework.util.CollectionUtils;
  * automatically apply to Scheduler operations performed within those scopes.
  * Alternatively, define a TransactionProxyFactoryBean for the Scheduler itself.
  *
- * <p>This version of SchedulerFactoryBean requires Quartz 1.4 or higher.
+ * <p>This version of SchedulerFactoryBean requires Quartz 1.5 or higher.
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
@@ -176,6 +177,8 @@ public class SchedulerFactoryBean
 	private ApplicationContext applicationContext;
 
 	private String applicationContextSchedulerContextKey;
+
+	private JobFactory jobFactory = new AdaptableJobFactory();
 
 
 	private boolean overwriteExistingJobs = false;
@@ -359,6 +362,20 @@ public class SchedulerFactoryBean
 	 */
 	public void setApplicationContextSchedulerContextKey(String applicationContextSchedulerContextKey) {
 		this.applicationContextSchedulerContextKey = applicationContextSchedulerContextKey;
+	}
+
+	/**
+	 * Set the Quartz JobFactory to use for this Scheduler.
+	 * <p>Default is Spring's AdaptableJobFactory, which supports Runnables
+	 * as well as standard Quartz Jobs.
+	 * <p>Specify an instance of Spring's SpringBeanJobFactory here (typically
+	 * as an inner bean definition) to automatically populate a job's bean
+	 * properties from the specified job data map and scheduler context.
+	 * @see AdaptableJobFactory
+	 * @see SpringBeanJobFactory
+	 */
+	public void setJobFactory(JobFactory jobFactory) {
+		this.jobFactory = jobFactory;
 	}
 
 
@@ -549,6 +566,12 @@ public class SchedulerFactoryBean
 		// Get Scheduler instance from SchedulerFactory.
 		try {
 			this.scheduler = createScheduler(schedulerFactory, this.schedulerName);
+			if (this.jobFactory != null) {
+				if (this.jobFactory instanceof SchedulerContextAware) {
+					((SchedulerContextAware) this.jobFactory).setSchedulerContext(this.scheduler.getContext());
+				}
+				this.scheduler.setJobFactory(this.jobFactory);
+			}
 		}
 
 		finally {

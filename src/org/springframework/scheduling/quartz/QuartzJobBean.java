@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,37 +38,31 @@ import org.springframework.beans.MutablePropertyValues;
  * i.e. a method "setMyParam(int)". This will also work for complex
  * types like business objects etc.
  *
- * <p>This version of QuartzJobBean will automatically use the merged
- * JobDataMap (from Trigger and JobDetail) if running on Quartz 1.5,
- * falling back to the plain JobDetail JobDataMap on Quartz 1.4.
+ * <p>This version of QuartzJobBean requires Quartz 1.5 or higher,
+ * due to the support for trigger-specific job data.
+ *
+ * <p>Note that as of Spring 2.0 and Quartz 1.5, the preferred way to apply
+ * dependency injection to Job instances it to specify SpringBeanJobFactory
+ * as Quartz JobFactory (typically via SchedulerFactoryBean's "jobFactory"
+ * property). This allows to implement dependency-injected Jobs without a
+ * dependency on Spring classes.
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
- * @see org.quartz.JobDetail#getJobDataMap
- * @see org.quartz.Scheduler#getContext
+ * @see org.quartz.JobExecutionContext#getMergedJobDataMap()
+ * @see org.quartz.Scheduler#getContext()
  * @see JobDetailBean#setJobDataAsMap
+ * @see SimpleTriggerBean#setJobDataAsMap
+ * @see CronTriggerBean#setJobDataAsMap
  * @see SchedulerFactoryBean#setSchedulerContextAsMap
+ * @see SpringBeanJobFactory
+ * @see SchedulerFactoryBean#setJobFactory
  */
 public abstract class QuartzJobBean implements Job {
 
-	private static boolean getMergedJobDataMapAvailable;
-
-	static {
-		// Determine whether the Quartz 1.5 JobExecutionContext.getMergedJobDataMap()
-		// method is available.
-		try {
-			JobExecutionContext.class.getMethod("getMergedJobDataMap", new Class[0]);
-			getMergedJobDataMapAvailable = true;
-		}
-		catch (NoSuchMethodException ex) {
-			getMergedJobDataMapAvailable = false;
-		}
-	}
-
-
 	/**
-	 * This implementation applies the passed-in job data map as bean
-	 * property values, and delegates to executeInternal afterwards.
+	 * This implementation applies the passed-in job data map as bean property
+	 * values, and delegates to <code>executeInternal</code> afterwards.
 	 * @see #executeInternal
 	 */
 	public final void execute(JobExecutionContext context) throws JobExecutionException {
@@ -76,12 +70,7 @@ public abstract class QuartzJobBean implements Job {
 			BeanWrapper bw = new BeanWrapperImpl(this);
 			MutablePropertyValues pvs = new MutablePropertyValues();
 			pvs.addPropertyValues(context.getScheduler().getContext());
-			if (getMergedJobDataMapAvailable) {
-				pvs.addPropertyValues(context.getMergedJobDataMap());
-			}
-			else {
-				pvs.addPropertyValues(context.getJobDetail().getJobDataMap());
-			}
+			pvs.addPropertyValues(context.getMergedJobDataMap());
 			bw.setPropertyValues(pvs, true);
 		}
 		catch (SchedulerException ex) {
