@@ -35,15 +35,15 @@ public class DelegatingWork implements Work {
 
 
 	/**
-	 * Create a new DelegatingWork, assuming non-daemon status.
-	 * @param work the Runnable implementation to delegate to
+	 * Create a new DelegatingWork.
+	 * @param runnable the Runnable implementation to delegate to
 	 * (may be a SchedulingAwareRunnable for extended support)
 	 * @see org.springframework.scheduling.SchedulingAwareRunnable
 	 * @see #isDaemon()
 	 */
-	public DelegatingWork(Runnable work) {
-		Assert.notNull(work, "Runnable must not be null");
-		this.runnable = work;
+	public DelegatingWork(Runnable runnable) {
+		Assert.notNull(runnable, "Runnable must not be null");
+		this.runnable = runnable;
 	}
 
 
