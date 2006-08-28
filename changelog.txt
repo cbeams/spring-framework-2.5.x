@@ -57,6 +57,14 @@ Package org.springframework.remoting
 * added "serializerFactory" property to HessianServiceExporter, applied to HessianInput/Output objects
 * HessianServiceExporter is compatible with the Hessian 2 protocol (Hessian version 3.0.20+) as well as classic Hessian
 
+Package org.springframework.scheduling
+* Spring's Quartz support requires Quartz 1.5 or higher now
+* added support for Quartz 1.5 JobFactory to SchedulerFactoryBean, through "jobFactory" bean property
+* SchedulerFactoryBean uses AdaptableJobFactory as default, which also supports Runnables as job class
+* added SpringBeanJobFactory as subclass of AdaptableJobFactory, as JobFactory replacement for QuartzJobBean
+* JobDetailBean allows any job class to be specified, to allow a JobFactory to adapt any class to the Job interface
+* added "jobDataAsMap" property to Simple/CronTriggerBean, supporting the Quartz 1.5 notion of trigger-specific job data
+
 Package org.springframework.scripting
 * fixed JRubyScriptFactory to handle "toString()" invocations locally on the JRuby object proxy
 
