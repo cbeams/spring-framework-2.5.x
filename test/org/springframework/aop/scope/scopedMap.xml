@@ -18,4 +18,5 @@
 	<bean id="simpleMap" class="java.util.HashMap" scope="prototype">
 		<aop:scoped-proxy/>
 	</bean>
+
 </beans>
