@@ -18,13 +18,15 @@ package org.springframework.scripting.bsh;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.JdkVersion;
+import org.springframework.core.NestedRuntimeException;
 import org.springframework.scripting.Calculator;
+import org.springframework.scripting.ConfigurableMessenger;
 import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptSource;
@@ -35,6 +37,7 @@ import org.springframework.scripting.support.ScriptFactoryPostProcessor;
  *
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
 public class BshScriptFactoryTests extends TestCase {
 
@@ -50,8 +53,19 @@ public class BshScriptFactoryTests extends TestCase {
 		assertFalse("Scripted object should not be instance of Refreshable", calc instanceof Refreshable);
 		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
 
+		assertEquals(5, calc.add(2, 3));
+
 		String desiredMessage = "Hello World!";
 		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
+	}
+
+	public void testStaticWithNullReturnValue() throws Exception {
+		ApplicationContext ctx =
+				new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshContext.xml");
+		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messenger");
+
+		messenger.setMessage(null);
+		assertNull(messenger.getMessage());
 	}
 
 	public void testNonStatic() throws Exception {
@@ -180,4 +194,5 @@ public class BshScriptFactoryTests extends TestCase {
 		assertEquals("Hello World!", messenger.getMessage());
 		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
 	}
+
 }

@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.scripting.support;
-
-import org.springframework.scripting.ConfigurableMessenger;
+package org.springframework.scripting;
 
 /**
- * @author Rick Evans
+ * @author Juergen Hoeller
  */
-public final class StubMessenger implements ConfigurableMessenger {
+public interface ConfigurableMessenger extends Messenger {
 
-	private String message = "I used to be smart... now I'm just stupid.";
-
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
-	public String getMessage() {
-		return message;
-	}
+	void setMessage(String message);
 
 }
