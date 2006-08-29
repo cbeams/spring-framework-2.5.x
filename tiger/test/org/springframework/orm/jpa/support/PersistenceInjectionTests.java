@@ -39,7 +39,8 @@ import org.springframework.orm.jpa.AbstractEntityManagerFactoryBeanTests;
 public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanTests {
 	
 	private ApplicationContext applicationContext;
-	
+
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -74,84 +75,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		
 		this.applicationContext = sac;
 	}
-	
-	public static class DefaultPrivatePersistenceContextField {
-		
-		@PersistenceContext
-		private EntityManager em;
-		
-	}
-	
-	
-	public static class DefaultPublicPersistenceContextSetter {
-		
-		private EntityManager em;
-		
-		@PersistenceContext(type=PersistenceContextType.EXTENDED)
-		public void setEntityManager(EntityManager em) {
-			this.em = em;
-		}	
-		
-		public EntityManager getEntityManager() {
-			return em;
-		}
-	}
-	
-	public static class DefaultPrivatePersistenceUnitField {
-		@PersistenceUnit
-		private EntityManagerFactory emf;
-		
-	}
-	
-	public static class DefaultPublicPersistenceUnitSetter {
-		
-		private EntityManagerFactory emf;
-		
-		@PersistenceUnit
-		public void setEmf(EntityManagerFactory emf) {
-			this.emf = emf;
-		}
-		
-		public EntityManagerFactory getEmf() {
-			return emf;
-		}
-	}
-	
-	public static class DefaultPublicPersistenceUnitSetterNamedPerson {
-		
-		private EntityManagerFactory emf;
-		
-		@PersistenceUnit(name="Person")
-		public void setEmf(EntityManagerFactory emf) {
-			this.emf = emf;
-		}
-		
-		public EntityManagerFactory getEntityManagerFactory() {
-			return emf;
-		}
-	}
-	
-	public static class FieldOfWrongTypeAnnotatedWithPersistenceUnit {
-		
-		@PersistenceUnit
-		public String thisFieldIsOfTheWrongType;
-		
-	}
-	
-	public static class SetterOfWrongTypeAnnotatedWithPersistenceUnit {
-		
-		@PersistenceUnit
-		public void setSomething(Comparable c) {
-		}
-	}
-	
-	public static class SetterWithNoArgs {
-		
-		@PersistenceUnit
-		public void setSomething() {
-		}
-	}
-	
+
 	public void testDefaultPrivatePersistenceContextField() {
 		DefaultPrivatePersistenceContextField dppc = (DefaultPrivatePersistenceContextField) applicationContext.getBean(DefaultPrivatePersistenceContextField.class.getName());
 		assertNotNull("EntityManager was injected", dppc.em);
@@ -221,7 +145,6 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		emfMc.verify();
 	}
 	
-	
 	// TODO fix this
 //	public static class DefaultPrivatePersistenceContextFieldExtendedWithProps {
 //		
@@ -257,4 +180,86 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 	
+	public static class DefaultPrivatePersistenceContextField {
+
+		@PersistenceContext
+		private EntityManager em;
+
+	}
+
+
+	public static class DefaultPublicPersistenceContextSetter {
+
+		private EntityManager em;
+
+		@PersistenceContext(type=PersistenceContextType.EXTENDED)
+		public void setEntityManager(EntityManager em) {
+			this.em = em;
+		}
+
+		public EntityManager getEntityManager() {
+			return em;
+		}
+	}
+
+
+	public static class DefaultPrivatePersistenceUnitField {
+
+		@PersistenceUnit
+		private EntityManagerFactory emf;
+	}
+
+
+	public static class DefaultPublicPersistenceUnitSetter {
+
+		private EntityManagerFactory emf;
+
+		@PersistenceUnit
+		public void setEmf(EntityManagerFactory emf) {
+			this.emf = emf;
+		}
+
+		public EntityManagerFactory getEmf() {
+			return emf;
+		}
+	}
+
+
+	public static class DefaultPublicPersistenceUnitSetterNamedPerson {
+
+		private EntityManagerFactory emf;
+
+		@PersistenceUnit(name="Person")
+		public void setEmf(EntityManagerFactory emf) {
+			this.emf = emf;
+		}
+
+		public EntityManagerFactory getEntityManagerFactory() {
+			return emf;
+		}
+	}
+
+
+	public static class FieldOfWrongTypeAnnotatedWithPersistenceUnit {
+
+		@PersistenceUnit
+		public String thisFieldIsOfTheWrongType;
+	}
+
+
+	public static class SetterOfWrongTypeAnnotatedWithPersistenceUnit {
+
+		@PersistenceUnit
+		public void setSomething(Comparable c) {
+		}
+	}
+
+
+	public static class SetterWithNoArgs {
+
+		@PersistenceUnit
+		public void setSomething() {
+		}
+	}
+
 }
