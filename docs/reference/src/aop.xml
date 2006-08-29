@@ -26,8 +26,8 @@
         typed advice and use of the AspectJ pointcut language, while still using
         Spring AOP for weaving.</para>
         <para>The Spring 2.0 schema and @AspectJ based AOP support
-        is discussed in this chapter. See <link linkend="aop-choosing">
-        choosing which AOP declaration style to use</link> for advice on choosing the
+        is discussed in this chapter. See section <link linkend="aop-choosing">
+        "choosing which AOP declaration style to use"</link> for advice on choosing the
         appropriate style for your application. Spring 2.0 remains fully backwards compatible
         with Spring 1.2 and the lower-level AOP support offered by the Spring 1.2
         APIs is discussed in <link linkend="aop-api">the next chapter</link>.</para>
