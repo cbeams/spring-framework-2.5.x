@@ -344,25 +344,25 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					beanName, "Validation of method overrides failed", ex);
 		}
 
-		Object bean = null;
-
-		// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
-		if (beanClass != null && !mergedBeanDefinition.isSynthetic()) {
-			bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
-			if (bean != null) {
-				bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
-				return bean;
-			}
-		}
-
-		BeanWrapper instanceWrapper = null;
-		Object originalBean = null;
 		String errorMessage = null;
 
 		try {
 			// Instantiate the bean.
+			errorMessage = "BeanPostProcessor before instantiation of bean failed";
+
+			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+			if (beanClass != null && !mergedBeanDefinition.isSynthetic()) {
+				Object bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
+				if (bean != null) {
+					bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
+					return bean;
+				}
+			}
+
+			// Instantiate the bean.
 			errorMessage = "Instantiation of bean failed";
 
+			BeanWrapper instanceWrapper = null;
 			if (mergedBeanDefinition.getFactoryMethodName() != null)  {
 				instanceWrapper = instantiateUsingFactoryMethod(beanName, mergedBeanDefinition, args);
 			}
@@ -374,7 +374,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				// No special handling: simply use no-arg constructor.
 				instanceWrapper = instantiateBean(beanName, mergedBeanDefinition);
 			}
-			bean = instanceWrapper.getWrappedInstance();
+			Object bean = instanceWrapper.getWrappedInstance();
 
 			// Eagerly cache singletons to be able to resolve circular references
 			// even when triggered by lifecycle interfaces like BeanFactoryAware.
@@ -411,7 +411,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				populateBean(beanName, mergedBeanDefinition, instanceWrapper);
 			}
 
-			originalBean = bean;
+			Object originalBean = bean;
 			bean = initializeBean(beanName, bean, mergedBeanDefinition);
 
 			if (originalBean != bean && hasDependentBean(beanName)) {
@@ -423,6 +423,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						"This is often the result of over-eager type matching - consider using " +
 						"'getBeanNamesOfType' with the 'allowEagerInit' flag turned off, for example.");
 			}
+
+			// Register bean as disposable, and also as dependent on specified "dependsOn" beans.
+			registerDisposableBeanIfNecessary(beanName, originalBean, mergedBeanDefinition);
+
+			return bean;
 		}
 
 		catch (BeanCreationException ex) {
@@ -432,11 +437,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throw new BeanCreationException(
 					mergedBeanDefinition.getResourceDescription(), beanName, errorMessage, ex);
 		}
-
-		// Register bean as disposable, and also as dependent on specified "dependsOn" beans.
-		registerDisposableBeanIfNecessary(beanName, originalBean, mergedBeanDefinition);
-
-		return bean;
 	}
 
 	/**
