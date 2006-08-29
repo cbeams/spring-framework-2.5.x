@@ -31,11 +31,13 @@ import org.hibernate.Filter;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
+import org.hibernate.JDBCException;
 import org.hibernate.LockMode;
 import org.hibernate.NonUniqueResultException;
 import org.hibernate.ObjectDeletedException;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.PersistentObjectException;
+import org.hibernate.PropertyValueException;
 import org.hibernate.Query;
 import org.hibernate.QueryException;
 import org.hibernate.ReplicationMode;
@@ -47,8 +49,12 @@ import org.hibernate.UnresolvableObjectException;
 import org.hibernate.WrongClassException;
 import org.hibernate.classic.Session;
 import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.JDBCConnectionException;
+import org.hibernate.exception.LockAcquisitionException;
 
 import org.springframework.beans.TestBean;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -2217,18 +2223,79 @@ public class HibernateTemplateTests extends TestCase {
 
 	public void testExceptions() throws HibernateException {
 		SQLException sqlEx = new SQLException("argh", "27");
-		final ConstraintViolationException jdbcEx = new ConstraintViolationException("mymsg", sqlEx, null);
+
+		final JDBCConnectionException jcex = new JDBCConnectionException("mymsg", sqlEx);
 		try {
 			createTemplate().execute(new HibernateCallback() {
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
-					throw jdbcEx;
+					throw jcex;
+				}
+			});
+			fail("Should have thrown DataAccessResourceFailureException");
+		}
+		catch (DataAccessResourceFailureException ex) {
+			// expected
+			assertEquals(jcex, ex.getCause());
+			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
+		}
+
+		final ConstraintViolationException cvex = new ConstraintViolationException("mymsg", sqlEx, "myconstraint");
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					throw cvex;
 				}
 			});
 			fail("Should have thrown DataIntegrityViolationException");
 		}
 		catch (DataIntegrityViolationException ex) {
 			// expected
-			assertEquals(jdbcEx, ex.getCause());
+			assertEquals(cvex, ex.getCause());
+			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
+		}
+
+		final LockAcquisitionException laex = new LockAcquisitionException("mymsg", sqlEx);
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					throw laex;
+				}
+			});
+			fail("Should have thrown CannotAcquireLockException");
+		}
+		catch (CannotAcquireLockException ex) {
+			// expected
+			assertEquals(laex, ex.getCause());
+			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
+		}
+
+		final JDBCException jdex = new JDBCException("mymsg", sqlEx);
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					throw jdex;
+				}
+			});
+			fail("Should have thrown HibernateJdbcException");
+		}
+		catch (HibernateJdbcException ex) {
+			// expected
+			assertEquals(jdex, ex.getCause());
+			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
+		}
+
+		final PropertyValueException pvex = new PropertyValueException("mymsg", "myentity", "myproperty");
+		try {
+			createTemplate().execute(new HibernateCallback() {
+				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
+					throw pvex;
+				}
+			});
+			fail("Should have thrown DataIntegrityViolationException");
+		}
+		catch (DataIntegrityViolationException ex) {
+			// expected
+			assertEquals(pvex, ex.getCause());
 			assertTrue(ex.getMessage().indexOf("mymsg") != -1);
 		}
 
