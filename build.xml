@@ -586,6 +586,7 @@
 				<attribute name="Implementation-Title" value="${spring-title}"/>
 				<attribute name="Implementation-Version" value="${spring-version}"/>
 				<attribute name="Spring-Version" value="${spring-version}"/>
+				<attribute name="Premain-Class" value="org.springframework.instrument.InstrumentationSavingAgent"/>
 			</manifest>
 		</jar>
 
