@@ -239,7 +239,7 @@ public abstract class DataSourceUtils {
 		catch (SQLException ex) {
 			logger.error("Could not close JDBC Connection", ex);
 		}
-		catch (RuntimeException ex) {
+		catch (Throwable ex) {
 			logger.error("Unexpected exception on closing JDBC Connection", ex);
 		}
 	}
@@ -309,6 +309,24 @@ public abstract class DataSourceUtils {
 		return conToUse;
 	}
 
+	/**
+	 * Determine the connection synchronization order to use for the given
+	 * DataSource. Decreased for every level of nesting that a DataSource
+	 * has, checked through the level of DelegatingDataSource nesting.
+	 * @param dataSource the DataSource to check
+	 * @return the connection synchronization order to use
+	 * @see #CONNECTION_SYNCHRONIZATION_ORDER
+	 */
+	private static int getConnectionSynchronizationOrder(DataSource dataSource) {
+		int order = CONNECTION_SYNCHRONIZATION_ORDER;
+		DataSource currDs = dataSource;
+		while (currDs instanceof DelegatingDataSource) {
+			order--;
+			currDs = ((DelegatingDataSource) currDs).getTargetDataSource();
+		}
+		return order;
+	}
+
 
 	/**
 	 * Callback for resource cleanup at the end of a non-native JDBC transaction
@@ -321,15 +339,18 @@ public abstract class DataSourceUtils {
 
 		private final DataSource dataSource;
 
+		private int order;
+
 		private boolean holderActive = true;
 
 		public ConnectionSynchronization(ConnectionHolder connectionHolder, DataSource dataSource) {
 			this.connectionHolder = connectionHolder;
 			this.dataSource = dataSource;
+			this.order = getConnectionSynchronizationOrder(dataSource);
 		}
 
 		public int getOrder() {
-			return CONNECTION_SYNCHRONIZATION_ORDER;
+			return order;
 		}
 
 		public void suspend() {
