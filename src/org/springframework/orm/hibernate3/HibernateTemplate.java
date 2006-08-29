@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,6 +38,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
+import org.hibernate.engine.SessionImplementor;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -426,9 +427,15 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @see #prepareCriteria
 	 */
 	protected Session createSessionProxy(Session session) {
+		Class[] sessionIfcs = null;
+		if (session instanceof SessionImplementor) {
+			sessionIfcs = new Class[] {Session.class, SessionImplementor.class};
+		}
+		else {
+			sessionIfcs = new Class[] {Session.class};
+		}
 		return (Session) Proxy.newProxyInstance(
-				getClass().getClassLoader(),
-				new Class[] {Session.class},
+				getClass().getClassLoader(), sessionIfcs,
 				new CloseSuppressingInvocationHandler(session));
 	}
 
