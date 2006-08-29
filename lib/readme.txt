@@ -21,10 +21,14 @@ distribution/website before using any of them in your own applications.
 - required for building the framework
 - required at runtime when using parameter name discovery with AspectJ
 
-* aspectj/aspectjweaver.jar, aspectj/aspectjrt.jar, aspectj/aspectjtools.jar
+* aspectj/aspectjweaver.jar, aspectj/aspectjrt.jar, (aspectj/aspectjtools.jar)
 - AspectJ 1.5.2a (http://www.aspectj.org)
 - required for building the framework
 - required at runtime when using Spring's AspectJ support
+
+NOTE: aspectjtools.jar is not included in the Spring distribution because of its size.
+It needs to be taken from the AspectJ distribution or from Spring CVS. Note that this
+is only necessary if you want to rebuild the Spring jars including the AspectJ aspects.
 
 * axis/axis.jar, axis/saaj.jar, axis/wsdl4j.jar
 - Apache Axis 1.3 (http://ws.apache.org/axis)
