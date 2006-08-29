@@ -36,6 +36,7 @@ import org.hibernate.JDBCException;
 import org.hibernate.NonUniqueResultException;
 import org.hibernate.ObjectDeletedException;
 import org.hibernate.PersistentObjectException;
+import org.hibernate.PropertyValueException;
 import org.hibernate.Query;
 import org.hibernate.QueryException;
 import org.hibernate.Session;
@@ -631,6 +632,9 @@ public abstract class SessionFactoryUtils {
 		}
 		if (ex instanceof JDBCException) {
 			return new HibernateJdbcException((JDBCException) ex);
+		}
+		if (ex instanceof PropertyValueException) {
+			return new DataIntegrityViolationException(ex.getMessage(), ex);
 		}
 		if (ex instanceof PersistentObjectException) {
 			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
