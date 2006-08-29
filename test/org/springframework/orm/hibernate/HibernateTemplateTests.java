@@ -90,7 +90,7 @@ public class HibernateTemplateTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 		List result = ht.executeFind(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
+			public Object doInHibernate(Session session) {
 				return l;
 			}
 		});
@@ -114,7 +114,7 @@ public class HibernateTemplateTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 		List result = ht.executeFind(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
+			public Object doInHibernate(Session session) {
 				return l;
 			}
 		});
@@ -140,7 +140,7 @@ public class HibernateTemplateTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 		List result = ht.executeFind(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
+			public Object doInHibernate(Session session) {
 				return l;
 			}
 		});
@@ -153,7 +153,7 @@ public class HibernateTemplateTests extends TestCase {
 		ht.setAllowCreate(false);
 		try {
 			ht.execute(new HibernateCallback() {
-				public Object doInHibernate(Session session) throws HibernateException{
+				public Object doInHibernate(Session session) {
 					return null;
 				}
 			});
@@ -180,7 +180,7 @@ public class HibernateTemplateTests extends TestCase {
 			final List l = new ArrayList();
 			l.add("test");
 			List result = ht.executeFind(new HibernateCallback() {
-				public Object doInHibernate(Session session) throws HibernateException {
+				public Object doInHibernate(Session session) {
 					return l;
 				}
 			});
@@ -214,7 +214,7 @@ public class HibernateTemplateTests extends TestCase {
 			final List l = new ArrayList();
 			l.add("test");
 			List result = ht.executeFind(new HibernateCallback() {
-				public Object doInHibernate(Session session) throws HibernateException {
+				public Object doInHibernate(Session session) {
 					return l;
 				}
 			});
@@ -250,7 +250,7 @@ public class HibernateTemplateTests extends TestCase {
 			final List l = new ArrayList();
 			l.add("test");
 			List result = ht.executeFind(new HibernateCallback() {
-				public Object doInHibernate(Session session) throws HibernateException {
+				public Object doInHibernate(Session session) {
 					return l;
 				}
 			});
@@ -287,7 +287,7 @@ public class HibernateTemplateTests extends TestCase {
 			final List l = new ArrayList();
 			l.add("test");
 			List result = ht.executeFind(new HibernateCallback() {
-				public Object doInHibernate(Session session) throws HibernateException {
+				public Object doInHibernate(Session session) {
 					return l;
 				}
 			});
@@ -328,7 +328,7 @@ public class HibernateTemplateTests extends TestCase {
 			final List l = new ArrayList();
 			l.add("test");
 			List result = ht.executeFind(new HibernateCallback() {
-				public Object doInHibernate(Session session) throws HibernateException {
+				public Object doInHibernate(Session session) {
 					return l;
 				}
 			});
@@ -359,7 +359,7 @@ public class HibernateTemplateTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 		List result = ht.executeFind(new HibernateCallback() {
-			public Object doInHibernate(Session session) throws HibernateException {
+			public Object doInHibernate(Session session) {
 				return l;
 			}
 		});
