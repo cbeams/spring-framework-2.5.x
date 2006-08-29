@@ -18,14 +18,13 @@ package org.springframework.instrument.classloading;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Abstract superclass for class loaders that do <i>not</i> always delegate to
@@ -34,20 +33,16 @@ import org.springframework.util.StringUtils;
  * selected classes are loaded by a child loader but not loaded by the parent.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public abstract class AbstractOverridingClassLoader extends ClassLoader {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	private static final String CLASS_FILE_SUFFIX = ".class";
 
-	// Determined at startup since parsing the log hierarchy can be expensive.
-	protected final boolean debug = logger.isDebugEnabled();
+	private final Set<String> excludedPackages = Collections.synchronizedSet(new HashSet<String>());
 
-	private final Set<String> exclusions = new HashSet<String>();
-
-	private final Set<String> inclusions = new HashSet<String>();
-
-	private final Set<String> namesSeen = new HashSet<String>();
+	private final Set<String> excludedClasses = Collections.synchronizedSet(new HashSet<String>());
 
 
 	/**
@@ -56,47 +51,90 @@ public abstract class AbstractOverridingClassLoader extends ClassLoader {
 	 */
 	protected AbstractOverridingClassLoader(ClassLoader parent) {
 		super(parent);
+		this.excludedPackages.add("java");
 	}
 
 
-	public void addClassNameToExcludeFromUndelegation(String className) {
-		this.exclusions.add(className);
+	/**
+	 * Add a package name to exclude from overriding.
+	 * <p>Any class whose fully-qualified name starts with the name registered
+	 * here will be handled by the parent ClassLoader in the usual fashion.
+	 * @param packageName the package name to exclude
+	 */
+	public void excludePackage(String packageName) {
+		Assert.notNull(packageName, "Package name must not be null");
+		this.excludedPackages.add(packageName);
 	}
 
-	public void addClassNameToExplicitlyInclude(String className) {
-		this.inclusions.add(className);
-	}
-
-	protected boolean excludeFromUndelegation(String name) {
-		return (this.exclusions.contains(name) || !this.inclusions.contains(name));
+	/**
+	 * Add a class name to exclude from overriding.
+	 * <p>Any class name registered here will be handled by
+	 * the parent ClassLoader in the usual fashion.
+	 * @param className the class name to exclude
+	 */
+	public void excludeClass(String className) {
+		Assert.notNull(className, "Class name must not be null");
+		this.excludedClasses.add(className);
 	}
 
 
 	@Override
-	public Class<?> loadClass(String name) throws ClassNotFoundException {
-		if (!name.startsWith("java") && !this.namesSeen.contains(name) && !excludeFromUndelegation(name)) {
-			this.namesSeen.add(name);
-			String internalName = StringUtils.replace(name, ".", "/") + ".class";
-			InputStream is = getParent().getResourceAsStream(internalName);
-			if (is == null) {
-				throw new ClassNotFoundException(name);
+	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+		Class<?> result = null;
+
+		if (isEligibleForOverriding(name)) {
+			result = findLoadedClass(name);
+			if (result == null) {
+				String internalName = name.replace('.', '/') + CLASS_FILE_SUFFIX;
+				InputStream is = getParent().getResourceAsStream(internalName);
+				if (is != null) {
+					try {
+						// Load the raw bytes.
+						byte[] bytes = FileCopyUtils.copyToByteArray(is);
+						// Transform if necessary and use the potentially transformed bytes.
+						byte[] transformed = transformIfNecessary(name, bytes);
+						result = defineClass(name, transformed, 0, transformed.length);
+					}
+					catch (IOException ex) {
+						throw new ClassNotFoundException("Cannot load resource for class [" + name + "]", ex);
+					}
+				}
 			}
-			try {
-				// Load the raw bytes.
-				byte[] bytes = FileCopyUtils.copyToByteArray(is);
-				// Transform if necessary and use the potentially transformed bytes.
-				byte[] transformed = transformIfNecessary(name, internalName, bytes);
-				return defineClass(name, transformed, 0, transformed.length);
+		}
+
+		if (result != null) {
+			if (resolve) {
+				resolveClass(result);
 			}
-			catch (IOException ex) {
-				throw new ClassNotFoundException("Cannot load resource for class [" + name + "]", ex);
-			}
+			return result;
 		}
 		else {
-			// We don't override this class.
-			return super.loadClass(name);
+			return super.loadClass(name, resolve);
 		}
 	}
+
+	/**
+	 * Determine whether the given class name is eligible for overriding
+	 * by this class loader.
+	 * <p>The default implementation excludes all specified packages
+	 * and classes.
+	 * @param className the class name to check
+	 * @see #excludePackage
+	 * @see #excludeClass
+	 */
+	protected boolean isEligibleForOverriding(String className) {
+		if (this.excludedClasses.contains(className)) {
+			return false;
+		}
+		for (Iterator<String> it = this.excludedPackages.iterator(); it.hasNext();) {
+			String packageName = it.next();
+			if (className.startsWith(packageName)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 
 	/**
 	 * Transformation hook to be implemented by subclasses.
@@ -105,6 +143,6 @@ public abstract class AbstractOverridingClassLoader extends ClassLoader {
 	 * @return transformed bytes. Return same as input bytes if
 	 * the transformation produced no changes.
 	 */
-	protected abstract byte[] transformIfNecessary(String name, String internalName, byte[] bytes);
+	protected abstract byte[] transformIfNecessary(String name, byte[] bytes);
 
 }

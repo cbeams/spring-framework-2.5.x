@@ -52,7 +52,7 @@ public class SimpleInstrumentableClassLoader extends AbstractOverridingClassLoad
 
 
 	@Override
-	public byte[] transformIfNecessary(String name, String internalName, byte[] bytes) {
+	protected byte[] transformIfNecessary(String name, byte[] bytes) {
 		return this.weavingTransformer.transformIfNecessary(name, bytes);
 	}
 

@@ -31,10 +31,7 @@ public class SimpleThrowawayClassLoader extends AbstractOverridingClassLoader {
 	}
 
 	@Override
-	public byte[] transformIfNecessary(String name, String internalName, byte[] bytes) {
-		if (debug) {
-			logger.debug("Throwaway class loader loading class [" + name + "]");
-		}
+	protected byte[] transformIfNecessary(String name, byte[] bytes) {
 		return bytes;
 	}
 
