@@ -17,7 +17,6 @@
 package org.springframework.orm.jdo;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
@@ -34,10 +33,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * FactoryBean that creates a local JDO EntityManagerFactory instance.
@@ -220,18 +219,8 @@ public class LocalPersistenceManagerFactoryBean
 	protected PersistenceManagerFactory newPersistenceManagerFactory(Properties props) {
 		// Use JDO 1.0 getPersistenceManagerFactory(Properties) method, if available.
 		if (getPersistenceManagerFactoryMethod != null) {
-			try {
-				return (PersistenceManagerFactory)
-						getPersistenceManagerFactoryMethod.invoke(null, new Object[] {props});
-			}
-			catch (InvocationTargetException ex) {
-				throw new InvalidDataAccessResourceUsageException(
-						"Could not invoke JDO 1.0 getPersistenceManagerFactory(Properties) method", ex.getTargetException());
-			}
-			catch (Exception ex) {
-				throw new InvalidDataAccessResourceUsageException(
-						"Could not invoke JDO 1.0 getPersistenceManagerFactory(Properties) method", ex);
-			}
+			return (PersistenceManagerFactory) ReflectionUtils.invokeMethod(
+					getPersistenceManagerFactoryMethod, null, new Object[] {props});
 		}
 		// Use JDO 2.0 getPersistenceManagerFactory(Map) method else.
 		return JDOHelper.getPersistenceManagerFactory(props);
@@ -246,8 +235,8 @@ public class LocalPersistenceManagerFactoryBean
 	}
 
 	public Class getObjectType() {
-		return (this.persistenceManagerFactory != null) ?
-		    this.persistenceManagerFactory.getClass() : PersistenceManagerFactory.class;
+		return (this.persistenceManagerFactory != null ?
+		    this.persistenceManagerFactory.getClass() : PersistenceManagerFactory.class);
 	}
 
 	public boolean isSingleton() {

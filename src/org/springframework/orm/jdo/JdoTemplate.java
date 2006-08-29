@@ -30,10 +30,10 @@ import javax.jdo.Query;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper class that simplifies JDO data access code, and converts
@@ -328,18 +328,8 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				// Use JDO 1.0 newObjectIdInstance(Class, String) method, if available.
 				if (newObjectIdInstanceMethod != null) {
-					Object id = null;
-					try {
-						id = newObjectIdInstanceMethod.invoke(pm, new Object[] {entityClass, idValue.toString()});
-					}
-					catch (InvocationTargetException ex) {
-						throw new InvalidDataAccessResourceUsageException(
-								"Could not invoke JDO 1.0 newObjectIdInstance(Class, String) method", ex.getTargetException());
-					}
-					catch (Exception ex) {
-						throw new InvalidDataAccessResourceUsageException(
-								"Could not invoke JDO 1.0 newObjectIdInstance(Class, String) method", ex);
-					}
+					Object id = ReflectionUtils.invokeMethod(
+							newObjectIdInstanceMethod, pm, new Object[] {entityClass, idValue.toString()});
 					return pm.getObjectById(id, true);
 				}
 				// Use JDO 2.0 getObjectById(Class, Object) method.
@@ -405,17 +395,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public void makePersistent(final Object entity) throws DataAccessException {
 		execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				try {
-					return makePersistentMethod.invoke(pm, new Object[] {entity});
-				}
-				catch (InvocationTargetException ex) {
-					throw new InvalidDataAccessResourceUsageException(
-							"Could not invoke JDO makePersistent(Object) method", ex.getTargetException());
-				}
-				catch (Exception ex) {
-					throw new InvalidDataAccessResourceUsageException(
-							"Could not invoke JDO makePersistent(Object) method", ex);
-				}
+				return ReflectionUtils.invokeMethod(makePersistentMethod, pm, new Object[] {entity});
 			}
 		}, true);
 	}
@@ -423,17 +403,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public void makePersistentAll(final Collection entities) throws DataAccessException {
 		execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				try {
-					return makePersistentAllMethod.invoke(pm, new Object[] {entities});
-				}
-				catch (InvocationTargetException ex) {
-					throw new InvalidDataAccessResourceUsageException(
-							"Could not invoke JDO makePersistentAll(Collection) method", ex.getTargetException());
-				}
-				catch (Exception ex) {
-					throw new InvalidDataAccessResourceUsageException(
-							"Could not invoke JDO makePersistentAll(Collection) method", ex);
-				}
+				return ReflectionUtils.invokeMethod(makePersistentAllMethod, pm, new Object[] {entities});
 			}
 		}, true);
 	}
