@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -261,10 +261,6 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 */
 	private static class CloseSuppressingInvocationHandler implements InvocationHandler {
 
-		private static final String GET_TARGET_CONNECTION_METHOD_NAME = "getTargetConnection";
-
-		private static final String CONNECTION_CLOSE_METHOD_NAME = "close";
-
 		private final Connection target;
 
 		public CloseSuppressingInvocationHandler(Connection target) {
@@ -274,13 +270,20 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			// Handle getTargetConnection method: return underlying connection.
-			if (method.getName().equals(GET_TARGET_CONNECTION_METHOD_NAME)) {
+			if (method.getName().equals("getTargetConnection")) {
+				// Handle getTargetConnection method: return underlying connection.
 				return this.target;
 			}
-
-			// Handle close method: don't pass the call on.
-			if (method.getName().equals(CONNECTION_CLOSE_METHOD_NAME)) {
+			else if (method.getName().equals("equals")) {
+				// Only consider equal when proxies are identical.
+				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+			}
+			else if (method.getName().equals("hashCode")) {
+				// Use hashCode of Connection proxy.
+				return new Integer(hashCode());
+			}
+			else if (method.getName().equals("close")) {
+				// Handle close method: don't pass the call on.
 				return null;
 			}
 

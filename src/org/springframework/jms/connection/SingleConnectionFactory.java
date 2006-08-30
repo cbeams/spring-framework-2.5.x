@@ -276,8 +276,16 @@ public class SingleConnectionFactory
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			if (method.getName().equals("close")) {
-				// don't pass the call on
+			if (method.getName().equals("equals")) {
+				// Only consider equal when proxies are identical.
+				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+			}
+			else if (method.getName().equals("hashCode")) {
+				// Use hashCode of Connection proxy.
+				return new Integer(hashCode());
+			}
+			else if (method.getName().equals("close")) {
+				// Handle close method: don't pass the call on.
 				return null;
 			}
 			try {
