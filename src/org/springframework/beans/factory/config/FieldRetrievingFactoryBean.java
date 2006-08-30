@@ -209,11 +209,11 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, B
 	}
 
 	public Class getObjectType() {
-		return this.fieldObject.getType();
+		return (this.fieldObject != null ? this.fieldObject.getType() : null);
 	}
 
 	public boolean isSingleton() {
-		return true;
+		return false;
 	}
 
 }
