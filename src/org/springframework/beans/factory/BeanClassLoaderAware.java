@@ -18,7 +18,7 @@ package org.springframework.beans.factory;
 
 /**
  * Interface to be implemented by beans that wish to be aware of the bean class
- * loader, that is, the class loader uses by the present bean factory to load
+ * loader, that is, the class loader used by the present bean factory to load
  * bean classes.
  *
  * <p>This is mainly intended to be implemented by framework classes which
