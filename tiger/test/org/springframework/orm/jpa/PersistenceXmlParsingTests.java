@@ -16,7 +16,17 @@
 
 package org.springframework.orm.jpa;
 
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.PersistenceUnitTransactionType;
+import javax.sql.DataSource;
+
 import junit.framework.TestCase;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -25,14 +35,6 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
-
-import javax.persistence.spi.PersistenceUnitInfo;
-import javax.persistence.spi.PersistenceUnitTransactionType;
-import javax.sql.DataSource;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 
 /**
  * Unit and integration tests for the JPA XML resource parsing support.
@@ -248,22 +250,21 @@ public class PersistenceXmlParsingTests extends TestCase {
 		assertNotNull(res);
 		res = reader.findSchemaResource("white-horse.xml");
 		assertNull(res);
-
 	}
 
-	public void testDetermineUnitRootUrl() throws Exception {
+	public void testPersistenceUnitRootUrl() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
 
-		URL url = reader.determineUnitRootUrl(new ClassPathResource(
+		URL url = reader.determinePersistenceUnitRootUrl(new ClassPathResource(
 				"/org/springframework/orm/jpa/persistence-no-schema.xml"));
 		assertNull(url);
 
-		url = reader.determineUnitRootUrl(new ClassPathResource("/org/springframework/orm/jpa/META-INF/persistence.xml"));
+		url = reader.determinePersistenceUnitRootUrl(new ClassPathResource("/org/springframework/orm/jpa/META-INF/persistence.xml"));
 		assertTrue("the containing folder should have been returned", url.toString().endsWith("/org/springframework/orm/jpa/"));
 	}
 	
-	public void testPersistenceUnitRootURLWithJars() throws Exception {
+	public void testPersistenceUnitRootUrlWithJar() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
 				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
 
@@ -272,7 +273,7 @@ public class PersistenceXmlParsingTests extends TestCase {
 		Resource insideArchive = new UrlResource(newRoot);
 		// make sure the location actually exists
 		assertTrue(insideArchive.exists());
-		URL url = reader.determineUnitRootUrl(insideArchive);
+		URL url = reader.determinePersistenceUnitRootUrl(insideArchive);
 		assertTrue("the archive location should have been returned", archive.getURL().sameFile(url));
 	}
 

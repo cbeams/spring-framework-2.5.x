@@ -30,6 +30,11 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookup;
@@ -38,10 +43,6 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.util.xml.SimpleSaxErrorHandler;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
 
 /**
  * Internal helper class for reading <code>persistence.xml</code> files.
@@ -135,7 +136,7 @@ class PersistenceUnitReader {
 			List<SpringPersistenceUnitInfo> infos) throws IOException {
 
 		Element persistence = document.getDocumentElement();
-		URL unitRootURL = determineUnitRootUrl(resource);
+		URL unitRootURL = determinePersistenceUnitRootUrl(resource);
 		List<Element> units = (List<Element>) DomUtils.getChildElementsByTagName(persistence, PERSISTENCE_UNIT);
 		for (Element unit : units) {
 			SpringPersistenceUnitInfo info = parsePersistenceUnitInfo(unit);
@@ -146,13 +147,18 @@ class PersistenceUnitReader {
 		return infos;
 	}
 
-	protected URL determineUnitRootUrl(Resource resource) throws IOException {
-
+	/**
+	 * Determine the persistence unit root URL based on the given resource
+	 * (which points to the <code>persistence.xml</code> file we're reading).
+	 * @param resource the resource to check
+	 * @return the corresponding persistence unit root URL
+	 * @throws IOException if the checking failed
+	 */
+	protected URL determinePersistenceUnitRootUrl(Resource resource) throws IOException {
 		URL originalURL = resource.getURL();
 		String urlToString = originalURL.toExternalForm();
 
-		// if we get an archive, simply return the jar URL (section 6.2 from the
-		// JPA spec)
+		// If we get an archive, simply return the jar URL (section 6.2 from the JPA spec)
 		if (ResourceUtils.isJarURL(originalURL)) {
 			return ResourceUtils.extractJarFileURL(originalURL);
 		}
@@ -161,16 +167,18 @@ class PersistenceUnitReader {
 			// check META-INF folder
 			if (!urlToString.contains(META_INF)) {
 				if (logger.isWarnEnabled()) {
-					logger.warn(resource.getFilename()
-							+ " should be located inside META-INF directory; cannot determine persistence unit root URL for "
-							+ resource);
+					logger.warn(resource.getFilename() +
+							" should be located inside META-INF directory; cannot determine persistence unit root URL for " +
+							resource);
 				}
 				return null;
 			}
 			if (urlToString.lastIndexOf(META_INF) == urlToString.lastIndexOf('/') - (1 + META_INF.length())) {
-				logger.warn(resource.getFilename()
-						+ " is not located in the root of META-INF directory; cannot determine persistence unit root URL for "
-						+ resource);
+				if (logger.isWarnEnabled()) {
+					logger.warn(resource.getFilename() +
+							" is not located in the root of META-INF directory; cannot determine persistence unit root URL for " +
+							resource);
+				}
 				return null;
 			}
 
