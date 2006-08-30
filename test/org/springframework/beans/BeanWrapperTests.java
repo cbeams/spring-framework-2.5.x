@@ -1465,15 +1465,24 @@ public class BeanWrapperTests extends TestCase {
 
 	public static class ReadOnlyMap extends HashMap {
 
+		private boolean frozen = false;
+
 		public ReadOnlyMap() {
+			this.frozen = true;
 		}
 
 		public ReadOnlyMap(Map map) {
 			super(map);
+			this.frozen = true;
 		}
 
 		public Object put(Object key, Object value) {
-			throw new UnsupportedOperationException();
+			if (this.frozen) {
+				throw new UnsupportedOperationException();
+			}
+			else {
+				return super.put(key, value);
+			}
 		}
 	}
 
