@@ -115,7 +115,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for running JPetStore and PetClinic
 
 * ibatis/ibatis-sqlmap-2.jar, ibatis/ibatis-common-2.jar
-- iBATIS SQL Maps 2.1.7 (http://www.ibatis.com)
+- iBATIS SQL Maps 2.2.0 b638 (http://ibatis.apache.org)
 - required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.x support
 

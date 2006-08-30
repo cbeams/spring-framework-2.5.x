@@ -16,7 +16,7 @@
    limitations under the License.
  -->
 
-<!ELEMENT sqlMapConfig (properties?, settings?, typeAlias*, typeHandler*, transactionManager?, sqlMap+)+>
+<!ELEMENT sqlMapConfig (properties?, settings?, resultObjectFactory?, typeAlias*, typeHandler*, transactionManager?, sqlMap+)+>
 <!ATTLIST sqlMapConfig
 xmlns:fo CDATA #IMPLIED
 >
@@ -29,6 +29,7 @@ url CDATA #IMPLIED
 
 <!ELEMENT settings EMPTY>
 <!ATTLIST settings
+classInfoCacheEnabled (true | false) #IMPLIED
 lazyLoadingEnabled (true | false) #IMPLIED
 cacheModelsEnabled (true | false) #IMPLIED
 enhancementEnabled (true | false) #IMPLIED
@@ -37,6 +38,7 @@ useStatementNamespaces (true | false) #IMPLIED
 maxSessions CDATA #IMPLIED
 maxTransactions CDATA #IMPLIED
 maxRequests CDATA #IMPLIED
+defaultStatementTimeout CDATA #IMPLIED
 >
 
 <!ELEMENT transactionManager (property*,dataSource)>
@@ -73,4 +75,9 @@ type CDATA #REQUIRED
 javaType CDATA #REQUIRED
 jdbcType CDATA #IMPLIED
 callback CDATA #REQUIRED
+>
+
+<!ELEMENT resultObjectFactory (property*)>
+<!ATTLIST resultObjectFactory
+type CDATA #REQUIRED
 >
