@@ -16,16 +16,19 @@
 
 package org.springframework.jmx.export.notification;
 
+import javax.management.AttributeChangeNotification;
+import javax.management.MBeanException;
+import javax.management.MalformedObjectNameException;
+import javax.management.Notification;
+import javax.management.ObjectName;
+import javax.management.RuntimeOperationsException;
+
 import junit.framework.TestCase;
+
 import org.springframework.jmx.export.SpringModelMBean;
 import org.springframework.test.AssertThrows;
 
-import javax.management.*;
-import java.util.Calendar;
-
 /**
- * Unit tests for the {@link ModelMBeanNotificationPublisher} class.
- *
  * @author Rick Evans
  */
 public final class ModelMBeanNotificationPublisherTests extends TestCase {
@@ -79,7 +82,7 @@ public final class ModelMBeanNotificationPublisherTests extends TestCase {
 
 	public void testSendAttributeChangeNotification() throws Exception {
 		StubSpringModelMBean mbean = new StubSpringModelMBean();
-		Notification notification = new AttributeChangeNotification(mbean, 1872, Calendar.getInstance().getTimeInMillis(), "Shall we break for some tea?", "agree", "java.lang.Boolean", Boolean.FALSE, Boolean.TRUE);
+		Notification notification = new AttributeChangeNotification(mbean, 1872, System.currentTimeMillis(), "Shall we break for some tea?", "agree", "java.lang.Boolean", Boolean.FALSE, Boolean.TRUE);
 		ObjectName objectName = createObjectName();
 
 		NotificationPublisher publisher = new ModelMBeanNotificationPublisher(mbean, objectName, mbean);
@@ -93,7 +96,7 @@ public final class ModelMBeanNotificationPublisherTests extends TestCase {
 
 	public void testSendAttributeChangeNotificationWhereSourceIsNotTheManagedResource() throws Exception {
 		StubSpringModelMBean mbean = new StubSpringModelMBean();
-		Notification notification = new AttributeChangeNotification(this, 1872, Calendar.getInstance().getTimeInMillis(), "Shall we break for some tea?", "agree", "java.lang.Boolean", Boolean.FALSE, Boolean.TRUE);
+		Notification notification = new AttributeChangeNotification(this, 1872, System.currentTimeMillis(), "Shall we break for some tea?", "agree", "java.lang.Boolean", Boolean.FALSE, Boolean.TRUE);
 		ObjectName objectName = createObjectName();
 
 		NotificationPublisher publisher = new ModelMBeanNotificationPublisher(mbean, objectName, mbean);
@@ -105,25 +108,21 @@ public final class ModelMBeanNotificationPublisherTests extends TestCase {
 		assertSame("The 'source' property of the Notification is *wrongly* being set to the ObjectName of the associated MBean.", this, mbean.getActualNotification().getSource());
 	}
 
-
 	private static ObjectName createObjectName() throws MalformedObjectNameException {
 		return ObjectName.getInstance("foo:type=bar");
 	}
 
 
-	private final static class StubSpringModelMBean extends SpringModelMBean {
+	private static class StubSpringModelMBean extends SpringModelMBean {
 
 		private Notification actualNotification;
-
 
 		public StubSpringModelMBean() throws MBeanException, RuntimeOperationsException {
 		}
 
-
 		public Notification getActualNotification() {
 			return this.actualNotification;
 		}
-
 
 		public void sendNotification(Notification notification) throws RuntimeOperationsException {
 			this.actualNotification = notification;
@@ -132,7 +131,6 @@ public final class ModelMBeanNotificationPublisherTests extends TestCase {
 		public void sendAttributeChangeNotification(AttributeChangeNotification notification) throws RuntimeOperationsException {
 			this.actualNotification = notification;
 		}
-
 	}
 
 }
