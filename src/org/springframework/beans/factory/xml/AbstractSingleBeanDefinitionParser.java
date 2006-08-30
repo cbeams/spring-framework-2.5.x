@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.w3c.dom.Element;
 
 /**
  * @author Rob Harrop
@@ -27,17 +28,21 @@ import org.w3c.dom.Element;
 public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	/**
-	 * Creates a {@link BeanDefinitionBuilder} instance for the {@link #getBeanClass bean Class} and passes
-	 * it to the {@link #doParse} strategy method.
+	 * Creates a {@link BeanDefinitionBuilder} instance for the {@link #getBeanClass bean Class}
+	 * and passes it to the {@link #doParse} strategy method.
 	 */
 	protected final BeanDefinition parseInternal(Element element, ParserContext parserContext) {
-		BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder.rootBeanDefinition(getBeanClass(element));
-		doParse(element, definitionBuilder);
-		return definitionBuilder.getBeanDefinition();
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(getBeanClass(element));
+		if (parserContext.isNested()) {
+			// Inner bean definition should receive same singleton status as containing bean.
+			builder.setSingleton(parserContext.getContainingBeanDefinition().isSingleton());
+		}
+		doParse(element, builder);
+		return builder.getBeanDefinition();
 	}
 
 	/**
-	 * Gets the bean class corresponding to the supplied {@link Element}.
+	 * Determine the bean class corresponding to the supplied {@link Element}.
 	 */
 	protected abstract Class getBeanClass(Element element);
 
@@ -47,4 +52,5 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 	 */
 	protected void doParse(Element element, BeanDefinitionBuilder definitionBuilder) {
 	}
+
 }

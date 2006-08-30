@@ -138,12 +138,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 						parseDefaultElement(ele, delegate);
 					}
 					else {
-						delegate.parseCustomElement(ele, false);
+						delegate.parseCustomElement(ele);
 					}
 				}
 			}
 		} else {
-			delegate.parseCustomElement(root, false);
+			delegate.parseCustomElement(root);
 		}
 	}
 

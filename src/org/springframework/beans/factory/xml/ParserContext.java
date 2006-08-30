@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 
 /**
@@ -28,13 +29,19 @@ public final class ParserContext {
 
 	private final BeanDefinitionParserDelegate delegate;
 
-	private final boolean nested;
+	private final BeanDefinition containingBeanDefinition;
 
 
-	public ParserContext(XmlReaderContext readerContext, BeanDefinitionParserDelegate delegate, boolean nested) {
+	public ParserContext(XmlReaderContext readerContext, BeanDefinitionParserDelegate delegate) {
+		this(readerContext, delegate, null);
+	}
+
+	public ParserContext(XmlReaderContext readerContext, BeanDefinitionParserDelegate delegate,
+			BeanDefinition containingBeanDefinition) {
+
 		this.readerContext = readerContext;
 		this.delegate = delegate;
-		this.nested = nested;
+		this.containingBeanDefinition = containingBeanDefinition;
 	}
 
 
@@ -50,14 +57,12 @@ public final class ParserContext {
 		return this.delegate;
 	}
 
-	/**
-	 * Indicates whether or not the custom tag being parsed is nested under a
-	 * <code>&lt;property&gt;</code> or other such container tag.
-	 * @return <code>false</code> when parsing a tag nested under <code>&lt;beans&gt;</code>
-	 * or <code>&lt;bean&gt;</code> tag otherwise returns <code>true</code>.
-	 */
+	public BeanDefinition getContainingBeanDefinition() {
+		return this.containingBeanDefinition;
+	}
+
 	public boolean isNested() {
-		return this.nested;
+		return (this.containingBeanDefinition != null);
 	}
 
 }

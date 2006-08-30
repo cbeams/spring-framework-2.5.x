@@ -50,7 +50,7 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 		XmlReaderContext readerContext =
 				new XmlReaderContext(reader, null, null, this.readerEventListener, sourceExtractor, null);
 
-		this.parserContext = new ParserContext(readerContext, null, false);
+		this.parserContext = new ParserContext(readerContext, null);
 	}
 
 	public void testRegisterAutoProxyCreator() throws Exception {

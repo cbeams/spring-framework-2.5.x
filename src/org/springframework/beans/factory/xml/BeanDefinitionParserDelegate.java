@@ -824,7 +824,7 @@ public class BeanDefinitionParserDelegate {
 	 */
 	public Object parsePropertySubElement(Element ele, BeanDefinition bd, String defaultTypeClassName) {
 		if (!isDefaultNamespace(ele.getNamespaceURI())) {
-			return parseNestedCustomElement(ele);
+			return parseNestedCustomElement(ele, bd);
 		}
 		else if (DomUtils.nodeNameEquals(ele, BEAN_ELEMENT)) {
 			return parseBeanDefinitionElement(ele, bd);
@@ -1108,14 +1108,18 @@ public class BeanDefinitionParserDelegate {
 		return TRUE_VALUE.equals(value);
 	}
 
-	public BeanDefinition parseCustomElement(Element ele, boolean nested) {
+	public BeanDefinition parseCustomElement(Element ele) {
+		return parseCustomElement(ele, null);
+	}
+
+	public BeanDefinition parseCustomElement(Element ele, BeanDefinition containingBd) {
 		String namespaceUri = ele.getNamespaceURI();
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
-			getReaderContext().error("Unable to locate NamespaceHandler for namespace [" + namespaceUri + "].", ele);
+			getReaderContext().error("Unable to locate NamespaceHandler for namespace [" + namespaceUri + "]", ele);
 			return null;
 		}
-		return handler.parse(ele, new ParserContext(getReaderContext(), this, nested));
+		return handler.parse(ele, new ParserContext(getReaderContext(), this, containingBd));
 	}
 
 	public BeanDefinitionHolder decorateBeanDefinitionIfRequired(Element element, BeanDefinitionHolder definitionHolder) {
@@ -1143,7 +1147,7 @@ public class BeanDefinitionParserDelegate {
 		String uri = node.getNamespaceURI();
 		if (!isDefaultNamespace(uri)) {
 			NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(uri);
-			finalDefinition = handler.decorate(node, finalDefinition, new ParserContext(getReaderContext(), this, false));
+			finalDefinition = handler.decorate(node, finalDefinition, new ParserContext(getReaderContext(), this));
 		}
 		return finalDefinition;
 	}
@@ -1152,8 +1156,8 @@ public class BeanDefinitionParserDelegate {
 		return (!StringUtils.hasLength(namespaceUri) || BEANS_NAMESPACE_URI.equals(namespaceUri));
 	}
 
-	private Object parseNestedCustomElement(Element candidateEle) {
-		BeanDefinition innerDefinition = parseCustomElement(candidateEle, true);
+	private Object parseNestedCustomElement(Element candidateEle, BeanDefinition containingBd) {
+		BeanDefinition innerDefinition = parseCustomElement(candidateEle, containingBd);
 		if (innerDefinition == null) {
 			error("Incorrect usage of element '" + candidateEle.getNodeName() + "' in a nested manner. " +
 					"This tag cannot be used nested inside <property>.", candidateEle);
