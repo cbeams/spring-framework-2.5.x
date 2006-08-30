@@ -39,6 +39,8 @@ public class SingleConnectionFactoryTests extends TestCase {
 
 		con.start();
 		conControl.setVoidCallable(2);
+		con.stop();
+		conControl.setVoidCallable(1);
 		con.close();
 		conControl.setVoidCallable(1);
 
@@ -47,9 +49,11 @@ public class SingleConnectionFactoryTests extends TestCase {
 		SingleConnectionFactory scf = new SingleConnectionFactory(con);
 		Connection con1 = scf.createConnection();
 		con1.start();
+		con1.stop();  // should be ignored
 		con1.close();  // should be ignored
 		Connection con2 = scf.createConnection();
 		con2.start();
+		con2.stop();  // should be ignored
 		con2.close();  // should be ignored
 		scf.destroy();  // should trigger actual close
 
@@ -62,6 +66,8 @@ public class SingleConnectionFactoryTests extends TestCase {
 
 		con.start();
 		conControl.setVoidCallable(2);
+		con.stop();
+		conControl.setVoidCallable(1);
 		con.close();
 		conControl.setVoidCallable(1);
 
@@ -70,9 +76,11 @@ public class SingleConnectionFactoryTests extends TestCase {
 		SingleConnectionFactory scf = new SingleConnectionFactory(con);
 		QueueConnection con1 = scf.createQueueConnection();
 		con1.start();
+		con1.stop();  // should be ignored
 		con1.close();  // should be ignored
 		QueueConnection con2 = scf.createQueueConnection();
 		con2.start();
+		con2.stop();  // should be ignored
 		con2.close();  // should be ignored
 		scf.destroy();  // should trigger actual close
 
@@ -85,6 +93,8 @@ public class SingleConnectionFactoryTests extends TestCase {
 
 		con.start();
 		conControl.setVoidCallable(2);
+		con.stop();
+		conControl.setVoidCallable(1);
 		con.close();
 		conControl.setVoidCallable(1);
 
@@ -93,9 +103,11 @@ public class SingleConnectionFactoryTests extends TestCase {
 		SingleConnectionFactory scf = new SingleConnectionFactory(con);
 		TopicConnection con1 = scf.createTopicConnection();
 		con1.start();
+		con1.stop();  // should be ignored
 		con1.close();  // should be ignored
 		TopicConnection con2 = scf.createTopicConnection();
 		con2.start();
+		con2.stop();  // should be ignored
 		con2.close();  // should be ignored
 		scf.destroy();  // should trigger actual close
 
@@ -112,6 +124,8 @@ public class SingleConnectionFactoryTests extends TestCase {
 		cfControl.setReturnValue(con, 1);
 		con.start();
 		conControl.setVoidCallable(2);
+		con.stop();
+		conControl.setVoidCallable(1);
 		con.close();
 		conControl.setVoidCallable(1);
 
@@ -143,6 +157,8 @@ public class SingleConnectionFactoryTests extends TestCase {
 		conControl.setVoidCallable(1);
 		con.start();
 		conControl.setVoidCallable(2);
+		con.stop();
+		conControl.setVoidCallable(1);
 		con.close();
 		conControl.setVoidCallable(1);
 
@@ -173,6 +189,8 @@ public class SingleConnectionFactoryTests extends TestCase {
 		cfControl.setReturnValue(con, 1);
 		con.start();
 		conControl.setVoidCallable(2);
+		con.stop();
+		conControl.setVoidCallable(1);
 		con.close();
 		conControl.setVoidCallable(1);
 
@@ -202,6 +220,8 @@ public class SingleConnectionFactoryTests extends TestCase {
 		cfControl.setReturnValue(con, 1);
 		con.start();
 		conControl.setVoidCallable(2);
+		con.stop();
+		conControl.setVoidCallable(1);
 		con.close();
 		conControl.setVoidCallable(1);
 

@@ -189,7 +189,12 @@ public class SingleConnectionFactory
 	 */
 	public void destroy() throws JMSException {
 		if (this.target != null) {
-			this.target.close();
+			try {
+				this.target.stop();
+			}
+			finally {
+				this.target.close();
+			}
 		}
 	}
 
@@ -283,6 +288,10 @@ public class SingleConnectionFactory
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of Connection proxy.
 				return new Integer(hashCode());
+			}
+			else if (method.getName().equals("stop")) {
+				// Handle stop method: don't pass the call on.
+				return null;
 			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: don't pass the call on.
