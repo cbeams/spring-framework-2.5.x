@@ -68,7 +68,6 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 * dom4j/dom4j-1.6.1, dom4j/jaxen-1.1-beta-7.jar
 - DOM4J 1.6.1 XML parser (http://www.dom4j.org)
 - required for running PetClinic (by Hibernate)
-- required for building and running Tiles Example
 
 * easymock/easymock.jar, easymock/easymockclassextension.jar
 - EasyMock 1.2 (JDK 1.3 version) (http://www.easymock.org)
@@ -154,7 +153,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's JSP support
 
 * j2ee/jstl.jar
-- JSP Standard Tag Library API 1.0 (http://java.sun.com/products/jstl)
+- JSP Standard Tag Library API 1.1 (http://java.sun.com/products/jstl)
 - required for building the framework
 - required at runtime when using Spring's JstlView
 
@@ -245,8 +244,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for running JPetStore's Struts web tier on servers that eagerly load tag libraries (e.g. Resin)
 
 * jakarta-taglibs/standard.jar
-- Jakarta's JSTL implementation 1.0.6 (http://jakarta.apache.org/taglibs)
-- required for running JPetStore, PetClinic, Countries, and Tiles Example
+- Jakarta's JSTL implementation 1.1.2 (http://jakarta.apache.org/taglibs)
+- required for running JPetStore, PetClinic, Countries
 
 * jamon/JAMon.jar
 - JAMon API (Java Application Monitor) 1.0 (http://www.jamonapi.com)
