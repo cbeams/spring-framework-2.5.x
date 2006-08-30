@@ -20,7 +20,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,7 @@ import org.springframework.util.StringUtils;
 /**
  * @author Rob Harrop
  * @author Rod Johnson
+ * @author Costin Leau
  * @since 2.0
  */
 public class ShadowingClassLoader extends ClassLoader {
@@ -131,4 +134,22 @@ public class ShadowingClassLoader extends ClassLoader {
 		this.classFileTransformers.add(transformer);
 	}
 
+
+	public URL getResource(String name) {
+		return enclosingClassLoader.getResource(name);
+	}
+
+
+	public InputStream getResourceAsStream(String name) {
+		return enclosingClassLoader.getResourceAsStream(name);
+	}
+
+
+	public Enumeration<URL> getResources(String name) throws IOException {
+		return enclosingClassLoader.getResources(name);
+	}
+
+
+	
+	
 }
