@@ -260,13 +260,20 @@ public class PersistenceXmlParsingTests extends TestCase {
 		assertNull(url);
 
 		url = reader.determineUnitRootUrl(new ClassPathResource("/org/springframework/orm/jpa/META-INF/persistence.xml"));
-		Resource root = new ClassPathResource("/org/springframework/orm/jpa/");
-		assertTrue(root.getURL().sameFile(url));
+		assertTrue("the containing folder should have been returned", url.toString().endsWith("/org/springframework/orm/jpa/"));
+	}
+	
+	public void testPersistenceUnitRootURLWithJars() throws Exception {
+		PersistenceUnitReader reader = new PersistenceUnitReader(
+				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
 
 		ClassPathResource archive = new ClassPathResource("/org/springframework/orm/jpa/jpa-archive.jar");
-		String newRoot = "jar:" + archive.getURL().toExternalForm() + "!/META-INF/persistence.xml";
+		String newRoot = "jar:" + archive.getURL().toExternalForm() + "!/META-INF/persist.xml";
 		Resource insideArchive = new UrlResource(newRoot);
-		reader.determineUnitRootUrl(insideArchive);
+		// make sure the location actually exists
+		assertTrue(insideArchive.exists());
+		URL url = reader.determineUnitRootUrl(insideArchive);
+		assertTrue("the archive location should have been returned", archive.getURL().sameFile(url));
 	}
 
 }

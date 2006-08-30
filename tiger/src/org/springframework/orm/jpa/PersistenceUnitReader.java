@@ -30,18 +30,18 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookup;
 import org.springframework.util.Assert;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.util.xml.SimpleSaxErrorHandler;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
 
 /**
  * Internal helper class for reading <code>persistence.xml</code> files.
@@ -82,13 +82,11 @@ class PersistenceUnitReader {
 
 	private static final String META_INF = "META-INF";
 
-
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
 	private final DataSourceLookup dataSourceLookup;
-
 
 	public PersistenceUnitReader(ResourcePatternResolver resourcePatternResolver, DataSourceLookup dataSourceLookup) {
 		Assert.notNull(resourcePatternResolver, "ResourceLoader must not be null");
@@ -96,7 +94,6 @@ class PersistenceUnitReader {
 		this.resourcePatternResolver = resourcePatternResolver;
 		this.dataSourceLookup = dataSourceLookup;
 	}
-
 
 	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String persistenceXmlLocation) {
 		ErrorHandler handler = new SimpleSaxErrorHandler(logger);
@@ -134,8 +131,8 @@ class PersistenceUnitReader {
 	 * Parse the validated document and populates(add to) the given unit info
 	 * list.
 	 */
-	protected List<SpringPersistenceUnitInfo> parseDocument(
-			Resource resource, Document document, List<SpringPersistenceUnitInfo> infos) throws IOException {
+	protected List<SpringPersistenceUnitInfo> parseDocument(Resource resource, Document document,
+			List<SpringPersistenceUnitInfo> infos) throws IOException {
 
 		Element persistence = document.getDocumentElement();
 		URL unitRootURL = determineUnitRootUrl(resource);
@@ -150,27 +147,36 @@ class PersistenceUnitReader {
 	}
 
 	protected URL determineUnitRootUrl(Resource resource) throws IOException {
-		// check META-INF folder
+
 		URL originalURL = resource.getURL();
-
 		String urlToString = originalURL.toExternalForm();
-		if (!urlToString.contains(META_INF)) {
-			if (logger.isWarnEnabled()) {
-				logger.warn(resource.getFilename() +
-						" should be located inside META-INF directory; cannot determine persistence unit root URL for " +
-						resource);
-			}
-			return null;
-		}
-		if (urlToString.lastIndexOf(META_INF) == urlToString.lastIndexOf('/') - (1 + META_INF.length())) {
-			logger.warn(resource.getFilename() +
-					" is not located in the root of META-INF directory; cannot determine persistence unit root URL for " +
-					resource);
-			return null;
+
+		// if we get an archive, simply return the jar URL (section 6.2 from the
+		// JPA spec)
+		if (ResourceUtils.isJarURL(originalURL)) {
+			return ResourceUtils.extractJarFileURL(originalURL);
 		}
 
-		String persistenceUnitRoot = urlToString.substring(0, urlToString.lastIndexOf(META_INF));
-		return new URL(persistenceUnitRoot);
+		else {
+			// check META-INF folder
+			if (!urlToString.contains(META_INF)) {
+				if (logger.isWarnEnabled()) {
+					logger.warn(resource.getFilename()
+							+ " should be located inside META-INF directory; cannot determine persistence unit root URL for "
+							+ resource);
+				}
+				return null;
+			}
+			if (urlToString.lastIndexOf(META_INF) == urlToString.lastIndexOf('/') - (1 + META_INF.length())) {
+				logger.warn(resource.getFilename()
+						+ " is not located in the root of META-INF directory; cannot determine persistence unit root URL for "
+						+ resource);
+				return null;
+			}
+
+			String persistenceUnitRoot = urlToString.substring(0, urlToString.lastIndexOf(META_INF));
+			return new URL(persistenceUnitRoot);
+		}
 	}
 
 	/**
@@ -280,7 +286,9 @@ class PersistenceUnitReader {
 	/**
 	 * Try to locate the SCHEMA_NAME first on disk before using the URL
 	 * specified inside the XML.
-	 * @return an existing resource or null if one can't be find (or it does not exist)
+	 * 
+	 * @return an existing resource or null if one can't be find (or it does not
+	 *         exist)
 	 */
 	protected Resource findSchemaResource(String schemaName) throws IOException {
 		// First search the classpath root (TopLink)
@@ -317,8 +325,8 @@ class PersistenceUnitReader {
 	/**
 	 * Validate the given stream and return a valid DOM document for parsing.
 	 */
-	protected Document validateResource(ErrorHandler handler, InputStream stream)
-			throws ParserConfigurationException, SAXException, IOException {
+	protected Document validateResource(ErrorHandler handler, InputStream stream) throws ParserConfigurationException,
+			SAXException, IOException {
 
 		// InputSource source = new InputSource(stream);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
