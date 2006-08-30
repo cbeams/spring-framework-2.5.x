@@ -57,6 +57,18 @@ public abstract class ResourceUtils {
 	/** URL protocol for a file in the file system: "file" */
 	public static final String URL_PROTOCOL_FILE = "file";
 
+	/** URL protocol for an entry from a jar file: "jar" */
+	public static final String URL_PROTOCOL_JAR = "jar";
+
+	/** URL protocol for an entry from a zip file: "zip" */
+	public static final String URL_PROTOCOL_ZIP = "zip";
+
+	/** URL protocol for an entry from a WebSphere jar file: "wsjar" */
+	public static final String URL_PROTOCOL_WSJAR = "wsjar";
+
+	/** Separator between JAR URL and file path within the JAR */
+	public static final String JAR_URL_SEPARATOR = "!/";
+
 
 	/**
 	 * Return whether the given resource location is a URL:
@@ -181,6 +193,38 @@ public abstract class ResourceUtils {
 					"because it does not reside in the file system: " + resourceUrl);
 		}
 		return new File(URLDecoder.decode(resourceUrl.getFile()));
+	}
+
+	/**
+	 * Determine whether the given URL points to a resource in a jar file,
+	 * that is, has protocol "jar", "zip" or "wsjar".
+	 * <p>"zip" and "wsjar" are used by BEA WebLogic Server and IBM WebSphere,
+	 * respectively, but can be treated like jar files.
+	 * @param url the URL to check
+	 */
+	public static boolean isJarURL(URL url) {
+		String protocol = url.getProtocol();
+		return (URL_PROTOCOL_JAR.equals(protocol) ||
+				URL_PROTOCOL_ZIP.equals(protocol) ||
+				URL_PROTOCOL_WSJAR.equals(protocol));
+	}
+
+	/**
+	 * Extract the URL for the actual jar file from the given URL
+	 * (which may point to a resource in a jar file or to a jar file itself).
+	 * @param jarUrl the original URL
+	 * @return the URL for the actual jar file
+	 * @throws MalformedURLException if no valid jar file URL could be extracted
+	 */
+	public static URL extractJarFileURL(URL jarUrl) throws MalformedURLException {
+		String urlFile = jarUrl.getFile();
+		int separatorIndex = urlFile.indexOf(JAR_URL_SEPARATOR);
+		if (separatorIndex != -1) {
+			return new URL(urlFile.substring(0, separatorIndex));
+		}
+		else {
+			return jarUrl;
+		}
 	}
 
 }

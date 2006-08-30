@@ -158,19 +158,6 @@ import org.springframework.util.StringUtils;
  */
 public class PathMatchingResourcePatternResolver implements ResourcePatternResolver {
 
-	/** URL protocol for an entry from a jar file: "jar" */
-	private static final String URL_PROTOCOL_JAR = "jar";
-
-	/** URL protocol for an entry from a zip file: "zip" */
-	private static final String URL_PROTOCOL_ZIP = "zip";
-
-	/** URL protocol for an entry from a WebSphere jar file: "wsjar" */
-	private static final String URL_PROTOCOL_WSJAR = "wsjar";
-
-	/** Separator between JAR URL and file path within the JAR */
-	private static final String JAR_URL_SEPARATOR = "!/";
-
-
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final ResourceLoader resourceLoader;
@@ -373,12 +360,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @param resource the resource handle to check
 	 * (usually the root directory to start path matching from)
 	 * @see #doFindPathMatchingJarResources
+	 * @see org.springframework.util.ResourceUtils#isJarURL
 	 */
 	protected boolean isJarResource(Resource resource) throws IOException {
-		String protocol = resource.getURL().getProtocol();
-		return (URL_PROTOCOL_JAR.equals(protocol) ||
-				URL_PROTOCOL_ZIP.equals(protocol) ||
-				URL_PROTOCOL_WSJAR.equals(protocol));
+		return ResourceUtils.isJarURL(resource.getURL());
 	}
 
 	/**
@@ -410,14 +395,14 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			// being arbitrary as long as following the entry format.
 			// We'll also handle paths with and without leading "file:" prefix.
 			String urlFile = rootDirResource.getURL().getFile();
-			int separatorIndex = urlFile.indexOf(JAR_URL_SEPARATOR);
+			int separatorIndex = urlFile.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
 			jarFileUrl = urlFile.substring(0, separatorIndex);
 			if (jarFileUrl.startsWith(ResourceUtils.FILE_URL_PREFIX)) {
 				jarFileUrl = jarFileUrl.substring(ResourceUtils.FILE_URL_PREFIX.length());
 			}
 			jarFile = new JarFile(jarFileUrl);
 			jarFileUrl = ResourceUtils.FILE_URL_PREFIX + jarFileUrl;
-			rootEntryPath = urlFile.substring(separatorIndex + JAR_URL_SEPARATOR.length());
+			rootEntryPath = urlFile.substring(separatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
 		}
 
 		if (logger.isDebugEnabled()) {
