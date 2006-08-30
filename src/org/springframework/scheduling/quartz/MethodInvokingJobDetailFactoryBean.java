@@ -41,11 +41,13 @@ import org.springframework.util.MethodInvoker;
  *
  * <p>Derived from MethodInvoker to share common properties and behavior
  * with MethodInvokingFactoryBean.
- * 
- * <p>Supports both concurrently running jobs and non-currently running
- * ones through the "concurrent" property.
  *
- * <p><b>Note: JobDetails created via this FactoryBean are <i>not</i>
+ * <p>Supports both concurrently running jobs and non-currently running
+ * ones through the "concurrent" property. Jobs created by this
+ * MethodInvokingJobDetailFactoryBean are by default volatile and durable
+ * (according to Quartz terminology).
+ *
+ * <p><b>NOTE: JobDetails created via this FactoryBean are <i>not</i>
  * serializable and thus not suitable for persistent job stores.</b>
  * You need to implement your own Quartz Job as a thin wrapper for each case
  * where you want a persistent job to delegate to a specific service method.
@@ -147,6 +149,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		this.jobDetail = new JobDetail(name, this.group, jobClass);
 		this.jobDetail.getJobDataMap().put("methodInvoker", this);
 		this.jobDetail.setVolatility(true);
+		this.jobDetail.setDurability(true);
 
 		// Register job listener names.
 		if (this.jobListenerNames != null) {
@@ -154,6 +157,16 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 				this.jobDetail.addJobListener(this.jobListenerNames[i]);
 			}
 		}
+
+		postProcessJobDetail(this.jobDetail);
+	}
+
+	/**
+	 * Callback for post-processing the JobDetail to be exposed by this FactoryBean.
+	 * <p>The default implementation is empty. Can be overridden in subclasses.
+	 * @param jobDetail the JobDetail prepared by this FactoryBean
+	 */
+	protected void postProcessJobDetail(JobDetail jobDetail) {
 	}
 
 
