@@ -95,14 +95,22 @@ public abstract class ExpressionEvaluationUtils {
 
 	static {
 		if (ClassUtils.isPresent(JSP_20_CLASS_NAME)) {
-			helper = new Jsp20ExpressionEvaluationHelper();
-			logger.info("Using JSP 2.0 ExpressionEvaluator");
-		} else if (ClassUtils.isPresent(JAKARTA_JSTL_CLASS_NAME)) {
+			logger.info("Found JSP 2.0 ExpressionEvaluator");
+			if (ClassUtils.isPresent(JAKARTA_JSTL_CLASS_NAME)) {
+				logger.info("Found Jakarta JSTL ExpressionEvaluatorManager");
+				helper = new Jsp20ExpressionEvaluationHelper(new JakartaExpressionEvaluationHelper());
+			}
+			else {
+				helper = new Jsp20ExpressionEvaluationHelper(new NoExpressionEvaluationHelper());
+			}
+		}
+		else if (ClassUtils.isPresent(JAKARTA_JSTL_CLASS_NAME)) {
+			logger.info("Found Jakarta JSTL ExpressionEvaluatorManager");
 			helper = new JakartaExpressionEvaluationHelper();
-			logger.info("Using Jakarta JSTL ExpressionEvaluatorManager");
-		} else {
-			helper = new NoExpressionEvaluationHelper();
+		}
+		else {
 			logger.info("JSP expression evaluation not available");
+			helper = new NoExpressionEvaluationHelper();
 		}
 	}
 
@@ -358,8 +366,20 @@ public abstract class ExpressionEvaluationUtils {
 	 */
 	private static class Jsp20ExpressionEvaluationHelper implements ExpressionEvaluationHelper {
 
+		private final ExpressionEvaluationHelper fallback;
+
+		private boolean fallbackNecessary = false;
+
+		public Jsp20ExpressionEvaluationHelper(ExpressionEvaluationHelper fallback) {
+			this.fallback = fallback;
+		}
+
 		public Object evaluate(String attrName, String attrValue, Class resultClass, PageContext pageContext)
-			throws JspException {
+				throws JspException {
+
+			if (isFallbackNecessary()) {
+				return this.fallback.evaluate(attrName, attrValue, resultClass, pageContext);
+			}
 
 			try {
 				Map expressionCache = getJspExpressionCache(pageContext);
@@ -382,6 +402,19 @@ public abstract class ExpressionEvaluationUtils {
 			catch (ELException ex) {
 				throw new JspException("Parsing of JSP EL expression \"" + attrValue + "\" failed", ex);
 			}
+			catch (NoSuchMethodError err) {
+				logger.debug("JSP 2.0 ExpressionEvaluator API present but not implemented - using fallback");
+				setFallbackNecessary();
+				return this.fallback.evaluate(attrName, attrValue, resultClass, pageContext);
+			}
+		}
+
+		private synchronized boolean isFallbackNecessary() {
+			return this.fallbackNecessary;
+		}
+
+		private synchronized void setFallbackNecessary() {
+			this.fallbackNecessary = true;
 		}
 	}
 
