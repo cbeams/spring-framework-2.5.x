@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xmlns:util="http://www.springframework.org/schema/util"
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+	     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	     xmlns:util="http://www.springframework.org/schema/util"
+	     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
 	<util:properties id="myProperties"
-					 location="classpath:org/springframework/beans/factory/config/util.properties"/>
+			location="classpath:org/springframework/beans/factory/config/util.properties"/>
 
 	<util:constant id="min" static-field="java.lang.Integer.MIN_VALUE"/>
 
@@ -14,7 +14,7 @@
 
 	<util:property-path id="name" path="configuredBean.name"/>
 
-	<bean id="testBean" class="org.springframework.beans.TestBean">
+	<bean id="testBean" class="org.springframework.beans.TestBean" scope="prototype">
 		<property name="name">
 			<util:property-path path="configuredBean.name"/>
 		</property>
@@ -33,24 +33,24 @@
 		<property name="name" value="Rob Harrop"/>
 	</bean>
 
-	<bean id="nestedCustomTagBean" class="org.springframework.beans.TestBean">
+	<bean id="nestedCustomTagBean" class="org.springframework.beans.TestBean" scope="prototype">
 	  <property name="someMap">
-	      <map>
-	          <entry>
-							<key><value>min</value></key>
-							<util:constant static-field="java.lang.Integer.MIN_VALUE"/>
-						</entry>
-	      </map>
+			<map>
+				<entry>
+					<key><value>min</value></key>
+					<util:constant static-field="java.lang.Integer.MIN_VALUE"/>
+				</entry>
+			</map>
 	  </property>
 		<property name="someList">
-		    <list>
-		        <util:constant static-field="java.lang.Integer.MIN_VALUE"/>
-		    </list>
+			<list>
+				<util:constant static-field="java.lang.Integer.MIN_VALUE"/>
+			</list>
 		</property>
 		<property name="someSet">
-		    <set>
-		        <util:constant static-field="java.lang.Integer.MIN_VALUE"/>
-		    </set>
+			<set>
+				<util:constant static-field="java.lang.Integer.MIN_VALUE"/>
+			</set>
 		</property>
 	</bean>
 
@@ -69,4 +69,5 @@
 	<util:set id="simpleSet">
 		<value>Rob Harrop</value>
 	</util:set>
+
 </beans>
