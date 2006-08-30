@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,37 +27,34 @@ import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
 import org.springframework.beans.factory.config.ListFactoryBean;
 import org.springframework.beans.factory.config.MapFactoryBean;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
+import org.springframework.beans.factory.config.PropertyPathFactoryBean;
 import org.springframework.beans.factory.config.SetFactoryBean;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
  * {@link NamespaceHandler} for the <code>util</code> namespace.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
 	public void init() {
-		registerBeanDefinitionParser("properties", new PropertiesBeanDefinitionParser());
 		registerBeanDefinitionParser("constant", new ConstantBeanDefinitionParser());
 		registerBeanDefinitionParser("property-path", new PropertyPathBeanDefinitionParser());
-		registerBeanDefinitionParser("map", new MapBeanDefinitionParser());
 		registerBeanDefinitionParser("list", new ListBeanDefinitionParser());
 		registerBeanDefinitionParser("set", new SetBeanDefinitionParser());
+		registerBeanDefinitionParser("map", new MapBeanDefinitionParser());
+		registerBeanDefinitionParser("properties", new PropertiesBeanDefinitionParser());
 	}
 
 
-	public static class PropertiesBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
-
-		protected Class getBeanClass(Element element) {
-			return PropertiesFactoryBean.class;
-		}
-	}
-
-
-	public static class ConstantBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
+	private static class ConstantBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
 		private static final String STATIC_FIELD_ATTRIBUTE = "static-field";
 
@@ -75,26 +72,40 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 	}
 
 
-	public static class MapBeanDefinitionParser implements BeanDefinitionParser {
+	private static class PropertyPathBeanDefinitionParser implements BeanDefinitionParser {
 
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			String id = element.getAttribute("id");
-			String mapClass = element.getAttribute("map-class");
+			String path = element.getAttribute("path");
 
-			Map parsedMap = parserContext.getDelegate().parseMapElement(element, null);
-			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(MapFactoryBean.class);
-			builder.addPropertyValue("sourceMap", parsedMap);
-			if (StringUtils.hasText(mapClass)) {
-				builder.addPropertyValue("targetMapClass", mapClass);
+			Assert.hasText(path, "Attribute 'path' must not be null or zero length");
+			int dotIndex = path.indexOf(".");
+			if (dotIndex == -1) {
+				throw new IllegalArgumentException("Attribute 'path' must follow pattern 'beanName.propertyName'");
 			}
+
+			String beanName = path.substring(0, dotIndex);
+			String propertyPath = path.substring(dotIndex + 1);
+
+			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(PropertyPathFactoryBean.class);
+			if (parserContext.isNested()) {
+				// Inner bean definition should receive same singleton status as containing bean.
+				builder.setSingleton(parserContext.getContainingBeanDefinition().isSingleton());
+			}
+			builder.addPropertyValue("targetBeanName", beanName);
+			builder.addPropertyValue("propertyPath", propertyPath);
+
+			BeanDefinition definition = builder.getBeanDefinition();
+			id = (StringUtils.hasText(id) ? id :
+					BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) definition, parserContext.getRegistry(), false));
 			parserContext.getRegistry().registerBeanDefinition(id, builder.getBeanDefinition());
-			// cannot be used in a 'inner-bean' setting (use plain <map>)
-			return null;
+
+			return definition;
 		}
 	}
 
 
-	public static class ListBeanDefinitionParser implements BeanDefinitionParser {
+	private static class ListBeanDefinitionParser implements BeanDefinitionParser {
 
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			String id = element.getAttribute("id");
@@ -113,7 +124,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 	}
 
 
-	public static class SetBeanDefinitionParser implements BeanDefinitionParser {
+	private static class SetBeanDefinitionParser implements BeanDefinitionParser {
 
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			String id = element.getAttribute("id");
@@ -128,6 +139,33 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			parserContext.getRegistry().registerBeanDefinition(id, builder.getBeanDefinition());
 			// cannot be used in a 'inner-bean' setting (use plain <set>)
 			return null;
+		}
+	}
+
+
+	private static class MapBeanDefinitionParser implements BeanDefinitionParser {
+
+		public BeanDefinition parse(Element element, ParserContext parserContext) {
+			String id = element.getAttribute("id");
+			String mapClass = element.getAttribute("map-class");
+
+			Map parsedMap = parserContext.getDelegate().parseMapElement(element, null);
+			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(MapFactoryBean.class);
+			builder.addPropertyValue("sourceMap", parsedMap);
+			if (StringUtils.hasText(mapClass)) {
+				builder.addPropertyValue("targetMapClass", mapClass);
+			}
+			parserContext.getRegistry().registerBeanDefinition(id, builder.getBeanDefinition());
+			// cannot be used in a 'inner-bean' setting (use plain <map>)
+			return null;
+		}
+	}
+
+
+	private static class PropertiesBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
+
+		protected Class getBeanClass(Element element) {
+			return PropertiesFactoryBean.class;
 		}
 	}
 
