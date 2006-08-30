@@ -16,14 +16,15 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.util.StringUtils;
-import org.w3c.dom.Element;
 
 /**
  * Abstract {@link BeanDefinitionParser} implementation providing a number
@@ -56,8 +57,8 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 			}
 		}
 		else if (!parserContext.isNested()) {
-			throw new IllegalArgumentException("Attribute '" + ID_ATTRIBUTE + "' is required for element '"
-							+ element.getLocalName() + "' when used as a top-level tag.");
+			throw new IllegalArgumentException("Attribute '" + ID_ATTRIBUTE + "' is required for element '" +
+					element.getLocalName() + "' when used as a top-level tag");
 		}
 		return definition;
 	}

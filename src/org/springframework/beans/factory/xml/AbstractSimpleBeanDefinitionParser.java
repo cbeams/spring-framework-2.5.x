@@ -16,11 +16,12 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.core.Conventions;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Attr;
+
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.core.Conventions;
 
 /**
  * @author Rob Harrop
@@ -29,16 +30,13 @@ import org.w3c.dom.Attr;
 public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	protected final void doParse(Element element, BeanDefinitionBuilder builder) {
-
 		NamedNodeMap attributes = element.getAttributes();
 		for (int x = 0; x < attributes.getLength(); x++) {
 			Attr attribute = (Attr) attributes.item(x);
 			String name = attribute.getLocalName();
-
 			if (ID_ATTRIBUTE.equals(name)) {
 				continue;
 			}
-
 			builder.addPropertyValue(extractPropertyName(name), attribute.getValue());
 		}
 		postProcess(builder, element);
