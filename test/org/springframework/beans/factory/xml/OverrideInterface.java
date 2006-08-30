@@ -19,33 +19,10 @@ package org.springframework.beans.factory.xml;
 import org.springframework.beans.TestBean;
 
 /**
- * @author Rod Johnson
+ * @author Juergen Hoeller
  */
-public abstract class OverrideOneMethod extends MethodReplaceCandidate implements OverrideInterface {
+public interface OverrideInterface {
 
-	protected abstract TestBean protectedOverrideSingleton();
-
-	public TestBean invokesOverridenMethodOnSelf() {
-		return getPrototypeDependency();
-	}
-
-	public String echo(String echo) {
-		return echo;
-	}
-
-	/**
-	 * Overloaded form of replaceMe.
-	 */
-	public String replaceMe() {
-		return "replaceMe";
-	}
-
-	/**
-	 * Another overloaded form of replaceMe, not getting replaced.
-	 * Must not cause errors when the other replaceMe methods get replaced.
-	 */
-	public String replaceMe(int someParam) {
-		return "replaceMe:" + someParam;
-	}
+	TestBean getPrototypeDependency();
 
 }

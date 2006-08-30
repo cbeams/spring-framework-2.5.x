@@ -287,16 +287,19 @@ public abstract class ClassUtils {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		int count = 0;
-		do {
-			for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
-				Method method = clazz.getDeclaredMethods()[i];
-				if (methodName.equals(method.getName())) {
-					count++;
-				}
+		for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
+			Method method = clazz.getDeclaredMethods()[i];
+			if (methodName.equals(method.getName())) {
+				count++;
 			}
-			clazz = clazz.getSuperclass();
 		}
-		while (clazz != null);
+		Class[] ifcs = clazz.getInterfaces();
+		for (int i = 0; i < ifcs.length; i++) {
+			count += getMethodCountForName(ifcs[i], methodName);
+		}
+		if (clazz.getSuperclass() != null) {
+			count += getMethodCountForName(clazz.getSuperclass(), methodName);
+		}
 		return count;
 	}
 
@@ -310,16 +313,21 @@ public abstract class ClassUtils {
 	public static boolean hasAtLeastOneMethodWithName(Class clazz, String methodName) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
-		do {
-			for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
-				Method method = clazz.getDeclaredMethods()[i];
-				if (method.getName().equals(methodName)) {
-					return true;
-				}
+		for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
+			Method method = clazz.getDeclaredMethods()[i];
+			if (method.getName().equals(methodName)) {
+				return true;
 			}
-			clazz = clazz.getSuperclass();
 		}
-		while (clazz != null);
+		Class[] ifcs = clazz.getInterfaces();
+		for (int i = 0; i < ifcs.length; i++) {
+			if (hasAtLeastOneMethodWithName(ifcs[i], methodName)) {
+				return true;
+			}
+		}
+		if (clazz.getSuperclass() != null) {
+			return hasAtLeastOneMethodWithName(clazz.getSuperclass(), methodName);
+		}
 		return false;
 	}
 
