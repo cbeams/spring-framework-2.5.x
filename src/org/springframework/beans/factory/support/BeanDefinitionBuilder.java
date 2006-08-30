@@ -169,7 +169,19 @@ public class BeanDefinitionBuilder  {
 	}
 
 	/**
-	 * Sets whether or not this definition describes a singleton bean.
+	 * Set the scope of this definition.
+	 * @see org.springframework.beans.factory.config.BeanDefinition#SCOPE_SINGLETON
+	 * @see org.springframework.beans.factory.config.BeanDefinition#SCOPE_PROTOTYPE
+	 */
+	public BeanDefinitionBuilder setScope(String scope) {
+		this.beanDefinition.setScope(scope);
+		return this;
+	}
+
+	/**
+	 * Set whether or not this definition describes a singleton bean,
+	 * as alternative to <code>setScope</code>.
+	 * @see #setScope
 	 */
 	public BeanDefinitionBuilder setSingleton(boolean singleton) {
 		this.beanDefinition.setSingleton(singleton);
@@ -177,7 +189,7 @@ public class BeanDefinitionBuilder  {
 	}
 
 	/**
-	 * Sets whether or not this definition is abstract.
+	 * Set whether or not this definition is abstract.
 	 */
 	public BeanDefinitionBuilder setAbstract(boolean flag) {
 		this.beanDefinition.setAbstract(flag);
