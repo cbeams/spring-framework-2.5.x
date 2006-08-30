@@ -459,7 +459,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 */
 	public void shutdown() throws JmsException {
 		logger.debug("Shutting down message listener container");
+		boolean wasRunning = false;
 		synchronized (this.lifecycleMonitor) {
+			wasRunning = this.running;
 			this.running = false;
 			this.active = false;
 			this.lifecycleMonitor.notifyAll();
@@ -472,6 +474,14 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 		}
 		finally {
 			synchronized (this.sharedConnectionMonitor) {
+				if (this.sharedConnection != null && wasRunning) {
+					try {
+						this.sharedConnection.stop();
+					}
+					catch (Throwable ex) {
+						logger.debug("Could not stop shared JMS Connection before closing it", ex);
+					}
+				}
 				JmsUtils.closeConnection(this.sharedConnection);
 			}
 		}

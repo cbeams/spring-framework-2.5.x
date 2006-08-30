@@ -51,8 +51,8 @@ import org.springframework.jms.TransactionInProgressException;
 import org.springframework.jms.TransactionRolledBackException;
 import org.springframework.jms.UncategorizedJmsException;
 import org.springframework.jms.connection.ConnectionFactoryUtils;
-import org.springframework.jms.connection.TransactionAwareConnectionFactoryProxy;
 import org.springframework.jms.connection.SingleConnectionFactory;
+import org.springframework.jms.connection.TransactionAwareConnectionFactoryProxy;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.destination.JndiDestinationResolver;
@@ -287,6 +287,8 @@ public class JmsTemplateTests extends TestCase {
 		}
 		mockSession.close();
 		sessionControl.setVoidCallable(1);
+		mockConnection.stop();
+		connectionControl.setVoidCallable(1);
 		mockConnection.close();
 		connectionControl.setVoidCallable(1);
 
@@ -637,6 +639,8 @@ public class JmsTemplateTests extends TestCase {
 		}
 
 		mockConnection.start();
+		connectionControl.setVoidCallable(1);
+		mockConnection.stop();
 		connectionControl.setVoidCallable(1);
 		mockConnection.close();
 		connectionControl.setVoidCallable(1);

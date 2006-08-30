@@ -922,11 +922,15 @@ public class JmsTemplate102Tests extends TestCase {
 		if (pubSub) {
 			mockTopicConnection.start();
 			topicConnectionControl.setVoidCallable(1);
+			mockTopicConnection.stop();
+			topicConnectionControl.setVoidCallable(1);
 			mockTopicConnection.close();
 			topicConnectionControl.setVoidCallable(1);
 		}
 		else {
 			mockQueueConnection.start();
+			queueConnectionControl.setVoidCallable(1);
+			mockQueueConnection.stop();
 			queueConnectionControl.setVoidCallable(1);
 			mockQueueConnection.close();
 			queueConnectionControl.setVoidCallable(1);
