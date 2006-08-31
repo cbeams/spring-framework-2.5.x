@@ -84,7 +84,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 
 	@ExpectedException(RuntimeException.class)
 	public void testBogusQuery() {
-		sharedEntityManager.createQuery("It's raining toads");
+		Query query = sharedEntityManager.createQuery("It's raining toads");
 	}
 	
 	@ExpectedException(EntityNotFoundException.class)

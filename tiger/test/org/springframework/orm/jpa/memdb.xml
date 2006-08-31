@@ -3,8 +3,6 @@
 
 <beans>
 
-	<import resource="weaver.xml"/>
-
 	<bean id="entityManager" class="org.springframework.orm.jpa.support.SharedEntityManagerBean">
 		<property name="entityManagerFactory" ref="entityManagerFactory"/>
 	</bean>
