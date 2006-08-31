@@ -176,7 +176,7 @@ public abstract class ExtendedEntityManagerCreator {
 				return (proxy == args[0]);
 			}
 			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of SessionFactory proxy.
+				// Use hashCode of EntityManager proxy.
 				return proxy.hashCode();
 			}
 			else if (method.getName().equals("joinTransaction")) {
