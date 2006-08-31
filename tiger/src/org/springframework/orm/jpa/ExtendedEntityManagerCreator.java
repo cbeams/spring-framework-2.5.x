@@ -112,12 +112,12 @@ public abstract class ExtendedEntityManagerCreator {
 	 * @param rawEntityManager raw EntityManager
 	 * @param plusOperations an implementation of the EntityManagerPlusOperations
 	 * interface, if those operations should be exposed (can be <code>null</code>)
-	 * @param containedManaged whether to follow container-managed EntityManager
+	 * @param containerManaged whether to follow container-managed EntityManager
 	 * or application-managed EntityManager semantics
 	 * @return the EntityManager proxy
 	 */
 	private static EntityManager createProxy(
-			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations, boolean containedManaged) {
+			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations, boolean containerManaged) {
 
 		Class[] ifcs = ClassUtils.getAllInterfaces(rawEntityManager);
 		if (plusOperations != null) {
@@ -125,7 +125,7 @@ public abstract class ExtendedEntityManagerCreator {
 		}
 		return (EntityManager) Proxy.newProxyInstance(
 				ExtendedEntityManagerCreator.class.getClassLoader(), ifcs,
-				new ExtendedEntityManagerInvocationHandler(rawEntityManager, plusOperations, containedManaged));
+				new ExtendedEntityManagerInvocationHandler(rawEntityManager, plusOperations, containerManaged));
 	}
 
 
