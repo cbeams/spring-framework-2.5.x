@@ -21,7 +21,6 @@ import java.util.Properties;
 import org.apache.openjpa.persistence.OpenJPAEntityManager;
 import org.apache.openjpa.persistence.PersistenceProviderImpl;
 import org.springframework.orm.jpa.JpaDialect;
-import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 
 /**
  * OpenJPA-specific JpaVendorAdapter implementation.
@@ -58,27 +57,24 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	/* (non-Javadoc)
 	 * @see org.springframework.orm.jpa.JpaVendorAdapter#getJpaPropertyMap()
 	 */
-	// TODO: find the openjpa/kodo properties to plug in.
 	public Map getJpaPropertyMap() {
 		Properties jpaProperties = new Properties();
 
-		// for db properties seems we have to specify dialects (though they come with special properties).
-		/*
+		// for db properties seems we have to specify dialects (though they come with special properties). */
+		
 		if (getDatabasePlatform() != null) {
-			jpaProperties.setProperty(XXX, getDatabasePlatform());
+			jpaProperties.setProperty("openjpa.jdbc.DBDictionary", getDatabasePlatform());
 		}
 		else if (getDatabase() != null) {
-			Class databaseDialectClass = determineDatabaseDialectClass(getDatabase());
-			if (databaseDialectClass != null) {
-				jpaProperties.setProperty(XXX, databaseDialectClass.getName());
+			String databaseDictonary = determineDatabaseDictionary(getDatabase());
+			if (databaseDictonary != null) {
+				jpaProperties.setProperty("openjpa.jdbc.DBDictionary", databaseDictonary);
 			}
 		}
-		*/
 
 		if (isGenerateDdl()) {
 			jpaProperties.setProperty("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=true)");
 		}
-		// we can configure this as logging but then it might rewrite some other openjpa logging property. 
 		
 		// taken from the docs - (under the name "Standard OpenJPA Log Configuration + All SQL Statements").
 		if (isShowSql()) {
@@ -89,20 +85,20 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		return jpaProperties;
 	}
 
-	/*
-	protected Class determineDatabaseDialectClass(Database database) {
+	
+	protected String determineDatabaseDictionary(Database database) {
 		switch (database) {
-			case DB2: return DB2Dialect.class;
-			case HSQL: return HSQLDialect.class;
-			case INFORMIX: return InformixDialect.class;
-			case MYSQL: return MySQLDialect.class;
-			case ORACLE: return Oracle9Dialect.class;
-			case POSTGRESQL: return PostgreSQLDialect.class;
-			case SQL_SERVER: return SQLServerDialect.class;
-			case SYBASE: return SybaseDialect.class;
+			case DB2: return "db2";
+			case HSQL: return "hsql(SimulateLocking=true)";
+			case INFORMIX: return "informix";
+			case MYSQL: return "mysql";
+			case ORACLE: return "oracle";
+			case POSTGRESQL: return "postgres";
+			case SQL_SERVER: return "sqlserver";
+			case SYBASE: return "sybase";
 			default: return null;
 		}
 	}
-	*/
+	
 
 }
