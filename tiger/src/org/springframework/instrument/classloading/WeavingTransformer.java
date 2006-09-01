@@ -45,7 +45,7 @@ public class WeavingTransformer {
 	 * Create a new WeavingTransformer for the current context class loader.
 	 */
 	public WeavingTransformer() {
-		this.classLoader = getDefaultClassLoader();
+		this(null);
 	}
 
 	/**
@@ -53,10 +53,7 @@ public class WeavingTransformer {
 	 * @param classLoader the ClassLoader to build a transformer for
 	 */
 	public WeavingTransformer(ClassLoader classLoader) {
-		if (classLoader == null) {
-			throw new IllegalArgumentException("ClassLoader must not be null");
-		}
-		this.classLoader = classLoader;
+		this.classLoader = (classLoader != null ?  classLoader :getDefaultClassLoader());
 	}
 
 
@@ -72,11 +69,32 @@ public class WeavingTransformer {
 	}
 
 
+	/**
+	 * Apply transformation on a given class byte definition.
+	 * The method will always return a non-null byte array (if no transformation has taken place
+	 * the array content will be identical to the original one).
+	 * 
+	 * @param className the full qualified name of the class in dot format (i.e. some.package.SomeClass)
+	 * @param bytes class byte definition
+	 * @return (possibly transformed) class byte definition
+	 */
 	public byte[] transformIfNecessary(String className, byte[] bytes) {
 		String internalName = className.replace(".", "/");
 		return transformIfNecessary(className, internalName, bytes, null);
 	}
 
+	/**
+	 * Apply transformation on a given class byte definition.
+	 * The method will always return a non-null byte array (if no transformation has taken place
+	 * the array content will be identical to the original one).
+	 * 
+	 * @param className the full qualified name of the class in dot format (i.e. some.package.SomeClass)
+	 * @param internalName class name internal name in / format (i.e. some/package/SomeClass)
+	 * @param bytes class byte definition
+	 * @param pd protection domain to be used (can be null)
+	 * 
+	 * @return (possibly transformed) class byte definition
+	 */
 	public byte[] transformIfNecessary(String className, String internalName, byte[] bytes, ProtectionDomain pd) {
 		byte[] result = bytes;
 		for (ClassFileTransformer cft : this.transformers) {
@@ -98,11 +116,11 @@ public class WeavingTransformer {
 	 * See ClassUtils. We don't depend on that to avoid pulling in more of Spring.
 	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 */
-	private static ClassLoader getDefaultClassLoader() {
+	protected ClassLoader getDefaultClassLoader() {
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		if (cl == null) {
 			// No thread context class loader -> use class loader of this class.
-			cl = WeavingTransformer.class.getClassLoader();
+			cl = getClass().getClassLoader();
 		}
 		return cl;
 	}

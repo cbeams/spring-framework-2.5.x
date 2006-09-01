@@ -27,7 +27,7 @@ import org.springframework.instrument.classloading.WeavingTransformer;
 
 /**
  * Extension of Tomcat's default class loader which adds instrumentation
- * to loaded classes without the need of using a VM-level agent.
+ * to loaded classes without the need of using a VM-wide agent.
  *
  * @author Costin Leau
  * @since 2.0
