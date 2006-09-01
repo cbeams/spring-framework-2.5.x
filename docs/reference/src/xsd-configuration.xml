@@ -381,7 +381,7 @@ public class Client {
         <entry key="raskolnikov" value="raskolnikov@slums.org"/>
         <entry key="stavrogin" value="stavrogin@gov.org"/>
         <entry key="porfiry" value="porfiry@gov.org"/>
-      </list>
+      </map>
   </property>
 </bean>]]></programlisting>
                 <para>The above configuration uses a Spring <interfacename>FactoryBean</interfacename>
@@ -634,7 +634,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
             <title>The <literal>tx</literal> (transaction) schema</title>
             <para>The <literal>tx</literal> tags deal with configuring all of those
             beans in Spring's comprehensive support for transactions. These tags are
-            comprehensively covered in the chapter entitled <xref linkend="transaction"/>.</para>
+            covered in the chapter entitled <xref linkend="transaction"/>.</para>
             <para>In the interest of completeness, to use the tags in the <literal>tx</literal>
             schema, you need to have the following preamble at the top of your Spring XML
             configuration file; the emboldened text in the following snippet references the
