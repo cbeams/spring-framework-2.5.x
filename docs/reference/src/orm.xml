@@ -2450,6 +2450,16 @@
  &lt;/bean&gt;
 &lt;/beans&gt;</programlisting>
 
+        <sidebar>
+          <title>When is load time weaving required?</title>
+
+          <para>Not all JPA providers impose the need of an JDK agent
+          (Hibernate being an example). If your provider does not require an
+          agent or you have other alternatives (for example applying
+          enhancements at build time through a custom compiler or an ant task)
+          there is no need to use the load time weaver.</para>
+        </sidebar>
+
         <para>The <interfacename>LoadTimeWeaver</interfacename> interface is a
         Spring-provided class that allows JPA
         <interfacename>ClassTransformer</interfacename> instances to be
@@ -2536,8 +2546,8 @@
             </listitem>
 
             <listitem>
-              <para>Use the appropriate <literal>LoadTimeWeaver</literal>
-              when configuring
+              <para>Use the appropriate <literal>LoadTimeWeaver</literal> when
+              configuring
               <literal>LocalContainerEntityManagerFactoryBean</literal>:</para>
 
               <programlisting>&lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
@@ -2558,15 +2568,14 @@
           other.</para>
         </section>
 
-        <!-- 
         <section>
-          <title>OC4J setup</title>
+          <title>OC4J setup (10.1.3.1+)</title>
 
           <para>As Oracle's <ulink
           url="http://www.oracle.com/technology/tech/java/oc4j/index.html">OC4J</ulink>
           classloader has native bytecode transformation support, switching
-          from an JPA agent to <literal>LoadTimeWeaver</literal> is just a
-          matter of configuration:</para>
+          from an JDK agent to a <literal>LoadTimeWeaver</literal> can be done
+          just through the application Spring configuration:</para>
 
           <programlisting>&lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
   ...
@@ -2577,6 +2586,7 @@
 &lt;/bean&gt;</programlisting>
         </section>
 
+        <!-- 
         <section>
           <title>Resin setup</title>
 
@@ -2678,15 +2688,19 @@
 
     <section>
       <title>Implementing DAOs based on plain JPA</title>
-      
+
       <note>
-        <para>While <interfacename>EntityManagerFactory</interfacename> instances are thread safe,
-        <interfacename>EntityManager</interfacename> instances are not. The injected JPA <interfacename>EntityManager</interfacename> behave
-        just like an <interfacename>EntityManager</interfacename> fetched from an application server's JNDI
-        environment, as defined by the JPA specification. It will delegate all
-        calls to the current transactional <interfacename>EntityManager</interfacename>, if any; else, it
-        will fall back to a newly created <interfacename>EntityManager</interfacename> per operation, making
-        it thread safe. </para>
+        <para>While <interfacename>EntityManagerFactory</interfacename>
+        instances are thread safe,
+        <interfacename>EntityManager</interfacename> instances are not. The
+        injected JPA <interfacename>EntityManager</interfacename> behave just
+        like an <interfacename>EntityManager</interfacename> fetched from an
+        application server's JNDI environment, as defined by the JPA
+        specification. It will delegate all calls to the current transactional
+        <interfacename>EntityManager</interfacename>, if any; else, it will
+        fall back to a newly created
+        <interfacename>EntityManager</interfacename> per operation, making it
+        thread safe.</para>
       </note>
 
       <para>It is possible to write code against the plain JPA without using
@@ -2758,7 +2772,7 @@
 }</programlisting>
 
       <sidebar>
-        <title> Method and Field level Injection</title>
+        <title>Method and Field level Injection</title>
 
         <para>Annotations that indicate dependency injections (such as
         @PersistenceUnit and @PersistenceContext) can be applied on field or
@@ -2768,7 +2782,7 @@
         cases the member visibility (public, protected, private) does not
         matter.</para>
 
-        <para> What about class level annotations? </para>
+        <para>What about class level annotations?</para>
 
         <para>On JEE 5 platform, they are used for dependency declaration and
         not for resource injection.</para>
@@ -2787,7 +2801,6 @@
       automatically by the Spring container. This is of course appealing from
       a non-invasiveness perspective, and might feel more natural to JPA
       developers.</para>
-
     </section>
 
     <section>
