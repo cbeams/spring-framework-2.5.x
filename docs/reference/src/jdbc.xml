@@ -318,18 +318,15 @@ public Actor findActor(long id) {
     // in an array, and the boxing of the 'id' argument as a reference type</lineannotation><![CDATA[
     return (Actor) jdbcTemplate.queryForObject(sql, mapper, new Object[] {Long.valueOf(id)});
 }]]></programlisting>
-			<para>
-				Here is the same method, only this time using the
-				<classname>SimpleJdbcTemplate</classname>; notice how much 'cleaner'
-				the code is.
-			</para>
+			<para>Here is the same method, only this time using the	<classname>SimpleJdbcTemplate</classname>;
+			notice how much 'cleaner'the code is.</para>
 			<programlisting><lineannotation>// <classname>SimpleJdbcTemplate</classname>-style...</lineannotation><![CDATA[
 public Actor findActor(long id) {
     String sql = "select id, first_name, last_name from T_ACTOR where id = ?";
 
-    ParameterizedRowMapper<Actor> mapper = new ParameterizedRowMapper()<Actor> {
+    ParameterizedRowMapper<Actor> mapper = new ParameterizedRowMapper<Actor>() {
     
-        ]]><lineannotation>// notice the return type (c.f. Java 5 covariant return types)</lineannotation><![CDATA[
+        ]]><lineannotation>// notice the return type with respect to Java 5 covariant return types</lineannotation><![CDATA[
         public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
             Actor actor = new Actor();
             actor.setId(rs.getLong("id"));
