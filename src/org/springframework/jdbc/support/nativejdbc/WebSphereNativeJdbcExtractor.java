@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.jdbc.support.nativejdbc;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -24,7 +23,7 @@ import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Implementation of the NativeJdbcExtractor interface for WebSphere.
@@ -127,35 +126,16 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		// WebSphere 5 connection?
 		if (this.webSphere5ConnectionClass != null &&
 				this.webSphere5ConnectionClass.isAssignableFrom(con.getClass())) {
-			try {
-				// WebSphere 5's WSJdbcUtil.getNativeConnection(wsJdbcConnection)
-				return (Connection) this.webSphere5NativeConnectionMethod.invoke(null, new Object[] {con});
-			}
-			catch (InvocationTargetException ex) {
-				throw new DataAccessResourceFailureException(
-						"WebSphere5's getNativeConnection method failed", ex.getTargetException());
-			}
-			catch (Exception ex) {
-				throw new DataAccessResourceFailureException(
-						"Could not access WebSphere5's getNativeConnection method", ex);
-			}
+			// WebSphere 5's WSJdbcUtil.getNativeConnection(wsJdbcConnection)
+			return (Connection) ReflectionUtils.invokeMethod(
+					this.webSphere5NativeConnectionMethod, null, new Object[] {con});
 		}
 
 		// WebSphere 4 connection (or version 4 connection on WebSphere 5)?
 		else if (this.webSphere4ConnectionClass != null &&
 				this.webSphere4ConnectionClass.isAssignableFrom(con.getClass())) {
-			try {
-				// WebSphere 4's connectionProxy.getPhysicalConnection()
-				return (Connection) this.webSphere4PhysicalConnectionMethod.invoke(con, (Object[]) null);
-			}
-			catch (InvocationTargetException ex) {
-				throw new DataAccessResourceFailureException(
-						"WebSphere4's getPhysicalConnection method failed", ex.getTargetException());
-			}
-			catch (Exception ex) {
-				throw new DataAccessResourceFailureException(
-						"Could not access WebSphere4's getPhysicalConnection method", ex);
-			}
+			// WebSphere 4's connectionProxy.getPhysicalConnection()
+			return (Connection) ReflectionUtils.invokeMethod(this.webSphere4PhysicalConnectionMethod, con);
 		}
 
 		// No known WebSphere connection -> return as-is.

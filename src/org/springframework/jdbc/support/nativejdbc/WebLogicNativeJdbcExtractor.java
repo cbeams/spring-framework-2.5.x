@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,13 +16,11 @@
 
 package org.springframework.jdbc.support.nativejdbc;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Implementation of the NativeJdbcExtractor interface for WebLogic Server
@@ -63,8 +61,8 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 			this.getVendorConnectionMethod = this.jdbcExtensionClass.getMethod("getVendorConnection", (Class[]) null);
 		}
 		catch (Exception ex) {
-			throw new InvalidDataAccessApiUsageException(
-					"Could not initialize WebLogicNativeJdbcExtractor because WebLogic API classes are not available", ex);
+			throw new IllegalStateException(
+					"Could not initialize WebLogicNativeJdbcExtractor because WebLogic API classes are not available: " + ex);
 		}
 	}
 
@@ -95,17 +93,7 @@ public class WebLogicNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	 */
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (this.jdbcExtensionClass.isAssignableFrom(con.getClass())) {
-			try {
-				return (Connection) this.getVendorConnectionMethod.invoke(con, (Object[]) null);
-			}
-			catch (InvocationTargetException ex) {
-				throw new DataAccessResourceFailureException(
-						"WebLogic's getVendorConnection method failed", ex.getTargetException());
-			}
-			catch (Exception ex) {
-				throw new DataAccessResourceFailureException(
-						"Could not access WebLogic's getVendorConnection method", ex);
-			}
+			return (Connection) ReflectionUtils.invokeMethod(this.getVendorConnectionMethod, con);
 		}
 		return con;
 	}

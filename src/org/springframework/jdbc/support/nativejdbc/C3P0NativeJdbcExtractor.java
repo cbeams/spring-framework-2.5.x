@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.sql.SQLException;
 
 import com.mchange.v2.c3p0.C3P0ProxyConnection;
 
-import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Implementation of the NativeJdbcExtractor interface for the C3P0 connection pool.
@@ -48,6 +48,18 @@ public class C3P0NativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	private final Method getRawConnectionMethod;
 
+
+	/**
+	 * This method is not meant to be used directly; it rather serves
+	 * as callback method for C3P0's "rawConnectionOperation" API.
+	 * @param con a native Connection handle
+	 * @return the native Connection handle, as-is
+	 */
+	public static Connection getRawConnection(Connection con) {
+		return con;
+	}
+
+
 	public C3P0NativeJdbcExtractor() {
 		try {
 			this.getRawConnectionMethod = getClass().getMethod("getRawConnection", new Class[] {Connection.class});
@@ -56,6 +68,7 @@ public class C3P0NativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 			throw new IllegalStateException("Internal error in C3P0NativeJdbcExtractor: " + ex.getMessage());
 		}
 	}
+
 
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
 		return true;
@@ -82,20 +95,13 @@ public class C3P0NativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 				return (Connection) cpCon.rawConnectionOperation(
 						this.getRawConnectionMethod, null, new Object[] {C3P0ProxyConnection.RAW_CONNECTION});
 			}
+			catch (SQLException ex) {
+				throw ex;
+			}
 			catch (Exception ex) {
-				throw new DataAccessResourceFailureException("Could not retrieve C3P0's raw connection", ex);
+				ReflectionUtils.handleReflectionException(ex);
 			}
 		}
-		return con;
-	}
-
-	/**
-	 * This method is not meant to be used directly; it rather serves
-	 * as callback method for C3P0's "rawConnectionOperation" API.
-	 * @param con a native Connection handle
-	 * @return the native Connection handle, as-is
-	 */
-	public static Connection getRawConnection(Connection con) {
 		return con;
 	}
 
