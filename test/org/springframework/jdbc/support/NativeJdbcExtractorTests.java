@@ -124,15 +124,17 @@ public class NativeJdbcExtractorTests extends TestCase {
 		MockControl psControl = MockControl.createControl(PreparedStatement.class);
 		PreparedStatement ps = (PreparedStatement) psControl.getMock();
 		psControl.replay();
-
 		assertEquals(ps, extractor.getNativePreparedStatement(ps));
 
-		CallableStatement mockCallableStmt =
-			(CallableStatement) MockControl.createControl(CallableStatement.class).getMock();
-		assertEquals(mockCallableStmt, extractor.getNativeCallableStatement(mockCallableStmt));
+		MockControl csControl = MockControl.createControl(CallableStatement.class);
+		CallableStatement cs = (CallableStatement) csControl.getMock();
+		csControl.replay();
+		assertEquals(cs, extractor.getNativePreparedStatement(cs));
 
-		ResultSet mockResultSet = mockCallableStmt.getResultSet();
-		assertEquals(mockResultSet, extractor.getNativeResultSet(mockResultSet));
+		MockControl rsControl = MockControl.createControl(ResultSet.class);
+		ResultSet rs = (ResultSet) rsControl.getMock();
+		rsControl.replay();
+		assertEquals(rs, extractor.getNativeResultSet(rs));
 
 		conControl.verify();
 		stmtControl.verify();
