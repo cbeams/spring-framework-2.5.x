@@ -92,6 +92,9 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	 * @see org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy
 	 */
 	public Connection getNativeConnection(Connection con) throws SQLException {
+		if (con == null) {
+			return null;
+		}
 		Connection targetCon = DataSourceUtils.getTargetConnection(con);
 		Connection nativeCon = doGetNativeConnection(targetCon);
 		if (nativeCon == targetCon) {
@@ -126,6 +129,9 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	 * @see Statement#getConnection
 	 */
 	public Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException {
+		if (stmt == null) {
+			return null;
+		}
 		return getNativeConnection(stmt.getConnection());
 	}
 
