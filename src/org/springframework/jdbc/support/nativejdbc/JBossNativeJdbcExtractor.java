@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,6 @@
 
 package org.springframework.jdbc.support.nativejdbc;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -25,19 +24,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.util.ReflectionUtils;
 
 /**
- * Implementation of the NativeJdbcExtractor interface for JBoss 3.2.
+ * Implementation of the NativeJdbcExtractor interface for JBoss 3.2.4+.
  *
  * <p>Returns the underlying native Connection, Statement, etc to
  * application code instead of JBoss' wrapper implementations.
  * The returned JDBC classes can then safely be cast, e.g. to
  * <code>oracle.jdbc.OracleConnection</code>.
- *
- * <p>Note that JBoss started wrapping ResultSets as of 3.2.4, which is
- * supported by this implementation, while still being compatible with 3.2.x.
  *
  * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working with
  * a JBoss connection pool: If a given object is not a JBoss wrapper,
@@ -62,9 +57,13 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	private Class wrappedStatementClass;
 
+	private Class wrappedResultSetClass;
+
 	private Method getUnderlyingConnectionMethod;
 
 	private Method getUnderlyingStatementMethod;
+
+	private Method getUnderlyingResultSetMethod;
 
 
 	/**
@@ -75,14 +74,17 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		try {
 			this.wrappedConnectionClass = getClass().getClassLoader().loadClass(WRAPPED_CONNECTION_NAME);
 			this.wrappedStatementClass = getClass().getClassLoader().loadClass(WRAPPED_STATEMENT_NAME);
+			this.wrappedResultSetClass = getClass().getClassLoader().loadClass(WRAPPED_RESULT_SET_NAME);
 			this.getUnderlyingConnectionMethod =
 			    this.wrappedConnectionClass.getMethod("getUnderlyingConnection", (Class[]) null);
 			this.getUnderlyingStatementMethod =
 			    this.wrappedStatementClass.getMethod("getUnderlyingStatement", (Class[]) null);
+			this.getUnderlyingResultSetMethod =
+			    this.wrappedResultSetClass.getMethod("getUnderlyingResultSet", (Class[]) null);
 		}
 		catch (Exception ex) {
-			throw new InvalidDataAccessApiUsageException(
-					"Could not initialize JBossNativeJdbcExtractor because JBoss API classes are not available", ex);
+			throw new IllegalStateException(
+					"Could not initialize JBossNativeJdbcExtractor because JBoss API classes are not available: " + ex);
 		}
 	}
 
@@ -92,17 +94,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	 */
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {
 		if (this.wrappedConnectionClass.isAssignableFrom(con.getClass())) {
-			try {
-				return (Connection) this.getUnderlyingConnectionMethod.invoke(con, (Object[]) null);
-			}
-			catch (InvocationTargetException ex) {
-				throw new DataAccessResourceFailureException(
-						"JBoss' getUnderlyingConnection method failed", ex.getTargetException());
-			}
-			catch (Exception ex) {
-				throw new DataAccessResourceFailureException(
-						"Could not access JBoss' getUnderlyingConnection method", ex);
-			}
+			return (Connection) ReflectionUtils.invokeMethod(this.getUnderlyingConnectionMethod, con);
 		}
 		return con;
 	}
@@ -112,17 +104,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	 */
 	public Statement getNativeStatement(Statement stmt) throws SQLException {
 		if (this.wrappedStatementClass.isAssignableFrom(stmt.getClass())) {
-			try {
-				return (Statement) this.getUnderlyingStatementMethod.invoke(stmt, (Object[]) null);
-			}
-			catch (InvocationTargetException ex) {
-				throw new DataAccessResourceFailureException(
-						"JBoss' getUnderlyingStatement method failed", ex.getTargetException());
-			}
-			catch (Exception ex) {
-				throw new DataAccessResourceFailureException(
-						"Could not access JBoss' getUnderlyingStatement method", ex);
-			}
+			return (Statement) ReflectionUtils.invokeMethod(this.getUnderlyingStatementMethod, stmt);
 		}
 		return stmt;
 	}
@@ -140,26 +122,13 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	public CallableStatement getNativeCallableStatement(CallableStatement cs) throws SQLException {
 		return (CallableStatement) getNativeStatement(cs);
 	}
-	
+
 	/**
 	 * Retrieve the Connection via JBoss' <code>getUnderlyingResultSet</code> method.
-	 * <p>We access WrappedResultSet via direct reflection, since this class only
-	 * appeared in JBoss 3.2.4 and we want to stay compatible with at least 3.2.2+.
 	 */
 	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
-		if (rs.getClass().getName().equals(WRAPPED_RESULT_SET_NAME)) {
-			try {
-				Method getUnderlyingResultSetMethod = rs.getClass().getMethod("getUnderlyingResultSet", (Class[]) null);
-				return (ResultSet) getUnderlyingResultSetMethod.invoke(rs, (Object[]) null);
-			}
-			catch (InvocationTargetException ex) {
-				throw new DataAccessResourceFailureException(
-						"JBoss' getUnderlyingResultSet method failed", ex.getTargetException());
-			}
-			catch (Exception ex) {
-				throw new DataAccessResourceFailureException(
-						"Could not access JBoss' getUnderlyingResultSet method", ex);
-			}
+		if (this.wrappedResultSetClass.isAssignableFrom(rs.getClass())) {
+			return (ResultSet) ReflectionUtils.invokeMethod(this.getUnderlyingResultSetMethod, rs);
 		}
 		return rs;
 	}
