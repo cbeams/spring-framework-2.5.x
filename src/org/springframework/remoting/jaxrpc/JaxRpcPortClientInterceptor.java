@@ -45,27 +45,27 @@ import org.springframework.util.CollectionUtils;
  *
  * <p>Allows to set JAX-RPC's standard stub properties directly, via the
  * "username", "password", "endpointAddress" and "maintainSession" properties.
- * For typical usage, it is not necessary to specify those, though.
+ * For typical usage, it is not necessary to specify those.
  *
- * <p>This invoker is typically used with an RMI service interface. Alternatively,
- * this invoker can also proxy a JAX-RPC service with a matching non-RMI business
- * interface, i.e. an interface that mirrors the RMI service methods but does not
- * declare RemoteExceptions. In the latter case, RemoteExceptions thrown by the
- * JAX-RPC stub will automatically get converted to Spring's unchecked
- * RemoteAccessException.
+ * <p>In standard JAX-RPC style, this invoker is used with an RMI service interface.
+ * Alternatively, this invoker can also proxy a JAX-RPC service with a matching
+ * non-RMI business interface, that is, an interface that declares the service methods
+ * without RemoteExceptions. In the latter case, RemoteExceptions thrown by JAX-RPC
+ * will automatically get converted to Spring's unchecked RemoteAccessException.
  *
- * <p>If exposing the JAX-RPC port interface (i.e. an RMI interface) directly,
- * setting "serviceInterface" is sufficient. If exposing a non-RMI business
- * interface, the business interface needs to be set as "serviceInterface",
- * and the JAX-RPC port interface as "portInterface".
+ * <p>Setting "serviceInterface" is usually sufficient: The invoker will automatically
+ * use JAX-RPC "dynamic invocations" via the Call API in this case, no matter whether
+ * the specified interface is an RMI or non-RMI interface. Alternatively, a corresponding
+ * JAX-RPC port interface can be specified as "portInterface", which will turn this
+ * invoker into "static invocation" mode - operating on a standard JAX-RPC port stub.
  *
  * @author Juergen Hoeller
  * @since 15.12.2003
  * @see #setPortName
  * @see #setServiceInterface
  * @see #setPortInterface
+ * @see javax.xml.rpc.Service#createCall
  * @see javax.xml.rpc.Service#getPort
- * @see javax.xml.rpc.Stub
  * @see org.springframework.remoting.RemoteAccessException
  * @see org.springframework.jndi.JndiObjectFactoryBean
  */
@@ -638,7 +638,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Post-process the given JAX-RPC call.
 	 * Default implementation is empty. Called by <code>invoke</code>.
 	 * <p>Just applied when actually using JAX-RPC dynamic calls,
-	 * i.e. if no JAX-RPC-compliant port interface was specified.
+	 * that is, if no JAX-RPC-compliant port interface was specified.
 	 * Else, a JAX-RPC port stub will be used.
 	 * @param call the current JAX-RPC call object
 	 * (can be cast to an implementation-specific class if necessary)
