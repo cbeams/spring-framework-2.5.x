@@ -35,7 +35,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -114,29 +113,25 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 	}
 	
 	/**
-	 * Find an EntityManagerFactory with the given name in the current
-	 * application context
-	 * @param emfName name of the EntityManagerFactory
-	 * @return the EntityManagerFactory or throw NoSuchBeanDefinitionException
-	 * @throws NoSuchBeanDefinitionException if there is no such EntityManagerFactory
-	 * in the context
+	 * Find an EntityManagerFactory with the given name in the current application context.
+	 * @param emfName the name of the EntityManagerFactory
+	 * @return the EntityManagerFactory
+	 * @throws IllegalStateException if there is no such EntityManagerFactory in the context
 	 */
-	protected EntityManagerFactory findEntityManagerFactoryByName(String emfName)
-			throws NoSuchBeanDefinitionException {
-
+	protected EntityManagerFactory findEntityManagerFactoryByName(String emfName) throws IllegalStateException {
 		initMapsIfNecessary();
 		if (emfName == null || "".equals(emfName)) {
 			if (this.uniqueEntityManagerFactory != null) {
 				return this.uniqueEntityManagerFactory;
 			}
 			else {
-				throw new NoSuchBeanDefinitionException(
+				throw new IllegalStateException(
 						"No EntityManagerFactory name given and factory contains several");
 			}
 		}
 		EntityManagerFactory namedEmf = this.entityManagersByName.get(emfName);
 		if (namedEmf == null) {
-			throw new NoSuchBeanDefinitionException(
+			throw new IllegalStateException(
 					"No EntityManagerFactory found for persistence unit name '" + emfName + "'");
 		}
 		return namedEmf;
