@@ -19,15 +19,20 @@ package org.springframework.transaction;
 import java.sql.Connection;
 
 /**
- * Interface for classes that define transaction properties.
- * Base interface for TransactionAttribute.
+ * Interface that defines Spring-compliant transaction properties.
+ * Based on propagation behavior definitions analogous to EJB CMT attributes.
  *
- * <p>Note that isolation level, timeout and read-only settings will not get
- * applied unless a new transaction gets started. As only PROPAGATION_REQUIRED
- * and PROPAGATION_REQUIRES_NEW can actually cause that, it usually doesn't make
- * sense to specify those settings in all other cases. Furthermore, be aware
+ * <p>Note that isolation level and timeout settings will not get applied
+ * unless an actual new transaction gets started. As only PROPAGATION_REQUIRED
+ * and PROPAGATION_REQUIRES_NEW can cause that, it usually doesn't make sense
+ * to specify those settings in all other cases. Furthermore, be aware
  * that not all transaction managers will support those advanced features and
  * thus might throw corresponding exceptions when given non-default values.
+ *
+ * <p>The read-only flag applies to any transaction context, whether backed
+ * by an actual resource transaction or operating non-transactionally at
+ * the resource level. In the latter case, the flag will only apply to
+ * managed resources within the application, such as a Hibernate Session.
  *
  * @author Juergen Hoeller
  * @since 08.05.2003
@@ -108,7 +113,7 @@ public interface TransactionDefinition {
 	 * All other levels correspond to the JDBC isolation levels.
 	 * @see java.sql.Connection
 	 */
-	int ISOLATION_DEFAULT          = -1;
+	int ISOLATION_DEFAULT = -1;
 
 	/**
 	 * A constant indicating that dirty reads, non-repeatable reads and phantom reads
@@ -126,7 +131,7 @@ public interface TransactionDefinition {
 	 * from reading a row with uncommitted changes in it.
 	 * @see java.sql.Connection#TRANSACTION_READ_COMMITTED
 	 */
-	int ISOLATION_READ_COMMITTED   = Connection.TRANSACTION_READ_COMMITTED;
+	int ISOLATION_READ_COMMITTED = Connection.TRANSACTION_READ_COMMITTED;
 
 	/**
 	 * A constant indicating that dirty reads and non-repeatable reads are
@@ -137,7 +142,7 @@ public interface TransactionDefinition {
 	 * different values the second time (a "non-repeatable read").
 	 * @see java.sql.Connection#TRANSACTION_REPEATABLE_READ
 	 */
-	int ISOLATION_REPEATABLE_READ  = Connection.TRANSACTION_REPEATABLE_READ;
+	int ISOLATION_REPEATABLE_READ = Connection.TRANSACTION_REPEATABLE_READ;
 
 	/**
 	 * A constant indicating that dirty reads, non-repeatable reads and phantom
@@ -149,7 +154,7 @@ public interface TransactionDefinition {
 	 * same condition, retrieving the additional "phantom" row in the second read.
 	 * @see java.sql.Connection#TRANSACTION_SERIALIZABLE
 	 */
-	int ISOLATION_SERIALIZABLE     = Connection.TRANSACTION_SERIALIZABLE;
+	int ISOLATION_SERIALIZABLE = Connection.TRANSACTION_SERIALIZABLE;
 
 
 	/**
@@ -192,14 +197,15 @@ public interface TransactionDefinition {
 
 	/**
 	 * Return whether to optimize as read-only transaction.
-	 * This just serves as a hint for the actual transaction subsystem,
+	 * <p>The read-only flag applies to any transaction context, whether backed
+	 * by an actual resource transaction (PROPAGATION_REQUIRED/REQUIRES_NEW) or
+	 * operating non-transactionally at the resource level (PROPAGATION_SUPPORTS).
+	 * In the latter case, the flag will only apply to managed resources within
+	 * the application, such as a Hibernate Session.
+	 * <p>This just serves as a hint for the actual transaction subsystem;
 	 * it will <i>not necessarily</i> cause failure of write access attempts.
-	 * <p>Intended to be used in combination with PROPAGATION_REQUIRED or
-	 * PROPAGATION_REQUIRES_NEW. Beyond optimizing such actual transactions
-	 * accordingly, a transaction manager might also pass the read-only flag
-	 * to transaction synchronizations, even outside an actual transaction.
-	 * <p>A transaction manager that cannot interpret the read-only hint
-	 * will <i>not</i> throw an exception when given readOnly=true.
+	 * A transaction manager that cannot interpret the read-only hint will
+	 * <i>not</i> throw an exception when given asked for a read-only transaction.
 	 * @see org.springframework.transaction.support.TransactionSynchronization#beforeCommit(boolean)
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isCurrentTransactionReadOnly()
 	 */
@@ -209,8 +215,8 @@ public interface TransactionDefinition {
 	 * Return the name of this transaction. Can be <code>null</code>.
 	 * This will be used as transaction name to be shown in a
 	 * transaction monitor, if applicable (for example, WebLogic's).
-	 * <p>In case of Spring's declarative transactions, the exposed name will
-	 * be the fully-qualified class name + "." + method name (by default).
+	 * <p>In case of Spring's declarative transactions, the exposed name will be
+	 * <code>fully-qualified class name + "." + method name</code> (by default).
 	 * @see org.springframework.transaction.interceptor.TransactionAspectSupport
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionName()
 	 */
