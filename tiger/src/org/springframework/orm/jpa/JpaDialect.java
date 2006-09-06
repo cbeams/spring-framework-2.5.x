@@ -45,9 +45,12 @@ import org.springframework.transaction.TransactionException;
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since 2.0
- * @see JpaTransactionManager#setJpaDialect
- * @see JpaAccessor#setJpaDialect
  * @see DefaultJpaDialect
+ * @see JpaAccessor#setJpaDialect
+ * @see JpaTransactionManager#setJpaDialect
+ * @see JpaVendorAdapter#getJpaDialect()
+ * @see AbstractEntityManagerFactoryBean#setJpaDialect
+ * @see AbstractEntityManagerFactoryBean#setJpaVendorAdapter
  */
 public interface JpaDialect extends PersistenceExceptionTranslator {
 
@@ -186,6 +189,5 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 */
 	void releaseJdbcConnection(ConnectionHandle conHandle, EntityManager entityManager)
 			throws PersistenceException, SQLException;
-
 
 }
