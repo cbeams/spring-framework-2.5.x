@@ -35,40 +35,39 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Abstract support for FactoryBeans that create a local JPA 
- * EntityManagerFactory instance.
+ * Abstract base class for a FactoryBean that creates a local JPA EntityManagerFactory
+ * instance with a Spring application context. Encapsulates the common functionality
+ * between the different JPA bootstrap contracts (standalone as well as container).
  *
- * <p>Behaves like a EntityManagerFactory instance when used as bean
- * reference, e.g. for JpaTemplate's "entityManagerFactory" property.
- * Note that switching to a JndiObjectFactoryBean or a bean-style
- * EntityManagerFactory instance is just a matter of configuration!
+ * <p>Implements support for standard JPA configuration as well as Spring's
+ * JpaVendorAdapter abstraction, and controls the EntityManagerFactory's lifecycle.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since 2.0
- * @see JpaTemplate#setEntityManagerFactory
- * @see JpaTransactionManager#setEntityManagerFactory
- * @see org.springframework.jndi.JndiObjectFactoryBean
+ * @see LocalEntityManagerFactoryBean
+ * @see LocalContainerEntityManagerFactoryBean
  */
 public abstract class AbstractEntityManagerFactoryBean
 		implements FactoryBean, InitializingBean, DisposableBean,
 		EntityManagerFactoryInfo, PersistenceExceptionTranslator {
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private EntityManagerFactory entityManagerFactory;
-
-	private Class persistenceProviderClass;
+	private PersistenceProvider persistenceProvider;
 
 	private String persistenceUnitName;
 
@@ -80,31 +79,42 @@ public abstract class AbstractEntityManagerFactoryBean
 
 	private JpaDialect jpaDialect;
 
-	/**
-	 * Raw EntityManagerFactory as returned by the PersistenceProvider.
-	 */
+	/** Raw EntityManagerFactory as returned by the PersistenceProvider */
 	public EntityManagerFactory nativeEntityManagerFactory;
+
+	private EntityManagerFactory entityManagerFactory;
 
 
 	/**
 	 * Set the PersistenceProvider implementation class to use for creating
-	 * the EntityManagerFactory. If not specified (which is the default),
-	 * the <code>Persistence</code> class will be used to create the
-	 * EntityManagerFactory, relying on JPA's autodetection mechanism.
+	 * the EntityManagerFactory. If not specified, the persistence provider
+	 * will be taken from the JpaVendorAdapter (if any) or retrieved through
+	 * scanning (as far as possible).
+	 * @see JpaVendorAdapter#getPersistenceProvider()
 	 * @see javax.persistence.spi.PersistenceProvider
 	 * @see javax.persistence.Persistence
 	 */
 	public void setPersistenceProviderClass(Class persistenceProviderClass) {
-		if (persistenceProviderClass != null &&
-				!PersistenceProvider.class.isAssignableFrom(persistenceProviderClass)) {
-			throw new IllegalArgumentException(
-					"serviceFactoryClass must implement [javax.persistence.spi.PersistenceProvider]");
-		}
-		this.persistenceProviderClass = persistenceProviderClass;
+		Assert.notNull(persistenceProviderClass, "persistenceProviderClass must not be null");
+		Assert.isTrue(PersistenceProvider.class.isAssignableFrom(persistenceProviderClass),
+				"serviceFactoryClass must implement [javax.persistence.spi.PersistenceProvider]");
+		this.persistenceProvider = (PersistenceProvider) BeanUtils.instantiateClass(persistenceProviderClass);
 	}
 
-	protected Class getPersistenceProviderClass() {
-		return persistenceProviderClass;
+	/**
+	 * Set the PersistenceProvider instance to use for creating the EntityManagerFactory.
+	 * If not specified, the persistence provider will be taken from the JpaVendorAdapter
+	 * (if any) or retrieved through scanning (as far as possible).
+	 * @see JpaVendorAdapter#getPersistenceProvider()
+	 * @see javax.persistence.spi.PersistenceProvider
+	 * @see javax.persistence.Persistence
+	 */
+	public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
+		this.persistenceProvider = persistenceProvider;
+	}
+
+	public PersistenceProvider getPersistenceProvider() {
+		return persistenceProvider;
 	}
 
 	/**
@@ -199,8 +209,8 @@ public abstract class AbstractEntityManagerFactoryBean
 
 	public final void afterPropertiesSet() throws PersistenceException {
 		if (this.jpaVendorAdapter != null) {
-			if (this.persistenceProviderClass == null) {
-				this.persistenceProviderClass = this.jpaVendorAdapter.getPersistenceProviderClass();
+			if (this.persistenceProvider == null) {
+				this.persistenceProvider = this.jpaVendorAdapter.getPersistenceProvider();
 			}
 			Map vendorPropertyMap = this.jpaVendorAdapter.getJpaPropertyMap();
 			if (vendorPropertyMap != null) {
@@ -285,11 +295,11 @@ public abstract class AbstractEntityManagerFactoryBean
 		return this.nativeEntityManagerFactory;
 	}
 
-	public DataSource getDataSource() {
+	public PersistenceUnitInfo getPersistenceUnitInfo() {
 		return null;
 	}
 
-	public PersistenceUnitInfo getPersistenceUnitInfo() {
+	public DataSource getDataSource() {
 		return null;
 	}
 
