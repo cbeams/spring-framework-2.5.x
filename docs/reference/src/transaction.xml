@@ -520,7 +520,7 @@ xsi:schemaLocation="
             to drive transactions around <emphasis>method invocations</emphasis>.</para>
             <note>
                 <para>Although knowledge of AOP (and specifically Spring AOP) is not required
-                in order to use Springs declarative transaction support, it can help.
+                in order to use Spring's declarative transaction support, it can help.
                 Spring AOP is thoroughly covered in the chapter entitled <xref linkend="aop"/>.</para>
             </note>
             <para>Conceptually, calling a method on a transactional proxy looks like this...</para>
@@ -538,10 +538,10 @@ xsi:schemaLocation="
         <section id="transaction-declarative-first-example">
             <title>A first example</title>
             <para>Consider the following interface, and its attendant implementation.
-            The intent is to convey the concepts, and using <literal><emphasis>Foo</emphasis></literal> and
-            <literal><emphasis>Bar</emphasis></literal> means that you can concentrate
-            on the transaction usage and not have to worry about the domain model.</para>
-            <programlisting><lineannotation>&lt;!-- the service (facade) interface that we want to make transactional --&gt;</lineannotation><![CDATA[
+            The intent is to convey the concepts, and using the rote <classname>Foo</classname> and
+            <classname>Bar</classname> tropes means that you can concentrate on the transaction
+            usage and not have to worry about the domain model.</para>
+            <programlisting><lineannotation>&lt;!-- the service interface that we want to make transactional --&gt;</lineannotation><![CDATA[
             
 package x.y.service;
             
@@ -554,6 +554,7 @@ public interface FooService {
     void insertFoo(Foo foo);
 
     void updateFoo(Foo foo);
+
 }]]></programlisting>
             <programlisting><lineannotation>&lt;!-- an implementation of the above interface --&gt;</lineannotation><![CDATA[
             
@@ -576,6 +577,7 @@ public class DefaultFooService implements FooService {
     public void updateFoo(Foo foo) {
         throw new UnsupportedOperationException();
     }
+
 }]]></programlisting>
             <para><emphasis>(For the purposes of this example, the fact that the implementation class
             (<classname>DefaultFooService</classname>) throws
@@ -686,7 +688,7 @@ public class DefaultFooService implements FooService {
             <xref linkend="aop"/> for more details.)</emphasis></para>
             <para>Now that we've analyzed the configuration, you may be asking
             yourself, <quote><emphasis>Okay... but what does all this configuration actually
-            <emphasis role="bold">do</emphasis>?</emphasis></quote>.</para>
+            do?</emphasis></quote>.</para>
             <para>What the above configuration is going to do is create
             a transactional proxy around the object that is created from the
             <literal>'fooService'</literal> bean definition. The proxy will be configured
@@ -842,7 +844,7 @@ public interface FooService {
   <bean id="fooService" class="x.y.service.DefaultFooService"/>
 
   ]]><lineannotation>&lt;!-- enable the configuration of transactional behavior based on annotations --&gt;</lineannotation><![CDATA[
-  ]]><emphasis role="bold"><![CDATA[<tx:annotation-driven/>]]></emphasis><![CDATA[
+  ]]><emphasis role="bold"><![CDATA[<tx:annotation-driven transaction-manager="txManager"/>]]></emphasis><![CDATA[
 
   ]]><lineannotation>&lt;!-- a <interfacename>PlatformTransactionManager</interfacename> is still required --&gt;</lineannotation><![CDATA[
   <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
@@ -853,6 +855,16 @@ public interface FooService {
   ]]><lineannotation>&lt;!-- other <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
+            <tip>
+                <para>You can actually omit the <literal>'transaction-manager'</literal>
+                attribute in the <literal>&lt;tx:annotation-driven/&gt;</literal> tag 
+                if the bean name of the <interfacename>PlatformTransactionManager</interfacename>
+                that you want to wire in has the name <literal>'transactionManager'</literal>.
+                If the <interfacename>PlatformTransactionManager</interfacename> bean
+                that you want to wire in has any other name, then you have to be explicit
+                and use the <literal>'transaction-manager'</literal> attribute as in the example
+                above.</para>
+            </tip>
             <para>The <interfacename>@Transactional</interfacename> annotation may
             be placed before an interface definition, a method on an interface, a
             class definition, or a method on a class.</para>

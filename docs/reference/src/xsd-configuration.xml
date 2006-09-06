@@ -635,6 +635,16 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
             <para>The <literal>tx</literal> tags deal with configuring all of those
             beans in Spring's comprehensive support for transactions. These tags are
             covered in the chapter entitled <xref linkend="transaction"/>.</para>
+            <tip>
+                <para>You are strongly encouraged to look at the
+                <filename>'spring-tx.xsd'</filename> file that ships with the Spring
+                distribution. This file is (of course), the XML Schema for Spring's
+                transaction configuration, and covers all of the various tags in the
+                <literal>tx</literal> namespace, including attribute defaults and
+                suchlike. This file is documented inline, and thus the information is
+                not repeated here in the interests of adhering to the DRY (Don't Repeat
+                Yourself) principle.</para>
+            </tip>
             <para>In the interest of completeness, to use the tags in the <literal>tx</literal>
             schema, you need to have the following preamble at the top of your Spring XML
             configuration file; the emboldened text in the following snippet references the
