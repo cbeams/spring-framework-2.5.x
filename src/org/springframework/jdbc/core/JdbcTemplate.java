@@ -524,7 +524,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 	}
 
-	public Object execute(final String sql, PreparedStatementCallback action) throws DataAccessException {
+	public Object execute(String sql, PreparedStatementCallback action) throws DataAccessException {
 		return execute(new SimplePreparedStatementCreator(sql), action);
 	}
 
@@ -781,11 +781,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				try {
 					int batchSize = pss.getBatchSize();
-					boolean interruptible = pss instanceof InterruptibleBatchPreparedStatementSetter;
+					InterruptibleBatchPreparedStatementSetter ipss =
+							(pss instanceof InterruptibleBatchPreparedStatementSetter ?
+							(InterruptibleBatchPreparedStatementSetter) pss : null);
 					if (JdbcUtils.supportsBatchUpdates(ps.getConnection())) {
 						for (int i = 0; i < batchSize; i++) {
 							pss.setValues(ps, i);
-							if (interruptible && ((InterruptibleBatchPreparedStatementSetter)pss).isBatchExhausted(i)) {
+							if (ipss != null && ipss.isBatchExhausted(i)) {
 								break;
 							}
 							else {
