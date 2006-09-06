@@ -38,8 +38,8 @@ import org.springframework.web.servlet.mvc.throwaway.ThrowawayController;
  * remove the 'Controller' suffix if it exists and return the remaining text, lowercased,
  * as the mapping, with a leading <code>/</code>. For example:
  * <ul>
- * 	<li><code>WelcomeController</code> -> <code>/welcome</code></li>
- * 	<li><code>HomeController</code> -> <code>/home</code></li>
+ * 	<li><code>WelcomeController</code> -> <code>/welcome*</code></li>
+ * 	<li><code>HomeController</code> -> <code>/home*</code></li>
  * </ul>
  *
  * <p>For {@link MultiActionController MultiActionControllers} then a similar mapping is registered,
