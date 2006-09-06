@@ -1,20 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <xsd:schema xmlns="http://www.springframework.org/schema/tx"
-						xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-						xmlns:beans="http://www.springframework.org/schema/beans"
-						xmlns:tool="http://www.springframework.org/schema/tool"
-						targetNamespace="http://www.springframework.org/schema/tx"
-						elementFormDefault="qualified"
-						attributeFormDefault="unqualified">
+			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			xmlns:beans="http://www.springframework.org/schema/beans"
+			xmlns:tool="http://www.springframework.org/schema/tool"
+			targetNamespace="http://www.springframework.org/schema/tx"
+			elementFormDefault="qualified"
+			attributeFormDefault="unqualified">
 
 	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
 	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
 
-
 	<xsd:element name="advice">
 		<xsd:complexType>
 			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.transaction.interceptor.TransactionInterceptor">
+					Defines the transactional semantics of the AOP advice that
+					is to be executed.
+
+					That is, this advice tag is where the transactional
+					semantics of any number of methods are defined (where
+					transactional semantics includes the propagation
+					settings, the isolation level, the rollback rules, etc.).
+				</xsd:documentation>
 				<xsd:appinfo>
 					<tool:annotation>
 						<tool:exports type="org.springframework.transaction.interceptor.TransactionInterceptor"/>
@@ -34,8 +42,40 @@
 
 	<xsd:element name="annotation-driven">
 		<xsd:complexType>
-			<xsd:attribute name="transaction-manager" type="xsd:string" default="transactionManager"/>
-			<xsd:attribute name="proxy-target-class" type="xsd:boolean" default="false"/>
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.aop.aspectj.autoproxy.AspectJInvocationContextExposingAdvisorAutoProxyCreator">
+					The presence of this tag indicates that transaction
+					configuration is defined by Java5 annotations on bean
+					classes, and that proxies are automatically to be created
+					for the relevant annotated beans.
+
+					Transaction semantics such as propagation settings, the
+					isolation level, the rollback rules, etc. are all defined
+					in the annotation metadata
+					(see org.springframework.transaction.annotation.Transactional).
+				</xsd:documentation>
+			</xsd:annotation>
+			<xsd:attribute name="transaction-manager" type="xsd:string" default="transactionManager">
+				<xsd:annotation>
+					<xsd:documentation source="java:org.springframework.transaction.PlatformTransactionManager">
+						The bean name of the PlatformTransactionManager that
+						is to be used to drive transactions.
+						
+						This attribute is not required, and only needs to be
+						specified explicitly if the bean name of the desired
+						PlatformTransactionManager is not 'transactionManager'.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="proxy-target-class" type="xsd:boolean" default="false">
+				<xsd:annotation>
+					<xsd:documentation source="java:org.springframework.transaction.PlatformTransactionManager">
+						Are class-based (CGLIB) proxies to be created? By
+						default, standard Java interface-based proxies are
+						created.
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
@@ -46,6 +86,11 @@
 					<xsd:attribute name="name" type="xsd:string" use="required"/>
 					<xsd:attribute name="propagation" default="REQUIRED">
 						<xsd:simpleType>
+							<xsd:annotation>
+								<xsd:documentation source="java:org.springframework.transaction.annotation.Propgation">
+									The transaction propagation setting.
+								</xsd:documentation>
+							</xsd:annotation>
 							<xsd:restriction base="xsd:string">
 								<xsd:enumeration value="REQUIRED"/>
 								<xsd:enumeration value="SUPPORTS"/>
@@ -59,6 +104,11 @@
 					</xsd:attribute>
 					<xsd:attribute name="isolation" default="DEFAULT">
 						<xsd:simpleType>
+							<xsd:annotation>
+								<xsd:documentation source="java:org.springframework.transaction.annotation.Isolation">
+									The transaction isolation setting.
+								</xsd:documentation>
+							</xsd:annotation>
 							<xsd:restriction base="xsd:string">
 								<xsd:enumeration value="DEFAULT"/>
 								<xsd:enumeration value="READ_UNCOMMITTED"/>
