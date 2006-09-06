@@ -2729,7 +2729,8 @@ public class FileUploadBean {
             <para>The <classname>ControllerClassNameHandlerMapping</classname> class extends
             the <classname>AbstractHandlerMapping</classname> base class so you can define
             <interfacename>HandlerInterceptor</interfacename> instances and everything else
-            as per usual.</para>
+            just like you would with many other <interfacename>HandlerMapping</interfacename>
+            implementations.</para>
         </section>
 
         <section id="mvc-coc-modelmap">
