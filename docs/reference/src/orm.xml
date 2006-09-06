@@ -2402,7 +2402,7 @@
         <programlisting>&lt;beans&gt;
 ...
 &lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean"&gt;
- &lt;property name="entityManagerName" value="myPersistenceUnit"/&gt;
+ &lt;property name="persistenceUnitName" value="myPersistenceUnit"/&gt;
 &lt;/bean&gt;
 ...
 &lt;/beans&gt;</programlisting>
