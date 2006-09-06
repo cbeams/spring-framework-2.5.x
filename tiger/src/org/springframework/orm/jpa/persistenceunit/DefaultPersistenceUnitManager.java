@@ -1,0 +1,348 @@
+/*
+ * Copyright 2002-2006 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.orm.jpa.persistenceunit;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.PersistenceException;
+import javax.persistence.spi.PersistenceUnitInfo;
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.instrument.classloading.LoadTimeWeaver;
+import org.springframework.jdbc.datasource.lookup.DataSourceLookup;
+import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
+import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
+
+/**
+ * Default implementation of the PersistenceUnitManager interface.
+ * Used as internal default by LocalContainerEntityManagerFactoryBean.
+ *
+ * <p>Supports standard JPA scanning for <code>persistence.xml</code> files,
+ * with configurable file location, JDBC DataSource lookup and load-time weaving.
+ *
+ * <p>The default XML file location is <code>classpath:META-INF/persistence.xml</code>,
+ * scanning for all matching files in the class path (as defined in the JPA specification).
+ * DataSource names are by default interpreted as JNDI names, and no load time weaving
+ * is available (which requires weaving to be turned off in the persistence provider).
+ *
+ * @author Juergen Hoeller
+ * @since 2.0
+ * @see #setPersistenceXmlLocation
+ * @see #setDataSourceLookup
+ * @see #setLoadTimeWeaver
+ * @see org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
+ */
+public class DefaultPersistenceUnitManager implements PersistenceUnitManager, ResourceLoaderAware, InitializingBean {
+
+	/**
+	 * Default location of the <code>persistence.xml</code> file:
+	 * "classpath*:META-INF/persistence.xml".
+	 */
+	public final static String DEFAULT_PERSISTENCE_XML_LOCATION = "classpath*:META-INF/persistence.xml";
+
+	/**
+	 * Default location for the persistence unit root URL:
+	 * "classpath:", indicating the root of the class path.
+	 */
+	public final static String ORIGINAL_DEFAULT_PERSISTENCE_UNIT_ROOT_LOCATION = "classpath:";
+
+
+	/** Location of persistence.xml file(s) */
+	private String persistenceXmlLocation = DEFAULT_PERSISTENCE_XML_LOCATION;
+
+	private String defaultPersistenceUnitRootLocation = ORIGINAL_DEFAULT_PERSISTENCE_UNIT_ROOT_LOCATION;
+
+	private DataSourceLookup dataSourceLookup = new JndiDataSourceLookup();
+
+	private DataSource defaultDataSource;
+
+	private LoadTimeWeaver loadTimeWeaver;
+
+	private PersistenceUnitPostProcessor[] persistenceUnitPostProcessors;
+
+	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+
+	private final Set<String> persistenceUnitInfoNames = new HashSet<String>();
+
+	private final Map<String, PersistenceUnitInfo> persistenceUnitInfos = new HashMap<String, PersistenceUnitInfo>();
+
+
+	/**
+	 * Set the location of the <code>persistence.xml</code> file
+	 * we want to use. This is a Spring resource location.
+	 * <p>Default is "classpath:META-INF/persistence.xml".
+	 * @param persistenceXmlLocation a Spring resource String
+	 * identifying the location of the <code>persistence.xml</code> file
+	 * that this LocalContainerEntityManagerFactoryBean should parse
+	 */
+	public void setPersistenceXmlLocation(String persistenceXmlLocation) {
+		this.persistenceXmlLocation = persistenceXmlLocation;
+	}
+
+	/**
+	 * Set the default persistence unit root location, to be applied
+	 * if no unit-specific persistence unit root could be determined.
+	 * <p>Default is "classpath:", that is, the root of the current class path
+	 * (nearest root directory). To be overridden if unit-specific resolution
+	 * does not work and the class path root is not appropriate either.
+	 */
+	public void setDefaultPersistenceUnitRootLocation(String defaultPersistenceUnitRootLocation) {
+		this.defaultPersistenceUnitRootLocation = defaultPersistenceUnitRootLocation;
+	}
+
+	/**
+	 * Specify the JDBC DataSources that the JPA persistence provider is supposed
+	 * to use for accessing the database, resolving data source names in
+	 * <code>persistence.xml</code> against Spring-managed DataSources.
+	 * <p>The specified Map needs to define data source names for specific DataSource
+	 * objects, matching the data source names used in <code>persistence.xml</code>.
+	 * If not specified, data source names will be resolved as JNDI names instead
+	 * (as defined by standard JPA).
+	 * @see org.springframework.jdbc.datasource.lookup.MapDataSourceLookup
+	 */
+	public void setDataSources(Map<String, DataSource> dataSources) {
+		this.dataSourceLookup = new MapDataSourceLookup(dataSources);
+	}
+
+	/**
+	 * Specify the JDBC DataSourceLookup that provides DataSources for the
+	 * persistence provider, resolving data source names in <code>persistence.xml</code>
+	 * against Spring-managed DataSource instances.
+	 * <p>Default is JndiDataSourceLookup, which resolves DataSource names as
+	 * JNDI names (as defined by standard JPA). Specify a BeanFactoryDataSourceLookup
+	 * instance if you want DataSource names to be resolved against Spring bean names.
+	 * <p>Alternatively, consider passing in a map from names to DataSource instances
+	 * via the "dataSources" property. If the <code>persistence.xml</code> file
+	 * does not define DataSource names at all, specify a default DataSource
+	 * via the "defaultDataSource" property.
+	 * @see org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup
+	 * @see org.springframework.jdbc.datasource.lookup.BeanFactoryDataSourceLookup
+	 * @see #setDataSources
+	 * @see #setDefaultDataSource
+	 */
+	public void setDataSourceLookup(DataSourceLookup dataSourceLookup) {
+		this.dataSourceLookup = (dataSourceLookup != null ? dataSourceLookup : new JndiDataSourceLookup());
+	}
+
+	/**
+	 * Return the JDBC DataSourceLookup that provides DataSources for the
+	 * persistence provider, resolving data source names in <code>persistence.xml</code>
+	 * against Spring-managed DataSource instances.
+	 */
+	public DataSourceLookup getDataSourceLookup() {
+		return dataSourceLookup;
+	}
+
+	/**
+	 * Specify the JDBC DataSource that the JPA persistence provider is supposed
+	 * to use for accessing the database if none has been specified in
+	 * <code>persistence.xml</code>.
+	 * <p>In JPA speak, a DataSource passed in here will be uses as "nonJtaDataSource"
+	 * on the PersistenceUnitInfo passed to the PersistenceProvider, provided that
+	 * none has been registered before.
+	 * @see javax.persistence.spi.PersistenceUnitInfo#getNonJtaDataSource()
+	 */
+	public void setDefaultDataSource(DataSource defaultDataSource) {
+		this.defaultDataSource = defaultDataSource;
+	}
+
+	/**
+	 * Return the JDBC DataSource that the JPA persistence provider is supposed
+	 * to use for accessing the database if none has been specified in
+	 * <code>persistence.xml</code>.
+	 */
+	public DataSource getDefaultDataSource() {
+		return defaultDataSource;
+	}
+
+	/**
+	 * Specify the Spring LoadTimeWeaver to use for class instrumentation according
+	 * to the JPA class transformer contract.
+	 * <p>It is a not required to specify a LoadTimeWeaver: Most providers will be
+	 * able to provide a subset of their functionality without class instrumentation
+	 * as well, or operate with their VM agent specified on JVM startup.
+	 * <p>In terms of Spring-provided weaving options, the most important ones are
+	 * InstrumentationLoadTimeWeaver, which requires a Spring-specific (but very general)
+	 * VM agent specified on JVM startup, and ReflectiveLoadTimeWeaver, which interacts
+	 * with an underlying ClassLoader based on specific extended methods being available
+	 * on it (for example, interacting with Spring's TomcatInstrumentableClassLoader).
+	 * @see org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver
+	 * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
+	 * @see org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader
+	 */
+	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
+		this.loadTimeWeaver = loadTimeWeaver;
+	}
+
+	/**
+	 * Return the Spring LoadTimeWeaver to use for class instrumentation according
+	 * to the JPA class transformer contract.
+	 */
+	public LoadTimeWeaver getLoadTimeWeaver() {
+		return loadTimeWeaver;
+	}
+
+	/**
+	 * Set the PersistenceUnitPostProcessors to be applied to each
+	 * PersistenceUnitInfo that has been parsed by this manager.
+	 * <p>Such post-processors can, for example, register further entity
+	 * classes and jar files, in addition to the metadata read in from
+	 * <code>persistence.xml</code>.
+	 */
+	public void setPersistenceUnitPostProcessors(PersistenceUnitPostProcessor[] postProcessors) {
+		this.persistenceUnitPostProcessors = postProcessors;
+	}
+
+	/**
+	 * Return the PersistenceUnitPostProcessors to be applied to each
+	 * PersistenceUnitInfo that has been parsed by this manager.
+	 */
+	public PersistenceUnitPostProcessor[] getPersistenceUnitPostProcessors() {
+		return persistenceUnitPostProcessors;
+	}
+
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourcePatternResolver = (resourceLoader != null ?
+				ResourcePatternUtils.getResourcePatternResolver(resourceLoader) :
+				new PathMatchingResourcePatternResolver());
+	}
+
+
+	public void afterPropertiesSet() {
+		preparePersistenceUnitInfos();
+	}
+
+	/**
+	 * Prepare the PersistenceUnitInfos according to the configuration
+	 * of this manager: scanning for <code>persistence.xml</code> files,
+	 * parsing all matching files, configurating and post-processing them.
+	 * <p>PersistenceUnitInfos cannot be obtained before this preparation
+	 * method has been invoked.
+	 * @see #obtainDefaultPersistenceUnitInfo()
+	 * @see #obtainPersistenceUnitInfo(String)
+	 */
+	public void preparePersistenceUnitInfos() {
+		this.persistenceUnitInfoNames.clear();
+		this.persistenceUnitInfos.clear();
+		SpringPersistenceUnitInfo[] puis = readPersistenceUnitInfos();
+		for (int i = 0; i < puis.length; i++) {
+			SpringPersistenceUnitInfo pui = puis[i];
+			if (pui.getPersistenceUnitRootUrl() == null) {
+				pui.setPersistenceUnitRootUrl(determineDefaultPersistenceUnitRootUrl());
+			}
+			if (pui.getNonJtaDataSource() == null) {
+				pui.setNonJtaDataSource(this.defaultDataSource);
+			}
+			pui.setLoadTimeWeaver(this.loadTimeWeaver);
+			postProcessPersistenceUnitInfo(pui);
+			String name = pui.getPersistenceUnitName();
+			this.persistenceUnitInfoNames.add(name);
+			this.persistenceUnitInfos.put(name, pui);
+		}
+	}
+
+	/**
+	 * Read all persistence unit infos from <code>persistence.xml</code>,
+	 * as defined in the JPA specification.
+	 */
+	private SpringPersistenceUnitInfo[] readPersistenceUnitInfos() {
+		PersistenceUnitReader reader = new PersistenceUnitReader(this.resourcePatternResolver, this.dataSourceLookup);
+		return reader.readPersistenceUnitInfos(this.persistenceXmlLocation);
+	}
+
+	/**
+	 * Try to determine the persistence unit root URL based on the given
+	 * "defaultPersistenceUnitRootLocation".
+	 * @return the persistence unit root URL to pass to the JPA PersistenceProvider
+	 * @see #setDefaultPersistenceUnitRootLocation
+	 */
+	private URL determineDefaultPersistenceUnitRootUrl() {
+		if (this.defaultPersistenceUnitRootLocation == null) {
+			return null;
+		}
+		try {
+			Resource res = this.resourcePatternResolver.getResource(this.defaultPersistenceUnitRootLocation);
+			return res.getURL();
+		}
+		catch (IOException ex) {
+			throw new PersistenceException("Unable to resolve persistence unit root URL", ex);
+		}
+	}
+
+	/**
+	 * Hook method allowing subclasses to customize each PersistenceUnitInfo.
+	 * <p>Default implementation delegates to all registered PersistenceUnitPostProcessors.
+	 * It is usually preferable to register further entity classes, jar files etc there
+	 * rather than in a subclass of this manager, to be able to reuse the post-processors.
+	 * @param pui the chosen PersistenceUnitInfo, as read from <code>persistence.xml</code>.
+	 * Passed in as MutablePersistenceUnitInfo.
+	 * @see #setPersistenceUnitPostProcessors
+	 */
+	protected void postProcessPersistenceUnitInfo(MutablePersistenceUnitInfo pui) {
+		PersistenceUnitPostProcessor[] postProcessors = getPersistenceUnitPostProcessors();
+		if (postProcessors != null) {
+			for (int i = 0; i < postProcessors.length; i++) {
+				postProcessors[i].postProcessPersistenceUnitInfo(pui);
+			}
+		}
+	}
+
+
+	public PersistenceUnitInfo obtainDefaultPersistenceUnitInfo() {
+		if (this.persistenceUnitInfoNames.isEmpty()) {
+			throw new IllegalStateException(
+					"No persistence units parsed from [" + this.persistenceXmlLocation + "]");
+		}
+		if (this.persistenceUnitInfos.isEmpty()) {
+			throw new IllegalStateException(
+					"All persistence units from [" + this.persistenceXmlLocation + "] already obtained");
+		}
+		if (this.persistenceUnitInfos.size() > 1) {
+			throw new IllegalStateException(
+					"No single default persistence unit defined in [" + this.persistenceXmlLocation + "]");
+		}
+		return this.persistenceUnitInfos.values().iterator().next();
+	}
+
+	public PersistenceUnitInfo obtainPersistenceUnitInfo(String persistenceUnitName) {
+		PersistenceUnitInfo pui = this.persistenceUnitInfos.remove(persistenceUnitName);
+		if (pui == null) {
+			if (!this.persistenceUnitInfoNames.contains(persistenceUnitName)) {
+				throw new IllegalArgumentException(
+						"No persistence unit with name '" + persistenceUnitName + "' found");
+			}
+			else {
+				throw new IllegalStateException(
+						"Persistence unit with name '" + persistenceUnitName + "' already obtained");
+			}
+		}
+		return pui;
+	}
+
+}

@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.jpa;
+package org.springframework.orm.jpa.persistenceunit;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.xml.XMLConstants;
@@ -83,11 +86,21 @@ class PersistenceUnitReader {
 
 	private static final String META_INF = "META-INF";
 
+
+	/**
+	 * Cache for PersistenceUnitInfos loaded from the class path, in particular
+	 * for the default location "classpath*:META-INF/persistence.xml".
+	 */
+	private static final Map<String, SpringPersistenceUnitInfo[]> persistenceUnitInfoCache =
+			Collections.synchronizedMap(new HashMap<String, SpringPersistenceUnitInfo[]>());
+	
+	
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
 	private final DataSourceLookup dataSourceLookup;
+
 
 	public PersistenceUnitReader(ResourcePatternResolver resourcePatternResolver, DataSourceLookup dataSourceLookup) {
 		Assert.notNull(resourcePatternResolver, "ResourceLoader must not be null");
@@ -96,10 +109,10 @@ class PersistenceUnitReader {
 		this.dataSourceLookup = dataSourceLookup;
 	}
 
+
 	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String persistenceXmlLocation) {
 		ErrorHandler handler = new SimpleSaxErrorHandler(logger);
 		List<SpringPersistenceUnitInfo> infos = new ArrayList<SpringPersistenceUnitInfo>();
-
 		String resourceLocation = null;
 		try {
 			Resource[] resources = this.resourcePatternResolver.getResources(persistenceXmlLocation);

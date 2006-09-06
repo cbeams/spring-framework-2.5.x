@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.jpa;
+package org.springframework.orm.jpa.persistenceunit;
 
 import java.net.URL;
 import java.util.LinkedList;
@@ -26,28 +26,24 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
-import org.springframework.instrument.classloading.LoadTimeWeaver;
-import org.springframework.instrument.classloading.SimpleThrowawayClassLoader;
 import org.springframework.util.ClassUtils;
 
 /**
- * Spring's implementation of the JPA PersistenceUnitInfo interface
+ * Spring's base implementation of the JPA PersistenceUnitInfo interface
  * used to bootstrap an EntityManagerFactory in a container.
  *
- * <p>This implementation is largely a JavaBean, with some instrumentation
- * hooks based on Spring's LoadTimeWeaver abstraction.
+ * <p>This implementation is largely a JavaBean, offering mutators
+ * for all standard PersistenceUnitInfo properties.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Costin Leau
  * @since 2.0
- * @see #setLoadTimeWeaver
- * @see LocalContainerEntityManagerFactoryBean#determinePersistenceUnitInfo()
  */
-public class SpringPersistenceUnitInfo implements PersistenceUnitInfo {
-	
+public class MutablePersistenceUnitInfo implements PersistenceUnitInfo {
+
 	private String persistenceUnitName;
-	
+
 	private String persistenceProviderClassName;
 
 	private PersistenceUnitTransactionType transactionType = PersistenceUnitTransactionType.RESOURCE_LOCAL;
@@ -57,15 +53,11 @@ public class SpringPersistenceUnitInfo implements PersistenceUnitInfo {
 	private DataSource jtaDataSource;
 
 	private List<String> mappingFileNames = new LinkedList<String>();
-	
-	private List<String> managedClassNames = new LinkedList<String>();
-	
-	private List<URL> jarFileUrls = new LinkedList<URL>(); 
 
-	private LoadTimeWeaver loadTimeWeaver;
-	
-	// When this is false, will load from jar.
-	// TODO: Should the default be false?
+	private List<String> managedClassNames = new LinkedList<String>();
+
+	private List<URL> jarFileUrls = new LinkedList<URL>();
+
 	private boolean excludeUnlistedClasses = false;
 
 	private Properties properties = new Properties();
@@ -80,7 +72,7 @@ public class SpringPersistenceUnitInfo implements PersistenceUnitInfo {
 	public String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}
-	
+
 	public void setPersistenceProviderClassName(String persistenceProviderClassName) {
 		this.persistenceProviderClassName = persistenceProviderClassName;
 	}
@@ -88,7 +80,7 @@ public class SpringPersistenceUnitInfo implements PersistenceUnitInfo {
 	public String getPersistenceProviderClassName() {
 		return this.persistenceProviderClassName;
 	}
-	
+
 	public void setTransactionType(PersistenceUnitTransactionType transactionType) {
 		this.transactionType = transactionType;
 	}
@@ -120,7 +112,7 @@ public class SpringPersistenceUnitInfo implements PersistenceUnitInfo {
 	public List<String> getMappingFileNames() {
 		return mappingFileNames;
 	}
-	
+
 	public void addJarFileUrl(URL jarFileUrl) {
 		this.jarFileUrls.add(jarFileUrl);
 	}
@@ -128,7 +120,7 @@ public class SpringPersistenceUnitInfo implements PersistenceUnitInfo {
 	public List<URL> getJarFileUrls() {
 		return jarFileUrls;
 	}
-	
+
 	public void setPersistenceUnitRootUrl(URL persistenceUnitRootUrl) {
 		this.persistenceUnitRootUrl = persistenceUnitRootUrl;
 	}
@@ -152,14 +144,14 @@ public class SpringPersistenceUnitInfo implements PersistenceUnitInfo {
 	public boolean excludeUnlistedClasses() {
 		return excludeUnlistedClasses;
 	}
-	
+
 	public void addProperty(String name, String value) {
 		if (this.properties == null) {
 			this.properties = new Properties();
 		}
 		this.properties.setProperty(name, value);
 	}
-	
+
 	public void setProperties(Properties properties) {
 		this.properties = properties;
 	}
@@ -168,41 +160,17 @@ public class SpringPersistenceUnitInfo implements PersistenceUnitInfo {
 		return properties;
 	}
 
-	/**
-	 * Set the LoadTimeWeaver SPI strategy interface used by Spring
-	 * to add instrumentation to the current class loader.
-	 */
-	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
-		this.loadTimeWeaver = loadTimeWeaver;
-	}
 
 	public ClassLoader getClassLoader() {
-		if (this.loadTimeWeaver != null) {
-			return this.loadTimeWeaver.getInstrumentableClassLoader();
-		}
-		else {
-			return ClassUtils.getDefaultClassLoader();
-		}
+		return ClassUtils.getDefaultClassLoader();
 	}
 
-	/**
-	 * Method called by PersistenceProvider to add instrumentation to
-	 * the current environment.
-	 */
 	public void addTransformer(ClassTransformer classTransformer) {
-		if (this.loadTimeWeaver == null) {
-			throw new IllegalStateException("Cannot apply class transformer without LoadTimeWeaver specified");
-		}
-		this.loadTimeWeaver.addTransformer(new ClassFileTransformerAdapter(classTransformer));
+		throw new UnsupportedOperationException("addTransformer not supported");
 	}
 
 	public ClassLoader getNewTempClassLoader() {
-		if (this.loadTimeWeaver != null) {
-			return this.loadTimeWeaver.getThrowawayClassLoader();
-		}
-		else {
-			return new SimpleThrowawayClassLoader(ClassUtils.getDefaultClassLoader());
-		}
+		throw new UnsupportedOperationException("getNewTempClassLoader not supported");
 	}
 
 

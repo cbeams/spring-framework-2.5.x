@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.jpa;
+package org.springframework.orm.jpa.persistenceunit;
 
 import java.net.URL;
 import java.util.HashMap;

@@ -4,8 +4,7 @@
 <beans>
 
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-		<property name="persistenceXmlLocation" value="org/springframework/orm/jpa/hibernate/persistence.xml"/>
-		<property name="allowRedeploymentWithSameName" value="true"/>
+		<property name="persistenceXmlLocation" value="org/springframework/orm/jpa/domain/persistence.xml"/>
 		<property name="dataSource" ref="dataSource"/>
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
@@ -16,7 +15,8 @@
 		</property>
 		<property name="jpaPropertyMap">
 			<props>
-			<!-- 
+				<prop key="hibernate.cache.provider_class">org.hibernate.cache.HashtableCacheProvider</prop>
+				<!--
 				<prop key="hibernate.ejb.use_class_enhancer">true</prop>
 				 -->
 			</props>

@@ -247,8 +247,7 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		actualProps = null;
 		
 		LocalContainerEntityManagerFactoryBean containerEmfb = new LocalContainerEntityManagerFactoryBean();
-		containerEmfb.setAllowRedeploymentWithSameName(true);
-		
+
 		containerEmfb.setPersistenceUnitName(entityManagerName);
 		containerEmfb.setPersistenceProviderClass(DummyContainerPersistenceProvider.class);
 		if (props != null) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.jpa;
+package org.springframework.orm.jpa.persistenceunit;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;

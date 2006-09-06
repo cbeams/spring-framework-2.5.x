@@ -30,11 +30,11 @@ import org.springframework.orm.jpa.SharedEntityManagerCreator;
  * @author Rod Johnson
  */
 public class HibernateEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
-	
+
 	protected String[] getConfigLocations() {
 		return HIBERNATE_CONFIG_LOCATIONS;
 	}
-		
+
 
 	public void testCanCastNativeEntityManagerFactoryToHibernateEntityManagerFactoryImpl() {
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;

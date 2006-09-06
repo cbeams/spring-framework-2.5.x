@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="persistenceUnitManager" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
+		<property name="persistenceXmlLocation" value="org/springframework/orm/jpa/hibernate/persistence-multi.xml"/>
+		<property name="defaultDataSource" ref="dataSource"/>
+		<property name="loadTimeWeaver" ref="weaver"/>
+	</bean>
+
+	<bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		<property name="database" value="HSQL"/>
+		<property name="showSql" value="true"/>
+		<property name="generateDdl" value="true"/>
+	</bean>
+
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="persistenceUnitManager" ref="persistenceUnitManager"/>
+		<property name="jpaVendorAdapter" ref="jpaVendorAdapter"/>
+		<property name="jpaPropertyMap">
+			<props>
+				<prop key="hibernate.cache.provider_class">org.hibernate.cache.HashtableCacheProvider</prop>
+				<!--
+				<prop key="hibernate.ejb.use_class_enhancer">true</prop>
+				 -->
+			</props>
+		</property>
+		<property name="persistenceUnitName" value="Person"/>
+	</bean>
+
+	<bean id="entityManagerFactory2" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="persistenceUnitManager" ref="persistenceUnitManager"/>
+		<property name="jpaVendorAdapter" ref="jpaVendorAdapter"/>
+		<property name="jpaPropertyMap">
+			<props>
+				<prop key="hibernate.cache.provider_class">org.hibernate.cache.HashtableCacheProvider</prop>
+				<!--
+				<prop key="hibernate.ejb.use_class_enhancer">true</prop>
+				 -->
+			</props>
+		</property>
+		<property name="persistenceUnitName" value="Test"/>
+	</bean>
+
+</beans>
