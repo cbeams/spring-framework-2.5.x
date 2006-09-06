@@ -21,17 +21,18 @@ import javax.sql.DataSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.util.Assert;
 
 /**
  * {@link DataSourceLookup} implementation based on a Spring {@link BeanFactory}.
  * 
- * <p>Will lookup Spring managed beans identified by bean name.
+ * <p>Will lookup Spring managed beans identified by bean name,
+ * expecting them to be of type <code>javax.sql.DataSource</code>.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
  * @since 2.0
+ * @see org.springframework.beans.factory.BeanFactory
  */
 public class BeanFactoryDataSourceLookup implements DataSourceLookup, BeanFactoryAware {
 
@@ -39,13 +40,15 @@ public class BeanFactoryDataSourceLookup implements DataSourceLookup, BeanFactor
 
 
 	/**
-	 * Creates a new instance of the {@link BeanFactoryDataSourceLookup} class.
+	 * Create a new instance of the {@link BeanFactoryDataSourceLookup} class.
+	 * <p>The BeanFactory to access must be set via <code>setBeanFactory</code>.
+	 * @see #setBeanFactory
 	 */
 	public BeanFactoryDataSourceLookup() {
 	}
 
 	/**
-	 * Creates a new instance of the {@link BeanFactoryDataSourceLookup} class.
+	 * Create a new instance of the {@link BeanFactoryDataSourceLookup} class.
 	 * <p>Use of this constructor is redundant if this object is being created
 	 * by a Spring IoC container, as the supplied {@link BeanFactory} will be
 	 * replaced by the {@link BeanFactory} that creates it (c.f. the
@@ -54,21 +57,23 @@ public class BeanFactoryDataSourceLookup implements DataSourceLookup, BeanFactor
 	 * @param beanFactory the bean factory to be used to lookup {@link DataSource DataSources}
 	 */
 	public BeanFactoryDataSourceLookup(BeanFactory beanFactory) {
+		Assert.notNull(beanFactory, "BeanFactory is required");
 		this.beanFactory = beanFactory;
 	}
+
 
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
 
-	public DataSource getDataSource(String dataSourceName) throws DataAccessResourceFailureException {
+	public DataSource getDataSource(String dataSourceName) throws DataSourceLookupFailureException {
 		Assert.notNull(this.beanFactory, "BeanFactory is required");
 		try {
 			return (DataSource) this.beanFactory.getBean(dataSourceName, DataSource.class);
 		}
 		catch (BeansException ex) {
-			throw new DataAccessResourceFailureException(
+			throw new DataSourceLookupFailureException(
 					"Failed to look up DataSource bean with name '" + dataSourceName + "'", ex);
 		}
 	}

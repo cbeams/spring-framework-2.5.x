@@ -16,27 +16,32 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
-import javax.sql.DataSource;
+import org.springframework.dao.DataAccessException;
 
 /**
- * Strategy interface for looking up DataSources by name.
+ * Exception to be thrown by a DataSourceLookup implementation,
+ * indicating that the specified DataSource could not be obtained.
  *
- * <p>Used, for example, to resolve data source names in JPA
- * <code>persistence.xml</code> files.
- *
- * @author Costin Leau
  * @author Juergen Hoeller
  * @since 2.0
- * @see org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager#setDataSourceLookup
  */
-public interface DataSourceLookup {
+public class DataSourceLookupFailureException extends DataAccessException {
 
 	/**
-	 * Retrieve the DataSource identified by the given name.
-	 * @param dataSourceName the name of the DataSource
-	 * @return the DataSource (never <code>null</code>)
-	 * @throws DataSourceLookupFailureException if the lookup failed
+	 * Constructor for DataSourceLookupFailureException.
+	 * @param msg the detail message
 	 */
-	DataSource getDataSource(String dataSourceName) throws DataSourceLookupFailureException;
+	public DataSourceLookupFailureException(String msg) {
+		super(msg);
+	}
+
+	/**
+	 * Constructor for DataSourceLookupFailureException.
+	 * @param msg the detail message
+	 * @param ex root cause (usually from using a underlying lookup API such as JNDI)
+	 */
+	public DataSourceLookupFailureException(String msg, Throwable ex) {
+		super(msg, ex);
+	}
 
 }

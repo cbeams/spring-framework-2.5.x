@@ -16,16 +16,14 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
-import junit.framework.TestCase;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.test.AssertThrows;
-
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import junit.framework.TestCase;
+
+import org.springframework.test.AssertThrows;
+
 /**
- * Unit tests for the {@link JndiDataSourceLookup} class.
- *
  * @author Rick Evans
  */
 public final class JndiDataSourceLookupTests extends TestCase {
@@ -47,7 +45,7 @@ public final class JndiDataSourceLookupTests extends TestCase {
 	}
 
 	public void testNoDataSourceAtJndiLocation() throws Exception {
-		new AssertThrows(DataAccessResourceFailureException.class) {
+		new AssertThrows(DataSourceLookupFailureException.class) {
 			public void test() throws Exception {
 				JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
 					protected Object lookup(String jndiName, Class requiredType) throws NamingException {

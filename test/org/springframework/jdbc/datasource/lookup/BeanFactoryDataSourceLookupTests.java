@@ -16,14 +16,14 @@
 
 package org.springframework.jdbc.datasource.lookup;
 
+import javax.sql.DataSource;
+
 import junit.framework.TestCase;
 import org.easymock.MockControl;
+
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.test.AssertThrows;
-
-import javax.sql.DataSource;
 
 /**
  * Unit tests for the {@link BeanFactoryDataSourceLookup} class.
@@ -63,7 +63,7 @@ public final class BeanFactoryDataSourceLookupTests extends TestCase {
 
 		mockBeanFactory.replay();
 
-		new AssertThrows(DataAccessResourceFailureException.class) {
+		new AssertThrows(DataSourceLookupFailureException.class) {
 			public void test() throws Exception {
 				BeanFactoryDataSourceLookup lookup = new BeanFactoryDataSourceLookup(beanFactory);
 				lookup.getDataSource(DATASOURCE_BEAN_NAME);

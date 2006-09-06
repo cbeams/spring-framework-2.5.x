@@ -22,7 +22,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.util.Assert;
 
 /**
  * Simple {@link DataSourceLookup} implementation that relies on a map for doing lookups.
@@ -37,17 +37,17 @@ import org.springframework.dao.DataAccessResourceFailureException;
  */
 public class MapDataSourceLookup implements DataSourceLookup {
 
-	private final Map dataSources = new HashMap(16);
+	private final Map dataSources = new HashMap(4);
 
 
 	/**
-	 * Creates a new instance of the {@link MapDataSourceLookup} class. 
+	 * Create a new instance of the {@link MapDataSourceLookup} class.
 	 */
 	public MapDataSourceLookup() {
 	}
 
 	/**
-	 * Creates a new instance of the {@link MapDataSourceLookup} class.
+	 * Create a new instance of the {@link MapDataSourceLookup} class.
 	 * @param dataSources the {@link Map} of {@link DataSource DataSources}; the keys
 	 * are {@link String Strings}, the values are actual {@link DataSource} instances.
 	 */
@@ -55,19 +55,18 @@ public class MapDataSourceLookup implements DataSourceLookup {
 		setDataSources(dataSources);
 	}
 
-
 	/**
-	 * Adds the supplied {@link DataSource} to the map of {@link DataSource DataSources}
-	 * maintained by this object.
+	 * Create a new instance of the {@link MapDataSourceLookup} class.
 	 * @param dataSourceName the name under which the supplied {@link DataSource} is to be added
-	 * @param dataSource the {@link DataSource} to be so added
+	 * @param dataSource the {@link DataSource} to be added
 	 */
-	public void addDataSource(String dataSourceName, DataSource dataSource) {
-		this.dataSources.put(dataSourceName, dataSource);
+	public MapDataSourceLookup(String dataSourceName, DataSource dataSource) {
+		addDataSource(dataSourceName, dataSource);
 	}
 
+
 	/**
-	 * Sets the {@link Map} of {@link DataSource DataSources}; the keys
+	 * Set the {@link Map} of {@link DataSource DataSources}; the keys
 	 * are {@link String Strings}, the values are actual {@link DataSource} instances.
 	 * <p>If the supplied {@link Map} is <code>null</code>, then this method
 	 * call effectively has no effect. 
@@ -80,7 +79,7 @@ public class MapDataSourceLookup implements DataSourceLookup {
 	}
 
 	/**
-	 * Gets the {@link Map} of {@link DataSource DataSources} maintained by this object.
+	 * Get the {@link Map} of {@link DataSource DataSources} maintained by this object.
 	 * <p>The returned {@link Map} is {@link Collections#unmodifiableMap(java.util.Map) unmodifiable}.
 	 * @return said {@link Map} of {@link DataSource DataSources} (never <code>null</code>) 
 	 */
@@ -88,20 +87,31 @@ public class MapDataSourceLookup implements DataSourceLookup {
 		return Collections.unmodifiableMap(this.dataSources);
 	}
 
+	/**
+	 * Add the supplied {@link DataSource} to the map of {@link DataSource DataSources}
+	 * maintained by this object.
+	 * @param dataSourceName the name under which the supplied {@link DataSource} is to be added
+	 * @param dataSource the {@link DataSource} to be so added
+	 */
+	public void addDataSource(String dataSourceName, DataSource dataSource) {
+		Assert.notNull(dataSourceName, "DataSource name must not be null");
+		Assert.notNull(dataSource, "DataSource must not be null");
+		this.dataSources.put(dataSourceName, dataSource);
+	}
 
-	public DataSource getDataSource(String dataSourceName) throws DataAccessResourceFailureException {
-		DataSource dataSource;
-		try {
-			dataSource = (DataSource) this.dataSources.get(dataSourceName);
-		} catch (ClassCastException ex) {
-			throw new DataAccessResourceFailureException(
-					"The object in the DataSource map with this name '" + dataSourceName + "' is not a DataSource", ex);
-		}
-		if (dataSource == null) {
-			throw new DataAccessResourceFailureException(
+	public DataSource getDataSource(String dataSourceName) throws DataSourceLookupFailureException {
+		Assert.notNull(dataSourceName, "DataSource name must not be null");
+		Object value = this.dataSources.get(dataSourceName);
+		if (value == null) {
+			throw new DataSourceLookupFailureException(
 					"No DataSource with name '" + dataSourceName + "' registered");
 		}
-		return dataSource;
+		if (!(value instanceof DataSource)) {
+			throw new DataSourceLookupFailureException(
+					"The object [" + value + "] with name '" + dataSourceName +
+					"' in the DataSource map is not a [javax.sql.DataSource]");
+		}
+		return (DataSource) value;
 	}
 
 }
