@@ -19,6 +19,7 @@ package org.springframework.orm.jpa;
 import java.util.Map;
 
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.spi.PersistenceProvider;
 
 /**
  * SPI interface that allows to plug in vendor-specific behavior
@@ -32,9 +33,9 @@ import javax.persistence.EntityManagerFactory;
 public interface JpaVendorAdapter {
 
 	/**
-	 * Return the vendor-specific persistence provider class.
+	 * Return the vendor-specific persistence provider.
 	 */
-	Class getPersistenceProviderClass();
+	PersistenceProvider getPersistenceProvider();
 
 	/**
 	 * Return a Map of vendor-specific JPA properties,

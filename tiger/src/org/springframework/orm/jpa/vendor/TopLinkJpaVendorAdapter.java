@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import javax.persistence.spi.PersistenceProvider;
+
 import oracle.toplink.essentials.config.TargetDatabase;
 import oracle.toplink.essentials.config.TopLinkProperties;
 import oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider;
@@ -35,11 +37,13 @@ import org.springframework.orm.jpa.JpaDialect;
  */
 public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
+	private final PersistenceProvider persistenceProvider = new EntityManagerFactoryProvider();
+
 	private final JpaDialect jpaDialect = new TopLinkJpaDialect();
 
 
-	public Class getPersistenceProviderClass() {
-		return EntityManagerFactoryProvider.class;
+	public PersistenceProvider getPersistenceProvider() {
+		return this.persistenceProvider;
 	}
 
 	public Map getJpaPropertyMap() {
@@ -87,7 +91,7 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	}
 
 	public JpaDialect getJpaDialect() {
-		return jpaDialect;
+		return this.jpaDialect;
 	}
 
 }

@@ -19,6 +19,8 @@ package org.springframework.orm.jpa.vendor;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.persistence.spi.PersistenceProvider;
+
 import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.DB2Dialect;
 import org.hibernate.dialect.HSQLDialect;
@@ -42,11 +44,13 @@ import org.springframework.orm.jpa.JpaDialect;
  */
 public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
+	private final PersistenceProvider persistenceProvider = new HibernatePersistence();
+
 	private final JpaDialect jpaDialect = new HibernateJpaDialect();
 
 
-	public Class getPersistenceProviderClass() {
-		return HibernatePersistence.class;
+	public PersistenceProvider getPersistenceProvider() {
+		return this.persistenceProvider;
 	}
 
 	public Map getJpaPropertyMap() {
@@ -91,7 +95,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	}
 
 	public JpaDialect getJpaDialect() {
-		return jpaDialect;
+		return this.jpaDialect;
 	}
 
 }
