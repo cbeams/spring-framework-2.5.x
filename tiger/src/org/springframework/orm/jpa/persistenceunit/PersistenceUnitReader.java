@@ -20,10 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.xml.XMLConstants;
@@ -87,14 +84,6 @@ class PersistenceUnitReader {
 	private static final String META_INF = "META-INF";
 
 
-	/**
-	 * Cache for PersistenceUnitInfos loaded from the class path, in particular
-	 * for the default location "classpath*:META-INF/persistence.xml".
-	 */
-	private static final Map<String, SpringPersistenceUnitInfo[]> persistenceUnitInfoCache =
-			Collections.synchronizedMap(new HashMap<String, SpringPersistenceUnitInfo[]>());
-	
-	
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private final ResourcePatternResolver resourcePatternResolver;
@@ -140,6 +129,91 @@ class PersistenceUnitReader {
 
 		return infos.toArray(new SpringPersistenceUnitInfo[infos.size()]);
 	}
+
+
+	/**
+	 * Validate the given stream and return a valid DOM document for parsing.
+	 */
+	protected Document validateResource(ErrorHandler handler, InputStream stream) throws ParserConfigurationException,
+			SAXException, IOException {
+
+		// InputSource source = new InputSource(stream);
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setValidating(true);
+		dbf.setNamespaceAware(true);
+
+		dbf.setAttribute(JAXP_SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
+		Resource schemaLocation = findSchemaResource(SCHEMA_NAME);
+
+		// Set schema location only if we found one inside the classpath.
+		if (schemaLocation != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found schema location: " + schemaLocation.getURL());
+			}
+			dbf.setAttribute(JAXP_SCHEMA_SOURCE, schemaLocation.getURL().toString());
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("No schema location found - falling back to the XML parser");
+		}
+
+		// dbf.setAttribute(XERCES_SCHEMA_LOCATION,
+		// schemaLocation.getURL().toString());
+		/*
+		 * see if these should be used on other jdks
+		 *
+		 * dbf.setAttribute(JAXP_SCHEMA_SOURCE,
+		 * schemaLocation.getURL().toString());
+		 * dbf.setAttribute(XERCES_SCHEMA_LOCATION,
+		 * schemaLocation.getURL().toString());
+		 *
+		 * dbf.setAttribute(XML_SCHEMA_VALIDATION, Boolean.TRUE);
+		 * dbf.setAttribute(XML_VALIDATION, Boolean.TRUE);
+		 */
+
+		DocumentBuilder parser = dbf.newDocumentBuilder();
+		parser.setErrorHandler(handler);
+		return parser.parse(stream);
+	}
+
+	/**
+	 * Try to locate the schema first in the class path before using the URL specified inside the XML.
+	 * @return an existing resource, or <code>null</code> if none found
+	 */
+	protected Resource findSchemaResource(String schemaName) {
+		try {
+			// First search the class path root (TopLink)
+			Resource schemaLocation = this.resourcePatternResolver.getResource("classpath:" + schemaName);
+			if (schemaLocation.exists()) {
+				return schemaLocation;
+			}
+
+			// Search org packages (open source provider such as Hibernate or OpenJPA)
+			Resource[] resources = this.resourcePatternResolver.getResources("classpath*:org/**/" + schemaName);
+			if (resources.length > 0) {
+				return resources[0];
+			}
+
+			// Search com packages (some commercial provider)
+			resources = this.resourcePatternResolver.getResources("classpath*:com/**/" + schemaName);
+			if (resources.length > 0) {
+				return resources[0];
+			}
+
+			// Finally, do a lookup for unpacked files.
+			// See the warning in
+			// org.springframework.core.io.support.PathMatchingResourcePatternResolver
+			// for more info on this strategy.
+			resources = this.resourcePatternResolver.getResources("classpath*:**/" + schemaName);
+			if (resources.length > 0) {
+				return resources[0];
+			}
+		}
+		catch (IOException ex) {
+			logger.debug("Could not search for JPA schema resource [" + schemaName + "] in class path", ex);
+		}
+		return null;
+	}
+
 
 	/**
 	 * Parse the validated document and populates(add to) the given unit info
@@ -302,89 +376,6 @@ class PersistenceUnitReader {
 			if (StringUtils.hasText(value))
 				unitInfo.addMappingFileName(value);
 		}
-	}
-
-	/**
-	 * Try to locate the SCHEMA_NAME first on disk before using the URL
-	 * specified inside the XML.
-	 * 
-	 * @return an existing resource or null if one can't be find (or it does not
-	 *         exist)
-	 */
-	protected Resource findSchemaResource(String schemaName) throws IOException {
-		// First search the classpath root (TopLink)
-		Resource schemaLocation = this.resourcePatternResolver.getResource("classpath:" + schemaName);
-
-		if (schemaLocation.exists()) {
-			return schemaLocation;
-		}
-
-		// Do a lookup for unpacked files.
-		// See the warning in
-		// org.springframework.core.io.support.PathMatchingResourcePatternResolver
-		// for more info.
-		Resource[] resources = this.resourcePatternResolver.getResources("classpath*:**/" + schemaName);
-		if (resources.length > 0) {
-			return resources[0];
-		}
-
-		// Try org packages (Hibernate)
-		resources = this.resourcePatternResolver.getResources("classpath*:org/**/" + schemaName);
-		if (resources.length > 0) {
-			return resources[0];
-		}
-
-		// Try com packages (some commercial provider)
-		resources = this.resourcePatternResolver.getResources("classpath*:com/**/" + schemaName);
-		if (resources.length > 0) {
-			return resources[0];
-		}
-
-		return null;
-	}
-
-	/**
-	 * Validate the given stream and return a valid DOM document for parsing.
-	 */
-	protected Document validateResource(ErrorHandler handler, InputStream stream) throws ParserConfigurationException,
-			SAXException, IOException {
-
-		// InputSource source = new InputSource(stream);
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		dbf.setValidating(true);
-		dbf.setNamespaceAware(true);
-
-		dbf.setAttribute(JAXP_SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
-		Resource schemaLocation = findSchemaResource(SCHEMA_NAME);
-
-		// set schema location only if we found one inside the classpath
-		if (schemaLocation != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Found schema location " + schemaLocation.getURL());
-			}
-			dbf.setAttribute(JAXP_SCHEMA_SOURCE, schemaLocation.getURL().toString());
-		}
-		else if (logger.isDebugEnabled()) {
-			logger.debug("No schema location found - falling back to the XML parser");
-		}
-
-		// dbf.setAttribute(XERCES_SCHEMA_LOCATION,
-		// schemaLocation.getURL().toString());
-		/*
-		 * see if these should be used on other jdks
-		 * 
-		 * dbf.setAttribute(JAXP_SCHEMA_SOURCE,
-		 * schemaLocation.getURL().toString());
-		 * dbf.setAttribute(XERCES_SCHEMA_LOCATION,
-		 * schemaLocation.getURL().toString());
-		 * 
-		 * dbf.setAttribute(XML_SCHEMA_VALIDATION, Boolean.TRUE);
-		 * dbf.setAttribute(XML_VALIDATION, Boolean.TRUE);
-		 */
-
-		DocumentBuilder parser = dbf.newDocumentBuilder();
-		parser.setErrorHandler(handler);
-		return parser.parse(stream);
 	}
 
 }
