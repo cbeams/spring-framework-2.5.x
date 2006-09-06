@@ -2706,7 +2706,7 @@ public class FileUploadBean {
             </itemizedlist>
             <para>In the case of <classname>MultiActionController</classname> handler classes, the
             mappings generated are (ever so slightly) more complex, but hopefully no less
-            understandeable. Some examples (all of the <interfacename>Controller</interfacename>
+            understandable. Some examples (all of the <interfacename>Controller</interfacename>
             names in this next bit are assumed to be <classname>MultiActionController</classname>
             implementations).</para>
             <itemizedlist>
