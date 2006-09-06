@@ -615,36 +615,36 @@
         call), and then merged to form the final application context
         definition.</para>
 
+        <note>
+          <title>Classpath*: portability</title>
+
+          <para>The wildcard classpath relies on the <literal>getResources()</literal> method of the
+          underlying classloader. As most application servers nowadays supply
+          their own classloader implementation, the behavior might differ
+          especially when dealing with jar files. A simple test to check if
+          <literal>classpath*</literal> works is to use the classloader to load a file from
+          within a jar on the classpath:
+          <literal>getClass().getClassLoader().getResources("&lt;someFileInsideTheJar&gt;")</literal>.
+          Try this test with files that have the same name but are placed
+          inside two different locations. In case an inappropriate result is
+          returned, check the application server documentation for settings
+          that might affect the classloader behavior.</para>
+        </note>
+
         <para>The "<literal>classpath*:</literal>" prefix can also be combined
-        with a PathMatcher pattern in the rest of the location path, for
+        with a <literal>PathMatcher</literal> pattern in the rest of the location path, for
         example "<literal>classpath*:META-INF/*-beans.xml</literal>". In this
         case, the resolution strategy is fairly simple: a
         ClassLoader.getResources() call is used on the last non-wildcard path
         segment to get all the matching resources in the class loader
         hierarchy, and then off each resource the same PathMatcher resoltion
         strategy described above is used for the wildcard subpath.</para>
-
-        <sidebar>
-          <title>Classpath*: portability</title>
-
-          <para>Wildcard classpath relies on the getResources() method of the
-          underlying classloader. As most application servers nowadays supply
-          their own classloader implementation, the behavior might differ
-          especially when dealing with jar files. A simple test to check if
-          classpath* works is to use the classloader to load a file from
-          within a jar on the classpath:
-          <literal>getClass().getClassLoader().getResources("&lt;someFileInsideTheJar&gt;")</literal>.
-          Try this test with files that have the same name but are placed
-          inside two different locations. In case an inapproaprite result is
-          returned, check the application server documentation for settings
-          that might affect the classloader behavior.</para>
-        </sidebar>
       </section>
 
       <section>
         <title>Other notes relating to wildcards</title>
 
-        <para>WARNING: Note that "<literal>classpath*:</literal>" when
+        <para>Please note that "<literal>classpath*:</literal>" when
         combined with Ant-style patterns will only work reliably with at least
         one root directory before the pattern starts, unless the actual target
         files reside in the file system. This means that a pattern like
@@ -655,17 +655,18 @@
         returns file system locations for a passed-in empty String (indicating
         potential roots to search).</para>
 
-        <para>WARNING: Ant-style patterns with "<literal>classpath:</literal>"
-        resources are not guaranteed to find matching resources if the root
-        package to search is available in multiple class path locations. This
-        is because a resource such as</para>
+		<para>Ant-style patterns with "<literal>classpath:</literal>"
+		resources are not guaranteed to find matching resources if the root
+		package to search is available in multiple class path locations. This
+		is because a resource such as</para>
 
         <programlisting>    com/mycompany/package1/service-context.xml</programlisting>
 
         <para>may be in only one location, but when a path such as</para>
 
-        <para><programlisting>    classpath:com/mycompany/**/service-context.xml</programlisting>is
-        used to try to resolve it, the resolver will work off the (first) URL
+        <programlisting>    classpath:com/mycompany/**/service-context.xml</programlisting>
+        
+        <para>is used to try to resolve it, the resolver will work off the (first) URL
         returned by <methodname>getResource("com/mycompany")</methodname>;. If
         this base package node exists in multiple classloader locations, the
         actual end resource may not be underneath. Therefore, preferably, use
