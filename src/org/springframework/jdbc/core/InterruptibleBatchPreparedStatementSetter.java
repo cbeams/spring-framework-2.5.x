@@ -31,8 +31,8 @@ package org.springframework.jdbc.core;
  *
  * <p>Consider extending the AbstractInterruptibleBatchPreparedStatementSetter
  * base class instead of implementing this interface directly, having a
- * single callback method that combines the setting of values and the
- * checking whether further vlaues exist.
+ * single callback method that combines the check for available values
+ * and the setting of those.
  *
  * @author Thomas Risberg
  * @since 2.0
@@ -45,10 +45,10 @@ public interface InterruptibleBatchPreparedStatementSetter extends BatchPrepared
 	 * Return whether the batch is complete, that is, whether there were no
 	 * additional values added during the last <code>setValues</code> call.
 	 * <p><b>NOTE:</b> If this method returns <code>true</code>, any parameters
-	 * set during the last <code>setValues</code> call will be ignored!
-	 * Make sure that you set a corresponding internal flag if you detect
-	 * exhaustion in your <code>setValues</code> implementation, letting
-	 * this method return <code>true</code> based on the flag.
+	 * that might have been set during the last <code>setValues</code> call will
+	 * be ignored! Make sure that you set a corresponding internal flag if you
+	 * detect exhaustion <i>at the beginning</i> of your <code>setValues</code>
+	 * implementation, letting this method return <code>true</code> based on the flag.
 	 * @param i index of the statement we're issuing in the batch, starting from 0
 	 * @see #setValues
 	 */
