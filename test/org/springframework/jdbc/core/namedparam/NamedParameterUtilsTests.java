@@ -25,11 +25,13 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.AssertThrows;
 
 /**
+ * Unit tests for the {@link NamedParameterUtils} class.
+ * 
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @author Rick Evans
  */
-public class NamedParameterUtilsTests extends TestCase {
+public final class NamedParameterUtilsTests extends TestCase {
 
 	public void testCountParameterPlaceholders() {
 		assertTrue(NamedParameterUtils.countParameterPlaceholders(null) == 0);
@@ -93,8 +95,7 @@ public class NamedParameterUtilsTests extends TestCase {
 			NamedParameterUtils.buildValueArray("xxx :a :b ?", paramMap);
 			fail("mixed named parameters and ? placeholders not detected");
 		}
-		catch (InvalidDataAccessApiUsageException ex) {
-			// ok - it works
+		catch (InvalidDataAccessApiUsageException expected) {
 		}
 	}
 
@@ -132,6 +133,24 @@ public class NamedParameterUtilsTests extends TestCase {
 		String sql = "select 'first name' from artists where id = :id and quote = 'exsqueeze me?'";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 		assertEquals(expectedSql, parsedSql.getNewSql());
+	}
+
+	/*
+	 * SPR-2544
+	 */
+	public void testParseSqlStatementWithLogicalAnd() {
+		String expectedSql = "xxx & yyyy";
+		ParsedSql psql = NamedParameterUtils.parseSqlStatement(expectedSql);
+		assertEquals(expectedSql, psql.getNewSql());
+	}
+
+	/*
+	 * SPR-2544
+	 */
+	public void testSubstituteNamedParametersWithLogicalAnd() throws Exception {
+		String expectedSql = "xxx & yyyy";
+		String newSql = NamedParameterUtils.substituteNamedParameters(expectedSql, new MapSqlParameterSource());
+		assertEquals(expectedSql, newSql);
 	}
 
 }

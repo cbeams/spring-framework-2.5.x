@@ -154,6 +154,8 @@ public abstract class NamedParameterUtils {
 							newSql.append("?");
 							parameters.add(parameter);
 							totalParameterCount++;
+						} else {
+							newSql.append(statement[i]);
 						}
 						i = j - 1;
 					}
@@ -237,6 +239,8 @@ public abstract class NamedParameterUtils {
 							else {
 								newSql.append("?");
 							}
+						} else {
+							newSql.append(statement[i]);
 						}
 						i = j - 1;
 					}
