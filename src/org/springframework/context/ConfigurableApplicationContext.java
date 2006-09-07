@@ -65,6 +65,16 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	void refresh() throws BeansException, IllegalStateException;
 
 	/**
+	 * Register a shutdown hook with the JVM runtime, closing this context
+	 * on JVM shutdown unless it has already been closed at that time.
+	 * <p>This method can be called multiple times. Only one shutdown hook
+	 * (at max) will be registered for each context instance.
+	 * @see java.lang.Runtime#addShutdownHook
+	 * @see #close()
+	 */
+	void registerShutdownHook();
+
+	/**
 	 * Close this application context, releasing all resources and locks that the
 	 * implementation might hold. This includes destroying all cached singleton beans.
 	 * <p>Note: Does <i>not</i> invoke <code>close</code> on a parent context;
