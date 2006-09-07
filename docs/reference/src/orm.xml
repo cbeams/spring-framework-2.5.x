@@ -2586,6 +2586,28 @@
 &lt;/bean&gt;</programlisting>
         </section>
 
+        <section>
+          <title>Using LocalContainerEntityManagerFactoryBean without a
+          classloader LoadTimeWeaver</title>
+
+          <para>For environments where field interception is required but are
+          not supported by the existing LoadTimeWeaver implementations, a JDK
+          agent can be the only solution. For such cases, Spring provides
+          <literal>InstrumentationLoadTimeWeaver</literal> along with the
+          <literal>spring-agent.jar</literal>:</para>
+
+          <programlisting>&lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
+  &lt;property name="loadTimeWeaver"&gt;
+    &lt;bean class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver"/&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting>
+
+          <para>Note that the virtual machine has to be started with the
+          Spring agent, by supplying the following JVM options:</para>
+
+          <programlisting>-javaagent:/path/to/spring-agent.jar</programlisting>
+        </section>
+
         <!-- 
         <section>
           <title>Resin setup</title>
