@@ -20,7 +20,8 @@
     existing functionality has been reviewed and improved. In fact, so much of
     Spring is shiny and improved that the Spring development team decided that
     the next release of Spring merited an increment of the version number; and
-    so Spring 2.0 was announced in December 2005 at the Spring Experience
+    so Spring 2.0 was announced in December 2005 at the
+    <ulink url="http://www.thespringexperience.com/">Spring Experience</ulink>
     conference in Florida.</para>
 
     <para>This chapter is a guide to the new and improved features of Spring 
@@ -30,9 +31,8 @@
     corresponding sections hyperlinked from within this chapter.</para>
     
     <para>Some of the new and improved functionality described below has
-    been (or will be) backported into the Spring 1.2.x release line.</para>
-    <para>Please do consult the changelogs for the 1.2.x releases to see if
-    a feature has been backported.</para>
+    been (or will be) backported into the Spring 1.2.x release line. Please do consult
+    the changelogs for the 1.2.x releases to see if a feature has been backported.</para>
   </section>
 
   <section id="new-in-2-ioc">
@@ -44,11 +44,22 @@
       <title>Easier XML configuration</title>
 
       <para>Spring XML configuration is now even easier, thanks to the advent
-      of the new XML configuration syntax. If you want to take advantage of
-      the new tags that Spring provides (and the Spring team certainly suggest
-      that you do because they make configuration much less verbose and
-      much easier to read), then do read the section entitled
-      <xref linkend="xsd-config"/>.</para>
+      of the new XML configuration syntax based on XML Schema. If you want to take
+      advantage of the new tags that Spring provides (and the Spring team certainly
+      suggest that you do because they make configuration less verbose and easier
+      to read), then do read the section entitled <xref linkend="xsd-config"/>.</para>
+      
+      <para>On a related note, there is a new, updated DTD for Spring 2.0 that
+      you may wish to reference if you cannot take advantage of the XML Schema-based
+      configuration. The DOCTYPE declaration is included below for your convenience,
+      but the interested reader should definitely read the
+      <filename>'spring-beans-2.0.dtd'</filename> DTD included in the
+      <filename class="directory">'dist/resources'</filename> directory of the Spring
+      2.0 distribution.</para>
+      
+      <programlisting><![CDATA[<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+		  "http://www.springframework.org/dtd/spring-beans-2.0.dtd">]]></programlisting>
+      
     </section>
 
     <section id="new-in-2-ioc-custom-configuration">
@@ -66,8 +77,7 @@
       We expect third-party vendors to be highly interested in developing
       custom configuration tags for use in Spring configuration files.</para>
       
-      <para>The extensible configuration mechanism is more thoroughly documented in 
-      <xref linkend="extensible-xml"/>.</para>
+      <para>The extensible configuration mechanism is documented in <xref linkend="extensible-xml"/>.</para>
     </section>
 
     <section id="new-in-2-ioc-scopes">
@@ -322,13 +332,13 @@
 
     <para>Said distribution also ships with a number of so-called
     <emphasis>showcase</emphasis> applications. Each showcase application provides
-		fully working examples, focussed on demonstrating exactly one new Spring 2.0 feature
+    fully working examples, focussed on demonstrating exactly one new Spring 2.0 feature
     at a time. The idea is that you can take the code in these showcases and experiment
     with it, as opposed to having to create your own small project to test out each new
     Spring 2.0 feature. Please be advised that the scope of these showcase applications is
     deliberately limited; the domain model (if there is one) consists of maybe one or two classes,
     and typical enterprise concerns such as security and transactional integrity are deliberately
-		omitted.</para>
+    omitted.</para>
   
   </section>
 
@@ -339,8 +349,8 @@
     <para>While every effort has been made to ensure that there are no errors in this
     documentation, some errors may nevertheless have crept in. If you do spot any typos
     or even more serious errors, and you can spare a few cycles during lunch, please do
-    bring the error to the attention of the Spring team by raising an issue on the
-    <ulink url="http://opensource.atlassian.com/projects/spring/">Spring Framework's JIRA site.</ulink></para>
+    bring the error to the attention of the Spring team by
+    <ulink url="http://opensource.atlassian.com/projects/spring/">raising an issue</ulink>.</para>
   </section>
 
 </chapter>
