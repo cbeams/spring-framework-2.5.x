@@ -108,7 +108,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * @see #setPersistenceUnitManager
 	 */
 	public void setPersistenceXmlLocation(String persistenceXmlLocation) {
-		this.internalPersistenceUnitManager.setPersistenceXmlLocation(persistenceXmlLocation);
+		this.internalPersistenceUnitManager.setPersistenceXmlLocations(new String[] {persistenceXmlLocation});
 	}
 
 	/**

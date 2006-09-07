@@ -4,7 +4,7 @@
 <beans>
 
 	<bean id="persistenceUnitManager" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
-		<property name="persistenceXmlLocation" value="org/springframework/orm/jpa/domain/persistence-multi.xml"/>
+		<property name="persistenceXmlLocations" value="org/springframework/orm/jpa/domain/persistence-multi.xml"/>
 		<property name="defaultDataSource" ref="dataSource"/>
 	</bean>
 
@@ -21,4 +21,5 @@
 	<bean id="entityManagerFactory2" parent="abstractEMF">
 		<property name="persistenceUnitName" value="Test"/>
 	</bean>
+
 </beans>

@@ -19,7 +19,7 @@ package org.springframework.orm.jpa.persistenceunit;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.spi.PersistenceUnitTransactionType;
@@ -100,20 +100,26 @@ class PersistenceUnitReader {
 
 
 	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String persistenceXmlLocation) {
+		return readPersistenceUnitInfos(new String[] {persistenceXmlLocation});
+	}
+
+	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String[] persistenceXmlLocations) {
 		ErrorHandler handler = new SimpleSaxErrorHandler(logger);
-		List<SpringPersistenceUnitInfo> infos = new ArrayList<SpringPersistenceUnitInfo>();
+		List<SpringPersistenceUnitInfo> infos = new LinkedList<SpringPersistenceUnitInfo>();
 		String resourceLocation = null;
 		try {
-			Resource[] resources = this.resourcePatternResolver.getResources(persistenceXmlLocation);
-			for (Resource resource : resources) {
-				resourceLocation = resource.toString();
-				InputStream stream = resource.getInputStream();
-				try {
-					Document document = validateResource(handler, stream);
-					parseDocument(resource, document, infos);
-				}
-				finally {
-					stream.close();
+			for (int i = 0; i < persistenceXmlLocations.length; i++) {
+				Resource[] resources = this.resourcePatternResolver.getResources(persistenceXmlLocations[i]);
+				for (Resource resource : resources) {
+					resourceLocation = resource.toString();
+					InputStream stream = resource.getInputStream();
+					try {
+						Document document = validateResource(handler, stream);
+						parseDocument(resource, document, infos);
+					}
+					finally {
+						stream.close();
+					}
 				}
 			}
 		}

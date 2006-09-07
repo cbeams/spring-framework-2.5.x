@@ -38,13 +38,14 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.jdbc.datasource.lookup.DataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Default implementation of the PersistenceUnitManager interface.
  * Used as internal default by LocalContainerEntityManagerFactoryBean.
  *
  * <p>Supports standard JPA scanning for <code>persistence.xml</code> files,
- * with configurable file location, JDBC DataSource lookup and load-time weaving.
+ * with configurable file locations, JDBC DataSource lookup and load-time weaving.
  *
  * <p>The default XML file location is <code>classpath:META-INF/persistence.xml</code>,
  * scanning for all matching files in the class path (as defined in the JPA specification).
@@ -53,7 +54,7 @@ import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see #setPersistenceXmlLocation
+ * @see #setPersistenceXmlLocations
  * @see #setDataSourceLookup
  * @see #setLoadTimeWeaver
  * @see org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
@@ -74,7 +75,7 @@ public class DefaultPersistenceUnitManager implements PersistenceUnitManager, Re
 
 
 	/** Location of persistence.xml file(s) */
-	private String persistenceXmlLocation = DEFAULT_PERSISTENCE_XML_LOCATION;
+	private String[] persistenceXmlLocations = new String[] {DEFAULT_PERSISTENCE_XML_LOCATION};
 
 	private String defaultPersistenceUnitRootLocation = ORIGINAL_DEFAULT_PERSISTENCE_UNIT_ROOT_LOCATION;
 
@@ -94,15 +95,14 @@ public class DefaultPersistenceUnitManager implements PersistenceUnitManager, Re
 
 
 	/**
-	 * Set the location of the <code>persistence.xml</code> file
-	 * we want to use. This is a Spring resource location.
+	 * Set the locations of the <code>persistence.xml</code> files to load.
+	 * These can be specified as Spring resource locations.
 	 * <p>Default is "classpath:META-INF/persistence.xml".
-	 * @param persistenceXmlLocation a Spring resource String
-	 * identifying the location of the <code>persistence.xml</code> file
-	 * that this LocalContainerEntityManagerFactoryBean should parse
+	 * @param persistenceXmlLocations an array of Spring resource Strings
+	 * identifying the location of the <code>persistence.xml</code> files to read
 	 */
-	public void setPersistenceXmlLocation(String persistenceXmlLocation) {
-		this.persistenceXmlLocation = persistenceXmlLocation;
+	public void setPersistenceXmlLocations(String[] persistenceXmlLocations) {
+		this.persistenceXmlLocations = persistenceXmlLocations;
 	}
 
 	/**
@@ -273,7 +273,7 @@ public class DefaultPersistenceUnitManager implements PersistenceUnitManager, Re
 	 */
 	private SpringPersistenceUnitInfo[] readPersistenceUnitInfos() {
 		PersistenceUnitReader reader = new PersistenceUnitReader(this.resourcePatternResolver, this.dataSourceLookup);
-		return reader.readPersistenceUnitInfos(this.persistenceXmlLocation);
+		return reader.readPersistenceUnitInfos(this.persistenceXmlLocations);
 	}
 
 	/**
@@ -316,16 +316,16 @@ public class DefaultPersistenceUnitManager implements PersistenceUnitManager, Re
 
 	public PersistenceUnitInfo obtainDefaultPersistenceUnitInfo() {
 		if (this.persistenceUnitInfoNames.isEmpty()) {
-			throw new IllegalStateException(
-					"No persistence units parsed from [" + this.persistenceXmlLocation + "]");
+			throw new IllegalStateException("No persistence units parsed from " +
+					ObjectUtils.nullSafeToString(this.persistenceXmlLocations));
 		}
 		if (this.persistenceUnitInfos.isEmpty()) {
-			throw new IllegalStateException(
-					"All persistence units from [" + this.persistenceXmlLocation + "] already obtained");
+			throw new IllegalStateException("All persistence units from " +
+					ObjectUtils.nullSafeToString(this.persistenceXmlLocations) + " already obtained");
 		}
 		if (this.persistenceUnitInfos.size() > 1) {
-			throw new IllegalStateException(
-					"No single default persistence unit defined in [" + this.persistenceXmlLocation + "]");
+			throw new IllegalStateException("No single default persistence unit defined in " +
+					ObjectUtils.nullSafeToString(this.persistenceXmlLocations));
 		}
 		return this.persistenceUnitInfos.values().iterator().next();
 	}
