@@ -25,12 +25,18 @@ import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.context.PortletWebRequest;
 
 /**
- * Adapter that implements the HandlerInterceptor interface
+ * Adapter that implements the Portlet HandlerInterceptor interface
  * and wraps an underlying WebRequestInterceptor.
+ *
+ * <p><b>NOTE:</b> The WebRequestInterceptor is only applied to the Portlet <b>render</b>
+ * phase, which is dealing with preparing and rendering a Portlet view.
+ * The Portlet action phase <i>cannot</i> be intercepted with the WebRequestInterceptor
+ * mechanism; use the Portlet-specific HandlerInterceptor mechanism for such needs.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.web.context.request.WebRequestInterceptor
+ * @see org.springframework.web.portlet.HandlerInterceptor
  */
 public class WebRequestHandlerInterceptorAdapter extends HandlerInterceptorAdapter {
 

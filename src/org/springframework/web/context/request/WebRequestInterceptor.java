@@ -31,15 +31,23 @@ import org.springframework.ui.ModelMap;
  * <p>This interface is deliberatly minimalistic to keep the dependencies of
  * generic request interceptors as minimal as feasible.
  *
+ * <p><b>NOTE:</b> While this interceptor is applied to the entire request processing
+ * in a Servlet environment, it is only applied to the <b>render</b> phase in a
+ * Portlet environment, which is dealing with preparing and rendering a Portlet view.
+ * The Portlet action phase <i>cannot</i> be intercepted with this mechanism;
+ * use the Portlet-specific HandlerInterceptor mechanism for such needs.
+ *
  * @author Juergen Hoeller
  * @since 2.0
  * @see WebRequest
  * @see ServletWebRequest
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.servlet.handler.AbstractHandlerMapping#setInterceptors
+ * @see org.springframework.web.servlet.HandlerInterceptor
  * @see org.springframework.web.portlet.context.PortletWebRequest
  * @see org.springframework.web.portlet.DispatcherPortlet
  * @see org.springframework.web.portlet.handler.AbstractHandlerMapping#setInterceptors
+ * @see org.springframework.web.portlet.HandlerInterceptor
  */
 public interface WebRequestInterceptor {
 
