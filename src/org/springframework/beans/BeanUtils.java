@@ -46,7 +46,7 @@ public abstract class BeanUtils {
 	 * As this method doesn't try to load classes by name, it should avoid
 	 * class-loading issues.
 	 * <p>Note that this method tries to set the constructor accessible
-	 * if given a non-accessible (i.e. non-public) constructor.
+	 * if given a non-accessible (that is, non-public) constructor.
 	 * @param clazz class to instantiate
 	 * @return the new instance
 	 */
@@ -68,7 +68,7 @@ public abstract class BeanUtils {
 	 * As this method doesn't try to load classes by name, it should avoid
 	 * class-loading issues.
 	 * <p>Note that this method tries to set the constructor accessible
-	 * if given a non-accessible (i.e. non-public) constructor.
+	 * if given a non-accessible (that is, non-public) constructor.
 	 * @param ctor constructor to instantiate
 	 * @return the new instance
 	 */
@@ -387,9 +387,9 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Check if the given class represents a "simple" property,
-	 * i.e. a primitive, a String, a Class, or a corresponding array.
-	 * Used to determine properties to check for a "simple" dependency-check.
+	 * Check if the given class represents a "simple" property:
+	 * a primitive, a String, a Class, or a corresponding array.
+	 * <p>Used to determine properties to check for a "simple" dependency-check.
 	 * @see org.springframework.beans.factory.support.RootBeanDefinition#DEPENDENCY_CHECK_SIMPLE
 	 * @see org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#checkDependencies
 	 */
