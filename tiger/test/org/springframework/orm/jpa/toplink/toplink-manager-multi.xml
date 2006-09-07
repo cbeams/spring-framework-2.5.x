@@ -4,19 +4,13 @@
 <beans>
 	
 	<import resource="classpath:/org/springframework/orm/jpa/multi-jpa-emf.xml"/>
-	
-	
+
 	<bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter">
 		<property name="database" value="HSQL"/>
 		<property name="showSql" value="true"/>
 		<property name="generateDdl" value="true"/>
 	</bean>
 
-    <bean id="jpaProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-    	<property name="properties">
-			<props>
-			</props>
-    	</property>
-    </bean>
-    
+	<bean id="jpaProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean"/>
+
 </beans>

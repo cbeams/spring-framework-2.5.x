@@ -27,7 +27,8 @@ import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrat
  *
  * @author Juergen Hoeller
  */
-public class HibernateMultiEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
+public class HibernateMultiEntityManagerFactoryIntegrationTests extends
+		AbstractContainerEntityManagerFactoryIntegrationTests {
 
 	private EntityManagerFactory entityManagerFactory2;
 

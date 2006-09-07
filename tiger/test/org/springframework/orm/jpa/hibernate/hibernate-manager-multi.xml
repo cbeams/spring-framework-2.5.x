@@ -4,20 +4,19 @@
 <beans>
 	
 	<import resource="classpath:/org/springframework/orm/jpa/multi-jpa-emf.xml"/>
-	
-	
+
 	<bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
 		<property name="database" value="HSQL"/>
 		<property name="showSql" value="true"/>
 		<property name="generateDdl" value="true"/>
 	</bean>
 
-    <bean id="jpaProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-    	<property name="properties">
+	<bean id="jpaProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="properties">
 			<props>
 				<prop key="hibernate.cache.provider_class">org.hibernate.cache.HashtableCacheProvider</prop>
 			</props>
-    	</property>
-    </bean>
+		</property>
+	</bean>
     
 </beans>
