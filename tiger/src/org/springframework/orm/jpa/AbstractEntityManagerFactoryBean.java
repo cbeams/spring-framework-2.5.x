@@ -118,8 +118,8 @@ public abstract class AbstractEntityManagerFactoryBean
 	}
 
 	/**
-	 * Specify the name of the EntityManager configuration for the factory.
-	 * <p>Default is none, indicating the default EntityManager configuration.
+	 * Specify the name of the EntityManagerFactory configuration.
+	 * <p>Default is none, indicating the default EntityManagerFactory configuration.
 	 * The persistence provider will throw an exception if ambiguous
 	 * EntityManager configurations are found.
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String)
