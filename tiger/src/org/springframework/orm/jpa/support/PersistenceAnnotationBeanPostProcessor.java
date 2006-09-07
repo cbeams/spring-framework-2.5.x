@@ -24,24 +24,31 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import javax.persistence.PersistenceProperty;
 import javax.persistence.PersistenceUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * BeanPostProcessor that processes PersistenceUnit and PersistenceContext
@@ -60,82 +67,22 @@ import org.springframework.util.ReflectionUtils;
  * @see javax.persistence.PersistenceContext
  */
 public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
-		implements ApplicationContextAware {
+		implements BeanFactoryAware {
 	
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private ApplicationContext applicationContext;
+	private ListableBeanFactory beanFactory;
 
 	private Map<Class<?>, List<AnnotatedMember>> classMetadata = new HashMap<Class<?>, List<AnnotatedMember>>();
 
-	private Map<String, EntityManagerFactory> entityManagersByName;
-	
-	private EntityManagerFactory uniqueEntityManagerFactory;
 
+	public void setBeanFactory(BeanFactory beanFactory) {
+		if (!(beanFactory instanceof ListableBeanFactory)) {
+			throw new IllegalArgumentException("ListableBeanFactory required for EntityManagerFactory lookup");
+		}
+		this.beanFactory = (ListableBeanFactory) beanFactory;
+	}
 
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
-	
-	
-	/**
-	 * Lazily initialize entity manager map.
-	 */
-	private synchronized void initMapsIfNecessary() {
-		if (this.entityManagersByName == null) {
-			this.entityManagersByName = new HashMap<String, EntityManagerFactory>();
-			// Look for named EntityManagers
-			for (String emfName : this.applicationContext.getBeanNamesForType(EntityManagerFactory.class)) {
-				EntityManagerFactory emf = (EntityManagerFactory) this.applicationContext.getBean(emfName);
-				if (emf instanceof EntityManagerFactoryInfo) {
-					EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) emf;
-					if (emfi.getPersistenceUnitName() != null) {
-						this.entityManagersByName.put(emfi.getPersistenceUnitName(), emf);
-					}
-				}
-			}
-			
-			if (this.entityManagersByName.isEmpty()) {
-				// Try to find a unique EntityManagerFactory.
-				String[] emfNames = this.applicationContext.getBeanNamesForType(EntityManagerFactory.class);
-				if (emfNames.length == 1) {
-					this.uniqueEntityManagerFactory = (EntityManagerFactory) this.applicationContext.getBean(emfNames[0]);
-				}
-			}
-			else if (this.entityManagersByName.size() == 1) {
-				this.uniqueEntityManagerFactory = this.entityManagersByName.values().iterator().next();
-			}
-			
-			if (this.entityManagersByName.isEmpty() && this.uniqueEntityManagerFactory == null) {
-				logger.warn("No named entity manager factories defined and not exactly one anonymous one: cannot inject");
-			}
-		}
-	}
-	
-	/**
-	 * Find an EntityManagerFactory with the given name in the current application context.
-	 * @param emfName the name of the EntityManagerFactory
-	 * @return the EntityManagerFactory
-	 * @throws IllegalStateException if there is no such EntityManagerFactory in the context
-	 */
-	protected EntityManagerFactory findEntityManagerFactoryByName(String emfName) throws IllegalStateException {
-		initMapsIfNecessary();
-		if (emfName == null || "".equals(emfName)) {
-			if (this.uniqueEntityManagerFactory != null) {
-				return this.uniqueEntityManagerFactory;
-			}
-			else {
-				throw new IllegalStateException(
-						"No EntityManagerFactory name given and factory contains several");
-			}
-		}
-		EntityManagerFactory namedEmf = this.entityManagersByName.get(emfName);
-		if (namedEmf == null) {
-			throw new IllegalStateException(
-					"No EntityManagerFactory found for persistence unit name '" + emfName + "'");
-		}
-		return namedEmf;
-	}
 
 	@Override
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {		
@@ -146,43 +93,89 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 		return true;
 	}
 
-	private synchronized List<AnnotatedMember> findClassMetadata(Class<? extends Object> clazz) {
-		List<AnnotatedMember> metadata = this.classMetadata.get(clazz);
-		if (metadata == null) {
-			final List<AnnotatedMember> newMetadata = new LinkedList<AnnotatedMember>();
-
-			ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
-				public void doWith(Field f) {
-					addIfPresent(newMetadata, f);
-				}
-			});
-
-			// TODO is it correct to walk up the hierarchy for methods? Otherwise inheritance
-			// is implied? CL to resolve
-			ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
-				public void doWith(Method m) {
-					addIfPresent(newMetadata, m);
-				}
-			});
-
-			metadata = newMetadata;
-			this.classMetadata.put(clazz, metadata);
+	private List<AnnotatedMember> findClassMetadata(Class<? extends Object> clazz) {
+		synchronized (this.classMetadata) {
+			List<AnnotatedMember> metadata = this.classMetadata.get(clazz);
+			if (metadata == null) {
+				final List<AnnotatedMember> newMetadata = new LinkedList<AnnotatedMember>();
+				ReflectionUtils.doWithFields(clazz, new ReflectionUtils.FieldCallback() {
+					public void doWith(Field field) {
+						addIfPresent(newMetadata, field);
+					}
+				});
+				ReflectionUtils.doWithMethods(clazz, new ReflectionUtils.MethodCallback() {
+					public void doWith(Method method) {
+						addIfPresent(newMetadata, method);
+					}
+				});
+				metadata = newMetadata;
+				this.classMetadata.put(clazz, metadata);
+			}
+			return metadata;
 		}
-		return metadata;
 	}
-	
-	
+
 	private void addIfPresent(List<AnnotatedMember> metadata, AccessibleObject ao) {
 		PersistenceContext pc = ao.getAnnotation(PersistenceContext.class);
 		if (pc != null) {
-			metadata.add(new AnnotatedMember(pc.unitName(), pc.type(), ao));
+			Properties properties = null;
+			PersistenceProperty[] pps = pc.properties();
+			if (!ObjectUtils.isEmpty(pps)) {
+				properties = new Properties();
+				for (int i = 0; i < pps.length; i++) {
+					PersistenceProperty pp = pps[i];
+					properties.setProperty(pp.name(), pp.value());
+				}
+			}
+			metadata.add(new AnnotatedMember(ao, pc.unitName(), pc.type(), properties));
 		}
 		else {
 			PersistenceUnit pu = ao.getAnnotation(PersistenceUnit.class);
 			if (pu != null) {
-				metadata.add(new AnnotatedMember(pu.unitName(), null, ao));
+				metadata.add(new AnnotatedMember(ao, pu.unitName()));
 			}
 		}
+	}
+
+
+	/**
+	 * Find an EntityManagerFactory with the given name in the current application context.
+	 * @param emfName the name of the EntityManagerFactory
+	 * @return the EntityManagerFactory
+	 * @throws IllegalStateException if there is no such EntityManagerFactory in the context
+	 */
+	protected EntityManagerFactory findEntityManagerFactory(String emfName) throws IllegalStateException {
+		if (StringUtils.hasLength(emfName)) {
+			return findNamedEntityManagerFactory(emfName);
+		}
+		else {
+			return findDefaultEntityManagerFactory();
+		}
+	}
+
+	protected EntityManagerFactory findNamedEntityManagerFactory(String emfName) {
+		String[] candidateNames =
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.beanFactory, EntityManagerFactory.class);
+		for (String candidateName : candidateNames) {
+			EntityManagerFactory emf = (EntityManagerFactory) this.beanFactory.getBean(candidateName);
+			String nameToCompare = candidateName;
+			if (emf instanceof EntityManagerFactoryInfo) {
+				EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) emf;
+				if (emfi.getPersistenceUnitName() != null) {
+					nameToCompare = emfi.getPersistenceUnitName();
+				}
+			}
+			if (emfName.equals(nameToCompare)) {
+				return emf;
+			}
+		}
+		throw new NoSuchBeanDefinitionException(EntityManagerFactory.class,
+				"No EntityManagerFactory found for persistence unit name '" + emfName + "'");
+	}
+
+	protected EntityManagerFactory findDefaultEntityManagerFactory() {
+		return (EntityManagerFactory) BeanFactoryUtils.beanOfTypeIncludingAncestors(
+				this.beanFactory, EntityManagerFactory.class);
 	}
 
 	
@@ -192,15 +185,23 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 	 */
 	private class AnnotatedMember {
 
+		private final AccessibleObject member;
+
 		private final String unitName;
 
 		private final PersistenceContextType type;
 
-		private final AccessibleObject member;
+		private final Properties properties;
 
-		public AnnotatedMember(String unitName, PersistenceContextType type, AccessibleObject member) {
+
+		public AnnotatedMember(AccessibleObject member, String unitName) {
+			this(member, unitName, null, null);
+		}
+
+		public AnnotatedMember(AccessibleObject member, String unitName, PersistenceContextType type, Properties properties) {
 			this.unitName = unitName;
 			this.type = type;
+			this.properties = properties;
 			this.member = member;
 			
 			// Validate member type
@@ -210,6 +211,7 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 				throw new IllegalArgumentException("Cannot inject " + member + ": not a supported JPA type");
 			}
 		}
+
 
 		public void inject(Object instance) {
 			Object value = resolve();
@@ -248,15 +250,15 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 				Method setter = (Method) member;
 				if (setter.getParameterTypes().length != 1) {
 					throw new IllegalArgumentException(
-							"Supposed setter " + this.member + " must have 1 argument, not " +
+							"Supposed setter [" + this.member + "] must have 1 argument, not " +
 							setter.getParameterTypes().length);
 				}
 				return setter.getParameterTypes()[0];
 			}
 			else {
 				throw new IllegalArgumentException(
-						"Unknown AccessibleObject type " + this.member.getClass() +
-						"; Can only inject settermethods or fields");
+						"Unknown AccessibleObject type [" + this.member.getClass() +
+						"]; can only inject setter methods and fields");
 			}
 		}
 
@@ -265,11 +267,11 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 		 */
 		protected Object resolve() {
 			// Resolves to EM or EMF.
-			EntityManagerFactory emf = findEntityManagerFactoryByName(this.unitName);
+			EntityManagerFactory emf = findEntityManagerFactory(this.unitName);
 			if (EntityManagerFactory.class.isAssignableFrom(getMemberType())) {
 				if (!getMemberType().isInstance(emf)) {
-					throw new IllegalArgumentException("Cannot inject " + this.member +
-							" with EntityManagerFactory [" + emf + "]: type mismatch");
+					throw new IllegalArgumentException("Cannot inject [" + this.member +
+							"] with EntityManagerFactory [" + emf + "]: type mismatch");
 				}
 				return emf;
 			}
@@ -281,7 +283,7 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 				}
 				else {
 					// Type is container-managed extended.
-					return ExtendedEntityManagerCreator.createContainerManagedEntityManager(emf);
+					return ExtendedEntityManagerCreator.createContainerManagedEntityManager(emf, this.properties);
 				}
 			}
 		}

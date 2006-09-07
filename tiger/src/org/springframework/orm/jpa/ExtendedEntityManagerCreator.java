@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -32,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -90,11 +92,32 @@ public abstract class ExtendedEntityManagerCreator {
 	 * will automatically apply.
 	 * @return a container-managed EntityManager that will automatically participate
 	 * in any managed transaction
+	 * @see javax.persistence.EntityManagerFactory#createEntityManager()
 	 */
 	public static EntityManager createContainerManagedEntityManager(EntityManagerFactory emf) {
+		return createContainerManagedEntityManager(emf, null);
+	}
+
+	/**
+	 * Create an EntityManager that automatically joins transactions on each
+	 * operation in a transaction.
+	 * @param emf the EntityManagerFactory to create the EntityManager with.
+	 * If this implements the EntityManagerFactoryInfo interface, appropriate handling
+	 * of the native EntityManagerFactory and available EntityManagerPlusOperations
+	 * will automatically apply.
+	 * @param properties the properties to be passed into the <code>createEntityManager</code>
+	 * call (may be <code>null</code>)
+	 * @return a container-managed EntityManager that will automatically participate
+	 * in any managed transaction
+	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 */
+	public static EntityManager createContainerManagedEntityManager(EntityManagerFactory emf, Map properties) {
+		Assert.notNull(emf, "EntityManagerFactory must not be null");
 		if (emf instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
-			EntityManager rawEntityManager = emfInfo.getNativeEntityManagerFactory().createEntityManager();
+			EntityManagerFactory nativeEmf = emfInfo.getNativeEntityManagerFactory();
+			EntityManager rawEntityManager =
+					(properties != null ? nativeEmf.createEntityManager(properties) : nativeEmf.createEntityManager());
 			JpaDialect jpaDialect = emfInfo.getJpaDialect();
 			EntityManagerPlusOperations plusOperations = null;
 			if (jpaDialect != null && jpaDialect.supportsEntityManagerPlusOperations()) {
@@ -103,7 +126,9 @@ public abstract class ExtendedEntityManagerCreator {
 			return createProxy(rawEntityManager, plusOperations, true);
 		}
 		else {
-			return createProxy(emf.createEntityManager(), null, true);
+			EntityManager rawEntityManager =
+					(properties != null ? emf.createEntityManager(properties) : emf.createEntityManager());
+			return createProxy(rawEntityManager, null, true);
 		}
 	}
 
@@ -119,6 +144,7 @@ public abstract class ExtendedEntityManagerCreator {
 	private static EntityManager createProxy(
 			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations, boolean containerManaged) {
 
+		Assert.notNull(rawEntityManager, "EntityManager must not be null");
 		Class[] ifcs = ClassUtils.getAllInterfaces(rawEntityManager);
 		if (plusOperations != null) {
 			ifcs = (Class[]) ObjectUtils.addObjectToArray(ifcs, EntityManagerPlusOperations.class);
@@ -319,7 +345,7 @@ public abstract class ExtendedEntityManagerCreator {
 			else {
 				this.entityManagerHolder.getEntityManager().getTransaction().commit();
 			}
-			// Don't close the EntityManager...that's up to the user
+			// Don't close the EntityManager... That's up to the user.
 		}
 	}
 
