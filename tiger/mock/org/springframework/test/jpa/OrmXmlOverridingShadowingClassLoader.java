@@ -37,11 +37,13 @@ class OrmXmlOverridingShadowingClassLoader extends ResourceOverridingShadowingCl
 	private List<String> providerPrefixes = new LinkedList<String>(); {
 		// Automatically exclude classes from these well-known persistence providers
 		providerPrefixes.add("oracle.toplink.essentials");
-		providerPrefixes.add("kodo");
 		
+
 		// Do NOT exclude Hibernate classes --
 		// this causes class casts due to use of
 		// CGLIB by Hibernate
+		
+		// Same goes for OpenJPA which will not enhance the domain classes
 	}
 	
 
