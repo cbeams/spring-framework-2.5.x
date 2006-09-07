@@ -6,7 +6,6 @@
 	<bean id="persistenceUnitManager" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
 		<property name="persistenceXmlLocation" value="org/springframework/orm/jpa/hibernate/persistence-multi.xml"/>
 		<property name="defaultDataSource" ref="dataSource"/>
-		<property name="loadTimeWeaver" ref="weaver"/>
 	</bean>
 
 	<bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
