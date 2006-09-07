@@ -111,7 +111,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
-            <section>
+            <section id="xsd-config-body-schemas-util-constant">
                 <title><literal>&lt;util:constant/&gt;</literal></title>
                 <para>Before...</para>    
                 <programlisting><![CDATA[<bean id="..." class="...">
@@ -136,7 +136,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <util:constant static-field="java.sql.Connection.TRANSACTION_SERIALIZABLE"/>
   </property>
 </bean>]]></programlisting>
-                <section>
+                <section id="xsd-config-body-schemas-util-frfb">
                     <title>Setting a bean property or constructor arg from a field value</title>
                     <para>
 			            <ulink url="http://www.springframework.org/docs/api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html"><classname>FieldRetrievingFactoryBean</classname></ulink>
@@ -219,7 +219,7 @@ public class Client {
 		            </para>
                 </section>
             </section>
-            <section>
+            <section id="xsd-config-body-schemas-util-property-path">
                 <title><literal>&lt;util:property-path/&gt;</literal></title>
                 <para>Before...</para>    
                 <programlisting><lineannotation>&lt;!-- target bean to be referenced by name --&gt;</lineannotation><![CDATA[
@@ -309,7 +309,7 @@ public class Client {
 			        Please see the Javadocs for more info on this feature.</para>
                 </section>
             </section>
-            <section>
+            <section id="xsd-config-body-schemas-util-properties">
                 <title><literal>&lt;util:properties/&gt;</literal></title>
                 <para>Before...</para>    
                 <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Properties</classname> instance with values loaded from the supplied location --&gt;</lineannotation><![CDATA[
@@ -325,7 +325,7 @@ public class Client {
                 <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Properties</classname> instance with values loaded from the supplied location --&gt;</lineannotation><![CDATA[
 <util:properties id="jdbcConfiguration" location="classpath:com/foo/jdbc-production.properties"/>]]></programlisting>
             </section>
-            <section>
+            <section id="xsd-config-body-schemas-util-list">
                 <title><literal>&lt;util:list/&gt;</literal></title>
                 <para>Before...</para>    
                 <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.List</classname> instance with values loaded from the supplied <literal>'sourceList'</literal> --&gt;</lineannotation><![CDATA[
@@ -370,7 +370,7 @@ public class Client {
                 element; collection merging is described in more detail in the section entitled
                 <xref linkend="beans-collection-elements-merging"/>.</para>
             </section>
-            <section>
+            <section id="xsd-config-body-schemas-util-map">
                 <title><literal>&lt;util:map/&gt;</literal></title>
                 <para>Before...</para>    
                 <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Map</classname> instance with values loaded from the supplied <literal>'sourceMap'</literal> --&gt;</lineannotation><![CDATA[
@@ -415,7 +415,7 @@ public class Client {
                 element; collection merging is described in more detail in the section entitled
                 <xref linkend="beans-collection-elements-merging"/>.</para>
             </section>
-            <section>
+            <section id="xsd-config-body-schemas-util-set">
                 <title><literal>&lt;util:set/&gt;</literal></title>
                 <para>Before...</para>    
                 <programlisting><lineannotation>&lt;!-- creates a <classname>java.util.Set</classname> instance with values loaded from the supplied <literal>'sourceSet'</literal> --&gt;</lineannotation><![CDATA[
@@ -480,7 +480,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
-            <section>
+            <section id="xsd-config-body-schemas-jee-jndi-lookup">
                 <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (simple)</title>
                 <para>Before...</para>
                 <programlisting><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
@@ -489,7 +489,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 <para>After...</para>
                 <programlisting><![CDATA[<jee:jndi-lookup id="simple" jndi-name="jdbc/MyDataSource"/>]]></programlisting>
             </section>
-            <section>
+            <section id="xsd-config-body-schemas-jee-jndi-lookup-environment-single">
                 <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (with single JNDI environment setting)</title>
                 <para>Before...</para>
                 <programlisting><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
@@ -505,7 +505,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <jee:environment>foo=bar</jee:environment>
 </jee:jndi-lookup>]]></programlisting>
             </section>
-            <section>
+            <section id="xsd-config-body-schemas-jee-jndi-lookup-evironment-multiple">
                 <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (with multiple JNDI environment settings)</title>
                 <para>Before...</para>
                 <programlisting><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
@@ -526,7 +526,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     </jee:environment>
 </jee:jndi-lookup>]]></programlisting>
             </section>
-            <section>
+            <section id="xsd-config-body-schemas-jee-jndi-lookup-complex">
                 <title><literal>&lt;jee:jndi-lookup/&gt;</literal> (complex)</title>
                 <para>Before...</para>
                 <programlisting><![CDATA[<bean id="simple" class="org.springframework.jndi.JndiObjectFactoryBean">
@@ -546,7 +546,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
              expected-type="com.myapp.DefaultFoo"
              proxy-interface="com.myapp.Foo"/>]]></programlisting>
             </section>
-            <section>
+            <section id="xsd-config-body-schemas-jee-local-slsb">
                 <title><literal>&lt;jee:local-slsb/&gt;</literal> (simple)</title>
                 <para>The <literal>&lt;jee:local-slsb/&gt;</literal> tag configures a
                 reference to an EJB Stateless SessionBean.</para>
@@ -560,7 +560,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 <programlisting><![CDATA[<jee:local-slsb id="simpleSlsb" jndi-name="ejb/RentalServiceBean"
     business-interface="com.foo.service.RentalService"/>]]></programlisting>
             </section>
-            <section>
+            <section id="xsd-config-body-schemas-jee-local-slsb-complex">
                 <title><literal>&lt;jee:local-slsb/&gt;</literal> (complex)</title>
                 <programlisting><![CDATA[<bean id="complexLocalEjb"
       class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
@@ -578,7 +578,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     lookup-home-on-startup="true"
     resource-ref="true">]]></programlisting>
             </section>
-            <section>
+            <section id="xsd-config-body-schemas-jee-remote-slsb">
                 <title><literal>&lt;jee:remote-slsb/&gt;</literal> (simple)</title>
                 <para>The <literal>&lt;jee:remote-slsb/&gt;</literal> tag configures a
                 reference to a <literal>remote</literal> EJB Stateless SessionBean.</para>
@@ -746,11 +746,12 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         popular Java IDEs to effect the easier editing of Spring's XML Schema-based
         configuration files.</para>
         <para>If your favourite Java IDE or editor is not included in the list of
-        documented IDEs, then please do raise an issue on the Spring Framework
-        <ulink url="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">JIRA Issue Tracker</ulink>
-        and an example with the IDE <emphasis>may</emphasis> may be featured in the next release.</para>
-        <procedure id="xsd-config-setup-eclipse">
-            <title>Setting up Eclipse</title>
+        documented IDEs, then please do
+        <ulink url="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">raise an issue</ulink>
+        and an example with the IDE <emphasis>may</emphasis> be featured in the next release.</para>
+        <section id="xsd-config-setup-eclipse">
+        <title>Setting up Eclipse</title>
+        <procedure>
             <para>The following steps illustrate setting up
             <ulink url="http://www.eclipse.org/">Eclipse</ulink> to be XSD-aware. 
             The assumption in the following steps is that you already have an Eclipse
@@ -859,8 +860,10 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 		        </para>
             </step>
         </procedure>
-        <procedure id="xsd-config-setup-idea">
-            <title>Setting up IntelliJ IDEA</title>
+        </section>
+        <section id="xsd-config-setup-idea">
+        <title>Setting up IntelliJ IDEA</title>
+        <procedure>
             <para>The following steps illustrate setting up the
             <ulink url="http://www.jetbrains.com/idea/">IntelliJ IDEA</ulink> IDE to be XSD-aware.
             The assumption in the following steps is that you already have an IDEA project
@@ -996,6 +999,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 Repeat as required for setting up IDEA to reference the other Spring XSD files.
             </para>
         </procedure>
+        </section>
         
         <section id="xsd-config-integration">
             <title>Integration issues</title>
