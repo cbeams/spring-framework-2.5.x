@@ -58,7 +58,8 @@ public interface EntityManagerFactoryInfo {
 	PersistenceUnitInfo getPersistenceUnitInfo();
 
 	/**
-	 * Return the name of the EntityManager, or <code>null</code> if
+	 * Return the name of the persistence unit used to create this 
+	 * EntityManagerFactory, or <code>null</code> if
 	 * it is an unnamed default. If <code>getPersistenceUnitInfo()</code>
 	 * returns non-null, the return type of <code>getPersistenceUnitName()</code>
 	 * must be equal to the value returned by
