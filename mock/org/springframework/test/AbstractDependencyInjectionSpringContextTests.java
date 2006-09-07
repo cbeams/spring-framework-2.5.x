@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,6 @@ import java.util.LinkedList;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * Convenient superclass for tests depending on a Spring context.
@@ -44,23 +43,6 @@ import org.springframework.context.ConfigurableApplicationContext;
  * on Field Injection.
  * </ul>
  *
- * <p>This class will normally cache contexts based on a <i>context key</i>:
- * normally the config locations String array describing the Spring resource
- * descriptors making up the context. Unless the <code>setDirty()</code> method
- * is called by a test, the context will not be reloaded, even across different
- * subclasses of this test. This is particularly beneficial if your context is
- * slow to construct, for example if you are using Hibernate and the time taken
- * to load the mappings is an issue.
- *
- * <p>If you don't want this behavior, you can override the <code>contextKey()</code>
- * method, most likely to return the test class. In conjunction with this you would
- * probably override the <code>getContext</code> method, which by default loads
- * the locations specified in the <code>getConfigLocations()</code> method.
- *
- * <p><b>WARNING:</b> When doing integration tests from within Eclipse, only use
- * classpath resource URLs. Else, you may see misleading failures when changing
- * context locations.
- *
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Rick Evans
@@ -70,7 +52,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * @see #getContext
  * @see #getConfigLocations
  */
-public abstract class AbstractDependencyInjectionSpringContextTests extends AbstractSpringContextTests {
+public abstract class AbstractDependencyInjectionSpringContextTests extends AbstractSingleSpringContextTests {
 
 	/**
 	 * Constant that indicates no autowiring at all.
@@ -97,12 +79,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 
 	private boolean dependencyCheck = true;
 
-	/** Application context this test will run against */
-	protected ConfigurableApplicationContext applicationContext;
-
-	protected String[] managedVariableNames;
-
-	private int loadCount = 0;
+	private String[] managedVariableNames;
 
 
 	/**
@@ -124,14 +101,14 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	 * Set whether to populate protected variables of this test case.
 	 * Default is "false".
 	 */
-	public void setPopulateProtectedVariables(boolean populateFields) {
+	public final void setPopulateProtectedVariables(boolean populateFields) {
 		this.populateProtectedVariables = populateFields;
 	}
 
 	/**
 	 * Return whether to populate protected variables of this test case.
 	 */
-	public boolean isPopulateProtectedVariables() {
+	public final boolean isPopulateProtectedVariables() {
 		return populateProtectedVariables;
 	}
 
@@ -143,14 +120,14 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	 * @see #AUTOWIRE_BY_NAME
 	 * @see #AUTOWIRE_NO
 	 */
-	public void setAutowireMode(int autowireMode) {
+	public final void setAutowireMode(int autowireMode) {
 		this.autowireMode = autowireMode;
 	}
 
 	/**
 	 * Return the autowire mode for test properties set by Dependency Injection.
 	 */
-	public int getAutowireMode() {
+	public final int getAutowireMode() {
 		return autowireMode;
 	}
 
@@ -160,7 +137,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	 * <p>The default is "true", meaning that tests cannot be run
 	 * unless all properties are populated.
 	 */
-	public void setDependencyCheck(boolean dependencyCheck) {
+	public final void setDependencyCheck(boolean dependencyCheck) {
 		this.dependencyCheck = dependencyCheck;
 	}
 
@@ -168,38 +145,17 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	 * Return whether or not dependency checking should be performed
 	 * for test properties set by Dependency Injection.
 	 */
-	public boolean isDependencyCheck() {
+	public final boolean isDependencyCheck() {
 		return dependencyCheck;
 	}
 
-	/**
-	 * Return the current number of context load attempts.
-	 */
-	public final int getLoadCount() {
-		return loadCount;
-	}
-
 
 	/**
-	 * Called to say that the "applicationContext" instance variable is dirty and
-	 * should be reloaded. We need to do this if a test has modified the context
-	 * (for example, by replacing a bean definition).
+	 * Prepare this test instance, injecting dependencies into its
+	 * protected fields and its bean properties.
 	 */
-	public void setDirty() {
-		setDirty(getConfigLocations());
-	}
-
-
-	protected final void setUp() throws Exception {
-		this.applicationContext = getContext(contextKey());
+	protected void prepareTestInstance() throws Exception {
 		injectDependencies();
-		try {
-			onSetUp();
-		}
-		catch (Exception ex) {
-			logger.error("Setup error", ex);
-			throw ex;
-		}
 	}
 
 	/**
@@ -212,7 +168,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	 * @throws Exception in the case of any errors
 	 * @see #populateProtectedVariables() 
 	 */
-	protected void injectDependencies() throws Exception {
+	private void injectDependencies() throws Exception {
 		if (isPopulateProtectedVariables()) {
 			if (this.managedVariableNames == null) {
 				initManagedVariableNames();
@@ -225,20 +181,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 		}
 	}
 
-	/**
-	 * Return a key for this context. Usually based on config locations, but
-	 * a subclass overriding buildContext() might want to return its class.
-	 */
-	protected Object contextKey() {
-		return getConfigLocations();
-	}
-
-	protected ConfigurableApplicationContext loadContextLocations(String[] locations) {
-		++this.loadCount;
-		return super.loadContextLocations(locations);
-	}
-
-	protected void initManagedVariableNames() throws IllegalAccessException {
+	private void initManagedVariableNames() throws IllegalAccessException {
 		LinkedList managedVarNames = new LinkedList();
 		Class clazz = getClass();
 
@@ -276,12 +219,12 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 		this.managedVariableNames = (String[]) managedVarNames.toArray(new String[managedVarNames.size()]);
 	}
 
-	private static boolean isProtectedInstanceField(Field field) {
+	private boolean isProtectedInstanceField(Field field) {
 		int modifiers = field.getModifiers();
 		return !Modifier.isStatic(modifiers) && Modifier.isProtected(modifiers);
 	}
 
-	protected void populateProtectedVariables() throws IllegalAccessException {
+	private void populateProtectedVariables() throws IllegalAccessException {
 		for (int i = 0; i < this.managedVariableNames.length; i++) {
 			String varName = this.managedVariableNames[i];
 			Object bean = null;
@@ -321,49 +264,5 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 			}
 		}
 	}
-
-	/**
-	 * Subclasses can override this method in place of the
-	 * <code>setUp()</code> method, which is final in this class.
-	 * This implementation does nothing.
-	 * @throws Exception simply let any exception propagate
-	 */
-	protected void onSetUp() throws Exception {
-	}
-
-
-	/**
-	 * Reload the context if it's marked as dirty.
-	 * @see #onTearDown
-	 */
-	protected final void tearDown() {
-		try {
-			onTearDown();
-		}
-		catch (Exception ex) {
-			logger.error("onTearDown error", ex);
-		}
-	}
-
-	/**
-	 * Subclasses can override this to add custom behavior on teardown.
-	 * @throws Exception simply let any exception propagate
-	 */
-	protected void onTearDown() throws Exception {
-	}
-
-
-	/**
-	 * Subclasses must implement this method to return the locations of their
-	 * config files. A plain path will be treated as class path location.
-	 * E.g.: "org/springframework/whatever/foo.xml". Note however that you may
-	 * prefix path locations with standard Spring resource prefixes. Therefore,
-	 * a config location path prefixed with "classpath:" with behave the same
-	 * as a plain path, but a config location such as
-	 * "file:/some/path/path/location/appContext.xml" will be treated as a
-	 * filesystem location.
-	 * @return an array of config locations
-	 */
-	protected abstract String[] getConfigLocations();
 
 }
