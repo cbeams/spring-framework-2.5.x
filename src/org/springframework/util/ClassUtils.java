@@ -231,6 +231,22 @@ public abstract class ClassUtils {
 		}
 	}
 
+	/**
+	 * Build a nice qualified name for an array:
+	 * component type class name + "[]".
+	 * @param clazz the array class
+	 * @return a qualified name for the array class
+	 */
+	private static String getQualifiedNameForArray(Class clazz) {
+		StringBuffer buffer = new StringBuffer();
+		while (clazz.isArray()) {
+			clazz = clazz.getComponentType();
+			buffer.append(ClassUtils.ARRAY_SUFFIX);
+		}
+		buffer.insert(0, clazz.getName());
+		return buffer.toString();
+	}
+
 
 	/**
 	 * Return the qualified name of the given method, consisting of
@@ -494,6 +510,7 @@ public abstract class ClassUtils {
 	 * @return all interfaces that the given object implements as List
 	 */
 	public static Set getAllInterfacesAsSet(Object object) {
+		Assert.notNull(object, "Object must not be null");
 		return getAllInterfacesForClassAsSet(object.getClass());
 	}
 
@@ -505,6 +522,7 @@ public abstract class ClassUtils {
 	 * @return all interfaces that the given object implements as Set
 	 */
 	public static Set getAllInterfacesForClassAsSet(Class clazz) {
+		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isInterface()) {
 			return Collections.singleton(clazz);
 		}
@@ -517,17 +535,6 @@ public abstract class ClassUtils {
 			clazz = clazz.getSuperclass();
 		}
 		return interfaces;
-	}
-
-
-	private static String getQualifiedNameForArray(Class clazz) {
-		StringBuffer buffer = new StringBuffer();
-		while (clazz.isArray()) {
-			clazz = clazz.getComponentType();
-			buffer.append(ClassUtils.ARRAY_SUFFIX);
-		}
-		buffer.insert(0, clazz.getName());
-		return buffer.toString();
 	}
 
 }
