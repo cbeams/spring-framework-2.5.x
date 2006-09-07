@@ -65,7 +65,7 @@ import java.util.ResourceBundle;
  * <p>Please note that this {@link java.beans.PropertyEditor} is
  * <b>not</b> registered by default with any of the Spring infrastructure.
  * 
- * <p>Thanks to David Leal Valmaña for the suggestion and initial prototype.
+ * <p>Thanks to David Leal Valmana for the suggestion and initial prototype.
  *
  * @author Rick Evans
  * @since 2.0
