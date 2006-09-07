@@ -206,6 +206,12 @@ public abstract class ExtendedEntityManagerCreator {
 				return proxy.hashCode();
 			}
 			else if (method.getName().equals("joinTransaction")) {
+				//Should we do a check here like:
+				//if(!this.containerManaged){
+				//	doJoinTransaction(true);
+				//  return null;
+				//} ? D.K.
+				
 				doJoinTransaction(true);
 				return null;
 			}
