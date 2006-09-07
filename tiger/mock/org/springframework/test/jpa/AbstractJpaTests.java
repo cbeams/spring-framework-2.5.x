@@ -44,6 +44,7 @@ import org.springframework.instrument.classloading.ShadowingClassLoader;
 import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
+import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager;
 import org.springframework.test.annotation.AbstractAnnotationAwareTransactionalTests;
 import org.springframework.util.StringUtils;
 
@@ -272,7 +273,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	 * that type.
 	 */
 	protected void customizeResourceOverridingShadowingClassLoader(ClassLoader shadowingClassLoader) {
-		// Empty
+		// empty
 	}
 	
 	/**
@@ -284,6 +285,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 		return DEFAULT_ORM_XML_LOCATION;
 	}
 
+
 	private static class LoadTimeWeaverInjectingBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter {
 
 		private final LoadTimeWeaver ltw;
@@ -294,11 +296,15 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			if (bean instanceof LocalContainerEntityManagerFactoryBean) {
-				((LocalContainerEntityManagerFactoryBean) bean).setLoadTimeWeaver(ltw);
+				((LocalContainerEntityManagerFactoryBean) bean).setLoadTimeWeaver(this.ltw);
+			}
+			if (bean instanceof DefaultPersistenceUnitManager) {
+				((DefaultPersistenceUnitManager) bean).setLoadTimeWeaver(this.ltw);
 			}
 			return bean;
 		}
 	}
+
 
 	private static class ShadowingLoadTimeWeaver implements LoadTimeWeaver {
 
