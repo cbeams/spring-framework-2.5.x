@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2006 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.jdbc.core;
 
 /**
@@ -8,11 +24,10 @@ package org.springframework.jdbc.core;
  * must have names.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
+ * @since 2.0
  */
 public class SqlInOutParameter extends SqlOutParameter {
-
-	private SqlReturnType sqlReturnType;
-
 
 	/**
 	 * Create a new SqlInOutParameter.
@@ -41,8 +56,7 @@ public class SqlInOutParameter extends SqlOutParameter {
 	 * @param sqlReturnType custom value handler for complex type (optional)
 	 */
 	public SqlInOutParameter(String name, int sqlType, String typeName, SqlReturnType sqlReturnType) {
-		super(name, sqlType, typeName);
-		this.sqlReturnType = sqlReturnType;
+		super(name, sqlType, typeName, sqlReturnType);
 	}
 
 	/**
@@ -77,22 +91,7 @@ public class SqlInOutParameter extends SqlOutParameter {
 
 
 	/**
-	 * Return whether this parameter holds a custom return type.
-	 */
-	public boolean isReturnTypeSupported() {
-		return (this.sqlReturnType != null);
-	}
-
-	/**
-	 * Return the custom return type, if any.
-	 */
-	public SqlReturnType getSqlReturnType() {
-		return sqlReturnType;
-	}
-
-	/**
-	 * Return whether this parameter holds input values that should be set
-	 * before execution even if they are null.
+	 * This implementation always returns <code>true</code>.
 	 */
 	public boolean isInputValueProvided() {
 		return true;
