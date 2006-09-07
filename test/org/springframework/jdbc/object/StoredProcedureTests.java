@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,8 +36,8 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ParameterMapper;
-import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SimpleRowCountCallbackHandler;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlReturnResultSet;
@@ -365,20 +365,17 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
-		mockConnection.prepareCall(
-			"{call " + StoredProcedureWithResultSet.SQL + "()}");
+		mockConnection.prepareCall("{call " + StoredProcedureWithResultSet.SQL + "()}");
 		ctrlConnection.setReturnValue(mockCallable);
 
 		replay();
 		ctrlResultSet.replay();
 
-		StoredProcedureWithResultSet sproc =
-			new StoredProcedureWithResultSet(mockDataSource);
+		StoredProcedureWithResultSet sproc = new StoredProcedureWithResultSet(mockDataSource);
 		sproc.execute();
 
 		ctrlResultSet.verify();
 		assertEquals(2, sproc.getCount());
-		
 	}
 	
 	public void testStoredProcedureWithResultSetMapped() throws Exception {
@@ -412,15 +409,13 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		mockCallable.close();
 		ctrlCallable.setVoidCallable();
 
-		mockConnection.prepareCall(
-			"{call " + StoredProcedureWithResultSetMapped.SQL + "()}");
+		mockConnection.prepareCall("{call " + StoredProcedureWithResultSetMapped.SQL + "()}");
 		ctrlConnection.setReturnValue(mockCallable);
 
 		replay();
 		ctrlResultSet.replay();
 
-		StoredProcedureWithResultSetMapped sproc =
-			new StoredProcedureWithResultSetMapped(mockDataSource);
+		StoredProcedureWithResultSetMapped sproc = new StoredProcedureWithResultSetMapped(mockDataSource);
 		Map res = sproc.execute();
 
 		ctrlResultSet.verify();
@@ -489,8 +484,11 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		assertEquals("OK", out.get("out"));
 	}
 
-	private class StoredProcedureConfiguredViaJdbcTemplate extends StoredProcedure {
+
+	private static class StoredProcedureConfiguredViaJdbcTemplate extends StoredProcedure {
+
 		public static final String SQL = "configured_via_jt";
+
 		public StoredProcedureConfiguredViaJdbcTemplate(JdbcTemplate t) {
 			setJdbcTemplate(t);
 			setSql(SQL);
@@ -508,8 +506,11 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 	}
 
-	private class AddInvoice extends StoredProcedure {
+
+	private static class AddInvoice extends StoredProcedure {
+
 		public static final String SQL = "add_invoice";
+
 		public AddInvoice(DataSource ds) {
 			setDataSource(ds);
 			setSql(SQL);
@@ -529,7 +530,8 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 	}
 
-	private class NullArg extends StoredProcedure {
+
+	private static class NullArg extends StoredProcedure {
 
 		public static final String SQL = "takes_null";
 
@@ -547,7 +549,8 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 	}
 
-	private class NoSuchStoredProcedure extends StoredProcedure {
+
+	private static class NoSuchStoredProcedure extends StoredProcedure {
 
 		public static final String SQL = "no_sproc_with_this_name";
 
@@ -562,18 +565,8 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 	}
 
-	private class UncompiledStoredProcedure extends StoredProcedure {
-		public static final String SQL = "uncompile_sp";
-		public UncompiledStoredProcedure(DataSource ds) {
-			super(ds, SQL);
-		}
 
-		public void execute() {
-			execute(new HashMap());
-		}
-	}
-
-	private class UnnamedParameterStoredProcedure extends StoredProcedure {
+	private static class UnnamedParameterStoredProcedure extends StoredProcedure {
 
 		public UnnamedParameterStoredProcedure(DataSource ds) {
 			super(ds, "unnamed_parameter_sp");
@@ -585,11 +578,11 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 			Map in = new HashMap();
 			in.put("id", new Integer(id));
 			Map out = execute(in);
-
 		}
 	}
 
-	private class MissingParameterStoredProcedure extends StoredProcedure {
+
+	private static class MissingParameterStoredProcedure extends StoredProcedure {
 
 		public MissingParameterStoredProcedure(DataSource ds) {
 			setDataSource(ds);
@@ -603,16 +596,17 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 	}
 
-	private class StoredProcedureWithResultSet extends StoredProcedure {
+
+	private static class StoredProcedureWithResultSet extends StoredProcedure {
+
 		public static final String SQL = "sproc_with_result_set";
 
-		private int count = 0;
+		private final SimpleRowCountCallbackHandler handler = new SimpleRowCountCallbackHandler();
 
 		public StoredProcedureWithResultSet(DataSource ds) {
 			setDataSource(ds);
 			setSql(SQL);
-			declareParameter(
-				new SqlReturnResultSet("rs", new RowCallbackHandlerImpl()));
+			declareParameter(new SqlReturnResultSet("rs", this.handler));
 			compile();
 		}
 
@@ -621,18 +615,13 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 
 		public int getCount() {
-			return count;
+			return this.handler.getCount();
 		}
-
-		private class RowCallbackHandlerImpl implements RowCallbackHandler {
-			public void processRow(ResultSet rs) throws SQLException {
-				count++;
-			}
-		}
-
 	}
 
-	private class StoredProcedureWithResultSetMapped extends StoredProcedure {
+
+	private static class StoredProcedureWithResultSetMapped extends StoredProcedure {
+
 		public static final String SQL = "sproc_with_result_set";
 
 		public StoredProcedureWithResultSetMapped(DataSource ds) {
@@ -648,15 +637,15 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 			return out;
 		}
 
-		private class RowMapperImpl implements RowMapper {
+		private static class RowMapperImpl implements RowMapper {
 			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 				return rs.getString(2);
 			}
 		}
-
 	}
 
-	private class ParameterMapperStoredProcedure extends StoredProcedure {
+
+	private static class ParameterMapperStoredProcedure extends StoredProcedure {
 
 		public static final String SQL = "parameter_mapper_sp";
 
@@ -674,7 +663,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 			return out;
 		}
 		
-		private class TestParameterMapper implements ParameterMapper {
+		private static class TestParameterMapper implements ParameterMapper {
 			
 			private TestParameterMapper() {
 			}
@@ -685,22 +674,20 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 				inParms.put("in", testValue);
 				return inParms;
 			}
-		
 		}
-
-		
 	}
 
-	private class SqlTypeValueStoredProcedure extends StoredProcedure {
+
+	private static class SqlTypeValueStoredProcedure extends StoredProcedure {
 
 		public static final String SQL = "sql_type_value_sp";
 
 		public SqlTypeValueStoredProcedure(DataSource ds) {
-				setDataSource(ds);
-				setSql(SQL);
-				declareParameter(new SqlParameter("in", Types.ARRAY, "NUMBERS"));
-				declareParameter(new SqlOutParameter("out", Types.VARCHAR));
-				compile();
+			setDataSource(ds);
+			setSql(SQL);
+			declareParameter(new SqlParameter("in", Types.ARRAY, "NUMBERS"));
+			declareParameter(new SqlOutParameter("out", Types.VARCHAR));
+			compile();
 		}
 
 		public Map executeTest(final int[] inValue) {
@@ -719,8 +706,11 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 	}
 
-	private class StoredProcedureExceptionTranslator extends StoredProcedure {
+
+	private static class StoredProcedureExceptionTranslator extends StoredProcedure {
+
 		public static final String SQL = "no_sproc_with_this_name";
+
 		public StoredProcedureExceptionTranslator(DataSource ds) {
 			setDataSource(ds);
 			setSql(SQL);
@@ -741,7 +731,8 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 	}
 
-	private class CustomDataException extends DataAccessException {
+
+	private static class CustomDataException extends DataAccessException {
 
 		public CustomDataException(String s) {
 			super(s);
