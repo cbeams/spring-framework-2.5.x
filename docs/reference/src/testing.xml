@@ -355,8 +355,8 @@
 				</listitem>
 			</itemizedlist>
 			<para>
-				The PetClinic application supports three data access
-				technologies - JDBC, Hibernate and Apache OJB. Thus the
+				The PetClinic application supports four data access
+				technologies - JDBC, Hibernate, TopLink, and JPA. Thus the
 				<classname>AbstractClinicTests</classname> class does not itself specify the
 				context locations - this is deferred to subclasses,
 				that implement the necessary protected abstract method from

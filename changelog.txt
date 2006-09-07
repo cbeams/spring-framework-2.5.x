@@ -3,13 +3,14 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 RC4 (6.9.2006)
+Changes in version 2.0 RC4 (9.9.2006)
 -------------------------------------
 
 General
 * added "spring-agent.jar" to "dist/weavers" directory, containing the agent for Spring's InstrumentationLoadTimeWeaver
-* spring-beans.dtd renamed to spring-beans_2_0.dtd, reflecting the significant changes for Spring 2.0. Update your XML!
-* spring-beans_2_0.dtd does not declare "singleton" attribute anymore. If you declare that DTD, use "scope" instead.
+* Spring 2.0 DTD renamed to spring-beans-2.0.dtd, reflecting the significant changes for Spring 2.0. Update your XML!
+* spring-beans-2.0.dtd does not declare "singleton" attribute anymore. If you declare that DTD, use "scope" instead!
+* removed ORM support for Apache OJB from the Spring core distribution. OJB support has been moved to Spring Modules.
 * declared all internal ThreadLocal variables as final (to avoid potential class reloading issues)
 
 Package org.springframework.aop
@@ -34,6 +35,7 @@ Package org.springframework.cache
 * refined EhCacheManagerFactoryBean to use "CacheManager.create(InputStream)" instead of "CacheManager.create(URL)"
 
 Package org.springframework.context
+* exposed AbstractApplicationContext's "registerShutdownHook()" method in ConfigurableApplicationContext interface
 * reverted AbstractApplicationContext to not inherit ClassLoader from parent context by default (as up until 2.0 RC1)
 * added appropriate "equals"/"hashCode" implementations to DefaultMessageSourceResolvable
 
@@ -53,6 +55,11 @@ Package org.springframework.jdbc
 * refined DataSourceUtils to catch Throwable on "Connection.close()"
 * DataSourceUtils uses lower synchronization order for delegating handles (such as from TransactionAwareDataSourceProxy)
 * SingleConnectionDataSource's Connection proxy implements "equals" and "hashCode" based on proxy equality
+* CommonsDbcpNativeJdbcExtractor supports original Commons DBCP as well as Tomcat 5.5's relocated version
+* revised JBossNativeJdbcExtractor to unwrap ResultSet even for WrappedResultSet subclasses (requires JBoss 3.2.4+ now)
+* DataSourceLookup throws DataSourceLookupFailureException instead of DataAccessResourceFailureException
+* added SingleDataSourceLookup, exposing a single given DataSource for any data source name
+* added AbstractInterruptibleBatchPreparedStatementSetter base class, with single "setValuesIfAvailable" callback method
 
 Package org.springframework.jms
 * SingleConnectionFactory's Connection proxy implements "equals" and "hashCode" based on proxy equality
@@ -68,7 +75,19 @@ Package org.springframework.orm
 * exception translation for Hibernate3 turns PropertyValueException into Spring's DataIntegrityViolationException
 * exception translation for Hibernate3 keeps original JDBCException as root cause of Spring's HibernateJdbcException
 * LocalPersistenceManagerFactoryBean and JdoTemplate perform full exception translation even for reflective calls
-* LocalContainerEntityManagerFactoryBean calls "postProcessPersistenceUnitInfo" after having applied default settings
+* expose underlying PersistenceProvider instance in EntityManagerFactoryInfo (if available)
+* added "persistenceProvider" property to AbstractEntityManagerFactoryBean, for using a shared PersistenceProvider
+* JpaVendorAdapter exposes a shared PersistenceProvider instance rather than just the PersistenceProvider class
+* added PersistenceUnitManager interface and DefaultPersistenceUnitManager implementation (in "jpa.persistenceunit")
+* added "persistenceUnitManager" bean property to LocalContainerEntityManagerFactoryBean (default is internal manager)
+* "dataSourceLookup"/"dataSources" configuration is now available on DefaultPersistenceUnitManager instead of LCEMFB
+* "postProcessPersistenceUnitInfo" hook method is now available on DefaultPersistenceUnitManager instead of LCEMFB
+* introduced PersistenceUnitPostProcessor interface, to be registered on DefaultPersistenceUnitManager or LCEMFB
+* introduced MutablePersistenceUnitInfo base class, to turn SpringPersistenceUnitInfo to package-protected again
+* PersistenceUnitReader searches for "classpath*:**/SCHEMA_NAME" last, and catches and logs any IOException thrown
+* PersistenceAnnotationBeanPostProcessor supports @PersistenceContext's "properties", passed into "createEntityManager"
+* PersistenceAnnotationBeanPostProcessor does not cache EntityManagerFactory instances anymore, to allow for new EMFs
+* PersistenceAnnotationBeanPostProcessor throws IllegalStateException instead of NoSuchBeanDefinitionException
 
 Package org.springframework.mock
 * added support for attributes which implement the Servlet 2.3 HttpSessionBindingListener interface to MockHttpSession
@@ -95,6 +114,11 @@ Package org.springframework.scheduling
 Package org.springframework.scripting
 * fixed BshScriptFactory to correctly handle void, null, and primitive return values
 * fixed JRubyScriptFactory to handle "toString()" invocations locally on the JRuby object proxy
+
+Package org.springframework.test
+* AbstractSpringContextTests calls ConfigurableApplicationContext's "registerShutdownHook()" for each context instance
+* factored out concrete loading of a single context from specified config locations to AbstractSingleSpringContextTests
+* restricted visibilities and stronger use of final in AbstractDependencyInjectionSpringContextTests
 
 Package org.springframework.transaction
 * added "afterCommit" callback to TransactionSynchronization interface

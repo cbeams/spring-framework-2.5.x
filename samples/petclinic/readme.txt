@@ -11,7 +11,7 @@
 1. DATA ACCESS STRATEGIES
 
 PetClinic features alternative DAO implementations and application configurations
-for JDBC, Hibernate, Apache OJB and Oracle TopLink, with HSQLDB and MySQL as target
+for JDBC, Hibernate, Oracle TopLink and JPA, with HSQLDB and MySQL as target
 databases. The default PetClinic configuration is JDBC on HSQL (as of Spring 1.2.1).
 See "WEB-INF/web.xml" and "WEB-INF/applicationContext-*.xml" for details;
 a simple comment change in web.xml switches between the data access strategies.
@@ -23,7 +23,7 @@ On JDK < 1.5, your application server's JMX infrastructure needs to be used.
 Note that special setup is necessary on WebLogic <= 8.1 and on JBoss:
 see "jmxExporter" definition in "applicationContext-jdbc.xml" for details!
 
-The Spring distribution comes with all required Hibernate, OJB and TopLink Essentials
+The Spring distribution comes with all required Hibernate and TopLink Essentials
 (JPA RI) jar files to be able to build and run PetClinic on those two ORM tools. For
 standard TopLink, only a minimal toplink-api.jar is included in the Spring distribution.
 To run PetClinic with TopLink, download TopLink 10.1.3 or higher from the Oracle
@@ -36,9 +36,9 @@ copy toplink.jar and xmlparserv2.jar into Spring's "lib/toplink" directory.
 
 All data access strategies can work with JTA for transaction management,
 by activating the JtaTransactionManager and a JndiObjectFactoryBean that
-refers to a transactional container DataSource. The default for Hibernate
-is HibernateTransactionManager; for OJB, PersistenceBrokerTransactionManager;
-for TopLink TopLinkTransactionManager; for JDBC, DataSourceTransactionManager.
+refers to a transactional container DataSource. The default for JDBC is
+DataSourceTransactionManager; for Hibernate, HibernateTransactionManager;
+for TopLink TopLinkTransactionManager; for JPA, JpaTransactionManager.
 Those local strategies allow for working with any locally defined DataSource.
 
 Note that in the default case, the sample configurations specify Spring's

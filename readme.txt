@@ -23,7 +23,7 @@ SQLException), simplifies error handling, and greatly reduces the amount of code
 You'll never need to write another finally block to use JDBC again. The JDBC-oriented exceptions comply to
 Spring's generic DAO exception hierarchy.
 
-* Integration with JDO, JPA, Hibernate, TopLink, Apache OJB, and iBATIS SQL Maps: in terms of resource holders,
+* Integration with JDO, JPA, Hibernate, TopLink, and iBATIS SQL Maps: in terms of resource holders,
 DAO implementation support, and transaction strategies. First-class Hibernate and JDO support with many
 IoC convenience features, addressing many typical Hibernate/JDO integration issues. All of these comply
 to Spring's generic transaction and DAO exception hierarchies.
@@ -55,10 +55,10 @@ The Spring Framework requires J2SE 1.3 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1
 required for building the framework; for the full build including all aspects, AspectJ is required as well.
 J2EE 1.2 (Servlet 2.2, JSP 1.1) is sufficient when not using Spring's JSP tag libraries or the EJB support.
 
-Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1/2.2, JMX 1.0/1.2, JCA 1.0,
-Hibernate 2.1/3.0/3.1/3.2, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, JPA 1.0, Apache OJB 1.0, iBATIS SQL Maps 2.1/2.2,
-Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.5, EHCache 1.1, JSTL 1.0, Velocity 1.4, FreeMarker 2.3,
-JasperReports 1.2, Struts/Tiles 1.1/1.2, JSF 1.1/1.2, Jakarta Commons FileUpload 1.1, etc.
+Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1/2.2, JMX 1.0/1.2,
+JCA 1.0, Hibernate 2.1/3.0/3.1/3.2, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, JPA 1.0, iBATIS SQL Maps 2.1/2.2,
+Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.5, EHCache 1.1, JSTL 1.0, Velocity 1.4,
+FreeMarker 2.3, JasperReports 1.2, Struts/Tiles 1.1/1.2, JSF 1.1/1.2, Jakarta Commons FileUpload 1.1, etc.
 
 Release contents:
 * "src" contains the Java source files for the framework
@@ -90,7 +90,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2465 KB)
+* "spring" (~2450 KB)
 - Convenient jar file combining all standard modules (except for superseded modules)
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar, aspects jar, spring-portlet jar, and spring-hibernate2 jar!
@@ -109,7 +109,7 @@ MODULE JARS (dist/modules):
 - Contents: AOP framework, source-level metadata support
 - Dependencies: spring-core, (spring-beans, AOP Alliance, CGLIB, Commons Attributes)
 
-* "spring-context" (~120 KB)
+* "spring-context" (~125 KB)
 - Contents: application context, JNDI support, instrumentation, validation
 - Dependencies: spring-beans, (spring-aop)
 
@@ -177,10 +177,6 @@ MODULE JARS (dist/modules):
 - Contents: TopLink support
 - Dependencies: spring-dao, spring-jdbc, TopLink
 
-* "spring-ojb" (~30 KB)
-- Contents: OJB 1.0 support
-- Dependencies: spring-dao, spring-jdbc, OJB
-
 * "spring-ibatis" (~25 KB)
 - Contents: iBATIS SQL Maps support
 - Dependencies: spring-dao, spring-jdbc, iBATIS SQL Maps
@@ -224,11 +220,11 @@ Documented sample applications can be found in "samples" (depending on distribut
 * petclinic
 * (showcases)
 
-PetClinic features alternative DAO implementations and application configurations for JDBC, JPA, Hibernate,
-Apache OJB and Oracle TopLink, with HSQLDB and MySQL as target databases. The default PetClinic configuration
+PetClinic features alternative DAO implementations and application configurations for JDBC, Hibernate,
+Oracle TopLink and JPA, with HSQLDB and MySQL as target databases. The default PetClinic configuration
 is JDBC on HSQL, which also demonstrates Spring's JMX export through exposing the CachingClinic management
-interface. To to be able to build and run the Hibernate and OJB versions, the Spring distribution comes with
-all required Hibernate jar files; for TopLink, the full jars need to be downloaded (see PetClinic's readme.txt).
+interface. To to be able to build and run the Hibernate and JPA versions, the Spring distribution comes
+with all required jar files; for TopLink, the full jars need to be downloaded (see PetClinic's readme.txt).
 
 The Spring JPetStore is an adapted version of Clinton Begin's JPetStore (available from http://www.ibatis.com).
 It leverages Spring's support for the iBATIS SQL Maps to improve the original JPetStore in terms of

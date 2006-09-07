@@ -350,7 +350,6 @@
 				<exclude name="org/springframework/orm/ibatis/**"/>
 				<exclude name="org/springframework/orm/jdo/**"/>
 				<exclude name="org/springframework/orm/jpa/**"/>
-				<exclude name="org/springframework/orm/ojb/**"/>
 				<exclude name="org/springframework/orm/toplink/**"/>
 			</fileset>
 			<manifest>
@@ -517,17 +516,6 @@
 		<jar jarfile="${dist.dir}/modules/spring-toplink.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/orm/toplink/**"/>
-			</fileset>
-			<manifest>
-				<attribute name="Implementation-Title" value="${spring-title}"/>
-				<attribute name="Implementation-Version" value="${spring-version}"/>
-				<attribute name="Spring-Version" value="${spring-version}"/>
-			</manifest>
-		</jar>
-
-		<jar jarfile="${dist.dir}/modules/spring-ojb.jar">
-			<fileset dir="${target.classes.dir}">
-				<include name="org/springframework/orm/ojb/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Implementation-Title" value="${spring-title}"/>
@@ -1603,7 +1591,7 @@
 				<include name="lib/jsf/**"/>
 				<include name="lib/junit/**"/>
 				<include name="lib/log4j/**"/>
-				<include name="lib/ojb/**"/>
+				<include name="lib/oc4j/**"/>
 				<include name="lib/oro/**"/>
 				<include name="lib/poi/**"/>
 				<include name="lib/portlet/**"/>
@@ -2003,27 +1991,6 @@
 			<param name="spring-module" value="spring-dao"/>
 		</antcall>
 		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-jdbc"/>
-		</antcall>
-		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-remoting"/>
-		</antcall>
-		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-support"/>
-		</antcall>
-		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-web"/>
-		</antcall>
-		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-webmvc"/>
-		</antcall>
-		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-jmx"/>
-		</antcall>
-		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-jms"/>
-		</antcall>
-		<antcall target="mvn.install">
 			<param name="spring-module" value="spring-hibernate2"/>
 		</antcall>
 		<antcall target="mvn.install">
@@ -2033,25 +2000,43 @@
 			<param name="spring-module" value="spring-ibatis"/>
 		</antcall>
 		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-jpa"/>
+			<param name="spring-module" value="spring-jca"/>
 		</antcall>
 		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-jca"/>
+			<param name="spring-module" value="spring-jdbc"/>
 		</antcall>
 		<antcall target="mvn.install">
 			<param name="spring-module" value="spring-jdo"/>
 		</antcall>
 		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-ojb"/>
+			<param name="spring-module" value="spring-jms"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-jmx"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-jpa"/>
 		</antcall>
 		<antcall target="mvn.install">
 			<param name="spring-module" value="spring-portlet"/>
 		</antcall>
 		<antcall target="mvn.install">
-			<param name="spring-module" value="spring-toplink"/>
+			<param name="spring-module" value="spring-remoting"/>
 		</antcall>
 		<antcall target="mvn.install">
 			<param name="spring-module" value="spring-struts"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-support"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-toplink"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-web"/>
+		</antcall>
+		<antcall target="mvn.install">
+			<param name="spring-module" value="spring-webmvc"/>
 		</antcall>
 	</target>
 

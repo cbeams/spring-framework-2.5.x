@@ -293,7 +293,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's XAPoolNativeJdbcExtractor
 
 * jpa/persistence.jar
-- Java Persistence API 1.0 b44 (http://glassfish.dev.java.net/javaee5/persistence)
+- Java Persistence API 1.0 (http://www.oracle.com/technology/products/ias/toplink/jpa)
 - required for building the framework
 - required at runtime when using Spring's JPA support
 
@@ -315,11 +315,6 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Log4J 1.2.13 (http://logging.apache.org/log4j)
 - required for building the framework
 - required at runtime when using Spring's Log4jConfigurer
-
-* ojb/db-ojb-1.0.4.jar
-- Apache ObJectRelationalBridge 1.0.4 (http://db.apache.org/ojb)
-- required for building the framework
-- required at runtime when using Spring's OJB support
 
 * oro/jakarta-oro-2.0.8.jar
 - Jakarta ORO 2.0.8 (http://jakarta.apache.org/oro)
@@ -362,7 +357,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - replaced with full toplink.jar at runtime when using Spring's TopLink support
 
 * toplink/toplink-essentials.jar
-- Oracle TopLink Essentials v2 b11 (http://www.oracle.com/technology/products/ias/toplink/jpa)
+- Oracle TopLink Essentials v2 b16 (http://www.oracle.com/technology/products/ias/toplink/jpa)
 - required for building the framework
 - required at runtime when using Spring's JPA TopLink support
 

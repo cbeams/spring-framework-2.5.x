@@ -35,9 +35,6 @@
 			<include name="jdbc2_0-stdext.jar"/>
 			<include name="servlet-api.jar"/>
 		</fileset>
-		<fileset dir="${spring.root}/lib/ojb">
-			<include name="db-ojb-*.jar"/>
-		</fileset>
 		<fileset dir="${spring.root}/lib/jpa">
 			<include name="persistence.jar"/>
 		</fileset>
@@ -230,9 +227,6 @@
 			<fileset dir="${spring.root}/lib/jakarta-taglibs">
 				<include name="standard.jar"/>
 			</fileset>
-			<fileset dir="${spring.root}/lib/ojb">
-				<include name="db-ojb-*.jar"/>
-			</fileset>
 			<fileset dir="${spring.root}/lib/jpa">
 				<include name="*.jar"/>
 			</fileset>
@@ -380,7 +374,6 @@
 			<test name="org.springframework.samples.petclinic.OwnerTests" todir="${testreports.dir}"/>
 			<test name="org.springframework.samples.petclinic.jdbc.JdbcClinicTests" todir="${testreports.dir}"/>
 			<test name="org.springframework.samples.petclinic.hibernate.HibernateClinicTests" todir="${testreports.dir}"/>
-			<test name="org.springframework.samples.petclinic.ojb.PersistenceBrokerClinicTests" todir="${testreports.dir}"/>
 			<test name="org.springframework.samples.petclinic.toplink.TopLinkClinicTests" todir="${testreports.dir}"/>
 			<test name="org.springframework.samples.petclinic.jpa.EntityManagerClinicTests" todir="${testreports.dir}"/>			
 			<test name="org.springframework.samples.petclinic.jpa.JpaTemplateClinicTests" todir="${testreports.dir}"/>
