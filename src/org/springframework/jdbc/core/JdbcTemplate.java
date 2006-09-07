@@ -956,8 +956,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 							returnedResults.putAll(processResultSet((ResultSet) out, outParam));
 						}
 						else {
-							logger.warn("ResultSet returned from stored procedure but a corresponding " +
-									"SqlOutParameter with a RowCallbackHandler was not declared");
+							logger.warn("ResultSet returned from stored procedure but no corresponding SqlOutParameter " +
+									"with a ResultSetExtractor/RowCallbackHandler/RowMapper declared");
 							returnedResults.put(outParam.getName(), "ResultSet was returned but not processed");
 						}
 					}
