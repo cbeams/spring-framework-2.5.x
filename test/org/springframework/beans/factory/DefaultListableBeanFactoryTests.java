@@ -345,6 +345,15 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertTrue(lbf.getBean("test") instanceof NestedTestBean);
 	}
 
+	public void testBeanDefinitionOverridingWithAlias() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
+		lbf.registerAlias("test", "testAlias");
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
+		lbf.registerAlias("test", "testAlias");
+		assertTrue(lbf.getBean("test") instanceof NestedTestBean);
+	}
+
 	public void testBeanDefinitionOverridingNotAllowed() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.setAllowBeanDefinitionOverriding(false);

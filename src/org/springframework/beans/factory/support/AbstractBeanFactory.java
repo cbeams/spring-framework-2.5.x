@@ -551,9 +551,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		}
 		synchronized (this.aliasMap) {
 			Object registeredName = this.aliasMap.get(alias);
-			if (registeredName != null) {
+			if (registeredName != null && !registeredName.equals(beanName)) {
 				throw new BeanDefinitionStoreException("Cannot register alias '" + alias + "' for bean name '" +
-						beanName + "': it's already registered for bean name '" + registeredName + "'");
+						beanName + "': It's already registered for bean name '" + registeredName + "'.");
 			}
 			this.aliasMap.put(alias, beanName);
 		}
