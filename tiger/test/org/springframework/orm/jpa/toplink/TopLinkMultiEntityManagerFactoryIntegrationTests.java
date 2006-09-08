@@ -72,7 +72,7 @@ public class TopLinkMultiEntityManagerFactoryIntegrationTests extends
 
 	// TODO: Temporarily disabled because TopLink complains about redeployment of Person unit...
 	protected boolean isDisabledInThisEnvironment(Method testMethod) {
-		return true;
+		return false;
 	}
 
 }

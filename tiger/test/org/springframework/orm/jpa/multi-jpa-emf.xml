@@ -15,7 +15,7 @@
 	</bean>
 
 	<bean id="entityManagerFactory" parent="abstractEMF">
-		<property name="persistenceUnitName" value="Person"/>
+		<property name="persistenceUnitName" value="Drivers"/>
 	</bean>
 
 	<bean id="entityManagerFactory2" parent="abstractEMF">
