@@ -19,15 +19,8 @@ package org.springframework.web.servlet.tags.form;
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockPageContext;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
-import org.springframework.web.servlet.support.RequestContext;
-import org.springframework.web.servlet.tags.RequestContextAwareTag;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Rob Harrop
