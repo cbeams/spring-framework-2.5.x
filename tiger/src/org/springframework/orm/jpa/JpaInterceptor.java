@@ -20,6 +20,7 @@ import javax.persistence.EntityManager;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -82,11 +83,11 @@ public class JpaInterceptor extends JpaAccessor implements MethodInterceptor {
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		// Determine current EntityManager: either the transactional one
 		// managed by the factory or a temporary one for the given invocation.
-		EntityManager em = EntityManagerFactoryUtils.getTransactionalEntityManager(getEntityManagerFactory());
+		EntityManager em = getTransactionalEntityManager();
 		boolean isNewEm = false;
 		if (em == null) {
 			logger.debug("Creating new EntityManager for JpaInterceptor invocation");
-			em = getEntityManagerFactory().createEntityManager();
+			em = createEntityManager();
 			isNewEm = true;
 			TransactionSynchronizationManager.bindResource(getEntityManagerFactory(), new EntityManagerHolder(em));
 		}

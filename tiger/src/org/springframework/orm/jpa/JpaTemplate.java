@@ -31,8 +31,8 @@ import javax.persistence.Query;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Helper class that allows for writing JPA data access code in the same style
@@ -170,10 +170,10 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		EntityManager em = getEntityManager();
 		boolean isNewEm = false;
 		if (em == null) {
-			em = EntityManagerFactoryUtils.getTransactionalEntityManager(getEntityManagerFactory());
+			em = getTransactionalEntityManager();
 			if (em == null) {
 				logger.debug("Creating new EntityManager for JpaTemplate execution");
-				em = getEntityManagerFactory().createEntityManager();
+				em = createEntityManager();
 				isNewEm = true;
 			}
 		}

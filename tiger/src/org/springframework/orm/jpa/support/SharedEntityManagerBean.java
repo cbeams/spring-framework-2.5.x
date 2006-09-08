@@ -16,6 +16,10 @@
 
 package org.springframework.orm.jpa.support;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -26,6 +30,7 @@ import org.springframework.orm.jpa.EntityManagerPlus;
 import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * FactoryBeans that exposes a shared JPA EntityManager reference for a
@@ -53,7 +58,9 @@ import org.springframework.util.Assert;
  */
 public class SharedEntityManagerBean implements FactoryBean, InitializingBean {
 
-	private EntityManagerFactory target;
+	private EntityManagerFactory targetFactory;
+
+	private final Map jpaPropertyMap = new HashMap();
 
 	private Class entityManagerInterface;
 
@@ -64,8 +71,40 @@ public class SharedEntityManagerBean implements FactoryBean, InitializingBean {
 	 * Set the EntityManagerFactory that this adapter is supposed to
 	 * expose a shared JPA EntityManager for.
 	 */
-	public void setEntityManagerFactory(EntityManagerFactory target) {
-		this.target = target;
+	public void setEntityManagerFactory(EntityManagerFactory targetFactory) {
+		this.targetFactory = targetFactory;
+	}
+
+	/**
+	 * Specify JPA properties, to be passed into
+	 * <code>EntityManagerFactory.createEntityManager(Map)</code> (if any).
+	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
+	 * or a "props" element in XML bean definitions.
+	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 */
+	public void setJpaProperties(Properties jpaProperties) {
+		CollectionUtils.mergePropertiesIntoMap(jpaProperties, this.jpaPropertyMap);
+	}
+
+	/**
+	 * Specify JPA properties as a Map, to be passed into
+	 * <code>EntityManagerFactory.createEntityManager(Map)</code> (if any).
+	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
+	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 */
+	public void setJpaPropertyMap(Map jpaProperties) {
+		if (jpaProperties != null) {
+			this.jpaPropertyMap.putAll(jpaProperties);
+		}
+	}
+
+	/**
+	 * Allow Map access to the JPA properties to be passed to the persistence
+	 * provider, with the option to add or override specific entries.
+	 * <p>Useful for specifying entries directly, for example via "jpaPropertyMap[myKey]".
+	 */
+	public Map getJpaPropertyMap() {
+		return jpaPropertyMap;
 	}
 
 	/**
@@ -84,12 +123,12 @@ public class SharedEntityManagerBean implements FactoryBean, InitializingBean {
 
 
 	public final void afterPropertiesSet() {
-		if (this.target == null) {
+		if (this.targetFactory == null) {
 			throw new IllegalArgumentException("entityManagerFactory is required");
 		}
 		Class[] ifcs = null;
-		if (this.target instanceof EntityManagerFactoryInfo) {
-			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) this.target;
+		if (this.targetFactory instanceof EntityManagerFactoryInfo) {
+			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) this.targetFactory;
 			if (this.entityManagerInterface == null) {
 				this.entityManagerInterface = emfInfo.getEntityManagerInterface();
 			}
@@ -107,7 +146,7 @@ public class SharedEntityManagerBean implements FactoryBean, InitializingBean {
 			}
 			ifcs = new Class[] {this.entityManagerInterface};
 		}
-		this.shared = SharedEntityManagerCreator.createSharedEntityManager(this.target, ifcs);
+		this.shared = SharedEntityManagerCreator.createSharedEntityManager(this.targetFactory, this.jpaPropertyMap, ifcs);
 	}
 
 

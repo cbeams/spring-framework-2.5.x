@@ -16,6 +16,10 @@
 
 package org.springframework.orm.jpa;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
@@ -25,6 +29,8 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Base class for JpaTemplate and JpaInterceptor, defining common
@@ -47,6 +53,8 @@ public abstract class JpaAccessor implements InitializingBean {
 
 	private EntityManagerFactory entityManagerFactory;
 
+	private final Map jpaPropertyMap = new HashMap();
+
 	private EntityManager entityManager;
 
 	private JpaDialect jpaDialect = new DefaultJpaDialect();
@@ -68,6 +76,38 @@ public abstract class JpaAccessor implements InitializingBean {
 	 */
 	public EntityManagerFactory getEntityManagerFactory() {
 		return entityManagerFactory;
+	}
+
+	/**
+	 * Specify JPA properties, to be passed into
+	 * <code>EntityManagerFactory.createEntityManager(Map)</code> (if any).
+	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
+	 * or a "props" element in XML bean definitions.
+	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 */
+	public void setJpaProperties(Properties jpaProperties) {
+		CollectionUtils.mergePropertiesIntoMap(jpaProperties, this.jpaPropertyMap);
+	}
+
+	/**
+	 * Specify JPA properties as a Map, to be passed into
+	 * <code>EntityManagerFactory.createEntityManager(Map)</code> (if any).
+	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
+	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 */
+	public void setJpaPropertyMap(Map jpaProperties) {
+		if (jpaProperties != null) {
+			this.jpaPropertyMap.putAll(jpaProperties);
+		}
+	}
+
+	/**
+	 * Allow Map access to the JPA properties to be passed to the persistence
+	 * provider, with the option to add or override specific entries.
+	 * <p>Useful for specifying entries directly, for example via "jpaPropertyMap[myKey]".
+	 */
+	public Map getJpaPropertyMap() {
+		return jpaPropertyMap;
 	}
 
 	/**
@@ -144,12 +184,35 @@ public abstract class JpaAccessor implements InitializingBean {
 
 
 	/**
+	 * Obtain a new EntityManager from this accessor's EntityManagerFactory.
+	 * @return a new EntityManager
+	 * @throws IllegalStateException if this accessor is not configured with an EntityManagerFactory
+	 */
+	protected EntityManager createEntityManager() throws IllegalStateException {
+		EntityManagerFactory emf = getEntityManagerFactory();
+		Assert.state(emf != null, "No EntityManagerFactory specified");
+		Map properties = getJpaPropertyMap();
+		return (!CollectionUtils.isEmpty(properties) ? emf.createEntityManager(properties) : emf.createEntityManager());
+	}
+
+	/**
+	 * Obtain the transactional EntityManager for this accessor's EntityManagerFactory, if any.
+	 * @return the transactional EntityManager, or <code>null</code> if none
+	 * @throws IllegalStateException if this accessor is not configured with an EntityManagerFactory
+	 */
+	protected EntityManager getTransactionalEntityManager() throws IllegalStateException{
+		EntityManagerFactory emf = getEntityManagerFactory();
+		Assert.state(emf != null, "No EntityManagerFactory specified");
+		return EntityManagerFactoryUtils.getTransactionalEntityManager(emf, getJpaPropertyMap());
+	}
+
+	/**
 	 * Flush the given JPA entity manager if necessary.
 	 * @param em the current JPA PersistenceManage
 	 * @param existingTransaction if executing within an existing transaction
 	 * @throws javax.persistence.PersistenceException in case of JPA flushing errors
 	 */
-	public void flushIfNecessary(EntityManager em, boolean existingTransaction) throws PersistenceException {
+	protected void flushIfNecessary(EntityManager em, boolean existingTransaction) throws PersistenceException {
 		if (isFlushEager()) {
 			logger.debug("Eagerly flushing JPA entity manager");
 			em.flush();

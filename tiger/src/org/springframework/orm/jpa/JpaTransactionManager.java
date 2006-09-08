@@ -16,6 +16,10 @@
 
 package org.springframework.orm.jpa;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -38,6 +42,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.CollectionUtils;
 
 /**
  * PlatformTransactionManager implementation for a single JPA EntityManagerFactory.
@@ -93,6 +98,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 
 	private EntityManagerFactory entityManagerFactory;
 
+	private final Map jpaPropertyMap = new HashMap();
+
 	private DataSource dataSource;
 
 	private JpaDialect jpaDialect = new DefaultJpaDialect();
@@ -127,6 +134,38 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 	 */
 	public EntityManagerFactory getEntityManagerFactory() {
 		return entityManagerFactory;
+	}
+
+	/**
+	 * Specify JPA properties, to be passed into
+	 * <code>EntityManagerFactory.createEntityManager(Map)</code> (if any).
+	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
+	 * or a "props" element in XML bean definitions.
+	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 */
+	public void setJpaProperties(Properties jpaProperties) {
+		CollectionUtils.mergePropertiesIntoMap(jpaProperties, this.jpaPropertyMap);
+	}
+
+	/**
+	 * Specify JPA properties as a Map, to be passed into
+	 * <code>EntityManagerFactory.createEntityManager(Map)</code> (if any).
+	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
+	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
+	 */
+	public void setJpaPropertyMap(Map jpaProperties) {
+		if (jpaProperties != null) {
+			this.jpaPropertyMap.putAll(jpaProperties);
+		}
+	}
+
+	/**
+	 * Allow Map access to the JPA properties to be passed to the persistence
+	 * provider, with the option to add or override specific entries.
+	 * <p>Useful for specifying entries directly, for example via "jpaPropertyMap[myKey]".
+	 */
+	public Map getJpaPropertyMap() {
+		return jpaPropertyMap;
 	}
 
 	/**
@@ -328,11 +367,13 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 	 * @see EntityManagerFactoryInfo#getNativeEntityManagerFactory()
 	 */
 	protected EntityManager createEntityManagerForTransaction() {
-		EntityManagerFactory emfToUse = getEntityManagerFactory();
-		if (emfToUse instanceof EntityManagerFactoryInfo) {
-			emfToUse = ((EntityManagerFactoryInfo) emfToUse).getNativeEntityManagerFactory();
+		EntityManagerFactory emf = getEntityManagerFactory();
+		if (emf instanceof EntityManagerFactoryInfo) {
+			emf = ((EntityManagerFactoryInfo) emf).getNativeEntityManagerFactory();
 		}
-		return emfToUse.createEntityManager();
+		Map properties = getJpaPropertyMap();
+		return (!CollectionUtils.isEmpty(properties) ?
+				emf.createEntityManager(properties) : emf.createEntityManager());
 	}
 
 	protected Object doSuspend(Object transaction) {
