@@ -34,6 +34,10 @@ public class GenericBean {
 
 	private List<Resource> resourceList;
 
+	private List<List<Integer>> listOfLists;
+
+	private List<Map<Integer, Long>> listOfMaps;
+
 	private Map plainMap;
 
 	private Map<Short, Integer> shortMap;
@@ -41,6 +45,10 @@ public class GenericBean {
 	private Map<Long, ?> longMap;
 
 	private Map<Number, Collection<? extends Object>> collectionMap;
+
+	private Map<String, Map<Integer, Long>> mapOfMaps;
+
+	private Map<String, List<Integer>> mapOfLists;
 
 
 	public GenericBean() {
@@ -95,6 +103,22 @@ public class GenericBean {
 		this.resourceList = resourceList;
 	}
 
+	public List<List<Integer>> getListOfLists() {
+		return listOfLists;
+	}
+
+	public void setListOfLists(List<List<Integer>> listOfLists) {
+		this.listOfLists = listOfLists;
+	}
+
+	public List<Map<Integer, Long>> getListOfMaps() {
+		return listOfMaps;
+	}
+
+	public void setListOfMaps(List<Map<Integer, Long>> listOfMaps) {
+		this.listOfMaps = listOfMaps;
+	}
+
 	public Map getPlainMap() {
 		return plainMap;
 	}
@@ -121,6 +145,22 @@ public class GenericBean {
 
 	public void setCollectionMap(Map<Number, Collection<? extends Object>> collectionMap) {
 		this.collectionMap = collectionMap;
+	}
+
+	public Map<String, Map<Integer, Long>> getMapOfMaps() {
+		return mapOfMaps;
+	}
+
+	public void setMapOfMaps(Map<String, Map<Integer, Long>> mapOfMaps) {
+		this.mapOfMaps = mapOfMaps;
+	}
+
+	public Map<String, List<Integer>> getMapOfLists() {
+		return mapOfLists;
+	}
+
+	public void setMapOfLists(Map<String, List<Integer>> mapOfLists) {
+		this.mapOfLists = mapOfLists;
 	}
 
 
