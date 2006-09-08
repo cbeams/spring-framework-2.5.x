@@ -6,17 +6,16 @@
     <title>Introduction</title>
 
     <para>Spring provides integration with <emphasis>Hibernate, JDO, Oracle
-    TopLink, iBATIS SQL Maps</emphasis> and <emphasis>JPA</emphasis>:
-    in terms of resource management, DAO implementation support,
-    and transaction strategies. For example for Hibernate, there is
-    first-class support with lots of IoC convenience features,
-    addressing many typical Hibernate integration issues. All of
-    these support packages for O/R mappers comply with Spring's generic
-    transaction and DAO exception hierarchies. There are usually two
-    integration styles: either using Spring's DAO 'templates' or coding DAOs
-    against plain Hibernate/JDO/TopLink/etc APIs. In both cases, DAOs can be
-    configured through Dependency Injection and participate in Spring's
-    resource and transaction management.</para>
+    TopLink, iBATIS SQL Maps</emphasis> and <emphasis>JPA</emphasis>: in terms
+    of resource management, DAO implementation support, and transaction
+    strategies. For example for Hibernate, there is first-class support with
+    lots of IoC convenience features, addressing many typical Hibernate
+    integration issues. All of these support packages for O/R mappers comply
+    with Spring's generic transaction and DAO exception hierarchies. There are
+    usually two integration styles: either using Spring's DAO 'templates' or
+    coding DAOs against plain Hibernate/JDO/TopLink/etc APIs. In both cases,
+    DAOs can be configured through Dependency Injection and participate in
+    Spring's resource and transaction management.</para>
 
     <para>Spring's adds significant support when using the O/R mapping layer
     of your choice to create data access applications. First of all, you
@@ -125,9 +124,9 @@
 
     <para>The PetClinic sample in the Spring distribution offers alternative
     DAO implementations and application context configurations for JDBC,
-    Hibernate, Oracle TopLink, and JPA. PetClinic can therefore serve
-    as working sample app that illustrates the use of Hibernate, TopLink and
-    JPA in a Spring web application. It also leverages declarative transaction
+    Hibernate, Oracle TopLink, and JPA. PetClinic can therefore serve as
+    working sample app that illustrates the use of Hibernate, TopLink and JPA
+    in a Spring web application. It also leverages declarative transaction
     demarcation with different transaction strategies.</para>
 
     <para>The JPetStore sample illustrates the use of iBATIS SQL Maps in a
@@ -2379,14 +2378,14 @@
         </section>
 
         <section>
-          <title>Using LocalContainerEntityManagerFactoryBean without a
-          classloader LoadTimeWeaver</title>
+          <title>General LoadTimeWeaver</title>
 
-          <para>For environments where field interception is required but are
-          not supported by the existing LoadTimeWeaver implementations, a JDK
-          agent can be the only solution. For such cases, Spring provides
-          <literal>InstrumentationLoadTimeWeaver</literal> along with the
-          <literal>spring-agent.jar</literal>:</para>
+          <para>For environments where class instrumentation is required but
+          are not supported by the existing LoadTimeWeaver implementations, a
+          JDK agent can be the only solution. For such cases, Spring provides
+          <literal>InstrumentationLoadTimeWeaver</literal> which requires a
+          Spring-specific (but very general) VM agent
+          (<literal>spring-agent.jar</literal>):</para>
 
           <programlisting>&lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
   &lt;property name="loadTimeWeaver"&gt;
@@ -2416,6 +2415,45 @@
 &lt;/bean&gt;</programlisting>
         </section>
                -->
+      </section>
+
+      <section>
+        <title>Dealing with multiple persistence units</title>
+
+        <para>For applications that rely on multiple persistence units
+        locations (stored in various jars in the classpath for example),
+        Spring offers the <literal>PersistenceUnitManager</literal> to act as
+        a central repository and avoid the (potentially expensive) persistence
+        units discovery process. The default implementation allows multiple
+        locations to be specified (by default, the classpath is searched for
+        META-INF/persistence.xml files) which are parsed and later on
+        retrieved through the persistence unit name:</para>
+
+        <programlisting>&lt;bean id="persistenceUnitManager" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager"&gt;
+  &lt;property name="persistenceXmlLocation"&gt;
+    &lt;list&gt;
+     &lt;value&gt;org/springframework/orm/jpa/domain/persistence-multi.xml&lt;/value&gt;
+     &lt;value&gt;classpath:/my/package/**/custom-persistence.xml&lt;/value&gt;
+     &lt;value&gt;classpath*:META-INF/persistence.xml&lt;/value&gt;
+    &lt;/list&gt;
+  &lt;/property&gt;
+  &lt;/property&gt;
+  &lt;property name="defaultDataSource" ref="dataSource"/&gt;
+&lt;/bean&gt;
+
+&lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
+ &lt;property name="persistenceUnitManager" ref="persistenceUnitManager"/&gt;
+ ...
+&lt;/bean&gt;</programlisting>
+
+        <para>Note that the default implementation allows customization of the
+        persistence unit infos before feeding them to the JPA provider
+        declaratively through its properties (which affect *all* housed units)
+        or programatically, through the
+        <literal>PersistenceUnitPostProcessor</literal> (which allow
+        persistence unit selection). If no persistenceUnitManager is
+        specified, one will be created and used internally by
+        <literal>LocalContainerEntityManagerFactoryBean</literal>.</para>
       </section>
     </section>
 
@@ -2491,9 +2529,9 @@
 
       <para>Besides working with Spring's <classname>JpaTemplate</classname>,
       one can also code Spring-based DAOs against the JPA, doing one's own
-      explicit EntityManager handling. As elaborated in the corresponding
-      Hibernate section, the main advantage of this approach is that that your
-      data access code is able to throw checked exceptions.
+      explicit <literal>EntityManager</literal> handling. As elaborated in the
+      corresponding Hibernate section, the main advantage of this approach is
+      that that your data access code is able to throw checked exceptions.
       <classname>JpaDaoSupport</classname> offers a variety of support methods
       for this scenario, for retrieving and releasing a transaction
       <interfacename>EntityManager</interfacename>, as well as for converting
