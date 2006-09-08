@@ -31,12 +31,12 @@ import org.springframework.web.context.request.WebRequestInterceptor;
 /**
  * Spring web HandlerInterceptor that binds a Hibernate Session to the thread for the
  * entire processing of the request. Intended for the "Open Session in View" pattern,
- * i.e. to allow for lazy loading in web views despite the original transactions
+ * that is, to allow for lazy loading in web views despite the original transactions
  * already being completed.
  *
  * <p>This interceptor works similar to the AOP HibernateInterceptor: It just makes
  * Hibernate Sessions available via the thread. It is suitable for non-transactional
- * execution but also for middle tier transactions via HibernateTransactionManager
+ * execution but also for service layer transactions via HibernateTransactionManager
  * or JtaTransactionManager. In the latter case, Sessions pre-bound by this interceptor
  * will automatically be used for the transactions and flushed accordingly.
  *
@@ -57,17 +57,17 @@ import org.springframework.web.context.request.WebRequestInterceptor;
  * for deferred close, though, actually processed at request completion.
  *
  * <p>A single session per request allows for most efficient first-level caching,
- * but can cause side effects, for example on saveOrUpdate or if continuing
- * after a rolled-back transaction. The deferred close strategy is as safe as
- * no Open Session in View in that respect, while still allowing for lazy loading
+ * but can cause side effects, for example on <code>saveOrUpdate</code> or when
+ * continuing after a rolled-back transaction. The deferred close strategy is as safe
+ * as no Open Session in View in that respect, while still allowing for lazy loading
  * in views (but not providing a first-level cache for the entire request).
  *
  * <p><b>NOTE</b>: This interceptor will by default <i>not</i> flush the Hibernate Session,
- * as it assumes to be used in combination with business layer transactions that care
- * for the flushing, or HibernateAccessors with flushMode FLUSH_EAGER. If you want this
+ * as it assumes to be used in combination with service layer transactions that care
+ * for the flushing, or HibernateAccessors with "flushMode" FLUSH_EAGER. If you want this
  * interceptor to flush after the handler has been invoked but before view rendering,
- * set the flushMode of this interceptor to FLUSH_AUTO in such a scenario. Note that
- * the flushMode of this interceptor will just apply in single session mode!
+ * set the "flushMode" of this interceptor to FLUSH_AUTO in such a scenario. Note that
+ * the "flushMode" of this interceptor will just apply in single session mode!
  *
  * @author Juergen Hoeller
  * @since 06.12.2003
@@ -157,12 +157,12 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements W
 	 * Flush the Hibernate Session before view rendering, if necessary.
 	 * Note that this just applies in single session mode!
 	 * <p>The default is FLUSH_NEVER to avoid this extra flushing, assuming that
-	 * middle tier transactions have flushed their changes on commit.
+	 * service layer transactions have flushed their changes on commit.
 	 * @see #setFlushMode
 	 */
 	public void postHandle(WebRequest request, ModelMap model) throws DataAccessException {
 		if (isSingleSession()) {
-			// only potentially flush in single session mode
+			// Only potentially flush in single session mode.
 			SessionHolder sessionHolder =
 					(SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
 			logger.debug("Flushing single Hibernate Session in OpenSessionInViewInterceptor");

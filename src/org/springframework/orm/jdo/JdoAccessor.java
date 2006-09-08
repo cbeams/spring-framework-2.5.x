@@ -28,14 +28,14 @@ import org.springframework.dao.DataAccessException;
 
 /**
  * Base class for JdoTemplate and JdoInterceptor, defining common
- * properties like PersistenceManagerFactory and flushing behavior.
+ * properties such as PersistenceManagerFactory and flushing behavior.
  *
  * <p>Note: With JDO, modifications to persistent objects are just possible
  * within a transaction (in contrast to Hibernate). Therefore, eager flushing
  * will just get applied when in a transaction. Furthermore, there is no
  * explicit notion of flushing never, as this would not imply a performance
- * gain due to JDO's field interception mechanism that doesn't involve
- * the overhead of snapshot comparisons.
+ * gain due to JDO's field interception mechanism (which doesn't involve
+ * the overhead of snapshot comparisons).
  *
  * <p>Eager flushing is just available for specific JDO providers.
  * You need to a corresponding JdoDialect to make eager flushing work.
@@ -50,6 +50,7 @@ import org.springframework.dao.DataAccessException;
  */
 public abstract class JdoAccessor implements InitializingBean {
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private PersistenceManagerFactory persistenceManagerFactory;

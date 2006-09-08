@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,7 +37,7 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 /**
  * Base class for HibernateTemplate and HibernateInterceptor, defining common
- * properties like SessionFactory and flushing behavior.
+ * properties such as SessionFactory and flushing behavior.
  *
  * <p>Not intended to be used directly. See HibernateTemplate and HibernateInterceptor.
  *
@@ -108,8 +108,8 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	/** Constants instance for HibernateAccessor */
 	private static final Constants constants = new Constants(HibernateAccessor.class);
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
-
 
 	private SessionFactory sessionFactory;
 

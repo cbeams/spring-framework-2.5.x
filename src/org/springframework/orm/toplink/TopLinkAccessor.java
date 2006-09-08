@@ -29,7 +29,7 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 /**
  * Base class for TopLinkTemplate and TopLinkInterceptor, defining common properties
- * like SessionFactory and JDBC exception translator.
+ * such as SessionFactory and JDBC exception translator.
  *
  * <p>Not intended to be used directly. See TopLinkTemplate and TopLinkInterceptor.
  *
@@ -42,6 +42,7 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
  */
 public abstract class TopLinkAccessor implements InitializingBean {
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private SessionFactory sessionFactory;
