@@ -126,12 +126,14 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	}
 
 	/**
-	 * Gets the value for the HTML '<code>name</code>' attribute. The default
-	 * implementation simply delegates to {@link #getNestedPath} and {@link #getPath()} to use the property
-	 * path as the name. For the most part this is desirable as it links with
-	 * the server-side expectation for databinding. However, some subclasses
-	 * may wish to change the value of the '<code>name</code>' attribute without
-	 * changing the bind path.
+	 * Gets the value for the HTML '<code>name</code>' attribute.
+	 * <p>The default implementation simply delegates to
+	 * {@link #getNestedPath} and {@link #getPath()} to use the property
+	 * path as the name. For the most part this is desirable as it links
+	 * with the server-side expectation for databinding. However, some
+	 * subclasses may wish to change the value of the '<code>name</code>'
+	 * attribute without changing the bind path.
+	 * @return the value for the HTML '<code>name</code>' attribute
 	 */
 	protected String getName() throws JspException {
 		String nestedPath = getNestedPath();
@@ -192,7 +194,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 * Gets the value of the nested path that may have been exposed by the
 	 * {@link NestedPathTag}.
 	 */
-	private String getNestedPath() {
+	protected String getNestedPath() {
 		return (String) this.pageContext.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
 	}
 
