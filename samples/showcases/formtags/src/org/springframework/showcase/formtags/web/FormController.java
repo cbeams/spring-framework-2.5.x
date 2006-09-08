@@ -38,20 +38,18 @@ import java.util.Map;
  */
 public class FormController extends SimpleFormController {
 
+	private UserManager userManager;
 
-    private UserManager userManager;
 
-
-    /**
-     * Sets the {@link UserManager} that to which this presentation component delegates
-     * in order to perform complex business logic.
-     *
-     * @param userManager the {@link UserManager} that to which this presentation component delegates
-     *                    in order to perform complex business logic
-     */
-    public void setUserManager(UserManager userManager) {
-        this.userManager = userManager;
-    }
+	/**
+	 * Sets the {@link UserManager} to which this presentation component
+	 * delegates in order to perform complex business logic.
+	 * @param userManager the {@link UserManager} to which this presentation
+	 *                    component delegatesin order to perform complex business logic
+	 */
+	public void setUserManager(UserManager userManager) {
+		this.userManager = userManager;
+	}
 
 
     protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) throws Exception {
@@ -88,6 +86,5 @@ public class FormController extends SimpleFormController {
                 "Quidditch"
         };
     }
-
 
 }
