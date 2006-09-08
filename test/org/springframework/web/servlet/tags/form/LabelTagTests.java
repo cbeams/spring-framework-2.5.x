@@ -17,17 +17,23 @@
 package org.springframework.web.servlet.tags.form;
 
 import org.springframework.beans.TestBean;
+import org.springframework.mock.web.MockPageContext;
+import org.springframework.web.servlet.tags.NestedPathTag;
 
+import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
 /**
  * Unit tests for the {@link LabelTag} class.
- * 
+ *
  * @author Rob Harrop
  * @author Rick Evans
  * @since 2.0
  */
 public final class LabelTagTests extends AbstractFormTagTests {
+
+	private static final String NESTED_PATH = "spouse.";
+
 
 	private LabelTag tag;
 
@@ -42,6 +48,11 @@ public final class LabelTagTests extends AbstractFormTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
+	protected void extendPageContext(MockPageContext pageContext) {
+		super.extendPageContext(pageContext);
+		pageContext.setAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, NESTED_PATH, PageContext.REQUEST_SCOPE);
+	}
+
 
 	public void testSimpleRender() throws Exception {
 		int startResult = this.tag.doStartTag();
@@ -51,7 +62,8 @@ public final class LabelTagTests extends AbstractFormTagTests {
 		assertEquals(Tag.EVAL_PAGE, endResult);
 
 		String output = getWriter().toString();
-		assertContainsAttribute(output, "for", "name");
+		// we are using a nexted path (see extendPageContext(..)), so...
+		assertContainsAttribute(output, "for", NESTED_PATH + "name");
 		// name attribute is not supported by <label/>
 		assertAttributeNotPresent(output, "name");
 		// id attribute is supported, but we don't want it
@@ -80,7 +92,9 @@ public final class LabelTagTests extends AbstractFormTagTests {
 
 
 	protected TestBean createTestBean() {
-		return new TestBean();
+		TestBean bean = new TestBean();
+		bean.setSpouse(new TestBean("Hoopy"));
+		return bean;
 	}
 
 }

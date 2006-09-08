@@ -102,15 +102,16 @@ public class LabelTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Returns the value that must be used for '<code>for</code>' attribute.
-	 * @return the value that must be used for '<code>for</code>' attribute
+	 * Returns the value that must be used for the '<code>for</code>' attribute.
+	 * @return the value that must be used for the '<code>for</code>' attribute
 	 */
 	protected final String resolveFor() throws JspException {
 		if (StringUtils.hasText(this.forId)) {
 			return getDisplayString(evaluate(FOR_ATTRIBUTE, this.forId));
 		}
 		else {
-			return getPath();
+			String nestedPath = getNestedPath();
+			return (nestedPath == null) ? getPath() : nestedPath + getPath();
 		}
 	}
 
