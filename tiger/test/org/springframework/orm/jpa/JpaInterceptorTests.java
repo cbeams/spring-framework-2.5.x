@@ -36,17 +36,13 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 public class JpaInterceptorTests extends TestCase {
 
-	MockControl factoryControl, managerControl;
+	private MockControl factoryControl, managerControl;
 
-	EntityManagerFactory factory;
+	private EntityManagerFactory factory;
 
-	EntityManager entityManager;
+	private EntityManager entityManager;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
+
 	@Override
 	protected void setUp() throws Exception {
 		factoryControl = MockControl.createControl(EntityManagerFactory.class);
@@ -234,6 +230,7 @@ public class JpaInterceptorTests extends TestCase {
 		managerControl.verify();
 	}
 
+
 	private static class TestInvocation implements MethodInvocation {
 
 		private EntityManagerFactory entityManagerFactory;
@@ -299,4 +296,5 @@ public class JpaInterceptorTests extends TestCase {
 		public void release() {
 		}
 	}
+
 }
