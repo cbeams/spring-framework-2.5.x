@@ -20,12 +20,15 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.util.CollectionUtils;
 
 /**
  * Factory for a shared JPA EntityManager for a given EntityManagerFactory.
@@ -54,6 +57,21 @@ public abstract class SharedEntityManagerCreator {
 	 * @return a shareable transaction EntityManager proxy
 	 */
 	public static EntityManager createSharedEntityManager(EntityManagerFactory emf) {
+		return createSharedEntityManager(emf, null);
+	}
+
+	/**
+	 * Create a shared transactional EntityManager proxy,
+	 * given this EntityManagerFactory
+	 * @param emf the EntityManagerFactory to delegate to.
+	 * If this implements the EntityManagerFactoryInfo interface, appropriate handling
+	 * of the native EntityManagerFactory and available EntityManagerPlusOperations
+	 * will automatically apply.
+	 * @param properties the properties to be passed into the <code>createEntityManager</code>
+	 * call (may be <code>null</code>)
+	 * @return a shareable transaction EntityManager proxy
+	 */
+	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, Map properties) {
 		Class[] entityManagerInterfaces = null;
 		if (emf instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
@@ -69,24 +87,26 @@ public abstract class SharedEntityManagerCreator {
 		else {
 			entityManagerInterfaces = new Class[] {EntityManager.class};
 		}
-		return createSharedEntityManager(emf, entityManagerInterfaces);
+		return createSharedEntityManager(emf, properties, entityManagerInterfaces);
 	}
 
 	/**
 	 * Create a shared transactional EntityManager proxy,
 	 * given this EntityManagerFactory
 	 * @param emf EntityManagerFactory to obtain EntityManagers from as needed
+	 * @param properties the properties to be passed into the <code>createEntityManager</code>
+	 * call (may be <code>null</code>)
 	 * @param entityManagerInterfaces interfaces to be implemented by the
 	 * EntityManager. Allows the addition or specification of proprietary interfaces.
 	 * @return a shareable transaction EntityManager proxy
 	 */
 	public static EntityManager createSharedEntityManager(
-			EntityManagerFactory emf, Class... entityManagerInterfaces) {
+			EntityManagerFactory emf, Map properties, Class... entityManagerInterfaces) {
 
 		return (EntityManager) Proxy.newProxyInstance(
 				SharedEntityManagerCreator.class.getClassLoader(),
 				entityManagerInterfaces,
-				new SharedEntityManagerInvocationHandler(emf));
+				new SharedEntityManagerInvocationHandler(emf, properties));
 	}
 
 
@@ -101,8 +121,11 @@ public abstract class SharedEntityManagerCreator {
 
 		private final EntityManagerFactory targetFactory;
 
-		public SharedEntityManagerInvocationHandler(EntityManagerFactory target) {
+		private final Map properties;
+
+		public SharedEntityManagerInvocationHandler(EntityManagerFactory target, Map properties) {
 			this.targetFactory = target;
+			this.properties = properties;
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -137,11 +160,14 @@ public abstract class SharedEntityManagerCreator {
 
 			// Determine current EntityManager: either the transactional one
 			// managed by the factory or a temporary one for the given invocation.
-			EntityManager target = EntityManagerFactoryUtils.doGetTransactionalEntityManager(this.targetFactory);
+			EntityManager target =
+					EntityManagerFactoryUtils.doGetTransactionalEntityManager(this.targetFactory, this.properties);
 			boolean isNewEm = false;
 			if (target == null) {
 				logger.debug("Creating new EntityManager for shared EntityManager invocation");
-				target = this.targetFactory.createEntityManager();
+				target = (!CollectionUtils.isEmpty(this.properties) ?
+						this.targetFactory.createEntityManager(this.properties) :
+						this.targetFactory.createEntityManager());
 				isNewEm = true;
 			}
 

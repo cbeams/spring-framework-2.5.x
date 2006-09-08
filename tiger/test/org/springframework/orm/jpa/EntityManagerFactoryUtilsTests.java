@@ -50,7 +50,7 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 	public void testDoGetEntityManager() {
 		// test null assertion
 		try {
-			EntityManagerFactoryUtils.doGetTransactionalEntityManager(null);
+			EntityManagerFactoryUtils.doGetTransactionalEntityManager(null, null);
 			fail("expected exception");
 		}
 		catch (IllegalArgumentException ex) {
@@ -61,7 +61,7 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 
 		mockControl.replay();
 		// no tx active
-		assertNull(EntityManagerFactoryUtils.doGetTransactionalEntityManager(factory));
+		assertNull(EntityManagerFactoryUtils.doGetTransactionalEntityManager(factory, null));
 		mockControl.verify();
 	}
 
@@ -78,7 +78,7 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 
 			mockControl.replay();
 			// no tx active
-			assertSame(manager, EntityManagerFactoryUtils.doGetTransactionalEntityManager(factory));
+			assertSame(manager, EntityManagerFactoryUtils.doGetTransactionalEntityManager(factory, null));
 			assertSame(manager, ((EntityManagerHolder)TransactionSynchronizationManager.unbindResource(factory)).getEntityManager());
 			
 			mockControl.verify();

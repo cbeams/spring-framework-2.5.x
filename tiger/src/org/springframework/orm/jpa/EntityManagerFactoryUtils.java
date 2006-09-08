@@ -16,6 +16,8 @@
 
 package org.springframework.orm.jpa;
 
+import java.util.Map;
+
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -39,6 +41,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Helper class featuring methods for JPA EntityManager handling,
@@ -76,8 +79,26 @@ public abstract class EntityManagerFactoryUtils {
 	 */
 	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf)
 			throws DataAccessResourceFailureException {
+
+		return getTransactionalEntityManager(emf, null);
+	}
+
+	/**
+	 * Obtain a JPA EntityManager from the given factory. Is aware of a
+	 * corresponding EntityManager bound to the current thread,
+	 * for example when using JpaTransactionManager.
+	 * <p>Note: Will return <code>null</code> if no thread-bound EntityManager found!
+	 * @param emf EntityManagerFactory to create the EntityManager with
+	 * @param properties the properties to be passed into the <code>createEntityManager</code>
+	 * call (may be <code>null</code>)
+	 * @return the EntityManager, or <code>null</code> if none found
+	 * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained
+	 * @see JpaTransactionManager
+	 */
+	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf, Map properties)
+			throws DataAccessResourceFailureException {
 		try {
-			return doGetTransactionalEntityManager(emf);
+			return doGetTransactionalEntityManager(emf, properties);
 		}
 		catch (PersistenceException ex) {
 			throw new DataAccessResourceFailureException("Could not obtain JPA EntityManager", ex);
@@ -90,12 +111,16 @@ public abstract class EntityManagerFactoryUtils {
 	 * for example when using JpaTransactionManager.
 	 * <p>Same as <code>getEntityManager</code>, but throwing the original PersistenceException.
 	 * @param emf EntityManagerFactory to create the EntityManager with
+	 * @param properties the properties to be passed into the <code>createEntityManager</code>
+	 * call (may be <code>null</code>)
 	 * @return the EntityManager, or <code>null</code> if none found
 	 * @throws javax.persistence.PersistenceException if the EntityManager couldn't be created
 	 * @see #getTransactionalEntityManager(javax.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
 	 */
-	public static EntityManager doGetTransactionalEntityManager(EntityManagerFactory emf) throws PersistenceException {
+	public static EntityManager doGetTransactionalEntityManager(
+			EntityManagerFactory emf, Map properties) throws PersistenceException {
+
 		Assert.notNull(emf, "No EntityManagerFactory specified");
 
 		EntityManagerHolder emHolder =
@@ -125,7 +150,8 @@ public abstract class EntityManagerFactoryUtils {
 
 		// Create a new EntityManager for use within the current transaction.
 		logger.debug("Opening JPA EntityManager");
-		EntityManager em = emf.createEntityManager();
+		EntityManager em =
+				(!CollectionUtils.isEmpty(properties) ? emf.createEntityManager(properties) : emf.createEntityManager());
 
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			logger.debug("Registering transaction synchronization for JPA EntityManager");

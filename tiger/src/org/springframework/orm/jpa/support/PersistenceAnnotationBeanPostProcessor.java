@@ -279,7 +279,7 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 				// We need to inject an EntityManager.
 				if (this.type == PersistenceContextType.TRANSACTION) {
 					// Inject a shared transactional EntityManager proxy.
-					return SharedEntityManagerCreator.createSharedEntityManager(emf, getMemberType());
+					return SharedEntityManagerCreator.createSharedEntityManager(emf, this.properties, getMemberType());
 				}
 				else {
 					// Type is container-managed extended.
