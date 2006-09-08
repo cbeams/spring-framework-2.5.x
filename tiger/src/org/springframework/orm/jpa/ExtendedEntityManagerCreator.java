@@ -35,6 +35,7 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -116,8 +117,8 @@ public abstract class ExtendedEntityManagerCreator {
 		if (emf instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
 			EntityManagerFactory nativeEmf = emfInfo.getNativeEntityManagerFactory();
-			EntityManager rawEntityManager =
-					(properties != null ? nativeEmf.createEntityManager(properties) : nativeEmf.createEntityManager());
+			EntityManager rawEntityManager = (!CollectionUtils.isEmpty(properties) ?
+					nativeEmf.createEntityManager(properties) : nativeEmf.createEntityManager());
 			JpaDialect jpaDialect = emfInfo.getJpaDialect();
 			EntityManagerPlusOperations plusOperations = null;
 			if (jpaDialect != null && jpaDialect.supportsEntityManagerPlusOperations()) {
@@ -126,8 +127,8 @@ public abstract class ExtendedEntityManagerCreator {
 			return createProxy(rawEntityManager, plusOperations, true);
 		}
 		else {
-			EntityManager rawEntityManager =
-					(properties != null ? emf.createEntityManager(properties) : emf.createEntityManager());
+			EntityManager rawEntityManager = (!CollectionUtils.isEmpty(properties) ?
+					emf.createEntityManager(properties) : emf.createEntityManager());
 			return createProxy(rawEntityManager, null, true);
 		}
 	}
