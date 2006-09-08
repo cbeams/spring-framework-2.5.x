@@ -20,13 +20,13 @@ import oracle.toplink.essentials.internal.ejb.cmp3.base.EntityManagerFactoryImpl
 
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
-import org.springframework.orm.jpa.SharedEntityManagerCreator;
 
 /**
  * TopLink-specific JPA tests.
  * 
  * @author Costin Leau
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class TopLinkEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 	
@@ -40,15 +40,10 @@ public class TopLinkEntityManagerFactoryIntegrationTests extends AbstractContain
 		assertTrue(emfi.getNativeEntityManagerFactory() instanceof EntityManagerFactoryImpl);
 	}
 	
-	public void testCannotCastSharedEntityManagerProxyToToplinkEntityManager() {
-		assertFalse(sharedEntityManager instanceof oracle.toplink.essentials.ejb.cmp3.EntityManager);
-	}
-
-	public void testCanGetSharedTopLinkEntityManagerProxy() {
+	public void testCanCastSharedEntityManagerProxyToTopLinkEntityManager() {
+		assertTrue(sharedEntityManager instanceof oracle.toplink.essentials.ejb.cmp3.EntityManager);
 		oracle.toplink.essentials.ejb.cmp3.EntityManager toplinkEntityManager =
-				(oracle.toplink.essentials.ejb.cmp3.EntityManager)
-				SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory,
-						oracle.toplink.essentials.ejb.cmp3.EntityManager.class);
+				(oracle.toplink.essentials.ejb.cmp3.EntityManager) sharedEntityManager;
 		assertNotNull(toplinkEntityManager.getActiveSession());
 	}
 

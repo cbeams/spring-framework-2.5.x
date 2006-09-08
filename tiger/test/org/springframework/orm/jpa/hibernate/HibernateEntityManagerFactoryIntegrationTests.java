@@ -21,7 +21,6 @@ import org.hibernate.ejb.HibernateEntityManagerFactory;
 
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
-import org.springframework.orm.jpa.SharedEntityManagerCreator;
 
 /**
  * Hibernate-specific JPA tests.
@@ -46,13 +45,9 @@ public class HibernateEntityManagerFactoryIntegrationTests extends AbstractConta
 		assertTrue(emfi.getNativeEntityManagerFactory() instanceof HibernateEntityManagerFactory);
 	}
 
-	public void testCannotCastSharedEntityManagerProxyToHibernateEntityManager() {
-		assertFalse(sharedEntityManager instanceof HibernateEntityManager);
-	}
-
-	public void testCanGetSharedHibernateEntityManagerProxy() {
-		HibernateEntityManager hibernateEntityManager = (HibernateEntityManager)
-				SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory, HibernateEntityManager.class);
+	public void testCanCastSharedEntityManagerProxyToHibernateEntityManager() {
+		assertTrue(sharedEntityManager instanceof HibernateEntityManager);
+		HibernateEntityManager hibernateEntityManager = (HibernateEntityManager) sharedEntityManager;
 		assertNotNull(hibernateEntityManager.getSession());
 	}
 

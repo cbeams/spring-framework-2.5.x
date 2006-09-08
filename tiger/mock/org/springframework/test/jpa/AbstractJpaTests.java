@@ -93,11 +93,11 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	 * It will participate in any current transaction.
 	 */
 	protected EntityManager sharedEntityManager;
-	
+
+
 	public void setEntityManagerFactory(EntityManagerFactory entityManagerFactory) {
 		this.entityManagerFactory = entityManagerFactory;
-		this.sharedEntityManager = SharedEntityManagerCreator.createSharedEntityManager(
-						this.entityManagerFactory, EntityManager.class);
+		this.sharedEntityManager = SharedEntityManagerCreator.createSharedEntityManager(this.entityManagerFactory);
 	}
 
 	/**
