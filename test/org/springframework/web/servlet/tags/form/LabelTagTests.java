@@ -21,12 +21,16 @@ import org.springframework.beans.TestBean;
 import javax.servlet.jsp.tagext.Tag;
 
 /**
+ * Unit tests for the {@link LabelTag} class.
+ * 
  * @author Rob Harrop
+ * @author Rick Evans
  * @since 2.0
  */
-public class LabelTagTests extends AbstractFormTagTests {
+public final class LabelTagTests extends AbstractFormTagTests {
 
 	private LabelTag tag;
+
 
 	protected void onSetUp() {
 		this.tag = new LabelTag() {
@@ -48,7 +52,10 @@ public class LabelTagTests extends AbstractFormTagTests {
 
 		String output = getWriter().toString();
 		assertContainsAttribute(output, "for", "name");
-		assertContainsAttribute(output, "name", "name.label");
+		// name attribute is not supported by <label/>
+		assertAttributeNotPresent(output, "name");
+		// id attribute is supported, but we don't want it
+		assertAttributeNotPresent(output, "id");
 		assertTrue(output.startsWith("<label "));
 		assertTrue(output.endsWith("</label>"));
 	}
@@ -63,12 +70,17 @@ public class LabelTagTests extends AbstractFormTagTests {
 
 		String output = getWriter().toString();
 		assertContainsAttribute(output, "for", "myElement");
-		assertContainsAttribute(output, "name", "myElement.label");
+		// name attribute is not supported by <label/>
+		assertAttributeNotPresent(output, "name");
+		// id attribute is supported, but we don't want it
+		assertAttributeNotPresent(output, "id");
 		assertTrue(output.startsWith("<label "));
 		assertTrue(output.endsWith("</label>"));
 	}
 
+
 	protected TestBean createTestBean() {
 		return new TestBean();
 	}
+
 }

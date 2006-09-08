@@ -91,12 +91,14 @@ public class LabelTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Overrides {@link #getName()} to use the value of {@link #resolveFor} with
-	 * '<code>.label</code>' appended to the end.
+	 * Overrides {@link #getName()} to always return the empty string "",
+	 * because the '<code>name</code>' attribute is not supported by the
+	 * '<code>label</code>' tag.
 	 * @return the value for the HTML '<code>name</code>' attribute
 	 */
 	protected String getName() throws JspException {
-		return resolveFor() + ".label";
+		// this also suppresses the 'id' attribute (which is okay for a <label/>)
+		return "";
 	}
 
 	/**
