@@ -16,7 +16,6 @@
 
 package org.springframework.showcase.formtags.validation;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.showcase.formtags.domain.User;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
@@ -36,7 +35,6 @@ public class UserValidator implements Validator {
     public void validate(Object obj, Errors errors) {
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "firstName", "required", "Field is required.");
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "lastName", "required", "Field is required.");
-        User user = (User) obj;
     }
 
 }
