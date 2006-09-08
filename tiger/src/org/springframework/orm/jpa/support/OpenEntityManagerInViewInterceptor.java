@@ -17,14 +17,11 @@
 package org.springframework.orm.jpa.support;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.orm.jpa.EntityManagerFactoryAccessor;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.ui.ModelMap;
@@ -57,7 +54,7 @@ import org.springframework.web.context.request.WebRequestInterceptor;
  * @see org.springframework.orm.jpa.SharedEntityManagerCreator
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
-public class OpenEntityManagerInViewInterceptor implements WebRequestInterceptor {
+public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAccessor implements WebRequestInterceptor {
 
 	/**
 	 * Suffix that gets appended to the EntityManagerFactory toString
@@ -66,28 +63,6 @@ public class OpenEntityManagerInViewInterceptor implements WebRequestInterceptor
 	 * @see #getParticipateAttributeName
 	 */
 	public static final String PARTICIPATE_SUFFIX = ".PARTICIPATE";
-
-
-	protected final Log logger = LogFactory.getLog(getClass());
-
-	private EntityManagerFactory entityManagerFactory;
-
-
-	/**
-	 * Set the JPA EntityManagerFactory that should be used to create
-	 * EntityManagers.
-	 */
-	public void setEntityManagerFactory(EntityManagerFactory emf) {
-		this.entityManagerFactory = emf;
-	}
-
-	/**
-	 * Return the JPA EntityManagerFactory that should be used to create
-	 * EntityManagers.
-	 */
-	public EntityManagerFactory getEntityManagerFactory() {
-		return entityManagerFactory;
-	}
 
 
 	public void preHandle(WebRequest request) throws DataAccessException {
@@ -113,13 +88,11 @@ public class OpenEntityManagerInViewInterceptor implements WebRequestInterceptor
 	public void postHandle(WebRequest request, ModelMap model) {
 	}
 
-	public void afterCompletion(WebRequest request, Exception ex)
-			throws DataAccessException {
-
+	public void afterCompletion(WebRequest request, Exception ex) throws DataAccessException {
 		String participateAttributeName = getParticipateAttributeName();
 		Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 		if (count != null) {
-			// do not modify the EntityManager: just clear the marker
+			// Do not modify the EntityManager: just clear the marker.
 			if (count.intValue() > 1) {
 				request.setAttribute(participateAttributeName, new Integer(count.intValue() - 1), WebRequest.SCOPE_REQUEST);
 			}
@@ -143,16 +116,6 @@ public class OpenEntityManagerInViewInterceptor implements WebRequestInterceptor
 	 */
 	protected String getParticipateAttributeName() {
 		return getEntityManagerFactory().toString() + PARTICIPATE_SUFFIX;
-	}
-
-	/**
-	 * Create a JPA EntityManager to be bound to a request.
-	 * <p>Can be overridden in subclasses.
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager()
-	 * @see #getEntityManagerFactory()
-	 */
-	protected EntityManager createEntityManager() {
-		return getEntityManagerFactory().createEntityManager();
 	}
 
 }

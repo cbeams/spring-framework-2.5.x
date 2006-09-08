@@ -16,44 +16,30 @@
 
 package org.springframework.orm.jpa;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.support.DataAccessUtils;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Base class for JpaTemplate and JpaInterceptor, defining common
- * properties like EntityManagerFactory and flushing behavior.
- *
- * <p>Eager flushing is just available for specific JPA implementations.
- * You need to a corresponding JpaDialect to make eager flushing work.
+ * properties such as EntityManagerFactory and flushing behavior.
  *
  * <p>Not intended to be used directly. See JpaTemplate and JpaInterceptor.
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see #setEntityManagerFactory
+ * @see #setEntityManager
+ * @see #setJpaDialect
+ * @see #setFlushEager
  * @see JpaTemplate
  * @see JpaInterceptor
- * @see #setFlushEager
+ * @see JpaDialect
  */
-public abstract class JpaAccessor implements InitializingBean {
-
-	protected final Log logger = LogFactory.getLog(getClass());
-
-	private EntityManagerFactory entityManagerFactory;
-
-	private final Map jpaPropertyMap = new HashMap();
+public abstract class JpaAccessor extends EntityManagerFactoryAccessor implements InitializingBean {
 
 	private EntityManager entityManager;
 
@@ -61,54 +47,6 @@ public abstract class JpaAccessor implements InitializingBean {
 
 	private boolean flushEager = false;
 
-
-	/**
-	 * Set the JPA EntityManagerFactory that should be used to create
-	 * EntityManagers.
-	 */
-	public void setEntityManagerFactory(EntityManagerFactory emf) {
-		this.entityManagerFactory = emf;
-	}
-
-	/**
-	 * Return the JPA EntityManagerFactory that should be used to create
-	 * EntityManagers.
-	 */
-	public EntityManagerFactory getEntityManagerFactory() {
-		return entityManagerFactory;
-	}
-
-	/**
-	 * Specify JPA properties, to be passed into
-	 * <code>EntityManagerFactory.createEntityManager(Map)</code> (if any).
-	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
-	 * or a "props" element in XML bean definitions.
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
-	 */
-	public void setJpaProperties(Properties jpaProperties) {
-		CollectionUtils.mergePropertiesIntoMap(jpaProperties, this.jpaPropertyMap);
-	}
-
-	/**
-	 * Specify JPA properties as a Map, to be passed into
-	 * <code>EntityManagerFactory.createEntityManager(Map)</code> (if any).
-	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
-	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
-	 */
-	public void setJpaPropertyMap(Map jpaProperties) {
-		if (jpaProperties != null) {
-			this.jpaPropertyMap.putAll(jpaProperties);
-		}
-	}
-
-	/**
-	 * Allow Map access to the JPA properties to be passed to the persistence
-	 * provider, with the option to add or override specific entries.
-	 * <p>Useful for specifying entries directly, for example via "jpaPropertyMap[myKey]".
-	 */
-	public Map getJpaPropertyMap() {
-		return jpaPropertyMap;
-	}
 
 	/**
 	 * Set the JPA EntityManager to use.
@@ -171,40 +109,18 @@ public abstract class JpaAccessor implements InitializingBean {
 	 * for the specified EntityManagerFactory if none set.
 	 */
 	public void afterPropertiesSet() {
-		if (getEntityManagerFactory() == null && getEntityManager() == null) {
+		EntityManagerFactory emf = getEntityManagerFactory();
+		if (emf == null && getEntityManager() == null) {
 			throw new IllegalArgumentException("entityManagerFactory or entityManager is required");
 		}
-		if (getEntityManagerFactory() instanceof EntityManagerFactoryInfo) {
-			JpaDialect jpaDialect = ((EntityManagerFactoryInfo) getEntityManagerFactory()).getJpaDialect();
+		if (emf instanceof EntityManagerFactoryInfo) {
+			JpaDialect jpaDialect = ((EntityManagerFactoryInfo) emf).getJpaDialect();
 			if (jpaDialect != null) {
 				setJpaDialect(jpaDialect);
 			}
 		}
 	}
 
-
-	/**
-	 * Obtain a new EntityManager from this accessor's EntityManagerFactory.
-	 * @return a new EntityManager
-	 * @throws IllegalStateException if this accessor is not configured with an EntityManagerFactory
-	 */
-	protected EntityManager createEntityManager() throws IllegalStateException {
-		EntityManagerFactory emf = getEntityManagerFactory();
-		Assert.state(emf != null, "No EntityManagerFactory specified");
-		Map properties = getJpaPropertyMap();
-		return (!CollectionUtils.isEmpty(properties) ? emf.createEntityManager(properties) : emf.createEntityManager());
-	}
-
-	/**
-	 * Obtain the transactional EntityManager for this accessor's EntityManagerFactory, if any.
-	 * @return the transactional EntityManager, or <code>null</code> if none
-	 * @throws IllegalStateException if this accessor is not configured with an EntityManagerFactory
-	 */
-	protected EntityManager getTransactionalEntityManager() throws IllegalStateException{
-		EntityManagerFactory emf = getEntityManagerFactory();
-		Assert.state(emf != null, "No EntityManagerFactory specified");
-		return EntityManagerFactoryUtils.getTransactionalEntityManager(emf, getJpaPropertyMap());
-	}
 
 	/**
 	 * Flush the given JPA entity manager if necessary.
