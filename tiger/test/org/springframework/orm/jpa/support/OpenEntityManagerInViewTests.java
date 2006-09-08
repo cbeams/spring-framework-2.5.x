@@ -20,7 +20,6 @@ import java.io.IOException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -45,15 +44,14 @@ import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapt
  */
 public class OpenEntityManagerInViewTests extends TestCase {
 
-	private MockControl factoryControl, managerControl, txControl;
+	private MockControl factoryControl, managerControl;
 
 	private EntityManager manager;
-
-	private EntityTransaction tx;
 
 	private EntityManagerFactory factory;
 
 	private JpaTemplate template;
+
 
 	@Override
 	protected void setUp() throws Exception {
@@ -61,8 +59,6 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		factory = (EntityManagerFactory) factoryControl.getMock();
 		managerControl = MockControl.createControl(EntityManager.class);
 		manager = (EntityManager) managerControl.getMock();
-		txControl = MockControl.createControl(EntityTransaction.class);
-		tx = (EntityTransaction) txControl.getMock();
 
 		template = new JpaTemplate(factory);
 		template.afterPropertiesSet();
@@ -76,14 +72,6 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
-
-		factoryControl = null;
-		managerControl = null;
-		txControl = null;
-		manager = null;
-		factory = null;
-		template = null;
-		tx = null;
 	}
 
 	public void testOpenEntityManagerInterceptorInView() throws Exception {
