@@ -1109,7 +1109,7 @@ public class ExampleBean {
         attribute may be used, which allows the XML parser itself to validate the bean
         id even earlier, at XML document parse time.</para>
         <programlisting><![CDATA[<property name="targetName">
-   ]]><lineannotation>&lt;!-- a bean with an id of 'target' must exist, else an XML exception will be thrown --&gt;</lineannotation><![CDATA[
+   ]]><lineannotation>&lt;!-- a bean with an id of 'theTargetBean' must exist, else an XML exception will be thrown --&gt;</lineannotation><![CDATA[
    <idref local="theTargetBean"/>
 </property>]]></programlisting>
         <para>By way of an example, one common place (at least in pre-Spring 2.0
