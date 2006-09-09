@@ -61,6 +61,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.Assert;
 
 /**
  * Abstract implementation of the ApplicationContext interface.
@@ -230,13 +231,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Publish the given event to all listeners.
 	 * <p>Note: Listeners get initialized after the MessageSource, to be able
 	 * to access it within listener implementations. Thus, MessageSource
-	 * implementation cannot publish events.
-	 * @param event event to publish (may be application-specific or a
+	 * implementations cannot publish events.
+	 * @param event the event to publish (may be application-specific or a
 	 * standard framework event)
 	 */
 	public void publishEvent(ApplicationEvent event) {
+		Assert.notNull(event, "Event must not be null");
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing event in context [" + getDisplayName() + "]: " + event.toString());
+			logger.debug("Publishing event in context [" + getDisplayName() + "]: " + event);
 		}
 		getApplicationEventMulticaster().multicastEvent(event);
 		if (this.parent != null) {
