@@ -17,33 +17,36 @@
 package org.springframework.aop;
 
 /**
- * A TargetSource is used to obtain the current "target" of  an AOP invocation,
- * which will be invoked via reflection if no around advice chooses to end the
- * interceptor chain itself.
+ * A <code>TargetSource</code> is used to obtain the current "target" of
+ * an AOP invocation, which will be invoked via reflection if no around
+ * advice chooses to end the interceptor chain itself.
  *
- * <p>If a TargetSource is "static", it will always return the same target,
- * allowing optimizations in the AOP framework. Dynamic target sources can
- * support pooling, hot swapping, etc.
+ * <p>If a <code>TargetSource</code> is "static", it will always return
+ * the same target, allowing optimizations in the AOP framework. Dynamic
+ * target sources can support pooling, hot swapping, etc.
  *
- * <p>Application developers don't usually need to work with TargetSources
- * directly: This is an AOP framework interface.
+ * <p>Application developers don't usually need to work with
+ * <code>TargetSources</code> directly: this is an AOP framework interface.
  *
  * @author Rod Johnson
  */
 public interface TargetSource {
 
 	/**
-	 * Return the type of targets returned by this TargetSource.
-	 * Can return <code>null</code>, although certain usages of a TargetSource
-	 * might just work with a predetermined target class.
+	 * Return the type of targets returned by this {@link TargetSource}.
+	 * <p>Can return <code>null</code>, although certain usages of a
+	 * <code>TargetSource</code> might just work with a predetermined
+	 * target class.
+	 * @return the type of targets returned by this {@link TargetSource}
 	 */
 	Class getTargetClass();
 	
 	/**
-	 * Will all calls to <code>getTarget()</code> return the same object?
-	 * In that case, there will be no need to invoke <code>releaseTarget</code>,
-	 * and the AOP framework can cache the return value of <code>getTarget()</code>.
-	 * @return whether the target is immutable
+	 * Will all calls to {@link #getTarget()} return the same object?
+	 * <p>In that case, there will be no need to invoke
+	 * {@link #releaseTarget(Object)}, and the AOP framework can cache
+	 * the return value of {@link #getTarget()}.
+	 * @return <code>true</code> if the target is immutable
 	 * @see #getTarget
 	 */
 	boolean isStatic();
@@ -51,17 +54,16 @@ public interface TargetSource {
 	/**
 	 * Return a target instance. Invoked immediately before the
 	 * AOP framework calls the "target" of an AOP method invocation.
-	 * @return the target object, whicch contains the joinpoint
+	 * @return the target object, which contains the joinpoint
 	 * @throws Exception if the target object can't be resolved
 	 */
 	Object getTarget() throws Exception;
 	
 	/**
 	 * Release the given target object obtained from the
-	 * <code>getTarget()</code> method.
-	 * @param target object obtained from a call to <code>getTarget()</code>
+	 * {@link #getTarget()} method.
+	 * @param target object obtained from a call to {@link #getTarget()}
 	 * @throws Exception if the object can't be released
-	 * @see #getTarget
 	 */
 	void releaseTarget(Object target) throws Exception;
 
