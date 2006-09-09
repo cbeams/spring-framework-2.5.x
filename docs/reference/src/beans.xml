@@ -142,9 +142,9 @@
 				attendant <literal>web.xml</literal> file of the application will typically
 				suffice (see <xref linkend="context-create" />).</para>
 			</section>
-            <para>A Spring IoC container configuration consists of,
-			at its most basic level, definitions of at least one (but typically more)
-			beans that the container must manage. When using XML-based configuration metadata,
+            <para>At its most basic level, a Spring IoC container configuration consists of the
+            definition of at least one bean that the container must manage, but typically there
+            will be more than one bean definition. When using XML-based configuration metadata,
 			these beans are configured as one or more <literal>&lt;bean/&gt;</literal> elements
 			inside a top-level <literal>&lt;beans/&gt;</literal> element.</para>
 			<para>These bean definitions correspond to the actual objects that make up your
