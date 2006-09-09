@@ -152,4 +152,5 @@
 		</xsd:annotation>
 		<xsd:union memberTypes="xsd:string"/>
 	</xsd:simpleType>
+
 </xsd:schema>

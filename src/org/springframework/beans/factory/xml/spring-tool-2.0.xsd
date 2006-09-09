@@ -51,4 +51,5 @@
 			</xsd:annotation>
 		</xsd:attribute>
 	</xsd:complexType>
+
 </xsd:schema>

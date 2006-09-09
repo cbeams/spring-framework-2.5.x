@@ -125,4 +125,5 @@
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
+
 </xsd:schema>

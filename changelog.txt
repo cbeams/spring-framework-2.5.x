@@ -3,13 +3,14 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 RC4 (9.9.2006)
--------------------------------------
+Changes in version 2.0 RC4 (10.9.2006)
+--------------------------------------
 
 General
 * added "spring-agent.jar" to "dist/weavers" directory, containing the agent for Spring's InstrumentationLoadTimeWeaver
-* Spring 2.0 DTD renamed to spring-beans-2.0.dtd, reflecting the significant changes for Spring 2.0. Update your XML!
-* spring-beans-2.0.dtd does not declare "singleton" attribute anymore. If you declare that DTD, use "scope" instead!
+* renamed Spring 2.0 DTD to spring-beans-2.0.dtd, while keeping the Spring 1.2.x DTD as compatible spring-beans.dtd
+* renamed Spring 2.0 XSDs to spring-beans-2.0.xsd etc, to allow for proper versioning of future additions and changes
+* spring-beans-2.0.dtd/xsd does not support singleton="true"/"false" anymore. Use scope="singleton/"prototype" instead!
 * removed ORM support for Apache OJB from the Spring core distribution. OJB support has been moved to Spring Modules.
 * declared all internal ThreadLocal variables as final (to avoid potential class reloading issues)
 
@@ -20,10 +21,12 @@ Package org.springframework.aop
 Package org.springframework.beans
 * fixed BeanWrapperImpl to return a Collection/Map as-is if it is not accessible (e.g. because it is a scoped proxy)
 * fixed BeanWrapperImpl to always use a valid read-write type for a converted collection/map (never use original class)
+* fixed BeanWrapperImpl to properly resolve even nested generic Collections and Maps (List of Map, Map of List, etc)
 * added "destroyBean" method to ConfigurableBeanFactory interface, for destroying a given instance based on a bean def
 * added support for destruction callbacks to Scope abstraction, driven by a BeanFactory's definition for a scoped bean
 * PropertyResourceConfigurer, CustomEditorConfigurer and CustomScopeConfigurer use highest Ordered precendence now
 * fixed FieldRetrievingFactoryBean to return "false" from "isSingleton()", since it reobtains the field value every time
+* fixed AbstractBeanFactory to accept re-registration of alias for same bean name (-> bean definition overriding)
 * AbstractAutowireCapableBeanFactory only logs name and class of eagerly cached bean (does not trigger toString anymore)
 * AbstractAutowireCapableBeanFactory catches any exception from BeanPostProcessor and wraps it in BeanCreationException
 * DefaultListableBeanFactory's "preInstantiateSingletons" only fetches the FactoryBean instance (instead of its object)
@@ -85,6 +88,8 @@ Package org.springframework.orm
 * introduced PersistenceUnitPostProcessor interface, to be registered on DefaultPersistenceUnitManager or LCEMFB
 * introduced MutablePersistenceUnitInfo base class, to turn SpringPersistenceUnitInfo to package-protected again
 * PersistenceUnitReader searches for "classpath*:**/SCHEMA_NAME" last, and catches and logs any IOException thrown
+* added support for custom JPA properties to SharedEntityManagerBean/JpaTransactionManager/JpaInterceptor/JpaTemplate
+* added support for custom JPA properties to OpenEntityManagerInViewInterceptor
 * PersistenceAnnotationBeanPostProcessor supports @PersistenceContext's "properties", passed into "createEntityManager"
 * PersistenceAnnotationBeanPostProcessor does not cache EntityManagerFactory instances anymore, to allow for new EMFs
 * PersistenceAnnotationBeanPostProcessor throws IllegalStateException instead of NoSuchBeanDefinitionException

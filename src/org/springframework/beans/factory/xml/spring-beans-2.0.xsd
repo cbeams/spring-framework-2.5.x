@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
 <xsd:schema xmlns="http://www.springframework.org/schema/beans" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 						targetNamespace="http://www.springframework.org/schema/beans">
+
 	<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+
 	<!-- base types -->
 	<xsd:complexType name="identifiedType" abstract="true">
 		<xsd:attribute name="id" type="xsd:ID"/>
 	</xsd:complexType>
+
 	<!-- Top-level <beans> tag -->
 	<xsd:element name="beans">
 		<xsd:complexType>
@@ -45,11 +49,13 @@
 			<xsd:attribute name="default-destroy-method" type="xsd:string"/>
 		</xsd:complexType>
 	</xsd:element>
+
 	<xsd:element name="description">
 		<xsd:complexType mixed="true">
 			<xsd:choice minOccurs="0" maxOccurs="unbounded"/>
 		</xsd:complexType>
 	</xsd:element>
+
 	<xsd:element name="import">
 		<xsd:complexType>
 			<xsd:complexContent>
@@ -59,6 +65,7 @@
 			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
+
 	<xsd:element name="alias">
 		<xsd:complexType>
 			<xsd:complexContent>
@@ -69,6 +76,7 @@
 			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
+
 	<xsd:group name="beanElements">
 		<xsd:sequence>
 			<xsd:element ref="description" minOccurs="0"/>
@@ -142,6 +150,7 @@
 			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
+
 	<xsd:element name="constructor-arg">
 		<xsd:complexType>
 			<xsd:sequence>
@@ -165,7 +174,9 @@
 			<xsd:attribute name="value" type="xsd:string"/>
 		</xsd:complexType>
 	</xsd:element>
+
 	<xsd:element name="property" type="propertyType"/>
+
 	<xsd:element name="lookup-method">
 		<xsd:complexType>
 			<xsd:complexContent>
@@ -176,6 +187,7 @@
 			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
+
 	<xsd:element name="replaced-method">
 		<xsd:complexType>
 			<xsd:sequence>
@@ -187,12 +199,14 @@
 			<xsd:attribute name="replacer" type="xsd:string"/>
 		</xsd:complexType>
 	</xsd:element>
+
 	<xsd:element name="arg-type">
 		<xsd:complexType mixed="true">
 			<xsd:choice minOccurs="0" maxOccurs="unbounded"/>
 			<xsd:attribute name="match" type="xsd:string"/>
 		</xsd:complexType>
 	</xsd:element>
+
 	<xsd:element name="ref">
 		<xsd:complexType>
 			<xsd:complexContent>
@@ -204,6 +218,7 @@
 			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
+
 	<xsd:element name="idref">
 		<xsd:complexType>
 			<xsd:complexContent>
@@ -214,12 +229,14 @@
 			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
+
 	<xsd:element name="value">
 		<xsd:complexType mixed="true">
 			<xsd:choice minOccurs="0" maxOccurs="unbounded"/>
 			<xsd:attribute name="type" type="xsd:string"/>
 		</xsd:complexType>
 	</xsd:element>
+
 	<xsd:element name="null">
 		<xsd:complexType mixed="true">
 			<xsd:choice minOccurs="0" maxOccurs="unbounded"/>
@@ -285,7 +302,6 @@
 		<xsd:attribute name="ref" type="xsd:string"/>
 		<xsd:attribute name="value" type="xsd:string"/>
 	</xsd:complexType>
-
 
 	<!-- Collection Types -->
 
@@ -359,4 +375,5 @@
 			<xsd:enumeration value="false"/>
 		</xsd:restriction>
 	</xsd:simpleType>
+
 </xsd:schema>
