@@ -1423,7 +1423,7 @@ support=support@somecompany.co.uk]]></programlisting>
                 <programlisting><![CDATA[<constructor-arg value="hello"/>]]></programlisting>
                 <programlisting><![CDATA[<entry key="myKey" value="hello"/>]]></programlisting>
                 <para>In general, when typing definitions by hand, you will probably prefer to
-                use the less verbose shortcut form (the Spring team certainly do).</para>
+                use the less verbose shortcut form (the Spring team certainly does).</para>
                 <para>The <literal>&lt;property/&gt;</literal> and
                 <literal>&lt;constructor-arg/&gt;</literal> elements support a similar
                 shortcut <literal>'ref'</literal> attribute which may be used instead
