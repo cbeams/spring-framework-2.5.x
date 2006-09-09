@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,19 +30,21 @@ public abstract class ApplicationEvent extends EventObject {
 	/** System time when the event happened */
 	private final long timestamp;
 
+
 	/**
 	 * Create a new ApplicationEvent.
-	 * @param source the component that published the event
+	 * @param source the component that published the event (never <code>null</code>)
 	 */
 	public ApplicationEvent(Object source) {
 		super(source);
 		this.timestamp = System.currentTimeMillis();
 	}
 
+
 	/**
 	 * Return the system time in milliseconds when the event happened.
 	 */
-	public long getTimestamp() {
+	public final long getTimestamp() {
 		return timestamp;
 	}
 
