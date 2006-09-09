@@ -513,10 +513,10 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
                     existing bean from the container is invoked to create the new bean.</para>
                     <para>To use this mechanism, the <literal>'class'</literal> attribute
 				    must be left empty, and the <literal>'factory-bean'</literal> attribute
-				    must specify the name of a bean in the current or an ancestor bean
-				    factory which contains the factory method. The factory method itself
-				    should still be set via the <literal>'factory-method'</literal>
-				    attribute (as seen in the example below).</para>
+				    must specify the name of a bean in the current (or parent/ancestor) container
+				    that contains the factory method. The factory method itself must still be set
+				    via the <literal>'factory-method'</literal> attribute (as seen in the example
+				    below).</para>
                     <programlisting><lineannotation>&lt;!-- the factory bean, which contains a method called <methodname>createInstance()</methodname> --&gt;</lineannotation><![CDATA[
 <bean id="myFactoryBean" class="...">
   ...
