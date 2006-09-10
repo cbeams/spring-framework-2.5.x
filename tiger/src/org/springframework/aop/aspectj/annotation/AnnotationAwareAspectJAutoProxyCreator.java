@@ -21,8 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.reflect.PerClauseKind;
 
 import org.springframework.aop.Advisor;
@@ -30,8 +28,6 @@ import org.springframework.aop.aspectj.InstantiationModelAwarePointcutAdvisor;
 import org.springframework.aop.aspectj.autoproxy.AspectJInvocationContextExposingAdvisorAutoProxyCreator;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -56,15 +52,12 @@ import org.springframework.util.Assert;
  * {@link org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator}.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator
  * @see org.springframework.aop.aspectj.annotation.AspectJAdvisorFactory
  */
 public class AnnotationAwareAspectJAutoProxyCreator extends AspectJInvocationContextExposingAdvisorAutoProxyCreator {
-
-	private static final long serialVersionUID = -3347584141231774337L;
-
-	private static final Log staticLogger = LogFactory.getLog(AnnotationAwareAspectJAutoProxyCreator.class);
 
 	private static final String ORDER_PROPERTY = "order";
 
@@ -171,76 +164,65 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJInvocationCon
 
 			if (aspectJAdvisorFactory.isAspect(beanType)) {
 				AspectMetadata amd = new AspectMetadata(beanType, beanName);
+				MetadataAwareAspectInstanceFactory factory = null;
 				if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
-					// Default singleton binding.
-					try {
-						Object beanInstance = beanFactory.getBean(beanName);
-						List<Advisor> classAdvisors =
-								aspectJAdvisorFactory.getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(beanInstance,beanName));
-						setAdvisorOrderIfNecessary(classAdvisors,beanInstance);
-						if (staticLogger.isDebugEnabled()) {
-							staticLogger.debug("Found " + classAdvisors.size() + " AspectJ advice methods");
-						}
-						advisors.addAll(classAdvisors);
-					}
-					catch (BeanCreationException ex) {
-						if (ex.contains(BeanCurrentlyInCreationException.class)) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("Ignoring currently created advisor '" + beanName + "': " + ex.getMessage());
-							}
-							// Ignore: indicates a reference back to the bean we're trying to advise.
-							// We want to find advisors other than the currently created bean itself.
-						}
-						else {
-							throw ex;
-						}
-					}
+					factory = new BeanFactoryAspectInstanceFactory(beanFactory, beanName);
 				}
 				else {
-					// Pertarget or per this
+					// Per target or per this
 					if (beanFactory.isSingleton(beanName)) {
 						throw new IllegalArgumentException(
 								"Bean with name '" + beanName + "' is a singleton, but aspect instantiation model is not singleton");
 					}
-					
-					List<Advisor> classAdvisors =
-							aspectJAdvisorFactory.getAdvisors(new PrototypeAspectInstanceFactory(beanFactory, beanName));
-					setAdvisorOrderIfNecessary(classAdvisors,beanFactory,beanName);
-					if (staticLogger.isDebugEnabled()) {
-						staticLogger.debug("Found " + classAdvisors.size() +
-								" AspectJ advice methods in bean with name '" + beanName + "'");
-					}
-					advisors.addAll(classAdvisors);
+					factory = new PrototypeAspectInstanceFactory(beanFactory, beanName);
 				}
+				List<Advisor> classAdvisors = aspectJAdvisorFactory.getAdvisors(factory);
+				setAdvisorOrderIfNecessary(classAdvisors, beanFactory, beanName);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found " + classAdvisors.size() +
+							" AspectJ advice methods in bean with name '" + beanName + "'");
+				}
+				advisors.addAll(classAdvisors);
 			}
 		}
 		return advisors;
 	}
 
-	private void setAdvisorOrderIfNecessary(List<Advisor> advisors, Object beanInstance) {
-		if (beanInstance instanceof Ordered) {
-			int order = ((Ordered)beanInstance).getOrder();
-			for (Advisor advisor : advisors) {
-				if (advisor instanceof InstantiationModelAwarePointcutAdvisor) {
-					((InstantiationModelAwarePointcutAdvisor)advisor).setOrder(order);
+	private void setAdvisorOrderIfNecessary(List<Advisor> advisors, BeanFactory beanFactory, String beanName) {
+		// We can't instantiate a bean instance, so we look for an order property value
+		// and use that instead...
+		if (beanFactory instanceof ConfigurableListableBeanFactory) {
+			ConfigurableListableBeanFactory lbf = (ConfigurableListableBeanFactory) beanFactory;
+			if (lbf.containsBeanDefinition(beanName)) {
+				BeanDefinition bd = lbf.getBeanDefinition(beanName);
+				MutablePropertyValues mpvs = bd.getPropertyValues();
+				if (mpvs.contains(ORDER_PROPERTY)) {
+					Object value = mpvs.getPropertyValue(ORDER_PROPERTY).getValue();
+					if (value != null) {
+						try {
+							int order = Integer.parseInt(value.toString());
+							applyOrderToAdvisors(advisors, order);
+						}
+						catch (NumberFormatException ex) {
+							// Ignoring non-integer order value...
+						}
+					}
+				}
+			}
+			else if (beanFactory.isSingleton(beanName)) {
+				Object beanInstance = beanFactory.getBean(beanName);
+				if (beanInstance instanceof Ordered) {
+					int order = ((Ordered) beanInstance).getOrder();
+					applyOrderToAdvisors(advisors, order);
 				}
 			}
 		}
 	}
-	
-	// We can't instantiate a bean instance, so we look for a prototype order property value
-	// and use that instead...
-	private void setAdvisorOrderIfNecessary(List<Advisor> advisors, BeanFactory beanFactory, String beanName) {
-		if (beanFactory instanceof ConfigurableListableBeanFactory) {
-			BeanDefinition beanDef = ((ConfigurableListableBeanFactory)beanFactory).getBeanDefinition(beanName);
-			MutablePropertyValues mpvs = beanDef.getPropertyValues();
-			if (mpvs.contains(ORDER_PROPERTY)) {
-				int order = Integer.parseInt((String)mpvs.getPropertyValue(ORDER_PROPERTY).getValue());
-				for (Advisor advisor : advisors) {
-					if (advisor instanceof InstantiationModelAwarePointcutAdvisor) {
-						((InstantiationModelAwarePointcutAdvisor)advisor).setOrder(order);
-					}
-				}
+
+	private void applyOrderToAdvisors(List<Advisor> advisors, int order) {
+		for (Advisor advisor : advisors) {
+			if (advisor instanceof InstantiationModelAwarePointcutAdvisor) {
+				((InstantiationModelAwarePointcutAdvisor) advisor).setOrder(order);
 			}
 		}
 	}
