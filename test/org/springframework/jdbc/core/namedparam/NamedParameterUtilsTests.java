@@ -34,28 +34,29 @@ import org.springframework.test.AssertThrows;
 public final class NamedParameterUtilsTests extends TestCase {
 
 	public void testCountParameterPlaceholders() {
-		assertTrue(NamedParameterUtils.countParameterPlaceholders(null) == 0);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("") == 0);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("?") == 1);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The \"big\" ? 'bad wolf'") == 1);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big ?? bad wolf") == 2);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big ? ? bad ? wolf") == 3);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The \"big?\" 'ba''ad?' ? wolf") == 1);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders(":parameter") == 1);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The \"big\" :parameter 'bad wolf'") == 1);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big :parameter :parameter bad wolf") == 1);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big :parameter :newpar :parameter bad wolf") == 2);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big :parameter, :newpar, :parameter bad wolf") == 2);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The \"big:\" 'ba''ad:p' :parameter wolf") == 1);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("&parameter") == 1);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The \"big\" &parameter 'bad wolf'") == 1);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big &parameter &parameter bad wolf") == 1);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big &parameter &newparameter &parameter bad wolf") == 2);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big &parameter, &newparameter, &parameter bad wolf") == 2);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The \"big &x  \" 'ba''ad&p' &parameter wolf") == 1);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big :parameter, &newparameter, &parameter bad wolf") == 2);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big :parameter, &sameparameter, &sameparameter bad wolf") == 2);
-		assertTrue(NamedParameterUtils.countParameterPlaceholders("The big :parameter, :sameparameter, :sameparameter bad wolf") == 2);
+		assertEquals(0, NamedParameterUtils.countParameterPlaceholders(null));
+		assertEquals(0, NamedParameterUtils.countParameterPlaceholders(""));
+		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("?"));
+		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("The \"big\" ? 'bad wolf'"));
+		assertEquals(2, NamedParameterUtils.countParameterPlaceholders("The big ?? bad wolf"));
+		assertEquals(3, NamedParameterUtils.countParameterPlaceholders("The big ? ? bad ? wolf"));
+		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("The \"big?\" 'ba''ad?' ? wolf"));
+		assertEquals(1, NamedParameterUtils.countParameterPlaceholders(":parameter"));
+		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("The \"big\" :parameter 'bad wolf'"));
+		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("The big :parameter :parameter bad wolf"));
+		assertEquals(2, NamedParameterUtils.countParameterPlaceholders("The big :parameter :newpar :parameter bad wolf"));
+		assertEquals(2, NamedParameterUtils.countParameterPlaceholders("The big :parameter, :newpar, :parameter bad wolf"));
+		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("The \"big:\" 'ba''ad:p' :parameter wolf"));
+		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("&parameter"));
+		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("The \"big\" &parameter 'bad wolf'"));
+		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("The big &parameter &parameter bad wolf"));
+		assertEquals(2, NamedParameterUtils.countParameterPlaceholders("The big &parameter &newparameter &parameter bad wolf"));
+		assertEquals(2, NamedParameterUtils.countParameterPlaceholders("The big &parameter, &newparameter, &parameter bad wolf"));
+		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("The \"big &x  \" 'ba''ad&p' &parameter wolf"));
+		assertEquals(2, NamedParameterUtils.countParameterPlaceholders("The big :parameter, &newparameter, &parameter bad wolf"));
+		assertEquals(2, NamedParameterUtils.countParameterPlaceholders("The big :parameter, &sameparameter, &sameparameter bad wolf"));
+		assertEquals(2, NamedParameterUtils.countParameterPlaceholders("The big :parameter, :sameparameter, :sameparameter bad wolf"));
+		assertEquals(0, NamedParameterUtils.countParameterPlaceholders("xxx & yyy"));
 	}
 
 	public void testParseSql() {
