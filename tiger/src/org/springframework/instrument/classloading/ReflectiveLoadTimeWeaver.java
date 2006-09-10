@@ -28,13 +28,16 @@ import org.springframework.util.ReflectionUtils;
  * which needs to support the following weaving methods (as defined in the
  * LoadTimeWeaver interface):
  * <ul>
- * <li><code>addTransformer(java.lang.instrument.ClassFileTransformer)</code>:
+ * <li><code>public void addTransformer(java.lang.instrument.ClassFileTransformer)</code>:
  * to register the given ClassFileTransformer for this ClassLoader
- * <li><code>ClassLoader getThrowawayClassLoader()</code>:
+ * <li><code>public ClassLoader getThrowawayClassLoader()</code>:
  * to obtain a throwaway class loader for this ClassLoader
  * (optional; ReflectiveLoadTimeWeaver will fall back to a
  * SimpleThrowawayClassLoader if that method isn't available)
  * </ul>
+ * 
+ * <p>Please note that the above methods <i>must</i> reside in a class
+ * that is publicly accessible.
  *
  * <p>Useful when the underlying class loader implementation is loaded in a
  * different class loader (such as the application server's class loader
@@ -63,17 +66,20 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 
 
 	/**
-	 * Create a new ReflectiveLoadTimeWeaver for the current context class loader,
-	 * which needs to support the required weaving methods.
+	 * Create a new ReflectiveLoadTimeWeaver for the current context class
+	 * loader, <i>which needs to support the required weaving methods</i>.
 	 */
 	public ReflectiveLoadTimeWeaver() {
 		this(ClassUtils.getDefaultClassLoader());
 	}
 
 	/**
-	 * Create a new ReflectiveLoadTimeWeaver for the given class loader.
-	 * @param classLoader the ClassLoader to delegate to for weaving
-	 * (needs to support the required weaving methods)
+	 * Create a new SimpleLoadTimeWeaver for the given class loader.
+	 * @param classLoader the <code>ClassLoader</code> to delegate to for
+	 * weaving (<i>must</i> support the required weaving methods).
+	 * @throws IllegalArgumentException if the supplied <code>ClassLoader</code> is <code>null</code>
+	 * @throws IllegalStateException if the supplied <code>ClassLoader</code>
+	 * does not support the required weaving methods
 	 */
 	public ReflectiveLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
