@@ -29,8 +29,26 @@ import org.springframework.instrument.classloading.WeavingTransformer;
  * Extension of Tomcat's default class loader which adds instrumentation
  * to loaded classes without the need of using a VM-wide agent.
  *
+ * <p>To be registered with a Loader tag in Tomcat's Context definition:
+ * <code>
+ * &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
+ * </code>
+ *
+ * <p>Typically used in combination with a ReflectiveLoadTimeWeaver
+ * defined in the Spring application context. The <code>addTransformer</code> and
+ * <code>getThrowawayClassLoader</code> methods mirror the corresponding methods
+ * in the LoadTimeWeaver interface, as expected by ReflectiveLoadTimeWeaver.
+ *
+ * <p>See the PetClinic sample application for a full example of this
+ * ClassLoader in action.
+ *
+ * <p><b>NOTE:</b> Requires Apache Tomcat version 5.0 or higher.
+ *
  * @author Costin Leau
  * @since 2.0
+ * @see #addTransformer
+ * @see #getThrowawayClassLoader
+ * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
  */
 public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 
@@ -50,11 +68,27 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 
 
 	/**
-	 * Add a class file transformer to be applied by this ClassLoader.
-	 * @param transformer the class file transformer to register
+	 * Delegate for LoadTimeWeaver's <code>addTransformer</code> method.
+	 * Typically called through ReflectiveLoadTimeWeaver.
+	 * @see org.springframework.instrument.classloading.LoadTimeWeaver#addTransformer
+	 * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
 	 */
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.weavingTransformer.addTransformer(transformer);
+	}
+
+	/**
+	 * Delegate for LoadTimeWeaver's <code>getThrowawayClassLoader</code> method.
+	 * Typically called through ReflectiveLoadTimeWeaver.
+	 * @see org.springframework.instrument.classloading.LoadTimeWeaver#getThrowawayClassLoader
+	 * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
+	 */
+	public ClassLoader getThrowawayClassLoader() {
+		WebappClassLoader tempLoader = new WebappClassLoader();
+		// Use reflection to copy all the fields since most of them are private
+		// on pre-5.5 Tomcat.
+		shallowCopyFieldState(this, tempLoader);
+		return tempLoader;
 	}
 
 
@@ -69,26 +103,18 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 		return entry;
 	}
 
-	public ClassLoader getThrowawayClassLoader() {
-		WebappClassLoader tempLoader = new WebappClassLoader();
-		// Use reflection to copy all the fields since most of them are private
-		// on pre-5.5.x Tomcat.
-		shallowCopyFieldState(this, tempLoader);
-		return tempLoader;
-	}
-
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder("TomcatInstrumentedClassLoader\r\n");
+		StringBuilder sb = new StringBuilder(getClass().getName());
+		sb.append("\r\n");
 		sb.append(super.toString());
 		return sb.toString();
 	}
 
 
 	// The code below is orginially taken from ReflectionUtils and optimized for
-	// local usage.
-	// There is no dependency on ReflectionUtils and this class is self
-	// contained to avoid class loading problems.
+	// local usage. There is no dependency on ReflectionUtils to keep this class
+	// self-contained (since it gets deployed into Tomcat's server class loader).
 
 	/**
 	 * Given the source object and the destination, which must be the same class
@@ -97,7 +123,7 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 	 * @throws IllegalArgumentException if arguments are incompatible or either
 	 * is <code>null</code>
 	 */
-	protected void shallowCopyFieldState(final Object src, final Object dest) throws IllegalArgumentException {
+	private static void shallowCopyFieldState(final Object src, final Object dest) throws IllegalArgumentException {
 		if (src == null) {
 			throw new IllegalArgumentException("Source for field copy cannot be null");
 		}
@@ -130,12 +156,12 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 				}
 			}
 			targetClass = targetClass.getSuperclass();
-		} while (targetClass != null && targetClass != Object.class);
+		}
+		while (targetClass != null && targetClass != Object.class);
 	}
 
-	protected Class findCommonAncestor(Class one, Class two) throws IllegalArgumentException {
+	private static Class findCommonAncestor(Class one, Class two) throws IllegalArgumentException {
 		Class ancestor = one;
-
 		while (ancestor != Object.class || ancestor != null) {
 			if (ancestor.isAssignableFrom(two)) {
 				return ancestor;
