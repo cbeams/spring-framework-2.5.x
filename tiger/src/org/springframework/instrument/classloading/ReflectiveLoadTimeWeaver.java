@@ -41,6 +41,7 @@ import org.springframework.util.ReflectionUtils;
  * which is not visible to the web application).
  *
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 2.0
  * @see #addTransformer(java.lang.instrument.ClassFileTransformer)
  * @see #getThrowawayClassLoader()
@@ -70,7 +71,7 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 	/**
-	 * Create a new SimpleLoadTimeWeaver for the given class loader.
+	 * Create a new ReflectiveLoadTimeWeaver for the given class loader.
 	 * @param classLoader the ClassLoader to delegate to for weaving
 	 * (needs to support the required weaving methods)
 	 */
