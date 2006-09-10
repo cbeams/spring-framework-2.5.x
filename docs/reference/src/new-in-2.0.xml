@@ -218,8 +218,8 @@
       makes the job of authoring JSP pages much easier when using Spring MVC;
       the Spring team is confident it will satisfy all of those developers who
       voted for the issue on JIRA. The new tag library is itself covered in the
-      section entitled <xref linkend="mvc" />, and a quick reference to all of
-      the new tags can be found in the appendix entitled
+      section entitled <xref linkend="mvc-formtaglib" />, and a quick reference
+      to all of the new tags can be found in the appendix entitled
       <xref linkend="spring-form.tld" />.</para>
     </section>
 

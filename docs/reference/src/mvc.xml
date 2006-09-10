@@ -2083,14 +2083,15 @@ public class FileUploadBean {
   <section id="mvc-formtaglib">
     <title>Using Spring's form tag library</title>
 
-    <para>As of version 2.0, Spring provides a comprehensive set of data binding-aware tags for handling form elements
-    when using JSP and Spring Web MVC. Each tag provides support for the set of attributes of its corresponding HTML
-    tag counterpart, making the tags familiar and intuitive to use.
-    The tag-generated HTML is HTML 4.01/XHTML 1.0 compliant.</para>
+    <para>As of version 2.0, Spring provides a comprehensive set of data binding-aware tags for handling
+    form elements when using JSP and Spring Web MVC. Each tag provides support for the set of attributes
+    of its corresponding HTML tag counterpart, making the tags familiar and intuitive to use. The
+    tag-generated HTML is HTML 4.01/XHTML 1.0 compliant.</para>
 
-    <para>Unlike other form/input tag libraries, Spring's form tag library is integrated with Spring Web MVC, giving
-    the tags access to the command object and reference data your controller deals with. As you will see in the
-    following examples, the form tags make JSPs easier to develop, read and maintain. </para>
+    <para>Unlike other form/input tag libraries, Spring's form tag library is integrated with Spring
+    Web MVC, giving the tags access to the command object and reference data your controller deals
+    with. As you will see in the following examples, the form tags make JSPs easier to develop, read
+    and maintain. </para>
 
     <para>Let's go through the form tags and look at an example of how each tag is used.
     We have included generated HTML snippets where certain tags require further commentary.</para>
@@ -2112,8 +2113,8 @@ public class FileUploadBean {
     <para>
         This tag renders an HTML 'form' tag and exposes a binding path to inner tags for binding.
         It puts the command object in the <literal>PageContext</literal> so that the command object
-        can be accessed by inner tags. All the other tags in this library are nested tags of the
-        <literal>form</literal> tag.
+        can be accessed by inner tags. <emphasis>All the other tags in this library are nested tags
+        of the <literal>form</literal> tag</emphasis>.
     </para>
     <para>
         Let's assume we have a domain object called <classname>User</classname>. It is a JavaBean with
