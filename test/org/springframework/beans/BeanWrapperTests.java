@@ -686,6 +686,9 @@ public class BeanWrapperTests extends TestCase {
 		assertTrue("kerry age not set", kerry.getAge() == 0);
 		bw.setPropertyValue(new PropertyValue("spouse.age", new Integer(35)));
 		assertTrue("Set primitive on spouse", kerry.getAge() == 35);
+
+		assertEquals(kerry, bw.getPropertyValue("spouse"));
+		assertEquals(rod, bw.getPropertyValue("spouse.spouse"));
 	}
 
 	public void testSetNestedPropertyNullValue() throws Exception {
