@@ -162,7 +162,9 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 		if (this.bindStatus == null) {
 			String resolvedPropertyPath = getPath();
 			String bindPath = getBindPath(resolvedPropertyPath);
-			this.bindStatus = new BindStatus(getRequestContext(), bindPath, this.isHtmlEscape());
+			this.bindStatus = new BindStatus(getRequestContext(), bindPath,
+				// HTML-escaping in tags is performed by the ValueFormatter class
+				false);
 		}
 		return this.bindStatus;
 	}

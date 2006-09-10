@@ -22,11 +22,16 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import javax.servlet.jsp.tagext.Tag;
 
 /**
+ * Unit tests for the {@link TextareaTag} class.
+ * 
  * @author Rob Harrop
+ * @author Rick Evans
  */
-public class TextareaTagTests extends AbstractFormTagTests {
+public final class TextareaTagTests extends AbstractFormTagTests {
 
 	private TextareaTag tag;
+	private TestBean rob;
+
 
 	protected void onSetUp() {
 		this.tag = new TextareaTag() {
@@ -37,13 +42,28 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
+
 	public void testSimpleBind() throws Exception {
 		this.tag.setPath("name");
 		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
 		String output = getWriter().toString();
 		assertContainsAttribute(output, "name", "name");
 		assertBlockTagContains(output, "Rob");
+	}
 
+	public void testSimpleBindWithHtmlEscaping() throws Exception {
+		final String NAME = "Rob \"I Love Mangos\" Harrop";
+		final String HTML_ESCAPED_NAME = "Rob &quot;I Love Mangos&quot; Harrop";
+		
+		this.tag.setPath("name");
+		this.rob.setName(NAME);
+		this.tag.setHtmlEscape("true");
+		
+		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+		String output = getWriter().toString();
+		System.out.println(output);
+		assertContainsAttribute(output, "name", "name");
+		assertBlockTagContains(output, HTML_ESCAPED_NAME);
 	}
 
 	public void testCustomBind() throws Exception {
@@ -55,12 +75,12 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		String output = getWriter().toString();
 		assertContainsAttribute(output, "name", "myFloat");
 		assertBlockTagContains(output, "12.34f");
-
 	}
+
 
 	protected TestBean createTestBean() {
 		// set up test data
-		TestBean rob = new TestBean();
+		this.rob = new TestBean();
 		rob.setName("Rob");
 		rob.setMyFloat(new Float(12.34));
 
@@ -70,4 +90,5 @@ public class TextareaTagTests extends AbstractFormTagTests {
 
 		return rob;
 	}
+
 }

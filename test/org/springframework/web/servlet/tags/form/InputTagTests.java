@@ -25,7 +25,10 @@ import javax.servlet.jsp.tagext.Tag;
 import java.io.StringWriter;
 
 /**
+ * Unit tests for the {@link InputTag} class.
+ * 
  * @author Rob Harrop
+ * @author Rick Evans
  * @since 2.0
  */
 public class InputTagTests extends AbstractFormTagTests {
@@ -52,6 +55,25 @@ public class InputTagTests extends AbstractFormTagTests {
 
 		assertContainsAttribute(output, "type", getType());
 		assertContainsAttribute(output, "value", "Rob");
+	}
+
+	public void testSimpleBindWithHtmlEscaping() throws Exception {
+		final String NAME = "Rob \"I Love Mangos\" Harrop";
+		final String HTML_ESCAPED_NAME = "Rob &quot;I Love Mangos&quot; Harrop";
+
+		this.tag.setPath("name");
+		this.tag.setHtmlEscape("true");
+		this.rob.setName(NAME);
+
+		assertEquals(Tag.EVAL_PAGE, this.tag.doStartTag());
+
+		String output = getWriter().toString();
+
+		assertTagOpened(output);
+		assertTagClosed(output);
+
+		assertContainsAttribute(output, "type", getType());
+		assertContainsAttribute(output, "value", HTML_ESCAPED_NAME);
 	}
 
 	public void testComplexBind() throws Exception {
