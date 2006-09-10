@@ -44,7 +44,6 @@
 		<param-value>/WEB-INF/applicationContext-jdbc.xml</param-value>
 		<!--
 		<param-value>/WEB-INF/applicationContext-hibernate.xml</param-value>
-		<param-value>/WEB-INF/applicationContext-ojb.xml</param-value>
 		<param-value>/WEB-INF/applicationContext-toplink.xml</param-value>
 		<param-value>/WEB-INF/applicationContext-jpa.xml</param-value>
  		-->
