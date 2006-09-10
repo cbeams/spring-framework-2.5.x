@@ -676,6 +676,9 @@
 			<fileset dir="${mock.dir}">
 				<include name="org/springframework/**"/>
 			</fileset>
+			<fileset dir="${tiger.mock.dir}">
+				<include name="org/springframework/**"/>
+			</fileset>
 		</zip>
 
 	</target>
