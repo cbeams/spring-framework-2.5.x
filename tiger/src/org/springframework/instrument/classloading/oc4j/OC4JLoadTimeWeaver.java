@@ -25,12 +25,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * LoadTimeWeaver implementation for OC4J's instrumentable ClassLoader.
+ * {@link LoadTimeWeaver} implementation for OC4J's instrumentable ClassLoader.
  *
  * <p><b>NOTE:</b> Requires Oracle OC4J version 10.1.3.1 or higher.
  *
- * <p>Many thanks to <a
- * href="mailto:mike.keith@oracle.com">Mike Keith</a>
+ * <p>Many thanks to <a href="mailto:mike.keith@oracle.com">Mike Keith</a>
  * for his assistance.
  *
  * @author Costin Leau
@@ -42,15 +41,20 @@ public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 
 
 	/**
-	 * Create a new OC4JLoadTimeWeaver for the current context class loader.
+	 * Creates a new instance of thie {@link OC4JLoadTimeWeaver} class
+	 * using the default {@link ClassLoader class loader}.
+	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader() 
 	 */
 	public OC4JLoadTimeWeaver() {
-		this.classLoader = ClassUtils.getDefaultClassLoader();
+		this(ClassUtils.getDefaultClassLoader());
 	}
-
+	
 	/**
-	 * Create a new OC4JLoadTimeWeaver for the given class loader.
-	 * @param classLoader the ClassLoader to delegate to for weaving
+	 * Creates a new instance of the {@link OC4JLoadTimeWeaver} class
+	 * using the supplied {@link ClassLoader}.
+	 * @param classLoader the <code>ClassLoader</code> to delegate to for weaving (must not be <code>null</code>)
+	 * @throws IllegalArgumentException if the supplied <code>ClassLoader</code> is <code>null</code>
+	 * @see #getInstrumentableClassLoader()  
 	 */
 	public OC4JLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
@@ -58,10 +62,11 @@ public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 
-	public void addTransformer(ClassFileTransformer classFileTransformer) {
+	public void addTransformer(ClassFileTransformer transformer) {
+		Assert.notNull(transformer, "Transformer must not be null");
 		// Since OC4J 10.1.3's PolicyClassLoader is going to be removed,
 		// we rely on the ClassLoaderUtilities API instead.
-		OC4JClassPreprocessorAdapter processor = new OC4JClassPreprocessorAdapter(classFileTransformer);
+		OC4JClassPreprocessorAdapter processor = new OC4JClassPreprocessorAdapter(transformer);
 		ClassLoaderUtilities.addPreprocessor(this.classLoader, processor);
 	}
 
