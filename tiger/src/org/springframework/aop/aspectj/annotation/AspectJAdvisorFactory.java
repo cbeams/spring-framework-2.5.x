@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -66,21 +66,18 @@ public interface AspectJAdvisorFactory {
 	 */
 	List<Advisor> getAdvisors(MetadataAwareAspectInstanceFactory aif);
 	
-	
 	/**
+	 * TODO: javadoc
 	 * @return <code>null</code> if the method is not an AspectJ advice method
 	 */
-	Advisor getAdvisor(
-			Method candidateAspectJAdviceMethod, 
-			MetadataAwareAspectInstanceFactory aif,
-			int declarationOrderInAspect,
-			String aspectName);
+	Advisor getAdvisor(Method candidateAspectJAdviceMethod,
+			MetadataAwareAspectInstanceFactory aif, int declarationOrderInAspect, String aspectName);
 	
-	Advice getAdvice(
-			Method candidateAspectJAdviceMethod, 
-			AspectJExpressionPointcut pointcut, 
-			MetadataAwareAspectInstanceFactory aif,
-			int declarationOrderInAspect,
-			String aspectName);
+	/**
+	 * TODO: javadoc
+	 * @return <code>null</code> if the method is not an AspectJ advice method
+	 */
+	Advice getAdvice(Method candidateAspectJAdviceMethod, AspectJExpressionPointcut pointcut,
+			MetadataAwareAspectInstanceFactory aif, int declarationOrderInAspect, String aspectName);
 
 }
