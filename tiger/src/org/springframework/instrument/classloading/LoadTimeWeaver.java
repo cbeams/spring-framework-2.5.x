@@ -19,9 +19,12 @@ package org.springframework.instrument.classloading;
 import java.lang.instrument.ClassFileTransformer;
 
 /**
- * Interface supporting adding one or more ClassFileTransformers
- * to a class loader - typically the current context class loader.
- * Implementations may of course provide their own class loader as well.
+ * Defines the contract for adding one or more
+ * {@link ClassFileTransformer ClassFileTransformers} to a
+ * {@link ClassLoader class loader} - typically the current context class
+ * loader.
+ * 
+ * <p>Implementations may of course provide their own class loader as well.
  *
  * @author Rod Johnson
  * @author Costin Leau
@@ -31,23 +34,29 @@ public interface LoadTimeWeaver {
 
 	/**
 	 * Add a class file transformer to be applied by this load time weaver.
-	 * @param transformer the class file transformer to register
+	 * @param transformer the class file transformer to add
 	 */
-	void addTransformer(ClassFileTransformer transformer) ;
+	void addTransformer(ClassFileTransformer transformer);
 	
 	/**
 	 * Return a class loader that supports instrumentation through AspectJ-style
-	 * load time weaving based on user-defined ClassFileTransformers. May be the
-	 * current class loader, or a class loader created by this LoadTimeWeaver.
+	 * load time weaving based on user-defined
+	 * {@link ClassFileTransformer ClassFileTransformers}.
+	 * <p>May be the current class loader, or a class loader created by this
+	 * {@link LoadTimeWeaver} instance.
+	 * @return a class loader that supports instrumentation through AspectJ-style
+	 * load time weaving based on user-defined
+	 * {@link ClassFileTransformer ClassFileTransformers}
 	 */
 	ClassLoader getInstrumentableClassLoader();
 	
 	/**
-	 * Return a throwaway class loader, enabling classes to be loaded and inspected
-	 * without affecting the parent class loader. Most <i>not</i> return the same as
-	 * {@link #getInstrumentableClassLoader() getInstrumentableClassLoader()}.
-	 * @return a temporary throwaway class loader. Should return a new
-	 * instance for each call, with no existing state.
+	 * Return a throwaway class loader, enabling classes to be loaded and
+	 * inspected without affecting the parent class loader.
+	 * <p>Should <i>not</i> return the same instance of the {@link ClassLoader}
+	 * returned from an invocation of {@link #getInstrumentableClassLoader()}.
+	 * @return a temporary throwaway class loader; should return a new
+	 * instance for each call, with no existing state
 	 */
 	ClassLoader getThrowawayClassLoader();
 
