@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import org.springframework.util.StringUtils;
+
 import java.io.IOException;
 
 import javax.servlet.jsp.JspException;
@@ -46,19 +48,21 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 	}
 
 	/**
-	 * If {@link #shouldRender rendering}, flush any buffered {@link BodyContent} or, if
-	 * no {@link BodyContent} is supplied, {@link #renderDefaultContent render the default content}.
+	 * If {@link #shouldRender rendering}, flush any buffered
+	 * {@link BodyContent} or, if no {@link BodyContent} is supplied,
+	 * {@link #renderDefaultContent render the default content}.
+	 * @return Tag#EVAL_PAGE
 	 */
 	public int doEndTag() throws JspException {
 		if (shouldRender()) {
-			if (this.bodyContent != null) {
+			if (this.bodyContent != null
+					&& StringUtils.hasText(this.bodyContent.getString())) {
 				renderFromBodyContent(this.bodyContent, this.tagWriter);
 			}
 			else {
 				renderDefaultContent(this.tagWriter);
 			}
 		}
-
 		return EVAL_PAGE;
 	}
 
@@ -122,7 +126,6 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 	 * buffered content into the main {@link javax.servlet.jsp.JspWriter}.
 	 */
 	protected void flushBufferedBodyContent(BodyContent bodyContent) throws JspException {
-		String bufferedBodyContent = bodyContent.getString();
 		try {
 			bodyContent.writeOut(bodyContent.getEnclosingWriter());
 		}
