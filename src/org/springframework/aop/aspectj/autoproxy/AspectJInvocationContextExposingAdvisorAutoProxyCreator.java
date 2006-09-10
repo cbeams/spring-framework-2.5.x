@@ -1,20 +1,19 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Created on 14-Feb-2006 by Adrian Colyer
  */
+
 package org.springframework.aop.aspectj.autoproxy;
 
 import java.util.ArrayList;
@@ -26,6 +25,7 @@ import java.util.List;
 import org.aopalliance.aop.Advice;
 import org.aspectj.util.PartialOrder;
 import org.aspectj.util.PartialOrder.PartialComparable;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AbstractAspectJAdvice;
 import org.springframework.aop.framework.autoproxy.InvocationContextExposingAdvisorAutoProxyCreator;
@@ -36,15 +36,13 @@ import org.springframework.core.Ordered;
  * An InvocationContextExposingAdvisorAutoProxyCreator that understands AspectJ's
  * rules for advice precedence when multiple pieces of advice come from the same
  * aspect.
- * 
+ *
  * @author Adrian Colyer
  * @since 2.0
  */
 public class AspectJInvocationContextExposingAdvisorAutoProxyCreator extends
 		InvocationContextExposingAdvisorAutoProxyCreator {
 	
-	private static final long serialVersionUID = 7343914060829875857L;
-
 	/**
 	 * <p>
 	 * Keep the special ExposeInvocationInterceptor at position 0 if
@@ -53,15 +51,14 @@ public class AspectJInvocationContextExposingAdvisorAutoProxyCreator extends
 	 * Advice from the same aspect is then further ordered according to the
 	 * following rules:</p>
 	 * <ul>
-	 *   <li>if either of the pair is after advice, then the advice declared
-	 *    last gets highest precedence (runs last)</li>
-	 *   <li>otherwise the advice declared first gets highest precedence (runs first)</li>
-	 *  </ul>
-	 *  
-	 *  <p><b>Important:</b> advisors are sorted in precedence order, from highest
-	 *  precedence to lowest. "On the way in" to a join point, the highest precedence
-	 *  advisor should run first. "On the way out" of a join point, the highest precedence
-	 *  advisor should run last.</p>
+	 * <li>if either of the pair is after advice, then the advice declared
+	 * last gets highest precedence (runs last)</li>
+	 * <li>otherwise the advice declared first gets highest precedence (runs first)</li>
+	 * </ul>
+	 * <p><b>Important:</b> advisors are sorted in precedence order, from highest
+	 * precedence to lowest. "On the way in" to a join point, the highest precedence
+	 * advisor should run first. "On the way out" of a join point, the highest precedence
+	 * advisor should run last.</p>
 	 */
 	protected List sortAdvisors(List advisors) {
 		if (advisors == null || advisors.isEmpty()) {
@@ -106,9 +103,6 @@ public class AspectJInvocationContextExposingAdvisorAutoProxyCreator extends
 		return result;
 	}
 
-	/**
-	 * @return
-	 */
 	private boolean excludeExposeInvocationInterceptorFromSorting(List advisors) {
 		if (advisors.get(0) == ExposeInvocationInterceptor.ADVISOR) {
 			advisors.remove(0);
@@ -117,42 +111,35 @@ public class AspectJInvocationContextExposingAdvisorAutoProxyCreator extends
 		return false;
 	}
 
+
 	/**
 	 * Implements AspectJ PartialComparable interface for defining partial orderings.
-	 * @author Adrian Colyer
-	 * @since 2.0
 	 */
 	private static class PartiallyComparableAdvisor implements PartialComparable {
 
-		private Advisor advisor;
-		private Comparator comparator; 
+		private final Advisor advisor;
+
+		private final Comparator comparator;
 		
 		public PartiallyComparableAdvisor(Advisor advisor, AspectJPrecedenceAwareOrderComparator comparator) {
 			this.advisor = advisor;
 			this.comparator = comparator;
 		}
 				
-		/* (non-Javadoc)
-		 * @see org.aspectj.util.PartialOrder.PartialComparable#compareTo(java.lang.Object)
-		 */
 		public int compareTo(Object obj) {
-			Advisor otherAdvisor = ((PartiallyComparableAdvisor)obj).advisor;
-			return this.comparator.compare(this.advisor,otherAdvisor);
+			Advisor otherAdvisor = ((PartiallyComparableAdvisor) obj).advisor;
+			return this.comparator.compare(this.advisor, otherAdvisor);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.aspectj.util.PartialOrder.PartialComparable#fallbackCompareTo(java.lang.Object)
-		 */
-		public int fallbackCompareTo(Object arg0) {
+		public int fallbackCompareTo(Object obj) {
 			return 0;
 		}
-
 
 		public Advisor getAdvisor() {
 			return this.advisor;
 		}
 		
-		// to assist in PD...
+		// To assist in PD...
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
 			Advice advice = advisor.getAdvice();
@@ -169,6 +156,6 @@ public class AspectJInvocationContextExposingAdvisorAutoProxyCreator extends
 			}
 			return sb.toString();
 		}
-		
 	}
+
 }
