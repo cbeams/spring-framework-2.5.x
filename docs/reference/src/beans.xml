@@ -3045,7 +3045,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961]]></programlisting>
                 a cop-out, in that you are directed to the section entitled
                 <xref linkend="metadata-annotations-required"/> which demonstrates the usage of a
                 custom <interfacename>BeanPostProcessor</interfacename> implementation that
-                that ships with the Spring distribution which ensures that JavaBean properties on
+                ships with the Spring distribution which ensures that JavaBean properties on
                 beans that are marked with an (arbitrary) annotation are actually (configured to
                 be) dependency-injected with a value.</para>
             </section>
