@@ -20,50 +20,57 @@ import java.lang.instrument.ClassFileTransformer;
 
 import oracle.classloader.util.ClassLoaderUtilities;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * LoadTimeWeaver suitable for OC4J. Many thanks to <a
- * href="mailto:mike.keith@oracle.com">Mike Keith</a> for assistance.
- * 
+ * LoadTimeWeaver implementation for OC4J's instrumentable ClassLoader.
+ *
+ * <p><b>NOTE:</b> Requires Oracle OC4J version 10.1.3.1 or higher.
+ *
+ * <p>Many thanks to <a
+ * href="mailto:mike.keith@oracle.com">Mike Keith</a>
+ * for his assistance.
+ *
  * @author Costin Leau
  * @since 2.0
  */
 public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 
-	private static final Log log = LogFactory.getLog(OC4JLoadTimeWeaver.class);
+	private final ClassLoader classLoader;
+
 
 	/**
-	 * Since the PolicyClassLoader from 10.1.3 is going to move away we rely on
-	 * the ClassLoaderUtilities.
+	 * Create a new OC4JLoadTimeWeaver for the current context class loader.
 	 */
-	private ClassLoader classLoader;
-
 	public OC4JLoadTimeWeaver() {
 		this.classLoader = ClassUtils.getDefaultClassLoader();
 	}
 
-	public OC4JLoadTimeWeaver(ClassLoader loader) {
-		this.classLoader = loader;
+	/**
+	 * Create a new OC4JLoadTimeWeaver for the given class loader.
+	 * @param classLoader the ClassLoader to delegate to for weaving
+	 */
+	public OC4JLoadTimeWeaver(ClassLoader classLoader) {
+		Assert.notNull(classLoader, "ClassLoader must not be null");
+		this.classLoader = classLoader;
 	}
 
+
 	public void addTransformer(ClassFileTransformer classFileTransformer) {
+		// Since OC4J 10.1.3's PolicyClassLoader is going to be removed,
+		// we rely on the ClassLoaderUtilities API instead.
 		OC4JClassPreprocessorAdapter processor = new OC4JClassPreprocessorAdapter(classFileTransformer);
-
-		ClassLoaderUtilities.addPreprocessor(classLoader, processor);
-
-		if (log.isDebugEnabled())
-			log.debug("added transformer " + processor);
+		ClassLoaderUtilities.addPreprocessor(this.classLoader, processor);
 	}
 
 	public ClassLoader getInstrumentableClassLoader() {
-		return classLoader;
+		return this.classLoader;
 	}
 
 	public ClassLoader getThrowawayClassLoader() {
-		return ClassLoaderUtilities.copy(classLoader);
+		return ClassLoaderUtilities.copy(this.classLoader);
 	}
+
 }
