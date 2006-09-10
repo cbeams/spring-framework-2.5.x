@@ -16,20 +16,18 @@
 
 package org.springframework.instrument.classloading.oc4j;
 
+import oracle.classloader.util.ClassPreprocessor;
+import org.springframework.util.Assert;
+
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 
-import oracle.classloader.util.ClassPreprocessor;
-
-import org.springframework.util.Assert;
-
 /**
- * ClassPreprocessor adapter for OC4J, delegating to a standard
- * JDK ClassFileTransformer underneath.
+ * {@link ClassPreprocessor} adapter for OC4J, delegating to a standard
+ * JDK {@link ClassFileTransformer} underneath.
  *
- * <p>Many thanks to <a
- * href="mailto:mike.keith@oracle.com">Mike Keith</a>
+ * <p>Many thanks to <a href="mailto:mike.keith@oracle.com">Mike Keith</a>
  * for his assistance.
  *
  * @author Costin Leau
@@ -41,8 +39,9 @@ class OC4JClassPreprocessorAdapter implements ClassPreprocessor {
 
 
 	/**
-	 * Create a new OC4JClassPreprocessorAdapter for the given transformer.
-	 * @param transformer the standard JDK ClassFileTransformer to wrap
+	 * Creates a new instance of the {@link OC4JClassPreprocessorAdapter} class.
+	 * @param transformer the {@link ClassFileTransformer} to be adapted (must not be <code>null</code>)
+	 * @throws IllegalArgumentException if the supplied <code>transformer</code> is <code>null</code>
 	 */
 	public OC4JClassPreprocessorAdapter(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "Transformer must not be null");
@@ -54,8 +53,8 @@ class OC4JClassPreprocessorAdapter implements ClassPreprocessor {
 		return this;
 	}
 
-	public byte[] processClass(
-			String className, byte origClassBytes[], int offset, int length, ProtectionDomain pd, ClassLoader loader) {
+	public byte[] processClass(String className, byte origClassBytes[], int offset, int length, ProtectionDomain pd,
+							   ClassLoader loader) {
 		try {
 			byte[] tempArray = new byte[length];
 			System.arraycopy(origClassBytes, offset, tempArray, 0, length);
@@ -69,6 +68,7 @@ class OC4JClassPreprocessorAdapter implements ClassPreprocessor {
 			throw new IllegalStateException("Cannot transform because of illegal class format", ex);
 		}
 	}
+
 
 	@Override
 	public String toString() {
