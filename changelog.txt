@@ -17,6 +17,7 @@ General
 Package org.springframework.aop
 * fixed PointcutAdvisor support classes to avoid eager access to Advice and Pointcut from "hashCode()"/"toString()"
 * added "getTargetObject" method to ScopedObject interface, allowing for access to the raw object in the target scope
+* fixed AnnotationAwareAspectJAutoProxyCreator to lazily retrieve aspect singletons (only once a pointcut matches)
 
 Package org.springframework.beans
 * fixed BeanWrapperImpl to return a Collection/Map as-is if it is not accessible (e.g. because it is a scoped proxy)
@@ -50,6 +51,7 @@ Package org.springframework.instrument
 * reworked ReflectiveLoadTimeWeaver to cache Method references and consider "getThrowawayClassLoader" as optional
 * fixed AbstractOverridingClassLoader to override "loadClass(name, resolve)" and correctly synchronize its variables
 * fixed and reworked AbstractOverridingClassLoader's facility for excluding class names
+* added OC4JLoadTimeWeaver for Oracle OC4J 10.1.3.1+
 
 Package org.springframework.jca
 * SingleConnectionFactory's Connection proxy implements "equals" and "hashCode" based on proxy equality
