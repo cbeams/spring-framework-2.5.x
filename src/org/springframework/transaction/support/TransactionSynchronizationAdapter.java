@@ -24,8 +24,8 @@ import org.springframework.core.Ordered;
  *
  * <p>Also implements the {@link Ordered} interface to enable the execution
  * order of synchronizations to be controlled declaratively. The default
- * {@link #getOrder() order} is {@link Integer#MAX_VALUE}, indicating late
- * execution; return a lower value for earlier execution.
+ * {@link #getOrder() order} is {@link Ordered#LOWEST_PRECEDENCE}, indicating
+ * late execution; return a lower value for earlier execution.
  *
  * @author Juergen Hoeller
  * @since 22.01.2004
@@ -33,7 +33,7 @@ import org.springframework.core.Ordered;
 public abstract class TransactionSynchronizationAdapter implements TransactionSynchronization, Ordered {
 
 	public int getOrder() {
-		return Integer.MAX_VALUE;
+		return Ordered.LOWEST_PRECEDENCE;
 	}
 
 	public void suspend() {
