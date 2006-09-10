@@ -160,15 +160,15 @@ final class CachedIntrospectionResults {
 			// This call is slow so we do it once.
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
 			for (int i = 0; i < pds.length; i++) {
+				PropertyDescriptor pd = pds[i];
 				if (logger.isDebugEnabled()) {
-					logger.debug("Found property '" + pds[i].getName() + "'" +
-							(pds[i].getPropertyType() != null ?
-							" of type [" + pds[i].getPropertyType().getName() + "]" : "") +
-							(pds[i].getPropertyEditorClass() != null ?
-							"; editor [" + pds[i].getPropertyEditorClass().getName() + "]" : ""));
+					logger.debug("Found bean property '" + pd.getName() + "'" +
+							(pd.getPropertyType() != null ?
+							" of type [" + pd.getPropertyType().getName() + "]" : "") +
+							(pd.getPropertyEditorClass() != null ?
+							"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
 				}
-
-				this.propertyDescriptorCache.put(pds[i].getName(), pds[i]);
+				this.propertyDescriptorCache.put(pd.getName(), pd);
 			}
 		}
 		catch (IntrospectionException ex) {
