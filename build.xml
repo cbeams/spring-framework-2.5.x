@@ -692,25 +692,25 @@
 		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans-2.0.dtd"
 					todir="${dist.dir}/resources" preservelastmodified="true"/>
 
-		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans.xsd"
+		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans-2.0.xsd"
 					todir="${dist.dir}/resources" preservelastmodified="true"/>
 
-		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-tool.xsd"
+		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-tool-2.0.xsd"
 					todir="${dist.dir}/resources" preservelastmodified="true"/>
 
-		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-util.xsd"
+		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-util-2.0.xsd"
 					todir="${dist.dir}/resources" preservelastmodified="true"/>
 
-		<copy file="${src.dir}/org/springframework/aop/config/spring-aop.xsd"
+		<copy file="${src.dir}/org/springframework/aop/config/spring-aop-2.0.xsd"
 					todir="${dist.dir}/resources" preservelastmodified="true"/>
 
-		<copy file="${src.dir}/org/springframework/ejb/spring-jee.xsd"
+		<copy file="${src.dir}/org/springframework/ejb/spring-jee-2.0.xsd"
 					todir="${dist.dir}/resources" preservelastmodified="true"/>
 
-		<copy file="${src.dir}/org/springframework/scripting/config/spring-lang.xsd"
+		<copy file="${src.dir}/org/springframework/scripting/config/spring-lang-2.0.xsd"
 					todir="${dist.dir}/resources" preservelastmodified="true"/>
 
-		<copy file="${src.dir}/org/springframework/transaction/config/spring-tx.xsd"
+		<copy file="${src.dir}/org/springframework/transaction/config/spring-tx-2.0.xsd"
 					todir="${dist.dir}/resources" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/web/servlet/tags/spring.tld"
