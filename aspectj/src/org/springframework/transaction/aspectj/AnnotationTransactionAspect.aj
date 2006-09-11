@@ -49,14 +49,13 @@ public aspect AnnotationTransactionAspect extends AbstractTransactionAspect {
 		super(new AnnotationTransactionAttributeSource());
 	}
 
-
 	/**
 	 * Matches the execution of any public method in a type with the
 	 * Transactional annotation, or any subtype of a type with the
 	 * Transactional annotation.
 	 */
 	private pointcut executionOfAnyPublicMethodInAtTransactionalType() :
-		execution(public * ((@Transactional *)+).*(..));
+		execution(public * ((@Transactional *)+).*(..)) && @this(Transactional);
 	
 	/**
 	 * Matches the execution of any non-private method with the 
@@ -70,8 +69,8 @@ public aspect AnnotationTransactionAspect extends AbstractTransactionAspect {
 	 * will have Spring transaction management applied.
 	 */	
 	protected pointcut transactionalMethodExecution(Object txObject) :
-		(executionOfAnyPublicMethodInAtTransactionalType() 
-		 || executionOfTransactionalNonPrivateMethod())
+		(executionOfAnyPublicMethodInAtTransactionalType()
+		 || executionOfTransactionalNonPrivateMethod() )
 		 && this(txObject);
 
 	/**
