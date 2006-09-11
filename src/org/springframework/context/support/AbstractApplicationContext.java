@@ -658,7 +658,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return getBeanFactory().getType(name);
 	}
 
-	public String[] getAliases(String name) throws NoSuchBeanDefinitionException {
+	public String[] getAliases(String name) {
 		return getBeanFactory().getAliases(name);
 	}
 
