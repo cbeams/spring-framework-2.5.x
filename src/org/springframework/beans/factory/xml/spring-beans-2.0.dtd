@@ -99,12 +99,12 @@
 <!ELEMENT meta EMPTY>
 
 <!--
-  Specifies the key name of the metdata parameter being defined
+  Specifies the key name of the metadata parameter being defined.
 -->
 <!ATTLIST meta key CDATA #REQUIRED>
 
 <!--
-  Specifies the value of the metadata parameter being defined as a String
+  Specifies the value of the metadata parameter being defined as a String.
 -->
 <!ATTLIST meta value CDATA #REQUIRED>
 
