@@ -183,8 +183,7 @@ public interface BeanFactory {
 	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the bean name to check for aliases
 	 * @return the aliases, or an empty array if none
-	 * @throws NoSuchBeanDefinitionException if there's no such bean definition
 	 */
-	String[] getAliases(String name) throws NoSuchBeanDefinitionException;
+	String[] getAliases(String name);
 
 }

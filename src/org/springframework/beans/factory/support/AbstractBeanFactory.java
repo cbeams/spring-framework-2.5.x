@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import java.beans.PropertyEditor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -213,15 +214,17 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			}
 
 			// Check if bean definition exists in this factory.
-			if (getParentBeanFactory() != null && !containsBeanDefinition(beanName)) {
+			BeanFactory parentBeanFactory = getParentBeanFactory();
+			if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
 				// Not found -> check parent.
-				if (getParentBeanFactory() instanceof AbstractBeanFactory) {
+				String nameToLookup = originalBeanName(name);
+				if (parentBeanFactory instanceof AbstractBeanFactory) {
 					// Delegation to parent with args only possible for AbstractBeanFactory.
-					return ((AbstractBeanFactory) getParentBeanFactory()).getBean(name, requiredType, args);
+					return ((AbstractBeanFactory) parentBeanFactory).getBean(nameToLookup, requiredType, args);
 				}
 				else if (args == null) {
 					// No args -> delegate to standard getBean method.
-					return getParentBeanFactory().getBean(name, requiredType);
+					return parentBeanFactory.getBean(nameToLookup, requiredType);
 				}
 				else {
 					throw new NoSuchBeanDefinitionException(beanName,
@@ -311,7 +314,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		// Not found -> check parent.
 		BeanFactory parentBeanFactory = getParentBeanFactory();
 		if (parentBeanFactory != null) {
-			return parentBeanFactory.containsBean(name);
+			return parentBeanFactory.containsBean(originalBeanName(name));
 		}
 		return false;
 	}
@@ -329,9 +332,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 		else {
 			// No singleton instance found -> check bean definition.
-			if (getParentBeanFactory() != null && !containsBeanDefinition(beanName)) {
+			BeanFactory parentBeanFactory = getParentBeanFactory();
+			if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
 				// No bean definition found in this factory -> delegate to parent.
-				return getParentBeanFactory().isSingleton(name);
+				return parentBeanFactory.isSingleton(originalBeanName(name));
 			}
 
 			RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
@@ -361,9 +365,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 		else {
 			// No singleton instance found -> check bean definition.
-			if (getParentBeanFactory() != null && !containsBeanDefinition(beanName)) {
+			BeanFactory parentBeanFactory = getParentBeanFactory();
+			if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
 				// No bean definition found in this factory -> delegate to parent.
-				return getParentBeanFactory().getType(name);
+				return parentBeanFactory.getType(originalBeanName(name));
 			}
 
 			RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition(beanName, false);
@@ -402,28 +407,33 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 	public String[] getAliases(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
-		// Check if bean actually exists in this bean factory.
-		if (containsSingleton(beanName) || containsBeanDefinition(beanName)) {
-			// If found, gather aliases.
-			List aliases = new ArrayList();
-			synchronized (this.aliasMap) {
-				for (Iterator it = this.aliasMap.entrySet().iterator(); it.hasNext();) {
-					Map.Entry entry = (Map.Entry) it.next();
-					if (entry.getValue().equals(beanName)) {
-						aliases.add(entry.getKey());
+		List aliases = new ArrayList();
+		boolean factoryPrefix = name.startsWith(FACTORY_BEAN_PREFIX);
+		String fullBeanName = beanName;
+		if (factoryPrefix) {
+			fullBeanName = FACTORY_BEAN_PREFIX + beanName;
+		}
+		if (!fullBeanName.equals(name)) {
+			aliases.add(fullBeanName);
+		}
+		synchronized (this.aliasMap) {
+			for (Iterator it = this.aliasMap.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				if (entry.getValue().equals(beanName)) {
+					String key = (factoryPrefix ? FACTORY_BEAN_PREFIX : "") + entry.getKey();
+					if (!key.equals(name)) {
+						aliases.add(key);
 					}
 				}
 			}
-			return StringUtils.toStringArray(aliases);
 		}
-		else {
-			// Not found -> check parent.
+		if (!containsSingleton(beanName) && !containsBeanDefinition(beanName)) {
 			BeanFactory parentBeanFactory = getParentBeanFactory();
 			if (parentBeanFactory != null) {
-				return parentBeanFactory.getAliases(name);
+				aliases.addAll(Arrays.asList(parentBeanFactory.getAliases(fullBeanName)));
 			}
-			throw new NoSuchBeanDefinitionException(beanName, toString());
 		}
+		return StringUtils.toStringArray(aliases);
 	}
 
 
@@ -655,6 +665,17 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			String canonicalName = (String) this.aliasMap.get(beanName);
 			return (canonicalName != null ? canonicalName : beanName);
 		}
+	}
+
+	/**
+	 * Return the original bean name, resolving locally defined aliases to canonical names.
+	 */
+	protected String originalBeanName(String name) {
+		String beanName = transformedBeanName(name);
+		if (name.startsWith(FACTORY_BEAN_PREFIX)) {
+			beanName = FACTORY_BEAN_PREFIX + beanName;
+		}
+		return beanName;
 	}
 
 	/**
