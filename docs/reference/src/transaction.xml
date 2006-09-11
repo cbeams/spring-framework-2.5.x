@@ -1181,7 +1181,8 @@ public class SimpleProfiler implements Ordered {
             <title>Using <interfacename>@Transactional</interfacename> with AspectJ</title>
             <para>It is also possible to use Spring's <interfacename>@Transactional</interfacename>
             support outside of a Spring container by means of an AspectJ aspect shipped in
-            <literal>spring-aspects.jar</literal>. To use this support you first annotate types and methods with the
+            <literal>spring-aspects.jar</literal>. To use this support you first annotate implementation types and methods 
+            with the
             <interfacename>@Transactional</interfacename> annotation, and then you must link (weave)
             your application with the
             <classname>org.springframework.transaction.aspectj.AnnotationTransactionAspect</classname>
@@ -1199,14 +1200,21 @@ DataSourceTransactionManager txManager = new  DataSourceTransactionManager(getDa
 
 ]]><lineannotation>// configure the <classname>AnnotationTransactionAspect</classname> to use it; this must be done before executing any transactional methods</lineannotation><![CDATA[
 AnnotationTransactionAspect.aspectOf().setTransactionManager (txManager); ]]></programlisting>
-            <para>When using this aspect the <interfacename>@Transactional</interfacename> annotation
-            can be used to annotate a type or interface as transactional, and subsequently the execution
-            of any <emphasis role="bold"><literal>public</literal></emphasis> operation defined by that
-            type will have transactional semantics. Transactional semantics for an individual
-            <emphasis role="bold"><literal>public</literal></emphasis> method can be defined by annotating
-            the corresponding method definition. Note that if annotating interface members (as opposed to
-            methods implementing the interface), the interface itself should also be annotated as
-            <interfacename>@Transactional</interfacename>.</para>
+        
+	        <para>When using this 
+			aspect, you must annotate the <emphasis>implementation</emphasis> class 
+	        (and/or methods within that class), <emphasis>not</emphasis> the interface 
+	        (if any) that the class implements. AspectJ follows Java's rule that annotations on 
+	        interfaces are <emphasis>not inherited</emphasis>.</para>
+	        
+	        <para>A @Transactional annotation on a class specifies the default transaction
+	        semantics for the execution of any <emphasis>public</emphasis> operation in the class.</para>
+	        <para>A @Transactional annotation on a method within the class overrides the
+	        default transaction semantics given by the class annotation (if present). 
+	        Methods with public, protected, and default visibility may all be annotated.
+	        Annotating protected and default visibility methods directly is the only way
+	        to get transaction demarcation for the execution of such operations.</para> 
+           
             <para>To weave your applications with the <classname>AnnotationTransactionAspect</classname>
             you must either build your application with AspectJ (see the
             <ulink url="http://www.eclipse.org/aspectj/doc/ released/devguide/index.html">AspectJ Development Guide</ulink>)

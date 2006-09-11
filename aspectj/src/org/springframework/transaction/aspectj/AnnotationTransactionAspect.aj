@@ -22,6 +22,20 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Concrete AspectJ transaction aspect using Spring Transactional annotation
  * for JDK 1.5+.
+ * 
+ * <p>
+ * When using this aspect, you <i>must</i> annotate the implementation class 
+ * (and/or methods within that class), <i>not</i> the interface (if any) that
+ * the class implements. AspectJ follows Java's rule that annotations on 
+ * interfaces are <i>not</i> inherited.
+ * </p>
+ * <p>A @Transactional annotation on a class specifies the default transaction
+ * semantics for the execution of any <b>public</b> operation in the class.</p>
+ * <p>A @Transactional annotation on a method within the class overrides the
+ * default transaction semantics given by the class annotation (if present). 
+ * Methods with public, protected, and default visibility may all be annotated.
+ * Annotating protected and default visibility methods directly is the only way
+ * to get transaction demarcation for the execution of such operations.</p> 
  *
  * @author Rod Johnson
  * @author Ramnivas Laddad
@@ -45,11 +59,11 @@ public aspect AnnotationTransactionAspect extends AbstractTransactionAspect {
 		execution(public * ((@Transactional *)+).*(..));
 	
 	/**
-	 * Matches the execution of any public method with the 
+	 * Matches the execution of any non-private method with the 
 	 * Transactional annotation.
 	 */
-	private pointcut executionOfTransactionalPublicMethod() :
-		execution(public * *(..)) && @annotation(Transactional);
+	private pointcut executionOfTransactionalNonPrivateMethod() :
+		execution(!private * *(..)) && @annotation(Transactional);
 	
 	/**
 	 * Definition of pointcut from super aspect - matched join points
@@ -57,7 +71,16 @@ public aspect AnnotationTransactionAspect extends AbstractTransactionAspect {
 	 */	
 	protected pointcut transactionalMethodExecution(Object txObject) :
 		(executionOfAnyPublicMethodInAtTransactionalType() 
-		 || executionOfTransactionalPublicMethod())
+		 || executionOfTransactionalNonPrivateMethod())
 		 && this(txObject);
 
+	/**
+	 * Annotating private methods with @Transactional has no effect...
+	 */
+	declare warning 
+	    // note, we should be able to say the following in one execution pcd, but
+	    // aj doesn't like it...
+		: execution(@Transactional * *(..)) &&
+		  execution(private * *(..))
+		: "@Transactional annotation on private method will be ignored";
 }

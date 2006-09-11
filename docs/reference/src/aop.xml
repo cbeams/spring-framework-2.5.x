@@ -2453,9 +2453,24 @@ public class Account {
   		<title>Other Spring aspects for AspectJ</title>
 		<para>In addition to the <interfacename>@Configurable</interfacename> support, spring-aspects.jar contains an
 		AspectJ aspect that can be used to drive Spring's transaction management for
-		types and methods annotated with the @Transactional annotation 
-		(see <xref linkend="transaction"/>). This is primarily intended for users
+		types and methods annotated with the @Transactional annotation. 
+		This is primarily intended for users
 		who want to use Spring's transaction support outside of the Spring container.</para>
+		
+		<para>The aspect that interprets @Transactional annotations is the
+		<interfacename>AnnotationTransactionAspect</interfacename>. When using this 
+		aspect, you must annotate the <emphasis>implementation</emphasis> class 
+	    (and/or methods within that class), <emphasis>not</emphasis> the interface 
+	    (if any) that the class implements. AspectJ follows Java's rule that annotations on 
+	    interfaces are <emphasis>not inherited</emphasis>.</para>
+        
+        <para>A @Transactional annotation on a class specifies the default transaction
+        semantics for the execution of any <emphasis>public</emphasis> operation in the class.</para>
+        <para>A @Transactional annotation on a method within the class overrides the
+        default transaction semantics given by the class annotation (if present). 
+        Methods with public, protected, and default visibility may all be annotated.
+        Annotating protected and default visibility methods directly is the only way
+        to get transaction demarcation for the execution of such operations.</para> 
 		  
 		<para>For AspectJ programmers that want to use the Spring configuration and 
 		transaction management support but don't want to (or can't) use annotations,
