@@ -40,7 +40,7 @@ public class FactoryBeanNotInitializedException extends FatalBeanException {
 	 * Create a new FactoryBeanNotInitializedException with the default message.
 	 */
 	public FactoryBeanNotInitializedException() {
-		super("FactoryBean not fully initialized yet (maybe due to circular bean reference)");
+		super("FactoryBean is not fully initialized yet");
 	}
 
 	/**
