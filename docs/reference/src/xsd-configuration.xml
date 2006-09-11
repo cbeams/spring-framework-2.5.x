@@ -12,8 +12,9 @@
             <para>Nothing will break if you forego the use of the new XML Schema-based
             approach to authoring Spring XML configuration files. All that you lose
             out on is the opportunity to have more succinct and clearer configuration.
-            In the end, all of the XML configuration, be it DTD- or Schema-based, all
-            boils down to the same object model in the container.</para>
+            Regardless of whether the XML configuration is DTD- or Schema-based, in the end
+			it all boils down to the same object model in the container (namely one or
+			more <interfacename>BeanDefinition</interfacename> instances).</para>
         </sidebar>
         <para>The central motivation for moving to XML Schema based configuration files was
         to make Spring XML configuration easier. The <emphasis>'classic'</emphasis>
@@ -65,31 +66,29 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
             <note>
                 <para>The <literal>'xsi:schemaLocation'</literal> fragment is not actually required,
-                but can be specified to refer to a local copy of a schema (which can be useful
+                but can be included to reference a local copy of a schema (which can be useful
                 during development).</para>
             </note>
-            <para>The above Spring XML configuration fragment is pretty much boilerplate;
-            you can simply use this and continue to write
-            <literal>&lt;bean/&gt;</literal> definitions like you have always done.
-            However, the entire point of switching over is to take advantage of the new Spring 2.0 XML tags since
-            they make configuration easier. The section entitled <xref linkend="xsd-config-body-schemas-util"/>
-            demonstrates how you can start immediately by using some of the more common utility tags.
-            </para>
+            <para>The above Spring XML configuration fragment is can pretty much be considered
+            boilerplate; you can simply use this and continue to write <literal>&lt;bean/&gt;</literal>
+            definitions like you have always done. However, the entire point of switching over is to
+            take advantage of the new Spring 2.0 XML tags since they make configuration easier. The
+            section entitled <xref linkend="xsd-config-body-schemas-util"/> demonstrates how you can
+            start immediately by using some of the more common utility tags.</para>
         </section>
         <para>The rest of this chapter is devoted to showing examples of the new Spring XML Schema
         based configuration, with at least one example for every new tag. The format follows
         a before and after style, with a <literal>'before'</literal> snippet of XML showing
         the old (but still 100% legal and supported) style, followed immediately
         by an <literal>'after'</literal> example showing the equivalent in the new XML Schema-based
-        style.
-        </para>
+        style.</para>
         <section id="xsd-config-body-schemas-util">
             <title>The <literal>util</literal> schema</title>
             <para>First up is coverage of the <literal>util</literal> tags. As the name
@@ -105,8 +104,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:util="http://www.springframework.org/schema/util"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
@@ -474,8 +473,8 @@ public class Client {
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:jee="http://www.springframework.org/schema/jee"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.0.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
@@ -623,8 +622,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:lang="http://www.springframework.org/schema/lang"</emphasis><![CDATA[
        ]]><emphasis role="bold">xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.0.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
@@ -637,7 +636,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
             covered in the chapter entitled <xref linkend="transaction"/>.</para>
             <tip>
                 <para>You are strongly encouraged to look at the
-                <filename>'spring-tx.xsd'</filename> file that ships with the Spring
+                <filename>'spring-tx-2.0.xsd'</filename> file that ships with the Spring
                 distribution. This file is (of course), the XML Schema for Spring's
                 transaction configuration, and covers all of the various tags in the
                 <literal>tx</literal> namespace, including attribute defaults and
@@ -656,9 +655,9 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
 	   xmlns:aop="http://www.springframework.org/schema/aop"
 	   ]]><emphasis role="bold">xmlns:tx="http://www.springframework.org/schema/tx"</emphasis><![CDATA[
 	   xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd</emphasis><![CDATA[
-http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd</emphasis><![CDATA[
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
@@ -686,8 +685,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   ]]><emphasis role="bold">xmlns:aop="http://www.springframework.org/schema/aop"</emphasis><![CDATA[
 	   xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
 
@@ -703,7 +702,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             Spring as they are currently undergoing review. If you are a third party tool
             vendor and you would like to contribute to this review process, then do mail
             the Spring mailing list. The currently supported <literal>tool</literal>
-            tags can be found in the file <literal>'spring-tool.xsd'</literal> in the
+            tags can be found in the file <literal>'spring-tool-2.0.xsd'</literal> in the
             <literal>'src/org/springframework/beans/factory/xml'</literal> directory of the
             Spring source distribution.</para>
         </section>
@@ -727,7 +726,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
     <bean id="foo" class="x.y.Foo">
         ]]><emphasis role="bold"><![CDATA[<meta key="cacheName" value="foo"/>]]></emphasis><![CDATA[
@@ -744,11 +743,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <title>Setting up your IDE</title>
         <para>This final section documents the steps involved in setting up a number of
         popular Java IDEs to effect the easier editing of Spring's XML Schema-based
-        configuration files.</para>
-        <para>If your favourite Java IDE or editor is not included in the list of
-        documented IDEs, then please do
+        configuration files. If your favourite Java IDE or editor is not included in the
+		list of documented IDEs, then please do
         <ulink url="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">raise an issue</ulink>
-        and an example with the IDE <emphasis>may</emphasis> be featured in the next release.</para>
+        and an example with said favorite IDE/editor <emphasis>may</emphasis> be included
+		in the next release.</para>
         <section id="xsd-config-setup-eclipse">
         <title>Setting up Eclipse</title>
         <procedure>
@@ -772,8 +771,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
 </beans>]]></programlisting>
 		        <para>
@@ -878,8 +877,8 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
-       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
 </beans>]]></programlisting>
 		        <para>
@@ -902,7 +901,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 area (see the screenshot below); then press the <keycombo action='open'>
                     <keycap>Alt</keycap>
                     <keycap>Enter</keycap>
-                 </keycombo> keystroke combination, and press the <keycombo action='open'>
+					</keycombo> keystroke combination, and press the <keycombo action='open'>
                     <keycap>Enter</keycap>
                  </keycombo> key again when the popup becomes active to fetch the external
                  resource.</para>
@@ -964,7 +963,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 relevant XSD file. As can be seen in the following screenshot, the
                 <literal>'http://www.springframework.org/schema/util'</literal> namespace
                 is being associated with the file resource
-                <literal>'C:\bench\spring\src\org\springframework\beans\factory\xml\spring-util.xsd'</literal>.</para>
+                <literal>'C:\bench\spring\src\org\springframework\beans\factory\xml\spring-util-2.0.xsd'</literal>.</para>
 		        <para>
 			        <mediaobject>
 				        <imageobject role="fo">
@@ -995,9 +994,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 			        </mediaobject>
 		        </para>
             </step>
-            <para>
-                Repeat as required for setting up IDEA to reference the other Spring XSD files.
-            </para>
+            <para>Repeat as required for setting up IDEA to reference the other Spring XSD files.</para>
         </procedure>
         </section>
         
@@ -1016,9 +1013,9 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 and deploying to v.3 of Caucho's Resin application server, you will need
                 to set some configuration options prior to startup so that an XSD-aware
                 parser is available to Spring.</para>
-                <para>Please do consult the following resource on the Caucho Resin website for
-                more information.</para>
-                <para><ulink url="http://www.caucho.com/resin-3.0/xml/jaxp.xtp#xerces">http://www.caucho.com/resin-3.0/xml/jaxp.xtp#xerces</ulink></para>
+                <para>Please do read this resource,
+                <ulink url="http://www.caucho.com/resin-3.0/xml/jaxp.xtp#xerces">http://www.caucho.com/resin-3.0/xml/jaxp.xtp#xerces</ulink>,
+                for further details.</para>
             </section>
         </section>
     </section>
