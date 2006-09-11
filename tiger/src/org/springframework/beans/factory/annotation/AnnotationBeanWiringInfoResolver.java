@@ -33,6 +33,8 @@ import org.springframework.util.Assert;
  */
 public class AnnotationBeanWiringInfoResolver implements BeanWiringInfoResolver {
 
+	private static final String CGLIB_MAGIC = "EnhancerByCGLIB";
+
 	public BeanWiringInfo resolveWiringInfo(Object beanInstance) {
 		Assert.notNull(beanInstance, "Bean instance must not be null");
 		Class<?> clazz = beanInstance.getClass();
@@ -45,11 +47,23 @@ public class AnnotationBeanWiringInfoResolver implements BeanWiringInfoResolver 
 			else {
 				// Bean name may be explicit or defaulted to FQN.
 				String beanName =
-						("".equals(configurableAnnotation.value())) ? clazz.getName() : configurableAnnotation.value();
+						("".equals(configurableAnnotation.value())) ? getUserClassName(clazz) : configurableAnnotation.value();
 				return new BeanWiringInfo(beanName);
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Copes with CGLIB generated subclasses and ensures that the user's class name
+	 * is returned instead.
+	 */
+	private String getUserClassName(Class beanClass) {
+		String className = beanClass.getName();
+		if (className.indexOf(CGLIB_MAGIC) != -1) {
+			className = beanClass.getSuperclass().getName();
+		}
+		return className;
 	}
 
 }
