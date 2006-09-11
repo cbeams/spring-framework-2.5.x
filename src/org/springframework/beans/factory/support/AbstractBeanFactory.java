@@ -679,6 +679,17 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	}
 
 	/**
+	 * Determine whether this given bean name is defines as an alias
+	 * (as opposed to the name of an actual bean definition).
+	 * @param beanName the bean name to check
+	 */
+	protected boolean isAlias(String beanName) {
+		synchronized (this.aliasMap) {
+			return this.aliasMap.containsKey(beanName);
+		}
+	}
+
+	/**
 	 * Initialize the given BeanWrapper with the custom editors registered
 	 * with this factory. To be called for BeanWrappers that will create
 	 * and populate bean instances.

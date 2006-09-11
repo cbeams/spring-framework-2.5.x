@@ -24,19 +24,16 @@ import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessExceptionsException;
 import org.springframework.beans.ResourceTestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
@@ -229,13 +226,56 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		ctx.close();
 	}
 
-	public void testSelfReference() {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("spouse", new RuntimeBeanReference("test"));
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class, pvs));
-		TestBean test = (TestBean) lbf.getBean("test");
-		assertEquals(test, test.getSpouse());
+	public void testAliasThatOverridesParent() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
+				"/org/springframework/context/support/simpleContext.xml");
+		Object someMs = ctx.getBean("someMessageSource");
+
+		ClassPathXmlApplicationContext child = new ClassPathXmlApplicationContext(
+				new String[] {"/org/springframework/context/support/aliasThatOverridesParent.xml"}, ctx);
+		Object myMs = child.getBean("myMessageSource");
+		Object someMs2 = child.getBean("someMessageSource");
+		assertSame(myMs, someMs2);
+		assertNotSame(someMs, someMs2);
+		assertOneMessageSourceOnly(child, myMs);
+	}
+
+	public void testAliasThatOverridesEarlierBean() {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
+				new String[] {"/org/springframework/context/support/simpleContext.xml",
+											"/org/springframework/context/support/aliasThatOverridesParent.xml"});
+		Object myMs = ctx.getBean("myMessageSource");
+		Object someMs2 = ctx.getBean("someMessageSource");
+		assertSame(myMs, someMs2);
+		assertOneMessageSourceOnly(ctx, myMs);
+	}
+
+	private void assertOneMessageSourceOnly(ClassPathXmlApplicationContext ctx, Object myMessageSource) {
+		String[] beanNamesForType = ctx.getBeanNamesForType(MessageSource.class);
+		assertEquals(1, beanNamesForType.length);
+		assertEquals("myMessageSource", beanNamesForType[0]);
+		beanNamesForType = ctx.getBeanNamesForType(MessageSource.class, true, true);
+		assertEquals(1, beanNamesForType.length);
+		assertEquals("myMessageSource", beanNamesForType[0]);
+		beanNamesForType = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(ctx, MessageSource.class);
+		assertEquals(1, beanNamesForType.length);
+		assertEquals("myMessageSource", beanNamesForType[0]);
+		beanNamesForType = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(ctx, MessageSource.class, true, true);
+		assertEquals(1, beanNamesForType.length);
+		assertEquals("myMessageSource", beanNamesForType[0]);
+
+		Map beansOfType = ctx.getBeansOfType(MessageSource.class);
+		assertEquals(1, beansOfType.size());
+		assertSame(myMessageSource, beansOfType.values().iterator().next());
+		beansOfType = ctx.getBeansOfType(MessageSource.class, true, true);
+		assertEquals(1, beansOfType.size());
+		assertSame(myMessageSource, beansOfType.values().iterator().next());
+		beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(ctx, MessageSource.class);
+		assertEquals(1, beansOfType.size());
+		assertSame(myMessageSource, beansOfType.values().iterator().next());
+		beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(ctx, MessageSource.class, true, true);
+		assertEquals(1, beansOfType.size());
+		assertSame(myMessageSource, beansOfType.values().iterator().next());
 	}
 
 	public void testResourceAndInputStream() throws IOException {

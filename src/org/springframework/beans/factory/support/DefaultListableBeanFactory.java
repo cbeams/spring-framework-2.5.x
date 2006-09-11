@@ -167,41 +167,45 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		// Check all bean definitions.
 		for (Iterator it = this.beanDefinitionNames.iterator(); it.hasNext();) {
 			String beanName = (String) it.next();
-			RootBeanDefinition rbd = getMergedBeanDefinition(beanName, false);
-			// Only check bean definition if it is complete.
-			if (!rbd.isAbstract() &&
-					(allowEagerInit || rbd.hasBeanClass() || !rbd.isLazyInit() || isAllowEagerClassLoading())) {
-				// In case of FactoryBean, match object created by FactoryBean.
-				try {
-					Class beanClass = resolveBeanClass(rbd, beanName);
-					boolean isFactoryBean = (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
-					if (isFactoryBean || rbd.getFactoryBeanName() != null) {
-						if (allowEagerInit && (includePrototypes || isSingleton(beanName)) &&
-								isBeanTypeMatch(beanName, type)) {
+			// Only consider bean as eligible if the bean name
+			// is not defined as alias for some other bean.
+			if (!isAlias(beanName)) {
+				RootBeanDefinition rbd = getMergedBeanDefinition(beanName, false);
+				// Only check bean definition if it is complete.
+				if (!rbd.isAbstract() &&
+						(allowEagerInit || rbd.hasBeanClass() || !rbd.isLazyInit() || isAllowEagerClassLoading())) {
+					// In case of FactoryBean, match object created by FactoryBean.
+					try {
+						Class beanClass = resolveBeanClass(rbd, beanName);
+						boolean isFactoryBean = (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
+						if (isFactoryBean || rbd.getFactoryBeanName() != null) {
+							if (allowEagerInit && (includePrototypes || isSingleton(beanName)) &&
+									isBeanTypeMatch(beanName, type)) {
+								result.add(beanName);
+								// Match found for this bean: do not match FactoryBean itself anymore.
+								continue;
+							}
+							// We're done for anything but a full FactoryBean.
+							if (!isFactoryBean) {
+								continue;
+							}
+							// In case of FactoryBean, try to match FactoryBean itself next.
+							beanName = FACTORY_BEAN_PREFIX + beanName;
+						}
+						// Match raw bean instance (might be raw FactoryBean).
+						if ((includePrototypes || rbd.isSingleton()) && isBeanTypeMatch(beanName, type)) {
 							result.add(beanName);
-							// Match found for this bean: do not match FactoryBean itself anymore.
-							continue;
-						}
-						// We're done for anything but a full FactoryBean.
-						if (!isFactoryBean) {
-							continue;
-						}
-						// In case of FactoryBean, try to match FactoryBean itself next.
-						beanName = FACTORY_BEAN_PREFIX + beanName;
-					}
-					// Match raw bean instance (might be raw FactoryBean).
-					if ((includePrototypes || rbd.isSingleton()) && isBeanTypeMatch(beanName, type)) {
-						result.add(beanName);
-					}
-				}
-				catch (CannotLoadBeanClassException ex) {
-					if (rbd.isLazyInit()) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Ignoring bean class loading failure for lazy-init bean '" + beanName + "'", ex);
 						}
 					}
-					else {
-						throw ex;
+					catch (CannotLoadBeanClassException ex) {
+						if (rbd.isLazyInit()) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Ignoring bean class loading failure for lazy-init bean '" + beanName + "'", ex);
+							}
+						}
+						else {
+							throw ex;
+						}
 					}
 				}
 			}

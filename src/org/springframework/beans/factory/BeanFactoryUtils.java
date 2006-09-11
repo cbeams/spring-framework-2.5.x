@@ -16,8 +16,11 @@
 
 package org.springframework.beans.factory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
@@ -105,7 +108,15 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				result = StringUtils.mergeStringArrays(result, parentResult);
+				List resultList = new ArrayList();
+				resultList.addAll(Arrays.asList(result));
+				for (int i = 0; i < parentResult.length; i++) {
+					String beanName = parentResult[i];
+					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
+						resultList.add(beanName);
+					}
+				}
+				result = StringUtils.toStringArray(resultList);
 			}
 		}
 		return result;
@@ -141,7 +152,15 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includePrototypes, allowEagerInit);
-				result = StringUtils.mergeStringArrays(result, parentResult);
+				List resultList = new ArrayList();
+				resultList.addAll(Arrays.asList(result));
+				for (int i = 0; i < parentResult.length; i++) {
+					String beanName = parentResult[i];
+					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
+						resultList.add(beanName);
+					}
+				}
+				result = StringUtils.toStringArray(resultList);
 			}
 		}
 		return result;
@@ -172,8 +191,9 @@ public abstract class BeanFactoryUtils {
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
 				for (Iterator it = parentResult.entrySet().iterator(); it.hasNext();) {
 					Map.Entry entry = (Map.Entry) it.next();
-					if (!result.containsKey(entry.getKey())) {
-						result.put(entry.getKey(), entry.getValue());
+					String beanName = (String) entry.getKey();
+					if (!result.containsKey(beanName) && !hbf.containsLocalBean(beanName)) {
+						result.put(beanName, entry.getValue());
 					}
 				}
 			}
@@ -217,8 +237,9 @@ public abstract class BeanFactoryUtils {
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includePrototypes, allowEagerInit);
 				for (Iterator it = parentResult.entrySet().iterator(); it.hasNext();) {
 					Map.Entry entry = (Map.Entry) it.next();
-					if (!result.containsKey(entry.getKey())) {
-						result.put(entry.getKey(), entry.getValue());
+					String beanName = (String) entry.getKey();
+					if (!result.containsKey(beanName) && !hbf.containsLocalBean(beanName)) {
+						result.put(beanName, entry.getValue());
 					}
 				}
 			}
