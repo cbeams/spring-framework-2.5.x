@@ -163,7 +163,7 @@ public int countOfActorsByFirstName(String firstName) {
     String sql = "select count(0) from T_ACTOR where first_name = :first_name";
 
     NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.getDataSource());
-    SqlParameterSource namedParameters = new SimpleSqlParameterSource("first_name", firstName);
+    SqlParameterSource namedParameters = new MapSqlParameterSource("first_name", firstName);
 
     return template.queryForInt(sql, namedParameters);
 }]]></programlisting>
@@ -171,7 +171,7 @@ public int countOfActorsByFirstName(String firstName) {
 				Notice the use of the named parameter notation in the value assigned
 				to the <literal>'sql'</literal> variable, and the corresponding value
 				that is plugged into the <literal>'namedParameters'</literal> variable
-				(of type <classname>SimpleSqlParameterSource</classname>).
+				(of type <classname>MapSqlParameterSource</classname>).
 			</para>
 			<para>
 				If you like, you can also pass along named parameters (and their
@@ -198,10 +198,10 @@ public int countOfActorsByFirstName(String firstName) {
 				(and existing in the same Java package) is the <interfacename>SqlParameterSource</interfacename>
 				interface. You have already seen an example of an implementation of this
 				interface in one of the preceding code snippets (the
-				<classname>SimpleSqlParameterSource</classname> class). The entire
+				<classname>MapSqlParameterSource</classname> class). The entire
 				point of the <interfacename>SqlParameterSource</interfacename> is to serve as
 				a source of named parameter values to a <classname>NamedParameterJdbcTemplate</classname>.
-				The <classname>SimpleSqlParameterSource</classname> class is (as the name implies)
+				The <classname>MapSqlParameterSource</classname> class is (as the name implies)
 				a very simple implementation, that is simply an adapter around a
 				<interfacename>java.util.Map</interfacename>, and its use (should) be
 				self-evident (if it is not then do raise a JIRA issue asking for more
