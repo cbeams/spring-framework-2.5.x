@@ -189,7 +189,7 @@
 	instantiate that particular bean in any case.
 
 	Note: This attribute will not be inherited by child bean definitions.
-	Hence, it needs to be specified per concrete bean definition.
+	Hence, it needs to be specified per abstract bean definition.
 -->
 <!ATTLIST bean abstract (true | false) #IMPLIED>
 
