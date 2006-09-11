@@ -162,8 +162,10 @@ public class LocalPersistenceManagerFactoryBean
 	}
 
 	/**
-	 * Set the JDO dialect to use for the PersistenceExceptionTranslator functionality
-	 * of this factory. The default is to rely on standard JDO exception translation.
+	 * Set the JDO dialect to use for the PersistenceExceptionTranslator
+	 * functionality of this factory.
+	 * <p>Default is a DefaultJdoDialect based on the PersistenceManagerFactory's
+	 * underlying DataSource, if any.
 	 * @see JdoDialect#translateException
 	 * @see #translateExceptionIfPossible
 	 * @see org.springframework.dao.support.PersistenceExceptionTranslator
@@ -198,6 +200,11 @@ public class LocalPersistenceManagerFactoryBean
 		// Build PersistenceManagerFactory instance.
 		logger.info("Building new JDO PersistenceManagerFactory");
 		this.persistenceManagerFactory = newPersistenceManagerFactory(mergedProps);
+
+		// Build default JdoDialect if none explicitly specified.
+		if (this.jdoDialect == null) {
+			this.jdoDialect = new DefaultJdoDialect(this.persistenceManagerFactory.getConnectionFactory());
+		}
 	}
 
 	/**

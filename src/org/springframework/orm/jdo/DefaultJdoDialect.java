@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,23 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 
 	private SQLExceptionTranslator jdbcExceptionTranslator;
 
+
+	/**
+	 * Create a new DefaultJdoDialect.
+	 */
+	public DefaultJdoDialect() {
+	}
+
+	/**
+	 * Create a new DefaultJdoDialect.
+	 * @param connectionFactory the connection factory of the JDO PersistenceManagerFactory,
+	 * which is used to initialize the default JDBC exception translator
+	 * @see javax.jdo.PersistenceManagerFactory#getConnectionFactory()
+	 * @see PersistenceManagerFactoryUtils#newJdbcExceptionTranslator(Object)
+	 */
+	DefaultJdoDialect(Object connectionFactory) {
+		this.jdbcExceptionTranslator = PersistenceManagerFactoryUtils.newJdbcExceptionTranslator(connectionFactory);
+	}
 
 	/**
 	 * Set the JDBC exception translator for this dialect.
@@ -282,7 +299,7 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 
 	/**
 	 * Template method for extracting a SQL String from the given exception.
-	 * <p>Default implementation always returns null. Can be overridden in
+	 * <p>Default implementation always returns <code>null</code>. Can be overridden in
 	 * subclasses to extract SQL Strings for vendor-specific exception classes.
 	 * @param ex the JDOException, containing a SQLException
 	 * @return the SQL String, or <code>null</code> if none found

@@ -35,6 +35,8 @@ public class JdoDaoSupportTests extends TestCase {
 	public void testJdoDaoSupportWithPersistenceManagerFactory() throws Exception {
 		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmfControl.replay();
 		final List test = new ArrayList();
 		JdoDaoSupport dao = new JdoDaoSupport() {

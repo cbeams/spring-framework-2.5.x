@@ -26,6 +26,7 @@ import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
+import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,6 +34,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -65,6 +69,27 @@ public abstract class PersistenceManagerFactoryUtils {
 
 	private static final Log logger = LogFactory.getLog(PersistenceManagerFactoryUtils.class);
 
+
+	/**
+	 * Create an appropriate SQLExceptionTranslator for the given PersistenceManagerFactory.
+	 * <p>If a DataSource is found, creates a SQLErrorCodeSQLExceptionTranslator for the
+	 * DataSource; else, falls back to a SQLStateSQLExceptionTranslator.
+	 * @param connectionFactory the connection factory of the PersistenceManagerFactory
+	 * (may be <code>null</code>)
+	 * @return the SQLExceptionTranslator (never <code>null</code>)
+	 * @see javax.jdo.PersistenceManagerFactory#getConnectionFactory()
+	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
+	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
+	 */
+	static SQLExceptionTranslator newJdbcExceptionTranslator(Object connectionFactory) {
+		// Check for PersistenceManagerFactory's DataSource.
+		if (connectionFactory instanceof DataSource) {
+			return new SQLErrorCodeSQLExceptionTranslator((DataSource) connectionFactory);
+		}
+		else {
+			return new SQLStateSQLExceptionTranslator();
+		}
+	}
 
 	/**
 	 * Obtain a JDO PersistenceManager via the given factory. Is aware of a

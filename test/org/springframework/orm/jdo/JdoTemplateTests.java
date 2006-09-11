@@ -56,6 +56,8 @@ public class JdoTemplateTests extends TestCase {
 		pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		pmControl = MockControl.createControl(PersistenceManager.class);
 		pm = (PersistenceManager) pmControl.getMock();
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 	}
 
 	protected void tearDown() {
@@ -771,6 +773,8 @@ public class JdoTemplateTests extends TestCase {
 	private JdoTemplate createTemplate() {
 		pmfControl.reset();
 		pmControl.reset();
+		pmf.getConnectionFactory();
+		pmfControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.close();

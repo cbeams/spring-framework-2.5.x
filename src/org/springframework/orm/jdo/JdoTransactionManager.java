@@ -214,6 +214,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	 * Set the JDO dialect to use for this transaction manager.
 	 * <p>The dialect object can be used to retrieve the underlying JDBC connection
 	 * and thus allows for exposing JDO transactions as JDBC transactions.
+	 * <p>Default is a DefaultJdoDialect based on the PersistenceManagerFactory's
+	 * underlying DataSource, if any.
 	 * @see JdoDialect#getJdbcConnection
 	 */
 	public void setJdoDialect(JdoDialect jdoDialect) {
@@ -222,7 +224,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 	/**
 	 * Return the JDO dialect to use for this transaction manager.
-	 * Creates a default one for the specified PersistenceManagerFactory if none set.
+	 * <p>Creates a default one for the specified PersistenceManagerFactory if none set.
 	 */
 	public JdoDialect getJdoDialect() {
 		if (this.jdoDialect == null) {
@@ -240,7 +242,10 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		if (getPersistenceManagerFactory() == null) {
 			throw new IllegalArgumentException("persistenceManagerFactory is required");
 		}
-		getJdoDialect();
+		// Build default JdoDialect if none explicitly specified.
+		if (this.jdoDialect == null) {
+			this.jdoDialect = new DefaultJdoDialect(getPersistenceManagerFactory().getConnectionFactory());
+		}
 
 		// Check for DataSource as connection factory.
 		if (this.autodetectDataSource && getDataSource() == null) {

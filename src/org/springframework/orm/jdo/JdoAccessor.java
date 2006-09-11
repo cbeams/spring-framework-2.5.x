@@ -80,6 +80,8 @@ public abstract class JdoAccessor implements InitializingBean {
 	 * Set the JDO dialect to use for this accessor.
 	 * <p>The dialect object can be used to retrieve the underlying JDBC
 	 * connection and to eagerly flush changes to the database.
+	 * <p>Default is a DefaultJdoDialect based on the PersistenceManagerFactory's
+	 * underlying DataSource, if any.
 	 */
 	public void setJdoDialect(JdoDialect jdoDialect) {
 		this.jdoDialect = jdoDialect;
@@ -129,7 +131,10 @@ public abstract class JdoAccessor implements InitializingBean {
 		if (getPersistenceManagerFactory() == null) {
 			throw new IllegalArgumentException("persistenceManagerFactory is required");
 		}
-		getJdoDialect();
+		// Build default JdoDialect if none explicitly specified.
+		if (this.jdoDialect == null) {
+			this.jdoDialect = new DefaultJdoDialect(getPersistenceManagerFactory().getConnectionFactory());
+		}
 	}
 
 
