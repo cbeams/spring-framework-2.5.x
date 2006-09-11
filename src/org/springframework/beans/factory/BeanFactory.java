@@ -174,12 +174,15 @@ public interface BeanFactory {
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @since 1.1.2
 	 * @see #getBean
-	 * @see FactoryBean#getObjectType
+	 * @see FactoryBean#getObjectType()
 	 */
 	Class getType(String name) throws NoSuchBeanDefinitionException;
 
 	/**
 	 * Return the aliases for the given bean name, if defined.
+	 * <p>If the given name is an alias, the corresponding original bean name
+	 * and other aliases (if any) will be returned, with the original bean name
+	 * being the first element in the array.
 	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the bean name to check for aliases
 	 * @return the aliases, or an empty array if none
