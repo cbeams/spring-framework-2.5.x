@@ -65,6 +65,16 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 
 		}
 	}
+	
+	// TODO: this test is failing (see SPR-2514)
+	public void xtestNonPublicMethodsNotAdvised() {
+		TransactionalTestBean testBean = getTestBean();
+		CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
+
+		assertEquals("Should not have any started transactions", 0, ptm.begun);
+		testBean.annotationsOnProtectedAreIgnored();
+		assertEquals("Should not have any started transactions", 0, ptm.begun);		
+	}
 
 	private TransactionalTestBean getTestBean() {
 		return (TransactionalTestBean) context.getBean("testBean");
@@ -89,6 +99,11 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 
 		public void doSomething() {
 
+		}
+		
+		@Transactional
+		protected void annotationsOnProtectedAreIgnored() {
+			
 		}
 	}
 }
