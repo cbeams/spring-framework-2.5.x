@@ -19,12 +19,14 @@ package org.springframework.core;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
 
@@ -139,12 +141,16 @@ public class LocalVariableTableParameterNameDiscover implements ParameterNameDis
 			if (name.equals(this.methodNameToMatch) &&
 				desc.equals(this.descriptorToMatch)) {
 				this.foundTargetMember = true;
-				return new LocalVariableTableVisitor(this,this.numParamsExpected);	
+				return new LocalVariableTableVisitor(isStatic(access), this,this.numParamsExpected);	
 			} 
 			else {
 				// not interested in this method...
 				return null;
 			}
+		}
+		
+		private boolean isStatic(int access) {
+			return ((access & Opcodes.ACC_STATIC) > 0);
 		}
 
 		public boolean foundTargetMember() {
@@ -188,31 +194,44 @@ public class LocalVariableTableParameterNameDiscover implements ParameterNameDis
 
 
 	private static class LocalVariableTableVisitor extends EmptyVisitor {
-
+		private boolean isStatic;
+		
 		private ParameterNameDiscoveringVisitor memberVisitor;
 
 		private int numParameters;
 
-		private String[] parameterNames;
+		private ArrayList parameterNames;
 
 		private boolean hasLVTInfo = false;
 		
-		public LocalVariableTableVisitor(ParameterNameDiscoveringVisitor memberVisitor, int numParams) {
+		public LocalVariableTableVisitor(boolean isStatic, ParameterNameDiscoveringVisitor memberVisitor, int numParams) {
+			this.isStatic = isStatic;
 			this.numParameters = numParams;
-			this.parameterNames = new String[this.numParameters];
+			this.parameterNames = new ArrayList(this.numParameters);
 			this.memberVisitor = memberVisitor;
 		}
 		
 		public void visitLocalVariable(String name, String description, String signature, Label start, Label end, int index) {
 			this.hasLVTInfo = true;
-			if (index > 0 && index <= this.numParameters) {
-				this.parameterNames[index-1] = name;
+			if (!this.isStatic) {
+				index--;
+			}
+			if (index >= 0 && (this.parameterNames.size() < this.numParameters)) {
+				this.parameterNames.add(name);
 			}
 		}
 		
 		public void visitEnd() {
-			if (this.hasLVTInfo) {
-				this.memberVisitor.setParameterNames(this.parameterNames);
+			if (this.hasLVTInfo || this.isStatic && numParameters == 0) {
+				/*
+				 *  visitLocalVariable will never be called for static no args methods
+				 *  which doesn't use any local variables.
+				 *  This means that hasLVTInfo could be false for that kind of methods 
+				 *  even if the class has local variable info.
+				 */
+				String[] names = new String[this.parameterNames.size()];
+				names = (String[]) this.parameterNames.toArray(names);
+				this.memberVisitor.setParameterNames(names);
 			}
 		}
 	}
