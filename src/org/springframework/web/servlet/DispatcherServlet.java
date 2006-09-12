@@ -74,7 +74,7 @@ import org.springframework.web.util.WebUtils;
  *
  * <li>It can use any HandlerMapping implementation - whether standard, or provided
  * as part of an application - to control the routing of requests to handler objects.
- * Default is BeanNameUrlHandlerMapping. HandlerMapping objects can be define as beans
+ * Default is BeanNameUrlHandlerMapping. HandlerMapping objects can be defined as beans
  * in the servlet's application context that implement the HandlerMapping interface.
  * HandlerMappings can be given any bean name (they are tested by type).
  *
