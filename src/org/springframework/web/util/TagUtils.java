@@ -38,6 +38,7 @@ import org.springframework.util.Assert;
  *
  * @author Alef Arendsen
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public abstract class TagUtils {
 
@@ -92,7 +93,7 @@ public abstract class TagUtils {
 		}
 		Tag ancestor = tag.getParent();
 		while (ancestor != null) {
-			if (parentTagClass.equals(ancestor.getClass())) {
+			if (parentTagClass.isAssignableFrom(ancestor.getClass())) {
 				return true;
 			}
 			ancestor = ancestor.getParent();
