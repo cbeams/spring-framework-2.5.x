@@ -20,31 +20,37 @@ import org.aspectj.weaver.tools.PointcutParser;
 import org.aspectj.weaver.tools.TypePatternMatcher;
 
 import org.springframework.aop.ClassFilter;
+import org.springframework.util.Assert;
 
 /**
- * Spring AOP ClassFilter implementation using AspectJ type matching.
+ * Spring AOP {@link ClassFilter} implementation using AspectJ type matching.
  *
  * @author Rod Johnson
  * @since 2.0
  */
 public class TypePatternClassFilter implements ClassFilter {
-	
+
 	private String typePattern;
-	
+
 	private TypePatternMatcher aspectJTypePatternMatcher;
 
 
 	/**
-	 * JavaBean constructor. Be sure to set the
-	 * typePattern property.
+	 * Creates a new instance of the {@link TypePatternClassFilter} class.
+	 * <p>This is the JavaBean constructor; be sure to set the
+	 * {@link #setTypePattern(String) typePattern} property, else a
+	 * no doubt fatal {@link IllegalStateException} will be thrown
+	 * when the {@link #matches(Class)} method is first invoked.
 	 */
 	public TypePatternClassFilter() {
 	}
-	
+
 	/**
-	 * Create a fully configured TypePatternClassFilter using the  
-	 * given typePattern
-	 * @param typePattern type pattern that AspectJ weaver should parse
+	 * Create a fully configured {@link TypePatternClassFilter} using the  
+	 * given type pattern.
+	 * @param typePattern the type pattern that AspectJ weaver should parse
+	 * @throws IllegalArgumentException if the supplied <code>typePattern</code> is <code>null</code>
+	 * or is recognized as invalid 
 	 */
 	public TypePatternClassFilter(String typePattern) {
 		setTypePattern(typePattern);
@@ -52,20 +58,24 @@ public class TypePatternClassFilter implements ClassFilter {
 
 
 	/**
-	 * Set the AspectJ type pattern to match. Examples include
-	 * <code>
+	 * Set the AspectJ type pattern to match.
+	 * <p>Examples include:
+	 * <code class="code">
 	 * org.springframework.beans.*
 	 * </code>
-	 * This will match any class or interface in the given package, and
-	 * <br>
-	 * <code>
+	 * This will match any class or interface in the given package.
+	 * <code class="code">
 	 * org.springframework.beans.ITestBean+
 	 * </code>
-	 * This will match the ITestBean interface and any class that implements it.
-	 * <br>These conventions are established by AspectJ, not Spring AOP.
-	 * @param typePattern
+	 * This will match the <code>ITestBean</code> interface and any class
+	 * that implements it.
+	 * <p>These conventions are established by AspectJ, not Spring AOP.
+	 * @param typePattern the type pattern that AspectJ weaver should parse
+	 * @throws IllegalArgumentException if the supplied <code>typePattern</code> is <code>null</code>
+	 * or is recognized as invalid 
 	 */
 	public void setTypePattern(String typePattern) {
+		Assert.notNull(typePattern);
 		this.typePattern = typePattern;
 		this.aspectJTypePatternMatcher =
 				PointcutParser.getPointcutParserSupportingAllPrimitivesAndUsingContextClassloaderForResolution().
@@ -76,8 +86,16 @@ public class TypePatternClassFilter implements ClassFilter {
 		return typePattern;
 	}
 
-
+	/**
+	 * Should the pointcut apply to the given interface or target class?
+	 * @param clazz candidate target class
+	 * @return whether the advice should apply to this candidate target class
+	 * @throws IllegalStateException if no {@link #setTypePattern(String)} has been set
+	 */
 	public boolean matches(Class clazz) {
+		if (this.aspectJTypePatternMatcher == null) {
+			throw new IllegalStateException("No 'typePattern' has been set via ctor/setter.");
+		}
 		return this.aspectJTypePatternMatcher.matches(clazz);
 	}
 

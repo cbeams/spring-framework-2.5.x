@@ -17,46 +17,64 @@
 package org.springframework.aop.aspectj;
 
 import junit.framework.TestCase;
-
 import org.springframework.aop.framework.autoproxy.CountingTestBean;
 import org.springframework.beans.IOther;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.test.AssertThrows;
 
 /**
+ * Unit tests for the {@link TypePatternClassFilter} class.
+ *
  * @author Rod Johnson
+ * @author Rick Evans
  */
-public class TypePatternClassFilterTests extends TestCase {
+public final class TypePatternClassFilterTests extends TestCase {
 
 	public void testInvalidPattern() {
 		try {
 			new TypePatternClassFilter("-");
-			fail("Pattern should be recognized as invalid");
+			fail("Pattern must be recognized as invalid.");
 		}
-		catch (IllegalArgumentException ex) {
-			// Ok
+		catch (IllegalArgumentException expected) {
 		}
 	}
-	
+
 	public void testValidPatternMatching() {
 		TypePatternClassFilter tpcf = new TypePatternClassFilter("org.springframework.beans.*");
-		assertTrue("Should match: in package", tpcf.matches(TestBean.class));
-		assertTrue("Should match: in package", tpcf.matches(ITestBean.class));
-		assertTrue("Should match: in package", tpcf.matches(IOther.class));
-		assertFalse("Should be excluded: in wrong package", tpcf.matches(CountingTestBean.class));
-		assertFalse("Should be excluded: in wrong package", tpcf.matches(BeanFactory.class));
-		assertFalse("Should be excluded: in wrong package", tpcf.matches(DefaultListableBeanFactory.class));
+		assertTrue("Must match: in package", tpcf.matches(TestBean.class));
+		assertTrue("Must match: in package", tpcf.matches(ITestBean.class));
+		assertTrue("Must match: in package", tpcf.matches(IOther.class));
+		assertFalse("Must be excluded: in wrong package", tpcf.matches(CountingTestBean.class));
+		assertFalse("Must be excluded: in wrong package", tpcf.matches(BeanFactory.class));
+		assertFalse("Must be excluded: in wrong package", tpcf.matches(DefaultListableBeanFactory.class));
 	}
-	
+
 	public void testSubclassMatching() {
 		TypePatternClassFilter tpcf = new TypePatternClassFilter("org.springframework.beans.ITestBean+");
-		assertTrue("Should match: in package", tpcf.matches(TestBean.class));
-		assertTrue("Should match: in package", tpcf.matches(ITestBean.class));
-		assertTrue("Should match: in package", tpcf.matches(CountingTestBean.class));
-		assertFalse("Should be excluded: not subclass", tpcf.matches(IOther.class));
-		assertFalse("Should be excluded: not subclass", tpcf.matches(DefaultListableBeanFactory.class));
+		assertTrue("Must match: in package", tpcf.matches(TestBean.class));
+		assertTrue("Must match: in package", tpcf.matches(ITestBean.class));
+		assertTrue("Must match: in package", tpcf.matches(CountingTestBean.class));
+		assertFalse("Must be excluded: not subclass", tpcf.matches(IOther.class));
+		assertFalse("Must be excluded: not subclass", tpcf.matches(DefaultListableBeanFactory.class));
+	}
+
+	public void testSetTypePatternWithNullArgument() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				new TypePatternClassFilter(null);
+			}
+		}.runTest();
+	}
+
+	public void testInvocationOfMatchesMethodBlowsUpWhenNoTypePatternHasBeenSet() throws Exception {
+		new AssertThrows(IllegalStateException.class) {
+			public void test() throws Exception {
+				new TypePatternClassFilter().matches(String.class);
+			}
+		}.runTest();
 	}
 
 }
