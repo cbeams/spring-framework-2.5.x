@@ -35,9 +35,13 @@ import org.springframework.util.ClassUtils;
  * <p>Proxies created using this factory bean are thread-safe singletons,
  * and may be injected, with transparent scoping behavior.
  *
- * <p>Proxies returned by this class implement the ScopedObject interface.
- * This presently allows removing corresponding object from the scope,
- * seamlessly creating a new instance in the scope on next access.
+ * <p>Proxies returned by this class implement the {@link ScopedObject}
+ * interface. This presently allows removing corresponding object from
+ * the scope, seamlessly creating a new instance in the scope on next
+ * access.
+ * 
+ * <p>Please note that the proxies created by this factory are
+ * <i>class-based</i> proxies.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -45,7 +49,7 @@ import org.springframework.util.ClassUtils;
  */
 public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, BeanFactoryAware {
 
-	/** TargetSource that manages scoping */
+	/** The TargetSource that manages scoping */
 	private final PrototypeTargetSource scopedTargetSource = new PrototypeTargetSource();
 
 	private String targetBeanName;
@@ -53,10 +57,19 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, 
 	/** The cached singleton proxy */
 	private Object proxy;
 
+
+	/**
+	 * Creates a new instance of the {@link ScopedProxyFactoryBean} class.
+	 */
 	public ScopedProxyFactoryBean() {
 		setProxyTargetClass(true);
 	}
 
+
+	/**
+	 * Sets the name of the bean that is to be scoped.
+	 * @param targetBeanName the name of the bean that is to be scoped.
+	 */
 	public void setTargetBeanName(String targetBeanName) {
 		this.targetBeanName = targetBeanName;
 		this.scopedTargetSource.setTargetBeanName(targetBeanName);
