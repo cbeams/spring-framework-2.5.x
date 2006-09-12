@@ -36,13 +36,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Unit tests for the {@link SelectTag} class.
+ * 
  * @author Rob Harrop
  */
-public class SelectTagTests extends AbstractFormTagTests {
+public final class SelectTagTests extends AbstractFormTagTests {
 
 	private SelectTag tag;
 
 	private TestBean bean;
+
 
 	protected void onSetUp() {
 		this.tag = new SelectTag() {
@@ -52,6 +55,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		};
 		this.tag.setPageContext(getPageContext());
 	}
+
 
 	public void testWithList() throws Exception {
 		this.tag.setPath("country");
@@ -72,7 +76,6 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItems(Country.getCountries());
 		assertList(false);
 	}
-
 
 	public void testWithNullValue() throws Exception {
 		TestBean tb = getTestBean();
@@ -104,10 +107,10 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItemValue("isoCode");
 		try {
 			this.tag.doStartTag();
-			fail("Should not be able to use a non-Collection typed value as the value of 'items'.");
+			fail("Must not be able to use a non-Collection typed value as the value of 'items'.");
 		}
-		catch (JspException e) {
-			String message = e.getMessage();
+		catch (JspException expected) {
+			String message = expected.getMessage();
 			assertTrue(message.indexOf("'items'") > -1);
 			assertTrue(message.indexOf("'org.springframework.beans.TestBean'") > -1);
 		}
@@ -302,15 +305,15 @@ public class SelectTagTests extends AbstractFormTagTests {
 		Element selectElement = rootElement.element("select");
 		assertEquals("select", selectElement.getName());
 		assertEquals("someList", selectElement.attribute("name").getValue());
-		assertEquals("true", selectElement.attribute("multiple").getValue());
+		assertEquals("multiple", selectElement.attribute("multiple").getValue());
 
 		List children = selectElement.elements();
 		assertEquals("Incorrect number of children", 4, children.size());
 
 		Element inputElement = rootElement.element("input");
 		assertNotNull(inputElement);
-
 	}
+
 
 	private void assertStringArray() throws JspException, DocumentException {
 		int result = this.tag.doStartTag();
@@ -395,7 +398,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	}
 
 	private TestBean getTestBean() {
-		TestBean tb = (TestBean) getPageContext().getRequest().getAttribute(COMMAND_NAME);
-		return tb;
+		return (TestBean) getPageContext().getRequest().getAttribute(COMMAND_NAME);
 	}
+
 }

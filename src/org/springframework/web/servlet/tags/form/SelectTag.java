@@ -178,8 +178,8 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 		tagWriter.startTag("select");
 		writeDefaultAttributes(tagWriter);
 
-		if(isMultiple()) {
-			tagWriter.writeAttribute("multiple", "true");
+		if (isMultiple()) {
+			tagWriter.writeAttribute("multiple", "multiple");
 		}
 
 		tagWriter.writeOptionalAttributeValue("size", getDisplayString(evaluate("size", getSize())));
@@ -230,11 +230,13 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 */
 	private boolean isMultiple() throws JspException {
 		Object multiple = getMultiple();
-		if (Boolean.TRUE.equals(multiple) || "true".equals(multiple)) {
+		if (Boolean.TRUE.equals(multiple)
+				|| "true".equals(multiple)
+				|| "multiple".equals(multiple)) {
 			return true;
 		}
 		else if (this.multiple instanceof String) {
-			Object evaluatedValue = evaluate("multiple", (String) multiple);
+			Object evaluatedValue = evaluate("multiple", multiple);
 			return Boolean.TRUE.equals(evaluatedValue);
 		}
 		return forceMultiple();
