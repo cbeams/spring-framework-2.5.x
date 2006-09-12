@@ -578,12 +578,12 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     resource-ref="true">]]></programlisting>
             </section>
             <section id="xsd-config-body-schemas-jee-remote-slsb">
-                <title><literal>&lt;jee:remote-slsb/&gt;</literal> (simple)</title>
+                <title><literal>&lt;jee:remote-slsb/&gt;</literal></title>
                 <para>The <literal>&lt;jee:remote-slsb/&gt;</literal> tag configures a
                 reference to a <literal>remote</literal> EJB Stateless SessionBean.</para>
                 <para>Before...</para>
                 <programlisting><![CDATA[<bean id="complexRemoteEjb"
-      class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
+      class="org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean">
   <property name="jndiName" value="ejb/MyRemoteBean"/>
   <property name="businessInterface" value="com.foo.service.RentalService"/>
   <property name="cacheHome" value="true"/>
