@@ -31,8 +31,12 @@ import org.springframework.util.ReflectionUtils;
  * <p>This implementation just supports fields in the actual target object.
  * It is not able to traverse nested fields.
  *
+ * <p>A DirectFieldAccessor's default for the "extractOldValueForEditor" setting
+ * is "true", since a field can always be read without side effects.
+ *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see #setExtractOldValueForEditor
  * @see BeanWrapper
  * @see org.springframework.validation.DirectFieldBindingResult
  * @see org.springframework.validation.DataBinder#initDirectFieldAccess()
