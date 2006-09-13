@@ -50,11 +50,11 @@ public class MapBindingResult extends AbstractBindingResult implements Serializa
 	}
 
 
-	public Map getTargetMap() {
+	public final Map getTargetMap() {
 		return this.target;
 	}
 
-	public Object getTarget() {
+	public final Object getTarget() {
 		return this.target;
 	}
 
