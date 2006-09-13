@@ -116,7 +116,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * to use for accessing the database. This is an alternative to keeping the
 	 * JDBC configuration in <code>persistence.xml</code>, passing in a Spring-managed
 	 * DataSource instead.
-	 * <p>In JPA speak, a DataSource passed in here will be uses as "nonJtaDataSource"
+	 * <p>In JPA speak, a DataSource passed in here will be used as "nonJtaDataSource"
 	 * on the PersistenceUnitInfo passed to the PersistenceProvider, overriding
 	 * data source configuration in <code>persistence.xml</code> (if any).
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
