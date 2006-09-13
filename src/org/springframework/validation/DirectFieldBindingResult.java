@@ -53,15 +53,28 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 	}
 
 
-	public Object getTarget() {
+	public final Object getTarget() {
 		return target;
 	}
 
-	public ConfigurablePropertyAccessor getPropertyAccessor() {
+	/**
+	 * Returns the DirectFieldAccessor that this instance uses.
+	 * Creates a new one if none existed before.
+	 * @see #createDirectFieldAccessor()
+	 */
+	public final ConfigurablePropertyAccessor getPropertyAccessor() {
 		if (this.directFieldAccessor == null) {
-			this.directFieldAccessor = new DirectFieldAccessor(this.target);
+			this.directFieldAccessor = createDirectFieldAccessor();
 		}
 		return this.directFieldAccessor;
+	}
+
+	/**
+	 * Create a new DirectFieldAccessor for the underlying target object.
+	 * @see #getTarget()
+	 */
+	protected DirectFieldAccessor createDirectFieldAccessor() {
+		return new DirectFieldAccessor(getTarget());
 	}
 
 }
