@@ -57,7 +57,7 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 		this.target = target;
 	}
 
-	public Object getTarget() {
+	public final Object getTarget() {
 		return this.target;
 	}
 
@@ -72,13 +72,22 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 	/**
 	 * Returns the BeanWrapper that this instance uses.
 	 * Creates a new one if none existed before.
+	 * @see #createBeanWrapper()
 	 */
-	public ConfigurablePropertyAccessor getPropertyAccessor() {
+	public final ConfigurablePropertyAccessor getPropertyAccessor() {
 		if (this.beanWrapper == null) {
-			this.beanWrapper = new BeanWrapperImpl(this.target);
+			this.beanWrapper = createBeanWrapper();
 			this.beanWrapper.setExtractOldValueForEditor(true);
 		}
 		return this.beanWrapper;
+	}
+
+	/**
+	 * Create a new BeanWrapper for the underlying target object.
+	 * @see #getTarget()
+	 */
+	protected BeanWrapper createBeanWrapper() {
+		return new BeanWrapperImpl(getTarget());
 	}
 
 }
