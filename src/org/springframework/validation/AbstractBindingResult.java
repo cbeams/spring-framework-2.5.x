@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.util.StringUtils;
 
 /**
@@ -202,6 +203,9 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	}
 
 	public void addAllErrors(Errors errors) {
+		if (!errors.getObjectName().equals(getObjectName())) {
+			throw new IllegalArgumentException("Errors object needs to have same object name");
+		}
 		this.errors.addAll(errors.getAllErrors());
 	}
 
@@ -383,6 +387,14 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 		// Mapping from name to target object.
 		model.put(getObjectName(), getTarget());
 		return model;
+	}
+
+	/**
+	 * This implementation throws an UnsupportedOperationException.
+	 */
+	public PropertyEditorRegistry getPropertyEditorRegistry() {
+		throw new UnsupportedOperationException(
+				"[" + getClass().getName() + "] does not support a PropertyEditorRegistry");
 	}
 
 	/**
