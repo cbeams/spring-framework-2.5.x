@@ -18,11 +18,13 @@ package org.springframework.core;
 
 import junit.framework.TestCase;
 import org.springframework.transaction.annotation.Transactional;
+import org.hibernate.SessionFactory;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.ArrayList;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
@@ -117,6 +119,32 @@ public class BridgeMethodResolverTests extends TestCase {
 		Method actualMethod = SerializableBounded.class.getMethod("boundedOperation", HashMap.class);
 		assertFalse(actualMethod.isBridge());
 		assertEquals(actualMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+	}
+
+	public void testWithGenericParameter() throws Exception {
+		Method[] methods = StringGenericParameter.class.getMethods();
+		Method bridgeMethod = null;
+		Method bridgedMethod = null;
+		for (int i = 0; i < methods.length; i++) {
+			Method method = methods[i];
+			if ("getFor".equals(method.getName()) && !method.getParameterTypes()[0].equals(Integer.class)) {
+				if (method.getReturnType().equals(Object.class)) {
+					bridgeMethod = method;
+				}
+				else {
+					bridgedMethod = method;
+				}
+			}
+		}
+		assertNotNull("bridgedMethod should not be null", bridgedMethod);
+		assertNotNull("bridgeMethod should not be null", bridgeMethod);
+		assertTrue(bridgeMethod.isBridge());
+		assertFalse(bridgedMethod.isBridge());
+		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+	}
+
+	public void testOnJarredClass() throws Exception {
+		BridgeMethodResolver.findBridgedMethod(SessionFactory.class.getMethod("isClosed"));
 	}
 
 	private Method findMethodWithReturnType(String name, Class returnType, Class targetType) {
@@ -285,17 +313,38 @@ public class BridgeMethodResolverTests extends TestCase {
 	}
 
 	private static interface Bounded<E> {
+
 		boolean boundedOperation(E e);
 	}
+
 	private static class AbstractBounded<E> implements Bounded<E> {
+
 		public boolean boundedOperation(E myE) {
 			return true;
 		}
 	}
 
 	private static class SerializableBounded<E extends HashMap & Delayed> extends AbstractBounded<E> {
+
 		public boolean boundedOperation(E myE) {
 			return false;
 		}
+	}
+
+	private static interface GenericParameter<T> {
+
+		T getFor(Class<T> cls);
+	}
+
+	private static class StringGenericParameter implements GenericParameter<String> {
+
+		public String getFor(Class<String> cls) {
+			return "foo";
+		}
+
+		public String getFor(Integer integer) {
+			return "foo";
+		}
+
 	}
 }

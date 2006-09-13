@@ -16,18 +16,16 @@
 
 package org.springframework.web.servlet.view.jasperreports;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Iterator;
-
-import javax.servlet.http.HttpServletResponse;
-
 import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
-
 import org.springframework.context.support.StaticApplicationContext;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * @author Rob Harrop
@@ -40,8 +38,8 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 
 		AbstractJasperReportsView view = new AbstractJasperReportsView() {
 			protected void renderReport(
-					JasperPrint filledReport, Map model, HttpServletResponse response)
-					throws Exception {
+							JasperPrint filledReport, Map model, HttpServletResponse response)
+							throws Exception {
 
 				assertEquals("Invalid number of exporter parameters", 1, getConvertedExporterParameters().size());
 
@@ -56,6 +54,7 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 			 * Merges the configured {@link net.sf.jasperreports.engine.JRExporterParameter JRExporterParameters} with any specified
 			 * in the supplied model data. {@link net.sf.jasperreports.engine.JRExporterParameter JRExporterParameters} in the model
 			 * override those specified in the configuration.
+			 *
 			 * @see #setExporterParameters(java.util.Map)
 			 */
 			protected Map mergeExporterParameters(Map model) {
@@ -131,6 +130,20 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 		catch (IllegalArgumentException ex) {
 			// expected
 		}
+	}
+
+
+	public void testTypeConversion() {
+		Map params = new HashMap();
+		params.put("net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN", "true");
+
+		AbstractJasperReportsView view = new JasperReportsHtmlView();
+		setViewProperties(view);
+
+		view.setExporterParameters(params);
+		view.convertExporterParameters();
+		Object value = view.getConvertedExporterParameters().get(JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN);
+		assertEquals(Boolean.TRUE, value);
 	}
 
 	private void setViewProperties(AbstractJasperReportsView view) {

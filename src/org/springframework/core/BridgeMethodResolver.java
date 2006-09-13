@@ -167,6 +167,9 @@ public abstract class BridgeMethodResolver {
 				TypeVariable tv = (TypeVariable) genericParameter;
 				resolvedTypes[i] = (Class) typeVariableMap.get(tv.getName());
 			}
+			else if (genericParameter instanceof ParameterizedType) {
+				resolvedTypes[i] = (Class) (((ParameterizedType) genericParameter).getRawType());
+			}
 			else {
 				resolvedTypes[i] = (Class) genericParameter;
 			}

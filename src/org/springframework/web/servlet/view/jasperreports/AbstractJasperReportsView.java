@@ -371,8 +371,26 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			this.convertedExporterParameters = new HashMap(this.exporterParameters.size());
 			for (Iterator it = this.exporterParameters.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
-				this.convertedExporterParameters.put(getExporterParameter(entry.getKey()), entry.getValue());
+				JRExporterParameter exporterParameter = getExporterParameter(entry.getKey());
+				this.convertedExporterParameters.put(exporterParameter, convertParameterValue(exporterParameter, entry.getValue()));
 			}
+		}
+	}
+
+	/**
+	 * Converts the supplied parameter value into the actual type required by the corresponding
+	 * {@link JRExporterParameter}. The default implementation simply converts the Strings '<code>true</code>' and
+	 * '<code>false</code>' into the corresponding <code>Boolean</code>.
+	 */
+	protected Object convertParameterValue(JRExporterParameter parameter, Object value) {
+		if ("false".equals(value)) {
+			return Boolean.FALSE;
+		}
+		else if ("true".equals(value)) {
+			return Boolean.TRUE;
+		}
+		else {
+			return value;
 		}
 	}
 
