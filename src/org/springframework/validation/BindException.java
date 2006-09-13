@@ -19,6 +19,7 @@ package org.springframework.validation;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.util.Assert;
 
 /**
@@ -72,20 +73,28 @@ public class BindException extends Exception implements BindingResult {
 		this.bindingResult = new BeanPropertyBindingResult(target, objectName);
 	}
 
+
 	/**
 	 * Return the BindingResult that this BindException wraps.
 	 * Will typically be a BeanPropertyBindingResult.
 	 * @see BeanPropertyBindingResult
 	 */
 	public final BindingResult getBindingResult() {
-		return bindingResult;
+		return this.bindingResult;
+	}
+
+	/**
+	 * Return the PropertyEditorRegistry that the underlying BindingResult uses.
+	 * @see #getBindingResult()
+	 */
+	public final PropertyEditorRegistry getPropertyEditorRegistry() {
+		return this.bindingResult.getPropertyEditorRegistry();
 	}
 
 
 	public String getObjectName() {
 		return this.bindingResult.getObjectName();
 	}
-
 
 	public void setNestedPath(String nestedPath) {
 		this.bindingResult.setNestedPath(nestedPath);

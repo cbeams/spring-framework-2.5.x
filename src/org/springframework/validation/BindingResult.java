@@ -18,6 +18,8 @@ package org.springframework.validation;
 
 import java.util.Map;
 
+import org.springframework.beans.PropertyEditorRegistry;
+
 /**
  * General interface that represents binding results.
  * Extends the Errors interface for error registration capabilities
@@ -67,6 +69,13 @@ public interface BindingResult extends Errors {
 	 * @see org.springframework.web.servlet.mvc.SimpleFormController
 	 */
 	Map getModel();
+
+	/**
+	 * Return the underlying PropertyEditorRegistry.
+	 * @throws UnsupportedOperationException if the BindingResult
+	 * does not support a PropertyEditorRegistry
+	 */
+	PropertyEditorRegistry getPropertyEditorRegistry();
 
 	/**
 	 * Mark the specified disallowed field as suppressed.

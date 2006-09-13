@@ -19,6 +19,7 @@ package org.springframework.validation;
 import java.beans.PropertyEditor;
 
 import org.springframework.beans.ConfigurablePropertyAccessor;
+import org.springframework.beans.PropertyEditorRegistry;
 
 /**
  * Abstract base class for BindingResult implementations that work with
@@ -44,6 +45,14 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 
 
 	/**
+	 * Returns the underlying PropertyAccessor.
+	 * @see #getPropertyAccessor()
+	 */
+	public PropertyEditorRegistry getPropertyEditorRegistry() {
+		return getPropertyAccessor();
+	}
+
+	/**
 	 * Determines the field type from the property type.
 	 * @see #getPropertyAccessor()
 	 */
@@ -60,7 +69,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	}
 
 	/**
-	 * Format the field value based on registered PropertyEditors.
+	 * Formats the field value based on registered PropertyEditors.
 	 * @see #getCustomEditor
 	 */
 	protected Object formatFieldValue(String field, Object value) {
@@ -92,6 +101,11 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	/**
 	 * Provide the PropertyAccessor to work with, according to the
 	 * concrete strategy of access.
+	 * <p>Note that a PropertyAccessor used by a BindingResult should
+	 * always have its "extractOldValueForEditor" flag set to "true"
+	 * by default, since this is typically possible without side effects
+	 * for model objects that serve as data binding target.
+	 * @see ConfigurablePropertyAccessor#setExtractOldValueForEditor
 	 */
 	public abstract ConfigurablePropertyAccessor getPropertyAccessor();
 
