@@ -262,8 +262,16 @@ public class SQLErrorCodeSQLExceptionTranslator implements SQLExceptionTranslato
 
 		// We couldn't identify it more precisely - let's hand it over to the SQLState fallback translator.
 		if (logger.isDebugEnabled()) {
-			logger.debug("Unable to translate SQLException with errorCode '" + sqlEx.getErrorCode() +
-					"', will now try the fallback translator");
+			String codes = null;
+			if (this.sqlErrorCodes.isUseSqlStateForTranslation()) {
+				codes = "SQL state '" + sqlEx.getSQLState() +
+					"', error code '" + sqlEx.getErrorCode();
+			}
+			else {
+				codes = "Error code '" + sqlEx.getErrorCode() + "'";
+			}
+			logger.debug("Unable to translate SQLException with " + codes +
+					", will now try the fallback translator");
 		}
 		return this.fallbackTranslator.translate(task, sql, sqlEx);
 	}
