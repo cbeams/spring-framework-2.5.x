@@ -32,6 +32,30 @@
 		</property>
 	</bean>
 
+	<bean id="Derby" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductName">
+			<value>Apache Derby</value>
+		</property>
+		<property name="useSqlStateForTranslation">
+			<value>true</value>
+		</property>
+		<property name="badSqlGrammarCodes">
+			<value>42802,42821,42X01,42X02,42X03,42X04,42X05,42X06,42X07,42X08</value>
+		</property>
+		<property name="dataAccessResourceFailureCodes">
+			<value>04501,08004,42Y07</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>22001,22005,23502,23503,23505,23513,X0Y32</value>
+		</property>
+		<property name="cannotAcquireLockCodes">
+			<value>40XL1</value>
+		</property>
+		<property name="deadlockLoserCodes">
+			<value>40001</value>
+		</property>
+	</bean>
+
 	<bean id="HSQL" class="org.springframework.jdbc.support.SQLErrorCodes">
 		<property name="databaseProductName">
 			<value>HSQL Database Engine</value>
