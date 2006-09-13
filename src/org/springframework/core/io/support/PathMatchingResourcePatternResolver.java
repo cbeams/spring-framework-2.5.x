@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Set;
@@ -92,11 +93,10 @@ import org.springframework.util.StringUtils;
  * <code>Classloader.getResource()</code> call. Since this is just a
  * node of the path (not the file at the end) it is actually undefined
  * (in the ClassLoader Javadocs) exactly what sort of a URL is returned in
- * this case. In practice, it is always a java.io.File representing the
- * directory, where the classpath resource resolves to a filesystem 
- * location, or a jar URL of some sort, where the classpath resource
- * resolves to a jar location. Still, there is a portability concern on
- * this operation.
+ * this case. In practice, it is usually a <code>java.io.File</code> representing
+ * the directory, where the classpath resource resolves to a filesystem
+ * location, or a jar URL of some sort, where the classpath resource resolves
+ * to a jar location. Still, there is a portability concern on this operation.
  *
  * <p>If a jar URL is obtained for the last non-wildcard segment, the resolver
  * must be able to get a <code>java.net.JarURLConnection</code> from it, or
@@ -124,9 +124,9 @@ import org.springframework.util.StringUtils;
  * and then off each resource the same PathMatcher resoltion strategy described
  * above is used for the wildcard subpath.
  *
- * <p><b>Other Notes:</b>
+ * <p><b>Other notes:</b>
  *
- * <p>WARNING: Note that "<code>classpath*:</code>" when combined with
+ * <p><b>WARNING:</b> Note that "<code>classpath*:</code>" when combined with
  * Ant-style patterns will only work reliably with at least one root directory
  * before the pattern starts, unless the actual target files reside in the file
  * system. This means that a pattern like "<code>classpath*:*.xml</code>" will
@@ -135,9 +135,9 @@ import org.springframework.util.StringUtils;
  * <code>ClassLoader.getResources()</code> method which only returns file system
  * locations for a passed-in empty String (indicating potential roots to search).
  *
- * <p>WARNING: Ant-style patterns with "classpath:" resources are not guaranteed
- * to find matching resources if the root package to search is available in
- * multiple class path locations. This is because a resource such as<pre>
+ * <p><b>WARNING:</b> Ant-style patterns with "classpath:" resources are not
+ * guaranteed to find matching resources if the root package to search is available
+ * in multiple class path locations. This is because a resource such as<pre>
  *     com/mycompany/package1/service-context.xml
  * </pre>may be in only one location, but when a path such as<pre>
  *     classpath:com/mycompany/**&#47;service-context.xml
@@ -438,7 +438,31 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see org.springframework.util.PathMatcher
 	 */
 	protected Set doFindPathMatchingFileResources(Resource rootDirResource, String subPattern) throws IOException {
-		File rootDir = rootDirResource.getFile().getAbsoluteFile();
+		File rootDir = null;
+		try {
+			rootDir = rootDirResource.getFile().getAbsoluteFile();
+		}
+		catch (IOException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Cannot search for matching files underneath " + rootDirResource +
+						" because it does not correspond to a directory in the file system", ex);
+			}
+			return Collections.EMPTY_SET;
+		}
+		return doFindMatchingFileSystemResources(rootDir, subPattern);
+	}
+
+	/**
+	 * Find all resources in the file system that match the given location pattern
+	 * via the Ant-style PathMatcher.
+	 * @param rootDir the root directory in the file system
+	 * @param subPattern the sub pattern to match (below the root directory)
+	 * @return the Set of matching Resource instances
+	 * @throws IOException in case of I/O errors
+	 * @see #retrieveMatchingFiles
+	 * @see org.springframework.util.PathMatcher
+	 */
+	protected Set doFindMatchingFileSystemResources(File rootDir, String subPattern) throws IOException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for matching resources in directory tree [" + rootDir.getPath() + "]");
 		}
@@ -462,7 +486,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 */
 	protected Set retrieveMatchingFiles(File rootDir, String pattern) throws IOException {
 		if (!rootDir.isDirectory()) {
-			throw new IllegalArgumentException("'rootDir' parameter [" + rootDir + "] does not denote a directory");
+			throw new IllegalArgumentException("Resource path [" + rootDir + "] does not denote a directory");
 		}
 		String fullPattern = StringUtils.replace(rootDir.getAbsolutePath(), File.separator, "/");
 		if (!pattern.startsWith("/")) {
