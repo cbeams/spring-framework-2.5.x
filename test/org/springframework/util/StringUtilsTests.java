@@ -43,6 +43,17 @@ public class StringUtilsTests extends TestCase {
 		assertEquals(true, StringUtils.hasText("t"));
 	}
 
+	public void testTrimWhitespace() throws Exception {
+		assertEquals("", StringUtils.trimWhitespace(""));
+		assertEquals("", StringUtils.trimWhitespace(" "));
+		assertEquals("", StringUtils.trimWhitespace("\t"));
+		assertEquals("a", StringUtils.trimWhitespace(" a"));
+		assertEquals("a", StringUtils.trimWhitespace("a "));
+		assertEquals("a", StringUtils.trimWhitespace(" a "));
+		assertEquals("a b", StringUtils.trimWhitespace(" a b "));
+		assertEquals("a b  c", StringUtils.trimWhitespace(" a b  c "));
+	}
+
 	public void testTrimLeadingWhitespace() throws Exception {
 		assertEquals("", StringUtils.trimLeadingWhitespace(""));
 		assertEquals("", StringUtils.trimLeadingWhitespace(" "));
@@ -50,6 +61,8 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("a", StringUtils.trimLeadingWhitespace(" a"));
 		assertEquals("a ", StringUtils.trimLeadingWhitespace("a "));
 		assertEquals("a ", StringUtils.trimLeadingWhitespace(" a "));
+		assertEquals("a b ", StringUtils.trimLeadingWhitespace(" a b "));
+		assertEquals("a b  c ", StringUtils.trimLeadingWhitespace(" a b  c "));
 	}
 
 	public void testTrimTrailingWhitespace() throws Exception {
@@ -59,6 +72,19 @@ public class StringUtilsTests extends TestCase {
 		assertEquals("a", StringUtils.trimTrailingWhitespace("a "));
 		assertEquals(" a", StringUtils.trimTrailingWhitespace(" a"));
 		assertEquals(" a", StringUtils.trimTrailingWhitespace(" a "));
+		assertEquals(" a b", StringUtils.trimTrailingWhitespace(" a b "));
+		assertEquals(" a b  c", StringUtils.trimTrailingWhitespace(" a b  c "));
+	}
+
+	public void testTrimAllWhitespace() throws Exception {
+		assertEquals("", StringUtils.trimAllWhitespace(""));
+		assertEquals("", StringUtils.trimAllWhitespace(" "));
+		assertEquals("", StringUtils.trimAllWhitespace("\t"));
+		assertEquals("a", StringUtils.trimAllWhitespace(" a"));
+		assertEquals("a", StringUtils.trimAllWhitespace("a "));
+		assertEquals("a", StringUtils.trimAllWhitespace(" a "));
+		assertEquals("ab", StringUtils.trimAllWhitespace(" a b "));
+		assertEquals("abc", StringUtils.trimAllWhitespace(" a b  c "));
 	}
 
 	public void testCountOccurrencesOf() {
@@ -448,9 +474,22 @@ public class StringUtilsTests extends TestCase {
 		doTestCommaDelimitedListToStringArrayLegalMatch(sa);
 	}
 
+	private void doTestCommaDelimitedListToStringArrayLegalMatch(String[] components) {
+		StringBuffer sbuf = new StringBuffer();
+		for (int i = 0; i < components.length; i++) {
+			if (i != 0) {
+				sbuf.append(",");
+			}
+			sbuf.append(components[i]);
+		}
+		String[] sa = StringUtils.commaDelimitedListToStringArray(sbuf.toString());
+		assertTrue("String array isn't null with legal match", sa != null);
+		assertEquals("String array length is correct with legal match", components.length, sa.length);
+		assertTrue("Output equals input", Arrays.equals(sa, components));
+	}
+
 	public void testEndsWithIgnoreCase() {
 		String suffix = "fOo";
-
 		assertTrue(StringUtils.endsWithIgnoreCase("foo", suffix));
 		assertTrue(StringUtils.endsWithIgnoreCase("Foo", suffix));
 		assertTrue(StringUtils.endsWithIgnoreCase("barfoo", suffix));
@@ -480,22 +519,6 @@ public class StringUtilsTests extends TestCase {
 	public void testParseLocaleStringWithEmptyLocaleStringYieldsNullLocale() throws Exception {
 		Locale locale = StringUtils.parseLocaleString("");
 		assertNull("When given an empty Locale string, must return null.", locale);
-	}
-
-
-	private void doTestCommaDelimitedListToStringArrayLegalMatch(String[] components) {
-		StringBuffer sbuf = new StringBuffer();
-		for (int i = 0; i < components.length; i++) {
-			if (i != 0) {
-				sbuf.append(",");
-			}
-			sbuf.append(components[i]);
-		}
-
-		String[] sa = StringUtils.commaDelimitedListToStringArray(sbuf.toString());
-		assertTrue("String array isn't null with legal match", sa != null);
-		assertEquals("String array length is correct with legal match", components.length, sa.length);
-		assertTrue("Output equals input", Arrays.equals(sa, components));
 	}
 
 }

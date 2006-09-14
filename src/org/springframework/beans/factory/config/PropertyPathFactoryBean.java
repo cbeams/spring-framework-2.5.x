@@ -24,6 +24,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link FactoryBean} that evaluates a property path on a given target object.
@@ -111,7 +112,7 @@ public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, Bean
 	 * @see #setTargetObject
 	 */
 	public void setTargetBeanName(String targetBeanName) {
-		this.targetBeanName = targetBeanName;
+		this.targetBeanName = StringUtils.trimAllWhitespace(targetBeanName);
 	}
 
 	/**
@@ -120,7 +121,7 @@ public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, Bean
 	 * (e.g. "age" or "spouse.age")
 	 */
 	public void setPropertyPath(String propertyPath) {
-		this.propertyPath = propertyPath;
+		this.propertyPath = StringUtils.trimAllWhitespace(propertyPath);
 	}
 
 	/**
@@ -142,7 +143,7 @@ public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, Bean
 	 * This allows for concise bean definitions with just an id/name.
 	 */
 	public void setBeanName(String beanName) {
-		this.beanName = beanName;
+		this.beanName = StringUtils.trimAllWhitespace(beanName);
 	}
 
 
@@ -181,6 +182,7 @@ public class PropertyPathFactoryBean implements FactoryBean, BeanNameAware, Bean
 			this.resultType = this.targetBeanWrapper.getPropertyType(this.propertyPath);
 		}
 	}
+
 
 	public Object getObject() throws BeansException {
 		BeanWrapper target = this.targetBeanWrapper;

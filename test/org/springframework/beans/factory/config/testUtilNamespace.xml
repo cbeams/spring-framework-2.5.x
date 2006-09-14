@@ -8,11 +8,17 @@
 	<util:properties id="myProperties"
 			location="classpath:org/springframework/beans/factory/config/util.properties"/>
 
-	<util:constant id="min" static-field="java.lang.Integer.MIN_VALUE"/>
+	<util:constant id="min" static-field="
+			java.lang.Integer.
+			MIN_VALUE
+ 	"/>
 
 	<util:constant static-field="java.lang.Integer.MAX_VALUE"/>
 
-	<util:property-path id="name" path="configuredBean.name"/>
+	<util:property-path id="name" path="
+			configuredBean.
+			name
+  "/>
 
 	<bean id="testBean" class="org.springframework.beans.TestBean" scope="prototype">
 		<property name="name">

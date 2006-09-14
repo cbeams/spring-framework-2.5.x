@@ -161,6 +161,30 @@ public abstract class StringUtils {
 		return buf.toString();
 	}
 
+	/**
+	 * Trim <i>all</i> whitespace from the given String:
+	 * leading, trailing, and inbetween characters.
+	 * @param str the String to check
+	 * @return the trimmed String
+	 * @see java.lang.Character#isWhitespace
+	 */
+	public static String trimAllWhitespace(String str) {
+		if (!hasLength(str)) {
+			return str;
+		}
+		StringBuffer buf = new StringBuffer(str);
+		int index = 0;
+		while (buf.length() > index) {
+			if (Character.isWhitespace(buf.charAt(index))) {
+				buf.deleteCharAt(index);
+			}
+			else {
+				index++;
+			}
+		}
+		return buf.toString();
+	}
+
 
 	/**
 	 * Test if the given String starts with the specified prefix,

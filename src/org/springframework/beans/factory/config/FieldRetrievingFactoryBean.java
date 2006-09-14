@@ -25,6 +25,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * FactoryBean which retrieves a static or non-static field value.
@@ -112,7 +113,7 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, B
 	 * @see #setTargetObject
 	 */
 	public void setTargetField(String targetField) {
-		this.targetField = (targetField != null ? targetField.trim() : null);
+		this.targetField = StringUtils.trimAllWhitespace(targetField);
 	}
 
 	/**
@@ -130,7 +131,7 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, B
 	 * @see #setTargetField
 	 */
 	public void setStaticField(String staticField) {
-		this.staticField = (staticField != null ? staticField.trim() : null);
+		this.staticField = StringUtils.trimAllWhitespace(staticField);
 	}
 
 	/**
@@ -140,7 +141,7 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, B
 	 * This allows for concise bean definitions with just an id/name.
 	 */
 	public void setBeanName(String beanName) {
-		this.beanName = beanName;
+		this.beanName = StringUtils.trimAllWhitespace(beanName);
 	}
 
 	public void setBeanClassLoader(ClassLoader classLoader) {
