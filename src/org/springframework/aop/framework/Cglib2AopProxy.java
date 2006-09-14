@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 
 import net.sf.cglib.core.CodeGenerationException;
 import net.sf.cglib.proxy.Callback;
@@ -158,11 +159,21 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 		Enhancer enhancer = createEnhancer();
 		try {
 			Class rootClass = this.advised.getTargetSource().getTargetClass();
-			Class proxySuperClass = (AopUtils.isCglibProxyClass(rootClass)) ? rootClass.getSuperclass() : rootClass;
 
 			// Create proxy in specific ClassLoader, if given.
 			if (classLoader != null) {
 				enhancer.setClassLoader(classLoader);
+			}
+
+			Class proxySuperClass = rootClass;
+
+			if (AopUtils.isCglibProxyClass(rootClass)) {
+				proxySuperClass = rootClass.getSuperclass();
+				Class[] additionalInterfaces = rootClass.getInterfaces();
+				for (int i = 0; i < additionalInterfaces.length; i++) {
+					Class additionalInterface = additionalInterfaces[i];
+					this.advised.addInterface(additionalInterface);
+				}
 			}
 
 			// Validate the class, writing log messages as necessary.

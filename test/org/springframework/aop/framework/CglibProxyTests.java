@@ -31,6 +31,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.io.Serializable;
+
 /**
  * Additional and overridden tests for the CGLIB proxy.
  *
@@ -246,6 +248,28 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 		cglib = new Cglib2AopProxy(as);
 
 		ITestBean proxy2 = (ITestBean) cglib.getProxy();
+	}
+
+	public void testProxyAProxyWithAdditionalInterface() {
+		ITestBean target = new TestBean();
+
+		mockTargetSource.setTarget(target);
+		AdvisedSupport as = new AdvisedSupport(new Class[]{});
+		as.setTargetSource(mockTargetSource);
+		as.addAdvice(new NopInterceptor());
+		as.addInterface(Serializable.class);
+		Cglib2AopProxy cglib = new Cglib2AopProxy(as);
+
+		ITestBean proxy1 = (ITestBean) cglib.getProxy();
+
+		mockTargetSource.setTarget(proxy1);
+		as = new AdvisedSupport(new Class[]{});
+		as.setTargetSource(mockTargetSource);
+		as.addAdvice(new NopInterceptor());
+		cglib = new Cglib2AopProxy(as);
+
+		ITestBean proxy2 = (ITestBean) cglib.getProxy();
+		assertTrue(proxy2 instanceof Serializable);
 	}
 
 	public void testExceptionHandling() {
