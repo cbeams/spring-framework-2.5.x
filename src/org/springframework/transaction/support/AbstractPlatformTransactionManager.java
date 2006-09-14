@@ -127,7 +127,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @param constantName name of the constant
 	 * @see #SYNCHRONIZATION_ALWAYS
 	 */
-	public void setTransactionSynchronizationName(String constantName) {
+	public final void setTransactionSynchronizationName(String constantName) {
 		setTransactionSynchronization(constants.asNumber(constantName).intValue());
 	}
 
@@ -143,7 +143,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see TransactionSynchronizationManager
 	 * @see TransactionSynchronization
 	 */
-	public void setTransactionSynchronization(int transactionSynchronization) {
+	public final void setTransactionSynchronization(int transactionSynchronization) {
 		this.transactionSynchronization = transactionSynchronization;
 	}
 
@@ -151,7 +151,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Return if this transaction manager should activate the thread-bound
 	 * transaction synchronization support.
 	 */
-	public int getTransactionSynchronization() {
+	public final int getTransactionSynchronization() {
 		return transactionSynchronization;
 	}
 
@@ -160,14 +160,14 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * <p>Typically initialized with an appropriate default by the
 	 * concrete transaction manager subclass.
 	 */
-	public void setNestedTransactionAllowed(boolean nestedTransactionAllowed) {
+	public final void setNestedTransactionAllowed(boolean nestedTransactionAllowed) {
 		this.nestedTransactionAllowed = nestedTransactionAllowed;
 	}
 
 	/**
 	 * Return whether nested transactions are allowed.
 	 */
-	public boolean isNestedTransactionAllowed() {
+	public final boolean isNestedTransactionAllowed() {
 		return nestedTransactionAllowed;
 	}
 
@@ -204,7 +204,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
-	public void setGlobalRollbackOnParticipationFailure(boolean globalRollbackOnParticipationFailure) {
+	public final void setGlobalRollbackOnParticipationFailure(boolean globalRollbackOnParticipationFailure) {
 		this.globalRollbackOnParticipationFailure = globalRollbackOnParticipationFailure;
 	}
 
@@ -212,7 +212,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Return whether to globally mark an existing transaction as rollback-only
 	 * after a participating transaction failed.
 	 */
-	public boolean isGlobalRollbackOnParticipationFailure() {
+	public final boolean isGlobalRollbackOnParticipationFailure() {
 		return globalRollbackOnParticipationFailure;
 	}
 
@@ -231,7 +231,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * managers will only fail earlier if this flag has explicitly been set to "true".
 	 * @see org.springframework.transaction.UnexpectedRollbackException
 	 */
-	public void setFailEarlyOnGlobalRollbackOnly(boolean failEarlyOnGlobalRollbackOnly) {
+	public final void setFailEarlyOnGlobalRollbackOnly(boolean failEarlyOnGlobalRollbackOnly) {
 		this.failEarlyOnGlobalRollbackOnly = failEarlyOnGlobalRollbackOnly;
 	}
 
@@ -239,7 +239,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Return whether to fail early in case of the transaction being globally marked
 	 * as rollback-only.
 	 */
-	public boolean isFailEarlyOnGlobalRollbackOnly() {
+	public final boolean isFailEarlyOnGlobalRollbackOnly() {
 		return failEarlyOnGlobalRollbackOnly;
 	}
 
@@ -252,7 +252,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see #doCommit
 	 * @see #doRollback
 	 */
-	public void setRollbackOnCommitFailure(boolean rollbackOnCommitFailure) {
+	public final void setRollbackOnCommitFailure(boolean rollbackOnCommitFailure) {
 		this.rollbackOnCommitFailure = rollbackOnCommitFailure;
 	}
 
@@ -260,7 +260,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Return whether <code>doRollback</code> should be performed on failure of the
 	 * <code>doCommit</code> call.
 	 */
-	public boolean isRollbackOnCommitFailure() {
+	public final boolean isRollbackOnCommitFailure() {
 		return rollbackOnCommitFailure;
 	}
 
