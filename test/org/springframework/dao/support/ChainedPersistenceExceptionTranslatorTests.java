@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 package org.springframework.dao.support;
 
+import junit.framework.TestCase;
+
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.dao.support.DataAccessUtilsTests.MapPersistenceExceptionTranslator;
 
-import junit.framework.TestCase;
-
 /**
- * 
  * @author Rod Johnson
  * @since 2.0
  */
@@ -45,19 +44,19 @@ public class ChainedPersistenceExceptionTranslatorTests extends TestCase {
 		
 		ChainedPersistenceExceptionTranslator chainedPet1 = new ChainedPersistenceExceptionTranslator();
 		assertSame("Should not translate yet", in1, DataAccessUtils.translateIfNecessary(in1, chainedPet1));
-		chainedPet1.add(mpet1);
+		chainedPet1.addDelegate(mpet1);
 		assertSame("Should now translate", out1, DataAccessUtils.translateIfNecessary(in1, chainedPet1));
 		
 		// Now add a new translator and verify it wins
 		MapPersistenceExceptionTranslator mpet2 = new MapPersistenceExceptionTranslator();
 		mpet2.addTranslation(in1, out2);
-		chainedPet1.add(mpet2);
+		chainedPet1.addDelegate(mpet2);
 		assertSame("Should still translate the same due to ordering", 
 				out1, DataAccessUtils.translateIfNecessary(in1, chainedPet1));
 		
 		ChainedPersistenceExceptionTranslator chainedPet2 = new ChainedPersistenceExceptionTranslator();
-		chainedPet2.add(mpet2);
-		chainedPet2.add(mpet1);
+		chainedPet2.addDelegate(mpet2);
+		chainedPet2.addDelegate(mpet1);
 		assertSame("Should translate differently due to ordering", 
 				out2, DataAccessUtils.translateIfNecessary(in1, chainedPet2));
 		
@@ -66,9 +65,8 @@ public class ChainedPersistenceExceptionTranslatorTests extends TestCase {
 		assertNull(chainedPet2.translateExceptionIfPossible(in2));
 		MapPersistenceExceptionTranslator mpet3 = new MapPersistenceExceptionTranslator();
 		mpet3.addTranslation(in2, out3);
-		chainedPet2.add(mpet3);
+		chainedPet2.addDelegate(mpet3);
 		assertSame(out3, chainedPet2.translateExceptionIfPossible(in2));
 	}
-	
 
 }

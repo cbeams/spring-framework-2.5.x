@@ -90,7 +90,7 @@ public class PersistenceExceptionTranslationPostProcessor implements BeanPostPro
 		pets = validateAndFilter(pets);
 		ChainedPersistenceExceptionTranslator cpet = new ChainedPersistenceExceptionTranslator();
 		for (PersistenceExceptionTranslator pet : pets) {
-			cpet.add(pet);
+			cpet.addDelegate(pet);
 		}
 		
 		this.persistenceExceptionTranslationAdvisor =
@@ -142,7 +142,7 @@ public class PersistenceExceptionTranslationPostProcessor implements BeanPostPro
 	}
 
 	/**
-	 * Validate and filter the given PersistenceExceptionTranslators
+	 * Validate and filter the given PersistenceExceptionTranslators.
 	 */
 	protected List<PersistenceExceptionTranslator> validateAndFilter(List<PersistenceExceptionTranslator> allPets)
 			throws IllegalStateException {
@@ -152,12 +152,10 @@ public class PersistenceExceptionTranslationPostProcessor implements BeanPostPro
 			// TODO filter according to rules: one of each class etc.
 			filteredPets.add(pet);
 		}
-		
 		if (filteredPets.isEmpty()) {
 			throw new IllegalStateException(
 					"No persistence exception translators found. Cannot translate. Remove this PostProcessor");
 		}
-		
 		return filteredPets;
 	}
 
