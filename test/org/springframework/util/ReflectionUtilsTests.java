@@ -193,4 +193,15 @@ public class ReflectionUtilsTests extends TestCase {
 		assertEquals("Found 2 absquatulates", 2, absquatulateCount);
 	}
 
+	public void testFindMethod() throws Exception {
+	  assertNotNull(ReflectionUtils.findMethod(B.class, "bar", new Class[]{String.class}));
+	  assertNotNull(ReflectionUtils.findMethod(B.class, "foo", new Class[]{Integer.class}));
+	}
+	private static class A {
+		private void foo(Integer i){}
+	}
+
+	private static class B extends A{
+		void bar(String s) {}
+	}
 }

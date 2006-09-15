@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Arrays;
 
 /**
  * Simple utility class for handling reflection exceptions.
@@ -76,6 +77,28 @@ public abstract class ReflectionUtils {
 		throw new IllegalStateException(
 				"Unexpected exception thrown by method - " + ex.getTargetException().getClass().getName() +
 				": " + ex.getTargetException().getMessage());
+	}
+
+	/**
+	 * Attempts to find a {@link Method} on the supplied type with the supplied name and
+	 * parameter types. Searches all superclasses up to <code>Object</code>. Returns
+	 * '<code>null</code>' if no {@link Method} can be found.
+	 */
+	public static Method findMethod(Class type, String name, Class[] paramTypes) {
+		Assert.notNull(type, "'type' cannot be null.");
+		Assert.notNull(name, "'name' cannot be null.");
+		Class searchType = type;
+		while(!Object.class.equals(searchType) && searchType != null) {
+			Method[] methods = (type.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
+			for (int i = 0; i < methods.length; i++) {
+				Method method = methods[i];
+				if(name.equals(method.getName()) && Arrays.equals(paramTypes, method.getParameterTypes())) {
+					return method;
+				}
+			}
+			searchType = searchType.getSuperclass();
+		}
+		return null;
 	}
 
 	/**

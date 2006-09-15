@@ -77,17 +77,21 @@ public abstract class BridgeMethodResolver {
 			}
 		}
 
+		Method result;
 		// Now perform simple quick checks.
-		if (candidateMethods.isEmpty()) {
+		if (candidateMethods.size() == 1) {
+			result = (Method) candidateMethods.get(0);
+		}
+		else {
+			result = searchCandidates(candidateMethods, bridgeMethod);
+		}
+
+		if(result == null) {
 			throw new IllegalStateException(
 					"Unable to locate bridged method for bridge method '" + bridgeMethod + "'");
 		}
-		else if (candidateMethods.size() == 1) {
-			return (Method) candidateMethods.get(0);
-		}
-		else {
-			return searchCandidates(candidateMethods, bridgeMethod);
-		}
+
+		return result;
 	}
 
 	private static Method searchCandidates(List candidateMethods, Method bridgeMethod) {
@@ -130,7 +134,7 @@ public abstract class BridgeMethodResolver {
 	private static Method findGenericDeclaration(Method bridgeMethod) {
 		// Search parent types for method that has same signature as bridge.
 		Class superclass = bridgeMethod.getDeclaringClass().getSuperclass();
-		while (superclass != Object.class) {
+		while (!Object.class.equals(superclass)) {
 			Method m = searchForMatch(superclass, bridgeMethod);
 			if (m != null) {
 				return m;
@@ -148,8 +152,7 @@ public abstract class BridgeMethodResolver {
 			}
 		}
 
-		throw new IllegalStateException(
-				"Unable to locate generic definition for bridge method '" + bridgeMethod + "'");
+		return null;
 	}
 
 	/**
@@ -183,12 +186,7 @@ public abstract class BridgeMethodResolver {
 	 * otherwise <code>null</code> is returned.
 	 */
 	private static Method searchForMatch(Class type, Method bridgeMethod) {
-		try {
-			return type.getDeclaredMethod(bridgeMethod.getName(), bridgeMethod.getParameterTypes());
-		}
-		catch (NoSuchMethodException ex) {
-			return null;
-		}
+			return ReflectionUtils.findMethod(type, bridgeMethod.getName(), bridgeMethod.getParameterTypes());
 	}
 
 	/**
@@ -202,7 +200,7 @@ public abstract class BridgeMethodResolver {
 		// super class
 		Type genericType = cls.getGenericSuperclass();
 		Class type = cls.getSuperclass();
-		while (type != Object.class) {
+		while (!type.equals(Object.class)) {
 			if (genericType instanceof ParameterizedType) {
 				ParameterizedType pt1 = (ParameterizedType) genericType;
 				populateTypeMapFromParameterizedType(typeVariableMap, pt1);
@@ -224,16 +222,23 @@ public abstract class BridgeMethodResolver {
 
 		// interfaces
 		Type[] genericInterfaces = cls.getGenericInterfaces();
+		extractTypeVariablesFromGenericInterfaces(genericInterfaces, typeVariableMap);
+
+		return typeVariableMap;
+	}
+
+	private static void extractTypeVariablesFromGenericInterfaces(Type[] genericInterfaces, Map typeVariableMap) {
 		for (int i = 0; i < genericInterfaces.length; i++) {
 			Type genericInterface = genericInterfaces[i];
 			if (genericInterface instanceof ParameterizedType) {
 				ParameterizedType pt = (ParameterizedType) genericInterface;
 				populateTypeMapFromParameterizedType(typeVariableMap, pt);
+			} else if (genericInterface instanceof Class) {
+				extractTypeVariablesFromGenericInterfaces(((Class)genericInterface).getGenericInterfaces(), typeVariableMap);
 			}
 		}
-
-		return typeVariableMap;
 	}
+
 
 	/**
 	 * Read the {@link TypeVariable TypeVariables} from the supplied {@link ParameterizedType}

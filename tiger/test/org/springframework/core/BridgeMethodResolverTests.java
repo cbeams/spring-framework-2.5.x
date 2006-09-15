@@ -17,14 +17,17 @@
 package org.springframework.core;
 
 import junit.framework.TestCase;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.transaction.annotation.Transactional;
-import org.hibernate.SessionFactory;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
-import java.util.ArrayList;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
@@ -143,8 +146,28 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
-	public void testOnJarredClass() throws Exception {
-		BridgeMethodResolver.findBridgedMethod(SessionFactory.class.getMethod("isClosed"));
+	public void testOnAllMethods() throws Exception {
+		Method[] methods = StringList.class.getMethods();
+		for (int i = 0; i < methods.length; i++) {
+			Method method = methods[i];
+			assertNotNull(BridgeMethodResolver.findBridgedMethod(method));
+		}
+	}
+
+	public void testSPR2583() throws Exception {
+		Method bridgedMethod = MessageBroadcasterImpl.class.getMethod("receive", MessageEvent.class);
+		assertFalse(bridgedMethod.isBridge());
+		Method bridgeMethod = MessageBroadcasterImpl.class.getMethod("receive", Event.class);
+		assertTrue(bridgeMethod.isBridge());
+
+		Method otherMethod = MessageBroadcasterImpl.class.getMethod("receive", NewMessageEvent.class);
+		assertFalse(otherMethod.isBridge());
+
+		Map typeVariableMap = BridgeMethodResolver.createTypeVariableMap(MessageBroadcasterImpl.class);
+		assertFalse("Match identified incorrectly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, otherMethod, typeVariableMap));
+		assertTrue("Match not found correctly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, bridgedMethod, typeVariableMap));
+
+		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
 
 	private Method findMethodWithReturnType(String name, Class returnType, Class targetType) {
@@ -347,4 +370,274 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 
 	}
+
+	private static class StringList implements List<String> {
+
+		public int size() {
+			throw new UnsupportedOperationException();
+		}
+
+		public boolean isEmpty() {
+			throw new UnsupportedOperationException();
+		}
+
+		public boolean contains(Object o) {
+			throw new UnsupportedOperationException();
+		}
+
+		public Iterator<String> iterator() {
+			throw new UnsupportedOperationException();
+		}
+
+		public Object[] toArray() {
+			throw new UnsupportedOperationException();
+		}
+
+		public <T>T[] toArray(T[] a) {
+			throw new UnsupportedOperationException();
+		}
+
+		public boolean add(String o) {
+			throw new UnsupportedOperationException();
+		}
+
+		public boolean remove(Object o) {
+			throw new UnsupportedOperationException();
+		}
+
+		public boolean containsAll(Collection<?> c) {
+			throw new UnsupportedOperationException();
+		}
+
+		public boolean addAll(Collection<? extends String> c) {
+			throw new UnsupportedOperationException();
+		}
+
+		public boolean addAll(int index, Collection<? extends String> c) {
+			throw new UnsupportedOperationException();
+		}
+
+		public boolean removeAll(Collection<?> c) {
+			throw new UnsupportedOperationException();
+		}
+
+		public boolean retainAll(Collection<?> c) {
+			throw new UnsupportedOperationException();
+		}
+
+		public void clear() {
+			throw new UnsupportedOperationException();
+		}
+
+		public String get(int index) {
+			throw new UnsupportedOperationException();
+		}
+
+		public String set(int index, String element) {
+			throw new UnsupportedOperationException();
+		}
+
+		public void add(int index, String element) {
+			throw new UnsupportedOperationException();
+		}
+
+		public String remove(int index) {
+			throw new UnsupportedOperationException();
+		}
+
+		public int indexOf(Object o) {
+			throw new UnsupportedOperationException();
+		}
+
+		public int lastIndexOf(Object o) {
+			throw new UnsupportedOperationException();
+		}
+
+		public ListIterator<String> listIterator() {
+			throw new UnsupportedOperationException();
+		}
+
+		public ListIterator<String> listIterator(int index) {
+			throw new UnsupportedOperationException();
+		}
+
+		public List<String> subList(int fromIndex, int toIndex) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	public interface Event {
+
+		int getPriority();
+	}
+
+	public class GenericEvent implements Event {
+
+		private int priority = 0;
+
+		public int getPriority() {
+			return priority;
+		}
+
+		/**
+		 * Constructor that takes an event priority
+		 *
+		 * @param priority
+		 */
+		public GenericEvent(int priority) {
+			this.priority = priority;
+		}
+
+		/**
+		 * Default Constructor
+		 */
+		public GenericEvent() {
+		}
+
+	}
+
+	public interface UserInitiatedEvent {
+		/**
+		 * returns the user who initiator this event
+		 * @return
+		 */
+		//public Session getInitiatorSession();
+
+	}
+
+	public abstract class BaseUserInitiatedEvent extends GenericEvent implements UserInitiatedEvent {
+
+	}
+
+	public class MessageEvent extends BaseUserInitiatedEvent {
+
+	}
+
+	public interface Channel<E extends Event> {
+
+		void send(E event);
+
+		void subscribe(final Receiver<E> receiver, Class<E> event);
+
+		void unsubscribe(final Receiver<E> receiver, Class<E> event);
+	}
+
+	public interface Broadcaster {
+
+
+	}
+
+	public interface EventBroadcaster extends Broadcaster {
+
+		public void subscribe();
+
+		public void unsubscribe();
+
+		public void setChannel(Channel channel);
+	}
+
+	public class GenericBroadcasterImpl implements Broadcaster {
+
+	}
+
+	public abstract class GenericEventBroadcasterImpl<T extends Event>
+					extends GenericBroadcasterImpl
+					implements EventBroadcaster, BeanNameAware {
+
+		private Class<T>[] subscribingEvents;
+
+		private Channel<T> channel;
+
+		/**
+		 * Abstract method to retrieve instance of subclass
+		 *
+		 * @return receiver instance
+		 */
+		public abstract Receiver<T> getInstance();
+
+		public void setChannel(Channel channel) {
+			this.channel = channel;
+		}
+
+		private String beanName;
+
+		public void setBeanName(String name) {
+			this.beanName = name;
+		}
+
+		public void subscribe() {
+
+		}
+
+		public void unsubscribe() {
+
+		}
+
+		public GenericEventBroadcasterImpl(Class<? extends T>... events) {
+
+		}
+	}
+
+	public interface Receiver<E extends Event> {
+
+		void receive(E event);
+	}
+
+	public interface MessageBroadcaster extends Receiver<MessageEvent> {
+
+	}
+
+	public class RemovedMessageEvent extends MessageEvent {
+
+	}
+
+	public class NewMessageEvent extends MessageEvent {
+
+		public NewMessageEvent() {
+		}
+	}
+
+	public class ModifiedMessageEvent extends MessageEvent {
+
+	}
+
+	public class MessageBroadcasterImpl
+					extends GenericEventBroadcasterImpl<MessageEvent>
+					implements MessageBroadcaster {
+
+
+		/**
+		 * Constructor
+		 */
+		public MessageBroadcasterImpl() {
+			super(NewMessageEvent.class);
+
+		}
+
+		public void receive(MessageEvent event) {
+			throw new UnsupportedOperationException("should not be called, use subclassed events");
+		}
+
+
+		public void receive(NewMessageEvent event) {
+
+		}
+
+		@Override
+		public Receiver<MessageEvent> getInstance() {
+			return null;
+		}
+
+		public void receive(RemovedMessageEvent event) {
+
+		}
+
+
+		public void receive(ModifiedMessageEvent event) {
+
+		}
+
+
+	}
+
 }
