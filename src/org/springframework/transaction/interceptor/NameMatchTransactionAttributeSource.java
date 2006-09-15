@@ -30,7 +30,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 
 /**
- * Simple implementation of TransactionAttributeSource that
+ * Simple {@link TransactionAttributeSource} implementation that
  * allows attributes to be matched by registered name.
  *
  * @author Juergen Hoeller
@@ -40,7 +40,10 @@ import org.springframework.util.PatternMatchUtils;
  */
 public class NameMatchTransactionAttributeSource implements TransactionAttributeSource, Serializable {
 
-	/** Static for optimal serialization */
+	/**
+	 * Logger available to subclasses.
+	 * <p>Static for optimal serialization.
+	 */
 	protected static final Log logger = LogFactory.getLog(NameMatchTransactionAttributeSource.class);
 
 	/** Keys are method names; values are TransactionAttributes */
@@ -95,7 +98,8 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 
 	/**
 	 * Add an attribute for a transactional method.
-	 * Method names can end with "*" for matching multiple methods.
+	 * <p>Method names can be exact matches, or of the pattern "xxx*",
+	 * "*xxx" or "*xxx*" for matching multiple methods.
 	 * @param methodName the name of the method
 	 * @param attr attribute associated with the method
 	 */
