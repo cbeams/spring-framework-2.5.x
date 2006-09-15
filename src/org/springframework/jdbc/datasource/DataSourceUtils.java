@@ -237,10 +237,10 @@ public abstract class DataSourceUtils {
 			doReleaseConnection(con, dataSource);
 		}
 		catch (SQLException ex) {
-			logger.error("Could not close JDBC Connection", ex);
+			logger.debug("Could not close JDBC Connection", ex);
 		}
 		catch (Throwable ex) {
-			logger.error("Unexpected exception on closing JDBC Connection", ex);
+			logger.debug("Unexpected exception on closing JDBC Connection", ex);
 		}
 	}
 
