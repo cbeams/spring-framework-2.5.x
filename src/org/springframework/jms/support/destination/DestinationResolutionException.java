@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.jms.support.destination;
 import org.springframework.jms.JmsException;
 
 /**
- * Thrown by DestinationResolver when it cannot resolve a destination name.
+ * Thrown by a DestinationResolver when it cannot resolve a destination name.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -27,10 +27,19 @@ import org.springframework.jms.JmsException;
  */
 public class DestinationResolutionException extends JmsException {
 
+	/**
+	 * Create a new DestinationResolutionException.
+	 * @param msg the detail message
+	 */
 	public DestinationResolutionException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Create a new DestinationResolutionException.
+	 * @param msg the detail message
+	 * @param cause the root cause (if any)
+	 */
 	public DestinationResolutionException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
