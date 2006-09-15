@@ -433,15 +433,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}
 		finally {
 			JmsUtils.closeSession(sessionToClose);
-			if (conToClose != null && startConnection) {
-				try {
-					conToClose.stop();
-				}
-				catch (Throwable ex) {
-					logger.debug("Could not stop JMS Connection before closing it", ex);
-				}
-			}
-			JmsUtils.closeConnection(conToClose);
+			JmsUtils.closeConnection(conToClose, startConnection);
 		}
 	}
 

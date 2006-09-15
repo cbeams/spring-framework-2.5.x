@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.JmsSecurityException;
 import org.springframework.jms.UncategorizedJmsException;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -52,9 +53,29 @@ public abstract class JmsUtils {
 	 * @param con the JMS Connection to close (may be <code>null</code>)
 	 */
 	public static void closeConnection(Connection con) {
+		closeConnection(con, false);
+	}
+
+	/**
+	 * Close the given JMS Connection and ignore any thrown exception.
+	 * This is useful for typical <code>finally</code> blocks in manual JMS code.
+	 * @param con the JMS Connection to close (may be <code>null</code>)
+	 * @param stop whether to call <code>stop()</code> before closing
+	 */
+	public static void closeConnection(Connection con, boolean stop) {
 		if (con != null) {
 			try {
-				con.close();
+				if (stop) {
+					try {
+						con.stop();
+					}
+					finally {
+						con.close();
+					}
+				}
+				else {
+					con.close();
+				}
 			}
 			catch (JMSException ex) {
 				logger.debug("Could not close JMS Connection", ex);
@@ -132,6 +153,7 @@ public abstract class JmsUtils {
 	 * @throws JMSException if committing failed
 	 */
 	public static void commitIfNecessary(Session session) throws JMSException {
+		Assert.notNull(session, "Session must not be null");
 		try {
 			session.commit();
 		}
@@ -149,6 +171,7 @@ public abstract class JmsUtils {
 	 * @throws JMSException if committing failed
 	 */
 	public static void rollbackIfNecessary(Session session) throws JMSException {
+		Assert.notNull(session, "Session must not be null");
 		try {
 			session.rollback();
 		}
@@ -168,6 +191,8 @@ public abstract class JmsUtils {
 	 * @return the Spring runtime JmsException wrapping <code>ex</code>.
 	 */
 	public static JmsException convertJmsAccessException(JMSException ex) {
+		Assert.notNull(ex, "JMSException must not be null");
+
 		if (ex instanceof JMSSecurityException) {
 			return new JmsSecurityException((JMSSecurityException) ex);
 		}
