@@ -22,7 +22,6 @@ import javax.jms.JMSException;
 import javax.jms.Session;
 import javax.jms.TransactionRolledBackException;
 
-import org.springframework.jms.support.JmsUtils;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
@@ -173,8 +172,22 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 					getConnectionFactory(), txObject.getResourceHolder());
 		}
 		catch (JMSException ex) {
-			JmsUtils.closeSession(session);
-			JmsUtils.closeConnection(con);
+			if (session != null) {
+				try {
+					session.close();
+				}
+				catch (Throwable ex2) {
+					// ignore
+				}
+			}
+			if (con != null) {
+				try {
+					con.close();
+				}
+				catch (Throwable ex2) {
+					// ignore
+				}
+			}
 			throw new CannotCreateTransactionException("Could not create JMS transaction", ex);
 		}
 	}
@@ -229,9 +242,8 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 	protected void doCleanupAfterCompletion(Object transaction) {
 		JmsTransactionObject txObject = (JmsTransactionObject) transaction;
 		TransactionSynchronizationManager.unbindResource(getConnectionFactory());
+		txObject.getResourceHolder().closeAll();
 		txObject.getResourceHolder().clear();
-		JmsUtils.closeSession(txObject.getResourceHolder().getSession());
-		JmsUtils.closeConnection(txObject.getResourceHolder().getConnection());
 	}
 
 

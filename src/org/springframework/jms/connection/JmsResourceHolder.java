@@ -25,8 +25,11 @@ import java.util.Map;
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Session;
+import javax.jms.TransactionInProgressException;
 
-import org.springframework.jms.support.JmsUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -44,6 +47,8 @@ import org.springframework.util.CollectionUtils;
  * @see org.springframework.jms.core.JmsTemplate
  */
 public class JmsResourceHolder extends ResourceHolderSupport {
+
+	private static final Log logger = LogFactory.getLog(JmsResourceHolder.class);
 
 	private final boolean frozen;
 
@@ -134,16 +139,40 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 
 	public void commitAll() throws JMSException {
 		for (Iterator it = this.sessions.iterator(); it.hasNext();) {
-			JmsUtils.commitIfNecessary((Session) it.next());
+			try {
+				((Session) it.next()).commit();
+			}
+			catch (TransactionInProgressException ex) {
+				// Ignore -> can only happen in case of a JTA transaction.
+			}
+			catch (javax.jms.IllegalStateException ex) {
+				// Ignore -> can only happen in case of a JTA transaction.
+			}
 		}
 	}
 
 	public void closeAll() {
 		for (Iterator it = this.sessions.iterator(); it.hasNext();) {
-			JmsUtils.closeSession((Session) it.next());
+			try {
+				((Session) it.next()).close();
+			}
+			catch (Throwable ex) {
+				logger.debug("Could not close JMS Session after transaction", ex);
+			}
 		}
 		for (Iterator it = this.connections.iterator(); it.hasNext();) {
-			JmsUtils.closeConnection((Connection) it.next());
+			try {
+				Connection con = (Connection) it.next();
+				try {
+					con.stop();
+				}
+				finally {
+					con.close();
+				}
+			}
+			catch (Throwable ex) {
+				logger.debug("Could not close JMS Connection after transaction", ex);
+			}
 		}
 	}
 
