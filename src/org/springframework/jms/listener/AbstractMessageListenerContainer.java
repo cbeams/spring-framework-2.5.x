@@ -411,8 +411,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	protected final void refreshSharedConnection() throws JMSException {
+		boolean running = isRunning();
 		synchronized (this.sharedConnectionMonitor) {
-			JmsUtils.closeConnection(this.sharedConnection);
+			JmsUtils.closeConnection(this.sharedConnection, running);
 			this.sharedConnection = createConnection();
 			if (getClientId() != null) {
 				this.sharedConnection.setClientID(getClientId());
@@ -474,15 +475,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 		}
 		finally {
 			synchronized (this.sharedConnectionMonitor) {
-				if (this.sharedConnection != null && wasRunning) {
-					try {
-						this.sharedConnection.stop();
-					}
-					catch (Throwable ex) {
-						logger.debug("Could not stop shared JMS Connection before closing it", ex);
-					}
-				}
-				JmsUtils.closeConnection(this.sharedConnection);
+				JmsUtils.closeConnection(this.sharedConnection, wasRunning);
 			}
 		}
 	}

@@ -526,7 +526,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		finally {
 			JmsUtils.closeMessageConsumer(consumerToClose);
 			JmsUtils.closeSession(sessionToClose);
-			JmsUtils.closeConnection(conToClose);
+			JmsUtils.closeConnection(conToClose, true);
 		}
 	}
 
