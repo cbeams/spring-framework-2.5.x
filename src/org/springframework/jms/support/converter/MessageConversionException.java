@@ -23,26 +23,26 @@ import org.springframework.jms.JmsException;
  * of an object to/from a {@link javax.jms.Message} fails.
  *
  * @author Mark Pollack
- * @see MessageConverter
  * @since 1.1
+ * @see MessageConverter
  */
 public class MessageConversionException extends JmsException {
 
-    /**
-     * Creates a new instance of the {@link MessageConversionException} class.
-     * @param msg the detail message (if any)
-     */
-    public MessageConversionException(String msg) {
-        super(msg);
-    }
+	/**
+	 * Create a new MessageConversionException.
+	 * @param msg the detail message
+	 */
+	public MessageConversionException(String msg) {
+		super(msg);
+	}
 
-    /**
-     * Creates a new instance of the {@link MessageConversionException} class.
-     * @param msg the detail message (if any)
-     * @param ex  the root cause (if any)
-     */
-    public MessageConversionException(String msg, Throwable ex) {
-        super(msg, ex);
-    }
+	/**
+	 * Create a new MessageConversionException.
+	 * @param msg the detail message
+	 * @param cause the root cause (if any)
+	 */
+	public MessageConversionException(String msg, Throwable cause) {
+		super(msg, cause);
+	}
 
 }
