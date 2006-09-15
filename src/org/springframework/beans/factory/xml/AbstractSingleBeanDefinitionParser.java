@@ -20,21 +20,48 @@ import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.util.Assert;
 
 /**
+ * Base class for those {@link BeanDefinitionParser} implementations that
+ * need to parse and define just a <i>single</i> {@link BeanDefinition}.
+ * 
+ * <p>Extend this parser class when you want to create a single
+ * bean definition from an arbitrarily complex XML element. You may wish
+ * to consider extending the {@link AbstractSimpleBeanDefinitionParser}
+ * when you want to create a single bean definition from a relatively
+ * simple custom XML element.
+ * 
+ * <p>The resulting <code>BeanDefinition</code> will be automatically
+ * registered with the relevant
+ * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}.
+ * Your job simply is to
+ * {@link #doParse(org.w3c.dom.Element, org.springframework.beans.factory.support.BeanDefinitionBuilder) parse}
+ * the custom XML {@link Element} into a single <code>BeanDefinition</code>.
+ * 
  * @author Rob Harrop
+ * @author Rick Evans
  * @since 2.0
  */
 public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	/**
-	 * Creates a {@link BeanDefinitionBuilder} instance for the {@link #getBeanClass bean Class}
-	 * and passes it to the {@link #doParse} strategy method.
+	 * Creates a {@link BeanDefinitionBuilder} instance for the
+	 * {@link #getBeanClass bean Class} and passes it to the
+	 * {@link #doParse} strategy method.
+	 * @param element the element that is to be parsed into a single {@link BeanDefinition}
+	 * @param parserContext the object encapsulating the current state of the parse
+	 * @return the {@link BeanDefinition} resulting from the parsing of the supplied {@link Element}
+	 * @throws IllegalStateException if the bean {@link Class} returned from {@link #getBeanClass(org.w3c.dom.Element)}
+	 * is <code>null</code> 
+	 * @see #doParse(org.w3c.dom.Element, org.springframework.beans.factory.support.BeanDefinitionBuilder)
 	 */
 	protected final BeanDefinition parseInternal(Element element, ParserContext parserContext) {
-		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(getBeanClass(element));
+		Class beanClass = getBeanClass(element);
+		Assert.state(beanClass != null, "The Class instance returned from 'getBeanClass(Element)' cannot be null.");
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(beanClass);
 		if (parserContext.isNested()) {
-			// Inner bean definition should receive same singleton status as containing bean.
+			// inner bean definition must receive same singleton status as containing bean.
 			builder.setSingleton(parserContext.getContainingBeanDefinition().isSingleton());
 		}
 		doParse(element, builder);
@@ -43,14 +70,21 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 
 	/**
 	 * Determine the bean class corresponding to the supplied {@link Element}.
+	 * @param element the <code>Element</code> that is being parsed
+	 * @return the {@link Class} of the bean that is being defined via parsing the supplied <code>Element</code>;
+	 * must <b>not</b> be <code>null</code>
+	 * @see #parseInternal(org.w3c.dom.Element, ParserContext)   
 	 */
 	protected abstract Class getBeanClass(Element element);
 
 	/**
-	 * Parse the supplied {@link Element} and populate the supplied {@link BeanDefinitionBuilder} as
-	 * required.
+	 * Parse the supplied {@link Element} and populate the supplied
+	 * {@link BeanDefinitionBuilder} as required.
+	 * <p>The default implementation does nothing.
+	 * @param element the XML element being parsed
+	 * @param builder used to define the <code>BeanDefinition</code>
 	 */
-	protected void doParse(Element element, BeanDefinitionBuilder definitionBuilder) {
+	protected void doParse(Element element, BeanDefinitionBuilder builder) {
 	}
 
 }

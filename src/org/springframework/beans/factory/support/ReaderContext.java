@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.support;
 
 import org.springframework.beans.factory.parsing.ParseState;
-import org.springframework.beans.factory.parsing.ParseState;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.Problem;

@@ -31,6 +31,14 @@ import org.springframework.util.StringUtils;
  * of convenience methods and a
  * {@link AbstractBeanDefinitionParser#parseInternal(org.w3c.dom.Element, ParserContext) template method}
  * that subclasses must override to provide the actual parsing logic.
+ * 
+ * <p>Use this {@link BeanDefinitionParser} implementation when you want
+ * to parse some arbitrarily complex XML into one or more
+ * {@link BeanDefinition BeanDefinitions}. If you just want to parse some
+ * XML into a single <code>BeanDefinition</code>, you may wish to consider
+ * the simpler convenience extensions of this class, namely
+ * {@link AbstractSingleBeanDefinitionParser} and
+ * {@link AbstractSimpleBeanDefinitionParser}.
  *
  * @author Rob Harrop
  * @author Rick Evans
