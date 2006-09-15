@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,15 +29,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Abstract implementation of TransactionAttributeSource that caches attributes
  * for methods, and implements fallback policy of 1. most specific method; 
  * 2. target class attribute; 3. declaring method; 4. declaring class.
  *
- * <p>Defaults to using class's transaction attribute if none is associated
- * with the target method. Any transaction attribute associated with the
- * target method completely overrides a class transaction attribute.
+ * <p>Defaults to using the target class's transaction attribute if none is
+ * associated with the target method. Any transaction attribute associated with
+ * the target method completely overrides a class transaction attribute.
+ * If none found on the target class, the interface that the invoked method
+ * has been called through (in case of a JDK proxy) will be checked.
  *
  * <p>This implementation caches attributes by method after they are first used.
  * If it's ever desirable to allow dynamic changing of transaction attributes
@@ -65,11 +68,11 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 * Cache of TransactionAttributes, keyed by Method and target class.
+	 * Cache of TransactionAttributes, keyed by DefaultCacheKey (Method + target Class).
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
-	private Map cache = new HashMap();
+	private final Map cache = new HashMap();
 
 
 	/**
@@ -113,18 +116,16 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 
 	/**
 	 * Determine a cache key for the given method and target class.
-	 * Must not produce same key for overloaded methods.
+	 * <p>Must not produce same key for overloaded methods.
 	 * Must produce same key for different instances of the same method.
 	 * @param method the method
 	 * @param targetClass the target class (may be <code>null</code>)
 	 * @return the cache key
 	 */
 	protected Object getCacheKey(Method method, Class targetClass) {
-		// TODO this works fine, but could consider making it faster in future:
-		// Method.toString() is relatively (although not disastrously) slow.
-		return targetClass + "." + method;
+		return new DefaultCacheKey(method, targetClass);
 	}
-	
+
 	/**
 	 * Same return as getTransactionAttribute method, but doesn't cache the result.
 	 * getTransactionAttribute is a caching decorator for this method.
@@ -152,7 +153,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 			return txAtt;
 		}
 
-		if (specificMethod != method ) {
+		if (specificMethod != method) {
 			// Fallback is to look at the original method.
 			txAtt = findTransactionAttribute(findAllAttributes(method));
 			if (txAtt != null) {
@@ -163,7 +164,8 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		}
 		return null;
 	}
-	
+
+
 	/**
 	 * Subclasses should implement this to return all attributes for this method.
 	 * We need all because of the need to analyze rollback rules.
@@ -239,4 +241,37 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	protected boolean allowPublicMethodsOnly() {
 		return false;
 	}
+
+
+	/**
+	 * Default cache key for the TransactionAttribute cache.
+	 */
+	private static class DefaultCacheKey {
+
+		private final Method method;
+
+		private final Class targetClass;
+
+		public DefaultCacheKey(Method method, Class targetClass) {
+			this.method = method;
+			this.targetClass = targetClass;
+		}
+
+		public boolean equals(Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof DefaultCacheKey)) {
+				return false;
+			}
+			DefaultCacheKey otherKey = (DefaultCacheKey) other;
+			return (this.method.equals(otherKey.method) &&
+					ObjectUtils.nullSafeEquals(this.targetClass, otherKey.targetClass));
+		}
+
+		public int hashCode() {
+			return this.method.hashCode() * 29 + (this.targetClass != null ? this.targetClass.hashCode() : 0);
+		}
+	}
+
 }
