@@ -27,7 +27,6 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 import javax.jms.TopicSession;
 
-import org.springframework.jms.support.JmsUtils;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -197,8 +196,22 @@ public abstract class ConnectionFactoryUtils {
 			}
 		}
 		catch (JMSException ex) {
-			JmsUtils.closeSession(session);
-			JmsUtils.closeConnection(con);
+			if (session != null) {
+				try {
+					session.close();
+				}
+				catch (Throwable ex2) {
+					// ignore
+				}
+			}
+			if (con != null) {
+				try {
+					con.close();
+				}
+				catch (Throwable ex2) {
+					// ignore
+				}
+			}
 			throw ex;
 		}
 		if (conHolderToUse != resourceHolder) {
@@ -306,7 +319,7 @@ public abstract class ConnectionFactoryUtils {
 					this.resourceHolder.commitAll();
 				}
 				catch (JMSException ex) {
-					throw JmsUtils.convertJmsAccessException(ex);
+					throw new SynchedLocalTransactionFailedException("Local JMS transaction failed to commit", ex);
 				}
 			}
 		}
