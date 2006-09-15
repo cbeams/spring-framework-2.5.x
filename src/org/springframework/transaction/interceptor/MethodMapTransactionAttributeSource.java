@@ -34,8 +34,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 
 /**
- * Simple implementation of TransactionAttributeSource that
- * allows attributes to be stored per method in a map.
+ * Simple {@link TransactionAttributeSource} implementation that
+ * allows attributes to be stored per method in a {@link Map}.
  * 
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -46,6 +46,7 @@ import org.springframework.util.PatternMatchUtils;
 public class MethodMapTransactionAttributeSource
 		implements TransactionAttributeSource, BeanClassLoaderAware, InitializingBean {
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Map from method name to attribute value */
@@ -62,11 +63,13 @@ public class MethodMapTransactionAttributeSource
 
 	/**
 	 * Set a name/attribute map, consisting of "FQCN.method" method names
-	 * (e.g. "com.mycompany.mycode.MyClass.myMethod") and TransactionAttribute
-	 * instances (or Strings to be converted to TransactionAttribute instances).
+	 * (e.g. "com.mycompany.mycode.MyClass.myMethod") and
+	 * {@link TransactionAttribute} instances (or Strings to be converted
+	 * to <code>TransactionAttribute</code> instances).
 	 * <p>Intended for configuration via setter injection, typically within
-	 * a Spring bean factory. Relies on <code>afterPropertiesSet()</code>
+	 * a Spring bean factory. Relies on {@link #afterPropertiesSet()}
 	 * being called afterwards.
+	 * @param methodMap said {@link Map} from method name to attribute value
 	 * @see TransactionAttribute
 	 * @see TransactionAttributeEditor
 	 */
@@ -79,7 +82,8 @@ public class MethodMapTransactionAttributeSource
 	}
 
 	/**
-	 * Eagerly initializes the specified "methodMap", if any.
+	 * Eagerly initializes the specified
+	 * {@link #setMethodMap(java.util.Map) "methodMap"}, if any.
 	 * @see #initMethodMap()
 	 */
 	public void afterPropertiesSet() {
@@ -87,7 +91,8 @@ public class MethodMapTransactionAttributeSource
 	}
 
 	/**
-	 * Initialize the specified "methodMap", if any.
+	 * Initialize the specified {@link #setMethodMap(java.util.Map) "methodMap"},
+	 * if any.
 	 * @see #setMethodMap
 	 */
 	protected synchronized void initMethodMap() {
@@ -114,7 +119,7 @@ public class MethodMapTransactionAttributeSource
 
 	/**
 	 * Add an attribute for a transactional method.
-	 * Method names can end or start with "*" for matching multiple methods.
+	 * <p>Method names can end or start with "*" for matching multiple methods.
 	 * @param name class and method name, separated by a dot
 	 * @param attr attribute associated with the method
 	 */
@@ -130,7 +135,7 @@ public class MethodMapTransactionAttributeSource
 			addTransactionalMethod(clazz, methodName, attr);
 		}
 		catch (ClassNotFoundException ex) {
-			throw new TransactionUsageException("Class '" + className + "' not found");
+			throw new TransactionUsageException("Class [" + className + "] not found");
 		}
 	}
 
@@ -196,8 +201,8 @@ public class MethodMapTransactionAttributeSource
 
 	/**
 	 * Return if the given method name matches the mapped name.
-	 * <p>The default implementation checks for "xxx*", "*xxx" and "*xxx*" matches,
-	 * as well as direct equality. Can be overridden in subclasses.
+	 * <p>The default implementation checks for "xxx*", "*xxx" and "*xxx*"
+	 * matches, as well as direct equality.
 	 * @param methodName the method name of the class
 	 * @param mappedName the name in the descriptor
 	 * @return if the names match
