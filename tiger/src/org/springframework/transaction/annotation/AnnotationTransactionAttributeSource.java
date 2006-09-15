@@ -127,6 +127,12 @@ public class AnnotationTransactionAttributeSource
 		return null;
 	}
 
+	/**
+	 * Only public methods can be made transactional using {@link @Transactional}.
+	 */
+	protected boolean allowPublicMethodsOnly() {
+		return true;
+	}
 
 	public boolean equals(Object other) {
 		return (other == this || other instanceof AnnotationTransactionAttributeSource);

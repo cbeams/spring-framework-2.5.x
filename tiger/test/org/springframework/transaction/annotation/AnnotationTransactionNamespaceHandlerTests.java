@@ -67,7 +67,7 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 	}
 	
 	// TODO: this test is failing (see SPR-2514)
-	public void xtestNonPublicMethodsNotAdvised() {
+	public void testNonPublicMethodsNotAdvised() {
 		TransactionalTestBean testBean = getTestBean();
 		CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
 

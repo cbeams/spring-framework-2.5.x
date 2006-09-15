@@ -17,6 +17,7 @@
 package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -129,6 +130,11 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * getTransactionAttribute is a caching decorator for this method.
 	 */
 	private TransactionAttribute computeTransactionAttribute(Method method, Class targetClass) {
+		// don't allow no-public methods as required
+		if(allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
+			return null;
+		}
+		
 		// The method may be on an interface, but we need attributes from the target class.
 		// The AopUtils class provides a convenience method for this. If the target class
 		// is null, the method will be unchanged.
@@ -226,4 +232,11 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		return txAttribute;
 	}
 
+	/**
+	 * Should only public methods be allowed to have transactional semantics?
+	 * Default implementation returns '<code>false</code>'.
+	 */
+	protected boolean allowPublicMethodsOnly() {
+		return false;
+	}
 }
