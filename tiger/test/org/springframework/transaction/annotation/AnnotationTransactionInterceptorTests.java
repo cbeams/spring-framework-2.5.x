@@ -156,6 +156,36 @@ public class AnnotationTransactionInterceptorTests extends TestCase {
 		assertGetTransactionAndCommitCount(4);
 	}
 
+	public void testCrossClassInterfaceMethodLevelOnJdkProxy() throws Exception {
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setTarget(new SomeServiceImpl());
+		proxyFactory.addInterface(SomeService.class);
+		proxyFactory.addAdvice(this.ti);
+
+		SomeService someService = (SomeService) proxyFactory.getProxy();
+
+		someService.bar();
+		assertGetTransactionAndCommitCount(1);
+
+		someService.foo();
+		assertGetTransactionAndCommitCount(2);
+
+		someService.fooBar();
+		assertGetTransactionAndCommitCount(3);
+	}
+
+	public void testCrossClassInterfaceOnJdkProxy() throws Exception {
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setTarget(new OtherServiceImpl());
+		proxyFactory.addInterface(OtherService.class);
+		proxyFactory.addAdvice(this.ti);
+
+		OtherService otherService = (OtherService) proxyFactory.getProxy();
+
+		otherService.foo();
+		assertGetTransactionAndCommitCount(1);
+	}
+
 	private void assertGetTransactionAndCommitCount(int expectedCount) {
 		assertEquals(expectedCount, this.ptm.begun);
 		assertEquals(expectedCount, this.ptm.commits);
@@ -287,4 +317,39 @@ public class AnnotationTransactionInterceptorTests extends TestCase {
 		}
 	}
 
+	public static interface SomeService {
+		void foo();
+
+		@Transactional
+		void bar();
+
+		@Transactional(readOnly = true)
+		void fooBar();
+	}
+
+	public static class SomeServiceImpl implements SomeService {
+
+		public void bar() {
+		}
+
+		@Transactional
+		public void foo() {
+		}
+
+		@Transactional(readOnly = false)
+		public void fooBar() {
+		}
+	}
+
+	public static interface OtherService {
+		void foo();
+	}
+
+	@Transactional
+	public static class OtherServiceImpl implements OtherService {
+
+		public void foo() {
+
+		}
+	}
 }
