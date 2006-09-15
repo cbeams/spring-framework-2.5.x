@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,44 +19,41 @@ package org.springframework.aop.aspectj;
 import java.lang.reflect.Method;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
-import org.aspectj.lang.JoinPoint.StaticPart;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.aspectj.runtime.internal.AroundClosure;
+
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 
 /**
  * Implementation of AspectJ ProceedingJoinPoint interface
  * wrapping an AOP Alliance MethodInvocation.
- * <p>
- * <b>Note</b>: the getThis() method returns the current Spring AOP proxy.
- * The getTarget() method returns the current Spring AOP target (which may be
- * null if there is no target), and is a plain POJO without any advice.
- * <b>If you want to call the object and have the advice take effect, use getThis().</b> 
- * A common example is casting the object to an introduced interface in
- * the implementation of an introduction.
- * <br>
- * Of course there is no such distinction between target and proxy
- * in AspectJ.
- * 
+ *
+ * <p><b>Note</b>: the <code>getThis()</code> method returns the current Spring AOP proxy.
+ * The <code>getTarget()</code> method returns the current Spring AOP target (which may be
+ * <code>null</code> if there is no target), and is a plain POJO without any advice.
+ * <b>If you want to call the object and have the advice take effect, use
+ * <code>getThis()</code>.</b> A common example is casting the object to an
+ * introduced interface in the implementation of an introduction.
+ *
+ * <p>Of course there is no such distinction between target and proxy in AspectJ.
+ *
  * @author Rod Johnson
  * @since 2.0
  */
-public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint, StaticPart {
+public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint, JoinPoint.StaticPart {
 	
 	private final MethodInvocation methodInvocation;
+
 	private Object[] defensiveCopyOfArgs;
 
-	/**
-	 * Lazily initialized signature object.
-	 */
+	/** Lazily initialized signature object */
 	private Signature signature;
-	
-	/**
-	 * Lazily initialized.
-	 */
+
+	/** Lazily initialized source location object */
 	private SourceLocation sourceLocation;
 
 
@@ -69,23 +66,23 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	}
 
 	public Object proceed() throws Throwable {
-		return methodInvocation.proceed();
+		return this.methodInvocation.proceed();
 	}
 
 	public Object proceed(Object[] args) throws Throwable {
-		Object[] oldArgs = methodInvocation.getArguments();
+		Object[] oldArgs = this.methodInvocation.getArguments();
 		for (int i = 0; i < oldArgs.length; i++) {
 			oldArgs[i] = args[i];
 		}
-		return methodInvocation.proceed();
+		return this.methodInvocation.proceed();
 	}
 
 	public String toShortString() {
-		return "execution(" + methodInvocation.getMethod().getName() + ")";
+		return "execution(" + this.methodInvocation.getMethod().getName() + ")";
 	}
 
 	public String toLongString() {
-		return getClass().getName() + ": execution: [" + methodInvocation + "]";
+		return getClass().getName() + ": execution: [" + this.methodInvocation + "]";
 	}
 	
 	
@@ -94,14 +91,14 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	}
 
 	/**
-	 * Returns the Spring AOP proxy. Cannot be null.
+	 * Returns the Spring AOP proxy. Cannot be <code>null</code>.
 	 */
 	public Object getThis() {
-		return ((ReflectiveMethodInvocation) methodInvocation).getProxy();
+		return ((ReflectiveMethodInvocation) this.methodInvocation).getProxy();
 	}
 
 	/**
-	 * Returns the Spring AOP target. May be null if there is no target.
+	 * Returns the Spring AOP target. May be <code>null</code> if there is no target.
 	 */
 	public Object getTarget() {
 		return methodInvocation.getThis();
@@ -109,38 +106,38 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 
 	public Object[] getArgs() {
 		if (this.defensiveCopyOfArgs == null) {
-			Object[] argsSource = methodInvocation.getArguments();
+			Object[] argsSource = this.methodInvocation.getArguments();
 			this.defensiveCopyOfArgs = new Object[argsSource.length];
 			System.arraycopy(argsSource, 0, this.defensiveCopyOfArgs, 0, argsSource.length);
 		}
 		return this.defensiveCopyOfArgs;
 	}
 
-	public synchronized Signature getSignature() {
-		if (signature == null) {
-			signature = new MethodSignatureImpl();
+	public Signature getSignature() {
+		if (this.signature == null) {
+			this.signature = new MethodSignatureImpl();
 		}
 		return signature;
 	}
 
-	public synchronized SourceLocation getSourceLocation() {
-		if (sourceLocation == null) {
-			sourceLocation = new SourceLocationImpl();
+	public SourceLocation getSourceLocation() {
+		if (this.sourceLocation == null) {
+			this.sourceLocation = new SourceLocationImpl();
 		}
-		return sourceLocation;
+		return this.sourceLocation;
 	}
 
 	public String getKind() {
 		return ProceedingJoinPoint.METHOD_EXECUTION;
 	}
 
-	public StaticPart getStaticPart() {
+	public JoinPoint.StaticPart getStaticPart() {
 		return this;
 	}
 	
 	
 	/**
-	 * Lazily initialzed MethodSignature.
+	 * Lazily initialized MethodSignature.
 	 */
 	private class MethodSignatureImpl implements Signature, MethodSignature {
 
@@ -190,7 +187,11 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 			return methodInvocation.getMethod().getExceptionTypes();
 		}
 	}
-	
+
+
+	/**
+	 * Lazily initialized SourceLocation.
+	 */
 	private class SourceLocationImpl implements SourceLocation {
 
 		public Class getWithinType() {
