@@ -187,10 +187,10 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 	 * Check that required properties were set.
 	 */
 	public void afterPropertiesSet() {
-		if (this.transactionManager == null) {
+		if (getTransactionManager() == null) {
 			throw new IllegalArgumentException("transactionManager is required");
 		}
-		if (this.transactionAttributeSource == null) {
+		if (getTransactionAttributeSource() == null) {
 			throw new IllegalArgumentException(
 					"Either 'transactionAttributeSource' or 'transactionAttributes' is required: " +
 					"If there are no transactional methods, don't use a TransactionInterceptor " +
@@ -200,30 +200,46 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 
 
 	/**
-	 * Create a transaction if necessary.
+	 * Create a transaction if necessary, based on the given method and class.
+	 * <p>Performs a default TransactionAttribute lookup for the given method.
 	 * @param method method about to execute
 	 * @param targetClass class the method is on
 	 * @return a TransactionInfo object, whether or not a transaction was created.
 	 * The hasTransaction() method on TransactionInfo can be used to tell if there
 	 * was a transaction created.
+	 * @see #getTransactionAttributeSource()
 	 */
 	protected TransactionInfo createTransactionIfNecessary(Method method, Class targetClass) {
 		// If the transaction attribute is null, the method is non-transactional.
-		final TransactionAttribute sourceAttr =
-				this.transactionAttributeSource.getTransactionAttribute(method, targetClass);
-		TransactionAttribute txAttr = sourceAttr;
+		TransactionAttribute txAttr = getTransactionAttributeSource().getTransactionAttribute(method, targetClass);
+		return createTransactionIfNecessary(txAttr, methodIdentification(method));
+	}
+
+	/**
+	 * Create a transaction if necessary based on the given TransactionAttribute.
+	 * <p>Allows callers to perform custom TransactionAttribute lookups through
+	 * the TransactionAttributeSource.
+	 * @param txAttr the TransactionAttribute (may be <code>null</code>)
+	 * @param methodIdentification the fully qualified method name
+	 * (used for monitoring and logging purposes)
+	 * @return a TransactionInfo object, whether or not a transaction was created.
+	 * The <code>hasTransaction()</code> method on TransactionInfo can be used to
+	 * tell if there was a transaction created.
+	 * @see #getTransactionAttributeSource()
+	 */
+	protected TransactionInfo createTransactionIfNecessary(
+			TransactionAttribute txAttr, final String methodIdentification) {
 
 		// If no name specified, apply method identification as transaction name.
 		if (txAttr != null && txAttr.getName() == null) {
-			final String name = methodIdentification(method);
-			txAttr = new DelegatingTransactionAttribute(sourceAttr) {
+			txAttr = new DelegatingTransactionAttribute(txAttr) {
 				public String getName() {
-					return name;
+					return methodIdentification;
 				}
 			};
 		}
 
-		TransactionInfo txInfo = new TransactionInfo(txAttr, method);
+		TransactionInfo txInfo = new TransactionInfo(txAttr, methodIdentification);
 		if (txAttr != null) {
 			// We need a transaction for this method
 			if (logger.isDebugEnabled()) {
@@ -231,14 +247,14 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 			}
 
 			// The transaction manager will flag an error if an incompatible tx already exists
-			txInfo.newTransactionStatus(this.transactionManager.getTransaction(txAttr));
+			txInfo.newTransactionStatus(getTransactionManager().getTransaction(txAttr));
 		}
 		else {
 			// The TransactionInfo.hasTransaction() method will return
 			// false. We created it only to preserve the integrity of
 			// the ThreadLocal stack maintained in this class.
 			if (logger.isDebugEnabled())
-				logger.debug("Don't need to create transaction for [" + methodIdentification(method) +
+				logger.debug("Don't need to create transaction for [" + methodIdentification +
 						"]: this method isn't transactional");
 		}
 
@@ -343,25 +359,23 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 
 		private final TransactionAttribute transactionAttribute;
 
-		// TODO: Could open up to other kinds of joinpoint?
-		private final Method method;
+		private final String methodIdentification;
 
 		private TransactionStatus transactionStatus;
 
 		private TransactionInfo oldTransactionInfo;
 
-		public TransactionInfo(TransactionAttribute transactionAttribute, Method method) {
+		public TransactionInfo(TransactionAttribute transactionAttribute, String methodIdentification) {
 			this.transactionAttribute = transactionAttribute;
-			this.method = method;
+			this.methodIdentification = methodIdentification;
 		}
 
 		/**
-		 * @return whether a transaction was created by this aspect,
-		 * or whether we just have a placeholder to keep ThreadLocal
-		 * stack integrity
+		 * Return whether a transaction was created by this aspect,
+		 * or whether we just have a placeholder to keep ThreadLocal stack integrity.
 		 */
 		public boolean hasTransaction() {
-			return transactionStatus != null;
+			return (this.transactionStatus != null);
 		}
 
 		/**
@@ -369,7 +383,7 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 		 * for use in logging.
 		 */
 		public String joinpointIdentification() {
-			return methodIdentification(this.method);
+			return this.methodIdentification;
 		}
 
 		public void newTransactionStatus(TransactionStatus status) {
@@ -379,14 +393,14 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 		private void bindToThread() {
 			// Expose current TransactionStatus, preserving any existing transactionStatus for
 			// restoration after this transaction is complete.
-			oldTransactionInfo = (TransactionInfo) currentTransactionInfo.get();
+			this.oldTransactionInfo = (TransactionInfo) currentTransactionInfo.get();
 			currentTransactionInfo.set(this);
 		}
 
 		private void restoreThreadLocalStatus() {
 			// Use stack to restore old transaction TransactionInfo.
 			// Will be <code>null</code> if none was set.
-			currentTransactionInfo.set(oldTransactionInfo);
+			currentTransactionInfo.set(this.oldTransactionInfo);
 		}
 
 		public TransactionStatus getTransactionStatus() {
