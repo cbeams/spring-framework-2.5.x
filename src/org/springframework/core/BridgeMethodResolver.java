@@ -135,9 +135,9 @@ public abstract class BridgeMethodResolver {
 		// Search parent types for method that has same signature as bridge.
 		Class superclass = bridgeMethod.getDeclaringClass().getSuperclass();
 		while (!Object.class.equals(superclass)) {
-			Method m = searchForMatch(superclass, bridgeMethod);
-			if (m != null) {
-				return m;
+			Method method = searchForMatch(superclass, bridgeMethod);
+			if (method != null) {
+				return method;
 			}
 			superclass = superclass.getSuperclass();
 		}
@@ -146,9 +146,9 @@ public abstract class BridgeMethodResolver {
 		Class[] interfaces = bridgeMethod.getDeclaringClass().getInterfaces();
 		for (int i = 0; i < interfaces.length; i++) {
 			Class anInterface = interfaces[i];
-			Method m = searchForMatch(anInterface, bridgeMethod);
-			if (m != null) {
-				return m;
+			Method method = searchForMatch(anInterface, bridgeMethod);
+			if (method != null) {
+				return method;
 			}
 		}
 
@@ -200,7 +200,7 @@ public abstract class BridgeMethodResolver {
 		// super class
 		Type genericType = cls.getGenericSuperclass();
 		Class type = cls.getSuperclass();
-		while (!type.equals(Object.class)) {
+		while (!Object.class.equals(type)) {
 			if (genericType instanceof ParameterizedType) {
 				ParameterizedType pt1 = (ParameterizedType) genericType;
 				populateTypeMapFromParameterizedType(typeVariableMap, pt1);
