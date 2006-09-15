@@ -70,7 +70,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 			return createView(viewName, locale);
 		}
 		else {
-			String cacheKey = getCacheKey(viewName, locale);
+			Object cacheKey = getCacheKey(viewName, locale);
 			// No synchronization, as we can live with occasional double caching.
 			synchronized (this.viewCache) {
 				View view = (View) this.viewCache.get(cacheKey);
@@ -79,7 +79,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 					view = createView(viewName, locale);
 					this.viewCache.put(cacheKey, view);
 					if (logger.isDebugEnabled()) {
-						logger.debug("Cached view '" + cacheKey + "'");
+						logger.debug("Cached view [" + cacheKey + "]");
 					}
 				}
 				return view;
@@ -88,11 +88,12 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	}
 
 	/**
-	 * Return the cache key for the given viewName and the given locale.
-	 * Needs to regard the locale in general, as a different locale can lead to a
+	 * Return the cache key for the given view name and the given locale.
+	 * Default is a String consisting of view name and locale suffix.
+	 * <p>Needs to regard the locale in general, as a different locale can lead to a
 	 * different view! Can be overridden in subclasses.
 	 */
-	protected String getCacheKey(String viewName, Locale locale) {
+	protected Object getCacheKey(String viewName, Locale locale) {
 		return viewName + "_" + locale;
 	}
 
@@ -110,7 +111,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 			logger.warn("View caching is SWITCHED OFF -- removal not necessary");			
 		}
 		else {
-			String cacheKey = getCacheKey(viewName, locale);
+			Object cacheKey = getCacheKey(viewName, locale);
 			Object cachedView = null;
 			synchronized (this.viewCache) {
 				cachedView = this.viewCache.remove(cacheKey);
