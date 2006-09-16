@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.beans.factory.InitializingBean;
  * or all properties are not set at configuration time, this FactoryBean will use defaults.
  *
  * <p>Note: If the named Cache instance is found, the properties will be ignored and the
- * Cache instance will be retrieved from CacheManager.
+ * Cache instance will be retrieved from the CacheManager.
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
@@ -162,8 +162,8 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 	public void afterPropertiesSet() throws CacheException, IOException {
 		// If no CacheManager given, fetch the default.
 		if (this.cacheManager == null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Using default EHCache CacheManager for cache region '" + this.cacheName + "'");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using default EHCache CacheManager for cache region '" + this.cacheName + "'");
 			}
 			this.cacheManager = CacheManager.getInstance();
 		}
@@ -176,32 +176,23 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 		// Fetch cache region: If none with the given name exists,
 		// create one on the fly.
 		if (this.cacheManager.cacheExists(this.cacheName)) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Using existing EHCache cache region '" + this.cacheName + "'");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using existing EHCache cache region '" + this.cacheName + "'");
 			}
 			this.cache = this.cacheManager.getCache(this.cacheName);
 		}
 		else {
-			if (logger.isInfoEnabled()) {
-				logger.info("Creating new EHCache cache region '" + this.cacheName + "'");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Creating new EHCache cache region '" + this.cacheName + "'");
 			}
-			// Manually construct the named Cache instance and add it to CacheManager.
-			// Use simplified constructor if not diskPersistent (an EHCache 1.0 property),
-			// to stay compatible with EHCache 0.9.
-			if (this.diskPersistent) {
-				this.cache = new Cache(
-						this.cacheName, this.maxElementsInMemory, this.overflowToDisk,
-						this.eternal, this.timeToLive, this.timeToIdle,
-						this.diskPersistent, this.diskExpiryThreadIntervalSeconds);
-			}
-			else {
-				this.cache = new Cache(
-						this.cacheName, this.maxElementsInMemory, this.overflowToDisk,
-						this.eternal, this.timeToLive, this.timeToIdle);
-			}
+			this.cache = new Cache(
+					this.cacheName, this.maxElementsInMemory, this.overflowToDisk,
+					this.eternal, this.timeToLive, this.timeToIdle,
+					this.diskPersistent, this.diskExpiryThreadIntervalSeconds);
 			this.cacheManager.addCache(this.cache);
 		}
 	}
+
 
 	public Object getObject() {
 		return this.cache;
