@@ -28,12 +28,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.OrderComparator;
+import org.springframework.util.Assert;
 
 /**
  * Central helper that manages resources and transaction synchronizations per thread.
  * To be used by resource management code but not by typical application code.
  *
- * <p>Supports one resource per key without overwriting, i.e. a resource needs
+ * <p>Supports one resource per key without overwriting, that is, a resource needs
  * to be removed before a new one can be set for the same key.
  * Supports a list of transaction synchronizations if synchronization is active.
  *
@@ -115,6 +116,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @return if there is a value bound to the current thread
 	 */
 	public static boolean hasResource(Object key) {
+		Assert.notNull(key, "Key must not be null");
 		Map map = (Map) resources.get();
 		return (map != null && map.containsKey(key));
 	}
@@ -125,6 +127,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @return a value bound to the current thread, or <code>null</code> if none
 	 */
 	public static Object getResource(Object key) {
+		Assert.notNull(key, "Key must not be null");
 		Map map = (Map) resources.get();
 		if (map == null) {
 			return null;
@@ -144,6 +147,8 @@ public abstract class TransactionSynchronizationManager {
 	 * @throws IllegalStateException if there is already a value bound to the thread
 	 */
 	public static void bindResource(Object key, Object value) throws IllegalStateException {
+		Assert.notNull(key, "Key must not be null");
+		Assert.notNull(value, "Value must not be null");
 		Map map = (Map) resources.get();
 		// set ThreadLocal Map if none found
 		if (map == null) {
@@ -168,6 +173,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @throws IllegalStateException if there is no value bound to the thread
 	 */
 	public static Object unbindResource(Object key) throws IllegalStateException {
+		Assert.notNull(key, "Key must not be null");
 		Map map = (Map) resources.get();
 		if (map == null || !map.containsKey(key)) {
 			throw new IllegalStateException(
@@ -224,6 +230,7 @@ public abstract class TransactionSynchronizationManager {
 	public static void registerSynchronization(TransactionSynchronization synchronization)
 	    throws IllegalStateException {
 
+		Assert.notNull(synchronization, "TransactionSynchronization must not be null");
 		if (!isSynchronizationActive()) {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
