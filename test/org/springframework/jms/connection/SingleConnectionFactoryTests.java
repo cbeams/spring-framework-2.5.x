@@ -18,6 +18,7 @@ package org.springframework.jms.connection;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
@@ -26,6 +27,8 @@ import javax.jms.TopicConnectionFactory;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
+
+import org.springframework.jms.connection.ChainedExceptionListener;
 
 /**
  * @author Juergen Hoeller
@@ -177,6 +180,97 @@ public class SingleConnectionFactoryTests extends TestCase {
 
 		cfControl.verify();
 		conControl.verify();
+	}
+
+	public void testWithConnectionFactoryAndExceptionListener() throws JMSException {
+		MockControl cfControl = MockControl.createControl(ConnectionFactory.class);
+		ConnectionFactory cf = (ConnectionFactory) cfControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+
+		ExceptionListener listener = new ChainedExceptionListener();
+		cf.createConnection();
+		cfControl.setReturnValue(con, 1);
+		con.setExceptionListener(listener);
+		conControl.setVoidCallable(1);
+		con.getExceptionListener();
+		conControl.setReturnValue(listener, 1);
+		con.start();
+		conControl.setVoidCallable(2);
+		con.stop();
+		conControl.setVoidCallable(1);
+		con.close();
+		conControl.setVoidCallable(1);
+
+		cfControl.replay();
+		conControl.replay();
+
+		SingleConnectionFactory scf = new SingleConnectionFactory(cf);
+		scf.setExceptionListener(listener);
+		Connection con1 = scf.createConnection();
+		assertEquals(listener, con1.getExceptionListener());
+		con1.start();
+		con1.stop();  // should be ignored
+		con1.close();  // should be ignored
+		Connection con2 = scf.createConnection();
+		con2.start();
+		con2.stop();  // should be ignored
+		con2.close();  // should be ignored
+		scf.destroy();  // should trigger actual close
+
+		cfControl.verify();
+		conControl.verify();
+	}
+
+	public void testWithConnectionFactoryAndReconnectOnException() throws JMSException {
+		MockControl cfControl = MockControl.createControl(ConnectionFactory.class);
+		ConnectionFactory cf = (ConnectionFactory) cfControl.getMock();
+		TestConnection con = new TestConnection();
+
+		cf.createConnection();
+		cfControl.setReturnValue(con, 2);
+		cfControl.replay();
+
+		SingleConnectionFactory scf = new SingleConnectionFactory(cf);
+		scf.setReconnectOnException(true);
+		Connection con1 = scf.createConnection();
+		assertNull(con1.getExceptionListener());
+		con1.start();
+		con.getExceptionListener().onException(new JMSException(""));
+		Connection con2 = scf.createConnection();
+		con2.start();
+		scf.destroy();  // should trigger actual close
+
+		cfControl.verify();
+		assertEquals(2, con.getStartCount());
+		assertEquals(2, con.getCloseCount());
+	}
+
+	public void testWithConnectionFactoryAndExceptionListenerAndReconnectOnException() throws JMSException {
+		MockControl cfControl = MockControl.createControl(ConnectionFactory.class);
+		ConnectionFactory cf = (ConnectionFactory) cfControl.getMock();
+		TestConnection con = new TestConnection();
+
+		TestExceptionListener listener = new TestExceptionListener();
+		cf.createConnection();
+		cfControl.setReturnValue(con, 2);
+		cfControl.replay();
+
+		SingleConnectionFactory scf = new SingleConnectionFactory(cf);
+		scf.setExceptionListener(listener);
+		scf.setReconnectOnException(true);
+		Connection con1 = scf.createConnection();
+		assertSame(listener, con1.getExceptionListener());
+		con1.start();
+		con.getExceptionListener().onException(new JMSException(""));
+		Connection con2 = scf.createConnection();
+		con2.start();
+		scf.destroy();  // should trigger actual close
+
+		cfControl.verify();
+		assertEquals(2, con.getStartCount());
+		assertEquals(2, con.getCloseCount());
+		assertEquals(1, listener.getCount());
 	}
 
 	public void testConnectionFactory102WithQueue() throws JMSException {

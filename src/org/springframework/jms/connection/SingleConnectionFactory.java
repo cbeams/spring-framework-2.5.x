@@ -25,6 +25,7 @@ import java.util.List;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
@@ -36,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
 
 /**
  * A JMS ConnectionFactory adapter that returns the same Connection on all
@@ -61,7 +63,8 @@ import org.springframework.beans.factory.InitializingBean;
  * @see SingleConnectionFactory102
  */
 public class SingleConnectionFactory
-		implements ConnectionFactory, QueueConnectionFactory, TopicConnectionFactory, InitializingBean, DisposableBean {
+		implements ConnectionFactory, QueueConnectionFactory, TopicConnectionFactory, ExceptionListener,
+		InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -69,11 +72,18 @@ public class SingleConnectionFactory
 
 	private String clientId;
 
-	/** Wrapped connection */
+	private ExceptionListener exceptionListener;
+
+	private boolean reconnectOnException = false;
+
+	/** Wrapped Connection */
 	private Connection target;
 
-	/** Proxy connection */
+	/** Proxy Connection */
 	private Connection connection;
+
+	/** Synchronization monitor for the shared Connection */
+	private final Object connectionMonitor = new Object();
 
 
 	/**
@@ -89,9 +99,9 @@ public class SingleConnectionFactory
 	 * @param target the single Connection
 	 */
 	public SingleConnectionFactory(Connection target) {
+		Assert.notNull(target, "Target Connection must not be null");
 		this.target = target;
-		this.connection = getCloseSuppressingConnectionProxy(target);
-		afterPropertiesSet();
+		this.connection = getSharedConnectionProxy(target);
 	}
 
 	/**
@@ -101,9 +111,10 @@ public class SingleConnectionFactory
 	 * @param targetConnectionFactory the target ConnectionFactory
 	 */
 	public SingleConnectionFactory(ConnectionFactory targetConnectionFactory) {
+		Assert.notNull(targetConnectionFactory, "Target ConnectionFactory must not be null");
 		this.targetConnectionFactory = targetConnectionFactory;
-		afterPropertiesSet();
 	}
+
 
 	/**
 	 * Set the target ConnectionFactory which will be used to lazily
@@ -138,77 +149,70 @@ public class SingleConnectionFactory
 	 * Return a JMS client ID for the single Connection created and exposed
 	 * by this ConnectionFactory, if any.
 	 */
-	public String getClientId() {
+	protected String getClientId() {
 		return clientId;
 	}
 
 	/**
-	 * Make sure a connection or connection factory has been set.
+	 * Specify an JMS ExceptionListener implementation that should be
+	 * registered with with the single Connection created by this factory.
+	 * @see #setReconnectOnException
+	 */
+	public void setExceptionListener(ExceptionListener exceptionListener) {
+		this.exceptionListener = exceptionListener;
+	}
+
+	/**
+	 * Return the JMS ExceptionListener implementation that should be registered
+	 * with with the single Connection created by this factory, if any.
+	 */
+	protected ExceptionListener getExceptionListener() {
+		return exceptionListener;
+	}
+
+	/**
+	 * Specify whether the single Connection should be reset (to be subsequently renewed)
+	 * when a JMSException is reported by the underlying Connection.
+	 * <p>Default is "false". Switch this to "true" to automatically trigger
+	 * recovery based on your JMS provider's exception notifications.
+	 * <p>Internally, this will lead to a special JMS ExceptionListener
+	 * (this SingleConnectionFactory itself) being registered with the
+	 * underlying Connection. This can also be combined with a
+	 * user-specified ExceptionListener, if desired.
+	 * @see #setExceptionListener
+	 */
+	public void setReconnectOnException(boolean reconnectOnException) {
+		this.reconnectOnException = reconnectOnException;
+	}
+
+	/**
+	 * Return whether the single Connection should be renewed when
+	 * a JMSException is reported by the underlying Connection.
+	 */
+	protected boolean isReconnectOnException() {
+		return reconnectOnException;
+	}
+
+	/**
+	 * Make sure a Connection or ConnectionFactory has been set.
 	 */
 	public void afterPropertiesSet() {
-		if (this.connection == null && this.targetConnectionFactory == null) {
-			throw new IllegalArgumentException("connection or targetConnectionFactory is required");
-		}
-	}
-
-
-	/**
-	 * Initialize the single Connection.
-	 * @throws javax.jms.JMSException if thrown by JMS API methods
-	 */
-	protected void init() throws JMSException {
-		if (getTargetConnectionFactory() == null) {
-			throw new IllegalStateException("targetConnectionFactory is required for lazily initializing a connection");
-		}
-		Connection target = doCreateConnection();
-		if (getClientId() != null) {
-			target.setClientID(getClientId());
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Created single connection: " + target);
-		}
-		this.target = target;
-		this.connection = getCloseSuppressingConnectionProxy(target);
-	}
-
-	/**
-	 * Create a JMS Connection via this template's ConnectionFactory.
-	 * <p>This implementation uses JMS 1.1 API.
-	 * @return the new JMS Connection
-	 * @throws javax.jms.JMSException if thrown by JMS API methods
-	 */
-	protected Connection doCreateConnection() throws JMSException {
-		return this.targetConnectionFactory.createConnection();
-	}
-
-	/**
-	 * Close the underlying connection.
-	 * The provider of this ConnectionFactory needs to care for proper shutdown.
-	 * <p>As this bean implements DisposableBean, a bean factory will
-	 * automatically invoke this on destruction of its cached singletons.
-	 */
-	public void destroy() throws JMSException {
-		if (this.target != null) {
-			try {
-				this.target.stop();
-			}
-			finally {
-				this.target.close();
-			}
+		if (this.connection == null && getTargetConnectionFactory() == null) {
+			throw new IllegalArgumentException("Connection or targetConnectionFactory is required");
 		}
 	}
 
 
 	public Connection createConnection() throws JMSException {
-		synchronized (this) {
+		synchronized (this.connectionMonitor) {
 			if (this.connection == null) {
-				init();
+				initConnection();
 			}
+			if (logger.isInfoEnabled()) {
+				logger.info("Established shared JMS Connection: " + this.target);
+			}
+			return this.connection;
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Returning single connection: " + this.connection);
-		}
-		return this.connection;
 	}
 
 	public Connection createConnection(String username, String password) throws JMSException {
@@ -244,6 +248,109 @@ public class SingleConnectionFactory
 				"SingleConnectionFactory does not support custom username and password");
 	}
 
+	/**
+	 * Exception listener callback that renews the underlying single Connection.
+	 */
+	public void onException(JMSException ex) {
+		resetConnection();
+	}
+
+	/**
+	 * Close the underlying shared connection.
+	 * The provider of this ConnectionFactory needs to care for proper shutdown.
+	 * <p>As this bean implements DisposableBean, a bean factory will
+	 * automatically invoke this on destruction of its cached singletons.
+	 */
+	public void destroy() {
+		resetConnection();
+	}
+
+
+	/**
+	 * Initialize the underlying shared Connection.
+	 * <p>Closes and reinitializes the Connection if an underlying
+	 * Connection is present already.
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 */
+	public void initConnection() throws JMSException {
+		if (getTargetConnectionFactory() == null) {
+			throw new IllegalStateException("targetConnectionFactory is required for lazily initializing a Connection");
+		}
+		synchronized (this.connectionMonitor) {
+			if (this.target != null) {
+				closeConnection(this.target);
+			}
+			this.target = doCreateConnection();
+			prepareConnection(this.target);
+			if (logger.isInfoEnabled()) {
+				logger.info("Established shared JMS Connection: " + this.target);
+			}
+			this.connection = getSharedConnectionProxy(this.target);
+		}
+	}
+
+	/**
+	 * Reset the underlying shared Connection, to be reinitialized on next access.
+	 */
+	public void resetConnection() {
+		synchronized (this.connectionMonitor) {
+			if (this.target != null) {
+				closeConnection(this.target);
+			}
+			this.target = null;
+			this.connection = null;
+		}
+	}
+
+	/**
+	 * Create a JMS Connection via this template's ConnectionFactory.
+	 * <p>This implementation uses JMS 1.1 API.
+	 * @return the new JMS Connection
+	 * @throws javax.jms.JMSException if thrown by JMS API methods
+	 */
+	protected Connection doCreateConnection() throws JMSException {
+		return getTargetConnectionFactory().createConnection();
+	}
+
+	/**
+	 * Prepare the given Connection before it is exposed.
+	 * <p>The default implementation applies ExceptionListener and client id.
+	 * Can be overridden in subclasses.
+	 * @param con the Connection to prepare
+	 * @throws JMSException if thrown by JMS API methods
+	 * @see #setExceptionListener
+	 * @see #setReconnectOnException
+	 */
+	protected void prepareConnection(Connection con) throws JMSException {
+		if (getExceptionListener() != null || isReconnectOnException()) {
+			ExceptionListener listenerToUse = getExceptionListener();
+			if (isReconnectOnException()) {
+				listenerToUse = new InternalChainedExceptionListener(this, listenerToUse);
+			}
+			con.setExceptionListener(listenerToUse);
+		}
+		if (getClientId() != null) {
+			con.setClientID(getClientId());
+		}
+	}
+
+	/**
+	 * Close the given Connection.
+	 * @param con the Connection to close
+	 */
+	protected void closeConnection(Connection con) {
+		try {
+			try {
+				con.stop();
+			}
+			finally {
+				con.close();
+			}
+		}
+		catch (Throwable ex) {
+			logger.warn("Could not close shared JMS Connection", ex);
+		}
+	}
 
 	/**
 	 * Wrap the given Connection with a proxy that delegates every method call to it
@@ -253,7 +360,7 @@ public class SingleConnectionFactory
 	 * @param target the original Connection to wrap
 	 * @return the wrapped Connection
 	 */
-	protected Connection getCloseSuppressingConnectionProxy(Connection target) {
+	protected Connection getSharedConnectionProxy(Connection target) {
 		List classes = new ArrayList(3);
 		classes.add(Connection.class);
 		if (target instanceof QueueConnection) {
@@ -265,19 +372,19 @@ public class SingleConnectionFactory
 		return (Connection) Proxy.newProxyInstance(
 				Connection.class.getClassLoader(),
 				(Class[]) classes.toArray(new Class[classes.size()]),
-				new CloseSuppressingInvocationHandler(target));
+				new SharedConnectionInvocationHandler(target));
 	}
 
 
 	/**
 	 * Invocation handler that suppresses close calls on JMS Connections.
 	 */
-	private static class CloseSuppressingInvocationHandler implements InvocationHandler {
+	private static class SharedConnectionInvocationHandler implements InvocationHandler {
 
 		private final Connection target;
 
-		private CloseSuppressingInvocationHandler(Connection source) {
-			this.target = source;
+		private SharedConnectionInvocationHandler(Connection target) {
+			this.target = target;
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -289,6 +396,18 @@ public class SingleConnectionFactory
 				// Use hashCode of Connection proxy.
 				return new Integer(hashCode());
 			}
+			else if (method.getName().equals("setExceptionListener")) {
+				// Handle setExceptionListener method: throw exception.
+				throw new javax.jms.IllegalStateException(
+						"setExceptionListener call not supported on proxy for shared Connection. " +
+						"Set the 'exceptionListener' property on the SingleConnectionFactory instead.");
+			}
+			else if (method.getName().equals("setClientID")) {
+				// Handle setExceptionListener method: throw exception.
+				throw new javax.jms.IllegalStateException(
+						"setClientID call not supported on proxy for shared Connection. " +
+						"Set the 'clientId' property on the SingleConnectionFactory instead.");
+			}
 			else if (method.getName().equals("stop")) {
 				// Handle stop method: don't pass the call on.
 				return null;
@@ -298,11 +417,39 @@ public class SingleConnectionFactory
 				return null;
 			}
 			try {
-				return method.invoke(this.target, args);
+				Object retVal = method.invoke(this.target, args);
+				if (method.getName().equals("getExceptionListener") && retVal instanceof InternalChainedExceptionListener) {
+					// Handle getExceptionListener method: hide internal chain.
+					InternalChainedExceptionListener listener = (InternalChainedExceptionListener) retVal;
+					return listener.getUserListener();
+				}
+				else {
+					return retVal;
+				}
 			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
 			}
+		}
+	}
+
+
+	/**
+	 * Internal chained ExceptionListener for handling the internal recovery listener
+	 * in combination with a user-specified listener.
+	 */
+	private static class InternalChainedExceptionListener extends ChainedExceptionListener {
+
+		public InternalChainedExceptionListener(ExceptionListener internalListener, ExceptionListener userListener) {
+			addDelegate(internalListener);
+			if (userListener != null) {
+				addDelegate(userListener);
+			}
+		}
+
+		public ExceptionListener getUserListener() {
+			ExceptionListener[] delegates = getDelegates();
+			return (delegates.length > 1 ? delegates[1] : null);
 		}
 	}
 
