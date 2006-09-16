@@ -25,6 +25,7 @@ import java.sql.SQLException;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -57,16 +58,20 @@ import org.springframework.util.ObjectUtils;
 public class SingleConnectionDataSource extends DriverManagerDataSource
 		implements SmartDataSource, DisposableBean {
 
+	/** Create a close-suppressing proxy? */
 	private boolean suppressClose;
 
-	/** Wrapped connection */
+	/** Override AutoCommit? */
+	private Boolean autoCommit;
+
+	/** Wrapped Connection */
 	private Connection target;
 
-	/** Proxy connection */
+	/** Proxy Connection */
 	private Connection connection;
 
-	/** Override AutoCommit? */
-	private Boolean autoCommit = null;
+	/** Synchronization monitor for the shared Connection */
+	private final Object connectionMonitor = new Object();
 
 
 	/**
@@ -82,13 +87,14 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * @param url the JDBC URL to use for accessing the DriverManager
 	 * @param username the JDBC username to use for accessing the DriverManager
 	 * @param password the JDBC password to use for accessing the DriverManager
-	 * @param suppressClose if the returned connection should be a
-	 * close-suppressing proxy or the physical connection.
+	 * @param suppressClose if the returned Connection should be a
+	 * close-suppressing proxy or the physical Connection
 	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
 	public SingleConnectionDataSource(
 			String driverClassName, String url, String username, String password, boolean suppressClose)
 			throws CannotGetJdbcConnectionException {
+
 		super(driverClassName, url, username, password);
 		this.suppressClose = suppressClose;
 	}
@@ -99,12 +105,13 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * @param url the JDBC URL to use for accessing the DriverManager
 	 * @param username the JDBC username to use for accessing the DriverManager
 	 * @param password the JDBC password to use for accessing the DriverManager
-	 * @param suppressClose if the returned connection should be a
-	 * close-suppressing proxy or the physical connection.
+	 * @param suppressClose if the returned Connection should be a
+	 * close-suppressing proxy or the physical Connection
 	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
 	public SingleConnectionDataSource(String url, String username, String password, boolean suppressClose)
 			throws CannotGetJdbcConnectionException {
+
 		super(url, username, password);
 		this.suppressClose = suppressClose;
 	}
@@ -113,124 +120,84 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * Create a new SingleConnectionDataSource with the given standard
 	 * DriverManager parameters.
 	 * @param url the JDBC URL to use for accessing the DriverManager
-	 * @param suppressClose if the returned connection should be a
-	 * close-suppressing proxy or the physical connection.
+	 * @param suppressClose if the returned Connection should be a
+	 * close-suppressing proxy or the physical Connection
 	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
 	public SingleConnectionDataSource(String url, boolean suppressClose)
 			throws CannotGetJdbcConnectionException {
+
 		super(url);
 		this.suppressClose = suppressClose;
 	}
 
 	/**
-	 * Create a new SingleConnectionDataSource with a given connection.
-	 * @param target underlying target connection
-	 * @param suppressClose if the connection should be wrapped with a* connection that
-	 * suppresses close() calls (to allow for normal close() usage in applications that
-	 * expect a pooled connection but do not know our SmartDataSource interface).
+	 * Create a new SingleConnectionDataSource with a given Connection.
+	 * @param target underlying target Connection
+	 * @param suppressClose if the Connection should be wrapped with a Connection that
+	 * suppresses <code>close()</code> calls (to allow for normal <code>close()</code>
+	 * usage in applications that expect a pooled Connection but do not know our
+	 * SmartDataSource interface)
 	 */
 	public SingleConnectionDataSource(Connection target, boolean suppressClose) {
-		if (target == null) {
-			throw new IllegalArgumentException("Connection is null in SingleConnectionDataSource");
-		}
+		Assert.notNull(target, "Connection must not be null");
+		this.target = target;
 		this.suppressClose = suppressClose;
-		init(target);
+		this.connection = (suppressClose ? getCloseSuppressingConnectionProxy(target) : target);
 	}
 
 
 	/**
-	 * Set if the returned connection should be a close-suppressing proxy
-	 * or the physical connection.
+	 * Set whether the returned Connection should be a close-suppressing proxy
+	 * or the physical Connection.
 	 */
 	public void setSuppressClose(boolean suppressClose) {
 		this.suppressClose = suppressClose;
 	}
 
 	/**
-	 * Return if the returned connection will be a close-suppressing proxy
-	 * or the physical connection.
+	 * Return whether the returned Connection will be a close-suppressing proxy
+	 * or the physical Connection.
 	 */
-	public boolean isSuppressClose() {
+	protected boolean isSuppressClose() {
 		return suppressClose;
 	}
 
-
 	/**
-	 * Set if the returned connection's autoCommit setting should be overridden
+	 * Set whether the returned Connection's "autoCommit" setting should be overridden.
 	 */
 	public void setAutoCommit(boolean autoCommit) {
-		this.autoCommit = Boolean.valueOf(autoCommit);
-	}
-
-
-	/**
-	 * This is a single connection: Do not close it when returning to the "pool".
-	 */
-	public boolean shouldClose(Connection con) {
-		return (con != this.connection && con != this.target);
+		this.autoCommit = (autoCommit ? Boolean.TRUE : Boolean.FALSE);
 	}
 
 	/**
-	 * Initialize the underlying connection via DriverManager.
+	 * Return whether the returned Connection's "autoCommit" setting should be overridden.
+	 * @return the "autoCommit" value, or <code>null</code> if none to be applied
 	 */
-	protected void init() throws SQLException {
-		init(getConnectionFromDriverManager());
-		if (autoCommit != null && this.connection.getAutoCommit() != autoCommit.booleanValue()) {
-			this.connection.setAutoCommit(autoCommit.booleanValue());
-		}
-		if (logger.isDebugEnabled()) {
-			if (autoCommit != null) {
-				logger.debug("AutoCommit is: " + this.autoCommit);
-			}
-		}
-	}
-
-	/**
-	 * Initialize the underlying connection.
-	 * Wraps the connection with a close-suppressing proxy if necessary.
-	 * @param target the JDBC Connection to use
-	 */
-	protected void init(Connection target) {
-		this.target = target;
-		this.connection = this.suppressClose ? getCloseSuppressingConnectionProxy(target) : target;
-	}
-
-	/**
-	 * Close the underlying connection.
-	 * The provider of this DataSource needs to care for proper shutdown.
-	 * <p>As this bean implements DisposableBean, a bean factory will
-	 * automatically invoke this on destruction of its cached singletons.
-	 */
-	public void destroy() throws SQLException {
-		if (this.target != null) {
-			this.target.close();
-		}
+	protected Boolean getAutoCommitValue() {
+		return autoCommit;
 	}
 
 
 	public Connection getConnection() throws SQLException {
-		synchronized (this) {
+		synchronized (this.connectionMonitor) {
 			if (this.connection == null) {
-				// no underlying connection -> lazy init via DriverManager
-				init();
+				// No underlying Connection -> lazy init via DriverManager.
+				initConnection();
 			}
+			if (this.connection.isClosed()) {
+				throw new SQLException(
+						"Connection was closed in SingleConnectionDataSource. Check that user code checks " +
+						"shouldClose() before closing Connections, or set 'suppressClose' to 'true'");
+			}
+			return this.connection;
 		}
-		if (this.connection.isClosed()) {
-			throw new SQLException(
-					"Connection was closed in SingleConnectionDataSource. Check that user code checks " +
-					"shouldClose() before closing connections, or set suppressClose to true");
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Returning single connection: " + this.connection);
-		}
-		return this.connection;
 	}
 
 	/**
 	 * Specifying a custom username and password doesn't make sense
-	 * with a single connection. Returns the single connection if given
-	 * the same username and password, though.
+	 * with a single Connection. Returns the single Connection if given
+	 * the same username and password; throws a SQLException else.
 	 */
 	public Connection getConnection(String username, String password) throws SQLException {
 		if (ObjectUtils.nullSafeEquals(username, getUsername()) &&
@@ -239,6 +206,85 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 		}
 		else {
 			throw new SQLException("SingleConnectionDataSource does not support custom username and password");
+		}
+	}
+
+	/**
+	 * This is a single Connection: Do not close it when returning to the "pool".
+	 */
+	public boolean shouldClose(Connection con) {
+		synchronized (this.connectionMonitor) {
+			return (con != this.connection && con != this.target);
+		}
+	}
+
+	/**
+	 * Close the underlying Connection.
+	 * The provider of this DataSource needs to care for proper shutdown.
+	 * <p>As this bean implements DisposableBean, a bean factory will
+	 * automatically invoke this on destruction of its cached singletons.
+	 */
+	public void destroy() {
+		synchronized (this.connectionMonitor) {
+			closeConnection();
+		}
+	}
+
+
+	/**
+	 * Initialize the underlying Connection via the DriverManager.
+	 */
+	public void initConnection() throws SQLException {
+		if (getUrl() == null) {
+			throw new IllegalStateException("'url' property is required for lazily initializing a Connection");
+		}
+		synchronized (this.connectionMonitor) {
+			closeConnection();
+			this.target = getConnectionFromDriverManager();
+			prepareConnection(this.target);
+			if (logger.isInfoEnabled()) {
+				logger.info("Established shared JDBC Connection: " + this.target);
+			}
+			this.connection = (isSuppressClose() ? getCloseSuppressingConnectionProxy(this.target) : this.target);
+		}
+	}
+
+	/**
+	 * Reset the underlying shared Connection, to be reinitialized on next access.
+	 */
+	public void resetConnection() {
+		synchronized (this.connectionMonitor) {
+			closeConnection();
+			this.target = null;
+			this.connection = null;
+		}
+	}
+
+	/**
+	 * Prepare the given Connection before it is exposed.
+	 * <p>The default implementation applies the auto-commit flag, if necessary.
+	 * Can be overridden in subclasses.
+	 * @param con the Connection to prepare
+	 * @see #setAutoCommit
+	 */
+	protected void prepareConnection(Connection con) throws SQLException {
+		Boolean autoCommit = getAutoCommitValue();
+		if (autoCommit != null && con.getAutoCommit() != autoCommit.booleanValue()) {
+			con.setAutoCommit(autoCommit.booleanValue());
+		}
+	}
+
+	/**
+	 * Close the underlying shared Connection.
+	 */
+	private void closeConnection() {
+		if (this.target != null) {
+			try {
+				this.target.close();
+			}
+			catch (Throwable ex) {
+				logger.warn("Could not close shared JDBC Connection", ex);
+			}
 		}
 	}
 
@@ -271,7 +317,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 			// Invocation on ConnectionProxy interface coming in...
 
 			if (method.getName().equals("getTargetConnection")) {
-				// Handle getTargetConnection method: return underlying connection.
+				// Handle getTargetConnection method: return underlying Connection.
 				return this.target;
 			}
 			else if (method.getName().equals("equals")) {
@@ -287,7 +333,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 				return null;
 			}
 
-			// Invoke method on target connection.
+			// Invoke method on target Connection.
 			try {
 				return method.invoke(this.target, args);
 			}
