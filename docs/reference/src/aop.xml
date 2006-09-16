@@ -57,7 +57,7 @@
 
     <para>
     This chapter first <link linkend="aop-introduction-defn">introduces AOP concepts</link>,
-    which you will want to read whatever style of aspect declaration
+    which you will want to read whichever style of aspect declaration
     you choose to use. The remainder of the chapter focuses on the Spring 2.0 AOP 
     support; see <link linkend="aop-api">the following chapter</link> for an overview of
     the Spring 1.2 style AOP, which you may well encounter in books, articles, and
@@ -481,7 +481,7 @@ private void anyOldTransfer() {}]]><lineannotation>// the pointcut signature</li
 	  expressions: <literal>anyPublicOperation</literal> (which matches if a method execution
 	  join point represents the execution of any public method); <literal>inTrading</literal> (which matches
 	  if a method execution is in the trading module), and <literal>tradingOperation</literal>
-	  (which matches if an method execution represents any public method in the trading module).
+	  (which matches if a method execution represents any public method in the trading module).
 	  </para>
 
       <programlisting><![CDATA[    @Pointcut("execution(public * *(..))")
@@ -738,7 +738,7 @@ public class BeforeExample {
 }]]></programlisting>
 		   
 	   <para>
-		   If using an in-place pointcut expressio we could rewrite the above example as:
+		   If using an in-place pointcut expression we could rewrite the above example as:
 	   </para>
 
 	<programlisting><![CDATA[import org.aspectj.lang.annotation.Aspect;
@@ -863,7 +863,7 @@ public class AfterThrowingExample {
 	<para>After (finally) advice runs however a matched method execution exits.
 	It is declared using the <interfacename>@After</interfacename> annotation. After
 	advice must be prepared to handle both normal and exception return conditions.
-	It is typically used for releasing resources etc.</para>
+	It is typically used for releasing resources, etc.</para>
 
      <programlisting><![CDATA[import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.After;
@@ -895,7 +895,7 @@ public class AfterFinallyExample {
 	of the advice method must be of type <interfacename>ProceedingJoinPoint</interfacename>. Within the body of the
 	advice, calling <literal>proceed()</literal> on the <interfacename>ProceedingJoinPoint</interfacename> causes the
 	underlying method to execute. The <literal>proceed</literal> method may also be
-	calling passing in an <classname>Object[]</classname> - the values in the array will be used as the arguments
+	called passing in an <classname>Object[]</classname> - the values in the array will be used as the arguments
 	to the method execution when it proceeds.
 	</para>
 	
@@ -905,7 +905,7 @@ public class AfterFinallyExample {
 	passed to proceed must match the number of arguments passed to the around advice (not the 
 	number of arguments taken by the underlying join point), and the value passed to proceed
 	in a given argument position supplants the original value at the join point for the entity
-	the value was bound to. (Don't worry if this doesn't make sense right now!). The 
+	the value was bound to. (Don't worry if this doesn't make sense right now!) The 
 	approach taken by Spring is simpler and a better match to its proxy-based, execution only
 	semantics. You only need to be aware of this difference if you compiling @AspectJ aspects
 	written for Spring and using proceed with arguments with the AspectJ compiler and weaver.
@@ -984,7 +984,7 @@ public void validateAccount(Account account) {
 }]]></programlisting>	   	
 	   	
 	   	<para>The <literal>args(account,..)</literal> part of the pointcut expression serves
-	   	two purposes: firstly it restricts matching to only those method executions where
+	   	two purposes: firstly, it restricts matching to only those method executions where
 	   	the method takes at least one parameter, and the argument passed to that parameter
 	   	is an instance of <classname>Account</classname>; secondly, it makes the actual
 	   	<classname>Account</classname> object available to the advice via the
@@ -1003,7 +1003,7 @@ public void validateAccount(Account account) {
   ]]><lineannotation>// ...</lineannotation><![CDATA[
 }]]></programlisting>	   	
 	   
-	    <para>The interested reader is once more refered to the AspectJ programming guide for
+	    <para>The interested reader is once more referred to the AspectJ programming guide for
 	    more details.</para>	
 	   	
 	   	<para>The proxy object (<literal>this</literal>), target object (<literal>target</literal>),
@@ -1067,7 +1067,7 @@ public void audit(Auditable auditable) {
 		        compiling with this flag on are: (1) your code will be slightly easier to understand
 		        (reverse engineer), (2) the class file sizes will be very slightly bigger (typically
 		        inconsequential), (3) the optimization to remove unused local variables will not be
-		        applied by your compiler. In other words, uou should encounter no difficulties building
+		        applied by your compiler. In other words, you should encounter no difficulties building
 		        with this flag on.</para>
 		    </listitem>
 		    <listitem>
@@ -1166,7 +1166,7 @@ doAfterTwo
         see the AspectJ Programming Guide for full details.</para>
 
         <para>When two pieces of advice defined in <emphasis>different</emphasis> aspects both need
-        to run at the same join point, then unless you specify otherwise the order of execution is 
+        to run at the same join point, unless you specify otherwise the order of execution is 
         undefined. You can control the order of execution by specifying precedence. This is done in 
         the normal Spring way by implementing the <interfacename>org.springframework.core.Ordered</interfacename>
         interface in the aspect class. Given two aspects, the aspect returning the lower value from
@@ -1189,7 +1189,7 @@ doAfterTwo
 	<classname>DefaultUsageTracked</classname>, the following
 	aspect declares that all implementors of service interfaces also implement the
 	<interfacename>UsageTracked</interfacename> interface.
-	(In order to expose statistics via JMX for example). 
+	(In order to expose statistics via JMX for example.)
 	</para>
 
 		<programlisting><![CDATA[@Aspect
@@ -1274,7 +1274,7 @@ public class MyAspect {
       to do something useful!</para>
       <para>The execution of business services can sometimes fail
       due to concurrency issues (for example, deadlock loser).
-      If the operation is retried, it is quite likely it will succeed next time round. For
+      If the operation is retried, it is quite likely to succeed next time round. For
       business services where it is appropriate to retry in such conditions (idempotent
       operations that don't need to go back to the user for conflict resolution), we'd like
       to transparently retry the operation to avoid the client seeing a 
@@ -1376,7 +1376,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
     tags. The exact same pointcut expressions and advice kinds are supported as when
     using the @AspectJ style, hence in this section we will focus on the new
     <emphasis>syntax</emphasis> and refer the reader to the discussion in the previous
-    section (<xref linkend="aop-ataspectj" />) for a understanding of writing pointcut
+    section (<xref linkend="aop-ataspectj" />) for an understanding of writing pointcut
     expressions and the binding of advice parameters.</para>
     
     <para>To use the aop namespace tags described in this section, you need to import
@@ -1388,7 +1388,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
     placed within an <literal>&lt;aop:config&gt;</literal> element (you can have more
     than one <literal>&lt;aop:config&gt;</literal> element in an application context 
     configuration). An <literal>&lt;aop:config&gt;</literal> element can contain
-    pointcut, advisor, and aspect elements (and these must be declared in that order).</para>
+    pointcut, advisor, and aspect elements (note these must be declared in that order).</para>
     
     <warning>
         <para>The <literal>&lt;aop:config&gt;</literal> style of configuration makes
@@ -1404,7 +1404,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         <title>Declaring an aspect</title>
 
         <para>Using the schema support, an aspect is simply a regular Java object 
-        defined as a bean in your spring application context. The state and behavior is
+        defined as a bean in your Spring application context. The state and behavior is
         captured in the fields and methods of the object, and the pointcut and advice 
         information is captured in the XML.</para>
 
@@ -1862,7 +1862,7 @@ ms     %     Task name
     <para>The class backing the <literal>usageTracking</literal> bean would contain the
     method:</para>
     
-  <programlisting><![CDATA[public void (UsageTracked usageTracked) {
+  <programlisting><![CDATA[public void recordUsage(UsageTracked usageTracked) {
     usageTracked.incrementUseCount();
 }]]></programlisting>
     
@@ -2193,7 +2193,7 @@ public @interface Idempotent {
       </listitem>
       <listitem>
         <para>You will need the CGLIB 2 binaries on your classpath, whereas
-        dynamic proxies are available with the JDK
+        dynamic proxies are available with the JDK.
         </para>
       </listitem>
     </itemizedlist>
@@ -2223,7 +2223,7 @@ public @interface Idempotent {
   	<title>Programmatic creation of @AspectJ Proxies</title>
 
 	<para>In addition to declaring aspects in your configuration using either
-	<literal>&lt;aop:config&gt;</literal> or <literal>&lt;aop:aspectj-autoproxy&gt;</literal>
+	<literal>&lt;aop:config&gt;</literal> or <literal>&lt;aop:aspectj-autoproxy&gt;</literal>,
 	it is also possible programmatically to create proxies that advise target objects. For the
 	full details of Spring's AOP API, see the next chapter. Here we want to focus on the ability
 	to automatically create proxies	using @AspectJ aspects.</para>
@@ -2275,7 +2275,7 @@ MyInterfaceType proxy = factory.getProxy();]]></programlisting>
 		  The Spring container instantiates and configures beans defined in your 
 		  application context. It is also possible to ask a bean factory to configure
 		  a <emphasis>pre-existing</emphasis> object given the name of a bean definition 
-		  containing the configuration to be applied. The spring-aspects.jar contains an 
+		  containing the configuration to be applied. The <literal>spring-aspects.jar</literal> contains an 
 		  annotation-driven aspect that exploits this capability to allow dependency-injection
 		  of any object. The support is intended to be used for objects created 
 		  <emphasis>outside of the control of any container</emphasis>. Domain objects
@@ -2519,7 +2519,7 @@ public class Account {
   <property name="profilingStrategy" ref="jamonProfilingStrategy"/>
 </bean>]]></programlisting>
 
-	   <para>For non-singleton aspects the easiest way to configure them is to create
+	   <para>For non-singleton aspects, the easiest way to configure them is to create
 	   prototypical bean definitions and annotate use the @Configurable support from
 	   spring-aspects.jar to configure the aspect instances once they have bean created
 	   by the AspectJ runtime.</para>  
@@ -2527,7 +2527,7 @@ public class Account {
 	   <para>If you have some @AspectJ aspects that you want to weave with AspectJ
 	   (for example, using load-time weaving for domain model types) and other @AspectJ
 	   aspects that you want to use with Spring AOP, and these aspects are all configured
-	   using Spring then you'll need to tell the Spring AOP @AspectJ autoproxying support
+	   using Spring, then you'll need to tell the Spring AOP @AspectJ autoproxying support
 	   which subset of the @AspectJ aspects defined in the configuration should be used
 	   for autoproxying. You can do this by using one or more <literal>&lt;include/&gt;</literal>
 	   elements inside the <literal>&lt;aop:aspectj-autoproxy/&gt;</literal> declaration.
@@ -2573,7 +2573,7 @@ public class Account {
 </aspectj>]]></programlisting>
 		  		  
 		<para>
-			The <literal>&lt;include/&gt;</literal>' element tells AspectJ what set of types
+			The <literal>&lt;include/&gt;</literal> element tells AspectJ which set of types
 			should be included in the weaving process. Use the package prefix for your
 			application followed by "..*" (meaning '... and any type defined in a subpackage
 			of this') as a good default. Using the include element is important as otherwise
