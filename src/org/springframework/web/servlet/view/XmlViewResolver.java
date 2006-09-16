@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,7 +54,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver implements Orde
 
 	/** Default if no other location is supplied */
 	public final static String DEFAULT_LOCATION = "/WEB-INF/views.xml";
-	
+
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
@@ -95,7 +95,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver implements Orde
 	 * This implementation returns just the view name,
 	 * as XmlViewResolver doesn't support localized resolution.
 	 */
-	protected String getCacheKey(String viewName, Locale locale) {
+	protected Object getCacheKey(String viewName, Locale locale) {
 		return viewName;
 	}
 

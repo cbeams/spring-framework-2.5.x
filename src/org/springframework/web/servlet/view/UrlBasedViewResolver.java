@@ -341,7 +341,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * This implementation returns just the view name,
 	 * as this ViewResolver doesn't support localized resolution.
 	 */
-	protected String getCacheKey(String viewName, Locale locale) {
+	protected Object getCacheKey(String viewName, Locale locale) {
 		return viewName;
 	}
 
