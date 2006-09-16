@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 RC4 (12.9.2006)
+Changes in version 2.0 RC4 (16.9.2006)
 --------------------------------------
 
 General
@@ -27,6 +27,7 @@ Package org.springframework.beans
 * added support for destruction callbacks to Scope abstraction, driven by a BeanFactory's definition for a scoped bean
 * PropertyResourceConfigurer, CustomEditorConfigurer and CustomScopeConfigurer use highest Ordered precendence now
 * fixed FieldRetrievingFactoryBean to return "false" from "isSingleton()", since it reobtains the field value every time
+* FieldRetrievingFactoryBean and PropertyPathFactoryBean trim whitespace in all given names (even within the String)
 * fixed AbstractBeanFactory to accept re-registration of alias for same bean name (-> bean definition overriding)
 * reworked AbstractBeanFactory's alias handling to support local alias definitions for a bean in the parent BeanFactory
 * AbstractAutowireCapableBeanFactory only logs name and class of eagerly cached bean (does not trigger toString anymore)
@@ -38,7 +39,9 @@ Package org.springframework.beans
 * removed deprecated BeanFactoryBootstrap class
 
 Package org.springframework.cache
-* refined EhCacheManagerFactoryBean to use "CacheManager.create(InputStream)" instead of "CacheManager.create(URL)"
+* EhCacheManagerFactoryBean creates an independent CacheManager instance by default now (requires EHCache 1.2)
+* added "shared" flag to EhCacheManagerFactoryBean, allowing to explicitly ask for a shared CacheManager instance
+* refined EhCacheManagerFactoryBean to use pass in an InputStream instead of a URL for CacheManager initialization
 
 Package org.springframework.context
 * exposed AbstractApplicationContext's "registerShutdownHook()" method in ConfigurableApplicationContext interface
@@ -47,6 +50,8 @@ Package org.springframework.context
 
 Package org.springframework.core
 * fixed SpringVersion to return null if the package is not determinable because of ClassLoader restrictions
+* ResourceArrayPropertyEditor always preserves order of resource entries, even on JDK 1.3 without Commons Collections
+* refined PathMatchingResourcePatternResolver to ignore classpath roots that cannot be resolved as jar or in file system
 
 Package org.springframework.instrument
 * removed unused AbstractLoadTimeWeaver and AspectJWeavingTransformer classes
@@ -57,20 +62,25 @@ Package org.springframework.instrument
 
 Package org.springframework.jca
 * SingleConnectionFactory's Connection proxy implements "equals" and "hashCode" based on proxy equality
+* factored out "resetConnection", "prepareConnection" and "closeConnection" methods in SingleConnectionFactory
 
 Package org.springframework.jdbc
 * refined DataSourceUtils to catch Throwable on "Connection.close()"
 * DataSourceUtils uses lower synchronization order for delegating handles (such as from TransactionAwareDataSourceProxy)
 * SingleConnectionDataSource's Connection proxy implements "equals" and "hashCode" based on proxy equality
+* factored out "resetConnection", "prepareConnection" and "closeConnection" methods in SingleConnectionDataSource
 * CommonsDbcpNativeJdbcExtractor supports original Commons DBCP as well as Tomcat 5.5's relocated version
 * revised JBossNativeJdbcExtractor to unwrap ResultSet even for WrappedResultSet subclasses (requires JBoss 3.2.4+ now)
 * DataSourceLookup throws DataSourceLookupFailureException instead of DataAccessResourceFailureException
 * added SingleDataSourceLookup, exposing a single given DataSource for any data source name
 * added AbstractInterruptibleBatchPreparedStatementSetter base class, with single "setValuesIfAvailable" callback method
+* added default SQL error codes for the Apache Derby database
 
 Package org.springframework.jms
 * SingleConnectionFactory's Connection proxy implements "equals" and "hashCode" based on proxy equality
 * SingleConnectionFactory's Connection proxy ignores "stop()" calls as well (not just "close()" calls)
+* factored out "resetConnection", "prepareConnection" and "closeConnection" methods in SingleConnectionFactory
+* added "exceptionListener" and "reconnectOnException" properties to SingleConnectionFactory
 * JmsTemplate and AbstractMessageListenerContainer call "stop()" on a Connection before closing it (if started before)
 * DefaultMessageListenerContainer does not block on startup until it can establish a shared Connection (if necessary)
 * added support for synchronized local JMS transactions (alongside some other main transaction) to JmsTemplate
@@ -135,6 +145,8 @@ Package org.springframework.transaction
 * fixed TransactionAttributeSourceAdvisor to avoid potential NPE in TransactionAttributeSourcePointcut's "hashCode"
 
 Package org.springframework.validation
+* added "getPropertyEditorRegistry" method to BindingResult interface, for re-registering custom editors
+* AbstractBindingResult's "addAllErrors" only accepts Errors instance with same object name
 * added appropriate "toString" implementation to AbstractBindingResult
 * added appropriate "equals"/"hashCode" implementations to AbstractBindingResult and BindException
 * added appropriate "equals"/"hashCode" implementations to ObjectError and FieldError
@@ -143,6 +155,8 @@ Package org.springframework.web
 * ExpressionEvaluationUtils falls back to Jakarta JSTL if JSP 2.0 ExpressionEvaluator API present but not implemented
 * added support for attribute destruction callbacks to RequestAttributes abstraction + Servlet/PortletRequestAttributes
 * introduced "requestCompleted()" method in AbstractRequestAttributes base class for Servlet/PortletRequestAttributes
+* adapted TagUtils to accept subclassed parent tag as expected ancestor too (e.g. OptionTag within subclassed SelectTag)
+* AbstractJasperReportsView converts exporter parameter values "true"/"false" to Boolean.TRUE/FALSE
 * fixed various JSP form tag issues
 
 
