@@ -73,14 +73,14 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - EasyMock 1.2 (JDK 1.3 version) (http://www.easymock.org)
 - required for building and running the framework test suite
 
-* ehcache/ehcache-1.2.jar
-- EHCache 1.2 (http://ehcache.sourceforge.net)
+* ehcache/ehcache-1.2.3.jar
+- EHCache 1.2.3 (http://ehcache.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's EHCache support
 - required for running PetClinic (by Hibernate)
 
 * freemarker/freemarker.jar
-- FreeMarker 2.3.6 (http://www.freemarker.org)
+- FreeMarker 2.3.8 (http://www.freemarker.org)
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
 
@@ -252,8 +252,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's JamonPerformanceMonitorInterceptor
 
-* jasperreports/jasperreports-1.2.5.jar
-- JasperReports 1.2.5 (http://jasperreports.sourceforge.net)
+* jasperreports/jasperreports-1.2.6.jar
+- JasperReports 1.2.6 (http://jasperreports.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JasperReports support
 
