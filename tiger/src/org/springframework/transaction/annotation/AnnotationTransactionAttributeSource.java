@@ -30,12 +30,11 @@ import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute
 import org.springframework.transaction.interceptor.TransactionAttribute;
 
 /**
- * <p>Implementation of <code>TransactionAttributeSource</code> for working
- * with transaction metadata in JDK 1.5+ annotation format.
+ * Implementation of <code>TransactionAttributeSource</code> for working with
+ * transaction metadata in JDK 1.5+ annotation format.
  *
- * <p>This class reads the JDK 1.5+ <code>Transactional</code> annotation
- * and exposes corresponding transaction attributes to Spring's transaction
- * infrastructure.
+ * <p>This class reads the JDK 1.5+ <code>Transactional</code> annotation and
+ * exposes corresponding transaction attributes to Spring's transaction infrastructure.
  *
  * <p>This is a direct alternative to <code>AttributesTransactionAttributeSource</code>,
  * which is able to read in source-level attributes via Commons Attributes.
@@ -128,14 +127,14 @@ public class AnnotationTransactionAttributeSource
 	}
 
 	/**
-	 * Only public methods can be made transactional using {@link @Transactional}.
+	 * Only public methods can be made transactional using {@link Transactional}.
 	 */
 	protected boolean allowPublicMethodsOnly() {
 		return true;
 	}
 
 	public boolean equals(Object other) {
-		return (other == this || other instanceof AnnotationTransactionAttributeSource);
+		return (this == other || other instanceof AnnotationTransactionAttributeSource);
 	}
 
 	public int hashCode() {
