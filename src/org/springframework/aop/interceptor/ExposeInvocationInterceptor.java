@@ -19,7 +19,6 @@ package org.springframework.aop.interceptor;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -69,18 +68,15 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 	 * Return the AOP Alliance MethodInvocation object associated with the current
 	 * invocation. 
 	 * @return the invocation object associated with the current invocation
-	 * @throws AspectException if there is no AOP invocation
-	 * in progress, or if the ExposeInvocationInterceptor was not
-	 * added to this interceptor chain.
+	 * @throws IllegalStateException if there is no AOP invocation in progress,
+	 * or if the ExposeInvocationInterceptor was not added to this interceptor chain.
 	 */
-	public static MethodInvocation currentInvocation() throws AspectException {
+	public static MethodInvocation currentInvocation() throws IllegalStateException {
 		MethodInvocation mi = (MethodInvocation) invocation.get();
-		String mesg = "No MethodInvocation found: check that an AOP invocation is in progress, " +
-					"and that the ExposeInvocationInterceptor is in the interceptor chain";
 		if (mi == null)
-			throw new AspectException(
-					mesg, 
-					new Throwable(mesg));
+			throw new IllegalStateException(
+					"No MethodInvocation found: Check that an AOP invocation is in progress, " +
+					"and that the ExposeInvocationInterceptor is in the interceptor chain.");
 		return mi;
 	}
 	

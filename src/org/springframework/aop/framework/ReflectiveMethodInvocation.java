@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -183,9 +182,9 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 
 	/**
-	 * Create a clone of this object. If cloning is done before proceed() is invoked on this
-	 * object, proceed() can be invoked once per clone to invoke the joinpoint (and the rest
-	 * of the advice chain) more than once.
+	 * Create a clone of this object. If cloning is done before <code>proceed()</code>
+	 * is invoked on this object, <code>proceed()</code> can be invoked once per clone
+	 * to invoke the joinpoint (and the rest of the advice chain) more than once.
 	 * <p>This method returns a shallow copy, except for the argument array, which is
 	 * deep-copied to allow for independent modification. We want a shallow copy in this case:
 	 * We want to use the same interceptor-chain and other object references, but we want an
@@ -204,7 +203,8 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 			return clone;
 		}
 		catch (CloneNotSupportedException ex) {
-			throw new AspectException("Should be able to clone object of " + getClass(), ex);
+			throw new IllegalStateException(
+					"Should be able to clone object of type [" + getClass() + "]: " + ex);
 		}
 	}
 

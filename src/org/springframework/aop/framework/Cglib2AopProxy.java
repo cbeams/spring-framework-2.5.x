@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collections;
 
 import net.sf.cglib.core.CodeGenerationException;
 import net.sf.cglib.proxy.Callback;
@@ -37,14 +36,13 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import net.sf.cglib.proxy.NoOp;
 import net.sf.cglib.transform.impl.UndeclaredThrowableStrategy;
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.PointcutAdvisor;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -207,20 +205,20 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			return proxy;
 		}
 		catch (CodeGenerationException ex) {
-			throw new AspectException("Couldn't generate CGLIB subclass of class '" +
+			throw new AopConfigException("Couldn't generate CGLIB subclass of class '" +
 					this.advised.getTargetSource().getTargetClass() + "': " +
 					"Common causes of this problem include using a final class or a non-visible class",
 					ex);
 		}
 		catch (IllegalArgumentException ex) {
-			throw new AspectException("Couldn't generate CGLIB subclass of class '" +
+			throw new AopConfigException("Couldn't generate CGLIB subclass of class '" +
 					this.advised.getTargetSource().getTargetClass() + "': " +
 					"Common causes of this problem include using a final class or a non-visible class",
 					ex);
 		}
 		catch (Exception ex) {
 			// TargetSource.getTarget failed
-			throw new AspectException("Unexpected AOP exception", ex);
+			throw new AopConfigException("Unexpected AOP exception", ex);
 		}
 	}
 

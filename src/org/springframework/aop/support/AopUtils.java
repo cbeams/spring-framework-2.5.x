@@ -18,6 +18,7 @@ package org.springframework.aop.support;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,11 +28,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.aopalliance.aop.AspectException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.Advisor;
+import org.springframework.aop.AopInvocationException;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionAwareMethodMatcher;
 import org.springframework.aop.MethodMatcher;
@@ -323,14 +324,17 @@ public abstract class AopUtils {
 	 * @param method the method to invoke
 	 * @param args the arguments for the method
 	 * @throws Throwable if thrown by the target method
-	 * @throws org.aopalliance.aop.AspectException if encountering a reflection error
+	 * @throws org.springframework.aop.AopInvocationException in case of a reflection error
 	 */
 	public static Object invokeJoinpointUsingReflection(Object target, Method method, Object[] args)
 	    throws Throwable {
 
 		// Use reflection to invoke the method.
 		try {
-			method.setAccessible(true);
+			if (!Modifier.isPublic(method.getModifiers()) ||
+					!Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+				method.setAccessible(true);
+			}
 			return method.invoke(target, args);
 		}
 		catch (InvocationTargetException ex) {
@@ -339,14 +343,11 @@ public abstract class AopUtils {
 			throw ex.getTargetException();
 		}
 		catch (IllegalArgumentException ex) {
-			throw new AspectException("AOP configuration seems to be invalid: tried calling method [" +
+			throw new AopInvocationException("AOP configuration seems to be invalid: tried calling method [" +
 					method + "] on target [" + target + "]", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new AspectException("Couldn't access method: " + method, ex);
-		}
-		finally {
-			method.setAccessible(false);
+			throw new AopInvocationException("Couldn't access method: " + method, ex);
 		}
 	}
 

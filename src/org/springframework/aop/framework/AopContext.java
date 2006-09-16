@@ -16,7 +16,7 @@
 
 package org.springframework.aop.framework;
 
-import org.aopalliance.aop.AspectException;
+
 
 /**
  * Class containing static methods used to obtain information about the
@@ -54,17 +54,17 @@ public abstract class AopContext {
 	 * Try to return the current AOP proxy. This method is usable
 	 * only if the calling method has been invoked via AOP, and the
 	 * AOP framework has been set to expose proxies. Otherwise,
-	 * this method will throw an AspectException.
+	 * this method will throw an IllegalStateException.
 	 * @return Object the current AOP proxy (never returns null)
-	 * @throws AspectException if the proxy cannot be found,
+	 * @throws IllegalStateException if the proxy cannot be found,
 	 * because the method was invoked outside an AOP invocation
 	 * context, or because the AOP framework has not been configured
 	 * to expose the proxy
 	 */
-	public static Object currentProxy() throws AspectException {
+	public static Object currentProxy() throws IllegalStateException {
 		if (currentProxy.get() == null) {
-			String mesg = "Cannot find proxy: set 'exposeProxy' property on Advised to true to make it available";
-			throw new AspectException(mesg, new Throwable(mesg));
+			throw new IllegalStateException(
+					"Cannot find proxy: Set 'exposeProxy' property on Advised to true to make it available.");
 		}
 		return currentProxy.get();
 	}

@@ -16,22 +16,22 @@
 
 package org.springframework.aop.framework;
 
+import java.io.Serializable;
+
 import net.sf.cglib.core.CodeGenerationException;
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
+
+import org.springframework.aop.ClassFilter;
+import org.springframework.aop.MethodMatcher;
+import org.springframework.aop.Pointcut;
 import org.springframework.aop.interceptor.NopInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.aop.Pointcut;
-import org.springframework.aop.ClassFilter;
-import org.springframework.aop.MethodMatcher;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import java.io.Serializable;
 
 /**
  * Additional and overridden tests for the CGLIB proxy.
@@ -124,11 +124,10 @@ public class CglibProxyTests extends AbstractAopProxyTests {
 			pf.getProxy();
 			fail("Shouldn't be able to proxy non-visible class with CGLIB");
 		}
-		catch (AspectException ex) {
+		catch (AopConfigException ex) {
 			// Check that stack trace is preserved
 			// FIX: CGLIB will throw an IllegalArgumentException when trying to
-			// create a proxy
-			// of a class where the constructor is not visible - Rob Harrop
+			// create a proxy of a class where the constructor is not visible.
 			assertTrue((ex.getCause() instanceof CodeGenerationException)
 					|| (ex.getCause() instanceof IllegalArgumentException));
 

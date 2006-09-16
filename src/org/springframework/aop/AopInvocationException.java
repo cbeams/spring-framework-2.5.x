@@ -14,32 +14,33 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.framework;
+package org.springframework.aop;
 
 import org.springframework.core.NestedRuntimeException;
 
 /**
- * Exception that gets thrown on illegal AOP configuration arguments.
+ * Exception that gets thrown when an AOP invocation failed
+ * because of misconfiguration or unexpected runtime issues.
  *
- * @author Rod Johnson
- * @since 13.03.2003
+ * @author Juergen Hoeller
+ * @since 2.0
  */
-public class AopConfigException extends NestedRuntimeException {
+public class AopInvocationException extends NestedRuntimeException {
 
 	/**
-	 * Constructor for EjbAccessException.
+	 * Constructor for AopInvocationException.
 	 * @param msg the detail message
 	 */
-	public AopConfigException(String msg) {
+	public AopInvocationException(String msg) {
 		super(msg);
 	}
 
 	/**
-	 * Constructor for EjbAccessException.
+	 * Constructor for AopInvocationException.
 	 * @param msg the detail message
 	 * @param cause the root cause
 	 */
-	public AopConfigException(String msg, Throwable cause) {
+	public AopInvocationException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
 

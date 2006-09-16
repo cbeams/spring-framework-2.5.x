@@ -1,69 +1,67 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Created on 6 Jun 2006 by Adrian Colyer
  */
+
 package org.springframework.aop.support;
 
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.ProxyMethodInvocation;
-import org.springframework.util.Assert;
 
 /**
- * <p>
  * Convenient implementation of the IntroductionInterceptor interface.
- * </p>
- * <p>
- * This differs from DelegatingIntroductionInterceptor in that a single instance
+ *
+ * <p>This differs from DelegatingIntroductionInterceptor in that a single instance
  * of this class can be used to advise multiple target objects, and each target
  * object will have its <i>own</i> delegate (whereas DelegatingIntroductionInterceptor
  * shares the same delegate, and hence the same state across all targets).
- * </p>
+ *
  * <p>The <code>suppressInterface</code> method can be used to suppress interfaces
  * implemented by the delegate class but which should not be introduced to the owning
  * AOP proxy.
- * </p>
- * <p>
- * A DelegatePerTargetObjectDelegatingIntroductionInterceptor is serializable if the delegates are.
- * </p>
- * <p><i>Note: there are some implementation similarities between this class and
+ *
+ * <p>A DelegatePerTargetObjectDelegatingIntroductionInterceptor is serializable
+ * if the delegates are.
+ *
+ * <p><i>Note: There are some implementation similarities between this class and
  * DelegatingIntroductionInterceptor that suggest a possible refactoring to extract
- * a common ancestor class in the future</i></p>
- * 
+ * a common ancestor class in the future.</i>
+ *
  * @author Adrian Colyer
  * @since 2.0
  * @see #suppressInterface
  * @see DelegatingIntroductionInterceptor
  */
 public class DelegatePerTargetObjectDelegatingIntroductionInterceptor extends IntroductionInfoSupport
-implements IntroductionInterceptor {
+		implements IntroductionInterceptor {
 
 	/** 
-	 * Hold weak references to keys as we don't want to interfere with 
-	 * garbage collection..
+	 * Hold weak references to keys as we don't want to interfere with garbage collection..
 	 */
 	private Map delegateMap = new WeakHashMap();
+
 	private Class defaultImplType;
+
 	private Class interfaceType;
-	
+
+
 	public DelegatePerTargetObjectDelegatingIntroductionInterceptor(Class defaultImplType, Class interfaceType) {
 		this.defaultImplType = defaultImplType;
 		this.interfaceType = interfaceType;
@@ -76,7 +74,8 @@ implements IntroductionInterceptor {
 		suppressInterface(IntroductionInterceptor.class);
 		suppressInterface(DynamicIntroductionAdvice.class);
 	}
-	
+
+
 	/**
 	 * Subclasses may need to override this if they want to  perform custom
 	 * behaviour in around advice. However, subclasses should invoke this
@@ -128,21 +127,13 @@ implements IntroductionInterceptor {
 	}
 	
 	private Object createNewDelegate() {
-		Object delegate = null;
 		try {
 			return this.defaultImplType.newInstance();
 		}
-		catch (IllegalArgumentException ex) {
-			throw new AspectException("Cannot create default implementation for '" +
-					this.interfaceType.getName() + "' mixin (" + this.defaultImplType.getName() + ")" , ex);
-		}
-		catch (IllegalAccessException ex) {
-			throw new AspectException("Cannot create default implementation for '" +
-					this.interfaceType.getName() + "' mixin (" + this.defaultImplType.getName() + ")" , ex);
-		}
-		catch (InstantiationException ex) {
-			throw new AspectException("Cannot create default implementation for '" +
-					this.interfaceType.getName() + "' mixin (" + this.defaultImplType.getName() + ")" , ex);
+		catch (Exception ex) {
+			throw new IllegalArgumentException("Cannot create default implementation for '" +
+					this.interfaceType.getName() + "' mixin (" + this.defaultImplType.getName() + "): " + ex);
 		}
 	}
+
 }

@@ -16,7 +16,6 @@
 
 package org.springframework.aop.interceptor;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -52,10 +51,10 @@ public abstract class ExposeBeanNameAdvisors extends DefaultPointcutAdvisor {
 	 * Find the bean name for the current invocation. Assumes that an ExposeBeanNameAdvisor
 	 * has been included in the interceptor chain, and that the invocation is exposed
 	 * with ExposeInvocationInterceptor.
-	 * @return the bean name. Never returns null
-	 * @throws AspectException if the bean name has not been exposed
+	 * @return the bean name (never <code>null</code>)
+	 * @throws IllegalStateException if the bean name has not been exposed
 	 */
-	public static String getBeanName() throws AspectException, IllegalArgumentException {
+	public static String getBeanName() throws IllegalStateException {
 		MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
 		return getBeanName(mi);
 	}
@@ -64,17 +63,17 @@ public abstract class ExposeBeanNameAdvisors extends DefaultPointcutAdvisor {
 	 * Find the bean name for the given invocation. Assumes that an ExposeBeanNameAdvisor
 	 * has been included in the interceptor chain.
 	 * @param mi MethodInvocation that should contain the bean name as an attribute
-	 * @return the bean name. Never returns null
-	 * @throws AspectException if the bean name has not been exposed
+	 * @return the bean name (never <code>null</code>)
+	 * @throws IllegalStateException if the bean name has not been exposed
 	 */
-	public static String getBeanName(MethodInvocation mi) throws AspectException, IllegalArgumentException {
+	public static String getBeanName(MethodInvocation mi) throws IllegalStateException {
 		if (!(mi instanceof ReflectiveMethodInvocation)) {
 			throw new IllegalArgumentException("Not a Spring AOP ReflectiveMethodInvocation");
 		}
 		ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) mi;
 		String beanName = (String) rmi.getUserAttributes().get(BEAN_NAME_ATTRIBUTE);
 		if (beanName == null) {
-			throw new AspectException("Cannot get bean name: not set on MethodInvocation. " +
+			throw new IllegalStateException("Cannot get bean name: not set on MethodInvocation. " +
 					"Include ExposeBeanNameAdvisor in interceptor chain.");
 		}
 		return beanName;

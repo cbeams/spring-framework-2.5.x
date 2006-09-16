@@ -29,11 +29,10 @@ import javax.servlet.ServletException;
 import javax.transaction.TransactionRequiredException;
 
 import junit.framework.TestCase;
-
 import org.aopalliance.aop.Advice;
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.DynamicIntroductionAdvice;
@@ -361,7 +360,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 			proxied.incrementViaProxy();
 			fail("Should have failed to get proxy as exposeProxy wasn't set to true");
 		}
-		catch (AspectException ex) {
+		catch (IllegalStateException ex) {
 			// Ok
 		}
 	}
@@ -598,7 +597,8 @@ public abstract class AbstractAopProxyTests extends TestCase {
 		try {
 			ExposeInvocationInterceptor.currentInvocation();
 			fail("Expected no invocation context");
-		} catch (AspectException ex) {
+		}
+		catch (IllegalStateException ex) {
 			// ok
 		}
 	}
@@ -1679,10 +1679,9 @@ public abstract class AbstractAopProxyTests extends TestCase {
 				assertEquals(current, ExposeInvocationInterceptor.currentInvocation());
 				return retval;
 			}
-			catch (AspectException ex) {
+			catch (IllegalStateException ex) {
 				System.err.println(task + " for " + mi.getMethod());
 				ex.printStackTrace();
-				//fail("Can't find invocation: " + ex);
 				throw ex;
 			}
 		}
