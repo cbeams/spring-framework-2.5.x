@@ -109,11 +109,11 @@ public abstract class ConnectionFactoryUtils {
 	}
 
 	/**
-	 * Close the given Connection if necessary, i.e. if it is not bound to the thread
-	 * and it is not created by a SmartDataSource returning shouldClose=false.
-	 * @param con Connection to close if necessary
-	 * (if this is null, the call will be ignored)
-	 * @param cf ConnectionFactory that the Connection came from
+	 * Close the given Connection if necessary, that is, if it is not bound to the thread.
+	 * @param con the Connection to close if necessary
+	 * (if this is <code>null</code>, the call will be ignored)
+	 * @param cf the ConnectionFactory that the Connection came from
+	 * (can be <code>null</code>)
 	 */
 	public static void releaseConnection(Connection con, ConnectionFactory cf) {
 		try {
@@ -132,11 +132,15 @@ public abstract class ConnectionFactoryUtils {
 	 * Actually close a JCA CCI Connection for the given DataSource.
 	 * Same as <code>releaseConnection</code>, but throwing the original ResourceException.
 	 * <p>Directly accessed by TransactionAwareConnectionFactoryProxy.
+	 * @param con the Connection to close if necessary
+	 * (if this is <code>null</code>, the call will be ignored)
+	 * @param cf the ConnectionFactory that the Connection came from
+	 * (can be <code>null</code>)
 	 * @throws ResourceException if thrown by JCA CCI methods
 	 * @see #releaseConnection
 	 */
 	public static void doReleaseConnection(Connection con, ConnectionFactory cf) throws ResourceException {
-		if (con == null || TransactionSynchronizationManager.hasResource(cf)) {
+		if (con == null || (cf != null && TransactionSynchronizationManager.hasResource(cf))) {
 			return;
 		}
 		con.close();
