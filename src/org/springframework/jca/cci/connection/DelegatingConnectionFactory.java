@@ -30,9 +30,10 @@ import org.springframework.beans.factory.InitializingBean;
 /**
  * {@link ConnectionFactory} implementation that delegates all calls to a
  * given target {@link ConnectionFactory}.
- * 
- * <p>It is meant to be subclassed, with subclasses overriding only those
- * methods that must not simply delegate to the target {@link ConnectionFactory}.
+ *
+ * <p>This class is meant to be subclassed, with subclasses overriding only
+ * those methods (such as {@link #getConnection()}) that should not simply
+ * delegate to the target {@link ConnectionFactory}.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -80,32 +81,12 @@ public class DelegatingConnectionFactory implements ConnectionFactory, Initializ
 		return getTargetConnectionFactory().getMetaData();
 	}
 
-	/**
-	 * This implementation always throws an {@link UnsupportedOperationException}.
-	 * 
-	 * <p>Subclasses can of course override this method to set the
-	 * {@link Reference} instance.
-	 * 
-	 * Sets 
-	 * @param reference a {@link Reference} instance
-	 * @throws UnsupportedOperationException always
-	 */
 	public void setReference(Reference reference) {
-		throw new UnsupportedOperationException("setReference");
+		getTargetConnectionFactory().setReference(reference);
 	}
 
-	/**
-	 * This implementation always throws an {@link UnsupportedOperationException}.
-	 * 
-	 * <p>Subclasses can of course override this method to retrieve the
-	 * {@link Reference} of this instance.
-	 *
-	 * @return the non-null {@link Reference} of this object
-	 * @exception NamingException if a naming exception was encountered while retrieving the reference
-	 * @throws UnsupportedOperationException always
-	 */
 	public Reference getReference() throws NamingException {
-		throw new UnsupportedOperationException("getReference");
+		return getTargetConnectionFactory().getReference();
 	}
 
 }
