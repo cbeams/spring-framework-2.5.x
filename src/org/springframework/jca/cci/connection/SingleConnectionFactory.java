@@ -21,20 +21,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import javax.naming.NamingException;
-import javax.naming.Reference;
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.ConnectionSpec;
-import javax.resource.cci.RecordFactory;
-import javax.resource.cci.ResourceAdapterMetaData;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.util.Assert;
 
 /**
  * A CCI ConnectionFactory adapter that returns the same Connection on all
@@ -58,11 +55,14 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Wrapped connection */
+	/** Wrapped Connection */
 	private Connection target;
 
-	/** Proxy connection */
+	/** Proxy Connection */
 	private Connection connection;
+
+	/** Synchronization monitor for the shared Connection */
+	private final Object connectionMonitor = new Object();
 
 
 	/**
@@ -78,9 +78,9 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 	 * @param target the single Connection
 	 */
 	public SingleConnectionFactory(Connection target) {
+		Assert.notNull(target, "Target Connection must not be null");
 		this.target = target;
 		this.connection = getCloseSuppressingConnectionProxy(target);
-		afterPropertiesSet();
 	}
 
 	/**
@@ -90,34 +90,79 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 	 * @param targetConnectionFactory the target ConnectionFactory
 	 */
 	public SingleConnectionFactory(ConnectionFactory targetConnectionFactory) {
+		Assert.notNull(targetConnectionFactory, "Target ConnectionFactory must not be null");
 		setTargetConnectionFactory(targetConnectionFactory);
-		afterPropertiesSet();
 	}
 
 	/**
-	 * Make sure a connection or connection factory has been set.
+	 * Make sure a Connection or ConnectionFactory has been set.
 	 */
 	public void afterPropertiesSet() {
 		if (this.connection == null && getTargetConnectionFactory() == null) {
-			throw new IllegalArgumentException("connection or targetConnectionFactory is required");
+			throw new IllegalArgumentException("Connection or targetConnectionFactory is required");
 		}
 	}
 
 
+	public Connection getConnection() throws ResourceException {
+		synchronized (this.connectionMonitor) {
+			if (this.connection == null) {
+				initConnection();
+			}
+			return this.connection;
+		}
+	}
+
+	public Connection getConnection(ConnectionSpec connectionSpec) throws ResourceException {
+		throw new NotSupportedException(
+				"SingleConnectionFactory does not support custom ConnectionSpec");
+	}
+
 	/**
-	 * Initialize the single Connection.
+	 * Close the underlying Connection.
+	 * The provider of this ConnectionFactory needs to care for proper shutdown.
+	 * <p>As this bean implements DisposableBean, a bean factory will
+	 * automatically invoke this on destruction of its cached singletons.
+	 */
+	public void destroy() {
+		resetConnection();
+	}
+
+
+	/**
+	 * Initialize the single underlying Connection.
+	 * <p>Closes and reinitializes the Connection if an underlying
+	 * Connection is present already.
 	 * @throws javax.resource.ResourceException if thrown by CCI API methods
 	 */
-	protected void init() throws ResourceException {
+	public void initConnection() throws ResourceException {
 		if (getTargetConnectionFactory() == null) {
-			throw new IllegalStateException("targetConnectionFactory is required for lazily initializing a connection");
+			throw new IllegalStateException("targetConnectionFactory is required for lazily initializing a Connection");
 		}
-		Connection target = doCreateConnection();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Created single connection: " + target);
+		synchronized (this.connectionMonitor) {
+			if (this.target != null) {
+				closeConnection(this.target);
+			}
+			this.target = doCreateConnection();
+			prepareConnection(this.target);
+			if (logger.isInfoEnabled()) {
+				logger.info("Established shared CCI Connection: " + this.target);
+			}
+			this.connection = getCloseSuppressingConnectionProxy(this.target);
 		}
-		this.target = target;
-		this.connection = getCloseSuppressingConnectionProxy(target);
+	}
+
+	/**
+	 * Reset the underlying shared Connection, to be reinitialized on next access.
+	 */
+	public void resetConnection() {
+		synchronized (this.connectionMonitor) {
+			if (this.target != null) {
+				closeConnection(this.target);
+			}
+			this.target = null;
+			this.connection = null;
+		}
 	}
 
 	/**
@@ -130,51 +175,25 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 	}
 
 	/**
-	 * Close the underlying connection.
-	 * The provider of this ConnectionFactory needs to care for proper shutdown.
-	 * <p>As this bean implements DisposableBean, a bean factory will
-	 * automatically invoke this on destruction of its cached singletons.
+	 * Prepare the given Connection before it is exposed.
+	 * <p>The default implementation is empty. Can be overridden in subclasses.
+	 * @param con the Connection to prepare
 	 */
-	public void destroy() throws ResourceException {
-		if (this.target != null) {
-			this.target.close();
+	protected void prepareConnection(Connection con) throws ResourceException {
+	}
+
+	/**
+	 * Close the given Connection.
+	 * @param con the Connection to close
+	 */
+	protected void closeConnection(Connection con) {
+		try {
+			con.close();
+		}
+		catch (Throwable ex) {
+			logger.warn("Could not close shared CCI Connection", ex);
 		}
 	}
-
-
-	public Connection getConnection() throws ResourceException {
-		synchronized (this) {
-			if (this.connection == null) {
-				init();
-			}
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Returning single connection: " + this.connection);
-		}
-		return this.connection;
-	}
-
-	public Connection getConnection(ConnectionSpec connectionSpec) throws ResourceException {
-		throw new NotSupportedException(
-				"SingleConnectionFactory does not support custom ConnectionSpec");
-	}
-
-	public RecordFactory getRecordFactory() throws ResourceException {
-		return getTargetConnectionFactory().getRecordFactory();
-	}
-
-	public ResourceAdapterMetaData getMetaData() throws ResourceException {
-		return getTargetConnectionFactory().getMetaData();
-	}
-
-	public void setReference(Reference reference) {
-		getTargetConnectionFactory().setReference(reference);
-	}
-
-	public Reference getReference() throws NamingException {
-		return getTargetConnectionFactory().getReference();
-	}
-
 
 	/**
 	 * Wrap the given Connection with a proxy that delegates every method call to it
@@ -199,8 +218,8 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 
 		private final Connection target;
 
-		private CloseSuppressingInvocationHandler(Connection source) {
-			this.target = source;
+		private CloseSuppressingInvocationHandler(Connection target) {
+			this.target = target;
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
