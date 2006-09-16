@@ -29,21 +29,28 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 
 /**
- * FactoryBean that exposes a EHCache CacheManager singleton,
+ * FactoryBean that exposes a EHCache CacheManager instance (independent or shared),
  * configured from a specified config location.
  *
- * <p>If no config location is specified, a CacheManager will be
- * configured from "ehcache.xml" in the root of the class path
- * (i.e., default EHCache initialization will apply).
+ * <p>If no config location is specified, a CacheManager will be configured from
+ * "ehcache.xml" in the root of the class path (that is, default EHCache initialization
+ * - as defined in the EHCache docs - will apply).
  *
- * <p>Setting up a separate EhCacheManagerFactoryBean is also advisable
- * when using EhCacheFactoryBean, as it cares for proper shutdown of the
- * CacheManager. EhCacheManagerFactoryBean is also necessary for loading
- * EHCache configuration from a non-default config location.
+ * <p>Setting up a separate EhCacheManagerFactoryBean is also advisable when using
+ * EhCacheFactoryBean, as it provides a (by default) independent CacheManager instance
+ * and cares for proper shutdown of the CacheManager. EhCacheManagerFactoryBean is
+ * also necessary for loading EHCache configuration from a non-default config location.
+ *
+ * <p>Note: As of Spring 2.0, this FactoryBean will by default create an independent
+ * CacheManager instance, which requires EHCache 1.2 or higher. Set the "shared"
+ * flag to "true" to create a CacheManager instance that is shared at the VM level
+ * (which is also compatible with EHCache 1.1).
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @since 1.1.1
+ * @see #setConfigLocation
+ * @see #setShared
  * @see EhCacheFactoryBean
  * @see net.sf.ehcache.CacheManager
  */
@@ -52,6 +59,8 @@ public class EhCacheManagerFactoryBean implements FactoryBean, InitializingBean,
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Resource configLocation;
+
+	private boolean shared = false;
 
 	private CacheManager cacheManager;
 
@@ -65,13 +74,37 @@ public class EhCacheManagerFactoryBean implements FactoryBean, InitializingBean,
 		this.configLocation = configLocation;
 	}
 
+	/**
+	 * Set whether the EHCache CacheManager should be shared (as a singleton at the VM level)
+	 * or independent (typically local within the application). Default is "false", creating
+	 * an independent instance.
+	 * <p>Note that independent CacheManager instances are only available on EHCache 1.2 and
+	 * higher. Switch this flag to "true" if you intend to run against an EHCache 1.1 jar.
+	 */
+	public void setShared(boolean shared) {
+		this.shared = shared;
+	}
+
+
 	public void afterPropertiesSet() throws IOException, CacheException {
 		logger.info("Initializing EHCache CacheManager");
-		if (this.configLocation != null) {
-			this.cacheManager = CacheManager.create(this.configLocation.getInputStream());
+		if (this.shared) {
+			// Shared CacheManager singleton at the VM level.
+			if (this.configLocation != null) {
+				this.cacheManager = CacheManager.create(this.configLocation.getInputStream());
+			}
+			else {
+				this.cacheManager = CacheManager.create();
+			}
 		}
 		else {
-			this.cacheManager = CacheManager.create();
+			// Independent CacheManager instance (the default).
+			if (this.configLocation != null) {
+				this.cacheManager = new CacheManager(this.configLocation.getInputStream());
+			}
+			else {
+				this.cacheManager = new CacheManager();
+			}
 		}
 	}
 
