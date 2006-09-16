@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 
 import javax.naming.NamingException;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import org.springframework.jndi.JndiObjectLocator;
@@ -114,15 +113,15 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 * Determine the create method of the given EJB home object.
 	 * @param home the EJB home object
 	 * @return the create method
-	 * @throws AspectException if the method couldn't be retrieved
+	 * @throws EjbAccessException if the method couldn't be retrieved
 	 */
-	protected Method getCreateMethod(Object home) throws AspectException {
+	protected Method getCreateMethod(Object home) throws EjbAccessException {
 		try {
 			// Cache the EJB create() method that must be declared on the home interface.
 			return home.getClass().getMethod("create", (Class[]) null);
 		}
 		catch (NoSuchMethodException ex) {
-			throw new AspectException("EJB home [" + home + "] has no no-arg create() method");
+			throw new EjbAccessException("EJB home [" + home + "] has no no-arg create() method");
 		}
 	}
 
@@ -178,7 +177,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 			return createMethodToUse.invoke(home, (Object[]) null);
 		}
 		catch (IllegalAccessException ex) {
-			throw new AspectException("Could not access EJB home create() method", ex);
+			throw new EjbAccessException("Could not access EJB home create() method", ex);
 		}
 	}
 

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,6 @@ import javax.ejb.CreateException;
 import javax.ejb.EJBLocalObject;
 import javax.naming.NamingException;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
@@ -77,17 +76,17 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 				logger.debug("Method of local EJB [" + getJndiName() + "] threw exception", targetEx);
 			}
 			if (targetEx instanceof CreateException) {
-				throw new AspectException("Could not create local EJB [" + getJndiName() + "]", targetEx);
+				throw new EjbAccessException("Could not create local EJB [" + getJndiName() + "]", targetEx);
 			}
 			else {
 				throw targetEx;
 			}
 		}
 		catch (NamingException ex) {
-			throw new AspectException("Failed to locate local EJB [" + getJndiName() + "]", ex);
+			throw new EjbAccessException("Failed to locate local EJB [" + getJndiName() + "]", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new AspectException("Could not access method [" + invocation.getMethod().getName() +
+			throw new EjbAccessException("Could not access method [" + invocation.getMethod().getName() +
 			    "] of local EJB [" + getJndiName() + "]", ex);
 		}
 		finally {
@@ -131,7 +130,7 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 		// call superclass to invoke the EJB create method on the cached home
 		Object ejbInstance = create();
 		if (!(ejbInstance instanceof EJBLocalObject)) {
-			throw new AspectException("EJB instance [" + ejbInstance + "] is not a local SLSB");
+			throw new EjbAccessException("EJB instance [" + ejbInstance + "] is not a local SLSB");
 		}
 
 		if (logger.isDebugEnabled()) {
