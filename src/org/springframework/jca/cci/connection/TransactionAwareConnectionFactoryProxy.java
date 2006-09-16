@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import javax.resource.cci.ConnectionFactory;
  * <p>Delegates to ConnectionFactoryUtils for automatically participating in thread-bound
  * transactions, for example managed by Spring's CciLocalTransactionManager.
  * <code>getConnection</code> calls and <code>close<code> calls on returned Connections
- * will behave properly within a transaction, i.e. always work on the transactional
+ * will behave properly within a transaction, that is, always work on the transactional
  * Connection. If not within a transaction, normal ConnectionFactory behavior applies.
  *
  * <p>This proxy allows data access code to work with the plain JCA CCI API and still
@@ -81,6 +81,7 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 		afterPropertiesSet();
 	}
 
+
 	/**
 	 * Delegate to ConnectionFactoryUtils for automatically participating in Spring-managed
 	 * transactions. Throws the original ResourceException, if any.
@@ -94,10 +95,11 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 
 	/**
 	 * Wrap the given Connection with a proxy that delegates every method call to it
-	 * but delegates close calls to ConnectionFactoryUtils.
+	 * but delegates <code>close</code> calls to ConnectionFactoryUtils.
 	 * @param target the original Connection to wrap
 	 * @param cf ConnectionFactory that the Connection came from
 	 * @return the wrapped Connection
+	 * @see javax.resource.cci.Connection#close()
 	 * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils#doReleaseConnection
 	 */
 	protected Connection getTransactionAwareConnectionProxy(Connection target, ConnectionFactory cf) {
@@ -136,9 +138,7 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 			}
 			else if (method.getName().equals("close")) {
 				// Handle close method: only close if not within a transaction.
-				if (this.connectionFactory != null) {
-					ConnectionFactoryUtils.doReleaseConnection(this.target, this.connectionFactory);
-				}
+				ConnectionFactoryUtils.doReleaseConnection(this.target, this.connectionFactory);
 				return null;
 			}
 

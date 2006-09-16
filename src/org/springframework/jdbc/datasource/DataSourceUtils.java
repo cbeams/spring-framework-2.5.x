@@ -225,11 +225,12 @@ public abstract class DataSourceUtils {
 
 	/**
 	 * Close the given Connection, created via the given DataSource,
-	 * if it is not managed externally (i.e. not bound to the thread).
+	 * if it is not managed externally (that is, not bound to the thread).
 	 * Will never close a Connection from a SmartDataSource returning shouldClose=false.
-	 * @param con Connection to close if necessary
+	 * @param con the Connection to close if necessary
 	 * (if this is <code>null</code>, the call will be ignored)
-	 * @param dataSource DataSource that the Connection came from (can be <code>null</code>)
+	 * @param dataSource the DataSource that the Connection came from
+	 * (can be <code>null</code>)
 	 * @see SmartDataSource#shouldClose
 	 */
 	public static void releaseConnection(Connection con, DataSource dataSource) {
@@ -248,9 +249,10 @@ public abstract class DataSourceUtils {
 	 * Actually release a JDBC Connection for the given DataSource.
 	 * Same as <code>releaseConnection</code>, but throwing the original SQLException.
 	 * <p>Directly accessed by TransactionAwareDataSourceProxy.
-	 * @param con Connection to close if necessary
+	 * @param con the Connection to close if necessary
 	 * (if this is <code>null</code>, the call will be ignored)
-	 * @param dataSource DataSource that the Connection came from (can be <code>null</code>)
+	 * @param dataSource the DataSource that the Connection came from
+	 * (can be <code>null</code>)
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #releaseConnection
 	 * @see TransactionAwareDataSourceProxy

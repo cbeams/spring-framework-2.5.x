@@ -81,12 +81,12 @@ public class DelegatingConnectionFactory implements ConnectionFactory, Initializ
 		return getTargetConnectionFactory().getMetaData();
 	}
 
-	public void setReference(Reference reference) {
-		getTargetConnectionFactory().setReference(reference);
-	}
-
 	public Reference getReference() throws NamingException {
 		return getTargetConnectionFactory().getReference();
+	}
+
+	public void setReference(Reference reference) {
+		getTargetConnectionFactory().setReference(reference);
 	}
 
 }

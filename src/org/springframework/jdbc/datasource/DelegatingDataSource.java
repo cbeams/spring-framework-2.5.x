@@ -29,14 +29,13 @@ import org.springframework.util.Assert;
  * {@link DataSource} implementation that delegates all calls to a given
  * target {@link DataSource}
  * 
- * <p>It is meant to be subclassed, with subclasses overriding only
- * those methods (such as {@link #getConnection()}) that must not simply
- * delegate to the target {@link DataSource} .
+ * <p>This class is meant to be subclassed, with subclasses overriding only
+ * those methods (such as {@link #getConnection()}) that should not simply
+ * delegate to the target {@link DataSource}.
  *
  * @author Juergen Hoeller
  * @since 1.1
  * @see #getConnection()
- * @see #getConnection(String, String)
  */
 public class DelegatingDataSource implements DataSource, InitializingBean {
 
@@ -89,20 +88,20 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 		return getTargetDataSource().getConnection(username, password);
 	}
 
-	public int getLoginTimeout() throws SQLException {
-		return getTargetDataSource().getLoginTimeout();
-	}
-
-	public void setLoginTimeout(int seconds) throws SQLException {
-		getTargetDataSource().setLoginTimeout(seconds);
-	}
-
 	public PrintWriter getLogWriter() throws SQLException {
 		return getTargetDataSource().getLogWriter();
 	}
 
 	public void setLogWriter(PrintWriter out) throws SQLException {
 		getTargetDataSource().setLogWriter(out);
+	}
+
+	public int getLoginTimeout() throws SQLException {
+		return getTargetDataSource().getLoginTimeout();
+	}
+
+	public void setLoginTimeout(int seconds) throws SQLException {
+		getTargetDataSource().setLoginTimeout(seconds);
 	}
 
 }

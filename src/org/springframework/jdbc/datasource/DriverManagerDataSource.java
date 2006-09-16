@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,8 +36,8 @@ import org.springframework.util.StringUtils;
  * Connections on every call.
  *
  * <p>Useful for test or standalone environments outside of a J2EE container, either
- * as a DataSource bean in a respective ApplicationContext, or in conjunction with a
- * simple JNDI environment. Pool-assuming <code>Connection.close()</code> calls will
+ * as a DataSource bean in a corresponding ApplicationContext or in conjunction with
+ * a simple JNDI environment. Pool-assuming <code>Connection.close()</code> calls will
  * simply close the Connection, so any DataSource-aware persistence code should work.
  *
  * <p>In a J2EE container, it is recommended to use a JNDI DataSource provided by
@@ -216,7 +216,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	 * to be passed to the DriverManager.
 	 * <p>Can also contain "user" and "password" properties. However,
 	 * any "username" and "password" bean properties specified on this
-	 * DataSource will override the respective connection properties.
+	 * DataSource will override the corresponding connection properties.
 	 * @see java.sql.DriverManager#getConnection(String, java.util.Properties)
 	 */
 	public void setConnectionProperties(Properties connectionProperties) {
@@ -224,8 +224,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	}
 
 	/**
-	 * Return the connection properties to be passed to the DriverManager,
-	 * if any.
+	 * Return the connection properties to be passed to the DriverManager, if any.
 	 */
 	public Properties getConnectionProperties() {
 		return connectionProperties;
@@ -249,6 +248,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 	public Connection getConnection(String username, String password) throws SQLException {
 		return getConnectionFromDriverManager(username, password);
 	}
+
 
 	/**
 	 * Get a Connection from the DriverManager,
