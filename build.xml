@@ -769,21 +769,19 @@
 			<packageset dir="${mock.dir}">
 				<include name="org/springframework/**"/>
 			</packageset>
-			<!-- Unfortunately, jDocs have switched off their package listing, so we can't link to jDocs :( -->
 			<link href="http://java.sun.com/j2ee/1.4/docs/api"/>
 			<link href="http://java.sun.com/j2se/1.5.0/docs/api"/>
 			<link href="http://aopalliance.sourceforge.net/doc"/>
-			<!-- Burlap -->
-			<!-- Hessian -->
+			<!-- Caucho Burlap/Hessian -->
 			<link href="http://cglib.sourceforge.net/apidocs"/>
 			<!-- COS -->
 			<!-- EasyMock -->
-			<!-- EHCache -->
+			<link href="http://ehcache.sourceforge.net/apidocs"/>
 			<link href="http://freemarker.sourceforge.net/docs/api/"/>
 			<link href="http://www.hibernate.org/hib_docs/v3/api"/>
-			<link href="http://www.ibatis.com/common/javadocs/"/>
+			<!-- iBATIS -->
 			<!-- iText -->
-			<!-- Commons Attributes (api + compiler -->
+			<!-- Commons Attributes -->
 			<link href="http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/"/>
 			<link href="http://jakarta.apache.org/commons/dbcp/apidocs/"/>
 			<link href="http://jakarta.apache.org/commons/fileupload/apidocs/"/>
@@ -794,10 +792,10 @@
 			<!-- JDO -->
 			<!-- JMX -->
 			<!-- JOTM -->
+			<!-- JPA -->
 			<!-- JSF -->
 			<link href="http://www.junit.org/junit/javadoc/"/>
 			<link href="http://logging.apache.org/log4j/docs/api/"/>
-			<!-- OJB -->
 			<link href="http://jakarta.apache.org/regexp/apidocs/"/>
 			<link href="http://jakarta.apache.org/poi/apidocs/"/>
 			<link href="http://portals.apache.org/pluto/multiproject/portlet-api/apidocs/"/>
@@ -1838,42 +1836,8 @@
 			<packageset dir="${sandbox.src.dir}">
 				<include name="org/springframework/**"/>
 			</packageset>
-			<!-- Unfortunately, jDocs have switched off their package listing, so we can't link to jDocs :( -->
 			<link href="http://java.sun.com/j2ee/1.4/docs/api"/>
-			<link href="http://java.sun.com/j2se/1.4.2/docs/api"/>
-			<link href="http://aopalliance.sourceforge.net/doc"/>
-			<!-- Burlap -->
-			<!-- Hessian -->
-			<link href="http://cglib.sourceforge.net/apidocs"/>
-			<!-- COS -->
-			<!-- EasyMock -->
-			<!-- EHCache -->
-			<link href="http://freemarker.sourceforge.net/docs/api/"/>
-			<link href="http://www.hibernate.org/hib_docs/v3/api"/>
-			<link href="http://httpunit.sourceforge.net/doc/api/"/>
-			<link href="http://www.ibatis.com/common/javadocs/"/>
-			<!-- iText -->
-			<!-- Commons Attributes (api + compiler -->
-			<link href="http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/"/>
-			<link href="http://jakarta.apache.org/commons/dbcp/apidocs/"/>
-			<link href="http://jakarta.apache.org/commons/fileupload/apidocs/"/>
-			<link href="http://jakarta.apache.org/commons/httpclient/apidocs/"/>
-			<link href="http://jakarta.apache.org/commons/logging/apidocs/"/>
-			<link href="http://jakarta.apache.org/commons/pool/apidocs/"/>
-			<!-- JasperReports -->
-			<!-- JDO -->
-			<!-- JMX -->
-			<!-- JOTM -->
-			<!-- JSF -->
-			<link href="http://www.junit.org/junit/javadoc/"/>
-			<link href="http://logging.apache.org/log4j/docs/api/"/>
-			<!-- OJB -->
-			<link href="http://jakarta.apache.org/poi/apidocs/"/>
-			<link href="http://portals.apache.org/pluto/multiproject/portlet-api/apidocs/"/>
-			<link href="http://quartz.sourceforge.net/javadoc/"/>
-			<link href="http://jakarta.apache.org/regexp/apidocs/"/>
-			<link href="http://struts.apache.org/struts-doc-1.2.9/api/"/>
-			<link href="http://jakarta.apache.org/velocity/api/"/>
+			<link href="http://java.sun.com/j2se/1.5.0/docs/api"/>
 		</javadoc>
 
 	</target>
