@@ -86,7 +86,7 @@
 	<classpathentry kind="lib" path="lib/itext/itext-1.3.jar"/>
 	<classpathentry kind="lib" path="lib/ibatis/ibatis-common-2.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-commons/commons-codec.jar"/>
-	<classpathentry kind="lib" path="lib/ehcache/ehcache-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/ehcache/ehcache-1.2.3.jar"/>
 	<classpathentry kind="lib" path="lib/aspectwerkz/aspectwerkz-2.0.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/ejb.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/j2ee/servlet-api.jar"/>
@@ -111,7 +111,7 @@
 	<classpathentry kind="lib" path="lib/asm/asm-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/asm/asm-commons-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/asm/asm-util-2.2.2.jar"/>
-	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-1.2.5.jar"/>
+	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-1.2.6.jar"/>
 	<classpathentry kind="lib" path="lib/easymock/easymockclassextension.jar"/>
 	<classpathentry kind="lib" path="lib/dom4j/dom4j-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/osgi/org.eclipse.osgi_3.1.1.jar"/>
