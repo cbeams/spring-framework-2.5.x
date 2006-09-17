@@ -23,11 +23,11 @@ a:visited {
 }
 
 p {
-	font-family: Verdana, Arial;
+	font-family: Verdana, Arial, sans-serif;
 }
 
 dt {
-	font-family: Verdana, Arial;
+	font-family: Verdana, Arial, sans-serif;
 	font-size: 12px;
 }
 
@@ -119,6 +119,10 @@ div.table {
 	margin: 30px 0px 30px 0px;
 	border: 1px dashed gray;
 	padding: 10px;
+}
+
+div .table-contents table {
+	border: 1px solid black;
 }
 
 div.table > p.title {
@@ -249,7 +253,7 @@ hr {
 }
 
 a code {
-	font-family: Verdana, Arial;
+	font-family: Verdana, Arial, monospace;
 	font-size: 12px;
 }
 
@@ -270,7 +274,7 @@ div.warning * td {
     font-size: 95%;
 }
 
-/* everything in a <lineannotation/> is displayed in a nice green, comment-like color */
+/* everything in a <lineannotation/> is displayed in a coloured, comment-like font */
 .programlisting * .lineannotation,
 .programlisting * .lineannotation * {
 	color: green;
