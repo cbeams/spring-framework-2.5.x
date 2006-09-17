@@ -1467,244 +1467,14 @@ support=support@somecompany.co.uk]]></programlisting>
                 <programlisting><![CDATA[<bean id="foo" class="foo.Bar">
   <property name="fred.bob.sammy" value="123" />
 </bean>]]></programlisting>
-                <para>The <literal>foo</literal> bean has a <literal>fred</literal> property which has a
-                <literal>bob</literal> property, which has a <literal>sammy</literal>
-                property, and that final <literal>sammy</literal> property is being
-                set to a scalar value of 123. In order for this to work, the
-                <literal>fred</literal> property of <literal>foo</literal>, and the
-                <literal>bob</literal> property of <literal>fred</literal> must both
+                <para>The <literal>foo</literal> bean has a <literal>fred</literal> property
+                which has a <literal>bob</literal> property, which has a 
+                <literal>sammy</literal> property, and that final <literal>sammy</literal>
+                property is being set to a scalar value of <literal>123</literal>. In order
+                for this to work, the <literal>fred</literal> property of <literal>foo</literal>,
+                and the <literal>bob</literal> property of <literal>fred</literal> must both
                 be non-null after the bean is constructed, or a
-                <classname>NullPointerException</classname> will be thrown.</para>
-            </section>
-        </section>
-        <section id="beans-factory-method-injection">
-            <title>Method Injection</title>
-            <para>For most users, the majority of the beans in the container will be
-            singletons. When a singleton bean needs to collaborate with (use)
-            another singleton bean, or a non-singleton bean needs to collaborate
-            with another non-singleton bean, the typical and common approach of
-            handling this dependency by defining one bean to be a property of the
-            other, is quite adequate. There is however a problem when the bean
-            lifecycles are different. Consider a singleton bean A which needs to use
-            a non-singleton (prototype) bean B, perhaps on each method invocation on
-            A. The container will only create the singleton bean A once, and thus
-            only get the opportunity to set its properties once. There is no
-            opportunity for the container to provide bean A with a new instance of
-            bean B every time one is needed.</para>
-            <para>One solution to this problem is to forgo some inversion of
-            control. Bean A can be aware of the container (as described
-            <link linkend="beans-factory-aware-beanfactoryaware">here</link>) by
-            implementing <literal>BeanFactoryAware</literal>, and use programmatic
-            means (as described <link linkend="beans-factory-client">here</link>) to
-            ask the container via a <literal>getBean("B")</literal> call for (a new)
-            bean B every time it needs it. By way of an example...</para>
-            
-            <programlisting><lineannotation>// a class that uses a stateful inner class to do some data processing</lineannotation><![CDATA[
-package fiona.apple;
-
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-
-public class CommandProcessor implements BeanFactoryAware {
-   
-   ]]><lineannotation>// instances of this class are stateful, and hence best deployed as prototypes</lineannotation><![CDATA[
-   public static final class ThreadedCommandHelper implements CommandHelper, Runnable {
-
-      private Object command;
-
-      public Object process(Object command) {
-         this.command = command;
-         new Thread(this).start();
-         ]]><lineannotation>// harvest and return result of processing...</lineannotation><![CDATA[
-         return ...;
-      }
-
-      public void run() {
-         ]]><lineannotation>// do the processing of the command...</lineannotation><![CDATA[
-      }
-   }
-
-   private BeanFactory beanFactory;
-
-   public Object process(Object command) {
-       ]]><lineannotation>// grab a new instance of the appropriate <interfacename>CommandHelper</interfacename></lineannotation><![CDATA[
-      return createHelper().process(command);
-   }
-
-   protected CommandHelper createHelper() {
-       return (CommandHelper) this.beanFactory.getBean("command.helper");
-   }
-
-   public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-      this.beanFactory = beanFactory;
-   }
-}]]></programlisting>
-            
-            <para>This generally is not a desirable solution since the business code
-            is then aware of and coupled to Spring. Method Injection, a somewhat
-            advanced feature of the Spring IoC container, allows this use case to be
-            handled in a clean fashion.</para>
-            <section>
-                <title>Lookup method injection</title>
-                <sidebar>
-                    <title>Mmm, isn't this kinda like...</title>
-                    <para>... Tapestry 4.0's pages, where you wrote <literal>abstract</literal>
-                    setters and getters that Tapestry would override at runtime with
-                    implementations that did stuff? It sure is (well, kinda).</para>
-                    <para>You can read more about the motivation for Method Injection in
-                    <ulink url="http://blog.springframework.com/rod/?p=1">this blog entry</ulink>.</para>
-                </sidebar>
-                <para>Lookup method injection refers to the ability of the container
-                to override methods on <emphasis>container managed beans</emphasis>, to
-                return the result of looking up another named bean in the container.
-                The lookup will typically be of a prototype bean as in the scenario
-                described above (although it can also be a singleton). Spring implements
-                this injection by dynamically generating a subclass overriding the method,
-                using bytecode generation via the CGLIB library.</para>
-                <para>So if you look at the code from previous code snippet (the
-                <classname>CommandProcessor</classname> class), it is the Spring container
-                that is going to dynamically supply the implementation of the
-                <methodname>createHelper()</methodname> method. Your
-                <classname>CommandProcessor</classname> class is not going to have any
-                Spring dependencies, as can be seen below:</para>
-                <programlisting><![CDATA[package fiona.apple;
-
-]]><lineannotation>// no more Spring imports! </lineannotation><![CDATA[
-
-public class CommandProcessor {
-   
-   ]]><lineannotation>// instances of this class are stateful, and hence best deployed as prototypes</lineannotation><![CDATA[
-   public static final class ThreadedCommandHelper implements CommandHelper, Runnable {
-
-      private Object command;
-
-      public Object process(Object command) {
-         this.command = command;
-         new Thread(this).start();
-         ]]><lineannotation>// harvest and return result of processing...</lineannotation><![CDATA[
-         return ...;
-      }
-
-      public void run() {
-         ]]><lineannotation>// do the processing of the command...</lineannotation><![CDATA[
-      }
-   }
-
-   public Object process(Object command) {
-       ]]><lineannotation>// grab a new instance of the appropriate <interfacename>CommandHelper</interfacename></lineannotation><![CDATA[
-      return createHelper().process(command);
-   }
-
-    ]]><lineannotation>// mmm, but where is the implementation of this method?</lineannotation><![CDATA[
-   protected abstract CommandHelper createHelper();
-
-}]]></programlisting>
-                <para>In the client class containing the method to be injected (the
-                <classname>CommandProcessor</classname> in the above code snippet), the method that
-                is to be 'injected' must have a signature of the following form:</para>
-                <programlisting><![CDATA[<public|protected> [abstract] <return-type> theMethodName(]]><lineannotation>no-arguments</lineannotation><![CDATA[);]]></programlisting>
-                <para>If the method is <literal>abstract</literal>, the Spring-generated subclass
-                will implement the method. Otherwise, the Spring-generated subclass will override
-                the concrete method defined in the original class. Let's look at an example:</para>
-                <programlisting><lineannotation>&lt;!-- a stateful bean deployed as a prototype (non-singleton) --&gt;</lineannotation><![CDATA[
-<bean id="statefulCommandHelper"
-      class="fiona.apple.CommandProcessor$ThreadedCommandHelper" scope="prototype"/>
-
-]]><lineannotation>&lt;!-- <literal>commandProcessor</literal> uses <literal>statefulCommandHelper</literal> --&gt;</lineannotation><![CDATA[
-<bean id="commandProcessor" class="fiona.apple.CommandProcessor">
-  <lookup-method name="createHelper" bean="statefulCommandHelper"/>
-</bean>]]></programlisting>
-                <para>The bean identified as <emphasis>commandProcessor</emphasis> will call its
-                own method <literal>createHelper</literal> whenever it needs
-                a new instance of the <emphasis>statefulCommandHelper</emphasis> bean. It
-                is important to note that the person deploying the beans must be
-                careful to deploy the <literal>statefulCommandHelper</literal> bean as a
-                prototype (if that is actually what is needed). If it is deployed
-                as a singleton (either explicitly, or relying on the default
-                <emphasis>true</emphasis> setting for this flag), the same instance of
-                <literal>statefulCommandHelper</literal> will be returned each time!</para>
-                <para>Note that lookup method injection can be combined with
-                both Constructor and Setter Injection.</para>
-                <para>Please be aware that in order for this dynamic subclassing to work,
-                you will need to have the CGLIB jar(s) on your classpath. Additionally, the
-                class that the Spring container is going to subclass cannot be
-                <literal>final</literal>, and the method that is being overridden cannot be
-                <literal>final</literal> either. Also, testing a class that has an
-                <literal>abstract</literal> method can be somewhat odd in that you will have
-                to subclass the class yourself and supply a stub implementation of the
-                <literal>abstract</literal> method. Finally, beans that have been the target
-                of method injection cannot be serialized.</para>
-                <para>The interested reader may also find the <classname>ServiceLocatorFactoryBean</classname>
-                (in the <literal>org.springframework.beans.factory.config</literal> package) to be
-                of use... the approach is similar to that of the
-                <classname>ObjectFactoryCreatingFactoryBean</classname>, but it allows you
-                to specify your own lookup interface as opposed to having to use a Spring-specific
-                lookup interface such as the <interfacename>ObjectFactory</interfacename>.
-                Consult the (copious) Javadocs for the <classname>ServiceLocatorFactoryBean</classname>
-                for a full treatment of this alternative approach (that <emphasis>does</emphasis>
-                reduce the coupling to Spring).</para>
-            </section>
-            <section>
-                <title>Arbitrary method replacement</title>
-                <para>A less commonly useful form of method injection than Lookup
-                Method Injection is the ability to replace arbitrary methods in a
-                managed bean with another method implementation. Users may safely skip
-                the rest of this section (which describes this somewhat advanced
-                feature), until this functionality is actually needed.</para>
-                <para>When using XML-based configuration metadata, the <literal>replaced-method</literal>
-                element may be used to replace an existing method implementation with
-                another, for a deployed bean. Consider the following class, with a
-                method computeValue, which we want to override:</para>
-        
-                <programlisting><![CDATA[public class MyValueCalculator {
-
-  public String computeValue(String input) {
-    ]]><lineannotation>// some real code...</lineannotation><![CDATA[
-  }
-
-  ]]><lineannotation>// some other methods...</lineannotation><![CDATA[
-
-}]]></programlisting>
-                <para>A class implementing the
-                <interfacename>org.springframework.beans.factory.support.MethodReplacer</interfacename>
-                interface provides the new method definition.</para>
-                
-                <programlisting><lineannotation>&lt;!-- /** meant to be used to override the existing computeValue
-    implementation in <classname>MyValueCalculator</classname> */ --&gt;</lineannotation><![CDATA[
-public class ReplacementComputeValue implements MethodReplacer {
-
-    public Object reimplement(Object o, Method m, Object[] args) throws Throwable {
-        ]]><lineannotation>&lt;!-- // get the input value, work with it, and return a computed result --&gt;</lineannotation><![CDATA[
-        String input = (String) args[0];
-        ... 
-        return ...;
-}]]></programlisting>
-                <para>The bean definition to deploy the original class and specify the
-                method override would look like this:</para>
-                <programlisting><![CDATA[<bean id="myValueCalculator class="x.y.z.MyValueCalculator">
-  ]]><lineannotation>&lt;!-- arbitrary method replacement --&gt;</lineannotation><![CDATA[
-  <replaced-method name="computeValue" replacer="replacementComputeValue">
-    <arg-type>String</arg-type>
-  </replaced-method>
-</bean>
-
-<bean id="replacementComputeValue" class="a.b.c.ReplacementComputeValue"/>]]></programlisting>
-                <para>One or more contained <literal>&lt;arg-type/&gt;</literal> elements
-                within the <literal>&lt;replaced-method/&gt;</literal> element may be used to
-                indicate the method signature of the method being overridden. Note
-                that the signature for the arguments is actually only needed in the
-                case that the method is actually overloaded and there are multiple
-                variants within the class. For convenience, the type string for an
-                argument may be a substring of the fully qualified type name. For
-                example, all the following would match <classname>java.lang.String</classname>.</para>
-                <programlisting><![CDATA[    java.lang.String
-    String
-    Str]]></programlisting>
-                <para>Since the number of arguments is often enough to
-                distinguish between each possible choice, this shortcut can save a lot
-                of typing, by just using the shortest string which will match an
-                argument.</para>
+                <exceptionname>NullPointerException</exceptionname> will be thrown.</para>
             </section>
         </section>
         <section id="beans-factory-dependson">
@@ -2006,7 +1776,217 @@ public class ReplacementComputeValue implements MethodReplacer {
 			you may find the section entitled <xref linkend="metadata-annotations-required"/>
 			to be of interest.</para>
         </section>
+        <section id="beans-factory-method-injection">
+            <title>Method Injection</title>
+            <para>For most application scenarios, the majority of the beans in the
+            container will be singletons. When a singleton bean needs to collaborate
+            with (use) another singleton bean, or a non-singleton bean needs to collaborate
+            with another non-singleton bean, the typical and common approach of
+            handling this dependency by defining one bean to be a property of the
+            other, is quite adequate. There is however a problem when the bean
+            lifecycles are different. Consider a singleton bean A which needs to use
+            a non-singleton (prototype) bean B, perhaps on each method invocation on
+            A. The container will only create the singleton bean A once, and thus
+            only get the opportunity to set its properties once. There is no
+            opportunity for the container to provide bean A with a new instance of
+            bean B every time one is needed.</para>
+            <para>One solution to this issue is to forgo some inversion of
+            control. Bean A can be
+            <link linkend="beans-factory-aware-beanfactoryaware">made aware of the container</link>
+            by implementing the <interfacename>BeanFactoryAware</interfacename> interface, and
+            <link linkend="beans-factory-client">use programmatic means</link> to
+            ask the container via a <methodname>getBean("B")</methodname> call for
+            (a typically new) bean B instance every time it needs it. Find below an
+            admittedly somewhat contrived example of this approach:</para>
+            
+            <programlisting><lineannotation>// a class that uses a stateful Command-style class to perform some processing</lineannotation><![CDATA[
+package fiona.apple;
+
+]]><lineannotation>// lots of Spring-API imports</lineannotation><![CDATA[
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+
+public class CommandManager implements BeanFactoryAware {
+
+   private BeanFactory beanFactory;
+
+   public Object process(Map commandState) {
+      ]]><lineannotation>// grab a new instance of the appropriate <interfacename>Command</interfacename></lineannotation><![CDATA[
+      Command command = createCommand();
+      ]]><lineannotation>// set the state on the (hopefully brand new) <interfacename>Command</interfacename> instance</lineannotation><![CDATA[
+      command.setState(commandState);
+      return command.execute();
+   }
+
+   ]]><lineannotation>// the <interfacename>Command</interfacename> returned here could be an implementation that executes asynchronously, or whatever</lineannotation><![CDATA[
+   protected Command createCommand() {
+      return (Command) this.beanFactory.getBean("command"); ]]><lineannotation>// notice the Spring API dependency</lineannotation><![CDATA[
+   }
+
+   public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+      this.beanFactory = beanFactory;
+   }
+}]]></programlisting>
+            
+            <para>The above example is generally is not a desirable solution since the
+            business code is then aware of and coupled to the Spring Framework. Method Injection,
+            a somewhat advanced feature of the Spring IoC container, allows this use case to be
+            handled in a clean fashion.</para>
+            <section>
+                <title>Lookup method injection</title>
+                <sidebar>
+                    <title>Isn't this Method Injection...</title>
+                    <para>... somewhat like Tapestry 4.0's pages, where folks wrote
+                    <literal>abstract</literal> properties that Tapestry would override at
+                    runtime with implementations that did stuff? It sure is (well, kinda).</para>
+                    <para>You can read more about the motivation for Method Injection in
+                    <ulink url="http://blog.springframework.com/rod/?p=1">this blog entry</ulink>.</para>
+                </sidebar>
+                <para>Lookup method injection refers to the ability of the container
+                to override methods on <emphasis>container managed beans</emphasis>, to
+                return the result of looking up another named bean in the container.
+                The lookup will typically be of a prototype bean as in the scenario
+                described above (although it can also be a singleton of course - but in that
+                case injecting the instance straight into the object would suffice). The
+                Spring Framework implements this method injection by dynamically generating
+                a subclass overriding the method, using bytecode generation via the CGLIB library.</para>
+                <para>So if you look at the code from previous code snippet (the
+                <classname>CommandManager</classname> class), the Spring container
+                is going to dynamically override the implementation of the
+                <methodname>createCommand()</methodname> method. Your
+                <classname>CommandManager</classname> class is not going to have any
+                Spring dependencies, as can be seen in this reworked example below:</para>
+                <programlisting><![CDATA[package fiona.apple;
+
+]]><lineannotation>// no more Spring imports! </lineannotation><![CDATA[
+
+public class CommandManager {
+
+   public Object process(Object command) {
+      ]]><lineannotation>// grab a new instance of the appropriate <interfacename>Command</interfacename> interface</lineannotation><![CDATA[
+      Command command = createCommand();
+      ]]><lineannotation>// set the state on the (hopefully brand new) <interfacename>Command</interfacename> instance</lineannotation><![CDATA[
+      command.setState(commandState);
+      return command.execute();
+   }
+
+    ]]><lineannotation>// mmm, but where is the implementation of this method?</lineannotation><![CDATA[
+   protected abstract CommandHelper createHelper();
+
+}]]></programlisting>
+                <para>In the client class containing the method to be injected (the
+                <classname>CommandManager</classname> in this case), the method that
+                is to be 'injected' must have a signature of the following form:</para>
+                <programlisting><![CDATA[<public|protected> [abstract] <return-type> theMethodName(]]><lineannotation>no-arguments</lineannotation><![CDATA[);]]></programlisting>
+                <para>If the method is <literal>abstract</literal>, the dynamically-generated
+                subclass will implement the method. Otherwise, the dynamically-generated subclass
+                will override the concrete method defined in the original class. Let's look at an
+                example:</para>
+                <programlisting><lineannotation>&lt;!-- a stateful bean deployed as a prototype (non-singleton) --&gt;</lineannotation><![CDATA[
+<bean id="command" class="fiona.apple.AsyncCommand" scope="prototype">
+  ]]><lineannotation>&lt;!-- inject dependencies here as required --&gt;</lineannotation><![CDATA[
+</bean>
+
+]]><lineannotation>&lt;!-- <literal>commandProcessor</literal> uses <literal>statefulCommandHelper</literal> --&gt;</lineannotation><![CDATA[
+<bean id="commandManager" class="fiona.apple.CommandManager">
+  <lookup-method name="createCommand" bean="command"/>
+</bean>]]></programlisting>
+                <para>The bean identified as <emphasis>commandManager</emphasis> will call its
+                own method <literal>createCommand</literal> whenever it needs
+                a new instance of the <emphasis>command</emphasis> bean. It
+                is important to note that the person deploying the beans must be
+                careful to deploy the <literal>command</literal> bean as a
+                prototype (if that is actually what is needed). If it is deployed
+                as a singleton (either explicitly, or relying on the default
+                <emphasis>true</emphasis> setting for this flag), the same instance of
+                the <literal>command</literal> bean will be returned each time!</para>
+                <para>Note that lookup method injection can be combined with
+                both Constructor and Setter Injection.</para>
+                <para>Please be aware that in order for this dynamic subclassing to work,
+                you will need to have the CGLIB jar(s) on your classpath. Additionally, the
+                class that the Spring container is going to subclass cannot be
+                <literal>final</literal>, and the method that is being overridden cannot be
+                <literal>final</literal> either. Also, testing a class that has an
+                <literal>abstract</literal> method can be somewhat odd in that you will have
+                to subclass the class yourself and supply a stub implementation of the
+                <literal>abstract</literal> method. Finally, beans that have been the target
+                of method injection cannot be serialized.</para>
+                <tip>
+                    <para>The interested reader may also find the <classname>ServiceLocatorFactoryBean</classname>
+                    (in the <literal>org.springframework.beans.factory.config</literal> package) to be
+                    of use... the approach is similar to that of the
+                    <classname>ObjectFactoryCreatingFactoryBean</classname>, but it allows you
+                    to specify your own lookup interface as opposed to having to use a Spring-specific
+                    lookup interface such as the <interfacename>ObjectFactory</interfacename>.
+                    Consult the (copious) Javadocs for the <classname>ServiceLocatorFactoryBean</classname>
+                    for a full treatment of this alternative approach (that <emphasis>does</emphasis>
+                    reduce the coupling to Spring).</para>
+                </tip>
+            </section>
+            <section>
+                <title>Arbitrary method replacement</title>
+                <para>A less commonly useful form of method injection than Lookup
+                Method Injection is the ability to replace arbitrary methods in a
+                managed bean with another method implementation. Users may safely skip
+                the rest of this section (which describes this somewhat advanced
+                feature), until this functionality is actually needed.</para>
+                <para>When using XML-based configuration metadata, the <literal>replaced-method</literal>
+                element may be used to replace an existing method implementation with
+                another, for a deployed bean. Consider the following class, with a
+                method computeValue, which we want to override:</para>
+        
+                <programlisting><![CDATA[public class MyValueCalculator {
+
+  public String computeValue(String input) {
+    ]]><lineannotation>// some real code...</lineannotation><![CDATA[
+  }
+
+  ]]><lineannotation>// some other methods...</lineannotation><![CDATA[
+
+}]]></programlisting>
+                <para>A class implementing the
+                <interfacename>org.springframework.beans.factory.support.MethodReplacer</interfacename>
+                interface provides the new method definition.</para>
+                
+                <programlisting><lineannotation>/** meant to be used to override the existing computeValue
+    implementation in <classname>MyValueCalculator</classname> */</lineannotation><![CDATA[
+public class ReplacementComputeValue implements MethodReplacer {
+
+    public Object reimplement(Object o, Method m, Object[] args) throws Throwable {
+        ]]><lineannotation>// get the input value, work with it, and return a computed result</lineannotation><![CDATA[
+        String input = (String) args[0];
+        ... 
+        return ...;
+}]]></programlisting>
+                <para>The bean definition to deploy the original class and specify the
+                method override would look like this:</para>
+                <programlisting><![CDATA[<bean id="myValueCalculator class="x.y.z.MyValueCalculator">
+  ]]><lineannotation>&lt;!-- arbitrary method replacement --&gt;</lineannotation><![CDATA[
+  <replaced-method name="computeValue" replacer="replacementComputeValue">
+    <arg-type>String</arg-type>
+  </replaced-method>
+</bean>
+
+<bean id="replacementComputeValue" class="a.b.c.ReplacementComputeValue"/>]]></programlisting>
+                <para>One or more contained <literal>&lt;arg-type/&gt;</literal> elements
+                within the <literal>&lt;replaced-method/&gt;</literal> element may be used to
+                indicate the method signature of the method being overridden. Note
+                that the signature for the arguments is actually only needed in the
+                case that the method is actually overloaded and there are multiple
+                variants within the class. For convenience, the type string for an
+                argument may be a substring of the fully qualified type name. For
+                example, all the following would match <classname>java.lang.String</classname>.</para>
+                <programlisting><![CDATA[    java.lang.String
+    String
+    Str]]></programlisting>
+                <para>Since the number of arguments is often enough to distinguish between
+                each possible choice, this shortcut can save a lot of typing, by allowing
+                you to type just the shortest string that will match an argument type.</para>
+            </section>
+        </section>
     </section>
+
     <section id="beans-factory-scopes">
         <title>Bean scopes</title>
         <para>When you create a bean definition (typically in an XML configuration file)
@@ -2934,7 +2914,7 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
 <bean id="inheritsWithClass" class="org.springframework.beans.DerivedTestBean"
     parent="inheritedTestBeanWithoutClass" init-method="initialize">
   <property name="name" value="override"/>
-  ]]><lineannotation>&lt;!-- age will inherit value of 1 from parent --&gt;</lineannotation><![CDATA[
+  ]]><lineannotation>&lt;!-- age will inherit the value of <literal>1</literal> from the parent bean definition--&gt;</lineannotation><![CDATA[
 </bean>]]></programlisting>
 
         <para>The parent bean cannot get instantiated on its own since it is
@@ -2948,19 +2928,18 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
         result in an error. Similarly, the container's internal
         <methodname>preInstantiateSingletons()</methodname> method will completely
         ignore bean definitions which are defined as abstract.</para>
-        
         <note>
             <para><literal>ApplicationContexts</literal> (but <emphasis>not</emphasis>
             <literal>BeanFactories</literal>) will by default pre-instantiate
-            all singletons. therefore it is important (at least for singleton beans)
+            all singletons. Therefore it is important (at least for singleton beans)
             that if you have a (parent) bean definition which you intend to use only
             as a template, and this definition specifies a class, you must make sure
-            to set the <emphasis>abstract</emphasis> attribute to <emphasis>true</emphasis>,
+            to set the <emphasis>'abstract'</emphasis> attribute to <emphasis>'true'</emphasis>,
             otherwise the application context will actually (attempt to) pre-instantiate
-            it.</para>
+            the <literal>abstract</literal> bean.</para>
         </note>
     </section>
-    
+
     <section id="beans-factory-extension">
         <title>Container extension points</title>
         <para>The IoC component of the Spring Framework has been designed for extension.
