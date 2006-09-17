@@ -16,11 +16,8 @@
 
 package org.springframework.orm.jpa.toplink;
 
-import java.lang.reflect.Method;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceException;
 
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 
@@ -55,24 +52,14 @@ public class TopLinkMultiEntityManagerFactoryIntegrationTests extends
 		EntityManager em = this.entityManagerFactory2.createEntityManager();
 		try {
 			em.createQuery("select tb from TestBean");
-			fail("Should have thrown PersistenceException");
-		}
-		catch (PersistenceException ex) {
-			// expected
+			fail("Should have thrown IllegalArgumentException");
 		}
 		catch (IllegalArgumentException ex) {
 			// expected
 		}
-
 		finally {
 			em.close();
 		}
-	}
-
-
-	// TODO: Temporarily disabled because TopLink complains about redeployment of Person unit...
-	protected boolean isDisabledInThisEnvironment(Method testMethod) {
-		return false;
 	}
 
 }
