@@ -29,7 +29,7 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.PropertyAccessExceptionsException;
+import org.springframework.beans.PropertyBatchUpdateException;
 import org.springframework.beans.ResourceTestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -92,7 +92,7 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 			fail("Should have thrown BeanCreationException");
 		}
 		catch (BeanCreationException ex) {
-			assertTrue(ex.getCause() instanceof PropertyAccessExceptionsException);
+			assertTrue(ex.getCause() instanceof PropertyBatchUpdateException);
 			assertTrue(ex.toString().indexOf("someMessageSource") != -1);
 			assertTrue(ex.toString().indexOf("useCodeAsDefaultMessage") != -1);
 			assertTrue(ex.toString().indexOf("alwaysUseMessageFormat") != -1);

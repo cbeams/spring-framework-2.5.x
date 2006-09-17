@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessException;
-import org.springframework.beans.PropertyAccessExceptionsException;
+import org.springframework.beans.PropertyBatchUpdateException;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
@@ -498,7 +498,7 @@ public class DataBinder implements PropertyEditorRegistry {
 			// Bind request parameters onto target object.
 			getPropertyAccessor().setPropertyValues(mpvs, isIgnoreUnknownFields(), isIgnoreInvalidFields());
 		}
-		catch (PropertyAccessExceptionsException ex) {
+		catch (PropertyBatchUpdateException ex) {
 			// Use bind error processor to create FieldErrors.
 			PropertyAccessException[] exs = ex.getPropertyAccessExceptions();
 			for (int i = 0; i < exs.length; i++) {

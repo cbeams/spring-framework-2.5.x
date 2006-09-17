@@ -23,7 +23,7 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
-import org.springframework.beans.PropertyAccessExceptionsException;
+import org.springframework.beans.PropertyBatchUpdateException;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.AbstractBeanFactory;
 
@@ -38,8 +38,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 	protected abstract BeanFactory getBeanFactory();
 
 	/**
-	 * Roderick beans inherits from rod,
-	 * overriding name only.
+	 * Roderick beans inherits from rod, overriding name only.
 	 */
 	public void testInheritance() {
 		assertTrue(getBeanFactory().containsBean("rod"));
@@ -64,8 +63,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 	}
 	
 	/**
-	 * Test that InitializingBean objects receive the
-	 * afterPropertiesSet() callback
+	 * Test that InitializingBean objects receive the afterPropertiesSet() callback
 	 */
 	public void testInitializingBeanCallback() {
 		MustBeInitialized mbi = (MustBeInitialized) getBeanFactory().getBean("mustBeInitialized");
@@ -221,8 +219,8 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 		}
 		catch (BeanCreationException wex) {
 			assertEquals("typeMismatch", wex.getBeanName());
-			assertTrue(wex.getCause() instanceof PropertyAccessExceptionsException);
-			PropertyAccessExceptionsException ex = (PropertyAccessExceptionsException) wex.getCause();
+			assertTrue(wex.getCause() instanceof PropertyBatchUpdateException);
+			PropertyBatchUpdateException ex = (PropertyBatchUpdateException) wex.getCause();
 			// Further tests
 			assertTrue("Has one error ", ex.getExceptionCount() == 1);
 			assertTrue("Error is for field age", ex.getPropertyAccessException("age") != null);

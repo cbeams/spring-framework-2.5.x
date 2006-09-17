@@ -578,7 +578,7 @@ public class BeanWrapperTests extends TestCase {
 			bw.setPropertyValues(pvs);
 			fail("Should throw exception when everything is valid");
 		}
-		catch (PropertyAccessExceptionsException ex) {
+		catch (PropertyBatchUpdateException ex) {
 			System.out.println(ex);
 			ex.printStackTrace();
 			assertTrue("Must contain 2 exceptions", ex.getExceptionCount() == 2);
@@ -921,7 +921,7 @@ public class BeanWrapperTests extends TestCase {
 			bw.setPropertyValues(pvs);
 			fail("Should have thrown TypeMismatchException");
 		}
-		catch (PropertyAccessExceptionsException ex) {
+		catch (PropertyBatchUpdateException ex) {
 			PropertyAccessException pae = ex.getPropertyAccessException("map[key2]");
 			assertTrue(pae instanceof TypeMismatchException);
 		}

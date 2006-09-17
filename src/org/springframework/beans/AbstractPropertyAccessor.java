@@ -92,9 +92,9 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 
 		// If we encountered individual exceptions, throw the composite exception.
 		if (!propertyAccessExceptions.isEmpty()) {
-			Object[] paeArray =
+			PropertyAccessException[] paeArray = (PropertyAccessException[])
 					propertyAccessExceptions.toArray(new PropertyAccessException[propertyAccessExceptions.size()]);
-			throw new PropertyAccessExceptionsException((PropertyAccessException[]) paeArray);
+			throw new PropertyBatchUpdateException(paeArray);
 		}
 	}
 
@@ -107,8 +107,10 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 	 * Actually get the value of a property.
 	 * @param propertyName name of the property to get the value of
 	 * @return the value of the property
-	 * @throws FatalBeanException if there is no such property, if the property
-	 * isn't readable, or if the property getter throws an exception.
+	 * @throws InvalidPropertyException if there is no such property or
+	 * if the property isn't readable
+	 * @throws PropertyAccessException if the property was valid but the
+	 * accessor method failed
 	 */
 	public abstract Object getPropertyValue(String propertyName) throws BeansException;
 
@@ -116,8 +118,10 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 	 * Actually set a property value.
 	 * @param propertyName name of the property to set value of
 	 * @param value the new value
-	 * @throws FatalBeanException if there is no such property, if the property
-	 * isn't writable, or if the property setter throws an exception.
+	 * @throws InvalidPropertyException if there is no such property or
+	 * if the property isn't writable
+	 * @throws PropertyAccessException if the property was valid but the
+	 * accessor method failed or a type mismatch occured
 	 */
 	public abstract void setPropertyValue(String propertyName, Object value) throws BeansException;
 

@@ -19,7 +19,7 @@ package org.springframework.beans;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.Assert;
 
 /**
  * Combined exception, composed of individual PropertyAccessException instances.
@@ -34,21 +34,19 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 18 April 2001
  */
-public class PropertyAccessExceptionsException extends BeansException {
+public class PropertyBatchUpdateException extends BeansException {
 
 	/** List of PropertyAccessException objects */
 	private PropertyAccessException[] propertyAccessExceptions;
 
 
 	/**
-	 * Create a new PropertyAccessExceptionsException.
+	 * Create a new PropertyBatchUpdateException.
 	 * @param propertyAccessExceptions the List of PropertyAccessExceptions
 	 */
-	public PropertyAccessExceptionsException(PropertyAccessException[] propertyAccessExceptions) {
+	public PropertyBatchUpdateException(PropertyAccessException[] propertyAccessExceptions) {
 		super(null);
-		if (ObjectUtils.isEmpty(propertyAccessExceptions)) {
-			throw new IllegalArgumentException("At least 1 PropertyAccessException required");
-		}
+		Assert.notEmpty(propertyAccessExceptions, "At least 1 PropertyAccessException required");
 		this.propertyAccessExceptions = propertyAccessExceptions;
 	}
 
