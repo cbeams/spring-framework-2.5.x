@@ -7,10 +7,11 @@ Changes in version 2.0 RC4 (17.9.2006)
 --------------------------------------
 
 General
-* added "spring-agent.jar" to "dist/weavers" directory, containing the agent for Spring's InstrumentationLoadTimeWeaver
 * renamed Spring 2.0 DTD to spring-beans-2.0.dtd, while keeping the Spring 1.2.x DTD as compatible spring-beans.dtd
 * renamed Spring 2.0 XSDs to spring-beans-2.0.xsd etc, to allow for proper versioning of future additions and changes
 * spring-beans-2.0.dtd/xsd does not support singleton="true"/"false" anymore. Use scope="singleton/"prototype" instead!
+* added "spring-agent.jar" to "dist/weavers" directory, containing the agent for Spring's InstrumentationLoadTimeWeaver
+* JPA support is fully tested against Oracle TopLink Essentials v2 b16 as well as Hibernate EntityManager 3.2.0 CR4
 * removed ORM support for Apache OJB from the Spring core distribution. OJB support has been moved to Spring Modules.
 * declared all internal ThreadLocal variables as final (to avoid potential class reloading issues)
 
@@ -26,6 +27,7 @@ Package org.springframework.beans
 * fixed BeanWrapperImpl to return a Collection/Map as-is if it is not accessible (e.g. because it is a scoped proxy)
 * fixed BeanWrapperImpl to always use a valid read-write type for a converted collection/map (never use original class)
 * fixed BeanWrapperImpl to properly resolve even nested generic Collections and Maps (List of Map, Map of List, etc)
+* renamed PropertyAccessExceptionsException to PropertyBatchUpdateException and explicitly declared when it is thrown
 * added "destroyBean" method to ConfigurableBeanFactory interface, for destroying a given instance based on a bean def
 * added support for destruction callbacks to Scope abstraction, driven by a BeanFactory's definition for a scoped bean
 * PropertyResourceConfigurer, CustomEditorConfigurer and CustomScopeConfigurer use highest Ordered precendence now

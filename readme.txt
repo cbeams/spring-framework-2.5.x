@@ -90,8 +90,8 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2450 KB)
-- Convenient jar file combining all standard modules (except for superseded modules)
+* "spring" (~2470 KB)
+- Convenient jar file combining all standard modules (except for Portlet and Hibernate2 support)
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar, aspects jar, spring-portlet jar, and spring-hibernate2 jar!
 
@@ -101,7 +101,7 @@ MODULE JARS (dist/modules):
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~350 KB)
+* "spring-beans" (~360 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
@@ -117,7 +117,7 @@ MODULE JARS (dist/modules):
 - Contents: DAO support, transaction infrastructure, caching support
 - Dependencies: spring-core, (spring-aop, spring-context, JTA API)
 
-* "spring-jdbc" (~210 KB)
+* "spring-jdbc" (~215 KB)
 - Contents: JDBC support
 - Dependencies: spring-dao, spring-beans
 
@@ -133,23 +133,23 @@ MODULE JARS (dist/modules):
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (spring-support, Tiles, iText, POI)
 
+* "spring-portlet" (~110 KB)
+- Contents: framework portlets, portlet MVC framework, portlet controllers
+- Dependencies: spring-web, Portlet API, (spring-webmvc)
+
 * "spring-struts" (~25 KB)
 - Contents: Struts support
 - Dependencies: spring-web, Struts
 
-* "spring-remoting" (~105 KB)
+* "spring-remoting" (~110 KB)
 - Contents: remoting support, EJB support
 - Dependencies: spring-aop, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB API)
-
-* "spring-portlet" (~110 KB)
-- Contents: framework portlets, portlet MVC framework, portlet controllers
-- Dependencies: spring-web, Portlet API, (spring-webmvc)
 
 * "spring-jmx" (~85 KB)
 - Contents: JMX 1.0/1.2 support
 - Dependencies: spring-aop, JMX API
 
-* "spring-jms" (~115 KB)
+* "spring-jms" (~120 KB)
 - Contents: JMS 1.0.2/1.1 support
 - Dependencies: spring-dao, JMS API
 
@@ -161,7 +161,7 @@ MODULE JARS (dist/modules):
 - Contents: JDO 1.0/2.0 support
 - Dependencies: spring-dao, spring-jdbc, JDO API, (spring-web)
 
-* "spring-jpa" (~85 KB)
+* "spring-jpa" (~90 KB)
 - Contents: JPA 1.0 support
 - Dependencies: spring-dao, spring-jdbc, JPA API, (spring-web)
 
