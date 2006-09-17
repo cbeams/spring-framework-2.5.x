@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,9 +33,10 @@ public class MailSendException extends MailException {
 
 	private Map failedMessages = new HashMap();
 
+
 	/**
 	 * Constructor for MailSendException.
-	 * @param msg message
+	 * @param msg the detail message
 	 */
 	public MailSendException(String msg) {
 		super(msg);
@@ -43,11 +44,11 @@ public class MailSendException extends MailException {
 
 	/**
 	 * Constructor for MailSendException.
-	 * @param msg message
-	 * @param ex root cause from remoting API in use
+	 * @param msg the detail message
+	 * @param cause the root cause from the mail API in use
 	 */
-	public MailSendException(String msg, Throwable ex) {
-		super(msg, ex);
+	public MailSendException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 	/**
@@ -61,30 +62,33 @@ public class MailSendException extends MailException {
 		this.failedMessages.putAll(failedMessages);
 	}
 
+
 	/**
 	 * Return a Map with the failed messages as keys, and the thrown exceptions
 	 * as values. Note that a general mail server connection failure will not
 	 * result in failed messages being returned here: A message will only be
 	 * contained here if actually sending it was attempted but failed.
 	 * <p>The messages will be the same that were originally passed to the
-	 * invoked send method, i.e. SimpleMailMessages in case of using the
-	 * generic MailSender interface.
+	 * invoked send method, that is, SimpleMailMessages in case of using
+	 * the generic MailSender interface.
 	 * <p>In case of sending MimeMessage instances via JavaMailSender,
 	 * the messages will be of type MimeMessage.
 	 * @return the Map of failed messages as keys and thrown exceptions as
 	 * values, or an empty Map if no failed messages
+	 * @see SimpleMailMessage
+	 * @see javax.mail.internet.MimeMessage
 	 */
-	public Map getFailedMessages() {
+	public final Map getFailedMessages() {
 		return failedMessages;
 	}
 
 	public String getMessage() {
 		StringBuffer msg = new StringBuffer();
 		String superMsg = super.getMessage();
-		msg.append(superMsg != null ? superMsg : "Could not send mails: ");
-		for (Iterator subExs = this.failedMessages.values().iterator(); subExs.hasNext();) {
-			Exception subEx = (Exception) subExs.next();
-			msg.append(subEx.getMessage());
+		msg.append(superMsg != null ? superMsg : "Failed messages: ");
+		for (Iterator subExs = getFailedMessages().values().iterator(); subExs.hasNext();) {
+			Throwable subEx = (Throwable) subExs.next();
+			msg.append(subEx.toString());
 			if (subExs.hasNext()) {
 				msg.append("; ");
 			}
@@ -93,33 +97,35 @@ public class MailSendException extends MailException {
 	}
 
 	public void printStackTrace(PrintStream ps) {
-		if (this.failedMessages.isEmpty()) {
+		if (getFailedMessages().isEmpty()) {
 			super.printStackTrace(ps);
 		}
 		else {
-			ps.println(this);
-			for (Iterator subExs = this.failedMessages.values().iterator(); subExs.hasNext();) {
-				Exception subEx = (Exception) subExs.next();
+			ps.println(getClass().getName() + " (" + getFailedMessages().size() +
+					"); nested exception details are:");
+			int i = 0;
+			for (Iterator subExs = getFailedMessages().values().iterator(); subExs.hasNext();) {
+				Throwable subEx = (Throwable) subExs.next();
+				i++;
+				ps.println("Failed message " + i + ":");
 				subEx.printStackTrace(ps);
-				if (subExs.hasNext()) {
-					ps.println();
-				}
 			}
 		}
 	}
 
 	public void printStackTrace(PrintWriter pw) {
-		if (this.failedMessages.isEmpty()) {
+		if (getFailedMessages().isEmpty()) {
 			super.printStackTrace(pw);
 		}
 		else {
-			pw.println(this);
-			for (Iterator subExs = this.failedMessages.values().iterator(); subExs.hasNext();) {
-				Exception subEx = (Exception) subExs.next();
+			pw.println(getClass().getName() + " (" + getFailedMessages().size() +
+					"); nested mail exception details are:");
+			int i = 0;
+			for (Iterator subExs = getFailedMessages().values().iterator(); subExs.hasNext();) {
+				Throwable subEx = (Throwable) subExs.next();
+				i++;
+				pw.println("Failed message " + i + ":");
 				subEx.printStackTrace(pw);
-				if (subExs.hasNext()) {
-					pw.println();
-				}
 			}
 		}
 	}

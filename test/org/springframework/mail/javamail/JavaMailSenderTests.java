@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -400,6 +400,7 @@ public class JavaMailSenderTests extends TestCase {
 			sender.send(new SimpleMailMessage[] {simpleMessage1, simpleMessage2});
 		}
 		catch (MailSendException ex) {
+			ex.printStackTrace();
 			assertEquals(sender.transport.getConnectedHost(), "host");
 			assertEquals(sender.transport.getConnectedUsername(), "username");
 			assertEquals(sender.transport.getConnectedPassword(), "password");
@@ -430,6 +431,7 @@ public class JavaMailSenderTests extends TestCase {
 			sender.send(new MimeMessage[] {mimeMessage1, mimeMessage2});
 		}
 		catch (MailSendException ex) {
+			ex.printStackTrace();
 			assertEquals(sender.transport.getConnectedHost(), "host");
 			assertEquals(sender.transport.getConnectedUsername(), "username");
 			assertEquals(sender.transport.getConnectedPassword(), "password");
