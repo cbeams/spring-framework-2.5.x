@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 RC4 (16.9.2006)
+Changes in version 2.0 RC4 (17.9.2006)
 --------------------------------------
 
 General
@@ -15,9 +15,12 @@ General
 * declared all internal ThreadLocal variables as final (to avoid potential class reloading issues)
 
 Package org.springframework.aop
+* replaced all use of AOP Alliance AspectException with AopInvocationException/AopConfigException/IllegalStateException
+* Cglib2AopProxy exposes additional interfaces of a CGLIB-enhanced target bean on a CGLIB AOP proxy as well
 * fixed PointcutAdvisor support classes to avoid eager access to Advice and Pointcut from "hashCode()"/"toString()"
 * added "getTargetObject" method to ScopedObject interface, allowing for access to the raw object in the target scope
 * fixed AnnotationAwareAspectJAutoProxyCreator to lazily retrieve aspect singletons (only once a pointcut matches)
+* fixed @Configurable support to correctly identify the class name even for a CGLIB proxy
 
 Package org.springframework.beans
 * fixed BeanWrapperImpl to return a Collection/Map as-is if it is not accessible (e.g. because it is a scoped proxy)
@@ -52,6 +55,9 @@ Package org.springframework.core
 * fixed SpringVersion to return null if the package is not determinable because of ClassLoader restrictions
 * ResourceArrayPropertyEditor always preserves order of resource entries, even on JDK 1.3 without Commons Collections
 * refined PathMatchingResourcePatternResolver to ignore classpath roots that cannot be resolved as jar or in file system
+
+Package org.springframework.ejb
+* introduced EjbAccessException as replacement of AOP Alliance AspectException in local/remote SLSB invoker interceptors
 
 Package org.springframework.instrument
 * removed unused AbstractLoadTimeWeaver and AspectJWeavingTransformer classes
@@ -157,6 +163,7 @@ Package org.springframework.web
 * introduced "requestCompleted()" method in AbstractRequestAttributes base class for Servlet/PortletRequestAttributes
 * adapted TagUtils to accept subclassed parent tag as expected ancestor too (e.g. OptionTag within subclassed SelectTag)
 * AbstractJasperReportsView converts exporter parameter values "true"/"false" to Boolean.TRUE/FALSE
+* removed deprecated FormatHelper from XSLT view package
 * fixed various JSP form tag issues
 
 
