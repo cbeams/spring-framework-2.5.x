@@ -36,20 +36,20 @@ public abstract class PropertyAccessException extends BeansException implements 
 	 * Create a new PropertyAccessException.
 	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
 	 * @param msg the detail message
-	 * @param ex the root cause
+	 * @param cause the root cause
 	 */
-	public PropertyAccessException(PropertyChangeEvent propertyChangeEvent, String msg, Throwable ex) {
-		super(msg, ex);
+	public PropertyAccessException(PropertyChangeEvent propertyChangeEvent, String msg, Throwable cause) {
+		super(msg, cause);
 		this.propertyChangeEvent = propertyChangeEvent;
 	}
 
 	/**
 	 * Create a new PropertyAccessException without PropertyChangeEvent.
 	 * @param msg the detail message
-	 * @param ex the root cause
+	 * @param cause the root cause
 	 */
-	public PropertyAccessException(String msg, Throwable ex) {
-		super(msg, ex);
+	public PropertyAccessException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 

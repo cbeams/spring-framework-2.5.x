@@ -53,11 +53,11 @@ public class NestedIOException extends IOException {
 	 * Construct a <code>NestedServletException</code> with the specified detail message
 	 * and nested exception.
 	 * @param msg the detail message
-	 * @param ex the nested exception
+	 * @param cause the nested exception
 	 */
-	public NestedIOException(String msg, Throwable ex) {
+	public NestedIOException(String msg, Throwable cause) {
 		super(msg);
-		this.cause = ex;
+		this.cause = cause;
 	}
 
 

@@ -40,13 +40,13 @@ public class CannotLoadBeanClassException extends FatalBeanException {
 	 * that the bean definition came from
 	 * @param beanName the name of the bean requested
 	 * @param beanClassName the name of the bean class
-	 * @param ex the root cause
+	 * @param cause the root cause
 	 */
 	public CannotLoadBeanClassException(
-			String resourceDescription, String beanName, String beanClassName, ClassNotFoundException ex) {
+			String resourceDescription, String beanName, String beanClassName, ClassNotFoundException cause) {
 
 		super("Error loading class [" + beanClassName + "] of bean with name '" + beanName +
-				"' defined in " + resourceDescription, ex);
+				"' defined in " + resourceDescription, cause);
 		this.resourceDescription = resourceDescription;
 		this.beanName = beanName;
 		this.beanClassName = beanClassName;
@@ -58,13 +58,13 @@ public class CannotLoadBeanClassException extends FatalBeanException {
 	 * that the bean definition came from
 	 * @param beanName the name of the bean requested
 	 * @param beanClassName the name of the bean class
-	 * @param err the root cause
+	 * @param cause the root cause
 	 */
 	public CannotLoadBeanClassException(
-			String resourceDescription, String beanName, String beanClassName, NoClassDefFoundError err) {
+			String resourceDescription, String beanName, String beanClassName, NoClassDefFoundError cause) {
 
 		super("Error loading class that [" + beanClassName + "] of bean with name '" + beanName +
-				"' defined in " + resourceDescription + ": dependency not found", err);
+				"' defined in " + resourceDescription + ": dependency not found", cause);
 		this.resourceDescription = resourceDescription;
 		this.beanName = beanName;
 		this.beanClassName = beanClassName;

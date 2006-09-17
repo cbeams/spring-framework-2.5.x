@@ -69,11 +69,11 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	 * Construct a <code>NestedRuntimeException</code> with the specified detail message
 	 * and nested exception.
 	 * @param msg the detail message
-	 * @param ex the nested exception
+	 * @param cause the nested exception
 	 */
-	public NestedRuntimeException(String msg, Throwable ex) {
+	public NestedRuntimeException(String msg, Throwable cause) {
 		super(msg);
-		this.cause = ex;
+		this.cause = cause;
 	}
 
 

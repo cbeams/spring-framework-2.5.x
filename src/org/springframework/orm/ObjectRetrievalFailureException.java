@@ -35,11 +35,11 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	/**
 	 * Create a general ObjectRetrievalFailureException with the given message,
 	 * without any information on the affected object.
-	 * @param msg exception message
-	 * @param ex source exception
+	 * @param msg the detail message
+	 * @param cause the source exception
 	 */
-	public ObjectRetrievalFailureException(String msg, Throwable ex) {
-		super(msg, ex);
+	public ObjectRetrievalFailureException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 	/**
@@ -59,13 +59,13 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * with the given explicit message and exception.
 	 * @param persistentClass the persistent class
 	 * @param identifier the ID of the object that should have been retrieved
-	 * @param msg exception message
-	 * @param ex source exception
+	 * @param msg the detail message
+	 * @param cause the source exception
 	 */
 	public ObjectRetrievalFailureException(
-			Class persistentClass, Object identifier, String msg, Throwable ex) {
+			Class persistentClass, Object identifier, String msg, Throwable cause) {
 
-		super(msg, ex);
+		super(msg, cause);
 		this.persistentClass = persistentClass;
 		this.identifier = identifier;
 	}
@@ -87,13 +87,13 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * with the given explicit message and exception.
 	 * @param persistentClassName the name of the persistent class
 	 * @param identifier the ID of the object that should have been retrieved
-	 * @param msg exception message
-	 * @param ex source exception
+	 * @param msg the detail message
+	 * @param cause the source exception
 	 */
 	public ObjectRetrievalFailureException(
-			String persistentClassName, Object identifier, String msg, Throwable ex) {
+			String persistentClassName, Object identifier, String msg, Throwable cause) {
 
-		super(msg, ex);
+		super(msg, cause);
 		this.persistentClass = persistentClassName;
 		this.identifier = identifier;
 	}

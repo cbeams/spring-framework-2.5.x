@@ -41,10 +41,10 @@ public class BeanInstantiationException extends FatalBeanException {
 	 * Create a new BeanInstantiationException.
 	 * @param beanClass the offending bean class
 	 * @param msg the detail message
-	 * @param ex the root cause
+	 * @param cause the root cause
 	 */
-	public BeanInstantiationException(Class beanClass, String msg, Throwable ex) {
-		super("Could not instantiate bean class [" + beanClass.getName() + "]: " + msg, ex);
+	public BeanInstantiationException(Class beanClass, String msg, Throwable cause) {
+		super("Could not instantiate bean class [" + beanClass.getName() + "]: " + msg, cause);
 		this.beanClass = beanClass;
 	}
 

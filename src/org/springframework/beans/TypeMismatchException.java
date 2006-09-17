@@ -52,9 +52,9 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * Create a new TypeMismatchException.
 	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
 	 * @param requiredType the required target type (or <code>null</code> if not known)
-	 * @param ex the root cause (may be <code>null</code>)
+	 * @param cause the root cause (may be <code>null</code>)
 	 */
-	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, Class requiredType, Throwable ex) {
+	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, Class requiredType, Throwable cause) {
 		super(propertyChangeEvent,
 				"Failed to convert property value of type [" +
 				(propertyChangeEvent.getNewValue() != null ?
@@ -63,7 +63,7 @@ public class TypeMismatchException extends PropertyAccessException {
 				 " to required type [" + ClassUtils.getQualifiedName(requiredType) + "]" : "") +
 				(propertyChangeEvent.getPropertyName() != null ?
 				 " for property '" + propertyChangeEvent.getPropertyName() + "'" : ""),
-				ex);
+				cause);
 		this.value = propertyChangeEvent.getNewValue();
 		this.requiredType = requiredType;
 	}
@@ -81,15 +81,15 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * Create a new TypeMismatchException without PropertyChangeEvent.
 	 * @param value the offending value that couldn't be converted (may be <code>null</code>)
 	 * @param requiredType the required target type (or <code>null</code> if not known)
-	 * @param ex the root cause (may be <code>null</code>)
+	 * @param cause the root cause (may be <code>null</code>)
 	 */
-	public TypeMismatchException(Object value, Class requiredType, Throwable ex) {
+	public TypeMismatchException(Object value, Class requiredType, Throwable cause) {
 		super("Failed to convert value of type [" +
 				(value != null ?
 				 ClassUtils.getQualifiedName(value.getClass()) : null) + "]" +
 				(requiredType != null ?
 				 " to required type [" + ClassUtils.getQualifiedName(requiredType) + "]" : ""),
-				ex);
+				cause);
 		this.value = value;
 		this.requiredType = requiredType;
 	}

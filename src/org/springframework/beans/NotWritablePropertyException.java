@@ -16,8 +16,6 @@
 
 package org.springframework.beans;
 
-
-
 /**
  * Exception thrown on an attempt to set the value of a property
  * that isn't writable, because there's no setter method. In some
@@ -58,10 +56,10 @@ public class NotWritablePropertyException extends InvalidPropertyException {
 	 * @param beanClass the offending bean class
 	 * @param propertyName the offending property name
 	 * @param msg the detail message
-	 * @param ex the root cause
+	 * @param cause the root cause
 	 */
-	public NotWritablePropertyException(Class beanClass, String propertyName, String msg, Throwable ex) {
-		super(beanClass, propertyName, msg, ex);
+	public NotWritablePropertyException(Class beanClass, String propertyName, String msg, Throwable cause) {
+		super(beanClass, propertyName, msg, cause);
 	}
 
 	/**

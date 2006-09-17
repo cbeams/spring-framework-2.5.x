@@ -31,8 +31,8 @@ public class BeanDefinitionValidationException extends FatalBeanException {
 		super(msg);
 	}
 
-	public BeanDefinitionValidationException(String msg, Throwable ex) {
-		super(msg, ex);
+	public BeanDefinitionValidationException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ public class NestedTransactionNotSupportedException extends CannotCreateTransact
 
 	/**
 	 * Constructor for NestedTransactionNotSupportedException.
-	 * @param msg message
+	 * @param msg the detail message
 	 */
 	public NestedTransactionNotSupportedException(String msg) {
 		super(msg);
@@ -35,11 +35,11 @@ public class NestedTransactionNotSupportedException extends CannotCreateTransact
 
 	/**
 	 * Constructor for NestedTransactionNotSupportedException.
-	 * @param msg message
-	 * @param ex root cause from transaction API in use
+	 * @param msg the detail message
+	 * @param cause the root cause from the transaction API in use
 	 */
-	public NestedTransactionNotSupportedException(String msg, Throwable ex) {
-		super(msg, ex);
+	public NestedTransactionNotSupportedException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 }

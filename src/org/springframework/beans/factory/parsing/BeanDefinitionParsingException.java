@@ -29,9 +29,16 @@ public class BeanDefinitionParsingException extends BeanDefinitionStoreException
 
 	/**
 	 * Create a new BeanDefinitionParsingException.
+	 * @param resourceDescription description of the resource
+	 * that the bean definition came from
+	 * @param parseState the ParseState at the time of failure
+	 * @param msg the detail message
+	 * @param cause the root cause
 	 */
-	public BeanDefinitionParsingException(String resourceDescription, ParseState parseState, String msg, Throwable ex) {
-		super(resourceDescription, "Error '" + msg + "' in " + resourceDescription + " at:\n" + parseState, ex);
+	public BeanDefinitionParsingException(
+			String resourceDescription, ParseState parseState, String msg, Throwable cause) {
+
+		super(resourceDescription, "Error '" + msg + "' in " + resourceDescription + " at:\n" + parseState, cause);
 	}
 
 }

@@ -58,10 +58,10 @@ public class NestedServletException extends ServletException {
 	 * Construct a <code>NestedServletException</code> with the specified detail message
 	 * and nested exception.
 	 * @param msg the detail message
-	 * @param ex the nested exception
+	 * @param cause the nested exception
 	 */
-	public NestedServletException(String msg, Throwable ex) {
-		super(msg, ex);
+	public NestedServletException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 

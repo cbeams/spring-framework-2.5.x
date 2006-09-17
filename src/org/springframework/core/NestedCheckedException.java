@@ -69,11 +69,11 @@ public abstract class NestedCheckedException extends Exception {
 	 * Construct a <code>NestedCheckedException</code> with the specified detail message
 	 * and nested exception.
 	 * @param msg the detail message
-	 * @param ex the nested exception
+	 * @param cause the nested exception
 	 */
-	public NestedCheckedException(String msg, Throwable ex) {
+	public NestedCheckedException(String msg, Throwable cause) {
 		super(msg);
-		this.cause = ex;
+		this.cause = cause;
 	}
 
 

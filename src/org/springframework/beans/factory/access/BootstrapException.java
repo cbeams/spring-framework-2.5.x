@@ -38,10 +38,10 @@ public class BootstrapException extends FatalBeanException {
 	 * Create a new BootstrapException with the specified message
 	 * and root cause.
 	 * @param msg the detail message
-	 * @param ex the root cause
+	 * @param cause the root cause
 	 */
-	public BootstrapException(String msg, Throwable ex) {
-		super(msg, ex);
+	public BootstrapException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 }

@@ -28,11 +28,11 @@ public class RemoteProxyFailureException extends RemoteAccessException {
 
 	/**
 	 * Constructor for RemoteProxyFailureException.
-	 * @param msg message
-	 * @param ex root cause from remoting API in use
+	 * @param msg the detail message
+	 * @param cause the root cause from the remoting API in use
 	 */
-	public RemoteProxyFailureException(String msg, Throwable ex) {
-		super(msg, ex);
+	public RemoteProxyFailureException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 }

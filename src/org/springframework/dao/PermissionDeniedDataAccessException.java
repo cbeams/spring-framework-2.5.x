@@ -28,11 +28,11 @@ public class PermissionDeniedDataAccessException extends DataAccessException {
 	/**
 	 * Constructor for PermissionDeniedDataAccessException.
 	 * @param msg the detail message
-	 * @param ex root cause from the underlying data access API,
+	 * @param cause the root cause from the underlying data access API,
 	 * such as JDBC
 	 */
-	public PermissionDeniedDataAccessException(String msg, Throwable ex) {
-		super(msg, ex);
+	public PermissionDeniedDataAccessException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 }

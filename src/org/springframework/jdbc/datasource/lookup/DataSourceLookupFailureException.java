@@ -38,10 +38,11 @@ public class DataSourceLookupFailureException extends DataAccessException {
 	/**
 	 * Constructor for DataSourceLookupFailureException.
 	 * @param msg the detail message
-	 * @param ex root cause (usually from using a underlying lookup API such as JNDI)
+	 * @param cause the root cause (usually from using a underlying
+	 * lookup API such as JNDI)
 	 */
-	public DataSourceLookupFailureException(String msg, Throwable ex) {
-		super(msg, ex);
+	public DataSourceLookupFailureException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 }

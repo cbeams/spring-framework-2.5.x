@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.jmx;
-
-import org.springframework.core.NestedRuntimeException;
 
 /**
  * Exception thrown when we cannot locate an instance of an <code>MBeanServer</code>,
@@ -42,10 +40,10 @@ public class MBeanServerNotFoundException extends JmxException {
 	 * Create a new <code>MBeanServerNotFoundException</code> with the
 	 * specified error message and root cause.
 	 * @param msg the error message
-	 * @param ex the root cause
+	 * @param cause the root cause
 	 */
-	public MBeanServerNotFoundException(String msg, Throwable ex) {
-		super(msg, ex);
+	public MBeanServerNotFoundException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 }

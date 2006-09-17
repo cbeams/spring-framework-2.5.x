@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,10 +42,10 @@ public class BeanCreationException extends FatalBeanException {
 	/**
 	 * Create a new BeanCreationException.
 	 * @param msg the detail message
-	 * @param ex the root cause
+	 * @param cause the root cause
 	 */
-	public BeanCreationException(String msg, Throwable ex) {
-		super(msg, ex);
+	public BeanCreationException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 	/**
@@ -61,10 +61,10 @@ public class BeanCreationException extends FatalBeanException {
 	 * Create a new BeanCreationException.
 	 * @param beanName the name of the bean requested
 	 * @param msg the detail message
-	 * @param ex the root cause
+	 * @param cause the root cause
 	 */
-	public BeanCreationException(String beanName, String msg, Throwable ex) {
-		super("Error creating bean with name '" + beanName + "': " + msg, ex);
+	public BeanCreationException(String beanName, String msg, Throwable cause) {
+		super("Error creating bean with name '" + beanName + "': " + msg, cause);
 	}
 
 	/**
@@ -84,12 +84,12 @@ public class BeanCreationException extends FatalBeanException {
 	 * that the bean definition came from
 	 * @param beanName the name of the bean requested
 	 * @param msg the detail message
-	 * @param ex the root cause
+	 * @param cause the root cause
 	 */
-	public BeanCreationException(String resourceDescription, String beanName, String msg, Throwable ex) {
+	public BeanCreationException(String resourceDescription, String beanName, String msg, Throwable cause) {
 		super("Error creating bean with name '" + beanName + "'" +
 				(resourceDescription != null ? " defined in " + resourceDescription : "") +
-				": " + msg, ex);
+				": " + msg, cause);
 		this.resourceDescription = resourceDescription;
 		this.beanName = beanName;
 	}
