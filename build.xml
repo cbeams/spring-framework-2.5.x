@@ -704,7 +704,7 @@
 		<copy file="${src.dir}/org/springframework/aop/config/spring-aop-2.0.xsd"
 					todir="${dist.dir}/resources" preservelastmodified="true"/>
 
-		<copy file="${src.dir}/org/springframework/ejb/spring-jee-2.0.xsd"
+		<copy file="${src.dir}/org/springframework/ejb/config/spring-jee-2.0.xsd"
 					todir="${dist.dir}/resources" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/scripting/config/spring-lang-2.0.xsd"
