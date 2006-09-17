@@ -82,18 +82,33 @@ public class MailSendException extends MailException {
 		return failedMessages;
 	}
 
+
 	public String getMessage() {
-		StringBuffer msg = new StringBuffer();
+		StringBuffer sb = new StringBuffer();
 		String superMsg = super.getMessage();
-		msg.append(superMsg != null ? superMsg : "Failed messages: ");
+		sb.append(superMsg != null ? superMsg : "Failed messages: ");
 		for (Iterator subExs = getFailedMessages().values().iterator(); subExs.hasNext();) {
 			Throwable subEx = (Throwable) subExs.next();
-			msg.append(subEx.toString());
+			sb.append(subEx.toString());
 			if (subExs.hasNext()) {
-				msg.append("; ");
+				sb.append("; ");
 			}
 		}
-		return msg.toString();
+		return sb.toString();
+	}
+
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(getClass().getName()).append("; nested exceptions (");
+		sb.append(getFailedMessages().size()).append(") are:");
+		int i = 0;
+		for (Iterator subExs = getFailedMessages().values().iterator(); subExs.hasNext();) {
+			Throwable subEx = (Throwable) subExs.next();
+			i++;
+			sb.append('\n').append("Failed message ").append(i).append(": ");
+			sb.append(subEx);
+		}
+		return sb.toString();
 	}
 
 	public void printStackTrace(PrintStream ps) {
@@ -101,8 +116,8 @@ public class MailSendException extends MailException {
 			super.printStackTrace(ps);
 		}
 		else {
-			ps.println(getClass().getName() + " (" + getFailedMessages().size() +
-					"); nested exception details are:");
+			ps.println(getClass().getName() + "; nested exception details (" +
+					getFailedMessages().size() + ") are:");
 			int i = 0;
 			for (Iterator subExs = getFailedMessages().values().iterator(); subExs.hasNext();) {
 				Throwable subEx = (Throwable) subExs.next();
@@ -118,8 +133,8 @@ public class MailSendException extends MailException {
 			super.printStackTrace(pw);
 		}
 		else {
-			pw.println(getClass().getName() + " (" + getFailedMessages().size() +
-					"); nested mail exception details are:");
+			pw.println(getClass().getName() + "; nested exception details (" +
+					getFailedMessages().size() + ") are:");
 			int i = 0;
 			for (Iterator subExs = getFailedMessages().values().iterator(); subExs.hasNext();) {
 				Throwable subEx = (Throwable) subExs.next();

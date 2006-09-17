@@ -400,6 +400,7 @@ public class JavaMailSenderTests extends TestCase {
 			sender.send(new SimpleMailMessage[] {simpleMessage1, simpleMessage2});
 		}
 		catch (MailSendException ex) {
+			System.out.println(ex);
 			ex.printStackTrace();
 			assertEquals(sender.transport.getConnectedHost(), "host");
 			assertEquals(sender.transport.getConnectedUsername(), "username");
