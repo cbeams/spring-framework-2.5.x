@@ -18,7 +18,6 @@ package org.springframework.orm.jpa.hibernate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceException;
 
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 
@@ -49,18 +48,13 @@ public class HibernateMultiEntityManagerFactoryIntegrationTests extends
 	}
 
 
-	public void testGetReferenceWhenNoRow() {
-		// Skip for Hibernate EntityManager RC1: doesn't work there because of new persistence.jar
-		// TODO: Remove this once a Hibernate EntityManager update fixes the underlying issue.
-	}
-
 	public void testEntityManagerFactory2() {
 		EntityManager em = this.entityManagerFactory2.createEntityManager();
 		try {
 			em.createQuery("select tb from TestBean");
-			fail("Should have thrown PersistenceException");
+			fail("Should have thrown IllegalArgumentException");
 		}
-		catch (PersistenceException ex) {
+		catch (IllegalArgumentException ex) {
 			// expected
 		}
 		finally {

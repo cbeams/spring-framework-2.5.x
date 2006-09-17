@@ -28,17 +28,13 @@ import org.springframework.orm.jpa.EntityManagerFactoryInfo;
  * @author Juergen Hoeller
  * @author Rod Johnson
  */
-public class HibernateEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
+public class HibernateEntityManagerFactoryIntegrationTests extends
+		AbstractContainerEntityManagerFactoryIntegrationTests {
 
 	protected String[] getConfigLocations() {
 		return HIBERNATE_CONFIG_LOCATIONS;
 	}
 
-
-	public void testGetReferenceWhenNoRow() {
-		// Skip for Hibernate EntityManager RC1: doesn't work there because of new persistence.jar
-		// TODO: Remove this once a Hibernate EntityManager update fixes the underlying issue.
-	}
 
 	public void testCanCastNativeEntityManagerFactoryToHibernateEntityManagerFactoryImpl() {
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
