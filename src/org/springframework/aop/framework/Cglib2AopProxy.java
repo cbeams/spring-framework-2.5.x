@@ -205,19 +205,19 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			return proxy;
 		}
 		catch (CodeGenerationException ex) {
-			throw new AopConfigException("Couldn't generate CGLIB subclass of class '" +
-					this.advised.getTargetSource().getTargetClass() + "': " +
+			throw new AopConfigException("Couldn't generate CGLIB subclass of class [" +
+					this.advised.getTargetSource().getTargetClass() + "]: " +
 					"Common causes of this problem include using a final class or a non-visible class",
 					ex);
 		}
 		catch (IllegalArgumentException ex) {
-			throw new AopConfigException("Couldn't generate CGLIB subclass of class '" +
-					this.advised.getTargetSource().getTargetClass() + "': " +
+			throw new AopConfigException("Couldn't generate CGLIB subclass of class [" +
+					this.advised.getTargetSource().getTargetClass() + "]: " +
 					"Common causes of this problem include using a final class or a non-visible class",
 					ex);
 		}
 		catch (Exception ex) {
-			// TargetSource.getTarget failed
+			// TargetSource.getTarget() failed
 			throw new AopConfigException("Unexpected AOP exception", ex);
 		}
 	}

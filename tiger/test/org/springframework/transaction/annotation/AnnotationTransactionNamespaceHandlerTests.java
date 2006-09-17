@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,8 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 	private ApplicationContext context;
 
 	public void setUp() {
-		this.context = new ClassPathXmlApplicationContext("org/springframework/transaction/annotation/annotationTransactionNamespaceHandlerTests.xml");
+		this.context = new ClassPathXmlApplicationContext(
+				"org/springframework/transaction/annotation/annotationTransactionNamespaceHandlerTests.xml");
 	}
 
 	public void testIsProxy() throws Exception {
@@ -80,6 +81,7 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 		return (TransactionalTestBean) context.getBean("testBean");
 	}
 
+
 	public static class TransactionalTestBean {
 
 		@Transactional(readOnly = true)
@@ -98,12 +100,11 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 		}
 
 		public void doSomething() {
-
 		}
 		
 		@Transactional
 		protected void annotationsOnProtectedAreIgnored() {
-			
 		}
 	}
+
 }
