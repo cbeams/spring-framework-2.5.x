@@ -27,8 +27,8 @@ import org.springframework.util.ObjectUtils;
  * process, and errors added to it as necessary.
  *
  * <p>The binding process continues when it encounters application-level
- * propertyAccessExceptions, applying those changes that can be applied and storing
- * rejected changes in an object of this class.
+ * PropertyAccessExceptions, applying those changes that can be applied
+ * and storing rejected changes in an object of this class.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -45,7 +45,7 @@ public class PropertyAccessExceptionsException extends BeansException {
 	 * @param propertyAccessExceptions the List of PropertyAccessExceptions
 	 */
 	public PropertyAccessExceptionsException(PropertyAccessException[] propertyAccessExceptions) {
-		super("");
+		super(null);
 		if (ObjectUtils.isEmpty(propertyAccessExceptions)) {
 			throw new IllegalArgumentException("At least 1 PropertyAccessException required");
 		}
@@ -56,7 +56,7 @@ public class PropertyAccessExceptionsException extends BeansException {
 	/**
 	 * If this returns 0, no errors were encountered during binding.
 	 */
-	public int getExceptionCount() {
+	public final int getExceptionCount() {
 		return this.propertyAccessExceptions.length;
 	}
 
@@ -64,7 +64,7 @@ public class PropertyAccessExceptionsException extends BeansException {
 	 * Return an array of the propertyAccessExceptions stored in this object.
 	 * Will return the empty array (not null) if there were no errors.
 	 */
-	public PropertyAccessException[] getPropertyAccessExceptions() {
+	public final PropertyAccessException[] getPropertyAccessExceptions() {
 		return this.propertyAccessExceptions;
 	}
 
@@ -83,13 +83,20 @@ public class PropertyAccessExceptionsException extends BeansException {
 
 
 	public String getMessage() {
-		return "" + getExceptionCount() + " errors";
+		StringBuffer sb = new StringBuffer("Failed properties: ");
+		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
+			sb.append(this.propertyAccessExceptions[i].getMessage());
+			if (i < this.propertyAccessExceptions.length - 1) {
+				sb.append("; ");
+			}
+		}
+		return sb.toString();
 	}
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append(getClass().getName()).append(" (").append(getExceptionCount());
-		sb.append(" errors); nested PropertyAccessExceptions are:");
+		sb.append(getClass().getName()).append("; nested PropertyAccessExceptions (");
+		sb.append(getExceptionCount()).append(") are:");
 		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
 			sb.append('\n').append("PropertyAccessException ").append(i + 1).append(": ");
 			sb.append(this.propertyAccessExceptions[i]);
@@ -98,8 +105,8 @@ public class PropertyAccessExceptionsException extends BeansException {
 	}
 
 	public void printStackTrace(PrintStream ps) {
-		ps.println(getClass().getName() + " (" + getExceptionCount() +
-				" errors); nested PropertyAccessException details are:");
+		ps.println(getClass().getName() + "; nested PropertyAccessException details (" +
+				getExceptionCount() + ") are:");
 		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
 			ps.println("PropertyAccessException " + (i + 1) + ":");
 			this.propertyAccessExceptions[i].printStackTrace(ps);
@@ -107,8 +114,8 @@ public class PropertyAccessExceptionsException extends BeansException {
 	}
 
 	public void printStackTrace(PrintWriter pw) {
-		pw.println(getClass().getName() + " (" + getExceptionCount() +
-				" errors); nested PropertyAccessException details are:");
+		pw.println(getClass().getName() + "; nested PropertyAccessException details (" +
+				getExceptionCount() + ") are:");
 		for (int i = 0; i < this.propertyAccessExceptions.length; i++) {
 			pw.println("PropertyAccessException " + (i + 1) + ":");
 			this.propertyAccessExceptions[i].printStackTrace(pw);

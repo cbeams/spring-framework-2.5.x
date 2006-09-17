@@ -571,7 +571,6 @@ public class BeanWrapperTests extends TestCase {
 		String invalidTouchy = ".valid";
 		try {
 			BeanWrapper bw = new BeanWrapperImpl(t);
-			//System.out.println(bw);
 			MutablePropertyValues pvs = new MutablePropertyValues();
 			pvs.addPropertyValue(new PropertyValue("age", "foobar"));
 			pvs.addPropertyValue(new PropertyValue("name", newName));
@@ -580,15 +579,14 @@ public class BeanWrapperTests extends TestCase {
 			fail("Should throw exception when everything is valid");
 		}
 		catch (PropertyAccessExceptionsException ex) {
+			System.out.println(ex);
+			ex.printStackTrace();
 			assertTrue("Must contain 2 exceptions", ex.getExceptionCount() == 2);
 			// Test validly set property matches
 			assertTrue("Validly set property must stick", t.getName().equals(newName));
 			assertTrue("Invalidly set property must retain old value", t.getAge() == 0);
 			assertTrue("New value of dodgy setter must be available through exception",
 					ex.getPropertyAccessException("touchy").getPropertyChangeEvent().getNewValue().equals(invalidTouchy));
-		}
-		catch (Exception ex) {
-			fail("Shouldn't throw exception other than pvee");
 		}
 	}
 
