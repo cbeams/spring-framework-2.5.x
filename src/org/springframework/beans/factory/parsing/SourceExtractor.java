@@ -34,7 +34,7 @@ public interface SourceExtractor {
 	/**
 	 * Extract the source metadata from the candidate object supplied
 	 * by the configuration parser.
-	 * @param sourceCandidate the source metatada
+	 * @param sourceCandidate the source metadata
 	 */
 	Object extract(Object sourceCandidate);
 

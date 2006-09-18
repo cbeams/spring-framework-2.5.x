@@ -30,7 +30,7 @@ public class NullSourceExtractor implements SourceExtractor {
 
 	/**
 	 * This default implementation returns <code>null</code>.
-	 * @param sourceCandidate the source metatada
+	 * @param sourceCandidate the source metadata
 	 * @return <code>null</code> 
 	 */
 	public Object extract(Object sourceCandidate) {
