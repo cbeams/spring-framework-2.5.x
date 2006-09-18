@@ -44,7 +44,7 @@ public class OpenJpaEntityManagerFactoryIntegrationTests extends AbstractContain
 
 	public void testCanGetSharedOpenJpaEntityManagerProxy() {
 		OpenJPAEntityManager openJPAEntityManager = (OpenJPAEntityManager) SharedEntityManagerCreator.createSharedEntityManager(
-				entityManagerFactory, OpenJPAEntityManager.class);
+				entityManagerFactory, null, OpenJPAEntityManager.class);
 		assertNotNull(openJPAEntityManager.getDelegate());
 	}
 }
