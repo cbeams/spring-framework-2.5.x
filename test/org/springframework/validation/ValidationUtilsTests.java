@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,38 +17,72 @@
 package org.springframework.validation;
 
 import junit.framework.TestCase;
-
 import org.springframework.beans.TestBean;
+import org.springframework.test.AssertThrows;
 
 /**
+ * Unit tests for the {@link ValidationUtils} class.
+ *
  * @author Juergen Hoeller
+ * @author Rick Evans
  * @since 08.10.2004
  */
-public class ValidationUtilsTests extends TestCase {
+public final class ValidationUtilsTests extends TestCase {
 
-	public void testValidationUtilsEmpty() throws Exception {
-		//Test null
+	public void testInvokeValidatorWithNullValidator() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				TestBean tb = new TestBean();
+				Errors errors = new BindException(tb, "tb");
+				ValidationUtils.invokeValidator(null, tb, errors);
+			}
+		}.runTest();
+	}
+
+	public void testInvokeValidatorWithNullErrors() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				TestBean tb = new TestBean();
+				ValidationUtils.invokeValidator(new EmptyValidator(), tb, null);
+			}
+		}.runTest();
+	}
+
+	public void testInvokeValidatorSunnyDay() throws Exception {
+		TestBean tb = new TestBean();
+		Errors errors = new BindException(tb, "tb");
+		ValidationUtils.invokeValidator(new EmptyValidator(), tb, errors);
+		assertTrue(errors.hasFieldErrors("name"));
+		assertEquals("EMPTY", errors.getFieldError("name").getCode());
+	}
+
+	public void testValidationUtilsNull() throws Exception {
 		TestBean tb = new TestBean();
 		Errors errors = new BindException(tb, "tb");
 		Validator testValidator = new EmptyValidator();
 		testValidator.validate(tb, errors);
 		assertTrue(errors.hasFieldErrors("name"));
 		assertEquals("EMPTY", errors.getFieldError("name").getCode());
+	}
 
-		//Test empty String
-		tb.setName("");
-		errors = new BindException(tb, "tb");
+	public void testValidationUtilsEmpty() throws Exception {
+		TestBean tb = new TestBean("");
+		Errors errors = new BindException(tb, "tb");
+		Validator testValidator = new EmptyValidator();
 		testValidator.validate(tb, errors);
 		assertTrue(errors.hasFieldErrors("name"));
 		assertEquals("EMPTY", errors.getFieldError("name").getCode());
+	}
 
-		//Test OK1
+	public void testValidationUtilsSunnyDay() throws Exception {
+		TestBean tb = new TestBean("");
+
+		Validator testValidator = new EmptyValidator();
 		tb.setName(" ");
-		errors = new BindException(tb, "tb");
+		Errors errors = new BindException(tb, "tb");
 		testValidator.validate(tb, errors);
 		assertFalse(errors.hasFieldErrors("name"));
 
-		//Test OK2
 		tb.setName("Roddy");
 		errors = new BindException(tb, "tb");
 		testValidator.validate(tb, errors);
@@ -86,26 +120,24 @@ public class ValidationUtilsTests extends TestCase {
 	}
 
 
-	private static class EmptyValidator implements Validator {
+	private static final class EmptyValidator implements Validator {
 
 		public boolean supports(Class clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
 
 		public void validate(Object obj, Errors errors) {
-			//TestBean tb = (TestBean) obj;
 			ValidationUtils.rejectIfEmpty(errors, "name", "EMPTY", "You must enter a name!");
 		}
 	}
 
-	private static class ValidationUtilsEmptyOrWhitespaceValidator implements Validator {
+	private static final class ValidationUtilsEmptyOrWhitespaceValidator implements Validator {
 
 		public boolean supports(Class clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
 
 		public void validate(Object obj, Errors errors) {
-			//TestBean tb = (TestBean) obj;
 			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "EMPTY_OR_WHITESPACE", "You must enter a name!");
 		}
 	}

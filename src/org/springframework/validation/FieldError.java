@@ -19,11 +19,11 @@ package org.springframework.validation;
 import org.springframework.util.Assert;
 
 /**
- * Class that encapsulates a field error, that is, a reason for rejecting
- * a specific field value.
+ * Encapsulates a field error, that is, a reason for rejecting a specific
+ * field value.
  *
- * <p>See DefaultMessageCodesResolver javadoc for details on how a message
- * code list is built for a FieldError.
+ * <p>See the {@link DefaultMessageCodesResolver} javadoc for details on
+ * how a message code list is built for a <code>FieldError</code>.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

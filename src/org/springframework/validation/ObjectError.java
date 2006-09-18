@@ -20,36 +20,37 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.util.Assert;
 
 /**
- * Class that encapsulates an object error, that is, a global reason for
- * rejecting an object.
- *
- * <p>See DefaultMessageCodesResolver javadoc for details on how a message
- * code list is built for an ObjectError.
+ * Encapsulates an object error, that is, a global reason for rejecting
+ * an object.
+ * 
+ * <p>See the {@link DefaultMessageCodesResolver} javadoc for details on
+ * how a message code list is built for an <code>ObjectError</code>.
  *
  * @author Juergen Hoeller
- * @since 10.03.2003
  * @see FieldError
  * @see DefaultMessageCodesResolver
+ * @since 10.03.2003
  */
 public class ObjectError extends DefaultMessageSourceResolvable {
 
-  private final String objectName;
+	private final String objectName;
 
 
-  /**
-   * Create a new ObjectError instance.
+	/**
+	 * Creates a new instance of the {@link ObjectError} class.
 	 * @param objectName the name of the affected object
 	 * @param codes the codes to be used to resolve this message
-	 * @param arguments the array of arguments to be used to resolve this message
+	 * @param arguments	the array of arguments to be used to resolve this message
 	 * @param defaultMessage the default message to be used to resolve this message
-   */
+	 * @throws IllegalArgumentException if the supplied <code>objectName</code> is <code>null</code> 
+	 */
 	public ObjectError(String objectName, String[] codes, Object[] arguments, String defaultMessage) {
 		super(codes, arguments, defaultMessage);
 		Assert.notNull(objectName, "Object name must not be null");
 		this.objectName = objectName;
 	}
 
-  /**
+	/**
 	 * Return the name of the affected object.
 	 */
 	public String getObjectName() {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="validation">
-  <title>PropertyEditors, data binding, validation and the BeanWrapper</title>
+  <title>Validation, Data-binding, the <interfacename>BeanWrapper</interfacename>, and <literal>PropertyEditors</literal></title>
 
   <section id="validation-introduction">
     <title>Introduction</title>
@@ -10,15 +10,16 @@
     does not exclude either one of them. Specifically validation should not be
     tied to the web tier, should be easy to localize and it should be
     possible to plug in any validator available. Considering the above, Spring
-    has come up with a <interfacename>Validator</interfacename> interface that's both
-    basic and usable in every layer of an application.</para>
+    has come up with a <interfacename>Validator</interfacename> interface that
+    is both basic and eminently usable in every layer of an application.</para>
 
     <para>Data binding is useful for allowing user input to be dynamically
     bound to the domain model of an application (or whatever objects you use
     to process user input). Spring provides the so-called
-    <literal>DataBinder</literal> to do exactly that. The <interfacename>Validator</interfacename> and the
-    DataBinder make up the <literal>validation</literal> package, which is
-    primarily used in but not limited to the MVC framework.</para>
+    <interfacename>DataBinder</interfacename> to do exactly that. The
+    <interfacename>Validator</interfacename> and the
+    <interfacename>DataBinder</interfacename> make up the <literal>validation</literal> package,
+    which is primarily used in but not limited to the MVC framework.</para>
 
     <para>The <interfacename>BeanWrapper</interfacename> is a fundamental concept in the
     Spring Framework and is used in a lot of places. However, you probably
@@ -32,8 +33,151 @@
     <interfacename>PropertyEditor</interfacename> is part of the JavaBeans specification. Just as the
     <interfacename>BeanWrapper</interfacename>, it's best to explain the use of PropertyEditors in this
     chapter as well, since it's closely related to the <interfacename>BeanWrapper</interfacename> and the
-    DataBinder.</para>
+    <interfacename>DataBinder</interfacename>.</para>
   </section>
+  
+    <section id="validator">
+        <title>Validation using Spring's <interfacename>Validator</interfacename> interface</title>
+        <para>Spring's features a <interfacename>Validator</interfacename> interface that you can
+        use to validate objects. The <interfacename>Validator</interfacename> interface works using
+        an <interfacename>Errors</interfacename> object so that while validating, validators can report
+        validation failures to the <interfacename>Errors</interfacename> object.</para>
+        <para>Let's consider a small data object:</para>
+        <programlisting><![CDATA[
+public class Person {
+
+  private String name;
+  private int age;
+
+  ]]><lineannotation>// the usual getters and setters...</lineannotation><![CDATA[
+}]]></programlisting>
+		<para>We're going to provide validation behavior for the <classname>Person</classname>
+			class by implementing the following two methods of the
+			<interfacename>org.springframework.validation.Validator</interfacename> interface:
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para><methodname>supports(Class)</methodname> - Can this
+					<interfacename>Validator</interfacename> validate instances of the supplied
+					<classname>Class</classname>?</para>
+				</listitem>
+				<listitem>
+					<para><methodname>validate(Object, org.springframework.validation.Errors)</methodname> - 
+					validates the given object and in case of validation errors, registers
+					those with the given <interfacename>Errors</interfacename> object</para>					
+				</listitem>				
+			</itemizedlist>
+		</para>
+		<para>
+		Implementing a <interfacename>Validator</interfacename> is fairly straightforward,
+		especially when you know of the <classname>ValidationUtils</classname> helper class
+		that the Spring Framework also provides.</para>
+		<programlisting><![CDATA[public class PersonValidator implements Validator {
+    
+    ]]><lineannotation>/**
+    * This <interfacename>Validator</interfacename> validates <emphasis role="bold">just</emphasis> <classname>Person</classname> instances
+    */</lineannotation><![CDATA[
+    public boolean supports(Class clazz) {
+        return Person.class.equals(clazz);
+    }
+    
+    public void validate(Object obj, Errors e) {
+        ValidationUtils.rejectIfEmpty(e, "name", "name.empty");
+        Person p = (Person) obj;
+        if (p.getAge() < 0) {
+            e.rejectValue("age", "negativevalue");
+        } else if (p.getAge() > 110) {
+            e.rejectValue("age", "too.darn.old");
+        }
+    }
+}]]></programlisting>
+		<para>As you can see, the <literal>static</literal> <methodname>rejectIfEmpty(..)</methodname>
+		method on the <classname>ValidationUtils</classname> class is used to reject the
+		<literal>'name'</literal> property if it is <literal>null</literal> or the empty string.
+		Have a look at the Javadoc for the <classname>ValidationUtils</classname> class to see
+		what functionality it provides besides the example shown previously.</para>
+		<para>While it is certainly possible to implement a single
+		<interfacename>Validator</interfacename> class to validate each of the nested objects
+		in a rich object, it may be better to encapsulate the validation logic for each nested
+		class of object in its own <interfacename>Validator</interfacename> implementation. A
+		simple example of a <emphasis>'rich'</emphasis> object would be a
+		<classname>Customer</classname> that is composed of two <classname>String</classname>
+		properties (a first and second name) and a complex <classname>Address</classname> object.
+        <classname>Address</classname> objects may be used independant of
+        <classname>Customer</classname> objects, and so a distinct
+        <classname>AddressValidator</classname> has been implemented. If you want your
+        <classname>CustomerValidator</classname> to reuse the logic contained within the
+        <classname>AddressValidator</classname> class without recourse to copy-n-paste you can
+        dependency-inject or instantiate an <classname>AddressValidator</classname> within your
+        <classname>CustomerValidator</classname>, and use it like so:</para>
+        <programlisting><![CDATA[public class CustomerValidator implements Validator {
+
+   private final Validator addressValidator;
+
+   public UserValidator(Validator addressValidator) {
+      if (addressValidator == null) {
+          throw new IllegalArgumentException("The supplied [Validator] is required and must not be null.");
+      }
+      if (!addressValidator.supports(Address.class)) {
+          throw new IllegalArgumentException(
+            "The supplied [Validator] must support the validation of [Address] instances.");
+      }
+      this.addressValidator = addressValidator;
+   }
+
+    ]]><lineannotation>/**
+    * This <interfacename>Validator</interfacename> validates <classname>Customer</classname> instances, and any subclasses of <classname>Customer</classname> too
+    */</lineannotation><![CDATA[
+   public boolean supports(Class clazz) {
+      return Customer.class.isAssignableFrom(clazz);
+   }
+
+   public void validate(Object target, Errors errors) {
+      ValidationUtils.rejectIfEmptyOrWhitespace(errors, "firstName", "field.required");
+      ValidationUtils.rejectIfEmptyOrWhitespace(errors, "surname", "field.required");
+      Customer customer = (Customer) target;
+      try {
+          errors.pushNestedPath("address");
+          ValidationUtils.invokeValidator(this.addressValidator, customer.getAddress(), errors);
+      } finally {
+          errors.popNestedPath();
+      }
+   }
+}]]></programlisting>
+		<para>Validation errors are reported to the <interfacename>Errors</interfacename>
+		object passed to the validator. In case of Spring Web MVC you can use
+		<literal>&lt;spring:bind/&gt;</literal> tag to inspect the error messages, but
+		of course you can also inspect the errors object yourself. More information about
+		the methods it offers can be found from the Javadoc.</para>
+	</section>
+	<section id="validation-conversion">
+		<title>Resolving codes to error messages</title>
+		<para>We've talked about databinding and validation. Outputting messages corresponding to 
+		validation errors is the last thing we need to discuss. In the example we've shown
+		above, we rejected the <literal>name</literal> and the <literal>age</literal> field.
+		If we're going to output the error messages by using a <interfacename>MessageSource</interfacename>,
+		we will do so using the error code we've given when rejecting the field ('name' and 'age'
+		in this case). When you call (either directly, or indirectly, using for example the 
+		<classname>ValidationUtils</classname> class) <literal>rejectValue</literal> or one of
+		the other <literal>reject</literal> methods from the <interfacename>Errors</interfacename>
+		interface, the underlying implementation will not only register the code you've
+		passed in, but also a number of additional error codes. What error codes it registers
+		is determined by the <interfacename>MessageCodesResolver</interfacename> that is used.
+		By default, the <classname>DefaultMessageCodesResolver</classname> is used, which for example
+		not only registers a message with the code you gave, but also messages that include the 
+		field name you passed to the reject method. So in case you reject a field using
+		<literal>rejectValue("age", "too.darn.old")</literal>, apart from the
+		<literal>too.darn.old</literal> code, Spring will also register
+		<literal>too.darn.old.age</literal> and <literal>too.darn.old.age.int</literal>
+		(so the first will include the field name and the second will include the type of the
+		field); this is done as a convenience to aid developers in targeting error
+		messages and suchlike.</para>
+		<para>More information on the <interfacename>MessageCodesResolver</interfacename> and the default
+		strategy can be found online with the Javadocs for
+		<ulink url="http://www.springframework.org/docs/api/org/springframework/validation/MessageCodesResolver.html">MessageCodesResolver</ulink>
+		and
+		<ulink url="http://www.springframework.org/docs/api/org/springframework/validation/DefaultMessageCodesResolver.html">DefaultMessageCodesResolver</ulink>
+		respectively.</para>		
+	</section>
 
   <section id="beans-beans">
     <title>Bean manipulation and the <interfacename>BeanWrapper</interfacename></title>
@@ -41,11 +185,11 @@
     <para>The <literal>org.springframework.beans</literal> package adheres to
     the JavaBeans standard provided by Sun. A JavaBean is simply a class with
     a default no-argument constructor, which follows a naming conventions
-    where a property named <literal>prop</literal> has a setter
-    <literal>setProp(...)</literal> and a getter <literal>getProp()</literal>.
+    where a property named <literal>bingoMadness</literal> has a setter
+    <methodname>setBingoMadness(..)</methodname> and a getter <methodname>getBingoMadness()</methodname>.
     For more information about JavaBeans and the specification, please refer
-    to Sun's website (<ulink
-    url="http://java.sun.com/products/javabeans/">java.sun.com/products/javabeans</ulink>).</para>
+    to Sun's website
+    (<ulink url="http://java.sun.com/products/javabeans/">java.sun.com/products/javabeans</ulink>).</para>
 
     <para>One quite important concept of the beans package is the
     <interfacename>BeanWrapper</interfacename> interface and its corresponding
@@ -83,13 +227,10 @@
 
           <tgroup cols="2">
             <colspec colname="c1" colwidth="1*" />
-
             <colspec colname="c2" colwidth="3*" />
-
             <thead>
               <row>
                 <entry>Expression</entry>
-
                 <entry>Explanation</entry>
               </row>
             </thead>
@@ -137,11 +278,12 @@
       <para>Below you'll find some examples of working with the <interfacename>BeanWrapper</interfacename> to
       get and set properties.</para>
 
-      <para><emphasis>Note: this part is not important to you if you're not
-      planning to work with the <interfacename>BeanWrapper</interfacename> directly. If you're just using the
-      <literal>DataBinder</literal> and the <interfacename>BeanFactory</interfacename> and
-      their out-of-the-box implementation, you should skip ahead to the
-      section about <interfacename>PropertyEditors</interfacename>.</emphasis></para>
+      <para><emphasis>(This next section is not vitally important to you if you're not
+      planning to work with the <interfacename>BeanWrapper</interfacename> directly. If you're
+      just using the <interfacename>DataBinder</interfacename> and the
+      <interfacename>BeanFactory</interfacename> and their out-of-the-box implementation, you
+      should skip ahead to the section about
+      <interfacename>PropertyEditors</interfacename>.)</emphasis></para>
 
       <para>Consider the following two classes:</para>
 	  <programlisting><![CDATA[public class Company {
@@ -203,7 +345,7 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
       date (or even better: convert any date entered in a human readable form,
       back to <classname>Date</classname> objects). This behavior can be achieved by
       <emphasis>registering custom editors</emphasis>, of type
-      <literal>java.beans.PropertyEditor</literal>. Registering custom editors
+      <interfacename>java.beans.PropertyEditor</interfacename>. Registering custom editors
       on a <interfacename>BeanWrapper</interfacename> or alternately in a specific IoC container as
       mentioned in the previous chapter, gives it the knowledge of how to
       convert properties to the desired type. Read more about PropertyEditors
@@ -214,23 +356,23 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
       <itemizedlist spacing="compact">
           <listitem>
             <para><emphasis>setting properties on beans</emphasis> is done
-            using PropertyEditors. When mentioning
+            using <literal>PropertyEditors</literal>. When mentioning
             <literal>java.lang.String</literal> as the value of a property of
             some bean you're declaring in XML file, Spring will (if the setter
-            of the corresponding property has a Class-parameter) use the
+            of the corresponding property has a <classname>Class</classname>-parameter) use the
             <classname>ClassEditor</classname> to try to resolve the parameter to
             a <classname>Class</classname> object</para>
           </listitem>
 
           <listitem>
             <para><emphasis>parsing HTTP request parameters</emphasis> in
-            Spring's MVC framework is done using all kinds of PropertyEditors
+            Spring's MVC framework is done using all kinds of <literal>PropertyEditors</literal>
             that you can manually bind in all subclasses of the
-            <literal>CommandController</literal></para>
+            <classname>CommandController</classname></para>
           </listitem>
         </itemizedlist></para>
 
-      <para>Spring has a number of built-in PropertyEditors to make life easy.
+      <para>Spring has a number of built-in <literal>PropertyEditors</literal> to make life easy.
       Each of those is listed below and they are all located in the
       <literal>org.springframework.beans.propertyeditors</literal> package.
       Most, but not all (as indicated below), are registered by default by
@@ -243,13 +385,11 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
 
           <tgroup cols="2">
             <colspec colname="c1" colwidth="3*" />
-
             <colspec colname="c2" colwidth="5*" />
 
             <thead>
               <row>
                 <entry>Class</entry>
-
                 <entry>Explanation</entry>
               </row>
             </thead>
@@ -297,9 +437,10 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
                 <entry><classname>CustomNumberEditor</classname></entry>
 
                 <entry>Customizable property editor for any Number subclass
-                like Integer, Long, Float, Double. Registered by default by
-                <classname>BeanWrapperImpl</classname>, but, can be overridden
-                by registering custom instance of it as custom editor.</entry>
+                like <classname>Integer</classname>, <classname>Long</classname>,
+                <classname>Float</classname>, <classname>Double</classname>. Registered
+                by default by <classname>BeanWrapperImpl</classname>, but can be
+                overridden by registering custom instance of it as a custom editor.</entry>
               </row>
 
               <row>
@@ -311,55 +452,56 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
               </row>
 
               <row>
-                <entry><literal>InputStreamEditor</literal></entry>
+                <entry><classname>InputStreamEditor</classname></entry>
 
                 <entry>One-way property editor, capable of taking a text
-                string and producing (via an intermediate ResourceEditor and
-                Resource) an InputStream, so InputStream properties may be
-                directly set as Strings. Note that the default usage
-                will not close the InputStream for you! Registered by default
-                by <classname>BeanWrapperImpl</classname>.</entry>
+                string and producing (via an intermediate <classname>ResourceEditor</classname> and
+                <interfacename>Resource</interfacename>) an
+                <interfacename>InputStream</interfacename>, so <interfacename>InputStream</interfacename>
+                properties may be directly set as Strings. Note that the default usage
+                will not close the <interfacename>InputStream</interfacename> for
+                you! Registered by default by <classname>BeanWrapperImpl</classname>.</entry>
               </row>
 
               <row>
-                <entry><literal>LocaleEditor</literal></entry>
+                <entry><classname>LocaleEditor</classname></entry>
 
                 <entry>Capable of resolving Strings to
-                <literal>Locale</literal> objects and vice versa (the String
+                <classname>Locale</classname> objects and vice versa (the String
                 format is [language]_[country]_[variant], which is the same
                 thing the toString() method of Locale provides). Registered by
                 default by <classname>BeanWrapperImpl</classname>.</entry>
               </row>
 
               <row>
-                <entry><literal>PropertiesEditor</literal></entry>
+                <entry><classname>PropertiesEditor</classname></entry>
 
                 <entry>Capable of converting Strings (formatted using the
                 format as defined in the Javadoc for the java.lang.Properties
-                class) to <literal>Properties</literal> objects. Registered by
+                class) to <classname>Properties</classname> objects. Registered by
                 default by <classname>BeanWrapperImpl</classname>.</entry>
               </row>
 
               <row>
-                <entry><literal>StringArrayPropertyEditor</literal></entry>
+                <entry><classname>StringArrayPropertyEditor</classname></entry>
 
                 <entry>Capable of resolving a comma-delimited list of String
                 to a String-array and vice versa.</entry>
               </row>
 
               <row>
-                <entry><literal>StringTrimmerEditor</literal></entry>
+                <entry><classname>StringTrimmerEditor</classname></entry>
 
                 <entry>Property editor that trims Strings. Optionally allows
-                transforming an empty string into a null value. NOT registered
-                by default. Must be user registered as needed.</entry>
+                transforming an empty string into a <literal>null</literal> value. NOT
+                registered by default; must be user registered as needed.</entry>
               </row>
 
               <row>
                 <entry><classname>URLEditor</classname></entry>
 
                 <entry>Capable of resolving a String representation of a URL
-                to an actual <literal>URL</literal> object. Registered by
+                to an actual <classname>URL</classname> object. Registered by
                 default by <classname>BeanWrapperImpl</classname>.</entry>
               </row>
             </tbody>
@@ -386,21 +528,19 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
     pop
       Foo
       FooEditor   ]]><lineannotation>// the <interfacename>PropertyEditor</interfacename> for the <classname>Foo</classname> class</lineannotation></programlisting>
-      <para>
-		Note that you can also use the standard <interfacename>BeanInfo</interfacename> JavaBeans
+      <para>Note that you can also use the standard <interfacename>BeanInfo</interfacename> JavaBeans
 		mechanism here as well (described
 		<ulink url="http://java.sun.com/docs/books/tutorial/javabeans/customization/index.html">in not-amazing-detail here</ulink>).
 		Find below an example of using the <interfacename>BeanInfo</interfacename> mechanism for
 		explicitly registering one or more <interfacename>PropertyEditor</interfacename> instances
-		with the properties of an associated class.
-      </para>
+		with the properties of an associated class.</para>
 	  <programlisting><![CDATA[com
   chank
     pop
       Foo
       FooBeanInfo   ]]><lineannotation>// the <interfacename>BeanInfo</interfacename> for the <classname>Foo</classname> class</lineannotation></programlisting>
       <para>
-		And here is the Java source code for the referenced <classname>FooBeanInfo</classname> class. This
+		Here is the Java source code for the referenced <classname>FooBeanInfo</classname> class. This
 		would associate a <classname>CustomNumberEditor</classname> with the <literal>age</literal>
 		property of the <classname>Foo</classname> class.
 	  </para>
@@ -430,9 +570,9 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
             Strings to the complex type of the property. Spring pre-registers a number
             of custom <literal>PropertyEditors</literal> (for example, to convert a classname expressed
             as a string into a real <classname>Class</classname> object). Additionally, Java's standard
-            JavaBeans <interfacename>PropertyEditor</interfacename> lookup mechanism allows a <classname>PropertyEditor</classname> for a
-            class to be simply named appropriately and placed in the same package as
-            the class it provides support for, to be found automatically.</para>
+            JavaBeans <interfacename>PropertyEditor</interfacename> lookup mechanism allows a
+            <classname>PropertyEditor</classname> for a class simply to be named appropriately and
+            placed in the same package as the class it provides support for, to be found automatically.</para>
             <para>If there is a need to register other custom <literal>PropertyEditors</literal>, there
             are several mechanisms available. The most manual approach, which is not normally convenient or
             recommended, is to simply use the <methodname>registerCustomEditor()</methodname> method of the
@@ -492,7 +632,7 @@ public class DependsOnExoticType {
     <property name="type" value="aNameForExoticType"/>
 </bean>]]></programlisting>
 		<para>The <interfacename>PropertyEditor</interfacename> implementation could look similar to this:</para>
-		<programlisting><lineannotation>// converts string representation to ExoticType object</lineannotation><![CDATA[
+		<programlisting><lineannotation>// converts string representation to <classname>ExoticType</classname> object</lineannotation><![CDATA[
 package example;
 
 public class ExoticTypeEditor extends PropertyEditorSupport {
@@ -530,126 +670,6 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
         </section>
 
     </section>
-
-    <section id="beans-beans-other">
-      <title>Other features worth mentioning</title>
-
-      <para>Besides the features you've seen in the previous sections, there a
-      couple of features that might be interesting to you, though not worth an
-      entire section.</para>
-      <itemizedlist>
-          <listitem>
-            <para><emphasis>determining readability and
-            writability</emphasis>: using the <literal>isReadable()</literal>
-            and <literal>isWritable()</literal> methods, you can determine
-            whether or not a property is readable or writable</para>
-          </listitem>
-
-          <listitem>
-            <para><emphasis>retrieving PropertyDescriptors</emphasis>: using
-            <literal>getPropertyDescriptor(String)</literal> and
-            <literal>getPropertyDescriptors()</literal> you can retrieve
-            objects of type <literal>java.beans.PropertyDescriptor</literal>,
-            that might come in handy sometimes</para>
-          </listitem>
-        </itemizedlist>
-    </section>
   </section>
-	
-	<section id="validator">
-		<title>Validation using Spring's <interfacename>Validator</interfacename> interface</title>
-		<para>Spring's features a <interfacename>Validator</interfacename> interface that you can
-		use to validate objects. The <interfacename>Validator</interfacename> interface works using
-		an <classname>Errors</classname> object so that while validating, validators can report
-		validation failures to the <classname>Errors</classname> object.</para>
-		<para>Let's consider a small data object:</para>
-		<programlisting><![CDATA[
-public class Person {
 
-  private String name;
-  private int age;
-
-  ]]><lineannotation>// the usual getters and setters...</lineannotation><![CDATA[
-}]]></programlisting>
-		<para>We're going to provide validation behavior for the <classname>Person</classname>
-			class by using the <interfacename>org.springframework.validation.Validator</interfacename>:
-			<itemizedlist spacing="compact">
-				<listitem>
-					<para><literal>supports(Class)</literal> - indicates whether or not this validator
-					supports the given object</para>
-				</listitem>
-				<listitem>
-					<para><literal>validate(Object, org.springframework.validation.Errors)</literal> - 
-					validates the given object and in case of validation errors, registers
-					those with the given <classname>Errors</classname> object</para>					
-				</listitem>				
-			</itemizedlist>
-		</para>
-		<para>
-			Implementing a validator is fairly straightforward, especially when you know of the 
-			<classname>ValidationUtils</classname> helper class that Spring also provides. Let's
-			review how a validator is created:</para>
-			<programlisting><![CDATA[public class PersonValidator implements Validator {
-    
-    public boolean supports(Class clazz) {
-        return Person.class.equals(clazz);
-    }
-    
-    public void validate(Object obj, Errors e) {
-        ValidationUtils.rejectIfEmpty(e, "name", "name.empty");
-        Person p = (Person) obj;
-        if (p.getAge() < 0) {
-            e.rejectValue("age", "negativevalue");
-        } else if (p.getAge() > 110) {
-            e.rejectValue("age", "too.darn.old");
-        }
-    }
-}]]></programlisting>
-			<para>As you can see, a <literal>static</literal> method on the
-			<classname>ValidationUtils</classname> class is used to reject the name
-			property. Have a look at the Javadoc for <classname>ValidationUtils</classname>
-		    to see what functionality it provides besides the example shown previously.</para>
-	</section>
-	<section id="validation-errors">
-		<title>The Errors interface</title>
-		<para>
-			Validation errors are reported to the <classname>Errors</classname> object
-			passed to the validator. In case of Spring Web MVC you can use
-			<literal>spring:bind</literal> tags to inspect the error messages, but of
-			course you can also inspect the errors object yourself. More information about
-			the methods it offers can be found from the Javadoc.
-		</para>
-	</section>
-	<section id="validation-conversion">
-		<title>Resolving codes to error messages</title>
-		<para>
-			We've talked about databinding and validation. Outputting messages corresponding to 
-			validation errors is the last thing we need to discuss. In the example we've shown
-			above, we rejected the <literal>name</literal> and the <literal>age</literal> field.
-			f we're going to output the error messages by using a <interfacename>MessageSource</interfacename>,
-			we will do so using the error code we've given when rejecting the field ('name' and 'age'
-			in this case). When you call (either directly, or indirectly, using for example the 
-			<classname>ValidationUtils</classname> class) <literal>rejectValue</literal> or one of
-			the other <literal>reject</literal> methods from the <interfacename>Errors</interfacename>
-			interface, the underlying implementation will not only register the code you've
-			passed in, but also a number of additional error codes. What error codes it registers
-			is determined by the <interfacename>MessageCodesResolver</interfacename> that is used.
-			By default, the <classname>DefaultMessageCodesResolver</classname> is used, which for example
-			not only registers a message with the code you gave, but also messages that include the 
-			field name you passed to the reject method. So in case you reject a field using
-			<literal>rejectValue("age", "too.darn.old")</literal>, apart from the
-			<literal>too.darn.old</literal> code, Spring will also register
-			<literal>too.darn.old.age</literal> and <literal>too.darn.old.age.int</literal>
-			(so the first will include the field name and the second will include the type of the
-			field); this is done as a convenience to aid developers in targeting error
-			messages and suchlike.</para>
-		<para>
-			More information on the <classname>MessageCodesResolver</classname> and the default
-			strategy can be found online with the Javadocs for
-			<ulink url="http://www.springframework.org/docs/api/org/springframework/validation/MessageCodesResolver.html">MessageCodesResolver</ulink>
-			and
-			<ulink url="http://www.springframework.org/docs/api/org/springframework/validation/DefaultMessageCodesResolver.html">DefaultMessageCodesResolver</ulink>
-			respectively. 
-		</para>		
-	</section>
 </chapter>

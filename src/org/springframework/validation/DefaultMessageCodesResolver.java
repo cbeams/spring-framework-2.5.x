@@ -24,15 +24,15 @@ import java.util.List;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of the MessageCodesResolver interface.
+ * Default implementation of the {@link MessageCodesResolver} interface.
  *
- * <p>Will create 2 message codes for an object error, in the following order:
+ * <p>Will create two message codes for an object error, in the following order:
  * <ul>
  * <li>1.: code + "." + object name
  * <li>2.: code
  * </ul>
  *
- * <p>Will create 4 message codes for a field specification, in the following order:
+ * <p>Will create four message codes for a field specification, in the following order:
  * <ul>
  * <li>1.: code + "." + object name + "." + field
  * <li>2.: code + "." + field
@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
  * <li>4.: code
  * </ul>
  *
- * <p>E.g. in case of code "typeMismatch", object name "user", field "age":
+ * <p>For example, in case of code "typeMismatch", object name "user", field "age":
  * <ul>
  * <li>1. try "typeMismatch.user.age"
  * <li>2. try "typeMismatch.age"
@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
  * <li>4. try "typeMismatch"
  * </ul>
  *
- * <p>Thus, this resolution algorithm can be leveraged for example to show
+ * <p>This resolution algorithm thus can be leveraged for example to show
  * specific messages for binding errors like "required" and "typeMismatch":
  * <ul>
  * <li>at the object + field level ("age" field, but only on "user");
@@ -56,9 +56,9 @@ import org.springframework.util.StringUtils;
  * <li>or at the general level (all fields, on any object).
  * </ul>
  *
- * <p>In case of array, List or Map properties, both codes for specific
- * elements and for the whole collection are generated. Assuming a field
- * "name" of an array "groups" in object "user":
+ * <p>In case of array, {@link List} or {@link java.util.Map} properties,
+ * both codes for specific elements and for the whole collection are
+ * generated. Assuming a field "name" of an array "groups" in object "user":
  * <ul>
  * <li>1. try "typeMismatch.user.groups[0].name"
  * <li>2. try "typeMismatch.user.groups.name"
@@ -74,6 +74,9 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultMessageCodesResolver implements MessageCodesResolver, Serializable {
 
+	/**
+	 * The separator that this implementation uses when resolving message codes.
+	 */
 	public static final String CODE_SEPARATOR = ".";
 
 
@@ -82,10 +85,12 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	}
 
 	/**
-	 * Build the code list for the given code and field: an object/field-specific code,
-	 * a field-specific code, a plain error code. Arrays, Lists and Maps are resolved
-	 * both for specific elements and the whole collection.
-	 * <p>See class javadoc for details on the generated codes.
+	 * Build the code list for the given code and field: an
+	 * object/field-specific code, a field-specific code, a plain error code.
+	 * <p>Arrays, Lists and Maps are resolved both for specific elements and
+	 * the whole collection.
+	 * <p>See the {@link DefaultMessageCodesResolver class level Javadoc} for
+	 * details on the generated codes.
 	 * @return the list of codes
 	 */
 	public String[] resolveMessageCodes(String errorCode, String objectName, String field, Class fieldType) {
@@ -112,7 +117,8 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	}
 
 	/**
-	 * Add both keyed and non-keyed entries for the given field to the field list.
+	 * Add both keyed and non-keyed entries for the supplied <code>field</code>
+	 * to the supplied field list.
 	 */
 	protected void buildFieldList(String field, List fieldList) {
 		fieldList.add(field);
