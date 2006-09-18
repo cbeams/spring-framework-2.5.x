@@ -23,7 +23,13 @@ public class AjTestCaseLoaderTests extends TestCase {
     public void testCallTestIncrementOnSelf() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         Class advicedTestClass = loadTestCaseClass("org/springframework/test/aj/aop.xml", AbstractAdvicedTests.class);
         Object testCase = advicedTestClass.getDeclaredConstructor(new Class[0]).newInstance();
-        ReflectionUtils.invokeMethod("testIncrementOnSelf", advicedTestClass, testCase, new Object[0], new Class[0]);
+        try {
+        	Method testIncrementOnSelfMethod = advicedTestClass.getDeclaredMethod("testIncrementOnSelf", new Class[0]);
+        	ReflectionUtils.invokeMethod(testIncrementOnSelfMethod, testCase);
+        }
+        catch (NoSuchMethodException ex) {
+        	ex.printStackTrace();
+        }
     }
 
 
