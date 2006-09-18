@@ -38,7 +38,7 @@ public class Location {
 
 
 	/**
-	 * Creates a new instance if the {@link Location} class.
+	 * Creates a new instance of the {@link Location} class.
 	 * @param resource the resource with which this location is associated
 	 */
 	public Location(Resource resource) {
@@ -46,7 +46,7 @@ public class Location {
 	}
 
 	/**
-	 * Creates a new instance if the {@link Location} class.
+	 * Creates a new instance of the {@link Location} class.
 	 * @param resource the resource with which this location is associated
 	 * @param source the actual location within the associated resource
 	 */
