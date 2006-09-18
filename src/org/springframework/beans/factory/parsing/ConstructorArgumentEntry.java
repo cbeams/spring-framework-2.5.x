@@ -16,21 +16,37 @@
 
 package org.springframework.beans.factory.parsing;
 
+import org.springframework.util.Assert;
+
 /**
- * {@link ParseState} entry representing a constructor argument. May be indexed.
- * 
+ * {@link ParseState} entry representing a (possibly indexed)
+ * constructor argument.
+ *
  * @author Rob Harrop
  * @since 2.0
  */
 public class ConstructorArgumentEntry implements ParseState.Entry {
 
-	private int index = Integer.MIN_VALUE;
+	private final int index;
 
 
+	/**
+	 * Creates a new instance of the {@link ConstructorArgumentEntry} class
+	 * representing a constructor argument with a (currently) unknown index.
+	 */
 	public ConstructorArgumentEntry() {
+		index = Integer.MIN_VALUE;
 	}
 
+	/**
+	 * Creates a new instance of the {@link ConstructorArgumentEntry} class
+	 * representing a constructor argument at the supplied <code>index</code>.
+	 * @param index the index of the constructor argument
+	 * @throws IllegalArgumentException if the supplied <code>index</code>
+	 * is less than zero
+	 */
 	public ConstructorArgumentEntry(int index) {
+		Assert.isTrue(index >= 0, "The constructor argument index must be greater than or equal to zero.");
 		this.index = index;
 	}
 
