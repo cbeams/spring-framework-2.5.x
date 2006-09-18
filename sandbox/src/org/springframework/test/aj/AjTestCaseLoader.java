@@ -1,5 +1,7 @@
 package org.springframework.test.aj;
 
+import java.lang.reflect.Method;
+
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.aspectj.weaver.loadtime.ClassPreProcessorAgentAdapter;
@@ -285,7 +287,14 @@ public class AjTestCaseLoader {
                 "Required aspect [" + requiredAspect + "] cannot be loaded!"
             );
         }
-
-        ReflectionUtils.invokeMethod("aspectOf", aspectClass, null, new Object[0], new Class[0]);
+        
+        try {
+        	Method aspectOfmethod = aspectClass.getDeclaredMethod("aspectOf", new Class[0]);
+        	ReflectionUtils.invokeMethod(aspectOfmethod, null);
+        }
+        catch (NoSuchMethodException ex) {
+        	//How to better handle NSM ex?
+        	ex.printStackTrace();
+        }
     }
 }
