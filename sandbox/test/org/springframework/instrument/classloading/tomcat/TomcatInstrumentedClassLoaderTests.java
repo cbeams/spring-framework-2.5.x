@@ -55,7 +55,7 @@ public class TomcatInstrumentedClassLoaderTests extends TestCase {
 		getClass().getClassLoader().loadClass(getClass().getName());
 		classloader.loadClass(getClass().getName());
 		ctrl.replay();
-		classloader.addClassFileTransformer(transformer);
+		classloader.addTransformer(transformer);
 		try {
 			classloader.findClass("java.lang.Object");
 			fail("should not delegate to parent");
