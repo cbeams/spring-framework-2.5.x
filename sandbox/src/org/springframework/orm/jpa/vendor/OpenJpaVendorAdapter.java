@@ -18,6 +18,8 @@ package org.springframework.orm.jpa.vendor;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.persistence.spi.PersistenceProvider;
+
 import org.apache.openjpa.persistence.OpenJPAEntityManager;
 import org.apache.openjpa.persistence.PersistenceProviderImpl;
 import org.springframework.orm.jpa.JpaDialect;
@@ -32,6 +34,8 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
 	private final OpenJpaDialect jpaDialect = new OpenJpaDialect();
 	
+	private final PersistenceProvider persistenceProvider = new PersistenceProviderImpl();
+	
 
 	/* (non-Javadoc)
 	 * @see org.springframework.orm.jpa.JpaVendorAdapter#getJpaDialect()
@@ -40,11 +44,9 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		return jpaDialect;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.orm.jpa.JpaVendorAdapter#getPersistenceProviderClass()
-	 */
-	public Class getPersistenceProviderClass() {
-		return PersistenceProviderImpl.class;
+
+	public PersistenceProvider getPersistenceProvider() {
+		return this.persistenceProvider;
 	}
 
 	/* (non-Javadoc)
