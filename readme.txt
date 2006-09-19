@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.0 RC4 (September 2006)
-------------------------------------------------------
+THE SPRING FRAMEWORK, release 2.0 (September 2006)
+--------------------------------------------------
 http://www.springframework.org
 
 
