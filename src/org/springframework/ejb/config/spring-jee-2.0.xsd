@@ -63,7 +63,9 @@
 	"cache"=false.
 							]]></xsd:documentation>
 							<xsd:appinfo>
-								<expected-type/>
+								<tool:annotation>
+									<tool:expected-type type="java.lang.Class"/>
+								</tool:annotation>
 							</xsd:appinfo>
 						</xsd:annotation>
 					</xsd:attribute>
