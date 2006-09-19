@@ -19,6 +19,7 @@ package org.springframework.web.servlet.tags.form;
 import org.springframework.util.ObjectUtils;
 
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.BodyTag;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,7 +37,7 @@ import java.util.List;
  * @author Rob Harrop
  * @since 2.0
  */
-public class ErrorsTag extends AbstractHtmlElementBodyTag {
+public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	public static final String MESSAGES_ATTRIBUTE = "messages";
 
