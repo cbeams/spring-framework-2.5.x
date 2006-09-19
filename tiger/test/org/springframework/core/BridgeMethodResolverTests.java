@@ -18,6 +18,8 @@ package org.springframework.core;
 
 import junit.framework.TestCase;
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
@@ -168,6 +170,16 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertTrue("Match not found correctly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, bridgedMethod, typeVariableMap));
 
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+	}
+
+	public void testSPR2454() throws Exception {
+	  Method brigedMethod = HibernateRepositoryRegistry.class.getMethod("injectInto", GenericHibernateRepository.class);
+		assertFalse(brigedMethod.isBridge());
+
+		Method brigeMethod = HibernateRepositoryRegistry.class.getMethod("injectInto", SimpleGenericRepository.class);
+		assertTrue(brigeMethod.isBridge());
+
+		assertEquals(brigedMethod, BridgeMethodResolver.findBridgedMethod(brigedMethod));
 	}
 
 	private Method findMethodWithReturnType(String name, Class returnType, Class targetType) {
@@ -473,7 +485,7 @@ public class BridgeMethodResolverTests extends TestCase {
 
 	public class GenericEvent implements Event {
 
-		private int priority = 0;
+		private int priority;
 
 		public int getPriority() {
 			return priority;
@@ -593,8 +605,6 @@ public class BridgeMethodResolverTests extends TestCase {
 
 	public class NewMessageEvent extends MessageEvent {
 
-		public NewMessageEvent() {
-		}
 	}
 
 	public class ModifiedMessageEvent extends MessageEvent {
@@ -640,4 +650,146 @@ public class BridgeMethodResolverTests extends TestCase {
 
 	}
 
+	//-----------------------------
+	// SPR-2454 Test Classes
+	//-----------------------------
+
+	public interface SimpleGenericRepository<T> {
+
+		public Class<T> getPersistentClass();
+
+
+		List<T> findByQuery();
+
+
+		List<T> findAll();
+
+
+		T refresh(T entity);
+
+
+		T saveOrUpdate(T entity);
+
+
+		void delete(Collection<T> entities);
+	}
+
+	public interface RepositoryRegistry {
+
+		<T> SimpleGenericRepository<T> getFor(Class<T> entityType);
+	}
+
+	public class SettableRepositoryRegistry<R extends SimpleGenericRepository<?>>
+					implements RepositoryRegistry, InitializingBean {
+
+
+		protected void injectInto(R rep) {
+		}
+
+		public void register(R rep) {
+		}
+
+		public void register(R... reps) {
+		}
+
+		public void setRepos(R... reps) {
+		}
+
+		public <T> SimpleGenericRepository<T> getFor(Class<T> entityType) {
+			return null;
+		}
+
+		public void afterPropertiesSet() throws Exception {
+		}
+	}
+
+	public interface ConvenientGenericRepository<T, ID extends Serializable>
+					extends SimpleGenericRepository<T> {
+
+
+		T findById(ID id, boolean lock);
+
+
+		List<T> findByExample(T exampleInstance);
+
+		void delete(ID id);
+
+		void delete(T entity);
+	}
+
+	public class GenericHibernateRepository<T, ID extends Serializable>
+					extends HibernateDaoSupport
+					implements ConvenientGenericRepository<T, ID> {
+
+
+		/**
+		 * @param c Mandatory. The domain class this repository is responsible for.
+		 */
+		// Since it is impossible to determine the actual type of a type
+		// parameter (!), we resort to requiring the caller to provide the
+		// actual type as parameter, too.
+		// Not set in a constructor to enable easy CGLIB-proxying (passing
+		// constructor arguments to Spring AOP proxies is quite cumbersome).
+		public void setPersistentClass(Class<T> c) {
+
+		}
+
+
+		public Class<T> getPersistentClass() {
+			return null;
+		}
+
+
+		public T findById(ID id, boolean lock) {
+			return null;
+		}
+
+
+		public List<T> findAll() {
+			return null;
+		}
+
+
+		public List<T> findByExample(T exampleInstance) {
+			return null;
+		}
+
+
+		public List<T> findByQuery() {
+			return null;
+		}
+
+
+		public T saveOrUpdate(T entity) {
+			return null;
+		}
+
+
+		public void delete(T entity) {
+
+		}
+
+		public T refresh(T entity) {
+			return null;
+
+		}
+
+		public void delete(ID id) {
+		}
+
+		public void delete(Collection<T> entities) {
+		}
+	}
+
+	public class HibernateRepositoryRegistry
+					extends SettableRepositoryRegistry<GenericHibernateRepository<?, ?>> {
+
+
+		public void injectInto(GenericHibernateRepository<?, ?> rep) {
+		}
+
+		public <T> GenericHibernateRepository<T, ?> getFor(Class<T> entityType) {
+			return null;
+		}
+	}
 }
