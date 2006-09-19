@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -67,11 +67,11 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 
 
 	public void testNoTransaction() throws Exception {
-		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
-		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
+		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = (PlatformTransactionManager) ptmControl.getMock();
 
 		// expect no calls
-		ptxControl.replay();
+		ptmControl.replay();
 
 		TestBean tb = new TestBean();
 		TransactionAttributeSource tas = new MapTransactionAttributeSource();
@@ -85,7 +85,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		itb.getName();
 		checkTransactionStatus(false);
 
-		ptxControl.verify();
+		ptmControl.verify();
 	}
 
 	/**
@@ -98,14 +98,14 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		tas.register(getNameMethod, txatt);
 
 		TransactionStatus status = transactionStatusForNewTransaction();
-		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
-		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
+		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = (PlatformTransactionManager) ptmControl.getMock();
 		// expect a transaction
 		ptm.getTransaction(txatt);
-		ptxControl.setReturnValue(status, 1);
+		ptmControl.setReturnValue(status, 1);
 		ptm.commit(status);
-		ptxControl.setVoidCallable(1);
-		ptxControl.replay();
+		ptmControl.setVoidCallable(1);
+		ptmControl.replay();
 
 		TestBean tb = new TestBean();
 		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
@@ -114,7 +114,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		itb.getName();
 		checkTransactionStatus(false);
 
-		ptxControl.verify();
+		ptmControl.verify();
 	}
 
 	/**
@@ -129,14 +129,14 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		tas2.register(setNameMethod, txatt);
 
 		TransactionStatus status = transactionStatusForNewTransaction();
-		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
-		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
+		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = (PlatformTransactionManager) ptmControl.getMock();
 		// expect a transaction
 		ptm.getTransaction(txatt);
-		ptxControl.setReturnValue(status, 2);
+		ptmControl.setReturnValue(status, 2);
 		ptm.commit(status);
-		ptxControl.setVoidCallable(2);
-		ptxControl.replay();
+		ptmControl.setVoidCallable(2);
+		ptmControl.replay();
 
 		TestBean tb = new TestBean();
 		ITestBean itb = (ITestBean) advised(tb, ptm, new TransactionAttributeSource[] {tas1, tas2});
@@ -147,7 +147,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		itb.setName("myName");
 		checkTransactionStatus(false);
 
-		ptxControl.verify();
+		ptmControl.verify();
 	}
 
 	/**
@@ -161,14 +161,14 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 
 		MockControl statusControl = MockControl.createControl(TransactionStatus.class);
 		TransactionStatus status = (TransactionStatus) statusControl.getMock();
-		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
-		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
+		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = (PlatformTransactionManager) ptmControl.getMock();
 		// expect a transaction
 		ptm.getTransaction(txatt);
-		ptxControl.setReturnValue(status, 1);
+		ptmControl.setReturnValue(status, 1);
 		ptm.commit(status);
-		ptxControl.setVoidCallable(1);
-		ptxControl.replay();
+		ptmControl.setVoidCallable(1);
+		ptmControl.replay();
 
 		TestBean tb = new TestBean();
 		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
@@ -178,7 +178,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		itb.getName();
 		checkTransactionStatus(false);
 
-		ptxControl.verify();
+		ptmControl.verify();
 	}
 
 	public void testEnclosingTransactionWithNonTransactionMethodOnAdvisedInside() throws Throwable {
@@ -188,14 +188,14 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		tas.register(exceptionalMethod, txatt);
 
 		TransactionStatus status = transactionStatusForNewTransaction();
-		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
-		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
+		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = (PlatformTransactionManager) ptmControl.getMock();
 		// Expect a transaction
 		ptm.getTransaction(txatt);
-		ptxControl.setReturnValue(status, 1);
+		ptmControl.setReturnValue(status, 1);
 		ptm.commit(status);
-		ptxControl.setVoidCallable(1);
-		ptxControl.replay();
+		ptmControl.setVoidCallable(1);
+		ptmControl.replay();
 		
 		final String spouseName = "innerName";
 
@@ -226,7 +226,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		
 		checkTransactionStatus(false);
 
-		ptxControl.verify();
+		ptmControl.verify();
 	}
 	
 	public void testEnclosingTransactionWithNestedTransactionOnAdvisedInside() throws Throwable {
@@ -242,21 +242,21 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		TransactionStatus outerStatus = transactionStatusForNewTransaction();
 		TransactionStatus innerStatus = transactionStatusForNewTransaction();
 		
-		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
-		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
+		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = (PlatformTransactionManager) ptmControl.getMock();
 		// Expect a transaction
 		ptm.getTransaction(outerTxatt);
-		ptxControl.setReturnValue(outerStatus, 1);
+		ptmControl.setReturnValue(outerStatus, 1);
 		
 		ptm.getTransaction(innerTxatt);
-		ptxControl.setReturnValue(innerStatus, 1);
+		ptmControl.setReturnValue(innerStatus, 1);
 		
 		ptm.commit(innerStatus);
-		ptxControl.setVoidCallable(1);
+		ptmControl.setVoidCallable(1);
 		
 		ptm.commit(outerStatus);
-		ptxControl.setVoidCallable(1);
-		ptxControl.replay();
+		ptmControl.setVoidCallable(1);
+		ptmControl.replay();
 		
 		final String spouseName = "innerName";
 
@@ -290,7 +290,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		
 		checkTransactionStatus(false);
 
-		ptxControl.verify();
+		ptmControl.verify();
 	}
 	
 	public void testRollbackOnCheckedException() throws Throwable {
@@ -399,14 +399,14 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		tas.register(m, txatt);
 
 		TransactionStatus status = transactionStatusForNewTransaction();
-		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
-		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
+		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = (PlatformTransactionManager) ptmControl.getMock();
 
 		ptm.getTransaction(txatt);
-		ptxControl.setReturnValue(status, 1);
+		ptmControl.setReturnValue(status, 1);
 		ptm.commit(status);
-		ptxControl.setVoidCallable(1);
-		ptxControl.replay();
+		ptmControl.setVoidCallable(1);
+		ptmControl.replay();
 
 		final String name = "jenny";
 		TestBean tb = new TestBean() {
@@ -422,7 +422,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		// verification!?
 		assertTrue(name.equals(itb.getName()));
 
-		ptxControl.verify();
+		ptmControl.verify();
 	}
 	
 	/**
@@ -444,13 +444,13 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
-		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
-		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
+		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = (PlatformTransactionManager) ptmControl.getMock();
 		// Expect a transaction
 		ptm.getTransaction(txatt);
 		CannotCreateTransactionException ex = new CannotCreateTransactionException("foobar", null);
-		ptxControl.setThrowable(ex);
-		ptxControl.replay();
+		ptmControl.setThrowable(ex);
+		ptmControl.replay();
 
 		TestBean tb = new TestBean() {
 			public String getName() {
@@ -467,7 +467,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		catch (CannotCreateTransactionException thrown) {
 			assertTrue(thrown == ex);
 		}
-		ptxControl.verify();
+		ptmControl.verify();
 	}
 
 	/**
@@ -484,16 +484,16 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		Method m2 = getNameMethod;
 		// No attributes for m2
 
-		MockControl ptxControl = MockControl.createControl(PlatformTransactionManager.class);
-		PlatformTransactionManager ptm = (PlatformTransactionManager) ptxControl.getMock();
+		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = (PlatformTransactionManager) ptmControl.getMock();
 
 		TransactionStatus status = transactionStatusForNewTransaction();
 		ptm.getTransaction(txatt);
-		ptxControl.setReturnValue(status);
+		ptmControl.setReturnValue(status);
 		UnexpectedRollbackException ex = new UnexpectedRollbackException("foobar", null);
 		ptm.commit(status);
-		ptxControl.setThrowable(ex);
-		ptxControl.replay();
+		ptmControl.setThrowable(ex);
+		ptmControl.replay();
 
 		TestBean tb = new TestBean();		
 		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
@@ -509,7 +509,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 
 		// Should have invoked target and changed name
 		assertTrue(itb.getName() == name);
-		ptxControl.verify();
+		ptmControl.verify();
 	}
 
 	protected void checkTransactionStatus(boolean expected) {
