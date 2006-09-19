@@ -3,6 +3,19 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.0 final (27.9.2006)
+----------------------------------------
+
+Package org.springframework.aop
+* dropped InvocationContextExposingAdvisorAutoProxyCreator base class
+
+Package org.springframework.transaction
+* clarified @Transactional semantics for JDK/CGLIB proxies as well as for AspectJ
+
+Package org.springframework.web
+* OptionTag and ErrorsTag implement BodyTag interface directly to work around a bug in WebLogic Server 8.1's JSP engine
+
+
 Changes in version 2.0 RC4 (17.9.2006)
 --------------------------------------
 
