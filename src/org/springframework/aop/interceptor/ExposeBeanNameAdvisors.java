@@ -31,14 +31,14 @@ import org.springframework.beans.factory.NamedBean;
  * created with the Spring IoC container, binding the bean name to the current
  * invocation. May support a <code>bean()</code> pointcut designator with AspectJ.
  *
- * <p>Typically used in Spring autoproxying, where the bean name is known
+ * <p>Typically used in Spring auto-proxying, where the bean name is known
  * at proxy creation time.
- * 
+ *
  * @author Rod Johnson
  * @since 2.0
  * @see org.springframework.beans.factory.NamedBean
  */
-public abstract class ExposeBeanNameAdvisors extends DefaultPointcutAdvisor {
+public abstract class ExposeBeanNameAdvisors {
 
 	/**
 	 * Binding for the bean name of the bean which is currently being invoked
