@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -43,6 +44,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -105,6 +107,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Class objects. By default, only the BeanFactory interface is ignored.
 	 */
 	private final Set ignoredDependencyInterfaces = new HashSet();
+
+	/** Cache of unfinished FactoryBean instances: FactoryBean name --> BeanWrapper */
+	private final Map factoryBeanInstanceCache = new HashMap();
 
 
 	/**
@@ -363,16 +368,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			errorMessage = "Instantiation of bean failed";
 
 			BeanWrapper instanceWrapper = null;
-			if (mergedBeanDefinition.getFactoryMethodName() != null)  {
-				instanceWrapper = instantiateUsingFactoryMethod(beanName, mergedBeanDefinition, args);
+			synchronized (this.factoryBeanInstanceCache) {
+				instanceWrapper = (BeanWrapper) this.factoryBeanInstanceCache.remove(beanName);
 			}
-			else if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
-					mergedBeanDefinition.hasConstructorArgumentValues() )  {
-				instanceWrapper = autowireConstructor(beanName, mergedBeanDefinition);
-			}
-			else {
-				// No special handling: simply use no-arg constructor.
-				instanceWrapper = instantiateBean(beanName, mergedBeanDefinition);
+			if (instanceWrapper == null) {
+				instanceWrapper = createBeanInstance(beanName, mergedBeanDefinition, args);
 			}
 			Object bean = instanceWrapper.getWrappedInstance();
 
@@ -486,6 +486,78 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 	}
 
+	/**
+	 * This implementation checks the FactoryBean's <code>getObjectType</code> method
+	 * on a plain instance of the FactoryBean, without bean properties applied yet.
+	 * If this doesn't return a type yet, a full creation of the FactoryBean is
+	 * used as fallback (through delegation to the superclass's implementation).
+	 * <p>The shortcut check for a FactoryBean is only applied in case of a singleton
+	 * FactoryBean. If the FactoryBean instance itself is not kept as singleton,
+	 * it will be fully created to check the type of its exposed object.
+	 */
+	protected Class getTypeForFactoryBean(String beanName, RootBeanDefinition mergedBeanDefinition) {
+		if (mergedBeanDefinition.isSingleton()) {
+			FactoryBean fb = null;
+
+			synchronized (this.factoryBeanInstanceCache) {
+				BeanWrapper bw = (BeanWrapper) this.factoryBeanInstanceCache.get(beanName);
+				if (bw != null) {
+					fb = (FactoryBean) bw.getWrappedInstance();
+				}
+				else {
+					if (isSingletonCurrentlyInCreation(beanName)) {
+						return null;
+					}
+					Object instance = null;
+					try {
+						// Mark this bean as currently in creation, even if just partially.
+						beforeSingletonCreation(beanName);
+						// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+						Class beanClass = resolveBeanClass(mergedBeanDefinition, beanName);
+						if (beanClass != null && !mergedBeanDefinition.isSynthetic()) {
+							Object bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
+							if (bean != null) {
+								instance = applyBeanPostProcessorsAfterInitialization(bean, beanName);
+							}
+						}
+						if (instance == null) {
+							bw = createBeanInstance(beanName, mergedBeanDefinition, null);
+							instance = bw.getWrappedInstance();
+						}
+					}
+					finally {
+						// Finished partial creation of this bean.
+						afterSingletonCreation(beanName);
+					}
+					if (!(instance instanceof FactoryBean)) {
+						throw new BeanCreationException(beanName,
+								"Bean instance of type [" + instance.getClass() + "] is not a FactoryBean");
+					}
+					fb = (FactoryBean) instance;
+					if (bw != null) {
+						this.factoryBeanInstanceCache.put(beanName, bw);
+					}
+				}
+			}
+
+			try {
+				Class type = fb.getObjectType();
+				if (type != null) {
+					return type;
+				}
+			}
+			catch (Throwable ex) {
+				// Thrown from the FactoryBean's getObjectType implementation.
+				logger.warn("FactoryBean threw exception from getObjectType, despite the contract saying " +
+						"that it should return null if the type of its object cannot be determined yet", ex);
+				return null;
+			}
+		}
+
+		// No type found - fall back to full creation of the FactoryBean instance.
+		return super.getTypeForFactoryBean(beanName, mergedBeanDefinition);
+	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation methods
@@ -520,6 +592,34 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Create a new instance for the specified bean, using an appropriate instantiation strategy:
+	 * factory method, constructor autowiring, or simple instantiation.
+	 * @param beanName name of the bean
+	 * @param mergedBeanDefinition the bean definition for the bean
+	 * @return BeanWrapper for the new instance
+	 * @see #instantiateUsingFactoryMethod
+	 * @see #autowireConstructor
+	 * @see #instantiateBean
+	 */
+	protected BeanWrapper createBeanInstance(String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args)
+			throws BeansException {
+
+		BeanWrapper instanceWrapper = null;
+		if (mergedBeanDefinition.getFactoryMethodName() != null)  {
+			instanceWrapper = instantiateUsingFactoryMethod(beanName, mergedBeanDefinition, args);
+		}
+		else if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR ||
+				mergedBeanDefinition.hasConstructorArgumentValues() )  {
+			instanceWrapper = autowireConstructor(beanName, mergedBeanDefinition);
+		}
+		else {
+			// No special handling: simply use no-arg constructor.
+			instanceWrapper = instantiateBean(beanName, mergedBeanDefinition);
+		}
+		return instanceWrapper;
 	}
 
 	/**
@@ -1012,6 +1112,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	protected Object postProcessObjectFromFactoryBean(Object object, String beanName) {
 		return applyBeanPostProcessorsAfterInitialization(object, beanName);
+	}
+
+	/**
+	 * Overridden to clear FactoryBean instance cache as well.
+	 */
+	protected void removeSingleton(String beanName) {
+		super.removeSingleton(beanName);
+		synchronized (this.factoryBeanInstanceCache) {
+			this.factoryBeanInstanceCache.remove(beanName);
+		}
 	}
 
 

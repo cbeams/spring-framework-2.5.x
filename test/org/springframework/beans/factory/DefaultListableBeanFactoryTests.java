@@ -33,8 +33,18 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NestedTestBean;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.config.*;
-import org.springframework.beans.factory.support.*;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.ChildBeanDefinition;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
 import org.springframework.beans.factory.xml.DependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
@@ -776,6 +786,16 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(ConstructorDependencyFactoryBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR));
 		try {
 			lbf.preInstantiateSingletons();
+		}
+		catch (UnsatisfiedDependencyException expected) {
+		}
+	}
+
+	public void testCircularReferenceThroughFactoryBeanTypeCheck() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(ConstructorDependencyFactoryBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR));
+		try {
+			lbf.getBeansOfType(String.class);
 		}
 		catch (UnsatisfiedDependencyException expected) {
 		}

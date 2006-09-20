@@ -17,7 +17,9 @@
 package org.springframework.beans.factory.xml;
 
 import junit.framework.TestCase;
+
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.CountingFactory;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -27,16 +29,22 @@ import org.springframework.core.io.ClassPathResource;
 public class AutowireWithExclusionTests extends TestCase {
 
 	public void testByTypeAutowireWithAutoSelfExclusion() throws Exception {
+		CountingFactory.reset();
 		XmlBeanFactory beanFactory = getBeanFactory("autowire-with-exclusion.xml");
+		beanFactory.preInstantiateSingletons();
 		TestBean rob = (TestBean) beanFactory.getBean("rob");
 		TestBean sally = (TestBean) beanFactory.getBean("sally");
 		assertEquals(sally, rob.getSpouse());
+		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
 	public void testByTypeAutowireWithExclusion() throws Exception {
+		CountingFactory.reset();
 		XmlBeanFactory beanFactory = getBeanFactory("autowire-with-exclusion.xml");
+		beanFactory.preInstantiateSingletons();
 		TestBean rob = (TestBean) beanFactory.getBean("rob");
 		assertEquals("props1", rob.getSomeProperties().getProperty("name"));
+		assertEquals(1, CountingFactory.getFactoryBeanInstanceCount());
 	}
 
 	public void testConstructorAutowireWithAutoSelfExclusion() throws Exception {
