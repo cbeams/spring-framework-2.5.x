@@ -33,6 +33,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.LocalVariableTableParameterNameDiscover;
 import org.springframework.core.Ordered;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -46,8 +47,7 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformation, InitializingBean {
 	
 	/**
-	 * Key used in ReflectiveMethodInvocation userAtributes map for the current
-	 * joinpoint.
+	 * Key used in ReflectiveMethodInvocation userAtributes map for the current joinpoint.
 	 */
 	protected final static String JOIN_POINT_KEY = JoinPoint.class.getName();
 
@@ -230,8 +230,7 @@ public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformat
 		else {
 			// assume a type
 			try {
-				// TODO: which ClassLoader to use here?
-				this.discoveredReturningType = Class.forName(name);
+				this.discoveredReturningType = ClassUtils.forName(name);
 			}
 			catch (ClassNotFoundException ex) {
 				throw new IllegalArgumentException("Returning name '" + name  +
@@ -260,8 +259,7 @@ public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformat
 		else {
 			// assume a type
 			try {
-				// TODO: which ClassLoader to use here?
-				this.discoveredThrowingType = Class.forName(name);
+				this.discoveredThrowingType = ClassUtils.forName(name);
 			}
 			catch (ClassNotFoundException cnfEx) {
 				throw new IllegalArgumentException("Throwing name '" + name 
@@ -577,7 +575,7 @@ public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformat
 
 	public String toString() {
 		return getClass().getName() + ": adviceMethod=" + this.aspectJAdviceMethod + "; " +
-			"aspectName='" + this.aspectName + "'";
+				"aspectName='" + this.aspectName + "'";
 	}
 
 }
