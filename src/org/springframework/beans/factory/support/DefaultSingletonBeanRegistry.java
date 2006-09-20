@@ -188,7 +188,9 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 * @see #isSingletonCurrentlyInCreation
 	 */
 	protected void beforeSingletonCreation(String beanName) {
-		this.singletonsCurrentlyInCreation.add(beanName);
+		if (!this.singletonsCurrentlyInCreation.add(beanName)) {
+			throw new IllegalStateException("Singleton '" + beanName + "' is already in creation");
+		}
 	}
 
 	/**
@@ -198,7 +200,9 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 * @see #isSingletonCurrentlyInCreation
 	 */
 	protected void afterSingletonCreation(String beanName) {
-		this.singletonsCurrentlyInCreation.remove(beanName);
+		if (!this.singletonsCurrentlyInCreation.remove(beanName)) {
+			throw new IllegalStateException("Singleton '" + beanName + "' isn't currently in creation");
+		}
 	}
 
 	/**
