@@ -71,6 +71,18 @@
 		</property>
 	</bean>
 
+	<bean id="Informix" class="org.springframework.jdbc.support.SQLErrorCodes">
+		<property name="databaseProductName">
+			<value>Informix Dynamic Server</value>
+		</property>
+		<property name="badSqlGrammarCodes">
+			<value>-201,-217,-696</value>
+		</property>
+		<property name="dataIntegrityViolationCodes">
+			<value>-239,-268,-692,-11030</value>
+		</property>
+	</bean>
+
 	<bean id="MS-SQL" class="org.springframework.jdbc.support.SQLErrorCodes">
 		<property name="databaseProductName">
 			<value>Microsoft SQL Server</value>
@@ -125,18 +137,6 @@
 		</property>
 		<property name="deadlockLoserCodes">
 			<value>60</value>
-		</property>
-	</bean>
-
-	<bean id="Informix" class="org.springframework.jdbc.support.SQLErrorCodes">
-		<property name="databaseProductName">
-			<value>Informix Dynamic Server</value>
-		</property>
-		<property name="badSqlGrammarCodes">
-			<value>-201,-217,-696</value>
-		</property>
-		<property name="dataIntegrityViolationCodes">
-			<value>-239,-268,-692,-11030</value>
 		</property>
 	</bean>
 
