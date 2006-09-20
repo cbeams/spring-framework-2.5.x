@@ -65,23 +65,6 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		assertTrue("can set NOT to ignore warnings", !template.isIgnoreWarnings());
 	}
 
-	/* Now relies on JDBC driver/database to complain, to avoid double parsing.
-	public void testCannotRunStaticSqlWithBindParameters() throws Exception {
-		final String sql = "UPDATE FOO SET NAME='tony' WHERE ID > ?";
-
-		replay();
-
-		JdbcTemplate t = new JdbcTemplate(mockDataSource);
-		try {
-			t.query(sql, new RowCountCallbackHandler());
-			fail("Should have objected to bind variables");
-		}
-		catch (InvalidDataAccessApiUsageException ex) {
-			// OK
-		}
-	}
-	*/
-
 	public void testUpdateCount() throws Exception {
 		final String sql =
 			"UPDATE INVOICE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
