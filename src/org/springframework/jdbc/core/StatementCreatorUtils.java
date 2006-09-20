@@ -93,7 +93,19 @@ abstract class StatementCreatorUtils {
 
 		if (inValue == null) {
 			if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
-				ps.setNull(paramIndex, Types.NULL);
+				boolean useSetObject = false;
+				try {
+					useSetObject = (ps.getConnection().getMetaData().getDatabaseProductName().indexOf("Informix") != -1);
+				}
+				catch (Throwable ex) {
+					logger.debug("Could not check database product name", ex);
+				}
+				if (useSetObject) {
+					ps.setObject(paramIndex, null);
+				}
+				else {
+					ps.setNull(paramIndex, Types.NULL);
+				}
 			}
 			else if (typeName != null) {
 				ps.setNull(paramIndex, sqlType, typeName);

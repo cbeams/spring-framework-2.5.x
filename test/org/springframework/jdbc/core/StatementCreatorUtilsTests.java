@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.jdbc.core;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -61,6 +63,27 @@ public class StatementCreatorUtilsTests extends TestCase {
 		psControl.setVoidCallable(1);
 		psControl.replay();
 		StatementCreatorUtils.setParameterValue(ps, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
+	}
+
+	public void testSetParameterValueWithNullAndUnknownTypeOnInformix() throws SQLException {
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl metaDataControl = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData metaData = (DatabaseMetaData) metaDataControl.getMock();
+		ps.getConnection();
+		psControl.setReturnValue(con, 1);
+		con.getMetaData();
+		conControl.setReturnValue(metaData, 1);
+		metaData.getDatabaseProductName();
+		metaDataControl.setReturnValue("Informix Dynamic Server");
+		ps.setObject(1, null);
+		psControl.setVoidCallable(1);
+		psControl.replay();
+		conControl.replay();
+		metaDataControl.replay();
+		StatementCreatorUtils.setParameterValue(ps, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
+		conControl.verify();
+		metaDataControl.verify();
 	}
 
 	public void testSetParameterValueWithString() throws SQLException {
