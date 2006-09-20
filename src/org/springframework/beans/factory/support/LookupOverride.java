@@ -16,9 +16,9 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.util.ObjectUtils;
-
 import java.lang.reflect.Method;
+
+import org.springframework.util.ObjectUtils;
 
 /**
  * Represents an override of a method that looks up an object in the same IoC context.
@@ -55,10 +55,10 @@ public class LookupOverride extends MethodOverride {
 
 
 	/**
-	 * Doesn't allow for overloading, so matching method name is fine.
+	 * Match method of the given name, with no parameters.
 	 */
 	public boolean matches(Method method) {
-		return method.getName().equals(getMethodName());
+		return (method.getName().equals(getMethodName()) && method.getParameterTypes().length == 0);
 	}
 
 

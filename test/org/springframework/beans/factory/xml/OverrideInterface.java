@@ -25,4 +25,6 @@ public interface OverrideInterface {
 
 	TestBean getPrototypeDependency();
 
+	TestBean getPrototypeDependency(Object someParam);
+
 }

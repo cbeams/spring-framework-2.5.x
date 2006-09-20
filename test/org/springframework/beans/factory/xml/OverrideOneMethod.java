@@ -20,10 +20,15 @@ import org.springframework.beans.TestBean;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public abstract class OverrideOneMethod extends MethodReplaceCandidate implements OverrideInterface {
 
 	protected abstract TestBean protectedOverrideSingleton();
+
+	public TestBean getPrototypeDependency(Object someParam) {
+		return new TestBean();
+	}
 
 	public TestBean invokesOverridenMethodOnSelf() {
 		return getPrototypeDependency();

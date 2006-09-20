@@ -1027,6 +1027,9 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertEquals("Jenny", jenny2.getName());
 		assertNotSame(jenny1, jenny2);
 
+		TestBean notJenny = oom.getPrototypeDependency("someParam");
+		assertTrue(!"Jenny".equals(notJenny.getName()));
+
 		// Now try protected method, and singleton
 		TestBean dave1 = oom.protectedOverrideSingleton();
 		assertEquals("David", dave1.getName());
