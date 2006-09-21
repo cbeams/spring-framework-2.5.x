@@ -56,7 +56,6 @@ class TrueMethodMatcher implements MethodMatcher, Serializable {
 		return INSTANCE;
 	}
 	
-
 	public String toString() {
 		return "MethodMatcher.TRUE";
 	}
