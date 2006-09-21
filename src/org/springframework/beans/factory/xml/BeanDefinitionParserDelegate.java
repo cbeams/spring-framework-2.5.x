@@ -35,6 +35,7 @@ import org.w3c.dom.NodeList;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -697,13 +698,13 @@ public class BeanDefinitionParserDelegate {
 				}
 				try {
 					this.parseState.push(new ConstructorArgumentEntry(index));
-					Object val = parsePropertyValue(ele, bd, null);
+					Object value = parsePropertyValue(ele, bd, null);
+					ConstructorArgumentValues.ValueHolder valueHolder = new ConstructorArgumentValues.ValueHolder(value);
 					if (StringUtils.hasLength(typeAttr)) {
-						bd.getConstructorArgumentValues().addIndexedArgumentValue(index, val, typeAttr);
+						valueHolder.setType(typeAttr);
 					}
-					else {
-						bd.getConstructorArgumentValues().addIndexedArgumentValue(index, val);
-					}
+					valueHolder.setSource(extractSource(ele));
+					bd.getConstructorArgumentValues().addIndexedArgumentValue(index, valueHolder);
 				}
 				finally {
 					this.parseState.pop();
@@ -716,13 +717,13 @@ public class BeanDefinitionParserDelegate {
 		else {
 			try {
 				this.parseState.push(new ConstructorArgumentEntry());
-				Object val = parsePropertyValue(ele, bd, null);
+				Object value = parsePropertyValue(ele, bd, null);
+				ConstructorArgumentValues.ValueHolder valueHolder = new ConstructorArgumentValues.ValueHolder(value);
 				if (StringUtils.hasLength(typeAttr)) {
-					bd.getConstructorArgumentValues().addGenericArgumentValue(val, typeAttr);
+					valueHolder.setType(typeAttr);
 				}
-				else {
-					bd.getConstructorArgumentValues().addGenericArgumentValue(val);
-				}
+				valueHolder.setSource(extractSource(ele));
+				bd.getConstructorArgumentValues().addGenericArgumentValue(valueHolder);
 			}
 			finally {
 				this.parseState.pop();
