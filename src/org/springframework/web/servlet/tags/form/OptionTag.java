@@ -74,6 +74,9 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 */
 	private String label;
 
+	private Object oldValue;
+
+	private Object oldDisplayValue;
 
 	/**
 	 * Sets the 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
@@ -138,31 +141,46 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	protected void exposeAttributes() throws JspException {
 		Object value = resolveValue();
+		this.oldValue = this.pageContext.getAttribute(VALUE_VARIABLE_NAME);
 		this.pageContext.setAttribute(VALUE_VARIABLE_NAME, value);
+		this.oldDisplayValue = this.pageContext.getAttribute(DISPLAY_VALUE_VARIABLE_NAME);
 		this.pageContext.setAttribute(DISPLAY_VALUE_VARIABLE_NAME, getDisplayString(value, getBindStatus().getEditor()));
 	}
 
 
 	protected void removeAttributes() {
-		this.pageContext.removeAttribute(VALUE_VARIABLE_NAME);
-		this.pageContext.removeAttribute(DISPLAY_VALUE_VARIABLE_NAME);
+		if (this.oldValue != null) {
+			this.pageContext.setAttribute(VALUE_ATTRIBUTE, this.oldValue);
+			this.oldValue = null;
+		}
+		else {
+			this.pageContext.removeAttribute(VALUE_VARIABLE_NAME);
+		}
+
+		if (this.oldDisplayValue != null) {
+			this.pageContext.setAttribute(DISPLAY_VALUE_VARIABLE_NAME, this.oldDisplayValue);
+			this.oldDisplayValue = null;
+		}
+		else {
+			this.pageContext.removeAttribute(DISPLAY_VALUE_VARIABLE_NAME);
+		}
 	}
 
-    private void renderOption(Object value, String label, TagWriter tagWriter) throws JspException {
-        tagWriter.startTag("option");
+	private void renderOption(Object value, String label, TagWriter tagWriter) throws JspException {
+		tagWriter.startTag("option");
 
-        String renderedValue = getDisplayString(value, getBindStatus().getEditor());
+		String renderedValue = getDisplayString(value, getBindStatus().getEditor());
 
 
-        tagWriter.writeAttribute(VALUE_ATTRIBUTE, renderedValue);
+		tagWriter.writeAttribute(VALUE_ATTRIBUTE, renderedValue);
 
-        if (isSelected(value)) {
-            tagWriter.writeAttribute(SELECTED_ATTRIBUTE, SELECTED_ATTRIBUTE);
-        }
-        tagWriter.appendValue(label);
+		if (isSelected(value)) {
+			tagWriter.writeAttribute(SELECTED_ATTRIBUTE, SELECTED_ATTRIBUTE);
+		}
+		tagWriter.appendValue(label);
 
-        tagWriter.endTag();
-    }
+		tagWriter.endTag();
+	}
 
 	/**
 	 * Returns the value of the label for this '<code>option</code>' element.

@@ -107,11 +107,13 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	protected void removeAttributes() {
-		this.pageContext.setAttribute(MESSAGES_ATTRIBUTE, this.oldMessages);
-	}
+		if (this.oldMessages != null) {
+			this.pageContext.setAttribute(MESSAGES_ATTRIBUTE, this.oldMessages);
+			this.oldMessages = null;
+		}
+		else {
+			this.pageContext.removeAttribute(MESSAGES_ATTRIBUTE);
+		}
 
-	public void doFinally() {
-		super.doFinally();
-		this.oldMessages = null;
 	}
 }
