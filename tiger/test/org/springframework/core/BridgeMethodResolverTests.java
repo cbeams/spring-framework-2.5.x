@@ -16,12 +16,6 @@
 
 package org.springframework.core;
 
-import junit.framework.TestCase;
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -33,6 +27,13 @@ import java.util.Map;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
+
+import junit.framework.TestCase;
+
+import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Rob Harrop
@@ -286,13 +287,16 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 	}
 
+
 	interface Settings {
 
 	}
 
+
 	interface ConcreteSettings extends Settings {
 
 	}
+
 
 	interface Dao<T, S> {
 
@@ -301,15 +305,18 @@ public class BridgeMethodResolverTests extends TestCase {
 		S loadFromParent();
 	}
 
+
 	interface SettingsDao<T extends Settings, S> extends Dao<T, S> {
 
 		T load();
 	}
 
+
 	interface ConcreteSettingsDao extends SettingsDao<ConcreteSettings, String> {
 
 		String loadFromParent();
 	}
+
 
 	abstract class AbstractDaoImpl<T, S> implements Dao<T, S> {
 
@@ -328,8 +335,8 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 	}
 
-	class SettingsDaoImpl extends AbstractDaoImpl<ConcreteSettings, String> implements ConcreteSettingsDao {
 
+	class SettingsDaoImpl extends AbstractDaoImpl<ConcreteSettings, String> implements ConcreteSettingsDao {
 
 		protected SettingsDaoImpl(ConcreteSettings object) {
 			super(object, "From Parent");
@@ -357,12 +364,14 @@ public class BridgeMethodResolverTests extends TestCase {
 		boolean boundedOperation(E e);
 	}
 
+
 	private static class AbstractBounded<E> implements Bounded<E> {
 
 		public boolean boundedOperation(E myE) {
 			return true;
 		}
 	}
+
 
 	private static class SerializableBounded<E extends HashMap & Delayed> extends AbstractBounded<E> {
 
@@ -371,10 +380,12 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 	}
 
+
 	private static interface GenericParameter<T> {
 
 		T getFor(Class<T> cls);
 	}
+
 
 	private static class StringGenericParameter implements GenericParameter<String> {
 
@@ -385,8 +396,8 @@ public class BridgeMethodResolverTests extends TestCase {
 		public String getFor(Integer integer) {
 			return "foo";
 		}
-
 	}
+
 
 	private static class StringList implements List<String> {
 
@@ -483,10 +494,12 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 	}
 
+
 	public interface Event {
 
 		int getPriority();
 	}
+
 
 	public class GenericEvent implements Event {
 
@@ -498,8 +511,6 @@ public class BridgeMethodResolverTests extends TestCase {
 
 		/**
 		 * Constructor that takes an event priority
-		 *
-		 * @param priority
 		 */
 		public GenericEvent(int priority) {
 			this.priority = priority;
@@ -510,25 +521,28 @@ public class BridgeMethodResolverTests extends TestCase {
 		 */
 		public GenericEvent() {
 		}
-
 	}
 
+
 	public interface UserInitiatedEvent {
+
 		/**
 		 * returns the user who initiator this event
 		 * @return
 		 */
 		//public Session getInitiatorSession();
-
 	}
+
 
 	public abstract class BaseUserInitiatedEvent extends GenericEvent implements UserInitiatedEvent {
 
 	}
 
+
 	public class MessageEvent extends BaseUserInitiatedEvent {
 
 	}
+
 
 	public interface Channel<E extends Event> {
 
@@ -539,10 +553,11 @@ public class BridgeMethodResolverTests extends TestCase {
 		void unsubscribe(final Receiver<E> receiver, Class<E> event);
 	}
 
+
 	public interface Broadcaster {
 
-
 	}
+
 
 	public interface EventBroadcaster extends Broadcaster {
 
@@ -553,13 +568,14 @@ public class BridgeMethodResolverTests extends TestCase {
 		public void setChannel(Channel channel);
 	}
 
+
 	public class GenericBroadcasterImpl implements Broadcaster {
 
 	}
 
-	public abstract class GenericEventBroadcasterImpl<T extends Event>
-					extends GenericBroadcasterImpl
-					implements EventBroadcaster, BeanNameAware {
+
+	public abstract class GenericEventBroadcasterImpl<T extends Event> extends GenericBroadcasterImpl
+			implements EventBroadcaster, BeanNameAware {
 
 		private Class<T>[] subscribingEvents;
 
@@ -595,47 +611,45 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 	}
 
+
 	public interface Receiver<E extends Event> {
 
 		void receive(E event);
 	}
 
+
 	public interface MessageBroadcaster extends Receiver<MessageEvent> {
 
 	}
+
 
 	public class RemovedMessageEvent extends MessageEvent {
 
 	}
 
+
 	public class NewMessageEvent extends MessageEvent {
 
 	}
+
 
 	public class ModifiedMessageEvent extends MessageEvent {
 
 	}
 
-	public class MessageBroadcasterImpl
-					extends GenericEventBroadcasterImpl<MessageEvent>
-					implements MessageBroadcaster {
 
+	public class MessageBroadcasterImpl extends GenericEventBroadcasterImpl<MessageEvent>
+			implements MessageBroadcaster {
 
-		/**
-		 * Constructor
-		 */
 		public MessageBroadcasterImpl() {
 			super(NewMessageEvent.class);
-
 		}
 
 		public void receive(MessageEvent event) {
 			throw new UnsupportedOperationException("should not be called, use subclassed events");
 		}
 
-
 		public void receive(NewMessageEvent event) {
-
 		}
 
 		@Override
@@ -644,16 +658,12 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 
 		public void receive(RemovedMessageEvent event) {
-
 		}
-
 
 		public void receive(ModifiedMessageEvent event) {
-
 		}
-
-
 	}
+
 
 	//-----------------------------
 	// SPR-2454 Test Classes
@@ -679,14 +689,15 @@ public class BridgeMethodResolverTests extends TestCase {
 		void delete(Collection<T> entities);
 	}
 
+
 	public interface RepositoryRegistry {
 
 		<T> SimpleGenericRepository<T> getFor(Class<T> entityType);
 	}
 
-	public class SettableRepositoryRegistry<R extends SimpleGenericRepository<?>>
-					implements RepositoryRegistry, InitializingBean {
 
+	public class SettableRepositoryRegistry<R extends SimpleGenericRepository<?>>
+			implements RepositoryRegistry, InitializingBean {
 
 		protected void injectInto(R rep) {
 		}
@@ -708,12 +719,10 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 	}
 
-	public interface ConvenientGenericRepository<T, ID extends Serializable>
-					extends SimpleGenericRepository<T> {
 
+	public interface ConvenientGenericRepository<T, ID extends Serializable> extends SimpleGenericRepository<T> {
 
 		T findById(ID id, boolean lock);
-
 
 		List<T> findByExample(T exampleInstance);
 
@@ -722,10 +731,9 @@ public class BridgeMethodResolverTests extends TestCase {
 		void delete(T entity);
 	}
 
-	public class GenericHibernateRepository<T, ID extends Serializable>
-					extends HibernateDaoSupport
-					implements ConvenientGenericRepository<T, ID> {
 
+	public class GenericHibernateRepository<T, ID extends Serializable> extends HibernateDaoSupport
+			implements ConvenientGenericRepository<T, ID> {
 
 		/**
 		 * @param c Mandatory. The domain class this repository is responsible for.
@@ -736,47 +744,37 @@ public class BridgeMethodResolverTests extends TestCase {
 		// Not set in a constructor to enable easy CGLIB-proxying (passing
 		// constructor arguments to Spring AOP proxies is quite cumbersome).
 		public void setPersistentClass(Class<T> c) {
-
 		}
-
 
 		public Class<T> getPersistentClass() {
 			return null;
 		}
 
-
 		public T findById(ID id, boolean lock) {
 			return null;
 		}
-
 
 		public List<T> findAll() {
 			return null;
 		}
 
-
 		public List<T> findByExample(T exampleInstance) {
 			return null;
 		}
-
 
 		public List<T> findByQuery() {
 			return null;
 		}
 
-
 		public T saveOrUpdate(T entity) {
 			return null;
 		}
 
-
 		public void delete(T entity) {
-
 		}
 
 		public T refresh(T entity) {
 			return null;
-
 		}
 
 		public void delete(ID id) {
@@ -786,9 +784,8 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 	}
 
-	public class HibernateRepositoryRegistry
-					extends SettableRepositoryRegistry<GenericHibernateRepository<?, ?>> {
 
+	public class HibernateRepositoryRegistry extends SettableRepositoryRegistry<GenericHibernateRepository<?, ?>> {
 
 		public void injectInto(GenericHibernateRepository<?, ?> rep) {
 		}
@@ -797,6 +794,7 @@ public class BridgeMethodResolverTests extends TestCase {
 			return null;
 		}
 	}
+
 
 	//-------------------
 	// SPR-2603 classes
@@ -807,6 +805,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		void foo(E e);
 	}
 
+
 	public class MyHomer<L extends Bounded<String>> implements Homer<L> {
 
 		public void foo(L t) {
@@ -815,6 +814,7 @@ public class BridgeMethodResolverTests extends TestCase {
 
 	}
 
+
 	public class YourHomer<L extends AbstractBounded<String>> extends MyHomer<L> {
 
 		public void foo(L t) {
@@ -822,4 +822,5 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 
 	}
+
 }
