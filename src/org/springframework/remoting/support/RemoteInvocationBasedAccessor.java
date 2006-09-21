@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,8 @@ public abstract class RemoteInvocationBasedAccessor extends UrlBasedRemoteAccess
 	 * to the invocation, for example user credentials.
 	 */
 	public void setRemoteInvocationFactory(RemoteInvocationFactory remoteInvocationFactory) {
-		this.remoteInvocationFactory = remoteInvocationFactory;
+		this.remoteInvocationFactory =
+				(remoteInvocationFactory != null ? remoteInvocationFactory : new DefaultRemoteInvocationFactory());
 	}
 
 	/**
@@ -73,7 +74,7 @@ public abstract class RemoteInvocationBasedAccessor extends UrlBasedRemoteAccess
 	 * @param result the RemoteInvocationResult to recreate
 	 * @return a return value if the invocation result is a successful return
 	 * @throws Throwable if the invocation result is an exception
-	 * @see org.springframework.remoting.support.RemoteInvocationResult#recreate
+	 * @see org.springframework.remoting.support.RemoteInvocationResult#recreate()
 	 */
 	protected Object recreateRemoteInvocationResult(RemoteInvocationResult result) throws Throwable {
 		return result.recreate();
