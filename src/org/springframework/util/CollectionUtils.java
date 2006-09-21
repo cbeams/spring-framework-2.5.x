@@ -35,18 +35,18 @@ import java.util.Properties;
 public abstract class CollectionUtils {
 
 	/**
-	 * Return <code>true</code> if the supplied <code>Collection</code> is null or empty.
-	 * Otherwise, return <code>false</code>.
-	 * @param collection the <code>Collection</code> to check
+	 * Return <code>true</code> if the supplied Collection is <code>null</code>
+	 * or empty. Otherwise, return <code>false</code>.
+	 * @param collection the Collection to check
 	 */
 	public static boolean isEmpty(Collection collection) {
 		return (collection == null || collection.isEmpty());
 	}
 
 	/**
-	 * Return <code>true</code> if the supplied <code>Map</code> is null or empty.
-	 * Otherwise, return <code>false</code>.
-	 * @param map the <code>Map</code> to check
+	 * Return <code>true</code> if the supplied Map is <code>null</code>
+	 * or empty. Otherwise, return <code>false</code>.
+	 * @param map the Map to check
 	 */
 	public static boolean isEmpty(Map map) {
 		return (map == null || map.isEmpty());
@@ -89,12 +89,10 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Determine whether the given collection only contains a
-	 * single unique object.
-	 * @param collection the collection to check
-	 * @return <code>true</code> if the collection contains a
-	 * single reference or multiple references to the same
-	 * instance, <code>false</code> else
+	 * Determine whether the given Collection only contains a single unique object.
+	 * @param collection the Collection to check
+	 * @return <code>true</code> if the collection contains a single reference or
+	 * multiple references to the same instance, <code>false</code> else
 	 */
 	public static boolean hasUniqueObject(Collection collection) {
 		if (isEmpty(collection)) {
@@ -116,12 +114,11 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Find a value of the given type in the given collection.
-	 * @param collection the collection to search
+	 * Find a value of the given type in the given Collection.
+	 * @param collection the Collection to search
 	 * @param type the type to look for
 	 * @return a value of the given type found, or <code>null</code> if none
-	 * @throws IllegalArgumentException if more than one value
-	 * of the given type found
+	 * @throws IllegalArgumentException if more than one value of the given type found
 	 */
 	public static Object findValueOfType(Collection collection, Class type) throws IllegalArgumentException {
 		if (isEmpty(collection)) {
@@ -142,14 +139,13 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Find a value of one of the given types in the given collection:
-	 * searching the collection for a value of the first type, then
+	 * Find a value of one of the given types in the given Collection:
+	 * searching the Collection for a value of the first type, then
 	 * searching for a value of the second type, etc.
 	 * @param collection the collection to search
 	 * @param types the types to look for, in prioritized order
 	 * @return a of one of the given types found, or <code>null</code> if none
-	 * @throws IllegalArgumentException if more than one value
-	 * of the given type found
+	 * @throws IllegalArgumentException if more than one value of the given type found
 	 */
 	public static Object findValueOfType(Collection collection, Class[] types) throws IllegalArgumentException {
 		if (isEmpty(collection) || ObjectUtils.isEmpty(types)) {
@@ -165,7 +161,7 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Converts the supplied array into a List. Primitive arrays are
+	 * Convert the supplied array into a List. Primitive arrays are
 	 * correctly converted into Lists of the appropriate wrapper type.
 	 * @param source the original array
 	 * @return the converted List result
@@ -207,8 +203,8 @@ public abstract class CollectionUtils {
 		if (isEmpty(source) || isEmpty(candidates)) {
 			return false;
 		}
-		for (Iterator iterator = candidates.iterator(); iterator.hasNext();) {
-			if (source.contains(iterator.next())) {
+		for (Iterator it = candidates.iterator(); it.hasNext();) {
+			if (source.contains(it.next())) {
 				return true;
 			}
 		}
@@ -225,8 +221,8 @@ public abstract class CollectionUtils {
 		if (isEmpty(source) || isEmpty(candidates)) {
 			return null;
 		}
-		for (Iterator iterator = candidates.iterator(); iterator.hasNext();) {
-			Object candidate = iterator.next();
+		for (Iterator it = candidates.iterator(); it.hasNext();) {
+			Object candidate = it.next();
 			if (source.contains(candidate)) {
 				return candidate;
 			}

@@ -792,7 +792,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("constructor-arg.xml", getClass()));
 		try {
 			xbf.getBean("rod7", ConstructorDependenciesBean.class);
-			fail("Should have thrown BeanDefinitionStoreException");
+			fail("Should have thrown BeanCreationException");
 		}
 		catch (BeanCreationException expected) {
 		}
