@@ -23,12 +23,11 @@ import org.aopalliance.aop.Advice;
 import org.springframework.aop.Pointcut;
 
 /**
- * Convenient pointcut-driven advisor implementation.
+ * Convenient Pointcut-driven Advisor implementation.
  *
- * <p>This is the most commonly used Advisor implementation. It can be
- * used with any pointcut and advice type, except for introductions.
- * There is normally no need to subclass this class, or to implement
- * custom Advisors.
+ * <p>This is the most commonly used Advisor implementation. It can be used
+ * with any pointcut and advice type, except for introductions. There is
+ * normally no need to subclass this class, or to implement custom Advisors.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -40,26 +39,25 @@ public class DefaultPointcutAdvisor extends AbstractGenericPointcutAdvisor imple
 
 	/**
 	 * Create an empty DefaultPointcutAdvisor.
-	 * Advice must be set before use using setter methods.
-	 * Pointcut will normally be set also, but defaults to true.
+	 * <p>Advice must be set before use using setter methods.
+	 * Pointcut will normally be set also, but defaults to <code>Pointcut.TRUE</code>.
 	 */
 	public DefaultPointcutAdvisor() {
 	}
 	
 	/**
 	 * Create a DefaultPointcutAdvisor that matches all methods.
-	 * Pointcut.TRUE will be used as pointcut.
-	 * @param advice the advice to use
+	 * <p><code>Pointcut.TRUE</code> will be used as Pointcut.
+	 * @param advice the Advice to use
 	 */
 	public DefaultPointcutAdvisor(Advice advice) {
 		this(Pointcut.TRUE, advice);
 	}
 	
 	/**
-	 * Create a DefaultPointcutAdvisor, specifying pointcut
-	 * and advice
-	 * @param pointcut pointcut targeting the advice
-	 * @param advice advice to run when pointcut matches
+	 * Create a DefaultPointcutAdvisor, specifying Pointcut and Advice.
+	 * @param pointcut the Pointcut targeting the Advice
+	 * @param advice the Advice to run when Pointcut matches
 	 */
 	public DefaultPointcutAdvisor(Pointcut pointcut, Advice advice) {
 		this.pointcut = pointcut;
@@ -77,7 +75,7 @@ public class DefaultPointcutAdvisor extends AbstractGenericPointcutAdvisor imple
 
 
 	public String toString() {
-		return getClass().getName() + ": advice [" + getAdvice() + "], pointcut [" + getPointcut()  + "]";
+		return getClass().getName() + ": pointcut [" + getPointcut() + "]; advice [" + getAdvice() + "]";
 	}
 
 }
