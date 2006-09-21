@@ -23,6 +23,7 @@ import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
+import javax.jms.QueueRequestor;
 import javax.jms.Session;
 import javax.jms.TransactionInProgressException;
 
@@ -143,6 +144,26 @@ public abstract class JmsUtils {
 			catch (Throwable ex) {
 				// We don't trust the JMS provider: It might throw RuntimeException or Error.
 				logger.debug("Unexpected exception on closing JMS MessageConsumer", ex);
+			}
+		}
+	}
+
+	/**
+	 * Close the given JMS QueueRequestor and ignore any thrown exception.
+	 * This is useful for typical <code>finally</code> blocks in manual JMS code.
+	 * @param requestor the JMS QueueRequestor to close (may be <code>null</code>)
+	 */
+	public static void closeQueueRequestor(QueueRequestor requestor) {
+		if (requestor != null) {
+			try {
+				requestor.close();
+			}
+			catch (JMSException ex) {
+				logger.debug("Could not close JMS QueueRequestor", ex);
+			}
+			catch (Throwable ex) {
+				// We don't trust the JMS provider: It might throw RuntimeException or Error.
+				logger.debug("Unexpected exception on closing JMS QueueRequestor", ex);
 			}
 		}
 	}
