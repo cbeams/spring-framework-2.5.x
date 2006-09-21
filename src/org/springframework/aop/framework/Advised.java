@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,14 +34,14 @@ import org.springframework.aop.TargetSource;
  * @see org.springframework.aop.framework.AdvisedSupport
  */
 public interface Advised {
-	
+
 	/**
 	 * Change the TargetSource used by this Advised object.
 	 * Only works if the configuration isn't frozen.
 	 * @param targetSource new TargetSource to use
 	 */
 	void setTargetSource(TargetSource targetSource);
-	
+
 	/**
 	 * Return the TargetSource used by this Advised object.
 	 */
@@ -55,7 +55,7 @@ public interface Advised {
 	 * <p>Default is "false", for optimal performance.
 	 */
 	void setExposeProxy(boolean exposeProxy);
-	
+
 	/**
 	 * Return whether the factory should expose the proxy as a ThreadLocal.
 	 * This can be necessary if a target object needs to invoke a method on itself
@@ -74,23 +74,23 @@ public interface Advised {
 	/**
 	 * Return the Advisors applying to this proxy.
 	 * @return a list of Advisors applying to this proxy.
-	 * Cannot return null, but may return the empty array.
+	 * Cannot return <code>null</code>, but may return the empty array.
 	 */
 	Advisor[] getAdvisors();
-	
+
 	/**
 	 * Return the interfaces proxied by the AOP proxy. Will not
 	 * include the target class, which may also be proxied.
 	 * @return the interfaces proxied by the AOP proxy
 	 */
 	Class[] getProxiedInterfaces();
-	
+
 	/**
 	 * Return whether this interface is proxied.
-	 * @param intf interface to test
+	 * @param intf the interface to test
 	 */
 	boolean isInterfaceProxied(Class intf);
-	
+
 	/**
 	 * Add the given AOP Alliance advice to the tail of the advice (interceptor) chain.
 	 * <p>This will be wrapped in a DefaultPointcutAdvisor with a pointcut that always
@@ -115,7 +115,7 @@ public interface Advised {
 	 * @param advice advice to add at the specified position in the advice chain
 	 */
 	void addAdvice(int pos, Advice advice) throws AopConfigException;
-	
+
 	/**
 	 * Add an Advisor at the end of the advisor chain.
 	 * <p>The Advisor may be an IntroductionAdvisor, in which new interfaces
@@ -130,7 +130,7 @@ public interface Advised {
 	 * @param pos position in chain (0 is head). Must be valid.
 	 */
 	void addAdvisor(int pos, Advisor advisor) throws AopConfigException;
-	
+
 	/**
 	 * Return the index (from 0) of the given advisor, or -1 if no such
 	 * advisor applies to this proxy.
@@ -141,7 +141,7 @@ public interface Advised {
 	 * no such advisor.
 	 */
 	int indexOf(Advisor advisor);
-	
+
 	/**
 	 * Remove the given advisor.
 	 * @param advisor advisor to remove
@@ -149,14 +149,14 @@ public interface Advised {
 	 * advisor was not found and hence could not be removed
 	 */
 	boolean removeAdvisor(Advisor advisor) throws AopConfigException;
-	
+
 	/**
 	 * Remove the advisor at the given index.
 	 * @param index index of advisor to remove
 	 * @throws AopConfigException if the index is invalid
 	 */
 	void removeAdvisor(int index) throws AopConfigException;
-	
+
 	/**
 	 * Remove the Advisor containing the given advice.
 	 * @param advice advice to remove
@@ -164,7 +164,7 @@ public interface Advised {
 	 * (false if there was no such advice)
 	 */
 	boolean removeAdvice(Advice advice) throws AopConfigException;
-	
+
 	/**
 	 * Replace the given advisor.
 	 * <p><b>NB:</b>If the advisor is an IntroductionAdvisor
@@ -177,15 +177,15 @@ public interface Advised {
 	 * list of advisors, this method returns false and does nothing.
 	 */
 	boolean replaceAdvisor(Advisor a, Advisor b) throws AopConfigException;
-	
+
 	/**
 	 * Return whether the Advised configuration is frozen, and no
 	 * advice changes can be made.
 	 */
 	boolean isFrozen();
-	
+
 	/**
-	 * As toString() will normally be delegated to the target, 
+	 * As <code>toString()</code> will normally be delegated to the target,
 	 * this returns the equivalent for the AOP proxy.
 	 * @return a string description of the proxy configuration
 	 */
