@@ -448,7 +448,7 @@ class RubyMessenger &lt; Messenger
  
 end
     </lang:inline-script>
-    <property name="message" value="Hello World!" />
+    <lang:property name="message" value="Hello World!" />
 </lang:jruby>]]></programlisting>
 			</section>
 			<section>
@@ -592,7 +592,7 @@ RubyMessenger.new]]><lineannotation> # this last line is not essential (but see 
             script-interfaces="org.springframework.scripting.Messenger"
             script-source="classpath:RubyMessenger.rb">
     
-    <property name="message" value="Hello World!" />
+    <lang:property name="message" value="Hello World!" />
 
 </lang:jruby>]]></programlisting>
 			<para>
