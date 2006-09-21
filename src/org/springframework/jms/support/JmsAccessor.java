@@ -58,15 +58,14 @@ public abstract class JmsAccessor implements InitializingBean {
 
 
 	/**
-	 * Set the connection factory used for obtaining JMS Connections.
-	 * @param connectionFactory connection factory used for obtaining JMS Connections
+	 * Set the ConnectionFactory to use for obtaining JMS Connections.
 	 */
 	public void setConnectionFactory(ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
 	}
 
 	/**
-	 * Return the connection factory used for obtaining JMS Connections.
+	 * Return the ConnectionFactory to use for obtaining JMS Connections.
 	 */
 	public ConnectionFactory getConnectionFactory() {
 		return connectionFactory;

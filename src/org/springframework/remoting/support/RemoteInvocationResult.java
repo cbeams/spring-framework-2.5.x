@@ -65,7 +65,7 @@ public class RemoteInvocationResult implements Serializable {
 	 * @see #hasException
 	 */
 	public Object getValue() {
-		return value;
+		return this.value;
 	}
 
 	/**
@@ -74,7 +74,7 @@ public class RemoteInvocationResult implements Serializable {
 	 * @see #hasException
 	 */
 	public Throwable getException() {
-		return exception;
+		return this.exception;
 	}
 
 	/**
@@ -85,7 +85,7 @@ public class RemoteInvocationResult implements Serializable {
 	 * @see #getException
 	 */
 	public boolean hasException() {
-		return (exception != null);
+		return (this.exception != null);
 	}
 
 

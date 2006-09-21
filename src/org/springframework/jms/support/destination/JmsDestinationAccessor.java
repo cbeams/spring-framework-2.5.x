@@ -43,11 +43,10 @@ public class JmsDestinationAccessor extends JmsAccessor {
 
 
 	/**
-	 * Set the destination resolver that is to be used to resolve
-	 * {@link Destination Destinations} for this accessor.
-	 * <p>The default resolver is a {@link DynamicDestinationResolver}. Specify a
-	 * {@link JndiDestinationResolver} for resolving destination names as JNDI locations.
-	 * @param destinationResolver the destination resolver that is to be used
+	 * Set the DestinationResolver that is to be used to resolve
+	 * Destination references for this accessor.
+	 * <p>The default resolver is a DynamicDestinationResolver. Specify a
+	 * JndiDestinationResolver for resolving destination names as JNDI locations.
 	 * @see org.springframework.jms.support.destination.DynamicDestinationResolver
 	 * @see org.springframework.jms.support.destination.JndiDestinationResolver
 	 */
@@ -57,8 +56,7 @@ public class JmsDestinationAccessor extends JmsAccessor {
 	}
 
 	/**
-	 * Return the destination resolver for this accessor.
-	 * @return the destination resolver for this accessor
+	 * Return the DestinationResolver for this accessor.
 	 */
 	public DestinationResolver getDestinationResolver() {
 		return destinationResolver;

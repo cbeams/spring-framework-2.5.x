@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,6 +34,7 @@ import org.aopalliance.intercept.MethodInvocation;
  *
  * @author Juergen Hoeller
  * @since 25.02.2004
+ * @see RemoteInvocationResult
  * @see RemoteInvocationFactory
  * @see RemoteInvocationExecutor
  */
@@ -175,12 +176,13 @@ public class RemoteInvocation implements Serializable {
 	 */
 	public Object invoke(Object targetObject)
 			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+
 		Method method = targetObject.getClass().getMethod(this.methodName, this.parameterTypes);
 		return method.invoke(targetObject, this.arguments);
 	}
 
 	public String toString() {
-		return "RemoteInvocation: methodName='" + this.methodName + "', parameterTypes=" +
+		return getClass().getName() + ": methodName '" + this.methodName + "'; parameterTypes " +
 				Arrays.asList(this.parameterTypes);
 	}
 
