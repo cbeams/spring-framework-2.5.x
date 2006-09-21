@@ -412,6 +412,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	//---------------------------------------------------------------------
 
 	public ObjectName registerManagedResource(Object managedResource) throws MBeanExportException {
+		Assert.notNull(managedResource, "Managed resource must not be null");
 		try {
 			ObjectName objectName = getObjectName(managedResource, null);
 			if (this.ensureUniqueRuntimeObjectNames) {
@@ -426,7 +427,15 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	}
 
 	public void registerManagedResource(Object managedResource, ObjectName objectName) throws MBeanExportException {
-		Object mbean = createAndConfigureMBean(managedResource, managedResource.getClass().getName());
+		Assert.notNull(managedResource, "Managed resource must not be null");
+		Assert.notNull(objectName, "ObjectName must not be null");
+		Object mbean = null;
+		if (JmxUtils.isMBean(managedResource.getClass())) {
+			mbean = managedResource;
+		}
+		else {
+			mbean = createAndConfigureMBean(managedResource, managedResource.getClass().getName());
+		}
 		try {
 			doRegister(mbean, objectName);
 		}
