@@ -16,6 +16,7 @@
 
 package org.springframework.transaction.interceptor;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -25,21 +26,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * TransactionAttribute implementation that works out whether a given
- * exception should cause transaction rollback by applying a number of
- * rollback rules, both positive and negative. If no rules are relevant
- * to the exception, it behaves like DefaultTransactionAttribute
- * (rolling back on runtime exceptions).
+ * TransactionAttribute implementation that works out whether a given exception
+ * should cause transaction rollback by applying a number of rollback rules,
+ * both positive and negative. If no rules are relevant to the exception, it
+ * behaves like DefaultTransactionAttribute (rolling back on runtime exceptions).
  *
- * <p>The TransactionAttributeEditor property editor creates objects
- * of this class.
+ * <p>TransactionAttributeEditor creates objects of this class.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 09.04.2003
  * @see TransactionAttributeEditor
  */
-public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute {
-	
+public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute implements Serializable {
+
 	/** Prefix for rollback-on-exception rules in description strings */
 	public static final String PREFIX_ROLLBACK_RULE = "-";
 
