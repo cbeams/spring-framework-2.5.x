@@ -311,7 +311,10 @@
 		<jar jarfile="${dist.dir}/modules/spring-context.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/context/**"/>
-				<include name="org/springframework/instrument/**"/>
+				<!-- exclude content of spring-agent.jar and spring-tomcat-weaver.jar -->
+				<include name="org/springframework/instrument/classloading/**"/>
+				<exclude name="org/springframework/instrument/classloading/oc4j/**"/>
+				<exclude name="org/springframework/instrument/classloading/tomcat/**"/>
 				<include name="org/springframework/jndi/**"/>
 				<include name="org/springframework/stereotype/**"/>
 				<include name="org/springframework/ui/**"/>
@@ -362,6 +365,7 @@
 		<jar jarfile="${dist.dir}/modules/spring-support.jar">
 			<fileset dir="${target.classes.dir}">
 				<include name="org/springframework/cache/**"/>
+				<include name="org/springframework/instrument/classloading/oc4j/**"/>
 				<include name="org/springframework/mail/**"/>
 				<include name="org/springframework/scheduling/**"/>
 				<include name="org/springframework/scripting/**"/>
