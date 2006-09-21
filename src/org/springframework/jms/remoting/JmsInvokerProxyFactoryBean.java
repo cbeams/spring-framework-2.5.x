@@ -20,10 +20,13 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
- * Factory bean for JMS proxies. Behaves like the proxied service when
- * used as bean reference, exposing the specified service interface.
+ * Factory bean for JMS proxies.
+ * 
+ * <p>Behaves like the proxied service when used as a bean reference,
+ * exposing the specified {@link #setServiceInterface(Class) service interface}.
  *
- * <p>For configuration details, see JmsClientInterceptor docs.
+ * <p>For configuration details, see the
+ * {@link JmsInvokerClientInterceptor} javadoc.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -40,7 +43,11 @@ public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor impl
 
 
 	/**
-	 * Set the interface that the proxy should implement.
+	 * Set the interface that the proxy must implement.
+	 * @param serviceInterface the interface that the proxy must implement
+	 * @throws IllegalArgumentException if the supplied <code>serviceInterface</code>
+	 * is <code>null</code>, or if the supplied <code>serviceInterface</code>
+	 * is not an interface type
 	 */
 	public void setServiceInterface(Class serviceInterface) {
 		if (serviceInterface == null || !serviceInterface.isInterface()) {
