@@ -173,13 +173,18 @@ public class BridgeMethodResolverTests extends TestCase {
 	}
 
 	public void testSPR2454() throws Exception {
-	  Method brigedMethod = HibernateRepositoryRegistry.class.getMethod("injectInto", GenericHibernateRepository.class);
-		assertFalse(brigedMethod.isBridge());
+	  Map typeVariableMap = BridgeMethodResolver.createTypeVariableMap(YourHomer.class);
+		assertEquals(AbstractBounded.class, typeVariableMap.get("L"));
+	}
 
-		Method brigeMethod = HibernateRepositoryRegistry.class.getMethod("injectInto", SimpleGenericRepository.class);
-		assertTrue(brigeMethod.isBridge());
+	public void testSPR2603() throws Exception {
+		Method objectBridge = YourHomer.class.getDeclaredMethod("foo", Bounded.class);
 
-		assertEquals(brigedMethod, BridgeMethodResolver.findBridgedMethod(brigedMethod));
+		Method abstractBoundedFoo = YourHomer.class.getDeclaredMethod("foo", AbstractBounded.class);
+
+		Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(objectBridge);
+
+		assertEquals("foo(AbstractBounded) not resolved.", abstractBoundedFoo, bridgedMethod);
 	}
 
 	private Method findMethodWithReturnType(String name, Class returnType, Class targetType) {
@@ -791,5 +796,30 @@ public class BridgeMethodResolverTests extends TestCase {
 		public <T> GenericHibernateRepository<T, ?> getFor(Class<T> entityType) {
 			return null;
 		}
+	}
+
+	//-------------------
+	// SPR-2603 classes
+	//-------------------
+
+	public interface Homer<E> {
+
+		void foo(E e);
+	}
+
+	public class MyHomer<L extends Bounded<String>> implements Homer<L> {
+
+		public void foo(L t) {
+			throw new UnsupportedOperationException();
+		}
+
+	}
+
+	public class YourHomer<L extends AbstractBounded<String>> extends MyHomer<L> {
+
+		public void foo(L t) {
+			throw new UnsupportedOperationException();
+		}
+
 	}
 }

@@ -271,7 +271,13 @@ public abstract class BridgeMethodResolver {
 				TypeVariable typeVariableArgument = (TypeVariable) actualTypeArgument;
 				Type[] bounds = typeVariableArgument.getBounds();
 				if (bounds.length > 0) {
-					typeVariableMap.put(typeVariables[i].getName(), (Class) bounds[0]);
+					Type bound = bounds[0];
+					if (bound instanceof ParameterizedType) {
+						typeVariableMap.put(typeVariables[i].getName(), ((ParameterizedType) bound).getRawType());
+					}
+					else {
+						typeVariableMap.put(typeVariables[i].getName(), (Class) bound);
+					}
 				}
 			}
 		}
