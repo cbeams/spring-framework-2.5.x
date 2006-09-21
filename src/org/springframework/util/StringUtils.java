@@ -700,15 +700,14 @@ public abstract class StringUtils {
 	 * prior to attempting the split operation (typically the quotation mark
 	 * symbol), or <code>null</code> if no removal should occur
 	 * @return a <code>Properties</code> instance representing the array contents,
-	 * or <code>null</code> if the array to process was null or empty
+	 * or <code>null</code> if the array to process was <code>null</code> or empty
 	 */
 	public static Properties splitArrayElementsIntoProperties(
 			String[] array, String delimiter, String charsToDelete) {
 
-		if (array == null || array.length == 0) {
+		if (ObjectUtils.isEmpty(array)) {
 			return null;
 		}
-
 		Properties result = new Properties();
 		for (int i = 0; i < array.length; i++) {
 			String element = array[i];
@@ -796,7 +795,6 @@ public abstract class StringUtils {
 		if (delimiter == null) {
 			return new String[] {str};
 		}
-
 		List result = new ArrayList();
 		if ("".equals(delimiter)) {
 			for (int i = 0; i < str.length(); i++) {
@@ -843,17 +841,58 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Convenience method to return a Collection as a delimited (e.g. CSV)
+	 * String. E.g. useful for <code>toString()</code> implementations.
+	 * @param coll Collection to display
+	 * @param delim delimiter to use (probably a ",")
+	 * @param prefix string to start each element with
+	 * @param suffix string to end each element with
+	 */
+	public static String collectionToDelimitedString(Collection coll, String delim, String prefix, String suffix) {
+		if (CollectionUtils.isEmpty(coll)) {
+			return "";
+		}
+		StringBuffer sb = new StringBuffer();
+		Iterator it = coll.iterator();
+		while (it.hasNext()) {
+			sb.append(prefix).append(it.next()).append(suffix);
+			if (it.hasNext()) {
+				sb.append(delim);
+			}
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Convenience method to return a Collection as a delimited (e.g. CSV)
+	 * String. E.g. useful for <code>toString()</code> implementations.
+	 * @param coll Collection to display
+	 * @param delim delimiter to use (probably a ",")
+	 */
+	public static String collectionToDelimitedString(Collection coll, String delim) {
+		return collectionToDelimitedString(coll, delim, "", "");
+	}
+
+	/**
+	 * Convenience method to return a Collection as a CSV String.
+	 * E.g. useful for <code>toString()</code> implementations.
+	 * @param coll Collection to display
+	 */
+	public static String collectionToCommaDelimitedString(Collection coll) {
+		return collectionToDelimitedString(coll, ",");
+	}
+
+	/**
 	 * Convenience method to return a String array as a delimited (e.g. CSV)
-	 * String. E.g. useful for toString() implementations.
+	 * String. E.g. useful for <code>toString()</code> implementations.
 	 * @param arr array to display. Elements may be of any type (toString
 	 * will be called on each element).
 	 * @param delim delimiter to use (probably a ",")
 	 */
 	public static String arrayToDelimitedString(Object[] arr, String delim) {
-		if (arr == null) {
+		if (ObjectUtils.isEmpty(arr)) {
 			return "";
 		}
-
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < arr.length; i++) {
 			if (i > 0) {
@@ -865,58 +904,13 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Convenience method to return a Collection as a delimited (e.g. CSV)
-	 * String. E.g. useful for toString() implementations.
-	 * @param coll Collection to display
-	 * @param delim delimiter to use (probably a ",")
-	 * @param prefix string to start each element with
-	 * @param suffix string to end each element with
-	 */
-	public static String collectionToDelimitedString(Collection coll, String delim, String prefix, String suffix) {
-		if (coll == null) {
-			return "";
-		}
-
-		StringBuffer sb = new StringBuffer();
-		Iterator it = coll.iterator();
-		int i = 0;
-		while (it.hasNext()) {
-			if (i > 0) {
-				sb.append(delim);
-			}
-			sb.append(prefix).append(it.next()).append(suffix);
-			i++;
-		}
-		return sb.toString();
-	}
-
-	/**
-	 * Convenience method to return a Collection as a delimited (e.g. CSV)
-	 * String. E.g. useful for toString() implementations.
-	 * @param coll Collection to display
-	 * @param delim delimiter to use (probably a ",")
-	 */
-	public static String collectionToDelimitedString(Collection coll, String delim) {
-		return collectionToDelimitedString(coll, delim, "", "");
-	}
-
-	/**
 	 * Convenience method to return a String array as a CSV String.
-	 * E.g. useful for toString() implementations.
+	 * E.g. useful for <code>toString()</code> implementations.
 	 * @param arr array to display. Elements may be of any type (toString
 	 * will be called on each element).
 	 */
 	public static String arrayToCommaDelimitedString(Object[] arr) {
 		return arrayToDelimitedString(arr, ",");
-	}
-
-	/**
-	 * Convenience method to return a Collection as a CSV String.
-	 * E.g. useful for toString() implementations.
-	 * @param coll Collection to display
-	 */
-	public static String collectionToCommaDelimitedString(Collection coll) {
-		return collectionToDelimitedString(coll, ",");
 	}
 
 }
