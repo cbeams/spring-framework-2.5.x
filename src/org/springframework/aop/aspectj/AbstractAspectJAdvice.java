@@ -62,10 +62,10 @@ public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformat
 	 */
 	public static JoinPoint currentJoinPoint() {
 		ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) ExposeInvocationInterceptor.currentInvocation();
-		JoinPoint jp = (JoinPoint) rmi.getUserAttributes().get(JOIN_POINT_KEY);
+		JoinPoint jp = (JoinPoint) rmi.getUserAttribute(JOIN_POINT_KEY);
 		if (jp == null) {
 			jp = new MethodInvocationProceedingJoinPoint(rmi);
-			rmi.getUserAttributes().put(JOIN_POINT_KEY, jp);
+			rmi.setUserAttribute(JOIN_POINT_KEY, jp);
 		}
 		return jp;
 	}
@@ -533,7 +533,7 @@ public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformat
 	// Using the expression is guaranteed to be safe, since 2 identical expressions
 	// are guaranteed to bind in exactly the same way.
 	protected JoinPointMatch getJoinPointMatch(ReflectiveMethodInvocation rmi) {
-		JoinPointMatch jpm = (JoinPointMatch) rmi.getUserAttributes().get(this.pointcutExpression.getExpression());
+		JoinPointMatch jpm = (JoinPointMatch) rmi.getUserAttribute(this.pointcutExpression.getExpression());
 		return jpm;		
 	}
 

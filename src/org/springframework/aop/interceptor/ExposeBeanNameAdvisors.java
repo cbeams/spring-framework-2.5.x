@@ -71,7 +71,7 @@ public abstract class ExposeBeanNameAdvisors {
 			throw new IllegalArgumentException("Not a Spring AOP ReflectiveMethodInvocation");
 		}
 		ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) mi;
-		String beanName = (String) rmi.getUserAttributes().get(BEAN_NAME_ATTRIBUTE);
+		String beanName = (String) rmi.getUserAttribute(BEAN_NAME_ATTRIBUTE);
 		if (beanName == null) {
 			throw new IllegalStateException("Cannot get bean name: not set on MethodInvocation. " +
 					"Include ExposeBeanNameAdvisor in interceptor chain.");
@@ -111,7 +111,7 @@ public abstract class ExposeBeanNameAdvisors {
 		
 		public Object invoke(MethodInvocation mi) throws Throwable {
 			ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) mi;
-			rmi.getUserAttributes().put(BEAN_NAME_ATTRIBUTE, beanName);
+			rmi.setUserAttribute(BEAN_NAME_ATTRIBUTE, beanName);
 			return mi.proceed();
 		}
 	}
@@ -127,7 +127,7 @@ public abstract class ExposeBeanNameAdvisors {
 		
 		public Object invoke(MethodInvocation mi) throws Throwable {
 			ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) mi;
-			rmi.getUserAttributes().put(BEAN_NAME_ATTRIBUTE, beanName);
+			rmi.setUserAttribute(BEAN_NAME_ATTRIBUTE, beanName);
 			return super.invoke(mi);
 		}
 		

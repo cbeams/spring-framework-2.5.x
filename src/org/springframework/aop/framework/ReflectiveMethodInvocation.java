@@ -58,6 +58,8 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	protected Object[] arguments;
 	
 	private final Class targetClass;
+
+	private ReflectiveMethodInvocation parent;
 	
 	/**
 	 * Lazily initialized map of user-specific attributes for this invocation.
@@ -74,7 +76,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * Index from 0 of the current interceptor we're invoking.
 	 * -1 until we invoke: then the current interceptor
 	 */
-	private int currentInterceptorIndex = -1;
+	private int currentInterceptorIndex;
 
 	
 	/**
@@ -133,43 +135,64 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * @return any user attributes associated with this invocation
 	 * (never <code>null</code>)
 	 */
-	public Map getUserAttributes() {
+	protected Map getUserAttributes() {
 		if (this.userAttributes == null) {
 			this.userAttributes = new HashMap();
 		}
 		return this.userAttributes;
 	}
 
+	public Object getUserAttribute(String key) {
+		return getUserAttributes().get(key);
+	}
+
+	public void setUserAttribute(String key, Object value) {
+		if(this.parent != null) {
+			Object valueInParent = this.parent.getUserAttribute(key);
+			if(valueInParent == null) {
+				this.parent.setUserAttribute(key, value);
+			}
+		}
+		getUserAttributes().put(key, value);
+	}
 
 	public Object proceed() throws Throwable {
 		//	We start with an index of -1 and increment early.
-		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
+		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size()) {
 			return invokeJoinpoint();
 		}
 
 		Object interceptorOrInterceptionAdvice =
-		    this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
+		    this.interceptorsAndDynamicMethodMatchers.get(this.currentInterceptorIndex);
 		if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) {
 			// Evaluate dynamic method matcher here: static part will already have
 			// been evaluated and found to match.
 			InterceptorAndDynamicMethodMatcher dm =
 			    (InterceptorAndDynamicMethodMatcher) interceptorOrInterceptionAdvice;
 			if (dm.methodMatcher.matches(this.method, this.targetClass, this.arguments)) {
-				return dm.interceptor.invoke(this);
+				return dm.interceptor.invoke(nextInvocation());
 			}
 			else {
 				// Dynamic matching failed.
 				// Skip this interceptor and invoke the next in the chain.
+				this.currentInterceptorIndex++;
 				return proceed();
 			}
 		}
 		else {
 			// It's an interceptor, so we just invoke it: The pointcut will have
 			// been evaluated statically before this object was constructed.
-			return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
+			return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(nextInvocation());
 		}
 	}
-	
+
+	private ReflectiveMethodInvocation nextInvocation() throws CloneNotSupportedException {
+		ReflectiveMethodInvocation invocation = (ReflectiveMethodInvocation) clone();
+		invocation.currentInterceptorIndex = this.currentInterceptorIndex + 1;
+		invocation.parent = this;
+		return invocation;
+	}
+
 	/**
 	 * Invoke the joinpoint using reflection.
 	 * Subclasses can override this to use custom invocation.

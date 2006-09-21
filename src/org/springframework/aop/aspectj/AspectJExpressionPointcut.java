@@ -287,14 +287,13 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 	}
 	
 	private void bindParameters(ReflectiveMethodInvocation invocation, JoinPointMatch jpm) {
-		Map userAttributes = invocation.getUserAttributes();
 		// note - can't use JoinPointMatch.getClass().getName() as the key, since
 		// Spring AOP does all the matching at a join point, and then all the invocations
 		// under this scenario, if we just use JoinPointMatch as the key, then
 		// 'last man wins' which is not what we want at all.
 		// Using the expression is guaranteed to be safe, since 2 identical expressions
 		// are guaranteed to bind in exactly the same way.
-		userAttributes.put(getExpression(),jpm);
+		invocation.setUserAttribute(getExpression(),jpm);
 	}
 
 	private ShadowMatch getShadowMatch(Method method) {

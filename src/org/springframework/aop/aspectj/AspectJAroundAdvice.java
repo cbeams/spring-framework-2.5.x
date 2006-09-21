@@ -66,12 +66,7 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 	 * @return the ProceedingJoinPoint to make available to advice methods
 	 */
 	protected ProceedingJoinPoint lazyGetProceedingJoinPoint(ReflectiveMethodInvocation rmi) {
-		ProceedingJoinPoint pjp = (ProceedingJoinPoint) rmi.getUserAttributes().get(JOIN_POINT_KEY);
-		if (pjp == null) {
-			pjp = new MethodInvocationProceedingJoinPoint(rmi);
-			rmi.getUserAttributes().put(JOIN_POINT_KEY, pjp);
-		}
-		return pjp;
+			return new MethodInvocationProceedingJoinPoint(rmi);
 	}
 
 }
