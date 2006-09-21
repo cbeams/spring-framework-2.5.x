@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,7 @@ import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInfo;
 import org.springframework.core.Ordered;
+import org.springframework.util.ClassUtils;
 
 /**
  * Simple IntroductionAdvisor implementation that by default applies to any class.
@@ -36,10 +37,6 @@ import org.springframework.core.Ordered;
  * @since 11.11.2003
  */
 public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFilter, Ordered, Serializable {
-
-	/** use serialVersionUID from Spring 1.1 for interoperability */
-	private static final long serialVersionUID = 1360502830817661569L;
-
 
 	private int order = Integer.MAX_VALUE;
 
@@ -62,9 +59,6 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 		addInterface(clazz);
 	}
 	
-	/**
-	 * Wrap the given interceptor and introduce all interfaces.
-	 */
 	public DefaultIntroductionAdvisor(Advice advice, IntroductionInfo introductionInfo) {
 		init(advice, introductionInfo);
 	}
@@ -118,23 +112,24 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	}
 	
 	public void validateInterfaces() throws IllegalArgumentException {
-		for (Iterator ut = this.interfaces.iterator(); ut.hasNext();) {
-			Class intf = (Class) ut.next();
-			if (!intf.isInterface()) {
-			 throw new IllegalArgumentException("Class '" + intf.getName() +
-																					"' is not an interface; cannot be used in an introduction");
+		for (Iterator it = this.interfaces.iterator(); it.hasNext();) {
+			Class ifc = (Class) it.next();
+			if (!ifc.isInterface()) {
+			 throw new IllegalArgumentException(
+					 "Class [" + ifc.getName() + "] is not an interface; cannot be used in an introduction");
 			}
 			if (this.advice instanceof DynamicIntroductionAdvice &&
-					!((DynamicIntroductionAdvice) this.advice).implementsInterface(intf)) {
+					!((DynamicIntroductionAdvice) this.advice).implementsInterface(ifc)) {
 			 throw new IllegalArgumentException("IntroductionAdvice [" + this.advice + "] " +
-					 "does not implement interface '" + intf.getName() + "' specified in introduction advice");
+					 "does not implement interface [" + ifc.getName() + "] specified in introduction advice");
 			}
 		}
 	}
-	
+
+
 	public String toString() {
-		return "DefaultIntroductionAdvisor: interfaces=[" + AopUtils.interfacesString(this.interfaces) +
-				"]; introductionInterceptor=[" + this.advice + "]";
+		return getClass().getName() + ": advice [" + this.advice + "]; interfaces " +
+				ClassUtils.classNamesToString(this.interfaces);
 	}
 
 }

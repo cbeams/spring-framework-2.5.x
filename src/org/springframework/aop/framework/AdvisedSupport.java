@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,6 @@
 
 package org.springframework.aop.framework;
 
-import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -32,13 +31,12 @@ import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInfo;
 import org.springframework.aop.TargetSource;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ClassUtils;
 
 /**
  * Superclass for AOP proxy configuration managers.
@@ -76,10 +74,10 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	/**
 	 * List of Advice. If an Interceptor is added, it will be wrapped
-	 * in an Advice before being added to this List. 
+	 * in an Advice before being added to this List.
 	 */
 	private List advisors = new LinkedList();
-	
+
 	/**
 	 * Array updated on changes to the advisors list, which is easier
 	 * to manipulate internally.
@@ -404,7 +402,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	protected final void updateAdvisorArray() {
 		this.advisorArray = (Advisor[]) this.advisors.toArray(new Advisor[this.advisors.size()]);
 	}
-	
+
 	public final Advisor[] getAdvisors() {
 		return this.advisorArray;
 	}
@@ -518,34 +516,30 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	//---------------------------------------------------------------------
 	
 	/**
-	 * Serialize a copy of the state of this class, ignoring
-	 * subclass state.
+	 * Serializes a copy of the state of this class, ignoring subclass state.
 	 */
-	protected Object writeReplace() throws ObjectStreamException {
+	protected Object writeReplace() {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Disconnecting " + this);
 		}
 
-		// Copy state to avoid dependencies
-		// on BeanFactories etc. that subclasses may have.
+		// Copy state to avoid dependencies on BeanFactory etc that subclasses may have.
 		AdvisedSupport copy = this;
 
-		// If we're in a non-serializable subclass,
-		// copy into an AdvisedSupport object.
-		if (getClass() != AdvisedSupport.class) {
+		// If we're in a non-serializable subclass, copy into an AdvisedSupport object.
+		if (!getClass().equals(AdvisedSupport.class)) {
 			copy = new AdvisedSupport();
 			copy.copyConfigurationFrom(this);
 		}
 
-		// may return this
+		// May return this.
 		return copy;
 	}
 	 
 	/**
-	 * Used to initialize transient state.
+	 * Initializes transient fields.
 	 */
-	protected Object readResolve() throws ObjectStreamException {
-		// initialize transient fields
+	private Object readResolve() {
 		this.logger = LogFactory.getLog(getClass());
 		this.isActive = true;
 		this.listeners = new LinkedList();
@@ -563,14 +557,13 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 */
 	public String toString() {
 		StringBuffer sb = new StringBuffer(getClass().getName() + ": ");
-		sb.append(this.interfaces.size()).append(" interfaces=[");
-		sb.append(AopUtils.interfacesString(interfaces));
-		sb.append("]; ");
-		sb.append(this.advisors.size()).append(" advisors=[");
-		sb.append(StringUtils.collectionToDelimitedString(this.advisors, ",", "{", "}")).append("]; ");
-		sb.append("targetSource=[").append(this.targetSource).append("]; ");
-		sb.append(super.toString());
-		sb.append("advisorChainFactory=").append(this.advisorChainFactory);
+		sb.append(this.interfaces.size()).append(" interfaces ");
+		sb.append(ClassUtils.classNamesToString(this.interfaces)).append("; ");
+		sb.append(this.advisors.size()).append(" advisors ");
+		sb.append(this.advisors).append("; ");
+		sb.append("targetSource [").append(this.targetSource).append("]; ");
+		sb.append("advisorChainFactory [").append(this.advisorChainFactory);
+		sb.append("]; ").append(super.toString());
 		return sb.toString();
 	}
 

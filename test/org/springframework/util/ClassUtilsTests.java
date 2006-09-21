@@ -22,6 +22,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -33,8 +35,6 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 
 /**
- * Unit tests for the {@link ClassUtils} class.
- * 
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -46,6 +46,11 @@ public class ClassUtilsTests extends TestCase {
 		InnerClass.noArgCalled = false;
 		InnerClass.argCalled = false;
 		InnerClass.overloadedCalled = false;
+	}
+
+	public void testIsPresent() throws Exception {
+		assertTrue(ClassUtils.isPresent("java.lang.String"));
+		assertFalse(ClassUtils.isPresent("java.lang.MySpecialString"));
 	}
 
 	public void testForName() throws ClassNotFoundException {
@@ -148,6 +153,26 @@ public class ClassUtilsTests extends TestCase {
 		assertEquals("Class name did not match", "classUtilsTests", shortName);
 	}
 
+	public void testHasMethod() throws Exception {
+		assertTrue(ClassUtils.hasMethod(Collection.class, "size", null));
+		assertTrue(ClassUtils.hasMethod(Collection.class, "remove", new Class[] {Object.class}));
+		assertFalse(ClassUtils.hasMethod(Collection.class, "remove", null));
+		assertFalse(ClassUtils.hasMethod(Collection.class, "someOtherMethod", null));
+	}
+
+	public void testGetMethodIfAvailable() throws Exception {
+		Method method = ClassUtils.getMethodIfAvailable(Collection.class, "size", null);
+		assertNotNull(method);
+		assertEquals("size", method.getName());
+
+		method = ClassUtils.getMethodIfAvailable(Collection.class, "remove", new Class[] {Object.class});
+		assertNotNull(method);
+		assertEquals("remove", method.getName());
+
+		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "remove", null));
+		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "someOtherMethod", null));
+	}
+
 	public void testCountOverloadedMethods() {
 		assertFalse(ClassUtils.hasAtLeastOneMethodWithName(TestBean.class, "foobar"));
 		// no args
@@ -201,29 +226,24 @@ public class ClassUtilsTests extends TestCase {
 		assertTrue("Contains IOther", ifcs.contains(IOther.class));
 	}
 
-	public void testIsPresent() throws Exception {
-		assertTrue(ClassUtils.isPresent("java.lang.String"));
-		assertFalse(ClassUtils.isPresent("java.lang.MySpecialString"));
-	}
+	public void testClassNamesToString() {
+		List ifcs = new LinkedList();
+		ifcs.add(Serializable.class);
+		ifcs.add(Runnable.class);
+		assertEquals("[interface java.io.Serializable, interface java.lang.Runnable]", ifcs.toString());
+		assertEquals("[java.io.Serializable, java.lang.Runnable]", ClassUtils.classNamesToString(ifcs));
 
-	public void testHasMethod() throws Exception {
-		assertTrue(ClassUtils.hasMethod(Collection.class, "size", null));
-		assertTrue(ClassUtils.hasMethod(Collection.class, "remove", new Class[] {Object.class}));
-		assertFalse(ClassUtils.hasMethod(Collection.class, "remove", null));
-		assertFalse(ClassUtils.hasMethod(Collection.class, "someOtherMethod", null));
-	}
+		List classes = new LinkedList();
+		classes.add(LinkedList.class);
+		classes.add(Integer.class);
+		assertEquals("[class java.util.LinkedList, class java.lang.Integer]", classes.toString());
+		assertEquals("[java.util.LinkedList, java.lang.Integer]", ClassUtils.classNamesToString(classes));
 
-	public void testGetMethodIfAvailable() throws Exception {
-		Method method = ClassUtils.getMethodIfAvailable(Collection.class, "size", null);
-		assertNotNull(method);
-		assertEquals("size", method.getName());
+		assertEquals("[interface java.util.List]", Collections.singletonList(List.class).toString());
+		assertEquals("[java.util.List]", ClassUtils.classNamesToString(Collections.singletonList(List.class)));
 
-		method = ClassUtils.getMethodIfAvailable(Collection.class, "remove", new Class[] {Object.class});
-		assertNotNull(method);
-		assertEquals("remove", method.getName());
-
-		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "remove", null));
-		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "someOtherMethod", null));
+		assertEquals("[]", Collections.EMPTY_LIST.toString());
+		assertEquals("[]", ClassUtils.classNamesToString(Collections.EMPTY_LIST));
 	}
 
 

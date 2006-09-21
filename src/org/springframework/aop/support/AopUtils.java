@@ -20,7 +20,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -147,25 +146,6 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Build a String that consists of the names of the interfaces
-	 * in the given collection.
-	 * @param interfaces collection of Class objects that represent interfaces.
-	 * @return a string of form com.foo.Bar,com.foo.Baz
-	 */
-	public static String interfacesString(Collection interfaces) {
-		StringBuffer sb = new StringBuffer();
-		int i = 0;
-		for (Iterator itr = interfaces.iterator(); itr.hasNext(); ) {
-			Class intf = (Class) itr.next();
-			if (i++ > 0) {
-				sb.append(",");
-			}
-			sb.append(intf.getName());
-		}
-		return sb.toString();
-	}
-
-	/**
 	 * Can the given pointcut apply at all on the given class?
 	 * This is an important test as it can be used to optimize
 	 * out a pointcut for a class.
@@ -174,7 +154,7 @@ public abstract class AopUtils {
 	 * @return whether the pointcut can apply on any method
 	 */
 	public static boolean canApply(Pointcut pc, Class targetClass) {
-		return canApply(pc,targetClass,false);
+		return canApply(pc, targetClass, false);
 	}
 
 	/**

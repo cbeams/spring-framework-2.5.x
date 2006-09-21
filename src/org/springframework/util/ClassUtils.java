@@ -20,6 +20,7 @@ import java.beans.Introspector;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -535,6 +536,31 @@ public abstract class ClassUtils {
 			clazz = clazz.getSuperclass();
 		}
 		return interfaces;
+	}
+
+	/**
+	 * Build a String that consists of the names of the classes/interfaces
+	 * in the given collection.
+	 * <p>Basically like <code>AbstractCollection.toString()</code>, but stripping
+	 * the "class "/"interface " prefix before every class name.
+	 * @param classes a Collection of Class objects (may be <code>null</code>)
+	 * @return a String of form "[com.foo.Bar, com.foo.Baz]"
+	 * @see java.util.AbstractCollection#toString()
+	 */
+	public static String classNamesToString(Collection classes) {
+		if (CollectionUtils.isEmpty(classes)) {
+			return "[]";
+		}
+		StringBuffer sb = new StringBuffer("[");
+		for (Iterator it = classes.iterator(); it.hasNext(); ) {
+			Class clazz = (Class) it.next();
+			sb.append(clazz.getName());
+			if (it.hasNext()) {
+				sb.append(", ");
+			}
+		}
+		sb.append("]");
+		return sb.toString();
 	}
 
 }
