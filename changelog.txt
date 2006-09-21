@@ -9,8 +9,26 @@ Changes in version 2.0 final (27.9.2006)
 Package org.springframework.aop
 * dropped InvocationContextExposingAdvisorAutoProxyCreator base class
 
+Package org.springframework.beans
+* ConstructorArgumentValues supports configuration source objects per argument (e.g. keep track of original XML element)
+* reworked type matching for FactoryBeans, avoiding repeated recreation/destruction through early "getObjectType" checks
+* "lookup-method" overrides no-arg method only, to let overloaded variants be implemented in a traditional fashion
+
+Package org.springframework.jdbc
+* JdbcTemplate uses "PreparedStatement.setObject(index, null)" for null values with unknown SQL type on Informix
+* turned visibility of "org.springframework.jdbc.core.StatementCreatorUtils" to public (again)
+
+Package org.springframework.jms
+* added JMS invoker strategy for service-based remoting via JMS: JmsInvokerServiceExporter, JmsInvokerProxyFactoryBean
+
+Package org.springframework.jmx
+* MBeanExporter's "registerManagedResource" registers a given MBean as-is (only wrapping a plain object as ModelMBean)
+
 Package org.springframework.transaction
 * clarified @Transactional semantics for JDK/CGLIB proxies as well as for AspectJ
+
+Package org.springframework.util
+* all class loading is done via "ClassLoader.loadClass(name)" rather than "Class.forName(name, true, ClassLoader)"
 
 Package org.springframework.web
 * OptionTag and ErrorsTag implement BodyTag interface directly to work around a bug in WebLogic Server 8.1's JSP engine
