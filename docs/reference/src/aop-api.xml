@@ -780,7 +780,7 @@ public interface IntroductionInfo {
     <para>It is possible to mix advisor and advice types in Spring in the same
     AOP proxy. For example, you could use a interception around advice, throws
     advice and before advice in one proxy configuration: Spring will
-    automatically create the necessary create interceptor chain.</para>
+    automatically create the necessary interceptor chain.</para>
   </section>
 
   <section id="aop-pfb">
@@ -790,7 +790,7 @@ public interface IntroductionInfo {
     BeanFactory) for your business objects - and you should be! - you will want
     to use one of Spring's AOP FactoryBeans. (Remember that a factory bean
     introduces a layer of indirection, enabling it to create objects of a
-    different type).</para>
+    different type.)</para>
     
 		<note>
 			<para>The Spring 2.0 AOP support also uses factory beans under the covers.</para>
@@ -834,11 +834,11 @@ public interface IntroductionInfo {
 	  </para>
       <itemizedlist>
         <listitem>
-          <para>Specify the target you want to proxy</para>
+          <para>Specify the target you want to proxy.</para>
         </listitem>
         <listitem>
           <para>Specify whether to use CGLIB (see below and also the section entitled
-			<xref linkend="aop-pfb-proxy-types"/>)</para>
+			<xref linkend="aop-pfb-proxy-types"/>).</para>
         </listitem>
       </itemizedlist>
       <para>
@@ -928,7 +928,8 @@ public interface IntroductionInfo {
 			You can append an interceptor name with an asterisk
 			(<literal>*</literal>). This will result in the application of all
 			advisor beans with names starting with the part before the asterisk
-			to be applied. An example of using this feature can be found below.
+			to be applied. An example of using this feature can be found in
+			<xref linkend="aop-global-advisors"/>.
           </para>
         </listitem>
         <listitem>
@@ -948,7 +949,7 @@ public interface IntroductionInfo {
     <section id="aop-pfb-proxy-types">
 		<title>JDK- and CGLIB-based proxies</title>
         <para>
-			This section serves as the definitive documentation as to how the
+			This section serves as the definitive documentation on how the
 			<classname>ProxyFactoryBean</classname> chooses to create one of
 			either a JDK- and CGLIB-based proxy for a particular target object
 			(that is to be proxied).
@@ -1134,7 +1135,7 @@ public interface IntroductionInfo {
 
       <para>This has the advantage that there's only one object of type
       <literal>Person</literal>: useful if we want to prevent users of the
-      application context obtaining a reference to the un-advised object, or
+      application context from obtaining a reference to the un-advised object, or
       need to avoid any ambiguity with Spring IoC
       <emphasis>autowiring</emphasis>. There's also arguably an advantage in
       that the ProxyFactoryBean definition is self-contained. However, there
@@ -1161,7 +1162,7 @@ public interface IntroductionInfo {
       easy to apply good practices, it avoids forcing a particular
       approach.)</para>
 
-      <para>If you want to you can force the use of CGLIB in any case, even if
+      <para>If you want to, you can force the use of CGLIB in any case, even if
       you do have interfaces.</para>
 
       <para>CGLIB proxying works by generating a subclass of the target class
@@ -1190,7 +1191,7 @@ public interface IntroductionInfo {
       decisive consideration in this case.</para>
     </section>
 
-    <section>
+    <section id="aop-global-advisors">
       <title>Using 'global' advisors</title>
 
       <para>By appending an asterisk to an interceptor name, all advisors with
@@ -1235,7 +1236,7 @@ public interface IntroductionInfo {
 
     <para>This will never be instantiated itself, so may actually be
     incomplete. Then each proxy which needs to be created is just a child bean
-    definition, which to wraps the target of the proxy as an inner bean
+    definition, which wraps the target of the proxy as an inner bean
     definition, since the target will never be used on its own
     anyway.<programlisting>&lt;bean id="myService" parent="txProxyTemplate"&gt;
   &lt;property name="target"&gt;
@@ -1266,8 +1267,8 @@ public interface IntroductionInfo {
     <emphasis>abstract</emphasis> attribute, as described <link
     linkend="beans-child-bean-definitions">previously</link>, so that it may
     not actually ever be instantiated. Application contexts (but not simple
-    bean factories) will by default pre-instantiate all singletons. Therefore
-    it is important (at least for singleton beans) that if you have a (parent)
+    bean factories) will by default pre-instantiate all singletons. It is therefore
+    important (at least for singleton beans) that if you have a (parent)
     bean definition which you intend to use only as a template, and this
     definition specifies a class, you must make sure to set the
     <emphasis>abstract</emphasis> attribute to <emphasis>true</emphasis>,
@@ -1301,7 +1302,7 @@ MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();</programlisti
     additional interfaces.</para>
 
     <para>There are also convenience methods on ProxyFactory (inherited from
-    <classname>AdvisedSupport</classname>) allowing you to add other advice types 
+    <classname>AdvisedSupport</classname>) which allow you to add other advice types 
 		such as before and throws advice. AdvisedSupport is the superclass of both 
     ProxyFactory and ProxyFactoryBean.</para>
 
@@ -1317,7 +1318,7 @@ MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();</programlisti
 
     <para>However you create AOP proxies, you can manipulate them using the
     <literal>org.springframework.aop.framework.Advised</literal> interface.
-    Any AOP proxy can be cast to this interface, whatever other interfaces it
+    Any AOP proxy can be cast to this interface, whichever other interfaces it
     implements. This interface includes the following methods:</para>
 
     <programlisting>Advisor[] getAdvisors();
@@ -1400,7 +1401,7 @@ assertEquals("Added two advisors",
     <literal>Advised</literal> <literal>isFrozen()</literal> method will
     return true, and any attempts to modify advice through addition or removal
     will result in an <literal>AopConfigException</literal>. The ability to
-    freeze the state of an advised object is useful in some cases
+    freeze the state of an advised object is useful in some cases, for
     example, to prevent calling code removing a security interceptor. It may
     also be used in Spring 1.1 to allow aggressive optimization if runtime
     advice modification is known not to be required.</para>
@@ -1418,7 +1419,7 @@ assertEquals("Added two advisors",
     bean definition as the container loads.</para>
 
     <para>In this model, you set up some special bean definitions in your XML
-    bean definition file configuring the auto proxy infrastructure. This
+    bean definition file to configure the auto proxy infrastructure. This
     allows you just to declare the targets eligible for autoproxying: you
     don't need to use <literal>ProxyFactoryBean</literal>.</para>
 
@@ -1459,13 +1460,13 @@ assertEquals("Added two advisors",
 &lt;/bean&gt;</programlisting></para>
 
         <para>As with <literal>ProxyFactoryBean</literal>, there is an
-        <literal>interceptorNames</literal> property rather than a list of interceptor, to allow
+        <literal>interceptorNames</literal> property rather than a list of interceptors, to allow
         correct behavior for prototype advisors. Named "interceptors" can be
         advisors or any advice type.</para>
 
         <para>As with auto proxying in general, the main point of using
         <literal>BeanNameAutoProxyCreator</literal> is to apply the same
-        configuration consistently to multiple objects, and with minimal
+        configuration consistently to multiple objects, with minimal
         volume of configuration. It is a popular choice for applying
         declarative transactions to multiple objects.</para>
 
@@ -1799,7 +1800,7 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
       general, this service can be applied in a non-invasive way.</para>
 
       <para>Spring provides out-of-the-box support for Jakarta Commons Pool
-      1.1, which provides a fairly efficient pooling implementation. You'll
+      1.3, which provides a fairly efficient pooling implementation. You'll
       need the commons-pool Jar on your application's classpath to use this
       feature. It's also possible to subclass
       <literal>org.springframework.aop.target.AbstractPoolingTargetSource</literal>
@@ -1843,7 +1844,7 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
       size of the pool through an introduction. You'll need to define an
       advisor like this:</para>
 
-      <para><programlisting>&lt;bean id="poolConfig" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
+      <para><programlisting>&lt;bean id="poolConfigAdvisor" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
   &lt;property name="targetObject" ref="poolTargetSource"/&gt;
   &lt;property name="targetMethod" value="getPoolingConfigMixin"/&gt;
 &lt;/bean&gt;</programlisting></para>
@@ -1902,7 +1903,7 @@ System.out.println("Max pool size is " + conf.getMaxSize());]]></programlisting>
       <classname>ThreadLocal</classname> provide a JDK-wide facility to
       transparently store resource alongside a thread. Setting up a
       <classname>ThreadLocalTargetSource</classname> is pretty much the same as was explained for the
-      other target sources:</para>
+      other types of target source:</para>
 
       <programlisting><![CDATA[<bean id="threadlocalTargetSource" class="org.springframework.aop.target.ThreadLocalTargetSource">
   <property name="targetBeanName" value="businessObjectTarget"/>
@@ -1930,9 +1931,8 @@ System.out.println("Max pool size is " + conf.getMaxSize());]]></programlisting>
 
     <para>Spring AOP is designed to be extensible. While the interception
     implementation strategy is presently used internally, it is possible to
-    support arbitrary advice types in addition to interception around advice,
-    before, throws advice and after returning advice, which are supported out
-    of the box.</para>
+    support arbitrary advice types in addition to the out-of-the-box interception around advice,
+    before, throws advice and after returning advice.</para>
 
     <para>The <literal>org.springframework.aop.framework.adapter</literal>
     package is an SPI package allowing support for new custom advice types to
