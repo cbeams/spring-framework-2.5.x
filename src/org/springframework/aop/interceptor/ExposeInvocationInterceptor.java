@@ -16,7 +16,6 @@
 
 package org.springframework.aop.interceptor;
 
-import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -27,7 +26,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 
 /**
  * Interceptor that exposes the current MethodInvocation.
- * We occasionally need to do this--for example, when a pointcut
+ * We occasionally need to do this; for example, when a pointcut
  * or target object needs to know the Invocation context.
  *
  * <p>Don't use this interceptor unless this is really necessary.
@@ -42,12 +41,10 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
  */
 public class ExposeInvocationInterceptor implements MethodInterceptor, Serializable {
 	
-	private static final long serialVersionUID = -9148187649646413932L;
-
 	/** Singleton instance of this class */
 	public static final ExposeInvocationInterceptor INSTANCE = new ExposeInvocationInterceptor();
 	
-	/** 
+	/**
 	 * Singleton advisor for this class. Use in preference to INSTANCE when using
 	 * Spring AOP, as it prevents the need to create a new Advisor to wrap the instance.
 	 */
@@ -55,21 +52,19 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 		public int getOrder() {
 			return Integer.MIN_VALUE;
 		}
-		
 		public String toString() {
-			return "ExposeInvocationInterceptor.ADVISOR";
+			return ExposeInvocationInterceptor.class.getName() +".ADVISOR";
 		}
 	};
 
-
 	private static final ThreadLocal invocation = new ThreadLocal();
-	
+
+
 	/**
-	 * Return the AOP Alliance MethodInvocation object associated with the current
-	 * invocation. 
+	 * Return the AOP Alliance MethodInvocation object associated with the current invocation.
 	 * @return the invocation object associated with the current invocation
 	 * @throws IllegalStateException if there is no AOP invocation in progress,
-	 * or if the ExposeInvocationInterceptor was not added to this interceptor chain.
+	 * or if the ExposeInvocationInterceptor was not added to this interceptor chain
 	 */
 	public static MethodInvocation currentInvocation() throws IllegalStateException {
 		MethodInvocation mi = (MethodInvocation) invocation.get();
@@ -79,7 +74,8 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 					"and that the ExposeInvocationInterceptor is in the interceptor chain.");
 		return mi;
 	}
-	
+
+
 	/**
 	 * Ensure that only the canonical instance can be created.
 	 */
@@ -102,7 +98,7 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 	 * on deserialization, protecting Singleton pattern.
 	 * Alternative to overriding the <code>equals</code> method.
 	 */
-	private Object readResolve() throws ObjectStreamException {
+	private Object readResolve() {
 		return INSTANCE;
 	}
 
