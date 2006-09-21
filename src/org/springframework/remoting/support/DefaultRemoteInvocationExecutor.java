@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.remoting.support;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.springframework.util.Assert;
+
 /**
  * Default implementation of the RemoteInvocationExecutor interface.
  * Simply delegates to RemoteInvocation's invoke.
@@ -30,6 +32,9 @@ public class DefaultRemoteInvocationExecutor implements RemoteInvocationExecutor
 
 	public Object invoke(RemoteInvocation invocation, Object targetObject)
 			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException{
+
+		Assert.notNull(invocation, "RemoteInvocation must not be null");
+		Assert.notNull(targetObject, "Target object must not be null");
 		return invocation.invoke(targetObject);
 	}
 
