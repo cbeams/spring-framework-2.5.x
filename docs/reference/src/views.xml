@@ -1012,7 +1012,7 @@ New York</programlisting>
         application. Depending on the configuration of the application now,
         that list of words could be rendered by JSP/JSTL by having them added
         as request attributes, or they could be handled by Velocity by adding
-        the object to the <classname>So far we've done nothing</classname>. In
+        the object to the <classname>VelocityContext</classname>. In
         order to have XSLT render them, they of course have to be converted into
         an XML document somehow.
         There are software packages available that will automatically 'domify'
