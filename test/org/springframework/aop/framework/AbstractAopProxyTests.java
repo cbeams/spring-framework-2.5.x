@@ -1673,7 +1673,7 @@ public abstract class AbstractAopProxyTests extends TestCase {
 			String task = "get invocation on way IN";
 			try {
 				MethodInvocation current = ExposeInvocationInterceptor.currentInvocation();
-				assertEquals(mi, current);
+				assertEquals(mi.getMethod(), current.getMethod());
 				Object retval = mi.proceed();
 				task = "get invocation on way OUT";
 				assertEquals(current, ExposeInvocationInterceptor.currentInvocation());
