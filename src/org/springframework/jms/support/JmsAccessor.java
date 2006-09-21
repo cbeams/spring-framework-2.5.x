@@ -149,7 +149,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	}
 
 	public void afterPropertiesSet() {
-		if (this.connectionFactory == null) {
+		if (getConnectionFactory() == null) {
 			throw new IllegalArgumentException("connectionFactory is required");
 		}
 	}
