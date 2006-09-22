@@ -97,6 +97,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	private boolean allowCircularReferences = true;
 
 	/**
+	 * Whether to resort to injecting a raw bean instance in case of circular reference,
+	 * even if the injected bean eventually got wrapped.
+	 */
+	private boolean allowRawInjectionDespiteWrapping = false;
+
+	/**
 	 * Dependency types to ignore on dependency check and autowire, as Set of
 	 * Class objects: for example, String. Default is none.
 	 */
@@ -142,9 +148,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Return the current instantiation strategy.
+	 * Return the instantiation strategy to use for creating bean instances.
 	 */
-	public InstantiationStrategy getInstantiationStrategy() {
+	protected InstantiationStrategy getInstantiationStrategy() {
 		return instantiationStrategy;
 	}
 
@@ -157,17 +163,30 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * it does work fine for many scenarios, though.
 	 * <p>Default is "true". Turn this off to throw an exception when encountering
 	 * a circular reference, disallowing them completely.
+	 * <p><b>NOTE:</b> It is generally recommended to not rely on circular references
+	 * between your beans. Refactor your application logic to have the two beans
+	 * involved delegate to a third bean that encapsulates their common logic.
 	 */
 	public void setAllowCircularReferences(boolean allowCircularReferences) {
 		this.allowCircularReferences = allowCircularReferences;
 	}
 
 	/**
-	 * Return whether to allow circular references between beans - and automatically
-	 * try to resolve them.
+	 * Set whether to allow the raw injection of a bean instance into some other
+	 * bean's property, despite the injected bean eventually getting wrapped
+	 * (for example, through AOP auto-proxying).
+	 * <p>This will only be used as a last resort in case of a circular reference
+	 * that cannot be resolved otherwise: essentially, preferring a raw instance
+	 * getting injected over a failure of the entire bean wiring process.
+	 * <p>Default is "false", as of Spring 2.0. Turn this on to allow for non-wrapped
+	 * raw beans injected into some of your references, which was Spring 1.2's
+	 * (arguably unclean) default behavior.
+	 * <p><b>NOTE:</b> It is generally recommended to not rely on circular references
+	 * between your beans, in particular with auto-proxying involved.
+	 * @see #setAllowCircularReferences
 	 */
-	public boolean isAllowCircularReferences() {
-		return allowCircularReferences;
+	public void setAllowRawInjectionDespiteWrapping(boolean allowRawInjectionDespiteWrapping) {
+		this.allowRawInjectionDespiteWrapping = allowRawInjectionDespiteWrapping;
 	}
 
 	/**
@@ -176,14 +195,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	public void ignoreDependencyType(Class type) {
 		this.ignoredDependencyTypes.add(type);
-	}
-
-	/**
-	 * Return the set of dependency types that will get ignored for autowiring.
-	 * @return Set of Class objects
-	 */
-	public Set getIgnoredDependencyTypes() {
-		return ignoredDependencyTypes;
 	}
 
 	/**
@@ -200,12 +211,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		this.ignoredDependencyInterfaces.add(ifc);
 	}
 
-	/**
-	 * Return the set of dependency interfaces that will get ignored for autowiring.
-	 */
-	public Set getIgnoredDependencyInterfaces() {
-		return ignoredDependencyInterfaces;
-	}
 
 	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
 		super.copyConfigurationFrom(otherFactory);
@@ -243,7 +248,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return autowireConstructor(beanClass.getName(), bd).getWrappedInstance();
 		}
 		else {
-			Object bean = this.instantiationStrategy.instantiate(bd, null, this);
+			Object bean = getInstantiationStrategy().instantiate(bd, null, this);
 			populateBean(beanClass.getName(), bd, new BeanWrapperImpl(bean));
 			return bean;
 		}
@@ -378,7 +383,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 			// Eagerly cache singletons to be able to resolve circular references
 			// even when triggered by lifecycle interfaces like BeanFactoryAware.
-			if (isAllowCircularReferences() && isSingletonCurrentlyInCreation(beanName)) {
+			if (this.allowCircularReferences && isSingletonCurrentlyInCreation(beanName)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Eagerly caching bean of type [" + bean.getClass().getName() +
 							"] with name '" + beanName + "' to allow for resolving potential circular references");
@@ -414,7 +419,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			Object originalBean = bean;
 			bean = initializeBean(beanName, bean, mergedBeanDefinition);
 
-			if (originalBean != bean && hasDependentBean(beanName)) {
+			if (!this.allowRawInjectionDespiteWrapping && originalBean != bean && hasDependentBean(beanName)) {
 				throw new BeanCurrentlyInCreationException(beanName,
 						"Bean with name '" + beanName + "' has been injected into other beans " +
 						getDependentBeans(beanName) + " in its raw version as part of a circular reference, " +
@@ -885,8 +890,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	protected boolean isExcludedFromDependencyCheck(PropertyDescriptor pd) {
 		return (AutowireUtils.isExcludedFromDependencyCheck(pd) ||
-				getIgnoredDependencyTypes().contains(pd.getPropertyType()) ||
-				AutowireUtils.isSetterDefinedInInterface(pd, getIgnoredDependencyInterfaces()));
+				this.ignoredDependencyTypes.contains(pd.getPropertyType()) ||
+				AutowireUtils.isSetterDefinedInInterface(pd, this.ignoredDependencyInterfaces));
 	}
 
 	/**

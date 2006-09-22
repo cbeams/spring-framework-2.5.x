@@ -55,6 +55,7 @@ import org.springframework.beans.factory.DummyFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MethodReplacer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -66,6 +67,8 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.support.AopUtils;
 
 /**
  * Miscellaneous tests for XML bean definitions.
@@ -425,10 +428,46 @@ public class XmlBeanFactoryTests extends TestCase {
 		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
 		try {
 			xbf.getBean("jenny");
+			fail("Should have thrown BeanCreationException");
 		}
 		catch (BeanCreationException ex) {
 			assertTrue(ex.contains(BeanCurrentlyInCreationException.class));
 		}
+	}
+
+	public void testCircularReferencesWithWrapping() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
+		xbf.addBeanPostProcessor(new WrappingPostProcessor());
+		try {
+			xbf.getBean("jenny");
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.contains(BeanCurrentlyInCreationException.class));
+		}
+	}
+
+	public void testCircularReferencesWithWrappingAndRawInjectionAllowed() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		xbf.setAllowRawInjectionDespiteWrapping(true);
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
+		xbf.addBeanPostProcessor(new WrappingPostProcessor());
+
+		ITestBean jenny = (ITestBean) xbf.getBean("jenny");
+		ITestBean david = (ITestBean) xbf.getBean("david");
+		assertTrue(AopUtils.isAopProxy(jenny));
+		assertTrue(AopUtils.isAopProxy(david));
+		assertSame(david, jenny.getSpouse());
+		assertNotSame(jenny, david.getSpouse());
+		assertEquals("Jenny", david.getSpouse().getName());
+		assertSame(david, david.getSpouse().getSpouse());
+		assertTrue(AopUtils.isAopProxy(jenny.getSpouse()));
+		assertTrue(!AopUtils.isAopProxy(david.getSpouse()));
 	}
 
 	public void testFactoryReferenceCircle() {
@@ -1654,4 +1693,16 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 	}
 
+
+	public static class WrappingPostProcessor implements BeanPostProcessor {
+
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+			return bean;
+		}
+
+		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+			ProxyFactory pf = new ProxyFactory(bean);
+			return pf.getProxy();
+		}
+	}
 }
