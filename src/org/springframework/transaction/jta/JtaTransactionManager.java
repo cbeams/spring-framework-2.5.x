@@ -29,7 +29,6 @@ import javax.transaction.InvalidTransactionException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
-import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
@@ -869,37 +868,6 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		}
 		if (this.transactionManagerName != null) {
 			this.transactionManager = lookupTransactionManager(this.transactionManagerName);
-		}
-	}
-
-
-	/**
-	 * Adapter for a JTA Synchronization, invoking the <code>afterCompletion</code> of
-	 * Spring TransactionSynchronizations after the outer JTA transaction has completed.
-	 * Applied when participating in an existing (non-Spring) JTA transaction.
-	 */
-	private class JtaAfterCompletionSynchronization implements Synchronization {
-
-		private final List synchronizations;
-
-		public JtaAfterCompletionSynchronization(List synchronizations) {
-			this.synchronizations = synchronizations;
-		}
-
-		public void beforeCompletion() {
-		}
-
-		public void afterCompletion(int status) {
-			switch (status) {
-				case Status.STATUS_COMMITTED:
-					invokeAfterCompletion(this.synchronizations, TransactionSynchronization.STATUS_COMMITTED);
-					break;
-				case Status.STATUS_ROLLEDBACK:
-					invokeAfterCompletion(this.synchronizations, TransactionSynchronization.STATUS_ROLLED_BACK);
-					break;
-				default:
-					invokeAfterCompletion(this.synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
-			}
 		}
 	}
 
