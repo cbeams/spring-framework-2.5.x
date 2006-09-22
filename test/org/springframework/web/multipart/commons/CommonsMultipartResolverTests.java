@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.FilterChain;
@@ -146,27 +147,14 @@ public class CommonsMultipartResolverTests extends TestCase {
 		CommonsMultipartFile file1 = (CommonsMultipartFile) request.getFile("field1");
 		CommonsMultipartFile file2 = (CommonsMultipartFile) request.getFile("field2");
 		CommonsMultipartFile file2x = (CommonsMultipartFile) request.getFile("field2x");
-		List fileMapKeys = new ArrayList();
-		List fileMapValues = new ArrayList();
-		for (Iterator fileMapIter = request.getFileMap().keySet().iterator(); fileMapIter.hasNext();) {
-			String key = (String) fileMapIter.next();
-			fileMapKeys.add(key);
-			fileMapValues.add(request.getFileMap().get(key));
-		}
-		assertEquals(3, fileMapKeys.size());
-		assertEquals(3, fileMapValues.size());
-		int field1Index = fileMapKeys.indexOf("field1");
-		int field2Index = fileMapKeys.indexOf("field2");
-		int field2xIndex = fileMapKeys.indexOf("field2x");
-		assertTrue(field1Index != -1);
-		assertTrue(field2Index != -1);
-		assertTrue(field2xIndex != -1);
-		MultipartFile mapFile1 = (MultipartFile) fileMapValues.get(field1Index);
-		MultipartFile mapFile2 = (MultipartFile) fileMapValues.get(field2Index);
-		MultipartFile mapFile2x = (MultipartFile) fileMapValues.get(field2xIndex);
-		assertEquals(mapFile1, file1);
-		assertEquals(mapFile2, file2);
-		assertEquals(mapFile2x, file2x);
+		Map fileMap = request.getFileMap();
+		assertEquals(3, fileMap.size());
+		assertTrue(fileMap.containsKey("field1"));
+		assertTrue(fileMap.containsKey("field2"));
+		assertTrue(fileMap.containsKey("field2x"));
+		assertEquals(file1, fileMap.get("field1"));
+		assertEquals(file2, fileMap.get("field2"));
+		assertEquals(file2x, fileMap.get("field2x"));
 
 		assertEquals("type1", file1.getContentType());
 		assertEquals("type2", file2.getContentType());
