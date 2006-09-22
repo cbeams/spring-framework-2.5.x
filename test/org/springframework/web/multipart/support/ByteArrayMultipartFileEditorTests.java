@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.multipart.support;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-import org.springframework.web.multipart.MultipartFile;
+package org.springframework.web.multipart.support;
 
 import java.io.IOException;
 
+import junit.framework.TestCase;
+import org.easymock.MockControl;
+
+import org.springframework.web.multipart.MultipartFile;
+
 /**
- * Unit tests for the ByteArrayMultipartFileEditor class.
- *
  * @author Rick Evans
  */
 public final class ByteArrayMultipartFileEditorTests extends TestCase {
@@ -82,7 +82,7 @@ public final class ByteArrayMultipartFileEditorTests extends TestCase {
 		mock.replay();
 		try {
 			editor.setValue(file);
-			fail("Must have thrown an IllegalArgumentException : IOException thrown when reading MultipartFile bytes");
+			fail("Must have thrown an IllegalArgumentException: IOException thrown when reading MultipartFile bytes");
 		}
 		catch (IllegalArgumentException expected) {
 		}
