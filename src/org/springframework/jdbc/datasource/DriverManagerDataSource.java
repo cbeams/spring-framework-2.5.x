@@ -145,7 +145,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
 		}
 		this.driverClassName = driverClassName.trim();
 		try {
-			ClassUtils.forName(this.driverClassName);
+			Class.forName(this.driverClassName, true, ClassUtils.getDefaultClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
 			throw new CannotGetJdbcConnectionException(
