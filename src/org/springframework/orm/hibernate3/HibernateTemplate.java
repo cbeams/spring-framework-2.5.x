@@ -1068,22 +1068,23 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	/**
 	 * Check whether write operations are allowed on the given Session.
-	 * <p>Default implementation throws an InvalidDataAccessApiUsageException
-	 * in case of FlushMode.NEVER. Can be overridden in subclasses.
+	 * <p>Default implementation throws an InvalidDataAccessApiUsageException in
+	 * case of <code>FlushMode.NEVER/MANUAL</code>. Can be overridden in subclasses.
 	 * @param session current Hibernate Session
 	 * @throws InvalidDataAccessApiUsageException if write operations are not allowed
 	 * @see #setCheckWriteOperations
-	 * @see #getFlushMode
+	 * @see #getFlushMode()
 	 * @see #FLUSH_EAGER
-	 * @see org.hibernate.Session#getFlushMode
+	 * @see org.hibernate.Session#getFlushMode()
 	 * @see org.hibernate.FlushMode#NEVER
+	 * @see org.hibernate.FlushMode#MANUAL
 	 */
 	protected void checkWriteOperationAllowed(Session session) throws InvalidDataAccessApiUsageException {
 		if (isCheckWriteOperations() && getFlushMode() != FLUSH_EAGER &&
-				FlushMode.NEVER.equals(session.getFlushMode())) {
+				session.getFlushMode().lessThan(FlushMode.COMMIT)) {
 			throw new InvalidDataAccessApiUsageException(
-					"Write operations are not allowed in read-only mode (FlushMode.NEVER) - turn your Session " +
-					"into FlushMode.AUTO or remove 'readOnly' marker from transaction definition");
+					"Write operations are not allowed in read-only mode (FlushMode.NEVER/MANUAL): "+
+					"Turn your Session into FlushMode.COMMIT/AUTO or remove 'readOnly' marker from transaction definition.");
 		}
 	}
 

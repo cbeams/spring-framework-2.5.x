@@ -328,7 +328,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 		if (getFlushMode() == FLUSH_NEVER) {
 			if (existingTransaction) {
 				FlushMode previousFlushMode = session.getFlushMode();
-				if (!previousFlushMode.equals(FlushMode.NEVER)) {
+				if (!previousFlushMode.lessThan(FlushMode.COMMIT)) {
 					session.setFlushMode(FlushMode.NEVER);
 					return previousFlushMode;
 				}

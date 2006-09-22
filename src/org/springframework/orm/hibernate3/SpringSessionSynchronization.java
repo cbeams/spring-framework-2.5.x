@@ -123,8 +123,8 @@ class SpringSessionSynchronization extends TransactionSynchronizationAdapter imp
 				session = this.sessionHolder.getSession();
 			}
 			// Read-write transaction -> flush the Hibernate Session.
-			// Further check: only flush when not FlushMode.NEVER.
-			if (!FlushMode.NEVER.equals(session.getFlushMode())) {
+			// Further check: only flush when not FlushMode.NEVER/MANUAL.
+			if (!session.getFlushMode().lessThan(FlushMode.COMMIT)) {
 				try {
 					SessionFactoryUtils.logger.debug("Flushing Hibernate Session on transaction synchronization");
 					session.flush();

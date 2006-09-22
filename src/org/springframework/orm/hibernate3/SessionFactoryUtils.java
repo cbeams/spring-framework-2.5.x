@@ -314,7 +314,7 @@ public abstract class SessionFactoryUtils {
 					// Switch to FlushMode.AUTO, as we have to assume a thread-bound Session
 					// with FlushMode.NEVER, which needs to allow flushing within the transaction.
 					FlushMode flushMode = session.getFlushMode();
-					if (FlushMode.NEVER.equals(flushMode) &&
+					if (flushMode.lessThan(FlushMode.COMMIT) &&
 							!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
 						session.setFlushMode(FlushMode.AUTO);
 						sessionHolder.setPreviousFlushMode(flushMode);
@@ -418,7 +418,7 @@ public abstract class SessionFactoryUtils {
 							// Switch to FlushMode.AUTO, as we have to assume a thread-bound Session
 							// with FlushMode.NEVER, which needs to allow flushing within the transaction.
 							FlushMode flushMode = session.getFlushMode();
-							if (FlushMode.NEVER.equals(flushMode)) {
+							if (flushMode.lessThan(FlushMode.COMMIT)) {
 								session.setFlushMode(FlushMode.AUTO);
 								sessionHolder.setPreviousFlushMode(flushMode);
 							}
