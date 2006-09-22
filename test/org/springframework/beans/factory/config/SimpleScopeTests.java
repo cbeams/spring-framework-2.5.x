@@ -30,7 +30,7 @@ import org.springframework.context.support.GenericApplicationContext;
  * Simple test to illustrate and verify scope usage.
  *
  * @author Rod Johnson
- * @since 2.0
+ * @author Juergen Hoeller
  */
 public class SimpleScopeTests extends TestCase {
 
@@ -44,6 +44,9 @@ public class SimpleScopeTests extends TestCase {
 			private List objects = new LinkedList(); {
 				objects.add(new TestBean());
 				objects.add(new TestBean());
+			}
+			public String getConversationId() {
+				return null;
 			}
 			public Object get(String name, ObjectFactory objectFactory) {
 				if (index >= objects.size()) {
@@ -60,8 +63,14 @@ public class SimpleScopeTests extends TestCase {
 			public void registerDestructionCallback(String name, Runnable callback) {
 			}
 		};
+
 		applicationContext.getBeanFactory().registerScope("myScope", scope);
-		
+
+		String[] scopeNames = applicationContext.getBeanFactory().getRegisteredScopeNames();
+		assertEquals(1, scopeNames.length);
+		assertEquals("myScope", scopeNames[0]);
+		assertSame(scope, applicationContext.getBeanFactory().getRegisteredScope("myScope"));
+
 		XmlBeanDefinitionReader xbdr = new XmlBeanDefinitionReader(applicationContext);
 		xbdr.loadBeanDefinitions("org/springframework/beans/factory/config/simpleScope.xml");
 		

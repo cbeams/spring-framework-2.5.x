@@ -141,6 +141,25 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void registerScope(String scopeName, Scope scope);
 
 	/**
+	 * Return the names of all currently registered scopes.
+	 * <p>This will only return the names of explicitly registered scopes.
+	 * Built-in scopes such as "singleton" and "prototype" won't be exposed.
+	 * @return the array of scope names, or an empty array if none
+	 * @see #registerScope
+	 */
+	String[] getRegisteredScopeNames();
+
+	/**
+	 * Return the Scope implementation for the given scope name, if any.
+	 * <p>This will only return explicitly registered scopes.
+	 * Built-in scopes such as "singleton" and "prototype" won't be exposed.
+	 * @param scopeName the name of the scope
+	 * @return the registered Scope implementation, or <code>null</code> if none
+	 * @see #registerScope
+	 */
+	Scope getRegisteredScope(String scopeName);
+
+	/**
 	 * Copy all relevant configuration from the given other factory.
 	 * <p>Should include all standard configuration settings as well as
 	 * BeanPostProcessors, Scopes, and factory-specific internal settings.

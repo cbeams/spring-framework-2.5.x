@@ -529,7 +529,19 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	public void registerScope(String scopeName, Scope scope) {
 		Assert.notNull(scopeName, "Scope identifier must not be null");
 		Assert.notNull(scope, "Scope must not be null");
+		if (SCOPE_SINGLETON.equals(scopeName) || SCOPE_PROTOTYPE.equals(scopeName)) {
+			throw new IllegalArgumentException("Cannot replace existing scopes 'singleton' and 'prototype'");
+		}
 		this.scopes.put(scopeName, scope);
+	}
+
+	public String[] getRegisteredScopeNames() {
+		return StringUtils.toStringArray(this.scopes.keySet());
+	}
+
+	public Scope getRegisteredScope(String scopeName) {
+		Assert.notNull(scopeName, "Scope identifier must not be null");
+		return (Scope) this.scopes.get(scopeName);
 	}
 
 	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
