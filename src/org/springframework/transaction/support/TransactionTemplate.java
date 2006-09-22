@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,7 @@ package org.springframework.transaction.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -57,6 +58,7 @@ import org.springframework.transaction.TransactionStatus;
  */
 public class TransactionTemplate extends DefaultTransactionDefinition implements InitializingBean {
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private PlatformTransactionManager transactionManager = null;
@@ -113,32 +115,37 @@ public class TransactionTemplate extends DefaultTransactionDefinition implements
 
 	/**
 	 * Execute the action specified by the given callback object within a transaction.
-	 * <p>Allows for returning a result object created within the transaction, i.e.
+	 * <p>Allows for returning a result object created within the transaction, that is,
 	 * a domain object or a collection of domain objects. A RuntimeException thrown
-	 * by the callback is treated as application exception that enforces a rollback.
-	 * An exception gets propagated to the caller of the template.
-	 * @param action callback object that specifies the transactional action
-	 * @return a result object returned by the callback, or <code>null</code>
+	 * by the callback is treated as a fatal exception that enforces a rollback.
+	 * Such an exception gets propagated to the caller of the template.
+	 * @param action the callback object that specifies the transactional action
+	 * @return a result object returned by the callback, or <code>null</code> if none
 	 * @throws TransactionException in case of initialization, rollback, or system errors
 	 */
 	public Object execute(TransactionCallback action) throws TransactionException {
-		TransactionStatus status = this.transactionManager.getTransaction(this);
-		Object result = null;
-		try {
-			result = action.doInTransaction(status);
+		if (this.transactionManager instanceof CallbackPreferringPlatformTransactionManager) {
+			return ((CallbackPreferringPlatformTransactionManager) this.transactionManager).execute(this, action);
 		}
-		catch (RuntimeException ex) {
-			// Transactional code threw application exception -> rollback
-			rollbackOnException(status, ex);
-			throw ex;
+		else {
+			TransactionStatus status = this.transactionManager.getTransaction(this);
+			Object result = null;
+			try {
+				result = action.doInTransaction(status);
+			}
+			catch (RuntimeException ex) {
+				// Transactional code threw application exception -> rollback
+				rollbackOnException(status, ex);
+				throw ex;
+			}
+			catch (Error err) {
+				// Transactional code threw error -> rollback
+				rollbackOnException(status, err);
+				throw err;
+			}
+			this.transactionManager.commit(status);
+			return result;
 		}
-		catch (Error err) {
-			// Transactional code threw error -> rollback
-			rollbackOnException(status, err);
-			throw err;
-		}
-		this.transactionManager.commit(status);
-		return result;
 	}
 
 	/**
