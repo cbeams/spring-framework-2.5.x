@@ -313,12 +313,12 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				logger.debug("Creating new transaction with name [" + definition.getName() + "]");
 			}
 			doBegin(transaction, definition);
-			boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
+			boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 			return newTransactionStatus(definition, transaction, true, newSynchronization, debugEnabled, null);
 		}
 		else {
 			// Create "empty" transaction: no actual transaction, but potentially synchronization.
-			boolean newSynchronization = (this.transactionSynchronization == SYNCHRONIZATION_ALWAYS);
+			boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
 			return newTransactionStatus(definition, null, false, newSynchronization, debugEnabled, null);
 		}
 	}
@@ -340,7 +340,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				logger.debug("Suspending current transaction");
 			}
 			Object suspendedResources = suspend(transaction);
-			boolean newSynchronization = (this.transactionSynchronization == SYNCHRONIZATION_ALWAYS);
+			boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
 			return newTransactionStatus(
 					definition, null, false, newSynchronization, debugEnabled, suspendedResources);
 		}
@@ -352,7 +352,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			}
 			Object suspendedResources = suspend(transaction);
 			doBegin(transaction, definition);
-			boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
+			boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 			return newTransactionStatus(
 					definition, transaction, true, newSynchronization, debugEnabled, suspendedResources);
 		}
@@ -380,7 +380,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				// Usually only for JTA: Spring synchronization might get activated here
 				// in case of a pre-existing JTA transaction.
 				doBegin(transaction, definition);
-				boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
+				boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 				return newTransactionStatus(definition, transaction, true, newSynchronization, debugEnabled, null);
 			}
 		}
@@ -389,7 +389,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		if (debugEnabled) {
 			logger.debug("Participating in existing transaction");
 		}
-		boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
+		boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 		return newTransactionStatus(definition, transaction, false, newSynchronization, debugEnabled, null);
 	}
 
@@ -397,7 +397,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Create a new TransactionStatus for the given arguments,
 	 * initializing transaction synchronization if appropriate.
 	 */
-	private DefaultTransactionStatus newTransactionStatus(
+	protected DefaultTransactionStatus newTransactionStatus(
 			TransactionDefinition definition, Object transaction, boolean newTransaction,
 			boolean newSynchronization, boolean debug, Object suspendedResources) {
 
@@ -704,10 +704,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			if (status.isDebug()) {
 				logger.debug("Triggering beforeCommit synchronization");
 			}
-			for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
-				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
-				synchronization.beforeCommit(status.isReadOnly());
-			}
+			TransactionSynchronizationUtils.triggerBeforeCommit(status.isReadOnly());
 		}
 	}
 
@@ -720,15 +717,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			if (status.isDebug()) {
 				logger.debug("Triggering beforeCompletion synchronization");
 			}
-			for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
-				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
-				try {
-					synchronization.beforeCompletion();
-				}
-				catch (Throwable tsex) {
-					logger.error("TransactionSynchronization.beforeCompletion threw exception", tsex);
-				}
-			}
+			TransactionSynchronizationUtils.triggerBeforeCompletion();
 		}
 	}
 
@@ -741,15 +730,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			if (status.isDebug()) {
 				logger.debug("Triggering afterCommit synchronization");
 			}
-			for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
-				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
-				try {
-					synchronization.afterCommit();
-				}
-				catch (Throwable tsex) {
-					logger.error("TransactionSynchronization.afterCommit threw exception", tsex);
-				}
-			}
+			TransactionSynchronizationUtils.triggerAfterCommit();
 		}
 	}
 
@@ -792,15 +773,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see TransactionSynchronization#STATUS_UNKNOWN
 	 */
 	protected final void invokeAfterCompletion(List synchronizations, int completionStatus) {
-		for (Iterator it = synchronizations.iterator(); it.hasNext();) {
-			TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
-			try {
-				synchronization.afterCompletion(completionStatus);
-			}
-			catch (Throwable tsex) {
-				logger.error("TransactionSynchronization.afterCompletion threw exception", tsex);
-			}
-		}
+		TransactionSynchronizationUtils.invokeAfterCompletion(synchronizations, completionStatus);
 	}
 
 	/**

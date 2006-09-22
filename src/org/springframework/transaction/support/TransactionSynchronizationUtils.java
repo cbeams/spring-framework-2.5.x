@@ -1,0 +1,129 @@
+/*
+ * Copyright 2002-2006 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.transaction.support;
+
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+/**
+ * Utility methods for trigger specific TransactionSynchronization callbacks
+ * on all currently registered synchronizations.
+ *
+ * @author Juergen Hoeller
+ * @since 2.0
+ * @see TransactionSynchronization
+ * @see TransactionSynchronizationManager#getSynchronizations()
+ */
+public class TransactionSynchronizationUtils {
+
+	private static final Log logger = LogFactory.getLog(TransactionSynchronizationUtils.class);
+
+
+	/**
+	 * Trigger <code>beforeCommit</code> callbacks on all currently registered synchronizations.
+	 * @param readOnly whether the transaction is defined as read-only transaction
+	 * @see TransactionSynchronization#beforeCommit(boolean)
+	 */
+	public static void triggerBeforeCommit(boolean readOnly) {
+		for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
+			TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+			synchronization.beforeCommit(readOnly);
+		}
+	}
+
+	/**
+	 * Trigger <code>beforeCompletion</code> callbacks on all currently registered synchronizations.
+	 * @see TransactionSynchronization#beforeCompletion()
+	 */
+	public static void triggerBeforeCompletion() {
+		for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
+			TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+			try {
+				synchronization.beforeCompletion();
+			}
+			catch (Throwable tsex) {
+				logger.error("TransactionSynchronization.beforeCompletion threw exception", tsex);
+			}
+		}
+	}
+
+	/**
+	 * Trigger <code>afterCommit</code> callbacks on all currently registered synchronizations.
+	 * @see TransactionSynchronizationManager#getSynchronizations()
+	 * @see TransactionSynchronization#afterCommit()
+	 */
+	public static void triggerAfterCommit() {
+		for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
+			TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+			try {
+				synchronization.afterCommit();
+			}
+			catch (AbstractMethodError tserr) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Spring 2.0's TransactionSynchronization.afterCommit method not implemented in " +
+							"synchronization class [" + synchronization.getClass().getName() + "]", tserr);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Trigger <code>afterCompletion</code> callbacks on all currently registered synchronizations.
+	 * @see TransactionSynchronizationManager#getSynchronizations()
+	 * @param completionStatus the completion status according to the
+	 * constants in the TransactionSynchronization interface
+	 * @see TransactionSynchronization#afterCompletion(int)
+	 * @see TransactionSynchronization#STATUS_COMMITTED
+	 * @see TransactionSynchronization#STATUS_ROLLED_BACK
+	 * @see TransactionSynchronization#STATUS_UNKNOWN
+	 */
+	public static void triggerAfterCompletion(int completionStatus) {
+		List synchronizations = TransactionSynchronizationManager.getSynchronizations();
+		invokeAfterCompletion(synchronizations, completionStatus);
+	}
+
+	/**
+	 * Actually invoke the <code>afterCompletion</code> methods of the
+	 * given Spring TransactionSynchronization objects.
+	 * <p>To be called by this abstract manager itself, or by special implementations
+	 * of the <code>registerAfterCompletionWithExistingTransaction</code> callback.
+	 * @param synchronizations List of TransactionSynchronization objects
+	 * @param completionStatus the completion status according to the
+	 * constants in the TransactionSynchronization interface
+	 * @see TransactionSynchronization#afterCompletion(int)
+	 * @see TransactionSynchronization#STATUS_COMMITTED
+	 * @see TransactionSynchronization#STATUS_ROLLED_BACK
+	 * @see TransactionSynchronization#STATUS_UNKNOWN
+	 */
+	public static void invokeAfterCompletion(List synchronizations, int completionStatus) {
+		if (synchronizations != null) {
+			for (Iterator it = synchronizations.iterator(); it.hasNext();) {
+				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+				try {
+					synchronization.afterCompletion(completionStatus);
+				}
+				catch (Throwable tsex) {
+					logger.error("TransactionSynchronization.afterCompletion threw exception", tsex);
+				}
+			}
+		}
+	}
+
+}

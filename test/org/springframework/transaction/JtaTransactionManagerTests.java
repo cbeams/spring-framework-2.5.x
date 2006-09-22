@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -62,16 +62,18 @@ public class JtaTransactionManagerTests extends TestCase {
 		synchControl.setVoidCallable(1);
 		synch.beforeCompletion();
 		synchControl.setVoidCallable(1);
+		synch.afterCommit();
+		synchControl.setVoidCallable(1);
 		synch.afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setName("txName");
 
 		assertEquals(JtaTransactionManager.SYNCHRONIZATION_ALWAYS, ptm.getTransactionSynchronization());
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertNull(TransactionSynchronizationManager.getCurrentTransactionName());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		tt.execute(new TransactionCallbackWithoutResult() {
@@ -83,7 +85,7 @@ public class JtaTransactionManagerTests extends TestCase {
 				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertNull(TransactionSynchronizationManager.getCurrentTransactionName());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
@@ -110,14 +112,16 @@ public class JtaTransactionManagerTests extends TestCase {
 		synchControl.setVoidCallable(1);
 		synch.beforeCompletion();
 		synchControl.setVoidCallable(1);
+		synch.afterCommit();
+		synchControl.setVoidCallable(1);
 		synch.afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		ptm.setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_ON_ACTUAL_TRANSACTION);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
@@ -125,7 +129,7 @@ public class JtaTransactionManagerTests extends TestCase {
 				TransactionSynchronizationManager.registerSynchronization(synch);
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 		synchControl.verify();
@@ -144,16 +148,18 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.setVoidCallable(1);
 		utControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		ptm.setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_NEVER);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		ptm.afterPropertiesSet();
+
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+				assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 	}
@@ -181,12 +187,12 @@ public class JtaTransactionManagerTests extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setTimeout(10);
 		tt.setName("txName");
 
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertNull(TransactionSynchronizationManager.getCurrentTransactionName());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		tt.execute(new TransactionCallbackWithoutResult() {
@@ -198,7 +204,7 @@ public class JtaTransactionManagerTests extends TestCase {
 				status.setRollbackOnly();
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertNull(TransactionSynchronizationManager.getCurrentTransactionName());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
@@ -229,11 +235,11 @@ public class JtaTransactionManagerTests extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		ptm.setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_ON_ACTUAL_TRANSACTION);
 		tt.setTimeout(10);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -241,7 +247,7 @@ public class JtaTransactionManagerTests extends TestCase {
 				status.setRollbackOnly();
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 		synchControl.verify();
@@ -262,18 +268,20 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.setVoidCallable(1);
 		utControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		ptm.setTransactionSynchronizationName("SYNCHRONIZATION_NEVER");
 		tt.setTimeout(10);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		ptm.afterPropertiesSet();
+
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+				assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 				status.setRollbackOnly();
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 	}
@@ -295,9 +303,9 @@ public class JtaTransactionManagerTests extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -305,7 +313,7 @@ public class JtaTransactionManagerTests extends TestCase {
 				status.setRollbackOnly();
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 		synchControl.verify();
@@ -328,9 +336,9 @@ public class JtaTransactionManagerTests extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -344,7 +352,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		catch (IllegalStateException ex) {
 			// expected
 		}
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 		synchControl.verify();
@@ -367,10 +375,10 @@ public class JtaTransactionManagerTests extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		ptm.setGlobalRollbackOnParticipationFailure(false);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -378,7 +386,7 @@ public class JtaTransactionManagerTests extends TestCase {
 				status.setRollbackOnly();
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 		synchControl.verify();
@@ -399,10 +407,10 @@ public class JtaTransactionManagerTests extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		ptm.setGlobalRollbackOnParticipationFailure(false);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -416,7 +424,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		catch (IllegalStateException ex) {
 			// expected
 		}
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 		synchControl.verify();
@@ -447,9 +455,9 @@ public class JtaTransactionManagerTests extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut, tm);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut, tm);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -457,7 +465,7 @@ public class JtaTransactionManagerTests extends TestCase {
 				status.setRollbackOnly();
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertNotNull(tx.getSynchronization());
 		tx.getSynchronization().beforeCompletion();
 		tx.getSynchronization().afterCompletion(Status.STATUS_ROLLEDBACK);
@@ -484,10 +492,10 @@ public class JtaTransactionManagerTests extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		ptm.setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_ON_ACTUAL_TRANSACTION);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -495,7 +503,7 @@ public class JtaTransactionManagerTests extends TestCase {
 				status.setRollbackOnly();
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 		synchControl.verify();
@@ -510,17 +518,19 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.setVoidCallable(1);
 		utControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		ptm.setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_NEVER);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		ptm.afterPropertiesSet();
+
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+				assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 				status.setRollbackOnly();
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 	}
@@ -542,10 +552,10 @@ public class JtaTransactionManagerTests extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -553,7 +563,7 @@ public class JtaTransactionManagerTests extends TestCase {
 				status.setRollbackOnly();
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 		synchControl.verify();
@@ -574,10 +584,10 @@ public class JtaTransactionManagerTests extends TestCase {
 		synchControl.setVoidCallable(1);
 		synchControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -585,7 +595,7 @@ public class JtaTransactionManagerTests extends TestCase {
 				status.setRollbackOnly();
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 		synchControl.verify();
@@ -598,18 +608,20 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		utControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		ptm.setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_ON_ACTUAL_TRANSACTION);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		ptm.afterPropertiesSet();
+
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+				assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 				status.setRollbackOnly();
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 	}
@@ -621,18 +633,20 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		utControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		ptm.setTransactionSynchronization(JtaTransactionManager.SYNCHRONIZATION_NEVER);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		ptm.afterPropertiesSet();
+
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+				assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 				status.setRollbackOnly();
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 	}
@@ -653,17 +667,17 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.replay();
 		tmControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut, tm);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut, tm);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 				status.setRollbackOnly();
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 		tmControl.verify();
@@ -695,12 +709,12 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.replay();
 		tmControl.replay();
 
-		final JtaTransactionManager ptm = new JtaTransactionManager(ut, tm);
+		final JtaTransactionManager ptm = newJtaTransactionManager(ut, tm);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		tt.setName("txName");
 
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -724,7 +738,7 @@ public class JtaTransactionManagerTests extends TestCase {
 				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 		tmControl.verify();
@@ -743,11 +757,11 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.setVoidCallable(1);
 		utControl.replay();
 
-		final JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		final JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
 
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -765,7 +779,7 @@ public class JtaTransactionManagerTests extends TestCase {
 				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 	}
@@ -790,16 +804,16 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.replay();
 		tmControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut, tm);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut, tm);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 		tmControl.verify();
@@ -822,16 +836,16 @@ public class JtaTransactionManagerTests extends TestCase {
 		tmControl.setVoidCallable(1);
 		tmControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(tm);
+		JtaTransactionManager ptm = newJtaTransactionManager(tm);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 			}
 		});
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		tmControl.verify();
 	}
@@ -843,10 +857,10 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		utControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -857,7 +871,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		catch (TransactionSuspensionNotSupportedException ex) {
 			// expected
 		}
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 	}
@@ -870,7 +884,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.replay();
 
 		try {
-			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			JtaTransactionManager ptm = newJtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
 			tt.execute(new TransactionCallbackWithoutResult() {
@@ -895,7 +909,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.replay();
 
 		try {
-			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			JtaTransactionManager ptm = newJtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -922,7 +936,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.setVoidCallable(1);
 		utControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
 		TransactionTemplate tt = new TransactionTemplate(ptm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
 		tt.execute(new TransactionCallbackWithoutResult() {
@@ -944,7 +958,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.replay();
 
 		try {
-			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			JtaTransactionManager ptm = newJtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
 			tt.execute(new TransactionCallbackWithoutResult() {
@@ -971,7 +985,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.replay();
 
 		try {
-			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			JtaTransactionManager ptm = newJtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
 			tt.execute(new TransactionCallbackWithoutResult() {
@@ -998,7 +1012,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.replay();
 
 		try {
-			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			JtaTransactionManager ptm = newJtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -1028,7 +1042,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.replay();
 
 		try {
-			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			JtaTransactionManager ptm = newJtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -1077,7 +1091,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.setVoidCallable(1);
 		utControl.replay();
 
-		JtaTransactionManager tm = new JtaTransactionManager(ut);
+		JtaTransactionManager tm = newJtaTransactionManager(ut);
 		if (failEarly) {
 			tm.setFailEarlyOnGlobalRollbackOnly(true);
 		}
@@ -1134,7 +1148,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.replay();
 
 		try {
-			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			JtaTransactionManager ptm = newJtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -1170,7 +1184,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.replay();
 
 		try {
-			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			JtaTransactionManager ptm = newJtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -1206,7 +1220,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.replay();
 
 		try {
-			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			JtaTransactionManager ptm = newJtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -1241,7 +1255,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.replay();
 
 		try {
-			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			JtaTransactionManager ptm = newJtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -1272,7 +1286,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.replay();
 
 		try {
-			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			JtaTransactionManager ptm = newJtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -1298,7 +1312,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.replay();
 
 		try {
-			JtaTransactionManager ptm = new JtaTransactionManager(ut);
+			JtaTransactionManager ptm = newJtaTransactionManager(ut);
 			TransactionTemplate tt = new TransactionTemplate(ptm);
 			tt.execute(new TransactionCallbackWithoutResult() {
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -1332,13 +1346,13 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.setVoidCallable(1);
 		utControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		TransactionStatus status = ptm.getTransaction(new DefaultTransactionDefinition());
 		assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 		// first commit
 		ptm.commit(status);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		try {
 			// second commit attempt
 			ptm.commit(status);
@@ -1364,13 +1378,13 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.setVoidCallable(1);
 		utControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		TransactionStatus status = ptm.getTransaction(new DefaultTransactionDefinition());
 		assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 		// first rollback
 		ptm.rollback(status);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		try {
 			// second rollback attempt
 			ptm.rollback(status);
@@ -1396,13 +1410,13 @@ public class JtaTransactionManagerTests extends TestCase {
 		utControl.setVoidCallable(1);
 		utControl.replay();
 
-		JtaTransactionManager ptm = new JtaTransactionManager(ut);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		JtaTransactionManager ptm = newJtaTransactionManager(ut);
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		TransactionStatus status = ptm.getTransaction(new DefaultTransactionDefinition());
 		assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 		// first: rollback
 		ptm.rollback(status);
-		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		try {
 			// second: commit attempt
 			ptm.commit(status);
@@ -1414,6 +1428,20 @@ public class JtaTransactionManagerTests extends TestCase {
 
 		utControl.verify();
 	}
+
+
+	protected JtaTransactionManager newJtaTransactionManager(UserTransaction ut) {
+		return new JtaTransactionManager(ut);
+	}
+
+	protected JtaTransactionManager newJtaTransactionManager(TransactionManager tm) {
+		return new JtaTransactionManager(tm);
+	}
+
+	protected JtaTransactionManager newJtaTransactionManager(UserTransaction ut, TransactionManager tm) {
+		return new JtaTransactionManager(ut, tm);
+	}
+
 
 	/**
 	 * Prevent any side-effects due to this test modifying ThreadLocals that might
