@@ -13,6 +13,7 @@ Package org.springframework.beans
 * ConstructorArgumentValues supports configuration source objects per argument (e.g. keep track of original XML element)
 * reworked type matching for FactoryBeans, avoiding repeated recreation/destruction through early "getObjectType" checks
 * "lookup-method" overrides no-arg method only, to let overloaded variants be implemented in a traditional fashion
+* added "setAllowRawInjectionDespiteWrapping" config method to DefaultListableBeanFactory, to enable Spring 1.2 behavior
 
 Package org.springframework.jdbc
 * JdbcTemplate uses "PreparedStatement.setObject(index, null)" for null values with unknown SQL type on Informix
@@ -24,13 +25,25 @@ Package org.springframework.jms
 Package org.springframework.jmx
 * MBeanExporter's "registerManagedResource" registers a given MBean as-is (only wrapping a plain object as ModelMBean)
 
+Package org.springframework.mock
+* added MockMultipartFile, MockMultipartHttpServletRequest and MockMultipartActionRequest for testing multipart access
+
+Package org.springframework.orm
+* refined Hibernate3 support to detect Hibernate 3.2's FlushMode.MANUAL as well, while remaining compatible with 3.0/3.1
+
 Package org.springframework.transaction
 * clarified @Transactional semantics for JDK/CGLIB proxies as well as for AspectJ
+* AbstractPlatformTransactionManager properly propagates an "afterCommit" synchronization exception to the caller
+* JtaTransactionManager executes "afterCommit" callbacks even when synchronizing with an existing JTA transaction
+* factored out TransactionSynchronizationUtils and JtaAfterCompletionSynchronization helper classes
+* introduced CallbackPreferringPlatformTransactionManager interface, to be implemented by callback-loving PTM impls
+* TransactionTemplate/TransactionInterceptor automatically detect and use CallbackPreferringPlatformTransactionManager
 
 Package org.springframework.util
 * all class loading is done via "ClassLoader.loadClass(name)" rather than "Class.forName(name, true, ClassLoader)"
 
 Package org.springframework.web
+* clarified MultipartFile constract details
 * OptionTag and ErrorsTag implement BodyTag interface directly to work around a bug in WebLogic Server 8.1's JSP engine
 
 
