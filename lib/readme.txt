@@ -311,8 +311,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - JUnit 3.8.1 (http://www.junit.org)
 - required for building the test suite
 
-* log4j/log4j-1.2.13.jar
-- Log4J 1.2.13 (http://logging.apache.org/log4j)
+* log4j/log4j-1.2.14.jar
+- Log4J 1.2.14 (http://logging.apache.org/log4j)
 - required for building the framework
 - required at runtime when using Spring's Log4jConfigurer
 
