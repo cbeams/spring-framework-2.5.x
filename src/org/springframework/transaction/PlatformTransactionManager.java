@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,7 @@ package org.springframework.transaction;
  * This is the central interface in Spring's transaction infrastructure.
  * Applications can use this directly, but it is not primarily meant as API:
  * Typically, applications will work with either TransactionTemplate or
- * declarative transaction through AOP.
+ * declarative transaction demarcation through AOP.
  *
  * <p>For implementors, it is recommended to derive from the provided
  * AbstractPlatformTransactionManager class, which pre-implements the defined
@@ -89,7 +89,7 @@ public interface PlatformTransactionManager {
 	void commit(TransactionStatus status) throws TransactionException;
 
 	/**
-	 * Roll back the given transaction.
+	 * Perform a rollback of the given transaction.
 	 * <p>If the transaction wasn't a new one, just set it rollback-only for proper
 	 * participation in the surrounding transaction. If a previous transaction
 	 * has been suspended to be able to create a new one, resume the previous
