@@ -56,12 +56,17 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.ClassUtils;
 
 /**
  * @author Juergen Hoeller
  * @since 05.03.2005
  */
 public class HibernateTransactionManagerTests extends TestCase {
+
+	private final static boolean hibernateSetTimeoutAvailable =
+			ClassUtils.hasMethod(Transaction.class, "setTimeout", new Class[] {int.class});
+
 
 	public void testTransactionCommit() throws Exception {
 		MockControl dsControl = MockControl.createControl(DataSource.class);
@@ -89,12 +94,21 @@ public class HibernateTransactionManagerTests extends TestCase {
 		conControl.setReturnValue(false, 1);
 		sf.openSession();
 		sfControl.setReturnValue(session, 1);
-		session.getTransaction();
-		sessionControl.setReturnValue(tx, 1);
-		tx.setTimeout(10);
-		txControl.setVoidCallable(1);
-		tx.begin();
-		txControl.setVoidCallable(1);
+		if (hibernateSetTimeoutAvailable) {
+			// only on Hibernate 3.1+
+			session.getTransaction();
+			sessionControl.setReturnValue(tx, 1);
+			tx.setTimeout(10);
+			txControl.setVoidCallable(1);
+			tx.begin();
+			txControl.setVoidCallable(1);
+		}
+		else {
+			session.beginTransaction();
+			sessionControl.setReturnValue(tx, 1);
+			query.setTimeout(10);
+			queryControl.setReturnValue(query, 1);
+		}
 		session.connection();
 		sessionControl.setReturnValue(con, 3);
 		session.isOpen();
@@ -1037,8 +1051,11 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(true, 1);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
-		session.disconnect();
-		sessionControl.setReturnValue(null, 1);
+		if (hibernateSetTimeoutAvailable) {
+			// only on Hibernate 3.1+
+			session.disconnect();
+			sessionControl.setReturnValue(null, 1);
+		}
 
 		dsControl.replay();
 		conControl.replay();
@@ -1128,8 +1145,11 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(con, 6);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 2);
-		session.disconnect();
-		sessionControl.setReturnValue(null, 2);
+		if (hibernateSetTimeoutAvailable) {
+			// only on Hibernate 3.1+
+			session.disconnect();
+			sessionControl.setReturnValue(null, 2);
+		}
 
 		dsControl.replay();
 		conControl.replay();
