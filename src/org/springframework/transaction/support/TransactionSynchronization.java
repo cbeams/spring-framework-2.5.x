@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,15 +47,15 @@ public interface TransactionSynchronization {
 	
 
 	/**
-	 * Suspend this synchronization. Supposed to unbind resources
-	 * from TransactionSynchronizationManager if managing any.
+	 * Suspend this synchronization.
+	 * Supposed to unbind resources from TransactionSynchronizationManager if managing any.
 	 * @see TransactionSynchronizationManager#unbindResource
 	 */
 	void suspend();
 
 	/**
-	 * Resume this synchronization. Supposed to rebind resources
-	 * to TransactionSynchronizationManager if managing any.
+	 * Resume this synchronization.
+	 * Supposed to rebind resources to TransactionSynchronizationManager if managing any.
 	 * @see TransactionSynchronizationManager#bindResource
 	 */
 	void resume();
@@ -63,14 +63,13 @@ public interface TransactionSynchronization {
 	/**
 	 * Invoked before transaction commit (before "beforeCompletion").
 	 * Can e.g. flush transactional O/R Mapping sessions to the database.
-	 * <p>This callback does <i>not</i> mean that the transaction will actually
-	 * be committed. A rollback decision can still occur after this method has
-	 * been called. This callback is rather meant to perform work that's only
-	 * relevant if a commit still has a chance to happen, such as flushing SQL
-	 * statements to the database.
-	 * <p>Note that exceptions will get propagated to the commit caller
-	 * and cause a rollback of the transaction.
-	 * @param readOnly if the transaction is defined as read-only transaction 
+	 * <p>This callback does <i>not</i> mean that the transaction will actually be committed.
+	 * A rollback decision can still occur after this method has been called. This callback
+	 * is rather meant to perform work that's only relevant if a commit still has a chance
+	 * to happen, such as flushing SQL statements to the database.
+	 * <p>Note that exceptions will get propagated to the commit caller and cause a
+	 * rollback of the transaction.
+	 * @param readOnly whether the transaction is defined as read-only transaction
 	 * @throws RuntimeException in case of errors; will be <b>propagated to the caller</b>
 	 * (note: do not throw TransactionException subclasses here!)
 	 * @see #beforeCompletion
@@ -79,10 +78,10 @@ public interface TransactionSynchronization {
 
 	/**
 	 * Invoked before transaction commit/rollback.
-	 * Can e.g. perform resource cleanup, <i>before</i> transaction completion.
-	 * <p>This method will be invoked after <code>beforeCommit</code>, even
-	 * if <code>beforeCommit</code> threw an exception). This callback allows
-	 * for closing resources before transaction completion, for any outcome.
+	 * Can perform resource cleanup <i>before</i> transaction completion.
+	 * <p>This method will be invoked after <code>beforeCommit</code>, even when
+	 * <code>beforeCommit</code> threw an exception. This callback allows for
+	 * closing resources before transaction completion, for any outcome.
 	 * @throws RuntimeException in case of errors; will be <b>logged but not propagated</b>
 	 * (note: do not throw TransactionException subclasses here!)
 	 * @see #beforeCommit
@@ -91,9 +90,10 @@ public interface TransactionSynchronization {
 	void beforeCompletion();
 
 	/**
-	 * Invoked after transaction commit.
-	 * Can e.g. commit further operations that are supposed to follow
-	 * on a successful commit of the main transaction.
+	 * Invoked after transaction commit. Can perform further operations right
+	 * <i>after</i> the main transaction has <i>successfully</i> committed.
+	 * <p>Can e.g. commit further operations that are supposed to follow on a successful
+	 * commit of the main transaction, like confirmation messages or emails.
 	 * @throws RuntimeException in case of errors; will be <b>propagated to the caller</b>
 	 * (note: do not throw TransactionException subclasses here!)
 	 */
@@ -101,8 +101,8 @@ public interface TransactionSynchronization {
 
 	/**
 	 * Invoked after transaction commit/rollback.
-	 * Can e.g. perform resource cleanup, <i>after</i> transaction completion.
-	 * @param status completion status according to the STATUS_* constants
+	 * Can perform resource cleanup <i>after</i> transaction completion.
+	 * @param status completion status according to the <code>STATUS_*</code> constants
 	 * @throws RuntimeException in case of errors; will be <b>logged but not propagated</b>
 	 * (note: do not throw TransactionException subclasses here!)
 	 * @see #STATUS_COMMITTED
