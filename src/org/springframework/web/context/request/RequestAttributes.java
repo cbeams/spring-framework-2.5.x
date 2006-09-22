@@ -97,6 +97,11 @@ public interface RequestAttributes {
 	void registerDestructionCallback(String name, Runnable callback, int scope);
 
 	/**
+	 * Return an id for the current underlying session.
+	 */
+	String getSessionId();
+
+	/**
 	 * Expose the best available mutex for the underlying session:
 	 * that is, an object to synchronize on for the underlying session.
 	 */

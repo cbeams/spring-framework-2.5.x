@@ -72,6 +72,10 @@ public class SessionScope extends AbstractRequestAttributesScope {
 		return this.scope;
 	}
 
+	public String getConversationId() {
+		return RequestContextHolder.currentRequestAttributes().getSessionId();
+	}
+
 	public Object get(String name, ObjectFactory objectFactory) {
 		Object mutex = RequestContextHolder.currentRequestAttributes().getSessionMutex();
 		synchronized (mutex) {

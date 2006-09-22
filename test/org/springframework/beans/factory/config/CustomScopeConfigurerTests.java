@@ -31,7 +31,7 @@ import org.springframework.test.AssertThrows;
 /**
  * @author Rick Evans
  */
-public final class CustomScopeConfigurerTests extends TestCase {
+public class CustomScopeConfigurerTests extends TestCase {
 
 	private static final String FOO_SCOPE = "fooScope";
 
@@ -47,21 +47,16 @@ public final class CustomScopeConfigurerTests extends TestCase {
 	}
 
 	public void testSunnyDayWithBonaFideScopeInstances() throws Exception {
-
 		MockControl mockScope = MockControl.createControl(Scope.class);
 		final Scope scope = (Scope) mockScope.getMock();
 		mockScope.replay();
-
 		new ConfigurableListableBeanFactoryMockTemplate() {
-
 			public void setupExpectations(MockControl mockControl, ConfigurableListableBeanFactory factory) throws Exception {
 				factory.registerScope(FOO_SCOPE, scope);
 			}
-
 			protected void doTest(ConfigurableListableBeanFactory factory) throws Exception {
 				Map scopes = new HashMap();
 				scopes.put(FOO_SCOPE, scope);
-
 				CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 				figurer.setScopes(scopes);
 				figurer.postProcessBeanFactory(factory);
@@ -72,16 +67,13 @@ public final class CustomScopeConfigurerTests extends TestCase {
 
 	public void testSunnyDayWithScopeClass() throws Exception {
 		new ConfigurableListableBeanFactoryMockTemplate() {
-
 			public void setupExpectations(MockControl mockControl, ConfigurableListableBeanFactory factory) throws Exception {
 				factory.registerScope(FOO_SCOPE, null);
 				mockControl.setMatcher(new RegisterScopeArgumentsMatcher());
 			}
-
 			protected void doTest(ConfigurableListableBeanFactory factory) throws Exception {
 				Map scopes = new HashMap();
 				scopes.put(FOO_SCOPE, NoOpScope.class);
-
 				CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 				figurer.setScopes(scopes);
 				figurer.postProcessBeanFactory(factory);
@@ -91,16 +83,13 @@ public final class CustomScopeConfigurerTests extends TestCase {
 
 	public void testSunnyDayWithScopeClassName() throws Exception {
 		new ConfigurableListableBeanFactoryMockTemplate() {
-
 			public void setupExpectations(MockControl mockControl, ConfigurableListableBeanFactory factory) throws Exception {
 				factory.registerScope(FOO_SCOPE, null);
 				mockControl.setMatcher(new RegisterScopeArgumentsMatcher());
 			}
-
 			protected void doTest(ConfigurableListableBeanFactory factory) throws Exception {
 				Map scopes = new HashMap();
 				scopes.put(FOO_SCOPE, NoOpScope.class.getName());
-
 				CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 				figurer.setScopes(scopes);
 				figurer.postProcessBeanFactory(factory);
@@ -271,6 +260,10 @@ public final class CustomScopeConfigurerTests extends TestCase {
 
 	private static final class NoOpScope implements Scope {
 
+		public String getConversationId() {
+			return null;
+		}
+
 		public Object get(String name, ObjectFactory objectFactory) {
 			throw new UnsupportedOperationException();
 		}
@@ -291,6 +284,10 @@ public final class CustomScopeConfigurerTests extends TestCase {
 			throw new UnsupportedOperationException();
 		}
 
+		public String getConversationId() {
+			throw new UnsupportedOperationException();
+		}
+
 		public Object get(String name, ObjectFactory objectFactory) {
 			throw new UnsupportedOperationException();
 		}
@@ -300,6 +297,7 @@ public final class CustomScopeConfigurerTests extends TestCase {
 		}
 
 		public void registerDestructionCallback(String name, Runnable callback) {
+			throw new UnsupportedOperationException();
 		}
 	}
 

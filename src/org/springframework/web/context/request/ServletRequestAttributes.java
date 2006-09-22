@@ -133,6 +133,10 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
+	public String getSessionId() {
+		return this.request.getSession().getId();
+	}
+
 	public Object getSessionMutex() {
 		return WebUtils.getSessionMutex(this.request.getSession());
 	}

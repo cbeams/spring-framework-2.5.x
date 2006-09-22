@@ -43,6 +43,13 @@ import org.springframework.beans.factory.ObjectFactory;
 public interface Scope {
 
 	/**
+	 * Return the conversation id for the current underlying scope, if any.
+	 * @return the conversation id, or <code>null</code> if there is no
+	 * conversation id concept for this scope
+	 */
+	String getConversationId();
+
+	/**
 	 * Return the object from the underlying scope, creating it if not found.
 	 * @param name the name to bind with
 	 * @param objectFactory the {@link ObjectFactory} used to create the scoped object if not present

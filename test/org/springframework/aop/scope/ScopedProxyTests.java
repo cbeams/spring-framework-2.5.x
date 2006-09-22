@@ -66,6 +66,9 @@ public class ScopedProxyTests extends TestCase {
 	public void testScopedList() {
 		loadBeans("scopedList.xml");
 		this.beanFactory.registerScope("request", new Scope() {
+			public String getConversationId() {
+				throw new UnsupportedOperationException();
+			}
 			public Object get(String name, ObjectFactory objectFactory) {
 				throw new UnsupportedOperationException();
 			}

@@ -42,4 +42,9 @@ public class RequestScope extends AbstractRequestAttributesScope {
 		return RequestAttributes.SCOPE_REQUEST;
 	}
 
+	public String getConversationId() {
+		// There is no conversation id concept for a request.
+		return null;
+	}
+
 }

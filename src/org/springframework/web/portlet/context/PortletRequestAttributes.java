@@ -153,6 +153,10 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
+	public String getSessionId() {
+		return this.request.getPortletSession().getId();
+	}
+
 	public Object getSessionMutex() {
 		return PortletUtils.getSessionMutex(this.request.getPortletSession());
 	}
