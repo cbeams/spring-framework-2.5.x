@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public abstract aspect AbstractTransactionAspect extends TransactionAspectSuppor
 	@SuppressAjWarnings("adviceDidNotMatch")
 	after(Object txObject) throwing(Throwable t) : transactionalMethodExecution(txObject) {
     try {
-      doCloseTransactionAfterThrowing(TransactionAspectSupport.currentTransactionInfo(), t);
+      completeTransactionAfterThrowing(TransactionAspectSupport.currentTransactionInfo(), t);
     }
     catch (Throwable th) {
       logger.error("Failed to close transaction after throwing in a Transactional method", th);
@@ -79,12 +79,12 @@ public abstract aspect AbstractTransactionAspect extends TransactionAspectSuppor
 	
 	@SuppressAjWarnings("adviceDidNotMatch")
 	after(Object txObject) returning() : transactionalMethodExecution(txObject) {
-		doCommitTransactionAfterReturning(TransactionAspectSupport.currentTransactionInfo());
+		commitTransactionAfterReturning(TransactionAspectSupport.currentTransactionInfo());
 	}
 	
 	@SuppressAjWarnings("adviceDidNotMatch")
 	after(Object txObject) : transactionalMethodExecution(txObject) {
-		doFinally(TransactionAspectSupport.currentTransactionInfo());
+		cleanupTransactionInfo(TransactionAspectSupport.currentTransactionInfo());
 	}
 
 
