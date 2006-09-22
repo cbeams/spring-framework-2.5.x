@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,30 +38,31 @@ public interface MultipartFile {
 
 	/**
 	 * Return the name of the parameter in the multipart form.
-	 * @return the name of the parameter
+	 * @return the name of the parameter (never <code>null</code> or empty)
 	 */
 	String getName();
 
 	/**
-	 * Return whether the uploaded file is empty in the sense that
-	 * no file has been chosen in the multipart form.
-	 * @return whether the uploaded file is empty
-	 */
-	boolean isEmpty();
-
-	/**
 	 * Return the original filename in the client's filesystem.
-	 * This may contain path information depending on the browser used,
+	 * <p>This may contain path information depending on the browser used,
 	 * but it typically will not with any other than Opera.
-	 * @return the original filename, or <code>null</code> if empty
+	 * @return the original filename, or the empty String if no file
+	 * has been chosen in the multipart form
 	 */
 	String getOriginalFilename();
 
 	/**
 	 * Return the content type of the file.
-	 * @return the content type, or <code>null</code> if empty or not defined
+	 * @return the content type, or <code>null</code> if not defined
+	 * (or no file has been chosen in the multipart form)
 	 */
 	String getContentType();
+
+	/**
+	 * Return whether the uploaded file is empty, that is, either no file has
+	 * been chosen in the multipart form or the chosen file has no content.
+	 */
+	boolean isEmpty();
 
 	/**
 	 * Return the size of the file in bytes.
@@ -71,20 +72,16 @@ public interface MultipartFile {
 
 	/**
 	 * Return the contents of the file as an array of bytes.
-	 * @return the contents of the file as bytes,
-	 * or an empty byte array if empty
-	 * @throws IOException in case of access errors
-	 * (if the temporary store fails)
+	 * @return the contents of the file as bytes, or an empty byte array if empty
+	 * @throws IOException in case of access errors (if the temporary store fails)
 	 */
 	byte[] getBytes() throws IOException;
 
 	/**
 	 * Return an InputStream to read the contents of the file from.
 	 * The user is responsible for closing the stream.
-	 * @return the contents of the file as stream,
-	 * or an empty stream if empty
-	 * @throws IOException in case of access errors
-	 * (if the temporary store fails)
+	 * @return the contents of the file as stream, or an empty stream if empty
+	 * @throws IOException in case of access errors (if the temporary store fails)
 	 */
 	InputStream getInputStream() throws IOException;
 
@@ -98,8 +95,8 @@ public interface MultipartFile {
 	 * work with any storage mechanism.
 	 * @param dest the destination file
 	 * @throws IOException in case of reading or writing errors
-	 * @throws java.lang.IllegalStateException if the file has already been moved
-	 * in the filesystem as is not available anymore for another transfer
+	 * @throws IllegalStateException if the file has already been moved
+	 * in the filesystem and is not available anymore for another transfer
 	 */
 	void transferTo(File dest) throws IOException, IllegalStateException;
 
