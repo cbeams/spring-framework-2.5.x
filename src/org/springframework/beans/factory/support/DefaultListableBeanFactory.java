@@ -92,6 +92,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		super(parentBeanFactory);
 	}
 
+
 	/**
 	 * Set whether it should be allowed to override bean definitions by registering
 	 * a different definition with the same name, automatically replacing the former.
@@ -99,14 +100,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	public void setAllowBeanDefinitionOverriding(boolean allowBeanDefinitionOverriding) {
 		this.allowBeanDefinitionOverriding = allowBeanDefinitionOverriding;
-	}
-
-	/**
-	 * Return whether it should be allowed to override bean definitions by registering
-	 * a different definition with the same name, automatically replacing the former.
-	 */
-	public boolean isAllowBeanDefinitionOverriding() {
-		return allowBeanDefinitionOverriding;
 	}
 
 	/**
@@ -123,13 +116,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		this.allowEagerClassLoading = allowEagerClassLoading;
 	}
 
-	/**
-	 * Return whether the factory is allowed to eagerly load bean classes
-	 * even for bean definitions that are marked as "lazy-init".
-	 */
-	public boolean isAllowEagerClassLoading() {
-		return allowEagerClassLoading;
-	}
 
 	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
 		super.copyConfigurationFrom(otherFactory);
@@ -173,7 +159,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				RootBeanDefinition rbd = getMergedBeanDefinition(beanName, false);
 				// Only check bean definition if it is complete.
 				if (!rbd.isAbstract() &&
-						(allowEagerInit || rbd.hasBeanClass() || !rbd.isLazyInit() || isAllowEagerClassLoading())) {
+						(allowEagerInit || rbd.hasBeanClass() || !rbd.isLazyInit() || this.allowEagerClassLoading)) {
 					// In case of FactoryBean, match object created by FactoryBean.
 					try {
 						Class beanClass = resolveBeanClass(rbd, beanName);
@@ -331,7 +317,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		Object oldBeanDefinition = this.beanDefinitionMap.get(beanName);
 		if (oldBeanDefinition != null) {
-			if (!isAllowBeanDefinitionOverriding()) {
+			if (!this.allowBeanDefinitionOverriding) {
 				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
 						"Cannot register bean definition [" + beanDefinition + "] for bean '" + beanName +
 						"': there's already [" + oldBeanDefinition + "] bound");
