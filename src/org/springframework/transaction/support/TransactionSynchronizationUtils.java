@@ -39,6 +39,7 @@ public class TransactionSynchronizationUtils {
 	/**
 	 * Trigger <code>beforeCommit</code> callbacks on all currently registered synchronizations.
 	 * @param readOnly whether the transaction is defined as read-only transaction
+	 * @throws RuntimeException if thrown by a <code>beforeCommit</code> callback
 	 * @see TransactionSynchronization#beforeCommit(boolean)
 	 */
 	public static void triggerBeforeCommit(boolean readOnly) {
@@ -66,19 +67,33 @@ public class TransactionSynchronizationUtils {
 
 	/**
 	 * Trigger <code>afterCommit</code> callbacks on all currently registered synchronizations.
+	 * @throws RuntimeException if thrown by a <code>afterCommit</code> callback
 	 * @see TransactionSynchronizationManager#getSynchronizations()
 	 * @see TransactionSynchronization#afterCommit()
 	 */
 	public static void triggerAfterCommit() {
-		for (Iterator it = TransactionSynchronizationManager.getSynchronizations().iterator(); it.hasNext();) {
-			TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
-			try {
-				synchronization.afterCommit();
-			}
-			catch (AbstractMethodError tserr) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Spring 2.0's TransactionSynchronization.afterCommit method not implemented in " +
-							"synchronization class [" + synchronization.getClass().getName() + "]", tserr);
+		List synchronizations = TransactionSynchronizationManager.getSynchronizations();
+		invokeAfterCommit(synchronizations);
+	}
+
+	/**
+	 * Actually invoke the <code>afterCommit</code> methods of the
+	 * given Spring TransactionSynchronization objects.
+	 * @param synchronizations List of TransactionSynchronization objects
+	 * @see TransactionSynchronization#afterCommit()
+	 */
+	public static void invokeAfterCommit(List synchronizations) {
+		if (synchronizations != null) {
+			for (Iterator it = synchronizations.iterator(); it.hasNext();) {
+				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+				try {
+					synchronization.afterCommit();
+				}
+				catch (AbstractMethodError tserr) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Spring 2.0's TransactionSynchronization.afterCommit method not implemented in " +
+								"synchronization class [" + synchronization.getClass().getName() + "]", tserr);
+					}
 				}
 			}
 		}
@@ -102,8 +117,6 @@ public class TransactionSynchronizationUtils {
 	/**
 	 * Actually invoke the <code>afterCompletion</code> methods of the
 	 * given Spring TransactionSynchronization objects.
-	 * <p>To be called by this abstract manager itself, or by special implementations
-	 * of the <code>registerAfterCompletionWithExistingTransaction</code> callback.
 	 * @param synchronizations List of TransactionSynchronization objects
 	 * @param completionStatus the completion status according to the
 	 * constants in the TransactionSynchronization interface

@@ -53,8 +53,13 @@ public class JtaAfterCompletionSynchronization implements Synchronization {
 	public void afterCompletion(int status) {
 		switch (status) {
 			case Status.STATUS_COMMITTED:
-				TransactionSynchronizationUtils.invokeAfterCompletion(
-						this.synchronizations, TransactionSynchronization.STATUS_COMMITTED);
+				try {
+					TransactionSynchronizationUtils.invokeAfterCommit(this.synchronizations);
+				}
+				finally {
+					TransactionSynchronizationUtils.invokeAfterCompletion(
+							this.synchronizations, TransactionSynchronization.STATUS_COMMITTED);
+				}
 				break;
 			case Status.STATUS_ROLLEDBACK:
 				TransactionSynchronizationUtils.invokeAfterCompletion(
