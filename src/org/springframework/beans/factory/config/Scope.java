@@ -27,8 +27,8 @@ import org.springframework.beans.factory.ObjectFactory;
  * this class's <code>get</code> and <code>put</code> methods will identify
  * the target attribute in the scope.
  *
- * <p>Scope implementations are expected to be thread-safe. One Scope
- * can be used with multiple bean factories, if desired.
+ * <p><code>Scope</code> implementations are expected to be thread-safe.
+ * One <code>Scope</code> can be used with multiple bean factories, if desired.
  *
  * <p>Can be implemented on top of a session API such as the
  * Servlet API's {@link javax.servlet.http.HttpSession} interface.
@@ -58,9 +58,9 @@ public interface Scope {
 	Object get(String name, ObjectFactory objectFactory);
 
 	/**
-	 * Remove the object with the given name from the underlying scope. Returns
-	 * '<code>null</code>' if no object was found; otherwise returns the removed
-	 * <code>Object</code>.
+	 * Remove the object with the given name from the underlying scope.
+	 * <p>Returns '<code>null</code>' if no object was found; otherwise
+	 * returns the removed <code>Object</code>.
 	 * @param name the name of the object to remove
 	 * @return the removed object, if any
 	 */
@@ -72,7 +72,7 @@ public interface Scope {
 	 * destroy individual objects but rather only terminate in its entirety).
 	 * <p>Implementations should do their best to execute the callback
 	 * at the appropriate time. If such a callback is not supported
-	 * by the underlying runtime environment, the callback should be
+	 * by the underlying runtime environment, the callback must be
 	 * ignored and a corresponding warning should be logged.
 	 * @param name the name of the object to execute the destruction callback for
 	 * @param callback the destruction callback to be executed
