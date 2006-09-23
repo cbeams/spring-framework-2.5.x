@@ -9,11 +9,11 @@
 
     <sidebar>
       <title>JDK Support</title>
-      <para>Please be advised that the Spring Framework continues to be
-      totally compatible with all versions of Java since (and including)
-      Java 1.3. This means that 1.3, 1.4, and 1.5 are supported, although
-      some advanced functionality of the Spring Framework may not be
-      available to you if you are (for example) committed to using Java 1.3.</para>
+      <para>The Spring Framework continues to be totally compatible with all
+      versions of Java since (and including) Java 1.3. This means that 1.3,
+      1.4, and 1.5 are supported, although some advanced functionality of the
+      Spring Framework may not be available to you if you are (for example)
+      committed to using Java 1.3.</para>
     </sidebar>
 
     <para>This revision includes a host of new features, and a lot of the
@@ -62,24 +62,6 @@
       
     </section>
 
-    <section id="new-in-2-ioc-custom-configuration">
-      <title>Extensible XML authoring</title>
-
-      <para>Not only is XML configuration easier to write, it is now also extensible.</para>
-      <para>What 'extensible' means in this context is that you, as an
-      application developer, or (more likely) as a third party framework or
-      product vendor, can write custom tags that other developers can then
-      plug into their own Spring configuration files. This allows you to have
-      your own domain specific language (the term is used loosely here) of
-      sorts be reflected in the specific configuration of your own components.</para>
-      <para>Implementing custom Spring tags may not be of interest to every single 
-      application developer or enterprise architect using Spring in their own projects.
-      We expect third-party vendors to be highly interested in developing
-      custom configuration tags for use in Spring configuration files.</para>
-      
-      <para>The extensible configuration mechanism is documented in <xref linkend="extensible-xml"/>.</para>
-    </section>
-
     <section id="new-in-2-ioc-scopes">
       <title>New bean scopes</title>
 
@@ -100,6 +82,25 @@
       <para>Both the new and the original scopes are detailed in the section
       entitled <xref linkend="beans-factory-scopes" />.</para>
     </section>
+
+    <section id="new-in-2-ioc-custom-configuration">
+      <title>Extensible XML authoring</title>
+
+      <para>Not only is XML configuration easier to write, it is now also extensible.</para>
+      <para>What 'extensible' means in this context is that you, as an
+      application developer, or (more likely) as a third party framework or
+      product vendor, can write custom tags that other developers can then
+      plug into their own Spring configuration files. This allows you to have
+      your own domain specific language (the term is used loosely here) of
+      sorts be reflected in the specific configuration of your own components.</para>
+      <para>Implementing custom Spring tags may not be of interest to every single 
+      application developer or enterprise architect using Spring in their own projects.
+      We expect third-party vendors to be highly interested in developing
+      custom configuration tags for use in Spring configuration files.</para>
+      
+      <para>The extensible configuration mechanism is documented in <xref linkend="extensible-xml"/>.</para>
+    </section>
+    
   </section>
 
   <section id="new-in-2-aop">
