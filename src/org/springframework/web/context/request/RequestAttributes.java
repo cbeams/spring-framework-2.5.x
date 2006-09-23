@@ -83,13 +83,14 @@ public interface RequestAttributes {
 	 * <p>Implementations should do their best to execute the callback
 	 * at the appropriate time: that is, at request completion or session
 	 * termination, respectively. If such a callback is not supported
-	 * by the underlying runtime environment, the callback should be
+	 * by the underlying runtime environment, the callback must be
 	 * ignored and a corresponding warning should be logged.
 	 * <p>Note that destruction usually corresponds to destruction of the
 	 * entire scope, not to the individual attribute having been removed.
-	 * If an attribute gets removed via this facade's <code>removeAttribute</code>
-	 * method, any registered destruction callback should be disabled as well
-	 * (assuming that the removed object will be reused or manually destroyed).
+	 * If an attribute gets removed via this facade's
+	 * {@link #removeAttribute(String, int)} method, any registered
+	 * destruction callback should be disabled as well (assuming that the
+	 * removed object will be reused or manually destroyed).
 	 * @param name the name of the attribute to register the callback for
 	 * @param callback the destruction callback to be executed
 	 * @param scope the scope identifier
