@@ -2073,13 +2073,13 @@ public class ReplacementComputeValue implements MethodReplacer {
 		</table>
 
         <note>
-            <para>For backwards compatibility reasons, it is still possible to specify
-            <literal>singleton="false"</literal> and <literal>singleton="true"</literal>
-            as attributes of an XML-based bean definition. However, note that specifying
-            both the <literal>singleton</literal> and <literal>scope</literal> attribute
-            on a bean definition leads to unexpected behavior. You should only specify
-            one of the two attributes, with the use of <literal>scope</literal> being the
-            recommended choice.</para>
+            <para>If you are referencing the <filename>'spring-beans.dtd'</filename> DTD in your
+            bean definition file(s), you can use the "<literal>singleton</literal>" attribute to
+            express the lifecycle scope of your bean(s). If you are referencing the
+            <filename>'spring-beans-2.0.dtd'</filename> DTD or the Spring 2.0 XSD schema, then you
+            will need to use the "<literal>scope</literal>" attribute (because the
+            "<literal>singleton</literal>" attribute was removed from the definition of the
+            new DTD and XSD files in favour of the "<literal>scope</literal>" attribute).</para>
 		</note>
 
         <section id="beans-factory-scopes-singleton">
@@ -2505,23 +2505,23 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <section id="beans-factory-lifecycle">
             <title>Lifecycle interfaces</title>
             <para>Spring provides several marker interfaces to change the behavior
-      of your bean in the container. They include
-      <interfacename>InitializingBean</interfacename> and
-      <interfacename>DisposableBean</interfacename>. Implementing these interfaces will
-      result in the container calling
-      <literal>afterPropertiesSet()</literal> for the former and
-      <literal>destroy()</literal> for the latter to allow the bean to perform
-      certain actions upon initialization and destruction.</para>
+            of your bean in the container; they include
+            <interfacename>InitializingBean</interfacename> and
+            <interfacename>DisposableBean</interfacename>. Implementing these interfaces will
+            result in the container calling
+            <methodname>afterPropertiesSet()</methodname> for the former and
+            <methodname>destroy()</methodname> for the latter to allow the bean to perform
+            certain actions upon initialization and destruction.</para>
             <para>Internally, Spring uses <interfacename>BeanPostProcessor</interfacename> implementations to
-      process any marker interfaces it can find and call the appropriate
-      methods. If you need custom features or other lifecycle behavior Spring
-      doesn't offer out-of-the-box, you can implement a
-      <interfacename>BeanPostProcessor</interfacename> yourself. More information about
-      this can be found in <xref linkend="beans-factory-extension" />.</para>
+            process any marker interfaces it can find and call the appropriate
+            methods. If you need custom features or other lifecycle behavior Spring
+            doesn't offer out-of-the-box, you can implement a
+            <interfacename>BeanPostProcessor</interfacename> yourself. More information about
+            this can be found in <xref linkend="beans-factory-extension" />.</para>
             <para>All the different lifecycle marker interfaces are described below.
-      In one of the appendices, you can find diagram that show how Spring
-      manages beans and how those lifecycle features change the nature of your
-      beans and how they are managed.</para>
+            In one of the appendices, you can find diagram that show how Spring
+            manages beans and how those lifecycle features change the nature of your
+            beans and how they are managed.</para>
             <section id="beans-factory-lifecycle-initializingbean">
                 <title>Initialization callbacks</title>
                 <para>Implementing the
@@ -3704,10 +3704,10 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
             <para>The <interfacename>ContextLoader</interfacename> interface has two implementations: the
 			<classname>ContextLoaderListener</classname> and the
 			<classname>ContextLoaderServlet</classname>. They both have the same
-			functionality but differ in that the listener cannot be used in Servlet
+			functionality but differ in that the listener version cannot be used in Servlet
 			2.2 compatible containers. Since the Servlet 2.4 specification, listeners
-			are required to initialize after startup of a web application. A lot of
-			2.3 compatible containers already implement this feature. It is up to you
+			are required to initialize after startup of a web application. (A lot of
+			2.3 compatible containers already implement this feature.) It is up to you
 			as to which one you use, but all things being equal you should probably
 			prefer <classname>ContextLoaderListener</classname>; for more information on
 			compatibility, have a look at the Javadoc for the
