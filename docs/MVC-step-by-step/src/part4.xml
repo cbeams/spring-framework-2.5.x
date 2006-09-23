@@ -92,7 +92,7 @@ public class SpringappController implements Controller {
         
     </section>
     
-    <section id="step2.7">
+    <section id="step4.3">
         <title>Add some test data to automatically populate some business objects</title>
         <para>I am not going to add any code to load the business objects from a database
         just yet. Instead, we can stub a couple of <classname>Product</classname> instances
@@ -103,7 +103,7 @@ public class SpringappController implements Controller {
         I will create in the next step.</para>
         <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
         <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 ]]><lineannotation>&lt;!-- the application context definition for the springapp <classname>DispatcherServlet</classname> --&gt;</lineannotation><![CDATA[
 
@@ -159,7 +159,7 @@ public class SpringappController implements Controller {
 </beans>]]></programlisting>
     </section>
     
-    <section id="step2.8">
+    <section id="step4.4">
         <title>Add the message bundle and a <literal>'clean'</literal> target to <filename>'build.xml'</filename></title>
         <para>I create a <filename>'messages.properties'</filename> file in the
         <filename class="directory">'war/WEB-INF/classes'</filename> directory. This properties bundle
@@ -224,7 +224,7 @@ greeting=Greetings, it is now]]></programlisting>
 	    </screenshot>
     </section>
 		
-    <section id="step4.1">
+    <section id="step4.5">
         <title>Add unit test for the <classname>SpringappController</classname> class</title>
         <para>Before we create any unit tests, we want to prepare Ant and our build script to be
         able to handle this. Ant has a built in JUnit target, but we need to add
@@ -325,7 +325,7 @@ public class TestSpringappController extends TestCase {
         
         <para><filename>'springapp/src/tests/WEB-INF/springapp-servlet.xml'</filename>:</para>
         <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 ]]><lineannotation>&lt;!-- the application context definition for the springapp <classname>DispatcherServlet</classname> --&gt;</lineannotation><![CDATA[
 
@@ -366,7 +366,7 @@ public class TestSpringappController extends TestCase {
         
     </section>
 
-    <section id="step4.2">
+    <section id="step4.6">
         <title>Add unit test and new functionality for the <classname>ProductManager</classname> class</title>
         <para>Next I add a test case for the <classname>ProductManager</classname> class, and
         I also add a test for a new method to increase the prices that I am planning on adding
@@ -462,7 +462,7 @@ public class ProductManager implements Serializable {
         
     </section>
     
-    <section id="step4.3">
+    <section id="step4.7">
         <title>Adding a form</title>
         <para>To provide an interface in the web application to expose the price increase functionality,
         I add a form that will allow the user to enter a percentage value. This form uses a tag library
@@ -646,7 +646,7 @@ public class PriceIncreaseValidator implements Validator {
         
         <para><filename>'springapp/war/WEB-INF/springapp-servlet.xml'</filename>:</para>
         <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 ]]><lineannotation>&lt;!-- the application context definition for the springapp <classname>DispatcherServlet</classname> --&gt;</lineannotation><![CDATA[
 
