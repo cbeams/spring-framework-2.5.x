@@ -35,13 +35,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
 
 /**
- * Factory for creating SQLErrorCodes based on the
- * "databaseProductName" taken from the DatabaseMetaData.
+ * Factory for creating {@link SQLErrorCodes} based on the
+ * "databaseProductName" taken from the {@link java.sql.DatabaseMetaData}.
  *
- * <p>Returns SQLErrorCodes populated with vendor codes
+ * <p>Returns <code>SQLErrorCodes</code> populated with vendor codes
  * defined in a configuration file named "sql-error-codes.xml".
  * Reads the default file in this package if not overridden by a file in
- * the root of the class path (e.g. in the "/WEB-INF/classes" directory).
+ * the root of the class path (for example in the "/WEB-INF/classes" directory).
  *
  * @author Thomas Risberg
  * @author Rod Johnson
@@ -51,13 +51,13 @@ import org.springframework.util.PatternMatchUtils;
 public class SQLErrorCodesFactory {
 
 	/**
-	 * Name of custom SQL error codes file, loading from the root
+	 * The name of custom SQL error codes file, loading from the root
 	 * of the class path (e.g. in the "WEB-INF/classes" directory).
 	 */
 	public static final String SQL_ERROR_CODE_OVERRIDE_PATH = "sql-error-codes.xml";
 
 	/**
-	 * Name of default SQL error code files, loading from the class path.
+	 * The name of default SQL error code files, loading from the class path.
 	 */
 	public static final String SQL_ERROR_CODE_DEFAULT_PATH = "org/springframework/jdbc/support/sql-error-codes.xml";
 
@@ -71,7 +71,8 @@ public class SQLErrorCodesFactory {
 
 
 	/**
-	 * Return singleton instance.
+	 * Returns the singleton instance of this class.
+	 * @return the singleton instance of this class
 	 */
 	public static SQLErrorCodesFactory getInstance() {
 		return instance;
@@ -92,10 +93,12 @@ public class SQLErrorCodesFactory {
 
 
 	/**
-	 * Not public to enforce Singleton design pattern.
-	 * Would be private except to allow testing via overriding the loadResource method.
-	 * <b>Do not subclass in application code.</b>
-	 * @see #loadResource
+	 * Creates a new instance of the {@link SQLErrorCodesFactory} class.
+	 * <p>Not public to enforce Singleton design pattern. Would be private
+	 * except to allow testing via overriding the
+	 * {@link #loadResource(String)} method.
+	 * <p><b>Do not subclass in application code.</b>
+	 * @see #loadResource(String) 
 	 */
 	protected SQLErrorCodesFactory() {
 		Map errorCodes = null;
@@ -136,11 +139,13 @@ public class SQLErrorCodesFactory {
 	}
 	
 	/**
-	 * Protected for testability. Load the given resource from the class path.
-	 * @param path resource path. SQL_ERROR_CODE_DEFAULT_PATH or
-	 * SQL_ERROR_CODE_OVERRIDE_PATH.
-	 * <b>Not to be overridden by application developers, who should obtain instances
-	 * of this class from the static <code>getInstance()</code> method.</b>
+	 * Load the given resource from the class path.
+	 * <p><b>Not to be overridden by application developers, who should obtain
+	 * instances of this class from the static {@link #getInstance()} method.</b>
+	 * <p>Protected for testability.
+	 * @param path resource path; either a custom path or one of either
+	 * {@link #SQL_ERROR_CODE_DEFAULT_PATH} or
+	 * {@link #SQL_ERROR_CODE_OVERRIDE_PATH}.
 	 * @return the resource, or <code>null</code> if the resource wasn't found
 	 * @see #getInstance
 	 */
@@ -150,8 +155,11 @@ public class SQLErrorCodesFactory {
 
 
 	/**
-	 * Return SQLErrorCodes instance for the given database.
-	 * No need for a database metadata lookup.
+	 * Return the {@link SQLErrorCodes} instance for the given database.
+	 * <p>No need for a database metadata lookup.
+	 * @param dbName the database name (must not be <code>null</code> )
+	 * @return the <code>SQLErrorCodes</code> instance for the given database
+	 * @throws IllegalArgumentException if the supplied database name is <code>null</code> 
 	 */
 	public SQLErrorCodes getErrorCodes(String dbName) {
 		Assert.notNull(dbName, "Database product name must not be null");
@@ -182,9 +190,11 @@ public class SQLErrorCodesFactory {
 	}
 
 	/**
-	 * Return SQLErrorCodes for the given DataSource,
-	 * evaluating databaseProductName from DatabaseMetaData,
-	 * or an empty error codes instance if no SQLErrorCodes were found.
+	 * Return {@link SQLErrorCodes} for the given {@link DataSource},
+	 * evaluating "databaseProductName" from the
+	 * {@link java.sql.DatabaseMetaData}, or an empty error codes
+	 * instance if no <code>SQLErrorCodes</code> were found.
+	 * @param dataSource the <code>DataSource</code> identifying the database
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName
 	 */
 	public SQLErrorCodes getErrorCodes(DataSource dataSource) {
