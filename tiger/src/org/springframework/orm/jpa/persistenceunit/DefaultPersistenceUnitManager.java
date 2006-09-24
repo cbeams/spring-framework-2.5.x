@@ -96,8 +96,8 @@ public class DefaultPersistenceUnitManager implements PersistenceUnitManager, Re
 
 	/**
 	 * Set the locations of the <code>persistence.xml</code> files to load.
-	 * These can be specified as Spring resource locations.
-	 * <p>Default is "classpath:META-INF/persistence.xml".
+	 * These can be specified as Spring resource locations and/or location patterns.
+	 * <p>Default is "classpath*:META-INF/persistence.xml".
 	 * @param persistenceXmlLocations an array of Spring resource Strings
 	 * identifying the location of the <code>persistence.xml</code> files to read
 	 */
