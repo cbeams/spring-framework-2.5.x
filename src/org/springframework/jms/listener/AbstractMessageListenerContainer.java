@@ -27,6 +27,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.Session;
+import javax.jms.Topic;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.Lifecycle;
@@ -128,11 +129,13 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	private Object destination;
 
-	private String durableSubscriptionName;
-
 	private String messageSelector;
 
 	private Object messageListener;
+
+	private boolean subscriptionDurable = false;
+
+	private String durableSubscriptionName;
 
 	private ExceptionListener exceptionListener;
 
@@ -154,10 +157,10 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 
 	/**
-	 * Specify a JMS client ID for the single Connection created and used
+	 * Specify a JMS client id for a shared Connection created and used
 	 * by this messager listener container.
-	 * <p>Note that client IDs need to be unique among all active Connections
-	 * of the underlying JMS provider. Furthermore, a client ID can only be
+	 * <p>Note that client ids need to be unique among all active Connections
+	 * of the underlying JMS provider. Furthermore, a client id can only be
 	 * assigned if the original ConnectionFactory hasn't already assigned one.
 	 * @see javax.jms.Connection#setClientID
 	 * @see #setConnectionFactory
@@ -167,13 +170,12 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	}
 
 	/**
-	 * Return the JMS client ID for the single Connection created and used
+	 * Return the JMS client ID for the shared Connection created and used
 	 * by this messager listener container, if any.
 	 */
-	public String getClientId() {
+	protected String getClientId() {
 		return clientId;
 	}
-
 
 	/**
 	 * Set the destination to receive messages from.
@@ -182,7 +184,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @see #setDestinationName(String)
 	 */
 	public void setDestination(Destination destination) {
+		Assert.notNull(destination, "destination must not be null");
 		this.destination = destination;
+		setPubSubDomain(destination instanceof Topic);
 	}
 
 	/**
@@ -205,6 +209,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @see #setDestination(javax.jms.Destination)
 	 */
 	public void setDestinationName(String destinationName) {
+		Assert.notNull(destinationName, "destinationName must not be null");
 		this.destination = destinationName;
 	}
 
@@ -217,23 +222,6 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 */
 	protected String getDestinationName() {
 		return (this.destination instanceof String ? (String) this.destination : null);
-	}
-
-	/**
-	 * Set the name of a durable subscription to create.
-	 * To be applied in case of a topic (pub-sub domain).
-	 * <p>Note: Only 1 concurrent consumer (which is the default of this
-	 * message listener container) is allowed for a durable subscription.
-	 */
-	public void setDurableSubscriptionName(String durableSubscriptionName) {
-		this.durableSubscriptionName = durableSubscriptionName;
-	}
-
-	/**
-	 * Return the name of a durable subscription to create.
-	 */
-	protected String getDurableSubscriptionName() {
-		return durableSubscriptionName;
 	}
 
 	/**
@@ -265,6 +253,10 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	public void setMessageListener(Object messageListener) {
 		checkMessageListener(messageListener);
 		this.messageListener = messageListener;
+		if (this.durableSubscriptionName == null) {
+			// Use message listener class name as default name for a durable subscription.
+			this.durableSubscriptionName = messageListener.getClass().getName();
+		}
 	}
 
 	/**
@@ -292,6 +284,49 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 */
 	protected Object getMessageListener() {
 		return messageListener;
+	}
+
+	/**
+	 * Set whether to make the subscription durable. The durable subscription name
+	 * to be used can be specified through the "durableSubscriptionName" property.
+	 * <p>Default is "false". Set this to "true" to register a durable subscription,
+	 * typically in combination with a "durableSubscriptionName" value (unless
+	 * your message listener class name is good enough as subscription name).
+	 * <p>Only makes sense when listening to a topic (pub-sub domain).
+	 * @see #setDurableSubscriptionName
+	 */
+	public void setSubscriptionDurable(boolean subscriptionDurable) {
+		this.subscriptionDurable = subscriptionDurable;
+	}
+
+	/**
+	 * Return whether to make the subscription durable.
+	 */
+	protected boolean isSubscriptionDurable() {
+		return subscriptionDurable;
+	}
+
+	/**
+	 * Set the name of a durable subscription to create. To be applied in case
+	 * of a topic (pub-sub domain) with subscription durability activated.
+	 * <p>The durable subscription name needs to be unique within this client's
+	 * JMS client id. Default is the class name of the specified message listener.
+	 * <p>Note: Only 1 concurrent consumer (which is the default of this
+	 * message listener container) is allowed for each durable subscription.
+	 * @see #setSubscriptionDurable
+	 * @see #setClientId
+	 * @see #setMessageListener
+	 */
+	public void setDurableSubscriptionName(String durableSubscriptionName) {
+		Assert.notNull(durableSubscriptionName, "durableSubscriptionName must not be null");
+		this.durableSubscriptionName = durableSubscriptionName;
+	}
+
+	/**
+	 * Return the name of a durable subscription to create, if any.
+	 */
+	protected String getDurableSubscriptionName() {
+		return durableSubscriptionName;
 	}
 
 	/**
@@ -333,7 +368,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	/**
 	 * Set whether to automatically start the listener after initialization.
-	 * Default is "true"; set this to "false" to allow for manual startup.
+	 * <p>Default is "true"; set this to "false" to allow for manual startup.
 	 */
 	public void setAutoStartup(boolean autoStartup) {
 		this.autoStartup = autoStartup;
@@ -352,6 +387,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 		}
 		if (this.messageListener == null) {
 			throw new IllegalArgumentException("messageListener is required");
+		}
+		if (isSubscriptionDurable() && !isPubSubDomain()) {
+			throw new IllegalArgumentException("A durable subscription requires a topic (pub-sub domain)");
 		}
 
 		initialize();
@@ -414,10 +452,30 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 		boolean running = isRunning();
 		synchronized (this.sharedConnectionMonitor) {
 			JmsUtils.closeConnection(this.sharedConnection, running);
-			this.sharedConnection = createConnection();
-			if (getClientId() != null) {
-				this.sharedConnection.setClientID(getClientId());
+			Connection con = createConnection();
+			try {
+				prepareSharedConnection(con);
 			}
+			catch (JMSException ex) {
+				JmsUtils.closeConnection(con);
+				throw ex;
+			}
+			this.sharedConnection = con;
+		}
+	}
+
+	/**
+	 * Prepare the given Connection, which is about to be registered
+	 * as shared Connection for this message listener container.
+	 * <p>The default implementation sets the specified client id, if any.
+	 * Subclasses can override this to apply further settings.
+	 * @param connection the Connection to prepare
+	 * @throws JMSException if the preparation efforts failed
+	 * @see #setClientId
+	 */
+	protected void prepareSharedConnection(Connection connection) throws JMSException {
+		if (getClientId() != null) {
+			connection.setClientID(getClientId());
 		}
 	}
 
