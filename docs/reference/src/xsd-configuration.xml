@@ -3,8 +3,7 @@
     <title>XML Schema-based configuration</title>
     <section>
         <title>Introduction</title>
-        <para>This section of the reference documentation details the XML Schema based
-        configuration introduced in Spring 2.0.</para>
+        <para>This appendix details the XML Schema-based configuration introduced in Spring 2.0.</para>
         <sidebar>
             <title>DTD support?</title>
             <para>Authoring Spring configuration files using the older DTD style
@@ -39,10 +38,10 @@
         application-specific beans, such as DAOs, service layer objects, validators, etc.</para>
         <para>The examples included below will hopefully convince you that the inclusion
         of XML Schema support in Spring 2.0 was a good idea. The reception in the community
-        has been encouraging; something that is not covered in this section (at least
-        not right now) is the fact that this new configuration mechanism is totally
-        customisable and extensible. This means you can write your own domain-specific
-        configuration tags that would better represent your application's domain.</para>
+        has been encouraging; also, please note the fact that this new configuration mechanism
+        is totally customisable and extensible. This means you can write your own domain-specific
+        configuration tags that would better represent your application's domain; the process
+        involved in doing so is covered in the appendix entitled <xref linkend="extensible-xml"/>.</para>
     </section>
     <section id="xsd-config-body">
         <title>XML Schema-based configuration</title>
@@ -85,9 +84,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         </section>
         <para>The rest of this chapter is devoted to showing examples of the new Spring XML Schema
         based configuration, with at least one example for every new tag. The format follows
-        a before and after style, with a <literal>'before'</literal> snippet of XML showing
+        a before and after style, with a <emphasis>before</emphasis> snippet of XML showing
         the old (but still 100% legal and supported) style, followed immediately
-        by an <literal>'after'</literal> example showing the equivalent in the new XML Schema-based
+        by an <emphasis>after</emphasis> example showing the equivalent in the new XML Schema-based
         style.</para>
         <section id="xsd-config-body-schemas-util">
             <title>The <literal>util</literal> schema</title>
@@ -152,14 +151,10 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		            </para>
                     <programlisting><![CDATA[<bean id="myField"
         class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
-  <property name="staticField">
-    <value>java.sql.Connection.TRANSACTION_SERIALIZABLE</value>
-  </property>
+  <property name="staticField" value="java.sql.Connection.TRANSACTION_SERIALIZABLE"/>
 </bean>]]></programlisting>
-                    <para>
-			            There is also a convenience usage form where the <literal>static</literal> field is
-			            specified as a bean name:
-		            </para>
+                    <para>There is also a convenience usage form where the <literal>static</literal>
+                    field is specified as the bean name:</para>
                     <programlisting><![CDATA[<bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
     class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/>]]></programlisting>
                     <para>
@@ -264,10 +259,10 @@ public class Client {
                     <para>Here's an example where a path is used against another bean, by name:</para>
 		            <programlisting><![CDATA[// target bean to be referenced by name
 <bean id="person" class="org.springframework.beans.TestBean" scope="prototype">
-  <property name="age"><value>10</value></property>
+  <property name="age" value="10"/>
   <property name="spouse">
     <bean class="org.springframework.beans.TestBean">
-      <property name="age"><value>11</value></property>
+      <property name="age" value="11"/>
     </bean>
   </property>
 </bean>
@@ -287,7 +282,7 @@ public class Client {
       <property name="age" value="12"/>
     </bean>
   </property>
-  <property name="propertyPath"><value>age</value></property>
+  <property name="propertyPath" value="age"/>
 </bean>]]></programlisting>
 		            <para>There is also a shortcut form, where the bean name is the property path.</para>
 		            <programlisting><lineannotation>&lt;!-- will result in 10, which is the value of property 'age' of bean 'person' --&gt;</lineannotation><![CDATA[
