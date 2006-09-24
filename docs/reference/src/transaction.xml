@@ -3,71 +3,68 @@
     <title>Transaction management</title>
     <section>
         <title>Introduction</title>
-        <para>One of the most compelling reasons to use Spring is the transaction support.
-        Spring provides a consistent abstraction for transaction management that delivers
-        the following benefits:</para>
+        <para>One of the most compelling reasons to use the Spring Framework is the
+        comprehensive transaction support. The Spring Framework provides a consistent
+        abstraction for transaction management that delivers the following benefits:</para>
         <itemizedlist>
             <listitem>
                 <para>Provides a consistent programming model across different
                 transaction APIs such as JTA, JDBC, Hibernate, JPA, and JDO.</para>
             </listitem>
             <listitem>
-                <para>Supports declarative transaction management.</para>
+                <para>Supports <link linkend="transaction-declarative">declarative transaction management</link>.</para>
             </listitem>
             <listitem>
-                <para>Provides a simpler, easier to use, API for programmatic
-                transaction management than a number of disparate transaction APIs such as JTA.</para>
+                <para>Provides a simpler API for <link linkend="transaction-programmatic">programmatic</link>
+                transaction management than a number of complex transaction APIs such as JTA.</para>
             </listitem>
             <listitem>
-                <para>Integrates with Spring's various data access abstractions.</para>
+                <para>Integrates very well with Spring's various data access abstractions.</para>
             </listitem>
         </itemizedlist>
-        <para>This chapter is divided up into a number of sections; these sections are
-        described below, along with a link so that you can navigate directly to the
-        section which interests you.</para>
+        <para>This chapter is divided up into a number of sections, each detailing one of the
+        value-adds or technologies of the Spring Framework's transaction support. The chapter
+        closes up with some discussion of best practices surrounding transaction management
+        (for example, choosing between declarative and programmatic transaction management).</para>
         <itemizedlist>
             <listitem>
                 <para>The first section, entitled
                 <link linkend="transaction-motivation">Motivations</link>,
                 describes <emphasis>why</emphasis> one would want to use
-                Spring's transaction abstraction as opposed to EJB CMT
+                the Spring Framework's transaction abstraction as opposed to EJB CMT
                 or driving transactions via a proprietary API such
                 as Hibernate.</para>
             </listitem>
             <listitem>
                 <para>The second section, entitled
                 <link linkend="transaction-strategies">Key abstractions</link>
-                outlines the core classes in Spring's transaction support, as well
-                as how to configure and obtain <interfacename>DataSource</interfacename>
+                outlines the core classes in the Spring Framework's transaction support,
+                as well as how to configure and obtain <interfacename>DataSource</interfacename>
                 instances from a variety of sources.</para>
             </listitem>
             <listitem>
                 <para>The third section, entitled
-                <link linkend="transaction-declarative">Declarative transaction management</link>
-                covers, Spring's support for declarative transaction
-                management.</para>
+                <link linkend="transaction-declarative">Declarative transaction management</link>,
+                covers the Spring Framework's support for declarative transaction management.</para>
             </listitem>
             <listitem>
                 <para>The fourth section, entitled
-                <link linkend="transaction-programmatic">Programmatic transaction management</link>
-                covers, Spring's support for programmatic (i.e. explicitly
+                <link linkend="transaction-programmatic">Programmatic transaction management</link>,
+                covers the Spring Framework's support for programmatic (that is, explicitly
                 coded) transaction management.</para>
             </listitem>
         </itemizedlist>
-        <para>The chapter closes up with some discussion of best practices
-        surrounding transaction management (for example, choosing between
-        declarative and programmatic transaction management).</para>
     </section>
     <section id="transaction-motivation">
         <title>Motivations</title>
         <sidebar>
             <title>Is an application server needed for transaction management?</title>
-            <para>Spring's transaction management support significantly changes
+            <para>The Spring Framework's transaction management support significantly changes
             traditional thinking as to when a J2EE application requires an application
             server.</para>
             <para>In particular, you don't need an application server just to have
             declarative transactions via EJB. In fact, even if you have an application
-            server with powerful JTA capabilities, you may well decide that Spring's
+            server with powerful JTA capabilities, you may well decide that the Spring Framework's
             declarative transactions offer more power and a much more productive
             programming model than EJB CMT.</para>
             <para>You need an application server's JTA capability only if you need to
@@ -75,14 +72,14 @@
             to handle transactions across multiple resources isn't a requirement. 
             For example, many high-end applications use a single, highly scalable 
             database (such as Oracle 9i RAC).</para>
-            <para>Of course you may need other application server capabilities such as
-            JMS and JCA.</para>
-            <para>The most important point is that with Spring <emphasis>you can
+            <para>(Of course you may need other application server capabilities such as
+            JMS and JCA.)</para>
+            <para>The most important point is that with the Spring Framework <emphasis>you can
             choose when to scale your application up to a full-blown application
             server</emphasis>. Gone are the days when the only alternative to using
             EJB CMT or JTA was to write code using local transactions such as those
             on JDBC connections, and face a hefty rework if you ever needed that code
-            to run within global, container-managed transactions. With Spring, only
+            to run within global, container-managed transactions. With the Spring Framework, only
             configuration needs to change so that your code doesn't have to.</para>
         </sidebar>
         <para>Traditionally, J2EE developers have had two choices for transaction
@@ -123,23 +120,23 @@
             <title>Local Transactions</title>
             <para>Local transactions may be easier to use, but have significant
             disadvantages: they cannot work across multiple transactional resources.
-	    For example, code that manages transactions using a JDBC connection cannot 
-	    run within a global JTA transaction. Another downside is that local 
-	    transactions tend to be invasive of the programming model.</para>
+	        For example, code that manages transactions using a JDBC connection cannot 
+	        run within a global JTA transaction. Another downside is that local 
+	        transactions tend to be invasive to the programming model.</para>
         </formalpara>
         <para>Spring resolves these problems. It enables application developers to
         use a <emphasis>consistent</emphasis> programming model <emphasis>in any
         environment</emphasis>. You write your code once, and it can benefit from
         different transaction management strategies in different environments.
-        Spring provides both declarative and programmatic transaction management.
+        The Spring Framework provides both declarative and programmatic transaction management.
         Declarative transaction management is preferred by most users, and is
         recommended in most cases.</para>
         <para>With programmatic transaction management, developers work with the
-        Spring transaction abstraction, which can run over any underlying
+        Spring Framework transaction abstraction, which can run over any underlying
         transaction infrastructure. With the preferred declarative model,
         developers typically write little or no code related to transaction
-        management, and hence don't depend on Spring's transaction API (or indeed
-        on any other transaction API).</para>
+        management, and hence don't depend on the Spring Framework's transaction API
+        (or indeed on any other transaction API).</para>
     </section>
     <section id="transaction-strategies">
         <title>Key abstractions</title>
@@ -159,24 +156,24 @@
 }]]></programlisting>
         <para>This is primarily an SPI interface, although it can be used
         <link linkend="transaction-programmatic-ptm">programmatically</link>.
-        Note that in keeping with Spring's philosophy, 
+        Note that in keeping with the Spring Framework's philosophy, 
         <interfacename>PlatformTransactionManager</interfacename> is
         an <emphasis>interface</emphasis>, and can thus be easily mocked or stubbed
         as necessary. Nor is it tied to a lookup strategy such as JNDI:
         <interfacename>PlatformTransactionManager</interfacename> implementations
-        are defined like any other object (or bean) in a Spring IoC container.
+        are defined like any other object (or bean) in the Spring Framework's IoC container.
         This benefit alone makes it a worthwhile abstraction even when working
         with JTA: transactional code can be tested much more easily than if it
         used JTA directly.</para>
-        <para>Again in keeping with Spring's philosophy, the <classname>TransactionException</classname>
+        <para>Again in keeping with Spring's philosophy, the <exceptionname>TransactionException</exceptionname>
         that can be thrown by any of the <interfacename>PlatformTransactionManager</interfacename>
         interface's methods is <emphasis>unchecked</emphasis> (i.e. it extends the
-        <classname>java.lang.RuntimeException</classname> class). Transaction infrastructure
+        <exceptionname>java.lang.RuntimeException</exceptionname> class). Transaction infrastructure
         failures are almost invariably fatal. In rare cases where application code can actually
         recover from a transaction failure, the application developer can still choose to catch
-        and handle <classname>TransactionException</classname>. The salient point is
+        and handle <exceptionname>TransactionException</exceptionname>. The salient point is
         that developers are not <emphasis>forced</emphasis> to do so.</para>
-        <para>The <literal>getTransaction()</literal>method returns a
+        <para>The <methodname>getTransaction(..)</methodname> method returns a
         <interfacename>TransactionStatus</interfacename> object, depending on a
         <interfacename>TransactionDefinition</interfacename> parameter. The returned
         <interfacename>TransactionStatus</interfacename> might represent a new or
@@ -184,8 +181,7 @@
         call stack - with the implication being that (as with J2EE transaction contexts)
         a <interfacename>TransactionStatus</interfacename> is associated with a
         <emphasis role="bold">thread</emphasis> of execution).</para>
-        <para>The <interfacename>TransactionDefinition</interfacename> interface
-        specifies:</para>
+        <para>The <interfacename>TransactionDefinition</interfacename> interface specifies:</para>
         <itemizedlist>
             <listitem>
                 <para><emphasis role="bold">Isolation</emphasis>: the
@@ -198,10 +194,10 @@
                 normally all code executed within a transaction scope will run in that
                 transaction. However, there are several options specifying behavior if
                 a transactional method is executed when a transaction context already
-                exists: for example, simply running in the existing transaction (the
-                most common case); or suspending the existing transaction and creating
-                a new transaction. Spring offers all of the transaction propagation
-                options familiar from EJB CMT.</para>
+                exists: for example, simply continue running in the existing transaction
+                (the common case); or suspending the existing transaction and creating
+                a new transaction. <emphasis>Spring offers all of the transaction propagation
+                options familiar from EJB CMT</emphasis>.</para>
             </listitem>
             <listitem>
                 <para><emphasis role="bold">Timeout</emphasis>: how long
@@ -216,8 +212,8 @@
         </itemizedlist>
         <para>These settings reflect standard transactional concepts. If necessary,
         please refer to a resource discussing transaction isolation levels and other
-        core transaction concepts: understanding such core concepts is essential to
-        using Spring or indeed any other transaction management solution.</para>
+        core transaction concepts because understanding such core concepts is essential
+        to using the Spring Framework or indeed any other transaction management solution.</para>
         <para>The <interfacename>TransactionStatus</interfacename> interface provides a simple
         way for transactional code to control transaction execution and query
         transaction status. The concepts should be familiar, as they are common to
@@ -234,7 +230,7 @@
         management in Spring, defining the correct
         <interfacename>PlatformTransactionManager</interfacename> implementation is
         absolutely essential. In good Spring fashion, this important definition typically
-        is made using IoC.</para>
+        is made using via Dependency Injection.</para>
         <para><interfacename>PlatformTransactionManager</interfacename> implementations
         normally require knowledge of the environment in which they work: JDBC, JTA,
         Hibernate, etc The following examples from the
@@ -256,11 +252,10 @@
         <programlisting><![CDATA[<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
   <property name="dataSource" ref="dataSource"/>
 </bean>]]></programlisting>
-        <para>If we use JTA, as in the <literal>dataAccessContext-jta.xml</literal> file
-        from the same sample application, we need to use a container
-        <interfacename>DataSource</interfacename>, obtained via JNDI, and a
-        <classname>JtaTransactionManager</classname> implementation. The
-        <classname>JtaTransactionManager</classname> doesn't need to know about the
+        <para>If we use JTA, as in the <filename>''dataAccessContext-jta.xml''</filename> file
+        from the same sample application, we use a container <interfacename>DataSource</interfacename>,
+        obtained via JNDI, and the <classname>JtaTransactionManager</classname> implementation.
+        The <classname>JtaTransactionManager</classname> doesn't need to know about the
         <interfacename>DataSource</interfacename>, or any other specific resources, as
         it will use the  container's global transaction management infrastructure.</para>
         <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -280,22 +275,23 @@ xsi:schemaLocation="
 </beans>]]></programlisting>
         <note>
             <para>The above definition of the <literal>'dataSource'</literal> bean uses the
-            <literal>'jndi-lookup'</literal> tag from the <literal>'jee'</literal> namespace.
-            For more information on schema-based configuration, see <xref linkend="xsd-config"/>,
+            <literal>&lt;jndi-lookup/&gt;</literal> tag from the <literal>'jee'</literal>
+            namespace. For more information on schema-based configuration, see <xref linkend="xsd-config"/>,
             and for more information on the <literal>&lt;jee/&gt;</literal> tags
             see the section entitled <xref linkend="xsd-config-body-schemas-jee"/>.</para>
         </note>
-        <para>We can use Hibernate local transactions easily, as shown in the
-        following examples from the Spring <emphasis role="bold">PetClinic</emphasis>
+        <para>We can also use Hibernate local transactions easily, as shown in the
+        following examples from the Spring Framework's  <emphasis role="bold">PetClinic</emphasis>
         sample application. In this case, we need to define a Hibernate
         <classname>LocalSessionFactoryBean</classname>, which application code will
         use to obtain Hibernate <interfacename>Session</interfacename> instances.</para>
         <para>The <interfacename>DataSource</interfacename> bean definition will be
-        similar to one of the above examples, and is not shown. (If it is a container
-        <interfacename>DataSource</interfacename>, it should be non-transactional as
-        Spring, rather than the container, will manage transactions.)</para>
-        <para>The <literal>'txManager'</literal> bean in this case is of class
-        <classname>HibernateTransactionManager</classname>. In the same way as the
+        similar to the one shown previously (and thus is not shown). If the
+        <interfacename>DataSource</interfacename> is managed by the JEE container it should
+        be non-transactional as the Spring Framework, rather than the JEE container, will
+        manage transactions.</para>
+        <para>The <literal>'txManager'</literal> bean in this case is of the
+        <classname>HibernateTransactionManager</classname> type. In the same way as the
         <classname>DataSourceTransactionManager</classname> needs a reference to the
         <interfacename>DataSource</interfacename>, the
         <classname>HibernateTransactionManager</classname> needs a reference to the
@@ -318,17 +314,17 @@ xsi:schemaLocation="
   <property name="sessionFactory" ref="sessionFactory" />
 </bean>]]></programlisting>
         <para>With Hibernate and JTA transactions, we can simply use the
-            <classname>JtaTransactionManager</classname> as with JDBC or any other resource strategy.</para>
+        <classname>JtaTransactionManager</classname> as with JDBC or any other resource strategy.</para>
         <programlisting><![CDATA[<bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>]]></programlisting>
         <para>Note that this is identical to JTA configuration for any resource,
-            as these are global transactions, which can enlist any transactional
-            resource.</para>
-        <para>
-            <remark>In all these cases, application code won't need to change at
+        as these are global transactions, which can enlist any transactional
+        resource.</para>
+        <remark>
+            <para>In all these cases, application code will not need to change at
             all. We can change how transactions are managed merely by changing
             configuration, even if that change means moving from local to global
-            transactions or vice versa.</remark>
-        </para>
+            transactions or vice versa.</para>
+        </remark>
     </section>
     <section>
         <title>Resource synchronization with transactions</title>
@@ -342,8 +338,7 @@ xsi:schemaLocation="
         persistence API (JDBC, Hibernate, JDO, etc), ensures that these resources
         are obtained and handled properly in terms of proper
         creation/reuse/cleanup and trigger (optionally) transaction
-        synchronization via the relevant
-        <interfacename>PlatformTransactionManager</interfacename>.</para>
+        synchronization via the relevant <interfacename>PlatformTransactionManager</interfacename>.</para>
         <section>
             <title>High-level approach</title>
             <para>The preferred approach is to use Spring's highest level
@@ -352,11 +347,11 @@ xsi:schemaLocation="
             transaction synchronization of the resources and exception mapping so
             that user data access code doesn't have to worry about these concerns at
             all, but can concentrate purely on non-boilerplate persistence logic.
-            Generally, the same<emphasis> template</emphasis> approach is used
-            for all persistence APIs, with examples such as
+            Generally, the same <emphasis>template</emphasis> approach is used
+            for all persistence APIs, with examples including the
             <classname>JdbcTemplate</classname>, <classname>HibernateTemplate</classname>,
-            <classname>JdoTemplate</classname>, etc These integration classes are
-            detailed in subsequent chapters of this reference documentation.</para>
+            and <classname>JdoTemplate</classname> classes (detailed in subsequent chapters
+            of this reference documentation.</para>
         </section>
         <section>
             <title>Low-level approach</title>
@@ -366,7 +361,7 @@ xsi:schemaLocation="
             <classname>PersistenceManagerFactoryUtils</classname> (for JDO), and so on.
             When it is preferable for application code to deal directly with the
             resource types of the native persistence APIs, these classes ensure that
-            proper Spring-managed instances are obtained, transactions are
+            proper Spring Framework-managed instances are obtained, transactions are
             (optionally) synchronized, and exceptions which happen in the process
             are properly mapped to a consistent API.</para>
             <para>For example, in the case of JDBC, instead of the traditional JDBC approach of
@@ -380,12 +375,12 @@ xsi:schemaLocation="
             the method call will trigger the creation of a new connection, which
             will be (optionally) synchronized to any existing transaction, and
             made available for subsequent reuse in that same transaction. As mentioned,
-            this has the added advantage that any <classname>SQLException</classname>
-            will be wrapped in a Spring
-            <classname>CannotGetJdbcConnectionException</classname> - one of Spring's
-            hierarchy of unchecked DataAccessExceptions. This gives you more
+            this has the added advantage that any <exceptionname>SQLException</exceptionname>
+            will be wrapped in a Spring Framework
+            <exceptionname>CannotGetJdbcConnectionException</exceptionname> - one of the Spring
+            Framework's hierarchy of unchecked DataAccessExceptions. This gives you more
             information than can easily be obtained from the
-            <classname>SQLException</classname>, and ensures portability across
+            <exceptionname>SQLException</exceptionname>, and ensures portability across
             databases: even across different persistence technologies.</para>
             <para>It should be noted that this will also work fine without Spring
             transaction management (transaction synchronization is optional), so you
@@ -483,15 +478,15 @@ xsi:schemaLocation="
         So, while we can still call <literal>setRollbackOnly() </literal>on the
         <interfacename>TransactionStatus</interfacename> object to roll the current
         transaction back programmatically, most often we can specify a rule that
-        <classname>MyApplicationException</classname> should always result in roll
-        back. This has the significant advantage that business objects don't need
+        <exceptionname>MyApplicationException</exceptionname> must always result in
+        rollback. This has the significant advantage that business objects don't need
         to depend on the transaction infrastructure. For example, they typically
         don't need to import any Spring APIs, transaction or other.</para>
         <para>While the EJB default behavior is for the EJB container to
         automatically roll back the transaction on a <emphasis>system
         exception</emphasis> (usually a runtime exception), EJB CMT does not roll
         back the transaction automatically on an <emphasis>application exception</emphasis>
-        (i.e. a checked exception other than <classname>java.rmi.RemoteException</classname>).
+        (i.e. a checked exception other than <exceptionname>java.rmi.RemoteException</exceptionname>).
         While the Spring default behavior for declarative transaction management follows
         EJB convention (roll back is automatic only on unchecked exceptions), it's often useful
         to customize this.</para>
@@ -581,10 +576,10 @@ public class DefaultFooService implements FooService {
 }]]></programlisting>
             <para><emphasis>(For the purposes of this example, the fact that the implementation class
             (<classname>DefaultFooService</classname>) throws
-            <classname>UnsupportedOperationException</classname> instances in the body
+            <exceptionname>UnsupportedOperationException</exceptionname> instances in the body
             of each implemented method is good; it allows us to see transactions being created
-            and then rolled back in response to <classname>UnsupportedOperationException</classname>
-            instances being thrown.)</emphasis></para>
+            and then rolled back in response to the <exceptionname>UnsupportedOperationException</exceptionname>
+            instance being thrown.)</emphasis></para>
             <para>Let's assume that the first two methods of the <interfacename>FooService</interfacename>
             interface (<literal>getFoo(String)</literal> and <literal>getFoo(String, String)</literal>)
             have to execute in the context of a transaction with read-only semantics, and that
@@ -708,8 +703,8 @@ public class DefaultFooService implements FooService {
 }]]></programlisting>
             <para>The output from running the above program will look something
             like this. <emphasis>(Please note that the Log4J output and the attendant stacktrace
-            from the <classname>UnsupportedOperationException</classname> thrown by the
-            <literal>insertFoo(..)</literal> method of the
+            from the <exceptionname>UnsupportedOperationException</exceptionname> thrown by the
+            <methodname>insertFoo(..)</methodname> method of the
             <classname>DefaultFooService</classname> class have been truncated in
             the interest of clarity.)</emphasis></para>
             <programlisting>    <lineannotation><emphasis role="bold">&lt;!-- the Spring container is starting up... --&gt;</emphasis></lineannotation><![CDATA[
@@ -732,7 +727,7 @@ public class DefaultFooService implements FooService {
 [TransactionInterceptor] - Invoking rollback for transaction on x.y.service.FooService.insertFoo
         due to throwable [java.lang.UnsupportedOperationException]
 
-   ]]><lineannotation><emphasis role="bold">&lt;!-- and the transaction is rolled back (by default, <classname>RuntimeException</classname> instances cause rollback) --&gt;</emphasis></lineannotation><![CDATA[
+   ]]><lineannotation><emphasis role="bold">&lt;!-- and the transaction is rolled back (by default, <exceptionname>RuntimeException</exceptionname> instances cause rollback) --&gt;</emphasis></lineannotation><![CDATA[
 [DataSourceTransactionManager] - Rolling back JDBC transaction on Connection
         [org.apache.commons.dbcp.PoolableConnection@a53de4]
 [DataSourceTransactionManager] - Releasing JDBC Connection after transaction
@@ -744,7 +739,36 @@ Exception in thread "main" java.lang.UnsupportedOperationException
 	at $Proxy0.insertFoo(Unknown Source)
 	at Boot.main(Boot.java:11)]]></programlisting>
         </section>
-        <section>
+        <section id="transaction-declarative-rolling-back">
+            <title>Rolling back</title>
+            <para>The previous section outlined the basics of how to specify the transactional
+            settings for the classes, typically service layer classes, in your application in a
+            declarative fashion. This section describes how you can control the rollback of
+            transactions in a simple declarative fashion.</para>
+            <para>The easiest (and indeed recommended way) to indicate to the Spring Framework's
+            transaction infrastructure that a transaction's work is to be rolled back is to
+            throw an <exceptionname>Exception</exceptionname> from code that is currently
+            executing in the context of a transaction. The Spring Framework's
+            transaction infrastructure code will catch any unhandled <exceptionname>Exception</exceptionname>
+            as it bubbles up the call stack, and will mark the transaction for rollback.</para>
+            <para>However, please note that the Spring Framework's transaction infrastructure code
+            will, by default, <emphasis>only</emphasis> mark a transaction for rollback in the case
+            of runtime, unchecked exceptions; that is, when the thrown exception an instance or subclass of
+            <exceptionname>RuntimeException</exceptionname>. (<literal>Errors</literal> will also - by default -
+            result in a rollback.) Checked exceptions that are thrown from a transactional method will
+            <emphasis>not</emphasis> result in the transaction being rolled back.</para>
+            <para>So much for the default settings; these settings, namely exactly which
+            <exceptionname>Exception</exceptionname> types mark a transaction for rollback, can of course
+            be changed. Find below a snippet of XML configuration that demonstrates how one would
+            configure rollback for a checked, application-specific <exceptionname>Exception</exceptionname> type.</para>
+            <programlisting><![CDATA[<tx:advice id="txAdvice" transaction-manager="txManager">
+  <tx:attributes>
+	 <tx:method name="get*" read-only="false" ]]><lineannotation><emphasis role="bold">rollback-for="BingoException"</emphasis></lineannotation><![CDATA[/>
+	 <tx:method name="*"/>
+  </tx:attributes>
+</tx:advice>]]></programlisting>
+        </section>
+        <section id="transaction-declarative-diff-tx">
             <title>Applying different transactional semantics to different beans</title>
             <para>Let's now consider the scenario where you have a number of service layer objects,
             and you want to apply <emphasis>totally different</emphasis> transactional semantics
@@ -754,10 +778,9 @@ Exception in thread "main" java.lang.UnsupportedOperationException
             attribute values.</para>
             <para>By way of an example, let's assume that all of your service layer classes
             are defined in a root <literal>'x.y.service'</literal> package. To make all
-            beans that are instances of classes (or - better - implementations of interfaces)
-            defined in the service package (or in subpackages) and that have names ending in
-            <literal>'Service'</literal> have the default transactional semantics, you could
-            write the following configuration:</para>
+            beans that are instances of classes defined in said package (or in subpackages)
+            and that have names ending in <literal>'Service'</literal> have the default
+            transactional semantics, you could write the following configuration:</para>
             <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -768,32 +791,32 @@ Exception in thread "main" java.lang.UnsupportedOperationException
     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
-<aop:config>
+    <aop:config>
 
-    <aop:pointcut id="serviceOperationWithDefaultTxSemantics"
-                    expression="execution(* x.y.service..*Service.*(..))"/>
+        <aop:pointcut id="serviceOperation"
+                    expression="]]><lineannotation>execution(* x.y.service..*Service.*(..))</lineannotation><![CDATA["/>
 
-    <aop:advisor pointcut-ref="serviceOperationWithDefaultTxSemantics" 
+        <aop:advisor pointcut-ref="serviceOperation" 
                     advice-ref="txAdvice"/>
 
-</aop:config>
+    </aop:config>
 
-]]><lineannotation>&lt;!-- these two beans will have the transactional advice applied to them --&gt;</lineannotation><![CDATA[
-<bean id="fooService" class="org.xyz.service.DefaultFooService"/>
-<bean id="barService" class="org.xyz.service.extras.SimpleBarService"/>
+    ]]><lineannotation>&lt;!-- these two beans will be transactional... --&gt;</lineannotation><![CDATA[
+    <bean id="fooService" class="org.xyz.service.DefaultFooService"/>
+    <bean id="barService" class="org.xyz.service.extras.SimpleBarService"/>
 
-]]><lineannotation>&lt;!-- ...and these two beans won't --&gt;</lineannotation><![CDATA[
-<bean id="fooService" class="org.xyz.SomeService"/> ]]><lineannotation>&lt;!-- (not in the right package) --&gt;</lineannotation><![CDATA[
-<bean id="barService" class="org.xyz.service.SimpleBarManager"/> ]]><lineannotation>&lt;!-- (doesn't end in 'Service') --&gt;</lineannotation><![CDATA[
+    ]]><lineannotation>&lt;!-- ... and these two beans won't --&gt;</lineannotation><![CDATA[
+    <bean id="fooService" class="org.xyz.SomeService"/> ]]><lineannotation>&lt;!-- (not in the right package) --&gt;</lineannotation><![CDATA[
+    <bean id="barService" class="org.xyz.service.SimpleBarManager"/> ]]><lineannotation>&lt;!-- (doesn't end in 'Service') --&gt;</lineannotation><![CDATA[
 
-<tx:advice id="txAdvice">
-    <tx:attributes>
-        <tx:method name="get*" read-only="true"/>
-        <tx:method name="*"/>
-    </tx:attributes>
-</tx:advice>
+    <tx:advice id="txAdvice">
+        <tx:attributes>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
 
-]]><lineannotation>&lt;!-- other transaction infrastructure beans such as a <interfacename>PlatformTransactionManager</interfacename> omitted... --&gt;</lineannotation><![CDATA[
+    ]]><lineannotation>&lt;!-- other transaction infrastructure beans such as a <interfacename>PlatformTransactionManager</interfacename> omitted... --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
         </section>
@@ -805,18 +828,17 @@ Exception in thread "main" java.lang.UnsupportedOperationException
 				are using at least Java 5 (Tiger).</para>
 			</note>
             <para>In addition to the XML-based declarative approach to transaction configuration,
-            you can also use an annotation-based declarative approach to transaction configuration
-            via the <interfacename>@Transactional</interfacename> annotation.</para>
-            <para>Declaring transaction semantics directly in the Java source code
-            puts the declarations much closer to the affected code, and there is
-            generally not much danger of undue coupling, since typically, code that
-            is deployed as transactional is always deployed that way.</para>
+            you can also use an annotation-based approach to transaction configuration. Declaring
+            transaction semantics directly in the Java source code puts the declarations much
+            closer to the affected code, and there is generally not much danger of undue coupling,
+            since code that is meant to be used transactionally is almost always deployed that way
+            anyway.</para>
             <para>The ease-of-use afforded by the use of the <interfacename>@Transactional</interfacename>
             annotation is best illustrated with an example, after which all of the details
-            will be explained. Consider the following interface definition:</para>
-            <programlisting><lineannotation>&lt;!-- the service (facade) interface that we want to make transactional --&gt;</lineannotation><![CDATA[
+            will be explained. Consider the following class definition:</para>
+            <programlisting><lineannotation>&lt;!-- the service class that we want to make transactional --&gt;</lineannotation><![CDATA[
 ]]><emphasis role="bold">@Transactional</emphasis><![CDATA[
-public interface FooService {
+public class DefaultFooService implements FooService {
 
     Foo getFoo(String fooName);
 
@@ -826,9 +848,9 @@ public interface FooService {
 
     void updateFoo(Foo foo);
 }]]></programlisting>
-            <para>Implementations of the above <interfacename>FooService</interfacename> interfaces
-            that are declared as beans in the Spring container can be made transactional by
-            adding merely <emphasis>one</emphasis> line of XML configuration, like so:</para>
+            <para>When the above POJO is defined as a bean in a Spring IoC container, said bean
+            instance can be made transactional by adding merely <emphasis>one</emphasis> line of
+            XML configuration, like so:</para>
             <programlisting><lineannotation>&lt;!-- from the file <literal>'context.xml'</literal> --&gt;</lineannotation><![CDATA[
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -848,7 +870,7 @@ public interface FooService {
 
   ]]><lineannotation>&lt;!-- a <interfacename>PlatformTransactionManager</interfacename> is still required --&gt;</lineannotation><![CDATA[
   <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-    ]]><lineannotation>&lt;!-- sourced from somewhere else --&gt;</lineannotation><![CDATA[
+    ]]><lineannotation>&lt;!-- (this dependency is defined somewhere else) --&gt;</lineannotation><![CDATA[
     <property name="dataSource" ref="dataSource"/>
   </bean>
   
@@ -861,183 +883,227 @@ public interface FooService {
                 if the bean name of the <interfacename>PlatformTransactionManager</interfacename>
                 that you want to wire in has the name <literal>'transactionManager'</literal>.
                 If the <interfacename>PlatformTransactionManager</interfacename> bean
-                that you want to wire in has any other name, then you have to be explicit
-                and use the <literal>'transaction-manager'</literal> attribute as in the example
-                above.</para>
+                that you want to dependency inject has any other name, then you have to be
+                explicit and use the <literal>'transaction-manager'</literal> attribute as
+                in the example above.</para>
             </tip>
-            <para>The <interfacename>@Transactional</interfacename> annotation may
-            be placed before an interface definition, a method on an interface, a
-            class definition, or a method on a class.</para>
+            <sidebar>
+                <title>Method visibility and <interfacename>@Transactional</interfacename></title>
+                <para>The <interfacename>@Transactional</interfacename> annotation should only be
+                applied to methods with <emphasis>public</emphasis> visibility. If you do
+                annotate protected, private or package-visible methods with the
+                <interfacename>@Transactional</interfacename> annotation, no error will be raised,
+                but the annotated method will not exhibit the configured transactional settings.</para>
+            </sidebar>
+            <para>The <interfacename>@Transactional</interfacename> annotation may be placed
+            before an interface definition, a method on an interface, a class definition, or a
+            <emphasis>public</emphasis> method on a class. However, please note that the mere
+            presence of the <interfacename>@Transactional</interfacename> annotation is not
+            enough to actually turn on the transactional behavior - the
+            <interfacename>@Transactional</interfacename> annotation <emphasis>is simply metadata</emphasis>
+            that can be consumed by something that is <interfacename>@Transactional</interfacename>-aware
+            and that can use said metadata to configure the appropriate beans with transactional
+            behavior. In the case of the above example, it is the presence of the
+            <literal>&lt;tx:annotation-driven/&gt;</literal> element that
+            <emphasis>switches on</emphasis> the transactional behavior.</para>
+            <para>The Spring team's recommendation is that you place the
+            <interfacename>@Transactional</interfacename> annotation on the concrete class
+            (or method of a concrete class), as opposed to on any interface(s) that the class
+            may implement. You certainly can place the <interfacename>@Transactional</interfacename>
+            annotation on an interface, but this will only work as you would expect it to if
+            you are using interface-based proxies. Because annotations are <emphasis>not
+            inherited</emphasis> it means that if you are using class-based proxying then
+            the transaction settings will not be recognised by the class-based proxying
+            infrastructure and the object will not be wrapped in a transaction proxy (which
+            would be decidedly <emphasis>bad</emphasis>). So please do take the Spring teams's
+            advice and use the <interfacename>@Transactional</interfacename> annotation on
+            concrete classes.</para>
             <note>
-                <para>The mere presence of the <interfacename>@Transactional</interfacename>
-                annotation is not enough to actually turn on the transactional behavior - the
-                <interfacename>@Transactional</interfacename> annotation is simply metadata
-                that can be consumed by something that is
-                <interfacename>@Transactional</interfacename>-aware and that can use the
-                transactional metadata to apply transactional behavior.</para>
-                <para>In the case of the above example, it is the presence of the
-                <literal>&lt;tx:annotation-driven/&gt;</literal> element that
-                <emphasis>switches on</emphasis> the transactional behavior.</para>
+                <para>When using the <interfacename>@Transactional</interfacename> style of
+                declarative transaction demarcation you can control whether or not interface-
+                or class-based proxies are created via the presence and value of the
+                "<literal>proxy-target-class</literal>" attribute on the attendant
+                <literal>&lt;tx:annotation-driven/&gt;</literal> element. If the value
+                of the boolean-style value of the "<literal>proxy-target-class</literal>"
+                attribute is set to "<literal>true</literal>", then class-based proxying will
+                be in effect (and this currently requires the presence of the CGLIB library
+                (cglib.jar) on the classpath). If the value of the "<literal>proxy-target-class</literal>"
+                attribute is set to "<literal>false</literal>" or if the attribute is omitted,
+                then standard JDK interface-based proxying will be in effect.</para>
             </note>
-            <para>In keeping with one of the Spring framework's central tenets, namely 'do
-            the intuitive thing', Spring's treatment of the <interfacename>@Transactional</interfacename>
-            annotation with regard to inheritance just makes sense. If you annotate an interface
-            at the class level with the <interfacename>@Transactional</interfacename>
-            annotation, then all implementations of that interface will inherit the
-            transaction settings applied to the interface. This is the direct
-            opposite of the usual semantics that apply to annotations, where annotations on
-            interfaces and methods are <emphasis role="bold">never</emphasis> inherited.
-            With Spring, you can override the default transaction settings that may be inherited from a
-            superclass or interface by specifying your own <interfacename>@Transactional</interfacename>
-            values; basically, the most derived location takes precedence when evaluating
-            the transaction semantics of a method. In the case of the following example, the
-            <interfacename>FooService</interfacename>interface is annotated with default transaction
-            settings, but the <interfacename>@Transactional</interfacename> annotation on the
-            <literal>updateFoo(Foo)</literal> method on the <classname>DefaultFooService</classname>
-            class takes precedence over the transactional settings inherited from the
-            <interfacename>FooService</interfacename> interface.</para>
+            <para>The most derived location takes precedence when evaluating the transactional
+            settings for a method. In the case of the following example, the
+            <classname>DefaultFooService</classname> class is annotated with the settings for
+            a read-only transaction, but the <interfacename>@Transactional</interfacename>
+            annotation on the <methodname>updateFoo(Foo)</methodname> method in the same class
+            takes precedence over the transactional settings defined in the class level annotation.</para>
+
             <programlisting><![CDATA[@Transactional(readOnly = true)
-public interface FooService {
-
-    Foo getFoo(String fooName);
-
-    void updateFoo(Foo foo);
-}]]></programlisting>
-            <programlisting><![CDATA[public class DefaultFooService implements FooService {
+public class DefaultFooService implements FooService {
 
     public Foo getFoo(String fooName) {
         ]]><lineannotation>// do something</lineannotation><![CDATA[
     }
 
-    ]]><lineannotation>// <emphasis role="bold">these</emphasis> settings have precedence</lineannotation><![CDATA[
+    ]]><lineannotation>// <emphasis role="bold">these</emphasis> settings have precedence for this method</lineannotation><![CDATA[
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public void updateFoo(Foo foo) {
         ]]><lineannotation>// do something</lineannotation><![CDATA[
     }
 }]]></programlisting>
-            <note>
-                <para>Please note that this 'plain common sense' approach to inheriting
-                <interfacename>@Transactional</interfacename> settings <emphasis>only</emphasis>
-                applies in the case of SpringAOP-driven transaction management. If you are
-                using another transaction management strategy, such as AspectJ-driven transactions,
-                then the usual Java rules with regard to annotations apply
-                (i.e. there is no inheritance).</para>
-            </note>
+
             <section>
                 <title><interfacename>@Transactional</interfacename> settings</title>
-                <para>Used in its simplest form, the <interfacename>@Transactional</interfacename> annotation
-                specifies that an interface, class, or method must be transactional. The default
-                transaction semantics are read/write, <literal>PROPAGATION_REQUIRED</literal>,
-                <literal>ISOLATION_DEFAULT</literal>, <literal>TIMEOUT_DEFAULT</literal>, with
-                rollback on a <classname>RuntimeException</classname>, but not
-                <classname>Exception</classname>.</para>
-                    <para>Optional properties of the annotation modify transaction settings.</para>
-                    <para>
-                        <table>
-                            <title>Properties of the <interfacename>Transactional</interfacename> Annotation</title>
-                            <tgroup cols="3">
-                                <thead>
-                                    <row>
-                                        <entry>Property</entry>
-                                        <entry>Type</entry>
-                                        <entry>Description</entry>
-                                    </row>
-                                </thead>
-                                <tbody>
-                                    <row>
-                                        <entry>
-                                            <literal>propagation</literal>
-                                        </entry>
-                                        <entry>enum: <classname>Propagation</classname></entry>
-                                        <entry>optional propagation setting (defaults to <literal>PROPAGATION_REQUIRED</literal>)</entry>
-                                    </row>
-                                    <row>
-                                        <entry>
-                                            <literal>isolation</literal>
-                                        </entry>
-                                        <entry>enum: <classname>Isolation</classname></entry>
-                                        <entry>optional isolation level (defaults to <literal>ISOLATION_DEFAULT</literal>)</entry>
-                                    </row>
-                                    <row>
-                                        <entry>
-                                            <literal>readOnly</literal>
-                                        </entry>
-                                        <entry>boolean</entry>
-                                        <entry>read/write vs. read-only transaction; defaults to <literal>false</literal>, i.e.
-                                        transactions are read/write)</entry>
-                                    </row>
-                                    <row>
-                                        <entry>
-                                            <literal>rollbackFor</literal>
-                                        </entry>
-                                        <entry>an array of <classname>Class</classname> objects, which
-                                        must be derived from <classname>Throwable</classname></entry>
-                                        <entry>an optional array of exception classes which <emphasis role="bold">must</emphasis>
-                                    cause rollback. By default, checked exceptions do not roll
-                                    back, unchecked (<classname>RuntimeException</classname> derived) do
-                                    cause roll back</entry>
-                                    </row>
-                                    <row>
-                                        <entry>
-                                            <literal>rollbackForClassname</literal>
-                                        </entry>
-                                        <entry>an array of <classname></classname> class names. Classes must be derived
-                                        from <classname>Throwable</classname></entry>
-                                        <entry>an optional array of names of exception classes that
-                                        <emphasis role="bold">must</emphasis> cause rollback</entry>
-                                    </row>
-                                    <row>
-                                        <entry>
-                                            <literal>noRollbackFor</literal>
-                                        </entry>
-                                        <entry>an array of <classname>Class</classname> objects, which
-                                        must be derived from <classname>Throwable</classname></entry>
-                                        <entry>an optional array of exception classes that must
-                                        <emphasis role="bold">not</emphasis> cause rollback.</entry>
-                                    </row>
-                                    <row>
-                                        <entry>
-                                            <literal>noRollbackForClassname</literal>
-                                        </entry>
-                                        <entry>an array of <classname>String</classname> class names, which
-                                        must be derived from <classname>Throwable</classname></entry>
-                                        <entry>an optional array of names of exception classes which must
-                                        <emphasis role="bold">not</emphasis> cause rollback</entry>
-                                    </row>
-                                </tbody>
-                            </tgroup>
-                        </table>
-                    </para>
-                    <para><emphasis>We recommend you consult the Javadoc for the
-                    <interfacename>@Transactional</interfacename> annotation since it describes the above
-                    properties and their attendant values in much greater detail.</emphasis></para>
-                </section>
+                <para>The <interfacename>@Transactional</interfacename> annotation is
+                metadata that specifies that an interface, class, or method must have
+                transactional semantics; for example, <quote>start a brand new read-only
+                transaction when this method is invoked, suspending any existing
+                transaction</quote>. The default <interfacename>@Transactional</interfacename>
+                settings are:</para>
+                <itemizedlist>
+                    <listitem>
+                        <para>The propagation setting is <literal>PROPAGATION_REQUIRED</literal></para>
+                    </listitem>
+                    <listitem>
+                        <para>The isolation level is <literal>ISOLATION_DEFAULT</literal></para>
+                    </listitem>
+                    <listitem>
+                        <para>The transaction is read/write</para>
+                    </listitem>
+                    <listitem>
+                        <para>The transaction timeout defaults to the default timeout of the
+                        underlying transaction system, or or none if timeouts are not supported</para>
+                    </listitem>
+                    <listitem>
+                        <para>Any <exceptionname>RuntimeException</exceptionname> will trigger
+                        rollback, and any checked <exceptionname>Exception</exceptionname>
+                        will not</para>
+                    </listitem>
+                </itemizedlist>
+                <para>These default settings can, of course, be changed; the various
+                properties of the <interfacename>@Transactional</interfacename> annotation
+                are summarized in the following table:</para>
+                <para>
+                    <table>
+                        <title><interfacename>@Transactional</interfacename> properties</title>
+                        <tgroup cols="3">
+                            <thead>
+                                <row>
+                                    <entry>Property</entry>
+                                    <entry>Type</entry>
+                                    <entry>Description</entry>
+                                </row>
+                            </thead>
+                            <tbody>
+                                <row>
+                                    <entry>
+                                        <literal>propagation</literal>
+                                    </entry>
+                                    <entry>enum: <classname>Propagation</classname></entry>
+                                    <entry>optional propagation setting</entry>
+                                </row>
+                                <row>
+                                    <entry>
+                                        <literal>isolation</literal>
+                                    </entry>
+                                    <entry>enum: <classname>Isolation</classname></entry>
+                                    <entry>optional isolation level</entry>
+                                </row>
+                                <row>
+                                    <entry>
+                                        <literal>readOnly</literal>
+                                    </entry>
+                                    <entry>boolean</entry>
+                                    <entry>read/write vs. read-only transaction</entry>
+                                </row>
+                                <row>
+                                    <entry>
+                                        <literal>timeout</literal>
+                                    </entry>
+                                    <entry>int (in seconds granularity)</entry>
+                                    <entry>the transaction timeout</entry>
+                                </row>
+                                <row>
+                                    <entry>
+                                        <literal>rollbackFor</literal>
+                                    </entry>
+                                    <entry>an array of <classname>Class</classname> objects, which
+                                    must be derived from <classname>Throwable</classname></entry>
+                                    <entry>an optional array of exception classes which
+                                    <emphasis role="bold">must</emphasis> cause rollback</entry>
+                                </row>
+                                <row>
+                                    <entry>
+                                        <literal>rollbackForClassname</literal>
+                                    </entry>
+                                    <entry>an array of <classname></classname> class names. Classes
+                                    must be derived from <classname>Throwable</classname></entry>
+                                    <entry>an optional array of names of exception classes that
+                                    <emphasis role="bold">must</emphasis> cause rollback</entry>
+                                </row>
+                                <row>
+                                    <entry>
+                                        <literal>noRollbackFor</literal>
+                                    </entry>
+                                    <entry>an array of <classname>Class</classname> objects, which
+                                    must be derived from <classname>Throwable</classname></entry>
+                                    <entry>an optional array of exception classes that
+                                    <emphasis role="bold">must not</emphasis> cause rollback.</entry>
+                                </row>
+                                <row>
+                                    <entry>
+                                        <literal>noRollbackForClassname</literal>
+                                    </entry>
+                                    <entry>an array of <classname>String</classname> class names, which
+                                    must be derived from <classname>Throwable</classname></entry>
+                                    <entry>an optional array of names of exception classes that
+                                    <emphasis role="bold">must not</emphasis> cause rollback</entry>
+                                </row>
+                            </tbody>
+                        </tgroup>
+                    </table>
+                </para>
+            </section>
         </section>
         <section id="transaction-declarative-applying-more-than-just-tx-advice">
             <title>Advising transactional operations</title>
+            
             <para>Consider the situation where you have an instance of a class, and
             you would like to execute <emphasis>both</emphasis> transactional
             <emphasis>and</emphasis> (to keep things simple) some basic profiling
             advice. So how do you effect this in the context of using
             <literal>&lt;tx:annotation-driven/&gt;</literal>?</para>
-            <para>What we want to see when we invoke the
-            <literal>updateFoo(Foo)</literal> method is a) some
-            profiling aspect starting up, then b) transactional advice being applied
-            (by starting or participating in a transaction depending on the configured
-            transactional metadata), then c) the method on the advised object executing,
-            then d) the transaction committing (we'll assume a sunny day scenario here),
-            and then finally e) the profiling aspect reporting (somehow) exactly
-            how long the whole method invocation took.</para>
+            <para>What we want to see when we invoke the <methodname>updateFoo(Foo)</methodname>
+            method is:</para>
+
+            <itemizedlist>
+                <listitem>
+                    <para>the configured profiling aspect starting up,</para>
+                </listitem>
+                <listitem>
+                    <para>then the transactional advice executing,</para>
+                </listitem>
+                <listitem>
+                    <para>then the method on the advised object executing</para>
+                </listitem>
+                <listitem>
+                    <para>then the transaction committing (we'll assume a sunny day scenario here),</para>
+                </listitem>
+                <listitem>
+                    <para>and then finally the profiling aspect reporting (somehow) exactly
+                    how long the whole transactional method invocation took</para>
+                </listitem>
+            </itemizedlist>
+
             <note>
-                <para>This chapter is not concerned with explaining AOP (except as it
-                applies to transactions). Please see the chapter entitled
+                <para>This chapter is not concerned with explaining AOP in any great detail
+                (except as it applies to transactions). Please see the chapter entitled
                 <xref linkend="aop"/> for detailed coverage of the various bits and pieces
                 of the following AOP configuration (and AOP in general).</para>
             </note>
-            <para>Here is the code for a (naively) simple profiling aspect.
-            <emphasis>(Please note that the ordering of advice is controlled via the
-            <interfacename>Ordered</interfacename> interface. For full details on
-            advice ordering, consult the section entitled
+            <para>Here is the code for a simple profiling aspect. <emphasis>(Please note that the
+            ordering of advice is controlled via the <interfacename>Ordered</interfacename>
+            interface. For full details on advice ordering, see the section entitled
             <xref linkend="aop-ataspectj-advice-ordering"/>.)</emphasis></para>
             <programlisting><![CDATA[package x.y;
 
@@ -1179,69 +1245,52 @@ public class SimpleProfiler implements Ordered {
         </section>
         <section id="transaction-declarative-aspectj">
             <title>Using <interfacename>@Transactional</interfacename> with AspectJ</title>
-            <para>It is also possible to use Spring's <interfacename>@Transactional</interfacename>
-            support outside of a Spring container by means of an AspectJ aspect shipped in
-            <literal>spring-aspects.jar</literal>. To use this support you first annotate implementation types and methods 
-            with the
-            <interfacename>@Transactional</interfacename> annotation, and then you must link (weave)
-            your application with the
+            <para>It is also possible to use the Spring Framework's
+            <interfacename>@Transactional</interfacename> support outside of a Spring container
+            by means of an AspectJ aspect. To use this support you must first
+            annotate your classes (and optionally your classes' methods with the
+            <interfacename>@Transactional</interfacename> annotation, and then you must link
+            (weave) your application with the
             <classname>org.springframework.transaction.aspectj.AnnotationTransactionAspect</classname>
-            defined in <literal>spring-aspects.jar</literal>. The aspect must also be configured with
-            a transaction manager. You could of course use Spring to dependency inject the aspect, but
-            since we're focusing here on applications running outside of a Spring container, we'll
-            show you how to do it programmatically</para>
+            defined in the <filename class="libraryfile">spring-aspects.jar</filename> file.
+            The aspect must also be configured with a transaction manager. You could of course
+            use the Spring Framework's IoC container to take care of dependency injecting the 
+            aspect, but since we're focusing here on applications running outside of a Spring
+            container, we'll show you how to do it programmatically.</para>
             <note>
                 <para>Prior to continuing, you may well want to read the previous sections entitled
                 <xref linkend="transaction-declarative-annotations"/> and <xref linkend="aop"/>
                 respectively.</para>
             </note>
             <programlisting><lineannotation>// construct an appropriate transaction manager </lineannotation><![CDATA[
-DataSourceTransactionManager txManager = new  DataSourceTransactionManager(getDataSource());
+DataSourceTransactionManager txManager = new DataSourceTransactionManager(getDataSource());
 
 ]]><lineannotation>// configure the <classname>AnnotationTransactionAspect</classname> to use it; this must be done before executing any transactional methods</lineannotation><![CDATA[
 AnnotationTransactionAspect.aspectOf().setTransactionManager (txManager); ]]></programlisting>
         
-	        <para>When using this 
-			aspect, you must annotate the <emphasis>implementation</emphasis> class 
-	        (and/or methods within that class), <emphasis>not</emphasis> the interface 
-	        (if any) that the class implements. AspectJ follows Java's rule that annotations on 
-	        interfaces are <emphasis>not inherited</emphasis>.</para>
+            <note>
+	            <para>When using this aspect, you must annotate the <emphasis>implementation</emphasis>
+	            class (and/or methods within that class), <emphasis>not</emphasis> the interface 
+	            (if any) that the class implements. AspectJ follows Java's rule that annotations on 
+	            interfaces are <emphasis>not inherited</emphasis>.</para>
+	        </note>
 	        
-	        <para>A @Transactional annotation on a class specifies the default transaction
-	        semantics for the execution of any <emphasis>public</emphasis> operation in the class.</para>
-	        <para>A @Transactional annotation on a method within the class overrides the
-	        default transaction semantics given by the class annotation (if present). 
-	        Methods with public, protected, and default visibility may all be annotated.
-	        Annotating protected and default visibility methods directly is the only way
-	        to get transaction demarcation for the execution of such operations.</para> 
+	        <para>The <interfacename>@Transactional</interfacename> annotation on a class specifies
+	        the default transaction semantics for the execution of any <emphasis>public</emphasis>
+	        method in the class.</para>
+	        <para>The <interfacename>@Transactional</interfacename> on a method within the class
+	        overrides the default transaction semantics given by the class annotation (if present). 
+	        Methods with <literal>public</literal>, <literal>protected</literal>, and default
+	        visibility may all be annotated. Annotating <literal>protected</literal> and default
+	        visibility methods directly is the only way to get transaction demarcation for the
+	        execution of such method.</para> 
            
             <para>To weave your applications with the <classname>AnnotationTransactionAspect</classname>
             you must either build your application with AspectJ (see the
             <ulink url="http://www.eclipse.org/aspectj/doc/ released/devguide/index.html">AspectJ Development Guide</ulink>)
-            or use load-time weaving. See <xref linkend="aop-aj-ltw"/> for a discussion of load-time weaving with AspectJ.</para>
+            or use load-time weaving. See the section entitled <xref linkend="aop-aj-ltw"/> for a
+            discussion of load-time weaving with AspectJ.</para>
         </section>
-    </section>
-    <section id="transaction-default-settings">
-        <title>The default transaction settings</title>
-        <para>The default transaction settings (semantics) are as follows:</para>
-        <itemizedlist>
-            <listitem>
-                <para>Exception handling: A <classname>RuntimeException</classname> causes roll-back,
-                whereas a normal (checked) <classname>Exception</classname> does not.</para>
-            </listitem>
-            <listitem>
-                <para>Transactions are read/write.</para>
-            </listitem>
-            <listitem>
-                <para>Isolation level: <literal>TransactionDefinition.ISOLATION_DEFAULT</literal></para>
-            </listitem>
-            <listitem>
-                <para>Timeout: <literal>TransactionDefinition.TIMEOUT_DEFAULT</literal></para>
-            </listitem>
-        </itemizedlist>
-        <para>The <interfacename>org.springframework.transaction.TransactionDefinition</interfacename>
-        interface contains comprehensive Javadoc-style information concerning the above settings, and
-        so will not be repeated here.</para>
     </section>
     <section id="transaction-programmatic">
         <title>Programmatic transaction management</title>
