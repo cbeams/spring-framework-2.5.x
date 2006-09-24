@@ -236,7 +236,7 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 	protected ConnectionConsumer createConsumer(Connection con, Destination destination, ServerSessionPool pool)
 			throws JMSException {
 
-		if (getDurableSubscriptionName() != null && destination instanceof Topic) {
+		if (isSubscriptionDurable() && destination instanceof Topic) {
 			return con.createDurableConnectionConsumer(
 					(Topic) destination, getDurableSubscriptionName(), getMessageSelector(), pool, getMaxMessagesPerTask());
 		}

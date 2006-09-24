@@ -83,9 +83,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>For dynamic adaptation of the active number of Sessions, consider using
  * ServerSessionMessageListenerContainer.
- *
  * @author Juergen Hoeller
- * @since 2.0
  * @see #setTransactionManager
  * @see #setCacheLevel
  * @see #setCacheLevelName
@@ -94,6 +92,7 @@ import org.springframework.util.ClassUtils;
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
  * @see DefaultMessageListenerContainer102
+ * @since 2.0
  */
 public class DefaultMessageListenerContainer extends AbstractMessageListenerContainer {
 
@@ -338,7 +337,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		if (this.concurrentConsumers <= 0) {
 			throw new IllegalArgumentException("concurrentConsumers value must be at least 1 (one)");
 		}
-		if (getDurableSubscriptionName() != null && this.concurrentConsumers != 1) {
+		if (isSubscriptionDurable() && this.concurrentConsumers != 1) {
 			throw new IllegalArgumentException("Only 1 concurrent consumer supported for durable subscription");
 		}
 
@@ -480,8 +479,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 			Session sessionToUse = session;
 			boolean transactional = false;
 			if (sessionToUse == null) {
-				sessionToUse = ConnectionFactoryUtils.doGetTransactionalSession(
-						getConnectionFactory(), this.transactionalResourceFactory);
+				sessionToUse = ConnectionFactoryUtils.doGetTransactionalSession(getConnectionFactory(), this.transactionalResourceFactory);
 				transactional = (sessionToUse != null);
 			}
 			if (sessionToUse == null) {
@@ -682,15 +680,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 					logger.info("Could not refresh JMS Connection - retrying in " + this.recoveryInterval + " ms", ex);
 				}
 			}
-			if (this.recoveryInterval > 0) {
-				try {
-					Thread.sleep(this.recoveryInterval);
-				}
-				catch (InterruptedException interEx) {
-					// Re-interrupt current thread, to allow other threads to react.
-					Thread.currentThread().interrupt();
-				}
-			}
+			sleepInbetweenRecoveryAttempts();
 		}
 	}
 
@@ -709,6 +699,18 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 			DestinationResolver destResolver = getDestinationResolver();
 			if (destResolver instanceof CachingDestinationResolver) {
 				((CachingDestinationResolver) destResolver).removeFromCache(destName);
+			}
+		}
+	}
+
+	protected void sleepInbetweenRecoveryAttempts() {
+		if (this.recoveryInterval > 0) {
+			try {
+				Thread.sleep(this.recoveryInterval);
+			}
+			catch (InterruptedException interEx) {
+				// Re-interrupt current thread, to allow other threads to react.
+				Thread.currentThread().interrupt();
 			}
 		}
 	}
@@ -746,7 +748,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * <p>This implementation accepts any JMS 1.1 Connection.
 	 * @param holder the JmsResourceHolder
 	 * @return an appropriate Connection fetched from the holder,
-	 * or <code>null</code> if none found
+	 *         or <code>null</code> if none found
 	 */
 	protected Connection getConnection(JmsResourceHolder holder) {
 		return holder.getConnection();
@@ -757,7 +759,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * <p>This implementation accepts any JMS 1.1 Session.
 	 * @param holder the JmsResourceHolder
 	 * @return an appropriate Session fetched from the holder,
-	 * or <code>null</code> if none found
+	 *         or <code>null</code> if none found
 	 */
 	protected Session getSession(JmsResourceHolder holder) {
 		return holder.getSession();
@@ -776,9 +778,8 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		// Some JMS providers, such as WebSphere MQ 6.0, throw IllegalStateException
 		// in case of the NoLocal flag being specified for a Queue.
 		if (destination instanceof Topic) {
-			if (getDurableSubscriptionName() != null) {
-				return session.createDurableSubscriber(
-						(Topic) destination, getDurableSubscriptionName(), getMessageSelector(), isPubSubNoLocal());
+			if (isSubscriptionDurable()) {
+				return session.createDurableSubscriber((Topic) destination, getDurableSubscriptionName(), getMessageSelector(), isPubSubNoLocal());
 			}
 			else {
 				return session.createConsumer(destination, getMessageSelector(), isPubSubNoLocal());
@@ -805,6 +806,8 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 		private Object lastRecoveryMarker;
 
+		private boolean lastMessageSucceeded;
+
 		public void run() {
 			synchronized (activeInvokerMonitor) {
 				activeInvokerCount++;
@@ -829,6 +832,12 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 			}
 			catch (Throwable ex) {
 				clearResources();
+				if (!this.lastMessageSucceeded) {
+					// We failed more than once in a row - sleep for recovery interval
+					// even before first recovery attempt.
+					sleepInbetweenRecoveryAttempts();
+				}
+				this.lastMessageSucceeded = false;
 				boolean alreadyRecovered = false;
 				synchronized (recoveryMonitor) {
 					if (this.lastRecoveryMarker == currentRecoveryMarker) {
@@ -857,6 +866,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		private void invokeListener() throws JMSException {
 			initResourcesIfNecessary();
 			receiveAndExecute(this.session, this.consumer);
+			this.lastMessageSucceeded = true;
 		}
 
 		private void initResourcesIfNecessary() throws JMSException {

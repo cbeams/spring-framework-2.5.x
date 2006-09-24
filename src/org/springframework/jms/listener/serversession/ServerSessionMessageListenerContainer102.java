@@ -59,7 +59,7 @@ public class ServerSessionMessageListenerContainer102 extends ServerSessionMessa
 			throws JMSException {
 
 		if (isPubSubDomain()) {
-			if (getDurableSubscriptionName() != null) {
+			if (isSubscriptionDurable()) {
 				return ((TopicConnection) con).createDurableConnectionConsumer(
 						(Topic) destination, getDurableSubscriptionName(), getMessageSelector(), pool, getMaxMessagesPerTask());
 			}
@@ -89,10 +89,10 @@ public class ServerSessionMessageListenerContainer102 extends ServerSessionMessa
 	/**
 	 * This implementation overrides the superclass method to avoid using
 	 * JMS 1.1's Session <code>getAcknowledgeMode()</code> method.
-	 * The best we can do here is to check the setting on the template.
+	 * The best we can do here is to check the setting on the listener container.
 	 */
 	protected boolean isClientAcknowledge(Session session) throws JMSException {
-		return getSessionAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE;
+		return (getSessionAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);
 	}
 
 }

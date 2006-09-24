@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class SimpleMessageListenerContainer102 extends SimpleMessageListenerCont
 	 */
 	protected MessageConsumer createConsumer(Session session, Destination destination) throws JMSException {
 		if (isPubSubDomain()) {
-			if (getDurableSubscriptionName() != null) {
+			if (isSubscriptionDurable()) {
 				return ((TopicSession) session).createDurableSubscriber(
 						(Topic) destination, getDurableSubscriptionName(), getMessageSelector(), isPubSubNoLocal());
 			}
@@ -87,10 +87,10 @@ public class SimpleMessageListenerContainer102 extends SimpleMessageListenerCont
 	/**
 	 * This implementation overrides the superclass method to avoid using
 	 * JMS 1.1's Session <code>getAcknowledgeMode()</code> method.
-	 * The best we can do here is to check the setting on the template.
+	 * The best we can do here is to check the setting on the listener container.
 	 */
 	protected boolean isClientAcknowledge(Session session) throws JMSException {
-		return getSessionAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE;
+		return (getSessionAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);
 	}
 
 }

@@ -124,7 +124,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		if (this.concurrentConsumers <= 0) {
 			throw new IllegalArgumentException("concurrentConsumers value must be at least 1 (one)");
 		}
-		if (getDurableSubscriptionName() != null && this.concurrentConsumers != 1) {
+		if (isSubscriptionDurable() && this.concurrentConsumers != 1) {
 			throw new IllegalArgumentException("Only 1 concurrent consumer supported for durable subscription");
 		}
 
@@ -228,7 +228,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		// Some JMS providers, such as WebSphere MQ 6.0, throw IllegalStateException
 		// in case of the NoLocal flag being specified for a Queue.
 		if (destination instanceof Topic) {
-			if (getDurableSubscriptionName() != null) {
+			if (isSubscriptionDurable()) {
 				return session.createDurableSubscriber(
 						(Topic) destination, getDurableSubscriptionName(), getMessageSelector(), isPubSubNoLocal());
 			}
