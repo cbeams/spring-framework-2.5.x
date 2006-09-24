@@ -46,7 +46,7 @@ import org.springframework.util.xml.SimpleSaxErrorHandler;
 
 /**
  * Internal helper class for reading <code>persistence.xml</code> files.
- * 
+ *
  * @author Costin Leau
  * @author Juergen Hoeller
  * @since 2.0
@@ -91,6 +91,12 @@ class PersistenceUnitReader {
 	private final DataSourceLookup dataSourceLookup;
 
 
+	/**
+	 * Create a new PersistenceUnitReader.
+	 * @param resourcePatternResolver the ResourcePatternResolver to use for loading resources
+	 * @param dataSourceLookup the DataSourceLookup to resolve DataSource names in
+	 * <code>persistence.xml</code> files against
+	 */
 	public PersistenceUnitReader(ResourcePatternResolver resourcePatternResolver, DataSourceLookup dataSourceLookup) {
 		Assert.notNull(resourcePatternResolver, "ResourceLoader must not be null");
 		Assert.notNull(dataSourceLookup, "DataSourceLookup must not be null");
@@ -99,10 +105,20 @@ class PersistenceUnitReader {
 	}
 
 
+	/**
+	 * Parse and build all persistence unit infos defined in the specified XML file(s).
+	 * @param persistenceXmlLocation the resource location (can be a pattern)
+	 * @return the resulting PersistenceUnitInfo instances
+	 */
 	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String persistenceXmlLocation) {
 		return readPersistenceUnitInfos(new String[] {persistenceXmlLocation});
 	}
 
+	/**
+	 * Parse and build all persistence unit infos defined in the given XML files.
+	 * @param persistenceXmlLocations the resource locations (can be patterns)
+	 * @return the resulting PersistenceUnitInfo instances
+	 */
 	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String[] persistenceXmlLocations) {
 		ErrorHandler handler = new SimpleSaxErrorHandler(logger);
 		List<SpringPersistenceUnitInfo> infos = new LinkedList<SpringPersistenceUnitInfo>();
@@ -140,41 +156,26 @@ class PersistenceUnitReader {
 	/**
 	 * Validate the given stream and return a valid DOM document for parsing.
 	 */
-	protected Document validateResource(ErrorHandler handler, InputStream stream) throws ParserConfigurationException,
-			SAXException, IOException {
+	protected Document validateResource(ErrorHandler handler, InputStream stream)
+			throws ParserConfigurationException, SAXException, IOException {
 
-		// InputSource source = new InputSource(stream);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		dbf.setValidating(true);
 		dbf.setNamespaceAware(true);
 
-		dbf.setAttribute(JAXP_SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
-		Resource schemaLocation = findSchemaResource(SCHEMA_NAME);
-
 		// Set schema location only if we found one inside the classpath.
+		Resource schemaLocation = findSchemaResource(SCHEMA_NAME);
 		if (schemaLocation != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Found schema location: " + schemaLocation.getURL());
+				logger.debug("Found schema resource: " + schemaLocation.getURL());
 			}
+			dbf.setValidating(true);
+			dbf.setAttribute(JAXP_SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
 			dbf.setAttribute(JAXP_SCHEMA_SOURCE, schemaLocation.getURL().toString());
 		}
-		else if (logger.isDebugEnabled()) {
-			logger.debug("No schema location found - falling back to the XML parser");
+		else {
+			logger.debug("Schema resource [" + SCHEMA_NAME +
+					"] not found - falling back to XML parsing without schema validation");
 		}
-
-		// dbf.setAttribute(XERCES_SCHEMA_LOCATION,
-		// schemaLocation.getURL().toString());
-		/*
-		 * see if these should be used on other jdks
-		 *
-		 * dbf.setAttribute(JAXP_SCHEMA_SOURCE,
-		 * schemaLocation.getURL().toString());
-		 * dbf.setAttribute(XERCES_SCHEMA_LOCATION,
-		 * schemaLocation.getURL().toString());
-		 *
-		 * dbf.setAttribute(XML_SCHEMA_VALIDATION, Boolean.TRUE);
-		 * dbf.setAttribute(XML_VALIDATION, Boolean.TRUE);
-		 */
 
 		DocumentBuilder parser = dbf.newDocumentBuilder();
 		parser.setErrorHandler(handler);
@@ -215,7 +216,9 @@ class PersistenceUnitReader {
 			}
 		}
 		catch (IOException ex) {
-			logger.debug("Could not search for JPA schema resource [" + schemaName + "] in class path", ex);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not search for JPA schema resource [" + schemaName + "] in class path", ex);
+			}
 		}
 		return null;
 	}
@@ -225,8 +228,8 @@ class PersistenceUnitReader {
 	 * Parse the validated document and populates(add to) the given unit info
 	 * list.
 	 */
-	protected List<SpringPersistenceUnitInfo> parseDocument(Resource resource, Document document,
-			List<SpringPersistenceUnitInfo> infos) throws IOException {
+	protected List<SpringPersistenceUnitInfo> parseDocument(
+			Resource resource, Document document, List<SpringPersistenceUnitInfo> infos) throws IOException {
 
 		Element persistence = document.getDocumentElement();
 		URL unitRootURL = determinePersistenceUnitRootUrl(resource);
@@ -259,16 +262,16 @@ class PersistenceUnitReader {
 		else {
 			// check META-INF folder
 			if (!urlToString.contains(META_INF)) {
-				if (logger.isWarnEnabled()) {
-					logger.warn(resource.getFilename() +
+				if (logger.isInfoEnabled()) {
+					logger.info(resource.getFilename() +
 							" should be located inside META-INF directory; cannot determine persistence unit root URL for " +
 							resource);
 				}
 				return null;
 			}
 			if (urlToString.lastIndexOf(META_INF) == urlToString.lastIndexOf('/') - (1 + META_INF.length())) {
-				if (logger.isWarnEnabled()) {
-					logger.warn(resource.getFilename() +
+				if (logger.isInfoEnabled()) {
+					logger.info(resource.getFilename() +
 							" is not located in the root of META-INF directory; cannot determine persistence unit root URL for " +
 							resource);
 				}
