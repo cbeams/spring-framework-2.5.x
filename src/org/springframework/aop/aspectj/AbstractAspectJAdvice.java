@@ -30,7 +30,7 @@ import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.LocalVariableTableParameterNameDiscover;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.Ordered;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.ClassUtils;
@@ -356,7 +356,7 @@ public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformat
 			// We need to discover them, or if that fails, guess,
 			// and if we can't guess with 100% accuracy, fail.
 			PrioritizedParameterNameDiscoverer discoverer = new PrioritizedParameterNameDiscoverer();
-			discoverer.addDiscoverer(new LocalVariableTableParameterNameDiscover());
+			discoverer.addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 			AspectJAdviceParameterNameDiscoverer adviceParameterNameDiscoverer = 
 				new AspectJAdviceParameterNameDiscoverer(this.pointcutExpression.getExpression());
 			adviceParameterNameDiscoverer.setReturningName(this.returningName);

@@ -39,9 +39,9 @@ import org.objectweb.asm.commons.EmptyVisitor;
  * @author Adrian Colyer
  * @since 2.0
  */
-public class LocalVariableTableParameterNameDiscover implements ParameterNameDiscoverer {
+public class LocalVariableTableParameterNameDiscoverer implements ParameterNameDiscoverer {
 
-	private final Log logger = LogFactory.getLog(getClass());
+	private static Log logger = LogFactory.getLog(LocalVariableTableParameterNameDiscoverer.class);
 
 
 	public String[] getParameterNames(Method method) {
