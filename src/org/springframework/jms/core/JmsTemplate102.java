@@ -35,9 +35,9 @@ import javax.jms.TopicConnectionFactory;
 import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 
+import org.springframework.jms.connection.JmsResourceHolder;
 import org.springframework.jms.support.converter.SimpleMessageConverter102;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
-import org.springframework.jms.connection.JmsResourceHolder;
 
 /**
  * A subclass of JmsTemplate that uses the JMS 1.0.2 specification, rather than
@@ -239,7 +239,7 @@ public class JmsTemplate102 extends JmsTemplate {
 	 * @see #getSessionAcknowledgeMode()
 	 */
 	protected boolean isClientAcknowledge(Session session) throws JMSException {
-		return getSessionAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE;
+		return (getSessionAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);
 	}
 
 }
