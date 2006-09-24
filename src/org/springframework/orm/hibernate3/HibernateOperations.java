@@ -29,25 +29,32 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.springframework.dao.DataAccessException;
 
 /**
- * Specifies a basic set of Hibernate operations, implemented by HibernateTemplate.
- * Not often used, but a useful option to enhance testability, as it can
- * easily be mocked or stubbed.
+ * Specifies a basic set of Hibernate operations, implemented by
+ * {@link HibernateTemplate}.
+ * 
+ * <p>Not often used, but a useful option to enhance testability,
+ * as it can easily be mocked or stubbed.
  *
- * <p>Provides HibernateTemplate's data access methods that mirror
- * various Session methods. Users are strongly encouraged to read the
- * Hibernate Session javadocs for details on those methods.
+ * <p>Provides <code>HibernateTemplate's</code> data access methods that
+ * mirror the various {@link org.hibernate.Session} methods. Users are
+ * strongly encouraged to read the Hibernate <code>Session</code> javadocs
+ * for details on those methods.
  *
- * <p>Note that operations that return an Iterator (i.e. <code>iterate</code>)
- * are supposed to be used within Spring-driven or JTA-driven transactions
- * (with HibernateTransactionManager, JtaTransactionManager, or EJB CMT).
- * Else, the Iterator won't be able to read results from its ResultSet anymore,
- * as the underlying Hibernate Session will already have been closed.
+ * <p>Note that operations that return an {@link Iterator} (i.e.
+ * <code>iterate(..)</code>) are supposed to be used within Spring-driven
+ * or JTA-driven transactions (with {@link HibernateTransactionManager},
+ * {@link org.springframework.transaction.jta.JtaTransactionManager},
+ * or EJB CMT). Else, the <code>Iterator</code> won't be able to read
+ * results from it's {@link java.sql.ResultSet} anymore, as the
+ * underlying Hibernate <code>Session</code> will already have been closed.
  *
- * <p>Lazy loading will also just work with an open Hibernate Session,
- * either within a transaction or within OpenSessionInViewFilter/Interceptor.
+ * <p>Lazy loading will also just work with an open Hibernate
+ * <code>Session</code>, either within a transaction or within
+ * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewFilter}/
+ * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor}.
  * Furthermore, some operations just make sense within transactions,
- * for example: <code>contains</code>, <code>evict</code>, <code>lock</code>,
- * <code>flush</code>, <code>clear</code>.
+ * for example: <code>contains(..)</code>, <code>evict(..)</code>,
+ * <code>lock(..)</code>, <code>flush(..)</code>, <code>clear(..)</code>.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -62,15 +69,17 @@ import org.springframework.dao.DataAccessException;
 public interface HibernateOperations {
 
 	/**
-	 * Execute the action specified by the given action object within a Session.
-	 * Application exceptions thrown by the action object get propagated to the
-	 * caller (can only be unchecked). Hibernate exceptions are transformed into
-	 * appropriate DAO ones. Allows for returning a result object, i.e. a domain
-	 * object or a collection of domain objects.
+	 * Execute the action specified by the given action object within a
+	 * {@link org.hibernate.Session}.
+	 * <p>Application exceptions thrown by the action object get propagated
+	 * to the caller (can only be unchecked). Hibernate exceptions are
+	 * transformed into appropriate DAO ones. Allows for returning a result
+	 * object, that is a domain object or a collection of domain objects.
 	 * <p>Note: Callback code is not supposed to handle transactions itself!
-	 * Use an appropriate transaction manager like HibernateTransactionManager.
-	 * Generally, callback code must not touch any Session lifecycle methods,
-	 * like close, disconnect, or reconnect, to let the template do its work.
+	 * Use an appropriate transaction manager like
+	 * {@link HibernateTransactionManager}. Generally, callback code must not
+	 * touch any <code>Session</code> lifecycle methods, like close,
+	 * disconnect, or reconnect, to let the template do its work.
 	 * @param action callback object that specifies the Hibernate action
 	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -82,8 +91,9 @@ public interface HibernateOperations {
 	Object execute(HibernateCallback action) throws DataAccessException;
 
 	/**
-	 * Execute the specified action assuming that the result object is a List.
-	 * This is a convenience method for executing Hibernate find calls or
+	 * Execute the specified action assuming that the result object is a
+	 * {@link List}.
+	 * <p>This is a convenience method for executing Hibernate find calls or
 	 * queries within an action.
 	 * @param action calback object that specifies the Hibernate action
 	 * @return a List result returned by the action, or <code>null</code>
@@ -104,7 +114,7 @@ public interface HibernateOperations {
 	 * For an explanation of the exact semantics of this method, please do refer to
 	 * the Hibernate API documentation in the first instance.
 	 * @param entityClass a persistent class
-	 * @param id an identifier of the persistent instance
+	 * @param id the identifier of the persistent instance
 	 * @return the persistent instance, or <code>null</code> if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#get(Class, java.io.Serializable)
@@ -120,7 +130,7 @@ public interface HibernateOperations {
 	 * For an explanation of the exact semantics of this method, please do refer to
 	 * the Hibernate API documentation in the first instance.
 	 * @param entityClass a persistent class
-	 * @param id an identifier of the persistent instance
+	 * @param id the identifier of the persistent instance
 	 * @param lockMode the lock mode to obtain
 	 * @return the persistent instance, or <code>null</code> if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -137,7 +147,7 @@ public interface HibernateOperations {
 	 * For an explanation of the exact semantics of this method, please do refer to
 	 * the Hibernate API documentation in the first instance.
 	 * @param entityName the name of a persistent entity
-	 * @param id an identifier of the persistent instance
+	 * @param id the identifier of the persistent instance
 	 * @return the persistent instance, or <code>null</code> if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#get(Class, java.io.Serializable)
@@ -153,7 +163,7 @@ public interface HibernateOperations {
 	 * For an explanation of the exact semantics of this method, please do refer to
 	 * the Hibernate API documentation in the first instance.
 	 * @param entityName the name of a persistent entity
-	 * @param id an identifier of the persistent instance
+	 * @param id the identifier of the persistent instance
 	 * @param lockMode the lock mode to obtain
 	 * @return the persistent instance, or <code>null</code> if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -170,7 +180,7 @@ public interface HibernateOperations {
 	 * For an explanation of the exact semantics of this method, please do refer to
 	 * the Hibernate API documentation in the first instance.
 	 * @param entityClass a persistent class
-	 * @param id an identifier of the persistent instance
+	 * @param id the identifier of the persistent instance
 	 * @return the persistent instance
 	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -187,7 +197,7 @@ public interface HibernateOperations {
 	 * For an explanation of the exact semantics of this method, please do refer to
 	 * the Hibernate API documentation in the first instance.
 	 * @param entityClass a persistent class
-	 * @param id an identifier of the persistent instance
+	 * @param id the identifier of the persistent instance
 	 * @param lockMode the lock mode to obtain
 	 * @return the persistent instance
 	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
@@ -205,7 +215,7 @@ public interface HibernateOperations {
 	 * For an explanation of the exact semantics of this method, please do refer to
 	 * the Hibernate API documentation in the first instance.
 	 * @param entityName the name of a persistent entity
-	 * @param id an identifier of the persistent instance
+	 * @param id the identifier of the persistent instance
 	 * @return the persistent instance
 	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -222,7 +232,7 @@ public interface HibernateOperations {
 	 * For an explanation of the exact semantics of this method, please do refer to
 	 * the Hibernate API documentation in the first instance.
 	 * @param entityName the name of a persistent entity
-	 * @param id an identifier of the persistent instance
+	 * @param id the identifier of the persistent instance
 	 * @param lockMode the lock mode to obtain
 	 * @return the persistent instance
 	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
@@ -236,7 +246,7 @@ public interface HibernateOperations {
 	 * Return all persistent instances of the given entity class.
 	 * Note: Use queries or criteria for retrieving a specific subset. 
 	 * @param entityClass a persistent class
-	 * @return a List containing 0 or more persistent instances
+	 * @return a {@link List} containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException if there is a Hibernate error
 	 * @see org.hibernate.Session#createCriteria
 	 */
@@ -250,7 +260,7 @@ public interface HibernateOperations {
 	 * For an explanation of the exact semantics of this method, please do refer to
 	 * the Hibernate API documentation in the first instance.
 	 * @param entity the object (of the target class) to load into
-	 * @param id an identifier of the persistent instance
+	 * @param id the identifier of the persistent instance
 	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#load(Object, java.io.Serializable)
@@ -285,7 +295,7 @@ public interface HibernateOperations {
 	boolean contains(Object entity) throws DataAccessException;
 
 	/**
-	 * Remove the given object from the Session cache.
+	 * Remove the given object from the {@link org.hibernate.Session} cache.
 	 * @param entity the persistent instance to evict
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#evict
@@ -302,11 +312,11 @@ public interface HibernateOperations {
 	void initialize(Object proxy) throws DataAccessException;
 
 	/**
-	 * Return an enabled Hibernate Filter for the given filter name.
-	 * The returned Filter instance can be used to set filter parameters.
+	 * Return an enabled Hibernate {@link Filter} for the given filter name.
+	 * The returned <code>Filter</code> instance can be used to set filter parameters.
 	 * @param filterName the name of the filter
-	 * @return the enabled Hibernate Filter (either already enabled
-	 * or enabled on the fly by this operation)
+	 * @return the enabled Hibernate <code>Filter</code> (either already
+	 * enabled or enabled on the fly by this operation)
 	 * @throws IllegalStateException if we are not running within a
 	 * transactional Session (in which case this operation does not make sense)
 	 */
@@ -319,8 +329,7 @@ public interface HibernateOperations {
 
 	/**
 	 * Obtain the specified lock level upon the given object, implicitly
-	 * checking whether the corresponding database entry still exists
-	 * (throwing an OptimisticLockingFailureException if not found).
+	 * checking whether the corresponding database entry still exists.
 	 * @param entity the persistent instance to lock
 	 * @param lockMode the lock mode to obtain
 	 * @throws org.springframework.orm.ObjectOptimisticLockingFailureException if not found
@@ -331,8 +340,7 @@ public interface HibernateOperations {
 
 	/**
 	 * Obtain the specified lock level upon the given object, implicitly
-	 * checking whether the corresponding database entry still exists
-	 * (throwing an OptimisticLockingFailureException if not found).
+	 * checking whether the corresponding database entry still exists.
 	 * @param entityName the name of a persistent entity
 	 * @param entity the persistent instance to lock
 	 * @param lockMode the lock mode to obtain
@@ -363,7 +371,7 @@ public interface HibernateOperations {
 
 	/**
 	 * Update the given persistent instance,
-	 * associating it with the current Hibernate Session.
+	 * associating it with the current Hibernate {@link org.hibernate.Session}.
 	 * @param entity the persistent instance to update
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#update(Object)
@@ -372,10 +380,9 @@ public interface HibernateOperations {
 
 	/**
 	 * Update the given persistent instance,
-	 * associating it with the current Hibernate Session.
+	 * associating it with the current Hibernate {@link org.hibernate.Session}.
 	 * <p>Obtains the specified lock mode if the instance exists, implicitly
-	 * checking whether the corresponding database entry still exists
-	 * (throwing an OptimisticLockingFailureException if not found).
+	 * checking whether the corresponding database entry still exists.
 	 * @param entity the persistent instance to update
 	 * @param lockMode the lock mode to obtain
 	 * @throws org.springframework.orm.ObjectOptimisticLockingFailureException if not found
@@ -386,7 +393,7 @@ public interface HibernateOperations {
 
 	/**
 	 * Update the given persistent instance,
-	 * associating it with the current Hibernate Session.
+	 * associating it with the current Hibernate {@link org.hibernate.Session}.
 	 * @param entityName the name of a persistent entity
 	 * @param entity the persistent instance to update
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -396,10 +403,9 @@ public interface HibernateOperations {
 
 	/**
 	 * Update the given persistent instance,
-	 * associating it with the current Hibernate Session.
+	 * associating it with the current Hibernate {@link org.hibernate.Session}.
 	 * <p>Obtains the specified lock mode if the instance exists, implicitly
-	 * checking whether the corresponding database entry still exists
-	 * (throwing an OptimisticLockingFailureException if not found).
+	 * checking whether the corresponding database entry still exists.
 	 * @param entityName the name of a persistent entity
 	 * @param entity the persistent instance to update
 	 * @param lockMode the lock mode to obtain
@@ -412,9 +418,9 @@ public interface HibernateOperations {
 	/**
 	 * Save or update the given persistent instance,
 	 * according to its id (matching the configured "unsaved-value"?).
-	 * Associates the instance with the current Hibernate Session.
+	 * Associates the instance with the current Hibernate {@link org.hibernate.Session}.
 	 * @param entity the persistent instance to save or update
-	 * (to be associated with the Hibernate Session)
+	 * (to be associated with the Hibernate <code>Session</code>)
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#saveOrUpdate(Object)
 	 */
@@ -423,10 +429,10 @@ public interface HibernateOperations {
 	/**
 	 * Save or update the given persistent instance,
 	 * according to its id (matching the configured "unsaved-value"?).
-	 * Associates the instance with the current Hibernate Session.
+	 * Associates the instance with the current Hibernate <code>Session</code>.
 	 * @param entityName the name of a persistent entity
 	 * @param entity the persistent instance to save or update
-	 * (to be associated with the Hibernate Session)
+	 * (to be associated with the Hibernate <code>Session</code>)
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#saveOrUpdate(String, Object)
 	 */
@@ -435,9 +441,9 @@ public interface HibernateOperations {
 	/**
 	 * Save or update all given persistent instances,
 	 * according to its id (matching the configured "unsaved-value"?).
-	 * Associates the instances with the current Hibernate Session.
+	 * Associates the instances with the current Hibernate <code>Session</code>.
 	 * @param entities the persistent instances to save or update
-	 * (to be associated with the Hibernate Session)
+	 * (to be associated with the Hibernate <code>Session</code>)
 	 * @throws DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#saveOrUpdate(Object)
 	 */
@@ -465,7 +471,7 @@ public interface HibernateOperations {
 	/**
 	 * Persist the given transient instance. Follows JSR-220 semantics.
 	 * <p>Similar to <code>save</code>, associating the given object
-	 * with the current Hibernate Session.
+	 * with the current Hibernate {@link org.hibernate.Session}.
 	 * @param entity the persistent instance to persist
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#persist(Object)
@@ -476,7 +482,7 @@ public interface HibernateOperations {
 	/**
 	 * Persist the given transient instance. Follows JSR-220 semantics.
 	 * <p>Similar to <code>save</code>, associating the given object
-	 * with the current Hibernate Session.
+	 * with the current Hibernate {@link org.hibernate.Session}.
 	 * @param entityName the name of a persistent entity
 	 * @param entity the persistent instance to persist
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -491,10 +497,11 @@ public interface HibernateOperations {
 	 * <p>Similar to <code>saveOrUpdate</code>, but never associates the given
 	 * object with the current Hibernate Session. In case of a new entity,
 	 * the state will be copied over as well.
-	 * <p>Note that <code>merge</code> will <i>not</i> update the identifiers in
-	 * the passed-in object graph (in contrast to TopLink)! Consider registering
-	 * Spring's IdTransferringMergeEventListener if you'd like to have newly
-	 * assigned ids transferred to the original object graph too.
+	 * <p>Note that <code>merge</code> will <i>not</i> update the identifiers
+	 * in the passed-in object graph (in contrast to TopLink)! Consider
+	 * registering Spring's <code>IdTransferringMergeEventListener</code> if
+	 * you would like to have newly assigned ids transferred to the original
+	 * object graph too.
 	 * @param entity the object to merge with the corresponding persistence instance
 	 * @return the updated, registered persistent instance
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -508,12 +515,13 @@ public interface HibernateOperations {
 	 * Copy the state of the given object onto the persistent object
 	 * with the same identifier. Follows JSR-220 semantics.
 	 * <p>Similar to <code>saveOrUpdate</code>, but never associates the given
-	 * object with the current Hibernate Session. In case of a new entity,
-	 * the state will be copied over as well.
-	 * <p>Note that <code>merge</code> will <i>not</i> update the identifiers in
-	 * the passed-in object graph (in contrast to TopLink)! Consider registering
-	 * Spring's IdTransferringMergeEventListener if you'd like to have newly
-	 * assigned ids transferred to the original object graph too.
+	 * object with the current Hibernate {@link org.hibernate.Session}. In
+	 * the case of a new entity, the state will be copied over as well.
+	 * <p>Note that <code>merge</code> will <i>not</i> update the identifiers
+	 * in the passed-in object graph (in contrast to TopLink)! Consider
+	 * registering Spring's <code>IdTransferringMergeEventListener</code>
+	 * if you would like to have newly assigned ids transferred to the
+	 * original object graph too.
 	 * @param entityName the name of a persistent entity
 	 * @param entity the object to merge with the corresponding persistence instance
 	 * @return the updated, registered persistent instance
@@ -534,8 +542,7 @@ public interface HibernateOperations {
 	/**
 	 * Delete the given persistent instance.
 	 * <p>Obtains the specified lock mode if the instance exists, implicitly
-	 * checking whether the corresponding database entry still exists
-	 * (throwing an OptimisticLockingFailureException if not found).
+	 * checking whether the corresponding database entry still exists.
 	 * @param entity the persistent instance to delete
 	 * @param lockMode the lock mode to obtain
 	 * @throws org.springframework.orm.ObjectOptimisticLockingFailureException if not found
@@ -556,17 +563,18 @@ public interface HibernateOperations {
 
 	/**
 	 * Flush all pending saves, updates and deletes to the database.
-	 * <p>Only invoke this for selective eager flushing, for example when JDBC code
-	 * needs to see certain changes within the same transaction. Else, it's preferable
-	 * to rely on auto-flushing at transaction completion.
+	 * <p>Only invoke this for selective eager flushing, for example when
+	 * JDBC code needs to see certain changes within the same transaction.
+	 * Else, it is preferable to rely on auto-flushing at transaction
+	 * completion.
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#flush
 	 */
 	void flush() throws DataAccessException;
 
 	/**
-	 * Remove all objects from the Session cache, and cancel all pending saves,
-	 * updates and deletes.
+	 * Remove all objects from the {@link org.hibernate.Session} cache, and
+	 * cancel all pending saves, updates and deletes.
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#clear
 	 */
@@ -580,7 +588,7 @@ public interface HibernateOperations {
 	/**
 	 * Execute an HQL query.
 	 * @param queryString a query expressed in Hibernate's query language
-	 * @return a List containing the results of the query execution
+	 * @return a {@link List} containing the results of the query execution
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#createQuery
 	 */
@@ -591,7 +599,7 @@ public interface HibernateOperations {
 	 * query string.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param value the value of the parameter
-	 * @return a List containing the results of the query execution
+	 * @return a {@link List} containing the results of the query execution
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#createQuery
 	 */
@@ -602,7 +610,7 @@ public interface HibernateOperations {
 	 * in the query string.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param values the values of the parameters
-	 * @return a List containing the results of the query execution
+	 * @return a {@link List} containing the results of the query execution
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#createQuery
 	 */
@@ -612,9 +620,9 @@ public interface HibernateOperations {
 	 * Execute an HQL query, binding one value to a ":" named parameter
 	 * in the query string.
 	 * @param queryName the name of a Hibernate query in a mapping file
-	 * @param paramName the name of parameter
+	 * @param paramName the name of the parameter
 	 * @param value the value of the parameter
-	 * @return a List containing the results of the query execution
+	 * @return a {@link List} containing the results of the query execution
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#getNamedQuery(String)
 	 */
@@ -627,7 +635,7 @@ public interface HibernateOperations {
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param paramNames the names of the parameters
 	 * @param values the values of the parameters
-	 * @return a List containing the results of the query execution
+	 * @return a {@link List} containing the results of the query execution
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#getNamedQuery(String)
 	 */
@@ -639,7 +647,7 @@ public interface HibernateOperations {
 	 * <i>named</i> parameters in the query string.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param valueBean the values of the parameters
-	 * @return a List containing the results of the query execution
+	 * @return a {@link List} containing the results of the query execution
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Query#setProperties
 	 * @see org.hibernate.Session#createQuery
@@ -655,7 +663,7 @@ public interface HibernateOperations {
 	 * Execute a named query.
 	 * <p>A named query is defined in a Hibernate mapping file.
 	 * @param queryName the name of a Hibernate query in a mapping file
-	 * @return a List containing the results of the query execution
+	 * @return a {@link List} containing the results of the query execution
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#getNamedQuery(String)
 	 */
@@ -667,7 +675,7 @@ public interface HibernateOperations {
 	 * <p>A named query is defined in a Hibernate mapping file.
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param value the value of the parameter
-	 * @return a List containing the results of the query execution
+	 * @return a {@link List} containing the results of the query execution
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#getNamedQuery(String)
 	 */
@@ -679,7 +687,7 @@ public interface HibernateOperations {
 	 * <p>A named query is defined in a Hibernate mapping file.
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param values the values of the parameters
-	 * @return a List containing the results of the query execution
+	 * @return a {@link List} containing the results of the query execution
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#getNamedQuery(String)
 	 */
@@ -692,7 +700,7 @@ public interface HibernateOperations {
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param paramName the name of parameter
 	 * @param value the value of the parameter
-	 * @return a List containing the results of the query execution
+	 * @return a {@link List} containing the results of the query execution
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#getNamedQuery(String)
 	 */
@@ -706,7 +714,7 @@ public interface HibernateOperations {
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param paramNames the names of the parameters
 	 * @param values the values of the parameters
-	 * @return a List containing the results of the query execution
+	 * @return a {@link List} containing the results of the query execution
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#getNamedQuery(String)
 	 */
@@ -719,7 +727,7 @@ public interface HibernateOperations {
 	 * <p>A named query is defined in a Hibernate mapping file.
 	 * @param queryName the name of a Hibernate query in a mapping file
 	 * @param valueBean the values of the parameters
-	 * @return a List containing the results of the query execution
+	 * @return a {@link List} containing the results of the query execution
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Query#setProperties
 	 * @see org.hibernate.Session#getNamedQuery(String)
@@ -736,21 +744,21 @@ public interface HibernateOperations {
 	 * Execute a query based on a given Hibernate criteria object.
 	 * @param criteria the detached Hibernate criteria object,
 	 * which can for example be held in an instance variable of a DAO
-	 * @return a List containing 0 or more persistent instances
+	 * @return a {@link List} containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.criterion.DetachedCriteria#getExecutableCriteria(org.hibernate.Session)
 	 */
 	List findByCriteria(DetachedCriteria criteria) throws DataAccessException;
 
 	/**
-	 * Execute a query based on a given Hibernate criteria object.
+	 * Execute a query based on the given Hibernate criteria object.
 	 * @param criteria the detached Hibernate criteria object,
 	 * which can for example be held in an instance variable of a DAO
 	 * @param firstResult the index of the first result object to be retrieved
 	 * (numbered from 0)
 	 * @param maxResults the maximum number of result objects to retrieve
 	 * (or <=0 for no limit)
-	 * @return a List containing 0 or more persistent instances
+	 * @return a {@link List} containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.criterion.DetachedCriteria#getExecutableCriteria(org.hibernate.Session)
 	 * @see org.hibernate.Criteria#setFirstResult(int)
@@ -759,10 +767,10 @@ public interface HibernateOperations {
 	List findByCriteria(DetachedCriteria criteria, int firstResult, int maxResults) throws DataAccessException;
 
 	/**
-	 * Execute a query based on a given example entity object.
+	 * Execute a query based on the given example entity object.
 	 * @param exampleEntity an instance of the desired entity,
 	 * serving as example for "query-by-example"
-	 * @return a List containing 0 or more persistent instances
+	 * @return a {@link List} containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.criterion.Example#create(Object)
 	 */
@@ -776,7 +784,7 @@ public interface HibernateOperations {
 	 * (numbered from 0)
 	 * @param maxResults the maximum number of result objects to retrieve
 	 * (or <=0 for no limit)
-	 * @return a List containing 0 or more persistent instances
+	 * @return a {@link List} containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.criterion.Example#create(Object)
 	 * @see org.hibernate.Criteria#setFirstResult(int)
@@ -791,10 +799,10 @@ public interface HibernateOperations {
 
 	/**
 	 * Execute a query for persistent instances.
-	 * <p>Returns the results as Iterator. Entities returned are initialized
-	 * on demand. See Hibernate docs for details.
+	 * <p>Returns the results as an {@link Iterator}. Entities returned are
+	 * initialized on demand. See the Hibernate API documentation for details.
 	 * @param queryString a query expressed in Hibernate's query language
-	 * @return a List containing 0 or more persistent instances
+	 * @return the result {@link Iterator}
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#createQuery
 	 * @see org.hibernate.Query#iterate
@@ -804,11 +812,11 @@ public interface HibernateOperations {
 	/**
 	 * Execute a query for persistent instances, binding one value
 	 * to a "?" parameter in the query string.
-	 * <p>Returns the results as Iterator. Entities returned are initialized
-	 * on demand. See Hibernate docs for details.
+	 * <p>Returns the results as an {@link Iterator}. Entities returned are
+	 * initialized on demand. See the Hibernate API documentation for details.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param value the value of the parameter
-	 * @return a List containing 0 or more persistent instances
+	 * @return the result {@link Iterator}
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#createQuery
 	 * @see org.hibernate.Query#iterate
@@ -817,12 +825,12 @@ public interface HibernateOperations {
 
 	/**
 	 * Execute a query for persistent instances, binding a number of
-	 * values to "?" parameters in the query string.
-	 * <p>Returns the results as Iterator. Entities returned are initialized
-	 * on demand. See Hibernate docs for details.
+	 * <code>values</code> to "?" parameters in the query string.
+	 * <p>Returns the results as an {@link Iterator}. Entities returned are
+	 * initialized on demand. See the Hibernate API documentation for details.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param values the values of the parameters
-	 * @return a List containing 0 or more persistent instances
+	 * @return the result {@link Iterator}
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#createQuery
 	 * @see org.hibernate.Query#iterate
@@ -830,17 +838,17 @@ public interface HibernateOperations {
 	Iterator iterate(String queryString, Object[] values) throws DataAccessException;
 
 	/**
-	 * Close an Iterator created by <i>iterate</i> operations immediately,
-	 * instead of waiting until the session is closed or disconnected.
-	 * @param it the Iterator to close
-	 * @throws DataAccessException if the Iterator could not be closed
+	 * Immediately close an {@link Iterator} created by any of the various
+	 * <code>iterate(..)</code> operations, instead of waiting until the
+	 * session is closed or disconnected.
+	 * @param it the <code>Iterator</code> to close
+	 * @throws DataAccessException if the <code>Iterator</code> could not be closed
 	 * @see org.hibernate.Hibernate#close
 	 */
 	void closeIterator(Iterator it) throws DataAccessException;
 
 	/**
 	 * Update/delete all objects according to the given query.
-	 * Return the number of entity instances updated/deleted.
 	 * @param queryString an update/delete query expressed in Hibernate's query language
 	 * @return the number of instances updated/deleted
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
@@ -851,7 +859,6 @@ public interface HibernateOperations {
 
 	/**
 	 * Update/delete all objects according to the given query.
-	 * Return the number of entity instances updated/deleted.
 	 * @param queryString an update/delete query expressed in Hibernate's query language
 	 * @param value the value of the parameter
 	 * @return the number of instances updated/deleted
@@ -863,7 +870,6 @@ public interface HibernateOperations {
 
 	/**
 	 * Update/delete all objects according to the given query.
-	 * Return the number of entity instances updated/deleted.
 	 * @param queryString an update/delete query expressed in Hibernate's query language
 	 * @param values the values of the parameters
 	 * @return the number of instances updated/deleted
