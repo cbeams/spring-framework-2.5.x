@@ -2072,16 +2072,6 @@ public class ReplacementComputeValue implements MethodReplacer {
 			</tgroup>
 		</table>
 
-        <note>
-            <para>If you are referencing the <filename>'spring-beans.dtd'</filename> DTD in your
-            bean definition file(s), you can use the "<literal>singleton</literal>" attribute to
-            express the lifecycle scope of your bean(s). If you are referencing the
-            <filename>'spring-beans-2.0.dtd'</filename> DTD or the Spring 2.0 XSD schema, then you
-            will need to use the "<literal>scope</literal>" attribute (because the
-            "<literal>singleton</literal>" attribute was removed from the definition of the
-            new DTD and XSD files in favour of the "<literal>scope</literal>" attribute).</para>
-		</note>
-
         <section id="beans-factory-scopes-singleton">
 		    <title>The singleton scope</title>
 		    <para>When a bean is a singleton, only one <emphasis>shared</emphasis>
@@ -2168,7 +2158,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 			be called. It is the responsibility of the client code to clean up
 			prototype scoped objects and release any expensive resources that the prototype
 			bean(s) are holding onto. (One possible way to get the Spring container
-		  to release resources used by singleton-scoped beans is through the use
+		    to release resources used by singleton-scoped beans is through the use
 			of a bean post processor which would hold a reference to the beans that need to be cleaned
 			up.)</para>
 			<para>In some respects, you can think of the Spring container's role when talking
@@ -2178,6 +2168,27 @@ public class ReplacementComputeValue implements MethodReplacer {
 			further described in the section entitled
 			<xref linkend="beans-factory-lifecycle" />.</para>
 		</section>
+
+        <note>
+            <title>Backwards compatibility note: specifying the lifecycle scope in XML</title>
+            <para>If you are referencing the <filename>'spring-beans.dtd'</filename> DTD in
+            a bean definition file(s), and you are being explicit about the lifecycle scope
+            of your bean(s) you must use the "<literal>singleton</literal>" attribute to
+            express the lifecycle scope (remembering that the
+            <link linkend="beans-factory-lifecycle-singleton">singleton lifecycle scope</link> is
+            the default). If you are referencing the <filename>'spring-beans-2.0.dtd'</filename>
+            DTD or the Spring 2.0 XSD schema, then you will need to use the "<literal>scope</literal>"
+            attribute (because the "<literal>singleton</literal>" attribute was removed from the
+            definition of the new DTD and XSD files in favour of the "<literal>scope</literal>"
+            attribute).</para>
+            <para>To be totally clear about this, this means that if you use the
+            "<literal>singleton</literal>" attribute in an XML bean definition then you
+            <emphasis>must</emphasis> be referencing the <filename>'spring-beans.dtd'</filename>
+            DTD <emphasis>in that file</emphasis>. If you are using the "<literal>scope</literal>"
+            attribute then you <emphasis>must</emphasis> be referencing either the
+            <filename>'spring-beans-2.0.dtd'</filename> DTD or the
+            <filename>'spring-beans-2.0.xsd'</filename> XSD <emphasis>in that file</emphasis>.</para>
+		</note>
 
 		<section id="beans-factory-scopes-other">
 			<title>The other scopes</title>
