@@ -19,20 +19,18 @@ package org.springframework.beans.factory.parsing;
 import junit.framework.TestCase;
 
 /**
- * Unit tests for the {@link PassThroughSourceExtractor} class.
- *
  * @author Rick Evans
  */
 public final class PassThroughSourceExtractorTests extends TestCase {
 
 	public void testPassThroughContract() throws Exception {
-		final Object source  = new Object();
-		Object extractedSource = new PassThroughSourceExtractor().extract(source);
+		Object source  = new Object();
+		Object extractedSource = new PassThroughSourceExtractor().extractSource(source, null);
 		assertSame("The contract of PassThroughSourceExtractor states that the supplied source object *must* be returned as-is", source, extractedSource);
 	}
 
 	public void testPassThroughContractEvenWithNull() throws Exception {
-		Object extractedSource = new PassThroughSourceExtractor().extract(null);
+		Object extractedSource = new PassThroughSourceExtractor().extractSource(null, null);
 		assertNull("The contract of PassThroughSourceExtractor states that the supplied source object *must* be returned as-is (even if null)", extractedSource);
 	}
 

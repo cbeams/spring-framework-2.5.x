@@ -19,20 +19,18 @@ package org.springframework.beans.factory.parsing;
 import junit.framework.TestCase;
 
 /**
- * Unit tests for the {@link NullSourceExtractor} class.
- *
  * @author Rick Evans
  */
 public final class NullSourceExtractorTests extends TestCase {
 
 	public void testPassThroughContract() throws Exception {
-		final Object source  = new Object();
-		Object extractedSource = new NullSourceExtractor().extract(source);
+		Object source  = new Object();
+		Object extractedSource = new NullSourceExtractor().extractSource(source, null);
 		assertNull("The contract of NullSourceExtractor states that the extraction *always* return null", extractedSource);
 	}
 
 	public void testPassThroughContractEvenWithNull() throws Exception {
-		Object extractedSource = new NullSourceExtractor().extract(null);
+		Object extractedSource = new NullSourceExtractor().extractSource(null, null);
 		assertNull("The contract of NullSourceExtractor states that the extraction *always* return null", extractedSource);
 	}
 

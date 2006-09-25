@@ -16,10 +16,12 @@
 
 package org.springframework.beans.factory.parsing;
 
+import org.springframework.core.io.Resource;
+
 /**
  * Simple implementation of {@link SourceExtractor} that returns <code>null</code>
  * as the source metadata.
- * 
+ *
  * <p>This is the default implementation and prevents too much metadata from being
  * held in memory during normal (non-tooled) runtime usage.
  *
@@ -29,11 +31,9 @@ package org.springframework.beans.factory.parsing;
 public class NullSourceExtractor implements SourceExtractor {
 
 	/**
-	 * This default implementation returns <code>null</code>.
-	 * @param sourceCandidate the source metadata
-	 * @return <code>null</code> 
+	 * This implementation simply returns <code>null</code> for any input.
 	 */
-	public Object extract(Object sourceCandidate) {
+	public Object extractSource(Object sourceCandidate, Resource definitionResource) {
 		return null;
 	}
 

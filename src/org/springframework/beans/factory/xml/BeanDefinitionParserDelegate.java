@@ -576,11 +576,11 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
-	 * Invokes the {@link org.springframework.beans.factory.parsing.SourceExtractor} to pull the
+	 * Invoke the {@link org.springframework.beans.factory.parsing.SourceExtractor} to pull the
 	 * source metadata from the supplied {@link Element}.
 	 */
-	private Object extractSource(Element ele) {
-		return getReaderContext().getSourceExtractor().extract(ele);
+	protected Object extractSource(Element ele) {
+		return getReaderContext().extractSource(ele);
 	}
 
 	public int getDependencyCheck(String att) {

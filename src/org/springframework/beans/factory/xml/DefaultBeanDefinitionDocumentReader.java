@@ -104,6 +104,14 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	}
 
 	/**
+	 * Invoke the {@link org.springframework.beans.factory.parsing.SourceExtractor} to pull the
+	 * source metadata from the supplied {@link Element}.
+	 */
+	protected Object extractSource(Element ele) {
+		return getReaderContext().extractSource(ele);
+	}
+
+	/**
 	 * Allow the XML to be extensible by processing any custom element types first,
 	 * before we start to process the bean definitions. This method is a natural
 	 * extension point for any other custom pre-processing of the XML.
@@ -151,8 +159,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			String name = ele.getAttribute(NAME_ATTRIBUTE);
 			String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
 			getReaderContext().getReader().getBeanFactory().registerAlias(name, alias);
-			Object source = getReaderContext().getSourceExtractor().extract(ele);
-			getReaderContext().fireAliasRegistered(name, alias, source);
+			getReaderContext().fireAliasRegistered(name, alias, extractSource(ele));
 		}
 		else if (DomUtils.nodeNameEquals(ele, BEAN_ELEMENT)) {
 			BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
@@ -197,8 +204,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			}
 		}
 
-		Object source = getReaderContext().getSourceExtractor().extract(ele);
-		getReaderContext().fireImportProcessed(location, source);
+		getReaderContext().fireImportProcessed(location, extractSource(ele));
 	}
 
 	/**

@@ -16,15 +16,19 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.factory.parsing.ParseState;
-import org.springframework.beans.factory.parsing.SourceExtractor;
-import org.springframework.beans.factory.parsing.ProblemReporter;
-import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.Location;
+import org.springframework.beans.factory.parsing.ParseState;
+import org.springframework.beans.factory.parsing.Problem;
+import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.core.io.Resource;
 
 /**
+ * Context that gets passed along a bean definition reading process,
+ * encapsulating all relevant configuration as well as state.
+ *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class ReaderContext {
@@ -100,6 +104,10 @@ public class ReaderContext {
 
 	public SourceExtractor getSourceExtractor() {
 		return sourceExtractor;
+	}
+
+	public Object extractSource(Object sourceCandidate) {
+		return this.sourceExtractor.extractSource(sourceCandidate, this.resource);
 	}
 
 }
