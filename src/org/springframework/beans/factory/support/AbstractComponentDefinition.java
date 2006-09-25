@@ -16,17 +16,18 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 
 /**
  * Base implementation of {@link ComponentDefinition} that provides a basic implementation of
  * {@link #getDescription} which delegates to {@link #getName}. Also provides a base implementation
  * of {@link #toString} which delegates to {@link #getDescription} in keeping with the recommended
- * implementation strategy. Also provides a default implementation of {@link #getBeanReferences}
- * that returns an empty {@link RuntimeBeanReference RuntimeBeanReference[]} since this is not
- * all implementations will describe bean relationships in this way.
+ * implementation strategy. Also provides default implementations of {@link #getInnerBeanDefinitions}
+ * and {@link #getBeanReferences} that return an empty array.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public abstract class AbstractComponentDefinition implements ComponentDefinition {
@@ -36,6 +37,13 @@ public abstract class AbstractComponentDefinition implements ComponentDefinition
 	 */
 	public String getDescription() {
 		return getName();
+	}
+
+	/**
+	 * Returns an empty array.
+	 */
+	public BeanDefinitionHolder[] getInnerBeanDefinitions() {
+		return new BeanDefinitionHolder[0];
 	}
 
 	/**

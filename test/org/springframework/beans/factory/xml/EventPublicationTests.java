@@ -16,15 +16,16 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.util.List;
+
 import junit.framework.TestCase;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanComponentDefinition;
 import org.springframework.beans.factory.support.ComponentDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MapBasedReaderEventListener;
 import org.springframework.core.io.ClassPathResource;
-
-import java.util.List;
 
 /**
  * @author Rob Harrop
@@ -36,6 +37,7 @@ public class EventPublicationTests extends TestCase {
 
 	private final MapBasedReaderEventListener eventListener = new MapBasedReaderEventListener();
 
+
 	protected void setUp() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setEventListener(this.eventListener);
@@ -43,12 +45,24 @@ public class EventPublicationTests extends TestCase {
 	}
 
 	public void testBeanEventReceived() throws Exception {
-		ComponentDefinition componentDefinition = this.eventListener.getComponentDefinition("testBean");
-		assertNotNull("Event not fired for bean", componentDefinition);
-		assertTrue("ComponentDefinition for bean is of wrong type.", componentDefinition instanceof BeanComponentDefinition);
+		ComponentDefinition componentDefinition1 = this.eventListener.getComponentDefinition("testBean");
+		assertTrue(componentDefinition1 instanceof BeanComponentDefinition);
+		assertEquals(1, componentDefinition1.getBeanDefinitions().length);
+		BeanDefinition beanDefinition1 = componentDefinition1.getBeanDefinitions()[0];
+		assertEquals("Rob Harrop", beanDefinition1.getPropertyValues().getPropertyValue("name").getValue());
+		assertEquals(1, componentDefinition1.getBeanReferences().length);
+		assertEquals("testBean2", componentDefinition1.getBeanReferences()[0].getBeanName());
+		assertEquals(0, componentDefinition1.getInnerBeanDefinitions().length);
 
-		BeanDefinition beanDefinition = componentDefinition.getBeanDefinitions()[0];
-		assertNotNull("Underlying BeanDefinition is null", beanDefinition);
+		ComponentDefinition componentDefinition2 = this.eventListener.getComponentDefinition("testBean2");
+		assertTrue(componentDefinition2 instanceof BeanComponentDefinition);
+		assertEquals(1, componentDefinition1.getBeanDefinitions().length);
+		BeanDefinition beanDefinition2 = componentDefinition2.getBeanDefinitions()[0];
+		assertEquals("Juergen Hoeller", beanDefinition2.getPropertyValues().getPropertyValue("name").getValue());
+		assertEquals(0, componentDefinition2.getBeanReferences().length);
+		assertEquals(1, componentDefinition2.getInnerBeanDefinitions().length);
+		BeanDefinition innerBd = componentDefinition2.getInnerBeanDefinitions()[0].getBeanDefinition();
+		assertEquals("Eva Schallmeiner", innerBd.getPropertyValues().getPropertyValue("name").getValue());
 	}
 
 	public void testAliasEventReceived() throws Exception {

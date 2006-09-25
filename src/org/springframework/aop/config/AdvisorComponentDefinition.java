@@ -32,8 +32,6 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 
 	private final BeanDefinition advisorDefinition;
 
-	private final BeanDefinition pointcutDefinition;
-
 	private String description;
 
 	private RuntimeBeanReference[] beanReferences;
@@ -45,12 +43,13 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 		 this(advisorBeanName, advisorDefinition, null);
 	}
 
-	public AdvisorComponentDefinition(String advisorBeanName, BeanDefinition advisorDefinition, BeanDefinition pointcutDefinition) {
+	public AdvisorComponentDefinition(
+			String advisorBeanName, BeanDefinition advisorDefinition, BeanDefinition pointcutDefinition) {
+
 		Assert.notNull(advisorBeanName, "Advsor bean name must not be null");
 		Assert.notNull(advisorDefinition, "Advisor definition must not be null");
 		this.advisorBeanName = advisorBeanName;
 		this.advisorDefinition = advisorDefinition;
-		this.pointcutDefinition = pointcutDefinition;
 		unwrapDefinitions(advisorDefinition, pointcutDefinition);
 	}
 
@@ -62,33 +61,35 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 		RuntimeBeanReference adviceReference = (RuntimeBeanReference) propertyValues.getPropertyValue("advice").getValue();
 
 		if (pointcutDefinition == null) {
-			RuntimeBeanReference pointcutReference = (RuntimeBeanReference) propertyValues.getPropertyValue("pointcut").getValue();
+			RuntimeBeanReference pointcutReference =
+					(RuntimeBeanReference) propertyValues.getPropertyValue("pointcut").getValue();
 			this.beanReferences = new RuntimeBeanReference[]{adviceReference, pointcutReference};
-			this.beanDefinitions = new BeanDefinition[]{this.advisorDefinition};
-			this.description = createDescription(adviceReference, pointcutReference);
+			this.beanDefinitions = new BeanDefinition[] {this.advisorDefinition};
+			this.description = buildDescription(adviceReference, pointcutReference);
 		}
 		else {
 			this.beanReferences = new RuntimeBeanReference[]{adviceReference};
-			this.beanDefinitions = new BeanDefinition[]{this.advisorDefinition, pointcutDefinition};
-			this.description = createDescription(adviceReference, pointcutDefinition);
+			this.beanDefinitions = new BeanDefinition[] {this.advisorDefinition, pointcutDefinition};
+			this.description = buildDescription(adviceReference, pointcutDefinition);
 		}
 	}
 
-	private String createDescription(RuntimeBeanReference adviceReference, BeanDefinition pointcutDefinition) {
+	private String buildDescription(RuntimeBeanReference adviceReference, BeanDefinition pointcutDefinition) {
 		return new StringBuffer("Advisor <advice(ref)='")
 						.append(adviceReference.getBeanName())
-						.append("', pointcut(expression)='")
+						.append("', pointcut(expression)=[")
 						.append(pointcutDefinition.getPropertyValues().getPropertyValue("expression").getValue())
-						.append("'>").toString();
+						.append("]>").toString();
 	}
 
-	private String createDescription(RuntimeBeanReference adviceReference, RuntimeBeanReference pointcutReference) {
+	private String buildDescription(RuntimeBeanReference adviceReference, RuntimeBeanReference pointcutReference) {
 		return new StringBuffer("Advisor <advice(ref)='")
 						.append(adviceReference.getBeanName())
 						.append("', pointcut(ref)='")
 						.append(pointcutReference.getBeanName())
 						.append("'>").toString();
 	}
+
 
 	public String getName() {
 		return this.advisorBeanName;

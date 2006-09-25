@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
  */
 public class PointcutComponentDefinition extends AbstractComponentDefinition {
 
-	private final String beanName;
+	private final String pointcutBeanName;
 
 	private final BeanDefinition pointcutDefinition;
 
@@ -34,18 +34,20 @@ public class PointcutComponentDefinition extends AbstractComponentDefinition {
 
 	private final String expression;
 
-	public PointcutComponentDefinition(String beanName, BeanDefinition pointcutDefinition, String expression) {
-		Assert.notNull(beanName, "'beanName' cannot be null.");
-		Assert.notNull(pointcutDefinition, "'pointcutDefinition' cannot be null.");
-		Assert.notNull(expression, "'expression' cannot be null.");
-		this.beanName = beanName;
+
+	public PointcutComponentDefinition(String pointcutBeanName, BeanDefinition pointcutDefinition, String expression) {
+		Assert.notNull(pointcutBeanName, "Bean name must not be null");
+		Assert.notNull(pointcutDefinition, "Pointcut definition must not be null");
+		Assert.notNull(expression, "Expression must not be null");
+		this.pointcutBeanName = pointcutBeanName;
 		this.pointcutDefinition = pointcutDefinition;
 		this.expression = expression;
-		this.description = "Pointcut <name='" + getName() + "', expression='" + this.expression + ">'";
+		this.description = "Pointcut <name='" + getName() + "', expression=[" + this.expression + "]>";
 	}
 
+
 	public String getName() {
-		return this.beanName;
+		return this.pointcutBeanName;
 	}
 
 	public String getDescription() {
@@ -53,10 +55,11 @@ public class PointcutComponentDefinition extends AbstractComponentDefinition {
 	}
 
 	public BeanDefinition[] getBeanDefinitions() {
-		return new BeanDefinition[]{this.pointcutDefinition};
+		return new BeanDefinition[] {this.pointcutDefinition};
 	}
 
 	public Object getSource() {
 		return this.pointcutDefinition.getSource();
 	}
+
 }

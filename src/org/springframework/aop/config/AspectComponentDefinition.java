@@ -16,11 +16,12 @@
 
 package org.springframework.aop.config;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractComponentDefinition;
 import org.springframework.util.Assert;
-import org.w3c.dom.Element;
 
 /**
  * @author Rob Harrop
@@ -36,17 +37,18 @@ public class AspectComponentDefinition extends AbstractComponentDefinition {
 
 	private final RuntimeBeanReference[] beanReferences;
 
-	public AspectComponentDefinition(Element aspectElement, String aspectName,
-																	 BeanDefinition[] beanDefinitions, RuntimeBeanReference[] beanReferences) {
-		Assert.notNull(aspectElement, "'aspectElement' cannot be null.");
-		Assert.notNull(aspectName, "'aspectName' cannot be null.");
-		Assert.notNull(beanDefinitions, "'beanDefinitions' cannot be null.");
-		Assert.notNull(beanReferences, "'beanReferences' cannot be null.");
+
+	public AspectComponentDefinition(
+			Element aspectElement, String aspectName, BeanDefinition[] beanDefinitions, RuntimeBeanReference[] beanReferences) {
+
+		Assert.notNull(aspectElement, "Aspect element must not be null");
+		Assert.notNull(aspectName, "Aspect name must not be null");
 		this.aspectElement = aspectElement;
 		this.aspectName = aspectName;
-		this.beanDefinitions = beanDefinitions;
-		this.beanReferences = beanReferences;
+		this.beanDefinitions = (beanDefinitions != null ? beanDefinitions : new BeanDefinition[0]);
+		this.beanReferences = (beanReferences != null ? beanReferences : new RuntimeBeanReference[0]);
 	}
+
 
 	public String getName() {
 		return this.aspectName;
@@ -63,4 +65,5 @@ public class AspectComponentDefinition extends AbstractComponentDefinition {
 	public Object getSource() {
 		return this.aspectElement;
 	}
+
 }

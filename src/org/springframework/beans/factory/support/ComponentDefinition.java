@@ -17,12 +17,12 @@
 package org.springframework.beans.factory.support;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 
 /**
  * Describes the logical view of a set of {@link BeanDefinition BeanDefinitions} and
- * {@link RuntimeBeanReference RuntimeBeanReferences} as presented in some configuration
- * context.
+ * {@link RuntimeBeanReference RuntimeBeanReferences} as presented in some configuration context.
  *
  * <p>With the introduction of {@link org.springframework.beans.factory.xml.NamespaceHandler pluggable custom XML tags},
  * it is now possible for a single logical configuration entity, in this case an XML tag, to
@@ -67,6 +67,7 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
  * internal implementation reasons.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public interface ComponentDefinition {
@@ -92,22 +93,33 @@ public interface ComponentDefinition {
 	 * however these are <strong>not</strong> included as they may be not available immediately.
 	 * Important {@link RuntimeBeanReference RuntimeBeanReferences} are available from
 	 * {@link #getBeanReferences()}.
+	 * @return the array of BeanDefinitions, or an empty array if none
 	 */
 	BeanDefinition[] getBeanDefinitions();
 
 	/**
+	 * Return the {@link BeanDefinitionHolder BeanDefinitionHolders} that represent
+	 * all relevant inner beans within this component. Other inner beans may exist within
+	 * the associated {@link BeanDefinition BeanDefinitions}, however these are not
+	 * considered to be needed for validation or for user visualization.
+	 * @return the array of BeanDefinitionHolders, or an empty array if none
+	 */
+	BeanDefinitionHolder[] getInnerBeanDefinitions();
+
+	/**
 	 * Return the set of {@link RuntimeBeanReference RuntimeBeanReferences} that are
 	 * considered to be important to this <code>ComponentDefinition</code>. Other
-	 * {@link RuntimeBeanReference RuntimeBeanReferences} may exist on the associated
+	 * {@link RuntimeBeanReference RuntimeBeanReferences} may exist within the associated
 	 * {@link BeanDefinition BeanDefinitions}, however these are not considered to be
 	 * needed for validation or for user visualization.
+	 * @return the array of RuntimeBeanReferences, or an empty array if none
 	 */
 	RuntimeBeanReference[] getBeanReferences();
 
 	/**
 	 * Retrieve the <code>Object</code> representing the original configuration data
 	 * that resulted in this particular <code>ComponentDefinition</code>.
-	 * May be <code>null</code>.
+	 * @return the source object, or <code>null</code> if none
 	 * @see org.springframework.beans.factory.parsing.SourceExtractor
 	 */
 	Object getSource();
