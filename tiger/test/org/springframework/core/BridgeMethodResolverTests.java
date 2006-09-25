@@ -16,6 +16,12 @@
 
 package org.springframework.core;
 
+import junit.framework.TestCase;
+import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -27,13 +33,6 @@ import java.util.Map;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
-
-import junit.framework.TestCase;
-
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Rob Harrop
@@ -174,7 +173,7 @@ public class BridgeMethodResolverTests extends TestCase {
 	}
 
 	public void testSPR2454() throws Exception {
-	  Map typeVariableMap = BridgeMethodResolver.createTypeVariableMap(YourHomer.class);
+		Map typeVariableMap = BridgeMethodResolver.createTypeVariableMap(YourHomer.class);
 		assertEquals(AbstractBounded.class, typeVariableMap.get("L"));
 	}
 
@@ -575,7 +574,7 @@ public class BridgeMethodResolverTests extends TestCase {
 
 
 	public abstract class GenericEventBroadcasterImpl<T extends Event> extends GenericBroadcasterImpl
-			implements EventBroadcaster, BeanNameAware {
+					implements EventBroadcaster, BeanNameAware {
 
 		private Class<T>[] subscribingEvents;
 
@@ -639,7 +638,7 @@ public class BridgeMethodResolverTests extends TestCase {
 
 
 	public class MessageBroadcasterImpl extends GenericEventBroadcasterImpl<MessageEvent>
-			implements MessageBroadcaster {
+					implements MessageBroadcaster {
 
 		public MessageBroadcasterImpl() {
 			super(NewMessageEvent.class);
@@ -663,7 +662,6 @@ public class BridgeMethodResolverTests extends TestCase {
 		public void receive(ModifiedMessageEvent event) {
 		}
 	}
-
 
 	//-----------------------------
 	// SPR-2454 Test Classes
@@ -697,7 +695,7 @@ public class BridgeMethodResolverTests extends TestCase {
 
 
 	public class SettableRepositoryRegistry<R extends SimpleGenericRepository<?>>
-			implements RepositoryRegistry, InitializingBean {
+					implements RepositoryRegistry, InitializingBean {
 
 		protected void injectInto(R rep) {
 		}
@@ -733,7 +731,7 @@ public class BridgeMethodResolverTests extends TestCase {
 
 
 	public class GenericHibernateRepository<T, ID extends Serializable> extends HibernateDaoSupport
-			implements ConvenientGenericRepository<T, ID> {
+					implements ConvenientGenericRepository<T, ID> {
 
 		/**
 		 * @param c Mandatory. The domain class this repository is responsible for.
@@ -795,7 +793,6 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 	}
 
-
 	//-------------------
 	// SPR-2603 classes
 	//-------------------
@@ -805,8 +802,16 @@ public class BridgeMethodResolverTests extends TestCase {
 		void foo(E e);
 	}
 
+	public class MyHomer<T extends Bounded<T>, L extends T> implements Homer<L> {
 
-	public class MyHomer<L extends Bounded<String>> implements Homer<L> {
+		public void foo(L t) {
+			throw new UnsupportedOperationException();
+		}
+
+	}
+
+	public class YourHomer<T extends AbstractBounded<T>, L extends T> extends
+					MyHomer<T, L> {
 
 		public void foo(L t) {
 			throw new UnsupportedOperationException();
@@ -814,13 +819,5 @@ public class BridgeMethodResolverTests extends TestCase {
 
 	}
 
-
-	public class YourHomer<L extends AbstractBounded<String>> extends MyHomer<L> {
-
-		public void foo(L t) {
-			throw new UnsupportedOperationException();
-		}
-
-	}
 
 }
