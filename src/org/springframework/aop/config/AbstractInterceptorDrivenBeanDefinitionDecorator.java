@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,17 +104,16 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 	}
 
 	private boolean isProxyFactoryBeanDefinition(BeanDefinition existingDefinition) {
-		return ((RootBeanDefinition) existingDefinition).getBeanClassName().equals(ProxyFactoryBean.class.getName());
+		return existingDefinition.getBeanClassName().equals(ProxyFactoryBean.class.getName());
 	}
 
 	protected String getInterceptorNameSuffix(BeanDefinition interceptorDefinition) {
-		String name = ((RootBeanDefinition) interceptorDefinition).getBeanClassName();
-		return StringUtils.uncapitalize(ClassUtils.getShortName(name));
+		return StringUtils.uncapitalize(ClassUtils.getShortName(interceptorDefinition.getBeanClassName()));
 	}
 
 	/**
-	 * Subclasses should implement this method to return the <code>BeanDefinition</code> for
-	 * the interceptor they wish to apply to the bean being decorated.
+	 * Subclasses should implement this method to return the <code>BeanDefinition</code>
+	 * for the interceptor they wish to apply to the bean being decorated.
 	 */
 	protected abstract BeanDefinition createInterceptorDefinition(Node node);
 
