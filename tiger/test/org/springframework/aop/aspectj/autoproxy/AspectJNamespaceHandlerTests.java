@@ -19,6 +19,7 @@ package org.springframework.aop.aspectj.autoproxy;
 import junit.framework.TestCase;
 
 import org.springframework.aop.config.AopNamespaceUtils;
+import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -39,17 +40,12 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 
 	private BeanDefinitionRegistry registry = new DefaultListableBeanFactory();
 
-	protected void setUp() throws Exception {
-		SourceExtractor sourceExtractor = new SourceExtractor() {
-			public Object extract(Object sourceCandidate) {
-				return sourceCandidate;
-			}
-		};
 
+	protected void setUp() throws Exception {
+		SourceExtractor sourceExtractor = new PassThroughSourceExtractor();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.registry);
 		XmlReaderContext readerContext =
 				new XmlReaderContext(reader, null, null, this.readerEventListener, sourceExtractor, null);
-
 		this.parserContext = new ParserContext(readerContext, null);
 	}
 
