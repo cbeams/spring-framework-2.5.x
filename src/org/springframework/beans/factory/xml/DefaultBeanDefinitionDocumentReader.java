@@ -53,13 +53,7 @@ import org.springframework.util.xml.DomUtils;
  */
 public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocumentReader {
 
-	public static final String BEANS_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
-
-	public static final String BEAN_NAME_DELIMITERS = ",; ";
-
-	public static final String IMPORT_ELEMENT = "import";
-
-	public static final String RESOURCE_ATTRIBUTE = "resource";
+	public static final String BEAN_ELEMENT = BeanDefinitionParserDelegate.BEAN_ELEMENT;
 
 	public static final String ALIAS_ELEMENT = "alias";
 
@@ -67,7 +61,9 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 	public static final String ALIAS_ATTRIBUTE = "alias";
 
-	public static final String BEAN_ELEMENT = "bean";
+	public static final String IMPORT_ELEMENT = "import";
+
+	public static final String RESOURCE_ATTRIBUTE = "resource";
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
