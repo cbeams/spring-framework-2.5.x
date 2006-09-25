@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 final (27.9.2006)
+Changes in version 2.0 final (30.9.2006)
 ----------------------------------------
 
 Package org.springframework.aop
@@ -14,12 +14,20 @@ Package org.springframework.beans
 * reworked type matching for FactoryBeans, avoiding repeated recreation/destruction through early "getObjectType" checks
 * "lookup-method" overrides no-arg method only, to let overloaded variants be implemented in a traditional fashion
 * added "setAllowRawInjectionDespiteWrapping" config method to DefaultListableBeanFactory, to enable Spring 1.2 behavior
+* added "getRegisteredScopeNames" and "getRegisteredScope" accessors to ConfigurableBeanFactory interface
+* added "getConversationId" method to Scope interface (exposing session id for session scope, null for request scope)
+* introduced BeanMetadataElement interface, giving access to config source object (implemented by BeanDefinition etc)
+* added Resource argument to SourceExtractor interface, exposing the defining resource for the given source candidate
+* added "getInnerBeanDefinitions()" accessor to ComponentDefinition interface, exposing all relevant inner beans
 
 Package org.springframework.jdbc
 * JdbcTemplate uses "PreparedStatement.setObject(index, null)" for null values with unknown SQL type on Informix
 * turned visibility of "org.springframework.jdbc.core.StatementCreatorUtils" to public (again)
 
 Package org.springframework.jms
+* factored out protected "prepareSharedConnection" template method in AbstractMessageListenerContainer
+* AbstractMessageListenerContainer's "durableSubscriptionName" property defaults to the message listener class name
+* added "subscriptionDurable" flag to AbstractMessageListenerContainer (set this to "true" to for actual durability!)
 * added JMS invoker strategy for service-based remoting via JMS: JmsInvokerServiceExporter, JmsInvokerProxyFactoryBean
 
 Package org.springframework.jmx
