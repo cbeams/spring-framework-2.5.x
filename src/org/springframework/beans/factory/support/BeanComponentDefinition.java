@@ -55,8 +55,14 @@ public class BeanComponentDefinition extends AbstractComponentDefinition {
 		this.beanDefinition = holder.getBeanDefinition();
 		this.beanName = holder.getBeanName();
 		createDescription();
+		findBeanReferences();
 	}
 
+
+	private void createDescription() {
+		String beanType = this.beanDefinition.getBeanClassName();
+		this.description = "Bean '" + getName() + "' of type '" + beanType + "'";
+	}
 
 	private void findBeanReferences() {
 		List references = new ArrayList();
@@ -69,11 +75,6 @@ public class BeanComponentDefinition extends AbstractComponentDefinition {
 			}
 		}
 		this.beanReferences = (RuntimeBeanReference[]) references.toArray(new RuntimeBeanReference[references.size()]);
-	}
-
-	private void createDescription() {
-		String beanType = ((AbstractBeanDefinition) this.beanDefinition).getBeanClassName();
-		this.description = "Bean '" + getName() + "' of type '" + beanType + "'";
 	}
 
 
