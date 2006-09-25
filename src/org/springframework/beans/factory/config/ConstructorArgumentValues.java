@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -316,7 +317,7 @@ public class ConstructorArgumentValues {
 	 * Holder for a constructor argument value, with an optional type
 	 * attribute indicating the target type of the actual constructor argument.
 	 */
-	public static class ValueHolder {
+	public static class ValueHolder implements BeanMetadataElement {
 
 		private Object value;
 
@@ -376,16 +377,10 @@ public class ConstructorArgumentValues {
 			return type;
 		}
 
-		/**
-		 * Set the configuration source object for this ValueHolder.
-		 */
 		public void setSource(Object source) {
 			this.source = source;
 		}
 
-		/**
-		 * Return the configuration source object for this ValueHolder
-		 */
 		public Object getSource() {
 			return source;
 		}

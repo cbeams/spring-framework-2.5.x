@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.config;
 
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.core.AttributeAccessor;
 
@@ -37,7 +38,7 @@ import org.springframework.core.AttributeAccessor;
  * @see org.springframework.beans.factory.support.RootBeanDefinition
  * @see org.springframework.beans.factory.support.ChildBeanDefinition
  */
-public interface BeanDefinition extends AttributeAccessor {
+public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
 	 * Scope identifier for the standard singleton scope: "singleton".
@@ -146,13 +147,6 @@ public interface BeanDefinition extends AttributeAccessor {
 	 * came from (for the purpose of showing context in case of errors).
 	 */
 	String getResourceDescription();
-
-	/**
-	 * Return the <code>Object</code> that was the source of this definition in the
-	 * configuration. May be <code>null</code>. The exact type of this source
-	 * <code>Object</code> will depend on the configuration mechanism used.
-	 */
-	Object getSource();
 
 	/**
 	 * Get the role hint for this <code>BeanDefinition</code>. The role hint

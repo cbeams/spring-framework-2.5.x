@@ -687,18 +687,10 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 		return resourceDescription;
 	}
 
-	/**
-	 * Set the <code>Object</code> representing the configuration source
-	 * for this <code>BeanDefinition</code>.
-	 */
 	public void setSource(Object source) {
 		this.source = source;
 	}
 
-	/**
-	 * Return the <code>Object</code> representing the configuration source
-	 * for this <code>BeanDefinition</code>.
-	 */
 	public Object getSource() {
 		return source;
 	}

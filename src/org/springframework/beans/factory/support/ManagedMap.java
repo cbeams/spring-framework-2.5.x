@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
@@ -36,7 +37,7 @@ import org.springframework.util.Assert;
  * @since 27.05.2003
  * @see org.springframework.core.CollectionFactory#createLinkedMapIfPossible
  */
-public class ManagedMap implements Map, Mergeable {
+public class ManagedMap implements Map, Mergeable, BeanMetadataElement {
 
 	private final Map targetMap;
 

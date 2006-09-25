@@ -16,9 +16,10 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.util.ObjectUtils;
-
 import java.lang.reflect.Method;
+
+import org.springframework.beans.BeanMetadataElement;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Object representing the override of a method on a managed
@@ -28,9 +29,10 @@ import java.lang.reflect.Method;
  * generic means of inserting crosscutting code: use AOP for that.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 1.1
  */
-public abstract class MethodOverride {
+public abstract class MethodOverride implements BeanMetadataElement {
 	
 	private final String methodName;
 
@@ -71,18 +73,12 @@ public abstract class MethodOverride {
 		return overloaded;
 	}
 
-	/**
-	 * Gets the source metadata for this object.
-	 */
-	public Object getSource() {
-		return source;
-	}
-
-	/**
-	 * Sets the source metadata for this object.
-	 */
 	public void setSource(Object source) {
 		this.source = source;
+	}
+
+	public Object getSource() {
+		return source;
 	}
 
 

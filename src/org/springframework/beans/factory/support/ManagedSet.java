@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
@@ -36,7 +37,7 @@ import org.springframework.util.Assert;
  * @since 21.01.2004
  * @see org.springframework.core.CollectionFactory#createLinkedSetIfPossible
  */
-public class ManagedSet implements Set, Mergeable {
+public class ManagedSet implements Set, Mergeable, BeanMetadataElement {
 
 	private final Set targetSet;
 

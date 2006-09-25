@@ -38,7 +38,7 @@ import org.springframework.util.ObjectUtils;
  * @see PropertyValues
  * @see BeanWrapper
  */
-public class PropertyValue extends AttributeAccessorSupport implements Serializable {
+public class PropertyValue extends AttributeAccessorSupport implements BeanMetadataElement, Serializable {
 
 	private final String name;
 
@@ -89,19 +89,10 @@ public class PropertyValue extends AttributeAccessorSupport implements Serializa
 		return value;
 	}
 
-	/**
-	 * Set the configuration source <code>Object</code> for this
-	 * <code>PropertyValue</code>.
-	 */
 	public void setSource(Object source) {
 		this.source = source;
 	}
 
-	/**
-	 * Return the configuration source <code>Object</code> for this
-	 * <code>PropertyValue</code>. Exact type will depend on the
-	 * configuration mechanism used.
-	 */
 	public Object getSource() {
 		return source;
 	}

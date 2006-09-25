@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import java.util.Properties;
 
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
 import org.springframework.util.Assert;
 
@@ -28,7 +29,7 @@ import org.springframework.util.Assert;
  * @author Rob Harrop
  * @since 2.0
  */
-public class ManagedProperties extends Properties implements Mergeable {
+public class ManagedProperties extends Properties implements Mergeable, BeanMetadataElement {
 
 	private boolean mergeEnabled;
 
