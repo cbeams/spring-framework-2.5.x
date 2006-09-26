@@ -27,11 +27,13 @@ import org.springframework.util.Assert;
  * @see BeanDefinition#getPropertyValues()
  * @see org.springframework.beans.factory.BeanFactory#getBean
  */
-public class RuntimeBeanReference {
+public class RuntimeBeanReference implements BeanReference {
 	
 	private final String beanName;
 
 	private final boolean toParent;
+
+	private Object source;
 
 
 	/**
@@ -59,9 +61,6 @@ public class RuntimeBeanReference {
 	}
 
 
-	/**
-	 * Return the target bean name.
-	 */
 	public String getBeanName() {
 		return beanName;
 	}
@@ -72,6 +71,18 @@ public class RuntimeBeanReference {
 	 */
 	public boolean isToParent() {
 		return toParent;
+	}
+
+	/**
+	 * Set the configuration source <code>Object</code> for this metadata element.
+	 * <p>The exact type of the object will depend on the configuration mechanism used.
+	 */
+	public void setSource(Object source) {
+		this.source = source;
+	}
+
+	public Object getSource() {
+		return source;
 	}
 
 
