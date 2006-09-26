@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-200& the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import javax.servlet.http.HttpServletRequest;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockRequestDispatcher;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -50,59 +50,108 @@ public class InternalResourceViewTests extends TestCase {
 			// expected
 		}
 	}
-	
+
 	public void testForward() throws Exception {
 		HashMap model = new HashMap();
 		Object obj = new Integer(1);
 		model.put("foo", "bar");
 		model.put("I", obj);
 
-		MockControl wacControl = MockControl.createNiceControl(WebApplicationContext.class);
+		MockControl wacControl = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wacControl.getMock();
 		wacControl.replay();
 		
 		String url = "forward-to";
 		
-		MockControl reqControl = MockControl.createNiceControl(HttpServletRequest.class);
-		HttpServletRequest request = (HttpServletRequest) reqControl.getMock();
-		Set keys = model.keySet();
-		for (Iterator iter = keys.iterator(); iter.hasNext();) {
-			String key = (String) iter.next();
-			request.setAttribute(key, model.get(key));
-			reqControl.setVoidCallable(1);
-		}
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myservlet/handler.do");
+		request.setContextPath("/mycontext");
+		request.setServletPath("/myservlet");
+		request.setPathInfo(";mypathinfo");
+		request.setQueryString("?param1=value1");
 
-		request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
-		reqControl.setReturnValue(null);
-		request.getRequestDispatcher(url);
-		reqControl.setReturnValue(new MockRequestDispatcher(url));
-		reqControl.replay();
+		InternalResourceView view = new InternalResourceView();
+		view.setUrl(url);
+		view.setApplicationContext(wac);
 		
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		InternalResourceView v = new InternalResourceView();
-		v.setUrl(url);
-		v.setApplicationContext(wac);
-		
-		// Can now try multiple tests
-		v.render(model, request, response);
+		view.render(model, request, response);
 		assertEquals(url, response.getForwardedUrl());
+
+		Set keys = model.keySet();
+		for (Iterator it = keys.iterator(); it.hasNext();) {
+			String key = (String) it.next();
+			assertEquals(model.get(key), request.getAttribute(key));
+		}
+
+		assertEquals("/myservlet/handler.do", request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE));
+		assertEquals("/mycontext", request.getAttribute(WebUtils.FORWARD_CONTEXT_PATH_ATTRIBUTE));
+		assertEquals("/myservlet", request.getAttribute(WebUtils.FORWARD_SERVLET_PATH_ATTRIBUTE));
+		assertEquals(";mypathinfo", request.getAttribute(WebUtils.FORWARD_PATH_INFO_ATTRIBUTE));
+		assertEquals("?param1=value1", request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE));
+
 		wacControl.verify();
-		reqControl.verify();
 	}
-	
+
+	public void testForwardWithForwardAttributesPresent() throws Exception {
+		HashMap model = new HashMap();
+		Object obj = new Integer(1);
+		model.put("foo", "bar");
+		model.put("I", obj);
+
+		MockControl wacControl = MockControl.createControl(WebApplicationContext.class);
+		WebApplicationContext wac = (WebApplicationContext) wacControl.getMock();
+		wacControl.replay();
+
+		String url = "forward-to";
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myservlet/handler.do");
+		request.setContextPath("/mycontext");
+		request.setServletPath("/myservlet");
+		request.setPathInfo(";mypathinfo");
+		request.setQueryString("?param1=value1");
+
+		request.setAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE, "/MYservlet/handler.do");
+		request.setAttribute(WebUtils.FORWARD_CONTEXT_PATH_ATTRIBUTE, "/MYcontext");
+		request.setAttribute(WebUtils.FORWARD_SERVLET_PATH_ATTRIBUTE, "/MYservlet");
+		request.setAttribute(WebUtils.FORWARD_PATH_INFO_ATTRIBUTE, ";MYpathinfo");
+		request.setAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE, "?Param1=value1");
+
+		InternalResourceView view = new InternalResourceView();
+		view.setUrl(url);
+		view.setApplicationContext(wac);
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		view.render(model, request, response);
+		assertEquals(url, response.getForwardedUrl());
+
+		Set keys = model.keySet();
+		for (Iterator it = keys.iterator(); it.hasNext();) {
+			String key = (String) it.next();
+			assertEquals(model.get(key), request.getAttribute(key));
+		}
+
+		assertEquals("/MYservlet/handler.do", request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE));
+		assertEquals("/MYcontext", request.getAttribute(WebUtils.FORWARD_CONTEXT_PATH_ATTRIBUTE));
+		assertEquals("/MYservlet", request.getAttribute(WebUtils.FORWARD_SERVLET_PATH_ATTRIBUTE));
+		assertEquals(";MYpathinfo", request.getAttribute(WebUtils.FORWARD_PATH_INFO_ATTRIBUTE));
+		assertEquals("?Param1=value1", request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE));
+
+		wacControl.verify();
+	}
+
 	public void testIncludeOnAttribute() throws Exception {
 		HashMap model = new HashMap();
 		Object obj = new Integer(1);
 		model.put("foo", "bar");
 		model.put("I", obj);
 
-		MockControl wacControl = MockControl.createNiceControl(WebApplicationContext.class);
+		MockControl wacControl = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wacControl.getMock();
 		wacControl.replay();
 
 		String url = "forward-to";
 
-		MockControl reqControl = MockControl.createNiceControl(HttpServletRequest.class);
+		MockControl reqControl = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) reqControl.getMock();
 		Set keys = model.keySet();
 		for (Iterator iter = keys.iterator(); iter.hasNext();) {
@@ -135,13 +184,13 @@ public class InternalResourceViewTests extends TestCase {
 		model.put("foo", "bar");
 		model.put("I", obj);
 
-		MockControl wacControl = MockControl.createNiceControl(WebApplicationContext.class);
+		MockControl wacControl = MockControl.createControl(WebApplicationContext.class);
 		WebApplicationContext wac = (WebApplicationContext) wacControl.getMock();
 		wacControl.replay();
 
 		String url = "forward-to";
 
-		MockControl reqControl = MockControl.createNiceControl(HttpServletRequest.class);
+		MockControl reqControl = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) reqControl.getMock();
 		Set keys = model.keySet();
 		for (Iterator iter = keys.iterator(); iter.hasNext();) {

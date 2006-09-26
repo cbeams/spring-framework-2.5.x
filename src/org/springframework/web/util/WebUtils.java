@@ -346,29 +346,29 @@ public abstract class WebUtils {
 	/**
 	 * Expose the current request URI and paths as {@link javax.servlet.http.HttpServletRequest}
 	 * attributes under the keys defined in the Servlet 2.4 specification,
-	 * for Servlet 2.3- containers:
+	 * for containers that implement 2.3 or an earlier version of the Servlet API:
 	 * <code>javax.servlet.forward.request_uri</code>,
 	 * <code>javax.servlet.forward.context_path</code>,
 	 * <code>javax.servlet.forward.servlet_path</code>,
 	 * <code>javax.servlet.forward.path_info</code>,
 	 * <code>javax.servlet.forward.query_string</code>.
-	 * <p>Does not override values if already present, to not conflict
-	 * with Servlet 2.4+ containers.
+	 * <p>Does not override values if already present, to not cause conflicts
+	 * with the attributes exposed by Servlet 2.4+ containers themselves.
 	 */
 	public static void exposeForwardRequestAttributes(HttpServletRequest request) {
-		if (request.getAttribute(FORWARD_REQUEST_URI_ATTRIBUTE) != null) {
+		if (request.getAttribute(FORWARD_REQUEST_URI_ATTRIBUTE) == null) {
 			request.setAttribute(FORWARD_REQUEST_URI_ATTRIBUTE, request.getRequestURI());
 		}
-		if (request.getAttribute(FORWARD_CONTEXT_PATH_ATTRIBUTE) != null) {
+		if (request.getAttribute(FORWARD_CONTEXT_PATH_ATTRIBUTE) == null) {
 			request.setAttribute(FORWARD_CONTEXT_PATH_ATTRIBUTE, request.getContextPath());
 		}
-		if (request.getAttribute(FORWARD_SERVLET_PATH_ATTRIBUTE) != null) {
+		if (request.getAttribute(FORWARD_SERVLET_PATH_ATTRIBUTE) == null) {
 			request.setAttribute(FORWARD_SERVLET_PATH_ATTRIBUTE, request.getServletPath());
 		}
-		if (request.getAttribute(FORWARD_PATH_INFO_ATTRIBUTE) != null) {
+		if (request.getAttribute(FORWARD_PATH_INFO_ATTRIBUTE) == null) {
 			request.setAttribute(FORWARD_PATH_INFO_ATTRIBUTE, request.getPathInfo());
 		}
-		if (request.getAttribute(FORWARD_QUERY_STRING_ATTRIBUTE) != null) {
+		if (request.getAttribute(FORWARD_QUERY_STRING_ATTRIBUTE) == null) {
 			request.setAttribute(FORWARD_QUERY_STRING_ATTRIBUTE, request.getQueryString());
 		}
 	}
