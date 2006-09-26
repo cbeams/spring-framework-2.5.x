@@ -60,18 +60,4 @@ public class PropertyPathFactoryBeanTests extends TestCase {
 		assertTrue(result2 != result3);
 	}
 
-	public void testBeanReferenceFactoryBean() {
-		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("propertyPath.xml", getClass()));
-
-		TestBean tb = (TestBean) xbf.getBean("tbAlias");
-		assertEquals(10, tb.getAge());
-		assertEquals(TestBean.class, xbf.getType("tbAlias"));
-		assertFalse(xbf.isSingleton("tbAlias"));
-
-		Object otb = xbf.getBean("otb");
-		assertEquals(otb, xbf.getBean("otbAlias"));
-		assertEquals(TestBean.class, xbf.getType("otbAlias"));
-		assertTrue(xbf.isSingleton("otbAlias"));
-	}
-
 }

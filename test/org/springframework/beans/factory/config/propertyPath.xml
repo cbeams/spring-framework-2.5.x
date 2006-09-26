@@ -47,12 +47,4 @@
 		<property name="resultType"><value>org.springframework.beans.TestBean</value></property>
 	</bean>
 
-	<bean id="tbAlias" class="org.springframework.beans.factory.config.BeanReferenceFactoryBean">
-		<property name="targetBeanName"><value>tb</value></property>
-	</bean>
-
-	<bean id="otbAlias" class="org.springframework.beans.factory.config.BeanReferenceFactoryBean">
-		<property name="targetBeanName"><value>otb</value></property>
-	</bean>
-
 </beans>
