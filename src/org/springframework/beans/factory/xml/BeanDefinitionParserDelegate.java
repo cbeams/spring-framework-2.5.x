@@ -798,7 +798,9 @@ public class BeanDefinitionParserDelegate {
 			if (!StringUtils.hasText(refName)) {
 				error(elementName + " contains empty 'ref' attribute", ele);
 			}
-			return new RuntimeBeanReference(refName);
+			RuntimeBeanReference ref = new RuntimeBeanReference(refName);
+			ref.setSource(extractSource(ele));
+			return ref;
 		}
 		else if (hasValueAttribute) {
 			return ele.getAttribute(VALUE_ATTRIBUTE);
@@ -849,7 +851,9 @@ public class BeanDefinitionParserDelegate {
 			if (!StringUtils.hasText(refName)) {
 				error("<ref> element contains empty target attribute", ele);
 			}
-			return new RuntimeBeanReference(refName, toParent);
+			RuntimeBeanReference ref = new RuntimeBeanReference(refName, toParent);
+			ref.setSource(extractSource(ele));
+			return ref;
 		}
 		else if (DomUtils.nodeNameEquals(ele, IDREF_ELEMENT)) {
 			// A generic reference to any name of any bean.
@@ -861,7 +865,9 @@ public class BeanDefinitionParserDelegate {
 					error("Either 'bean' or 'local' is required for <idref> element", ele);
 				}
 			}
-			return new RuntimeBeanNameReference(beanRef);
+			RuntimeBeanNameReference ref = new RuntimeBeanNameReference(beanRef);
+			ref.setSource(extractSource(ele));
+			return ref;
 		}
 		else if (DomUtils.nodeNameEquals(ele, VALUE_ELEMENT)) {
 			// It's a literal value.
@@ -993,7 +999,9 @@ public class BeanDefinitionParserDelegate {
 				if (!StringUtils.hasText(refName)) {
 					error("<entry> element contains empty 'key-ref' attribute", entryEle);
 				}
-				key = new RuntimeBeanReference(refName);
+				RuntimeBeanReference ref = new RuntimeBeanReference(refName);
+				ref.setSource(extractSource(keyEle));
+				key = ref;
 			}
 			else if (keyEle != null) {
 				key = parseKeyElement(keyEle, bd, defaultKeyTypeClassName);
@@ -1020,7 +1028,9 @@ public class BeanDefinitionParserDelegate {
 				if (!StringUtils.hasText(refName)) {
 					error("<entry> element contains empty 'value-ref' attribute", entryEle);
 				}
-				value = new RuntimeBeanReference(refName);
+				RuntimeBeanReference ref = new RuntimeBeanReference(refName);
+				ref.setSource(extractSource(valueEle));
+				value = ref;
 			}
 			else if (valueEle != null) {
 				value = parsePropertySubElement(valueEle, bd, defaultValueTypeClassName);
