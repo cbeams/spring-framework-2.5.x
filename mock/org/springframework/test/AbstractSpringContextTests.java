@@ -96,7 +96,7 @@ public abstract class AbstractSpringContextTests extends ConditionalTestCase {
 	 * @param key the context key
 	 * @return the corresponding ApplicationContext instance (potentially cached)
 	 */
-	protected final ConfigurableApplicationContext getContext(Object key) {
+	protected final ConfigurableApplicationContext getContext(Object key) throws Exception {
 		String keyString = contextKeyString(key);
 		ConfigurableApplicationContext ctx =
 				(ConfigurableApplicationContext) contextKeyToContextMap.get(keyString);
@@ -139,6 +139,6 @@ public abstract class AbstractSpringContextTests extends ConditionalTestCase {
 	 * @param key the context key
 	 * @return the corresponding ApplicationContext instance (new)
 	 */
-	protected abstract ConfigurableApplicationContext loadContext(Object key);
+	protected abstract ConfigurableApplicationContext loadContext(Object key) throws Exception;
 
 }

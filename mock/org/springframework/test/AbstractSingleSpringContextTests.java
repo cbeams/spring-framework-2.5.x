@@ -121,7 +121,7 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	/**
 	 * This implementation loads a context from the given String array.
 	 */
-	protected final ConfigurableApplicationContext loadContext(Object key) {
+	protected final ConfigurableApplicationContext loadContext(Object key) throws Exception {
 		return loadContextLocations((String[]) key);
 	}
 
@@ -130,7 +130,7 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	 * @param locations the config locations
 	 * @return the corresponding ApplicationContext instance (potentially cached)
 	 */
-	protected ConfigurableApplicationContext loadContextLocations(String[] locations) {
+	protected ConfigurableApplicationContext loadContextLocations(String[] locations) throws Exception {
 		++this.loadCount;
 		if (logger.isInfoEnabled()) {
 			logger.info("Loading context for: " + StringUtils.arrayToCommaDelimitedString(locations));
