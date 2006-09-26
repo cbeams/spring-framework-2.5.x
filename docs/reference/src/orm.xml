@@ -2236,7 +2236,7 @@
    &lt;/map&gt;
   &lt;/property&gt;
   &lt;property name="loadTimeWeaver"&gt;
-    &lt;bean class="org.springframework.instrument.classloading.SimpleLoadTimeWeaver"/&gt;
+    &lt;bean class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver"/&gt;
   &lt;/property&gt;
  &lt;/bean&gt;
 &lt;/beans&gt;</programlisting>
@@ -2248,7 +2248,8 @@
           (Hibernate being an example). If your provider does not require an
           agent or you have other alternatives (for example applying
           enhancements at build time through a custom compiler or an ant task)
-          there is no need to use the load time weaver.</para>
+          the load time weaver <emphasis role="bold">should not</emphasis> be
+          used.</para>
         </sidebar>
 
         <para>The <interfacename>LoadTimeWeaver</interfacename> interface is a
