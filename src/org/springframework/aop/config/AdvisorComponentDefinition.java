@@ -18,6 +18,7 @@ package org.springframework.aop.config;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractComponentDefinition;
 import org.springframework.util.Assert;
@@ -34,7 +35,7 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 
 	private String description;
 
-	private RuntimeBeanReference[] beanReferences;
+	private BeanReference[] beanReferences;
 
 	private BeanDefinition[] beanDefinitions;
 
@@ -63,12 +64,12 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 		if (pointcutDefinition == null) {
 			RuntimeBeanReference pointcutReference =
 					(RuntimeBeanReference) propertyValues.getPropertyValue("pointcut").getValue();
-			this.beanReferences = new RuntimeBeanReference[]{adviceReference, pointcutReference};
+			this.beanReferences = new BeanReference[] {adviceReference, pointcutReference};
 			this.beanDefinitions = new BeanDefinition[] {this.advisorDefinition};
 			this.description = buildDescription(adviceReference, pointcutReference);
 		}
 		else {
-			this.beanReferences = new RuntimeBeanReference[]{adviceReference};
+			this.beanReferences = new BeanReference[] {adviceReference};
 			this.beanDefinitions = new BeanDefinition[] {this.advisorDefinition, pointcutDefinition};
 			this.description = buildDescription(adviceReference, pointcutDefinition);
 		}
@@ -103,7 +104,7 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 		return this.beanDefinitions;
 	}
 
-	public RuntimeBeanReference[] getBeanReferences() {
+	public BeanReference[] getBeanReferences() {
 		return this.beanReferences;
 	}
 

@@ -16,8 +16,8 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanReference;
 
 /**
  * Base implementation of {@link ComponentDefinition} that provides a basic implementation of
@@ -42,15 +42,15 @@ public abstract class AbstractComponentDefinition implements ComponentDefinition
 	/**
 	 * Returns an empty array.
 	 */
-	public BeanDefinitionHolder[] getInnerBeanDefinitions() {
-		return new BeanDefinitionHolder[0];
+	public BeanDefinition[] getInnerBeanDefinitions() {
+		return new BeanDefinition[0];
 	}
 
 	/**
 	 * Returns an empty array.
 	 */
-	public RuntimeBeanReference[] getBeanReferences() {
-		return new RuntimeBeanReference[0];
+	public BeanReference[] getBeanReferences() {
+		return new BeanReference[0];
 	}
 
 	/**

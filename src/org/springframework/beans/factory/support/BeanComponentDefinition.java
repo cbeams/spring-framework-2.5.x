@@ -23,7 +23,7 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.util.Assert;
 
 /**
@@ -42,9 +42,9 @@ public class BeanComponentDefinition extends AbstractComponentDefinition {
 
 	private final String description;
 
-	private BeanDefinitionHolder[] innerBeanDefinitions;
+	private BeanDefinition[] innerBeanDefinitions;
 
-	private RuntimeBeanReference[] beanReferences;
+	private BeanReference[] beanReferences;
 
 
 	/**
@@ -89,16 +89,17 @@ public class BeanComponentDefinition extends AbstractComponentDefinition {
 			PropertyValue propertyValue = propertyValues.getPropertyValues()[i];
 			Object value = propertyValue.getValue();
 			if (value instanceof BeanDefinitionHolder) {
+				innerBeans.add(((BeanDefinitionHolder) value).getBeanDefinition());
+			}
+			else if (value instanceof BeanDefinition) {
 				innerBeans.add(value);
 			}
-			else if (value instanceof RuntimeBeanReference) {
+			else if (value instanceof BeanReference) {
 				references.add(value);
 			}
 		}
-		this.innerBeanDefinitions =
-				(BeanDefinitionHolder[]) innerBeans.toArray(new BeanDefinitionHolder[innerBeans.size()]);
-		this.beanReferences =
-				(RuntimeBeanReference[]) references.toArray(new RuntimeBeanReference[references.size()]);
+		this.innerBeanDefinitions = (BeanDefinition[]) innerBeans.toArray(new BeanDefinition[innerBeans.size()]);
+		this.beanReferences = (BeanReference[]) references.toArray(new BeanReference[references.size()]);
 	}
 
 
@@ -114,11 +115,11 @@ public class BeanComponentDefinition extends AbstractComponentDefinition {
 		return new BeanDefinition[] {this.beanDefinition};
 	}
 
-	public BeanDefinitionHolder[] getInnerBeanDefinitions() {
+	public BeanDefinition[] getInnerBeanDefinitions() {
 		return innerBeanDefinitions;
 	}
 
-	public RuntimeBeanReference[] getBeanReferences() {
+	public BeanReference[] getBeanReferences() {
 		return this.beanReferences;
 	}
 

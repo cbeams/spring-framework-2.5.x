@@ -29,7 +29,7 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rob Harrop
- * @since 2.0
+ * @author Juergen Hoeller
  */
 public class EventPublicationTests extends TestCase {
 
@@ -61,7 +61,7 @@ public class EventPublicationTests extends TestCase {
 		assertEquals("Juergen Hoeller", beanDefinition2.getPropertyValues().getPropertyValue("name").getValue());
 		assertEquals(0, componentDefinition2.getBeanReferences().length);
 		assertEquals(1, componentDefinition2.getInnerBeanDefinitions().length);
-		BeanDefinition innerBd = componentDefinition2.getInnerBeanDefinitions()[0].getBeanDefinition();
+		BeanDefinition innerBd = componentDefinition2.getInnerBeanDefinitions()[0];
 		assertEquals("Eva Schallmeiner", innerBd.getPropertyValues().getPropertyValue("name").getValue());
 	}
 

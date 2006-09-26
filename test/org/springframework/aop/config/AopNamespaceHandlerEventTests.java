@@ -16,17 +16,18 @@
 
 package org.springframework.aop.config;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import junit.framework.TestCase;
+
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.support.ComponentDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MapBasedReaderEventListener;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.io.ClassPathResource;
-
-import java.util.Set;
-import java.util.HashSet;
 
 /**
  * @author Rob Harrop
@@ -38,6 +39,7 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 	private XmlBeanDefinitionReader reader;
 
 	private DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+
 
 	protected void setUp() throws Exception {
 		this.reader = new XmlBeanDefinitionReader(this.beanFactory);
@@ -97,13 +99,13 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 		assertNotNull(componentDefinition);
 		BeanDefinition[] beanDefinitions = componentDefinition.getBeanDefinitions();
 		assertEquals(6, beanDefinitions.length);
-		RuntimeBeanReference[] beanReferences = componentDefinition.getBeanReferences();
+		BeanReference[] beanReferences = componentDefinition.getBeanReferences();
 		assertEquals(6, beanReferences.length);
 		Set expectedReferences = new HashSet();
 		expectedReferences.add("pc");
 		expectedReferences.add("countingAdvice");
 		for (int i = 0; i < beanReferences.length; i++) {
-			RuntimeBeanReference beanReference = beanReferences[i];
+			BeanReference beanReference = beanReferences[i];
 			expectedReferences.remove(beanReference.getBeanName());
 		}
 		assertEquals("Incorrect references found", 0, expectedReferences.size());
@@ -112,4 +114,5 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 	private void loadBeansFrom(String path) {
 		this.reader.loadBeanDefinitions(new ClassPathResource(path, getClass()));
 	}
+
 }

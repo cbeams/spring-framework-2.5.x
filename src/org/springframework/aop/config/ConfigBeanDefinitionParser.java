@@ -33,6 +33,7 @@ import org.springframework.aop.aspectj.AspectJPointcutAdvisor;
 import org.springframework.aop.aspectj.DeclareParentsAdvisor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.ParseState;
@@ -181,25 +182,21 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 */
 	private void parseAdvisor(Element advisorElement, ParserContext parserContext) {
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
-		
-		AbstractBeanDefinition advisorDefinition = createAdvisorBeanDefinition(advisorElement);
-		
+		AbstractBeanDefinition advisorDef = createAdvisorBeanDefinition(advisorElement);
+
 		String advisorBeanName = advisorElement.getAttribute(ID);
 		if (!StringUtils.hasText(advisorBeanName)) {
-			advisorBeanName = BeanDefinitionReaderUtils.generateBeanName(advisorDefinition, registry, false);
+			advisorBeanName = BeanDefinitionReaderUtils.generateBeanName(advisorDef, registry, false);
 		}
-		
+
 		try {
 			this.parseState.push(new AdvisorEntry(advisorBeanName));
-		
-			String pointcutBeanName = parsePointcutProperty(advisorElement, advisorDefinition.getPropertyValues(), parserContext);
-
-			registry.registerBeanDefinition(advisorBeanName, advisorDefinition);
-
+			String pointcutBeanName = parsePointcutProperty(advisorElement, advisorDef.getPropertyValues(), parserContext);
+			registry.registerBeanDefinition(advisorBeanName, advisorDef);
 			boolean pointcutRef = advisorElement.hasAttribute(POINTCUT_REF);
 			if (pointcutBeanName != null) {
 				// no errors so fire event
-				fireAdvisorEvent(advisorBeanName, pointcutBeanName, advisorDefinition, parserContext, pointcutRef);
+				fireAdvisorEvent(advisorBeanName, pointcutBeanName, advisorDef, parserContext, pointcutRef);
 			}
 		}
 		finally {
@@ -208,11 +205,13 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	/**
-	 * Creates the {@link AdvisorComponentDefinition} appropriate to the supplied {@link RootBeanDefinition advisor definition}
-	 * and fires it through the {@link ParserContext}.
+	 * Creates the {@link AdvisorComponentDefinition} appropriate to the supplied
+	 * advisor bean definition and fires it through the {@link ParserContext}.
 	 */
-	private void fireAdvisorEvent(String advisorBeanName, String pointcutBeanName, AbstractBeanDefinition advisorDefinition,
-																ParserContext parserContext, boolean pointcutRef) {
+	private void fireAdvisorEvent(
+			String advisorBeanName, String pointcutBeanName, AbstractBeanDefinition advisorDefinition,
+			ParserContext parserContext, boolean pointcutRef) {
+
 		AdvisorComponentDefinition componentDefinition;
 		if (pointcutRef) {
 			componentDefinition = new AdvisorComponentDefinition(advisorBeanName, advisorDefinition);
@@ -225,7 +224,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	/**
-	 * Creates a {@link RootBeanDefinition} for the advisor described in the supplied. Does <strong>not</strong>
+	 * Create a {@link RootBeanDefinition} for the advisor described in the supplied. Does <strong>not</strong>
 	 * parse any associated '<code>pointcut</code>' or '<code>pointcut-ref</code>' attributes.
 	 */
 	private AbstractBeanDefinition createAdvisorBeanDefinition(Element advisorElement) {
@@ -285,18 +284,19 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	private void fireAspectEvent(Element aspectElement, String aspectId, List beanDefinitions, List beanReferences, ParserContext parserContext) {
-		BeanDefinition[] finalBeanDefinitions = (BeanDefinition[]) beanDefinitions.toArray(new BeanDefinition[beanDefinitions.size()]);
-		RuntimeBeanReference[] finalBeanReferences = (RuntimeBeanReference[]) beanReferences.toArray(new RuntimeBeanReference[beanReferences.size()]);
+	private void fireAspectEvent(
+			Element aspectElement, String aspectId, List beanDefs, List beanRefs, ParserContext parserContext) {
 
-		AspectComponentDefinition acd = new AspectComponentDefinition(aspectElement, aspectId, finalBeanDefinitions, finalBeanReferences);
-		parserContext.getReaderContext().fireComponentRegistered(acd);
+		BeanDefinition[] beanDefArray = (BeanDefinition[]) beanDefs.toArray(new BeanDefinition[beanDefs.size()]);
+		BeanReference[] beanRefArray = (BeanReference[]) beanRefs.toArray(new BeanReference[beanRefs.size()]);
+		parserContext.getReaderContext().fireComponentRegistered(
+				new AspectComponentDefinition(aspectElement, aspectId, beanDefArray, beanRefArray));
 	}
 
 	/**
-	 * Returns <code>true</code> if the supplied node describes an advice type. May be one of:
-	 * '<code>before</code>', '<code>after</code>', '<code>after-returning</code>', '<code>after-throwing</code>'
-	 * or '<code>around</code>'.
+	 * Return <code>true</code> if the supplied node describes an advice type. May be one of:
+	 * '<code>before</code>', '<code>after</code>', '<code>after-returning</code>',
+	 * '<code>after-throwing</code>' or '<code>around</code>'.
 	 */
 	private boolean isAdviceNode(Node aNode) {
 		if (! (aNode instanceof Element)) {
@@ -474,8 +474,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 			registry.registerBeanDefinition(id, pointcutDefinition);
 
-			PointcutComponentDefinition componentDefinition = new PointcutComponentDefinition(id, pointcutDefinition, expression);
-			parserContext.getReaderContext().fireComponentRegistered(componentDefinition);
+			PointcutComponentDefinition componentDef = new PointcutComponentDefinition(id, pointcutDefinition, expression);
+			parserContext.getReaderContext().fireComponentRegistered(componentDef);
 		}
 		finally {
 			this.parseState.pop();
@@ -487,8 +487,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	/**
 	 * Parses the <code>pointcut</code> or <code>pointcut-ref</code> attributes of the supplied
 	 * {@link Element} and add a <code>pointcut</code> property as appropriate. Generates a
-	 * {@link org.springframework.beans.factory.config.BeanDefinition} for the pointcut if necessary and returns its bean name,
-	 * otherwise returns the bean name of the referred pointcut.
+	 * {@link org.springframework.beans.factory.config.BeanDefinition} for the pointcut if  necessary
+	 * and returns its bean name, otherwise returns the bean name of the referred pointcut.
 	 */
 	public String parsePointcutProperty(
 					Element element, MutablePropertyValues mpvs, ParserContext parserContext) {
