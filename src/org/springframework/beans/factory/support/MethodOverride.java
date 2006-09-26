@@ -73,6 +73,10 @@ public abstract class MethodOverride implements BeanMetadataElement {
 		return overloaded;
 	}
 
+	/**
+	 * Set the configuration source <code>Object</code> for this metadata element.
+	 * <p>The exact type of the object will depend on the configuration mechanism used.
+	 */
 	public void setSource(Object source) {
 		this.source = source;
 	}

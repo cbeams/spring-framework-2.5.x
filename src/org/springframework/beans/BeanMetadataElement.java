@@ -18,18 +18,12 @@ package org.springframework.beans;
 
 /**
  * Interface to be implemented by bean metadata elements
- * that allow for carrying a configuration source object.
+ * that carry a configuration source object.
  *
  * @author Juergen Hoeller
  * @since 2.0
  */
 public interface BeanMetadataElement {
-
-	/**
-	 * Set the configuration source <code>Object</code> for this metadata element.
-	 * <p>The exact type of the object will depend on the configuration mechanism used.
-	 */
-	void setSource(Object source);
 
 	/**
 	 * Return the configuration source <code>Object</code> for this metadata element
