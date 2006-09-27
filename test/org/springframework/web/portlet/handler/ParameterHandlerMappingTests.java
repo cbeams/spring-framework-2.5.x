@@ -18,7 +18,6 @@ package org.springframework.web.portlet.handler;
 
 import junit.framework.TestCase;
 
-import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.portlet.MockPortletContext;
 import org.springframework.mock.web.portlet.MockPortletRequest;
 import org.springframework.web.portlet.HandlerMapping;
@@ -94,10 +93,11 @@ public class ParameterHandlerMappingTests extends TestCase {
 		ParameterHandlerMapping hm = (ParameterHandlerMapping)pac.getBean("handlerMapping");
 		try {
 			hm.registerHandler("add", new Object());
-			fail("Should have thrown ApplicationContextException");
+			fail("Should have thrown IllegalStateException");
 		}
-		catch(ApplicationContextException e) {
+		catch (IllegalStateException ex) {
 			// expected
 		}
 	}
+
 }

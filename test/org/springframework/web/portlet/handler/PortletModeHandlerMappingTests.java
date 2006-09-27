@@ -20,7 +20,6 @@ import javax.portlet.PortletMode;
 
 import junit.framework.TestCase;
 
-import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.portlet.MockPortletContext;
 import org.springframework.mock.web.portlet.MockPortletRequest;
 import org.springframework.web.portlet.HandlerMapping;
@@ -78,9 +77,9 @@ public class PortletModeHandlerMappingTests extends TestCase {
 		PortletModeHandlerMapping hm = (PortletModeHandlerMapping)pac.getBean("handlerMapping");
 		try {
 			hm.registerHandler(PortletMode.VIEW, new Object());
-			fail("Should have thrown ApplicationContextException");
+			fail("Should have thrown IllegalStateException");
 		}
-		catch(ApplicationContextException e) {
+		catch (IllegalStateException ex) {
 			// expected
 		}
 	}

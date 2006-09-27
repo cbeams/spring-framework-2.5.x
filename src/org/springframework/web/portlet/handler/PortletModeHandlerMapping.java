@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,7 +25,7 @@ import javax.portlet.PortletMode;
 import javax.portlet.PortletRequest;
 
 import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContextException;
+import org.springframework.util.CollectionUtils;
 
 /**
  * <p>Implementation of the HandlerMapping interface to map from
@@ -48,108 +48,65 @@ import org.springframework.context.ApplicationContextException;
  * @author John A. Lewis
  * @since 2.0
  */
-public class PortletModeHandlerMapping extends AbstractHandlerMapping {
+public class PortletModeHandlerMapping extends AbstractMapBasedHandlerMapping {
 
-	private Map portletModeMap;
+	private final Map portletModeMap = new HashMap();
 
-	private boolean lazyInitHandlers = false;
 
-	private final Map handlerMap = new HashMap();
-
+	/**
+	 * Set PortletMode to handler bean name mappings from a Properties object.
+	 * @param mappings properties with PortletMode names as keys and bean names as values
+	 */
+	public void setMappings(Properties mappings) {
+		this.portletModeMap.putAll(mappings);
+	}
 
 	/**
 	 * Set a Map with PortletModes as keys and handler beans as values.
 	 * Convenient for population with bean references.
-	 * @param portletModeMap map with PortletModes as keys and beans as values
+	 * @param portletModeMap map with PortletMode names as keys and beans or bean names as values
 	 */
 	public void setPortletModeMap(Map portletModeMap) {
-		this.portletModeMap = portletModeMap;
+		this.portletModeMap.putAll(portletModeMap);
 	}
+
 
 	/**
-	 * Set PortletMode to handler bean name mappings from a Properties object.
-	 * @param mappings properties with PortletMode.toString() as key and bean name as value
+	 * Calls the <code>registerHandlers</code> method in addition
+	 * to the superclass's initialization.
+	 * @see #registerHandlers
 	 */
-	public void setMappings(Properties mappings) {
-		this.portletModeMap = mappings;
-	}
-
-	/**
-	 * Set whether to lazily initialize handlers. Only applicable to
-	 * singleton handlers, as prototypes are always lazily initialized.
-	 * Default is false, as eager initialization allows for more efficiency
-	 * through referencing the handler objects directly.
-	 * <p>If you want to allow your handlers to be lazily initialized,
-	 * make them "lazy-init" and set this flag to true. Just making them
-	 * "lazy-init" will not work, as they are initialized through the
-	 * references from the handler mapping in this case.
-	 */
-	public void setLazyInitHandlers(boolean lazyInitHandlers) {
-		this.lazyInitHandlers = lazyInitHandlers;
-	}
-
-
 	public void initApplicationContext() throws BeansException {
-		// Make sure the map got initialized.
-		if (this.portletModeMap == null || this.portletModeMap.isEmpty()) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Neither 'portletModeMap' nor 'mappings' set on PortletModeHandlerMapping");
-			}
+		super.initApplicationContext();
+		registerHandlers(this.portletModeMap);
+	}
+
+	/**
+	 * Register all handlers specified in the Portlet mode map for the corresponding modes.
+	 * @param portletModeMap Map with mode names as keys and handler beans or bean names as values
+	 * @throws BeansException if the handler couldn't be registered
+	 */
+	protected void registerHandlers(Map portletModeMap) throws BeansException {
+		if (CollectionUtils.isEmpty(portletModeMap)) {
+			logger.warn("Neither 'portletModeMap' nor 'mappings' set on PortletModeHandlerMapping");
 		}
 		else {
-			// Iterate through the portlet modes in the passed in map.
-			for (Iterator it = this.portletModeMap.keySet().iterator(); it.hasNext();) {
-				// Get the portlet mode for this mapping.
-				String modeKey = (String) it.next();
+			for (Iterator it = portletModeMap.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				String modeKey = (String) entry.getKey();
 				PortletMode mode = new PortletMode(modeKey);
-				// Get the handler and register it.
-				Object handler = this.portletModeMap.get(modeKey);
+				Object handler = entry.getValue();
 				registerHandler(mode, handler);
 			}
 		}
 	}
 
-	/**
-	 * Register the given handler instance for the given PortletMode.
-	 * @param mode the PortletMode the bean is mapped to
-	 * @param handler the handler instance
-	 * @throws BeansException if the handler couldn't be registered
-	 */
-	protected void registerHandler(PortletMode mode, Object handler)
-			throws BeansException {
-
-		// check for duplicate mapping
-		Object mappedHandler = this.handlerMap.get(mode);
-		if (mappedHandler != null)
-			throw new ApplicationContextException("Cannot map handler [" + handler + "] to mode [" + mode +
-					"]: there's already handler [" + mappedHandler + "] mapped");
-
-		// eagerly resolve handler if referencing singleton via name
-		if (!this.lazyInitHandlers && handler instanceof String) {
-			String handlerName = (String) handler;
-			if (getApplicationContext().isSingleton(handlerName)) {
-				handler = getApplicationContext().getBean(handlerName);
-			}
-		}
-
-		// add the handler to the map
-		this.handlerMap.put(mode, handler);
-		logger.info("Mapped mode [" + mode + "] onto handler [" + handler + "]");
-	}
 
 	/**
-	 * Look up a handler for the PortletMode of the given request.
-	 * @param request current portlet request
-	 * @return the looked up handler instance, or <code>null</code>
+	 * Uses the current PortletMode as lookup key.
 	 */
-	protected Object getHandlerInternal(PortletRequest request) throws Exception {
-		// Look up the handler for the portlet mode.
-		PortletMode mode = request.getPortletMode();
-		Object handler = this.handlerMap.get(mode);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Portlet mode '" + mode + "' -> handler [" + handler + "]");
-		}
-		return handler;
+	protected Object getLookupKey(PortletRequest request) throws Exception {
+		return request.getPortletMode();
 	}
 
 }
