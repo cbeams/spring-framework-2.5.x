@@ -73,7 +73,7 @@
                <form:select path="house">
                    <form:option value="Gryffindor"/>
                    <form:option value="Hufflepuff"/>
-                   <form:option value="Ravenclaw"/>
+                   <form:option value="Ravenclaw" disabled="true"/>
                    <form:option value="Slytherin"/>
                </form:select>
            </div>
