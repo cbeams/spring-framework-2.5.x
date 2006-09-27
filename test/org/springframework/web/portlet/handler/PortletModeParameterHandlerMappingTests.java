@@ -20,7 +20,6 @@ import javax.portlet.PortletMode;
 
 import junit.framework.TestCase;
 
-import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.portlet.MockPortletContext;
 import org.springframework.mock.web.portlet.MockPortletRequest;
 import org.springframework.web.portlet.HandlerMapping;
@@ -77,9 +76,9 @@ public class PortletModeParameterHandlerMappingTests extends TestCase {
 		PortletModeParameterHandlerMapping hm = (PortletModeParameterHandlerMapping)pac.getBean("handlerMapping");
 		try {
 			hm.registerHandler(PortletMode.VIEW, "remove", new Object());
-			fail("Should have thrown ApplicationContextException");
+			fail("Should have thrown IllegalStateException");
 		}
-		catch(ApplicationContextException e) {
+		catch (IllegalStateException ex) {
 			// expected
 		}
 	}
@@ -88,16 +87,16 @@ public class PortletModeParameterHandlerMappingTests extends TestCase {
 		PortletModeParameterHandlerMapping hm = (PortletModeParameterHandlerMapping)pac.getBean("handlerMapping");
 		try {
 			hm.registerHandler(PortletMode.EDIT, "remove", new Object());
-			fail("Should have thrown ApplicationContextException");
+			fail("Should have thrown IllegalStateException");
 		}
-		catch(ApplicationContextException e) {
+		catch (IllegalStateException ex) {
 			// expected
 		}
 	}
 	
 	public void testAllowDuplicateMappingInDifferentPortletMode() throws Exception {
 		PortletModeParameterHandlerMapping hm = (PortletModeParameterHandlerMapping)pac.getBean("handlerMapping");
-		hm.setAllowDupParameters(true);
+		hm.setAllowDuplicateParameters(true);
 		
 		Object editRemoveHandler = new Object();
 		hm.registerHandler(PortletMode.EDIT, "remove", editRemoveHandler);
@@ -109,4 +108,5 @@ public class PortletModeParameterHandlerMappingTests extends TestCase {
 		Object handler = hm.getHandler(request).getHandler();
 		assertEquals(editRemoveHandler, handler);
 	}
+
 }

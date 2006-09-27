@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,14 +17,18 @@
 package org.springframework.web.portlet.handler;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.portlet.PortletMode;
 import javax.portlet.PortletRequest;
 
 import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContextException;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * <p>Implementation of the HandlerMapping interface to map from
@@ -44,7 +48,7 @@ import org.springframework.context.ApplicationContextException;
  * <p>By default, the same parameter value may not be used in two different portlet
  * modes.  This is so that if the portal itself changes the portlet mode, the request
  * will no longer be valid in the mapping.  This behavior can be changed with
- * {@link #setAllowDupParameters setAllowDupParameters()}.</p>
+ * {@link #setAllowDuplicateParameters setAllowDupParameters()}.</p>
  *
  * <p>The bean configuration for this mapping will look somthing like this:</p>
  * <pre>
@@ -75,12 +79,15 @@ import org.springframework.context.ApplicationContextException;
  * @author Rainer Schmitz
  * @author Yujin Kim
  * @author John A. Lewis
+ * @author Juergen Hoeller
  * @since 2.0
  * @see ParameterMappingInterceptor
  */
-public class PortletModeParameterHandlerMapping extends AbstractHandlerMapping {
+public class PortletModeParameterHandlerMapping extends AbstractMapBasedHandlerMapping {
 
-	// Default request parameter name to use for mapping to handlers.
+	/**
+	 * Default request parameter name to use for mapping to handlers: "action".
+	 */
 	public final static String DEFAULT_PARAMETER_NAME = "action";
 
 
@@ -88,33 +95,26 @@ public class PortletModeParameterHandlerMapping extends AbstractHandlerMapping {
 
 	private Map portletModeParameterMap;
 
-	private boolean lazyInitHandlers = false;
+	protected final Map modeHandlerMap = new HashMap();
 
-	protected final Map handlerMap = new HashMap();
+	private boolean allowDuplicateParameters = false;
 
-	private boolean allowDupParameters = false;
-
-	private Map parameterUsedMap = new HashMap();
+	private Set parametersUsed = new HashSet();
 
 
 	/**
-	 * Set the name of the parameter used for mapping.
+	 * Set the name of the parameter used for mapping to handlers.
+	 * <p>Default is "action".
 	 */
 	public void setParameterName(String parameterName) {
+		Assert.hasText(parameterName, "parameterName must not be null or empty");
 		this.parameterName = parameterName;
 	}
 
 	/**
-	 * Get the name of the parameter used for mapping.
-	 */
-	public String getParameterName() {
-		return parameterName;
-	}
-
-	/**
-	 * Set a Map with portlet modes as keys and another map as values.
-	 * The sub-map has parameters as keys and handler beans as values.
-	 * Convenient for population with bean references.
+	 * Set a Map with portlet mode names as keys and another Map as values.
+	 * The sub-map has parameter names as keys and handler bean or bean names as values.
+	 * <p>Convenient for population with bean references.
 	 * @param portletModeParameterMap two-level map of portlet modes and parameters to handler beans
 	 */
 	public void setPortletModeParameterMap(Map portletModeParameterMap) {
@@ -122,147 +122,137 @@ public class PortletModeParameterHandlerMapping extends AbstractHandlerMapping {
 	}
 
 	/**
-	 * Set whether to lazily initialize handlers. Only applicable to
-	 * singleton handlers, as prototypes are always lazily initialized.
-	 * Default is false, as eager initialization allows for more efficiency
-	 * through referencing the handler objects directly.
-	 * <p>If you want to allow your handlers to be lazily initialized,
-	 * make them "lazy-init" and set this flag to true. Just making them
-	 * "lazy-init" will not work, as they are initialized through the
-	 * references from the handler mapping in this case.
+	 * Set whether to allow duplicate parameter values across different portlet modes.
+	 * Default is "false".
+	 * <p>Doing this is dangerous because the portlet mode can be changed by the
+	 * portal itself and the only way to see that is a rerender of the portlet.
+	 * If the same parameter value is legal in multiple modes, then a change in
+	 * mode could result in a matched mapping that is not intended and the user
+	 * could end up in a strange place in the application.
 	 */
-	public void setLazyInitHandlers(boolean lazyInitHandlers) {
-		this.lazyInitHandlers = lazyInitHandlers;
+	public void setAllowDuplicateParameters(boolean allowDuplicateParameters) {
+		this.allowDuplicateParameters = allowDuplicateParameters;
+	}
+
+
+	/**
+	 * Calls the <code>registerHandlers</code> method in addition
+	 * to the superclass's initialization.
+	 * @see #registerHandlers
+	 */
+	public void initApplicationContext() throws BeansException {
+		super.initApplicationContext();
+		registerHandlers(this.portletModeParameterMap);
 	}
 
 	/**
-	 * Set whether to allow duplicate parameter values across different
-	 * portlet modes. Doing this is dangerous because the portlet mode
-	 * can be changed by the portal itself and the only way to see that
-	 * is a rerender of the portlet. If the same parameter value is
-	 * legal in multiple modes, then a change in mode could result in
-	 * a matched mapping that is not intended and the user could end up
-	 * in a strange place in the application.
+	 * Register all handlers specified in the Portlet mode map for the corresponding modes.
+	 * @param portletModeParameterMap Map with mode names as keys and parameter Maps as values
+	 * @throws BeansException if the handler couldn't be registered
 	 */
-	public void setAllowDupParameters(boolean allowDupParameters) {
-		this.allowDupParameters = allowDupParameters;
-	}
-
-
-	public void initApplicationContext() throws BeansException {
-
-		// make sure parameterName has a value
-		if (this.parameterName == null) {
-			throw new IllegalArgumentException("A parameterName is required");
-		}
-
-		// make sure the map got initialized.
-		if (this.portletModeParameterMap == null || this.portletModeParameterMap.isEmpty()) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("'portletModeParameterMap' not set on PortletModeParameterHandlerMapping");
-			}
+	protected void registerHandlers(Map portletModeParameterMap) throws BeansException {
+		if (CollectionUtils.isEmpty(portletModeParameterMap)) {
+			logger.warn("'portletModeParameterMap' not set on PortletModeParameterHandlerMapping");
 		}
 		else {
-			
-			// iterate through the portlet modes in the passed in map.
-			for (Iterator it = this.portletModeParameterMap.keySet().iterator(); it.hasNext();) {
-				// Get the portlet mode for this map
-				String modeKey = (String) it.next();
+			for (Iterator it = portletModeParameterMap.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				String modeKey = (String) entry.getKey();
 				PortletMode mode = new PortletMode(modeKey);
-				// Get the map of parameters to handler for this mode.
-				Object parameterMapObj = this.portletModeParameterMap.get(modeKey);
-				if (parameterMapObj != null && !(parameterMapObj instanceof Map)) {
+				Object parameterMap = entry.getValue();
+				if (!(parameterMap instanceof Map)) {
 					throw new IllegalArgumentException(
-							"The value for the portlet mode must be a Map of parameters to handlers");
+							"The value for the portlet mode must be a Map of parameter Strings to handler Objects");
 				}
-				Map parameterMap = (Map) parameterMapObj;
-				// Iterate through each parameter value and register the handler.
-				for (Iterator it2 = parameterMap.keySet().iterator(); it2.hasNext();) {
-					String parameter = (String) it2.next();
-					Object handler = parameterMap.get(parameter);
-					registerHandler(mode, parameter, handler);
-				}
+				registerHandler(mode, (Map) parameterMap);
 			}
 		}
 	}
 
 	/**
-	 * Register the given handler instance for the given PortletMode
-	 * and parameter value.
+	 * Register all handlers specified in the given parameter map.
+	 * @param parameterMap Map with parameter names as keys and handler beans or bean names as values
+	 * @throws BeansException if the handler couldn't be registered
+	 */
+	protected void registerHandler(PortletMode mode, Map parameterMap) throws BeansException {
+		for (Iterator it = parameterMap.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			String parameter = (String) entry.getKey();
+			Object handler = entry.getValue();
+			registerHandler(mode, parameter, handler);
+		}
+	}
+
+	/**
+	 * Register the given handler instance for the given PortletMode and parameter value,
+	 * under an appropriate lookup key.
 	 * @param mode the PortletMode for which this mapping is valid
 	 * @param parameter the parameter value to which this handler is mapped
 	 * @param handler the handler instance bean
 	 * @throws BeansException if the handler couldn't be registered
+	 * @throws IllegalStateException if there is a conflicting handler registered
+	 * @see #registerHandler(Object, Object)
 	 */
-	protected void registerHandler(PortletMode mode, String parameter, Object handler) throws BeansException {
-		// Get the handler map for the given mode.
-		Map parameterMap = (Map) this.handlerMap.get(mode);
-		if (parameterMap == null) {
-			parameterMap = new HashMap();
-			this.handlerMap.put(mode, parameterMap);
-		}
-
-		// Check for duplicate mapping in this mode.
-		Object mappedHandler = parameterMap.get(parameter);
-		if (mappedHandler != null) {
-			throw new ApplicationContextException("Cannot map handler [" + handler + "] to parameter [" + parameter +
-					"] in mode [" + mode + "]: there's already handler [" + mappedHandler + "] mapped");
-		}
+	protected void registerHandler(PortletMode mode, String parameter, Object handler)
+			throws BeansException, IllegalStateException {
 
 		// Check for duplicate parameter values across all portlet modes.
-		if (this.parameterUsedMap.get(parameter) != null) {
-			if (this.allowDupParameters) {
-				logger.info("Duplicate entries for parameter [" + parameter + "] in different modes");
-			}
-			else {
-				throw new ApplicationContextException(
-						"Duplicate entries for parameter [" + parameter + "] in different modes");
-			}
+		if (!this.allowDuplicateParameters && this.parametersUsed.contains(parameter)) {
+			throw new IllegalStateException(
+					"Duplicate entries for parameter [" + parameter + "] in different Portlet modes");
 		}
-		else {
-			this.parameterUsedMap.put(parameter, Boolean.TRUE);
-		}
+		this.parametersUsed.add(parameter);
 
-		// Eagerly resolve handler if referencing singleton via name.
-		if (!this.lazyInitHandlers && handler instanceof String) {
-			String handlerName = (String) handler;
-			if (getApplicationContext().isSingleton(handlerName)) {
-				handler = getApplicationContext().getBean(handlerName);
-			}
-		}
-
-		// Add the parameter value and handler to the map.
-		parameterMap.put(parameter, handler);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Mapped mode [" + mode + "] parameter [" + parameter + "] onto handler [" + handler + "]");
-		}
+		registerHandler(new LookupKey(mode, parameter), handler);
 	}
 
+
 	/**
-	 * Look up a handler for the portlet mode and parameter value of the given request.
-	 * @param request current portlet request
-	 * @return the looked up handler instance, or null
+	 * Returns a lookup key that combines the current PortletMode and the current
+	 * value of the specified parameter.
+	 * @see javax.portlet.PortletRequest#getPortletMode()
+	 * @see #setParameterName
 	 */
-	protected Object getHandlerInternal(PortletRequest request) throws Exception {
-		// Look up the handler map for the given mode
+	protected Object getLookupKey(PortletRequest request) throws Exception {
 		PortletMode mode = request.getPortletMode();
-		Map parameterMap = (Map) this.handlerMap.get(mode);
-		if (parameterMap == null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("No handler map present for mode [" + mode + "]");
+		String parameter = request.getParameter(this.parameterName);
+		return new LookupKey(mode, parameter);
+	}
+
+
+	/**
+	 * Internal class used as lookup key, combining PortletMode and parameter value.
+	 */
+	private static class LookupKey {
+
+		private final PortletMode mode;
+
+		private final String parameter;
+
+		public LookupKey(PortletMode portletMode, String parameter) {
+			this.mode = portletMode;
+			this.parameter = parameter;
+		}
+
+		public boolean equals(Object other) {
+			if (this == other) {
+				return true;
 			}
-			return null;
+			if (!(other instanceof LookupKey)) {
+				return false;
+			}
+			LookupKey otherKey = (LookupKey) other;
+			return (this.mode.equals(otherKey.mode) &&
+					ObjectUtils.nullSafeEquals(this.parameter, otherKey.parameter));
 		}
 
-		// Look up the handler for the given parameter value-
-		String parameter = request.getParameter(getParameterName());
-		Object handler = parameterMap.get(parameter);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Portlet mode '" + mode + "', parameter [" + parameter + "] -> " +
-					"handler [" + handler + "]");
+		public int hashCode() {
+			return (this.mode.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.parameter));
 		}
 
-		return handler;
+		public String toString() {
+			return "Portlet mode '" + this.mode + "', parameter '" + this.parameter + "'";
+		}
 	}
 
 }
