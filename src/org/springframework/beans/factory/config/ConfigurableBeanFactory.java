@@ -18,8 +18,8 @@ package org.springframework.beans.factory.config;
 
 import java.beans.PropertyEditor;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyEditorRegistrar;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 
@@ -58,12 +58,14 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 
 	/**
 	 * Set the parent of this bean factory.
-	 * <p>Note that the parent shouldn't be changed: It should only be set outside
-	 * a constructor if it isn't available when an object of this class is created.
-	 * @param parentBeanFactory the parent bean factory
+	 * <p>Note that the parent cannot be changed: It should only be set outside
+	 * a constructor if it isn't available at the time of factory instantiation.
+	 * @param parentBeanFactory the parent BeanFactory
+	 * @throws IllegalStateException if this factory is already associated with
+	 * a parent BeanFactory
 	 * @see #getParentBeanFactory()
 	 */
-	void setParentBeanFactory(BeanFactory parentBeanFactory);
+	void setParentBeanFactory(BeanFactory parentBeanFactory) throws IllegalStateException;
 
 	/**
 	 * Set the class loader to use for loading bean classes.
@@ -177,11 +179,9 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * implementation should synchronize alias access.
 	 * @param beanName name of the bean
 	 * @param alias alias that will behave the same as the bean name
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if there is no bean with the given name
-	 * @throws BeansException if the alias is already in use
+	 * @throws BeanDefinitionStoreException if the alias is already in use
 	 */
-	void registerAlias(String beanName, String alias) throws BeansException;
+	void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException;
 
 	/**
 	 * Return whether the specified bean is currently in creation.

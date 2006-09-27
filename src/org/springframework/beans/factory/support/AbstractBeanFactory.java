@@ -144,7 +144,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @see #getBean
 	 */
 	public AbstractBeanFactory(BeanFactory parentBeanFactory) {
-		setParentBeanFactory(parentBeanFactory);
+		this.parentBeanFactory = parentBeanFactory;
 	}
 
 
@@ -400,7 +400,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		}
 	}
 
-	public String[] getAliases(String name) throws NoSuchBeanDefinitionException {
+	public String[] getAliases(String name) {
 		String beanName = transformedBeanName(name);
 		List aliases = new ArrayList();
 		boolean factoryPrefix = name.startsWith(FACTORY_BEAN_PREFIX);
@@ -451,6 +451,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	//---------------------------------------------------------------------
 
 	public void setParentBeanFactory(BeanFactory parentBeanFactory) {
+		if (this.parentBeanFactory != null && this.parentBeanFactory != parentBeanFactory) {
+			throw new IllegalStateException("Already associated with parent BeanFactory: " + this.parentBeanFactory);
+		}
 		this.parentBeanFactory = parentBeanFactory;
 	}
 
