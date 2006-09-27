@@ -22,7 +22,7 @@
     </div>
 
     <div id="header">
-      <span class="title">spring<span class="darktitle">2.0</span> form tags</span><br/>
+      <span class="title">The Spring Framework <span class="darktitle">2.0</span> form tags</span><br/>
     </div>
 
     <div id="content">
@@ -38,8 +38,8 @@
 
            <div>
 			   <form:label path="lastName">Last Name:</form:label>
-               <form:input path="lastName" />
-               <form:errors path="lastName" cssClass="error"  />
+               <form:input path="lastName" disabled="true" />
+               <form:errors path="lastName" cssClass="error" />
            </div>
 
            <div>
@@ -129,7 +129,7 @@
 
    &lt;div&gt;
 	   &lt;form:label path="lastName"&gt;Last Name:&lt;/form:label&gt;
-	   &lt;form:input path="lastName" /&gt;
+	   &lt;form:input path="lastName" disabled="true" /&gt;
 	   &lt;form:errors path="lastName" cssClass="error"  /&gt;
    &lt;/div&gt;
 
