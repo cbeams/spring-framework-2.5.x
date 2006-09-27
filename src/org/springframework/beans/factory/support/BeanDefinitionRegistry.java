@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 
@@ -51,12 +51,14 @@ public interface BeanDefinitionRegistry {
 	 * Must support RootBeanDefinition and ChildBeanDefinition.
 	 * @param beanName the name of the bean instance to register
 	 * @param beanDefinition definition of the bean instance to register
-	 * @throws BeansException if the bean definition is invalid
+	 * @throws BeanDefinitionStoreException if the BeanDefinition is invalid
+	 * or if there is already a BeanDefinition for the specified bean name
+	 * (and we are not allowed to override it)
 	 * @see RootBeanDefinition
 	 * @see ChildBeanDefinition
 	 */
 	void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
-			throws BeansException;
+			throws BeanDefinitionStoreException;
 
 	/**
 	 * Return the BeanDefinition for the given bean name.
@@ -91,18 +93,15 @@ public interface BeanDefinitionRegistry {
 	 * support names that are illegal within XML ids (used for bean names).
 	 * @param beanName the name of the bean
 	 * @param alias alias that will behave the same as the bean name
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-	 * if there is no bean definition with the given name
-	 * @throws BeansException if the alias is already in use
+	 * @throws BeanDefinitionStoreException if the alias is already in use
 	 */
-	void registerAlias(String beanName, String alias) throws BeansException;
+	void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException;
 
 	/**
 	 * Return the aliases for the given bean name, if defined.
 	 * @param beanName the bean name to check for aliases
 	 * @return the aliases, or an empty array if none
-	 * @throws NoSuchBeanDefinitionException if there is no such bean definition
 	 */
-	String[] getAliases(String beanName) throws NoSuchBeanDefinitionException;
+	String[] getAliases(String beanName);
 
 }
