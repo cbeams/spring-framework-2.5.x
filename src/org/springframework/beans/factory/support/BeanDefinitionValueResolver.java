@@ -229,7 +229,7 @@ class BeanDefinitionValueResolver {
 	 */
 	private Object resolveReference(String argName, RuntimeBeanReference ref) throws BeansException {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Resolving reference from property '" + argName + "' in bean '" +
+			logger.debug("Resolving reference from property " + argName + " in bean '" +
 					this.beanName + "' to bean '" + ref.getBeanName() + "'");
 		}
 		try {
