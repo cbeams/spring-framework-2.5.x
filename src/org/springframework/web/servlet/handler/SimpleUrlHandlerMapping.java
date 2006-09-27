@@ -82,16 +82,32 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	}
 
 
+	/**
+	 * Calls the <code>registerHandlers</code> method in addition
+	 * to the superclass's initialization.
+	 * @see #registerHandlers
+	 */
 	public void initApplicationContext() throws BeansException {
-		if (this.urlMap.isEmpty()) {
-			logger.info("Neither 'urlMap' nor 'mappings' set on SimpleUrlHandlerMapping");
+		super.initApplicationContext();
+		registerHandlers(this.urlMap);
+	}
+
+	/**
+	 * Register all handlers specified in the URL map for the corresponding paths.
+	 * @param urlMap Map with URL paths as keys and handler beans or bean names as values
+	 * @throws BeansException if a handler couldn't be registered
+	 * @throws IllegalStateException if there is a conflicting handler registered
+	 */
+	protected void registerHandlers(Map urlMap) throws BeansException {
+		if (urlMap.isEmpty()) {
+			logger.warn("Neither 'urlMap' nor 'mappings' set on SimpleUrlHandlerMapping");
 		}
 		else {
-			Iterator itr = this.urlMap.keySet().iterator();
-			while (itr.hasNext()) {
-				String url = (String) itr.next();
-				Object handler = this.urlMap.get(url);
-				// prepend with slash if it's not present
+			Iterator it = urlMap.keySet().iterator();
+			while (it.hasNext()) {
+				String url = (String) it.next();
+				Object handler = urlMap.get(url);
+				// Prepend with slash if not already present.
 				if (!url.startsWith("/")) {
 					url = "/" + url;
 				}

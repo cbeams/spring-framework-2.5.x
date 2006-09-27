@@ -23,17 +23,16 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
-import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Abstract base class for URL-mapped HandlerMapping implementations.
- * Provides infrastructure for mapping handlers to URLs and configurable
- * URL lookup. For information on the latter, see alwaysUseFullPath property.
+ * Provides infrastructure for mapping handlers to URLs and configurable URL
+ * lookup. For information on the latter, see "alwaysUseFullPath" property.
  *
  * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
  * and various Ant-style pattern matches, e.g. a registered "/t*" pattern
@@ -174,17 +173,47 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	}
 
 	/**
-	 * Register the given handler instance for the given URL path.
-	 * @param urlPath URL the bean is mapped to
-	 * @param handler the handler instance
-	 * @throws BeansException if the handler couldn't be registered
+	 * Expose the path within the current mapping as request attribute.
+	 * @param pathWithinMapping the path within the current mapping
+	 * @param request the request to expose the path to
+	 * @see #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE
 	 */
-	protected void registerHandler(String urlPath, Object handler) throws BeansException {
+	protected void exposePathWithinMapping(String pathWithinMapping, HttpServletRequest request) {
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
+	}
+
+
+	/**
+	 * Register the specified handler for the given URL paths.
+	 * @param urlPaths the URLs that the bean should be mapped to
+	 * @param beanName the name of the handler bean
+	 * @throws BeansException if the handler couldn't be registered
+	 * @throws IllegalStateException if there is a conflicting handler registered
+	 */
+	protected void registerHandler(String[] urlPaths, String beanName) throws BeansException, IllegalStateException {
+		Assert.notNull(urlPaths, "URL path array must not be null");
+		for (int j = 0; j < urlPaths.length; j++) {
+			registerHandler(urlPaths[j], beanName);
+		}
+	}
+
+	/**
+	 * Register the specified handler for the given URL path.
+	 * @param urlPath the URL the bean should be mapped to
+	 * @param handler the handler instance or handler bean name String
+	 * (a bean name will automatically be resolved into the corrresponding handler bean)
+	 * @throws BeansException if the handler couldn't be registered
+	 * @throws IllegalStateException if there is a conflicting handler registered
+	 */
+	protected void registerHandler(String urlPath, Object handler) throws BeansException, IllegalStateException {
+		Assert.notNull(urlPath, "URL path must not be null");
+		Assert.notNull(handler, "Handler object must not be null");
+
 		Object mappedHandler = this.handlerMap.get(urlPath);
 		if (mappedHandler != null) {
-			throw new ApplicationContextException(
+			throw new IllegalStateException(
 					"Cannot map handler [" + handler + "] to URL path [" + urlPath +
-					"]: there's already handler [" + mappedHandler + "] mapped");
+					"]: There's already handler [" + mappedHandler + "] mapped.");
 		}
 
 		// Eagerly resolve handler if referencing singleton via name.
@@ -206,7 +235,4 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		}
 	}
 
-	protected void exposePathWithinMapping(String pathWithinMapping, HttpServletRequest request) {
-		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
-	}
 }

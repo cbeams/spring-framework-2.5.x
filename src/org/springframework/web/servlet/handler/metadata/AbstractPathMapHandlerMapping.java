@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Constants;
 import org.springframework.web.servlet.handler.AbstractUrlHandlerMapping;
@@ -99,23 +98,39 @@ public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMa
 
 
 	/**
-	 * Look for all classes with a PathMap class attribute, instantiate them in
-	 * the owning ApplicationContext and register them as MVC handlers usable
-	 * by the current DispatcherServlet.
-	 * @see PathMap
+	 * Calls the <code>detectAndCreateHandlers</code> method in addition
+	 * to the superclass's initialization.
+	 * @see #detectAndCreateHandlers
 	 */
 	public void initApplicationContext() throws BeansException {
+		super.initApplicationContext();
+
 		if (!(getApplicationContext() instanceof ConfigurableApplicationContext)) {
-			throw new ApplicationContextException(
+			throw new IllegalStateException(
 					"[" + getClass().getName() + "] needs to run in a ConfigurableApplicationContext");
 		}
 		ConfigurableListableBeanFactory beanFactory =
 				((ConfigurableApplicationContext) getApplicationContext()).getBeanFactory();
+		detectAndCreateHandlers(beanFactory);
+	}
 
+	/**
+	 * Look for all classes with a PathMap class attribute, instantiate them in
+	 * the owning ApplicationContext, and register them as MVC handlers usable
+	 * by the current DispatcherServlet.
+	 * @param beanFactory the ConfigurableListableBeanFactory to register the
+	 * created handler instances with
+	 * @throws BeansException if handler detection or creation failed
+	 * @see PathMap
+	 * @see #getClassesWithPathMapAttributes()
+	 * @see org.springframework.beans.factory.config.ConfigurableListableBeanFactory#createBean
+	 * @see org.springframework.beans.factory.config.ConfigurableListableBeanFactory#registerSingleton
+	 */
+	protected void detectAndCreateHandlers(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		try {
 			Class[] handlerClasses = getClassesWithPathMapAttributes();
-			if (logger.isInfoEnabled()) {
-				logger.info("Found " + handlerClasses.length + " attribute-targeted handlers");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found " + handlerClasses.length + " attribute-targeted handlers");
 			}
 
 			// for each Class returned by the Commons Attribute indexer
@@ -133,20 +148,9 @@ public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMa
 				// to enumerate controllers in the factory etc.
 				beanFactory.registerSingleton(handlerClass.getName(), handler);
 
-				// There may be multiple paths mapped to this handler,
+				// There may be multiple paths mapped to this handler.
 				PathMap[] pathMaps = getPathMapAttributes(handlerClass);
-				for (int j = 0; j < pathMaps.length; j++) {
-					PathMap pathMap = pathMaps[j];
-					String path = pathMap.getUrl();
-					if (!path.startsWith("/")) {
-						path = "/" + path;
-					}
-
-					if (logger.isInfoEnabled()) {
-						logger.info("Mapping path [" + path + "] to class [" + handlerClass.getName() + "]");
-					}
-					registerHandler(path, handler);
-				}
+				registerHandler(pathMaps, handler);
 			}
 		}
 		catch (BeansException ex) {
@@ -156,6 +160,25 @@ public abstract class AbstractPathMapHandlerMapping extends AbstractUrlHandlerMa
 			throw new BeanInitializationException("Could not retrieve PathMap attributes", ex);
 		}
 	}
+
+	/**
+	 * Register the given handler for the URL paths indicated by the given PathMaps.
+	 * @param pathMaps the PathMap attributes for the handler class
+	 * @param handler the handler instance
+	 * @throws BeansException if the handler couldn't be registered
+	 * @throws IllegalStateException if there is a conflicting handler registered
+	 */
+	protected void registerHandler(PathMap[] pathMaps, Object handler) throws BeansException, IllegalStateException {
+		for (int j = 0; j < pathMaps.length; j++) {
+			PathMap pathMap = pathMaps[j];
+			String path = pathMap.getUrl();
+			if (!path.startsWith("/")) {
+				path = "/" + path;
+			}
+			registerHandler(path, handler);
+		}
+	}
+
 
 	/**
 	 * Use an attribute index to get a Collection of Class objects

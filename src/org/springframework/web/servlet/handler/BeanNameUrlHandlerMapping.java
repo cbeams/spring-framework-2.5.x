@@ -19,6 +19,7 @@ package org.springframework.web.servlet.handler;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.StringUtils;
 
@@ -44,7 +45,23 @@ import org.springframework.util.StringUtils;
  */
 public class BeanNameUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	
+	/**
+	 * Calls the <code>detectHandlers()</code> method in addition
+	 * to the superclass's initialization.
+	 * @see #detectHandlers()
+	 */
 	public void initApplicationContext() throws ApplicationContextException {
+		super.initApplicationContext();
+		detectHandlers();
+	}
+
+	/**
+	 * Register all handlers found in the current ApplicationContext.
+	 * Any bean whose name appears to be a URL is considered a handler.
+	 * @throws BeansException if the handler couldn't be registered
+	 * @see #determineUrlsForHandler
+	 */
+	protected void detectHandlers() throws BeansException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for URL mappings in application context: " + getApplicationContext());
 		}
@@ -52,19 +69,15 @@ public class BeanNameUrlHandlerMapping extends AbstractUrlHandlerMapping {
 
 		// Take any bean name or alias that begins with a slash.
 		for (int i = 0; i < beanNames.length; i++) {
-			String[] urls = checkForUrl(beanNames[i]);
+			String beanName = beanNames[i];
+			String[] urls = determineUrlsForHandler(beanName);
 			if (urls.length > 0) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found URL mapping [" + beanNames[i] + "]");
-				}
-				// Create a mapping to each part of the path.
-				for (int j = 0; j < urls.length; j++) {
-					registerHandler(urls[j], beanNames[i]);
-				}
+				// URL paths found: Let's consider it a handler.
+				registerHandler(urls, beanName);
 			}
 			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Rejected bean name '" + beanNames[i] + "'");
+					logger.debug("Rejected bean name '" + beanNames[i] + "': no URL paths identified");
 				}
 			}
 		}
@@ -73,8 +86,10 @@ public class BeanNameUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	/**
 	 * Check name and aliases of the given bean for URLs,
 	 * detected by starting with "/".
+	 * @param beanName the name of the candidate bean
+	 * @return the URLs determined for the bean, or an empty array if none
 	 */
-	protected String[] checkForUrl(String beanName) {
+	protected String[] determineUrlsForHandler(String beanName) {
 		List urls = new ArrayList();
 		if (beanName.startsWith("/")) {
 			urls.add(beanName);
