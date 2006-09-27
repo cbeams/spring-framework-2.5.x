@@ -72,7 +72,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		request.addParameter("param2", "2");
 		request.addParameter("param2", "bogus");
 
-		int[] array = new int[] { 1, 2, 3 };
+		int[] array = new int[] {1, 2, 3};
 		int[] values = ServletRequestUtils.getRequiredIntParameters(request, "param");
 		assertEquals(3, values.length);
 		for (int i = 0; i < array.length; i++) {
@@ -136,7 +136,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		request.addParameter("param2", "2");
 		request.addParameter("param2", "bogus");
 
-		long[] array = new long[] { 1L, 2L, 3L };
+		long[] array = new long[] {1L, 2L, 3L};
 		long[] values = ServletRequestUtils.getRequiredLongParameters(request, "param");
 		assertEquals(3, values.length);
 		for (int i = 0; i < array.length; i++) {
@@ -213,7 +213,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		request.addParameter("param2", "2");
 		request.addParameter("param2", "bogus");
 
-		float[] array = new float[] { 1.5F, 2.5F, 3 };
+		float[] array = new float[] {1.5F, 2.5F, 3};
 		float[] values = ServletRequestUtils.getRequiredFloatParameters(request, "param");
 		assertEquals(3, values.length);
 		for (int i = 0; i < array.length; i++) {
@@ -275,7 +275,7 @@ public class ServletRequestUtilsTests extends TestCase {
 		request.addParameter("param2", "2");
 		request.addParameter("param2", "bogus");
 
-		double[] array = new double[] { 1.5, 2.5, 3 };
+		double[] array = new double[] {1.5, 2.5, 3};
 		double[] values = ServletRequestUtils.getRequiredDoubleParameters(request, "param");
 		assertEquals(3, values.length);
 		for (int i = 0; i < array.length; i++) {
@@ -332,14 +332,14 @@ public class ServletRequestUtilsTests extends TestCase {
 		request.addParameter("param2", "true");
 		request.addParameter("param2", "");
 
-		boolean[] array = new boolean[] { true, true, false, true, false };
+		boolean[] array = new boolean[] {true, true, false, true, false};
 		boolean[] values = ServletRequestUtils.getRequiredBooleanParameters(request, "param");
 		assertEquals(array.length, values.length);
 		for (int i = 0; i < array.length; i++) {
 			assertEquals(array[i], values[i]);
 		}
 
-		array = new boolean[] { false, true, false };
+		array = new boolean[] {false, true, false};
 		values = ServletRequestUtils.getRequiredBooleanParameters(request, "param2");
 		assertEquals(array.length, values.length);
 		for (int i = 0; i < array.length; i++) {
@@ -358,6 +358,7 @@ public class ServletRequestUtilsTests extends TestCase {
 
 		assertEquals(null, ServletRequestUtils.getStringParameter(request, "param3"));
 		assertEquals("string", ServletRequestUtils.getStringParameter(request, "param3", "string"));
+		assertNull(ServletRequestUtils.getStringParameter(request, "param3", null));
 		try {
 			ServletRequestUtils.getRequiredStringParameter(request, "param3");
 			fail("Should have thrown ServletRequestBindingException");
