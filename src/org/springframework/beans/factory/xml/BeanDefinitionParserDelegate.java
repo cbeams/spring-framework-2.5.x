@@ -396,22 +396,20 @@ public class BeanDefinitionParserDelegate {
 			checkNameUniqueness(beanName, aliases, ele);
 		}
 
-		BeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
-
+		AbstractBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
 		if (beanDefinition != null) {
-			if (!StringUtils.hasText(beanName) && beanDefinition instanceof AbstractBeanDefinition) {
+			if (!StringUtils.hasText(beanName)) {
 				beanName = BeanDefinitionReaderUtils.generateBeanName(
-						(AbstractBeanDefinition) beanDefinition, getReaderContext().getReader().getBeanFactory(),
-						(containingBean != null));
+						beanDefinition, getReaderContext().getReader().getBeanFactory(), (containingBean != null));
 				if (logger.isDebugEnabled()) {
 					logger.debug("Neither XML 'id' nor 'name' specified - " +
 							"using generated bean name [" + beanName + "]");
 				}
 			}
-
 			String[] aliasesArray = StringUtils.toStringArray(aliases);
 			return new BeanDefinitionHolder(beanDefinition, beanName, aliasesArray);
 		}
+
 		return null;
 	}
 
@@ -434,10 +432,12 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
-	 * Parse the BeanDefinition itself, without regard to name or aliases. May return
+	 * Parse the bean definition itself, without regard to name or aliases. May return
 	 * <code>null</code> if problems occured during the parse of the bean definition.
 	 */
-	public BeanDefinition parseBeanDefinitionElement(Element ele, String beanName, BeanDefinition containingBean) {
+	public AbstractBeanDefinition parseBeanDefinitionElement(
+			Element ele, String beanName, BeanDefinition containingBean) {
+
 		String className = null;
 		if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
 			className = ele.getAttribute(CLASS_ATTRIBUTE);
