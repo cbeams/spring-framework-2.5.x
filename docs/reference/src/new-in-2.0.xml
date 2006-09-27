@@ -36,7 +36,7 @@
   </section>
 
   <section id="new-in-2-ioc">
-    <title>IoC</title>
+    <title>The Inversion of Control (IoC) container</title>
     <para>One of the areas that contains a considerable number of 2.0 improvements
     is Spring's IoC container.</para>
 
@@ -104,11 +104,11 @@
   </section>
 
   <section id="new-in-2-aop">
-    <title>AOP</title>
+    <title>Aspect Oriented Programming (AOP)</title>
 
     <para>Spring 2.0 has a much improved AOP offering. The Spring AOP framework
-    itself is markedly easier to configure in XML (and significantly less verbose
-    as a result); and Spring 2.0 integrates with the AspectJ pointcut language
+    itself is markedly easier to configure in XML, and significantly less verbose
+    as a result; and Spring 2.0 integrates with the AspectJ pointcut language
     and @AspectJ aspect declaration style. The chapter entitled <xref linkend="aop" />
     is dedicated to describing this new support.</para>
 
@@ -127,13 +127,13 @@
 
       <para>Spring 2.0 also supports aspects defined using the @AspectJ annotations.
       These aspects can be shared between AspectJ and Spring AOP, and require (honestly!)
-      only some simple configuration. The support for @AspectJ aspects is discussed in
+      only some simple configuration. Said support for @AspectJ aspects is discussed in
       <xref linkend="aop-ataspectj" />.</para>
     </section>
   </section>
 
   <section id="new-in-2-middle-tier">
-    <title>Middle Tier (Data Access)</title>
+    <title>The Middle Tier</title>
 
     <section id="new-in-2-middle-tier-transaction-configuration">
       <title>Easier configuration of declarative transactions in XML</title>
@@ -142,8 +142,8 @@
       significantly. The previous 1.2.x style of configuration continues to be valid
       (and supported), but the new style is markedly less verbose and is the
       recommended style. Spring 2.0 also ships with an AspectJ aspects library that
-      you can use to make pretty much any object transactional - even objects not created by the
-      Spring container.</para>
+      you can use to make pretty much any object transactional - even objects not
+      created by the Spring IoC container.</para>
       <para>The chapter entitled <xref linkend="transaction"/> contains all of the details.</para>
     </section>
 
@@ -164,46 +164,36 @@
       <title>Asynchronous JMS</title>
 
       <para>Prior to Spring 2.0, Spring's JMS offering was limited to
-      producing messages. This functionality (encapsulated by the
-      <classname>JmsTemplate</classname> class) was good, but it didn't
-      address the full JMS stack such as the production
-      and consumption of messages <emphasis>asynchronously</emphasis>.</para>
+      sending messages and the <emphasis>synchronous</emphasis> receiving of
+      messages. This functionality (encapsulated in the
+      <classname>JmsTemplate</classname> class) is great, but it doesn't
+      address the requirement for the <emphasis>asynchronous</emphasis>
+      receiving of messages.</para>
 
-      <para>This missing piece of the JMS stack has been added, and
-      Spring 2.0 now ships with full support for the consumption of messages
-      in an asynchronous fashion, as detailed in the section entitled
+      <para>Spring 2.0 now ships with full support for the reception of
+      messages in an asynchronous fashion, as detailed in the section entitled
       <xref linkend="jms-asynchronousMessageReception" />.</para>
     </section>
 
     <section id="new-in-2-middle-tier-jdbc">
       <title>JDBC</title>
 
-      <para>There are some notable new classes in the area of Spring's JDBC
-      abstraction framework. The first,
-      <classname>NamedParameterJdbcTemplate</classname>, provides support for
-      programming JDBC statements using named parameters (as opposed to
-      programming JDBC statements using only classic placeholder
+      <para>There are some small (but nevertheless notable) new classes in the
+      Spring Framework's JDBC support library. The first,
+      <link linkend="jdbc-NamedParameterJdbcTemplate"><classname>NamedParameterJdbcTemplate</classname></link>,
+      provides support for programming JDBC statements using named parameters (as
+      opposed to programming JDBC statements using only classic placeholder
       (<literal>'?'</literal>) arguments.</para>
 
       <para>Another of the new classes, the
-      <classname>SimpleJdbcTemplate</classname>, is aimed at making using the
-      core class in Spring's JDBC abstraction framework,
-      <classname>JdbcTemplate</classname>, even easier to use... but this
-      class is only available to you if you are using Java 5 (Tiger).</para>
-
-      <itemizedlist>
-        <listitem>
-          <para><xref linkend="jdbc-NamedParameterJdbcTemplate" /></para>
-        </listitem>
-        <listitem>
-          <para><xref linkend="jdbc-SimpleJdbcTemplate" /></para>
-        </listitem>
-      </itemizedlist>
+      <link linkend="jdbc-SimpleJdbcTemplate"><classname>SimpleJdbcTemplate</classname></link>,
+      is aimed at making using the <classname>JdbcTemplate</classname> even easier to use when
+      you are developing against Java 5+ (Tiger).</para>
     </section>
   </section>
 
   <section id="new-in-2-web">
-    <title>Web</title>
+    <title>The Web Tier</title>
 
     <para>The web tier support has been <emphasis>substantially</emphasis>
     improved and expanded in Spring 2.0.</para>
@@ -212,10 +202,10 @@
       <title>A form tag library for Spring MVC</title>
 
       <para>A rich JSP tag library for Spring MVC was <emphasis>the</emphasis>
-      JIRA issue that garnered the most votes from Spring users (and by a wide
+      JIRA issue that garnered the most votes from Spring users (by a wide
       margin).</para>
 
-      <para>Spring 2.0 now ships with a full featured JSP tag library that
+      <para>Spring 2.0 ships with a full featured JSP tag library that
       makes the job of authoring JSP pages much easier when using Spring MVC;
       the Spring team is confident it will satisfy all of those developers who
       voted for the issue on JIRA. The new tag library is itself covered in the
@@ -231,12 +221,12 @@
       having reasonable defaults is just what the projects need...
       this theme of convention-over-configuration now has explicit support in
       Spring MVC. What this means is that if you establish a set of naming
-      conventions and suchlike, you can <emphasis>substantially</emphasis> cut
-      down on the amount of configuration that is required to setup handler
-      mappings, view resolvers, <classname>ModelAndView</classname> instances,
-      etc. This is a great boon with regards to rapid prototyping, and can also
-      lend a degree of (always good-to-have) consistency across a codebase
-      should you choose to move forward with it into production.</para>
+      conventions for your <literal>Controllers</literal> and views, you can
+      <emphasis>substantially</emphasis> cut down on the amount of XML configuration
+      that is required to setup handler mappings, view resolvers,
+      <classname>ModelAndView</classname> instances, etc. This is a great boon
+      with regards to rapid prototyping, and can also lend a degree of (always
+      good-to-have) consistency across a codebase.</para>
 
       <para>Spring MVC's convention-over-configuration support is detailed in
       the section entitled <xref linkend="mvc-coc"/></para>
@@ -246,14 +236,13 @@
       <title>Portlet framework</title>
 
       <para>Spring 2.0 ships with a Portlet framework that is conceptually similar 
-			to the Spring MVC framework. Detailed coverage of the Spring
-      Portlet framework can be found in the section entitled
-      <xref linkend="portlet" />.</para>
+      to the Spring MVC framework. Detailed coverage of the Spring Portlet framework
+      can be found in the section entitled <xref linkend="portlet" />.</para>
     </section>
   </section>
 
   <section id="new-in-2-other">
-    <title>Everything else...</title>
+    <title>Everything else</title>
 
     <para>This final section outlines all of the other new and improved Spring 2.0
     features and functionality.</para>
@@ -261,27 +250,25 @@
     <section id="new-in-2-other-dynamic-language-support">
       <title>Dynamic language support</title>
 
-      <para>Spring 2.0 now has support for beans written in 
-      languages other than Java. The supported dynamic languages 
-      include JRuby, Groovy and BeanShell. This dynamic language
-      support is comprehensively detailed in the section entitled
-      <xref linkend="dynamic-language" />.</para>
+      <para>Spring 2.0 now has support for beans written in languages other than
+      Java, with the currently supported dynamic languages being JRuby, Groovy and
+      BeanShell. This dynamic language support is comprehensively detailed in the
+      section entitled <xref linkend="dynamic-language" />.</para>
     </section>
 
     <section id="new-in-2-other-jmx">
       <title>JMX</title>
 
-      <para>The changes to the JMX support in Spring are more evolutionary
-      than revolutionary; check out the sections listed below to jump straight
-      to the JMX changes.</para>
+      <para>The Spring Framework now has support for <literal>Notifications</literal>;
+      it is also possible to exercise declarative control over the registration
+      behavior of MBeans with an <literal>MBeanServer</literal>.</para>
 
       <itemizedlist>
         <listitem>
-          <xref linkend="jmx-exporting-registration-behavior" />
-        </listitem>
-
-        <listitem>
           <xref linkend="jmx-notifications" />
+        </listitem>
+        <listitem>
+          <xref linkend="jmx-exporting-registration-behavior" />
         </listitem>
       </itemizedlist>
     </section>
@@ -290,8 +277,8 @@
       <title>Task scheduling</title>
 
       <para>Spring 2.0 offers an abstraction around the scheduling of tasks.
-      For the interested developer, the section entitled
-      <xref linkend="taskexecutor"/> contains all of the details.</para>
+      For the interested developer, the section entitled <xref linkend="taskexecutor"/>
+      contains all of the details.</para>
     </section>
 
     <section id="new-in-2-other-java5">
@@ -299,18 +286,18 @@
 
       <para>If you are one of the lucky few to be developing projects using
       Java 5 (Tiger), you will be pleased to know that Spring 2.0 now has some
-      quite compelling support for Tiger. Below is a set of pointers
-      to Spring Java 5-only features.</para>
+      compelling support for Tiger. Below is a set of pointers to Spring Java
+      5-only features.</para>
 
       <itemizedlist>
+		<listitem>
+			<xref linkend="transaction-declarative-aspectj"/>
+		</listitem>
 		<listitem>
 			<xref linkend="aop-atconfigurable"/>
 		</listitem>
 		<listitem>
 			<xref linkend="aop-ataspectj"/>
-		</listitem>
-		<listitem>
-			<xref linkend="transaction-declarative-aspectj"/>
 		</listitem>
         <listitem>
           <xref linkend="metadata-annotations-required" />
@@ -337,21 +324,23 @@
     at a time. The idea is that you can take the code in these showcases and experiment
     with it, as opposed to having to create your own small project to test out each new
     Spring 2.0 feature. Please be advised that the scope of these showcase applications is
-    deliberately limited; the domain model (if there is one) consists of maybe one or two classes,
-    and typical enterprise concerns such as security and transactional integrity are deliberately
-    omitted.</para>
+    deliberately limited; the domain model (if there even is one) consists of maybe one or
+    two classes, and typical enterprise concerns such as security and transactional integrity
+    are deliberately omitted.</para>
   
   </section>
 
   <section id="new-in-2-other-documentation">
     <title>Improved documentation</title>
-    <para>The Spring reference documentation has also been
-    substantially updated to reflect all of the above features new in Spring 2.0.</para>
+    <para>The Spring reference documentation has also substantially been updated to reflect
+    all of the above features new in Spring 2.0.</para>
     <para>While every effort has been made to ensure that there are no errors in this
     documentation, some errors may nevertheless have crept in. If you do spot any typos
     or even more serious errors, and you can spare a few cycles during lunch, please do
     bring the error to the attention of the Spring team by
     <ulink url="http://opensource.atlassian.com/projects/spring/">raising an issue</ulink>.</para>
+    <para>Special thanks to Arthur Loder for his tireless proofreading of the Spring Framework
+    reference documentation and Javadocs.</para>
   </section>
 
 </chapter>
