@@ -2229,12 +2229,7 @@
         <programlisting>&lt;beans&gt;
  ...
  &lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
-  &lt;property name="dataSources"&gt;
-   &lt;map&gt;
-    &lt;entry key="dataSource1" value-ref="someDataSource"/&gt;
-    &lt;entry key="dataSource2" value-ref="anotherDataSource"/&gt;
-   &lt;/map&gt;
-  &lt;/property&gt;
+  &lt;property name="dataSource" ref="someDataSource"/&gt;
   &lt;property name="loadTimeWeaver"&gt;
     &lt;bean class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver"/&gt;
   &lt;/property&gt;
@@ -2438,8 +2433,15 @@
      &lt;value&gt;classpath*:META-INF/persistence.xml&lt;/value&gt;
     &lt;/list&gt;
   &lt;/property&gt;
+  &lt;property&gt;
+   &lt;map&gt;
+    &lt;entry key="localDataSource" value-ref="local-db"/&gt;
+    &lt;entry key="remoteDataSource" value-ref="remote-db"/&gt;
+   &lt;/map&gt;
   &lt;/property&gt;
-  &lt;property name="defaultDataSource" ref="dataSource"/&gt;
+  &lt;!-- if no datasource is specified, use this one --&gt;
+  &lt;property name="defaultDataSource" ref="remoteDataSource"/&gt;
+  
 &lt;/bean&gt;
 
 &lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
