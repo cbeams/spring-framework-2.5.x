@@ -111,11 +111,11 @@ public class DispatcherPortletTests extends TestCase {
 		request.setParameter("action", "form");
 		request.setParameter("age", "29");
 		simpleDispatcherPortlet.processAction(request, response);
-		String exceptionParam = response.getRenderParameter("actionException");
+		String exceptionParam = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
 		assertNull(exceptionParam);
 		SimplePortletApplicationContext ac = (SimplePortletApplicationContext)simpleDispatcherPortlet.getPortletApplicationContext();
 		String commandAttribute = ac.getRenderCommandSessionAttributeName();
-		TestBean testBean = (TestBean)request.getPortletSession().getAttribute(commandAttribute);
+		TestBean testBean = (TestBean) request.getPortletSession().getAttribute(commandAttribute);
 		assertEquals(39, testBean.getAge());
 	}
 
@@ -124,7 +124,7 @@ public class DispatcherPortletTests extends TestCase {
 		MockActionResponse response = new MockActionResponse();
 		request.setParameter("action", "invalid");
 		simpleDispatcherPortlet.processAction(request, response);
-		String exceptionParam = response.getRenderParameter("actionException");
+		String exceptionParam = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
 		assertNotNull(exceptionParam);
 		assertTrue(exceptionParam.startsWith(UnavailableException.class.getName()));
 	}
@@ -250,7 +250,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.setPortletMode(PortletMode.HELP);
 		request.setParameter("action", "help3");
 		complexDispatcherPortlet.processAction(request, response);
-		String exceptionParam = response.getRenderParameter("actionException");
+		String exceptionParam = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
 		assertNotNull(exceptionParam);
 		assertTrue(exceptionParam.startsWith(UnavailableException.class.getName()));
 	}
@@ -261,9 +261,9 @@ public class DispatcherPortletTests extends TestCase {
 		request.setPortletMode(PortletMode.HELP);
 		request.setParameter("action", "help3");
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map)request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		assertTrue(model.get("exception").getClass().equals(UnavailableException.class));
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-unavailable", view.getBeanName());
 	}
 
@@ -286,7 +286,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.setParameter("action", "not mapped");
 		request.setParameter("myParam", "not mapped");
 		complexDispatcherPortlet.processAction(request, response);
-		String exception = response.getRenderParameter("actionException");
+		String exception = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
 		assertNotNull(exception);
 		String name = PortletSecurityException.class.getName();
 		assertTrue(exception.startsWith(name));
@@ -300,9 +300,9 @@ public class DispatcherPortletTests extends TestCase {
 		request.setParameter("action", "not mapped");
 		request.setParameter("myParam", "not mapped");
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map)request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		assertEquals("view was here", model.get("result"));
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("someViewName", view.getBeanName());
 	}
 
@@ -314,10 +314,11 @@ public class DispatcherPortletTests extends TestCase {
 		request.setParameter("action", "not mapped");
 		request.setParameter("myParam", "not mapped");
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map)request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		Exception exception = (Exception) model.get("exception");
+		assertNotNull(exception);
 		assertTrue(exception.getClass().equals(PortletSecurityException.class));
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-default-1", view.getBeanName());
 	}
 
@@ -346,7 +347,7 @@ public class DispatcherPortletTests extends TestCase {
 		MockActionResponse response = new MockActionResponse();
 		request.setParameter("myParam", "unknown");
 		complexDispatcherPortlet.processAction(request, response);
-		String exceptionParam = response.getRenderParameter("actionException");
+		String exceptionParam = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
 		assertNotNull(exceptionParam);
 		assertTrue(exceptionParam.startsWith(PortletException.class.getName()));
 		assertTrue(exceptionParam.indexOf("No adapter for handler") != -1);
@@ -357,11 +358,11 @@ public class DispatcherPortletTests extends TestCase {
 		MockRenderResponse response = new MockRenderResponse();
 		request.setParameter("myParam", "unknown");
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map)request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		Exception exception = (Exception)model.get("exception");
 		assertTrue(exception.getClass().equals(PortletException.class));
 		assertTrue(exception.getMessage().indexOf("No adapter for handler") != -1);
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-default-1", view.getBeanName());
 	}
 
@@ -375,7 +376,7 @@ public class DispatcherPortletTests extends TestCase {
 		MockActionResponse response = new MockActionResponse();
 		request.setPortletMode(PortletMode.EDIT);
 		complexDispatcherPortlet.processAction(request, response);
-		String exceptionParam = response.getRenderParameter("actionException");
+		String exceptionParam = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
 		assertNotNull(exceptionParam);
 		assertTrue(exceptionParam.startsWith(UnavailableException.class.getName()));
 	}
@@ -390,10 +391,10 @@ public class DispatcherPortletTests extends TestCase {
 		MockRenderResponse response = new MockRenderResponse();
 		request.setParameter("myParam", "test1");
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map)request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		Exception exception = (Exception) model.get("exception");
 		assertTrue(exception.getClass().equals(UnavailableException.class));
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-unavailable", view.getBeanName());
 	}
 
@@ -417,7 +418,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.addUserRole("role1");
 		request.setAttribute("fail", Boolean.TRUE);
 		complexDispatcherPortlet.processAction(request, response);
-		String exception = response.getRenderParameter("actionException");
+		String exception = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
 		assertTrue(exception.startsWith(MaxUploadSizeExceededException.class.getName()));
 	}
 
@@ -468,11 +469,11 @@ public class DispatcherPortletTests extends TestCase {
 		request.setParameter("myParam", "requestLocaleChecker");
 		request.addPreferredLocale(Locale.ENGLISH);
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map)request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		Exception exception = (Exception) model.get("exception");
 		assertTrue(exception.getClass().equals(PortletException.class));
 		assertEquals("Incorrect Locale in RenderRequest", exception.getMessage());
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-default-1", view.getBeanName());
 	}
 
@@ -491,11 +492,11 @@ public class DispatcherPortletTests extends TestCase {
 		request.setParameter("myParam", "contextLocaleChecker");
 		request.addPreferredLocale(Locale.ENGLISH);
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map)request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		Exception exception = (Exception) model.get("exception");
 		assertTrue(exception.getClass().equals(PortletException.class));
 		assertEquals("Incorrect Locale in LocaleContextHolder", exception.getMessage());
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-default-1", view.getBeanName());
 	}
 
@@ -536,9 +537,9 @@ public class DispatcherPortletTests extends TestCase {
 		request.addUserRole("role1");
 		request.addParameter("noView", "false");
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map)request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		assertEquals("view was here", model.get("result"));
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("someViewName", view.getBeanName());
 	}
 
@@ -549,9 +550,9 @@ public class DispatcherPortletTests extends TestCase {
 		request.addUserRole("role1");
 		request.addParameter("noView", "true");
 		complexDispatcherPortlet.doDispatch(request, response);
-		Map model = (Map)request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
+		Map model = (Map) request.getAttribute(ViewRendererServlet.MODEL_ATTRIBUTE);
 		assertNull(model);
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertNull(view);
 	}
 
@@ -615,7 +616,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.addParameter("fail", "yes");
 		MockRenderResponse response = new MockRenderResponse();
 		complexDispatcherPortlet.doDispatch(request, response);
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-modelandview", view.getBeanName());
 	}
 
@@ -626,7 +627,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.addParameter("fail", "yes");
 		MockRenderResponse response = new MockRenderResponse();
 		complexDispatcherPortlet.doDispatch(request, response);
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-modelandview", view.getBeanName());
 	}
 
@@ -637,7 +638,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.addParameter("access", "illegal");
 		MockRenderResponse response = new MockRenderResponse();
 		complexDispatcherPortlet.doDispatch(request, response);
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-exception", view.getBeanName());
 	}
 
@@ -648,7 +649,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.addParameter("access", "illegal");
 		MockRenderResponse response = new MockRenderResponse();
 		complexDispatcherPortlet.doDispatch(request, response);
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-illegalaccess", view.getBeanName());
 	}
 
@@ -659,7 +660,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.addParameter("binding", "should fail");
 		MockRenderResponse response = new MockRenderResponse();
 		complexDispatcherPortlet.doDispatch(request, response);
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-exception", view.getBeanName());
 	}
 
@@ -670,7 +671,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.addParameter("binding", "should fail");
 		MockRenderResponse response = new MockRenderResponse();
 		complexDispatcherPortlet.doDispatch(request, response);
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-binding", view.getBeanName());
 	}
 
@@ -681,7 +682,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.addParameter("unknown", "");
 		MockRenderResponse response = new MockRenderResponse();
 		complexDispatcherPortlet.doDispatch(request, response);
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-runtime", view.getBeanName());
 	}
 
@@ -692,7 +693,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.addParameter("unknown", "");
 		MockRenderResponse response = new MockRenderResponse();
 		complexDispatcherPortlet.doDispatch(request, response);
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-default-1", view.getBeanName());
 	}
 
@@ -703,7 +704,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.addParameter("generic", "123");
 		MockRenderResponse response = new MockRenderResponse();
 		complexDispatcherPortlet.doDispatch(request, response);
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-exception", view.getBeanName());
 	}
 
@@ -714,7 +715,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.addParameter("generic", "123");
 		MockRenderResponse response = new MockRenderResponse();
 		complexDispatcherPortlet.doDispatch(request, response);
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-default-1", view.getBeanName());
 	}
 
@@ -725,7 +726,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.addParameter("runtime", "true");
 		MockRenderResponse response = new MockRenderResponse();
 		complexDispatcherPortlet.doDispatch(request, response);
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-runtime", view.getBeanName());
 	}
 
@@ -736,7 +737,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.addParameter("runtime", "true");
 		MockRenderResponse response = new MockRenderResponse();
 		complexDispatcherPortlet.doDispatch(request, response);
-		InternalResourceView view = (InternalResourceView)request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
+		InternalResourceView view = (InternalResourceView) request.getAttribute(ViewRendererServlet.VIEW_ATTRIBUTE);
 		assertEquals("failed-default-1", view.getBeanName());
 	}
 
