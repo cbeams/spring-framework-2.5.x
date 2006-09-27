@@ -2184,7 +2184,7 @@
         <title><classname>LocalEntityManagerFactoryBean</classname></title>
 
         <para>The <classname>LocalEntityManagerFactoryBean</classname> creates
-        a <interfacename>EntityManager</interfacename> suitable for
+        an <interfacename>EntityManager</interfacename> suitable for
         environments which solely use JPA for data access. The factory bean
         will use the JPA <interfacename>PersistenceProvider</interfacename>
         autodetection mechanism and in most cases, requires only the
@@ -2239,7 +2239,7 @@
         <sidebar>
           <title>When is load time weaving required?</title>
 
-          <para>Not all JPA providers impose the need of an JDK agent
+          <para>Not all JPA providers impose the need of a JDK agent
           (Hibernate being an example). If your provider does not require an
           agent or you have other alternatives (for example applying
           enhancements at build time through a custom compiler or an ant task)
