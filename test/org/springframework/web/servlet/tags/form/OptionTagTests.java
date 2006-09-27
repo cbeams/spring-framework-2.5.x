@@ -20,28 +20,34 @@ import org.springframework.beans.Colour;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.test.AssertThrows;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.web.servlet.support.BindStatus;
 
-import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.BodyTag;
+import javax.servlet.jsp.tagext.Tag;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
 import java.io.Serializable;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
+ * Unit tests for the {@link OptionTag} class.
+ *
  * @author Rob Harrop
+ * @author Rick Evans
  */
-public class OptionTagTests extends AbstractHtmlElementTagTests {
+public final class OptionTagTests extends AbstractHtmlElementTagTests {
 
 	private static final String ARRAY_SOURCE = "abc,123,def";
 
 	private static final String[] ARRAY = StringUtils.commaDelimitedListToStringArray(ARRAY_SOURCE);
 
+
 	private OptionTag tag;
+
 
 	protected void onSetUp() {
 		this.tag = new OptionTag() {
@@ -52,6 +58,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setParent(new SelectTag());
 		this.tag.setPageContext(getPageContext());
 	}
+
 
 	public void testRenderNotSelected() throws Exception {
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.name", false));
@@ -108,13 +115,12 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setParent(null);
 		this.tag.setValue("foo");
 		this.tag.setLabel("Foo");
-		try {
-			int result = this.tag.doStartTag();
-			fail("Shouldn't be able to use <option> tag without exposed context.");
-		}
-		catch (IllegalStateException e) {
-			// success
-		}
+		new AssertThrows(IllegalStateException.class,
+				"Must not be able to use <option> tag without exposed context.") {
+			public void test() throws Exception {
+				tag.doStartTag();
+			}
+		}.runTest();
 	}
 
 	public void testWithEnum() throws Exception {
@@ -394,6 +400,18 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		this.tag.doEndTag();
 	}
 
+	public void testOptionTagNotNestedWithinSelectTag() throws Exception {
+		new AssertThrows(IllegalStateException.class,
+				"Must throw an IllegalStateException when not nested within a <select/> tag.") {
+			public void test() throws Exception {
+				tag.setParent(null);
+				tag.setValue("foo");
+				tag.doStartTag();
+			}
+		}.runTest();
+	}
+
+
 	private void assertOptionTagOpened(String output) {
 		assertTrue(output.startsWith("<option"));
 	}
@@ -463,8 +481,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		public String toId() {
 			if (this.variant != null) {
 				return this.rules + "-" + this.variant;
-			}
-			else {
+			} else {
 				return rules;
 			}
 		}
