@@ -95,7 +95,7 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.beans.factory.config.PropertiesFactoryBean#setLocation(org.springframework.core.io.Resource)}
  * method name on the <code>PropertiesFactoryBean</code> (the general
  * usage thus illustrated holds true for any number of attributes).
- * All thatthe <code>PropertiesBeanDefinitionParser</code> needs
+ * All that the <code>PropertiesBeanDefinitionParser</code> needs
  * actually do is supply an implementation of the
  * {@link #getBeanClass(org.w3c.dom.Element)} method to return the
  * <code>PropertiesFactoryBean</code> type.
@@ -143,7 +143,7 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
 	 * <p>The default implementation uses the {@link Conventions#attributeNameToPropertyName(String)}
 	 * method to perform the extraction.
 	 * <p>The name returned must obey the standard JavaBean property name
-	 * conventions. For exmape for a class with a setter method
+	 * conventions. For example for a class with a setter method
 	 * '<code>setBingoHallFavourite(String)</code>', the name returned had
 	 * better be '<code>bingoHallFavourite</code>' (with that exact casing).
 	 * @param attributeName the attribute name taken straight from the XML element being parsed; will never be <code>null</code> 
