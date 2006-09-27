@@ -3712,13 +3712,16 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 			using one of the <interfacename>ApplicationContext</interfacename> implementations.
 			First, let's examine the <interfacename>ContextLoader</interfacename> interface
 			and its implementations.</para>
-            <para>The <interfacename>ContextLoader</interfacename> interface has two implementations: the
-			<classname>ContextLoaderListener</classname> and the
+            <para>The <interfacename>ContextLoader</interfacename> interface has two
+            implementations: the <classname>ContextLoaderListener</classname> and the
 			<classname>ContextLoaderServlet</classname>. They both have the same
 			functionality but differ in that the listener version cannot be used in Servlet
-			2.2 compatible containers. Since the Servlet 2.4 specification, listeners
-			are required to initialize after startup of a web application. (A lot of
-			2.3 compatible containers already implement this feature.) It is up to you
+			2.2 compatible containers. Since the Servlet 2.4 specification, servlet context
+			listeners are required to execute immediately after the servlet context for the
+			web application has been created and is available to service the first request
+			(and also when the servlet context is about to be shut down): as such a 
+			servlet context listener is an ideal place to initialize the Spring
+			<interfacename>ApplicationContext</interfacename>. It is up to you
 			as to which one you use, but all things being equal you should probably
 			prefer <classname>ContextLoaderListener</classname>; for more information on
 			compatibility, have a look at the Javadoc for the
