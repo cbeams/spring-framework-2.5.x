@@ -182,12 +182,12 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * with the supplied {@link BeanDefinitionRegistry}.
 	 */
 	private void parseAdvisor(Element advisorElement, ParserContext parserContext) {
-		BeanDefinitionRegistry registry = parserContext.getRegistry();
 		AbstractBeanDefinition advisorDef = createAdvisorBeanDefinition(advisorElement, parserContext);
+		BeanDefinitionRegistry registry = parserContext.getRegistry();
 
 		String advisorBeanName = advisorElement.getAttribute(ID);
 		if (!StringUtils.hasText(advisorBeanName)) {
-			advisorBeanName = BeanDefinitionReaderUtils.generateBeanName(advisorDef, registry, false);
+			advisorBeanName = BeanDefinitionReaderUtils.generateBeanName(advisorDef, registry);
 		}
 
 		try {
@@ -319,14 +319,15 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * supplied ParserContext.
 	 */
 	private AbstractBeanDefinition parseDeclareParents(Element declareParentsElement, ParserContext parserContext) {
-		AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.rootBeanDefinition(DeclareParentsAdvisor.class).
-						addConstructorArg(declareParentsElement.getAttribute(IMPLEMENT_INTERFACE)).
-						addConstructorArg(declareParentsElement.getAttribute(TYPE_PATTERN)).
-						addConstructorArg(declareParentsElement.getAttribute(DEFAULT_IMPL)).
-						setSource(parserContext.getReaderContext().extractSource(declareParentsElement)).getBeanDefinition();
-		String name = BeanDefinitionReaderUtils.generateBeanName(beanDefinition, parserContext.getRegistry(), false);
-		parserContext.getRegistry().registerBeanDefinition(name, beanDefinition);
-		return beanDefinition;
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(DeclareParentsAdvisor.class);
+		builder.addConstructorArg(declareParentsElement.getAttribute(IMPLEMENT_INTERFACE));
+		builder.addConstructorArg(declareParentsElement.getAttribute(TYPE_PATTERN));
+		builder.addConstructorArg(declareParentsElement.getAttribute(DEFAULT_IMPL));
+		builder.setSource(parserContext.getReaderContext().extractSource(declareParentsElement));
+		AbstractBeanDefinition definition = builder.getBeanDefinition();
+		String name = BeanDefinitionReaderUtils.generateBeanName(definition, parserContext.getRegistry());
+		parserContext.getRegistry().registerBeanDefinition(name, definition);
+		return definition;
 	}
 
 	/**
@@ -369,8 +370,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	
 			// register the final advisor
 			BeanDefinitionRegistry registry = parserContext.getRegistry();
-			String id = BeanDefinitionReaderUtils.generateBeanName(advisorDefinition, registry, false);
-			registry.registerBeanDefinition(id, advisorDefinition);
+			BeanDefinitionReaderUtils.registerWithGeneratedName(advisorDefinition, registry);
 		}
 		finally {
 			this.parseState.pop();
@@ -470,7 +470,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 			BeanDefinitionRegistry registry = parserContext.getRegistry();
 			if (!StringUtils.hasText(id)) {
-				id = BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) pointcutDefinition, registry, false);
+				id = BeanDefinitionReaderUtils.generateBeanName(pointcutDefinition, registry);
 			}
 
 			registry.registerBeanDefinition(id, pointcutDefinition);
@@ -507,8 +507,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			Attr pointcutAttr = element.getAttributeNode(POINTCUT);
 			AbstractBeanDefinition pointcutDefinition = createPointcutDefinition(pointcutAttr.getValue());
 			pointcutDefinition.setSource(parserContext.getReaderContext().extractSource(pointcutAttr));
-			String pointcutName =
-							BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) pointcutDefinition, registry, false);
+			String pointcutName = BeanDefinitionReaderUtils.generateBeanName(pointcutDefinition, registry);
 			try {
 				this.parseState.push(new PointcutEntry(pointcutName));
 				registry.registerBeanDefinition(pointcutName, pointcutDefinition);
@@ -532,9 +531,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		else {
 			parserContext.getReaderContext().error(
-							"Must define one of 'pointcut' or 'pointcut-ref' on 'advisor'.",
-							element, 
-							this.parseState.snapshot());
+					"Must define one of 'pointcut' or 'pointcut-ref' on 'advisor'.",
+					element, this.parseState.snapshot());
 			return null;
 		}
 	}
