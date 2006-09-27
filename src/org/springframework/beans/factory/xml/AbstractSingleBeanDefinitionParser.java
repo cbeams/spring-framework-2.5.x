@@ -18,13 +18,13 @@ package org.springframework.beans.factory.xml;
 
 import org.w3c.dom.Element;
 
-import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.util.Assert;
 
 /**
  * Base class for those {@link BeanDefinitionParser} implementations that
- * need to parse and define just a <i>single</i> {@link BeanDefinition}.
+ * need to parse and define just a <i>single</i> <code>BeanDefinition</code>.
  *
  * <p>Extend this parser class when you want to create a single bean definition
  * from an arbitrarily complex XML element. You may wish to consider extending
@@ -47,14 +47,14 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 	 * Creates a {@link BeanDefinitionBuilder} instance for the
 	 * {@link #getBeanClass bean Class} and passes it to the
 	 * {@link #doParse} strategy method.
-	 * @param element the element that is to be parsed into a single {@link BeanDefinition}
+	 * @param element the element that is to be parsed into a single BeanDefinition
 	 * @param parserContext the object encapsulating the current state of the parse
-	 * @return the {@link BeanDefinition} resulting from the parsing of the supplied {@link Element}
+	 * @return the BeanDefinition resulting from the parsing of the supplied {@link Element}
 	 * @throws IllegalStateException if the bean {@link Class} returned from
 	 * {@link #getBeanClass(org.w3c.dom.Element)} is <code>null</code>
 	 * @see #doParse(org.w3c.dom.Element, org.springframework.beans.factory.support.BeanDefinitionBuilder)
 	 */
-	protected final BeanDefinition parseInternal(Element element, ParserContext parserContext) {
+	protected final AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		Class beanClass = getBeanClass(element);
 		Assert.state(beanClass != null, "Class returned from getBeanClass(Element) must not be null");
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(beanClass);

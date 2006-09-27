@@ -62,9 +62,9 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			return FieldRetrievingFactoryBean.class;
 		}
 
-		protected String extractId(Element element) {
-			String id = super.extractId(element);
-			if(!StringUtils.hasText(id)) {
+		protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
+			String id = super.resolveId(element, definition, parserContext);
+			if (!StringUtils.hasText(id)) {
 				id = element.getAttribute(STATIC_FIELD_ATTRIBUTE);
 			}
 			return id;
@@ -95,10 +95,11 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			builder.addPropertyValue("targetBeanName", beanName);
 			builder.addPropertyValue("propertyPath", propertyPath);
 
-			BeanDefinition definition = builder.getBeanDefinition();
+			AbstractBeanDefinition definition = builder.getBeanDefinition();
 			id = (StringUtils.hasText(id) ? id :
-					BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) definition, parserContext.getRegistry(), false));
-			parserContext.getRegistry().registerBeanDefinition(id, builder.getBeanDefinition());
+					BeanDefinitionReaderUtils.generateBeanName(
+							definition, parserContext.getRegistry(), parserContext.isNested()));
+			parserContext.getRegistry().registerBeanDefinition(id, definition);
 
 			return definition;
 		}

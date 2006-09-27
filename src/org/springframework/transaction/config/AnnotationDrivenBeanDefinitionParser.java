@@ -16,22 +16,23 @@
 
 package org.springframework.transaction.config;
 
+import org.w3c.dom.Element;
+
 import org.springframework.aop.config.AopNamespaceUtils;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
-import org.w3c.dom.Element;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} implementation that
  * allows users to easily configure all the infrastructure beans required to enable
  * annotation-driven transaction demarcation.
- * <p/>
- * By default, all proxies are created as JDK proxies. This may cause some problems if
+ *
+ * <p>By default, all proxies are created as JDK proxies. This may cause some problems if
  * you are injecting objects as concrete classes rather than interfaces. To overcome this
  * restriction you can set the '<code>proxy-target-class</code>' attribute to '<code>true</code>'.
  *
@@ -58,9 +59,7 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser 
 	 * {@link AopNamespaceUtils#registerAutoProxyCreatorIfNecessary register an AutoProxyCreator} in
 	 * the container as necessary.
 	 */
-	protected BeanDefinition parseInternal(Element element, ParserContext parserContext) {
-
-		// Register the APC if needed.
+	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext);
 
 		boolean proxyTargetClass = TRUE.equals(element.getAttribute(PROXY_TARGET_CLASS));
@@ -84,7 +83,8 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser 
 		return advisorDefinition;
 	}
 
-	protected boolean autogenerateId() {
+	protected boolean shouldGenerateId() {
 		return true;
 	}
+
 }

@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.w3c.dom.Element;
 
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ReaderContext;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -68,14 +68,14 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 
 	/**
-	 * The {@link org.springframework.scripting.ScriptFactory} class that this parser instance will create
-	 * {@link BeanDefinition BeanDefinitions} for.
+	 * The {@link org.springframework.scripting.ScriptFactory} class that this
+	 * parser instance will create bean definitions for.
 	 */
 	private final Class scriptFactoryClass;
 
 
 	/**
-	 * Creates a new instance of this class that creates {@link BeanDefinition BeanDefinitions}
+	 * Creates a new instance of this class that creates bean definitions
 	 * for the supplied {@link org.springframework.scripting.ScriptFactory} class.
 	 */
 	public ScriptBeanDefinitionParser(Class scriptFactoryClass) {
@@ -85,11 +85,10 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 
 	/**
-	 * Parses the dynamic object element and returns the resulting {@link BeanDefinition}.
+	 * Parses the dynamic object element and returns the resulting bean definition.
 	 * Registers a {@link ScriptFactoryPostProcessor} if needed.
 	 */
-	protected BeanDefinition parseInternal(Element element, ParserContext parserContext) {
-
+	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		// Resolve the script source.
 		String value = resolveScriptSource(element, parserContext.getReaderContext());
 		if (value == null) {
@@ -117,8 +116,8 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	}
 
 	/**
-	 * Parses the value of the '<code>refresh-check-delay</code>' attribute and attaches it to the
-	 * {@link BeanDefinition} metadata.
+	 * Parses the value of the '<code>refresh-check-delay</code>' attribute and
+	 * attaches it to the BeanDefinition metadata.
 	 * @see ScriptFactoryPostProcessor#REFRESH_CHECK_DELAY_ATTRIBUTE
 	 */
 	private void parseRefreshMetadata(Element element, RootBeanDefinition beanDefinition) {
@@ -155,9 +154,9 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	}
 
 	/**
-	 * Registers a {@link ScriptFactoryPostProcessor} {@link BeanDefinition} in the supplied
-	 * {@link BeanDefinitionRegistry} under the {@link #SCRIPT_FACTORY_POST_PROCESSOR_BEAN_NAME internal name}
-	 * if the {@link ScriptFactoryPostProcessor} hasn't already been registered.
+	 * Registers a {@link ScriptFactoryPostProcessor} bean definition in the supplied
+	 * {@link BeanDefinitionRegistry} if the {@link ScriptFactoryPostProcessor} hasn't
+	 * already been registered.
 	 */
 	private static void registerScriptFactoryPostProcessorIfNecessary(BeanDefinitionRegistry registry) {
 		if (!registry.containsBeanDefinition(SCRIPT_FACTORY_POST_PROCESSOR_BEAN_NAME)) {

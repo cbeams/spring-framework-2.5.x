@@ -31,7 +31,7 @@ import org.springframework.util.StringUtils;
  * of convenience methods and a
  * {@link AbstractBeanDefinitionParser#parseInternal(org.w3c.dom.Element, ParserContext) template method}
  * that subclasses must override to provide the actual parsing logic.
- * 
+ *
  * <p>Use this {@link BeanDefinitionParser} implementation when you want
  * to parse some arbitrarily complex XML into one or more
  * {@link BeanDefinition BeanDefinitions}. If you just want to parse some
@@ -53,24 +53,35 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 
 
 	public final BeanDefinition parse(Element element, ParserContext parserContext) {
-		BeanDefinition definition = parseInternal(element, parserContext);
-		String id = resolveId(definition, parserContext, element);
-		if (StringUtils.hasText(id)) {
-			BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
-			registerBeanDefinition(holder, parserContext.getRegistry(), parserContext.isNested());
-			if (shouldFireEvents()) {
-				BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
-				postProcessComponentDefinition(componentDefinition);
-				parserContext.getReaderContext().fireComponentRegistered(componentDefinition);
-			}
+		AbstractBeanDefinition definition = parseInternal(element, parserContext);
+		String id = resolveId(element, definition, parserContext);
+		if (!StringUtils.hasText(id) && !parserContext.isNested()) {
+			throw new IllegalArgumentException(
+					"Id is required for element '" + element.getLocalName() + "' when used as a top-level tag");
 		}
-		else if (!parserContext.isNested()) {
-			throw new IllegalArgumentException("Attribute '" + ID_ATTRIBUTE + "' is required for element '" +
-					element.getLocalName() + "' when used as a top-level tag");
+		BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
+		registerBeanDefinition(holder, parserContext.getRegistry(), parserContext.isNested());
+		if (shouldFireEvents()) {
+			BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
+			postProcessComponentDefinition(componentDefinition);
+			parserContext.getReaderContext().fireComponentRegistered(componentDefinition);
 		}
 		return definition;
 	}
 
+	/**
+	 * Resolve the ID for the supplied {@link BeanDefinition}. When using {@link #shouldGenerateId generation},
+	 * a name is generated automatically, otherwise the ID is extracted from the "id" attribute.
+	 */
+	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
+		if (shouldGenerateId()) {
+			return BeanDefinitionReaderUtils.generateBeanName(
+					definition, parserContext.getRegistry(), parserContext.isNested());
+		}
+		else {
+			return element.getAttribute(ID_ATTRIBUTE);
+		}
+	}
 
 	/**
 	 * Register the supplied {@link BeanDefinitionHolder bean} with the supplied
@@ -78,14 +89,15 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	 * <p>Subclasses can override this method to control whether or not the supplied
 	 * {@link BeanDefinitionHolder bean} is actually even registered, or to
 	 * register even more beans.
-	 * <p>The default implementation registers the supplied {@link BeanDefinitionHolder bean} with the supplied
-	 * {@link BeanDefinitionRegistry registry} only if the <code>isNested</code>
-	 * parameter is <code>false</code>, because one typically does not want
-	 * inner beans to be registered as top level beans.
+	 * <p>The default implementation registers the supplied {@link BeanDefinitionHolder bean}
+	 * with the supplied {@link BeanDefinitionRegistry registry} only if the <code>isNested</code>
+	 * parameter is <code>false</code>, because one typically does not want inner beans
+	 * to be registered as top level beans.
 	 * @param bean the bean to be registered
 	 * @param registry the registry that the bean is to be registered with 
-	 * @param isNested <code>true</code> if the supplied {@link BeanDefinitionHolder bean} was created from a nested element  
-	 * @see BeanDefinitionReaderUtils#registerBeanDefinition(org.springframework.beans.factory.config.BeanDefinitionHolder, org.springframework.beans.factory.support.BeanDefinitionRegistry) 
+	 * @param isNested <code>true</code> if the supplied {@link BeanDefinitionHolder bean}
+	 * was created from a nested element
+	 * @see BeanDefinitionReaderUtils#registerBeanDefinition(BeanDefinitionHolder, BeanDefinitionRegistry)
 	 */
 	protected void registerBeanDefinition(BeanDefinitionHolder bean, BeanDefinitionRegistry registry, boolean isNested) {
 		if (!isNested) {
@@ -93,40 +105,25 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 		}
 	}
 
+
 	/**
 	 * Central template method to actually parse the supplied {@link Element}
 	 * into one or more {@link BeanDefinition BeanDefinitions}.
-	 * @param element			 the element that is to be parsed into one or more {@link BeanDefinition BeanDefinitions}
+	 * @param element	the element that is to be parsed into one or more {@link BeanDefinition BeanDefinitions}
 	 * @param parserContext the object encapsulating the current state of the parse;
-	 *                      provides access to a {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
+	 * provides access to a {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
 	 * @return the primary {@link BeanDefinition} resulting from the parsing of the supplied {@link Element}
 	 * @see #parse(org.w3c.dom.Element, ParserContext)
 	 * @see #postProcessComponentDefinition(org.springframework.beans.factory.support.BeanComponentDefinition)
 	 */
-	protected abstract BeanDefinition parseInternal(Element element, ParserContext parserContext);
+	protected abstract AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext);
 
 	/**
-	 * Hook method called after the primary parsing of a
-	 * {@link BeanComponentDefinition} but before the
-	 * {@link BeanComponentDefinition} has been registered with a
-	 * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}.
-	 * <p>Derived classes can override this emthod to supply any custom logic that
-	 * is to be executed after all the parsing is finished.
-	 * <p>The default implementation is a no-op.
-	 * @param componentDefinition the {@link BeanComponentDefinition} that is to be processed
+	 * Should an ID be generated instead of read for the passed in {@link Element}?
+	 * Disabled by default; subclasses can override this to enable ID generation.
 	 */
-	protected void postProcessComponentDefinition(BeanComponentDefinition componentDefinition) {
-	}
-
-	/**
-	 * Convenience method to extract the id of a bean definition from the supplied
-	 * {@link Element element}.
-	 * @param element the element from which an id is to be extracted
-	 * @return the extracted id; must return <code>null</code> if no id could be extracted
-	 * @see #ID_ATTRIBUTE
-	 */
-	protected String extractId(Element element) {
-		return element.getAttribute(ID_ATTRIBUTE);
+	protected boolean shouldGenerateId() {
+		return false;
 	}
 
 	/**
@@ -139,33 +136,24 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	 * <p>This implementation returns <code>true</code> by default; that is, an event
 	 * will be fired when a bean definition has been totally parsed.
 	 * @return <code>true</code> if this instance is to
-	 *         {@link org.springframework.beans.factory.support.ReaderContext#fireComponentRegistered(org.springframework.beans.factory.support.ComponentDefinition) fire an event}
-	 *         when a bean definition has been totally parsed
+	 * {@link org.springframework.beans.factory.support.ReaderContext#fireComponentRegistered(org.springframework.beans.factory.support.ComponentDefinition) fire an event}
+	 * when a bean definition has been totally parsed
 	 */
 	protected boolean shouldFireEvents() {
 		return true;
 	}
 
 	/**
-	 * Should an ID be autogenerated instead of read for the passed in {@link Element}? Subclasses
-	 * can override this to enable ID autogeneration, which is disabled by default.
+	 * Hook method called after the primary parsing of a
+	 * {@link BeanComponentDefinition} but before the
+	 * {@link BeanComponentDefinition} has been registered with a
+	 * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}.
+	 * <p>Derived classes can override this emthod to supply any custom logic that
+	 * is to be executed after all the parsing is finished.
+	 * <p>The default implementation is a no-op.
+	 * @param componentDefinition the {@link BeanComponentDefinition} that is to be processed
 	 */
-	protected boolean autogenerateId() {
-		return false;
-	}
-	
-
-	/**
-	 * Resolves the ID for the supplied {@link BeanDefinition}. When using {@link #autogenerateId autogeneration}
-	 * a name is generated automatically, otherwise the ID is extracted by delegating to {@link #extractId}.
-	 */
-	private String resolveId(BeanDefinition definition, ParserContext parserContext, Element element) {
-		if (autogenerateId()) {
-			return BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) definition, parserContext.getRegistry(), parserContext.isNested());
-		}
-		else {
-			return extractId(element);
-		}
+	protected void postProcessComponentDefinition(BeanComponentDefinition componentDefinition) {
 	}
 
 }
