@@ -38,22 +38,6 @@ import org.springframework.util.ObjectUtils;
 public class BeanDefinitionBuilder  {
 
 	/**
-	 * The <code>BeanDefinition</code> instance we are creating.
-	 */
-	private AbstractBeanDefinition beanDefinition;
-	
-	/**
-	 * Our current position with respect to constructor args.
-	 */
-	private int constructorArgIndex;
-
-	/**
-	 * The bean name assigned to the current <code>BeanDefinition</code>, if any.
-	 */
-	private String assignedBeanName;
-
-
-	/**
 	 * Create a new <code>BeanDefinitionBuilder</code> used to construct a {@link RootBeanDefinition}.
 	 * @param beanClass the <code>Class</code> of the bean the definition is being created for.
 	 */
@@ -84,19 +68,40 @@ public class BeanDefinitionBuilder  {
 		return builder;
 	}
 
+
 	/**
-	 * Protected from public use.
+	 * The <code>BeanDefinition</code> instance we are creating.
 	 */
-	protected BeanDefinitionBuilder() {
+	private AbstractBeanDefinition beanDefinition;
+
+	/**
+	 * Our current position with respect to constructor args.
+	 */
+	private int constructorArgIndex;
+
+
+	/**
+	 * Enforce the use of factory methods.
+	 */
+	private BeanDefinitionBuilder() {
 	}
 
 	/**
-	 * Validate and return the created {@link org.springframework.beans.factory.config.BeanDefinition}.
+	 * Return the current BeanDefinition object in its raw (unvalidated) form.
+	 * @see #getBeanDefinition()
+	 */
+	public AbstractBeanDefinition getRawBeanDefinition() {
+		return this.beanDefinition;
+	}
+
+	/**
+	 * Validate and return the created BeanDefinition object.
 	 */
 	public AbstractBeanDefinition getBeanDefinition() {
 		this.beanDefinition.validate();
 		return this.beanDefinition;
 	}
+
 
 	/**
 	 * Add the supplied property value under the given name.
@@ -109,20 +114,10 @@ public class BeanDefinitionBuilder  {
 	/**
 	 * Add a reference to the specified bean name under the property specified.
 	 * @param name the name of the property to add the reference to
-	 * @param bean the name of the bean being referenced
+	 * @param beanName the name of the bean being referenced
 	 */
-	public BeanDefinitionBuilder addPropertyReference(String name, String bean) {
-		return this.addPropertyValue(name, new RuntimeBeanReference(bean));
-	}
-
-	/**
-	 * Add a reference to the bean identified by the supplied <code>BeanDefinitionBuilder</code>
-	 * to the specified property.
-	 * @param name the name of the property to add the reference to
-	 * @param target the targhet specified as <code>BeanDefinitionBuilder</code>
-	 */
-	public BeanDefinitionBuilder addPropertyReference(String name, BeanDefinitionBuilder target) {
-		return addPropertyReference(name, getTargetBeanName(target));
+	public BeanDefinitionBuilder addPropertyReference(String name, String beanName) {
+		return addPropertyValue(name, new RuntimeBeanReference(beanName));
 	}
 
 	/**
@@ -140,15 +135,6 @@ public class BeanDefinitionBuilder  {
 	 */
 	public BeanDefinitionBuilder addConstructorArgReference(String beanName) {
 		return addConstructorArg(new RuntimeBeanReference(beanName));
-	}
-
-	/**
-	 * Add a reference to the bean identified by the supplied <code>BeanDefinitionBuilder</code>
-	 * as a constructor arg.
-	 * @see #addConstructorArg(Object)
-	 */
-	public BeanDefinitionBuilder addConstructorArgReference(BeanDefinitionBuilder target) {
-		return addConstructorArgReference(getTargetBeanName(target));
 	}
 
 	/**
@@ -275,32 +261,6 @@ public class BeanDefinitionBuilder  {
 	public BeanDefinitionBuilder setRole(int role) {
 		this.beanDefinition.setRole(role);
 		return this;
-	}
-
-	/**
-	 * Called by BeanDefinitionRegistryBuilder to let this object know the name
-	 * of the bean definition.
-	 * @param name bean name to be assigned
-	 */
-	protected void assignBeanName(String name) {
-		if (this.assignedBeanName != null) {
-			throw new IllegalStateException(
-					"Cannot assign bean name: bean name of '" + this.assignedBeanName + "' already assigned");
-		}
-		this.assignedBeanName = name;
-	}
-
-	/**
-	 * Return the bean name assigned to the supplied <code>BeanDefinitionBuilder</code>.
-	 * @throws IllegalArgumentException if the <code>BeanDefinitionBuilder</code> has no assigned bean name
-	 */
-	private String getTargetBeanName(BeanDefinitionBuilder target) throws IllegalArgumentException {
-		String assignedBeanName = target.assignedBeanName;
-		if(assignedBeanName == null) {
-			throw new IllegalArgumentException("Cannot add a reference to the bean identified by the " +
-					"supplied BeanDefinitonBuilder. No bean name has been assigned.");
-		}
-		return assignedBeanName;
 	}
 
 }
