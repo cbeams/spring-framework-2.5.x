@@ -27,17 +27,16 @@ import org.springframework.util.StringUtils;
  */
 public class AspectEntry implements ParseState.Entry {
 
-	/**
-	 * The id of the aspect element.
-	 */
-	private String id;
-	
-	/**
-	 * The bean name referenced by this aspect element.
-	 */
-	private String ref;
-	
+	private final String id;
 
+	private final String ref;
+
+
+	/**
+	 * Creates a new instance of the {@link AspectEntry} class.
+	 * @param id the id of the aspect element
+	 * @param ref the bean name referenced by this aspect element
+	 */
 	public AspectEntry(String id, String ref) {
 		this.id = id;
 		this.ref = ref;
