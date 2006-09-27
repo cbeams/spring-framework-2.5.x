@@ -138,6 +138,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * @see #setDetectAllHandlerAdapters
 	 */
 	public static final String HANDLER_ADAPTER_BEAN_NAME = "handlerAdapter";
+
 	/**
 	 * Well-known name for the HandlerExceptionResolver object in the bean factory for this
 	 * namespace. Only used when "detectAllHandlerExceptionResolvers" is turned off.
@@ -161,8 +162,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * Request attribute to hold the currently chosen HandlerExecutionChain.
 	 * Only used for internal optimizations.
 	 */
-	public static final String HANDLER_EXECUTION_CHAIN_ATTRIBUTE = DispatcherPortlet.class.getName() + ".HANDLER";
-
+	public static final String HANDLER_EXECUTION_CHAIN_ATTRIBUTE =
+			DispatcherPortlet.class.getName() + ".HANDLER";
 
 	/**
 	 * Unlike the Servlet version of this class, we have to deal with the
@@ -178,14 +179,14 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * up polluting the session with an old exception when we finally leave
 	 * the render phase of one request and move on to something else.
 	 */
-	private static final String ACTION_EXCEPTION_SESSION_ATTRIBUTE =
+	public static final String ACTION_EXCEPTION_SESSION_ATTRIBUTE =
 			DispatcherPortlet.class.getName() + ".ACTION_EXCEPTION";
 
 	/**
 	 * This render parameter is used to indicate forward to the render phase
 	 * that an exception occurred during the action phase.
 	 */
-	private static final String ACTION_EXCEPTION_RENDER_PARAMETER = "actionException";
+	public static final String ACTION_EXCEPTION_RENDER_PARAMETER = "actionException";
 
 	/**
 	 * Log category to use when no mapped handler is found for a request.
