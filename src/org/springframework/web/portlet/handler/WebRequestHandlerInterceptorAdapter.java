@@ -16,11 +16,14 @@
 
 package org.springframework.web.portlet.handler;
 
+import javax.portlet.ActionRequest;
+import javax.portlet.ActionResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.WebRequestInterceptor;
+import org.springframework.web.portlet.HandlerInterceptor;
 import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.context.PortletWebRequest;
 
@@ -28,42 +31,77 @@ import org.springframework.web.portlet.context.PortletWebRequest;
  * Adapter that implements the Portlet HandlerInterceptor interface
  * and wraps an underlying WebRequestInterceptor.
  *
- * <p><b>NOTE:</b> The WebRequestInterceptor is only applied to the Portlet <b>render</b>
- * phase, which is dealing with preparing and rendering a Portlet view.
- * The Portlet action phase <i>cannot</i> be intercepted with the WebRequestInterceptor
- * mechanism; use the Portlet-specific HandlerInterceptor mechanism for such needs.
+ * <p><b>NOTE:</b> The WebRequestInterceptor is by default only applied to the Portlet
+ * <b>render</b> phase, which is dealing with preparing and rendering a Portlet view.
+ * The Portlet action phase will only be intercepted with WebRequestInterceptor calls
+ * if the <code>renderPhaseOnly</code> flag is explicitly set to <code>false</code>.
+ * In general, it is recommended to use the Portlet-specific HandlerInterceptor
+ * mechanism for differentiating between action and render interception.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.web.context.request.WebRequestInterceptor
  * @see org.springframework.web.portlet.HandlerInterceptor
  */
-public class WebRequestHandlerInterceptorAdapter extends HandlerInterceptorAdapter {
+public class WebRequestHandlerInterceptorAdapter implements HandlerInterceptor {
 
 	private final WebRequestInterceptor requestInterceptor;
 
+	private final boolean renderPhaseOnly;
+
+
+	/**
+	 * Create a new WebRequestHandlerInterceptorAdapter for the given WebRequestInterceptor,
+	 * applying to the render phase only.
+	 * @param requestInterceptor the WebRequestInterceptor to wrap
+	 */
+	public WebRequestHandlerInterceptorAdapter(WebRequestInterceptor requestInterceptor) {
+		this(requestInterceptor, true);
+	}
 
 	/**
 	 * Create a new WebRequestHandlerInterceptorAdapter for the given WebRequestInterceptor.
 	 * @param requestInterceptor the WebRequestInterceptor to wrap
+	 * @param renderPhaseOnly whether to apply to the render phase only (<code>true</code>)
+	 * or to the action phase as well (<code>false</code>)
 	 */
-	public WebRequestHandlerInterceptorAdapter(WebRequestInterceptor requestInterceptor) {
+	public WebRequestHandlerInterceptorAdapter(WebRequestInterceptor requestInterceptor, boolean renderPhaseOnly) {
 		Assert.notNull(requestInterceptor, "WebRequestInterceptor must not be null");
 		this.requestInterceptor = requestInterceptor;
+		this.renderPhaseOnly = renderPhaseOnly;
 	}
 
+
+	public boolean preHandleAction(ActionRequest request, ActionResponse response, Object handler) throws Exception {
+		if (!this.renderPhaseOnly) {
+			this.requestInterceptor.preHandle(new PortletWebRequest(request));
+		}
+		return true;
+	}
+
+	public void afterActionCompletion(
+			ActionRequest request, ActionResponse response, Object handler, Exception ex) throws Exception {
+
+		if (!this.renderPhaseOnly) {
+			this.requestInterceptor.afterCompletion(new PortletWebRequest(request), ex);
+		}
+	}
 
 	public boolean preHandleRender(RenderRequest request, RenderResponse response, Object handler) throws Exception {
 		this.requestInterceptor.preHandle(new PortletWebRequest(request));
 		return true;
 	}
 
-	public void postHandleRender(RenderRequest request, RenderResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+	public void postHandleRender(
+			RenderRequest request, RenderResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+
 		this.requestInterceptor.postHandle(new PortletWebRequest(request),
 				(modelAndView != null ? modelAndView.getModelMap() : null));
 	}
 
-	public void afterRenderCompletion(RenderRequest request, RenderResponse response, Object handler, Exception ex) throws Exception {
+	public void afterRenderCompletion(
+			RenderRequest request, RenderResponse response, Object handler, Exception ex) throws Exception {
+
 		this.requestInterceptor.afterCompletion(new PortletWebRequest(request), ex);
 	}
 
