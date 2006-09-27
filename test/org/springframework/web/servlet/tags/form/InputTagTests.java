@@ -168,7 +168,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "dir", dir);
 		assertContainsAttribute(output, "tabindex", tabindex);
 		assertContainsAttribute(output, "readonly", readOnly);
-		assertContainsAttribute(output, "disabled", disabled);
+		assertContainsAttribute(output, "disabled", "disabled");
 		assertContainsAttribute(output, "onclick", onclick);
 		assertContainsAttribute(output, "ondblclick", ondblclick);
 		assertContainsAttribute(output, "onkeydown", onkeydown);
