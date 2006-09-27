@@ -33,8 +33,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Servlet-based implementation of the RequestAttributes interface.
- * Accesses objects from servlet request and HTTP session scope,
+ * Servlet-based implementation of the {@link RequestAttributes} interface.
+ * <p>Accesses objects from servlet request and HTTP session scope,
  * with no distinction between "session" and "global session".
  *
  * @author Juergen Hoeller
@@ -44,6 +44,10 @@ import org.springframework.web.util.WebUtils;
  */
 public class ServletRequestAttributes extends AbstractRequestAttributes {
 
+	/**
+	 * Constant identifying the {@link String} prefixed to the name of a
+	 * destruction callback when it is stored in a {@link HttpSession}.
+	 */
 	public static final String DESTRUCTION_CALLBACK_NAME_PREFIX =
 			ServletRequestAttributes.class.getName() + ".DESTRUCTION_CALLBACK.";
 
@@ -71,7 +75,8 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	}
 
 	/**
-	 * Expose the HttpServletRequest that we're wrapping to subclasses.
+	 * Exposes the {@link HttpServletRequest} that we're wrapping to
+	 * subclasses.
 	 */
 	protected final HttpServletRequest getRequest() {
 		return request;
