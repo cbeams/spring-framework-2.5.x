@@ -24,6 +24,12 @@ import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.util.TagUtils;
 
 /**
+ * Convenient tag that allows one to supply a collection of objects
+ * that are to be rendered as '<code>option</code>' tags within a
+ * '<code>select</code>' tag.
+ * 
+ * <p><i>Must</i> be used within a {@link SelectTag 'select' tag}.
+ * 
  * @author Rob Harrop
  * @since 2.0
  */

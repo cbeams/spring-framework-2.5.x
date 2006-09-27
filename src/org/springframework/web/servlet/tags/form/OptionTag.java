@@ -25,18 +25,22 @@ import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.util.TagUtils;
 
 /**
- * JSP tag for rendering an HTML '<code>option</code>' tag. Must be used nested
- * inside a {@link SelectTag}. Provides full support for databinding by marking
- * an '<code>option</code>' as 'selected' if the {@link #setValue value}
+ * JSP tag for rendering an HTML '<code>option</code>' tag.
+ * 
+ * <p><b>Must be used nested inside a {@link SelectTag}.</b>
+ * 
+ * <p>Provides full support for databinding by marking an
+ * '<code>option</code>' as 'selected' if the {@link #setValue value}
  * matches the value bound to the out {@link SelectTag}.
  *
  * <p>The {@link #setValue value} property is required and corresponds to
  * the '<code>value</code>' attribute of the rendered '<code>option</code>'.
  *
- * <p>An optional {@link #setLabel label} property can be specified, the value of
- * which corresponds to inner text of the rendered '<code>option</code>' tag.
- * If no {@link #setLabel label} is specified then the {@link #setValue value}
- * property will be used when rendering the inner text.
+ * <p>An optional {@link #setLabel label} property can be specified, the
+ * value of which corresponds to inner text of the rendered
+ * '<code>option</code>' tag. If no {@link #setLabel label} is specified
+ * then the {@link #setValue value} property will be used when rendering
+ * the inner text.
  *
  * @author Rob Harrop
  * @since 2.0
@@ -62,6 +66,11 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 * The name of the '<code>value</code>' attribute.
 	 */
 	private static final String VALUE_ATTRIBUTE = VALUE_VARIABLE_NAME;
+	
+	/**
+	 * The name of the '<code>disabled</code>' attribute.
+	 */
+	private static final String DISABLED_ATTRIBUTE = "disabled";
 
 
 	/**
@@ -77,10 +86,12 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	private Object oldValue;
 
 	private Object oldDisplayValue;
+	
+	private String disabled;
 
 	/**
 	 * Sets the 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	public void setValue(Object value) {
 		this.value = value;
@@ -88,15 +99,42 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	/**
 	 * Gets the 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	protected Object getValue() {
 		return this.value;
 	}
+	
+	/**
+	 * Sets the value of the '<code>disabled</code>' attribute.
+	 * <p>May be a runtime expression.
+	 * @param disabled the value of the '<code>disabled</code>' attribute
+	 */
+	public void setDisabled(String disabled) {
+		this.disabled = disabled;
+	}
+
+	/**
+	 * Gets the value of the '<code>disabled</code>' attribute.
+	 * <p>May be a runtime expression.
+	 * @return the value of the '<code>disabled</code>' attribute
+	 */
+	protected String getDisabled() {
+		return disabled;
+	}
+	
+	/**
+	 * Is the current HTML tag disabled?
+	 * @return <code>true</code> if this tag is disabled 
+	 */
+	protected boolean isDisabled() {
+		return "true".equals(getDisabled());
+	}
 
 	/**
 	 * Sets the text body of the rendered HTML <code>&lt;option&gt;</code> tag.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
+	 * @throws IllegalArgumentException if the supplied <code>label</code> is <code>null</code> 
 	 */
 	public void setLabel(String label) {
 		Assert.notNull(label, "'label' cannot be null.");
@@ -105,7 +143,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	/**
 	 * Gets the text body of the rendered HTML <code>&lt;option&gt;</code> tag.
-	 * May be a runtime expression.
+	 * <p>May be a runtime expression.
 	 */
 	protected String getLabel() {
 		return this.label;
@@ -176,6 +214,9 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 		if (isSelected(value)) {
 			tagWriter.writeAttribute(SELECTED_ATTRIBUTE, SELECTED_ATTRIBUTE);
+		}
+		if(isDisabled()) {
+			tagWriter.writeAttribute(DISABLED_ATTRIBUTE, "disabled");
 		}
 		tagWriter.appendValue(label);
 
