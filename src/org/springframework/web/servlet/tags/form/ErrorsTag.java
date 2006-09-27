@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.tags.form;
 
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.util.TagUtils;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTag;
@@ -43,7 +44,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 
 	/**
-	 * The HTML '<code>span</code>' tag
+	 * The HTML '<code>span</code>' tag.
 	 */
 	public static final String SPAN_TAG = "span";
 
@@ -65,6 +66,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 		this.delimiter = delimiter;
 	}
 
+
 	/**
 	 * Gets the value for the HTML '<code>name</code>' attribute.
 	 * <p>Appends '<code>.errors</code>' to the value returned by {@link #getPath()}.
@@ -82,6 +84,15 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 */
 	protected boolean shouldRender() throws JspException {
 		return getBindStatus().isError();
+	}
+	
+	/**
+	 * Make sure we are under a '<code>form</code>' tag before proceeding.
+	 */
+	protected void onWriteTagContent() {
+		if (!TagUtils.hasAncestorOfType(this, FormTag.class)) {
+			throw new IllegalStateException("The 'errors' tag can only be used inside a valid 'form' tag.");
+		}
 	}
 
 	protected void renderDefaultContent(TagWriter tagWriter) throws JspException {
@@ -114,6 +125,6 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 		else {
 			this.pageContext.removeAttribute(MESSAGES_ATTRIBUTE);
 		}
-
 	}
+
 }

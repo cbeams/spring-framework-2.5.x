@@ -22,26 +22,29 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
+import org.springframework.test.AssertThrows;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.BodyTag;
+import javax.servlet.jsp.tagext.Tag;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Unit tests for the {@link ErrorsTag} class.
- * 
+ *
  * @author Rob Harrop
  * @author Rick Evans
  * @since 2.0
  */
 public final class ErrorsTagTests extends AbstractHtmlElementTagTests {
 
-	public static final String COMMAND_NAME = "testBean";
+	private static final String COMMAND_NAME = "testBean";
+
 
 	private ErrorsTag tag;
+
 
 	protected void onSetUp() {
 		this.tag = new ErrorsTag() {
@@ -51,12 +54,14 @@ public final class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		};
 		this.tag.setPath("name");
 		this.tag.setPageContext(getPageContext());
+		this.tag.setParent(new FormTag());
 	}
+
 
 	public void testWithExplicitNonWhitespaceBodyContent() throws Exception {
 		final String mockContent = "This is some explicit body content";
 		this.tag.setBodyContent(new MockBodyContent(mockContent, getWriter()));
-		
+
 		// construct an errors instance of the tag
 		TestBean target = new TestBean();
 		target.setName("Rob Harrop");
@@ -73,9 +78,19 @@ public final class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		assertEquals(mockContent, getWriter().toString());
 	}
 
+	public void testErrorsTagNotNestedWithinFormTag() throws Exception {
+		new AssertThrows(IllegalStateException.class,
+				"Must throw an IllegalStateException when not nested within a <form/> tag.") {
+			public void test() throws Exception {
+				tag.setParent(null);
+				tag.doStartTag();
+			}
+		}.runTest();
+	}
+
 	public void testWithExplicitWhitespaceBodyContent() throws Exception {
 		this.tag.setBodyContent(new MockBodyContent("\t\n   ", getWriter()));
-		
+
 		// construct an errors instance of the tag
 		TestBean target = new TestBean();
 		target.setName("Rob Harrop");
@@ -100,7 +115,7 @@ public final class ErrorsTagTests extends AbstractHtmlElementTagTests {
 
 	public void testWithExplicitEmptyWhitespaceBodyContent() throws Exception {
 		this.tag.setBodyContent(new MockBodyContent("", getWriter()));
-		
+
 		// construct an errors instance of the tag
 		TestBean target = new TestBean();
 		target.setName("Rob Harrop");
