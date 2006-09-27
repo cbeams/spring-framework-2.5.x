@@ -27,7 +27,7 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryBuilder;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationAdvisorTests.RepositoryInterface;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationAdvisorTests.RepositoryInterfaceImpl;
@@ -47,11 +47,9 @@ public class PersistenceExceptionTranslationPostProcessorTests extends TestCase 
 	
 	public void testFailsWithNoPersistenceExceptionTranslators() {
 		GenericApplicationContext gac = new GenericApplicationContext();
-		BeanDefinitionRegistryBuilder bdrb = new BeanDefinitionRegistryBuilder(gac);
-		bdrb.register(BeanDefinitionBuilder.rootBeanDefinition(PersistenceExceptionTranslationPostProcessor.class));
-		
-		bdrb.register("proxied", BeanDefinitionBuilder.rootBeanDefinition(StereotypedRepositoryInterfaceImpl.class));
-		
+		gac.registerBeanDefinition("translator",
+				new RootBeanDefinition(PersistenceExceptionTranslationPostProcessor.class));
+		gac.registerBeanDefinition("proxied", new RootBeanDefinition(StereotypedRepositoryInterfaceImpl.class));
 		try {
 			gac.refresh();
 			fail("Should fail with no translators");
@@ -63,22 +61,21 @@ public class PersistenceExceptionTranslationPostProcessorTests extends TestCase 
 	
 	public void testProxiesCorrectly() {
 		GenericApplicationContext gac = new GenericApplicationContext();
-		BeanDefinitionRegistryBuilder bdrb = new BeanDefinitionRegistryBuilder(gac);
-		bdrb.register(BeanDefinitionBuilder.rootBeanDefinition(PersistenceExceptionTranslationPostProcessor.class));
-		
-		bdrb.register("notProxied", BeanDefinitionBuilder.rootBeanDefinition(RepositoryInterfaceImpl.class));
-		bdrb.register("proxied", BeanDefinitionBuilder.rootBeanDefinition(StereotypedRepositoryInterfaceImpl.class));
-		bdrb.register("classProxied", BeanDefinitionBuilder.rootBeanDefinition(RepositoryWithoutInterface.class));
-		bdrb.register("classProxiedAndAdvised", BeanDefinitionBuilder.rootBeanDefinition(RepositoryWithoutInterfaceAndOtherwiseAdvised.class));		
-		
-		bdrb.register(BeanDefinitionBuilder.rootBeanDefinition(ChainedPersistenceExceptionTranslator.class));
-		
-		bdrb.register(BeanDefinitionBuilder.rootBeanDefinition(AnnotationAwareAspectJAutoProxyCreator.class).
-				addPropertyValue("order", 50));
-		bdrb.register(BeanDefinitionBuilder.rootBeanDefinition(LogAllAspect.class));
-		
+		gac.registerBeanDefinition("translator",
+				new RootBeanDefinition(PersistenceExceptionTranslationPostProcessor.class));
+		gac.registerBeanDefinition("notProxied", new RootBeanDefinition(RepositoryInterfaceImpl.class));
+		gac.registerBeanDefinition("proxied", new RootBeanDefinition(StereotypedRepositoryInterfaceImpl.class));
+		gac.registerBeanDefinition("classProxied", new RootBeanDefinition(RepositoryWithoutInterface.class));
+		gac.registerBeanDefinition("classProxiedAndAdvised",
+				new RootBeanDefinition(RepositoryWithoutInterfaceAndOtherwiseAdvised.class));
+		gac.registerBeanDefinition("chainedTranslator",
+				new RootBeanDefinition(ChainedPersistenceExceptionTranslator.class));
+		gac.registerBeanDefinition("proxyCreator",
+				BeanDefinitionBuilder.rootBeanDefinition(AnnotationAwareAspectJAutoProxyCreator.class).
+				addPropertyValue("order", 50).getBeanDefinition());
+		gac.registerBeanDefinition("logger", new RootBeanDefinition(LogAllAspect.class));
 		gac.refresh();
-		
+
 		RepositoryInterface shouldNotBeProxied = (RepositoryInterface) gac.getBean("notProxied");
 		assertFalse(AopUtils.isAopProxy(shouldNotBeProxied));
 		RepositoryInterface shouldBeProxied = (RepositoryInterface) gac.getBean("proxied");
@@ -86,7 +83,7 @@ public class PersistenceExceptionTranslationPostProcessorTests extends TestCase 
 		RepositoryWithoutInterface rwi = (RepositoryWithoutInterface) gac.getBean("classProxied");
 		assertTrue(AopUtils.isAopProxy(rwi));
 		checkWillTranslateExceptions(rwi);
-		
+
 		Additional rwi2 = (Additional) gac.getBean("classProxiedAndAdvised");
 		assertTrue(AopUtils.isAopProxy(rwi2));
 		rwi2.additionalMethod();

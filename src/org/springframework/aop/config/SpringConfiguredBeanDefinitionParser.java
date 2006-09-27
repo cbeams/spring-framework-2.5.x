@@ -20,7 +20,7 @@ import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.ClassUtils;
@@ -34,9 +34,8 @@ import org.springframework.util.ClassUtils;
  */
 class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 
-	private static final String ASPECT_OF = "aspectOf";
-
-	private static final String BEAN_CONFIGURER = "org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect";
+	private static final String BEAN_CONFIGURER_CLASS_NAME =
+			"org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect";
 
 
 	private boolean registered;
@@ -44,8 +43,9 @@ class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		if (!this.registered) {
-			BeanDefinitionRegistryBuilder registryBuilder = new BeanDefinitionRegistryBuilder(parserContext.getRegistry());
-			registryBuilder.register(BeanDefinitionBuilder.rootBeanDefinition(getBeanConfigurerClass(), ASPECT_OF));
+			BeanDefinitionReaderUtils.registerWithGeneratedName(
+					BeanDefinitionBuilder.rootBeanDefinition(getBeanConfigurerClass(), "aspectOf").getBeanDefinition(),
+					parserContext.getRegistry());
 			this.registered = true;
 		}
 
@@ -53,16 +53,17 @@ class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	/**
-	 * Returns the <code>Class</code> instance for the {@link #BEAN_CONFIGURER bean configurer}.
+	 * Load the <code>Class</code> instance for the bean configurer.
 	 * @throws IllegalStateException if the bean configurer <code>Class</code> cannot be found
 	 */
 	private static Class getBeanConfigurerClass() throws IllegalStateException {
 		try {
-			return ClassUtils.forName(BEAN_CONFIGURER);
+			return ClassUtils.forName(BEAN_CONFIGURER_CLASS_NAME);
 		}
-		catch (ClassNotFoundException ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException(
-					"Unable to locate class [" + BEAN_CONFIGURER + "]: cannot use @Configurable");
+					"Unable to load aspect class [" + BEAN_CONFIGURER_CLASS_NAME +
+					"]: cannot use @Configurable. Root cause: " + ex);
 		}
 	}
 
