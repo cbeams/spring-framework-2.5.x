@@ -71,7 +71,6 @@ import org.springframework.web.portlet.mvc.SimpleControllerHandlerAdapter;
 public class ComplexPortletApplicationContext extends StaticPortletApplicationContext {
 
 	public void refresh() throws BeansException {
-
 		registerSingleton("standardHandlerAdapter", SimpleControllerHandlerAdapter.class);
 		registerSingleton("portletHandlerAdapter", SimplePortletHandlerAdapter.class);
 		registerSingleton("myHandlerAdapter", MyHandlerAdapter.class);
@@ -99,11 +98,26 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		cvs.addIndexedArgumentValue(1, "complex");
 		registerBeanDefinition("portletConfig", new RootBeanDefinition(MockPortletConfig.class, cvs, null));
 		
+		UserRoleAuthorizationInterceptor userRoleInterceptor = new UserRoleAuthorizationInterceptor();
+		userRoleInterceptor.setAuthorizedRoles(new String[] {"role1", "role2"});
+
+		ParameterHandlerMapping interceptingHandlerMapping = new ParameterHandlerMapping();
+		interceptingHandlerMapping.setParameterName("interceptingParam");
+		ParameterMappingInterceptor parameterMappingInterceptor = new ParameterMappingInterceptor();
+		parameterMappingInterceptor.setParameterName("interceptingParam");
+
+		List interceptors = new ArrayList();
+		interceptors.add(parameterMappingInterceptor);
+		interceptors.add(userRoleInterceptor);
+		interceptors.add(new MyHandlerInterceptor1());
+		interceptors.add(new MyHandlerInterceptor2());
+
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		Map portletModeMap = new ManagedMap();
 		portletModeMap.put("view", new RuntimeBeanReference("viewController"));
 		portletModeMap.put("edit", new RuntimeBeanReference("editController"));
 		pvs.addPropertyValue("portletModeMap", portletModeMap);
+		pvs.addPropertyValue("interceptors", interceptors);
 		registerSingleton("handlerMapping3", PortletModeHandlerMapping.class, pvs);
 		
 		pvs = new MutablePropertyValues();
@@ -156,24 +170,8 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		addMessage("test.args", Locale.ENGLISH, "test {0} and {1}");
 		
 		super.refresh();
-		
-		UserRoleAuthorizationInterceptor userRoleInterceptor = new UserRoleAuthorizationInterceptor();
-		userRoleInterceptor.setAuthorizedRoles(new String[] {"role1", "role2"});
-		
-		ParameterHandlerMapping interceptingHandlerMapping = new ParameterHandlerMapping();
-		interceptingHandlerMapping.setParameterName("interceptingParam");
-		ParameterMappingInterceptor parameterMappingInterceptor = new ParameterMappingInterceptor();
-		parameterMappingInterceptor.setParameterName("interceptingParam");
-
-		List interceptors = new ArrayList();
-		interceptors.add(parameterMappingInterceptor);
-		interceptors.add(userRoleInterceptor);
-		interceptors.add(new MyHandlerInterceptor1());
-		interceptors.add(new MyHandlerInterceptor2());
-		
-		PortletModeHandlerMapping handlerMapping1 = (PortletModeHandlerMapping) getBean("handlerMapping3");
-		handlerMapping1.setInterceptors((HandlerInterceptor[]) interceptors.toArray(new HandlerInterceptor[interceptors.size()]));
 	}
+
 
 	public static class TestController1 implements Controller {
 
@@ -186,6 +184,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		}
 	}
 
+
 	public static class TestController2 implements Controller {
 
 		public void handleActionRequest(ActionRequest request, ActionResponse response) {}
@@ -196,6 +195,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		}
 	}
 
+
 	public static class ViewController implements Controller {
 
 		public void handleActionRequest(ActionRequest request, ActionResponse response) {}
@@ -205,6 +205,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		}
 	}
 	
+
 	public static class EditController implements Controller {
 
 		public void handleActionRequest(ActionRequest request, ActionResponse response) {
@@ -216,6 +217,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		}
 	}
 	
+
 	public static class HelpController1 implements Controller {
 
 		public void handleActionRequest(ActionRequest request, ActionResponse response) {
@@ -226,6 +228,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 			return new ModelAndView("help1-view");
 		}
 	}
+
 
 	public static class HelpController2 implements Controller {
 
@@ -256,6 +259,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		}
 	}
 
+
 	public static class LocaleContextCheckingController implements Controller {
 
 		public void handleActionRequest(ActionRequest request, ActionResponse response) throws PortletException {
@@ -273,6 +277,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 			return null;
 		}
 	}
+
 
 	public static class MyPortlet implements Portlet {
 
@@ -299,12 +304,13 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		}
 	}
 
+
 	public static interface MyHandler {
 
 		public void doSomething(PortletRequest request) throws Exception;
-
 	}
 	
+
 	public static class ExceptionThrowingHandler implements MyHandler {
 
 		public void doSomething(PortletRequest request) throws Exception {
@@ -326,6 +332,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 			throw new IllegalArgumentException("illegal argument");
 		}
 	}
+
 
 	public static class MyHandlerAdapter implements HandlerAdapter, Ordered {
 
