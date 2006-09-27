@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,10 +38,11 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.context.support.RequestHandledEvent;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -65,7 +66,6 @@ import org.springframework.web.servlet.theme.SessionThemeResolver;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ResourceBundleViewResolver;
-import org.springframework.ui.ModelMap;
 
 /**
  * @author Juergen Hoeller
@@ -77,9 +77,29 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, SessionLocaleResolver.class);
 		registerSingleton(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, SessionThemeResolver.class);
 
+		LocaleChangeInterceptor interceptor1 = new LocaleChangeInterceptor();
+		LocaleChangeInterceptor interceptor2 = new LocaleChangeInterceptor();
+		interceptor2.setParamName("locale2");
+		ThemeChangeInterceptor interceptor3 = new ThemeChangeInterceptor();
+		ThemeChangeInterceptor interceptor4 = new ThemeChangeInterceptor();
+		interceptor4.setParamName("theme2");
+		UserRoleAuthorizationInterceptor interceptor5 = new UserRoleAuthorizationInterceptor();
+		interceptor5.setAuthorizedRoles(new String[] {"role1", "role2"});
+
+		List interceptors = new ArrayList();
+		interceptors.add(interceptor5);
+		interceptors.add(interceptor1);
+		interceptors.add(interceptor2);
+		interceptors.add(interceptor3);
+		interceptors.add(interceptor4);
+		interceptors.add(new MyHandlerInterceptor1());
+		interceptors.add(new MyHandlerInterceptor2());
+		interceptors.add(new MyWebRequestInterceptor());
+
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(
 				"mappings", "/view.do=viewHandler\n/locale.do=localeHandler\nloc.do=anotherLocaleHandler");
+		pvs.addPropertyValue("interceptors", interceptors);
 		registerSingleton("myUrlMapping1", SimpleUrlHandlerMapping.class, pvs);
 
 		pvs = new MutablePropertyValues();
@@ -154,27 +174,6 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		addMessage("test", Locale.CANADA, "Canadian & test message");
 
 		super.refresh();
-
-		SimpleUrlHandlerMapping myUrlMapping1 = (SimpleUrlHandlerMapping) getBean("myUrlMapping1");
-		LocaleChangeInterceptor interceptor1 = new LocaleChangeInterceptor();
-		LocaleChangeInterceptor interceptor2 = new LocaleChangeInterceptor();
-		interceptor2.setParamName("locale2");
-		ThemeChangeInterceptor interceptor3 = new ThemeChangeInterceptor();
-		ThemeChangeInterceptor interceptor4 = new ThemeChangeInterceptor();
-		interceptor4.setParamName("theme2");
-		UserRoleAuthorizationInterceptor interceptor5 = new UserRoleAuthorizationInterceptor();
-		interceptor5.setAuthorizedRoles(new String[] {"role1", "role2"});
-
-		List interceptors = new ArrayList();
-		interceptors.add(interceptor5);
-		interceptors.add(interceptor1);
-		interceptors.add(interceptor2);
-		interceptors.add(interceptor3);
-		interceptors.add(interceptor4);
-		interceptors.add(new MyHandlerInterceptor1());
-		interceptors.add(new MyHandlerInterceptor2());
-		interceptors.add(new MyWebRequestInterceptor());
-		myUrlMapping1.setInterceptors(interceptors.toArray(new Object[interceptors.size()]));
 	}
 
 
