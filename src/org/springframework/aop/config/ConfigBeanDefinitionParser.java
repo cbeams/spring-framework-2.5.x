@@ -19,6 +19,7 @@ package org.springframework.aop.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -182,7 +183,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 */
 	private void parseAdvisor(Element advisorElement, ParserContext parserContext) {
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
-		AbstractBeanDefinition advisorDef = createAdvisorBeanDefinition(advisorElement);
+		AbstractBeanDefinition advisorDef = createAdvisorBeanDefinition(advisorElement, parserContext);
 
 		String advisorBeanName = advisorElement.getAttribute(ID);
 		if (!StringUtils.hasText(advisorBeanName)) {
@@ -227,9 +228,9 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * Create a {@link RootBeanDefinition} for the advisor described in the supplied. Does <strong>not</strong>
 	 * parse any associated '<code>pointcut</code>' or '<code>pointcut-ref</code>' attributes.
 	 */
-	private AbstractBeanDefinition createAdvisorBeanDefinition(Element advisorElement) {
+	private AbstractBeanDefinition createAdvisorBeanDefinition(Element advisorElement, ParserContext parserContext) {
 		RootBeanDefinition advisorDefinition = new RootBeanDefinition(AspectJPointcutAdvisor.class);
-		advisorDefinition.setSource(advisorElement);
+		advisorDefinition.setSource(parserContext.getReaderContext().extractSource(advisorElement));
 
 		MutablePropertyValues mpvs = advisorDefinition.getPropertyValues();
 		if (advisorElement.hasAttribute(ORDER_PROPERTY)) {
@@ -322,7 +323,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 						addConstructorArg(declareParentsElement.getAttribute(IMPLEMENT_INTERFACE)).
 						addConstructorArg(declareParentsElement.getAttribute(TYPE_PATTERN)).
 						addConstructorArg(declareParentsElement.getAttribute(DEFAULT_IMPL)).
-						setSource(declareParentsElement).getBeanDefinition();
+						setSource(parserContext.getReaderContext().extractSource(declareParentsElement)).getBeanDefinition();
 		String name = BeanDefinitionReaderUtils.generateBeanName(beanDefinition, parserContext.getRegistry(), false);
 		parserContext.getRegistry().registerBeanDefinition(name, beanDefinition);
 		return beanDefinition;
@@ -362,7 +363,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	
 			// configure the advisor
 			advisorDefinition = new RootBeanDefinition(AspectJPointcutAdvisor.class);
-			advisorDefinition.setSource(adviceElement);
+			advisorDefinition.setSource(parserContext.getReaderContext().extractSource(adviceElement));
 			advisorDefinition.setPropertyValues(advisorProperties);
 			advisorDefinition.getPropertyValues().addPropertyValue(ADVICE, adviceDefinition);
 	
@@ -393,7 +394,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		String pointcutBeanName = parsePointcutProperty(adviceElement, advisorProperties, parserContext);
 
 		RootBeanDefinition adviceDefinition = new RootBeanDefinition(getAdviceClass(adviceElement));
-		adviceDefinition.setSource(adviceElement);
+		adviceDefinition.setSource(parserContext.getReaderContext().extractSource(adviceElement));
 
 		isAroundAdvice = AROUND.equals(adviceElement.getLocalName());
 		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_NAME_PROPERTY, aspectName);
@@ -465,7 +466,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		try {
 			this.parseState.push(new PointcutEntry(id));
 			pointcutDefinition = createPointcutDefinition(expression);
-			pointcutDefinition.setSource(pointcutElement);
+			pointcutDefinition.setSource(parserContext.getReaderContext().extractSource(pointcutElement));
 
 			BeanDefinitionRegistry registry = parserContext.getRegistry();
 			if (!StringUtils.hasText(id)) {
@@ -502,9 +503,10 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		else if (element.hasAttribute(POINTCUT)) {
 			BeanDefinitionRegistry registry = parserContext.getRegistry();
-			// create a pointcut for the anonymous pc and register it
-			AbstractBeanDefinition pointcutDefinition = createPointcutDefinition(element.getAttribute(POINTCUT));
-			pointcutDefinition.setSource(element.getAttributeNode(POINTCUT));
+			// Create a pointcut for the anonymous pc and register it.
+			Attr pointcutAttr = element.getAttributeNode(POINTCUT);
+			AbstractBeanDefinition pointcutDefinition = createPointcutDefinition(pointcutAttr.getValue());
+			pointcutDefinition.setSource(parserContext.getReaderContext().extractSource(pointcutAttr));
 			String pointcutName =
 							BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) pointcutDefinition, registry, false);
 			try {
