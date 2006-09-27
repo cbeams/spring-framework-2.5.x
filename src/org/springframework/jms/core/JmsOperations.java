@@ -22,13 +22,14 @@ import javax.jms.Message;
 import org.springframework.jms.JmsException;
 
 /**
- * Interface that specifies a basic set of JMS operations.
- * Implemented by JmsTemplate. Not often used but a useful option
+ * Specifies a basic set of JMS operations.
+ * 
+ * <p>Implemented by {@link JmsTemplate}. Not often used but a useful option
  * to enhance testability, as it can easily be mocked or stubbed.
  *
- * <p>Provides JmsTemplate's send and receive methods that mirror
- * various JMS API methods. See the JMS specification and javadocs
- * for details on those methods.
+ * <p>Provides <code>JmsTemplate's</code> <code>send(..)</code> and
+ * <code>receive(..)</code> methods that mirror various JMS API methods.
+ * See the JMS specification and javadocs for details on those methods.
  *
  * @author Mark Pollack
  * @author Juergen Hoeller

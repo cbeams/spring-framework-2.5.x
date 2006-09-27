@@ -39,10 +39,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 
 /**
- * Helper class that simplifies JMS access code. This class requires a
- * JMS 1.1+ provider, because it builds on the domain-independent API.
- * <b>Use the {@link JmsTemplate102 JmsTemplate102} subclass for
- * JMS 1.0.2 providers.</b>
+ * Helper class that simplifies JMS access code.
+ * 
+ * <p>This class requires a JMS 1.1+ provider, because it builds on the
+ * domain-independent API. <b>Use the {@link JmsTemplate102 JmsTemplate102}
+ * subclass for JMS 1.0.2 providers.</b>
  *
  * <p>If you want to use dynamic destination creation, you must specify
  * the type of JMS destination to create, using the "pubSubDomain" property.
@@ -397,10 +398,10 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	/**
 	 * Execute the action specified by the given action object within a
 	 * JMS Session. Generalized version of <code>execute(SessionCallback)</code>,
-	 * allowing to start the JMS Connection on the fly.
+	 * allowing the JMS Connection to be started on the fly.
 	 * <p>Use <code>execute(SessionCallback)</code> for the general case.
 	 * Starting the JMS Connection is just necessary for receiving messages,
-	 * which is preferably achieve through the <code>receive</code> methods.
+	 * which is preferably achieved through the <code>receive</code> methods.
 	 * @param action callback object that exposes the session
 	 * @return the result object from working with the session
 	 * @throws JmsException if there is any problem

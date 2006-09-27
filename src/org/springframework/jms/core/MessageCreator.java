@@ -21,17 +21,16 @@ import javax.jms.Message;
 import javax.jms.Session;
 
 /**
- * The callback interface used by JmsTemplate.
- * This interface creates a JMS message given a session, provided
- * by the JmsTemplate.
+ * Creates a JMS message given a {@link Session}.
+ * 
+ * <p>The <code>Session</code> typically is provided by an instance
+ * of the {@link JmsTemplate} class.
  *
  * <p>Implementations <i>do not</i> need to concern themselves with
- * checked JMSException (from javax.jms) that may be thrown from
- * operations they attempt.  The JmsTemplate will catch and handle
- * these JMSExceptions appropriately.
- *
- * <p>If extra parameters need to be set, such as the delivery mode, priority or time
- * to live, override any of the getters with your own implementation.
+ * checked <code>JMSExceptions</code> (from the '<code>javax.jms</code>'
+ * package) that may be thrown from operations they attempt. The
+ * <code>JmsTemplate</code> will catch and handle these
+ * <code>JMSExceptions</code> appropriately.
  *
  * @author Mark Pollack
  * @since 1.1
@@ -39,9 +38,10 @@ import javax.jms.Session;
 public interface MessageCreator {
 
 	/**
-	 * Implement this method to return a message to be sent.
-	 * @param session the JMS session
-	 * @return the message to be sentt
+	 * Create a {@link Message} to be sent.
+	 * @param session the JMS {@link Session} to be used to create the
+	 * <code>Message</code> (never <code>null</code>) 
+	 * @return the <code>Message</code> to be sent
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
 	Message createMessage(Session session) throws JMSException;

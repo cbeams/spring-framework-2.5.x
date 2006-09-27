@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,16 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 
 /**
- * Callback interface for JMS code. To be used with JmsTemplate's execute method,
- * often as an anonymous class within a method implementation.
+ * Callback for sending a message to a JMS destination.
+ * 
+ * <p>To be used with the {@link JmsTemplate#execute(ProducerCallback)}
+ * method, often implemented as an anonymous inner class.
  *
  * <p>The typical implementation will perform multiple operations on the
- * JMS Session and MessageProducer. When used with a 1.0.2 provider, you
- * need to downcast to the appropriate domain implementation, either
- * QueueSender or TopicPublisher, to send a message.
+ * supplied JMS {@link Session} and {@link MessageProducer}. When used with
+ * a 1.0.2 provider, you need to downcast to the appropriate domain
+ * implementation, either {@link javax.jms.QueueSender} or
+ * {@link javax.jms.TopicPublisher}, to actually send a message.
  *
  * @author Mark Pollack
  * @since 1.1
@@ -36,11 +39,11 @@ import javax.jms.Session;
 public interface ProducerCallback {
 
 	/**
-	 * Perform operations on the given Session and MessageProducer.
-	 * The message producer is not associated with any destination.
-	 * @param session the JMS session object to use
-	 * @param producer the JMS MessageProducer object to use
-	 * @return a result object from working with the session, if any
+	 * Perform operations on the given {@link Session} and {@link MessageProducer}.
+	 * <p>The message producer is not associated with any destination.
+	 * @param session the JMS <code>Session</code> object to use
+	 * @param producer the JMS <code>MessageProducer</code> object to use
+	 * @return a result object from working with the <code>Session</code>, if any (can be <code>null</code>) 
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
 	Object doInJms(Session session, MessageProducer producer) throws JMSException;
