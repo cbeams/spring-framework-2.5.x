@@ -85,14 +85,12 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	protected boolean shouldRender() throws JspException {
 		return getBindStatus().isError();
 	}
-	
+
 	/**
 	 * Make sure we are under a '<code>form</code>' tag before proceeding.
 	 */
 	protected void onWriteTagContent() {
-		if (!TagUtils.hasAncestorOfType(this, FormTag.class)) {
-			throw new IllegalStateException("The 'errors' tag can only be used inside a valid 'form' tag.");
-		}
+		TagUtils.assertHasAncestorOfType(this, FormTag.class, "errors", "form");
 	}
 
 	protected void renderDefaultContent(TagWriter tagWriter) throws JspException {

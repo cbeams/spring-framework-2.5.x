@@ -36,8 +36,8 @@ import org.springframework.web.util.TagUtils;
 public class OptionsTag extends AbstractFormTag {
 	
 	/**
-	 * The {@link java.util.Collection}, {@link java.util.Map} or array of objects used to generate the inner
-	 * '<code>option</code>' tags.
+	 * The {@link java.util.Collection}, {@link java.util.Map} or array of
+	 * objects used to generate the inner '<code>option</code>' tags.
 	 */
 	private Object items;
 
@@ -55,26 +55,37 @@ public class OptionsTag extends AbstractFormTag {
 
 
 	/**
-	 * Sets the {@link java.util.Collection}, {@link java.util.Map} or array of objects used to generate
-	 * the inner '<code>option</code>' tags. Required when wishing to render
-	 * '<code>option</code>' tags from an array, {@link java.util.Collection} or
-	 * {@link java.util.Map}.
-	 * Typically a runtime expression.
+	 * Sets the {@link java.util.Collection}, {@link java.util.Map} or array
+	 * of objects used to generate the inner '<code>option</code>' tags.
+	 * <p>Required when wishing to render '<code>option</code>' tags from an
+	 * array, {@link java.util.Collection} or {@link java.util.Map}.
+	 * <p>Typically a runtime expression.
+	 * @param items said items
+	 * @throws IllegalArgumentException if the supplied <code>items</code> instance is <code>null</code> 
 	 */
 	public void setItems(Object items) {
 		Assert.notNull(items, "'items' cannot be null.");
 		this.items = items;
 	}
 
+	/**
+	 * Gets the {@link java.util.Collection}, {@link java.util.Map} or array
+	 * of objects used to generate the inner '<code>option</code>' tags.
+	 * <p>Typically a runtime expression.
+	 */
 	protected Object getItems() {
 		return this.items;
 	}
 
 	/**
-	 * Sets the name of the property mapped to the '<code>value</code>' attribute
-	 * of the '<code>option</code>' tag. Required when wishing to render
-	 * '<code>option</code>' tags from an array or {@link java.util.Collection}.
-	 * May be a runtime expression.
+	 * Sets the name of the property mapped to the '<code>value</code>'
+	 * attribute of the '<code>option</code>' tag.
+	 * <p>Required when wishing to render '<code>option</code>' tags from
+	 * an array or {@link java.util.Collection}.
+	 * <p>May be a runtime expression.
+	 * @param itemValue said item value
+	 * @throws IllegalArgumentException if the supplied <code>itemValue</code>
+	 * is <code>null</code> or consists wholly of whitespace
 	 */
 	public void setItemValue(String itemValue) {
 		Assert.hasText(itemValue, "'itemValue' cannot be null or zero length.");
@@ -87,13 +98,22 @@ public class OptionsTag extends AbstractFormTag {
 
 	/**
 	 * Sets the name of the property mapped to the label (inner text) of the
-	 * '<code>option</code>' tag. May be a runtime expression.
+	 * '<code>option</code>' tag.
+	 * <p>May be a runtime expression.
+	 * @param itemLabel said label
+	 * @throws IllegalArgumentException if the supplied <code>itemLabel</code> is
+	 * <code>null</code> or consists wholly of whitespace
 	 */
 	public void setItemLabel(String itemLabel) {
 		Assert.hasText(itemLabel, "'itemLabel' cannot be null or zero length.");
 		this.itemLabel = itemLabel;
 	}
 
+	/**
+	 * Gets the name of the property mapped to the label (inner text) of the
+	 * '<code>option</code>' tag.
+	 * <p>May be a runtime expression.
+	 */
 	protected String getItemLabel() {
 		return this.itemLabel;
 	}
@@ -118,11 +138,11 @@ public class OptionsTag extends AbstractFormTag {
 		return EVAL_PAGE;
 	}
 
+
 	private void assertUnderSelectTag() {
-		if (!TagUtils.hasAncestorOfType(this, SelectTag.class)) {
-			throw new IllegalStateException("The 'options' tag can only be used inside a valid 'select' tag.");
-		}
+		TagUtils.assertHasAncestorOfType(this, SelectTag.class, "options", "select");
 	}
+
 	private BindStatus getBindStatus() {
 		return (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
 	}
