@@ -60,6 +60,25 @@ public final class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 
+	public void testCanBeDisabledEvenWhenSelected() throws Exception {
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.name", false));
+		this.tag.setValue("bar");
+		this.tag.setLabel("Bar");
+		this.tag.setDisabled("true");
+		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+
+		assertOptionTagOpened(output);
+		assertOptionTagClosed(output);
+		assertContainsAttribute(output, "value", "bar");
+		assertContainsAttribute(output, "disabled", "disabled");
+		assertBlockTagContains(output, "Bar");
+	}
+
 	public void testRenderNotSelected() throws Exception {
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.name", false));
 		this.tag.setValue("bar");
