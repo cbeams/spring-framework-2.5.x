@@ -57,6 +57,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 */
 	public static final String DISPLAY_VALUE_VARIABLE_NAME = "displayValue";
 
+
 	/**
 	 * The name of the '<code>selected</code>' attribute.
 	 */
@@ -88,6 +89,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	private Object oldDisplayValue;
 	
 	private String disabled;
+
 
 	/**
 	 * Sets the 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
@@ -149,25 +151,17 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 		return this.label;
 	}
 
+
 	protected void renderDefaultContent(TagWriter tagWriter) throws JspException {
 		Object value = this.pageContext.getAttribute(VALUE_VARIABLE_NAME);
 		String label = getLabelValue(value);
 		renderOption(value,  label, tagWriter);
 	}
 
-
 	protected void renderFromBodyContent(BodyContent bodyContent, TagWriter tagWriter) throws JspException {
 		Object value = this.pageContext.getAttribute(VALUE_VARIABLE_NAME);
 		String label = bodyContent.getString();
 		renderOption(value, label, tagWriter);
-	}
-
-	/**
-	 * Returns the supplied value to attach to this tag. Evaluates EL expressions
-	 * as required.
-	 */
-	private Object resolveValue() throws JspException {
-		return evaluate(VALUE_VARIABLE_NAME, getValue());
 	}
 
 	/**
@@ -185,6 +179,9 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 		this.pageContext.setAttribute(DISPLAY_VALUE_VARIABLE_NAME, getDisplayString(value, getBindStatus().getEditor()));
 	}
 
+	protected BindStatus getBindStatus() {
+		return (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
+	}
 
 	protected void removeAttributes() {
 		if (this.oldValue != null) {
@@ -203,6 +200,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 			this.pageContext.removeAttribute(DISPLAY_VALUE_VARIABLE_NAME);
 		}
 	}
+
 
 	private void renderOption(Object value, String label, TagWriter tagWriter) throws JspException {
 		tagWriter.startTag("option");
@@ -236,17 +234,15 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	private void assertUnderSelectTag() {
-		if (!TagUtils.hasAncestorOfType(this, SelectTag.class)) {
-			throw new IllegalStateException("The 'option' tag can only be used inside a valid 'select' tag.");
-		}
+		TagUtils.assertHasAncestorOfType(this, SelectTag.class, "option", "select");
 	}
 
 	private boolean isSelected(Object resolvedValue) {
 		return SelectedValueComparator.isSelected(getBindStatus(), resolvedValue);
 	}
 
-	protected BindStatus getBindStatus() {
-		return (BindStatus) this.pageContext.getAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE);
+	private Object resolveValue() throws JspException {
+		return evaluate(VALUE_VARIABLE_NAME, getValue());
 	}
 
 }
