@@ -22,7 +22,8 @@ import javax.servlet.jsp.tagext.Tag;
 import org.springframework.util.Assert;
 
 /**
- * Utility class to translate {@link String Strings} to web scopes.
+ * Utility class for tag library related code, exposing functionality
+ * such as translating {@link String Strings} to web scopes.
  *
  * <p>
  * <ul>
@@ -39,6 +40,7 @@ import org.springframework.util.Assert;
  * @author Alef Arendsen
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Rick Evans
  */
 public abstract class TagUtils {
 
@@ -61,6 +63,7 @@ public abstract class TagUtils {
 	 * 'page' or 'application', the method will return {@link PageContext#PAGE_SCOPE}.
 	 * @param scope the <code>String</code> to inspect
 	 * @return the scope found, or {@link PageContext#PAGE_SCOPE} if no scope matched
+	 * @throws IllegalArgumentException if the supplied <code>scope</code> is <code>null</code> 
 	 */
 	public static int getScope(String scope) {
 		Assert.notNull(scope, "Scope to search for cannot be null");
@@ -81,24 +84,53 @@ public abstract class TagUtils {
 	/**
 	 * Determine whether the supplied {@link Tag} has any ancestor tag
 	 * of the supplied type.
+	 * @param tag the tag whose ancestors are to be checked
+	 * @param ancestorTagClass the ancestor {@link Class} being searched for
 	 * @return <code>true</code> if the supplied {@link Tag} has any ancestor tag
 	 * of the supplied type
+	 * @throws IllegalArgumentException if either of the supplied arguments is <code>null</code>;
+	 * or if the supplied <code>ancestorTagClass</code> is not type-assignable to
+	 * the {@link Tag} class 
 	 */
-	public static boolean hasAncestorOfType(Tag tag, Class parentTagClass) {
+	public static boolean hasAncestorOfType(Tag tag, Class ancestorTagClass) {
 		Assert.notNull(tag, "Tag cannot be null");
-		Assert.notNull(parentTagClass, "Parent tag class cannot be null");
-		if (!Tag.class.isAssignableFrom(parentTagClass)) {
+		Assert.notNull(ancestorTagClass, "Ancestor tag class cannot be null");
+		if (!Tag.class.isAssignableFrom(ancestorTagClass)) {
 			throw new IllegalArgumentException(
-					"Class '" + parentTagClass.getName() + "' is not a valid Tag type");
+					"Class '" + ancestorTagClass.getName() + "' is not a valid Tag type");
 		}
 		Tag ancestor = tag.getParent();
 		while (ancestor != null) {
-			if (parentTagClass.isAssignableFrom(ancestor.getClass())) {
+			if (ancestorTagClass.isAssignableFrom(ancestor.getClass())) {
 				return true;
 			}
 			ancestor = ancestor.getParent();
 		}
 		return false;
+	}
+
+	/**
+	 * Determine whether the supplied {@link Tag} has any ancestor tag
+	 * of the supplied type, throwing an {@link IllegalStateException}
+	 * if not.
+	 * @param tag the tag whose ancestors are to be checked
+	 * @param ancestorTagClass the ancestor {@link Class} being searched for
+	 * @param tagName the name of the <code>tag</code>; for example '<code>option</code>'
+	 * @param ancestorTagName the name of the ancestor <code>tag</code>; for example '<code>select</code>'
+	 * @throws IllegalStateException if the supplied <code>tag</code> does not
+	 * have a tag of the supplied <code>parentTagClass</code> as an ancestor
+	 * @throws IllegalArgumentException if any of the supplied arguments is <code>null</code>,
+	 * or in the case of the {@link String}-typed arguments, is composed wholly
+	 * of whitespace; or if the supplied <code>ancestorTagClass</code> is not
+	 * type-assignable to the {@link Tag} class 
+	 * @see #hasAncestorOfType(javax.servlet.jsp.tagext.Tag, Class)
+	 */
+	public static void assertHasAncestorOfType(Tag tag, Class ancestorTagClass, String tagName, String ancestorTagName) {
+		Assert.hasText(tagName, "The 'tagName' argument cannot be null or composed wholly of whitespace");
+		Assert.hasText(ancestorTagName, "The 'ancestorTagName' argument cannot be null or composed wholly of whitespace");
+		if (!TagUtils.hasAncestorOfType(tag, ancestorTagClass)) {
+			throw new IllegalStateException("The '" + tagName + "' tag can only be used inside a valid '" + ancestorTagName + "' tag.");
+		}
 	}
 
 }
