@@ -31,6 +31,8 @@ public class EhCacheSupportTests extends TestCase {
 
 	public void testLoadingBlankCacheManager() throws Exception {
 		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
+		assertEquals(CacheManager.class, cacheManagerFb.getObjectType());
+		assertTrue("Singleton property", cacheManagerFb.isSingleton());
 		cacheManagerFb.afterPropertiesSet();
 		try {
 			CacheManager cm = (CacheManager) cacheManagerFb.getObject();
@@ -72,6 +74,8 @@ public class EhCacheSupportTests extends TestCase {
 		EhCacheManagerFactoryBean cacheManagerFb = null;
 		try {
 			EhCacheFactoryBean cacheFb = new EhCacheFactoryBean();
+			assertEquals(Cache.class, cacheFb.getObjectType());
+			assertTrue("Singleton property", cacheFb.isSingleton());
 			if (useCacheManagerFb) {
 				cacheManagerFb = new EhCacheManagerFactoryBean();
 				cacheManagerFb.setConfigLocation(new ClassPathResource("testEhcache.xml", getClass()));
@@ -122,6 +126,7 @@ public class EhCacheSupportTests extends TestCase {
 			cacheFb.setDiskExpiryThreadIntervalSeconds(10);
 			cacheFb.afterPropertiesSet();
 			cache = (Cache) cacheFb.getObject();
+
 			assertEquals("undefinedCache2", cache.getName());
 			assertTrue("overridden maxElements is correct", cache.getMaxElementsInMemory() == 5);
 			assertFalse("overridden overflowToDisk is correct", cache.isOverflowToDisk());
@@ -139,24 +144,6 @@ public class EhCacheSupportTests extends TestCase {
 				CacheManager.getInstance().shutdown();
 			}
 		}
-	}
-
-	public void testFactoryBeans() throws Exception {
-		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
-		assertEquals(CacheManager.class, cacheManagerFb.getObjectType());
-		cacheManagerFb.afterPropertiesSet();
-
-		assertEquals(CacheManager.getInstance().getClass(), cacheManagerFb.getObjectType());
-		assertTrue("Singleton property", cacheManagerFb.isSingleton());
-		cacheManagerFb.destroy();
-
-		EhCacheFactoryBean cacheFb = new EhCacheFactoryBean();
-		cacheFb.setCacheName("myCache");
-		assertEquals(Cache.class, cacheFb.getObjectType());
-		cacheFb.afterPropertiesSet();
-
-		assertEquals(CacheManager.getInstance().getCache("myCache").getClass(), cacheFb.getObjectType());
-		assertTrue("Singleton property", cacheFb.isSingleton());
 	}
 
 }

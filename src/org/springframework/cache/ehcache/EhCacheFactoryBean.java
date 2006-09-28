@@ -21,15 +21,17 @@ import java.io.IOException;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheException;
 import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
 
 /**
- * FactoryBean that creates a named EHCache Cache object, representing a cache region.
+ * FactoryBean that creates a named EHCache Cache instance, representing a cache region.
  *
  * <p>If the specified named cache is not configured in the cache configuration descriptor,
  * this FactoryBean will construct an instance of a Cache with the provided name and the
@@ -38,6 +40,9 @@ import org.springframework.beans.factory.InitializingBean;
  *
  * <p>Note: If the named Cache instance is found, the properties will be ignored and the
  * Cache instance will be retrieved from the CacheManager.
+ *
+ * <p>Note: As of Spring 2.0, this FactoryBean uses EHCache 1.2's extended Cache constructor.
+ * It is not compatible with EHCache 1.1 anymore; please upgrade to EHCache 1.2.3 or higher.
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
@@ -56,7 +61,11 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 
 	private int maxElementsInMemory = 10000;
 
+	private MemoryStoreEvictionPolicy memoryStoreEvictionPolicy = MemoryStoreEvictionPolicy.LRU;
+
 	private boolean overflowToDisk = true;
+
+	private String diskStorePath;
 
 	private boolean eternal = false;
 
@@ -105,6 +114,17 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 	}
 
 	/**
+	 * Set the memory style eviction policy for this cache.
+	 * Supported values are "LRU", "LFU" and "FIFO", according to the
+	 * constants defined in EHCache's MemoryStoreEvictionPolicy class.
+	 * Default is "LRU".
+	 */
+	public void setMemoryStoreEvictionPolicy(MemoryStoreEvictionPolicy memoryStoreEvictionPolicy) {
+		Assert.notNull(memoryStoreEvictionPolicy, "memoryStoreEvictionPolicy must not be null");
+		this.memoryStoreEvictionPolicy = memoryStoreEvictionPolicy;
+	}
+
+	/**
 	 * Set whether elements can overflow to disk when the in-memory cache
 	 * has reached the maximum size limit. Default is "true".
 	 */
@@ -113,8 +133,16 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 	}
 
 	/**
-	 * Set whether elements are eternal. If true, timeouts are ignored
-	 * and the element is never expired. Default is "false".
+	 * Set the location of temporary files for the disk store of this cache.
+	 * Default is the CacheManager's disk store path.
+	 */
+	public void setDiskStorePath(String diskStorePath) {
+		this.diskStorePath = diskStorePath;
+	}
+
+	/**
+	 * Set whether elements are considered as eternal. If "true", timeouts
+	 * are ignored and the element is never expired. Default is "false".
 	 */
 	public void setEternal(boolean eternal) {
 		this.eternal = eternal;
@@ -130,9 +158,9 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 	}
 
 	/**
-	 * Set the time in seconds to idle for an element before it expires
-	 * i.e. the maximum amount of time between accesses before an element expires.
-	 * It is only used if the element is not eternal. Default is 120 seconds.
+	 * Set the time in seconds to idle for an element before it expires, that is,
+	 * the maximum amount of time between accesses before an element expires.
+	 * This is only used if the element is not eternal. Default is 120 seconds.
 	 */
 	public void setTimeToIdle(int timeToIdle) {
 		this.timeToIdle = timeToIdle;
@@ -140,7 +168,7 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 
 	/**
 	 * Set whether the disk store persists between restarts of the Virtual Machine.
-	 * The default is false.
+	 * The default is "false".
 	 */
 	public void setDiskPersistent(boolean diskPersistent) {
 		this.diskPersistent = diskPersistent;
@@ -186,9 +214,9 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 				logger.debug("Creating new EHCache cache region '" + this.cacheName + "'");
 			}
 			this.cache = new Cache(
-					this.cacheName, this.maxElementsInMemory, this.overflowToDisk,
-					this.eternal, this.timeToLive, this.timeToIdle,
-					this.diskPersistent, this.diskExpiryThreadIntervalSeconds);
+					this.cacheName, this.maxElementsInMemory, this.memoryStoreEvictionPolicy,
+					this.overflowToDisk, this.diskStorePath, this.eternal, this.timeToLive, this.timeToIdle,
+					this.diskPersistent, this.diskExpiryThreadIntervalSeconds, null);
 			this.cacheManager.addCache(this.cache);
 		}
 	}
