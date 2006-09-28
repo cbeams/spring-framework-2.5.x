@@ -208,9 +208,6 @@ public class SingleConnectionFactory
 			if (this.connection == null) {
 				initConnection();
 			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Established shared JMS Connection: " + this.target);
-			}
 			return this.connection;
 		}
 	}
