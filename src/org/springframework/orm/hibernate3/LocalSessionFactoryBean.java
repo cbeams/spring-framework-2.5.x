@@ -213,13 +213,13 @@ public class LocalSessionFactoryBean
 
 	private NamingStrategy namingStrategy;
 
-	private Properties entityCacheStrategies;
-
-	private Properties collectionCacheStrategies;
-
 	private TypeDefinitionBean[] typeDefinitions;
 
 	private FilterDefinition[] filterDefinitions;
+
+	private Properties entityCacheStrategies;
+
+	private Properties collectionCacheStrategies;
 
 	private Map eventListeners;
 
@@ -537,6 +537,33 @@ public class LocalSessionFactoryBean
 	}
 
 	/**
+	 * Specify the Hibernate type definitions to register with the SessionFactory,
+	 * as Spring TypeDefinitionBean instances. This is an alternative to specifying
+	 * <&lt;typedef&gt; elements in Hibernate mapping files.
+	 * <p>Unfortunately, Hibernate itself does not define a complete object that
+	 * represents a type definition, hence the need for Spring's TypeDefinitionBean.
+	 * @see TypeDefinitionBean
+	 * @see org.hibernate.cfg.Mappings#addTypeDef(String, String, java.util.Properties)
+	 */
+	public void setTypeDefinitions(TypeDefinitionBean[] typeDefinitions) {
+		this.typeDefinitions = typeDefinitions;
+	}
+
+	/**
+	 * Specify the Hibernate FilterDefinitions to register with the SessionFactory.
+	 * This is an alternative to specifying <&lt;filter-def&gt; elements in
+	 * Hibernate mapping files.
+	 * <p>Typically, the passed-in FilterDefinition objects will have been defined
+	 * as Spring FilterDefinitionFactoryBeans, probably as inner beans within the
+	 * LocalSessionFactoryBean definition.
+	 * @see FilterDefinitionFactoryBean
+	 * @see org.hibernate.cfg.Configuration#addFilterDefinition
+	 */
+	public void setFilterDefinitions(FilterDefinition[] filterDefinitions) {
+		this.filterDefinitions = filterDefinitions;
+	}
+
+	/**
 	 * Specify the cache strategies for entities (persistent classes or named entities).
 	 * This configuration setting corresponds to the &lt;class-cache&gt; entry
 	 * in the "hibernate.cfg.xml" configuration format.
@@ -578,33 +605,6 @@ public class LocalSessionFactoryBean
 	 */
 	public void setCollectionCacheStrategies(Properties collectionCacheStrategies) {
 		this.collectionCacheStrategies = collectionCacheStrategies;
-	}
-
-	/**
-	 * Specify the Hibernate type definitions to register with the SessionFactory,
-	 * as Spring TypeDefinitionBean instances. This is an alternative to specifying
-	 * <&lt;typedef&gt; elements in Hibernate mapping files.
-	 * <p>Unfortunately, Hibernate itself does not define a complete object that
-	 * represents a type definition, hence the need for Spring's TypeDefinitionBean.
-	 * @see TypeDefinitionBean
-	 * @see org.hibernate.cfg.Mappings#addTypeDef(String, String, java.util.Properties)
-	 */
-	public void setTypeDefinitions(TypeDefinitionBean[] typeDefinitions) {
-		this.typeDefinitions = typeDefinitions;
-	}
-
-	/**
-	 * Specify the Hibernate FilterDefinitions to register with the SessionFactory.
-	 * This is an alternative to specifying <&lt;filter-def&gt; elements in
-	 * Hibernate mapping files.
-	 * <p>Typically, the passed-in FilterDefinition objects will have been defined
-	 * as Spring FilterDefinitionFactoryBeans, probably as inner beans within the
-	 * LocalSessionFactoryBean definition.
-	 * @see FilterDefinitionFactoryBean
-	 * @see org.hibernate.cfg.Configuration#addFilterDefinition
-	 */
-	public void setFilterDefinitions(FilterDefinition[] filterDefinitions) {
-		this.filterDefinitions = filterDefinitions;
 	}
 
 	/**
@@ -694,6 +694,13 @@ public class LocalSessionFactoryBean
 				for (int i = 0; i < this.typeDefinitions.length; i++) {
 					TypeDefinitionBean typeDef = this.typeDefinitions[i];
 					mappings.addTypeDef(typeDef.getTypeName(), typeDef.getTypeClass(), typeDef.getParameters());
+				}
+			}
+
+			if (this.filterDefinitions != null) {
+				// Register specified Hibernate FilterDefinitions.
+				for (int i = 0; i < this.filterDefinitions.length; i++) {
+					config.addFilterDefinition(this.filterDefinitions[i]);
 				}
 			}
 
@@ -787,13 +794,6 @@ public class LocalSessionFactoryBean
 					else if (strategyAndRegion.length > 0) {
 						config.setCollectionCacheConcurrencyStrategy(collRole, strategyAndRegion[0]);
 					}
-				}
-			}
-
-			if (this.filterDefinitions != null) {
-				// Register specified Hibernate FilterDefinitions.
-				for (int i = 0; i < this.filterDefinitions.length; i++) {
-					config.addFilterDefinition(this.filterDefinitions[i]);
 				}
 			}
 
