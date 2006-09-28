@@ -99,7 +99,13 @@ public abstract class ClassUtils {
 	 * @see Thread#getContextClassLoader()
 	 */
 	public static ClassLoader getDefaultClassLoader() {
-		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		ClassLoader cl = null;
+		try {
+			cl = Thread.currentThread().getContextClassLoader();
+		}
+		catch (Throwable ex) {
+			logger.debug("Cannot access thread context ClassLoader - falling back to system class loader", ex);
+		}
 		if (cl == null) {
 			// No thread context class loader -> use class loader of this class.
 			cl = ClassUtils.class.getClassLoader();
