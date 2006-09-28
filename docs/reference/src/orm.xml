@@ -2534,7 +2534,7 @@
       one can also code Spring-based DAOs against the JPA, doing one's own
       explicit <literal>EntityManager</literal> handling. As elaborated in the
       corresponding Hibernate section, the main advantage of this approach is
-      that that your data access code is able to throw checked exceptions.
+      that your data access code is able to throw checked exceptions.
       <classname>JpaDaoSupport</classname> offers a variety of support methods
       for this scenario, for retrieving and releasing a transaction
       <interfacename>EntityManager</interfacename>, as well as for converting
