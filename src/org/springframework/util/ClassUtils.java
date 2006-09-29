@@ -154,6 +154,8 @@ public abstract class ClassUtils {
 	 * @see Class#forName(String, boolean, ClassLoader)
 	 */
 	public static Class forName(String name, ClassLoader classLoader) throws ClassNotFoundException {
+		Assert.notNull(name, "Name must not be null");
+		Assert.notNull(classLoader, "ClassLoader must not be null");
 		Class clazz = resolvePrimitiveClassName(name);
 		if (clazz != null) {
 			return clazz;
