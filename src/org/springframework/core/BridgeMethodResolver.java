@@ -28,6 +28,7 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.ClassUtils;
 
 /**
  * Helper for resolving synthetic {@link Method#isBridge bridge Methods} to the
@@ -136,18 +137,18 @@ public abstract class BridgeMethodResolver {
 		Class superclass = bridgeMethod.getDeclaringClass().getSuperclass();
 		while (!Object.class.equals(superclass)) {
 			Method method = searchForMatch(superclass, bridgeMethod);
-			if (method != null) {
+			if (method != null && !method.isBridge()) {
 				return method;
 			}
 			superclass = superclass.getSuperclass();
 		}
 
 		// Search interfaces.
-		Class[] interfaces = bridgeMethod.getDeclaringClass().getInterfaces();
+		Class[] interfaces = ClassUtils.getAllInterfacesForClass(bridgeMethod.getDeclaringClass());
 		for (int i = 0; i < interfaces.length; i++) {
 			Class anInterface = interfaces[i];
 			Method method = searchForMatch(anInterface, bridgeMethod);
-			if (method != null) {
+			if (method != null  && !method.isBridge()) {
 				return method;
 			}
 		}

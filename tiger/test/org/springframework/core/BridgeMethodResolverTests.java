@@ -187,6 +187,15 @@ public class BridgeMethodResolverTests extends TestCase {
 		assertEquals("foo(AbstractBounded) not resolved.", abstractBoundedFoo, bridgedMethod);
 	}
 
+	public void testSPR2648() throws Exception {
+		Method bridgeMethod = GenericSqlMapIntegerDao.class.getDeclaredMethod("saveOrUpdate", Object.class);
+		assertTrue(bridgeMethod.isBridge());
+
+		Method bridgedMethod = GenericSqlMapIntegerDao.class.getDeclaredMethod("saveOrUpdate", Integer.class);
+		assertFalse(bridgedMethod.isBridge());
+
+		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+	}
 	private Method findMethodWithReturnType(String name, Class returnType, Class targetType) {
 		Method[] methods = targetType.getMethods();
 		for (Method m : methods) {
@@ -819,5 +828,25 @@ public class BridgeMethodResolverTests extends TestCase {
 
 	}
 
+	public interface GenericDao<T> {
+		public void saveOrUpdate(T t);
+	}
+
+	public interface ConvenienceGenericDao<T> extends GenericDao<T> {
+
+	}
+
+	public class GenericSqlMapDao<T extends Serializable> implements ConvenienceGenericDao<T>{
+
+		public void saveOrUpdate(T t) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	public class GenericSqlMapIntegerDao<T extends Integer> extends GenericSqlMapDao<T> {
+	  public void saveOrUpdate(T t) {
+
+		}
+  }
 
 }
