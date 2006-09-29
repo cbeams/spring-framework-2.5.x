@@ -22,7 +22,9 @@ import java.util.Map;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.Queue;
 import javax.jms.Session;
+import javax.jms.Topic;
 import javax.naming.NamingException;
 
 import org.springframework.jndi.JndiLocatorSupport;
@@ -106,9 +108,13 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Cachi
 
 		Assert.notNull(destinationName, "Destination name must not be null");
 		Destination dest = (Destination) this.destinationCache.get(destinationName);
-		if (dest == null) {
+		if (dest != null) {
+			validateDestination(dest, destinationName, pubSubDomain);
+		}
+		else {
 			try {
 				dest = (Destination) lookup(destinationName, Destination.class);
+				validateDestination(dest, destinationName, pubSubDomain);
 			}
 			catch (NamingException ex) {
 				if (logger.isDebugEnabled()) {
@@ -128,6 +134,26 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Cachi
 		}
 		return dest;
 	}
+
+	/**
+	 * Validate the given Destination object, checking whether it matches
+	 * the expected type.
+	 * @param destination the Destination object to validate
+	 * @param destinationName the name of the destination
+	 * @param pubSubDomain <code>true</code> if a Topic is expected,
+	 * <code>false</code> in case of a Queue
+	 */
+	protected void validateDestination(Destination destination, String destinationName, boolean pubSubDomain) {
+		Class targetClass = Queue.class;
+		if (pubSubDomain) {
+			targetClass = Topic.class;
+		}
+		if (!targetClass.isInstance(destination)) {
+			throw new DestinationResolutionException(
+					"Destination [" + destinationName + "] is not of expected type [" + targetClass.getName() + "]");
+		}
+	}
+
 
 	public void removeFromCache(String destinationName) {
 		this.destinationCache.remove(destinationName);
