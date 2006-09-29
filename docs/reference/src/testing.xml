@@ -3,8 +3,7 @@
 	<title>Testing</title>
 	<section id="testing-introduction">
 		<title>Introduction</title>
-		<para>One certainly hopes that it should hardly need saying, but in the interests
-		of completeness, the Spring team (amongst many, many others) considers testing to
+		<para>The Spring team (amongst many, many others) considers testing to
 		be an absolutely integral part of enterprise software development.</para>
 		<para>This chapter is thus concerned with testing. A thorough treatment of testing
 		in the enterprise software space is beyond the scope of this chapter (and indeed 
@@ -24,15 +23,14 @@
 		your code in isolation. If you follow the architecture recommendations around
 		Spring you will find that the resulting clean layering and componentization of
 		your codebase will just naturally faciliate <emphasis>easier</emphasis> unit
-		testing. For example, you will be able to test service layer bjects by stubbing
+		testing. For example, you will be able to test service layer objects by stubbing
 		or mocking DAO interfaces, without any need to access persistent data while
 		running unit tests.</para>
 		<para>True unit tests typically will run extremely quickly, as there is no runtime
 	    infrastructure to set up, whether application server, database, ORM tool
-	    etc. Thus emphasizing true unit tests will boost your productivity.</para>
-		<para>The upshot of this is that you don't need this section of the testing chapter
-		to help you write effective <emphasis>unit</emphasis> tests for your Spring-based
-		applications.</para>
+	    etc. Thus emphasizing true unit tests will boost your productivity. The upshot of
+	    this is that you don't need this section of the testing chapter to help you write
+	    effective <emphasis>unit</emphasis> tests for your IoC-based applications.</para>
 	</section>
 	<section id="integration-testing">
 		<title>Integration testing</title>
@@ -42,21 +40,20 @@
 		</para>
 		<itemizedlist>
 			<listitem>
-				<para>The correct wiring of your Spring contexts.</para>
+				<para>The correct wiring of your Spring IoC container contexts.</para>
 			</listitem>
 			<listitem>
 				<para>Data access using JDBC or ORM tool. This would include thiings such as
 				the correctness of SQL statements / or Hibernate XML mapping file configuration.</para>
 			</listitem>
 		</itemizedlist>
-		<para>Spring provides first class support for integration testing. This first class
-		support is captured in a number of classes in the <literal>spring-mock.jar</literal>
-		file that ships with the Spring distribution. The classes in this library can be
+		<para>The Spring Framework provides first class support for integration testing.
+		This support is captured in a number of classes in the <literal>spring-mock.jar</literal>
+		file that ships with the Spring Framework distribution. The classes in this library can be
 		thought of as a significantly superior alternative to in-container testing using
 		tools such as Cactus.</para>
 		<note>
-			<para>Please note that all of the test classes described in the rest of this chapter
-			are JUnit-specific.</para>
+			<para>The test classes described in the rest of this chapter are JUnit-specific.</para>
 		</note>
 		<para>The <literal>org.springframework.test</literal> package provides valuable
 		superclasses for integration testing using a Spring container, while at the
@@ -206,8 +203,6 @@
 				One common issue in tests that access a real database is their
 				effect on the state of the persistence store. Even when you're using
 				a development database, changes to the state may affect future tests.
-			</para>
-			<para>
 				Also, many operations - such as inserting to or modifying
 				persistent data - can't be done (or verified) outside a transaction.
 			</para>
@@ -239,20 +234,20 @@
 			<para>
 				If you want a transaction to commit - unusual, but useful if you
 				want a particular test to populate the database, for example - you can
-				call the <literal>setComplete()</literal> method inherited from
+				call the <methodname>setComplete()</methodname> method inherited from
 				<classname>AbstractTransactionalSpringContextTests</classname>. This will
 				cause the transaction to commit instead of roll back.
 			</para>
 			<para>
 				There is also convenient ability to end a transaction before the
-				test case ends, through calling the <literal>endTransaction()</literal> method.
+				test case ends, through calling the <methodname>endTransaction()</methodname> method.
 				This will roll back the transaction by default, and commit it only if
-				<literal>setComplete()</literal> had previously been called. This
+				<methodname>setComplete()</methodname> had previously been called. This
 				functionality is useful if you want to test the behavior of
 				'disconnected' data objects, such as Hibernate-mapped objects
 				that will be used in a web or remoting tier outside a transaction.
 				Often, lazy loading errors are discovered only through UI testing; if
-				you call <literal>endTransaction()</literal> you can ensure correct
+				you call <methodname>endTransaction()</methodname> you can ensure correct
 				operation of the UI through your JUnit test suite.
 			</para>
 			<remark>
@@ -332,11 +327,11 @@
 				<listitem>
 					<para>The <literal>clinic</literal> instance variable - the application object
 					being tested - is set by Dependency Injection through the
-					<literal>setClinic()</literal> method.</para>
+					<methodname>setClinic(..)</methodname> method.</para>
 				</listitem>
 				<listitem>
 					<para>
-						The <literal>testGetVets()</literal> method illustrates how the
+						The <methodname>testGetVets()</methodname> method illustrates how the
 						inherited <literal>JdbcTemplate</literal> variable can be used to verify
 						correct behavior of the application code being tested. This allows
 						for stronger tests, and lessens dependency on the exact test data.
