@@ -18,7 +18,6 @@ package org.springframework.validation;
 
 import java.io.Serializable;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.ConfigurablePropertyAccessor;
@@ -65,19 +64,8 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 	}
 
 	/**
-	 * Returns the canonical JavaBeans property name,
-	 * as understood by the underlying {@link BeanWrapper}.
-	 * @param field the field name
-	 * @return the canonical JavaBeans property name
-	 */
-	protected String canonicalFieldName(String field) {
-		return BeanUtils.canonicalPropertyName(field);
-	}
-
-	/**
-	 * Returns the {@link ConfigurablePropertyAccessor property accessor}
-	 * that this instance uses.
-	 * <p>Creates a new one if none existed before.
+	 * Returns the {@link BeanWrapper} that this instance uses.
+	 * Creates a new one if none existed before.
 	 * @see #createBeanWrapper()
 	 */
 	public final ConfigurablePropertyAccessor getPropertyAccessor() {

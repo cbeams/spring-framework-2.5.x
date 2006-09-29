@@ -348,45 +348,6 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Determine the canonical name for the given property path.
-	 * Removes surrounding quotes from map keys:<br>
-	 * <code>map['key']</code> -> <code>map[key]</code><br>
-	 * <code>map["key"]</code> -> <code>map[key]</code>
-	 * @param propertyName the bean property path
-	 * @return the canonical representation of the property path
-	 */
-	public static String canonicalPropertyName(String propertyName) {
-		if (propertyName == null) {
-			return "";
-		}
-
-		// The following code does not use JDK 1.4's StringBuffer.indexOf(String)
-		// method to retain JDK 1.3 compatibility. The slight loss in performance
-		// is not really relevant, as this code will typically just run on startup.
-
-		StringBuffer buf = new StringBuffer(propertyName);
-		int searchIndex = 0;
-		while (searchIndex != -1) {
-			int keyStart = buf.toString().indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX, searchIndex);
-			searchIndex = -1;
-			if (keyStart != -1) {
-				int keyEnd = buf.toString().indexOf(
-						PropertyAccessor.PROPERTY_KEY_SUFFIX, keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length());
-				if (keyEnd != -1) {
-					String key = buf.substring(keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length(), keyEnd);
-					if ((key.startsWith("'") && key.endsWith("'")) || (key.startsWith("\"") && key.endsWith("\""))) {
-						buf.delete(keyStart + 1, keyStart + 2);
-						buf.delete(keyEnd - 2, keyEnd - 1);
-						keyEnd = keyEnd - 2;
-					}
-					searchIndex = keyEnd + PropertyAccessor.PROPERTY_KEY_SUFFIX.length();
-				}
-			}
-		}
-		return buf.toString();
-	}
-
-	/**
 	 * Check if the given class represents a "simple" property:
 	 * a primitive, a String, a Class, or a corresponding array.
 	 * <p>Used to determine properties to check for a "simple" dependency-check.
@@ -533,7 +494,7 @@ public abstract class BeanUtils {
 						}
 						writeMethod.invoke(target, new Object[] {value});
 					}
-					catch (Exception ex) {
+					catch (Throwable ex) {
 						throw new FatalBeanException("Could not copy properties from source to target", ex);
 					}
 				}

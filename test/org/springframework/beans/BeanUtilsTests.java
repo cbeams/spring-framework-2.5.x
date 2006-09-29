@@ -75,18 +75,6 @@ public class BeanUtilsTests extends TestCase {
 		}
 	}
 
-	public void testCanonicalPropertyName() {
-		assertEquals("map", BeanUtils.canonicalPropertyName("map"));
-		assertEquals("map[key1]", BeanUtils.canonicalPropertyName("map[key1]"));
-		assertEquals("map[key1]", BeanUtils.canonicalPropertyName("map['key1']"));
-		assertEquals("map[key1]", BeanUtils.canonicalPropertyName("map[\"key1\"]"));
-		assertEquals("map[key1][key2]", BeanUtils.canonicalPropertyName("map[key1][key2]"));
-		assertEquals("map[key1][key2]", BeanUtils.canonicalPropertyName("map['key1'][\"key2\"]"));
-		assertEquals("map[key1].name", BeanUtils.canonicalPropertyName("map[key1].name"));
-		assertEquals("map[key1].name", BeanUtils.canonicalPropertyName("map['key1'].name"));
-		assertEquals("map[key1].name", BeanUtils.canonicalPropertyName("map[\"key1\"].name"));
-	}
-
 	public void testCopyProperties() throws Exception {
 		TestBean tb = new TestBean();
 		tb.setName("rod");

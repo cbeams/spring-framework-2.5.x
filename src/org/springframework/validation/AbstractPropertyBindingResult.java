@@ -19,6 +19,7 @@ package org.springframework.validation;
 import java.beans.PropertyEditor;
 
 import org.springframework.beans.ConfigurablePropertyAccessor;
+import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyEditorRegistry;
 
 /**
@@ -50,6 +51,14 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 */
 	public PropertyEditorRegistry getPropertyEditorRegistry() {
 		return getPropertyAccessor();
+	}
+
+	/**
+	 * Returns the canonical property name.
+	 * @see org.springframework.beans.PropertyAccessorUtils#canonicalPropertyName
+	 */
+	protected String canonicalFieldName(String field) {
+		return PropertyAccessorUtils.canonicalPropertyName(field);
 	}
 
 	/**
