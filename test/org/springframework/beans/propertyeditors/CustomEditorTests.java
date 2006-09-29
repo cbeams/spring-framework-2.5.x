@@ -25,10 +25,10 @@ import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
-import java.util.HashMap;
 
 import junit.framework.TestCase;
 
@@ -231,15 +231,8 @@ public class CustomEditorTests extends TestCase {
 		bw.setPropertyValue("bool2", "0");
 		assertTrue("Correct bool2 value", !tb.getBool2().booleanValue());
 
-		try {
-			bw.setPropertyValue("bool2", "");
-			fail("Should have throw BeansException");
-		}
-		catch (BeansException ex) {
-			// expected
-			assertTrue("Correct bool2 value", bw.getPropertyValue("bool2") != null);
-			assertTrue("Correct bool2 value", tb.getBool2() != null);
-		}
+		bw.setPropertyValue("bool2", "");
+		assertNull("Correct bool2 value", tb.getBool2());
 	}
 
 	public void testCustomBooleanEditorWithAllowEmpty() {

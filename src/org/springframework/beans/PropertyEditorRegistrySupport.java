@@ -36,6 +36,7 @@ import java.util.SortedSet;
 import org.springframework.beans.propertyeditors.ByteArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.CharArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.CharacterEditor;
+import org.springframework.beans.propertyeditors.ClassArrayEditor;
 import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.beans.propertyeditors.CustomBooleanEditor;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
@@ -45,7 +46,6 @@ import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.LocaleEditor;
 import org.springframework.beans.propertyeditors.PropertiesEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
-import org.springframework.beans.propertyeditors.ClassArrayEditor;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceArrayPropertyEditor;
@@ -126,48 +126,30 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(byte[].class, new ByteArrayPropertyEditor());
 		this.defaultEditors.put(char[].class, new CharArrayPropertyEditor());
 
-		// Default instances of character and boolean editors.
-		// Can be overridden by registering custom instances of those as custom editors.
-		PropertyEditor characterEditor = new CharacterEditor(false);
-		PropertyEditor booleanEditor = new CustomBooleanEditor(false);
-
 		// The JDK does not contain a default editor for char!
-		this.defaultEditors.put(char.class, characterEditor);
-		this.defaultEditors.put(Character.class, characterEditor);
+		this.defaultEditors.put(char.class, new CharacterEditor(false));
+		this.defaultEditors.put(Character.class, new CharacterEditor(true));
 
 		// Spring's CustomBooleanEditor accepts more flag values than the JDK's default editor.
-		this.defaultEditors.put(boolean.class, booleanEditor);
-		this.defaultEditors.put(Boolean.class, booleanEditor);
+		this.defaultEditors.put(boolean.class, new CustomBooleanEditor(false));
+		this.defaultEditors.put(Boolean.class, new CustomBooleanEditor(true));
 
 		// The JDK does not contain default editors for number wrapper types!
 		// Override JDK primitive number editors with our own CustomNumberEditor.
-		PropertyEditor byteEditor = new CustomNumberEditor(Byte.class, false);
-		PropertyEditor shortEditor = new CustomNumberEditor(Short.class, false);
-		PropertyEditor integerEditor = new CustomNumberEditor(Integer.class, false);
-		PropertyEditor longEditor = new CustomNumberEditor(Long.class, false);
-		PropertyEditor floatEditor = new CustomNumberEditor(Float.class, false);
-		PropertyEditor doubleEditor = new CustomNumberEditor(Double.class, false);
-
-		this.defaultEditors.put(byte.class, byteEditor);
-		this.defaultEditors.put(Byte.class, byteEditor);
-
-		this.defaultEditors.put(short.class, shortEditor);
-		this.defaultEditors.put(Short.class, shortEditor);
-
-		this.defaultEditors.put(int.class, integerEditor);
-		this.defaultEditors.put(Integer.class, integerEditor);
-
-		this.defaultEditors.put(long.class, longEditor);
-		this.defaultEditors.put(Long.class, longEditor);
-
-		this.defaultEditors.put(float.class, floatEditor);
-		this.defaultEditors.put(Float.class, floatEditor);
-
-		this.defaultEditors.put(double.class, doubleEditor);
-		this.defaultEditors.put(Double.class, doubleEditor);
-
-		this.defaultEditors.put(BigDecimal.class, new CustomNumberEditor(BigDecimal.class, false));
-		this.defaultEditors.put(BigInteger.class, new CustomNumberEditor(BigInteger.class, false));
+		this.defaultEditors.put(byte.class, new CustomNumberEditor(Byte.class, false));
+		this.defaultEditors.put(Byte.class, new CustomNumberEditor(Byte.class, true));
+		this.defaultEditors.put(short.class, new CustomNumberEditor(Short.class, false));
+		this.defaultEditors.put(Short.class, new CustomNumberEditor(Short.class, true));
+		this.defaultEditors.put(int.class, new CustomNumberEditor(Integer.class, false));
+		this.defaultEditors.put(Integer.class, new CustomNumberEditor(Integer.class, true));
+		this.defaultEditors.put(long.class, new CustomNumberEditor(Long.class, false));
+		this.defaultEditors.put(Long.class, new CustomNumberEditor(Long.class, true));
+		this.defaultEditors.put(float.class, new CustomNumberEditor(Float.class, false));
+		this.defaultEditors.put(Float.class, new CustomNumberEditor(Float.class, true));
+		this.defaultEditors.put(double.class, new CustomNumberEditor(Double.class, false));
+		this.defaultEditors.put(Double.class, new CustomNumberEditor(Double.class, true));
+		this.defaultEditors.put(BigDecimal.class, new CustomNumberEditor(BigDecimal.class, true));
+		this.defaultEditors.put(BigInteger.class, new CustomNumberEditor(BigInteger.class, true));
 	}
 
 	/**
