@@ -17,6 +17,7 @@
 package org.springframework.validation;
 
 import java.beans.PropertyEditor;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -25,11 +26,13 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessException;
+import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyBatchUpdateException;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
 
@@ -268,7 +271,7 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @see org.springframework.web.bind.ServletRequestDataBinder
 	 */
 	public void setAllowedFields(String[] allowedFields) {
-		this.allowedFields = allowedFields;
+		this.allowedFields = PropertyAccessorUtils.canonicalPropertyNames(allowedFields);
 	}
 
 	/**
@@ -292,7 +295,7 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @see org.springframework.web.bind.ServletRequestDataBinder
 	 */
 	public void setDisallowedFields(String[] disallowedFields) {
-		this.disallowedFields = disallowedFields;
+		this.disallowedFields = PropertyAccessorUtils.canonicalPropertyNames(disallowedFields);
 	}
 
 	/**
@@ -314,7 +317,7 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @see DefaultBindingErrorProcessor#MISSING_FIELD_ERROR_CODE
 	 */
 	public void setRequiredFields(String[] requiredFields) {
-		this.requiredFields = requiredFields;
+		this.requiredFields = PropertyAccessorUtils.canonicalPropertyNames(requiredFields);
 		if (logger.isDebugEnabled()) {
 			logger.debug("DataBinder requires binding of required fields [" +
 					StringUtils.arrayToCommaDelimitedString(requiredFields) + "]");
@@ -422,14 +425,15 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @see #isAllowed(String)
 	 */
 	protected void checkAllowedFields(MutablePropertyValues mpvs) {
-		PropertyValue[] pvArray = mpvs.getPropertyValues();
-		for (int i = 0; i < pvArray.length; i++) {
-			String field = pvArray[i].getName();
+		PropertyValue[] pvs = mpvs.getPropertyValues();
+		for (int i = 0; i < pvs.length; i++) {
+			PropertyValue pv = pvs[i];
+			String field = PropertyAccessorUtils.canonicalPropertyName(pv.getName());
 			if (!isAllowed(field)) {
-				mpvs.removePropertyValue(pvArray[i]);
-				getBindingResult().recordSuppressedField(pvArray[i].getName());
+				mpvs.removePropertyValue(pv);
+				getBindingResult().recordSuppressedField(field);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Field [" + pvArray[i] + "] has been removed from PropertyValues " +
+					logger.debug("Field [" + field + "] has been removed from PropertyValues " +
 							"and will not be bound, because it has not been found in the list of allowed fields");
 				}
 			}
@@ -451,8 +455,10 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
 	 */
 	protected boolean isAllowed(String field) {
-		return ((getAllowedFields() == null || PatternMatchUtils.simpleMatch(getAllowedFields(), field)) &&
-				(getDisallowedFields() == null || !PatternMatchUtils.simpleMatch(getDisallowedFields(), field)));
+		String[] allowed = getAllowedFields();
+		String[] disallowed = getDisallowedFields();
+		return ((ObjectUtils.isEmpty(allowed) || PatternMatchUtils.simpleMatch(allowed, field)) &&
+				(ObjectUtils.isEmpty(disallowed) || !PatternMatchUtils.simpleMatch(disallowed, field)));
 	}
 
 	/**
@@ -464,18 +470,28 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @see BindingErrorProcessor#processMissingFieldError
 	 */
 	protected void checkRequiredFields(MutablePropertyValues mpvs) {
-		if (getRequiredFields() != null) {
-			String[] requiredFields = getRequiredFields();
+		String[] requiredFields = getRequiredFields();
+		if (!ObjectUtils.isEmpty(requiredFields)) {
+			Map propertyValues = new HashMap();
+			PropertyValue[] pvs = mpvs.getPropertyValues();
+			for (int i = 0; i < pvs.length; i++) {
+				PropertyValue pv = pvs[i];
+				String canonicalName = PropertyAccessorUtils.canonicalPropertyName(pv.getName());
+				propertyValues.put(canonicalName, pv);
+			}
 			for (int i = 0; i < requiredFields.length; i++) {
-				PropertyValue pv = mpvs.getPropertyValue(requiredFields[i]);
+				String field = requiredFields[i];
+				PropertyValue pv = (PropertyValue) propertyValues.get(field);
 				if (pv == null || pv.getValue() == null ||
 						(pv.getValue() instanceof String && !StringUtils.hasText((String) pv.getValue()))) {
 					// Use bind error processor to create FieldError.
-					String field = requiredFields[i];
 					getBindingErrorProcessor().processMissingFieldError(field, getInternalBindingResult());
 					// Remove property from property values to bind:
 					// It has already caused a field error with a rejected value.
-					mpvs.removePropertyValue(field);
+					if (pv != null) {
+						mpvs.removePropertyValue(pv);
+						propertyValues.remove(field);
+					}
 				}
 			}
 		}
