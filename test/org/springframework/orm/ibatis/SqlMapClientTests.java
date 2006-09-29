@@ -36,8 +36,6 @@ import org.easymock.MockControl;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.orm.ibatis.support.SqlMapClientDaoSupport;
 
 /**
@@ -183,6 +181,15 @@ public class SqlMapClientTests extends TestCase {
 
 	public void testQueryForObject() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.queryForObject("myStatement", null);
+		template.executorControl.setReturnValue("myResult", 1);
+		template.executorControl.replay();
+		assertEquals("myResult", template.queryForObject("myStatement"));
+		template.executorControl.verify();
+	}
+
+	public void testQueryForObjectWithParameter() throws SQLException {
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
 		template.executor.queryForObject("myStatement", "myParameter");
 		template.executorControl.setReturnValue("myResult", 1);
 		template.executorControl.replay();
@@ -190,7 +197,7 @@ public class SqlMapClientTests extends TestCase {
 		template.executorControl.verify();
 	}
 
-	public void testQueryForObjectWithResultObject() throws SQLException {
+	public void testQueryForObjectWithParameterAndResultObject() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
 		template.executor.queryForObject("myStatement", "myParameter", "myResult");
 		template.executorControl.setReturnValue("myResult", 1);
@@ -200,6 +207,16 @@ public class SqlMapClientTests extends TestCase {
 	}
 
 	public void testQueryForList() throws SQLException {
+		List result = new ArrayList();
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.queryForList("myStatement", null);
+		template.executorControl.setReturnValue(result, 1);
+		template.executorControl.replay();
+		assertEquals(result, template.queryForList("myStatement"));
+		template.executorControl.verify();
+	}
+
+	public void testQueryForListWithParameter() throws SQLException {
 		List result = new ArrayList();
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
 		template.executor.queryForList("myStatement", "myParameter");
@@ -212,6 +229,16 @@ public class SqlMapClientTests extends TestCase {
 	public void testQueryForListWithResultSize() throws SQLException {
 		List result = new ArrayList();
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.queryForList("myStatement", null, 10, 20);
+		template.executorControl.setReturnValue(result, 1);
+		template.executorControl.replay();
+		assertEquals(result, template.queryForList("myStatement", 10, 20));
+		template.executorControl.verify();
+	}
+
+	public void testQueryForListParameterAndWithResultSize() throws SQLException {
+		List result = new ArrayList();
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
 		template.executor.queryForList("myStatement", "myParameter", 10, 20);
 		template.executorControl.setReturnValue(result, 1);
 		template.executorControl.replay();
@@ -220,10 +247,17 @@ public class SqlMapClientTests extends TestCase {
 	}
 
 	public void testQueryWithRowHandler() throws SQLException {
-		RowHandler rowHandler = new RowHandler() {
-			public void handleRow(Object row) {
-			}
-		};
+		RowHandler rowHandler = new TestRowHandler();
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.queryWithRowHandler("myStatement", null, rowHandler);
+		template.executorControl.setVoidCallable(1);
+		template.executorControl.replay();
+		template.queryWithRowHandler("myStatement", rowHandler);
+		template.executorControl.verify();
+	}
+
+	public void testQueryWithRowHandlerWithParameter() throws SQLException {
+		RowHandler rowHandler = new TestRowHandler();
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
 		template.executor.queryWithRowHandler("myStatement", "myParameter", rowHandler);
 		template.executorControl.setVoidCallable(1);
@@ -233,6 +267,16 @@ public class SqlMapClientTests extends TestCase {
 	}
 
 	public void testQueryForPaginatedList() throws SQLException {
+		PaginatedList result = new PaginatedArrayList(10);
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.queryForPaginatedList("myStatement", null, 10);
+		template.executorControl.setReturnValue(result, 1);
+		template.executorControl.replay();
+		assertEquals(result, template.queryForPaginatedList("myStatement", 10));
+		template.executorControl.verify();
+	}
+
+	public void testQueryForPaginatedListWithParameter() throws SQLException {
 		PaginatedList result = new PaginatedArrayList(10);
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
 		template.executor.queryForPaginatedList("myStatement", "myParameter", 10);
@@ -264,6 +308,15 @@ public class SqlMapClientTests extends TestCase {
 
 	public void testInsert() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.insert("myStatement", null);
+		template.executorControl.setReturnValue("myResult", 1);
+		template.executorControl.replay();
+		assertEquals("myResult", template.insert("myStatement"));
+		template.executorControl.verify();
+	}
+
+	public void testInsertWithParameter() throws SQLException {
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
 		template.executor.insert("myStatement", "myParameter");
 		template.executorControl.setReturnValue("myResult", 1);
 		template.executorControl.replay();
@@ -273,19 +326,19 @@ public class SqlMapClientTests extends TestCase {
 
 	public void testUpdate() throws SQLException {
 		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.update("myStatement", null);
+		template.executorControl.setReturnValue(10, 1);
+		template.executorControl.replay();
+		assertEquals(10, template.update("myStatement"));
+		template.executorControl.verify();
+	}
+
+	public void testUpdateWithParameter() throws SQLException {
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
 		template.executor.update("myStatement", "myParameter");
 		template.executorControl.setReturnValue(10, 1);
 		template.executorControl.replay();
 		assertEquals(10, template.update("myStatement", "myParameter"));
-		template.executorControl.verify();
-	}
-
-	public void testDelete() throws SQLException {
-		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
-		template.executor.delete("myStatement", "myParameter");
-		template.executorControl.setReturnValue(10, 1);
-		template.executorControl.replay();
-		assertEquals(10, template.delete("myStatement", "myParameter"));
 		template.executorControl.verify();
 	}
 
@@ -312,6 +365,24 @@ public class SqlMapClientTests extends TestCase {
 			assertEquals(10, ex.getExpectedRowsAffected());
 			assertEquals(20, ex.getActualRowsAffected());
 		}
+		template.executorControl.verify();
+	}
+
+	public void testDelete() throws SQLException {
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.delete("myStatement", null);
+		template.executorControl.setReturnValue(10, 1);
+		template.executorControl.replay();
+		assertEquals(10, template.delete("myStatement"));
+		template.executorControl.verify();
+	}
+
+	public void testDeleteWithParameter() throws SQLException {
+		TestSqlMapClientTemplate template = new TestSqlMapClientTemplate();
+		template.executor.delete("myStatement", "myParameter");
+		template.executorControl.setReturnValue(10, 1);
+		template.executorControl.replay();
+		assertEquals(10, template.delete("myStatement", "myParameter"));
 		template.executorControl.verify();
 	}
 
@@ -378,6 +449,13 @@ public class SqlMapClientTests extends TestCase {
 			catch (SQLException ex) {
 				throw getExceptionTranslator().translate("SqlMapClient operation", null, ex);
 			}
+		}
+	}
+
+
+	private static class TestRowHandler implements RowHandler {
+
+		public void handleRow(Object row) {
 		}
 	}
 
