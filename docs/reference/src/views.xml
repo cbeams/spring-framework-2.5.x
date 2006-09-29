@@ -83,9 +83,9 @@ productList.url=/WEB-INF/jsp/productlist.jsp]]></programlisting>
       escaping of characters.</para>
 
       <para>The tag library descriptor (TLD) is included in the
-      <filename class="libraryfile">spring.jar</filename> as well in the distribution itself. More
-      information about the individual tags can be found online: <ulink
-      url="http://www.springframework.org/docs/taglib/index.html"></ulink>.</para>
+      <filename class="libraryfile">spring.jar</filename> as well in the distribution itself.
+      Further information about the individual tags can be found in the appendix entitled
+      <xref linkend="spring.tld"/>.</para>
     </section>
   </section>
 
