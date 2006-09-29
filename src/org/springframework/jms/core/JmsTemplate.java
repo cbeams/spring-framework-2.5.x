@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
 
 /**
  * Helper class that simplifies JMS access code.
- * 
+ *
  * <p>This class requires a JMS 1.1+ provider, because it builds on the
  * domain-independent API. <b>Use the {@link JmsTemplate102 JmsTemplate102}
  * subclass for JMS 1.0.2 providers.</b>
@@ -178,8 +178,8 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @see #setDestinationResolver
 	 * @see #setDefaultDestination(javax.jms.Destination)
 	 */
-	public void setDefaultDestinationName(String defaultDestinationName) {
-		this.defaultDestination = defaultDestinationName;
+	public void setDefaultDestinationName(String destinationName) {
+		this.defaultDestination = destinationName;
 	}
 
 	/**
@@ -888,11 +888,9 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 
 	/**
-	 * ResourceFactory implementation that delegates
-	 * to this template's protected callback methods.
+	 * ResourceFactory implementation that delegates to this template's protected callback methods.
 	 */
-	private class JmsTemplateResourceFactory
-			implements ConnectionFactoryUtils.ResourceFactory {
+	private class JmsTemplateResourceFactory implements ConnectionFactoryUtils.ResourceFactory {
 
 		public Connection getConnection(JmsResourceHolder holder) {
 			return JmsTemplate.this.getConnection(holder);
@@ -911,7 +909,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}
 
 		public boolean isSynchedLocalTransactionAllowed() {
-			return isSessionTransacted();
+			return JmsTemplate.this.isSessionTransacted();
 		}
 	}
 

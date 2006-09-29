@@ -83,7 +83,9 @@ import org.springframework.util.ClassUtils;
  *
  * <p>For dynamic adaptation of the active number of Sessions, consider using
  * ServerSessionMessageListenerContainer.
+ *
  * @author Juergen Hoeller
+ * @since 2.0
  * @see #setTransactionManager
  * @see #setCacheLevel
  * @see #setCacheLevelName
@@ -92,7 +94,6 @@ import org.springframework.util.ClassUtils;
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
  * @see DefaultMessageListenerContainer102
- * @since 2.0
  */
 public class DefaultMessageListenerContainer extends AbstractMessageListenerContainer {
 
@@ -479,7 +480,8 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 			Session sessionToUse = session;
 			boolean transactional = false;
 			if (sessionToUse == null) {
-				sessionToUse = ConnectionFactoryUtils.doGetTransactionalSession(getConnectionFactory(), this.transactionalResourceFactory);
+				sessionToUse = ConnectionFactoryUtils.doGetTransactionalSession(
+						getConnectionFactory(), this.transactionalResourceFactory);
 				transactional = (sessionToUse != null);
 			}
 			if (sessionToUse == null) {
@@ -779,7 +781,8 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		// in case of the NoLocal flag being specified for a Queue.
 		if (destination instanceof Topic) {
 			if (isSubscriptionDurable()) {
-				return session.createDurableSubscriber((Topic) destination, getDurableSubscriptionName(), getMessageSelector(), isPubSubNoLocal());
+				return session.createDurableSubscriber(
+						(Topic) destination, getDurableSubscriptionName(), getMessageSelector(), isPubSubNoLocal());
 			}
 			else {
 				return session.createConsumer(destination, getMessageSelector(), isPubSubNoLocal());
@@ -904,11 +907,9 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 
 	/**
-	 * ResourceFactory implementation that delegates to this
-	 * listener container's protected callback methods.
+	 * ResourceFactory implementation that delegates to this listener container's protected callback methods.
 	 */
-	private class MessageListenerContainerResourceFactory
-			implements ConnectionFactoryUtils.ResourceFactory {
+	private class MessageListenerContainerResourceFactory implements ConnectionFactoryUtils.ResourceFactory {
 
 		public Connection getConnection(JmsResourceHolder holder) {
 			return DefaultMessageListenerContainer.this.getConnection(holder);
@@ -919,7 +920,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		}
 
 		public Connection createConnection() throws JMSException {
-			if (sharedConnectionEnabled()) {
+			if (DefaultMessageListenerContainer.this.sharedConnectionEnabled()) {
 				return DefaultMessageListenerContainer.this.getSharedConnection();
 			}
 			else {
@@ -932,7 +933,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		}
 
 		public boolean isSynchedLocalTransactionAllowed() {
-			return isSessionTransacted();
+			return DefaultMessageListenerContainer.this.isSessionTransacted();
 		}
 	}
 
