@@ -28,15 +28,17 @@ import javax.servlet.jsp.PageContext;
 
 /**
  * Data-binding aware JSP tag for rendering an HTML '<code>form</code>' whose
- * inner elements are bound to properties on a {@link #setCommandName command object}.
+ * inner elements are bound to properties on a
+ * {@link #setCommandName command object}.
  * 
- * <p>Users should place the command object into the {@link org.springframework.web.servlet.ModelAndView}
- * when populating the data for their view. The name of this command object can
- * be configured using the {@link #setCommandName commandName} property.
+ * <p>Users should place the command object into the
+ * {@link org.springframework.web.servlet.ModelAndView} when populating the
+ * data for their view. The name of this command object can be configured
+ * using the {@link #setCommandName commandName} property.
  * 
- * <p>The default value for the {@link #setCommandName commandName} property is
- * '<code>command</code>' which corresponds to the default name when using the
- * {@link org.springframework.web.servlet.mvc.SimpleFormController}.
+ * <p>The default value for the {@link #setCommandName commandName} property
+ * is '<code>command</code>' which corresponds to the default name when using
+ * the {@link org.springframework.web.servlet.mvc.SimpleFormController}.
  * 
  * <p>Inner tags can access the name of the command object via the
  * {@link javax.servlet.jsp.PageContext}. The attribute name is defined in
@@ -325,8 +327,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * {@link #evaluate Resolves} and returns the name of the command object.
-	 *
-	 * @throws IllegalArgumentException if the command object resolves to null.
+	 * @throws IllegalArgumentException if the command object resolves to <code>null</code>
 	 */
 	protected String resolveCommandName() throws JspException {
 		Object resolvedCommmandName = evaluate(COMMAND_NAME_ATTRIBUTE, this.commandName);

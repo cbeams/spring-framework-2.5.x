@@ -25,13 +25,15 @@ import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of the Errors and BindingResult interfaces,
- * for registration and evaluation of binding errors on JavaBean objects.
- * Performs standard JavaBean property access, also supporting nested properties.
- *
- * <p>Normally, application code will work with the Errors interface
- * or the BindingResult interface. A DataBinder returns its BindingResult
- * via <code>getBindingResult()</code>.
+ * Default implementation of the {@link Errors} and {@link BindingResult}
+ * interfaces, for the registration and evaluation of binding errors on
+ * JavaBean objects.
+ * 
+ * <p>Performs standard JavaBean property access, also supporting nested
+ * properties. Normally, application code will work with the
+ * <code>Errors</code> interface or the <code>BindingResult</code> interface.
+ * A {@link DataBinder} returns its <code>BindingResult</code> via
+ * {@link org.springframework.validation.DataBinder#getBindingResult()}.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -47,9 +49,10 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 
 
 	/**
-	 * Create a new BeanPropertyBindingResult instance.
+	 * Creates a new instance of the {@link BeanPropertyBindingResult} class.
 	 * @param target the target bean to bind onto
 	 * @param objectName the name of the target object
+	 * @throws IllegalArgumentException if the supplied <code>target</code> is <code>null</code> 
 	 */
 	public BeanPropertyBindingResult(Object target, String objectName) {
 		super(objectName);
@@ -63,15 +66,18 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 
 	/**
 	 * Returns the canonical JavaBeans property name,
-	 * as understood by the BeanWrapper.
+	 * as understood by the underlying {@link BeanWrapper}.
+	 * @param field the field name
+	 * @return the canonical JavaBeans property name
 	 */
 	protected String canonicalFieldName(String field) {
 		return BeanUtils.canonicalPropertyName(field);
 	}
 
 	/**
-	 * Returns the BeanWrapper that this instance uses.
-	 * Creates a new one if none existed before.
+	 * Returns the {@link ConfigurablePropertyAccessor property accessor}
+	 * that this instance uses.
+	 * <p>Creates a new one if none existed before.
 	 * @see #createBeanWrapper()
 	 */
 	public final ConfigurablePropertyAccessor getPropertyAccessor() {
@@ -83,7 +89,7 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 	}
 
 	/**
-	 * Create a new BeanWrapper for the underlying target object.
+	 * Create a new {@link BeanWrapper} for the underlying target object.
 	 * @see #getTarget()
 	 */
 	protected BeanWrapper createBeanWrapper() {
