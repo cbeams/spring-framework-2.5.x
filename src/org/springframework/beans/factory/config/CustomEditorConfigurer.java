@@ -28,14 +28,17 @@ import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
 
 /**
- * BeanFactoryPostProcessor implementation that allows for convenient
- * registration of custom property editors.
+ * {@link BeanFactoryPostProcessor} implementation that allows for convenient
+ * registration of custom {@link PropertyEditor property editors}.
  *
- * <p>As of Spring 2.0, the recommended usage is with custom PropertyEditorRegistrar
- * implementations that in turn register desired editors on a given registry.
- * Each PropertyEditorRegistrar can register any number of custom editors.
+ * <p>As of Spring 2.0, the recommended usage is to use custom
+ * {@link PropertyEditorRegistrar} implementations that in turn register
+ * any desired editors on a given
+ * {@link org.springframework.beans.PropertyEditorRegistry registry}. Each
+ * <code>PropertyEditorRegistrar</code> can register any number of custom
+ * editors.
  *
- * <pre class="code">&lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
+ * <pre class="code"> &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
  *   &lt;property name="propertyEditorRegistrars"&gt;
  *     &lt;list&gt;
  *       &lt;bean class="mypackage.MyCustomDateEditorRegistrar"/&gt;
@@ -44,10 +47,10 @@ import org.springframework.util.ClassUtils;
  *   &lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
- * Alternative configuration example with custom editor instances,
- * assuming inner beans for PropertyEditor instances:
+ * <p>Alternative configuration example with custom editor instances,
+ * assuming inner beans for <code>PropertyEditor</code> instances:
  *
- * <pre class="code">&lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
+ * <pre class="code"> &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
  *   &lt;property name="customEditors"&gt;
  *     &lt;map&gt;
  *       &lt;entry key="java.util.Date"&gt;
@@ -62,14 +65,16 @@ import org.springframework.util.ClassUtils;
  *   &lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
- * Also supports "java.lang.String[]"-style array class names and primitive
- * class names (e.g. "boolean"). Delegates to ClassUtils for actual class name
- * resolution.
+ * <p>Also supports "java.lang.String[]"-style array class names and primitive
+ * class names (e.g. "boolean"). Delegates to {@link ClassUtils} for actual
+ * class name resolution.
  *
  * <p><b>NOTE:</b> Custom property editors registered with this configurer do
  * <i>not</i> apply to data binding. Custom editors for data binding need to
- * be registered on the DataBinder: Use a common base class or delegate to a
- * common PropertyEditorRegistrar code to reuse editor registration there.
+ * be registered on the {@link org.springframework.validation.DataBinder}:
+ * Use a common base class or delegate to common
+ * <code>PropertyEditorRegistrar</code> code to reuse editor registration
+ * there.
  * 
  * @author Juergen Hoeller
  * @since 27.02.2004
@@ -101,12 +106,13 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 	}
 
 	/**
-	 * Specify the PropertyEditorRegistrars to apply to beans defined
-	 * within the current application context.
-	 * <p>This allows for sharing PropertyEditorRegistrars with DataBinders etc.
+	 * Specify the {@link PropertyEditorRegistrar PropertyEditorRegistrars}
+	 * to apply to beans defined within the current application context.
+	 * <p>This allows for sharing <code>PropertyEditorRegistrars</code> with
+	 * {@link org.springframework.validation.DataBinder DataBinders}, etc.
 	 * Furthermore, it avoids the need for synchronization on custom editors:
-	 * A PropertyEditorRegistrar will always create fresh editor instances for
-	 * each bean creation attempt.
+	 * A <code>PropertyEditorRegistrar</code> will always create fresh editor
+	 * instances for each bean creation attempt.
 	 * @see ConfigurableListableBeanFactory#addPropertyEditorRegistrar
 	 */
 	public void setPropertyEditorRegistrars(PropertyEditorRegistrar[] propertyEditorRegistrars) {
@@ -114,8 +120,10 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 	}
 
 	/**
-	 * Specify the custom editors to register via a Map, using the class name
-	 * of the required type as key and the PropertyEditor instance as value.
+	 * Specify the custom editors to register via a {@link Map}, using the
+	 * class name of the required type as the key and the {@link PropertyEditor}
+	 * instance as the value.
+	 * @param customEditors said <code>Map</code> of editors (can be <code>null</code>) 
 	 * @see ConfigurableListableBeanFactory#registerCustomEditor
 	 */
 	public void setCustomEditors(Map customEditors) {
