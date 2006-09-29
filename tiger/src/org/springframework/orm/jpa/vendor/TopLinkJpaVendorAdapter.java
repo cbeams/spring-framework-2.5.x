@@ -61,7 +61,7 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
 		if (isGenerateDdl()) {
 			jpaProperties.setProperty(EntityManagerFactoryProvider.DDL_GENERATION,
-					EntityManagerFactoryProvider.DROP_AND_CREATE);
+					EntityManagerFactoryProvider.CREATE_ONLY);
 			jpaProperties.setProperty(EntityManagerFactoryProvider.DDL_GENERATION_MODE,
 					EntityManagerFactoryProvider.DDL_DATABASE_GENERATION);
 		}
@@ -72,6 +72,11 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		return jpaProperties;
 	}
 
+	/**
+	 * Determine the TopLink target database name for the given database.
+	 * @param database the specified database
+	 * @return the TopLink target database name, or <code>null<code> if none found
+	 */
 	protected String determineTargetDatabaseName(Database database) {
 		switch (database) {
 			case DB2: return TargetDatabase.DB2;

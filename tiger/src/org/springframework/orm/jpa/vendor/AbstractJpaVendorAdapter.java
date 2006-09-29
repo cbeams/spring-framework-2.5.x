@@ -71,16 +71,20 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	}
 
 	/**
-	 * Set whether to generate DDL after the EntityManagerFactory
-	 * has been initialized.
+	 * Set whether to generate DDL after the EntityManagerFactory has been initialized,
+	 * creating/updating all relevant tables.
+	 * <p>Note that the exact semantics of this flag depend on the underlying
+	 * persistence provider. For any more advanced needs, specify the appropriate
+	 * vendor-specific settings as "jpaProperties".
+	 * @see org.springframework.orm.jpa.AbstractEntityManagerFactoryBean#setJpaProperties
 	 */
 	public void setGenerateDdl(boolean generateDdl) {
 		this.generateDdl = generateDdl;
 	}
 
 	/**
-	 * Return whether to generate DDL after the EntityManagerFactory
-	 * has been initialized.
+	 * Return whether to generate DDL after the EntityManagerFactory has been initialized
+	 * creating/updating all relevant tables.
 	 */
 	protected boolean isGenerateDdl() {
 		return generateDdl;
@@ -88,6 +92,9 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 
 	/**
 	 * Set whether to show SQL in the log (or in the console).
+	 * <p>For more specific logging configuration, specify the appropriate
+	 * vendor-specific settings as "jpaProperties".
+	 * @see org.springframework.orm.jpa.AbstractEntityManagerFactoryBean#setJpaProperties
 	 */
 	public void setShowSql(boolean showSql) {
 		this.showSql = showSql;

@@ -67,7 +67,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 
 		if (isGenerateDdl()) {
-			jpaProperties.setProperty(Environment.HBM2DDL_AUTO, "create");
+			jpaProperties.setProperty(Environment.HBM2DDL_AUTO, "update");
 		}
 		if (isShowSql()) {
 			jpaProperties.setProperty(Environment.SHOW_SQL, "true");
@@ -76,6 +76,11 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		return jpaProperties;
 	}
 
+	/**
+	 * Determine the Hibernate database dialect class for the given target database.
+	 * @param database the target database
+	 * @return the Hibernate database dialect class, or <code>null<code> if none found
+	 */
 	protected Class determineDatabaseDialectClass(Database database) {
 		switch (database) {
 			case DB2: return DB2Dialect.class;
