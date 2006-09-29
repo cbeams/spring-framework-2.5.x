@@ -17,9 +17,9 @@
 package org.springframework.beans.factory;
 
 /**
- * Interface to be implemented by beans that wish to be aware of the bean class
- * loader, that is, the class loader used by the present bean factory to load
- * bean classes.
+ * Callback that allows a bean to be aware of the bean
+ * {@link ClassLoader class loader}; that is, the class loader used by the
+ * present bean factory to load bean classes.
  *
  * <p>This is mainly intended to be implemented by framework classes which
  * have to pick up application classes by name despite themselves potentially
@@ -37,12 +37,17 @@ package org.springframework.beans.factory;
 public interface BeanClassLoaderAware {
 
 	/**
-	 * Callback that supplies the bean class loader to a bean instance.
-	 * <p>Invoked after population of normal bean properties but before an init
-	 * callback like InitializingBean's <code>afterPropertiesSet</code> or a
-	 * custom init-method.
-	 * @param classLoader owning class loader (may be <code>null</code> in
-	 * case of the caller class loader to be used)
+	 * Callback that supplies the bean {@link ClassLoader class loader} to
+	 * a bean instance.
+	 * <p>Invoked <i>after</i> the population of normal bean properties but
+	 * <i>before</i> an initialization callback such as
+	 * {@link org.springframework.beans.factory.InitializingBean InitializingBean's}
+	 * {@link org.springframework.beans.factory.InitializingBean#afterPropertiesSet()}
+	 * method or a custom init-method.
+	 * @param classLoader the owning class loader; may be <code>null</code> in
+	 * which case a default <code>ClassLoader</code> must be used, for example
+	 * the <code>ClassLoader</code> obtained via
+	 * {@link org.springframework.util.ClassUtils#getDefaultClassLoader()}
 	 */
 	void setBeanClassLoader(ClassLoader classLoader);
 
