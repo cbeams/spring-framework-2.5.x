@@ -34,6 +34,8 @@ import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
+import org.springframework.jms.support.destination.DestinationResolver;
+import org.springframework.jms.support.destination.DynamicDestinationResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.ObjectUtils;
@@ -147,7 +149,9 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 
 	private String defaultListenerMethod = ORIGINAL_DEFAULT_LISTENER_METHOD;
 
-	private Destination defaultResponseDestination;
+	private Object defaultResponseDestination;
+
+	private DestinationResolver destinationResolver = new DynamicDestinationResolver();
 
 	private MessageConverter messageConverter;
 
@@ -206,23 +210,63 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	}
 
 	/**
-	 * Set the default destination to send response messages to.
-	 * This will be applied in case of a request message that does not
-	 * carry a "JMSReplyTo" field.
-	 * <p>Response destinations are only relevant for listener methods
-	 * that return result objects, which will be wrapped in a response
-	 * message and sent to a response destination.
+	 * Set the default destination to send response messages to. This will be applied
+	 * in case of a request message that does not carry a "JMSReplyTo" field.
+	 * <p>Response destinations are only relevant for listener methods that return
+	 * result objects, which will be wrapped in a response message and sent to a
+	 * response destination.
+	 * <p>Alternatively, specify a "defaultResponseQueueName" or "defaultResponseTopicName",
+	 * to be dynamically resolved via the DestinationResolver.
+	 * @see #setDefaultResponseQueueName(String)
+	 * @see #setDefaultResponseTopicName(String)
 	 * @see #getResponseDestination
 	 */
-	public void setDefaultResponseDestination(Destination defaultResponseDestination) {
-		this.defaultResponseDestination = defaultResponseDestination;
+	public void setDefaultResponseDestination(Destination destination) {
+		this.defaultResponseDestination = destination;
 	}
 
 	/**
-	 * Return the default destination to send response messages to.
+	 * Set the name of the default response queue to send response messages to.
+	 * This will be applied in case of a request message that does not carry a
+	 * "JMSReplyTo" field.
+	 * <p>Alternatively, specify a JMS Destination object as "defaultResponseDestination".
+	 * @see #setDestinationResolver
+	 * @see #setDefaultResponseDestination(javax.jms.Destination)
 	 */
-	protected Destination getDefaultResponseDestination() {
-		return defaultResponseDestination;
+	public void setDefaultResponseQueueName(String destinationName) {
+		this.defaultResponseDestination = new DestinationNameHolder(destinationName, false);
+	}
+
+	/**
+	 * Set the name of the default response topic to send response messages to.
+	 * This will be applied in case of a request message that does not carry a
+	 * "JMSReplyTo" field.
+	 * <p>Alternatively, specify a JMS Destination object as "defaultResponseDestination".
+	 * @see #setDestinationResolver
+	 * @see #setDefaultResponseDestination(javax.jms.Destination)
+	 */
+	public void setDefaultResponseTopicName(String destinationName) {
+		this.defaultResponseDestination = new DestinationNameHolder(destinationName, true);
+	}
+
+	/**
+	 * Set the DestinationResolver that should be used to resolve response
+	 * destination names for this adapter.
+	 * <p>The default resolver is a DynamicDestinationResolver. Specify a
+	 * JndiDestinationResolver for resolving destination names as JNDI locations.
+	 * @see org.springframework.jms.support.destination.DynamicDestinationResolver
+	 * @see org.springframework.jms.support.destination.JndiDestinationResolver
+	 */
+	public void setDestinationResolver(DestinationResolver destinationResolver) {
+		Assert.notNull(destinationResolver, "DestinationResolver must not be null");
+		this.destinationResolver = destinationResolver;
+	}
+
+	/**
+	 * Return the DestinationResolver for this adapter.
+	 */
+	protected DestinationResolver getDestinationResolver() {
+		return destinationResolver;
 	}
 
 	/**
@@ -283,9 +327,9 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 		Object convertedMessage = extractMessage(message);
 		String methodName = getListenerMethodName(message, convertedMessage);
 		if (methodName == null) {
-			throw new IllegalStateException(
-					"No listener method for message [" + convertedMessage +
-					"] - specify a 'defaultListenerMethod' or override 'getListenerMethodName'");
+			throw new javax.jms.IllegalStateException("No default listener method specified: " +
+					"Either specify a non-null value for the 'defaultListenerMethod' property or " +
+					"override the 'getListenerMethodName' method.");
 		}
 		Object[] listenerArguments = buildListenerArguments(convertedMessage);
 		Object result = invokeListenerMethod(methodName, listenerArguments);
@@ -338,20 +382,17 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	/**
 	 * Determine the name of the listener method that is supposed to
 	 * handle the given message.
+	 * <p>The default implementation simply returns the configured
+	 * default listener method, if any.
 	 * @param originalMessage the JMS request message
 	 * @param extractedMessage the converted JMS request message,
 	 * to be passed into the listener method as argument
 	 * @return the name of the listener method (never <code>null</code>)
 	 * @throws JMSException if thrown by JMS API methods
+	 * @see #setDefaultListenerMethod
 	 */
 	protected String getListenerMethodName(Message originalMessage, Object extractedMessage) throws JMSException {
-		String listenerMethod = getDefaultListenerMethod();
-		if (listenerMethod == null) {
-			throw new javax.jms.IllegalStateException("No default listener method specified - " +
-					"either specify a non-null value for the 'defaultListenerMethod' property or " +
-					"override the 'getListenerMethodName' method");
-		}
-		return listenerMethod;
+		return getDefaultListenerMethod();
 	}
 
 	/**
@@ -422,20 +463,20 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 			}
 			Message response = buildMessage(session, result);
 			postProcessResponse(request, response);
-			Destination destination = getResponseDestination(request, response);
+			Destination destination = getResponseDestination(request, response, session);
 			sendResponse(session, destination,  response);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Listener method returned result [" + result +
-						"] - not generating response message for it because of no JMS Session given");
+						"]: not generating response message for it because of no JMS Session given");
 			}
 		}
 	}
 
 	/**
 	 * Build a JMS message to be sent as response based on the given result object.
-	 * @param session the JMS session to operate on
+	 * @param session the JMS Session to operate on
 	 * @param result the content of the message, as returned from the listener method
 	 * @return the JMS <code>Message</code> (never <code>null</code>)
 	 * @throws JMSException if thrown by JMS API methods
@@ -473,27 +514,51 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	 * <p>The default implementation first checks the JMS Reply-To
 	 * {@link Destination} of the supplied request; if that is not <code>null</code>
 	 * it is returned; if it is <code>null</code>, then the configured
-	 * {@link #getDefaultResponseDestination() default response destination}
+	 * {@link #resolveDefaultResponseDestination default response destination}
 	 * is returned; if this too is <code>null</code>, then an
 	 * {@link InvalidDestinationException} is thrown.
 	 * @param request the original incoming JMS message
 	 * @param response the outgoing JMS message about to be sent
+	 * @param session the JMS Session to operate on
 	 * @return the response destination (never <code>null</code>)
 	 * @throws JMSException if thrown by JMS API methods
 	 * @throws InvalidDestinationException if no {@link Destination} can be determined
 	 * @see #setDefaultResponseDestination
 	 * @see javax.jms.Message#getJMSReplyTo()
 	 */
-	protected Destination getResponseDestination(Message request, Message response) throws JMSException {
+	protected Destination getResponseDestination(Message request, Message response, Session session)
+			throws JMSException {
+
 		Destination replyTo = request.getJMSReplyTo();
 		if (replyTo == null) {
-			replyTo = getDefaultResponseDestination();
+			replyTo = resolveDefaultResponseDestination(session);
 			if (replyTo == null) {
-				throw new InvalidDestinationException("Cannot determine response destination - " +
-						"request message does not contain reply-to destination, and no default response destination set");
+				throw new InvalidDestinationException("Cannot determine response destination: " +
+						"Request message does not contain reply-to destination, and no default response destination set.");
 			}
 		}
 		return replyTo;
+	}
+
+	/**
+	 * Resolve the default response destination into a JMS {@link Destination}, using this
+	 * accessor's {@link DestinationResolver} in case of a destination name.
+	 * @return the located {@link Destination}
+	 * @throws javax.jms.JMSException if resolution failed
+	 * @see #setDefaultResponseDestination
+	 * @see #setDefaultResponseQueueName
+	 * @see #setDefaultResponseTopicName
+	 * @see #setDestinationResolver
+	 */
+	protected Destination resolveDefaultResponseDestination(Session session) throws JMSException {
+		if (this.defaultResponseDestination instanceof Destination) {
+			return (Destination) this.defaultResponseDestination;
+		}
+		if (this.defaultResponseDestination instanceof DestinationNameHolder) {
+			DestinationNameHolder nameHolder = (DestinationNameHolder) this.defaultResponseDestination;
+			return getDestinationResolver().resolveDestinationName(session, nameHolder.name, nameHolder.isTopic);
+		}
+		return null;
 	}
 
 	/**
@@ -525,6 +590,23 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	protected void postProcessProducer(MessageProducer producer, Message response) throws JMSException {
+	}
+
+
+	/**
+	 * Internal class combining a destination name
+	 * and its target destination type (queue or topic).
+	 */
+	private static class DestinationNameHolder {
+
+		public final String name;
+
+		public final boolean isTopic;
+
+		public DestinationNameHolder(String name, boolean isTopic) {
+			this.name = name;
+			this.isTopic = isTopic;
+		}
 	}
 
 }
