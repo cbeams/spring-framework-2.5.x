@@ -3,13 +3,14 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0 final (30.9.2006)
+Changes in version 2.0 final (3.10.2006)
 ----------------------------------------
 
 Package org.springframework.aop
 * dropped InvocationContextExposingAdvisorAutoProxyCreator base class
 
 Package org.springframework.beans
+* default property editors for primitive wrapper types (Boolean, Integer, etc) turn empty Strings into null values now
 * ConstructorArgumentValues supports configuration source objects per argument (e.g. keep track of original XML element)
 * ConfigurableBeanFactory's "setParentBeanFactory" throws IllegalStateException if already associated with a parent
 * added "getRegisteredScopeNames" and "getRegisteredScope" accessors to ConfigurableBeanFactory interface
@@ -24,6 +25,9 @@ Package org.springframework.beans
 * "lookup-method" overrides no-arg method only, to let overloaded variants be implemented in a traditional fashion
 * added "setAllowRawInjectionDespiteWrapping" config method to DefaultListableBeanFactory, to enable Spring 1.2 behavior
 
+Package org.springframework.cache
+* EhCacheFactoryBean uses EHCache 1.2's extended Cache constructor to avoid EHCache warning (requires EHCache 1.2 now)
+
 Package org.springframework.jdbc
 * JdbcTemplate uses "PreparedStatement.setObject(index, null)" for null values with unknown SQL type on Informix
 * turned visibility of "org.springframework.jdbc.core.StatementCreatorUtils" to public (again)
@@ -32,6 +36,7 @@ Package org.springframework.jms
 * factored out protected "prepareSharedConnection" template method in AbstractMessageListenerContainer
 * AbstractMessageListenerContainer's "durableSubscriptionName" property defaults to the message listener class name
 * added "subscriptionDurable" flag to AbstractMessageListenerContainer (set this to "true" to for actual durability!)
+* added "defaultResponseQueueName" and "defaultResponseTopicName" properties to MessageListenerAdapter
 * added JMS invoker strategy for service-based remoting via JMS: JmsInvokerServiceExporter, JmsInvokerProxyFactoryBean
 
 Package org.springframework.jmx
@@ -42,7 +47,10 @@ Package org.springframework.mock
 * added MockMultipartFile, MockMultipartHttpServletRequest and MockMultipartActionRequest for testing multipart access
 
 Package org.springframework.orm
+* added overloaded query/insert/update/delete operations without parameter object to SqlMapClientOperations/Template
 * refined Hibernate3 support to detect Hibernate 3.2's FlushMode.MANUAL as well, while remaining compatible with 3.0/3.1
+* Hibernate3 LocalSessionFactoryBean registers filter definitions before loading any mapping files
+* changed the semantics of AbstractJpaVendorAdapter's "generateDdl" flag to create/update (instead of drop-and-recreate)
 
 Package org.springframework.transaction
 * clarified @Transactional semantics for JDK/CGLIB proxies as well as for AspectJ
@@ -53,10 +61,12 @@ Package org.springframework.transaction
 * TransactionTemplate/TransactionInterceptor automatically detect and use CallbackPreferringPlatformTransactionManager
 
 Package org.springframework.util
+* ClassUtils falls back to the system class loader if the thread context class loader is inaccessible
 * all class loading is done via "ClassLoader.loadClass(name)" rather than "Class.forName(name, true, ClassLoader)"
 
 Package org.springframework.web
 * clarified MultipartFile constract details
+* DataBinder matches all field names using their canonical name (for required, allowed and disallowed checks)
 * InternalResourceView correctly exports forward attributes on Servlet 2.3- (and preserves existing attributes on 2.4+)
 * OptionTag and ErrorsTag implement BodyTag interface directly to work around a bug in WebLogic Server 8.1's JSP engine
 * added "renderPhaseOnly" flag to Portlet WebRequestHandlerInterceptorAdapter, allowing to intercept action phase too
