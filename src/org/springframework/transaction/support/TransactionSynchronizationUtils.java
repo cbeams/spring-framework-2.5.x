@@ -23,15 +23,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Utility methods for trigger specific TransactionSynchronization callbacks
- * on all currently registered synchronizations.
+ * Utility methods for triggering specific {@link TransactionSynchronization}
+ * callback methods on all currently registered synchronizations.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see TransactionSynchronization
  * @see TransactionSynchronizationManager#getSynchronizations()
  */
-public class TransactionSynchronizationUtils {
+public abstract class TransactionSynchronizationUtils {
 
 	private static final Log logger = LogFactory.getLog(TransactionSynchronizationUtils.class);
 
