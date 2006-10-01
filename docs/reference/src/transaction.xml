@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <chapter id="transaction">
     <title>Transaction management</title>
-    <section>
+    <section id="transaction-intro">
         <title>Introduction</title>
         <para>One of the most compelling reasons to use the Spring Framework is the
         comprehensive transaction support. The Spring Framework provides a consistent
@@ -617,8 +617,8 @@ public class DefaultFooService implements FooService {
   ]]><lineannotation>&lt;!-- ensure that the above transactional advice runs for any execution
       of an operation defined by the <interfacename>FooService</interfacename> interface --&gt;</lineannotation><![CDATA[
   <aop:config>
-    <aop:pointcut id="fooServiceMethods" expression="execution(* x.y.service.FooService.*(..))"/>
-    <aop:advisor advice-ref="txAdvice" pointcut-ref="fooServiceMethods"/>
+    <aop:pointcut id="fooServiceOperation" expression="execution(* x.y.service.FooService.*(..))"/>
+    <aop:advisor advice-ref="txAdvice" pointcut-ref="fooServiceOperation"/>
   </aop:config>
   
   ]]><lineannotation>&lt;!-- don't forget the <interfacename>DataSource</interfacename> --&gt;</lineannotation><![CDATA[
@@ -745,7 +745,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
             settings for the classes, typically service layer classes, in your application in a
             declarative fashion. This section describes how you can control the rollback of
             transactions in a simple declarative fashion.</para>
-            <para>The easiest (and indeed recommended way) to indicate to the Spring Framework's
+            <para>The easiest (and indeed recommended) way to indicate to the Spring Framework's
             transaction infrastructure that a transaction's work is to be rolled back is to
             throw an <exceptionname>Exception</exceptionname> from code that is currently
             executing in the context of a transaction. The Spring Framework's
@@ -763,13 +763,30 @@ Exception in thread "main" java.lang.UnsupportedOperationException
             configure rollback for a checked, application-specific <exceptionname>Exception</exceptionname> type.</para>
             <programlisting><![CDATA[<tx:advice id="txAdvice" transaction-manager="txManager">
   <tx:attributes>
-	 <tx:method name="get*" read-only="false" ]]><lineannotation><emphasis role="bold">rollback-for="BingoException"</emphasis></lineannotation><![CDATA[/>
+	 <tx:method name="get*" read-only="false" ]]><lineannotation><emphasis role="bold">rollback-for="NoProductInStockException"</emphasis></lineannotation><![CDATA[/>
 	 <tx:method name="*"/>
   </tx:attributes>
 </tx:advice>]]></programlisting>
+            <para>The second way to indicate to the Spring Framework's transaction infrastructure
+            that a transaction's work is to be rolled back is to do so <emphasis>programmatically</emphasis>
+            Although very simple, this way is quite invasive, and tightly couples your code to the
+            Spring Framework's transaction infrastructure. Find below a snippet of code that does
+            programmatic rollback of a Spring Framework-managed transaction:</para>
+            <programlisting><![CDATA[public void resolvePosition() {
+    try {
+        ]]><lineannotation>// some business logic...</lineannotation><![CDATA[
+    } catch (NoProductInStockException ex) {
+        ]]><lineannotation>// trigger rollback programmatically</lineannotation><![CDATA[
+        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+    }
+}]]></programlisting>
+            <para>You are strongly encouraged to use the declarative approach to rollback if at
+            all possible. The programmtic means of rolling back is, as you can see, available to
+            you should you need it, but it's usage flies in the face of achieving a clean
+            POJO-based model in your application.</para>
         </section>
         <section id="transaction-declarative-diff-tx">
-            <title>Applying different transactional semantics to different beans</title>
+            <title>Configuring different transactional semantics for different beans</title>
             <para>Let's now consider the scenario where you have a number of service layer objects,
             and you want to apply <emphasis>totally different</emphasis> transactional semantics
             to each group of those objects. You can effect this in Spring by defining
@@ -796,18 +813,17 @@ Exception in thread "main" java.lang.UnsupportedOperationException
         <aop:pointcut id="serviceOperation"
                     expression="]]><lineannotation>execution(* x.y.service..*Service.*(..))</lineannotation><![CDATA["/>
 
-        <aop:advisor pointcut-ref="serviceOperation" 
-                    advice-ref="txAdvice"/>
+        <aop:advisor pointcut-ref="serviceOperation" advice-ref="txAdvice"/>
 
     </aop:config>
 
     ]]><lineannotation>&lt;!-- these two beans will be transactional... --&gt;</lineannotation><![CDATA[
-    <bean id="fooService" class="org.xyz.service.DefaultFooService"/>
-    <bean id="barService" class="org.xyz.service.extras.SimpleBarService"/>
+    <bean id="fooService" class="x.y.service.DefaultFooService"/>
+    <bean id="barService" class="x.y.service.extras.SimpleBarService"/>
 
     ]]><lineannotation>&lt;!-- ... and these two beans won't --&gt;</lineannotation><![CDATA[
-    <bean id="fooService" class="org.xyz.SomeService"/> ]]><lineannotation>&lt;!-- (not in the right package) --&gt;</lineannotation><![CDATA[
-    <bean id="barService" class="org.xyz.service.SimpleBarManager"/> ]]><lineannotation>&lt;!-- (doesn't end in 'Service') --&gt;</lineannotation><![CDATA[
+    <bean id="anotherService" class="org.xyz.SomeService"/> ]]><lineannotation>&lt;!-- (not in the right package) --&gt;</lineannotation><![CDATA[
+    <bean id="barManager" class="x.y.service.SimpleBarManager"/> ]]><lineannotation>&lt;!-- (doesn't end in 'Service') --&gt;</lineannotation><![CDATA[
 
     <tx:advice id="txAdvice">
         <tx:attributes>
@@ -819,7 +835,163 @@ Exception in thread "main" java.lang.UnsupportedOperationException
     ]]><lineannotation>&lt;!-- other transaction infrastructure beans such as a <interfacename>PlatformTransactionManager</interfacename> omitted... --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
+
+        <para>Find below an example of configuring two distinct beans with totally different
+        transactional settings.</para>
+        
+        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+    <aop:config>
+
+        <aop:pointcut id="defaultServiceOperation"
+                    expression="]]><lineannotation>execution(* x.y.service.*Service.*(..))</lineannotation><![CDATA["/>
+        <aop:advisor pointcut-ref="defaultServiceOperation" advice-ref="defaultTxAdvice"/>
+        
+        <aop:pointcut id="noTxServiceOperation"
+                    expression="]]><lineannotation>execution(* x.y.service.ddl.DefaultDdlManager.*(..))</lineannotation><![CDATA["/>
+        <aop:advisor pointcut-ref="noTxServiceOperation" advice-ref="noTxAdvice"/>
+
+    </aop:config>
+
+    ]]><lineannotation>&lt;!-- this bean will be transactional (c.f. the <literal>'defaultServiceOperation'</literal> pointcut) --&gt;</lineannotation><![CDATA[
+    <bean id="fooService" class="x.y.service.DefaultFooService"/>
+
+    ]]><lineannotation>&lt;!-- this bean will also be transactional, but with totally different transactional settings --&gt;</lineannotation><![CDATA[
+    <bean id="anotherFooService" class="x.y.service.ddl.DefaultDdlManager"/>
+
+    <tx:advice id="defaultTxAdvice">
+        <tx:attributes>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
+    
+    <tx:advice id="noTxAdvice">
+        <tx:attributes>
+            <tx:method name="*" propagation="NEVER"/>
+        </tx:attributes>
+    </tx:advice>
+
+    ]]><lineannotation>&lt;!-- other transaction infrastructure beans such as a <interfacename>PlatformTransactionManager</interfacename> omitted... --&gt;</lineannotation><![CDATA[
+
+</beans>]]></programlisting>
         </section>
+
+        <section id="transaction-declarative-txadvice-settings">
+            <title><literal>&lt;tx:advice/&gt;</literal> settings</title>
+            <para>This section summarises the various transactional settings that can be specified
+            using the <literal>&lt;tx:advice/&gt;</literal> tag. The default
+            <literal>&lt;tx:advice/&gt;</literal> settings are:</para>
+            <para>
+                <itemizedlist>
+                    <listitem>
+                        <para>The propagation setting is <literal>REQUIRED</literal></para>
+                    </listitem>
+                    <listitem>
+                        <para>The isolation level is <literal>DEFAULT</literal></para>
+                    </listitem>
+                    <listitem>
+                        <para>The transaction is read/write</para>
+                    </listitem>
+                    <listitem>
+                        <para>The transaction timeout defaults to the default timeout of the
+                        underlying transaction system, or or none if timeouts are not supported</para>
+                    </listitem>
+                    <listitem>
+                        <para>Any <exceptionname>RuntimeException</exceptionname> will trigger
+                        rollback, and any checked <exceptionname>Exception</exceptionname>
+                        will not</para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <para>These default settings can, of course, be changed; the various
+            attributes of the <literal>&lt;tx:method/&gt;</literal> tags that are nested within
+            <literal>&lt;tx:advice/&gt;</literal> and <literal>&lt;tx:attributes/&gt;</literal>
+            tags are summarized below:</para>
+            <para>
+                <table>
+                    <title><literal>&lt;tx:method/&gt;</literal> settings</title>
+                    <tgroup cols="4">
+                        <thead>
+                            <row>
+                                <entry>Attribute</entry>
+                                <entry>Required?</entry>
+                                <entry>Default</entry>
+                                <entry>Description</entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row>
+                                <entry><literal>name</literal></entry>
+                                <entry>Yes</entry>
+                                <entry></entry>
+                                <entry>
+                                    <para>The method name(s) with which the transaction attributes
+                                    are to be associated. The wildcard (*) character can be used to
+                                    associate the same transaction attribute settings with a number
+                                    of methods; for example, <literal>'get*'</literal>,
+                                    <literal>'handle*'</literal>,<literal> 'on*Event'</literal>, etc.</para>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry><literal>propagation</literal></entry>
+                                <entry>No</entry>
+                                <entry>REQUIRED</entry>
+                                <entry>The transaction propagation behavior</entry>
+                            </row>
+                            <row>
+                                <entry><literal>isolation</literal></entry>
+                                <entry>No</entry>
+                                <entry>DEFAULT</entry>
+                                <entry>The transaction isolation level</entry>
+                            </row>
+                            <row>
+                                <entry><literal>timeout</literal></entry>
+                                <entry>No</entry>
+                                <entry>-1</entry>
+                                <entry>The transaction timeout value (in seconds)</entry>
+                            </row>
+                            <row>
+                                <entry><literal>read-only</literal></entry>
+                                <entry>No</entry>
+                                <entry>false</entry>
+                                <entry>Is this transaction read-only?</entry>
+                            </row>
+                            <row>
+                                <entry><literal>rollback-for</literal></entry>
+                                <entry>No</entry>
+                                <entry></entry>
+                                <entry>
+                                    <para>The <literal>Exception(s)</literal> that will trigger
+                                    rollback; comma-delimited. For example,
+                                    <literal>'com.foo.MyBusinessException,ServletException'</literal></para>
+                                </entry>
+                            </row>
+                            <row>
+                                <entry><literal>no-rollback-for</literal></entry>
+                                <entry>No</entry>
+                                <entry></entry>
+                                <entry>
+                                    <para>The <literal>Exception(s)</literal> that will
+                                    <emphasis>not</emphasis> trigger rollback; comma-delimited.
+	                                For example,
+	                                <literal>'com.foo.MyBusinessException,ServletException'</literal></para>
+                                </entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
+            </para>
+        </section>
+
         <section id="transaction-declarative-annotations">
             <title>Using <interfacename>@Transactional</interfacename></title>
 			<note>
@@ -952,14 +1124,14 @@ public class DefaultFooService implements FooService {
     }
 }]]></programlisting>
 
-            <section>
+            <section id="transaction-declarative-attransactional-settings">
                 <title><interfacename>@Transactional</interfacename> settings</title>
                 <para>The <interfacename>@Transactional</interfacename> annotation is
                 metadata that specifies that an interface, class, or method must have
-                transactional semantics; for example, <quote>start a brand new read-only
+                transactional semantics; for example, <quote><emphasis>start a brand new read-only
                 transaction when this method is invoked, suspending any existing
-                transaction</quote>. The default <interfacename>@Transactional</interfacename>
-                settings are:</para>
+                transaction</emphasis></quote>. The default
+                <interfacename>@Transactional</interfacename> settings are:</para>
                 <itemizedlist>
                     <listitem>
                         <para>The propagation setting is <literal>PROPAGATION_REQUIRED</literal></para>
@@ -1431,7 +1603,7 @@ txManager.commit(status);]]></programlisting>
             Please see the Javadocs for full details.</para>
         </section>
     </section>
-    <section>
+    <section id="transaction-solutions-to-common-problems">
         <title>Solutions to common problems</title>
         <section>
             <title>Use of the wrong transaction manager for a specific <interfacename>DataSource</interfacename></title>
@@ -1450,5 +1622,17 @@ txManager.commit(status);]]></programlisting>
              <interfacename>DataSource</interfacename> instances. Such local transactions
              don't make sense, and a good application server will treat them as errors.</para>
         </section>
+    </section>
+    <section id="transaction-resources">
+		<title>Further Resources</title>
+		<para>Find below links to further resources about the Spring Framework's transaction support.</para>
+		<itemizedlist>
+			<listitem>
+				<para>This book, <ulink url="http://www.infoq.com/minibooks/JTDS">Java Transaction Design Strategies</ulink>
+				from <ulink url="http://www.infoq.com/">InfoQ</ulink> is a nice, well-paced introduction to
+				transactions in the Java space. It also includes side-by-side examples of how to
+				configure and use transactions in both the Spring Framework and EJB3.</para>
+			</listitem>
+		</itemizedlist>
     </section>
 </chapter>
