@@ -19,13 +19,10 @@ package org.springframework.beans.factory.config;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Simple {@link BeanFactoryPostProcessor} implementation that effects the
@@ -48,12 +45,9 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 
 
 	/**
-	 * The custom scopes that are to be registered.
-	 * <p>The keys of the supplied {@link Map} <b>must</b> be {@link String Strings};
-	 * the values can be either the fully qualified classname of the {@link Scope} type
-	 * that is to be instantiated, the actual {@link Class} of the {@link Scope} type
-	 * that is to be instantiated, or an actual custom {@link Scope} instance itself.
-	 * @param scopes the custom scopes that are to be registered
+	 * Specify the custom scopes that are to be registered.
+	 * <p>The keys indicate the scope names (of type String); each value
+	 * is expected to be the corresponding custom {@link Scope} instance.
 	 */
 	public void setScopes(Map scopes) {
 		this.scopes = scopes;
@@ -73,58 +67,21 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 
 
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		if (this.scopes != null && this.scopes.size() > 0) {
-			for (Iterator it = this.scopes.keySet().iterator(); it.hasNext();) {
-				String scopeName = resolveScopeName(it.next());
-				Scope scope = resolveScope(this.scopes.get(scopeName));
-				beanFactory.registerScope(scopeName, scope);
+		if (this.scopes != null) {
+			for (Iterator it = this.scopes.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				Object key = entry.getKey();
+				if (!(key instanceof String)) {
+					throw new IllegalArgumentException(
+							"Invalid scope key [" + key + "]: only Strings allowed");
+				}
+				Object value = entry.getValue();
+				if (!(value instanceof Scope)) {
+					throw new IllegalArgumentException("Mapped value [" + value + "] for scope key [" +
+							key + "] is not of required type [" + Scope.class.getName() + "]");
+				}
+				beanFactory.registerScope((String) key, (Scope) value);
 			}
-		}
-	}
-
-
-	private String resolveScopeName(Object value) {
-		if (value instanceof String) {
-			String scopeName = (String) value;
-			if (StringUtils.hasText(scopeName)) {
-				return scopeName;
-			}
-		}
-		throw new BeanInitializationException(
-				"Invalid scope name [" + value + "] for custom scope registration - " +
-						"needs to be a non-whitespace-only String");
-	}
-
-	private Scope resolveScope(Object value) {
-		if (value instanceof String) {
-			String className = (String) value;
-			try {
-				Class scopeType = ClassUtils.forName(className, this.beanClassLoader);
-				return instantiateScope(scopeType);
-			}
-			catch (ClassNotFoundException ex) {
-				throw new BeanInitializationException(
-						"Could not load required type [" + className + "] for custom scope", ex);
-			}
-		} else if (value instanceof Class) {
-			return instantiateScope((Class) value);
-		} else if (value instanceof Scope) {
-			return (Scope) value;
-		} else {
-			throw new BeanInitializationException(
-					"Invalid scope value [" + value + "] for custom scope registration - " +
-							"needs to be a fully qualified classname, Class, or Scope instance");
-		}
-	}
-
-
-	private static Scope instantiateScope(Class scopeType) {
-		if (Scope.class.isAssignableFrom(scopeType)) {
-			return (Scope) BeanUtils.instantiateClass(scopeType);
-		} else {
-			throw new BeanInitializationException(
-					"Invalid class type [" + scopeType + "] for custom scope : must be " +
-							"assignable to the [" + ClassUtils.getQualifiedName(Scope.class) + "] type");
 		}
 	}
 
