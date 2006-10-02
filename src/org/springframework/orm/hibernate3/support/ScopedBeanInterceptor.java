@@ -27,12 +27,12 @@ import org.springframework.aop.scope.ScopedObject;
  * </p>
  * 
  * <pre>
- *  &lt;bean id=&quot;sessionFactory&quot; class=&quot;org.springframework.orm.hibernate3.LocalSessionFactoryBean&quot;&gt;
- *     ...
- *    &lt;property name=&quot;entityInterceptor&quot;&gt;
- *   	&lt;bean class=&quot;org.springframework.orm.hibernate3.support.ScopedBeanInterceptor&quot;/&gt;
- *    &lt;/property&gt;
- *  &lt;/bean&gt;
+ *          &lt;bean id=&quot;sessionFactory&quot; class=&quot;org.springframework.orm.hibernate3.LocalSessionFactoryBean&quot;&gt;
+ *             ...
+ *            &lt;property name=&quot;entityInterceptor&quot;&gt;
+ *           	&lt;bean class=&quot;org.springframework.orm.hibernate3.support.ScopedBeanInterceptor&quot;/&gt;
+ *            &lt;/property&gt;
+ *          &lt;/bean&gt;
  * </pre>
  * 
  * @author Costin Leau
@@ -40,15 +40,19 @@ import org.springframework.aop.scope.ScopedObject;
  */
 public class ScopedBeanInterceptor extends EmptyInterceptor {
 
+	private static final String CGLIB_SEPARATOR = "$$";
+
 	public String getEntityName(Object entity) {
 		if (entity instanceof ScopedObject) {
 			// get underlying object
 			Object targetObject = ((ScopedObject) entity).getTargetObject();
-			return targetObject.getClass().getName();
+			// remove CGLIB signatures (if any)
+			String fullName = targetObject.getClass().getName();
+			int index = fullName.indexOf(CGLIB_SEPARATOR);
+			return (index > 0 ? fullName.substring(0, index) : fullName);
 		}
 
 		// delegate to default implementation
 		return super.getEntityName(entity);
 	}
-
 }
