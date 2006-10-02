@@ -23,8 +23,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.framework.Advised;
-import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.framework.AopProxyUtils;
 
 /**
  * Base <code>MethodInterceptor</code> implementation for tracing.
@@ -129,25 +128,12 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 		if (this.defaultLogger != null) {
 			return this.defaultLogger;
 		}
-
 		else {
 			Object target = invocation.getThis();
 			Class logCategoryClass = target.getClass();
-
 			if (this.hideProxyClassNames) {
-				if (AopUtils.isJdkDynamicProxy(target) && target instanceof Advised) {
-					Class targetClass = ((Advised) target).getTargetSource().getTargetClass();
-					if (targetClass != null) {
-						logCategoryClass = targetClass;
-					}
-				}
-				else {
-					while (AopUtils.isCglibProxyClass(logCategoryClass)) {
-						logCategoryClass = logCategoryClass.getSuperclass();
-					}
-				}
+				logCategoryClass = AopProxyUtils.getTargetClass(target);
 			}
-
 			return LogFactory.getLog(logCategoryClass);
 		}
 	}
