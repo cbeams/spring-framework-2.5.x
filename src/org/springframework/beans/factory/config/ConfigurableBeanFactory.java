@@ -177,8 +177,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * <p>Typically invoked during factory configuration, but can also be
 	 * used for runtime registration of aliases. Therefore, a factory
 	 * implementation should synchronize alias access.
-	 * @param beanName name of the bean
-	 * @param alias alias that will behave the same as the bean name
+	 * @param beanName the canonical name of the bean
+	 * @param alias the alias to be registered for the bean
 	 * @throws BeanDefinitionStoreException if the alias is already in use
 	 */
 	void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException;
