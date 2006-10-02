@@ -21,13 +21,12 @@ import java.util.Stack;
 /**
  * Simple {@link Stack}-based structure for tracking the logical position during
  * a parsing process. {@link Entry entries} are added to the stack at
- * each point during the parse phase in a
- * {@link org.springframework.beans.factory.support.BeanDefinitionReader}-specific manner.
+ * each point during the parse phase in a reader-specific manner.
  *
  * <p>Calling {@link #toString()} will render a tree-style view of the current logical
  * position in the parse phase. This representation is intended for use in
  * error messages.
- * 
+ *
  * @author Rob Harrop
  * @since 2.0
  */
