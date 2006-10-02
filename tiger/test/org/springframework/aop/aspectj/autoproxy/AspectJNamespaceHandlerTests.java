@@ -50,18 +50,18 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 	}
 
 	public void testRegisterAutoProxyCreator() throws Exception {
-		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(this.parserContext);
+		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(this.parserContext, null);
 		assertEquals("Incorrect number of definitions registered", 1, registry.getBeanDefinitionCount());
 
-		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
+		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext, null);
 		assertEquals("Incorrect number of definitions registered", 1, registry.getBeanDefinitionCount());
 	}
 
 	public void testRegisterAspectJAutoProxyCreator() throws Exception {
-		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
+		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext, null);
 		assertEquals("Incorrect number of definitions registered", 1, registry.getBeanDefinitionCount());
 
-		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
+		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext, null);
 		assertEquals("Incorrect number of definitions registered", 1, registry.getBeanDefinitionCount());
 
 		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
@@ -69,25 +69,25 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 	}
 
 	public void testRegisterAspectJAutoProxyCreatorWithExistingAutoProxyCreator() throws Exception {
-		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(this.parserContext);
+		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(this.parserContext, null);
 		assertEquals(1, registry.getBeanDefinitionCount());
 
-		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
+		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext, null);
 		assertEquals("Incorrect definition count", 1, registry.getBeanDefinitionCount());
 
 		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
-		assertEquals("APC class not swicthed", AspectJInvocationContextExposingAdvisorAutoProxyCreator.class, definition.getBeanClass());
+		assertEquals("APC class not switched", AspectJInvocationContextExposingAdvisorAutoProxyCreator.class.getName(), definition.getBeanClassName());
 	}
 
 	public void testRegisterAutoProxyCreatorWhenAspectJAutoProxyCreatorAlreadyExists() throws Exception {
-		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext);
+		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext, null);
 		assertEquals(1, registry.getBeanDefinitionCount());
 
-		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(this.parserContext);
+		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(this.parserContext, null);
 		assertEquals("Incorrect definition count", 1, registry.getBeanDefinitionCount());
 
 		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
-		assertEquals("Incorrect APC class", AspectJInvocationContextExposingAdvisorAutoProxyCreator.class, definition.getBeanClass());
+		assertEquals("Incorrect APC class", AspectJInvocationContextExposingAdvisorAutoProxyCreator.class.getName(), definition.getBeanClassName());
 	}
 
 }
