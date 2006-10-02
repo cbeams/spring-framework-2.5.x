@@ -111,7 +111,7 @@ public class MethodMapTransactionAttributeSource
 				Object key = entry.getKey();
 				if (!(key instanceof String)) {
 					throw new IllegalArgumentException(
-							"Illegal method map key [" + key + "]: only Strings allowed");
+							"Invalid method map key [" + key + "]: only Strings allowed");
 				}
 				Object value = entry.getValue();
 				// Check whether we need to convert from String to TransactionAttribute.

@@ -178,7 +178,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 				Object key = entry.getKey();
 				if (!(key instanceof String)) {
 					throw new IllegalArgumentException(
-							"Illegal attribute key [" + key + "]: only Strings allowed");
+							"Invalid attribute key [" + key + "]: only Strings allowed");
 				}
 				addStaticAttribute((String) key, entry.getValue());
 			}
@@ -293,7 +293,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 			Map.Entry entry = (Map.Entry) it.next();
 			if (!(entry.getKey() instanceof String)) {
 				throw new IllegalArgumentException(
-						"Invalid key [" + entry.getKey() + "] in model Map - only Strings allowed as model keys");
+						"Invalid key [" + entry.getKey() + "] in model Map: only Strings allowed as model keys");
 			}
 			String modelName = (String) entry.getKey();
 			Object modelValue = entry.getValue();
