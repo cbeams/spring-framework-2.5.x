@@ -132,7 +132,8 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
 				continue;
 			}
 			String propertyName = extractPropertyName(name);
-			Assert.state(StringUtils.hasText(propertyName), "Illegal property name returned from 'extractPropertyName(String)'; cannot be null or empty.");
+			Assert.state(StringUtils.hasText(propertyName),
+					"Illegal property name returned from 'extractPropertyName(String)': cannot be null or empty.");
 			builder.addPropertyValue(propertyName, attribute.getValue());
 		}
 		postProcess(builder, element);

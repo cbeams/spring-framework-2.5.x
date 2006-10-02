@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
 /**
  * Abstract {@link BeanDefinitionParser} implementation providing a number
  * of convenience methods and a
- * {@link AbstractBeanDefinitionParser#parseInternal(org.w3c.dom.Element, ParserContext) template method}
+ * {@link AbstractBeanDefinitionParser#parseInternal template method}
  * that subclasses must override to provide the actual parsing logic.
  *
  * <p>Use this {@link BeanDefinitionParser} implementation when you want
@@ -110,7 +110,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	 * Central template method to actually parse the supplied {@link Element}
 	 * into one or more {@link BeanDefinition BeanDefinitions}.
 	 * @param element	the element that is to be parsed into one or more {@link BeanDefinition BeanDefinitions}
-	 * @param parserContext the object encapsulating the current state of the parse;
+	 * @param parserContext the object encapsulating the current state of the parsing process;
 	 * provides access to a {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
 	 * @return the primary {@link BeanDefinition} resulting from the parsing of the supplied {@link Element}
 	 * @see #parse(org.w3c.dom.Element, ParserContext)
