@@ -48,7 +48,7 @@ public class LetterCodedLabeledEnum extends AbstractGenericLabeledEnum {
 		this.code = new Character(code);
 	}
 
-
+	
 	public Comparable getCode() {
 		return code;
 	}

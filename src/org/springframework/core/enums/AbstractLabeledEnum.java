@@ -74,8 +74,7 @@ public abstract class AbstractLabeledEnum implements LabeledEnum {
 	}
 
 	public String toString() {
-		String enumStr = (getLabel() != null ? getLabel() + " (" + getCode() + ")" : String.valueOf(getCode()));
-		return "[" + getType() + "." + enumStr + "]";
+		return getLabel();
 	}
 
 }
