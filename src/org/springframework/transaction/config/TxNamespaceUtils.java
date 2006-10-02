@@ -41,9 +41,10 @@ class TxNamespaceUtils {
 		try {
 			return ClassUtils.forName(ANNOTATION_TRANSACTION_ATTRIBUTE_SOURCE_CLASS_NAME);
 		}
-		catch (ClassNotFoundException ex) {
+		catch (Throwable ex) {
 			throw new IllegalStateException(
-					"Unable to load AnnotationTransactionAttributeSource class. Are you running on Java 1.5+?");
+					"Unable to load AnnotationTransactionAttributeSource class. Are you running on Java 1.5+? " +
+					"Root cause: " + ex);
 		}
 	}
 
