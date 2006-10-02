@@ -19,12 +19,12 @@ package org.springframework.aop.aspectj.autoproxy;
 import junit.framework.TestCase;
 
 import org.springframework.aop.config.AopNamespaceUtils;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.parsing.CollectingReaderEventListener;
 import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.parsing.SourceExtractor;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.MapBasedReaderEventListener;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.factory.xml.XmlReaderContext;
@@ -36,7 +36,7 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 
 	private ParserContext parserContext;
 
-	private MapBasedReaderEventListener readerEventListener = new MapBasedReaderEventListener();
+	private CollectingReaderEventListener readerEventListener = new CollectingReaderEventListener();
 
 	private BeanDefinitionRegistry registry = new DefaultListableBeanFactory();
 
@@ -45,7 +45,7 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 		SourceExtractor sourceExtractor = new PassThroughSourceExtractor();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.registry);
 		XmlReaderContext readerContext =
-				new XmlReaderContext(reader, null, null, this.readerEventListener, sourceExtractor, null);
+				new XmlReaderContext(null, null, this.readerEventListener, sourceExtractor, reader, null);
 		this.parserContext = new ParserContext(readerContext, null);
 	}
 
@@ -64,8 +64,9 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext, null);
 		assertEquals("Incorrect number of definitions registered", 1, registry.getBeanDefinitionCount());
 
-		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
-		assertEquals("Incorrect APC class", AspectJInvocationContextExposingAdvisorAutoProxyCreator.class, definition.getBeanClass());
+		BeanDefinition definition = registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		assertEquals("Incorrect APC class",
+				AspectJInvocationContextExposingAdvisorAutoProxyCreator.class.getName(), definition.getBeanClassName());
 	}
 
 	public void testRegisterAspectJAutoProxyCreatorWithExistingAutoProxyCreator() throws Exception {
@@ -75,8 +76,9 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(this.parserContext, null);
 		assertEquals("Incorrect definition count", 1, registry.getBeanDefinitionCount());
 
-		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
-		assertEquals("APC class not switched", AspectJInvocationContextExposingAdvisorAutoProxyCreator.class.getName(), definition.getBeanClassName());
+		BeanDefinition definition = registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		assertEquals("APC class not switched",
+				AspectJInvocationContextExposingAdvisorAutoProxyCreator.class.getName(), definition.getBeanClassName());
 	}
 
 	public void testRegisterAutoProxyCreatorWhenAspectJAutoProxyCreatorAlreadyExists() throws Exception {
@@ -86,8 +88,9 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(this.parserContext, null);
 		assertEquals("Incorrect definition count", 1, registry.getBeanDefinitionCount());
 
-		AbstractBeanDefinition definition = (AbstractBeanDefinition) registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
-		assertEquals("Incorrect APC class", AspectJInvocationContextExposingAdvisorAutoProxyCreator.class.getName(), definition.getBeanClassName());
+		BeanDefinition definition = registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		assertEquals("Incorrect APC class",
+				AspectJInvocationContextExposingAdvisorAutoProxyCreator.class.getName(), definition.getBeanClassName());
 	}
 
 }

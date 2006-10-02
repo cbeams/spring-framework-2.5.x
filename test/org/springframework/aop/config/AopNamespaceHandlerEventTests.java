@@ -23,9 +23,9 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
-import org.springframework.beans.factory.support.ComponentDefinition;
+import org.springframework.beans.factory.parsing.CollectingReaderEventListener;
+import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.MapBasedReaderEventListener;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 
@@ -34,7 +34,7 @@ import org.springframework.core.io.ClassPathResource;
  */
 public class AopNamespaceHandlerEventTests extends TestCase {
 
-	private MapBasedReaderEventListener eventListener = new MapBasedReaderEventListener();
+	private CollectingReaderEventListener eventListener = new CollectingReaderEventListener();
 
 	private XmlBeanDefinitionReader reader;
 

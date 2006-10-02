@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.support;
+package org.springframework.beans.factory.parsing;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -34,7 +34,7 @@ import org.springframework.beans.factory.config.BeanReference;
  * in the {@link org.springframework.beans.factory.BeanFactory} back to the configuration data in a way
  * that has concrete meaning to the end user. As such, {@link org.springframework.beans.factory.xml.NamespaceHandler}
  * implementations are able to publish events in the form of a <code>ComponentDefinition</code> for each
- * logical entity being configured. Third parties can then {@link ReaderEventListener subscribe to these events},
+ * logical entity being configured. Third parties can then {@link org.springframework.beans.factory.parsing.ReaderEventListener subscribe to these events},
  * allowing for a user-centric view of the bean metadata.
  *
  * <p>Each <code>ComponentDefinition</code> has a {@link #getSource source object} which is configuration-specific.
@@ -69,6 +69,7 @@ import org.springframework.beans.factory.config.BeanReference;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
+ * @see ReaderEventListener#componentRegistered(ComponentDefinition)
  */
 public interface ComponentDefinition extends BeanMetadataElement {
 
@@ -86,8 +87,8 @@ public interface ComponentDefinition extends BeanMetadataElement {
 	String getDescription();
 
 	/**
-	 * Return the {@link BeanDefinition BeanDefinitions} that were registed with the
-	 * {@link BeanDefinitionRegistry} to form this <code>ComponentDefinition</code>.
+	 * Return the {@link BeanDefinition BeanDefinitions} that were registered
+	 * to form this <code>ComponentDefinition</code>.
 	 * It should be noted that a <code>ComponentDefinition</code> may well be related with
 	 * other {@link BeanDefinition BeanDefinitions} via {@link BeanReference references},
 	 * however these are <strong>not</strong> included as they may be not available immediately.

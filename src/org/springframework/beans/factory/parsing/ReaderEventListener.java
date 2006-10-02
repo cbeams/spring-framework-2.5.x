@@ -14,19 +14,37 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.support;
+package org.springframework.beans.factory.parsing;
 
 import java.util.EventListener;
 
 /**
+ * Interface that receives callbacks for component, alias and import
+ * registrations during a bean definition reading process.
+ *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
+ * @see ReaderContext
  */
 public interface ReaderEventListener extends EventListener {
 
+	/**
+	 * Notification that the given component has been registered.
+	 * @param componentDefinition a descriptor for the new component
+	 */
 	void componentRegistered(ComponentDefinition componentDefinition);
 
-	void aliasRegistered(String targetBeanName, String alias, Object source);
+	/**
+	 * Notification that the given alias has been registered.
+	 * @param aliasDefinition a descriptor for the new alias
+	 */
+	void aliasRegistered(AliasDefinition aliasDefinition);
 
-	void importProcessed(String importedResource, Object source);
+	/**
+	 * Notification that the given import has been processed.
+	 * @param importDefinition a descriptor for the import
+	 */
+	void importProcessed(ImportDefinition importDefinition);
+
 }

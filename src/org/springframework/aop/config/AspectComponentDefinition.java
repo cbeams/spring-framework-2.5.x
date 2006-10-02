@@ -20,7 +20,7 @@ import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
-import org.springframework.beans.factory.support.AbstractComponentDefinition;
+import org.springframework.beans.factory.parsing.AbstractComponentDefinition;
 import org.springframework.util.Assert;
 
 /**

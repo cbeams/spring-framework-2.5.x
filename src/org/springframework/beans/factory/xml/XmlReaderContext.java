@@ -17,14 +17,14 @@
 package org.springframework.beans.factory.xml;
 
 import org.springframework.beans.factory.parsing.ProblemReporter;
-import org.springframework.beans.factory.support.ReaderContext;
-import org.springframework.beans.factory.support.ReaderEventListener;
+import org.springframework.beans.factory.parsing.ReaderContext;
+import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.beans.factory.parsing.SourceExtractor;
-import org.springframework.beans.factory.parsing.SourceExtractor;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.io.Resource;
 
 /**
- * Extension of {@link ReaderContext} specific to use with an {@link XmlBeanDefinitionReader}.
+ * Extension of {@link org.springframework.beans.factory.parsing.ReaderContext} specific to use with an {@link XmlBeanDefinitionReader}.
  * Provides access to the {@link NamespaceHandlerResolver} configured in the
  * {@link XmlBeanDefinitionReader}.
  *
@@ -33,15 +33,28 @@ import org.springframework.core.io.Resource;
  */
 public class XmlReaderContext extends ReaderContext {
 
+	private final XmlBeanDefinitionReader reader;
+
 	private final NamespaceHandlerResolver namespaceHandlerResolver;
 
-	public XmlReaderContext(
-			XmlBeanDefinitionReader reader, Resource resource, ProblemReporter problemReporter,
-			ReaderEventListener eventListener, SourceExtractor sourceExtractor,
-			NamespaceHandlerResolver namespaceHandlerResolver) {
 
-		super(reader, resource, problemReporter, eventListener, sourceExtractor);
+	public XmlReaderContext(
+			Resource resource, ProblemReporter problemReporter,
+			ReaderEventListener eventListener, SourceExtractor sourceExtractor,
+			XmlBeanDefinitionReader reader, NamespaceHandlerResolver namespaceHandlerResolver) {
+
+		super(resource, problemReporter, eventListener, sourceExtractor);
+		this.reader = reader;
 		this.namespaceHandlerResolver = namespaceHandlerResolver;
+	}
+
+
+	public XmlBeanDefinitionReader getReader() {
+		return reader;
+	}
+
+	public BeanDefinitionRegistry getRegistry() {
+		return getReader().getBeanFactory();
 	}
 
 	public NamespaceHandlerResolver getNamespaceHandlerResolver() {

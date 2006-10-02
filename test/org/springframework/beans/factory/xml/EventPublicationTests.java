@@ -21,10 +21,10 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanComponentDefinition;
-import org.springframework.beans.factory.support.ComponentDefinition;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.parsing.CollectingReaderEventListener;
+import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.MapBasedReaderEventListener;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -35,7 +35,7 @@ public class EventPublicationTests extends TestCase {
 
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
-	private final MapBasedReaderEventListener eventListener = new MapBasedReaderEventListener();
+	private final CollectingReaderEventListener eventListener = new CollectingReaderEventListener();
 
 
 	protected void setUp() throws Exception {

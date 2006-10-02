@@ -50,7 +50,7 @@ public final class ParserContext {
 	}
 
 	public BeanDefinitionRegistry getRegistry() {
-		return getReaderContext().getReader().getBeanFactory();
+		return getReaderContext().getRegistry();
 	}
 
 	public BeanDefinitionParserDelegate getDelegate() {
@@ -62,7 +62,7 @@ public final class ParserContext {
 	}
 
 	public boolean isNested() {
-		return (this.containingBeanDefinition != null);
+		return (getContainingBeanDefinition() != null);
 	}
 
 	public Object extractSource(Object sourceCandidate) {

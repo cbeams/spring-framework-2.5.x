@@ -16,20 +16,20 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Properties;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.MapBasedReaderEventListener;
-import org.springframework.beans.factory.support.ComponentDefinition;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.parsing.CollectingReaderEventListener;
+import org.springframework.beans.factory.parsing.ComponentDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -39,7 +39,7 @@ public class UtilNamespaceHandlerTests extends TestCase {
 
 	private DefaultListableBeanFactory beanFactory;
 
-	private MapBasedReaderEventListener listener = new MapBasedReaderEventListener();
+	private CollectingReaderEventListener listener = new CollectingReaderEventListener();
 
 	public void setUp() {
 		this.beanFactory = new DefaultListableBeanFactory();

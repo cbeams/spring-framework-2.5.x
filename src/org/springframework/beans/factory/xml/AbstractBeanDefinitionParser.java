@@ -21,7 +21,7 @@ import org.w3c.dom.Element;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanComponentDefinition;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.util.StringUtils;
@@ -114,7 +114,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	 * provides access to a {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
 	 * @return the primary {@link BeanDefinition} resulting from the parsing of the supplied {@link Element}
 	 * @see #parse(org.w3c.dom.Element, ParserContext)
-	 * @see #postProcessComponentDefinition(org.springframework.beans.factory.support.BeanComponentDefinition)
+	 * @see #postProcessComponentDefinition(org.springframework.beans.factory.parsing.BeanComponentDefinition)
 	 */
 	protected abstract AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext);
 
@@ -128,7 +128,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 
 	/**
 	 * Controls whether this instance is to
-	 * {@link org.springframework.beans.factory.support.ReaderContext#fireComponentRegistered(org.springframework.beans.factory.support.ComponentDefinition) fire an event}
+	 * {@link org.springframework.beans.factory.parsing.ReaderContext#fireComponentRegistered(org.springframework.beans.factory.parsing.ComponentDefinition) fire an event}
 	 * when a bean definition has been totally parsed?
 	 * <p>Implementations must return <code>true</code> if they want an event
 	 * will be fired when a bean definition has been totally parsed; returning
@@ -136,7 +136,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	 * <p>This implementation returns <code>true</code> by default; that is, an event
 	 * will be fired when a bean definition has been totally parsed.
 	 * @return <code>true</code> if this instance is to
-	 * {@link org.springframework.beans.factory.support.ReaderContext#fireComponentRegistered(org.springframework.beans.factory.support.ComponentDefinition) fire an event}
+	 * {@link org.springframework.beans.factory.parsing.ReaderContext#fireComponentRegistered(org.springframework.beans.factory.parsing.ComponentDefinition) fire an event}
 	 * when a bean definition has been totally parsed
 	 */
 	protected boolean shouldFireEvents() {

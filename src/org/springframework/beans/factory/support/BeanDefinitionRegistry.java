@@ -91,8 +91,8 @@ public interface BeanDefinitionRegistry {
 	/**
 	 * Given a bean name, create an alias. We typically use this method to
 	 * support names that are illegal within XML ids (used for bean names).
-	 * @param beanName the name of the bean
-	 * @param alias alias that will behave the same as the bean name
+	 * @param beanName the canonical name of the bean
+	 * @param alias the alias to be registered for the bean
 	 * @throws BeanDefinitionStoreException if the alias is already in use
 	 */
 	void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException;

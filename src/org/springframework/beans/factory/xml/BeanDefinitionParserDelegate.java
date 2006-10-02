@@ -51,7 +51,6 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.ManagedProperties;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
-import org.springframework.beans.factory.support.ReaderContext;
 import org.springframework.beans.factory.support.ReplaceOverride;
 import org.springframework.core.AttributeAccessor;
 import org.springframework.util.Assert;
@@ -242,16 +241,16 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Create a new <code>XmlBeanDefinitionParserHelper</code> associated with the
-	 * supplied {@link ReaderContext}.
+	 * supplied {@link XmlReaderContext}.
 	 */
 	public BeanDefinitionParserDelegate(XmlReaderContext readerContext) {
-		Assert.notNull(readerContext, "'readerContext' cannot be null.");
+		Assert.notNull(readerContext, "XmlReaderContext must not be null");
 		this.readerContext = readerContext;
 	}
 
 
 	/**
-	 * Get the {@link ReaderContext} associated with this helper instance.
+	 * Get the {@link XmlReaderContext} associated with this helper instance.
 	 */
 	public XmlReaderContext getReaderContext() {
 		return this.readerContext;
@@ -339,6 +338,29 @@ public class BeanDefinitionParserDelegate {
 	 */
 	public final String getDefaultMerge() {
 		return defaultMerge;
+	}
+
+
+	/**
+	 * Invoke the {@link org.springframework.beans.factory.parsing.SourceExtractor} to pull the
+	 * source metadata from the supplied {@link Element}.
+	 */
+	protected Object extractSource(Element ele) {
+		return getReaderContext().extractSource(ele);
+	}
+
+	/**
+	 * Report an error with the given message for the given source element-
+	 */
+	protected void error(String message, Element source) {
+		getReaderContext().error(message, source, this.parseState.snapshot());
+	}
+
+	/**
+	 * Report an error with the given message for the given source element-
+	 */
+	protected void error(String message, Element source, Throwable cause) {
+		getReaderContext().error(message, source, this.parseState.snapshot(), cause);
 	}
 
 
@@ -573,14 +595,6 @@ public class BeanDefinitionParserDelegate {
 				attributeAccessor.setAttribute(key, value);
 			}
 		}
-	}
-
-	/**
-	 * Invoke the {@link org.springframework.beans.factory.parsing.SourceExtractor} to pull the
-	 * source metadata from the supplied {@link Element}.
-	 */
-	protected Object extractSource(Element ele) {
-		return getReaderContext().extractSource(ele);
 	}
 
 	public int getDependencyCheck(String att) {
@@ -1186,14 +1200,6 @@ public class BeanDefinitionParserDelegate {
 			return new TypedStringValue(value, targetType);
 		}
 		return new TypedStringValue(value, targetTypeName);
-	}
-
-	private void error(String message, Object source) {
-		getReaderContext().error(message, source, this.parseState.snapshot());
-	}
-
-	private void error(String message, Object source, Throwable cause) {
-		getReaderContext().error(message, source, this.parseState.snapshot(), cause);
 	}
 
 }

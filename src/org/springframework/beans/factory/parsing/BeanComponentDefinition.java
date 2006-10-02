@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.support;
+package org.springframework.beans.factory.parsing;
 
 import java.util.ArrayList;
 import java.util.List;

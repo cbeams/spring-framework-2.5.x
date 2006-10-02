@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.support;
+package org.springframework.beans.factory.parsing;
 
-import org.springframework.beans.factory.parsing.Location;
-import org.springframework.beans.factory.parsing.ParseState;
-import org.springframework.beans.factory.parsing.Problem;
-import org.springframework.beans.factory.parsing.ProblemReporter;
-import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.core.io.Resource;
 
 /**
@@ -39,30 +34,22 @@ public class ReaderContext {
 
 	private final ReaderEventListener eventListener;
 
-	private final BeanDefinitionReader reader;
-
 	private final SourceExtractor sourceExtractor;
 
 
-	public ReaderContext(
-			BeanDefinitionReader reader, Resource resource, ProblemReporter problemReporter,
+	public ReaderContext(Resource resource, ProblemReporter problemReporter,
 			ReaderEventListener eventListener, SourceExtractor sourceExtractor) {
 
-		this.reader = reader;
 		this.resource = resource;
 		this.problemReporter = problemReporter;
 		this.eventListener = eventListener;
 		this.sourceExtractor = sourceExtractor;
 	}
 
-	public BeanDefinitionReader getReader() {
-		return reader;
-	}
 
 	public Resource getResource() {
 		return this.resource;
 	}
-
 
 	public void error(String message, Object source) {
 		error(message, source, null, null);
@@ -74,7 +61,7 @@ public class ReaderContext {
 
 	public void error(String message, Object source, ParseState parseState, Throwable cause) {
 		Location location = new Location(getResource(), source);
-		this.problemReporter.error(new Problem(message, parseState, cause, location));
+		this.problemReporter.error(new Problem(message, location, parseState, cause));
 	}
 
 	public void warning(String message, Object source) {
@@ -87,19 +74,19 @@ public class ReaderContext {
 
 	public void warning(String message, Object source, ParseState parseState, Throwable cause) {
 		Location location = new Location(getResource(), source);
-		this.problemReporter.warning(new Problem(message, parseState, cause, location));
+		this.problemReporter.warning(new Problem(message, location, parseState, cause));
 	}
 
 	public void fireComponentRegistered(ComponentDefinition componentDefinition) {
 		this.eventListener.componentRegistered(componentDefinition);
 	}
 
-	public void fireAliasRegistered(String targetBeanName, String alias, Object source) {
-		this.eventListener.aliasRegistered(targetBeanName, alias, source);
+	public void fireAliasRegistered(String beanName, String alias, Object source) {
+		this.eventListener.aliasRegistered(new AliasDefinition(beanName, alias, source));
 	}
 
 	public void fireImportProcessed(String importedResource, Object source) {
-		this.eventListener.importProcessed(importedResource, source);
+		this.eventListener.importProcessed(new ImportDefinition(importedResource, source));
 	}
 
 	public SourceExtractor getSourceExtractor() {

@@ -26,9 +26,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.BeanComponentDefinition;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.support.ReaderContext;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.SystemPropertyUtils;
@@ -99,7 +99,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	/**
 	 * Return the descriptor for the XML resource that this parser works on.
 	 */
-	protected final ReaderContext getReaderContext() {
+	protected final XmlReaderContext getReaderContext() {
 		return this.readerContext;
 	}
 
@@ -166,7 +166,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			if (bdHolder != null) {
 				bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 				// Register the final decorated instance.
-				BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getReader().getBeanFactory());
+				BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getRegistry());
 
 				// send registration event
 				getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));

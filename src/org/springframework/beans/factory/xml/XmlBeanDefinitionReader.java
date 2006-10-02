@@ -30,14 +30,14 @@ import org.xml.sax.SAXParseException;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.parsing.EmptyReaderEventListener;
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.beans.factory.parsing.NullSourceExtractor;
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.ComponentDefinition;
-import org.springframework.beans.factory.support.ReaderEventListener;
 import org.springframework.core.Constants;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
@@ -129,7 +129,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/**
 	 * The {@link ReaderEventListener} that all component registration events should be sent to.
 	 */
-	private ReaderEventListener eventListener = new NullReaderEventListener();
+	private ReaderEventListener eventListener = new EmptyReaderEventListener();
 
 	/**
 	 * The {@link SourceExtractor} to use when extracting
@@ -214,7 +214,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * Specify which {@link ReaderEventListener} to use. Default implementation is
-	 * NullReaderEventListener which discards every event notification. External tools
+	 * EmptyReaderEventListener which discards every event notification. External tools
 	 * can provide an alternative implementation to monitor the components being registered
 	 * in the BeanFactory.
 	 */
@@ -519,7 +519,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			resolver = createDefaultNamespaceHandlerResolver();
 		}
 		return new XmlReaderContext(
-				this, resource, this.problemReporter, this.eventListener, this.sourceExtractor, resolver);
+				resource, this.problemReporter, this.eventListener, this.sourceExtractor, this, resolver);
 	}
 
 	/**
@@ -528,25 +528,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	protected NamespaceHandlerResolver createDefaultNamespaceHandlerResolver() {
 		return new DefaultNamespaceHandlerResolver(getResourceLoader().getClassLoader());
-	}
-
-
-	/**
-	 * Empty implementation of the ReaderEventListener interface.
-	 */
-	private static class NullReaderEventListener implements ReaderEventListener {
-
-		public void componentRegistered(ComponentDefinition componentDefinition) {
-			// no-op
-		}
-
-		public void aliasRegistered(String targetBeanName, String alias, Object source) {
-			// no-op
-		}
-
-		public void importProcessed(String importedResource, Object source) {
-			// no-op
-		}
 	}
 
 }

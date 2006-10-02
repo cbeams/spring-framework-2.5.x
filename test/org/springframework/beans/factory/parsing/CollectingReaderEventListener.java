@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.support;
+package org.springframework.beans.factory.parsing;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Collection;
-import java.util.List;
-import java.util.Collections;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Rob Harrop
  */
-public class MapBasedReaderEventListener implements ReaderEventListener {
+public class CollectingReaderEventListener implements ReaderEventListener {
 
 	private final Map componentDefinitions = new HashMap();
 
 	private final Map aliasMap = new HashMap();
 
 	private final List imports = new ArrayList();
+
 
 	public void componentRegistered(ComponentDefinition componentDefinition) {
 		this.componentDefinitions.put(componentDefinition.getName(), componentDefinition);
@@ -47,13 +48,13 @@ public class MapBasedReaderEventListener implements ReaderEventListener {
 		return (ComponentDefinition[]) collection.toArray(new ComponentDefinition[collection.size()]);
 	}
 
-	public void aliasRegistered(String targetBeanName, String alias, Object source) {
-		List aliases = (List) this.aliasMap.get(targetBeanName);
+	public void aliasRegistered(AliasDefinition aliasDefinition) {
+		List aliases = (List) this.aliasMap.get(aliasDefinition.getBeanName());
 		if(aliases == null) {
 			aliases = new ArrayList();
-			this.aliasMap.put(targetBeanName, aliases);
+			this.aliasMap.put(aliasDefinition.getBeanName(), aliases);
 		}
-		aliases.add(alias);
+		aliases.add(aliasDefinition.getAlias());
 	}
 
 	public List getAliases(String beanName) {
@@ -61,11 +62,12 @@ public class MapBasedReaderEventListener implements ReaderEventListener {
 		return aliases == null ? null : Collections.unmodifiableList(aliases);
 	}
 
-	public void importProcessed(String importedResource, Object source) {
-		this.imports.add(importedResource);
+	public void importProcessed(ImportDefinition importDefinition) {
+		this.imports.add(importDefinition.getImportedResource());
 	}
 
 	public List getImports() {
 		return Collections.unmodifiableList(this.imports);
 	}
+
 }
