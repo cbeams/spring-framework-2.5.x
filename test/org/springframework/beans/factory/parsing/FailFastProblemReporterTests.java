@@ -48,8 +48,6 @@ public final class FailFastProblemReporterTests extends TestCase {
 
 		MockControl mockLog = MockControl.createControl(Log.class);
 		Log log = (Log) mockLog.getMock();
-		log.isWarnEnabled();
-		mockLog.setReturnValue(true);
 		log.warn(null, rootCause);
 		mockLog.setMatcher(new AbstractMatcher() {
 			public boolean matches(Object[] expected, Object[] actual) {
