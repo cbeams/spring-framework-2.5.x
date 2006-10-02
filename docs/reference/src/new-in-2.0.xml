@@ -2,7 +2,7 @@
 <chapter id="new-in-2">
   <title>What's new in Spring 2.0?</title>
 
-  <section>
+  <section id="new-in-2-intro">
     <title>Introduction</title>
     <para>If you have been using the Spring Framework for some time, you will
     be aware that Spring has just undergone a major revision.</para>
@@ -56,10 +56,9 @@
       <filename>'spring-beans-2.0.dtd'</filename> DTD included in the
       <filename class="directory">'dist/resources'</filename> directory of the Spring
       2.0 distribution.</para>
-      
+
       <programlisting><![CDATA[<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
 		  "http://www.springframework.org/dtd/spring-beans-2.0.dtd">]]></programlisting>
-      
     </section>
 
     <section id="new-in-2-ioc-scopes">
@@ -97,10 +96,10 @@
       application developer or enterprise architect using Spring in their own projects.
       We expect third-party vendors to be highly interested in developing
       custom configuration tags for use in Spring configuration files.</para>
-      
+
       <para>The extensible configuration mechanism is documented in <xref linkend="extensible-xml"/>.</para>
     </section>
-    
+
   </section>
 
   <section id="new-in-2-aop">
@@ -306,6 +305,110 @@
           <xref linkend="jdbc-SimpleJdbcTemplate" />
         </listitem>
       </itemizedlist>
+    </section>
+  </section>
+
+  <section id="new-in-2-migrating">
+    <title>Migrating to Spring 2.0</title>
+    <para>This final section details issues that may arise during any migration from Spring 1.2.x
+    to Spring 2.0.</para>
+    <para>Feel free to take this next statement with a pinch of salt, but upgrading to Spring 2.0
+    from a Spring 1.2 application <emphasis>should</emphasis> simply be a matter of dropping the
+    Spring 2.0 jar into the appropriate location in your application's directory structure.</para>
+    
+    <para>The keyword from the last sentence was of course the <quote><emphasis>should</emphasis></quote>.
+    Whether the upgrade is seamless or not depends on how much of the Spring APIs you are using in your
+    code. Spring 2.0 removed pretty much all of the classes and methods previously marked as
+    deprecated in the Spring 1.2.x codebase, so if you have been using such classes and methods, you
+    will of course have to use alternative classes and methods (some of which are summarised below).</para>
+    
+    <para>With regards to configuration, Spring 1.2.x style XML configuration is 100%,
+    satisfaction-guaranteed compatible with the Spring 2.0 library. Of course if you are still using
+    the Spring 1.2.x DTD, then you won't be able to take advantage of some of the new Spring 2.0
+    functionality (such as <link linkend="new-in-2-ioc-scopes">scopes</link> and
+    <link linkend="new-in-2-aop-configuration">easier AOP</link> and
+    <link linkend="new-in-2-middle-tier-transaction-configuration">transaction configuration</link>),
+    but nothing will blow up.</para>
+    
+    <para>The suggested migration strategy is to drop in the Spring 2.0 jar(s) to benefit from
+    the improved code present in the release (bug fixes, optimisations, etc.). You can then, on an
+    incremental basis, choose to start using the new Spring 2.0 features and configuration. For
+    example, you could choose to start configuring just your aspects in the new Spring 2.0 style; it
+    is perfectly valid to have 90% of your configuration using the old-school Spring 1.2.x configuration
+    (which references the 1.2.x DTD), and have the other 10% using the new Spring 2.0 configuration
+    (which references the 2.0 DTD or XSD). Bear in mind that you are not forced to upgrade your XML
+    configuration should you choose to drop in the Spring 2.0 libraries.</para>
+
+    <section id="new-in-2-migrating-changes">
+        <title>Changes</title>
+        <para>For a comprehensive list of changes, consult the <filename>'changelog.txt'</filename>
+        file that is located in the top level directory of the Spring Framework 2.0 distribution.</para>
+        <section id="new-in-2-migrating-packaging">
+		    <title>Jar packaging</title>
+		    <para>The packaging of the Spring Framework jars has changed quite substantially
+		    between the 1.2.x and 2.0 releases. In particular, there are now dedicated jars for the
+		    JDO, Hibernate 2/3, TopLink ORM integration classes: they are no longer bundled in the
+		    core <filename class="libraryfile">'spring.jar'</filename> file anymore.</para>
+        </section>
+        <section id="new-in-2-migrating-xml-configuration">
+		    <title>XML configuration</title>
+		    <para>Spring 2.0 ships with XSDs that describe Spring's XML metadata format in
+		    a much richer fashion than the DTD that shiiped with previous versions. The old DTD
+		    is still fully supported, but if possible you are encouraged to reference the XSD
+		    files at the top of your bean definition files.</para>
+		    <para>One thing that has changed in a (somewhat) breaking fashion is the way that
+		    bean scopes are defined. If you are using the Spring 1.2 DTD you can continue to use
+		    the <literal>'singleton'</literal> attribute. You can however choose to
+		    <link linkend="new-in-2-ioc-configuration">reference the new Spring 2.0 DTD</link>
+		    which does not permit the use of the <literal>'singleton'</literal> attribute, but
+		    rather uses the <literal>'scope'</literal> attribute to define the bean lifecycle scope.</para>
+        </section>
+        <section id="new-in-2-migrating-deprecated">
+		    <title>Deprecated classes and methods</title>
+		    <para>A number of classes and methods that previously were marked as
+		    <literal>@deprecated</literal> have been totally removed from the Spring 2.0 codebase.
+		    The Spring team decided that the 2.0 release marked a fresh start of sorts, and that any
+		    deprecated 'cruft' was better excised now instead of continuing to haunt the codebase for
+		    the forseeable future.</para>
+            <para>As mentioned previously, for a comprehensive list of changes, consult the
+            <filename>'changelog.txt'</filename> file that is located in the top level directory of
+            the Spring Framework 2.0 distribution.</para>
+		    <para>The following classes/interfaces have all been removed from the Spring 2.0 codebase.</para>
+		    <itemizedlist>
+                <listitem>
+                    <para><interfacename>ResultReader</interfacename> : use the
+                    <interfacename>RowMapper</interfacename> interface instead.</para>
+                </listitem>
+                <listitem>
+                    <para><interfacename>BeanReferenceFactoryBean</interfacename> : use the available alias
+                    mechanisms instead</para>
+                </listitem>
+                <listitem>
+                    <para><classname>BeanDefinitionRegistryBuilder</classname> : use the
+                    convenience methods on the <classname>BeanDefinitionReaderUtils</classname> class instead</para>
+                </listitem>
+                <listitem>
+                    <para><classname>BeanFactoryBootstrap</classname> : consider using a
+                    <interfacename>BeanFactoryLocator</interfacename> or a custom bootstrap class instead</para>
+                </listitem>
+                <listitem>
+                    <para><classname>RequestUtils</classname> : use <classname>ServletRequestUtils</classname>
+                    instead</para>
+                </listitem>
+		    </itemizedlist>
+        </section>
+        <section id="new-in-2-migrating-ojb">
+		    <title>Apache OJB</title>
+		    <para>Please note that support for Apache OJB was <emphasis>totally removed</emphasis>
+		    from the main Spring source tree; the Apache OJB integration library is still available,
+		    but can be found in it's new home in the
+		    <ulink url="https://springmodules.dev.java.net/">Spring Modules project</ulink>.</para>
+        </section>
+        <section id="new-in-2-migrating-ibatis">
+		    <title>iBatis</title>
+		    <para>Please note that support for iBATIS SQL Maps 1.3 has been totally removed. If you
+		    haven't done so already, upgrade to iBATIS SQL Maps 2.0/2.1.</para>
+        </section>
     </section>
   </section>
 
