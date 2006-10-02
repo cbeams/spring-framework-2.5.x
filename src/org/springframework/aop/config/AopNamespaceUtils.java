@@ -22,7 +22,6 @@ import java.util.List;
 import org.springframework.aop.aspectj.autoproxy.AspectJInvocationContextExposingAdvisorAutoProxyCreator;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -42,6 +41,7 @@ import org.springframework.util.ClassUtils;
  * in the application context.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public abstract class AopNamespaceUtils {
@@ -75,48 +75,43 @@ public abstract class AopNamespaceUtils {
 	}
 
 
-	/**
-	 * Register the basic auto proxy creator if required. This provides supports for using
-	 * basic Spring Advisors with classic Pointcuts.
-	 */
-	public static void registerAutoProxyCreatorIfNecessary(ParserContext parserContext) {
-		registryOrEscalateApcAsRequired(DefaultAdvisorAutoProxyCreator.class, parserContext);
+	public static void registerAutoProxyCreatorIfNecessary(ParserContext parserContext, Object sourceElement) {
+		registryOrEscalateApcAsRequired(DefaultAdvisorAutoProxyCreator.class, parserContext, sourceElement);
 	}
 
-	public static void registerAspectJAutoProxyCreatorIfNecessary(ParserContext parserContext) {
-		registryOrEscalateApcAsRequired(AspectJInvocationContextExposingAdvisorAutoProxyCreator.class, parserContext);
+	public static void registerAspectJAutoProxyCreatorIfNecessary(ParserContext parserContext, Object sourceElement) {
+		registryOrEscalateApcAsRequired(
+				AspectJInvocationContextExposingAdvisorAutoProxyCreator.class, parserContext, sourceElement);
 	}
 
-	public static void registerAtAspectJAutoProxyCreatorIfNecessary(ParserContext parserContext) {
+	public static void registerAtAspectJAutoProxyCreatorIfNecessary(ParserContext parserContext, Object sourceElement) {
 		Class cls = getAspectJAutoProxyCreatorClassIfPossible();
 		if (cls == null) {
 			throw new IllegalStateException("Unable to register AspectJ AutoProxyCreator. Cannot find class [" +
 							ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME + "]. Are you running on Java 5.0+?");
 		}
-		registryOrEscalateApcAsRequired(cls, parserContext);
+		registryOrEscalateApcAsRequired(cls, parserContext, sourceElement);
 	}
 
-	private static void registryOrEscalateApcAsRequired(Class cls, ParserContext parserContext) {
-		Assert.notNull(cls, "Class cannot be null");
-		Assert.notNull(parserContext, "ParserContext cannot be null");
-
+	private static void registryOrEscalateApcAsRequired(Class cls, ParserContext parserContext, Object sourceElement) {
+		Assert.notNull(parserContext, "ParserContext must not be null");
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
 
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
-			AbstractBeanDefinition abd =
-					(AbstractBeanDefinition) registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
-			if (cls.equals(abd.getBeanClass())) {
+			BeanDefinition apcDefinition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
+			if (cls.getName().equals(apcDefinition.getBeanClassName())) {
 				return;
 			}
-			int currentPriority = findPriorityForClass(abd.getBeanClass().getName());
+			int currentPriority = findPriorityForClass(apcDefinition.getBeanClassName());
 			int requiredPriority = findPriorityForClass(cls.getName());
 			if (currentPriority < requiredPriority) {
-				abd.setBeanClass(cls);
+				apcDefinition.setBeanClassName(cls.getName());
 			}
 		}
 
 		else {
 			RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);
+			beanDefinition.setSource(parserContext.extractSource(sourceElement));
 			beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, beanDefinition);
 			beanDefinition.getPropertyValues().addPropertyValue("order", new Integer(Ordered.HIGHEST_PRECEDENCE));
@@ -126,7 +121,6 @@ public abstract class AopNamespaceUtils {
 			parserContext.getReaderContext().fireComponentRegistered(componentDefinition);
 		}
 	}
-
 
 	public static void forceAutoProxyCreatorToUseClassProxying(BeanDefinitionRegistry registry) {
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
