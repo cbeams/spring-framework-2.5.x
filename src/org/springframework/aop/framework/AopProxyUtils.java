@@ -43,6 +43,7 @@ public abstract class AopProxyUtils {
 	 * @see org.springframework.aop.TargetSource#getTargetClass
 	 */
 	public static Class getTargetClass(Object proxy) {
+		Assert.notNull(proxy, "Proxy must not be null");
 		if (AopUtils.isCglibProxy(proxy)) {
 			return proxy.getClass().getSuperclass();
 		}
