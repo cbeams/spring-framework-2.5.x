@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Miscellaneous class utility methods. Mainly for internal use within the
  * framework; consider Jakarta's Commons Lang for a more comprehensive suite
- * of utilities.
+ * of class utilities.
  *
  * @author Keith Donald
  * @author Rob Harrop
@@ -47,13 +47,13 @@ public abstract class ClassUtils {
 	public static final String ARRAY_SUFFIX = "[]";
 
 	/** The package separator character '.' */
-	private static final char PACKAGE_SEPARATOR_CHAR = '.';
+	private static final char PACKAGE_SEPARATOR = '.';
 
 	/** The inner class separator character '$' */
-	private static final char INNER_CLASS_SEPARATOR_CHAR = '$';
+	private static final char INNER_CLASS_SEPARATOR = '$';
 
 	/** The CGLIB class separator character "$$" */
-	private static final String CGLIB_CLASS_SEPARATOR_CHAR = "$$";
+	private static final String CGLIB_CLASS_SEPARATOR = "$$";
 
 
 	private static final Log logger = LogFactory.getLog(ClassUtils.class);
@@ -194,13 +194,13 @@ public abstract class ClassUtils {
 	 */
 	public static String getShortName(String className) {
 		Assert.hasLength(className, "Class name must not be empty");
-		int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR_CHAR);
-		int nameEndIndex = className.indexOf(CGLIB_CLASS_SEPARATOR_CHAR);
+		int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR);
+		int nameEndIndex = className.indexOf(CGLIB_CLASS_SEPARATOR);
 		if (nameEndIndex == -1) {
 			nameEndIndex = className.length();
 		}
 		String shortName = className.substring(lastDotIndex + 1, nameEndIndex);
-		shortName = shortName.replace(INNER_CLASS_SEPARATOR_CHAR, PACKAGE_SEPARATOR_CHAR);
+		shortName = shortName.replace(INNER_CLASS_SEPARATOR, PACKAGE_SEPARATOR);
 		return shortName;
 	}
 
