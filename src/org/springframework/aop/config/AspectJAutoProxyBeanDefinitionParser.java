@@ -47,7 +47,7 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
-		AopNamespaceUtils.registerAtAspectJAutoProxyCreatorIfNecessary(parserContext);
+		AopNamespaceUtils.registerAtAspectJAutoProxyCreatorIfNecessary(parserContext, element);
 		extendBeanDefinition(registry, element);
 		return null;
 	}
@@ -76,4 +76,5 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		beanDef.getPropertyValues().addPropertyValue("includePatterns", includePatterns);
 	}
+
 }

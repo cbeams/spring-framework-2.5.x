@@ -88,6 +88,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			String propertyPath = path.substring(dotIndex + 1);
 
 			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(PropertyPathFactoryBean.class);
+			builder.setSource(parserContext.extractSource(element));
 			if (parserContext.isNested()) {
 				// Inner bean definition should receive same singleton status as containing bean.
 				builder.setSingleton(parserContext.getContainingBeanDefinition().isSingleton());
@@ -114,6 +115,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
 			List parsedList = parserContext.getDelegate().parseListElement(element, null);
 			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ListFactoryBean.class);
+			builder.setSource(parserContext.extractSource(element));
 			builder.addPropertyValue("sourceList", parsedList);
 			if (StringUtils.hasText(listClass)) {
 				builder.addPropertyValue("targetListClass", listClass);
@@ -133,6 +135,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
 			Set parsedSet = parserContext.getDelegate().parseSetElement(element, null);
 			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(SetFactoryBean.class);
+			builder.setSource(parserContext.extractSource(element));
 			builder.addPropertyValue("sourceSet", parsedSet);
 			if (StringUtils.hasText(setClass)) {
 				builder.addPropertyValue("targetSetClass", setClass);
@@ -152,6 +155,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
 			Map parsedMap = parserContext.getDelegate().parseMapElement(element, null);
 			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(MapFactoryBean.class);
+			builder.setSource(parserContext.extractSource(element));
 			builder.addPropertyValue("sourceMap", parsedMap);
 			if (StringUtils.hasText(mapClass)) {
 				builder.addPropertyValue("targetMapClass", mapClass);

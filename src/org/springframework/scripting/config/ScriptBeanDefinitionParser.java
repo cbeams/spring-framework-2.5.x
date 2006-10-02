@@ -98,6 +98,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		// Set up infrastructure.
 		registerScriptFactoryPostProcessorIfNecessary(parserContext.getRegistry());
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(this.scriptFactoryClass);
+		beanDefinition.setSource(parserContext.extractSource(element));
 
 		// Attach any refresh metadata.
 		parseRefreshMetadata(element, beanDefinition);

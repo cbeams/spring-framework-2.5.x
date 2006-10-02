@@ -43,9 +43,11 @@ class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		if (!this.registered) {
+			BeanDefinitionBuilder builder =
+					BeanDefinitionBuilder.rootBeanDefinition(getBeanConfigurerClass(), "aspectOf");
+			builder.setSource(parserContext.extractSource(element));
 			BeanDefinitionReaderUtils.registerWithGeneratedName(
-					BeanDefinitionBuilder.rootBeanDefinition(getBeanConfigurerClass(), "aspectOf").getBeanDefinition(),
-					parserContext.getRegistry());
+					builder.getBeanDefinition(), parserContext.getRegistry());
 			this.registered = true;
 		}
 

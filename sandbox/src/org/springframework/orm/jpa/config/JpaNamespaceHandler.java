@@ -63,6 +63,7 @@ public class JpaNamespaceHandler extends NamespaceHandlerSupport {
 
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(LocalEntityManagerFactoryBean.class);
+			builder.setSource(parserContext.extractSource(element));
 			configureAttributes(parserContext, element, builder);
 
 			NodeList childNodes = element.getChildNodes();
@@ -73,7 +74,6 @@ public class JpaNamespaceHandler extends NamespaceHandlerSupport {
 					if (VENDOR.equals(localName)) {
 						parseVendor((Element) node, parserContext, builder);
 					}
-
 				}
 			}
 

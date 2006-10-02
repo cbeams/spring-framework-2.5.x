@@ -18,20 +18,20 @@ package org.springframework.web.servlet.config;
 
 import java.util.Properties;
 
-import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * Bean definition parser <code>&lt;url:urlmappings&gt;</code> tag,
@@ -40,14 +40,9 @@ import org.w3c.dom.NodeList;
  * XML should adhere to the spring-web.xsd schema. 
  * 
  * @author Alef Arendsen
- * @since 2.0
  */
 public class UrlHandlerMappingBeanDefinitionParser extends MvcBeanDefinitionParserSupport 
 	implements BeanDefinitionParser {
-	
-	//---------------------------------------------------------------------
-	// Static section
-	//---------------------------------------------------------------------
 	
 	private static final String URLMAPPING = "url-mapping";
 	private static final String ALWAYS_USE_FULL_PATH = "always-use-full-path";
@@ -65,9 +60,6 @@ public class UrlHandlerMappingBeanDefinitionParser extends MvcBeanDefinitionPars
 	private static final String INTERCEPTOR = "interceptor";
 	private static final String INTERCEPTOR_REF = "interceptor-ref";
 
-	//---------------------------------------------------------------------
-	// Instance section
-	//---------------------------------------------------------------------
 
 	/**
 	 * Parses the url:handlermappings element resulting in a SimpleUrlHandlerMapping
@@ -75,10 +67,6 @@ public class UrlHandlerMappingBeanDefinitionParser extends MvcBeanDefinitionPars
 	 * for HandlerInterceptors matched on a specific path.
 	 */
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
-
-		Assert.notNull(element);
-		Assert.notNull(parserContext);
-
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
 		NodeList handlerMappingChildren = element.getChildNodes();
 		
@@ -87,18 +75,18 @@ public class UrlHandlerMappingBeanDefinitionParser extends MvcBeanDefinitionPars
 			Node handlerMapping = handlerMappingChildren.item(i);
 		
 			if (URLMAPPING.equals(handlerMapping.getLocalName()) && handlerMapping.getNodeType() == Node.ELEMENT_NODE) {
-				Element el = (Element)handlerMapping;
-				RootBeanDefinition handlerMappingDefinition = parseHandlerMappingDefinition(el, registry);
+				Element ele = (Element) handlerMapping;
+				RootBeanDefinition handlerMappingDefinition = parseHandlerMappingDefinition(ele);
+				handlerMappingDefinition.setSource(parserContext.extractSource(element));
 				handlerMappingDefinition.getPropertyValues().addPropertyValue("order", new Integer(handlerCount++));
-				registry.registerBeanDefinition(BeanDefinitionReaderUtils.generateBeanName(
-						handlerMappingDefinition, registry, false), handlerMappingDefinition);				
+				BeanDefinitionReaderUtils.registerWithGeneratedName(handlerMappingDefinition, registry);
 			}
 		}
 
 		return null;
 	}
 	
-	private RootBeanDefinition parseHandlerMappingDefinition(Element element, BeanDefinitionRegistry registry) {
+	private RootBeanDefinition parseHandlerMappingDefinition(Element element) {
 		Properties mappings = new Properties();
 		ManagedList interceptors = new ManagedList();
 		
@@ -113,9 +101,9 @@ public class UrlHandlerMappingBeanDefinitionParser extends MvcBeanDefinitionPars
 				Element el = (Element)childElement;
 				String path = el.getAttribute(PATH);
 				String ref = el.getAttribute(CONTROLLER_REF);
-				
 				mappings.put(path, ref);
-			} else if (INTERCEPTOR.equals(childElement.getLocalName()) && childElement.getNodeType() == Node.ELEMENT_NODE) {
+			}
+			else if (INTERCEPTOR.equals(childElement.getLocalName()) && childElement.getNodeType() == Node.ELEMENT_NODE) {
 				// parse interceptor
 				Element el = (Element)childElement;
 				String ref = el.getAttribute(INTERCEPTOR_REF);

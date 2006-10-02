@@ -16,23 +16,23 @@
 
 package org.springframework.web.servlet.config;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.Ordered;
-import org.springframework.util.Assert;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 import org.springframework.web.servlet.view.tiles.TilesJstlView;
 import org.springframework.web.servlet.view.tiles.TilesView;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * Parses <code>&lt;view-resolvers&gt;</code> elements and their
@@ -41,14 +41,10 @@ import org.w3c.dom.NodeList;
  *
  * @author Alef Arendsen
  * @see MvcNamespaceHandler
- * @since 2.0
  */
 public class ViewResolversBeanDefinitionParser extends MvcBeanDefinitionParserSupport
-				implements BeanDefinitionParser {
+		implements BeanDefinitionParser {
 
-	//---------------------------------------------------------------------
-	// Static section
-	//---------------------------------------------------------------------
 
 	private static final String INTERNAL_RESOURCE_VIEW_RESOLVER = "internal-resource-view-resolver";
 
@@ -60,15 +56,8 @@ public class ViewResolversBeanDefinitionParser extends MvcBeanDefinitionParserSu
 
 	private static final String BEAN_NAME_VIEW_RESOLVER = "bean-name-view-resolver";
 
-	//---------------------------------------------------------------------
-	// Instance section
-	//---------------------------------------------------------------------
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
-
-		Assert.notNull(element);
-		Assert.notNull(parserContext);
-
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
 		NodeList viewResolverChildren = element.getChildNodes();
 
@@ -78,14 +67,13 @@ public class ViewResolversBeanDefinitionParser extends MvcBeanDefinitionParserSu
 
 			if (viewResolverNode.getNodeType() == Node.ELEMENT_NODE) {
 				Element viewResolverElement = (Element) viewResolverNode;
-
 				RootBeanDefinition viewResolverDefinition = null;
 
 				if (INTERNAL_RESOURCE_VIEW_RESOLVER.equals(viewResolverNode.getLocalName())) {
-					viewResolverDefinition = parseInternalResourceViewResolver(viewResolverElement, registry);
+					viewResolverDefinition = createInternalResourceViewResolver(viewResolverElement);
 				}
 				else if (BEAN_NAME_VIEW_RESOLVER.equals(viewResolverNode.getLocalName())) {
-					viewResolverDefinition = parseBeanNameViewResolver(viewResolverElement, registry);
+					viewResolverDefinition = createBeanNameViewResolver();
 				}
 
 				if (Ordered.class.isAssignableFrom(viewResolverDefinition.getBeanClass())) {
@@ -95,33 +83,27 @@ public class ViewResolversBeanDefinitionParser extends MvcBeanDefinitionParserSu
 					// TODO possibly implement detection of non-ordered view resolvers not being last
 				}
 
-				registry.registerBeanDefinition(BeanDefinitionReaderUtils.generateBeanName(
-								viewResolverDefinition, registry, false), viewResolverDefinition);
+				viewResolverDefinition.setSource(parserContext.extractSource(viewResolverElement));
+				BeanDefinitionReaderUtils.registerWithGeneratedName(viewResolverDefinition, registry);
 			}
 		}
 
 		return null;
 	}
 
-	private RootBeanDefinition parseBeanNameViewResolver(Element viewResolverElement, BeanDefinitionRegistry registry) {
-		RootBeanDefinition beanDefinition = new RootBeanDefinition();
-		beanDefinition.setBeanClass(BeanNameViewResolver.class);
-		return beanDefinition;
-	}
-
-	private RootBeanDefinition parseInternalResourceViewResolver(Element el, BeanDefinitionRegistry registry) {
+	private RootBeanDefinition createInternalResourceViewResolver(Element ele) {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition();
 		beanDefinition.setBeanClass(InternalResourceViewResolver.class);
 
-		setPropertyIfAvailable(el, "prefix", "prefix", beanDefinition);
-		setPropertyIfAvailable(el, "suffix", "suffix", beanDefinition);
-		setPropertyIfAvailable(el, "enable-caching", "cache", beanDefinition);
-		setPropertyIfAvailable(el, "content-type", "contentType", beanDefinition);
-		setPropertyIfAvailable(el, "redirect-context-relative", "redirectContextRelative", beanDefinition);
-		setPropertyIfAvailable(el, "redirect-http10-compatible", "redirectHttp10Compatible", beanDefinition);
-		setPropertyIfAvailable(el, "request-context-attribute", "requestContextAttribute", beanDefinition);
+		setPropertyIfAvailable(ele, "prefix", "prefix", beanDefinition);
+		setPropertyIfAvailable(ele, "suffix", "suffix", beanDefinition);
+		setPropertyIfAvailable(ele, "enable-caching", "cache", beanDefinition);
+		setPropertyIfAvailable(ele, "content-type", "contentType", beanDefinition);
+		setPropertyIfAvailable(ele, "redirect-context-relative", "redirectContextRelative", beanDefinition);
+		setPropertyIfAvailable(ele, "redirect-http10-compatible", "redirectHttp10Compatible", beanDefinition);
+		setPropertyIfAvailable(ele, "request-context-attribute", "requestContextAttribute", beanDefinition);
 
-		String type = el.getAttribute("type");
+		String type = ele.getAttribute("type");
 		if (JSTL.equals(type)) {
 			beanDefinition.getPropertyValues().addPropertyValue("viewClass", JstlView.class);
 		}
@@ -136,6 +118,10 @@ public class ViewResolversBeanDefinitionParser extends MvcBeanDefinitionParserSu
 		}
 
 		return beanDefinition;
+	}
+
+	private RootBeanDefinition createBeanNameViewResolver() {
+		return new RootBeanDefinition(BeanNameViewResolver.class);
 	}
 
 }

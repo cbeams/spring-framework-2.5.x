@@ -23,10 +23,10 @@ import java.util.Map;
 
 import org.w3c.dom.Element;
 
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
+import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.transaction.interceptor.NameMatchTransactionAttributeSource;
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
@@ -44,26 +44,26 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	private static final String ATTRIBUTES = "attributes";
 
-	public static final String TIMEOUT = "timeout";
+	private static final String TIMEOUT = "timeout";
 
-	public static final String READ_ONLY = "read-only";
+	private static final String READ_ONLY = "read-only";
 
-	public static final String NAME_MAP = "nameMap";
+	private static final String NAME_MAP = "nameMap";
 
-	public static final String PROPAGATION = "propagation";
+	private static final String PROPAGATION = "propagation";
 
-	public static final String ISOLATION = "isolation";
+	private static final String ISOLATION = "isolation";
 
-	public static final String ROLLBACK_FOR = "rollback-for";
+	private static final String ROLLBACK_FOR = "rollback-for";
 
-	public static final String NO_ROLLBACK_FOR = "no-rollback-for";
+	private static final String NO_ROLLBACK_FOR = "no-rollback-for";
 
 
 	protected Class getBeanClass(Element element) {
 		return TransactionInterceptor.class;
 	}
 
-	protected void doParse(Element element, BeanDefinitionBuilder builder) {
+	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		// Set the transaction manager property.
 		builder.addPropertyReference(TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY,
 				element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE));
@@ -74,7 +74,9 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 		}
 		else if (txAttributes.size() == 1) {
 			// Using attributes source.
-			parseAttributes((Element) txAttributes.get(0), builder);
+			Element attributeSourceElement = (Element) txAttributes.get(0);
+			RootBeanDefinition attributeSourceDefinition = parseAttributeSource(attributeSourceElement, parserContext);
+			builder.addPropertyValue(TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE, attributeSourceDefinition);
 		}
 		else {
 			// Assume annotations source.
@@ -83,13 +85,12 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 		}
 	}
 
-	private void parseAttributes(Element attributesElement, BeanDefinitionBuilder builder) {
+	private RootBeanDefinition parseAttributeSource(Element attributesElement, ParserContext parserContext) {
 		List methods = DomUtils.getChildElementsByTagName(attributesElement, "method");
 		Map transactionAttributeMap = new HashMap(methods.size());
 
 		for (int i = 0; i < methods.size(); i++) {
 			Element methodElement = (Element) methods.get(i);
-
 			String name = methodElement.getAttribute("name");
 
 			RuleBasedTransactionAttribute attribute = new RuleBasedTransactionAttribute();
@@ -115,10 +116,10 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 		}
 
 		RootBeanDefinition attributeSourceDefinition = new RootBeanDefinition(NameMatchTransactionAttributeSource.class);
-		attributeSourceDefinition.setPropertyValues(new MutablePropertyValues());
+		attributeSourceDefinition.setSource(parserContext.extractSource(attributesElement));
 		attributeSourceDefinition.getPropertyValues().addPropertyValue(NAME_MAP, transactionAttributeMap);
 
-		builder.addPropertyValue(TxNamespaceUtils.TRANSACTION_ATTRIBUTE_SOURCE, attributeSourceDefinition);
+		return attributeSourceDefinition;
 	}
 
 	private void addRollbackRuleAttributesTo(List rollbackRules, String rollbackForValue) {

@@ -60,7 +60,7 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser 
 	 * the container as necessary.
 	 */
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
-		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext);
+		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext, element);
 
 		boolean proxyTargetClass = TRUE.equals(element.getAttribute(PROXY_TARGET_CLASS));
 		if (proxyTargetClass) {
@@ -70,8 +70,9 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser 
 		String transactionManagerName = element.getAttribute(TxNamespaceUtils.TRANSACTION_MANAGER_ATTRIBUTE);
 		Class sourceClass = TxNamespaceUtils.getAnnotationTransactionAttributeSourceClass();
 
-		// Create the TransactionInterceptor definition
+		// Create the TransactionInterceptor definition.
 		RootBeanDefinition interceptorDefinition = new RootBeanDefinition(TransactionInterceptor.class);
+		interceptorDefinition.setSource(parserContext.extractSource(element));
 		interceptorDefinition.getPropertyValues().addPropertyValue(
 						TxNamespaceUtils.TRANSACTION_MANAGER_PROPERTY, new RuntimeBeanReference(transactionManagerName));
 		interceptorDefinition.getPropertyValues().addPropertyValue(
@@ -79,6 +80,7 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractBeanDefinitionParser 
 
 		// Create the TransactionAttributeSourceAdvisor definition.
 		RootBeanDefinition advisorDefinition = new RootBeanDefinition(TransactionAttributeSourceAdvisor.class);
+		advisorDefinition.setSource(parserContext.extractSource(element));
 		advisorDefinition.getPropertyValues().addPropertyValue(TRANSACTION_INTERCEPTOR, interceptorDefinition);
 		return advisorDefinition;
 	}

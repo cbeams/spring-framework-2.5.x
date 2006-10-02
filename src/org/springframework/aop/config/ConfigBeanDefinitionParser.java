@@ -168,8 +168,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * @see AopNamespaceUtils
 	 */
 	private void configureAutoProxyCreator(ParserContext parserContext, Element element) {
-		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(parserContext);
-
+		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(parserContext, element);
 		boolean proxyTargetClass = TRUE.equals(element.getAttribute(PROXY_TARGET_CLASS));
 		if (proxyTargetClass) {
 			AopNamespaceUtils.forceAutoProxyCreatorToUseClassProxying(parserContext.getRegistry());
@@ -230,7 +229,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 */
 	private AbstractBeanDefinition createAdvisorBeanDefinition(Element advisorElement, ParserContext parserContext) {
 		RootBeanDefinition advisorDefinition = new RootBeanDefinition(AspectJPointcutAdvisor.class);
-		advisorDefinition.setSource(parserContext.getReaderContext().extractSource(advisorElement));
+		advisorDefinition.setSource(parserContext.extractSource(advisorElement));
 
 		MutablePropertyValues mpvs = advisorDefinition.getPropertyValues();
 		if (advisorElement.hasAttribute(ORDER_PROPERTY)) {
@@ -323,7 +322,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		builder.addConstructorArg(declareParentsElement.getAttribute(IMPLEMENT_INTERFACE));
 		builder.addConstructorArg(declareParentsElement.getAttribute(TYPE_PATTERN));
 		builder.addConstructorArg(declareParentsElement.getAttribute(DEFAULT_IMPL));
-		builder.setSource(parserContext.getReaderContext().extractSource(declareParentsElement));
+		builder.setSource(parserContext.extractSource(declareParentsElement));
 		AbstractBeanDefinition definition = builder.getBeanDefinition();
 		String name = BeanDefinitionReaderUtils.generateBeanName(definition, parserContext.getRegistry());
 		parserContext.getRegistry().registerBeanDefinition(name, definition);
@@ -364,7 +363,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	
 			// configure the advisor
 			advisorDefinition = new RootBeanDefinition(AspectJPointcutAdvisor.class);
-			advisorDefinition.setSource(parserContext.getReaderContext().extractSource(adviceElement));
+			advisorDefinition.setSource(parserContext.extractSource(adviceElement));
 			advisorDefinition.setPropertyValues(advisorProperties);
 			advisorDefinition.getPropertyValues().addPropertyValue(ADVICE, adviceDefinition);
 	
@@ -394,7 +393,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		String pointcutBeanName = parsePointcutProperty(adviceElement, advisorProperties, parserContext);
 
 		RootBeanDefinition adviceDefinition = new RootBeanDefinition(getAdviceClass(adviceElement));
-		adviceDefinition.setSource(parserContext.getReaderContext().extractSource(adviceElement));
+		adviceDefinition.setSource(parserContext.extractSource(adviceElement));
 
 		isAroundAdvice = AROUND.equals(adviceElement.getLocalName());
 		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_NAME_PROPERTY, aspectName);
@@ -466,7 +465,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		try {
 			this.parseState.push(new PointcutEntry(id));
 			pointcutDefinition = createPointcutDefinition(expression);
-			pointcutDefinition.setSource(parserContext.getReaderContext().extractSource(pointcutElement));
+			pointcutDefinition.setSource(parserContext.extractSource(pointcutElement));
 
 			BeanDefinitionRegistry registry = parserContext.getRegistry();
 			if (!StringUtils.hasText(id)) {
@@ -506,7 +505,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			// Create a pointcut for the anonymous pc and register it.
 			Attr pointcutAttr = element.getAttributeNode(POINTCUT);
 			AbstractBeanDefinition pointcutDefinition = createPointcutDefinition(pointcutAttr.getValue());
-			pointcutDefinition.setSource(parserContext.getReaderContext().extractSource(pointcutAttr));
+			pointcutDefinition.setSource(parserContext.extractSource(element));
 			String pointcutName = BeanDefinitionReaderUtils.generateBeanName(pointcutDefinition, registry);
 			try {
 				this.parseState.push(new PointcutEntry(pointcutName));
