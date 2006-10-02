@@ -23,10 +23,10 @@ import org.w3c.dom.Element;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.ReaderContext;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 import org.springframework.util.Assert;
@@ -131,10 +131,10 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	/**
 	 * Resolves the script source from either the '<code>script-source</code>' attribute or
-	 * the '<code>inline-script</code>' element. Logs and {@link ReaderContext#error} and
+	 * the '<code>inline-script</code>' element. Logs and {@link XmlReaderContext#error} and
 	 * returns <code>null</code> if neither or both of these values are specified.
 	 */
-	private String resolveScriptSource(Element element, ReaderContext readerContext) {
+	private String resolveScriptSource(Element element, XmlReaderContext readerContext) {
 		boolean hasScriptSource = element.hasAttribute(SCRIPT_SOURCE_ATTRIBUTE);
 		List elements = DomUtils.getChildElementsByTagName(element, INLINE_SCRIPT_ELEMENT);
 		if (hasScriptSource && !elements.isEmpty()) {
