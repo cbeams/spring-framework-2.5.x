@@ -30,6 +30,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.io.Resource;
@@ -483,12 +484,10 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 			getBeanFactory().registerBeanDefinition(beanName, bd);
 		}
 		catch (ClassNotFoundException ex) {
-			throw new BeanDefinitionStoreException(resourceDescription, beanName,
-					"Bean class [" + className + "] not found", ex);
+			throw new CannotLoadBeanClassException(resourceDescription, beanName, className, ex);
 		}
-		catch (NoClassDefFoundError err) {
-			throw new BeanDefinitionStoreException(resourceDescription, beanName,
-					"Class that bean class [" + className + "] depends on not found", err);
+		catch (LinkageError err) {
+			throw new CannotLoadBeanClassException(resourceDescription, beanName, className, err);
 		}
 	}
 
