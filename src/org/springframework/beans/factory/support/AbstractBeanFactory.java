@@ -565,16 +565,19 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
 		Assert.hasText(beanName, "Bean name must not be empty");
 		Assert.hasText(alias, "Alias must not be empty");
-		if (logger.isDebugEnabled()) {
-			logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
-		}
-		synchronized (this.aliasMap) {
-			Object registeredName = this.aliasMap.get(alias);
-			if (registeredName != null && !registeredName.equals(beanName)) {
-				throw new BeanDefinitionStoreException("Cannot register alias '" + alias + "' for bean name '" +
-						beanName + "': It's already registered for bean name '" + registeredName + "'.");
+		if (!alias.equals(beanName)) {
+			// Only actually register the alias if it is not equal to the bean name itself.
+			if (logger.isDebugEnabled()) {
+				logger.debug("Registering alias '" + alias + "' for bean with name '" + beanName + "'");
 			}
-			this.aliasMap.put(alias, beanName);
+			synchronized (this.aliasMap) {
+				Object registeredName = this.aliasMap.get(alias);
+				if (registeredName != null && !registeredName.equals(beanName)) {
+					throw new BeanDefinitionStoreException("Cannot register alias '" + alias + "' for bean name '" +
+							beanName + "': It's already registered for bean name '" + registeredName + "'.");
+				}
+				this.aliasMap.put(alias, beanName);
+			}
 		}
 	}
 
