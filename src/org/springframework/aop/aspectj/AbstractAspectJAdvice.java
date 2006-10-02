@@ -232,9 +232,10 @@ public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformat
 			try {
 				this.discoveredReturningType = ClassUtils.forName(name);
 			}
-			catch (ClassNotFoundException ex) {
+			catch (Throwable ex) {
 				throw new IllegalArgumentException("Returning name '" + name  +
-						"' is neither a valid argument name, nor the fully-qualified name of the Java type on the classpath");
+						"' is neither a valid argument name nor the fully-qualified name of a Java type on the classpath. " +
+						"Root cause: " + ex);
 			}
 		}
 	}
@@ -261,9 +262,10 @@ public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformat
 			try {
 				this.discoveredThrowingType = ClassUtils.forName(name);
 			}
-			catch (ClassNotFoundException cnfEx) {
-				throw new IllegalArgumentException("Throwing name '" + name 
-						 + "' is neither a valid argument name, nor the fully-qualified name of the Java type on the classpath");
+			catch (Throwable ex) {
+				throw new IllegalArgumentException("Throwing name '" + name  +
+						"' is neither a valid argument name nor the fully-qualified name of a Java type on the classpath. " +
+						"Root cause: " + ex);
 			}
 		}
 	}
