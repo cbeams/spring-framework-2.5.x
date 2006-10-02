@@ -43,8 +43,8 @@ class TxNamespaceUtils {
 		}
 		catch (Throwable ex) {
 			throw new IllegalStateException(
-					"Unable to load AnnotationTransactionAttributeSource class. Are you running on Java 1.5+? " +
-					"Root cause: " + ex);
+					"Unable to load class [" + ANNOTATION_TRANSACTION_ATTRIBUTE_SOURCE_CLASS_NAME +
+					"]. Are you running on Java 1.5+? Root cause: " + ex);
 		}
 	}
 
