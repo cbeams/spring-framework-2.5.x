@@ -247,7 +247,7 @@ public abstract class BeanUtils {
 	 * @see #findMethodWithMinimalParameters
 	 */
 	public static Method resolveSignature(String signature, Class clazz) {
-		Assert.hasText(signature, "Signature must not be null or zero-length");
+		Assert.hasText(signature, "Signature must not be null or empty");
 		Assert.notNull(clazz, "Class must not be null");
 
 		int firstParen = signature.indexOf("(");
@@ -274,9 +274,9 @@ public abstract class BeanUtils {
 				try {
 					parameterTypes[i] = ClassUtils.forName(parameterTypeName, clazz.getClassLoader());
 				}
-				catch (ClassNotFoundException ex) {
-					throw new IllegalArgumentException("Invalid method signature: unable to locate type [" +
-							parameterTypeName + "] for argument " + i);
+				catch (Throwable ex) {
+					throw new IllegalArgumentException("Invalid method signature: unable to resolve type [" +
+							parameterTypeName + "] for argument " + i + ". Root cause: " + ex);
 				}
 			}
 			return findMethod(clazz, methodName, parameterTypes);
