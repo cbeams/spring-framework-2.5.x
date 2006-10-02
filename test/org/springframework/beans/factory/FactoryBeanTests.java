@@ -87,7 +87,7 @@ public class FactoryBeanTests extends TestCase {
 
 		private Beta beta;
 
-		public void setBeta( Beta beta ) {
+		public void setBeta(Beta beta) {
 			this.beta = beta;
 		}
 
