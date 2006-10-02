@@ -65,4 +65,8 @@ public final class ParserContext {
 		return (this.containingBeanDefinition != null);
 	}
 
+	public Object extractSource(Object sourceCandidate) {
+		return getReaderContext().extractSource(sourceCandidate);
+	}
+
 }
