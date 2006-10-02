@@ -28,13 +28,10 @@ import org.springframework.core.io.ClassPathResource;
  */
 public class AopNamespaceHandlerPointcutErrorTests extends TestCase {
 
-	private static final String duplicatePointcutConfigLocation = "org/springframework/aop/config/aopNamespaceHandlerPointcutDuplicationTests.xml";
-	private static final String missingPointcutConfigLocation = "org/springframework/aop/config/aopNamespaceHandlerPointcutMissingTests.xml";
-
-
 	public void testDuplicatePointcutConfig() {
 		try {
-			new XmlBeanFactory(new ClassPathResource(duplicatePointcutConfigLocation));
+			new XmlBeanFactory(new ClassPathResource(
+					"org/springframework/aop/config/aopNamespaceHandlerPointcutDuplicationTests.xml"));
 			fail("parsing should have caused a BeanDefinitionStoreException");
 		}
 		catch (BeanDefinitionStoreException ex) {
@@ -44,7 +41,8 @@ public class AopNamespaceHandlerPointcutErrorTests extends TestCase {
 	
 	public void testMissingPointcutConfig() {
 		try {
-			new XmlBeanFactory(new ClassPathResource(missingPointcutConfigLocation));
+			new XmlBeanFactory(new ClassPathResource(
+					"org/springframework/aop/config/aopNamespaceHandlerPointcutMissingTests.xml"));
 			fail("parsing should have caused a BeanDefinitionStoreException");
 		}
 		catch (BeanDefinitionStoreException ex) {
