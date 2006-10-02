@@ -175,11 +175,12 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 			Iterator it = attributes.entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry entry = (Map.Entry) it.next();
-				if (!(entry.getKey() instanceof String)) {
+				Object key = entry.getKey();
+				if (!(key instanceof String)) {
 					throw new IllegalArgumentException(
-							"Illegal attribute key [" + entry.getKey() + "]: only Strings allowed");
+							"Illegal attribute key [" + key + "]: only Strings allowed");
 				}
-				addStaticAttribute((String) entry.getKey(), entry.getValue());
+				addStaticAttribute((String) key, entry.getValue());
 			}
 		}
 	}
