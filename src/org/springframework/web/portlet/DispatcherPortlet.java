@@ -513,27 +513,34 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 */
 	protected List getDefaultStrategies(Class strategyInterface) throws BeansException {
 		String key = strategyInterface.getName();
-		try {
-			List strategies = null;
-			String value = defaultStrategies.getProperty(key);
-			if (value != null) {
-				String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
-				strategies = new ArrayList(classNames.length);
-				for (int i = 0; i < classNames.length; i++) {
-					Class clazz = ClassUtils.forName(classNames[i], getClass().getClassLoader());
+		List strategies = null;
+		String value = defaultStrategies.getProperty(key);
+		if (value != null) {
+			String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
+			strategies = new ArrayList(classNames.length);
+			for (int i = 0; i < classNames.length; i++) {
+				String className = classNames[i];
+				try {
+					Class clazz = ClassUtils.forName(className, getClass().getClassLoader());
 					Object strategy = createDefaultStrategy(clazz);
 					strategies.add(strategy);
 				}
+				catch (ClassNotFoundException ex) {
+					throw new BeanInitializationException(
+							"Could not find DispatcherPortlet's default strategy class [" + className +
+							"] for interface [" + key + "]", ex);
+				}
+				catch (LinkageError err) {
+					throw new BeanInitializationException(
+							"Error loading DispatcherPortlet's default strategy class [" + className +
+							"] for interface [" + key + "]: problem with class file or dependent class", err);
+				}
 			}
-			else {
-				strategies = Collections.EMPTY_LIST;
-			}
-			return strategies;
 		}
-		catch (ClassNotFoundException ex) {
-			throw new BeanInitializationException(
-					"Could not find DispatcherPortlet's default strategy class for interface [" + key + "]", ex);
+		else {
+			strategies = Collections.EMPTY_LIST;
 		}
+		return strategies;
 	}
 
 	/**
@@ -541,11 +548,12 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * Default implementation uses <code>ApplicationContext.createBean</code>.
 	 * @param clazz the strategy implementation class to instantiate
 	 * @return the fully configured strategy instance
+	 * @throws BeansException if initialization failed
 	 * @see #getPortletApplicationContext()
 	 * @see org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()
 	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#createBean
 	 */
-	protected Object createDefaultStrategy(Class clazz) {
+	protected Object createDefaultStrategy(Class clazz) throws BeansException {
 		return getPortletApplicationContext().getAutowireCapableBeanFactory().createBean(
 				clazz, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
 	}

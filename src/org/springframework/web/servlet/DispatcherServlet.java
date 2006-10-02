@@ -654,39 +654,47 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	protected List getDefaultStrategies(Class strategyInterface) throws BeansException {
 		String key = strategyInterface.getName();
-		try {
-			List strategies = null;
-			String value = defaultStrategies.getProperty(key);
-			if (value != null) {
-				String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
-				strategies = new ArrayList(classNames.length);
-				for (int i = 0; i < classNames.length; i++) {
-					Class clazz = ClassUtils.forName(classNames[i], getClass().getClassLoader());
+		List strategies = null;
+		String value = defaultStrategies.getProperty(key);
+		if (value != null) {
+			String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
+			strategies = new ArrayList(classNames.length);
+			for (int i = 0; i < classNames.length; i++) {
+				String className = classNames[i];
+				try {
+					Class clazz = ClassUtils.forName(className, getClass().getClassLoader());
 					Object strategy = createDefaultStrategy(clazz);
 					strategies.add(strategy);
 				}
+				catch (ClassNotFoundException ex) {
+					throw new BeanInitializationException(
+							"Could not find DispatcherServlet's default strategy class [" + className +
+							"] for interface [" + key + "]", ex);
+				}
+				catch (LinkageError err) {
+					throw new BeanInitializationException(
+							"Error loading DispatcherServlet's default strategy class [" + className +
+							"] for interface [" + key + "]: problem with class file or dependent class", err);
+				}
 			}
-			else {
-				strategies = Collections.EMPTY_LIST;
-			}
-			return strategies;
 		}
-		catch (ClassNotFoundException ex) {
-			throw new BeanInitializationException(
-					"Could not find DispatcherServlet's default strategy class for interface [" + key + "]", ex);
+		else {
+			strategies = Collections.EMPTY_LIST;
 		}
+		return strategies;
 	}
 
 	/**
 	 * Create a default strategy.
 	 * Default implementation uses <code>AutowireCapableBeanFactory.createBean</code>.
 	 * @param clazz the strategy implementation class to instantiate
+	 * @throws BeansException if initialization failed
 	 * @return the fully configured strategy instance
 	 * @see #getWebApplicationContext()
 	 * @see org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()
 	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#createBean
 	 */
-	protected Object createDefaultStrategy(Class clazz) {
+	protected Object createDefaultStrategy(Class clazz) throws BeansException {
 		return getWebApplicationContext().getAutowireCapableBeanFactory().createBean(
 				clazz, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
 	}
