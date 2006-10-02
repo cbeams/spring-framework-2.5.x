@@ -55,76 +55,77 @@ import org.springframework.util.xml.DomUtils;
  * @author Rob Harrop
  * @author Adrian Colyer
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.0
  */
 class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
-	public static final String ASPECT = "aspect";
+	private static final String ASPECT = "aspect";
 
-	public static final String EXPRESSION = "expression";
+	private static final String EXPRESSION = "expression";
 
-	public static final String ID = "id";
+	private static final String ID = "id";
 
-	public static final String POINTCUT = "pointcut";
+	private static final String POINTCUT = "pointcut";
 
-	public static final String ADVICE = "advice";
+	private static final String ADVICE = "advice";
 
-	public static final String ADVISOR = "advisor";
+	private static final String ADVISOR = "advisor";
 
-	public static final String ADVICE_REF = "advice-ref";
+	private static final String ADVICE_REF = "advice-ref";
 
-	public static final String POINTCUT_REF = "pointcut-ref";
+	private static final String POINTCUT_REF = "pointcut-ref";
 
-	public static final String REF = "ref";
+	private static final String REF = "ref";
 
-	public static final String KIND = "kind";
+	private static final String KIND = "kind";
 
-	public static final String BEFORE = "before";
+	private static final String BEFORE = "before";
 
-	public static final String DECLARE_PARENTS = "declare-parents";
+	private static final String DECLARE_PARENTS = "declare-parents";
 
-	public static final String TYPE_PATTERN = "types-matching";
+	private static final String TYPE_PATTERN = "types-matching";
 
-	public static final String DEFAULT_IMPL = "default-impl";
+	private static final String DEFAULT_IMPL = "default-impl";
 
-	public static final String IMPLEMENT_INTERFACE = "implement-interface";
+	private static final String IMPLEMENT_INTERFACE = "implement-interface";
 
-	public static final String AFTER = "after";
+	private static final String AFTER = "after";
 
-	public static final String AFTER_RETURNING = "afterReturning";
+	private static final String AFTER_RETURNING = "afterReturning";
 
-	public static final String AFTER_THROWING = "afterThrowing";
+	private static final String AFTER_THROWING = "afterThrowing";
 
-	public static final String AFTER_RETURNING_ELEMENT = "after-returning";
+	private static final String AFTER_RETURNING_ELEMENT = "after-returning";
 
-	public static final String AFTER_THROWING_ELEMENT = "after-throwing";
+	private static final String AFTER_THROWING_ELEMENT = "after-throwing";
 
-	public static final String AROUND = "around";
+	private static final String AROUND = "around";
 
-	public static final String PROXY_TARGET_CLASS = "proxy-target-class";
+	private static final String PROXY_TARGET_CLASS = "proxy-target-class";
 
-	public static final String TRUE = "true";
+	private static final String TRUE = "true";
 
-	public static final String RETURNING = "returning";
+	private static final String RETURNING = "returning";
 
-	public static final String RETURNING_PROPERTY = "returningName";
+	private static final String RETURNING_PROPERTY = "returningName";
 
-	public static final String THROWING = "throwing";
+	private static final String THROWING = "throwing";
 
-	public static final String THROWING_PROPERTY = "throwingName";
+	private static final String THROWING_PROPERTY = "throwingName";
 
-	public static final String ARG_NAMES = "arg-names";
+	private static final String ARG_NAMES = "arg-names";
 
-	public static final String ARG_NAMES_PROPERTY = "argumentNames";
+	private static final String ARG_NAMES_PROPERTY = "argumentNames";
 
-	public static final String ASPECT_NAME_PROPERTY = "aspectName";
+	private static final String ASPECT_NAME_PROPERTY = "aspectName";
 
-	public static final String ASPECT_BEAN_PROPERTY = "aspectBean";
+	private static final String ASPECT_BEAN_PROPERTY = "aspectBean";
 
-	public static final String DECLARATION_ORDER_PROPERTY = "declarationOrder";
+	private static final String DECLARATION_ORDER_PROPERTY = "declarationOrder";
 
-	public static final String ORDER_PROPERTY = "order";
+	private static final String ORDER_PROPERTY = "order";
 
 	private static final int METHOD_INDEX = 0;
 
@@ -289,8 +290,9 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 		BeanDefinition[] beanDefArray = (BeanDefinition[]) beanDefs.toArray(new BeanDefinition[beanDefs.size()]);
 		BeanReference[] beanRefArray = (BeanReference[]) beanRefs.toArray(new BeanReference[beanRefs.size()]);
+		Object source = parserContext.extractSource(aspectElement);
 		parserContext.getReaderContext().fireComponentRegistered(
-				new AspectComponentDefinition(aspectElement, aspectId, beanDefArray, beanRefArray));
+				new AspectComponentDefinition(aspectId, beanDefArray, beanRefArray, source));
 	}
 
 	/**
@@ -299,16 +301,13 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * '<code>after-throwing</code>' or '<code>around</code>'.
 	 */
 	private boolean isAdviceNode(Node aNode) {
-		if (! (aNode instanceof Element)) {
+		if (!(aNode instanceof Element)) {
 			return false;
 		}
 		else {
 			String name = aNode.getLocalName();
-			return (BEFORE.equals(name) ||
-							AFTER.equals(name) ||
-							AFTER_RETURNING_ELEMENT.equals(name) ||
-							AFTER_THROWING_ELEMENT.equals(name) ||
-							AROUND.equals(name));
+			return (BEFORE.equals(name) || AFTER.equals(name) || AFTER_RETURNING_ELEMENT.equals(name) ||
+					AFTER_THROWING_ELEMENT.equals(name) || AROUND.equals(name));
 		}
 	}
 

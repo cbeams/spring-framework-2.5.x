@@ -16,8 +16,6 @@
 
 package org.springframework.aop.config;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.parsing.AbstractComponentDefinition;
@@ -25,11 +23,10 @@ import org.springframework.util.Assert;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class AspectComponentDefinition extends AbstractComponentDefinition {
-
-	private final Element aspectElement;
 
 	private final String aspectName;
 
@@ -37,16 +34,17 @@ public class AspectComponentDefinition extends AbstractComponentDefinition {
 
 	private final BeanReference[] beanReferences;
 
+	private final Object source;
+
 
 	public AspectComponentDefinition(
-			Element aspectElement, String aspectName, BeanDefinition[] beanDefinitions, BeanReference[] beanReferences) {
+			String aspectName, BeanDefinition[] beanDefinitions, BeanReference[] beanReferences, Object source) {
 
-		Assert.notNull(aspectElement, "Aspect element must not be null");
 		Assert.notNull(aspectName, "Aspect name must not be null");
-		this.aspectElement = aspectElement;
 		this.aspectName = aspectName;
 		this.beanDefinitions = (beanDefinitions != null ? beanDefinitions : new BeanDefinition[0]);
 		this.beanReferences = (beanReferences != null ? beanReferences : new BeanReference[0]);
+		this.source = source;
 	}
 
 
@@ -63,7 +61,7 @@ public class AspectComponentDefinition extends AbstractComponentDefinition {
 	}
 
 	public Object getSource() {
-		return this.aspectElement;
+		return this.source;
 	}
 
 }
