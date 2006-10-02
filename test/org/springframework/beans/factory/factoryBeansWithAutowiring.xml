@@ -3,7 +3,10 @@
 
 <beans>
 
-	<bean id="beta" class="org.springframework.beans.factory.FactoryBeanTests$TestFactoryBean">
+	<bean id="abstractBeta" class="org.springframework.beans.factory.FactoryBeanTests$TestFactoryBean"
+			abstract="true"/>
+
+	<bean name="beta" parent="abstractBeta">
 		<property name="target">
 			<bean class="org.springframework.beans.factory.FactoryBeanTests$Beta" autowire="byType"/>
 		</property>
