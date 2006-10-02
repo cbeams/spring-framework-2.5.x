@@ -52,13 +52,17 @@ public class MethodMapTransactionAttributeSource
 	/** Map from method name to attribute value */
 	private Map methodMap;
 
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+
+	private boolean eagerlyInitialized = false;
+
+	private boolean initialized = false;
+
 	/** Map from Method to TransactionAttribute */
-	private Map transactionAttributeMap = new HashMap();
+	private final Map transactionAttributeMap = new HashMap();
 
 	/** Map from Method to name pattern used for registration */
-	private Map methodNameMap = new HashMap();
-
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private final Map methodNameMap = new HashMap();
 
 
 	/**
@@ -81,37 +85,50 @@ public class MethodMapTransactionAttributeSource
 		this.beanClassLoader = beanClassLoader;
 	}
 
+
 	/**
 	 * Eagerly initializes the specified
 	 * {@link #setMethodMap(java.util.Map) "methodMap"}, if any.
-	 * @see #initMethodMap()
+	 * @see #initMethodMap(java.util.Map)
 	 */
 	public void afterPropertiesSet() {
-		initMethodMap();
+		initMethodMap(this.methodMap);
+		this.eagerlyInitialized = true;
+		this.initialized = true;
 	}
 
 	/**
-	 * Initialize the specified {@link #setMethodMap(java.util.Map) "methodMap"},
-	 * if any.
+	 * Initialize the specified {@link #setMethodMap(java.util.Map) "methodMap"}, if any.
+	 * @param methodMap Map from method names to <code>TransactionAttribute</code> instances
+	 * (or Strings to be converted to <code>TransactionAttribute</code> instances)
 	 * @see #setMethodMap
 	 */
-	protected synchronized void initMethodMap() {
-		if (this.methodMap != null) {
-			Iterator it = this.methodMap.entrySet().iterator();
+	protected void initMethodMap(Map methodMap) {
+		if (methodMap != null) {
+			Iterator it = methodMap.entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry entry = (Map.Entry) it.next();
-				String name = (String) entry.getKey();
+				Object key = entry.getKey();
+				if (!(key instanceof String)) {
+					throw new IllegalArgumentException(
+							"Illegal method map key [" + key + "]: only Strings allowed");
+				}
+				Object value = entry.getValue();
 				// Check whether we need to convert from String to TransactionAttribute.
 				TransactionAttribute attr = null;
-				if (entry.getValue() instanceof TransactionAttribute) {
-					attr = (TransactionAttribute) entry.getValue();
+				if (value instanceof TransactionAttribute) {
+					attr = (TransactionAttribute) value;
 				}
-				else {
+				else if (value instanceof String) {
 					TransactionAttributeEditor editor = new TransactionAttributeEditor();
-					editor.setAsText(entry.getValue().toString());
+					editor.setAsText((String) value);
 					attr = (TransactionAttribute) editor.getValue();
 				}
-				addTransactionalMethod(name, attr);
+				else {
+					throw new IllegalArgumentException("Value [" + value + "] is neither of type [" +
+							TransactionAttribute.class.getName() + "] nor a String");
+				}
+				addTransactionalMethod((String) key, attr);
 			}
 		}
 	}
@@ -214,10 +231,18 @@ public class MethodMapTransactionAttributeSource
 
 
 	public TransactionAttribute getTransactionAttribute(Method method, Class targetClass) {
-		if (this.methodMap != null) {
-			initMethodMap();
+		if (this.eagerlyInitialized) {
+			return (TransactionAttribute) this.transactionAttributeMap.get(method);
 		}
-		return (TransactionAttribute) this.transactionAttributeMap.get(method);
+		else {
+			synchronized (this.transactionAttributeMap) {
+				if (!this.initialized) {
+					initMethodMap(this.methodMap);
+					this.initialized = true;
+				}
+				return (TransactionAttribute) this.transactionAttributeMap.get(method);
+			}
+		}
 	}
 
 
