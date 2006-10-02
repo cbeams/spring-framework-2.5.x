@@ -119,7 +119,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	}
 
 
-	public int loadBeanDefinitions(Resource[] resources) throws BeansException {
+	public int loadBeanDefinitions(Resource[] resources) throws BeanDefinitionStoreException {
 		Assert.notNull(resources, "Resource array must not be null");
 		int counter = 0;
 		for (int i = 0; i < resources.length; i++) {
@@ -161,7 +161,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 		}
 	}
 
-	public int loadBeanDefinitions(String[] locations) throws BeansException {
+	public int loadBeanDefinitions(String[] locations) throws BeanDefinitionStoreException {
 		Assert.notNull(locations, "Location array must not be null");
 		int counter = 0;
 		for (int i = 0; i < locations.length; i++) {

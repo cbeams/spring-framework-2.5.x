@@ -29,7 +29,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.beans.factory.parsing.NullSourceExtractor;
@@ -331,7 +330,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
-	public int loadBeanDefinitions(Resource resource) throws BeansException {
+	public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException {
 		return loadBeanDefinitions(new EncodedResource(resource));
 	}
 
@@ -342,10 +341,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
-	public int loadBeanDefinitions(EncodedResource encodedResource) throws BeansException {
-		if (encodedResource == null) {
-			throw new BeanDefinitionStoreException("Resource cannot be null: expected an XML file");
-		}
+	public int loadBeanDefinitions(EncodedResource encodedResource) throws BeanDefinitionStoreException {
+		Assert.notNull(encodedResource, "EncodedResource must not be null");
 		if (logger.isInfoEnabled()) {
 			logger.info("Loading XML bean definitions from " + encodedResource.getResource());
 		}
@@ -375,7 +372,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
-	public int loadBeanDefinitions(InputSource inputSource) throws BeansException {
+	public int loadBeanDefinitions(InputSource inputSource) throws BeanDefinitionStoreException {
 		return loadBeanDefinitions(inputSource, "resource loaded through SAX InputSource");
 	}
 
@@ -387,7 +384,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
-	public int loadBeanDefinitions(InputSource inputSource, String resourceDescription) throws BeansException {
+	public int loadBeanDefinitions(InputSource inputSource, String resourceDescription)
+			throws BeanDefinitionStoreException {
+
 		return doLoadBeanDefinitions(inputSource, new DescriptiveResource(resourceDescription));
 	}
 
@@ -399,11 +398,16 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
-	protected int doLoadBeanDefinitions(InputSource inputSource, Resource resource) throws BeansException {
+	protected int doLoadBeanDefinitions(InputSource inputSource, Resource resource)
+			throws BeanDefinitionStoreException {
 		try {
 			int validationMode = getValidationModeForResource(resource);
-			Document doc = this.documentLoader.loadDocument(inputSource, this.entityResolver, this.errorHandler, validationMode, this.namespaceAware);
+			Document doc = this.documentLoader.loadDocument(
+					inputSource, this.entityResolver, this.errorHandler, validationMode, this.namespaceAware);
 			return registerBeanDefinitions(doc, resource);
+		}
+		catch (BeanDefinitionStoreException ex) {
+			throw ex;
 		}
 		catch (ParserConfigurationException ex) {
 			throw new BeanDefinitionStoreException(
@@ -419,7 +423,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		catch (IOException ex) {
 			throw new BeanDefinitionStoreException("IOException parsing XML document from " + resource, ex);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new BeanDefinitionStoreException("Unexpected exception parsing XML document from " + resource, ex);
 		}
 	}
@@ -477,13 +481,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @param doc the DOM document
 	 * @param resource the resource descriptor (for context information)
 	 * @return the number of bean definitions found
-	 * @throws BeansException in case of parser instantiation failure
 	 * @throws BeanDefinitionStoreException in case of parsing errors
 	 * @see #loadBeanDefinitions
 	 * @see #setDocumentReaderClass
 	 * @see BeanDefinitionDocumentReader#registerBeanDefinitions
 	 */
-	public int registerBeanDefinitions(Document doc, Resource resource) throws BeansException {
+	public int registerBeanDefinitions(Document doc, Resource resource) throws BeanDefinitionStoreException {
 		// Support old XmlBeanDefinitionParser SPI for backwards-compatibility.
 		if (this.parserClass != null) {
 			XmlBeanDefinitionParser parser =
