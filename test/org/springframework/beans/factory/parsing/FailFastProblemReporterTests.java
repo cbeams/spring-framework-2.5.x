@@ -19,17 +19,15 @@ package org.springframework.beans.factory.parsing;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
-import org.easymock.MockControl;
 import org.easymock.AbstractMatcher;
-import org.springframework.core.io.AbstractResource;
+import org.easymock.MockControl;
+
+import org.springframework.core.io.DescriptiveResource;
 import org.springframework.test.AssertThrows;
 
-import java.io.InputStream;
-
 /**
- * Unit tests for the {@link FailFastProblemReporter} class.
- *
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
 public final class FailFastProblemReporterTests extends TestCase {
 
@@ -37,17 +35,16 @@ public final class FailFastProblemReporterTests extends TestCase {
 		new AssertThrows(BeanDefinitionParsingException.class) {
 			public void test() throws Exception {
 				FailFastProblemReporter reporter = new FailFastProblemReporter();
-				reporter.error(new Problem("VGER", new ParseState(),
-						new IllegalArgumentException(),
-						new Location(new NullResource("here"), null)));
+				reporter.error(new Problem("VGER", new Location(new DescriptiveResource("here")),
+						null, new IllegalArgumentException()));
 			}
 		}.runTest();
 	}
 
 	public void testWarn() throws Exception {
 		IllegalArgumentException rootCause = new IllegalArgumentException();
-		Problem problem = new Problem("VGER", new ParseState(),
-				rootCause, new Location(new NullResource("here"), null));
+		Problem problem = new Problem("VGER", new Location(new DescriptiveResource("here")),
+				null, new IllegalArgumentException());
 
 		MockControl mockLog = MockControl.createControl(Log.class);
 		Log log = (Log) mockLog.getMock();
@@ -68,27 +65,6 @@ public final class FailFastProblemReporterTests extends TestCase {
 		reporter.warning(problem);
 
 		mockLog.verify();
-	}
-
-
-	private static final class NullResource extends AbstractResource {
-
-		private String description;
-
-
-		public NullResource(String description) {
-			this.description = description;
-		}
-
-
-		public String getDescription() {
-			return this.description;
-		}
-
-		public InputStream getInputStream() {
-			throw new UnsupportedOperationException();
-		}
-
 	}
 
 }
