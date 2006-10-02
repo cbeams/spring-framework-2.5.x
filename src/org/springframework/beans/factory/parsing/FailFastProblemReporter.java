@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
  * <p>Warnings are written to the log for this class.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @author Rick Evans
  * @since 2.0
  */
@@ -38,13 +39,13 @@ public class FailFastProblemReporter implements ProblemReporter {
 
 
 	/**
-	 * Sets the {@link Log logger} that is to be used to report warnings.
+	 * Set the {@link Log logger} that is to be used to report warnings.
 	 * <p>If set to <code>null</code> then a default {@link Log logger} set to
 	 * the name of the instance class will be used.
 	 * @param logger the {@link Log logger} that is to be used to report warnings
 	 */
 	public void setLogger(Log logger) {
-		this.logger = (logger == null) ? LogFactory.getLog(getClass()) : logger;
+		this.logger = (logger != null ? logger : LogFactory.getLog(getClass()));
 	}
 
 
@@ -53,10 +54,7 @@ public class FailFastProblemReporter implements ProblemReporter {
 	 * @param problem the source of the error
 	 */
 	public void error(Problem problem) {
-		throw new BeanDefinitionParsingException(problem.getResourceDescription(),
-						problem.getParseState(),
-						problem.getMessage(),
-						problem.getRootCause());
+		throw new BeanDefinitionParsingException(problem);
 	}
 
 	/**
@@ -64,9 +62,7 @@ public class FailFastProblemReporter implements ProblemReporter {
 	 * @param problem the source of the warning
 	 */
 	public void warning(Problem problem) {
-		if (this.logger.isWarnEnabled()) {
-			this.logger.warn(problem, problem.getRootCause());
-		}
+		this.logger.warn(problem, problem.getRootCause());
 	}
 
 }

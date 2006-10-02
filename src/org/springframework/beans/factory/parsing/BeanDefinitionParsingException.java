@@ -19,7 +19,8 @@ package org.springframework.beans.factory.parsing;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 
 /**
- * Exception thrown when a bean definition reader encounters an error during parsing.
+ * Exception thrown when a bean definition reader encounters an error
+ * during the parsing process.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -29,16 +30,10 @@ public class BeanDefinitionParsingException extends BeanDefinitionStoreException
 
 	/**
 	 * Create a new BeanDefinitionParsingException.
-	 * @param resourceDescription description of the resource
-	 * that the bean definition came from
-	 * @param parseState the ParseState at the time of failure
-	 * @param msg the detail message
-	 * @param cause the root cause
+	 * @param problem the configuration problem that was detected during the parsing process
 	 */
-	public BeanDefinitionParsingException(
-			String resourceDescription, ParseState parseState, String msg, Throwable cause) {
-
-		super(resourceDescription, "Error '" + msg + "' in " + resourceDescription + " at:\n" + parseState, cause);
+	public BeanDefinitionParsingException(Problem problem) {
+		super(problem.getResourceDescription(), problem.toString(), problem.getRootCause());
 	}
 
 }
