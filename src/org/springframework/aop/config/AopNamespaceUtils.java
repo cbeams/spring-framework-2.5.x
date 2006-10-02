@@ -86,10 +86,6 @@ public abstract class AopNamespaceUtils {
 
 	public static void registerAtAspectJAutoProxyCreatorIfNecessary(ParserContext parserContext, Object sourceElement) {
 		Class cls = getAspectJAutoProxyCreatorClassIfPossible();
-		if (cls == null) {
-			throw new IllegalStateException("Unable to register AspectJ AutoProxyCreator. Cannot find class [" +
-							ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME + "]. Are you running on Java 5.0+?");
-		}
 		registryOrEscalateApcAsRequired(cls, parserContext, sourceElement);
 	}
 
@@ -133,8 +129,10 @@ public abstract class AopNamespaceUtils {
 		try {
 			return ClassUtils.forName(ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME);
 		}
-		catch (ClassNotFoundException ex) {
-			return null;
+		catch (Throwable ex) {
+			throw new IllegalStateException(
+					"Unable to load class [" + ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME +
+					"]. Are you running on Java 1.5+? Root cause: " + ex);
 		}
 	}
 
