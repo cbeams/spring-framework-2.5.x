@@ -37,7 +37,7 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 
 	/**
 	 * Create a new BeanDefinitionStoreException.
-	 * @param msg the detail message
+	 * @param msg the detail message (used as exception message as-is)
 	 */
 	public BeanDefinitionStoreException(String msg) {
 		super(msg);
@@ -45,8 +45,8 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 
 	/**
 	 * Create a new BeanDefinitionStoreException.
-	 * @param msg the detail message
-	 * @param cause the root cause
+	 * @param msg the detail message (used as exception message as-is)
+	 * @param cause the root cause (may be <code>null</code>)
 	 */
 	public BeanDefinitionStoreException(String msg, Throwable cause) {
 		super(msg, cause);
@@ -54,10 +54,19 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 
 	/**
 	 * Create a new BeanDefinitionStoreException.
-	 * @param resourceDescription description of the resource
-	 * that the bean definition came from
-	 * @param msg the detail message
-	 * @param cause the root cause
+	 * @param resourceDescription description of the resource that the bean definition came from
+	 * @param msg the detail message (used as exception message as-is)
+	 */
+	public BeanDefinitionStoreException(String resourceDescription, String msg) {
+		super(msg);
+		this.resourceDescription = resourceDescription;
+	}
+
+	/**
+	 * Create a new BeanDefinitionStoreException.
+	 * @param resourceDescription description of the resource that the bean definition came from
+	 * @param msg the detail message (used as exception message as-is)
+	 * @param cause the root cause (may be <code>null</code>)
 	 */
 	public BeanDefinitionStoreException(String resourceDescription, String msg, Throwable cause) {
 		super(msg, cause);
@@ -66,32 +75,10 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 
 	/**
 	 * Create a new BeanDefinitionStoreException.
-	 * @param documentLocation descriptor of the resource
-	 * location that the bean definition came from
+	 * @param resourceDescription description of the resource that the bean definition came from
 	 * @param beanName the name of the bean requested
-	 * @param msg the detail message
-	 */
-	public BeanDefinitionStoreException(Resource documentLocation, String beanName, String msg) {
-		this(documentLocation.getDescription(), beanName, msg, null);
-	}
-
-	/**
-	 * Create a new BeanDefinitionStoreException.
-	 * @param documentLocation descriptor of the resource
-	 * location that the bean definition came from
-	 * @param beanName the name of the bean requested
-	 * @param msg the detail message
-	 * @param cause the root cause
-	 */
-	public BeanDefinitionStoreException(Resource documentLocation, String beanName, String msg, Throwable cause) {
-		this(documentLocation.getDescription(), beanName, msg, cause);
-	}
-
-	/**
-	 * Create a new BeanDefinitionStoreException.
-	 * @param resourceDescription description of the resource
-	 * that the bean definition came from
-	 * @param beanName the name of the bean requested
+	 * @param msg the detail message (appended to an introductory message that indicates
+	 * the resource and the name of the bean)
 	 * @param msg the detail message
 	 */
 	public BeanDefinitionStoreException(String resourceDescription, String beanName, String msg) {
@@ -100,16 +87,45 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 
 	/**
 	 * Create a new BeanDefinitionStoreException.
-	 * @param resourceDescription description of the resource
-	 * that the bean definition came from
+	 * @param resourceDescription description of the resource that the bean definition came from
 	 * @param beanName the name of the bean requested
-	 * @param msg the detail message
-	 * @param cause the root cause
+	 * @param msg the detail message (appended to an introductory message that indicates
+	 * the resource and the name of the bean)
+	 * @param cause the root cause (may be <code>null</code>)
 	 */
 	public BeanDefinitionStoreException(String resourceDescription, String beanName, String msg, Throwable cause) {
 		super("Error registering bean with name '" + beanName + "' defined in " + resourceDescription + ": " + msg, cause);
 		this.resourceDescription = resourceDescription;
 		this.beanName = beanName;
+	}
+
+	/**
+	 * Create a new BeanDefinitionStoreException.
+	 * @param documentLocation descriptor of the resource location that the bean definition came from
+	 * @param beanName the name of the bean requested
+	 * @param msg the detail message (appended to an introductory message that indicates
+	 * the resource and the name of the bean)
+	 * @deprecated as of Spring 2.0,
+	 * in favor of the constructor variant with a resource description argument
+	 * @see #BeanDefinitionStoreException(String, String, String)
+	 */
+	public BeanDefinitionStoreException(Resource documentLocation, String beanName, String msg) {
+		this(documentLocation.getDescription(), beanName, msg, null);
+	}
+
+	/**
+	 * Create a new BeanDefinitionStoreException.
+	 * @param documentLocation descriptor of the resource location that the bean definition came from
+	 * @param beanName the name of the bean requested
+	 * @param msg the detail message (appended to an introductory message that indicates
+	 * the resource and the name of the bean)
+	 * @param cause the root cause
+	 * @deprecated as of Spring 2.0,
+	 * in favor of the constructor variant with a resource description argument
+	 * @see #BeanDefinitionStoreException(String, String, String, Throwable)
+	 */
+	public BeanDefinitionStoreException(Resource documentLocation, String beanName, String msg, Throwable cause) {
+		this(documentLocation.getDescription(), beanName, msg, cause);
 	}
 
 
