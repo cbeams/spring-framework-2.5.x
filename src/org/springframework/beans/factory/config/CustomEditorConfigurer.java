@@ -23,7 +23,6 @@ import java.util.Map;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
 
@@ -38,7 +37,8 @@ import org.springframework.util.ClassUtils;
  * <code>PropertyEditorRegistrar</code> can register any number of custom
  * editors.
  *
- * <pre class="code"> &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
+ * <pre class="code">
+ * &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
  *   &lt;property name="propertyEditorRegistrars"&gt;
  *     &lt;list&gt;
  *       &lt;bean class="mypackage.MyCustomDateEditorRegistrar"/&gt;
@@ -50,7 +50,8 @@ import org.springframework.util.ClassUtils;
  * <p>Alternative configuration example with custom editor instances,
  * assuming inner beans for <code>PropertyEditor</code> instances:
  *
- * <pre class="code"> &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
+ * <pre class="code">
+ * &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
  *   &lt;property name="customEditors"&gt;
  *     &lt;map&gt;
  *       &lt;entry key="java.util.Date"&gt;
@@ -143,29 +144,24 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 		}
 
 		if (this.customEditors != null) {
-			for (Iterator it = this.customEditors.keySet().iterator(); it.hasNext();) {
-				Object key = it.next();
+			for (Iterator it = this.customEditors.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				Object key = entry.getKey();
 				Class requiredType = null;
 				if (key instanceof Class) {
 					requiredType = (Class) key;
 				}
 				else if (key instanceof String) {
 					String className = (String) key;
-					try {
-						requiredType = ClassUtils.forName(className, this.beanClassLoader);
-					}
-					catch (ClassNotFoundException ex) {
-						throw new BeanInitializationException(
-								"Could not load required type [" + className + "] for custom editor", ex);
-					}
+					requiredType = ClassUtils.resolveClassName(className, this.beanClassLoader);
 				}
 				else {
-					throw new BeanInitializationException(
-							"Invalid key [" + key + "] for custom editor - needs to be Class or String");
+					throw new IllegalArgumentException(
+							"Invalid key [" + key + "] for custom editor: needs to be Class or String");
 				}
-				Object value = this.customEditors.get(key);
+				Object value = entry.getValue();
 				if (!(value instanceof PropertyEditor)) {
-					throw new BeanInitializationException("Mapped value [" + value + "] for custom editor key [" +
+					throw new IllegalArgumentException("Mapped value [" + value + "] for custom editor key [" +
 							key + "] is not of required type [" + PropertyEditor.class.getName() + "]");
 				}
 				beanFactory.registerCustomEditor(requiredType, (PropertyEditor) value);
