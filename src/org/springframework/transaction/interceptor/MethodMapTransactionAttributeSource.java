@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.transaction.TransactionUsageException;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
@@ -139,21 +139,18 @@ public class MethodMapTransactionAttributeSource
 	 * <p>Method names can end or start with "*" for matching multiple methods.
 	 * @param name class and method name, separated by a dot
 	 * @param attr attribute associated with the method
+	 * @throws IllegalArgumentException in case of an invalid name
 	 */
 	public void addTransactionalMethod(String name, TransactionAttribute attr) {
+		Assert.notNull(name, "Name must not be null");
 		int lastDotIndex = name.lastIndexOf(".");
 		if (lastDotIndex == -1) {
-			throw new TransactionUsageException("'" + name + "' is not a valid method name: format is FQN.methodName");
+			throw new IllegalArgumentException("'" + name + "' is not a valid method name: format is FQN.methodName");
 		}
 		String className = name.substring(0, lastDotIndex);
 		String methodName = name.substring(lastDotIndex + 1);
-		try {
-			Class clazz = ClassUtils.forName(className, this.beanClassLoader);
-			addTransactionalMethod(clazz, methodName, attr);
-		}
-		catch (ClassNotFoundException ex) {
-			throw new TransactionUsageException("Class [" + className + "] not found");
-		}
+		Class clazz = ClassUtils.resolveClassName(className, this.beanClassLoader);
+		addTransactionalMethod(clazz, methodName, attr);
 	}
 
 	/**
@@ -164,6 +161,8 @@ public class MethodMapTransactionAttributeSource
 	 * @param attr attribute associated with the method
 	 */
 	public void addTransactionalMethod(Class clazz, String mappedName, TransactionAttribute attr) {
+		Assert.notNull(clazz, "Class must not be null");
+		Assert.notNull(mappedName, "Mapped name must not be null");
 		String name = clazz.getName() + '.'  + mappedName;
 
 		// TODO address method overloading? At present this will
@@ -177,7 +176,7 @@ public class MethodMapTransactionAttributeSource
 			}
 		}
 		if (matchingMethods.isEmpty()) {
-			throw new TransactionUsageException(
+			throw new IllegalArgumentException(
 					"Couldn't find method '" + mappedName + "' on class [" + clazz.getName() + "]");
 		}
 
@@ -210,6 +209,8 @@ public class MethodMapTransactionAttributeSource
 	 * @param attr attribute associated with the method
 	 */
 	public void addTransactionalMethod(Method method, TransactionAttribute attr) {
+		Assert.notNull(method, "Method must not be null");
+		Assert.notNull(attr, "TransactionAttribute must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding transactional method [" + method + "] with attribute [" + attr + "]");
 		}
