@@ -26,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.FatalBeanException;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -40,9 +39,10 @@ import org.springframework.util.ClassUtils;
  * {@link #DefaultNamespaceHandlerResolver(ClassLoader, String)} constructor.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
+ * @since 2.0
  * @see NamespaceHandler
  * @see DefaultBeanDefinitionDocumentReader
- * @since 2.0
  */
 public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver {
 
@@ -54,12 +54,6 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
-
-	/** ClassLoader instance used to load mapping resources */
-	private final ClassLoader classLoader;
-
-	/** The currently configured mapping file location */
-	private final String handlerMappingsLocation;
 
 	/** Stores the mappings from namespace URI Strings to NamespaceHandler instances */
 	private Map handlerMappings;
@@ -98,27 +92,8 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 */
 	public DefaultNamespaceHandlerResolver(ClassLoader classLoader, String handlerMappingsLocation) {
 		Assert.notNull(handlerMappingsLocation, "Handler mappings location must not be null");
-		this.classLoader = (classLoader == null ? ClassUtils.getDefaultClassLoader() : classLoader);
-		this.handlerMappingsLocation = handlerMappingsLocation;
-		initHandlerMappings();
-	}
-
-
-	/**
-	 * Locate the {@link NamespaceHandler} for the supplied namespace URI from the
-	 * configured mappings.
-	 * @param namespaceUri the relevant namespace URI
-	 * @return the located {@link NamespaceHandler} (never <code>null</code>)
-	 * @throws IllegalArgumentException if no {@link NamespaceHandler} can be
-	 * found for the supplied namespace URI
-	 */
-	public NamespaceHandler resolve(String namespaceUri) {
-		NamespaceHandler namespaceHandler = (NamespaceHandler) this.handlerMappings.get(namespaceUri);
-		if (namespaceHandler == null) {
-			throw new IllegalArgumentException(
-					"Unable to locate NamespaceHandler for namespace URI [" + namespaceUri + "]");
-		}
-		return namespaceHandler;
+		ClassLoader classLoaderToUse = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
+		initHandlerMappings(classLoaderToUse, handlerMappingsLocation);
 	}
 
 
@@ -129,8 +104,8 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * of each <code>NamespaceHandler</code> and maps that instance to the corresponding
 	 * namespace URI.
 	 */
-	private void initHandlerMappings() {
-		Properties mappings = loadMappings();
+	private void initHandlerMappings(ClassLoader classLoader, String handlerMappingsLocation) {
+		Properties mappings = loadMappings(classLoader, handlerMappingsLocation);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Loaded mappings [" + mappings + "]");
 		}
@@ -139,7 +114,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 			String namespaceUri = (String) en.nextElement();
 			String className = mappings.getProperty(namespaceUri);
 			try {
-				Class handlerClass = ClassUtils.forName(className, this.classLoader);
+				Class handlerClass = ClassUtils.forName(className, classLoader);
 				if (!NamespaceHandler.class.isAssignableFrom(handlerClass)) {
 					throw new IllegalArgumentException("Class [" + className +
 							"] does not implement the NamespaceHandler interface");
@@ -149,21 +124,38 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 				this.handlerMappings.put(namespaceUri, namespaceHandler);
 			}
 			catch (ClassNotFoundException ex) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Ignoring handler [" + className + "]: class not found");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Ignoring handler [" + className + "]: class not found", ex);
+				}
+			}
+			catch (LinkageError ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Ignoring handler [" + className + "]: problem with class file or dependent class", ex);
 				}
 			}
 		}
 	}
 
-	private Properties loadMappings() {
+	private Properties loadMappings(ClassLoader classLoader, String handlerMappingsLocation) {
 		try {
-			return PropertiesLoaderUtils.loadAllProperties(this.handlerMappingsLocation, this.classLoader);
+			return PropertiesLoaderUtils.loadAllProperties(handlerMappingsLocation, classLoader);
 		}
 		catch (IOException ex) {
-			throw new FatalBeanException("Unable to load NamespaceHandler mappings using mapping location ["
-					+ this.handlerMappingsLocation + "].", ex);
+			throw new IllegalStateException(
+					"Unable to load NamespaceHandler mappings from location [" +
+					handlerMappingsLocation + "]. Root cause: " + ex);
 		}
+	}
+
+
+	/**
+	 * Locate the {@link NamespaceHandler} for the supplied namespace URI
+	 * from the configured mappings.
+	 * @param namespaceUri the relevant namespace URI
+	 * @return the located {@link NamespaceHandler}, or <code>null</code> if none found
+	 */
+	public NamespaceHandler resolve(String namespaceUri) {
+		return (NamespaceHandler) this.handlerMappings.get(namespaceUri);
 	}
 
 }
