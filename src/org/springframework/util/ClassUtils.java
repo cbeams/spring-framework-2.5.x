@@ -138,10 +138,12 @@ public abstract class ClassUtils {
 	 * class loader, or the ClassLoader that loaded the ClassUtils class as fallback.
 	 * @param name the name of the Class
 	 * @return Class instance for the supplied name
+	 * @throws ClassNotFoundException if the class was not found
+	 * @throws LinkageError if the class file could not be loaded
 	 * @see Class#forName(String, boolean, ClassLoader)
 	 * @see #getDefaultClassLoader()
 	 */
-	public static Class forName(String name) throws ClassNotFoundException {
+	public static Class forName(String name) throws ClassNotFoundException, LinkageError {
 		return forName(name, getDefaultClassLoader());
 	}
 
@@ -150,12 +152,14 @@ public abstract class ClassUtils {
 	 * for primitives (like "int") and array class names (like "String[]").
 	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
+	 * (may be <code>null</code>, which indicates the default class loader)
 	 * @return Class instance for the supplied name
+	 * @throws ClassNotFoundException if the class was not found
+	 * @throws LinkageError if the class file could not be loaded
 	 * @see Class#forName(String, boolean, ClassLoader)
 	 */
-	public static Class forName(String name, ClassLoader classLoader) throws ClassNotFoundException {
+	public static Class forName(String name, ClassLoader classLoader) throws ClassNotFoundException, LinkageError {
 		Assert.notNull(name, "Name must not be null");
-		Assert.notNull(classLoader, "ClassLoader must not be null");
 		Class clazz = resolvePrimitiveClassName(name);
 		if (clazz != null) {
 			return clazz;
@@ -166,7 +170,38 @@ public abstract class ClassUtils {
 			Class elementClass = forName(elementClassName, classLoader);
 			return Array.newInstance(elementClass, 0).getClass();
 		}
-		return classLoader.loadClass(name);
+		ClassLoader classLoaderToUse = classLoader;
+		if (classLoaderToUse == null) {
+			classLoaderToUse = getDefaultClassLoader();
+		}
+		return classLoaderToUse.loadClass(name);
+	}
+
+	/**
+	 * Resolve the given class name into a Class instance. Supports
+	 * primitives (like "int") and array class names (like "String[]").
+	 * <p>This is effectively equivalent to the <code>forName</code>
+	 * method with the same arguments, with the only difference being
+	 * the exceptions thrown in case of class loading failure.
+	 * @param className the name of the Class
+	 * @param classLoader the class loader to use
+	 * (may be <code>null</code>, which indicates the default class loader)
+	 * @return Class instance for the supplied name
+	 * @throws IllegalArgumentException if the class name was not resolvable
+	 * (that is, the class could not be found or the class file could not be loaded)
+	 * @see #forName(String, ClassLoader)
+	 */
+	public static Class resolveClassName(String className, ClassLoader classLoader) throws IllegalArgumentException {
+		try {
+			return forName(className, classLoader);
+		}
+		catch (ClassNotFoundException ex) {
+			throw new IllegalArgumentException("Cannot find class [" + className + "]. Root cause: " + ex);
+		}
+		catch (LinkageError ex) {
+			throw new IllegalArgumentException("Error loading class [" + className +
+					"]: problem with class file or dependent class. Root cause: " + ex);
+		}
 	}
 
 	/**
@@ -185,6 +220,7 @@ public abstract class ClassUtils {
 		}
 		return result;
 	}
+
 
 	/**
 	 * Get the class name without the qualified package name.
@@ -256,7 +292,6 @@ public abstract class ClassUtils {
 		return buffer.toString();
 	}
 
-
 	/**
 	 * Return the qualified name of the given method, consisting of
 	 * fully qualified interface/class name + "." + method name.
@@ -267,6 +302,7 @@ public abstract class ClassUtils {
 		Assert.notNull(method, "Method must not be null");
 		return method.getDeclaringClass().getName() + "." + method.getName();
 	}
+
 
 	/**
 	 * Determine whether the given class has a method with the given signature.

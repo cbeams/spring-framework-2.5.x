@@ -60,12 +60,7 @@ public class ClassEditor extends PropertyEditorSupport {
 
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (StringUtils.hasText(text)) {
-			try {
-				setValue(ClassUtils.forName(text.trim(), this.classLoader));
-			}
-			catch (ClassNotFoundException ex) {
-				throw new IllegalArgumentException("Class not found: " + ex.getMessage());
-			}
+			setValue(ClassUtils.resolveClassName(text.trim(), this.classLoader));
 		}
 		else {
 			setValue(null);
@@ -74,10 +69,12 @@ public class ClassEditor extends PropertyEditorSupport {
 
 	public String getAsText() {
 		Class clazz = (Class) getValue();
-		if (clazz == null) {
+		if (clazz != null) {
+			return ClassUtils.getQualifiedName(clazz);
+		}
+		else {
 			return "";
 		}
-        return ClassUtils.getQualifiedName(clazz);
 	}
 
 }

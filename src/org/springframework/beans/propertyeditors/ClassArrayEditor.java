@@ -16,10 +16,10 @@
 
 package org.springframework.beans.propertyeditors;
 
+import java.beans.PropertyEditorSupport;
+
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-
-import java.beans.PropertyEditorSupport;
 
 /**
  * Property editor for an array of {@link java.lang.Class java.lang.Class}, to enable the direct
@@ -59,13 +59,8 @@ public class ClassArrayEditor extends PropertyEditorSupport {
 			String[] classNames = StringUtils.commaDelimitedListToStringArray(text);
 			Class[] classes = new Class[classNames.length];
 			for (int i = 0; i < classNames.length; i++) {
-				String className = classNames[i];
-				try {
-					classes[i] = ClassUtils.forName(className.trim(), this.classLoader);
-				}
-				catch (ClassNotFoundException ex) {
-					throw new IllegalArgumentException("Class not found: " + ex.getMessage());
-				}
+				String className = classNames[i].trim();
+				classes[i] = ClassUtils.resolveClassName(className, this.classLoader);
 			}
 			setValue(classes);
 		}
