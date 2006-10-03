@@ -58,6 +58,7 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 		Class beanClass = getBeanClass(element);
 		Assert.state(beanClass != null, "Class returned from getBeanClass(Element) must not be null");
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(beanClass);
+		builder.setSource(parserContext.extractSource(element));
 		if (parserContext.isNested()) {
 			// Inner bean definition must receive same singleton status as containing bean.
 			builder.setSingleton(parserContext.getContainingBeanDefinition().isSingleton());
