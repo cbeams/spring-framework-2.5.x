@@ -192,6 +192,8 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 		setSynthetic(original.isSynthetic());
 		setResourceDescription(original.getResourceDescription());
+		setSource(original.getSource());
+		setRole(original.getRole());
 
 		copyAttributesFrom(original);
 	}
@@ -245,6 +247,9 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 		setSynthetic(other.isSynthetic());
 		setResourceDescription(other.getResourceDescription());
+		setSource(other.getSource());
+		setRole(other.getRole());
+
 		copyAttributesFrom(other);
 	}
 
@@ -705,7 +710,6 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	public void setRole(int role) {
 		this.role = role;
 	}
-
 
 	/**
 	 * Return the role hint for this <code>BeanDefinition</code>.
