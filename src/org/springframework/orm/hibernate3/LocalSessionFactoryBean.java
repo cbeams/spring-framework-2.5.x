@@ -17,12 +17,7 @@
 package org.springframework.orm.hibernate3;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Array;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -35,12 +30,9 @@ import java.util.Properties;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.ConnectionReleaseMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
-import org.hibernate.JDBCException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -49,30 +41,23 @@ import org.hibernate.cfg.Mappings;
 import org.hibernate.cfg.NamingStrategy;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.FilterDefinition;
-import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.event.EventListeners;
 import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
  * FactoryBean that creates a local Hibernate SessionFactory instance.
- * Behaves like a SessionFactory instance when used as bean reference, e.g.
- * for HibernateTemplate's "sessionFactory" property. Note that switching
- * to JndiObjectFactoryBean is just a matter of configuration!
+ * Behaves like a SessionFactory instance when used as bean reference,
+ * e.g. for HibernateTemplate's "sessionFactory" property.
  *
  * <p>The typical usage will be to register this as singleton factory
  * (for a certain underlying JDBC DataSource) in an application context,
@@ -92,12 +77,6 @@ import org.springframework.util.StringUtils;
  * JtaTransactionManager can be used for transaction demarcation, the latter
  * only being necessary for transactions that span multiple databases.
  *
- * <p>Registering a SessionFactory with JNDI is only advisable when using
- * Hibernate's JCA Connector, i.e. when the application server cares for
- * initialization. Else, portability is rather limited: Manual JNDI binding
- * isn't supported by some application servers (e.g. Tomcat). Unfortunately,
- * JCA has drawbacks too: Its setup is container-specific and can be tedious.
- *
  * <p>This factory bean will by default expose a transaction-aware SessionFactory
  * proxy, letting data access code work with the plain Hibernate SessionFactory
  * and its <code>getCurrentSession()</code> method, while still being able to
@@ -106,12 +85,6 @@ import org.springframework.util.StringUtils;
  * synchronization mechanism, either Spring or JTA. Furthermore,
  * <code>getCurrentSession()</code> will also seamlessly work with
  * a request-scoped Session managed by OpenSessionInViewFilter/Interceptor.
- *
- * <p>This class also implements the PersistenceExceptionTranslator interface,
- * as autodetected by Spring's PersistenceExceptionTranslationPostProcessor,
- * for AOP-based translation of native exceptions to Spring DataAccessExceptions.
- * Hence, the presence of a LocalSessionFactoryBean automatically enables a
- * PersistenceExceptionTranslationPostProcessor to translate Hibernate exceptions.
  *
  * <p>Requires Hibernate 3.0.3 or later. Note that this factory will always use
  * "on_close" as default Hibernate connection release mode, for the reason that
@@ -124,14 +97,11 @@ import org.springframework.util.StringUtils;
  * @since 1.2
  * @see HibernateTemplate#setSessionFactory
  * @see HibernateTransactionManager#setSessionFactory
- * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see #setExposeTransactionAwareSessionFactory
  * @see org.hibernate.SessionFactory#getCurrentSession()
  * @see HibernateTransactionManager
- * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
  */
-public class LocalSessionFactoryBean
-		implements FactoryBean, InitializingBean, DisposableBean, PersistenceExceptionTranslator {
+public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 
 	private static final ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
 
@@ -181,8 +151,6 @@ public class LocalSessionFactoryBean
 	}
 
 
-	protected final Log logger = LogFactory.getLog(getClass());
-
 	private Class configurationClass = Configuration.class;
 
 	private Resource[] configLocations;
@@ -201,13 +169,9 @@ public class LocalSessionFactoryBean
 
 	private boolean useTransactionAwareDataSource = false;
 
-	private boolean exposeTransactionAwareSessionFactory = true;
-
 	private TransactionManager jtaTransactionManager;
 
 	private LobHandler lobHandler;
-
-	private SQLExceptionTranslator jdbcExceptionTranslator;
 
 	private Interceptor entityInterceptor;
 
@@ -226,8 +190,6 @@ public class LocalSessionFactoryBean
 	private boolean schemaUpdate = false;
 
 	private Configuration configuration;
-
-	private SessionFactory sessionFactory;
 
 
 	/**
@@ -438,35 +400,6 @@ public class LocalSessionFactoryBean
 	}
 
 	/**
-	 * Set whether to expose a transaction-aware proxy for the SessionFactory,
-	 * returning the Session that's associated with the current Spring-managed
-	 * transaction on <code>getCurrentSession()</code>, if any.
-	 * <p>Default is "true", letting data access code work with the plain
-	 * Hibernate SessionFactory and its <code>getCurrentSession()</code> method,
-	 * while still being able to participate in current Spring-managed transactions:
-	 * with any transaction management strategy, either local or JTA / EJB CMT,
-	 * and any transaction synchronization mechanism, either Spring or JTA.
-	 * Furthermore, <code>getCurrentSession()</code> will also seamlessly work with
-	 * a request-scoped Session managed by OpenSessionInViewFilter/Interceptor.
-	 * <p>Turn this flag off to expose the plain Hibernate SessionFactory with
-	 * Hibernate's default <code>getCurrentSession()</code> behavior, where
-	 * Hibernate 3.0.x only supports plain JTA synchronization. On Hibernate 3.1+,
-	 * such a plain SessionFactory will by default have a SpringSessionContext
-	 * registered to nevertheless provide Spring-managed Sessions; this can be
-	 * overridden through the corresponding Hibernate property
-	 * "hibernate.current_session_context_class".
-	 * @see org.hibernate.SessionFactory#getCurrentSession()
-	 * @see org.springframework.transaction.jta.JtaTransactionManager
-	 * @see HibernateTransactionManager
-	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewFilter
-	 * @see org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor
-	 * @see SpringSessionContext
-	 */
-	public void setExposeTransactionAwareSessionFactory(boolean exposeTransactionAwareSessionFactory) {
-		this.exposeTransactionAwareSessionFactory = exposeTransactionAwareSessionFactory;
-	}
-
-	/**
 	 * Set the JTA TransactionManager to be used for Hibernate's
 	 * TransactionManagerLookup. If set, this will override corresponding
 	 * settings in Hibernate properties. Allows to use a Spring-managed
@@ -490,23 +423,6 @@ public class LocalSessionFactoryBean
 	 */
 	public void setLobHandler(LobHandler lobHandler) {
 		this.lobHandler = lobHandler;
-	}
-
-	/**
-	 * Set the JDBC exception translator for the SessionFactory,
-	 * exposed via the PersistenceExceptionTranslator interface.
-	 * <p>Applied to any SQLException root cause of a Hibernate JDBCException,
-	 * overriding Hibernate's default SQLException translation (which is
-	 * based on Hibernate's Dialect for a specific target database).
-	 * @param jdbcExceptionTranslator the exception translator
-	 * @see java.sql.SQLException
-	 * @see org.hibernate.JDBCException
-	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
-	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
-	 * @see org.springframework.dao.support.PersistenceExceptionTranslator
-	 */
-	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
-		this.jdbcExceptionTranslator = jdbcExceptionTranslator;
 	}
 
 	/**
@@ -636,12 +552,9 @@ public class LocalSessionFactoryBean
 	}
 
 
-	/**
-	 * Initialize the SessionFactory for the given or the default location.
-	 * @throws IllegalArgumentException in case of illegal property values
-	 * @throws HibernateException in case of Hibernate initialization errors
-	 */
-	public void afterPropertiesSet() throws IllegalArgumentException, HibernateException, IOException {
+	protected SessionFactory buildSessionFactory() throws Exception {
+		SessionFactory sf = null;
+
 		// Create Configuration instance.
 		Configuration config = newConfiguration();
 
@@ -669,7 +582,7 @@ public class LocalSessionFactoryBean
 			// HibernateTransactionManager), "on_close" is the better default.
 			config.setProperty(Environment.RELEASE_CONNECTIONS, ConnectionReleaseMode.ON_CLOSE.toString());
 
-			if (!this.exposeTransactionAwareSessionFactory) {
+			if (!isExposeTransactionAwareSessionFactory()) {
 				// Not exposing a SessionFactory proxy with transaction-aware
 				// getCurrentSession() method -> set Hibernate 3.1 CurrentSessionContext
 				// implementation instead, providing the Spring-managed Session that way.
@@ -824,15 +737,7 @@ public class LocalSessionFactoryBean
 			// Build SessionFactory instance.
 			logger.info("Building new Hibernate SessionFactory");
 			this.configuration = config;
-			SessionFactory sf = newSessionFactory(config);
-
-			// Wrap SessionFactory with transaction-aware proxy, if demanded.
-			if (this.exposeTransactionAwareSessionFactory) {
-			 	this.sessionFactory = getTransactionAwareSessionFactoryProxy(sf);
-			}
-			else {
-				this.sessionFactory = sf;
-			}
+			sf = newSessionFactory(config);
 		}
 
 		finally {
@@ -856,8 +761,9 @@ public class LocalSessionFactoryBean
 		if (this.schemaUpdate) {
 			updateDatabaseSchema();
 		}
-	}
 
+		return sf;
+	}
 
 	/**
 	 * Subclasses can override this method to perform custom initialization
@@ -902,21 +808,35 @@ public class LocalSessionFactoryBean
 	}
 
 	/**
-	 * Wrap the given SessionFactory with a proxy that delegates every method call
-	 * to it but delegates <code>getCurrentSession</code> calls to SessionFactoryUtils,
-	 * for participating in Spring-managed transactions.
-	 * @param target the original SessionFactory to wrap
-	 * @return the wrapped SessionFactory
-	 * @see org.hibernate.SessionFactory#getCurrentSession()
-	 * @see SessionFactoryUtils#doGetSession(org.hibernate.SessionFactory, boolean)
+	 * Return the Configuration object used to build the SessionFactory.
+	 * Allows access to configuration metadata stored there (rarely needed).
+	 * @throws IllegalStateException if the Configuration object has not been initialized yet
 	 */
-	protected SessionFactory getTransactionAwareSessionFactoryProxy(SessionFactory target) {
-		Class sfInterface = SessionFactory.class;
-		if (target instanceof SessionFactoryImplementor) {
-			sfInterface = SessionFactoryImplementor.class;
+	public final Configuration getConfiguration() {
+		if (this.configuration == null) {
+			throw new IllegalStateException("Configuration not initialized yet");
 		}
-		return (SessionFactory) Proxy.newProxyInstance(sfInterface.getClassLoader(),
-				new Class[] {sfInterface}, new TransactionAwareInvocationHandler(target));
+		return this.configuration;
+	}
+
+	/**
+	 * Allow for schema export on shutdown.
+	 */
+	public void destroy() throws HibernateException {
+		if (this.dataSource != null) {
+			// Make given DataSource available for potential SchemaExport,
+			// which unfortunately reinstantiates a ConnectionProvider.
+			configTimeDataSourceHolder.set(this.dataSource);
+		}
+		try {
+			super.destroy();
+		}
+		finally {
+			if (this.dataSource != null) {
+				// Reset DataSource holder.
+				configTimeDataSourceHolder.set(null);
+			}
+		}
 	}
 
 
@@ -929,19 +849,19 @@ public class LocalSessionFactoryBean
 	 * <code>LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");</code>.
 	 * <p>Uses the SessionFactory that this bean generates for accessing a JDBC
 	 * connection to perform the script.
-	 * @throws DataAccessException in case of script execution errors
+	 * @throws org.springframework.dao.DataAccessException in case of script execution errors
 	 * @see org.hibernate.cfg.Configuration#generateDropSchemaScript
 	 * @see org.hibernate.tool.hbm2ddl.SchemaExport#drop
 	 */
 	public void dropDatabaseSchema() throws DataAccessException {
 		logger.info("Dropping database schema for Hibernate SessionFactory");
-		HibernateTemplate hibernateTemplate = new HibernateTemplate(this.sessionFactory);
+		HibernateTemplate hibernateTemplate = new HibernateTemplate(getSessionFactory());
 		hibernateTemplate.execute(
 			new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
 					Connection con = session.connection();
-					Dialect dialect = Dialect.getDialect(configuration.getProperties());
-					String[] sql = configuration.generateDropSchemaScript(dialect);
+					Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
+					String[] sql = getConfiguration().generateDropSchemaScript(dialect);
 					executeSchemaScript(con, sql);
 					return null;
 				}
@@ -964,13 +884,13 @@ public class LocalSessionFactoryBean
 	 */
 	public void createDatabaseSchema() throws DataAccessException {
 		logger.info("Creating database schema for Hibernate SessionFactory");
-		HibernateTemplate hibernateTemplate = new HibernateTemplate(this.sessionFactory);
+		HibernateTemplate hibernateTemplate = new HibernateTemplate(getSessionFactory());
 		hibernateTemplate.execute(
 			new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
 					Connection con = session.connection();
-					Dialect dialect = Dialect.getDialect(configuration.getProperties());
-					String[] sql = configuration.generateSchemaCreationScript(dialect);
+					Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
+					String[] sql = getConfiguration().generateSchemaCreationScript(dialect);
 					executeSchemaScript(con, sql);
 					return null;
 				}
@@ -995,15 +915,15 @@ public class LocalSessionFactoryBean
 	 */
 	public void updateDatabaseSchema() throws DataAccessException {
 		logger.info("Updating database schema for Hibernate SessionFactory");
-		HibernateTemplate hibernateTemplate = new HibernateTemplate(this.sessionFactory);
+		HibernateTemplate hibernateTemplate = new HibernateTemplate(getSessionFactory());
 		hibernateTemplate.setFlushMode(HibernateTemplate.FLUSH_NEVER);
 		hibernateTemplate.execute(
 			new HibernateCallback() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
 					Connection con = session.connection();
-					Dialect dialect = Dialect.getDialect(configuration.getProperties());
+					Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
 					DatabaseMetadata metadata = new DatabaseMetadata(con, dialect);
-					String[] sql = configuration.generateSchemaUpdateScript(dialect, metadata);
+					String[] sql = getConfiguration().generateSchemaUpdateScript(dialect, metadata);
 					executeSchemaScript(con, sql);
 					return null;
 				}
@@ -1064,132 +984,6 @@ public class LocalSessionFactoryBean
 		catch (SQLException ex) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Unsuccessful schema statement: " + sql, ex);
-			}
-		}
-	}
-
-
-	/**
-	 * Return the Configuration object used to build the SessionFactory.
-	 * Allows access to configuration metadata stored there (rarely needed).
-	 */
-	public Configuration getConfiguration() {
-		return configuration;
-	}
-
-
-	/**
-	 * Return the singleton SessionFactory.
-	 */
-	public Object getObject() {
-		return this.sessionFactory;
-	}
-
-	public Class getObjectType() {
-		return (this.sessionFactory != null) ? this.sessionFactory.getClass() : SessionFactory.class;
-	}
-
-	public boolean isSingleton() {
-		return true;
-	}
-
-
-	/**
-	 * Implementation of the PersistenceExceptionTranslator interface,
-	 * as autodetected by Spring's PersistenceExceptionTranslationPostProcessor.
-	 * <p>Converts the exception if it is a HibernateException;
-	 * else returns <code>null</code> to indicate an unknown exception.
-	 * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
-	 * @see #convertHibernateAccessException
-	 */
-	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
-		if (ex instanceof HibernateException) {
-			return convertHibernateAccessException((HibernateException) ex);
-		}
-		return null;
-	}
-
-	/**
-	 * Convert the given HibernateException to an appropriate exception from the
-	 * <code>org.springframework.dao</code> hierarchy.
-	 * <p>Will automatically apply a specified SQLExceptionTranslator to a
-	 * Hibernate JDBCException, else rely on Hibernate's default translation.
-	 * @param ex HibernateException that occured
-	 * @return a corresponding DataAccessException
-	 * @see SessionFactoryUtils#convertHibernateAccessException
-	 * @see #setJdbcExceptionTranslator
-	 */
-	protected DataAccessException convertHibernateAccessException(HibernateException ex) {
-		if (this.jdbcExceptionTranslator != null && ex instanceof JDBCException) {
-			JDBCException jdbcEx = (JDBCException) ex;
-			return this.jdbcExceptionTranslator.translate(
-					"Hibernate operation: " + jdbcEx.getMessage(), jdbcEx.getSQL(), jdbcEx.getSQLException());
-		}
-		return SessionFactoryUtils.convertHibernateAccessException(ex);
-	}
-
-
-	/**
-	 * Close the SessionFactory on bean factory shutdown.
-	 */
-	public void destroy() throws HibernateException {
-		logger.info("Closing Hibernate SessionFactory");
-		if (this.dataSource != null) {
-			// Make given DataSource available for potential SchemaExport,
-			// which unfortunately reinstantiates a ConnectionProvider.
-			configTimeDataSourceHolder.set(this.dataSource);
-		}
-		try {
-			this.sessionFactory.close();
-		}
-		finally {
-			if (this.dataSource != null) {
-				// Reset DataSource holder.
-				configTimeDataSourceHolder.set(null);
-			}
-		}
-	}
-
-
-	/**
-	 * Invocation handler that delegates <code>getCurrentSession()</code> calls
-	 * to SessionFactoryUtils, for being aware of thread-bound transactions.
-	 */
-	private static class TransactionAwareInvocationHandler implements InvocationHandler {
-
-		private final SessionFactory target;
-
-		public TransactionAwareInvocationHandler(SessionFactory target) {
-			this.target = target;
-		}
-
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			// Invocation on SessionFactory/SessionFactoryImplementor interface coming in...
-
-			if (method.getName().equals("getCurrentSession")) {
-				// Handle getCurrentSession method: return transactional Session, if any.
-				try {
-					return SessionFactoryUtils.doGetSession((SessionFactory) proxy, false);
-				}
-				catch (IllegalStateException ex) {
-					throw new HibernateException(ex.getMessage());
-				}
-			}
-			else if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
-			}
-			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of SessionFactory proxy.
-				return new Integer(hashCode());
-			}
-
-			// Invoke method on target SessionFactory.
-			try {
-				return method.invoke(this.target, args);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
 			}
 		}
 	}
