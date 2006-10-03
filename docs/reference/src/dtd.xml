@@ -1,21 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- The DTD should automatically get imported during the Ant build
-	(see the preparedocs target). I haven't been able to get the
-	extra newlines out of the way, somehow they keep coming up.
-	Have to figure out something for that.
-	-->
 <appendix id="springbeansdtd">
-  <title><literal>spring-beans_2_0.dtd</literal></title>
+  <title><literal>spring-beans-2.0.dtd</literal></title>
 
-  <para><programlisting>&lt;?xml version="1.0" encoding="UTF-8"?>
-
-&lt;!--
-	Spring XML Beans DTD
+  <para><programlisting>&lt;!--
+	Spring XML Beans DTD, version 2.0
 	Authors: Rod Johnson, Juergen Hoeller, Alef Arendsen, Colin Sampaleanu, Rob Harrop
 
 	This defines a simple and consistent way of creating a namespace
 	of JavaBeans objects, managed by a Spring BeanFactory, read by
-	XmlBeanDefinitionReader (with DefaultXmlBeanDefinitionParser).
+	XmlBeanDefinitionReader (with DefaultBeanDefinitionDocumentReader).
 
 	This document type is used by most Spring functionality, including
 	web application contexts, which are based on bean factories.
@@ -24,11 +17,11 @@
 	Typically the bean class is specified, along with JavaBean properties
 	and/or constructor arguments.
 
-	Bean instances can be "singletons" (shared instances) or "prototypes"
-	(independent instances). Further scopes are supposed to be built on top
-	of the core BeanFactory infrastructure and are therefore not part of it.
+	A bean instance can be a "singleton" (shared instance) or a "prototype"
+	(independent instance). Further scopes can be provided by extended
+	bean factories, for example in a web environment.
 
-	References among beans are supported, i.e. setting a JavaBean property
+	References among beans are supported, that is, setting a JavaBean property
 	or a constructor argument to refer to another bean in the same factory
 	(or an ancestor factory).
 
@@ -39,13 +32,13 @@
 	There is also support for lists, sets, maps, and java.util.Properties
 	as bean property types or constructor argument types.
 
-	As the format is simple, a DTD is sufficient, and there's no need
-	for a schema at this point.
+	For simple purposes, this DTD is sufficient. As of Spring 2.0,
+	XSD-based bean definitions are supported as more powerful alternative.
 
 	XML documents that conform to this DTD should declare the following doctype:
 
 	&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
-		"http://www.springframework.org/dtd/spring-beans_2_0.dtd">
+		"http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 -->
 
 
@@ -104,6 +97,20 @@
 -->
 &lt;!ATTLIST alias alias CDATA #REQUIRED>
 
+&lt;!--
+  Allows for arbitrary metadata to be attached to a bean definition.
+-->
+&lt;!ELEMENT meta EMPTY>
+
+&lt;!--
+  Specifies the key name of the metadata parameter being defined.
+-->
+&lt;!ATTLIST meta key CDATA #REQUIRED>
+
+&lt;!--
+  Specifies the value of the metadata parameter being defined as a String.
+-->
+&lt;!ATTLIST meta value CDATA #REQUIRED>
 
 &lt;!--
 	Defines a single (usually named) bean.
@@ -114,7 +121,7 @@
 -->
 &lt;!ELEMENT bean (
 	description?,
-	(constructor-arg | property | lookup-method | replaced-method)*
+	(meta | constructor-arg | property | lookup-method | replaced-method)*
 )>
 
 &lt;!--
@@ -154,9 +161,30 @@
 	method are specified, they will override the corresponding parent settings.
 
 	The remaining settings will always be taken from the child definition:
-	depends on, autowire mode, dependency check, singleton, lazy init.
+	depends on, autowire mode, dependency check, scope, lazy init.
 -->
 &lt;!ATTLIST bean parent CDATA #IMPLIED>
+
+&lt;!--
+	The scope of this bean: typically "singleton" (one shared instance,
+	which will be returned by all calls to getBean() with the id),
+	or "prototype" (independent instance resulting from each call to
+	getBean(). Default is "singleton".
+
+	Singletons are most commonly used, and are ideal for multi-threaded
+	service objects. Further scopes, such as "request" or "session",
+	might be supported by extended bean factories (for example, in a
+	web environment).
+
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
+
+	Inner bean definitions inherit the singleton status of their containing
+	bean definition, unless explicitly specified: The inner bean will be a
+	singleton if the containing bean is a singleton, and a prototype if
+	the containing bean has any other scope.
+-->
+&lt;!ATTLIST bean scope CDATA #IMPLIED>
 
 &lt;!--
 	Is this bean "abstract", i.e. not meant to be instantiated itself but
@@ -165,34 +193,25 @@
 	instantiate that particular bean in any case.
 
 	Note: This attribute will not be inherited by child bean definitions.
-	Hence, it needs to be specified per concrete bean definition.
+	Hence, it needs to be specified per abstract bean definition.
 -->
-&lt;!ATTLIST bean abstract (true | false) "false">
-
-&lt;!--
-	Is this bean a "singleton" (one shared instance, which will
-	be returned by all calls to getBean() with the id),
-	or a "prototype" (independent instance resulting from each call to
-	getBean(). Default is singleton.
-
-	Singletons are most commonly used, and are ideal for multi-threaded
-	service objects.
-
-	Note: This attribute will not be inherited by child bean definitions.
-	Hence, it needs to be specified per concrete bean definition.
--->
-&lt;!ATTLIST bean singleton (true | false) "true">
+&lt;!ATTLIST bean abstract (true | false) #IMPLIED>
 
 &lt;!--
 	If this bean should be lazily initialized.
 	If false, it will get instantiated on startup by bean factories
 	that perform eager initialization of singletons.
 
-
 	Note: This attribute will not be inherited by child bean definitions.
 	Hence, it needs to be specified per concrete bean definition.
 -->
 &lt;!ATTLIST bean lazy-init (true | false | default) "default">
+
+&lt;!--
+  Indicates whether or not this bean should be considered when looking
+  for candidates to satisfy another beans autowiring requirements.
+-->
+&lt;!ATTLIST bean autowire-candidate (true | false) #IMPLIED>
 
 &lt;!--
 	Optional attribute controlling whether to "autowire" bean properties.
@@ -228,7 +247,7 @@
 
 	The latter two are similar to PicoContainer and make bean factories simple to
 	configure for small namespaces, but doesn't work as well as standard Spring
-	behavior for bigger applications.
+	behaviour for bigger applications.
 
 	Note that explicit dependencies, i.e. "property" and "constructor-arg" elements,
 	always override autowiring. Autowire behavior can be combined with dependency
@@ -276,7 +295,11 @@
 &lt;!--
 	Optional attribute for the name of the custom destroy method to invoke
 	on bean factory shutdown. The method must have no arguments,
-	but may throw any exception. Note: Only invoked on singleton beans!
+	but may throw any exception.
+
+	Note: Only invoked on beans whose lifecycle is under full control
+	of the factory - which is always the case for singletons, but not
+	guaranteed for any other scope.
 -->
 &lt;!ATTLIST bean destroy-method CDATA #IMPLIED>
 
@@ -318,7 +341,6 @@
 	Injection, and an instance (rather than static) method to be used.
 -->
 &lt;!ATTLIST bean factory-bean CDATA #IMPLIED>
-
 
 &lt;!--
 	Bean definitions can specify zero or more constructor arguments.
@@ -370,7 +392,7 @@
 	beans in the same or related factories, lists, maps and properties.
 -->
 &lt;!ELEMENT property (
-	description?,
+	description?, meta*,
 	(bean | ref | idref | value | null | list | set | map | props)?
 )>
 
@@ -433,9 +455,9 @@
 &lt;!ATTLIST replaced-method name CDATA #IMPLIED>
 
 &lt;!--
-	Bean name of an implementation of the MethodReplacer interface
-	in the current or ancestor factories. This may be a singleton or prototype
-	bean. If it's a prototype, a new instance will be used for each method replacement.
+	Bean name of an implementation of the MethodReplacer interface in the current
+	or ancestor factories. This may be a singleton or prototype bean. If it's
+	a prototype, a new instance will be used for each method replacement.
 	Singleton usage is the norm.
 -->
 &lt;!ATTLIST replaced-method replacer CDATA #IMPLIED>
@@ -483,8 +505,8 @@
 	Defines a string property value, which must also be the id of another
 	bean in this factory or an external factory (parent or included factory).
 	While a regular 'value' element could instead be used for the same effect,
-	using idref in this case allows validation of local bean ids by the xml
-	parser, and name completion by helper tools.
+	using idref in this case allows validation of local bean ids by the XML
+	parser, and name completion by supporting tools.
 -->
 &lt;!ELEMENT idref EMPTY>
 
@@ -502,11 +524,10 @@
 
 &lt;!--
 	Contains a string representation of a property value.
-	The property may be a string, or may be converted to the
-	required type using the JavaBeans PropertyEditor
-	machinery. This makes it possible for application developers
-	to write custom PropertyEditor implementations that can
-	convert strings to objects.
+	The property may be a string, or may be converted to the required
+	type using the JavaBeans PropertyEditor machinery. This makes it
+	possible for application developers to write custom PropertyEditor
+	implementations that can convert strings to arbitrary target objects.
 
 	Note that this is recommended for simple objects only.
 	Configure more complex objects by populating JavaBean
@@ -541,8 +562,16 @@
 	(bean | ref | idref | value | null | list | set | map | props)*
 )>
 
-&lt;!-- Enable/disable merging for collections when using parent/child beans -->
+&lt;!--
+	Enable/disable merging for collections when using parent/child beans.
+-->
 &lt;!ATTLIST list merge (true | false | default) "default">
+
+&lt;!--
+	Specify the default Java type for nested values.
+-->
+&lt;!ATTLIST list value-type CDATA #IMPLIED>
+
 
 &lt;!--
 	A set can contain multiple inner bean, ref, collection, or value elements.
@@ -553,8 +582,15 @@
 	(bean | ref | idref | value | null | list | set | map | props)*
 )>
 
-&lt;!-- Enable/disable merging for collections when using parent/child beans -->
+&lt;!--
+	Enable/disable merging for collections when using parent/child beans.
+-->
 &lt;!ATTLIST set merge (true | false | default) "default">
+
+&lt;!--
+	Specify the default Java type for nested values.
+-->
+&lt;!ATTLIST set value-type CDATA #IMPLIED>
 
 
 &lt;!--
@@ -565,8 +601,20 @@
 	(entry)*
 )>
 
-&lt;!-- Enable/disable merging for collections when using parent/child beans -->
+&lt;!--
+	Enable/disable merging for collections when using parent/child beans.
+-->
 &lt;!ATTLIST map merge (true | false | default) "default">
+
+&lt;!--
+	Specify the default Java type for nested entry keys.
+-->
+&lt;!ATTLIST map key-type CDATA #IMPLIED>
+
+&lt;!--
+	Specify the default Java type for nested entry values.
+-->
+&lt;!ATTLIST map value-type CDATA #IMPLIED>
 
 &lt;!--
 	A map entry can be an inner bean, ref, value, or collection.
@@ -614,7 +662,9 @@
 	(prop)*
 )>
 
-&lt;!-- Enable/disable merging for collections when using parent/child beans -->
+&lt;!--
+	Enable/disable merging for collections when using parent/child beans.
+-->
 &lt;!ATTLIST props merge (true | false | default) "default">
 
 &lt;!--
