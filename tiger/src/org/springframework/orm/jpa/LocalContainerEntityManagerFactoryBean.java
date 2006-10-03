@@ -23,6 +23,7 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import javax.sql.DataSource;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
@@ -67,12 +68,14 @@ import org.springframework.util.ClassUtils;
  * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory
  */
 public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean
-		implements ResourceLoaderAware {
+		implements ResourceLoaderAware, BeanClassLoaderAware {
 
 	private PersistenceUnitManager persistenceUnitManager;
 
 	private final DefaultPersistenceUnitManager internalPersistenceUnitManager =
 			new DefaultPersistenceUnitManager();
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private PersistenceUnitInfo persistenceUnitInfo;
 
@@ -166,6 +169,10 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		this.internalPersistenceUnitManager.setResourceLoader(resourceLoader);
 	}
 
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+		this.beanClassLoader = beanClassLoader;
+	}
+
 
 	@Override
 	protected EntityManagerFactory createNativeEntityManagerFactory() throws PersistenceException {
@@ -180,13 +187,8 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		PersistenceProvider provider = getPersistenceProvider();
 		if (provider == null) {
 			String providerClassName = this.persistenceUnitInfo.getPersistenceProviderClassName();
-			try {
-				Class providerClass = ClassUtils.forName(providerClassName);
-				provider = (PersistenceProvider) BeanUtils.instantiateClass(providerClass);
-			}
-			catch (ClassNotFoundException ex) {
-				throw new IllegalArgumentException("Cannot resolve provider class name '" + providerClassName + "'", ex);
-			}
+			Class providerClass = ClassUtils.resolveClassName(providerClassName, this.beanClassLoader);
+			provider = (PersistenceProvider) BeanUtils.instantiateClass(providerClass);
 		}
 		if (provider == null) {
 			throw new IllegalStateException("Unable to determine persistence provider. " +
