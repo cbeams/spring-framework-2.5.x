@@ -68,7 +68,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Cache of singletons: bean name --> bean instance */
-	private final Map singletonCache = new HashMap();
+	private final Map singletonCache = CollectionFactory.createLinkedMapIfPossible(16);
 
 	/** Names of beans that are currently in creation */
 	private final Set singletonsCurrentlyInCreation = Collections.synchronizedSet(new HashSet());
