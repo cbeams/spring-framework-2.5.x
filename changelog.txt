@@ -19,6 +19,7 @@ Package org.springframework.beans
 * introduced BeanReference interface, implemented by RuntimeBeanReference as well as RuntimeBeanNameReference
 * dropped BeanReferenceFactoryBean; use the available alias mechanisms instead
 * reworked CustomScopeConfigurer to only support Scope instances as values for the "scopes" map
+* DefaultSingletonBeanRegistry keeps singleton beans in registration order (requires JDK 1.4 or Commons Collections)
 * AbstractBeanFactory does not explicitly register a given alias that is equal to the canonical bean name
 * dropped BeanDefinitionRegistryBuilder in favor of refined BeanDefinitionReaderUtils convenience methods
 * added "getInnerBeanDefinitions()" accessor to ComponentDefinition interface, exposing all relevant inner beans
@@ -50,6 +51,7 @@ Package org.springframework.jms
 * added JMS invoker strategy for service-based remoting via JMS: JmsInvokerServiceExporter, JmsInvokerProxyFactoryBean
 
 Package org.springframework.jmx
+* MBeanExporter's MBean autodetection properly registers multiple beans even if their instances as equal
 * MBeanExporter's "registerManagedResource" registers a given MBean as-is (only wrapping a plain object as ModelMBean)
 
 Package org.springframework.mock
@@ -59,6 +61,7 @@ Package org.springframework.mock
 Package org.springframework.orm
 * added overloaded query/insert/update/delete operations without parameter object to SqlMapClientOperations/Template
 * refined Hibernate3 support to detect Hibernate 3.2's FlushMode.MANUAL as well, while remaining compatible with 3.0/3.1
+* factored out AbstractSessionFactoryBean base class from Hibernate3 LocalSessionFactoryBean
 * Hibernate3 LocalSessionFactoryBean registers filter definitions before loading any mapping files
 * ScopedBeanInterceptor for Hibernate3 exposes target class name as Hibernate entity name in case of a CGLIB proxy
 * changed the semantics of AbstractJpaVendorAdapter's "generateDdl" flag to create/update (instead of drop-and-recreate)
