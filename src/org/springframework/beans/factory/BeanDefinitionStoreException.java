@@ -79,7 +79,6 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 	 * @param beanName the name of the bean requested
 	 * @param msg the detail message (appended to an introductory message that indicates
 	 * the resource and the name of the bean)
-	 * @param msg the detail message
 	 */
 	public BeanDefinitionStoreException(String resourceDescription, String beanName, String msg) {
 		this(resourceDescription, beanName, msg, null);

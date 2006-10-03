@@ -37,9 +37,8 @@ import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 
 /**
- * {@link org.springframework.aop.framework.autoproxy.InvocationContextExposingAdvisorAutoProxyCreator}
- * subclass that processes all AspectJ annotation classes in the current application context,
- * as well as Spring Advisors.
+ * AspectJInvocationContextExposingAdvisorAutoProxyCreator subclass that processes all
+ * AspectJ annotation classes in the current application context, as well as Spring Advisors.
  *
  * <p>Any AspectJ annotated classes will automatically be recognized, and their advice
  * applied if Spring AOP's proxy-based model is capable of applying it.

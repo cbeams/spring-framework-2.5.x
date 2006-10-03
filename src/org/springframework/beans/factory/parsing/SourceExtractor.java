@@ -30,7 +30,7 @@ import org.springframework.core.io.Resource;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
- * @see org.springframework.beans.BeanMetadataElement#setSource
+ * @see org.springframework.beans.BeanMetadataElement#getSource()
  * @see org.springframework.beans.factory.config.BeanDefinition
  */
 public interface SourceExtractor {
