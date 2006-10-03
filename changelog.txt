@@ -18,15 +18,25 @@ Package org.springframework.beans
 * introduced BeanMetadataElement interface, giving access to config source object (implemented by BeanDefinition etc)
 * introduced BeanReference interface, implemented by RuntimeBeanReference as well as RuntimeBeanNameReference
 * dropped BeanReferenceFactoryBean; use the available alias mechanisms instead
+* reworked CustomScopeConfigurer to only support Scope instances as values for the "scopes" map
+* AbstractBeanFactory does not explicitly register a given alias that is equal to the canonical bean name
 * dropped BeanDefinitionRegistryBuilder in favor of refined BeanDefinitionReaderUtils convenience methods
 * added "getInnerBeanDefinitions()" accessor to ComponentDefinition interface, exposing all relevant inner beans
 * added Resource argument to SourceExtractor interface, exposing the defining resource for the given source candidate
 * reworked type matching for FactoryBeans, avoiding repeated recreation/destruction through early "getObjectType" checks
 * "lookup-method" overrides no-arg method only, to let overloaded variants be implemented in a traditional fashion
 * added "setAllowRawInjectionDespiteWrapping" config method to DefaultListableBeanFactory, to enable Spring 1.2 behavior
+* added overloaded AbstractSingleBeanDefinitionParser's "doParse" template method with a ParserContext argument
+* moved ComponentDefinition, ReaderContext and support classes from "beans.factory.support" to "beans.factory.parsing"
+* reworked ReaderEventListener to take AliasDefinition/ImportDefinition argument for alias/import callback, respectively
+* revised BeanDefinitionParsingException to take a single Problem argument
 
 Package org.springframework.cache
 * EhCacheFactoryBean uses EHCache 1.2's extended Cache constructor to avoid EHCache warning (requires EHCache 1.2 now)
+
+Package org.springframework.core
+* AbstractLabeledEnum uses label as "toString()" representation, analogous to JDK 1.5 enums
+* StaticLabeledEnum and AbstractGenericLabeledEnum use the code as default label
 
 Package org.springframework.jdbc
 * JdbcTemplate uses "PreparedStatement.setObject(index, null)" for null values with unknown SQL type on Informix
@@ -50,6 +60,7 @@ Package org.springframework.orm
 * added overloaded query/insert/update/delete operations without parameter object to SqlMapClientOperations/Template
 * refined Hibernate3 support to detect Hibernate 3.2's FlushMode.MANUAL as well, while remaining compatible with 3.0/3.1
 * Hibernate3 LocalSessionFactoryBean registers filter definitions before loading any mapping files
+* ScopedBeanInterceptor for Hibernate3 exposes target class name as Hibernate entity name in case of a CGLIB proxy
 * changed the semantics of AbstractJpaVendorAdapter's "generateDdl" flag to create/update (instead of drop-and-recreate)
 
 Package org.springframework.transaction
@@ -59,6 +70,7 @@ Package org.springframework.transaction
 * factored out TransactionSynchronizationUtils and JtaAfterCompletionSynchronization helper classes
 * introduced CallbackPreferringPlatformTransactionManager interface, to be implemented by callback-loving PTM impls
 * TransactionTemplate/TransactionInterceptor automatically detect and use CallbackPreferringPlatformTransactionManager
+* fixed MethodMapTransactionAttributeSource to avoid unnecessary reinitialization of method map
 
 Package org.springframework.util
 * ClassUtils falls back to the system class loader if the thread context class loader is inaccessible
@@ -172,6 +184,7 @@ Package org.springframework.orm
 * HibernateTemplate exposes Session proxies that implement the SessionImplementor interface as well now (if possible)
 * exception translation for Hibernate3 turns PropertyValueException into Spring's DataIntegrityViolationException
 * exception translation for Hibernate3 keeps original JDBCException as root cause of Spring's HibernateJdbcException
+* added ScopedBeanInterceptor for Hibernate3, exposing the raw target class as entity name in case of a scoped proxy
 * LocalPersistenceManagerFactoryBean and JdoTemplate perform full exception translation even for reflective calls
 * expose underlying PersistenceProvider instance in EntityManagerFactoryInfo (if available)
 * added "persistenceProvider" property to AbstractEntityManagerFactoryBean, for using a shared PersistenceProvider

@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.0 (September 2006)
---------------------------------------------------
+THE SPRING FRAMEWORK, release 2.0 (October 2006)
+------------------------------------------------
 http://www.springframework.org
 
 
@@ -90,7 +90,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2480 KB)
+* "spring" (~2485 KB)
 - Convenient jar file combining all standard modules (except for Portlet and Hibernate2 support)
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar, aspects jar, spring-portlet jar, and spring-hibernate2 jar!
@@ -133,7 +133,7 @@ MODULE JARS (dist/modules):
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (spring-support, Tiles, iText, POI)
 
-* "spring-portlet" (~110 KB)
+* "spring-portlet" (~115 KB)
 - Contents: framework portlets, portlet MVC framework, portlet controllers
 - Dependencies: spring-web, Portlet API, (spring-webmvc)
 
