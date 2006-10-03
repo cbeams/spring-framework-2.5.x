@@ -74,7 +74,9 @@ import org.springframework.util.Assert;
  * HibernateTransactionManager. Can also be used directly in application code,
  * e.g. in combination with HibernateInterceptor.
  *
- * <p>Note: Spring's Hibernate support requires Hibernate 2.1 (as of Spring 1.0).
+ * <p>Note: Spring's Hibernate support in this package requires Hibernate 2.1.
+ * Dedicated Hibernate3 support can be found in a separate package:
+ * <code>org.springframework.orm.hibernate3</code>.
  *
  * @author Juergen Hoeller
  * @since 02.05.2003

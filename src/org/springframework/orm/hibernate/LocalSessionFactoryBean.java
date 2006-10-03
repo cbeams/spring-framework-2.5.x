@@ -49,9 +49,8 @@ import org.springframework.jdbc.support.lob.LobHandler;
 
 /**
  * FactoryBean that creates a local Hibernate SessionFactory instance.
- * Behaves like a SessionFactory instance when used as bean reference, e.g.
- * for HibernateTemplate's "sessionFactory" property. Note that switching
- * to JndiObjectFactoryBean is just a matter of configuration!
+ * Behaves like a SessionFactory instance when used as bean reference,
+ * e.g. for HibernateTemplate's "sessionFactory" property.
  *
  * <p>The typical usage will be to register this as singleton factory
  * (for a certain underlying JDBC DataSource) in an application context,
@@ -71,26 +70,14 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * JtaTransactionManager can be used for transaction demarcation, the latter
  * only being necessary for transactions that span multiple databases.
  *
- * <p>Registering a SessionFactory with JNDI is only advisable when using
- * Hibernate's JCA Connector, i.e. when the application server cares for
- * initialization. Else, portability is rather limited: Manual JNDI binding
- * isn't supported by some application servers (e.g. Tomcat). Unfortunately,
- * JCA has drawbacks too: Its setup is container-specific and can be tedious.
- *
- * <p>Note that the JCA Connector's sole major strength is its seamless
- * cooperation with EJB containers and JTA services. If you do not use EJB
- * and initiate your JTA transactions via Spring's JtaTransactionManager,
- * you can get all benefits including distributed transactions and proper
- * transactional JVM-level caching with local SessionFactory setup too -
- * without any configuration hassle like container-specific setup.
- *
- * <p>Note: Spring's Hibernate support requires Hibernate 2.1 (as of Spring 1.0).
+ * <p>Note: Spring's Hibernate support in this package requires Hibernate 2.1.
+ * Dedicated Hibernate3 support can be found in a separate package:
+ * <code>org.springframework.orm.hibernate3</code>.
  *
  * @author Juergen Hoeller
  * @since 05.05.2003
  * @see HibernateTemplate#setSessionFactory
  * @see HibernateTransactionManager#setSessionFactory
- * @see org.springframework.jndi.JndiObjectFactoryBean
  */
 public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 

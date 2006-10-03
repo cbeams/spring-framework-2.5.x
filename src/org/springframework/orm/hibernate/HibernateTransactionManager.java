@@ -100,7 +100,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <i>Note that Hibernate itself does not support nested transactions! Hence,
  * do not expect Hibernate access code to participate in a nested transaction.</i>
  *
- * <p>Note: Spring's Hibernate support requires Hibernate 2.1 (as of Spring 1.0).
+ * <p>Note: Spring's Hibernate support in this package requires Hibernate 2.1.
+ * Dedicated Hibernate3 support can be found in a separate package:
+ * <code>org.springframework.orm.hibernate3</code>.
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
