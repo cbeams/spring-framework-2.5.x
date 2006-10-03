@@ -13,6 +13,10 @@
 
 	<bean name="spring:mbean=true" class="org.springframework.jmx.export.TestDynamicMBean"/>
 
+	<bean name="spring:mbean2=true" class="org.springframework.jmx.export.TestDynamicMBean"/>
+
+	<bean name="spring:mbean3=true" class="org.springframework.jmx.export.TestDynamicMBean"/>
+
 	<bean id="connector" class="org.springframework.jmx.support.ConnectorServerFactoryBean">
 		<property name="server">
 			<ref local="server"/>

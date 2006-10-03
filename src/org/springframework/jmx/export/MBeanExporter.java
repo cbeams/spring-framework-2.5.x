@@ -60,6 +60,7 @@ import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.MBeanRegistrationSupport;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -195,7 +196,8 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * Bean instances are typically linked in through bean references.
 	 * Bean names will be resolved as beans in the current factory, respecting
 	 * lazy-init markers (that is, not triggering initialization of such beans).
-	 * @param beans Map with bean instances or bean names as values
+	 * @param beans Map with JMX names as keys and bean instances or bean names
+	 * as values
 	 * @see #setNamingStrategy
 	 * @see org.springframework.jmx.export.naming.KeyNamingStrategy
 	 * @see javax.management.ObjectName#ObjectName(String)
@@ -812,7 +814,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 					boolean lazyInit = isBeanDefinitionLazyInit(this.beanFactory, beanName);
 					Object beanInstance = (!lazyInit ? this.beanFactory.getBean(beanName) : null);
 					if (!this.beans.containsValue(beanName) &&
-							(beanInstance == null || !this.beans.containsValue(beanInstance))) {
+							(beanInstance == null || !CollectionUtils.containsInstance(this.beans.values(), beanInstance))) {
 						// Not already registered for JMX exposure.
 						this.beans.put(beanName, (beanInstance != null ? beanInstance : beanName));
 						if (logger.isInfoEnabled()) {

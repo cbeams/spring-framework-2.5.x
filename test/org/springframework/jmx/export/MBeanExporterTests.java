@@ -1,51 +1,52 @@
 /*
  * Copyright 2002-2006 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.springframework.jmx.export;
 
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.interceptor.NopInterceptor;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.TestBean;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.jmx.AbstractMBeanServerTests;
-import org.springframework.jmx.IJmxTestBean;
-import org.springframework.jmx.JmxTestBean;
-import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
-import org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler;
-import org.springframework.jmx.export.assembler.AutodetectCapableMBeanInfoAssembler;
-import org.springframework.jmx.export.naming.SelfNaming;
-import org.springframework.jmx.support.ObjectNameManager;
-
-import javax.management.InstanceNotFoundException;
-import javax.management.JMException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectInstance;
-import javax.management.ObjectName;
-import javax.management.Attribute;
-import javax.management.NotificationListener;
-import javax.management.Notification;
-import javax.management.modelmbean.ModelMBeanInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.management.Attribute;
+import javax.management.InstanceNotFoundException;
+import javax.management.JMException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.Notification;
+import javax.management.NotificationListener;
+import javax.management.ObjectInstance;
+import javax.management.ObjectName;
+import javax.management.modelmbean.ModelMBeanInfo;
+
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.interceptor.NopInterceptor;
+import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jmx.AbstractMBeanServerTests;
+import org.springframework.jmx.IJmxTestBean;
+import org.springframework.jmx.JmxTestBean;
+import org.springframework.jmx.export.assembler.AutodetectCapableMBeanInfoAssembler;
+import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
+import org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler;
+import org.springframework.jmx.export.naming.SelfNaming;
+import org.springframework.jmx.support.ObjectNameManager;
 
 /**
  * Integration tests for the MBeanExporter class.
@@ -146,6 +147,10 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 			MBeanServer server = (MBeanServer) bf.getBean("server");
 			ObjectInstance instance = server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=true"));
 			assertNotNull(instance);
+			instance = server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean2=true"));
+			assertNotNull(instance);
+			instance = server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean3=true"));
+			assertNotNull(instance);
 		}
 		finally {
 			bf.destroySingletons();
@@ -233,7 +238,6 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		Map beans = new HashMap();
 		beans.put("foo", testBean);
 
-
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
 		exporter.setBeans(beans);
@@ -255,8 +259,11 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		Person springRegistered = new Person();
 		springRegistered.setName("Sally Greenwood");
 
+		String objectName2 = "spring:test=equalBean";
+
 		Map beans = new HashMap();
 		beans.put(objectName.toString(), springRegistered);
+		beans.put(objectName2, springRegistered);
 
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
@@ -267,6 +274,8 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		ObjectInstance instance = server.getObjectInstance(objectName);
 		assertNotNull(instance);
+		ObjectInstance instance2 = server.getObjectInstance(new ObjectName(objectName2));
+		assertNotNull(instance2);
 
 		// should still be the first bean with name Rob Harrop
 		assertEquals("Rob Harrop", server.getAttribute(objectName, "Name"));
