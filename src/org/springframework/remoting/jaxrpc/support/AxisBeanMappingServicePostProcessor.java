@@ -30,6 +30,7 @@ import javax.xml.rpc.encoding.TypeMappingRegistry;
 import org.apache.axis.encoding.ser.BeanDeserializerFactory;
 import org.apache.axis.encoding.ser.BeanSerializerFactory;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.remoting.jaxrpc.JaxRpcServicePostProcessor;
 import org.springframework.util.ClassUtils;
 
@@ -51,13 +52,15 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.remoting.jaxrpc.LocalJaxRpcServiceFactoryBean#setServicePostProcessors
  * @see org.springframework.remoting.jaxrpc.JaxRpcPortProxyFactoryBean#setServicePostProcessors
  */
-public class AxisBeanMappingServicePostProcessor implements JaxRpcServicePostProcessor {
+public class AxisBeanMappingServicePostProcessor implements JaxRpcServicePostProcessor, BeanClassLoaderAware {
 
 	private String encodingStyleUri;
 
 	private String typeNamespaceUri;
 
 	private Map beanMappings;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 
 	/**
@@ -85,17 +88,15 @@ public class AxisBeanMappingServicePostProcessor implements JaxRpcServicePostPro
 	/**
 	 * Specify the bean mappings to register as String-String pairs,
 	 * with the Java type name as key and the WSDL type name as value.
-	 * @throws ClassNotFoundException if an invalid class has been specified
 	 */
-	public void setBeanMappings(Properties beanMappingProps) throws ClassNotFoundException {
-		if (beanMappings != null) {
+	public void setBeanMappings(Properties beanMappingProps) {
+		if (beanMappingProps != null) {
 			this.beanMappings = new HashMap(beanMappingProps.size());
 			Enumeration propertyNames = beanMappingProps.propertyNames();
 			while (propertyNames.hasMoreElements()) {
 				String javaTypeName = (String) propertyNames.nextElement();
 				String wsdlTypeName = beanMappingProps.getProperty(javaTypeName);
-				Class javaType = ClassUtils.forName(javaTypeName);
-				this.beanMappings.put(javaType, wsdlTypeName);
+				this.beanMappings.put(javaTypeName, wsdlTypeName);
 			}
 		}
 		else {
@@ -120,6 +121,10 @@ public class AxisBeanMappingServicePostProcessor implements JaxRpcServicePostPro
 		else {
 			this.beanMappings = null;
 		}
+	}
+
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+		this.beanClassLoader = beanClassLoader;
 	}
 
 
@@ -154,7 +159,14 @@ public class AxisBeanMappingServicePostProcessor implements JaxRpcServicePostPro
 		if (this.beanMappings != null) {
 			for (Iterator it = this.beanMappings.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
-				Class javaType = (Class) entry.getKey();
+				Object key = entry.getKey();
+				Class javaType = null;
+				if (key instanceof Class) {
+					javaType = (Class) key;
+				}
+				else {
+					javaType = ClassUtils.resolveClassName((String) key, this.beanClassLoader);
+				}
 				String wsdlTypeName = (String) entry.getValue();
 				registerBeanMapping(mapping, javaType, wsdlTypeName);
 			}
