@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -55,7 +57,8 @@ import org.springframework.util.StringUtils;
  * @see SimpleReflectiveMBeanInfoAssembler
  * @see org.springframework.jmx.export.MBeanExporter
  */
-public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanInfoAssembler {
+public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanInfoAssembler
+		implements BeanClassLoaderAware, InitializingBean {
 
 	/**
 	 * Stores the array of interfaces to use for creating the management interface.
@@ -65,7 +68,14 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	/**
 	 * Stores the mappings of bean keys to an array of <code>Class</code>es.
 	 */
-	private Map interfaceMappings;
+	private Properties interfaceMappings;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+
+	/**
+	 * Stores the mappings of bean keys to an array of <code>Class</code>es.
+	 */
+	private Map resolvedInterfaceMappings;
 
 
 	/**
@@ -96,30 +106,51 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	 * @param mappings the mappins of bean keys to interface names
 	 */
 	public void setInterfaceMappings(Properties mappings) {
-		this.interfaceMappings = new HashMap(mappings.size());
-		for (Enumeration en = mappings.propertyNames(); en.hasMoreElements();) {
-			String beanKey = (String) en.nextElement();
-			String[] classNames = StringUtils.commaDelimitedListToStringArray(mappings.getProperty(beanKey));
-			Class[] classes = convertToClasses(classNames, beanKey);
-			this.interfaceMappings.put(beanKey, classes);
+		this.interfaceMappings = mappings;
+	}
+
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+		this.beanClassLoader = beanClassLoader;
+	}
+
+
+	public void afterPropertiesSet() {
+		if (this.interfaceMappings != null) {
+			this.resolvedInterfaceMappings = resolveInterfaceMappings(this.interfaceMappings);
 		}
 	}
 
-	private Class[] convertToClasses(String[] classNames, String beanKey) {
+	/**
+	 * Resolve the given interface mappings, turning class names into Class objects.
+	 * @param mappings the specified interface mappings
+	 * @return the resolved interface mappings (with Class objects as values)
+	 */
+	private Map resolveInterfaceMappings(Properties mappings) {
+		Map resolvedMappings = new HashMap(mappings.size());
+		for (Enumeration en = mappings.propertyNames(); en.hasMoreElements();) {
+			String beanKey = (String) en.nextElement();
+			String[] classNames = StringUtils.commaDelimitedListToStringArray(mappings.getProperty(beanKey));
+			Class[] classes = resolveClassNames(classNames, beanKey);
+			resolvedMappings.put(beanKey, classes);
+		}
+		return resolvedMappings;
+	}
+
+	/**
+	 * Resolve the given class names into Class objects.
+	 * @param classNames the class names to resolve
+	 * @param beanKey the bean key that the class names are associated with
+	 * @return the resolved Class
+	 */
+	private Class[] resolveClassNames(String[] classNames, String beanKey) {
 		Class[] classes = new Class[classNames.length];
 		for (int x = 0; x < classes.length; x++) {
-			try {
-				Class cls = ClassUtils.forName(classNames[x].trim());
-				if (!cls.isInterface()) {
-					throw new IllegalArgumentException("Class [" + classNames[x] + "] mapped to bean key [" +
-							beanKey + "] is not an interface");
-				}
-				classes[x] = cls;
+			Class cls = ClassUtils.resolveClassName(classNames[x].trim(), this.beanClassLoader);
+			if (!cls.isInterface()) {
+				throw new IllegalArgumentException(
+						"Class [" + classNames[x] + "] mapped to bean key [" + beanKey + "] is no interface");
 			}
-			catch (ClassNotFoundException ex) {
-				throw new IllegalArgumentException("Class [" + classNames[x] + "] mapped to bean key [" +
-						beanKey + "] cannot be found: " + ex.getMessage());
-			}
+			classes[x] = cls;
 		}
 		return classes;
 	}
@@ -173,14 +204,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	 * configured interfaces and is public, otherwise <code>false</code>.
 	 */
 	private boolean isPublicInInterface(Method method, String beanKey) {
-		return isPublic(method) && isDeclaredInInterface(method, beanKey);
-	}
-
-	/**
-	 * Checks to see if the given method is public.
-	 */
-	private boolean isPublic(Method method) {
-		return (method.getModifiers() & Modifier.PUBLIC) > 0;
+		return ((method.getModifiers() & Modifier.PUBLIC) > 0) && isDeclaredInInterface(method, beanKey);
 	}
 
 	/**
@@ -190,8 +214,8 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	private boolean isDeclaredInInterface(Method method, String beanKey) {
 		Class[] ifaces = null;
 
-		if (this.interfaceMappings != null) {
-			ifaces = (Class[]) this.interfaceMappings.get(beanKey);
+		if (this.resolvedInterfaceMappings != null) {
+			ifaces = (Class[]) this.resolvedInterfaceMappings.get(beanKey);
 		}
 
 		if (ifaces == null) {
