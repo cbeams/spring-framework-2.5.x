@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,9 @@
 
 package org.springframework.core.enums;
 
-import org.springframework.util.Assert;
-
 /**
  * Base class for labeled enum instances that aren't static.
- * 
+ *
  * @author Keith Donald
  * @since 1.2.6
  */
@@ -34,19 +32,21 @@ public abstract class AbstractGenericLabeledEnum extends AbstractLabeledEnum {
 
 	/**
 	 * Create a new StaticLabeledEnum instance.
-	 * @param label the label (can be <code>null</code>); if null, the enum's code
-	 * will be treated as the label
-	 * @throws IllegalArgumentException if the label text is blank
+	 * @param label the label; if <code>null</code>), the enum's code
+	 * will be used as label
 	 */
 	protected AbstractGenericLabeledEnum(String label) {
 		this.label = label;
 	}
 
+
 	public String getLabel() {
-		if (label == null) {
-			return getCode().toString();
-		} else {
+		if (this.label != null) {
 			return label;
 		}
+		else {
+			return getCode().toString();
+		}
 	}	
+
 }

@@ -64,7 +64,8 @@ public abstract class StaticLabeledEnum extends AbstractLabeledEnum {
 		this.code = new Short((short) code);
 		if (label != null) {
 			this.label = label;
-		} else {
+		}
+		else {
 			this.label = this.code.toString();
 		}
 	}
