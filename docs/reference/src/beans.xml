@@ -2472,12 +2472,7 @@ beanFactory.registerScope("]]><emphasis role="bold">thread</emphasis><![CDATA[",
             <para>If you have your own custom <interfacename>Scope</interfacename> implementation(s),
             you are not just limited to only programmatic registration of said custom scope(s).
             You can also do the <interfacename>Scope</interfacename> registration declaratively,
-            using a custom <interfacename>BeanFactoryPostProcessor</interfacename>
-            implementation, the <classname>CustomScopeConfigurer</classname> class. The
-            <interfacename>BeanFactoryPostProcessor</interfacename> interface is one of the
-            primary means of extending the Spring IoC container, and is described in a
-            <link linkend="beans-factory-extension-factory-postprocessors">later section</link>
-            of this very chapter.</para>
+            using the <classname>CustomScopeConfigurer</classname> class.</para>
             <para>The declarative registration of custom <interfacename>Scope</interfacename>
             implementations using the <classname>CustomScopeConfigurer</classname> class is
             shown below:</para>
@@ -2490,8 +2485,10 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 
     <bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
         <property name="scopes">
-            <map>
-                ]]><emphasis role="bold">&lt;entry key="thread" value="com.foo.ThreadScope"/&gt;</emphasis><![CDATA[
+            <map>]]><emphasis role="bold"><![CDATA[
+                <entry key="thread">
+                    <bean class="com.foo.ThreadScope"/>
+                </entry>]]></emphasis><![CDATA[
             </map>
         </property>
     </bean>
@@ -2506,10 +2503,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     </bean>
 
 </beans>]]></programlisting>
-            <para>The <classname>CustomScopeConfigurer</classname> also allows you to specify
-            actual <classname>Class</classname> instances as entry values, as well as
-            actual <interfacename>Scope</interfacename> implementation instances; see the
-            Javadocs for the <classname>CustomScopeConfigurer</classname> class for details.</para>
 		</section>
     </section>
     <section id="beans-factory-nature">
