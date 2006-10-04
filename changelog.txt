@@ -3,6 +3,86 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 1.2.9 (13.10.2006)
+-------------------------------------
+
+General:
+* declared all internal ThreadLocal variables as final (to avoid class reloading issues)
+
+Package org.springframework.beans
+* refined PropertyAccessExceptionsException to show nested details even when wrapped in a standard JDK exception
+* ConfigurableBeanFactory's "setParentBeanFactory" throws IllegalStateException if already associated with a parent
+* AbstractBeanFactory keeps singleton beans in registration order (requires JDK 1.4 or Commons Collections)
+* AbstractBeanFactory does not explicitly register a given alias that is equal to the canonical bean name
+* fixed AbstractBeanFactory to accept re-registration of alias for same bean name (-> bean definition overriding)
+* AbstractAutowireCapableBeanFactory creates "depends-on" beans even before "postProcessBeforeInstantiation"
+* fixed method overrides check to accept methods declared on interfaces as well
+
+Package org.springframework.context
+* synchronized AbstractApplicationContext's "refresh()" method, for hot refreshing in concurrent environments
+
+Package org.springframework.core
+* fixed SpringVersion to return null if the package is not determinable because of ClassLoader restrictions
+* fixed PathMatchingResourcePatternResolver to prevent eternal recursion in case of invalid prefix with pattern symbols
+* refined PathMatchingResourcePatternResolver to ignore classpath roots that cannot be resolved as jar or in file system
+* ResourceArrayPropertyEditor always preserves order of resource entries, even on JDK 1.3 without Commons Collections
+
+Package org.springframework.ejb
+* fixed AbstractSlsbInvokerInterceptor to reobtain createMethod in case of cacheHome="false"/lookupHomeOnStartup="true"
+
+Package org.springframework.jca
+* SingleConnectionFactory's Connection proxy implements "equals" and "hashCode" based on proxy equality
+
+Package org.springframework.jdbc
+* synchronized SQLErrorCodesFactory's access to the DataSource cache
+* refined DataSourceUtils to catch Throwable on "Connection.close()"
+* DataSourceUtils uses lower synchronization order for delegating handles (such as from TransactionAwareDataSourceProxy)
+* SingleConnectionDataSource's Connection proxy implements "equals" and "hashCode" based on proxy equality
+* worked around "oracle.sql.DATE" problem on certain Oracle driver versions, extracting it as timestamp when appropriate
+* JdbcTemplate uses "PreparedStatement.setObject(index, null)" for null values with unknown SQL type on Informix
+* JdbcTemplate does not check static SQL for bind parameters anymore, to avoid overhead of double parsing
+
+Package org.springframework.jms
+* SingleConnectionFactory's Connection proxy implements "equals" and "hashCode" based on proxy equality
+
+Package org.springframework.jmx
+* MBeanExporter only logs a warning (no error) when an MBean does not exist anymore when trying to unregister
+* MBeanExporter's MBean autodetection properly registers multiple beans even if their instances as equal
+
+Package org.springframework.orm
+* iBATIS support works correctly with "useTransactionAwareDataSource" and JTA transaction resume with subsequent access
+* added overloaded query/insert/update/delete operations without parameter object to SqlMapClientOperations/Template
+* LocalPersistenceManagerFactoryBean and JdoTemplate perform full exception translation even for reflective calls
+* removed warning for read-only from JdoTransactionManager, since a vendor dialect may support it
+* Hibernate3 LocalSessionFactoryBean registers filter definitions before loading any mapping files
+
+Package org.springframework.scheduling
+* Quartz SchedulerFactoryBean uses given "nonTransactionalDataSource" as default DataSource if no "dataSource" specified
+* MethodInvokingJobDetailFactoryBean always creates durable JobDetails (just like it also sets the volatile flag)
+* added "jobListenerNames" bean property to MethodInvokingJobDetailFactoryBean
+
+Package org.springframework.test
+* AbstractTransactionalSpringContextTests properly ends a started transaction early if "onSetupInTransaction" fails
+* AbstractTransactionalSpringContextTests only tries to end transaction on "tearDown" if the transaction is still active
+
+Package org.springframework.transaction
+* added "timeout" attribute to Transactional annotation, allowing to specify a timeout in seconds within the annotation
+* JtaTransactionManager explicitly only calls "UserTransaction.setRollbackOnly()" if the transaction is still active
+
+Package org.springframework.validation
+* clarified that "Errors.reject" always registers a global error for the entire target object
+* "Errors.rejectValue" now accepts an empty field name to indicate the current object itself rather than a field of it
+* "Errors.addAllErrors" only accepts Errors instance with same object name
+* added public "getPropertyEditorRegistry()" method to BindException, for re-registering custom editors
+* fixed BindUtils to not call "ValidatorUtils.invokeValidator" if no Validator given
+
+Package org.springframework.web
+* HttpServletBean overrides "getServletName"/"getServletContext" to return null when no config set yet
+* added "cookieSecure" property to CookieGenerator, indicating that cookies should only be sent using HTTPS connections
+* added "defaultLocale" property to CookieLocaleResolver and SessionLocaleResolver, for fallback to an explicit locale
+* deprecated XSLT view FormatHelper
+
+
 Changes in version 1.2.8 (7.5.2006)
 -----------------------------------
 
