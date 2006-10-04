@@ -31,65 +31,89 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.util.StringUtils;
 
 /**
- * <p>
- * Implementation of ParameterNameDiscover that tries to deduce
+ * {@link ParameterNameDiscoverer} implementation that tries to deduce
  * parameter names for an advice method from the pointcut expression,
  * returning, and throwing clauses. If an unambiguous interpretation is
- * not avaliable, it will return null.
- * </p>
+ * not available, it will return <code>null</code>.
+ * 
  * <p>
  * This class interprets arguments in the following way:
- * </p>
  * <ol>
- *   <li>If the first parameter of the method is of type JoinPoint or ProceedingJoinPoint, it
- *   is assumed to be for passing thisJoinPoint to the advice, and the parameter name will be assigned the
- *   value "thisJoinPoint".</li>
- *   <li>If the first parameter of the method is of type JoinPoint.StaticPart it is assumed to be
- *   for passing "thisJoinPointStaticPart" to the advice, and the parameter name will be assigned the
- *   value "thisJoinPointStaticPart"</li>
- *   <li>If a throwingName has been set, and there are no unbound arguments of type Throwable+, 
- *   then an IllegalArgumentCondition is raised. If there is more than one unbound argument of type
- *   Throwable+, then an AmbiguousBindingCondition is raised. If there is exactly one unbound argument
- *   of type Throwable+, then the corresponding parameter name is assigned the value &lt;throwingName&gt;.
- *   </li>
- *   <li>If there remain unbound arguments, then the pointcut expression is examined. Let <code>a</code>
- *   be the number of annotation-based pointcut expressions (&#64;annotation, &#64;this, &#64;target,
- *   &#64;args, &#64;within, &#64;withincode) that are used in binding form. Usage in binding form
- *   has itself to be deduced: if the expression inside the pointcut is a single string literal that meets
- *   Java variable name conventions it is assumed to be a variable name. 
- *   If <code>a</code> is zero we proceed to the next stage. If <code>a</code> &gt; 1 then an 
- *   AmbiguousBindingCondition is raised. If <code>a</code> == 1, and there are no unbound arguments of
- *   type Annotation+, then an IllegalArgumentCondition is raised. if there is exactly one such argument,
- *   then the corresponding parameter name is assigned the value from the pointcut expression.
- *   </li>
+ *   <li>If the first parameter of the method is of type {@link JoinPoint}
+ * 	 or {@link ProceedingJoinPoint}, it is assumed to be for passing
+ *   <code>thisJoinPoint</code> to the advice, and the parameter name will
+ *   be assigned the value <code>"thisJoinPoint"</code>.</li>
+ *   <li>If the first parameter of the method is of type {@link JoinPoint.StaticPart}
+ *   it is assumed to be for passing <code>"thisJoinPointStaticPart"</code>
+ *   to the advice, and the parameter name will be assigned the value
+ *   <code>"thisJoinPointStaticPart"</code>.</li>
+ *   <li>If a {@link #setThrowingName(String) throwingName} has been set, and
+ *   there are no unbound arguments of type <code>Throwable+</code>, then an
+ * 	 {@link IllegalArgumentException} is raised. If there is more than one
+ *   unbound argument of type <code>Throwable+</code>, then an
+ *   {@link AmbiguousBindingException} is raised. If there is exactly one
+ *   unbound argument of type <code>Throwable+</code>, then the corresponding
+ *   parameter name is assigned the value &lt;throwingName&gt;.</li>
+ *   <li>If there remain unbound arguments, then the pointcut expression is
+ *   examined. Let <code>a</code> be the number of annotation-based pointcut
+ *   expressions (&#64;annotation, &#64;this, &#64;target, &#64;args,
+ *   &#64;within, &#64;withincode) that are used in binding form. Usage in
+ *   binding form has itself to be deduced: if the expression inside the
+ *   pointcut is a single string literal that meets Java variable name
+ *   conventions it is assumed to be a variable name. If <code>a</code> is
+ *   zero we proceed to the next stage. If <code>a</code> &gt; 1 then an 
+ *   <code>AmbiguousBindingException</code> is raised. If <code>a</code> == 1,
+ *   and there are no unbound arguments of type <code>Annotation+</code>,
+ *   then an <code>IllegalArgumentException</code> is raised. if there is
+ *   exactly one such argument, then the corresponding parameter name is
+ *   assigned the value from the pointcut expression.</li>
  *   <li>If a returningName has been set, and there are no unbound arguments
- *   then an IllegalArgumentCondition is raised. If there is more than one unbound argument then 
- *   an AmbiguousBindingCondition is raised. If there is exactly one unbound argument then the 
- *   corresponding parameter name is assigned the value &lt;returningName&gt;.
- *   </li>
- *   </li>If there remain unbound arguments, then the pointcut expression is examined once more for
- *   this, target, and args pointcut expressions used in the binding form (binding forms
- *   are deduced as described for the annotation based pointcuts). If there remains more than one
- *   unbound argument of a primitive type (which can only be bound in args) then an AmbiguousBindingCondition
- *   is raised. If there is exactly one argument of a primitive type, then if exactly one args bound
- *   variable was found, we assign the corresponding parameter name the variable name. If there were no args
- *   bound variables found an IllegalStateCondition is raised. If there are multiple args bound variables,
- *   an AmbiguousBindingCondition is raised. At this point, if there remains more than one unbound argument
- *   we raise an AmbiguousBindingCondition. If there are no unbound arguments remaining, we are done. If there
- *   is exactly one unbound argument remaining, and only one candidate variable name unbound from this, target,
- *   or args, it is assigned as the corresponding parameter name. If there are multiple possibilities, an
- *   AmbiguousBindingCondition is raised.
+ *   then an <code>IllegalArgumentException</code> is raised. If there is
+ *   more than one unbound argument then an
+ *   <code>AmbiguousBindingException</code> is raised. If there is exactly
+ *   one unbound argument then the corresponding parameter name is assigned
+ *   the value &lt;returningName&gt;.</li>
+ *   <li>If there remain unbound arguments, then the pointcut expression is
+ *   examined once more for <code>this</code>, <code>target</code>, and
+ *   <code>args</code> pointcut expressions used in the binding form (binding
+ *   forms are deduced as described for the annotation based pointcuts). If
+ *   there remains more than one unbound argument of a primitive type (which
+ *   can only be bound in <code>args</code>) then an
+ *   <code>AmbiguousBindingException</code> is raised. If there is exactly
+ *   one argument of a primitive type, then if exactly one <code>args</code>
+ *   bound variable was found, we assign the corresponding parameter name
+ * 	 the variable name. If there were no <code>args</code> bound variables
+ *   found an <code>IllegalStateException</code> is raised. If there are
+ *   multiple <code>args</code> bound variables, an
+ *   <code>AmbiguousBindingException</code> is raised. At this point, if
+ *   there remains more than one unbound argument we raise an
+ *   <code>AmbiguousBindingException</code>. If there are no unbound arguments
+ *   remaining, we are done. If there is exactly one unbound argument
+ *   remaining, and only one candidate variable name unbound from
+ *   <code>this</code>, <code>target</code>, or <code>args</code>, it is
+ *   assigned as the corresponding parameter name. If there are multiple
+ *   possibilities, an <code>AmbiguousBindingException</code> is raised.</li>
  * </ol>
- * <p>The behaviour on raising an IllegalArgumentCondition or AmbiguousBindingConfiguration is configurable to
- * allow this discoverer to be used as part of a chain-of-responsibility. By default the condition will be logged
- * and the getParameterNames method will simply return null. If the raiseExceptions property is set to true,
- * the conditions will be thrown as IllegalArgumentException and AmbiguousBindingException respectively.</p>
  * 
- * <p>Was that perfectly clear?? ;) </p>
- * <p>Short version: if an unambiguous binding can be deduced, then it is. If the advice requirements cannot
- * possibly be satisfied null is returned. By setting the raiseExceptions property to true, more descriptive
- * exceptions will be thrown instead of returning null in the case that the parameter names cannot be discovered.
- * </p>
+ * <p>The behavior on raising an <code>IllegalArgumentException</code> or
+ * <code>AmbiguousBindingException</code> is configurable to allow this
+ * discoverer to be used as part of a chain-of-responsibility. By default
+ * the condition will be logged and the <code>getParameterNames(..)</code>
+ * method will simply return <code>null</code>. If the
+ * {@link #setRaiseExceptions(boolean) raiseExceptions} property is set to
+ * <code>true</code>, the conditions will be thrown as
+ * <code>IllegalArgumentException</code> and
+ * <code>AmbiguousBindingException</code> respectively.
+ * 
+ * <p>Was that perfectly clear? ;)
+ * 
+ * <p>Short version: if an unambiguous binding can be deduced, then it is.
+ * If the advice requirements cannot possibly be satisfied then
+ * <code>null</code>  is returned. By setting the
+ * {@link #setRaiseExceptions(boolean) raiseExceptions} property to
+ * <code>true</code>, more descriptive exceptions will be thrown instead
+ * of returning <code>null</code> in the case that the parameter names
+ * cannot be discovered.
  * 
  * @author Adrian Colyer
  * @since 2.0
@@ -120,33 +144,33 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		singleValuedAnnotationPcds.add("@within");
 		singleValuedAnnotationPcds.add("@withincode");
 		singleValuedAnnotationPcds.add("@annotation");
-		
+
 		try {
 			annotationClass = Class.forName(ANNOTATION_CLASS_NAME);
 		}
-		catch(ClassNotFoundException ex) {
+		catch (ClassNotFoundException ex) {
 			// Running on < JDK 1.5, this is ok...
 			annotationClass = null;
 		}
 	}
 
 
-	private boolean raiseExceptions = false;
+	private boolean raiseExceptions;
 	
 	/**
 	 * If the advice is afterReturning, and binds the return value, this is the parameter name used. 
 	 */
-	private String returningName = null;
+	private String returningName;
 	
 	/**
 	 * If the advice is afterThrowing, and binds the thrown value, this is the parameter name used.
 	 */
-	private String throwingName = null;
+	private String throwingName;
 	
 	/**
 	 * The pointcut expression associated with the advice, as a simple String.
 	 */
-	private String pointcutExpression = null;
+	private String pointcutExpression;
 	
 	private Class[] argumentTypes;
 
@@ -167,39 +191,40 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	}
 	
 	/**
-	 * <p>
-	 * Set this property to true to indicate the IllegalArgumentException and AmbiguousBindingException
-	 * should be thrown as appropriate in the case of failing to deduce advice parameter names.
-	 * </p>
-	 * @param shouldRaise
+	 * Set this property to <code>true</code>  to indicate that
+	 * {@link IllegalArgumentException} and {@link AmbiguousBindingException}
+	 * must be thrown as appropriate in the case of failing to deduce
+	 * advice parameter names.
+	 * @param shouldRaise <code>true</code> if exceptions are to be thrown 
 	 */
 	public void setRaiseExceptions(boolean shouldRaise) {
 		this.raiseExceptions = shouldRaise;
 	}
 	
 	/**
-	 * If afterReturning advice binds the return value, the returning 
-	 * variable name must be specified.
-	 * @param returningName
+	 * If <code>afterReturning</code> advice binds the return value, the
+	 * returning variable name must be specified.
+	 * @param returningName the name of the returning variable
 	 */
 	public void setReturningName(String returningName) {
 		this.returningName = returningName;
 	}
 	
 	/**
-	 * If afterThrowing advice binds the thrown value, the throwing 
-	 * variable name must be specified.
-	 * @param throwingName
+	 * If <code>afterThrowing</code> advice binds the thrown value, the
+	 * throwing variable name must be specified.
+	 * @param throwingName the name of the throwing variable
 	 */
 	public void setThrowingName(String throwingName) {
 		this.throwingName = throwingName;
 	}
 	
 	/**
-	 * <p>
-	 * Deduce the parameter names for an advice method. See the javadoc comment for this class for 
-	 * details of the algorithm used.
-	 * </p>
+	 * Deduce the parameter names for an advice method.
+	 * <p>See the {@link AspectJAdviceParameterNameDiscoverer class level javadoc}
+	 * for this class for details of the algorithm used.
+	 * @param method the target {@link Method}
+	 * @return the parameter names
 	 */
 	public String[] getParameterNames(Method method) {
 		this.argumentTypes = method.getParameterTypes();
@@ -269,9 +294,10 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	}
 
 	/**
-	 * An advice method can never be a constructor.
-	 * @return null
-	 * @throws UnsupportedOperationException iff raiseExceptions has been set to true
+	 * An advice method can never be a constructor in Spring.
+	 * @return <code>null</code> 
+	 * @throws UnsupportedOperationException if
+	 * {@link #setRaiseExceptions(boolean) raiseExceptions} has been set to <code>true</code> 
 	 */
 	public String[] getParameterNames(Constructor ctor) {
 		if (this.raiseExceptions) {
@@ -430,13 +456,13 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		}
 	}
 	
-	/**
+	/*
 	 * If the token starts meets Java identifier conventions, it's in. 
-	 * @param candidateToken
-	 * @return
 	 */
 	private String maybeExtractVariableName(String candidateToken) {
-		if (candidateToken == null) { return null; }
+		if (candidateToken == null) {
+			return null;
+		}
 		
 		if (Character.isJavaIdentifierStart(candidateToken.charAt(0)) &&
 			Character.isLowerCase(candidateToken.charAt(0))) {
@@ -523,13 +549,10 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		// else varNames.size must be 0 and we have nothing to bind.
 	}
 
-	/**
+	/*
 	 * We've found the start of a binding pointcut at the given index into 
 	 * the token array. Now we need to extract the pointcut body and return
 	 * it.
-	 * @param tokens
-	 * @param startIndex
-	 * @return
 	 */
 	private PointcutBody getPointcutBody(String[] tokens, int startIndex) {
 		int numTokensConsumed = 0;
@@ -573,7 +596,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	}
 	
 	/**
-	 * match up args against unbound arguments of primitive types
+	 * Match up args against unbound arguments of primitive types
 	 */
 	private void maybeBindPrimitiveArgsFromPointcutExpression() {
 		int numUnboundPrimitives = countNumberOfUnboundPrimitiveArguments();
@@ -611,10 +634,9 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		
 	}
 
-	/**
-	 * true if the parameter name binding for the given parameter index has not yet been assigned
-	 * @param i
-	 * @return
+	/*
+	 * Return true if the parameter name binding for the given parameter
+	 * index has not yet been assigned.
 	 */
 	private boolean isUnbound(int i) {
 		return this.parameterNameBindings[i] == null;
@@ -629,11 +651,9 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		return false;
 	}
 	
-	/**
-	 * true if the given argument type is a subclass of the given supertype
-	 * @param supertype
-	 * @param argumentNumber
-	 * @return
+	/*
+	 * Return true if the given argument type is a subclass of the given
+	 * supertype.
 	 */
 	private boolean isSubtypeOf(Class supertype, int argumentNumber) {
 		return supertype.isAssignableFrom(this.argumentTypes[argumentNumber]);
@@ -664,11 +684,9 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		return count;
 	}
 	
-	/**
-	 * find the argument index with the given type, and bind the
-	 * given varName in that position
-	 * @param argumentType
-	 * @param varName
+	/*
+	 * Find the argument index with the given type, and bind the
+	 * given varName in that position.
 	 */
 	private void findAndBind(Class argumentType, String varName) {
 		for (int i = 0; i < this.argumentTypes.length; i++) {
@@ -685,21 +703,36 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 * Simple struct to hold the extracted text from a pointcut body, together
 	 * with the number of tokens consumed in extracting it.
 	 */
-	private static class PointcutBody {
-		int numTokensConsumed = 0;
-		String text = null;
+	private static final class PointcutBody {
+
+		int numTokensConsumed;
+		String text;
+
+
 		public PointcutBody(int tokens, String text) {
 			this.numTokensConsumed = tokens;
 			this.text = text;
 		}
+
 	}
 
 
+	/**
+	 * Thrown in response to an ambiguous binding being detected when
+	 * trying to resolve a method's parameter names.
+	 */
 	public static class AmbiguousBindingException extends RuntimeException {
 
-		public AmbiguousBindingException(String explanation) {
-			super(explanation);
+		/**
+		 * Create a new instance of the
+		 * {@link AspectJAdviceParameterNameDiscoverer.AmbiguousBindingException}
+		 * class with the specified message. 
+		 * @param msg the detail message
+		 */
+		public AmbiguousBindingException(String msg) {
+			super(msg);
 		}
+
 	}
 
 }
