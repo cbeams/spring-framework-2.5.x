@@ -61,12 +61,15 @@ Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.3/1.4/1.5, EHCache 1.1,
 FreeMarker 2.3, JasperReports 1.0/1.1, Struts/Tiles 1.1/1.2, JSF 1.1, Jakarta Commons FileUpload 1.0, etc.
 
 Release contents:
-* "src" contains the Java source files for the framework
-* "test" contains the Java source files for Spring's test suite
-* "dist" contains various Spring distribution jar files
+* "src" contains the general Java source files for the framework
+* "mock" contains the general Java source files for Spring's mock and test classes
+* "test" contains the general Java source files for Spring's test suite
+* "tiger/src" contains the JDK-1.5-specific Java source files for the framework
+* "tiger/test" contains the JDK-1.5-specific Java source files for Spring's test suite
+* "dist" contains the Spring distribution jar files
 * "lib" contains all third-party libraries needed for running the samples and/or building the framework
 * "docs" contains general documentation and API javadocs
-* "samples" contains demo applications and skeletons
+* "samples" contains demo applications
 
 The "lib" directory is just included in the "-with-dependencies" download. Make sure to download this full
 distribution ZIP file if you want to run the sample applications and/or build the framework yourself.
@@ -85,7 +88,7 @@ This product includes software developed by Clinton Begin (http://www.ibatis.com
 3. DISTRIBUTION JAR FILES
 
 The "dist" directory contains the following distinct jar files for use in applications. Both module-specific
-jar files and a jar file with all of Spring are provided. The following list specifies the respective contents
+jar files and a jar file with all of Spring are provided. The following list specifies the corresponding contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
 * "spring-core" (~120 KB)
