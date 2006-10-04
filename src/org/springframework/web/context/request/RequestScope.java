@@ -17,13 +17,17 @@
 package org.springframework.web.context.request;
 
 /**
- * Request-backed Scope implementation. Relies on a thread-bound
- * RequestAttributes instance, which can be exported through
- * RequestContextListener, RequestContextFilter or DispatcherServlet.
+ * Request-backed {@link org.springframework.beans.factory.config.Scope}
+ * implementation.
+ * 
+ * <p>Relies on a thread-bound {@link RequestAttributes} instance, which
+ * can be exported through {@link RequestContextListener},
+ * {@link org.springframework.web.filter.RequestContextFilter} or
+ * {@link org.springframework.web.servlet.DispatcherServlet}.
  *
- * <p>This Scope will also work for Portlet environments,
- * through an alternate RequestAttributes implementation
- * (as exposed out-of-the-box by Spring's DispatcherPortlet).
+ * <p>This <code>Scope</code> will also work for Portlet environments,
+ * through an alternate <code>RequestAttributes</code> implementation
+ * (as exposed out-of-the-box by Spring's <code>DispatcherPortlet</code>).
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -42,8 +46,13 @@ public class RequestScope extends AbstractRequestAttributesScope {
 		return RequestAttributes.SCOPE_REQUEST;
 	}
 
+
+	/**
+	 * There is no conversation id concept for a request, so this method
+	 * returns <code>null</code>.
+	 * @return <code>null</code> 
+	 */
 	public String getConversationId() {
-		// There is no conversation id concept for a request.
 		return null;
 	}
 

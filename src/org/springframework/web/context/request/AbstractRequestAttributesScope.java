@@ -26,8 +26,8 @@ import org.springframework.beans.factory.config.Scope;
  * <p>Subclasses simply need to implement {@link #getScope()} to instruct
  * this class which {@link RequestAttributes} scope to read attributes from.
  *
- * <p>Subclass may wish to override {@link #get} and {@link #remove}
- * to add synchronization around the call back into this super class.
+ * <p>Subclasses may wish to override the {@link #get} and {@link #remove}
+ * methods to add synchronization around the call back into this super class.
  * 
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -63,11 +63,14 @@ public abstract class AbstractRequestAttributesScope implements Scope {
 		attributes.registerDestructionCallback(name, callback, getScope());
 	}
 
+
 	/**
 	 * Template method that determines the actual target scope.
-	 * To be implemented by subclasses.
 	 * @return the target scope, in the form of an appropriate
 	 * {@link RequestAttributes} constant
+	 * @see RequestAttributes#SCOPE_REQUEST
+	 * @see RequestAttributes#SCOPE_SESSION
+	 * @see RequestAttributes#SCOPE_GLOBAL_SESSION
 	 */
 	protected abstract int getScope();
 
