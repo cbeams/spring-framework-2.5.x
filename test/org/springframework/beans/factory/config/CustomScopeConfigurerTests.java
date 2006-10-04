@@ -27,9 +27,11 @@ import org.springframework.mock.easymock.AbstractScalarMockTemplate;
 import org.springframework.test.AssertThrows;
 
 /**
+ * Unit tests for the {@link CustomScopeConfigurer} class.
+ * 
  * @author Rick Evans
  */
-public class CustomScopeConfigurerTests extends TestCase {
+public final class CustomScopeConfigurerTests extends TestCase {
 
 	private static final String FOO_SCOPE = "fooScope";
 
@@ -38,7 +40,6 @@ public class CustomScopeConfigurerTests extends TestCase {
 		new ConfigurableListableBeanFactoryMockTemplate() {
 			protected void doTest(ConfigurableListableBeanFactory factory) {
 				CustomScopeConfigurer figurer = new CustomScopeConfigurer();
-				figurer.setBeanClassLoader(Thread.currentThread().getContextClassLoader());
 				figurer.postProcessBeanFactory(factory);
 			}
 		}.test();

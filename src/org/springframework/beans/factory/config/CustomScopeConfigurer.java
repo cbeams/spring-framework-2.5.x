@@ -20,9 +20,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.core.Ordered;
-import org.springframework.util.ClassUtils;
 
 /**
  * Simple {@link BeanFactoryPostProcessor} implementation that effects the
@@ -35,13 +33,11 @@ import org.springframework.util.ClassUtils;
  * @author Rick Evans
  * @since 2.0
  */
-public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClassLoaderAware, Ordered {
+public class CustomScopeConfigurer implements BeanFactoryPostProcessor, Ordered {
 
-	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
+	private int order = Ordered.LOWEST_PRECEDENCE;
 
 	private Map scopes;
-
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 
 	/**
@@ -59,10 +55,6 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 
 	public int getOrder() {
 		return order;
-	}
-
-	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.beanClassLoader = classLoader;
 	}
 
 
