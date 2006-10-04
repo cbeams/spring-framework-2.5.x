@@ -62,7 +62,7 @@ distribution/website before using any of them in your own applications.
 - required for running PetClinic (by Hibernate)
 
 * freemarker/freemarker.jar
-- FreeMarker 2.3.4 (http://www.freemarker.org)
+- FreeMarker 2.3.8 (http://www.freemarker.org)
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
 
@@ -197,7 +197,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's CommonsMultipartResolver
 
 * jakarta-commons/commons-httpclient.jar
-- Commons HttpClient 3.0 (http://jakarta.apache.org/commons/httpclient)
+- Commons HttpClient 3.0.1 (http://jakarta.apache.org/commons/httpclient)
 - required for building the framework
 - required at runtime when using Spring's CommonsHttpInvokerRequestExecutor
 
@@ -277,8 +277,8 @@ distribution/website before using any of them in your own applications.
 - JUnit 3.8.1 (http://www.junit.org)
 - required for building the test suite
 
-* log4j/log4j-1.2.13.jar
-- Log4J 1.2.13 (http://logging.apache.org/log4j)
+* log4j/log4j-1.2.14.jar
+- Log4J 1.2.14 (http://logging.apache.org/log4j)
 - required for building the framework
 - required at runtime when using Spring's Log4jConfigurer
 
@@ -303,7 +303,7 @@ distribution/website before using any of them in your own applications.
 - required at runtime when using Spring's Quartz scheduling support
 
 * struts/struts.jar
-- Apache Struts 1.2.8 (http://jakarta.apache.org/struts)
+- Apache Struts 1.2.9 (http://jakarta.apache.org/struts)
 - required for building the framework
 - required at runtime when using the Struts support or TilesView
 - required for running JPetStore's Struts web tier
