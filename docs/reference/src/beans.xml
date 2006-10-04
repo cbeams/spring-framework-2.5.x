@@ -1872,7 +1872,7 @@ public class CommandManager {
    }
 
     ]]><lineannotation>// mmm, but where is the implementation of this method?</lineannotation><![CDATA[
-   protected abstract CommandHelper createHelper();
+   protected abstract CommandHelper createCommand();
 
 }]]></programlisting>
                 <para>In the client class containing the method to be injected (the
@@ -1893,7 +1893,7 @@ public class CommandManager {
   <lookup-method name="createCommand" bean="command"/>
 </bean>]]></programlisting>
                 <para>The bean identified as <emphasis>commandManager</emphasis> will call its
-                own method <literal>createCommand</literal> whenever it needs
+                own method <methodname>createCommand()</methodname> whenever it needs
                 a new instance of the <emphasis>command</emphasis> bean. It
                 is important to note that the person deploying the beans must be
                 careful to deploy the <literal>command</literal> bean as a
@@ -1915,7 +1915,7 @@ public class CommandManager {
                 <tip>
                     <para>The interested reader may also find the <classname>ServiceLocatorFactoryBean</classname>
                     (in the <literal>org.springframework.beans.factory.config</literal> package) to be
-                    of use... the approach is similar to that of the
+                    of use; the approach is similar to that of the
                     <classname>ObjectFactoryCreatingFactoryBean</classname>, but it allows you
                     to specify your own lookup interface as opposed to having to use a Spring-specific
                     lookup interface such as the <interfacename>ObjectFactory</interfacename>.
@@ -1949,8 +1949,9 @@ public class CommandManager {
                 <interfacename>org.springframework.beans.factory.support.MethodReplacer</interfacename>
                 interface provides the new method definition.</para>
                 
-                <programlisting><lineannotation>/** meant to be used to override the existing computeValue
-    implementation in <classname>MyValueCalculator</classname> */</lineannotation><![CDATA[
+                <programlisting><lineannotation>/** meant to be used to override the existing <methodname>computeValue(String)</methodname>
+    implementation in <classname>MyValueCalculator</classname>
+  */</lineannotation><![CDATA[
 public class ReplacementComputeValue implements MethodReplacer {
 
     public Object reimplement(Object o, Method m, Object[] args) throws Throwable {
