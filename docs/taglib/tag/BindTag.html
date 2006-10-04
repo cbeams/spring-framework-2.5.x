@@ -172,7 +172,7 @@
             ## if there are error codes, display them!
             &lt;c:if test="${status.error}"&gt;
                 Error codes:
-                &lt;c:forEach items="${status.errorMessages}" var"error"&gt;
+                &lt;c:forEach items="${status.errorMessages}" var="error"&gt;
                     &lt;c:out value="${error}"/&gt;
                 &lt;/c:forEach&gt;
             &lt;/c:if&gt;
@@ -185,7 +185,7 @@
             name="&lt;c:out value="${status.expression}"/&gt;"&gt;
             &lt;c:if test="${status.error}"&gt;
                 Error codes:
-                &lt;c:forEach items="${status.errorMessages}" var"error"&gt;
+                &lt;c:forEach items="${status.errorMessages}" var="error"&gt;
                     &lt;c:out value="${error}"/&gt;
                 &lt;/c:forEach&gt;
             &lt;/c:if&gt;
