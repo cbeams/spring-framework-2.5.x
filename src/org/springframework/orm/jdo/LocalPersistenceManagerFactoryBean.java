@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.orm.jdo;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -34,7 +33,8 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
-import org.springframework.dao.InvalidDataAccessResourceUsageException;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * FactoryBean that creates a local JDO EntityManagerFactory instance.
@@ -100,23 +100,14 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see javax.jdo.JDOHelper#getPersistenceManagerFactory
  * @see javax.jdo.PersistenceManagerFactory#setConnectionFactory
- * @see javax.jdo.PersistenceManagerFactory#close
+ * @see javax.jdo.PersistenceManagerFactory#close()
  */
 public class LocalPersistenceManagerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
-	private static Method getPersistenceManagerFactoryMethod;
-
-	static {
 		// Determine whether the JDO 1.0 getPersistenceManagerFactory(Properties) method
 		// is available, for use in the "newPersistenceManagerFactory" implementation.
-		try {
-			getPersistenceManagerFactoryMethod = JDOHelper.class.getMethod(
-					"getPersistenceManagerFactory", new Class[] {Properties.class});
-		}
-		catch (NoSuchMethodException ex) {
-			getPersistenceManagerFactoryMethod = null;
-		}
-	}
+	private final static Method getPersistenceManagerFactoryMethod = ClassUtils.getMethodIfAvailable(
+			JDOHelper.class, "getPersistenceManagerFactory", new Class[] {Properties.class});
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -205,18 +196,8 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean, Initiali
 	protected PersistenceManagerFactory newPersistenceManagerFactory(Properties props) {
 		// Use JDO 1.0 getPersistenceManagerFactory(Properties) method, if available.
 		if (getPersistenceManagerFactoryMethod != null) {
-			try {
-				return (PersistenceManagerFactory)
-						getPersistenceManagerFactoryMethod.invoke(null, new Object[] {props});
-			}
-			catch (InvocationTargetException ex) {
-				throw new InvalidDataAccessResourceUsageException(
-						"Could not invoke JDO 1.0 getPersistenceManagerFactory(Properties) method", ex.getTargetException());
-			}
-			catch (Exception ex) {
-				throw new InvalidDataAccessResourceUsageException(
-						"Could not invoke JDO 1.0 getPersistenceManagerFactory(Properties) method", ex);
-			}
+			return (PersistenceManagerFactory) ReflectionUtils.invokeMethod(
+					getPersistenceManagerFactoryMethod, null, new Object[] {props});
 		}
 		// Use JDO 2.0 getPersistenceManagerFactory(Map) method else.
 		return JDOHelper.getPersistenceManagerFactory(props);

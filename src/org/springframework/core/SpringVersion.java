@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,25 @@ package org.springframework.core;
  * Class that exposes the Spring version. Fetches the
  * "Implementation-Version" manifest attribute from the jar file.
  *
+ * <p>Note that some ClassLoaders do not expose the package metadata,
+ * hence this class might not be able to determine the Spring version
+ * in all environments. Consider using a reflection-based check instead:
+ * For example, checking for the presence of a specific Spring 2.0
+ * method that you intend to call.
+ *
  * @author Juergen Hoeller
  * @since 1.1
  */
 public class SpringVersion {
 
 	/**
-	 * Return the full Spring version string.
-	 * @see java.lang.Package#getImplementationVersion
+	 * Return the full version string of the present Spring codebase,
+	 * or <code>null</code> if it cannot be determined.
+	 * @see java.lang.Package#getImplementationVersion()
 	 */
 	public static String getVersion() {
-		return SpringVersion.class.getPackage().getImplementationVersion();
+		Package pkg = SpringVersion.class.getPackage();
+		return (pkg != null ? pkg.getImplementationVersion() : null);
 	}
 
 }

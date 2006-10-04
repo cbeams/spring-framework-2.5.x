@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,8 @@ public class CookieGenerator {
 	private String cookiePath = DEFAULT_COOKIE_PATH;
 
 	private int cookieMaxAge = DEFAULT_COOKIE_MAX_AGE;
+
+	private boolean cookieSecure = false;
 
 
 	/**
@@ -120,6 +122,23 @@ public class CookieGenerator {
 		return cookieMaxAge;
 	}
 
+	/**
+	 * Set whether the cookie should only be sent using a secure protocol,
+	 * such as HTTPS (SSL). This is an indication to the receiving browser,
+	 * not processed by the HTTP server itself. Default is "false".
+	 */
+	public void setCookieSecure(boolean cookieSecure) {
+		this.cookieSecure = cookieSecure;
+	}
+
+	/**
+	 * Return whether the cookie should only be sent using a secure protocol,
+	 * such as HTTPS (SSL).
+	 */
+	public boolean isCookieSecure() {
+		return cookieSecure;
+	}
+
 
 	/**
 	 * Add a cookie with the given value to the response,
@@ -136,6 +155,9 @@ public class CookieGenerator {
 	public void addCookie(HttpServletResponse response, String cookieValue) {
 		Cookie cookie = createCookie(cookieValue);
 		cookie.setMaxAge(getCookieMaxAge());
+		if (isCookieSecure()) {
+			cookie.setSecure(true);
+		}
 		response.addCookie(cookie);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Added cookie with name [" + getCookieName() + "] and value [" + cookieValue + "]");

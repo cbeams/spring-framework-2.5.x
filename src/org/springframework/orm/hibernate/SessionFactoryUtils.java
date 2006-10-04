@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.orm.hibernate;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -51,6 +50,7 @@ import net.sf.hibernate.engine.SessionImplementor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.Ordered;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -66,6 +66,7 @@ import org.springframework.util.Assert;
 /**
  * Helper class featuring methods for Hibernate Session handling,
  * allowing for reuse of Hibernate Session instances within transactions.
+ * Also provides support for exception translation.
  *
  * <p>Supports synchronization with both Spring-managed JTA transactions
  * (i.e. JtaTransactionManager) and non-Spring JTA transactions (i.e. plain JTA
@@ -98,7 +99,7 @@ public abstract class SessionFactoryUtils {
 
 	private static final Log logger = LogFactory.getLog(SessionFactoryUtils.class);
 
-	private static ThreadLocal deferredCloseHolder = new ThreadLocal();
+	private static final ThreadLocal deferredCloseHolder = new ThreadLocal();
 
 
 	/**
@@ -170,7 +171,7 @@ public abstract class SessionFactoryUtils {
 	 * Get a Hibernate Session for the given SessionFactory. Is aware of and will
 	 * return any existing corresponding Session bound to the current thread, for
 	 * example when using HibernateTransactionManager. Will create a new Session
-	 * otherwise, if allowCreate is true.
+	 * otherwise, if "allowCreate" is <code>true</code>.
 	 * <p>This is the <code>getSession</code> method used by typical data access code,
 	 * in combination with <code>releaseSession</code> called when done with
 	 * the Session. Note that HibernateTemplate allows to write data access code
@@ -184,7 +185,8 @@ public abstract class SessionFactoryUtils {
 	 * transactional Session can be found for the current thread
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
-	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
+	 * @throws IllegalStateException if no thread-bound Session found and
+	 * "allowCreate" is <code>false</code>
 	 * @see #releaseSession
 	 * @see HibernateTemplate
 	 */
@@ -238,7 +240,7 @@ public abstract class SessionFactoryUtils {
 	 * Get a Hibernate Session for the given SessionFactory. Is aware of and will
 	 * return any existing corresponding Session bound to the current thread, for
 	 * example when using HibernateTransactionManager. Will create a new Session
-	 * otherwise, if allowCreate is true.
+	 * otherwise, if "allowCreate" is <code>true</code>.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
 	 * @param entityInterceptor Hibernate entity interceptor, or <code>null</code> if none
 	 * @param jdbcExceptionTranslator SQLExceptionTranslator to use for flushing the
@@ -247,7 +249,8 @@ public abstract class SessionFactoryUtils {
 	 * transactional Session can be found for the current thread
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
-	 * @throws IllegalStateException if no thread-bound Session found and allowCreate false
+	 * @throws IllegalStateException if no thread-bound Session found and
+	 * "allowCreate" is <code>false</code>
 	 */
 	private static Session getSession(
 			SessionFactory sessionFactory, Interceptor entityInterceptor,
@@ -641,7 +644,7 @@ public abstract class SessionFactoryUtils {
 			holderMap = new HashMap();
 			deferredCloseHolder.set(holderMap);
 		}
-		holderMap.put(sessionFactory, new HashSet());
+		holderMap.put(sessionFactory, CollectionFactory.createLinkedSetIfPossible(4));
 	}
 
 	/**
@@ -683,7 +686,7 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Close the given Session, created via the given factory,
 	 * if it is not managed externally (i.e. not bound to the thread).
-	 * @param session the Hibernate Session to close
+	 * @param session the Hibernate Session to close (may be <code>null</code>)
 	 * @param sessionFactory Hibernate SessionFactory that the Session was created with
 	 * (can be <code>null</code>)
 	 */
@@ -709,6 +712,8 @@ public abstract class SessionFactoryUtils {
 		Map holderMap = (Map) deferredCloseHolder.get();
 		if (holderMap != null && sessionFactory != null && holderMap.containsKey(sessionFactory)) {
 			logger.debug("Registering Hibernate Session for deferred close");
+			// Switch Session to FlushMode.NEVER for remaining lifetime.
+			session.setFlushMode(FlushMode.NEVER);
 			Set sessions = (Set) holderMap.get(sessionFactory);
 			sessions.add(session);
 		}
@@ -718,8 +723,10 @@ public abstract class SessionFactoryUtils {
 	}
 
 	/**
-	 * Perform the actual closing of the Hibernate Session.
-	 * @param session the Hibernate Session to close
+	 * Perform actual closing of the Hibernate Session,
+	 * catching and logging any cleanup exceptions thrown.
+	 * @param session the Hibernate Session to close (may be <code>null</code>)
+	 * @see net.sf.hibernate.Session#close()
 	 */
 	private static void doClose(Session session) {
 		if (session != null) {
@@ -728,10 +735,10 @@ public abstract class SessionFactoryUtils {
 				session.close();
 			}
 			catch (HibernateException ex) {
-				logger.error("Could not close Hibernate Session", ex);
+				logger.debug("Could not close Hibernate Session", ex);
 			}
-			catch (RuntimeException ex) {
-				logger.error("Unexpected exception on closing Hibernate Session", ex);
+			catch (Throwable ex) {
+				logger.debug("Unexpected exception on closing Hibernate Session", ex);
 			}
 		}
 	}

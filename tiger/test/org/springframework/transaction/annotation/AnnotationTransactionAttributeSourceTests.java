@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,6 +108,9 @@ public class AnnotationTransactionAttributeSourceTests extends TestCase {
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute actual = atas.getTransactionAttribute(interfaceMethod, TestBean3.class);
 		assertEquals(TransactionAttribute.PROPAGATION_REQUIRES_NEW, actual.getPropagationBehavior());
+		assertEquals(TransactionAttribute.ISOLATION_REPEATABLE_READ, actual.getIsolationLevel());
+		assertEquals(5, actual.getTimeout());
+		assertTrue(actual.isReadOnly());
 
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
@@ -157,7 +160,7 @@ public class AnnotationTransactionAttributeSourceTests extends TestCase {
 		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
 	}
 
-	
+
 	public interface ITestBean {
 		
 		int getAge();
@@ -315,7 +318,8 @@ public class AnnotationTransactionAttributeSourceTests extends TestCase {
 			this.name = name;
 		}
 
-		@Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor=Exception.class, noRollbackFor={IOException.class})
+		@Transactional(propagation=Propagation.REQUIRES_NEW, isolation=Isolation.REPEATABLE_READ, timeout=5,
+				readOnly=true, rollbackFor=Exception.class, noRollbackFor={IOException.class})
 		public int getAge() {
 			return age;
 		}

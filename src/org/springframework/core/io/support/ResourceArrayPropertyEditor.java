@@ -18,12 +18,12 @@ package org.springframework.core.io.support;
 
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.util.SystemPropertyUtils;
 
@@ -33,8 +33,8 @@ import org.springframework.util.SystemPropertyUtils;
  * to Resource array properties. Can also translate a collection or array
  * of location patterns into a merged Resource array.
  *
- * <p>The path may contain ${...} placeholders, to be resolved as
- * system properties: e.g. ${user.dir}.
+ * <p>The path may contain <code>${...}</code> placeholders, to be resolved
+ * as system properties: e.g. <code>${user.dir}</code>.
  *
  * <p>Delegates to a ResourcePatternResolver, by default a
  * PathMatchingResourcePatternResolver.
@@ -91,7 +91,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	public void setValue(Object value) throws IllegalArgumentException {
 		if (value instanceof Collection || (value instanceof Object[] && !(value instanceof Resource[]))) {
 			Collection input = (value instanceof Collection ? (Collection) value : Arrays.asList((Object[]) value));
-			Set merged = CollectionFactory.createLinkedSetIfPossible(8);
+			List merged = new ArrayList();
 			for (Iterator it = input.iterator(); it.hasNext();) {
 				Object element = it.next();
 				if (element instanceof String) {
@@ -101,7 +101,10 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 					try {
 						Resource[] resources = this.resourcePatternResolver.getResources(pattern);
 						for (int i = 0; i < resources.length; i++) {
-							merged.add(resources[i]);
+							Resource resource = resources[i];
+							if (!merged.contains(resource)) {
+								merged.add(resource);
+							}
 						}
 					}
 					catch (IOException ex) {
@@ -110,12 +113,14 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 					}
 				}
 				else if (element instanceof Resource) {
-					// A Resource object: add it to the set.
-					merged.add(element);
+					// A Resource object: add it to the result.
+					if (!merged.contains(element)) {
+						merged.add(element);
+					}
 				}
 				else {
-					throw new IllegalArgumentException("Cannot convert element [" + element +
-							"] to Resource: only location Strings and Resource objects supported");
+					throw new IllegalArgumentException("Cannot convert element [" + element + "] to [" +
+							Resource.class.getName() + "]: only location String and Resource object supported");
 				}
 			}
 			super.setValue(merged.toArray(new Resource[merged.size()]));

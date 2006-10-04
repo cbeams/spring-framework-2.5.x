@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Utility methods for PreparedStatementCreator and CallableStatementCreator
- * implementations, providing sophisticated parameter management (including
- * support for LOB values).
+ * Utility methods for PreparedStatementSetter/Creator and CallableStatementCreator
+ * implementations, providing sophisticated parameter management (including support
+ * for LOB values).
  *
- * <p>Used by PreparedStatementCreatorFactory and CallableStatementCreatorFactory.
+ * <p>Used by PreparedStatementCreatorFactory and CallableStatementCreatorFactory,
+ * but also available for direct use in custom setter/creator implementations.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 1.1
+ * @see PreparedStatementSetter
  * @see PreparedStatementCreator
  * @see CallableStatementCreator
  * @see PreparedStatementCreatorFactory
@@ -47,7 +49,7 @@ import org.apache.commons.logging.LogFactory;
  * @see SqlTypeValue
  * @see org.springframework.jdbc.core.support.SqlLobValue
  */
-public class StatementCreatorUtils {
+public abstract class StatementCreatorUtils {
 
 	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
 
@@ -76,7 +78,7 @@ public class StatementCreatorUtils {
 	 * @param sqlType the SQL type of the parameter
 	 * @param typeName the type name of the parameter
 	 * (optional, only used for SQL NULL and SqlTypeValue)
-	 * @param inValue the value to set
+	 * @param inValue the value to set (plain value or a SqlTypeValue)
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
 	 */
@@ -93,7 +95,19 @@ public class StatementCreatorUtils {
 
 		if (inValue == null) {
 			if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
-				ps.setNull(paramIndex, Types.NULL);
+				boolean useSetObject = false;
+				try {
+					useSetObject = (ps.getConnection().getMetaData().getDatabaseProductName().indexOf("Informix") != -1);
+				}
+				catch (Throwable ex) {
+					logger.debug("Could not check database product name", ex);
+				}
+				if (useSetObject) {
+					ps.setObject(paramIndex, null);
+				}
+				else {
+					ps.setNull(paramIndex, Types.NULL);
+				}
 			}
 			else if (typeName != null) {
 				ps.setNull(paramIndex, sqlType, typeName);
@@ -197,8 +211,8 @@ public class StatementCreatorUtils {
 	 * Clean up all resources held by parameter values which were passed to an
 	 * execute method. This is for example important for closing LOB values.
 	 * @param paramValues parameter values supplied. May be <code>null</code>.
-	 * @see DisposableSqlTypeValue#cleanup
-	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup
+	 * @see DisposableSqlTypeValue#cleanup()
+	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup()
 	 */
 	public static void cleanupParameters(Object[] paramValues) {
 		if (paramValues != null) {
@@ -210,8 +224,8 @@ public class StatementCreatorUtils {
 	 * Clean up all resources held by parameter values which were passed to an
 	 * execute method. This is for example important for closing LOB values.
 	 * @param paramValues parameter values supplied. May be <code>null</code>.
-	 * @see DisposableSqlTypeValue#cleanup
-	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup
+	 * @see DisposableSqlTypeValue#cleanup()
+	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup()
 	 */
 	public static void cleanupParameters(Collection paramValues) {
 		if (paramValues != null) {

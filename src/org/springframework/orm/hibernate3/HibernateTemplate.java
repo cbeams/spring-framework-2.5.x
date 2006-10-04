@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,15 +44,16 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.util.Assert;
 
 /**
- * Helper class that simplifies Hibernate data access code, and converts
- * checked HibernateExceptions into unchecked DataAccessExceptions,
- * following the <code>org.springframework.dao</code> exception hierarchy.
- * Uses the same SQLExceptionTranslator mechanism as JdbcTemplate.
+ * Helper class that simplifies Hibernate data access code. Automatically
+ * converts HibernateExceptions into DataAccessExceptions, following the
+ * <code>org.springframework.dao</code> exception hierarchy.
  *
- * <p>Typically used to implement data access or business logic services that
- * use Hibernate within their implementation but are Hibernate-agnostic in their
- * interface. The latter or code calling the latter only have to deal with
- * domain objects, query objects, and <code>org.springframework.dao</code> exceptions.
+ * <p><b>NOTE: As of Hibernate 3.0.1, transactional Hibernate access code can
+ * also be coded in plain Hibernate style. Hence, for newly started projects,
+ * consider adopting the standard Hibernate3 style of coding data access objects
+ * instead, based on <code>SessionFactory.getCurrentSession()</code>.</b>
+ * (Spring's LocalSessionFactoryBean automatically supports Spring transaction
+ * management for the Hibernate3 <code>getCurrentSession()</code> method.)
  *
  * <p>The central method is <code>execute</code>, supporting Hibernate code
  * implementing the HibernateCallback interface. It provides Hibernate Session
@@ -76,15 +77,10 @@ import org.springframework.util.Assert;
  *
  * <p>Note that even if HibernateTransactionManager is used for transaction
  * demarcation in higher-level services, all those services above the data
- * access layer don't need need to be Hibernate-aware. Setting such a special
+ * access layer don't need to be Hibernate-aware. Setting such a special
  * PlatformTransactionManager is a configuration issue: For example,
  * switching to JTA is just a matter of Spring configuration (use
  * JtaTransactionManager instead) that does not affect application code.
- *
- * <p>LocalSessionFactoryBean is the preferred way of obtaining a reference
- * to a specific Hibernate SessionFactory, at least in a non-EJB environment.
- * Alternatively, use a JndiObjectFactoryBean to fetch a SessionFactory
- * from JNDI (possibly set up via a JCA Connector).
  *
  * <p>Note that operations that return an Iterator (i.e. <code>iterate</code>)
  * are supposed to be used within Spring-driven or JTA-driven transactions
@@ -100,14 +96,11 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 1.2
+ * @see org.hibernate.SessionFactory#getCurrentSession()
  * @see #setSessionFactory
- * @see #setJdbcExceptionTranslator
  * @see HibernateCallback
  * @see org.hibernate.Session
- * @see HibernateInterceptor
  * @see LocalSessionFactoryBean
- * @see org.springframework.jndi.JndiObjectFactoryBean
- * @see org.springframework.jdbc.support.SQLExceptionTranslator
  * @see HibernateTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.orm.hibernate3.support.OpenSessionInViewFilter
@@ -352,6 +345,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 */
 	public Object execute(HibernateCallback action, boolean exposeNativeSession) throws DataAccessException {
+		Assert.notNull(action, "Callback object must not be null");
+
 		Session session = getSession();
 		boolean existingTransaction = SessionFactoryUtils.isSessionTransactional(session, getSessionFactory());
 		if (existingTransaction) {
@@ -552,7 +547,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public boolean contains(final Object entity) throws DataAccessException {
 		Boolean result = (Boolean) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) {
-				return new Boolean(session.contains(entity));
+				return (session.contains(entity) ? Boolean.TRUE : Boolean.FALSE);
 			}
 		}, true);
 		return result.booleanValue();
@@ -1087,17 +1082,17 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @param session current Hibernate Session
 	 * @throws InvalidDataAccessApiUsageException if write operations are not allowed
 	 * @see #setCheckWriteOperations
-	 * @see #getFlushMode
+	 * @see #getFlushMode()
 	 * @see #FLUSH_EAGER
-	 * @see org.hibernate.Session#getFlushMode
+	 * @see org.hibernate.Session#getFlushMode()
 	 * @see org.hibernate.FlushMode#NEVER
 	 */
 	protected void checkWriteOperationAllowed(Session session) throws InvalidDataAccessApiUsageException {
 		if (isCheckWriteOperations() && getFlushMode() != FLUSH_EAGER &&
 				FlushMode.NEVER.equals(session.getFlushMode())) {
 			throw new InvalidDataAccessApiUsageException(
-					"Write operations are not allowed in read-only mode (FlushMode.NEVER) - turn your Session " +
-					"into FlushMode.AUTO or remove 'readOnly' marker from transaction definition");
+					"Write operations are not allowed in read-only mode (FlushMode.NEVER): Turn your Session " +
+					"into FlushMode.AUTO or remove 'readOnly' marker from transaction definition.");
 		}
 	}
 

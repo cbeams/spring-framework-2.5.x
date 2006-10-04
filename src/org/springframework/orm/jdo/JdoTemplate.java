@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,9 +30,10 @@ import javax.jdo.Query;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper class that simplifies JDO data access code, and converts
@@ -67,7 +68,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Note that even if JdoTransactionManager is used for transaction
  * demarcation in higher-level services, all those services above the data
- * access layer don't need need to be JDO-aware. Setting such a special
+ * access layer don't need to be JDO-aware. Setting such a special
  * PlatformTransactionManager is a configuration issue, without introducing
  * code dependencies: For example, switching to JTA is just a matter of
  * Spring configuration (use JtaTransactionManager instead) and JDO provider
@@ -250,6 +251,8 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 */
 	public Object execute(JdoCallback action, boolean exposeNativePersistenceManager) throws DataAccessException {
+		Assert.notNull(action, "Callback object must not be null");
+
 		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(
 		    getPersistenceManagerFactory(), isAllowCreate());
 		boolean existingTransaction =
@@ -325,18 +328,8 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
 				// Use JDO 1.0 newObjectIdInstance(Class, String) method, if available.
 				if (newObjectIdInstanceMethod != null) {
-					Object id = null;
-					try {
-						id = newObjectIdInstanceMethod.invoke(pm, new Object[] {entityClass, idValue.toString()});
-					}
-					catch (InvocationTargetException ex) {
-						throw new InvalidDataAccessResourceUsageException(
-								"Could not invoke JDO 1.0 newObjectIdInstance(Class, String) method", ex.getTargetException());
-					}
-					catch (Exception ex) {
-						throw new InvalidDataAccessResourceUsageException(
-								"Could not invoke JDO 1.0 newObjectIdInstance(Class, String) method", ex);
-					}
+					Object id = ReflectionUtils.invokeMethod(
+							newObjectIdInstanceMethod, pm, new Object[] {entityClass, idValue.toString()});
 					return pm.getObjectById(id, true);
 				}
 				// Use JDO 2.0 getObjectById(Class, Object) method.
@@ -402,17 +395,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public void makePersistent(final Object entity) throws DataAccessException {
 		execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				try {
-					return makePersistentMethod.invoke(pm, new Object[] {entity});
-				}
-				catch (InvocationTargetException ex) {
-					throw new InvalidDataAccessResourceUsageException(
-							"Could not invoke JDO makePersistent(Object) method", ex.getTargetException());
-				}
-				catch (Exception ex) {
-					throw new InvalidDataAccessResourceUsageException(
-							"Could not invoke JDO makePersistent(Object) method", ex);
-				}
+				return ReflectionUtils.invokeMethod(makePersistentMethod, pm, new Object[] {entity});
 			}
 		}, true);
 	}
@@ -420,17 +403,7 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 	public void makePersistentAll(final Collection entities) throws DataAccessException {
 		execute(new JdoCallback() {
 			public Object doInJdo(PersistenceManager pm) throws JDOException {
-				try {
-					return makePersistentAllMethod.invoke(pm, new Object[] {entities});
-				}
-				catch (InvocationTargetException ex) {
-					throw new InvalidDataAccessResourceUsageException(
-							"Could not invoke JDO makePersistentAll(Collection) method", ex.getTargetException());
-				}
-				catch (Exception ex) {
-					throw new InvalidDataAccessResourceUsageException(
-							"Could not invoke JDO makePersistentAll(Collection) method", ex);
-				}
+				return ReflectionUtils.invokeMethod(makePersistentAllMethod, pm, new Object[] {entities});
 			}
 		}, true);
 	}

@@ -20,10 +20,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Default implementation of the ResourceLoader interface.
- * Used by ResourceEditor, but also suitable for standalone usage.
+ * Used by ResourceEditor, and serves as base class for AbstractApplicationContext.
+ * Can also be used standalone.
  *
  * <p>Will return an UrlResource if the location value is a URL, and a
  * ClassPathResource if it is a non-URL path or a "classpath:" pseudo-URL.
@@ -34,6 +36,7 @@ import org.springframework.util.Assert;
  * @see ResourceEditor
  * @see UrlResource
  * @see ClassPathResource
+ * @see org.springframework.context.support.AbstractApplicationContext
  */
 public class DefaultResourceLoader implements ResourceLoader {
 
@@ -42,19 +45,18 @@ public class DefaultResourceLoader implements ResourceLoader {
 
 	/**
 	 * Create a new DefaultResourceLoader.
-	 * <p>ClassLoader access will happen via the thread context class loader on actual
-	 * access (applying to the thread that does ClassPathResource calls).
+	 * <p>ClassLoader access will happen using the thread context class loader
+	 * at the time of this ResourceLoader's initialization.
 	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	public DefaultResourceLoader() {
-		this.classLoader = Thread.currentThread().getContextClassLoader();
+		this.classLoader = ClassUtils.getDefaultClassLoader();
 	}
 
 	/**
 	 * Create a new DefaultResourceLoader.
-	 * @param classLoader the ClassLoader to load class path resources with,
-	 * or <code>null</code> if using the thread context class loader on actual access
-	 * (applying to the thread that does ClassPathResource calls).
+	 * @param classLoader the ClassLoader to load class path resources with, or <code>null</code>
+	 * for using the thread context class loader at the time of actual resource access
 	 */
 	public DefaultResourceLoader(ClassLoader classLoader) {
 		this.classLoader = classLoader;
@@ -62,10 +64,10 @@ public class DefaultResourceLoader implements ResourceLoader {
 
 
 	/**
-	 * Specify the ClassLoader to load class path resources with,
-	 * or <code>null</code> if using the thread context class loader.
-	 * <p>The default is that ClassLoader access will happen via the thread
-	 * context class loader.
+	 * Specify the ClassLoader to load class path resources with, or <code>null</code>
+	 * for using the thread context class loader at the time of actual resource access.
+	 * <p>The default is that ClassLoader access will happen using the thread context
+	 * class loader at the time of this ResourceLoader's initialization.
 	 */
 	public void setClassLoader(ClassLoader classLoader) {
 		this.classLoader = classLoader;

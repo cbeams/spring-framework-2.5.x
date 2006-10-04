@@ -181,7 +181,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * decision. If a participating transaction fails with an exception, the caller
 	 * can still decide to continue with a different path within the transaction.
 	 * However, note that this will only work as long as all participating resources
-	 * are capable of contiuing towards a transaction commit even after a data access
+	 * are capable of continuing towards a transaction commit even after a data access
 	 * failure: This is generally not the case for a Hibernate Session, for example;
 	 * neither is it for a sequence of JDBC insert/update/delete operations.
 	 * <p><b>Note:</b>This flag only applies to an explicit rollback attempt for a
@@ -215,9 +215,11 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Set if doRollback should be performed on failure of the doCommit call.
-	 * Typically not necessary and thus to be avoided as it can override the
-	 * commit exception with a subsequent rollback exception. Default is "false".
+	 * Set whether <code>doRollback</code> should be performed on failure of the
+	 * <code>doCommit</code> call. Typically not necessary and thus to be avoided,
+	 * as it can potentially override the commit exception with a subsequent
+	 * rollback exception.
+	 * <p>Default is "false".
 	 * @see #doCommit
 	 * @see #doRollback
 	 */
@@ -226,7 +228,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Return if a rollback should be performed on failure of the commit call.
+	 * Return whether <code>doRollback</code> should be performed on failure of the
+	 * <code>doCommit</code> call.
 	 */
 	public boolean isRollbackOnCommitFailure() {
 		return rollbackOnCommitFailure;
@@ -281,12 +284,12 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				logger.debug("Creating new transaction with name [" + definition.getName() + "]");
 			}
 			doBegin(transaction, definition);
-			boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
+			boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 			return newTransactionStatus(definition, transaction, true, newSynchronization, debugEnabled, null);
 		}
 		else {
 			// Create "empty" transaction: no actual transaction, but potentially synchronization.
-			boolean newSynchronization = (this.transactionSynchronization == SYNCHRONIZATION_ALWAYS);
+			boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
 			return newTransactionStatus(definition, null, false, newSynchronization, debugEnabled, null);
 		}
 	}
@@ -308,7 +311,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				logger.debug("Suspending current transaction");
 			}
 			Object suspendedResources = suspend(transaction);
-			boolean newSynchronization = (this.transactionSynchronization == SYNCHRONIZATION_ALWAYS);
+			boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
 			return newTransactionStatus(
 					definition, null, false, newSynchronization, debugEnabled, suspendedResources);
 		}
@@ -320,7 +323,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			}
 			Object suspendedResources = suspend(transaction);
 			doBegin(transaction, definition);
-			boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
+			boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 			return newTransactionStatus(
 					definition, transaction, true, newSynchronization, debugEnabled, suspendedResources);
 		}
@@ -348,7 +351,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				// Usually only for JTA: Spring synchronization might get activated here
 				// in case of a pre-existing JTA transaction.
 				doBegin(transaction, definition);
-				boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
+				boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 				return newTransactionStatus(definition, transaction, true, newSynchronization, debugEnabled, null);
 			}
 		}
@@ -357,7 +360,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		if (debugEnabled) {
 			logger.debug("Participating in existing transaction");
 		}
-		boolean newSynchronization = (this.transactionSynchronization != SYNCHRONIZATION_NEVER);
+		boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 		return newTransactionStatus(definition, transaction, false, newSynchronization, debugEnabled, null);
 	}
 
@@ -448,12 +451,12 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see #rollback
 	 */
 	public final void commit(TransactionStatus status) throws TransactionException {
-		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
-
-		if (defStatus.isCompleted()) {
+		if (status.isCompleted()) {
 			throw new IllegalTransactionStateException(
 					"Transaction is already completed - do not call commit or rollback more than once per transaction");
 		}
+
+		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
 		if (defStatus.isLocalRollbackOnly()) {
 			if (defStatus.isDebug()) {
 				logger.debug("Transactional code has requested rollback");
@@ -467,7 +470,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			}
 			processRollback(defStatus);
 			throw new UnexpectedRollbackException(
-					"Transaction has been rolled back because it has been marked as rollback-only");
+					"Transaction rolled back because it has been marked as rollback-only");
 		}
 
 		processCommit(defStatus);
@@ -550,13 +553,12 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see #doSetRollbackOnly
 	 */
 	public final void rollback(TransactionStatus status) throws TransactionException {
-		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
-
-		if (defStatus.isCompleted()) {
+		if (status.isCompleted()) {
 			throw new IllegalTransactionStateException(
 					"Transaction is already completed - do not call commit or rollback more than once per transaction");
 		}
 
+		DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
 		processRollback(defStatus);
 	}
 
@@ -886,27 +888,26 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Return whether to call <code>doCommit</code> on a transaction
-	 * that has been marked as rollback-only in a global fashion.
-	 * <p>Does not apply if an application locally sets the transaction to
-	 * rollback-only via the TransactionStatus, but only to the transaction
-	 * itself being marked as rollback-only by the transaction coordinator.
-	 * <p>Default is "false": Local transaction strategies usually don't
-	 * hold the rollback-only marker in the transaction itself, therefore
-	 * they can't handle rollback-only transactions in a special manner.
-	 * Hence, AbstractPlatformTransactionManager will trigger a rollback
-	 * in that case, throwing an UnexpectedRollbackException afterwards.
-	 * <p>Override this to return "true" if the concrete transaction manager
-	 * expects a <code>doCommit</code> call even for a rollback-only transaction,
-	 * allowing for special handling there. This will, for example, be the case
-	 * for JTA, where <code>UserTransaction.commit</code> will check the read-only
-	 * flag itself and throw a corresponding RollbackException, which might
-	 * include the specific reason (such as a transaction timeout).
-	 * <p>If this method returns "true" but the <code>doCommit</code>
-	 * implementation does not throw an exception, this transaction manager
-	 * will throw an UnexpectedRollbackException itself. This should not be the
-	 * typical case; it is mainly checked to cover misbehaving JTA providers that
-	 * silently roll back even when the rollback has not been requested by the user.
+	 * Return whether to call <code>doCommit</code> on a transaction that has been
+	 * marked as rollback-only in a global fashion.
+	 * <p>Does not apply if an application locally sets the transaction to rollback-only
+	 * via the TransactionStatus, but only to the transaction itself being marked as
+	 * rollback-only by the transaction coordinator.
+	 * <p>Default is "false": Local transaction strategies usually don't hold the rollback-only
+	 * marker in the transaction itself, therefore they can't handle rollback-only transactions
+	 * as part of transaction commit. Hence, AbstractPlatformTransactionManager will trigger
+	 * a rollback in that case, throwing an UnexpectedRollbackException afterwards.
+	 * <p>Override this to return "true" if the concrete transaction manager expects a
+	 * <code>doCommit</code> call even for a rollback-only transaction, allowing for
+	 * special handling there. This will, for example, be the case for JTA, where
+	 * <code>UserTransaction.commit</code> will check the read-only flag itself and
+	 * throw a corresponding RollbackException, which might include the specific reason
+	 * (such as a transaction timeout).
+	 * <p>If this method returns "true" but the <code>doCommit</code> implementation does not
+	 * throw an exception, this transaction manager will throw an UnexpectedRollbackException
+	 * itself. This should not be the typical case; it is mainly checked to cover misbehaving
+	 * JTA providers that silently roll back even when the rollback has not been requested
+	 * by the calling code.
 	 * @see #doCommit
 	 * @see DefaultTransactionStatus#isGlobalRollbackOnly()
 	 * @see DefaultTransactionStatus#isLocalRollbackOnly()

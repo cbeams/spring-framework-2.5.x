@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,8 +18,6 @@ package org.springframework.transaction.support;
 
 import org.springframework.transaction.NestedTransactionNotSupportedException;
 import org.springframework.transaction.SavepointManager;
-import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.TransactionUsageException;
 
 /**
  * Default implementation of the TransactionStatus interface,
@@ -98,7 +96,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	}
 
 	/**
-	 * Return whether there is actual transaction active.
+	 * Return whether there is an actual transaction active.
 	 */
 	public boolean hasTransaction() {
 		return (this.transaction != null);
@@ -154,7 +152,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 */
 	public boolean isGlobalRollbackOnly() {
 		return ((this.transaction instanceof SmartTransactionObject) &&
-		 ((SmartTransactionObject) this.transaction).isRollbackOnly());
+				((SmartTransactionObject) this.transaction).isRollbackOnly());
 	}
 
 	/**

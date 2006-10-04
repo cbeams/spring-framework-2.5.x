@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.util;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Simple utility class for handling reflection exceptions.
@@ -68,6 +69,37 @@ public abstract class ReflectionUtils {
 		throw new IllegalStateException(
 				"Unexpected exception thrown by method - " + ex.getTargetException().getClass().getName() +
 				": " + ex.getTargetException().getMessage());
+	}
+
+	/**
+	 * Invoke the specified {@link Method} against the supplied target object with no arguments
+	 * The target object can be <code>null</code> when invoking a static {@link Method}.
+	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
+	 */
+	public static Object invokeMethod(Method method, Object target) {
+		return invokeMethod(method, target, null);
+	}
+
+	/**
+	 * Invoke the specified {@link Method} against the supplied target object with the supplied arguments
+	 * The target object can be null when invoking a static {@link Method}.
+	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
+	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
+	 */
+	public static Object invokeMethod(Method method, Object target, Object[] args) {
+		try {
+			return method.invoke(target, args);
+		}
+		catch (IllegalAccessException ex) {
+			handleReflectionException(ex);
+			throw new IllegalStateException(
+					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
+		}
+		catch (InvocationTargetException ex) {
+			handleReflectionException(ex);
+			throw new IllegalStateException(
+					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
+		}
 	}
 
 }

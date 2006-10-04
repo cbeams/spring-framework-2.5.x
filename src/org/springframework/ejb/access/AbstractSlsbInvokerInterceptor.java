@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,6 +54,8 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 */
 	private Method createMethod;
 
+	private final Object homeMonitor = new Object();
+
 
 	/**
 	 * Set whether to look up the EJB home object on startup.
@@ -99,10 +101,13 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 * @see #getCreateMethod
 	 */
 	protected void refreshHome() throws NamingException {
-		Object home = lookup();
+		synchronized (this.homeMonitor) {
+			Object home = lookup();
 		this.createMethod = getCreateMethod(home);
-		if (this.cacheHome) {
-			this.cachedHome = home;
+			if (this.cacheHome) {
+				this.cachedHome = home;
+				this.createMethod = getCreateMethod(home);
+			}
 		}
 	}
 
@@ -139,7 +144,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 			return (this.cachedHome != null ? this.cachedHome : lookup());
 		}
 		else {
-			synchronized (this) {
+			synchronized (this.homeMonitor) {
 				if (this.cachedHome == null) {
 					this.cachedHome = lookup();
 					this.createMethod = getCreateMethod(this.cachedHome);

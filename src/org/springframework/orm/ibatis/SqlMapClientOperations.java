@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,6 +45,12 @@ import org.springframework.dao.DataAccessException;
 public interface SqlMapClientOperations {
 
 	/**
+	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#queryForObject(String)
+	 * @throws org.springframework.dao.DataAccessException in case of errors
+	 */
+	Object queryForObject(String statementName) throws DataAccessException;
+
+	/**
 	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#queryForObject(String, Object)
 	 * @throws org.springframework.dao.DataAccessException in case of errors
 	 */
@@ -59,10 +65,23 @@ public interface SqlMapClientOperations {
 			throws DataAccessException;
 
 	/**
+	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#queryForList(String)
+	 * @throws org.springframework.dao.DataAccessException in case of errors
+	 */
+	List queryForList(String statementName) throws DataAccessException;
+
+	/**
 	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#queryForList(String, Object)
 	 * @throws org.springframework.dao.DataAccessException in case of errors
 	 */
 	List queryForList(String statementName, Object parameterObject)
+			throws DataAccessException;
+
+	/**
+	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#queryForList(String, int, int)
+	 * @throws org.springframework.dao.DataAccessException in case of errors
+	 */
+	List queryForList(String statementName, int skipResults, int maxResults)
 			throws DataAccessException;
 
 	/**
@@ -73,10 +92,24 @@ public interface SqlMapClientOperations {
 			throws DataAccessException;
 
 	/**
+	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#queryWithRowHandler(String, RowHandler)
+	 * @throws org.springframework.dao.DataAccessException in case of errors
+	 */
+	void queryWithRowHandler(String statementName, RowHandler rowHandler)
+			throws DataAccessException;
+
+	/**
 	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#queryWithRowHandler(String, Object, RowHandler)
 	 * @throws org.springframework.dao.DataAccessException in case of errors
 	 */
 	void queryWithRowHandler(String statementName, Object parameterObject, RowHandler rowHandler)
+			throws DataAccessException;
+
+	/**
+	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#queryForPaginatedList(String, int)
+	 * @throws org.springframework.dao.DataAccessException in case of errors
+	 */
+	PaginatedList queryForPaginatedList(String statementName, int pageSize)
 			throws DataAccessException;
 
 	/**
@@ -101,25 +134,28 @@ public interface SqlMapClientOperations {
 			throws DataAccessException;
 
 	/**
+	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#insert(String)
+	 * @throws org.springframework.dao.DataAccessException in case of errors
+	 */
+	Object insert(String statementName) throws DataAccessException;
+
+	/**
 	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#insert(String, Object)
 	 * @throws org.springframework.dao.DataAccessException in case of errors
 	 */
-	Object insert(String statementName, Object parameterObject)
-			throws DataAccessException;
+	Object insert(String statementName, Object parameterObject) throws DataAccessException;
+
+	/**
+	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#update(String)
+	 * @throws org.springframework.dao.DataAccessException in case of errors
+	 */
+	int update(String statementName) throws DataAccessException;
 
 	/**
 	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#update(String, Object)
 	 * @throws org.springframework.dao.DataAccessException in case of errors
 	 */
-	int update(String statementName, Object parameterObject)
-			throws DataAccessException;
-
-	/**
-	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#delete(String, Object)
-	 * @throws org.springframework.dao.DataAccessException in case of errors
-	 */
-	int delete(String statementName, Object parameterObject)
-			throws DataAccessException;
+	int update(String statementName, Object parameterObject) throws DataAccessException;
 
 	/**
 	 * Convenience method provided by Spring: execute an update operation
@@ -133,6 +169,18 @@ public interface SqlMapClientOperations {
 	 */
 	void update(String statementName, Object parameterObject, int requiredRowsAffected)
 			throws DataAccessException;
+
+	/**
+	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#delete(String)
+	 * @throws org.springframework.dao.DataAccessException in case of errors
+	 */
+	int delete(String statementName) throws DataAccessException;
+
+	/**
+	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#delete(String, Object)
+	 * @throws org.springframework.dao.DataAccessException in case of errors
+	 */
+	int delete(String statementName, Object parameterObject) throws DataAccessException;
 
 	/**
 	 * Convenience method provided by Spring: execute a delete operation

@@ -16,11 +16,9 @@
 
 package org.springframework.util;
 
-import java.util.Enumeration;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +29,7 @@ import junit.framework.TestCase;
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Rick Evans
  */
 public class CollectionUtilsTests extends TestCase {
 
@@ -80,6 +79,60 @@ public class CollectionUtilsTests extends TestCase {
 
 		list = new LinkedList();
 		assertFalse(CollectionUtils.hasUniqueObject(list));
+	}
+
+	public void testContainsInstanceWithNullCollection() throws Exception {
+		assertFalse("Must return false if supplied Collection argument is null",
+				CollectionUtils.containsInstance(null, this));
+	}
+
+	public void testContainsInstanceWithInstancesThatAreEqualButDistinct() throws Exception {
+		List list = new ArrayList();
+		list.add(new Instance("fiona"));
+		assertFalse("Must return false if instance is not in the supplied Collection argument",
+				CollectionUtils.containsInstance(list, new Instance("fiona")));
+	}
+
+	public void testContainsInstanceWithSameInstance() throws Exception {
+		List list = new ArrayList();
+		list.add(new Instance("apple"));
+		Instance instance = new Instance("fiona");
+		list.add(instance);
+		assertTrue("Must return true if instance is in the supplied Collection argument",
+				CollectionUtils.containsInstance(list, instance));
+	}
+
+	public void testContainsInstanceWithNullInstance() throws Exception {
+		List list = new ArrayList();
+		list.add(new Instance("apple"));
+		list.add(new Instance("fiona"));
+		assertFalse("Must return false if null instance is supplied",
+				CollectionUtils.containsInstance(list, null));
+	}
+
+
+	private static final class Instance {
+
+		private final String name;
+
+		public Instance(String name) {
+			this.name = name;
+		}
+
+		public boolean equals(Object rhs) {
+			if (this == rhs) {
+				return true;
+			}
+			if (rhs == null || this.getClass() != rhs.getClass()) {
+				return false;
+			}
+			Instance instance = (Instance) rhs;
+			return this.name.equals(instance.name);
+		}
+
+		public int hashCode() {
+			return this.name.hashCode();
+		}
 	}
 
 }

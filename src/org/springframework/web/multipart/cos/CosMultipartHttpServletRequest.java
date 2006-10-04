@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -131,15 +131,11 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 		public CosMultipartFile(String name) {
 			this.name = name;
 			this.file = multipartRequest.getFile(this.name);
-			this.size = (file != null ? file.length() : 0);
+			this.size = (this.file != null ? this.file.length() : 0);
 		}
 
 		public String getName() {
 			return name;
-		}
-
-		public boolean isEmpty() {
-			return (this.size == 0);
 		}
 
 		public String getOriginalFilename() {
@@ -151,15 +147,19 @@ public class CosMultipartHttpServletRequest extends AbstractMultipartHttpServlet
 			return multipartRequest.getContentType(this.name);
 		}
 
+		public boolean isEmpty() {
+			return (this.size == 0);
+		}
+
 		public long getSize() {
-			return size;
+			return this.size;
 		}
 
 		public byte[] getBytes() throws IOException {
 			if (this.file != null && !this.file.exists()) {
 				throw new IllegalStateException("File has been moved - cannot be read again");
 			}
-			return (this.size != 0 ? FileCopyUtils.copyToByteArray(this.file) : new byte[0]);
+			return (this.size > 0 ? FileCopyUtils.copyToByteArray(this.file) : new byte[0]);
 		}
 
 		public InputStream getInputStream() throws IOException {

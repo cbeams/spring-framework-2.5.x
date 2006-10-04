@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Savepoint;
 
 import org.apache.commons.logging.Log;
@@ -116,10 +115,10 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 		try {
 			currentDriverSupportsSavepoints = con.getMetaData().supportsSavepoints();
 		}
-		catch (Throwable t) {
-			logger.error("JDBC driver does not support JDBC 3.0 syntax", t);
-			throw new NestedTransactionNotSupportedException("Cannot create a nested transaction because " +			
-					"your JDBC driver is not a JDBC 3.0 driver");
+		catch (Throwable ex) {
+			logger.error("JDBC driver does not support JDBC 3.0 syntax", ex);
+			throw new NestedTransactionNotSupportedException(
+					"Cannot create a nested transaction because your JDBC driver is not a JDBC 3.0 driver");
 		}
 		try {
 			if (!savepointClassAvailable || !currentDriverSupportsSavepoints) {
@@ -128,7 +127,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 			}
 			return con.setSavepoint();
 		}
-		catch (SQLException ex) {
+		catch (Throwable ex) {
 			throw new CannotCreateTransactionException("Could not create JDBC savepoint", ex);
 		}
 	}
@@ -141,7 +140,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 		try {
 			getConnectionHolderForSavepoint().getConnection().rollback((Savepoint) savepoint);
 		}
-		catch (SQLException ex) {
+		catch (Throwable ex) {
 			throw new TransactionSystemException("Could not roll back to JDBC savepoint", ex);
 		}
 	}
@@ -154,7 +153,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 		try {
 			getConnectionHolderForSavepoint().getConnection().releaseSavepoint((Savepoint) savepoint);
 		}
-		catch (SQLException ex) {
+		catch (Throwable ex) {
 			logger.debug("Could not explicitly release JDBC savepoint", ex);
 		}
 	}
@@ -164,7 +163,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 			throw new NestedTransactionNotSupportedException(
 					"Transaction manager does not allow nested transactions");
 		}
-		if (getConnectionHolder() == null) {
+		if (!hasConnectionHolder()) {
 			throw new TransactionUsageException(
 					"Cannot create nested transaction if not exposing a JDBC transaction");
 		}

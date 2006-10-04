@@ -235,11 +235,12 @@ public abstract class DataSourceUtils {
 
 	/**
 	 * Close the given Connection, created via the given DataSource,
-	 * if it is not managed externally (i.e. not bound to the thread).
+	 * if it is not managed externally (that is, not bound to the thread).
 	 * Will never close a Connection from a SmartDataSource returning shouldClose=false.
-	 * @param con Connection to close if necessary
-	 * (if this is null, the call will be ignored)
-	 * @param dataSource DataSource that the Connection came from (can be <code>null</code>)
+	 * @param con the Connection to close if necessary
+	 * (if this is <code>null</code>, the call will be ignored)
+	 * @param dataSource the DataSource that the Connection came from
+	 * (can be <code>null</code>)
 	 * @see SmartDataSource#shouldClose
 	 */
 	public static void releaseConnection(Connection con, DataSource dataSource) {
@@ -247,10 +248,10 @@ public abstract class DataSourceUtils {
 			doReleaseConnection(con, dataSource);
 		}
 		catch (SQLException ex) {
-			logger.error("Could not close JDBC Connection", ex);
+			logger.debug("Could not close JDBC Connection", ex);
 		}
-		catch (RuntimeException ex) {
-			logger.error("Unexpected exception on closing JDBC Connection", ex);
+		catch (Throwable ex) {
+			logger.debug("Unexpected exception on closing JDBC Connection", ex);
 		}
 	}
 
@@ -258,9 +259,10 @@ public abstract class DataSourceUtils {
 	 * Actually release a JDBC Connection for the given DataSource.
 	 * Same as <code>releaseConnection</code>, but throwing the original SQLException.
 	 * <p>Directly accessed by TransactionAwareDataSourceProxy.
-	 * @param con Connection to close if necessary
-	 * (if this is null, the call will be ignored)
-	 * @param dataSource DataSource that the Connection came from (can be <code>null</code>)
+	 * @param con the Connection to close if necessary
+	 * (if this is <code>null</code>, the call will be ignored)
+	 * @param dataSource the DataSource that the Connection came from
+	 * (can be <code>null</code>)
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #releaseConnection
 	 * @see TransactionAwareDataSourceProxy
@@ -319,6 +321,24 @@ public abstract class DataSourceUtils {
 		return conToUse;
 	}
 
+	/**
+	 * Determine the connection synchronization order to use for the given
+	 * DataSource. Decreased for every level of nesting that a DataSource
+	 * has, checked through the level of DelegatingDataSource nesting.
+	 * @param dataSource the DataSource to check
+	 * @return the connection synchronization order to use
+	 * @see #CONNECTION_SYNCHRONIZATION_ORDER
+	 */
+	private static int getConnectionSynchronizationOrder(DataSource dataSource) {
+		int order = CONNECTION_SYNCHRONIZATION_ORDER;
+		DataSource currDs = dataSource;
+		while (currDs instanceof DelegatingDataSource) {
+			order--;
+			currDs = ((DelegatingDataSource) currDs).getTargetDataSource();
+		}
+		return order;
+	}
+
 
 	/**
 	 * Callback for resource cleanup at the end of a non-native JDBC transaction
@@ -331,15 +351,18 @@ public abstract class DataSourceUtils {
 
 		private final DataSource dataSource;
 
+		private int order;
+
 		private boolean holderActive = true;
 
 		public ConnectionSynchronization(ConnectionHolder connectionHolder, DataSource dataSource) {
 			this.connectionHolder = connectionHolder;
 			this.dataSource = dataSource;
+			this.order = getConnectionSynchronizationOrder(dataSource);
 		}
 
 		public int getOrder() {
-			return CONNECTION_SYNCHRONIZATION_ORDER;
+			return order;
 		}
 
 		public void suspend() {
@@ -364,7 +387,7 @@ public abstract class DataSourceUtils {
 
 		public void beforeCompletion() {
 			// Release Connection early if the holder is not open anymore
-			// (i.e. not used by another resource like a Hibernate Session
+			// (that is, not used by another resource like a Hibernate Session
 			// that has its own cleanup via transaction synchronization),
 			// to avoid issues with strict JTA implementations that expect
 			// the close call before transaction completion.

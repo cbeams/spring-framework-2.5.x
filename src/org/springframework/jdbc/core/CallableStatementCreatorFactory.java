@@ -183,14 +183,13 @@ public class CallableStatementCreatorFactory {
 			for (int i = 0; i < declaredParameters.size(); i++) {
 				SqlParameter declaredParameter = (SqlParameter) declaredParameters.get(i);
 				if (!this.inParameters.containsKey(declaredParameter.getName()) &&
-						!(declaredParameter instanceof SqlOutParameter) && 
-						!(declaredParameter instanceof SqlReturnResultSet)) {
+						!(declaredParameter instanceof ResultSetSupportingSqlParameter)) {
 					throw new InvalidDataAccessApiUsageException(
 							"Required input parameter '" + declaredParameter.getName() + "' is missing");
 				}
 				// The value may still be null.
 				Object inValue = this.inParameters.get(declaredParameter.getName());
-				if (!(declaredParameter instanceof SqlOutParameter) && !(declaredParameter instanceof SqlReturnResultSet)) {
+				if (!(declaredParameter instanceof ResultSetSupportingSqlParameter)) {
 					StatementCreatorUtils.setParameterValue(csToUse, sqlColIndx, declaredParameter, inValue);
 				}
 				else {

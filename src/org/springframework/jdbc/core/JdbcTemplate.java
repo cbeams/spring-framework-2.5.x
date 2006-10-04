@@ -44,6 +44,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.util.Assert;
 
 /**
  * <b>This is the central class in the JDBC core package.</b>
@@ -216,6 +217,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	//-------------------------------------------------------------------------
 
 	public Object execute(ConnectionCallback action) throws DataAccessException {
+		Assert.notNull(action, "Callback object must not be null");
+
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		try {
 			Connection conToUse = con;
@@ -265,6 +268,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	//-------------------------------------------------------------------------
 
 	public Object execute(StatementCallback action) throws DataAccessException {
+		Assert.notNull(action, "Callback object must not be null");
+
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		Statement stmt = null;
 		try {
@@ -316,13 +321,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public Object query(final String sql, final ResultSetExtractor rse) throws DataAccessException {
-		if (sql == null) {
-			throw new InvalidDataAccessApiUsageException("SQL must not be null");
-		}
-		if (JdbcUtils.countParameterPlaceholders(sql, '?', "'\"") > 0) {
-			throw new InvalidDataAccessApiUsageException(
-					"Cannot execute [" + sql + "] as a static query: it contains bind variables");
-		}
+		Assert.notNull(rse, "ResultSetExtractor must not be null");
+		Assert.notNull(sql, "SQL must not be null");
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL query [" + sql + "]");
 		}
@@ -392,9 +393,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public int update(final String sql) throws DataAccessException {
-		if (sql == null) {
-			throw new InvalidDataAccessApiUsageException("SQL must not be null");
-		}
+		Assert.notNull(sql, "SQL must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL update [" + sql + "]");
 		}
@@ -414,9 +413,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	public int[] batchUpdate(final String[] sql) throws DataAccessException {
-		if (sql == null) {
-			throw new InvalidDataAccessApiUsageException("SQL must not be null");
-		}
+		Assert.notNull(sql, "SQL must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL batch update of " + sql.length + " statements");
 		}
@@ -458,6 +455,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	public Object execute(PreparedStatementCreator psc, PreparedStatementCallback action)
 			throws DataAccessException {
+
+		Assert.notNull(psc, "PreparedStatementCreator must not be null");
+		Assert.notNull(action, "Callback object must not be null");
 
 		Connection con = DataSourceUtils.getConnection(getDataSource());
 		PreparedStatement ps = null;
@@ -501,7 +501,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 	}
 
-	public Object execute(final String sql, PreparedStatementCallback action) throws DataAccessException {
+	public Object execute(String sql, PreparedStatementCallback action) throws DataAccessException {
 		return execute(new SimplePreparedStatementCreator(sql), action);
 	}
 
@@ -520,6 +520,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	public Object query(
 			PreparedStatementCreator psc, final PreparedStatementSetter pss, final ResultSetExtractor rse)
 			throws DataAccessException {
+
+		Assert.notNull(rse, "ResultSetExtractor must not be null");
 
 		if (logger.isDebugEnabled()) {
 			String sql = getSql(psc);
@@ -553,16 +555,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(psc, null, rse);
 	}
 
-	public Object query(String sql, PreparedStatementSetter pss, final ResultSetExtractor rse)
-			throws DataAccessException {
-		if (sql == null) {
-			throw new InvalidDataAccessApiUsageException("SQL may not be null");
-		}
+	public Object query(String sql, PreparedStatementSetter pss, ResultSetExtractor rse) throws DataAccessException {
 		return query(new SimplePreparedStatementCreator(sql), pss, rse);
 	}
 
-	public Object query(String sql, Object[] args, int[] argTypes, ResultSetExtractor rse)
-			throws DataAccessException {
+	public Object query(String sql, Object[] args, int[] argTypes, ResultSetExtractor rse) throws DataAccessException {
 		return query(sql, new ArgTypePreparedStatementSetter(args, argTypes), rse);
 	}
 
@@ -622,6 +619,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	public Object queryForObject(String sql, Object[] args, int[] argTypes, Class requiredType)
 			throws DataAccessException {
+
 		return queryForObject(sql, args, argTypes, getSingleColumnRowMapper(requiredType));
 	}
 
@@ -934,8 +932,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 							returnedResults.putAll(processResultSet((ResultSet) out, outParam));
 						}
 						else {
-							logger.warn("ResultSet returned from stored procedure but a corresponding " +
-									"SqlOutParameter with a RowCallbackHandler was not declared");
+							logger.warn("ResultSet returned from stored procedure but no corresponding SqlOutParameter " +
+									"with a ResultSetExtractor/RowCallbackHandler/RowMapper declared");
 							returnedResults.put(outParam.getName(), "ResultSet was returned but not processed");
 						}
 					}
@@ -1121,12 +1119,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/**
 	 * Simple adapter for PreparedStatementCreator, allowing to use a plain SQL statement.
 	 */
-	private static class SimplePreparedStatementCreator
-			implements PreparedStatementCreator, SqlProvider {
+	private static class SimplePreparedStatementCreator implements PreparedStatementCreator, SqlProvider {
 
 		private final String sql;
 
 		public SimplePreparedStatementCreator(String sql) {
+			Assert.notNull(sql, "SQL must not be null");
 			this.sql = sql;
 		}
 
@@ -1143,12 +1141,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/**
 	 * Simple adapter for CallableStatementCreator, allowing to use a plain SQL statement.
 	 */
-	private static class SimpleCallableStatementCreator
-			implements CallableStatementCreator, SqlProvider {
+	private static class SimpleCallableStatementCreator implements CallableStatementCreator, SqlProvider {
 
 		private final String callString;
 
 		public SimpleCallableStatementCreator(String callString) {
+			Assert.notNull(callString, "Call string must not be null");
 			this.callString = callString;
 		}
 

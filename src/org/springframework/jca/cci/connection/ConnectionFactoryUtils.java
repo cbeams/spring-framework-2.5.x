@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -48,6 +48,7 @@ import org.springframework.util.Assert;
 public abstract class ConnectionFactoryUtils {
 
 	private static final Log logger = LogFactory.getLog(ConnectionFactoryUtils.class);
+
 
 	/**
 	 * Get a Connection from the given DataSource. Changes any CCI exception into
@@ -108,18 +109,22 @@ public abstract class ConnectionFactoryUtils {
 	}
 
 	/**
-	 * Close the given Connection if necessary, i.e. if it is not bound to the thread
-	 * and it is not created by a SmartDataSource returning shouldClose=false.
-	 * @param con Connection to close if necessary
-	 * (if this is null, the call will be ignored)
-	 * @param cf ConnectionFactory that the Connection came from
+	 * Close the given Connection if necessary, that is, if it is not bound to the thread.
+	 * @param con the Connection to close if necessary
+	 * (if this is <code>null</code>, the call will be ignored)
+	 * @param cf the ConnectionFactory that the Connection came from
+	 * (can be <code>null</code>)
 	 */
 	public static void releaseConnection(Connection con, ConnectionFactory cf) {
 		try {
 			doReleaseConnection(con, cf);
 		}
 		catch (ResourceException ex) {
-			logger.error("Could not close CCI Connection", ex);
+			logger.debug("Could not close CCI Connection", ex);
+		}
+		catch (Throwable ex) {
+			// We don't trust the CCI driver: It might throw RuntimeException or Error.
+			logger.debug("Unexpected exception on closing CCI Connection", ex);
 		}
 	}
 
@@ -127,11 +132,15 @@ public abstract class ConnectionFactoryUtils {
 	 * Actually close a JCA CCI Connection for the given DataSource.
 	 * Same as <code>releaseConnection</code>, but throwing the original ResourceException.
 	 * <p>Directly accessed by TransactionAwareConnectionFactoryProxy.
+	 * @param con the Connection to close if necessary
+	 * (if this is <code>null</code>, the call will be ignored)
+	 * @param cf the ConnectionFactory that the Connection came from
+	 * (can be <code>null</code>)
 	 * @throws ResourceException if thrown by JCA CCI methods
 	 * @see #releaseConnection
 	 */
 	public static void doReleaseConnection(Connection con, ConnectionFactory cf) throws ResourceException {
-		if (con == null || TransactionSynchronizationManager.hasResource(cf)) {
+		if (con == null || (cf != null && TransactionSynchronizationManager.hasResource(cf))) {
 			return;
 		}
 		con.close();

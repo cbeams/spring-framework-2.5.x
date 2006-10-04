@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public abstract class JdbcUtils {
 	/**
 	 * Close the given JDBC Connection and ignore any thrown exception.
 	 * This is useful for typical finally blocks in manual JDBC code.
-	 * @param con the JDBC Connection to close
+	 * @param con the JDBC Connection to close (may be <code>null</code>)
 	 */
 	public static void closeConnection(Connection con) {
 		if (con != null) {
@@ -58,11 +58,11 @@ public abstract class JdbcUtils {
 				con.close();
 			}
 			catch (SQLException ex) {
-				logger.error("Could not close JDBC Connection", ex);
+				logger.debug("Could not close JDBC Connection", ex);
 			}
 			catch (Throwable ex) {
 				// We don't trust the JDBC driver: It might throw RuntimeException or Error.
-				logger.error("Unexpected exception on closing JDBC Connection", ex);
+				logger.debug("Unexpected exception on closing JDBC Connection", ex);
 			}
 		}
 	}
@@ -70,7 +70,7 @@ public abstract class JdbcUtils {
 	/**
 	 * Close the given JDBC Statement and ignore any thrown exception.
 	 * This is useful for typical finally blocks in manual JDBC code.
-	 * @param stmt the JDBC Statement to close
+	 * @param stmt the JDBC Statement to close (may be <code>null</code>)
 	 */
 	public static void closeStatement(Statement stmt) {
 		if (stmt != null) {
@@ -78,11 +78,11 @@ public abstract class JdbcUtils {
 				stmt.close();
 			}
 			catch (SQLException ex) {
-				logger.warn("Could not close JDBC Statement", ex);
+				logger.debug("Could not close JDBC Statement", ex);
 			}
 			catch (Throwable ex) {
 				// We don't trust the JDBC driver: It might throw RuntimeException or Error.
-				logger.error("Unexpected exception on closing JDBC Statement", ex);
+				logger.debug("Unexpected exception on closing JDBC Statement", ex);
 			}
 		}
 	}
@@ -90,7 +90,7 @@ public abstract class JdbcUtils {
 	/**
 	 * Close the given JDBC ResultSet and ignore any thrown exception.
 	 * This is useful for typical finally blocks in manual JDBC code.
-	 * @param rs the JDBC ResultSet to close
+	 * @param rs the JDBC ResultSet to close (may be <code>null</code>)
 	 */
 	public static void closeResultSet(ResultSet rs) {
 		if (rs != null) {
@@ -98,11 +98,11 @@ public abstract class JdbcUtils {
 				rs.close();
 			}
 			catch (SQLException ex) {
-				logger.warn("Could not close JDBC ResultSet", ex);
+				logger.debug("Could not close JDBC ResultSet", ex);
 			}
 			catch (Throwable ex) {
 				// We don't trust the JDBC driver: It might throw RuntimeException or Error.
-				logger.error("Unexpected exception on closing JDBC ResultSet", ex);
+				logger.debug("Unexpected exception on closing JDBC ResultSet", ex);
 			}
 		}
 	}

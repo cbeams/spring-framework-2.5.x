@@ -29,7 +29,9 @@ import java.util.Stack;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the Errors interface, supporting
@@ -85,6 +87,7 @@ public class BindException extends Exception implements Errors {
 		this.objectName = objectName;
 	}
 
+
 	/**
 	 * Return the wrapped target object.
 	 */
@@ -105,6 +108,14 @@ public class BindException extends Exception implements Errors {
 			this.beanWrapper = new BeanWrapperImpl(this.target);
 		}
 		return this.beanWrapper;
+	}
+
+	/**
+	 * Return the underlying BeanWrapper as PropertyEditorRegistry.
+	 * @see #getBeanWrapper()
+	 */
+	public final PropertyEditorRegistry getPropertyEditorRegistry() {
+		return getBeanWrapper();
 	}
 
 	/**
@@ -193,6 +204,13 @@ public class BindException extends Exception implements Errors {
 	}
 
 	public void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage) {
+		if ("".equals(getNestedPath()) && !StringUtils.hasLength(field)) {
+			// We're at the top of the nested object hierarchy,
+			// so the present level is not a field but rather the top object.
+			// The best we can do is register a global error here...
+			reject(errorCode, errorArgs, defaultMessage);
+			return;
+		}
 		String fixedField = fixedField(field);
 		Object newVal = getBeanWrapper().getPropertyValue(fixedField);
 		FieldError fe = new FieldError(
@@ -240,6 +258,9 @@ public class BindException extends Exception implements Errors {
 	}
 
 	public void addAllErrors(Errors errors) {
+		if (!errors.getObjectName().equals(getObjectName())) {
+			throw new IllegalArgumentException("Errors object needs to have same object name");
+		}
 		this.errors.addAll(errors.getAllErrors());
 	}
 

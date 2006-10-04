@@ -17,6 +17,7 @@
 package org.springframework.test;
 
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -71,24 +72,28 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  */
 public abstract class AbstractTransactionalSpringContextTests extends AbstractDependencyInjectionSpringContextTests {
 
+	/** The transaction manager to use */
 	protected PlatformTransactionManager transactionManager;
+
+	/** Should we roll back by default? */
+	private boolean defaultRollback = true;
+
+	/** Should we commit the current transaction? */
+	private boolean complete;
+
+	/** Number of transactions started */
+	private int transactionsStarted;
+	
+	/**
+	 * Default transaction definition is used.
+	 * Subclasses can change this to cause different behaviour.
+	 */
+	private TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
 	/**
 	 * TransactionStatus for this test. Typical subclasses won't need to use it.
 	 */
 	protected TransactionStatus transactionStatus;
-
-	private boolean defaultRollback = true;
-
-	/**
-	 * Should we commit this transaction?
-	 */
-	private boolean complete;
-
-	/**
-	 * Number of transactions started
-	 */
-	private int transactionsStarted;
 
 
 	/**
@@ -106,6 +111,16 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 
 	/**
+	 * Specify the transaction manager to use. No transaction management will be available
+	 * if this is not set. (This mode works only if dependency checking is turned off in
+	 * the AbstractDependencyInjectionSpringContextTests superclass.)
+	 * <p>Populated through dependency injection by the superclass.
+	 */
+	public void setTransactionManager(PlatformTransactionManager ptm) {
+		this.transactionManager = ptm;
+	}
+
+	/**
 	 * Subclasses can set this value in their constructor to change
 	 * default, which is always to roll the transaction back.
 	 */
@@ -113,14 +128,22 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 		this.defaultRollback = defaultRollback;
 	}
 
+
 	/**
-	 * The transaction manager to use. No transaction management will be available
-	 * if this is not set. (This mode works only if dependency checking is turned off in
-	 * the AbstractDependencyInjectionSpringContextTests superclass.)
-	 * Populated by dependency injection by superclass.
+	 * Call in an overridden <code>runBare()</code/ method to prevent transaction execution.
 	 */
-	public void setTransactionManager(PlatformTransactionManager ptm) {
-		this.transactionManager = ptm;
+	protected void preventTransaction() {
+		this.transactionDefinition = null;
+	}
+
+	/**
+	 * Override the transaction attributes that will be used.
+	 * Call in an overridden <code>runBare()</code> method so that
+	 * <code>setUp()</code> and <code>tearDown()</code> behavior is modified.
+	 * @param customDefinition custom definition to override with
+	 */
+	protected void setTransactionDefinition(TransactionDefinition customDefinition) {
+		this.transactionDefinition = customDefinition;
 	}
 
 
@@ -134,24 +157,34 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	protected final void onSetUp() throws Exception {
 		this.complete = !this.defaultRollback;
 
-		onSetUpBeforeTransaction();
-
-		if (this.transactionManager != null) {
-			startNewTransaction();
+		if (this.transactionManager == null) {
+			logger.info("No transaction manager set: test will NOT run within a transaction");
+		}
+		else if (this.transactionDefinition == null) {
+			logger.info("No transaction definition set: test will NOT run within a transaction");
 		}
 		else {
-			logger.info("No transaction manager set: tests will NOT run within a transaction");
+			onSetUpBeforeTransaction();
+			startNewTransaction();
+			try {
+				onSetUpInTransaction();
+			}
+			catch (Exception ex) {
+				endTransaction();
+				throw ex;
+			}
 		}
-
-		onSetUpInTransaction();
 	}
 
 
 	/**
 	 * Subclasses can override this method to perform any setup operations,
 	 * such as populating a database table, <i>before</i> the transaction
-	 * created by this class.
+	 * created by this class. Only invoked if there <i>is</i> a transaction:
+	 * that is, if <code>preventTransaction()</code> has not been invoked in
+	 * an overridden <code>runTest()</code> method.
 	 * @throws Exception simply let any exception propagate
+	 * @see #preventTransaction()
 	 */
 	protected void onSetUpBeforeTransaction() throws Exception {
 	}
@@ -162,7 +195,11 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * created by this class.
 	 * <p><b>NB:</b> Not called if there is no transaction management, due to no
 	 * transaction manager being provided in the context.
-	 * @throws Exception simply let any exception propagate
+	 * <p>If any {@link Throwable} is thrown, the transaction that has been started
+	 * prior to the execution of this method will be {@link #endTransaction() ended}
+	 * (or rather an attempt will be made to {@link #endTransaction() end it gracefully});
+	 * The offending {@link Throwable} will then be rethrown.
+	 * @throws Exception simply let any exception / error propagate
 	 */
 	protected void onSetUpInTransaction() throws Exception {
 	}
@@ -177,14 +214,15 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * @see #onTearDownAfterTransaction()
 	 */
 	protected final void onTearDown() throws Exception {
-		try {
-			onTearDownInTransaction();
+		if (this.transactionStatus != null && !this.transactionStatus.isCompleted()) {
+			try {
+				onTearDownInTransaction();
+			}
+			finally {
+				endTransaction();
+			}
+			onTearDownAfterTransaction();
 		}
-		finally {
-			endTransaction();
-		}
-
-		onTearDownAfterTransaction();
 	}
 
 	/**
@@ -211,12 +249,12 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	/**
 	 * Cause the transaction to commit for this test method,
 	 * even if default is set to rollback.
-	 * @throws UnsupportedOperationException if the operation cannot be set to
+	 * @throws IllegalStateException if the operation cannot be set to
 	 * complete as no transaction manager was provided
 	 */
 	protected void setComplete() throws UnsupportedOperationException {
 		if (this.transactionManager == null) {
-			throw new UnsupportedOperationException("Cannot set complete: no transaction manager");
+			throw new IllegalStateException("No transaction manager set");
 		}
 		this.complete = true;
 	}
@@ -226,8 +264,8 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * according to the complete flag.
 	 * <p>Can be used to explicitly let the transaction end early,
 	 * for example to check whether lazy associations of persistent objects
-	 * work outside of a transaction (i.e. have been initialized properly).
-	 * @see #setComplete
+	 * work outside of a transaction (that is, have been initialized properly).
+	 * @see #setComplete()
 	 */
 	protected void endTransaction() {
 		if (this.transactionStatus != null) {
@@ -259,8 +297,11 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 			throw new IllegalStateException("Cannot start new transaction without ending existing transaction:" +
 					"Invoke endTransaction() before startNewTransaction()");
 		}
+		if (this.transactionManager == null) {
+			throw new IllegalStateException("No transaction manager set");
+		}
 
-		this.transactionStatus = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
+		this.transactionStatus = this.transactionManager.getTransaction(this.transactionDefinition);
 		++this.transactionsStarted;
 		this.complete = !this.defaultRollback;
 

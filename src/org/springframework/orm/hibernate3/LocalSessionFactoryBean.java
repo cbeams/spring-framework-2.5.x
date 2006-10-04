@@ -117,11 +117,11 @@ import org.springframework.jdbc.support.lob.LobHandler;
  */
 public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
 
-	private static ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
+	private static final ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
 
-	private static ThreadLocal configTimeTransactionManagerHolder = new ThreadLocal();
+	private static final ThreadLocal configTimeTransactionManagerHolder = new ThreadLocal();
 
-	private static ThreadLocal configTimeLobHandlerHolder = new ThreadLocal();
+	private static final ThreadLocal configTimeLobHandlerHolder = new ThreadLocal();
 
 	/**
 	 * Return the DataSource for the currently configured Hibernate SessionFactory,
@@ -393,8 +393,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * remaining transaction timeouts to all created JDBC Statements</i>. This means
 	 * that all operations performed by the SessionFactory will automatically
 	 * participate in Spring-managed transaction timeouts, not just queries.
-	 * This adds value even for HibernateTransactionManager, but only on Hibernate 3.0,
-	 * as there is a direct transaction timeout facility in Hibernate 3.1.
+	 * This adds value even for HibernateTransactionManager.
 	 * <p><b>WARNING:</b> When using a transaction-aware JDBC DataSource in combination
 	 * with OpenSessionInViewFilter/Interceptor, whether participating in JTA or
 	 * external JDBC-based transactions, it is strongly recommended to set Hibernate's
@@ -509,7 +508,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * &lt;property name="entityCacheStrategies"&gt;
 	 *   &lt;props&gt;
 	 *     &lt;prop key="com.mycompany.Customer"&gt;read-write&lt;/prop&gt;
-	 *     &lt;prop key="com.mycompany.Product"&gt;read-only,myRegion&lt;/prop&gt;
+	 *     &lt;prop key="com.mycompany.Product"&gt;read-only&lt;/prop&gt;
 	 *   &lt;/props&gt;
 	 * &lt;/property&gt;</pre>
 	 * @param entityCacheStrategies properties that define entity cache strategies,
@@ -529,7 +528,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * &lt;property name="collectionCacheStrategies"&gt;
 	 *   &lt;props&gt;
 	 *     &lt;prop key="com.mycompany.Order.items">read-write&lt;/prop&gt;
-	 *     &lt;prop key="com.mycompany.Product.categories"&gt;read-only,myRegion&lt;/prop&gt;
+	 *     &lt;prop key="com.mycompany.Product.categories"&gt;read-only&lt;/prop&gt;
 	 *   &lt;/props&gt;
 	 * &lt;/property&gt;</pre>
 	 * @param collectionCacheStrategies properties that define collection cache strategies,
@@ -645,6 +644,13 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 				}
 			}
 
+			if (this.filterDefinitions != null) {
+				// Register specified Hibernate FilterDefinitions.
+				for (int i = 0; i < this.filterDefinitions.length; i++) {
+					config.addFilterDefinition(this.filterDefinitions[i]);
+				}
+			}
+
 			if (this.configLocations != null) {
 				for (int i = 0; i < this.configLocations.length; i++) {
 					// Load Hibernate configuration from given location.
@@ -722,13 +728,6 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 					String collRole = (String) collRoles.nextElement();
 					config.setCollectionCacheConcurrencyStrategy(
 							collRole, this.collectionCacheStrategies.getProperty(collRole));
-				}
-			}
-
-			if (this.filterDefinitions != null) {
-				// Register specified Hibernate FilterDefinitions.
-				for (int i = 0; i < this.filterDefinitions.length; i++) {
-					config.addFilterDefinition(this.filterDefinitions[i]);
 				}
 			}
 

@@ -30,9 +30,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.ResultSetSupportingSqlParameter;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.SqlReturnResultSet;
 
 /**
  * An "RDBMS operation" is a multithreaded, reusable object representing a
@@ -360,7 +359,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 			Iterator it = this.declaredParameters.iterator();
 			while (it.hasNext()) {
 				Object param = it.next();
-				if (!(param instanceof SqlOutParameter) && !(param instanceof SqlReturnResultSet)) {
+				if (!(param instanceof ResultSetSupportingSqlParameter)) {
 					if (!supportsLobParameters() &&
 							(((SqlParameter) param).getSqlType() == Types.BLOB ||
 							((SqlParameter) param).getSqlType() == Types.CLOB)) {

@@ -21,36 +21,39 @@ import java.util.List;
 import org.springframework.beans.PropertyAccessor;
 
 /**
- * Interface to be implemented by objects that can store and expose
- * information about data binding errors for a specific object.
+ * Stores and exposes information about data-binding and validation
+ * errors for a specific object.
  *
  * <p>Field names can be properties of the target object (e.g. "name"
  * when binding to a customer object), or nested fields in case of
  * subobjects (e.g. "address.street"). Supports subtree navigation
- * via setNestedPath, e.g. an AddressValidator validates "address",
- * not being aware that this is a subobject of customer.
+ * via {@link #setNestedPath(String)}: for example, an
+ * <code>AddressValidator</code> validates "address", not being aware
+ * that this is a subobject of customer.
  *
- * <p>Note: Errors objects are single-threaded.
+ * <p>Note: <code>Errors</code> objects are single-threaded.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setNestedPath
  * @see BindException
  * @see DataBinder
+ * @see ValidationUtils
  */
 public interface Errors {
 
 	/**
-	 * Separator between path elements in a nested path,
-	 * e.g. in "customer.name" or "customer.address.street".
-	 * "." = same as the nested property separator in the beans package.
-	 * @see org.springframework.beans.PropertyAccessor#NESTED_PROPERTY_SEPARATOR
+	 * The separator between path elements in a nested path,
+	 * for example in "customer.name" or "customer.address.street".
+	 * <p>"." = same as the
+	 * {@link org.springframework.beans.PropertyAccessor#NESTED_PROPERTY_SEPARATOR nested property separator}
+	 * in the beans package.
 	 */
 	String NESTED_PATH_SEPARATOR = PropertyAccessor.NESTED_PROPERTY_SEPARATOR;
 
 
 	/**
-	 * Return the name of the bound object.
+	 * Return the name of the bound root object.
 	 */
 	String getObjectName();
 
@@ -66,7 +69,7 @@ public interface Errors {
 	void setNestedPath(String nestedPath);
 
 	/**
-	 * Return the current nested path of this Errors object.
+	 * Return the current nested path of this {@link Errors} object.
 	 * <p>Returns a nested path with a dot, i.e. "address.", for easy
 	 * building of concatenated paths. Default is an empty String.
 	 */
@@ -74,12 +77,13 @@ public interface Errors {
 
 	/**
 	 * Push the given sub path onto the nested path stack.
-	 * A popNestedStack call will reset the original nested path
-	 * before the corresponding pushNestedPath call.
+	 * <p>A {@link #popNestedPath()} call will reset the original
+	 * nested path before the corresponding
+	 * <code>pushNestedPath(String)</code> call.
 	 * <p>Using the nested path stack allows to set temporary nested paths
 	 * for subobjects without having to worry about a temporary path holder.
 	 * <p>For example: current path "spouse.", pushNestedPath("child") ->
-	 * result path "spouse.child."; popNestedPath() -> "spouse." again
+	 * result path "spouse.child."; popNestedPath() -> "spouse." again.
 	 * @param subPath the sub path to push onto the nested path stack
 	 * @see #popNestedPath
 	 */
@@ -92,23 +96,25 @@ public interface Errors {
 	 */
 	void popNestedPath() throws IllegalStateException;
 
-
 	/**
-	 * Reject the current object, using the given error description.
-	 * @param errorCode error code, interpretable as message key
+	 * Register a global error for the entire target object,
+	 * using the given error description.
+	 * @param errorCode error code, interpretable as a message key
 	 */
 	void reject(String errorCode);
 
 	/**
-	 * Reject the current object, using the given error description.
-	 * @param errorCode error code, interpretable as message key
+	 * Register a global error for the entire target object,
+	 * using the given error description.
+	 * @param errorCode error code, interpretable as a message key
 	 * @param defaultMessage fallback default message
 	 */
 	void reject(String errorCode, String defaultMessage);
 
 	/**
-	 * Reject the current object, using the given error description.
-	 * @param errorCode error code, interpretable as message key
+	 * Register a global error for the entire target object,
+	 * using the given error description.
+	 * @param errorCode error code, interpretable as a message key
 	 * @param errorArgs error arguments, for argument binding via MessageFormat
 	 * (can be <code>null</code>)
 	 * @param defaultMessage fallback default message
@@ -116,42 +122,63 @@ public interface Errors {
 	void reject(String errorCode, Object[] errorArgs, String defaultMessage);
 
 	/**
-	 * Reject the given field of the current object, using the given error description.
-	 * @param field the field name
-	 * @param errorCode error code, interpretable as message key
+	 * Register a field error for the specified field of the current object
+	 * (respecting the current nested path, if any), using the given error
+	 * description.
+	 * <p>The field name may be <code>null</code> or empty String to indicate
+	 * the current object itself rather than a field of it. This may result
+	 * in a corresponding field error within the nested object graph or a
+	 * global error if the current object is the top object.
+	 * @param field the field name (may be <code>null</code> or empty String)
+	 * @param errorCode error code, interpretable as a message key
+	 * @see #getNestedPath()
 	 */
 	void rejectValue(String field, String errorCode);
 
 	/**
-	 * Reject the given field of the current object, using the given error description.
-	 * @param field the field name
-	 * @param errorCode error code, interpretable as message key
+	 * Register a field error for the specified field of the current object
+	 * (respecting the current nested path, if any), using the given error
+	 * description.
+	 * <p>The field name may be <code>null</code> or empty String to indicate
+	 * the current object itself rather than a field of it. This may result
+	 * in a corresponding field error within the nested object graph or a
+	 * global error if the current object is the top object.
+	 * @param field the field name (may be <code>null</code> or empty String)
+	 * @param errorCode error code, interpretable as a message key
 	 * @param defaultMessage fallback default message
+	 * @see #getNestedPath()
 	 */
 	void rejectValue(String field, String errorCode, String defaultMessage);
 
 	/**
-	 * Reject the given field of the current object, using the given error description.
-	 * @param field the field name
-	 * @param errorCode error code, interpretable as message key
+	 * Register a field error for the specified field of the current object
+	 * (respecting the current nested path, if any), using the given error
+	 * description.
+	 * <p>The field name may be <code>null</code> or empty String to indicate
+	 * the current object itself rather than a field of it. This may result
+	 * in a corresponding field error within the nested object graph or a
+	 * global error if the current object is the top object.
+	 * @param field the field name (may be <code>null</code> or empty String)
+	 * @param errorCode error code, interpretable as a message key
 	 * @param errorArgs error arguments, for argument binding via MessageFormat
 	 * (can be <code>null</code>)
 	 * @param defaultMessage fallback default message
+	 * @see #getNestedPath()
 	 */
 	void rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage);
 
 	/**
 	 * Add all errors from the given <code>Errors</code> instance to this
-	 * <code>Errors</code> instance. Convenience method to avoid repeated
-	 * <code>reject</code> calls for merging an <code>Errors</code> instance
-	 * into another <code>Errors</code> instance.
+	 * <code>Errors</code> instance.
+	 * <p>This is a onvenience method to avoid repeated <code>reject(..)</code>
+	 * calls for merging an <code>Errors</code> instance into another
+	 * <code>Errors</code> instance.
 	 * <p>Note that the passed-in <code>Errors</code> instance is supposed
 	 * to refer to the same target object, or at least contain compatible errors
 	 * that apply to the target object of this <code>Errors</code> instance.
 	 * @param errors the <code>Errors</code> instance to merge in
 	 */
 	void addAllErrors(Errors errors);
-
 
 	/**
 	 * Return if there were any errors.
@@ -165,17 +192,19 @@ public interface Errors {
 
 	/**
 	 * Get all errors, both global and field ones.
-	 * @return List of ObjectError instances
+	 * @return List of {@link ObjectError} instances
 	 */
 	List getAllErrors();
 
 	/**
-	 * Return if there were any global (i.e. not field-specific) errors.
+	 * Are there any global errors?
+	 * @return <code>true</code> if there are any global errors
 	 */
 	boolean hasGlobalErrors();
 
 	/**
-	 * Return the number of global (i.e. not field-specific) errors.
+	 * Return the number of global errors.
+	 * @return the number of global errors
 	 */
 	int getGlobalErrorCount();
 
@@ -186,15 +215,15 @@ public interface Errors {
 	List getGlobalErrors();
 
 	/**
-	 * Get the first global error, if any.
+	 * Get the <i>first</i> global error, if any.
 	 * @return the global error, or <code>null</code>
 	 */
 	ObjectError getGlobalError();
 
 	/**
-	 * Return if there are any errors associated with the given field.
+	 * Are there any errors associated with the given field?
 	 * @param field the field name
-	 * @return if there were any errors associated with the given field
+	 * @return <code>true</code> if there were any errors associated with the given field
 	 */
 	boolean hasFieldErrors(String field);
 
@@ -207,10 +236,10 @@ public interface Errors {
 
 	/**
 	 * Get all errors associated with the given field.
-	 * <p>Should support full field names like "name" but also pattern
-	 * matches like "na*" or "address.*".
+	 * <p>Implementations should support not only full field names like
+	 * "name" but also pattern matches like "na*" or "address.*".
 	 * @param field the field name
-	 * @return List of FieldError instances
+	 * @return a List of {@link FieldError} instances
 	 */
 	List getFieldErrors(String field);
 

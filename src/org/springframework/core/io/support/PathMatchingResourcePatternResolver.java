@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Set;
@@ -210,7 +211,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 		}
 		else {
-			if (getPathMatcher().isPattern(locationPattern)) {
+			// Only look for a pattern after a prefix here
+			// (to not get fooled by a pattern symbol in a strange prefix).
+			int prefixEnd = locationPattern.indexOf(":") + 1;
+			if (getPathMatcher().isPattern(locationPattern.substring(prefixEnd))) {
 				// a file pattern
 				return findPathMatchingResources(locationPattern);
 			}
@@ -228,6 +232,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @return the result as Resource array
 	 * @throws IOException in case of I/O errors
 	 * @see java.lang.ClassLoader#getResources
+	 * @see #convertClassLoaderURL
 	 */
 	protected Resource[] findAllClassPathResources(String location) throws IOException {
 		String path = location;
@@ -238,9 +243,21 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		Set result = CollectionFactory.createLinkedSetIfPossible(16);
 		while (resourceUrls.hasMoreElements()) {
 			URL url = (URL) resourceUrls.nextElement();
-			result.add(new UrlResource(url));
+			result.add(convertClassLoaderURL(url));
 		}
 		return (Resource[]) result.toArray(new Resource[result.size()]);
+	}
+
+	/**
+	 * Convert the given URL as returned from the ClassLoader into a Resource object.
+	 * <p>The default implementation simply creates a UrlResource instance.
+	 * @param url a URL as returned from the ClassLoader
+	 * @return the corresponding Resource object
+	 * @see java.lang.ClassLoader#getResources
+	 * @see org.springframework.core.io.Resource
+	 */
+	protected Resource convertClassLoaderURL(URL url) {
+		return new UrlResource(url);
 	}
 
 	/**
@@ -277,12 +294,12 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	/**
 	 * Determine the root directory for the given location.
 	 * <p>Used for determining the starting point for file matching,
-	 * resolving the root directory location to a java.io.File and
-	 * passing it into <code>retrieveMatchingFiles</code>, with the
+	 * resolving the root directory location to a <code>java.io.File</code>
+	 * and passing it into <code>retrieveMatchingFiles</code>, with the
 	 * remainder of the location as pattern.
 	 * <p>Will return "/WEB-INF" for the pattern "/WEB-INF/*.xml",
 	 * for example.
-	 * @param location the location to checkn
+	 * @param location the location to check
 	 * @return the part of the location that denotes the root directory
 	 * @see #retrieveMatchingFiles
 	 */
@@ -387,7 +404,31 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see org.springframework.util.PathMatcher
 	 */
 	protected Set doFindPathMatchingFileResources(Resource rootDirResource, String subPattern) throws IOException {
-		File rootDir = rootDirResource.getFile().getAbsoluteFile();
+		File rootDir = null;
+		try {
+			rootDir = rootDirResource.getFile().getAbsoluteFile();
+		}
+		catch (IOException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Cannot search for matching files underneath " + rootDirResource +
+						" because it does not correspond to a directory in the file system", ex);
+			}
+			return Collections.EMPTY_SET;
+		}
+		return doFindMatchingFileSystemResources(rootDir, subPattern);
+	}
+
+	/**
+	 * Find all resources in the file system that match the given location pattern
+	 * via the Ant-style PathMatcher.
+	 * @param rootDir the root directory in the file system
+	 * @param subPattern the sub pattern to match (below the root directory)
+	 * @return the Set of matching Resource instances
+	 * @throws IOException in case of I/O errors
+	 * @see #retrieveMatchingFiles
+	 * @see org.springframework.util.PathMatcher
+	 */
+	protected Set doFindMatchingFileSystemResources(File rootDir, String subPattern) throws IOException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for matching resources in directory tree [" + rootDir.getPath() + "]");
 		}
@@ -411,7 +452,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 */
 	protected Set retrieveMatchingFiles(File rootDir, String pattern) throws IOException {
 		if (!rootDir.isDirectory()) {
-			throw new IllegalArgumentException("'rootDir' parameter [" + rootDir + "] does not denote a directory");
+			throw new IllegalArgumentException("Resource path [" + rootDir + "] does not denote a directory");
 		}
 		String fullPattern = StringUtils.replace(rootDir.getAbsolutePath(), File.separator, "/");
 		if (!pattern.startsWith("/")) {

@@ -56,6 +56,7 @@ import org.springframework.jmx.export.naming.KeyNamingStrategy;
 import org.springframework.jmx.export.naming.ObjectNamingStrategy;
 import org.springframework.jmx.export.naming.SelfNaming;
 import org.springframework.jmx.support.JmxUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -662,14 +663,13 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 		String[] beanNames = this.beanFactory.getBeanNamesForType(null);
 		for (int i = 0; i < beanNames.length; i++) {
 			String beanName = beanNames[i];
-
 			if (!isExcluded(beanName)) {
 				Class beanClass = this.beanFactory.getType(beanName);
 				if (beanClass != null && callback.include(beanClass, beanName)) {
 					boolean lazyInit = isBeanDefinitionLazyInit(this.beanFactory, beanName);
 					Object beanInstance = (!lazyInit ? this.beanFactory.getBean(beanName) : null);
 					if (!this.beans.containsValue(beanName) &&
-							(beanInstance == null || !this.beans.containsValue(beanInstance))) {
+							(beanInstance == null || !CollectionUtils.containsInstance(this.beans.values(), beanInstance))) {
 						// Not already registered for JMX exposure.
 						this.beans.put(beanName, (beanInstance != null ? beanInstance : beanName));
 						if (logger.isInfoEnabled()) {
@@ -773,11 +773,22 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 		for (Iterator it = this.registeredBeans.iterator(); it.hasNext();) {
 			ObjectName objectName = (ObjectName) it.next();
 			try {
-				this.server.unregisterMBean(objectName);
-				notifyListenersOfUnregistration(objectName);
+				// MBean might already have been unregistered by an external process.
+				if (this.server.isRegistered(objectName)) {
+					this.server.unregisterMBean(objectName);
+					notifyListenersOfUnregistration(objectName);
+				}
+				else {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Could not unregister MBean [" + objectName + "] as said MBean " +
+								"is not registered (perhaps already unregistered by an external process)");
+					}
+				}
 			}
 			catch (JMException ex) {
-				logger.error("Could not unregister MBean [" + objectName + "]", ex);
+				if (logger.isErrorEnabled()) {
+					logger.error("Could not unregister MBean [" + objectName + "]", ex);
+				}
 			}
 		}
 		this.registeredBeans.clear();

@@ -27,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -40,7 +39,7 @@ import org.springframework.core.CollectionFactory;
  * resolving values contained in BeanDefinition objects
  * into the actual values applied to th target bean instance.
  *
- * <p>Works on an AbstractBeanFactory and a plain BeanDefinition object.
+ * <p>Operates on an AbstractBeanFactory and a plain BeanDefinition object.
  * Used by AbstractAutowireCapableBeanFactory.
  *
  * @author Juergen Hoeller
@@ -49,7 +48,7 @@ import org.springframework.core.CollectionFactory;
  */
 public class BeanDefinitionValueResolver {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected static final Log logger = LogFactory.getLog(BeanDefinitionValueResolver.class);
 
 	private final AbstractBeanFactory beanFactory;
 
@@ -124,7 +123,7 @@ public class BeanDefinitionValueResolver {
 				return this.beanFactory.doTypeConversionIfNecessary(
 						typedStringValue.getValue(), typedStringValue.getTargetType());
 			}
-			catch (TypeMismatchException ex) {
+			catch (Throwable ex) {
 				// Improve the message by showing the context.
 				throw new BeanCreationException(
 						this.beanDefinition.getResourceDescription(), this.beanName,
@@ -132,7 +131,7 @@ public class BeanDefinitionValueResolver {
 			}
 		}
 		else {
-			// no need to resolve value
+			// No need to resolve value...
 			return value;
 		}
 	}
@@ -166,7 +165,7 @@ public class BeanDefinitionValueResolver {
 	 */
 	private Object resolveReference(String argName, RuntimeBeanReference ref) throws BeansException {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Resolving reference from property '" + argName + "' in bean '" +
+			logger.debug("Resolving reference from property " + argName + " in bean '" +
 					this.beanName + "' to bean '" + ref.getBeanName() + "'");
 		}
 		try {
@@ -180,10 +179,11 @@ public class BeanDefinitionValueResolver {
 				return this.beanFactory.getParentBeanFactory().getBean(ref.getBeanName());
 			}
 			else {
+				Object bean = this.beanFactory.getBean(ref.getBeanName());
 				if (this.beanDefinition.isSingleton()) {
 					this.beanFactory.registerDependentBean(ref.getBeanName(), this.beanName);
 				}
-				return this.beanFactory.getBean(ref.getBeanName());
+				return bean;
 			}
 		}
 		catch (BeansException ex) {

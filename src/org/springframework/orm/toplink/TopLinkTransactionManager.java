@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -439,14 +439,14 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 
 		Session session = txObject.getSessionHolder().getSession();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Closing TopLink Session [" + session + "] after transaction");
+			logger.debug("Releasing TopLink Session [" + session + "] after transaction");
 		}
 		try {
 			session.release();
 		}
-		catch (RuntimeException ex) {
+		catch (Throwable ex) {
 			// just log it, to keep a transaction-related exception
-			logger.error("Could not close TopLink Session after transaction", ex);
+			logger.debug("Could not release TopLink Session after transaction", ex);
 		}
 	}
 

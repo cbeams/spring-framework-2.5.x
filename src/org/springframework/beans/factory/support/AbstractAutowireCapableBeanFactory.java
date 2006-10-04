@@ -78,11 +78,10 @@ import org.springframework.util.StringUtils;
  * @see RootBeanDefinition
  * @see #findMatchingBeans(Class)
  * @see DefaultListableBeanFactory
- * @see org.springframework.beans.factory.ListableBeanFactory
- * @see org.springframework.beans.factory.support.BeanDefinitionRegistry
+ * @see BeanDefinitionRegistry
  */
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory
-    implements AutowireCapableBeanFactory {
+		implements AutowireCapableBeanFactory {
 
 	private InstantiationStrategy instantiationStrategy = new CglibSubclassingInstantiationStrategy();
 
@@ -107,6 +106,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	public AbstractAutowireCapableBeanFactory() {
 		super();
+		ignoreDependencyInterface(BeanNameAware.class);
 		ignoreDependencyInterface(BeanFactoryAware.class);
 	}
 
@@ -118,6 +118,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		this();
 		setParentBeanFactory(parentBeanFactory);
 	}
+
 
 	/**
 	 * Set the instantiation strategy to use for creating bean instances.
@@ -144,6 +145,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * it does work fine for many scenarios, though.
 	 * <p>Default is "true". Turn this off to throw an exception when encountering
 	 * a circular reference, disallowing them completely.
+	 * <p><b>NOTE:</b> It is generally recommended to not rely on circular references
+	 * between your beans. Refactor your application logic to have the two beans
+	 * involved delegate to a third bean that encapsulates their common logic.
 	 */
 	public void setAllowCircularReferences(boolean allowCircularReferences) {
 		this.allowCircularReferences = allowCircularReferences;
@@ -209,7 +213,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return autowireConstructor(beanClass.getName(), bd).getWrappedInstance();
 		}
 		else {
-			Object bean = this.instantiationStrategy.instantiate(bd, null, this);
+			Object bean = getInstantiationStrategy().instantiate(bd, null, this);
 			populateBean(beanClass.getName(), bd, new BeanWrapperImpl(bean));
 			return bean;
 		}
@@ -320,6 +324,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Object createBean(String beanName, RootBeanDefinition mergedBeanDefinition, Object[] args)
 			throws BeanCreationException {
 
+		// Guarantee initialization of beans that the current one depends on.
+		if (mergedBeanDefinition.getDependsOn() != null) {
+			for (int i = 0; i < mergedBeanDefinition.getDependsOn().length; i++) {
+				getBean(mergedBeanDefinition.getDependsOn()[i]);
+			}
+		}
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating instance of bean '" + beanName +
 					"' with merged definition [" + mergedBeanDefinition + "]");
@@ -332,13 +343,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			bean = applyBeanPostProcessorsBeforeInstantiation(mergedBeanDefinition.getBeanClass(), beanName);
 			if (bean != null) {
 				return bean;
-			}
-		}
-
-		// Guarantee initialization of beans that the current one depends on.
-		if (mergedBeanDefinition.getDependsOn() != null) {
-			for (int i = 0; i < mergedBeanDefinition.getDependsOn().length; i++) {
-				getBean(mergedBeanDefinition.getDependsOn()[i]);
 			}
 		}
 
@@ -367,8 +371,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// even when triggered by lifecycle interfaces like BeanFactoryAware.
 			if (isAllowCircularReferences() && isSingletonCurrentlyInCreation(beanName)) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Eagerly caching bean with name '" + beanName +
-							"' to allow for resolving potential circular references");
+					logger.debug("Eagerly caching bean of type [" + bean.getClass().getName() +
+							"] with name '" + beanName + "' to allow for resolving potential circular references");
 				}
 				addSingleton(beanName, bean);
 			}

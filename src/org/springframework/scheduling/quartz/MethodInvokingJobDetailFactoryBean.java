@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -65,6 +65,8 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 
 	private boolean concurrent = true;
 
+	private String[] jobListenerNames;
+
 	private String beanName;
 
 	private JobDetail jobDetail;
@@ -103,6 +105,18 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		this.concurrent = concurrent;
 	}
 
+	/**
+	 * Set a list of JobListener names for this job, referring to
+	 * non-global JobListeners registered with the Scheduler.
+	 * <p>A JobListener name always refers to the name returned
+	 * by the JobListener implementation.
+	 * @see SchedulerFactoryBean#setJobListeners
+	 * @see org.quartz.JobListener#getName
+	 */
+	public void setJobListenerNames(String[] names) {
+		this.jobListenerNames = names;
+	}
+
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
@@ -117,9 +131,28 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		// Consider the concurrent flag to choose between stateful and stateless job.
 		Class jobClass = (this.concurrent ? (Class) MethodInvokingJob.class : StatefulMethodInvokingJob.class);
 
+		// Build JobDetail instance.
 		this.jobDetail = new JobDetail(name, this.group, jobClass);
 		this.jobDetail.getJobDataMap().put("methodInvoker", this);
-		this.jobDetail.setVolatility(true);		
+		this.jobDetail.setVolatility(true);
+		this.jobDetail.setDurability(true);
+
+		// Register job listener names.
+		if (this.jobListenerNames != null) {
+			for (int i = 0; i < this.jobListenerNames.length; i++) {
+				this.jobDetail.addJobListener(this.jobListenerNames[i]);
+			}
+		}
+
+		postProcessJobDetail(this.jobDetail);
+	}
+
+	/**
+	 * Callback for post-processing the JobDetail to be exposed by this FactoryBean.
+	 * <p>The default implementation is empty. Can be overridden in subclasses.
+	 * @param jobDetail the JobDetail prepared by this FactoryBean
+	 */
+	protected void postProcessJobDetail(JobDetail jobDetail) {
 	}
 
 
@@ -128,7 +161,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	}
 
 	public Class getObjectType() {
-		return (this.jobDetail != null) ? this.jobDetail.getClass() : JobDetail.class;
+		return JobDetail.class;
 	}
 
 	public boolean isSingleton() {
@@ -187,7 +220,8 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	 * won't let jobs interfere with each other.
 	 */
 	public static class StatefulMethodInvokingJob extends MethodInvokingJob implements StatefulJob {
-		// No implementation, just a addition of the tag interface StatefulJob
+
+		// No implementation, just an addition of the tag interface StatefulJob
 		// in order to allow stateful method invoking jobs.
 	}
 

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,12 +29,11 @@ import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute
 import org.springframework.transaction.interceptor.TransactionAttribute;
 
 /**
- * <p>Implementation of <code>TransactionAttributeSource</code> for working
- * with transaction metadata in JDK 1.5+ annotation format.
+ * Implementation of <code>TransactionAttributeSource</code> for working with
+ * transaction metadata in JDK 1.5+ annotation format.
  *
- * <p>This class reads the JDK 1.5+ <code>Transactional</code> annotation
- * and exposes corresponding transaction attributes to Spring's transaction
- * infrastructure.
+ * <p>This class reads the JDK 1.5+ <code>Transactional</code> annotation and
+ * exposes corresponding transaction attributes to Spring's transaction infrastructure.
  *
  * <p>This is a direct alternative to <code>AttributesTransactionAttributeSource</code>,
  * which is able to read in source-level attributes via Commons Attributes.
@@ -88,6 +87,7 @@ public class AnnotationTransactionAttributeSource
 				RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 				rbta.setPropagationBehavior(ruleBasedTx.propagation().value());
 				rbta.setIsolationLevel(ruleBasedTx.isolation().value());
+				rbta.setTimeout(ruleBasedTx.timeout());
 				rbta.setReadOnly(ruleBasedTx.readOnly());
 
 				ArrayList<RollbackRuleAttribute> rollBackRules = new ArrayList<RollbackRuleAttribute>();

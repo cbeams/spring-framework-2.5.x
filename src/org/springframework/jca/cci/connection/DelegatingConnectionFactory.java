@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,17 @@ import javax.resource.cci.ResourceAdapterMetaData;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * ConnectionFactory implementation that delegates all calls to a given target
- * ConnectionFactory. Abstract because it is meant to be to be subclasses,
- * overriding specific methods that should not simply delegate to the target.
+ * {@link ConnectionFactory} implementation that delegates all calls to a
+ * given target {@link ConnectionFactory}.
+ *
+ * <p>This class is meant to be subclassed, with subclasses overriding only
+ * those methods (such as {@link #getConnection()}) that should not simply
+ * delegate to the target {@link ConnectionFactory}.
  *
  * @author Juergen Hoeller
  * @since 1.2
  */
-public abstract class DelegatingConnectionFactory implements ConnectionFactory, InitializingBean {
+public class DelegatingConnectionFactory implements ConnectionFactory, InitializingBean {
 
 	private ConnectionFactory targetConnectionFactory;
 
@@ -53,6 +56,7 @@ public abstract class DelegatingConnectionFactory implements ConnectionFactory, 
 	public ConnectionFactory getTargetConnectionFactory() {
 		return targetConnectionFactory;
 	}
+
 
 	public void afterPropertiesSet() {
 		if (getTargetConnectionFactory() == null) {
@@ -77,12 +81,12 @@ public abstract class DelegatingConnectionFactory implements ConnectionFactory, 
 		return getTargetConnectionFactory().getMetaData();
 	}
 
-	public void setReference(Reference reference) {
-		throw new UnsupportedOperationException("setReference");
+	public Reference getReference() throws NamingException {
+		return getTargetConnectionFactory().getReference();
 	}
 
-	public Reference getReference() throws NamingException {
-		throw new UnsupportedOperationException("getReference");
+	public void setReference(Reference reference) {
+		getTargetConnectionFactory().setReference(reference);
 	}
 
 }

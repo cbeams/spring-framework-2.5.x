@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,7 @@ import java.sql.SQLException;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -57,16 +58,17 @@ import org.springframework.util.ObjectUtils;
 public class SingleConnectionDataSource extends DriverManagerDataSource
 		implements SmartDataSource, DisposableBean {
 
+	/** Create a close-suppressing proxy? */
 	private boolean suppressClose;
 
-	/** Wrapped connection */
+	/** Override AutoCommit? */
+	private Boolean autoCommit;
+
+	/** Wrapped Connection */
 	private Connection target;
 
-	/** Proxy connection */
+	/** Proxy Connection */
 	private Connection connection;
-
-	/** Override AutoCommit? */
-	private Boolean autoCommit = null;
 
 
 	/**
@@ -82,13 +84,14 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * @param url the JDBC URL to use for accessing the DriverManager
 	 * @param username the JDBC username to use for accessing the DriverManager
 	 * @param password the JDBC password to use for accessing the DriverManager
-	 * @param suppressClose if the returned connection should be a
-	 * close-suppressing proxy or the physical connection.
+	 * @param suppressClose if the returned Connection should be a
+	 * close-suppressing proxy or the physical Connection
 	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
 	public SingleConnectionDataSource(
 			String driverClassName, String url, String username, String password, boolean suppressClose)
 			throws CannotGetJdbcConnectionException {
+
 		super(driverClassName, url, username, password);
 		this.suppressClose = suppressClose;
 	}
@@ -99,12 +102,13 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * @param url the JDBC URL to use for accessing the DriverManager
 	 * @param username the JDBC username to use for accessing the DriverManager
 	 * @param password the JDBC password to use for accessing the DriverManager
-	 * @param suppressClose if the returned connection should be a
-	 * close-suppressing proxy or the physical connection.
+	 * @param suppressClose if the returned Connection should be a
+	 * close-suppressing proxy or the physical Connection
 	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
 	public SingleConnectionDataSource(String url, String username, String password, boolean suppressClose)
 			throws CannotGetJdbcConnectionException {
+
 		super(url, username, password);
 		this.suppressClose = suppressClose;
 	}
@@ -113,54 +117,54 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * Create a new SingleConnectionDataSource with the given standard
 	 * DriverManager parameters.
 	 * @param url the JDBC URL to use for accessing the DriverManager
-	 * @param suppressClose if the returned connection should be a
-	 * close-suppressing proxy or the physical connection.
+	 * @param suppressClose if the returned Connection should be a
+	 * close-suppressing proxy or the physical Connection
 	 * @see java.sql.DriverManager#getConnection(String, String, String)
 	 */
 	public SingleConnectionDataSource(String url, boolean suppressClose)
 			throws CannotGetJdbcConnectionException {
+
 		super(url);
 		this.suppressClose = suppressClose;
 	}
 
 	/**
-	 * Create a new SingleConnectionDataSource with a given connection.
-	 * @param target underlying target connection
-	 * @param suppressClose if the connection should be wrapped with a* connection that
-	 * suppresses close() calls (to allow for normal close() usage in applications that
-	 * expect a pooled connection but do not know our SmartDataSource interface).
+	 * Create a new SingleConnectionDataSource with a given Connection.
+	 * @param target underlying target Connection
+	 * @param suppressClose if the Connection should be wrapped with a Connection that
+	 * suppresses <code>close()</code> calls (to allow for normal <code>close()</code>
+	 * usage in applications that expect a pooled Connection but do not know our
+	 * SmartDataSource interface)
 	 */
 	public SingleConnectionDataSource(Connection target, boolean suppressClose) {
-		if (target == null) {
-			throw new IllegalArgumentException("Connection is null in SingleConnectionDataSource");
-		}
+		Assert.notNull(target, "Connection must not be null");
+		this.target = target;
 		this.suppressClose = suppressClose;
 		init(target);
 	}
 
 
 	/**
-	 * Set if the returned connection should be a close-suppressing proxy
-	 * or the physical connection.
+	 * Set whether the returned Connection should be a close-suppressing proxy
+	 * or the physical Connection.
 	 */
 	public void setSuppressClose(boolean suppressClose) {
 		this.suppressClose = suppressClose;
 	}
 
 	/**
-	 * Return if the returned connection will be a close-suppressing proxy
-	 * or the physical connection.
+	 * Return whether the returned Connection will be a close-suppressing proxy
+	 * or the physical Connection.
 	 */
 	public boolean isSuppressClose() {
 		return suppressClose;
 	}
 
-
 	/**
-	 * Set if the returned connection's autoCommit setting should be overridden
+	 * Set whether the returned Connection's "autoCommit" setting should be overridden.
 	 */
 	public void setAutoCommit(boolean autoCommit) {
-		this.autoCommit = Boolean.valueOf(autoCommit);
+		this.autoCommit = (autoCommit ? Boolean.TRUE : Boolean.FALSE);
 	}
 
 
@@ -261,10 +265,6 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 */
 	private static class CloseSuppressingInvocationHandler implements InvocationHandler {
 
-		private static final String GET_TARGET_CONNECTION_METHOD_NAME = "getTargetConnection";
-
-		private static final String CONNECTION_CLOSE_METHOD_NAME = "close";
-
 		private final Connection target;
 
 		public CloseSuppressingInvocationHandler(Connection target) {
@@ -274,17 +274,24 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			// Handle getTargetConnection method: return underlying connection.
-			if (method.getName().equals(GET_TARGET_CONNECTION_METHOD_NAME)) {
+			if (method.getName().equals("getTargetConnection")) {
+				// Handle getTargetConnection method: return underlying Connection.
 				return this.target;
 			}
-
-			// Handle close method: don't pass the call on.
-			if (method.getName().equals(CONNECTION_CLOSE_METHOD_NAME)) {
+			else if (method.getName().equals("equals")) {
+				// Only consider equal when proxies are identical.
+				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+			}
+			else if (method.getName().equals("hashCode")) {
+				// Use hashCode of Connection proxy.
+				return new Integer(hashCode());
+			}
+			else if (method.getName().equals("close")) {
+				// Handle close method: don't pass the call on.
 				return null;
 			}
 
-			// Invoke method on target connection.
+			// Invoke method on target Connection.
 			try {
 				return method.invoke(this.target, args);
 			}

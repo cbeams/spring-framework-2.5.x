@@ -44,13 +44,13 @@ public abstract class ClassUtils {
 		boolean.class, byte.class, char.class, short.class, int.class, long.class, float.class, double.class};
 
 	/** The package separator character '.' */
-	private static final char PACKAGE_SEPARATOR_CHAR = '.';
+	private static final char PACKAGE_SEPARATOR = '.';
 
 	/** The inner class separator character '$' */
-	private static final char INNER_CLASS_SEPARATOR_CHAR = '$';
+	private static final char INNER_CLASS_SEPARATOR = '$';
 
 	/** The CGLIB class separator character "$$" */
-	private static final String CGLIB_CLASS_SEPARATOR_CHAR = "$$";
+	private static final String CGLIB_CLASS_SEPARATOR = "$$";
 
 
 	/**
@@ -80,7 +80,8 @@ public abstract class ClassUtils {
 	 * class loader, or the ClassLoader that loaded the ClassUtils class as fallback.
 	 * @param name the name of the Class
 	 * @return Class instance for the supplied name
-	 * @see java.lang.Class#forName(String, boolean, ClassLoader)
+	 * @throws ClassNotFoundException if the class was not found
+	 * @see Class#forName(String, boolean, ClassLoader)
 	 * @see #getDefaultClassLoader()
 	 */
 	public static Class forName(String name) throws ClassNotFoundException {
@@ -93,9 +94,11 @@ public abstract class ClassUtils {
 	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
 	 * @return Class instance for the supplied name
-	 * @see java.lang.Class#forName(String, boolean, ClassLoader)
+	 * @throws ClassNotFoundException if the class was not found
+	 * @see Class#forName(String, boolean, ClassLoader)
 	 */
 	public static Class forName(String name, ClassLoader classLoader) throws ClassNotFoundException {
+		Assert.notNull(name, "Name must not be null");
 		Class clazz = resolvePrimitiveClassName(name);
 		if (clazz != null) {
 			return clazz;
@@ -138,13 +141,13 @@ public abstract class ClassUtils {
 	 */
 	public static String getShortName(String className) {
 		Assert.hasLength(className, "Class name must not be empty");
-		int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR_CHAR);
-		int nameEndIndex = className.indexOf(CGLIB_CLASS_SEPARATOR_CHAR);
+		int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR);
+		int nameEndIndex = className.indexOf(CGLIB_CLASS_SEPARATOR);
 		if (nameEndIndex == -1) {
 			nameEndIndex = className.length();
 		}
 		String shortName = className.substring(lastDotIndex + 1, nameEndIndex);
-		shortName = shortName.replace(INNER_CLASS_SEPARATOR_CHAR, PACKAGE_SEPARATOR_CHAR);
+		shortName = shortName.replace(INNER_CLASS_SEPARATOR, PACKAGE_SEPARATOR);
 		return shortName;
 	}
 
@@ -192,33 +195,48 @@ public abstract class ClassUtils {
 	 * @return the qualified name of the method
 	 */
 	public static String getQualifiedMethodName(Method method) {
-		Assert.notNull(method, "Method must not be empty");
+		Assert.notNull(method, "Method must not be null");
 		return method.getDeclaringClass().getName() + "." + method.getName();
 	}
 
+
 	/**
 	 * Determine whether the given class has a method with the given signature.
-	 * Essentially translates <code>NoSuchMethodException</code> to "false".
-	 * @param clazz the clazz to analyze
+	 * <p>Essentially translates <code>NoSuchMethodException</code> to "false".
+	 * @param clazz	the clazz to analyze
 	 * @param methodName the name of the method
 	 * @param paramTypes the parameter types of the method
+	 * @see java.lang.Class#getMethod
 	 */
 	public static boolean hasMethod(Class clazz, String methodName, Class[] paramTypes) {
+		return (getMethodIfAvailable(clazz, methodName, paramTypes) != null);
+	}
+
+	/**
+	 * Determine whether the given class has a method with the given signature,
+	 * and return it if available (else return <code>null</code>).
+	 * <p>Essentially translates <code>NoSuchMethodException</code> to <code>null</code>.
+	 * @param clazz	the clazz to analyze
+	 * @param methodName the name of the method
+	 * @param paramTypes the parameter types of the method
+	 * @return the method, or <code>null</code> if not found
+	 * @see java.lang.Class#getMethod
+	 */
+	public static Method getMethodIfAvailable(Class clazz, String methodName, Class[] paramTypes) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		try {
-			clazz.getMethod(methodName, paramTypes);
-			return true;
+			return clazz.getMethod(methodName, paramTypes);
 		}
 		catch (NoSuchMethodException ex) {
-			return false;
+			return null;
 		}
 	}
 
 	/**
 	 * Return the number of methods with a given name (with any argument types),
 	 * for the given class and/or its superclasses. Includes non-public methods.
-	 * @param clazz the clazz to check
+	 * @param clazz	the clazz to check
 	 * @param methodName the name of the method
 	 * @return the number of methods with the given name
 	 */
@@ -226,46 +244,54 @@ public abstract class ClassUtils {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		int count = 0;
-		do {
-			for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
-				Method method = clazz.getDeclaredMethods()[i];
-				if (methodName.equals(method.getName())) {
-					count++;
-				}
+		for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
+			Method method = clazz.getDeclaredMethods()[i];
+			if (methodName.equals(method.getName())) {
+				count++;
 			}
-			clazz = clazz.getSuperclass();
 		}
-		while (clazz != null);
+		Class[] ifcs = clazz.getInterfaces();
+		for (int i = 0; i < ifcs.length; i++) {
+			count += getMethodCountForName(ifcs[i], methodName);
+		}
+		if (clazz.getSuperclass() != null) {
+			count += getMethodCountForName(clazz.getSuperclass(), methodName);
+		}
 		return count;
 	}
 
 	/**
 	 * Does the given class and/or its superclasses at least have one or more
 	 * methods (with any argument types)? Includes non-public methods.
-	 * @param clazz the clazz to check
+	 * @param clazz	the clazz to check
 	 * @param methodName the name of the method
 	 * @return whether there is at least one method with the given name
 	 */
 	public static boolean hasAtLeastOneMethodWithName(Class clazz, String methodName) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
-		do {
-			for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
-				Method method = clazz.getDeclaredMethods()[i];
-				if (method.getName().equals(methodName)) {
-					return true;
-				}
+		for (int i = 0; i < clazz.getDeclaredMethods().length; i++) {
+			Method method = clazz.getDeclaredMethods()[i];
+			if (method.getName().equals(methodName)) {
+				return true;
 			}
-			clazz = clazz.getSuperclass();
 		}
-		while (clazz != null);
+		Class[] ifcs = clazz.getInterfaces();
+		for (int i = 0; i < ifcs.length; i++) {
+			if (hasAtLeastOneMethodWithName(ifcs[i], methodName)) {
+				return true;
+			}
+		}
+		if (clazz.getSuperclass() != null) {
+			return hasAtLeastOneMethodWithName(clazz.getSuperclass(), methodName);
+		}
 		return false;
 	}
 
 	/**
 	 * Return a static method of a class.
 	 * @param methodName the static method name
-	 * @param clazz the class which defines the method
+	 * @param clazz	the class which defines the method
 	 * @param args the parameter types to the method
 	 * @return the static method, or <code>null</code> if no static method was found
 	 * @throws IllegalArgumentException if the method name is blank or the clazz is null
@@ -278,7 +304,8 @@ public abstract class ClassUtils {
 			if ((method.getModifiers() & Modifier.STATIC) != 0) {
 				return method;
 			}
-		} catch (NoSuchMethodException ex) {
+		}
+		catch (NoSuchMethodException ex) {
 		}
 		return null;
 	}
@@ -318,8 +345,8 @@ public abstract class ClassUtils {
 	 * @param clazz the input class. A null value or the default (empty) package
 	 * will result in an empty string ("") being returned.
 	 * @return a path which represents the package name
-	 * @see java.lang.ClassLoader#getResource
-	 * @see java.lang.Class#getResource
+	 * @see ClassLoader#getResource
+	 * @see Class#getResource
 	 */
 	public static String classPackageAsResourcePath(Class clazz) {
 		if (clazz == null || clazz.getPackage() == null) {
@@ -358,6 +385,7 @@ public abstract class ClassUtils {
 	 * @return all interfaces that the given object implements as List
 	 */
 	public static Set getAllInterfacesAsSet(Object object) {
+		Assert.notNull(object, "Object must not be null");
 		return getAllInterfacesForClassAsSet(object.getClass());
 	}
 
@@ -369,6 +397,7 @@ public abstract class ClassUtils {
 	 * @return all interfaces that the given object implements as Set
 	 */
 	public static Set getAllInterfacesForClassAsSet(Class clazz) {
+		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isInterface()) {
 			return Collections.singleton(clazz);
 		}

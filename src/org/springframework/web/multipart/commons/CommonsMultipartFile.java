@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,11 +46,12 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 
 	private final long size;
 
+
 	/**
 	 * Create an instance wrapping the given FileItem.
 	 * @param fileItem the FileItem to wrap
 	 */
-	protected CommonsMultipartFile(FileItem fileItem) {
+	public CommonsMultipartFile(FileItem fileItem) {
 		this.fileItem = fileItem;
 		this.size = this.fileItem.getSize();
 	}
@@ -59,35 +60,34 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 	 * Return the underlying <code>org.apache.commons.fileupload.FileItem</code>
 	 * instance. There is hardly any need to access this.
 	 */
-	public FileItem getFileItem() {
-		return fileItem;
+	public final FileItem getFileItem() {
+		return this.fileItem;
 	}
+
 
 	public String getName() {
 		return this.fileItem.getFieldName();
 	}
 
-	public boolean isEmpty() {
-		return (this.size == 0);
-	}
-
 	public String getOriginalFilename() {
-		if (this.fileItem.getName() == null) {
-			return null;
+		String filename = this.fileItem.getName();
+		if (filename == null) {
+			// Should never happen.
+			return "";
 		}
 		// check for Unix-style path
-		int pos = this.fileItem.getName().lastIndexOf("/");
+		int pos = filename.lastIndexOf("/");
 		if (pos == -1) {
 			// check for Windows-style path
-			pos = this.fileItem.getName().lastIndexOf("\\");
+			pos = filename.lastIndexOf("\\");
 		}
 		if (pos != -1)  {
 			// any sort of path separator found
-			return this.fileItem.getName().substring(pos + 1);
+			return filename.substring(pos + 1);
 		}
 		else {
 			// plain name
-			return this.fileItem.getName();
+			return filename;
 		}
 	}
 
@@ -95,8 +95,12 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		return this.fileItem.getContentType();
 	}
 
+	public boolean isEmpty() {
+		return (this.size == 0);
+	}
+
 	public long getSize() {
-		return size;
+		return this.size;
 	}
 
 	public byte[] getBytes() {
@@ -171,7 +175,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 	 * Tries to be as specific as possible: mentions the file location in case
 	 * of a temporary file.
 	 */
-	protected String getStorageDescription() {
+	public String getStorageDescription() {
 		if (this.fileItem.isInMemory()) {
 			return "in memory";
 		}

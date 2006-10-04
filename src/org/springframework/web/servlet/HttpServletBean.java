@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
@@ -75,8 +76,10 @@ public abstract class HttpServletBean extends HttpServlet {
 	/**
 	 * Subclasses can invoke this method to specify that this property
 	 * (which must match a JavaBean property they expose) is mandatory,
-	 * and must be supplied as a config parameter. This method would
-	 * normally be called from a subclass constructor.
+	 * and must be supplied as a config parameter. This should be called
+	 * from the constructor of a subclass.
+	 * <p>This method is only relevant in case of traditional initialization
+	 * driven by a ServletConfig instance.
 	 * @param property name of the required property
 	 */
 	protected final void addRequiredProperty(String property) {
@@ -119,6 +122,7 @@ public abstract class HttpServletBean extends HttpServlet {
 	/**
 	 * Initialize the BeanWrapper for this HttpServletBean,
 	 * possibly with custom editors.
+	 * <p>This default implementation is empty.
 	 * @param bw the BeanWrapper to initialize
 	 * @throws BeansException if thrown by BeanWrapper methods
 	 * @see org.springframework.beans.BeanWrapper#registerCustomEditor
@@ -126,10 +130,31 @@ public abstract class HttpServletBean extends HttpServlet {
 	protected void initBeanWrapper(BeanWrapper bw) throws BeansException {
 	}
 
+
+	/**
+	 * Overridden method that simply returns <code>null</code> when no
+	 * ServletConfig set yet.
+	 * @see #getServletConfig()
+	 */
+	public final String getServletName() {
+		return (getServletConfig() != null ? getServletConfig().getServletName() : null);
+	}
+
+	/**
+	 * Overridden method that simply returns <code>null</code> when no
+	 * ServletConfig set yet.
+	 * @see #getServletConfig()
+	 */
+	public final ServletContext getServletContext() {
+		return (getServletConfig() != null ? getServletConfig().getServletContext() : null);
+	}
+
+
 	/**
 	 * Subclasses may override this to perform custom initialization.
 	 * All bean properties of this servlet will have been set before this
-	 * method is invoked. This default implementation does nothing.
+	 * method is invoked.
+	 * <p>This default implementation is empty.
 	 * @throws ServletException if subclass initialization fails
 	 */
 	protected void initServletBean() throws ServletException {
@@ -164,7 +189,7 @@ public abstract class HttpServletBean extends HttpServlet {
 				}
 			}
 
-			// fail if we are still missing properties
+			// Fail if we are still missing properties.
 			if (missingProps != null && missingProps.size() > 0) {
 				throw new ServletException(
 				    "Initialization from ServletConfig for servlet '" + config.getServletName() +

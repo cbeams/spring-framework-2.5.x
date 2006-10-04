@@ -60,6 +60,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.Assert;
 
 /**
  * Abstract implementation of the ApplicationContext interface.
@@ -141,6 +142,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** System time in milliseconds when this context started */
 	private long startupTime;
 
+	/** Synchronization monitor for the "refresh" and "destroy" */
+	private final Object startupShutdownMonitor = new Object();
+
 	/** ResourcePatternResolver used by this context */
 	private ResourcePatternResolver resourcePatternResolver;
 
@@ -206,13 +210,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Publish the given event to all listeners.
 	 * <p>Note: Listeners get initialized after the MessageSource, to be able
 	 * to access it within listener implementations. Thus, MessageSource
-	 * implementation cannot publish events.
-	 * @param event event to publish (may be application-specific or a
+	 * implementations cannot publish events.
+	 * @param event the event to publish (may be application-specific or a
 	 * standard framework event)
 	 */
 	public void publishEvent(ApplicationEvent event) {
+		Assert.notNull(event, "Event must not be null");
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing event in context [" + getDisplayName() + "]: " + event.toString());
+			logger.debug("Publishing event in context [" + getDisplayName() + "]: " + event);
 		}
 		getApplicationEventMulticaster().multicastEvent(event);
 		if (this.parent != null) {
@@ -247,8 +252,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Return the list of BeanPostProcessors that will get applied
-	 * to beans created with this factory.
+	 * Return the list of BeanFactoryPostProcessors that will get applied
+	 * to the internal BeanFactory.
+	 * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor
 	 */
 	public List getBeanFactoryPostProcessors() {
 		return beanFactoryPostProcessors;
@@ -256,64 +262,66 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	public void refresh() throws BeansException, IllegalStateException {
-		this.startupTime = System.currentTimeMillis();
+		synchronized (this.startupShutdownMonitor) {
+			this.startupTime = System.currentTimeMillis();
 
-		// Tell subclass to refresh the internal bean factory.
-		refreshBeanFactory();
-		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+			// Tell subclass to refresh the internal bean factory.
+			refreshBeanFactory();
+			ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 
-		// Populate the bean factory with context-specific resource editors.
-		ConfigurableBeanFactoryUtils.registerResourceEditors(beanFactory, this);
-		beanFactory.registerCustomEditor(Class.class, new ClassEditor(getClassLoader()));
+			// Populate the bean factory with context-specific resource editors.
+			ConfigurableBeanFactoryUtils.registerResourceEditors(beanFactory, this);
+			beanFactory.registerCustomEditor(Class.class, new ClassEditor(getClassLoader()));
 
-		// Configure the bean factory with context semantics.
-		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
-		beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
-		beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
-		beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
-		beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
+			// Configure the bean factory with context semantics.
+			beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+			beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
+			beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
+			beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
+			beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
 
-		// Allows post-processing of the bean factory in context subclasses.
-		postProcessBeanFactory(beanFactory);
+			// Allows post-processing of the bean factory in context subclasses.
+			postProcessBeanFactory(beanFactory);
 
-		// Invoke factory processors registered with the context instance.
-		for (Iterator it = getBeanFactoryPostProcessors().iterator(); it.hasNext();) {
-			BeanFactoryPostProcessor factoryProcessor = (BeanFactoryPostProcessor) it.next();
-			factoryProcessor.postProcessBeanFactory(beanFactory);
-		}
-
-		if (logger.isInfoEnabled()) {
-			if (getBeanDefinitionCount() == 0) {
-				logger.info("No beans defined in application context [" + getDisplayName() + "]");
+			// Invoke factory processors registered with the context instance.
+			for (Iterator it = getBeanFactoryPostProcessors().iterator(); it.hasNext();) {
+				BeanFactoryPostProcessor factoryProcessor = (BeanFactoryPostProcessor) it.next();
+				factoryProcessor.postProcessBeanFactory(beanFactory);
 			}
-			else {
-				logger.info(getBeanDefinitionCount() + " beans defined in application context [" + getDisplayName() + "]");
+
+			if (logger.isInfoEnabled()) {
+				if (getBeanDefinitionCount() == 0) {
+					logger.info("No beans defined in application context [" + getDisplayName() + "]");
+				}
+				else {
+					logger.info(getBeanDefinitionCount() + " beans defined in application context [" + getDisplayName() + "]");
+				}
 			}
+
+			// Invoke factory processors registered as beans in the context.
+			invokeBeanFactoryPostProcessors();
+
+			// Register bean processors that intercept bean creation.
+			registerBeanPostProcessors();
+
+			// Initialize message source for this context.
+			initMessageSource();
+
+			// Initialize event multicaster for this context.
+			initApplicationEventMulticaster();
+
+			// Initialize other special beans in specific context subclasses.
+			onRefresh();
+
+			// Check for listener beans and register them.
+			registerListeners();
+
+			// Instantiate singletons this late to allow them to access the message source.
+			beanFactory.preInstantiateSingletons();
+
+			// Last step: publish corresponding event.
+			publishEvent(new ContextRefreshedEvent(this));
 		}
-
-		// Invoke factory processors registered as beans in the context.
-		invokeBeanFactoryPostProcessors();
-
-		// Register bean processors that intercept bean creation.
-		registerBeanPostProcessors();
-
-		// Initialize message source for this context.
-		initMessageSource();
-
-		// Initialize event multicaster for this context.
-		initApplicationEventMulticaster();
-
-		// Initialize other special beans in specific context subclasses.
-		onRefresh();
-
-		// Check for listener beans and register them.
-		registerListeners();
-
-		// iIstantiate singletons this late to allow them to access the message source.
-		beanFactory.preInstantiateSingletons();
-
-		// Last step: publish corresponding event.
-		publishEvent(new ContextRefreshedEvent(this));
 	}
 
 	/**
@@ -674,25 +682,28 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Subclasses must implement this method to perform the actual configuration load.
-	 * The method is invoked by refresh before any other initialization work.
+	 * The method is invoked by <code>refresh()</code> before any other initialization work.
 	 * <p>A subclass will either create a new bean factory and hold a reference to it,
-	 * or return a single bean factory instance that it holds. In the latter case, it will
+	 * or return a single BeanFactory instance that it holds. In the latter case, it will
 	 * usually throw an IllegalStateException if refreshing the context more than once.
 	 * @throws BeansException if initialization of the bean factory failed
 	 * @throws IllegalStateException if already initialized and multiple refresh
 	 * attempts are not supported
-	 * @see #refresh
+	 * @see #refresh()
 	 */
 	protected abstract void refreshBeanFactory() throws BeansException, IllegalStateException;
 
 	/**
-	 * Subclasses must return their internal bean factory here.
-	 * They should implement the lookup efficiently, so that it can be called
-	 * repeatedly without a performance penalty.
-	 * @return this application context's internal bean factory
-	 * @throws IllegalStateException if the context does not hold an internal
-	 * bean factory yet (usually if <code>refresh</code> has never been called)
-	 * @see #refresh
+	 * Subclasses must return their internal bean factory here. They should implement the
+	 * lookup efficiently, so that it can be called repeatedly without a performance penalty.
+	 * <p>Note: Subclasses should check whether the context is still active before
+	 * returning the internal bean factory. The internal factory should generally be
+	 * considered unavailable once the context has been closed.
+	 * @return this application context's internal bean factory (never <code>null</code>)
+	 * @throws IllegalStateException if the context does not hold an internal bean factory yet
+	 * (usually if <code>refresh</code> has never been called) or if the context has been
+	 * closed already
+	 * @see #refresh()
 	 */
 	public abstract ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException;
 

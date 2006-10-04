@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,17 +22,18 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Editor for <code>java.lang.Class</code>, to directly populate a Class property
- * instead of using a String class name property as bridge.
+ * Property editor for {@link java.lang.Class java.lang.Class}, to enable the direct
+ * population of a <code>Class</code> property without recourse to having to use a
+ * String class name property as bridge.
  *
- * <p>Also supports "java.lang.String[]"-style array class names,
- * in contrast to the standard <code>Class.forName</code> method.
+ * <p>Also supports "java.lang.String[]"-style array class names, in contrast to the
+ * standard {@link Class#forName(String)} method.
  * Delegates to ClassUtils for actual class name resolution.
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
  * @see java.lang.Class#forName
- * @see org.springframework.util.ClassUtils#forName
+ * @see org.springframework.util.ClassUtils#forName(String, ClassLoader)
  */
 public class ClassEditor extends PropertyEditorSupport {
 
@@ -53,7 +54,7 @@ public class ClassEditor extends PropertyEditorSupport {
 	 */
 	public ClassEditor(ClassLoader classLoader) {
 		this.classLoader =
-				(classLoader != null ? classLoader : Thread.currentThread().getContextClassLoader());
+				(classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 	}
 
 
@@ -73,14 +74,11 @@ public class ClassEditor extends PropertyEditorSupport {
 
 	public String getAsText() {
 		Class clazz = (Class) getValue();
-		if (clazz == null) {
-			return "";
-		}
-		if (clazz.isArray()) {
-			return clazz.getComponentType().getName() + ClassUtils.ARRAY_SUFFIX;
+		if (clazz != null) {
+			return ClassUtils.getQualifiedName(clazz);
 		}
 		else {
-			return clazz.getName();
+			return "";
 		}
 	}
 

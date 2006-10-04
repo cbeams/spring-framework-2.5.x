@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -151,6 +151,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	 * @throws DataAccessException in case of SQL Maps errors
 	 */
 	public Object execute(SqlMapClientCallback action) throws DataAccessException {
+		Assert.notNull(action, "Callback object must not be null");
 		Assert.notNull(this.sqlMapClient, "No SqlMapClient specified");
 
 		// We always needs to use a SqlMapSession, as we need to pass a Spring-managed
@@ -200,7 +201,11 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	public Map executeWithMapResult(SqlMapClientCallback action) throws DataAccessException {
 		return (Map) execute(action);
 	}
-	
+
+
+	public Object queryForObject(String statementName) throws DataAccessException {
+		return queryForObject(statementName, null);
+	}
 
 	public Object queryForObject(final String statementName, final Object parameterObject)
 			throws DataAccessException {
@@ -223,6 +228,10 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		});
 	}
 
+	public List queryForList(String statementName) throws DataAccessException {
+		return queryForList(statementName, null);
+	}
+
 	public List queryForList(final String statementName, final Object parameterObject)
 			throws DataAccessException {
 
@@ -231,6 +240,12 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 				return executor.queryForList(statementName, parameterObject);
 			}
 		});
+	}
+
+	public List queryForList(String statementName, int skipResults, int maxResults)
+			throws DataAccessException {
+
+		return queryForList(statementName, null, skipResults, maxResults);
 	}
 
 	public List queryForList(
@@ -244,6 +259,12 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		});
 	}
 
+	public void queryWithRowHandler(String statementName, RowHandler rowHandler)
+			throws DataAccessException {
+
+		queryWithRowHandler(statementName, null, rowHandler);
+	}
+
 	public void queryWithRowHandler(
 			final String statementName, final Object parameterObject, final RowHandler rowHandler)
 			throws DataAccessException {
@@ -254,6 +275,12 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 				return null;
 			}
 		});
+	}
+
+	public PaginatedList queryForPaginatedList(String statementName, int pageSize)
+			throws DataAccessException {
+
+		return queryForPaginatedList(statementName, null, pageSize);
 	}
 
 	public PaginatedList queryForPaginatedList(
@@ -297,6 +324,10 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		});
 	}
 
+	public Object insert(String statementName) throws DataAccessException {
+		return insert(statementName, null);
+	}
+
 	public Object insert(final String statementName, final Object parameterObject)
 			throws DataAccessException {
 
@@ -305,6 +336,10 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 				return executor.insert(statementName, parameterObject);
 			}
 		});
+	}
+
+	public int update(String statementName) throws DataAccessException {
+		return update(statementName, null);
 	}
 
 	public int update(final String statementName, final Object parameterObject)
@@ -318,6 +353,20 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		return result.intValue();
 	}
 
+	public void update(String statementName, Object parameterObject, int requiredRowsAffected)
+			throws DataAccessException {
+
+		int actualRowsAffected = update(statementName, parameterObject);
+		if (actualRowsAffected != requiredRowsAffected) {
+			throw new JdbcUpdateAffectedIncorrectNumberOfRowsException(
+					statementName, requiredRowsAffected, actualRowsAffected);
+		}
+	}
+
+	public int delete(String statementName) throws DataAccessException {
+		return delete(statementName, null);
+	}
+
 	public int delete(final String statementName, final Object parameterObject)
 			throws DataAccessException {
 
@@ -327,16 +376,6 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 			}
 		});
 		return result.intValue();
-	}
-
-	public void update(String statementName, Object parameterObject, int requiredRowsAffected)
-			throws DataAccessException {
-
-		int actualRowsAffected = update(statementName, parameterObject);
-		if (actualRowsAffected != requiredRowsAffected) {
-			throw new JdbcUpdateAffectedIncorrectNumberOfRowsException(
-					statementName, requiredRowsAffected, actualRowsAffected);
-		}
 	}
 
 	public void delete(String statementName, Object parameterObject, int requiredRowsAffected)

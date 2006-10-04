@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,8 @@ import org.springframework.dao.DataRetrievalFailureException;
 
 /**
  * Exception thrown if a mapped object could not be retrieved via its identifier.
- * Provides information about the persistent class and the identifier. 
+ * Provides information about the persistent class and the identifier.
+ *
  * @author Juergen Hoeller
  * @since 13.10.2003
  */
@@ -34,11 +35,11 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	/**
 	 * Create a general ObjectRetrievalFailureException with the given message,
 	 * without any information on the affected object.
-	 * @param msg exception message
-	 * @param ex source exception
+	 * @param msg the detail message
+	 * @param cause the source exception
 	 */
-	public ObjectRetrievalFailureException(String msg, Throwable ex) {
-		super(msg, ex);
+	public ObjectRetrievalFailureException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 	/**
@@ -58,13 +59,13 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * with the given explicit message and exception.
 	 * @param persistentClass the persistent class
 	 * @param identifier the ID of the object that should have been retrieved
-	 * @param msg exception message
-	 * @param ex source exception
+	 * @param msg the detail message
+	 * @param cause the source exception
 	 */
 	public ObjectRetrievalFailureException(
-			Class persistentClass, Object identifier, String msg, Throwable ex) {
+			Class persistentClass, Object identifier, String msg, Throwable cause) {
 
-		super(msg, ex);
+		super(msg, cause);
 		this.persistentClass = persistentClass;
 		this.identifier = identifier;
 	}
@@ -86,13 +87,13 @@ public class ObjectRetrievalFailureException extends DataRetrievalFailureExcepti
 	 * with the given explicit message and exception.
 	 * @param persistentClassName the name of the persistent class
 	 * @param identifier the ID of the object that should have been retrieved
-	 * @param msg exception message
-	 * @param ex source exception
+	 * @param msg the detail message
+	 * @param cause the source exception
 	 */
 	public ObjectRetrievalFailureException(
-			String persistentClassName, Object identifier, String msg, Throwable ex) {
+			String persistentClassName, Object identifier, String msg, Throwable cause) {
 
-		super(msg, ex);
+		super(msg, cause);
 		this.persistentClass = persistentClassName;
 		this.identifier = identifier;
 	}

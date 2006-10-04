@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,7 +16,6 @@
 
 package org.springframework.aop.interceptor;
 
-import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 import org.aopalliance.aop.AspectException;
@@ -25,7 +24,7 @@ import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * Interceptor that exposes the current MethodInvocation.
- * We occasionally need to do this--for example, when a pointcut
+ * We occasionally need to do this; for example, when a pointcut
  * or target object needs to know the Invocation context.
  *
  * <p>Don't use this interceptor unless this is really necessary.
@@ -43,8 +42,9 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 	/** Singleton instance of this class */
 	public static final ExposeInvocationInterceptor INSTANCE = new ExposeInvocationInterceptor();
 
-	private static ThreadLocal invocation = new ThreadLocal();
+	private static final ThreadLocal invocation = new ThreadLocal();
 	
+
 	/**
 	 * Return the AOP Alliance MethodInvocation object associated with the current
 	 * invocation. 
@@ -57,11 +57,12 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 		MethodInvocation mi = (MethodInvocation) invocation.get();
 		if (mi == null)
 			throw new AspectException(
-					"No MethodInvocation found: check that an AOP invocation is in progress, " +
-					"and that the ExposeInvocationInterceptor is in the interceptor chain");
+					"No MethodInvocation found: Check that an AOP invocation is in progress, " +
+					"and that the ExposeInvocationInterceptor is in the interceptor chain.");
 		return mi;
 	}
-	
+
+
 	/**
 	 * Ensure that only the canonical instance can be created.
 	 */
@@ -84,7 +85,7 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Serializa
 	 * on deserialization, protecting Singleton pattern.
 	 * Alternative to overriding the <code>equals</code> method.
 	 */
-	private Object readResolve() throws ObjectStreamException {
+	private Object readResolve() {
 		return INSTANCE;
 	}
 

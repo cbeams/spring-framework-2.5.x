@@ -60,11 +60,11 @@ import org.springframework.transaction.support.TransactionSynchronization;
  * on a J2EE Connector (e.g. a persistence toolkit registered as JCA Connector).
  * For a single JDBC DataSource, DataSourceTransactionManager is perfectly sufficient,
  * and for accessing a single resource with Hibernate (including transactional cache),
- * HibernateTransactionManager is appropriate.
+ * HibernateTransactionManager is appropriate, for example.
  *
  * <p>Transaction synchronization is active by default, to allow data access support
  * classes to register resources that are opened within the transaction for closing at
- * transaction completion time. Spring's support classes for JDBC, Hibernate and JDO
+ * transaction completion time. Spring's support classes for JDBC, Hibernate, JDO etc
  * all perform such registration, allowing for reuse of the same Hibernate Session etc
  * within the transaction. Standard JTA does not even guarantee that for Connections
  * from a transactional JDBC DataSource: Spring's synchronization solves those issues.
@@ -819,7 +819,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			logger.debug("Setting JTA transaction rollback-only");
 		}
 		try {
-			txObject.getUserTransaction().setRollbackOnly();
+			if (txObject.getUserTransaction().getStatus() != Status.STATUS_NO_TRANSACTION) {
+				txObject.getUserTransaction().setRollbackOnly();
+			}
 		}
 		catch (IllegalStateException ex) {
 			throw new NoTransactionException("No active JTA transaction");
@@ -894,7 +896,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 					"libraries are available on the client side: " + ex.getMessage());
 		}
 
-		// Do client-side JNDI lookup.
+		// Create template for client-side JNDI lookup.
 		this.jndiTemplate = new JndiTemplate();
 
 		// Perform lookup for JTA UserTransaction and TransactionManager.

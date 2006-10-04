@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,11 +35,11 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	/**
 	 * Create a general ObjectOptimisticLockingFailureException with the given message,
 	 * without any information on the affected object.
-	 * @param msg exception message
-	 * @param ex source exception
+	 * @param msg the detail message
+	 * @param cause the source exception
 	 */
-	public ObjectOptimisticLockingFailureException(String msg, Throwable ex) {
-		super(msg, ex);
+	public ObjectOptimisticLockingFailureException(String msg, Throwable cause) {
+		super(msg, cause);
 	}
 
 	/**
@@ -59,13 +59,13 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 * with the given explicit message.
 	 * @param persistentClass the persistent class
 	 * @param identifier the ID of the object for which the locking failed
-	 * @param msg exception message
-	 * @param ex source exception
+	 * @param msg the detail message
+	 * @param cause the source exception
 	 */
 	public ObjectOptimisticLockingFailureException(
-			Class persistentClass, Object identifier, String msg, Throwable ex) {
+			Class persistentClass, Object identifier, String msg, Throwable cause) {
 
-		super(msg, ex);
+		super(msg, cause);
 		this.persistentClass = persistentClass;
 		this.identifier = identifier;
 	}
@@ -87,13 +87,13 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 * with the given explicit message.
 	 * @param persistentClassName the name of the persistent class
 	 * @param identifier the ID of the object for which the locking failed
-	 * @param msg exception message
-	 * @param ex source exception
+	 * @param msg the detail message
+	 * @param cause the source exception
 	 */
 	public ObjectOptimisticLockingFailureException(
-			String persistentClassName, Object identifier, String msg, Throwable ex) {
+			String persistentClassName, Object identifier, String msg, Throwable cause) {
 
-		super(msg, ex);
+		super(msg, cause);
 		this.persistentClass = persistentClassName;
 		this.identifier = identifier;
 	}

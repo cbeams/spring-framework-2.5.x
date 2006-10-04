@@ -86,7 +86,8 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return whether the given array is empty: that is, null or of zero length.
+	 * Return whether the given array is empty: that is, <code>null</code>
+	 * or of zero length.
 	 * @param array the array to check
 	 */
 	public static boolean isEmpty(Object[] array) {
@@ -113,7 +114,7 @@ public abstract class ObjectUtils {
 		if (array != null) {
 			System.arraycopy(array, 0, newArr, 0, array.length);
 		}
-		newArr[array.length] = obj;
+		newArr[newArr.length - 1] = obj;
 		return newArr;
 	}
 

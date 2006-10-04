@@ -593,7 +593,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
 		ut.getStatus();
 		utControl.setReturnValue(Status.STATUS_MARKED_ROLLBACK, 1);
 		ut.begin();

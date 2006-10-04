@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -51,7 +51,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * have not appeared before, through the use of a single Hibernate Session for the
  * processing of an entire request. In particular, the reassociation of persistent
  * objects with a Hibernate Session has to occur at the very beginning of request
- * processing, to avoid clashes will already loaded instances of the same objects.
+ * processing, to avoid clashes with already loaded instances of the same objects.
  *
  * <p>Alternatively, turn this filter into deferred close mode, by specifying
  * "singleSession"="false": It will not use a single session per request then,
@@ -180,12 +180,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 					// single session mode
 					TransactionSynchronizationManager.unbindResource(sessionFactory);
 					logger.debug("Closing single Hibernate Session in OpenSessionInViewFilter");
-					try {
-						closeSession(session, sessionFactory);
-					}
-					catch (RuntimeException ex) {
-						logger.error("Unexpected exception on closing Hibernate Session", ex);
-					}
+					closeSession(session, sessionFactory);
 				}
 				else {
 					// deferred close mode
@@ -245,8 +240,6 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	/**
 	 * Close the given Session.
 	 * Note that this just applies in single session mode!
-	 * <p>The default implementation delegates to SessionFactoryUtils'
-	 * releaseSession method.
 	 * <p>Can be overridden in subclasses, e.g. for flushing the Session before
 	 * closing it. See class-level javadoc for a discussion of flush handling.
 	 * Note that you should also override getSession accordingly, to set

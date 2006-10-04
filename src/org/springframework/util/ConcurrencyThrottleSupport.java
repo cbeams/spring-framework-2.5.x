@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
  * appropriate points of its workflow. Note that <code>afterAccess</code>
  * should usually be called in a finally block!.
  *
- * <p>This class is designed for serializablility, to allow for serializing
+ * <p>This class is designed for serializability, to allow for serializing
  * interceptors that derive from it. Note that the subclass needs to explicitly
  * implement the Serializable marker interface if it is actually serializable.
  *

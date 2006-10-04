@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -88,7 +88,7 @@ import org.springframework.util.ReflectionUtils;
  * Alternatively, define a TransactionProxyFactoryBean for the Scheduler itself.
  *
  * <p>SchedulerFactoryBean is fully compatible with both Quartz 1.3
- * and 1.4 (through special checks where necessary).
+ * as well as 1.4 and higher (through special checks where necessary).
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
@@ -106,9 +106,9 @@ public class SchedulerFactoryBean
 	public static final int DEFAULT_THREAD_COUNT = 10;
 
 
-	private static ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
+	private static final ThreadLocal configTimeDataSourceHolder = new ThreadLocal();
 
-	private static ThreadLocal configTimeNonTransactionalDataSourceHolder = new ThreadLocal();
+	private static final ThreadLocal configTimeNonTransactionalDataSourceHolder = new ThreadLocal();
 
 	/**
 	 * Return the DataSource for the currently configured Quartz Scheduler,
@@ -259,7 +259,7 @@ public class SchedulerFactoryBean
 	 * @see #setNonTransactionalDataSource
 	 * @see #setQuartzProperties
 	 * @see #setTransactionManager
-	 * @see org.springframework.scheduling.quartz.LocalDataSourceJobStore
+	 * @see LocalDataSourceJobStore
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
@@ -489,6 +489,10 @@ public class SchedulerFactoryBean
 
 
 	public void afterPropertiesSet() throws Exception {
+		if (this.dataSource == null && this.nonTransactionalDataSource != null) {
+			this.dataSource = this.nonTransactionalDataSource;
+		}
+
 		// Create SchedulerFactory instance.
 		SchedulerFactory schedulerFactory = (SchedulerFactory)
 				BeanUtils.instantiateClass(this.schedulerFactoryClass);
@@ -884,7 +888,7 @@ public class SchedulerFactoryBean
 	 * stopping all scheduled jobs.
 	 */
 	public void destroy() throws SchedulerException {
-		logger.info("Shutting down Quartz scheduler");
+		logger.info("Shutting down Quartz Scheduler");
 		this.scheduler.shutdown(this.waitForJobsToCompleteOnShutdown);
 	}
 

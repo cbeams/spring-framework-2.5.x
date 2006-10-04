@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>Note that even if TopLinkTransactionManager is used for transaction
  * demarcation in higher-level services, all those services above the data
- * access layer don't need need to be TopLink-aware. Setting such a special
+ * access layer don't need to be TopLink-aware. Setting such a special
  * PlatformTransactionManager is a configuration issue, without introducing
  * code dependencies. For example, switching to JTA is just a matter of Spring
  * configuration (use JtaTransactionManager instead) and TopLink session
@@ -147,6 +147,8 @@ public class TopLinkTemplate extends TopLinkAccessor implements TopLinkOperation
 
 
 	public Object execute(TopLinkCallback action) throws DataAccessException {
+		Assert.notNull(action, "Callback object must not be null");
+
 		Session session = SessionFactoryUtils.getSession(getSessionFactory(), this.allowCreate);
 		try {
 			return action.doInTopLink(session);

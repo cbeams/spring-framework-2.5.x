@@ -19,14 +19,19 @@ package org.springframework.aop.target;
 import org.springframework.beans.BeansException;
 
 /**
- * TargetSource that lazily accesses a singleton from a BeanFactory.
+ * {@link org.springframework.aop.TargetSource} that lazily accesses
+ * a singleton bean from a {@link org.springframework.beans.factory.BeanFactory}.
  *
  * <p>Useful when a proxy reference is needed on initialization but
  * the actual target object should not be initialized until first use.
- * The target bean must me marked as "lazy-init" too, else it would get
- * instantiated by the BeanFactory on startup. For example:
+ * When the target bean is defined in an
+ * {@link org.springframework.context.ApplicationContext} (or a
+ * <code>BeanFactory</code> that is eagerly pre-instantiating singleton beans)
+ * it must be marked as "lazy-init" too, else it will be instantiated by said
+ * <code>ApplicationContext</code> (or <code>BeanFactory</code>) on startup.
+ * <p>For example:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="serviceTarget" class="example.MyService" lazy-init="true"&gt;
  *   ...
  * &lt;/bean&gt;
@@ -34,7 +39,7 @@ import org.springframework.beans.BeansException;
  * &lt;bean id="service" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
  *   &lt;property name="targetSource"&gt;
  *     &lt;bean class="org.springframework.aop.target.LazyInitTargetSource"&gt;
- *       &lt;property name="targetBeanName" ref="serviceTarget"/&gt;
+ *       &lt;property name="targetBeanName"&gt;&lt;idref local="serviceTarget"/&gt;&lt;/property&gt;
  *     &lt;/bean&gt;
  *   &lt;/property&gt;
  * &lt;/bean&gt;</pre>
@@ -42,18 +47,12 @@ import org.springframework.beans.BeansException;
  * The "serviceTarget" bean will not get initialized until a method on the
  * "service" proxy gets invoked.
  *
- * <p><b>NOTE:</b> Consider specifying "targetClass" if you'd like to avoid any
- * kind of access to the target bean (for example, to avoid initialization of a
- * FactoryBean instance). Default is to detect the type automatically, through a
- * <code>getType</code> call on the BeanFactory, which will trigger FactoryBeans.
- *
- * <p>Subclasses can extend this class and override the {@link #postProcessTargetObject(Object)}
- * to perform some additional processing with the target object when it is first loaded.
+ * <p>Subclasses can extend this class and override the {@link #postProcessTargetObject(Object)} to
+ * perform some additional processing with the target object when it is first loaded.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 1.1.4
- * @see #setTargetClass
  * @see #postProcessTargetObject
  */
 public class LazyInitTargetSource extends AbstractBeanFactoryBasedTargetSource {
@@ -72,6 +71,7 @@ public class LazyInitTargetSource extends AbstractBeanFactoryBasedTargetSource {
 	/**
 	 * Sub-classes may override this method to perform additional processing on
 	 * the target object when it is first loaded.
+	 * @param targetObject the target object that has just been instantiated (and configured)
 	 */
 	protected void postProcessTargetObject(Object targetObject) {
 	}

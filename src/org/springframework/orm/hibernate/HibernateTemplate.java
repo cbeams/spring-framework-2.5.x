@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,6 +39,7 @@ import net.sf.hibernate.type.Type;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.util.Assert;
 
 /**
  * Helper class that simplifies Hibernate data access code, and converts
@@ -73,7 +74,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  *
  * <p>Note that even if HibernateTransactionManager is used for transaction
  * demarcation in higher-level services, all those services above the data
- * access layer don't need need to be Hibernate-aware. Setting such a special
+ * access layer don't need to be Hibernate-aware. Setting such a special
  * PlatformTransactionManager is a configuration issue: For example,
  * switching to JTA is just a matter of Spring configuration (use
  * JtaTransactionManager instead) that does not affect application code.
@@ -351,6 +352,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 */
 	public Object execute(HibernateCallback action, boolean exposeNativeSession) throws DataAccessException {
+		Assert.notNull(action, "Callback object must not be null");
+
 		Session session = getSession();
 		boolean existingTransaction = SessionFactoryUtils.isSessionTransactional(session, getSessionFactory());
 		if (existingTransaction) {
@@ -511,7 +514,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	public boolean contains(final Object entity) throws DataAccessException {
 		Boolean result = (Boolean) execute(new HibernateCallback() {
 			public Object doInHibernate(Session session) {
-				return new Boolean(session.contains(entity));
+				return (session.contains(entity) ? Boolean.TRUE : Boolean.FALSE);
 			}
 		}, true);
 		return result.booleanValue();
@@ -973,21 +976,21 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	/**
 	 * Check whether write operations are allowed on the given Session.
 	 * <p>Default implementation throws an InvalidDataAccessApiUsageException
-	 * in case of FlushMode.NEVER. Can be overridden in subclasses.
+	 * in case of <code>FlushMode.NEVER</code>. Can be overridden in subclasses.
 	 * @param session current Hibernate Session
 	 * @throws InvalidDataAccessApiUsageException if write operations are not allowed
 	 * @see #setCheckWriteOperations
-	 * @see #getFlushMode
+	 * @see #getFlushMode()
 	 * @see #FLUSH_EAGER
-	 * @see net.sf.hibernate.Session#getFlushMode
+	 * @see net.sf.hibernate.Session#getFlushMode()
 	 * @see net.sf.hibernate.FlushMode#NEVER
 	 */
 	protected void checkWriteOperationAllowed(Session session) throws InvalidDataAccessApiUsageException {
 		if (isCheckWriteOperations() && getFlushMode() != FLUSH_EAGER &&
 				FlushMode.NEVER.equals(session.getFlushMode())) {
 			throw new InvalidDataAccessApiUsageException(
-					"Write operations are not allowed in read-only mode (FlushMode.NEVER) - turn your Session " +
-					"into FlushMode.AUTO or remove 'readOnly' marker from transaction definition");
+					"Write operations are not allowed in read-only mode (FlushMode.NEVER): "+
+					"Turn your Session into FlushMode.AUTO or remove 'readOnly' marker from transaction definition.");
 		}
 	}
 

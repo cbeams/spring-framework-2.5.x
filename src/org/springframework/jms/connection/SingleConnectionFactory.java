@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
 
 /**
  * A JMS ConnectionFactory adapter that returns the same Connection on all
@@ -43,7 +44,7 @@ import org.springframework.beans.factory.InitializingBean;
  * <code>Connection.close()</code>. According to the JMS Connection model,
  * this is even thread-safe.
  *
- * <p>Useful for testing and standalone environemtns, to keep using the same
+ * <p>Useful for testing and standalone environments, to keep using the same
  * Connection for multiple JmsTemplate calls, without having a pooling
  * ConnectionFactory, also spanning any number of transactions.
  *
@@ -67,10 +68,10 @@ public class SingleConnectionFactory
 
 	private ConnectionFactory targetConnectionFactory;
 
-	/** Wrapped connection */
+	/** Wrapped Connection */
 	private Connection target;
 
-	/** Proxy connection */
+	/** Proxy Connection */
 	private Connection connection;
 
 
@@ -87,9 +88,9 @@ public class SingleConnectionFactory
 	 * @param target the single Connection
 	 */
 	public SingleConnectionFactory(Connection target) {
+		Assert.notNull(target, "Target Connection must not be null");
 		this.target = target;
 		this.connection = getCloseSuppressingConnectionProxy(target);
-		afterPropertiesSet();
 	}
 
 	/**
@@ -99,9 +100,10 @@ public class SingleConnectionFactory
 	 * @param targetConnectionFactory the target ConnectionFactory
 	 */
 	public SingleConnectionFactory(ConnectionFactory targetConnectionFactory) {
+		Assert.notNull(targetConnectionFactory, "Target ConnectionFactory must not be null");
 		this.targetConnectionFactory = targetConnectionFactory;
-		afterPropertiesSet();
 	}
+
 
 	/**
 	 * Set the target ConnectionFactory which will be used to lazily
@@ -245,13 +247,21 @@ public class SingleConnectionFactory
 
 		private final Connection target;
 
-		private CloseSuppressingInvocationHandler(Connection source) {
-			this.target = source;
+		private CloseSuppressingInvocationHandler(Connection target) {
+			this.target = target;
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			if (method.getName().equals("close")) {
-				// don't pass the call on
+			if (method.getName().equals("equals")) {
+				// Only consider equal when proxies are identical.
+				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+			}
+			else if (method.getName().equals("hashCode")) {
+				// Use hashCode of Connection proxy.
+				return new Integer(hashCode());
+			}
+			else if (method.getName().equals("close")) {
+				// Handle close method: don't pass the call on.
 				return null;
 			}
 			try {

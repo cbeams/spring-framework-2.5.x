@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,27 +21,24 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import javax.naming.NamingException;
-import javax.naming.Reference;
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.ConnectionSpec;
-import javax.resource.cci.RecordFactory;
-import javax.resource.cci.ResourceAdapterMetaData;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.util.Assert;
 
 /**
  * A CCI ConnectionFactory adapter that returns the same Connection on all
  * <code>getConnection</code> calls, and ignores calls to
  * <code>Connection.close()</code>.
  *
- * <p>Useful for testing and standalone environemtns, to keep using the same
+ * <p>Useful for testing and standalone environments, to keep using the same
  * Connection for multiple CciTemplate calls, without having a pooling
  * ConnectionFactory, also spanning any number of transactions.
  *
@@ -58,10 +55,10 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Wrapped connection */
+	/** Wrapped Connection */
 	private Connection target;
 
-	/** Proxy connection */
+	/** Proxy Connection */
 	private Connection connection;
 
 
@@ -78,9 +75,9 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 	 * @param target the single Connection
 	 */
 	public SingleConnectionFactory(Connection target) {
+		Assert.notNull(target, "Target Connection must not be null");
 		this.target = target;
 		this.connection = getCloseSuppressingConnectionProxy(target);
-		afterPropertiesSet();
 	}
 
 	/**
@@ -90,16 +87,16 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 	 * @param targetConnectionFactory the target ConnectionFactory
 	 */
 	public SingleConnectionFactory(ConnectionFactory targetConnectionFactory) {
+		Assert.notNull(targetConnectionFactory, "Target ConnectionFactory must not be null");
 		setTargetConnectionFactory(targetConnectionFactory);
-		afterPropertiesSet();
 	}
 
 	/**
-	 * Make sure a connection or connection factory has been set.
+	 * Make sure a Connection or ConnectionFactory has been set.
 	 */
 	public void afterPropertiesSet() {
 		if (this.connection == null && getTargetConnectionFactory() == null) {
-			throw new IllegalArgumentException("connection or targetConnectionFactory is required");
+			throw new IllegalArgumentException("Connection or targetConnectionFactory is required");
 		}
 	}
 
@@ -159,22 +156,6 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 				"SingleConnectionFactory does not support custom ConnectionSpec");
 	}
 
-	public RecordFactory getRecordFactory() throws ResourceException {
-		return getTargetConnectionFactory().getRecordFactory();
-	}
-
-	public ResourceAdapterMetaData getMetaData() throws ResourceException {
-		return getTargetConnectionFactory().getMetaData();
-	}
-
-	public void setReference(Reference reference) {
-		getTargetConnectionFactory().setReference(reference);
-	}
-
-	public Reference getReference() throws NamingException {
-		return getTargetConnectionFactory().getReference();
-	}
-
 
 	/**
 	 * Wrap the given Connection with a proxy that delegates every method call to it
@@ -199,13 +180,21 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 
 		private final Connection target;
 
-		private CloseSuppressingInvocationHandler(Connection source) {
-			this.target = source;
+		private CloseSuppressingInvocationHandler(Connection target) {
+			this.target = target;
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			if (method.getName().equals("close")) {
-				// don't pass the call on
+			if (method.getName().equals("equals")) {
+				// Only consider equal when proxies are identical.
+				return (proxy == args[0] ? Boolean.TRUE : Boolean.FALSE);
+			}
+			else if (method.getName().equals("hashCode")) {
+				// Use hashCode of Connection proxy.
+				return new Integer(hashCode());
+			}
+			else if (method.getName().equals("close")) {
+				// Handle close method: don't pass the call on.
 				return null;
 			}
 			try {
