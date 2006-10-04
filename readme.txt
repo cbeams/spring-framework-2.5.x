@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.2.8 (May 2006)
-----------------------------------------------
+THE SPRING FRAMEWORK, release 1.2.9 (October 2006)
+--------------------------------------------------
 http://www.springframework.org
 
 
@@ -120,7 +120,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: web application context, multipart resolver, Struts support, JSF support, web utilities
 - Dependencies: spring-context, Servlet, (JSP, JSTL, Commons FileUpload, COS, Struts, JSF)
 
-* "spring-webmvc" (~205 KB)
+* "spring-webmvc" (~210 KB)
 - Contents: framework servlets, web MVC framework, web controllers, web views
 - Dependencies: spring-web, (Tiles, iText, POI, Velocity, FreeMarker, JasperReports)
 
@@ -136,7 +136,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 - Contents: Hibernate 2.1 support, Hibernate 3.x support
 - Dependencies: spring-dao, spring-beans, (spring-aop, spring-web, Hibernate2, Hibernate3)
 
-* "spring" (~1890 KB)
+* "spring" (~1895 KB)
 - Contents: all of the above (note: mocks not included)
 - Dependencies: all of the above
 
