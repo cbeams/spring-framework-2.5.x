@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,17 +63,21 @@ import org.springframework.jmx.support.ObjectNameManager;
  * {@link #setConnectOnStartup(boolean) connectOnStartup} property to "false",
  * you can defer this process until the first invocation against the proxy.
  *
+ * <p>Requires JMX 1.2's <code>MBeanServerConnection</code> feature.
+ * As a consequence, this class will not work on JMX 1.0.
+ *
  * <p>This functionality is usually used through <code>MBeanProxyFactoryBean</code>.
  * See the javadoc of that class for more information.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @since 1.2
  * @see MBeanProxyFactoryBean
  * @see #setConnectOnStartup
- * @since 1.2
  */
 public class MBeanClientInterceptor implements MethodInterceptor, InitializingBean, DisposableBean {
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
