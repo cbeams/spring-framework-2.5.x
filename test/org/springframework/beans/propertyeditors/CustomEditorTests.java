@@ -625,12 +625,18 @@ public class CustomEditorTests extends TestCase {
 			return;
 		}
 
-		PropertyEditor patternEditor = new PatternEditor();
-		patternEditor.setAsText("a.*");
-		assertEquals(Pattern.compile("a.*").pattern(), ((Pattern) patternEditor.getValue()).pattern());
-		assertEquals("a.*", patternEditor.getAsText());
+		final String REGEX = "a.*";
 
-		patternEditor = new LocaleEditor();
+		PropertyEditor patternEditor = new PatternEditor();
+		patternEditor.setAsText(REGEX);
+		assertEquals(Pattern.compile(REGEX).pattern(), ((Pattern) patternEditor.getValue()).pattern());
+		assertEquals(REGEX, patternEditor.getAsText());
+
+		patternEditor = new PatternEditor();
+		assertEquals("", patternEditor.getAsText());
+		
+		patternEditor = new PatternEditor();
+		patternEditor.setAsText(null);
 		assertEquals("", patternEditor.getAsText());
 	}
 
