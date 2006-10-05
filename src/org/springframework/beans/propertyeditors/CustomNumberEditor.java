@@ -115,6 +115,18 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	}
 
 	/**
+	 * Coerce a Number value into the required target class, if necessary.
+	 */
+	public void setValue(Object value) {
+		if (value instanceof Number) {
+			super.setValue(NumberUtils.convertNumberToTargetClass((Number) value, this.numberClass));
+		}
+		else {
+			super.setValue(value);
+		}
+	}
+
+	/**
 	 * Format the Number as String, using the specified NumberFormat.
 	 */
 	public String getAsText() {
