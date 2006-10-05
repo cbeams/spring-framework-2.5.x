@@ -26,13 +26,9 @@ import org.springframework.util.ObjectUtils;
  * using the builder pattern. Intended primarily for use when implementing Spring 2.0
  * {@link org.springframework.beans.factory.xml.NamespaceHandler NamespaceHandlers}.
  *
- * <p>Note that <code>BeanDefinitionBuilder</code> objects support references. A property
- * or constructor argument that is passed another <code>BeanDefinitionBuilder</code> object
- * <b>that has already been registered with a <code>BeanDefinitionRegistryBuilder</code></b>
- * will result in a reference to the bean with that name.
- *
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class BeanDefinitionBuilder  {
