@@ -79,10 +79,10 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	private boolean defaultRollback = true;
 
 	/** Should we commit the current transaction? */
-	private boolean complete;
+	private boolean complete = false;
 
 	/** Number of transactions started */
-	private int transactionsStarted;
+	private int transactionsStarted = 0;
 	
 	/**
 	 * Default transaction definition is used.
@@ -130,7 +130,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 
 	/**
-	 * Call in an overridden <code>runBare()</code/ method to prevent transaction execution.
+	 * Call in an overridden <code>runBare()</code> method to prevent transactional execution.
 	 */
 	protected void preventTransaction() {
 		this.transactionDefinition = null;
@@ -149,8 +149,8 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 	/**
 	 * This implementation creates a transaction before test execution.
-	 * Override <code>onSetUpBeforeTransaction</code> and/or
-	 * <code>onSetUpInTransaction</code> to add custom set-up behavior.
+	 * Override <code>onSetUpBeforeTransaction()</code> and/or
+	 * <code>onSetUpInTransaction()</code> to add custom set-up behavior.
 	 * @see #onSetUpBeforeTransaction()
 	 * @see #onSetUpInTransaction()
 	 */
@@ -176,7 +176,6 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 		}
 	}
 
-
 	/**
 	 * Subclasses can override this method to perform any setup operations,
 	 * such as populating a database table, <i>before</i> the transaction
@@ -199,7 +198,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * prior to the execution of this method will be {@link #endTransaction() ended}
 	 * (or rather an attempt will be made to {@link #endTransaction() end it gracefully});
 	 * The offending {@link Throwable} will then be rethrown.
-	 * @throws Exception simply let any exception / error propagate
+	 * @throws Exception simply let any exception propagate
 	 */
 	protected void onSetUpInTransaction() throws Exception {
 	}
@@ -207,13 +206,19 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 	/**
 	 * This implementation ends the transaction after test execution.
-	 * Override <code>onTearDownInTransaction</code> and/or
-	 * <code>onTearDownAfterTransaction</code> to add custom tear-down behavior.
+	 * Override <code>onTearDownInTransaction()</code> and/or
+	 * <code>onTearDownAfterTransaction()</code> to add custom tear-down behavior.
+	 * <p>Note that <code>onTearDownInTransaction()</code> will only be called
+	 * if a transaction is still active at the time of the test shutdown.
+	 * In particular, it will <code>not</code> be called if the transaction has
+	 * been completed with an explicit <code>endTransaction()</code> call before.
 	 * @throws Exception simply let any exception propagate
 	 * @see #onTearDownInTransaction()
 	 * @see #onTearDownAfterTransaction()
+	 * @see #endTransaction()
 	 */
 	protected final void onTearDown() throws Exception {
+		// Call onTearDownInTransaction and end transaction if the transaction is still active.
 		if (this.transactionStatus != null && !this.transactionStatus.isCompleted()) {
 			try {
 				onTearDownInTransaction();
@@ -221,25 +226,29 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 			finally {
 				endTransaction();
 			}
+		}
+		// Call onTearDownAfterTransaction if there was at least one transaction,
+		// even if it has been completed early through an endTransaction() call.
+		if (this.transactionsStarted > 0) {
 			onTearDownAfterTransaction();
 		}
 	}
 
 	/**
 	 * Subclasses can override this method to run invariant tests here.
-	 * The transaction is <i>still open</i>, so any changes made in the
-	 * transaction will still be visible.
-	 * There is no need to clean up the database, as rollback will follow automatically.
-	 * <p><b>NB:</b> Not called if there is no transaction management, due to no
-	 * transaction manager being provided in the context.
+	 * The transaction is <i>still active</i> at this point, so any changes
+	 * made in the transaction will still be visible. However, there is no need
+	 * to clean up the database, as a rollback will follow automatically.
+	 * <p><b>NB:</b> Not called if there is no actual transaction, for example
+	 * due to no transaction manager being provided in the application context.
 	 * @throws Exception simply let any exception propagate
 	 */
 	protected void onTearDownInTransaction() throws Exception {
 	}
 
 	/**
-	 * Subclasses can override this method to perform cleanup here.
-	 * The transaction is <i>not open anymore</i> at this point.
+	 * Subclasses can override this method to perform cleanup after a transaction
+	 * here. At this point, the transaction is <i>not active anymore</i>.
 	 * @throws Exception simply let any exception propagate
 	 */
 	protected void onTearDownAfterTransaction() throws Exception {
@@ -294,7 +303,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 */
 	protected void startNewTransaction() throws TransactionException {
 		if (this.transactionStatus != null) {
-			throw new IllegalStateException("Cannot start new transaction without ending existing transaction:" +
+			throw new IllegalStateException("Cannot start new transaction without ending existing transaction: " +
 					"Invoke endTransaction() before startNewTransaction()");
 		}
 		if (this.transactionManager == null) {
