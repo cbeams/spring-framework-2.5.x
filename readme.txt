@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.0 (October 2006)
-------------------------------------------------
+THE SPRING FRAMEWORK, release 2.0.1 (October 2006)
+--------------------------------------------------
 http://www.springframework.org
 
 
@@ -55,18 +55,27 @@ The Spring Framework requires J2SE 1.3 and J2EE 1.3 (Servlet 2.3, JSP 1.2, JTA 1
 required for building the framework; for the full build including all aspects, AspectJ is required as well.
 J2EE 1.2 (Servlet 2.2, JSP 1.1) is sufficient when not using Spring's JSP tag libraries or the EJB support.
 
-Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1/2.2, JMX 1.0/1.2,
+Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1/2.2, AspectJ 5, JMX 1.0/1.2,
 JCA 1.0, Hibernate 2.1/3.0/3.1/3.2, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, JPA 1.0, iBATIS SQL Maps 2.1/2.2,
 Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.5, EHCache 1.1, JSTL 1.0, Velocity 1.4,
 FreeMarker 2.3, JasperReports 1.2, Struts/Tiles 1.1/1.2, JSF 1.1/1.2, Jakarta Commons FileUpload 1.1, etc.
 
-Release contents:
-* "src" contains the Java source files for the framework
-* "test" contains the Java source files for Spring's test suite
-* "dist" contains various Spring distribution jar files
-* "lib" contains all third-party libraries needed for running the samples and/or building the framework
-* "docs" contains general documentation and API javadocs
-* "samples" contains demo applications and skeletons
+Basic release contents (~ 10 MB):
+* "dist" contains the Spring distribution jar files, as well as a zip of all Java source files
+* "docs" contains the Spring reference documentation as a PDF file
+
+Contents of the "-with-dependencies" distribution (~ 57 MB):
+* "dist" contains the Spring distribution jar files, as well as a zip of all Java source files
+* "docs" contains the Spring reference documentation in PDF and HTML format, as well as the complete API javadocs
+* "lib" contains all third-party libraries needed for building the framework and/or running the samples
+* "src" contains the general Java source files for the framework
+* "mock" contains the general Java source files for Spring's mock and test classes
+* "test" contains the general Java source files for Spring's test suite
+* "tiger/src" contains the JDK-1.5-specific Java source files for the framework
+* "tiger/test" contains the JDK-1.5-specific Java source files for Spring's test suite
+* "aspectj/src" contains the AspectJ-specific source files for the framework
+* "aspectj/test" contains the AspectJ-specific source files for Spring's test suite
+* "samples" contains various demo applications and showcases
 
 The "lib" directory is just included in the "-with-dependencies" download. Make sure to download this full
 distribution ZIP file if you want to run the sample applications and/or build the framework yourself.
@@ -85,7 +94,7 @@ This product includes software developed by Clinton Begin (http://www.ibatis.com
 3. DISTRIBUTION JAR FILES
 
 The "dist" directory contains the following distinct jar files for use in applications. Both module-specific
-jar files and a jar file with all of Spring are provided. The following list specifies the respective contents
+jar files and a jar file with all of Spring are provided. The following list specifies the corresponding contents
 and third-party dependencies. Libraries in brackets are optional, i.e. just necessary for certain functionality.
 
 FULL JAR (dist):
