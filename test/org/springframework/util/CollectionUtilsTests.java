@@ -16,8 +16,6 @@
 
 package org.springframework.util;
 
-import junit.framework.TestCase;
-
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -29,14 +27,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 /**
- * Unit tests for the {@link CollectionUtils} class.
- *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rick Evans
  */
-public final class CollectionUtilsTests extends TestCase {
+public class CollectionUtilsTests extends TestCase {
 
 	public void testIsEmpty() {
 		assertTrue(CollectionUtils.isEmpty((Set) null));
@@ -167,11 +165,9 @@ public final class CollectionUtilsTests extends TestCase {
 
 		private final String name;
 
-
 		public Instance(String name) {
 			this.name = name;
 		}
-
 
 		public boolean equals(Object rhs) {
 			if (this == rhs) {
@@ -187,7 +183,6 @@ public final class CollectionUtilsTests extends TestCase {
 		public int hashCode() {
 			return this.name.hashCode();
 		}
-
 	}
 
 }

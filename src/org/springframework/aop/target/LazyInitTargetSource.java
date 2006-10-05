@@ -47,17 +47,18 @@ import org.springframework.beans.BeansException;
  * The "serviceTarget" bean will not get initialized until a method on the
  * "service" proxy gets invoked.
  *
- * <p>Sub-classes can extend this class and override the {@link #postProcessTargetObject(Object)} to
+ * <p>Subclasses can extend this class and override the {@link #postProcessTargetObject(Object)} to
  * perform some additional processing with the target object when it is first loaded.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 1.1.4
- * @see #postProcessTargetObject(Object)
+ * @see #postProcessTargetObject
  */
 public class LazyInitTargetSource extends AbstractBeanFactoryBasedTargetSource {
 
 	private Object target;
+
 
 	public synchronized Object getTarget() throws BeansException {
 		if (this.target == null) {

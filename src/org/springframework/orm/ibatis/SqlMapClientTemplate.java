@@ -155,6 +155,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	 * @throws DataAccessException in case of SQL Maps errors
 	 */
 	public Object execute(SqlMapClientCallback action) throws DataAccessException {
+		Assert.notNull(action, "Callback object must not be null");
 		Assert.notNull(this.sqlMapClient, "No SqlMapClient specified");
 
 		// We always needs to use a SqlMapSession, as we need to pass a Spring-managed

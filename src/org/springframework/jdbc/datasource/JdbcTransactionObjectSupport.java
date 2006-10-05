@@ -58,7 +58,8 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 		if (ClassUtils.isPresent(SAVEPOINT_CLASS_NAME)) {
 			savepointClassAvailable = true;
 			logger.info("JDBC 3.0 Savepoint class is available");
-		} else {
+		}
+		else {
 			savepointClassAvailable = false;
 			logger.info("JDBC 3.0 Savepoint class is not available");
 		}

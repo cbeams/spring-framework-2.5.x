@@ -362,9 +362,12 @@ public class AnnotationTransactionAttributeSourceTests extends TestCase {
 		}
 	}
 
+
 	public static interface Foo<T> {
+
 		void doSomething(T theArgument);
 	}
+
 
 	public static class MyFoo implements Foo<String> {
 
@@ -372,6 +375,6 @@ public class AnnotationTransactionAttributeSourceTests extends TestCase {
 		public void doSomething(String theArgument) {
 			System.out.println(theArgument);
 		}
-		
 	}
+
 }

@@ -80,7 +80,7 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Attempts to find a {@link Method} on the supplied type with the supplied name and
+	 * Attempt to find a {@link Method} on the supplied type with the supplied name and
 	 * parameter types. Searches all superclasses up to <code>Object</code>. Returns
 	 * '<code>null</code>' if no {@link Method} can be found.
 	 */

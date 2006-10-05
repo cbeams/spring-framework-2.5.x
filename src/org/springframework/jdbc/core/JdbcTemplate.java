@@ -345,8 +345,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	public Object query(final String sql, final ResultSetExtractor rse) throws DataAccessException {
 		Assert.notNull(rse, "ResultSetExtractor must not be null");
-
 		Assert.notNull(sql, "SQL must not be null");
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL query [" + sql + "]");
 		}

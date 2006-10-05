@@ -335,7 +335,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	/**
 	 * Check whether this operation has been compiled already;
 	 * lazily compile it if not already compiled.
-	 * <p>Automatically called by <code>validateNamedParameters</code>.
+	 * <p>Automatically called by <code>validateParameters</code>.
 	 * @see #validateParameters
 	 */
 	protected void checkCompiled() {

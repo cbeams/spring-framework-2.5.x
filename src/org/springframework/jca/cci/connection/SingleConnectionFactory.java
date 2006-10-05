@@ -231,7 +231,7 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 				// Use hashCode of Connection proxy.
 				return new Integer(hashCode());
 			}
-			if (method.getName().equals("close")) {
+			else if (method.getName().equals("close")) {
 				// Handle close method: don't pass the call on.
 				return null;
 			}

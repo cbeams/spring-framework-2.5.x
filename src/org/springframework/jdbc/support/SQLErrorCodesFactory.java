@@ -71,8 +71,7 @@ public class SQLErrorCodesFactory {
 
 
 	/**
-	 * Returns the singleton instance of this class.
-	 * @return the singleton instance of this class
+	 * Return the singleton instance.
 	 */
 	public static SQLErrorCodesFactory getInstance() {
 		return instance;
@@ -93,12 +92,12 @@ public class SQLErrorCodesFactory {
 
 
 	/**
-	 * Creates a new instance of the {@link SQLErrorCodesFactory} class.
+	 * Create a new instance of the {@link SQLErrorCodesFactory} class.
 	 * <p>Not public to enforce Singleton design pattern. Would be private
 	 * except to allow testing via overriding the
 	 * {@link #loadResource(String)} method.
 	 * <p><b>Do not subclass in application code.</b>
-	 * @see #loadResource(String) 
+	 * @see #loadResource(String)
 	 */
 	protected SQLErrorCodesFactory() {
 		Map errorCodes = null;
@@ -129,7 +128,6 @@ public class SQLErrorCodesFactory {
 				logger.info("SQLErrorCodes loaded: " + errorCodes.keySet());
 			}
 		}
-
 		catch (BeansException ex) {
 			logger.warn("Error loading SQL error codes from config file", ex);
 			errorCodes = Collections.EMPTY_MAP;
@@ -159,7 +157,7 @@ public class SQLErrorCodesFactory {
 	 * <p>No need for a database metadata lookup.
 	 * @param dbName the database name (must not be <code>null</code> )
 	 * @return the <code>SQLErrorCodes</code> instance for the given database
-	 * @throws IllegalArgumentException if the supplied database name is <code>null</code> 
+	 * @throws IllegalArgumentException if the supplied database name is <code>null</code>
 	 */
 	public SQLErrorCodes getErrorCodes(String dbName) {
 		Assert.notNull(dbName, "Database product name must not be null");

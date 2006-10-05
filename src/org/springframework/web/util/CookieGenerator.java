@@ -155,7 +155,7 @@ public class CookieGenerator {
 	public void addCookie(HttpServletResponse response, String cookieValue) {
 		Cookie cookie = createCookie(cookieValue);
 		cookie.setMaxAge(getCookieMaxAge());
-		if (this.cookieSecure) {
+		if (isCookieSecure()) {
 			cookie.setSecure(true);
 		}
 		response.addCookie(cookie);

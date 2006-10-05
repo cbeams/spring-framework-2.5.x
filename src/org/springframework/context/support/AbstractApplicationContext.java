@@ -177,9 +177,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @param parent the parent context
 	 */
 	public AbstractApplicationContext(ApplicationContext parent) {
-		if (parent != null) {
-			setParent(parent);
-		}
+		this.parent = parent;
 		this.resourcePatternResolver = getResourcePatternResolver();
 	}
 
