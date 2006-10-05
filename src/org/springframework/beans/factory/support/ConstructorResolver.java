@@ -391,8 +391,9 @@ abstract class ConstructorResolver {
 				if (matchingBeans.size() != 1) {
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, index, paramTypes[index],
-							"There are " + matchingBeans.size() + " beans of type [" + paramTypes[index] +
-							"] available for autowiring. There should have been 1 to be able to autowire " +
+							"There are " + matchingBeans.size() + " beans of type [" + paramTypes[index].getName() +
+							"] available for autowiring: " + matchingBeans.keySet() +
+							". There should have been 1 to be able to autowire " +
 							methodType + " of bean '" + beanName + "'.");
 				}
 				Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();

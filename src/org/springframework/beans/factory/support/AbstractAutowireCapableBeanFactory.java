@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -29,16 +30,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Collections;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
@@ -53,7 +53,6 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -806,8 +805,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			else if (count > 1) {
 				throw new UnsatisfiedDependencyException(
 						mergedBeanDefinition.getResourceDescription(), beanName, propertyName,
-						"There are " + matchingBeans.size() + " beans of type [" + requiredType +
-						"] for autowire by type. There should have been exactly 1 to be able to autowire property '" +
+						"There are " + matchingBeans.size() + " beans of type [" + requiredType.getName() +
+						"] for autowire by type: " + matchingBeans.keySet() +
+						". There should have been exactly 1 to be able to autowire property '" +
 						propertyName + "' of bean '" + beanName + "'. Consider using autowire by name instead.");
 			}
 			else {
