@@ -114,12 +114,11 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * Return the names of beans matching the given type (including subclasses),
 	 * judging from either bean definitions or the value of <code>getObjectType</code>
 	 * in the case of FactoryBeans.
-	 * <p>Does consider objects created by FactoryBeans if the "includeFactoryBeans"
-	 * flag is set, which means that FactoryBeans will get initialized. If the
-	 * object created by the FactoryBean doesn't match, the raw FactoryBean itself
-	 * will be matched against the type. If "includeFactoryBeans" is not set,
-	 * only raw FactoryBeans will be checked (which doesn't require initialization
-	 * of each FactoryBean).
+	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit" flag is set,
+	 * which means that FactoryBeans will get initialized. If the object created by the
+	 * FactoryBean doesn't match, the raw FactoryBean itself will be matched against the
+	 * type. If "allowEagerInit" is not set, only raw FactoryBeans will be checked
+	 * (which doesn't require initialization of each FactoryBean).
 $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' <code>beanNamesForTypeIncludingAncestors</code>
 	 * to include beans in ancestor factories too.
@@ -175,12 +174,11 @@ $	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Return the bean instances that match the given object type (including
 	 * subclasses), judging from either bean definitions or the value of
 	 * <code>getObjectType</code> in the case of FactoryBeans.
-	 * <p>Does consider objects created by FactoryBeans if the "includeFactoryBeans"
-	 * flag is set, which means that FactoryBeans will get initialized. If the
-	 * object created by the FactoryBean doesn't match, the raw FactoryBean itself
-	 * will be matched against the type. If "includeFactoryBeans" is not set,
-	 * only raw FactoryBeans will be checked (which doesn't require initialization
-	 * of each FactoryBean).
+	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit" flag is set,
+	 * which means that FactoryBeans will get initialized. If the object created by the
+	 * FactoryBean doesn't match, the raw FactoryBean itself will be matched against the
+	 * type. If "allowEagerInit" is not set, only raw FactoryBeans will be checked
+	 * (which doesn't require initialization of each FactoryBean).
 	 * <p>Does not consider any hierarchy this factory may participate in.
 	 * Use BeanFactoryUtils' <code>beansOfTypeIncludingAncestors</code>
 	 * to include beans in ancestor factories too.
