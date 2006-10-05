@@ -3,6 +3,19 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.0.1 (31.10.2006)
+-------------------------------------
+
+Package org.springframework.beans
+* Number objects (as property or argument values) are automatically coerced into the target Number type (if necessary)
+* added "findAutowireCandidates" template method to AbstractAutowireCapableBeanFactory, superseding "findMatchingBeans"
+* DefaultListableBeanFactory excludes beans which are not autowire candidates even before it obtains the instances
+* fixed PluggableSchemaResolver to accept a null ClassLoader argument (falling back to the default ClassLoader)
+
+Package org.springframework.orm
+* fixed Hibernate3 LocalSessionFactoryBean's "schemaUpdate" behavior to not run into an IllegalStateException
+
+
 Changes in version 2.0 final (3.10.2006)
 ----------------------------------------
 
