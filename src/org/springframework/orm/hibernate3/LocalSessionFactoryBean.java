@@ -553,8 +553,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 
 
 	protected SessionFactory buildSessionFactory() throws Exception {
-		SessionFactory sf = null;
-
 		// Create Configuration instance.
 		Configuration config = newConfiguration();
 
@@ -737,7 +735,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 			// Build SessionFactory instance.
 			logger.info("Building new Hibernate SessionFactory");
 			this.configuration = config;
-			sf = newSessionFactory(config);
+			return newSessionFactory(config);
 		}
 
 		finally {
@@ -756,13 +754,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 				configTimeLobHandlerHolder.set(null);
 			}
 		}
-
-		// Execute schema update if requested.
-		if (this.schemaUpdate) {
-			updateDatabaseSchema();
-		}
-
-		return sf;
 	}
 
 	/**
@@ -820,7 +811,18 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 	}
 
 	/**
-	 * Allow for schema export on shutdown.
+	 * Executes schema update if requested.
+	 * @see #setSchemaUpdate
+	 * @see #updateDatabaseSchema()
+	 */
+	protected void afterSessionFactoryCreation() throws Exception {
+		if (this.schemaUpdate) {
+			updateDatabaseSchema();
+		}
+	}
+
+	/**
+	 * Allows for schema export on shutdown.
 	 */
 	public void destroy() throws HibernateException {
 		if (this.dataSource != null) {

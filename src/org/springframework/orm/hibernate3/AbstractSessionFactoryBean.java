@@ -130,6 +130,7 @@ public abstract class AbstractSessionFactoryBean
 	public void afterPropertiesSet() throws Exception {
 		SessionFactory rawSf = buildSessionFactory();
 		this.sessionFactory = wrapSessionFactoryIfNecessary(rawSf);
+		afterSessionFactoryCreation();
 	}
 
 	/**
@@ -182,7 +183,12 @@ public abstract class AbstractSessionFactoryBean
 	 */
 	public void destroy() throws HibernateException {
 		logger.info("Closing Hibernate SessionFactory");
-		this.sessionFactory.close();
+		try {
+			beforeSessionFactoryDestruction();
+		}
+		finally {
+			this.sessionFactory.close();
+		}
 	}
 
 
@@ -244,6 +250,26 @@ public abstract class AbstractSessionFactoryBean
 	 * @throws Exception in case of initialization failure
 	 */
 	protected abstract SessionFactory buildSessionFactory() throws Exception;
+
+	/**
+	 * Hook that allows post-processing after the SessionFactory has been
+	 * successfully created. The SessionFactory is already available through
+	 * <code>getSessionFactory()</code> at this point.
+	 * <p>This implementation is empty.
+	 * @see #getSessionFactory()
+	 */
+	protected void afterSessionFactoryCreation() throws Exception {
+	}
+
+	/**
+	 * Hook that allows shutdown processing before the SessionFactory
+	 * will be closed. The SessionFactory is still available through
+	 * <code>getSessionFactory()</code> at this point.
+	 * <p>This implementation is empty.
+	 * @see #getSessionFactory()
+	 */
+	protected void beforeSessionFactoryDestruction() {
+	}
 
 
 	/**
