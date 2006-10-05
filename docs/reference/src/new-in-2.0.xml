@@ -366,34 +366,22 @@
         <section id="new-in-2-migrating-deprecated">
 		    <title>Deprecated classes and methods</title>
 		    <para>A number of classes and methods that previously were marked as
-		    <literal>@deprecated</literal> have been totally removed from the Spring 2.0 codebase.
+		    <literal>@deprecated</literal> have been removed from the Spring 2.0 codebase.
 		    The Spring team decided that the 2.0 release marked a fresh start of sorts, and that any
 		    deprecated 'cruft' was better excised now instead of continuing to haunt the codebase for
 		    the forseeable future.</para>
             <para>As mentioned previously, for a comprehensive list of changes, consult the
             <filename>'changelog.txt'</filename> file that is located in the top level directory of
             the Spring Framework 2.0 distribution.</para>
-		    <para>The following classes/interfaces have all been removed from the Spring 2.0 codebase.</para>
+		    <para>The following classes/interfaces have been removed from the Spring 2.0 codebase:</para>
 		    <itemizedlist>
                 <listitem>
-                    <para><interfacename>ResultReader</interfacename> : use the
+                    <para><interfacename>ResultReader</interfacename> : Use the
                     <interfacename>RowMapper</interfacename> interface instead.</para>
                 </listitem>
                 <listitem>
-                    <para><interfacename>BeanReferenceFactoryBean</interfacename> : use the available alias
-                    mechanisms instead</para>
-                </listitem>
-                <listitem>
-                    <para><classname>BeanDefinitionRegistryBuilder</classname> : use the
-                    convenience methods on the <classname>BeanDefinitionReaderUtils</classname> class instead</para>
-                </listitem>
-                <listitem>
-                    <para><classname>BeanFactoryBootstrap</classname> : consider using a
-                    <interfacename>BeanFactoryLocator</interfacename> or a custom bootstrap class instead</para>
-                </listitem>
-                <listitem>
-                    <para><classname>RequestUtils</classname> : use <classname>ServletRequestUtils</classname>
-                    instead</para>
+                    <para><classname>BeanFactoryBootstrap</classname> : Consider using a
+                    <interfacename>BeanFactoryLocator</interfacename> or a custom bootstrap class instead.</para>
                 </listitem>
 		    </itemizedlist>
         </section>
@@ -406,7 +394,7 @@
         </section>
         <section id="new-in-2-migrating-ibatis">
 		    <title>iBatis</title>
-		    <para>Please note that support for iBATIS SQL Maps 1.3 has been totally removed. If you
+		    <para>Please note that support for iBATIS SQL Maps 1.3 has been removed. If you
 		    haven't done so already, upgrade to iBATIS SQL Maps 2.0/2.1.</para>
         </section>
     </section>
