@@ -43,6 +43,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NumberTestBean;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
+import org.springframework.core.JdkVersion;
 import org.springframework.test.AssertThrows;
 
 /**
@@ -620,6 +621,10 @@ public class CustomEditorTests extends TestCase {
 	}
 
 	public void testPatternEditor() {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		PropertyEditor patternEditor = new PatternEditor();
 		patternEditor.setAsText("a.*");
 		assertEquals(Pattern.compile("a.*").pattern(), ((Pattern) patternEditor.getValue()).pattern());
