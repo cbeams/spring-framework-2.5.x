@@ -94,7 +94,6 @@ public class JmsDestinationAccessor extends JmsAccessor {
 	 * @return the located {@link Destination}
 	 * @throws javax.jms.JMSException if resolution failed
 	 * @see #setDestinationResolver
-	 * @see #getDestinationResolver()
 	 */
 	protected Destination resolveDestinationName(Session session, String destinationName) throws JMSException {
 		return getDestinationResolver().resolveDestinationName(session, destinationName, isPubSubDomain());
