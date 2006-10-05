@@ -36,6 +36,8 @@ import junit.framework.TestCase;
 import org.apache.commons.logging.LogFactory;
 import org.xml.sax.InputSource;
 
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.FatalBeanException;
@@ -67,8 +69,6 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.support.AopUtils;
 
 /**
  * Miscellaneous tests for XML bean definitions.
@@ -1478,8 +1478,8 @@ public class XmlBeanFactoryTests extends TestCase {
 			new XmlBeanFactory(new ClassPathResource("testWithDuplicateNames.xml", getClass()));
 			fail("Duplicate name not detected");
 		}
-		catch (BeansException e) {
-			assertTrue(e.getMessage().indexOf("Bean name 'foo'") > -1);
+		catch (BeansException ex) {
+			assertTrue(ex.getMessage().indexOf("Bean name 'foo'") > -1);
 		}
 	}
 
