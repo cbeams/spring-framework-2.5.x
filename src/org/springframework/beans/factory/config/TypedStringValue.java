@@ -133,6 +133,7 @@ public class TypedStringValue {
 	 * with the target type already resolved.
 	 * @param classLoader the ClassLoader to use for resolving a (potential) class name
 	 * @return the resolved type to convert to
+	 * @throws ClassNotFoundException if the type cannot be resolved
 	 */
 	public Class resolveTargetType(ClassLoader classLoader) throws ClassNotFoundException {
 		if (this.targetType == null) {

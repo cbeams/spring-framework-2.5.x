@@ -165,6 +165,13 @@ class BeanDefinitionValueResolver {
 		}
 	}
 
+	/**
+	 * Resolve the target type in the given TypedStringValue.
+	 * @param value the TypedStringValue to resolve
+	 * @return the resolved target type (or <code>null</code> if none specified)
+	 * @throws ClassNotFoundException if the specified type cannot be resolved
+	 * @see TypedStringValue#resolveTargetType
+	 */
 	protected Class resolveTargetType(TypedStringValue value) throws ClassNotFoundException {
 		if (value.hasTargetType()) {
 			return value.getTargetType();

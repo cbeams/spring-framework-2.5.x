@@ -38,6 +38,7 @@ public interface TypeConverter {
 	 * A number of PropertyEditors are automatically registered.
 	 * @param value the value to convert
 	 * @param requiredType the type we must convert to
+	 * (or <code>null</code> if not known, for example in case of a collection element)
 	 * @return the new value, possibly the result of type conversion
 	 * @throws TypeMismatchException if type conversion failed
 	 * @see java.beans.PropertyEditor#setAsText(String)
@@ -53,6 +54,7 @@ public interface TypeConverter {
 	 * A number of PropertyEditors are automatically registered.
 	 * @param value the value to convert
 	 * @param requiredType the type we must convert to
+	 * (or <code>null</code> if not known, for example in case of a collection element)
 	 * @param methodParam the method parameter that is the target of the conversion
 	 * (for analysis of generic types; may be <code>null</code>)
 	 * @return the new value, possibly the result of type conversion

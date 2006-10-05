@@ -741,7 +741,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * using the specified BeanWrapper.
 	 * @param converter the TypeConverter to work on
 	 * @param value the original value
-	 * @param targetType the target type
+	 * @param targetType the target type to convert to
+	 * (or <code>null</code> if not known, for example in case of a collection element)
 	 * @return the converted value, matching the target type
 	 * @throws org.springframework.beans.TypeMismatchException if type conversion failed
 	 * @see org.springframework.beans.BeanWrapperImpl#convertIfNecessary(Object, Class)
