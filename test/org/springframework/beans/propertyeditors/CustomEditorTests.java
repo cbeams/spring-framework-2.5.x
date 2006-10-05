@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import junit.framework.TestCase;
 
@@ -616,6 +617,16 @@ public class CustomEditorTests extends TestCase {
 
 		localeEditor = new LocaleEditor();
 		assertEquals("", localeEditor.getAsText());
+	}
+
+	public void testPatternEditor() {
+		PropertyEditor patternEditor = new PatternEditor();
+		patternEditor.setAsText("a.*");
+		assertEquals(Pattern.compile("a.*").pattern(), ((Pattern) patternEditor.getValue()).pattern());
+		assertEquals("a.*", patternEditor.getAsText());
+
+		patternEditor = new LocaleEditor();
+		assertEquals("", patternEditor.getAsText());
 	}
 
 	public void testCustomBooleanEditor() {

@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.propertyeditors.ByteArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.CharArrayPropertyEditor;
@@ -44,9 +45,11 @@ import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.LocaleEditor;
+import org.springframework.beans.propertyeditors.PatternEditor;
 import org.springframework.beans.propertyeditors.PropertiesEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.core.CollectionFactory;
+import org.springframework.core.JdkVersion;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceArrayPropertyEditor;
 import org.springframework.util.ClassUtils;
@@ -114,6 +117,11 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(Properties.class, new PropertiesEditor());
 		this.defaultEditors.put(Resource[].class, new ResourceArrayPropertyEditor());
 		this.defaultEditors.put(URL.class, new URLEditor());
+
+		// Register JDK-1.4-specific editors.
+		if (JdkVersion.isAtLeastJava14()) {
+			this.defaultEditors.put(Pattern.class, new PatternEditor());
+		}
 
 		// Default instances of collection editors.
 		// Can be overridden by registering custom instances of those as custom editors.
