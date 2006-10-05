@@ -37,7 +37,6 @@ import javax.jms.TopicSession;
 
 import org.springframework.jms.connection.JmsResourceHolder;
 import org.springframework.jms.support.converter.SimpleMessageConverter102;
-import org.springframework.jms.support.destination.DynamicDestinationResolver;
 
 /**
  * A subclass of JmsTemplate that uses the JMS 1.0.2 specification, rather than
@@ -89,7 +88,7 @@ public class JmsTemplate102 extends JmsTemplate {
 
 	/**
 	 * Create a new JmsTemplate102, given a ConnectionFactory.
-	 * @param connectionFactory the ConnectionFactory to obtain connections from
+	 * @param connectionFactory the ConnectionFactory to obtain Connections from
 	 * @param pubSubDomain whether the Publish/Subscribe domain (Topics) or
 	 * Point-to-Point domain (Queues) should be used
 	 * @see #setPubSubDomain
@@ -110,7 +109,6 @@ public class JmsTemplate102 extends JmsTemplate {
 	 * @see org.springframework.jms.support.converter.SimpleMessageConverter102
 	 */
 	protected void initDefaultStrategies() {
-		setDestinationResolver(new DynamicDestinationResolver());
 		setMessageConverter(new SimpleMessageConverter102());
 	}
 

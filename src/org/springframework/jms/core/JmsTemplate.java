@@ -123,7 +123,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	/**
 	 * Create a new JmsTemplate, given a ConnectionFactory.
-	 * @param connectionFactory the ConnectionFactory to obtain connections from
+	 * @param connectionFactory the ConnectionFactory to obtain Connections from
 	 */
 	public JmsTemplate(ConnectionFactory connectionFactory) {
 		this();
@@ -140,7 +140,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * @see org.springframework.jms.support.converter.SimpleMessageConverter
 	 */
 	protected void initDefaultStrategies() {
-		setDestinationResolver(new DynamicDestinationResolver());
 		setMessageConverter(new SimpleMessageConverter());
 	}
 
