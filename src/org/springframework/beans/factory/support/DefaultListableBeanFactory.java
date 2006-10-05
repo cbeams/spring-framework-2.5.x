@@ -357,8 +357,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return bd;
 	}
 
-	protected Map findMatchingBeans(Class requiredType) {
-		return BeanFactoryUtils.beansOfTypeIncludingAncestors(this, requiredType);
+	protected Map findAutowireCandidates(String beanName, Class requiredType) {
+		String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this, requiredType);
+		Map result = CollectionFactory.createLinkedMapIfPossible(candidateNames.length);
+		for (int i = 0; i < candidateNames.length; i++) {
+			String candidateName = candidateNames[i];
+			if (!candidateName.equals(beanName) &&
+					(!containsBeanDefinition(candidateName) || getMergedBeanDefinition(candidateName).isAutowireCandidate())) {
+				result.put(candidateName, getBean(candidateName));
+			}
+		}
+		return result;
 	}
 
 

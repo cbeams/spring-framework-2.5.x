@@ -387,17 +387,17 @@ abstract class ConstructorResolver {
 							"Ambiguous " + methodType + " argument types - " +
 							"did you specify the correct bean references as " + methodType + " arguments?");
 				}
-				Map matchingBeans = findMatchingBeans(paramTypes[index]);
-				if (matchingBeans == null || matchingBeans.size() != 1) {
-					int matchingBeansCount = (matchingBeans != null ? matchingBeans.size() : 0);
+				Map matchingBeans = findAutowireCandidates(beanName, paramTypes[index]);
+				if (matchingBeans.size() != 1) {
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, index, paramTypes[index],
-							"There are " + matchingBeansCount + " beans of type [" + paramTypes[index] +
-							"] for autowiring " + methodType + ". There should have been 1 to be able to " +
-							"autowire " + methodType + " of bean '" + beanName + "'.");
+							"There are " + matchingBeans.size() + " beans of type [" + paramTypes[index] +
+							"] available for autowiring. There should have been 1 to be able to autowire " +
+							methodType + " of bean '" + beanName + "'.");
 				}
-				String autowiredBeanName = (String) matchingBeans.keySet().iterator().next();
-				Object autowiredBean = matchingBeans.values().iterator().next();
+				Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();
+				String autowiredBeanName = (String) entry.getKey();
+				Object autowiredBean = entry.getValue();
 				args.rawArguments[index] = autowiredBean;
 				args.arguments[index] = autowiredBean;
 				if (mergedBeanDefinition.isSingleton()) {
@@ -414,15 +414,18 @@ abstract class ConstructorResolver {
 
 
 	/**
-	 * Find bean instances that match the required type. Called by autowiring.
-	 * If a subclass cannot obtain information about bean names by type,
+	 * Find bean instances that match the required type.
+	 * Called during autowiring for the specified bean.
+	 * <p>If a subclass cannot obtain information about bean names by type,
 	 * a corresponding exception should be thrown.
-	 * @param requiredType the type of the beans to look up
-	 * @return a Map of bean names and bean instances that match the required type,
-	 * or <code>null</code> if none found
+	 * @param beanName the name of the bean that is about to be wired
+	 * @param requiredType the type of the autowired constructor argument
+	 * @return a Map of candidate names and candidate instances that match
+	 * the required type (never <code>null</code>)
 	 * @throws BeansException in case of errors
+	 * @see #autowireConstructor
 	 */
-	protected abstract Map findMatchingBeans(Class requiredType) throws BeansException;
+	protected abstract Map findAutowireCandidates(String beanName, Class requiredType) throws BeansException;
 
 
 	/**

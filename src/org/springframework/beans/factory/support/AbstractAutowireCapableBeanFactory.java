@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Collections;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -37,6 +38,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
@@ -51,7 +53,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -84,7 +86,7 @@ import org.springframework.util.StringUtils;
  * @see AutowireCapableBeanFactory
  * @see AbstractBeanFactory#createBean
  * @see RootBeanDefinition
- * @see #findMatchingBeans(Class)
+ * @see #findAutowireCandidates
  * @see DefaultListableBeanFactory
  * @see BeanDefinitionRegistry
  */
@@ -785,11 +787,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			String propertyName = propertyNames[i];
 			// look for a matching type
 			Class requiredType = bw.getPropertyDescriptor(propertyName).getPropertyType();
-			Map matchingBeans = findMatchingBeans(requiredType);
-			filterMatchingBeans(matchingBeans, beanName);
-			if (matchingBeans != null && matchingBeans.size() == 1) {
-				String autowiredBeanName = (String) matchingBeans.keySet().iterator().next();
-				Object autowiredBean = matchingBeans.values().iterator().next();
+			Map matchingBeans = findAutowireCandidates(beanName, requiredType);
+			// Let's see how many matching beans we got...
+			int count = matchingBeans.size();
+			if (count == 1) {
+				Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();
+				String autowiredBeanName = (String) entry.getKey();
+				Object autowiredBean = entry.getValue();
 				pvs.addPropertyValue(propertyName, autowiredBean);
 				if (mergedBeanDefinition.isSingleton()) {
 					registerDependentBean(autowiredBeanName, beanName);
@@ -799,7 +803,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 							propertyName + "' to bean named '" + autowiredBeanName + "'");
 				}
 			}
-			else if (matchingBeans != null && matchingBeans.size() > 1) {
+			else if (count > 1) {
 				throw new UnsatisfiedDependencyException(
 						mergedBeanDefinition.getResourceDescription(), beanName, propertyName,
 						"There are " + matchingBeans.size() + " beans of type [" + requiredType +
@@ -835,25 +839,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 		return StringUtils.toStringArray(result);
-	}
-
-	/**
-	 * Filter the given map of matching beans for autowiring.
-	 * <p>Do not consider a bean as autowire candidate if constitutes a reference
-	 * back to the same bean or if it has been explicitly excluded from autowiring.
-	 * @param matchingBeans the map of matching beans
-	 * @param beanName the name of the bean to be autowired (may be <code>null</code>)
-	 */
-	private void filterMatchingBeans(Map matchingBeans, String beanName) {
-		for (Iterator it = matchingBeans.keySet().iterator(); it.hasNext();) {
-			String name = (String) it.next();
-			if (containsBeanDefinition(name)) {
-				RootBeanDefinition definition = getMergedBeanDefinition(name);
-				if (ObjectUtils.nullSafeEquals(beanName, name) || !definition.isAutowireCandidate()) {
-					it.remove();
-				}
-			}
-		}
 	}
 
 	/**
@@ -1131,21 +1116,38 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 	//---------------------------------------------------------------------
-	// Abstract method to be implemented by subclasses
+	// Template methods to be implemented by subclasses
 	//---------------------------------------------------------------------
 
 	/**
-	 * Find bean instances that match the required type. Called by autowiring.
-	 * If a subclass cannot obtain information about bean names by type,
+	 * Find bean instances that match the required type.
+	 * Called during autowiring for the specified bean.
+	 * <p>If a subclass cannot obtain information about bean names by type,
 	 * a corresponding exception should be thrown.
-	 * @param requiredType the type of the beans to look up
-	 * @return a Map of bean names and bean instances that match the required type,
-	 * or <code>null</code> if none found
+	 * @param beanName the name of the bean that is about to be wired
+	 * @param requiredType the type of the autowired property or argument
+	 * @return a Map of candidate names and candidate instances that match
+	 * the required type (never <code>null</code>)
 	 * @throws BeansException in case of errors
 	 * @see #autowireByType
 	 * @see #autowireConstructor
 	 */
-	protected abstract Map findMatchingBeans(Class requiredType) throws BeansException;
+	protected Map findAutowireCandidates(String beanName, Class requiredType) throws BeansException {
+		Map result = findMatchingBeans(requiredType);
+		return (result != null ? result : Collections.EMPTY_MAP);
+	}
+
+	/**
+	 * Find bean instances that match the required type. Called by autowiring.
+	 * @param requiredType the type of the beans to look up
+	 * @return a Map of bean names and bean instances that match the required type,
+	 * or <code>null</code> if none found
+	 * @throws BeansException in case of errors
+	 * @deprecated as of Spring 2.0.1: Override <code>findAutowireCandidates</code> instead
+	 */
+	protected Map findMatchingBeans(Class requiredType) throws BeansException {
+		throw new FatalBeanException("Bean lookup by type not supported by this factory");
+	}
 
 
 	//---------------------------------------------------------------------
@@ -1162,10 +1164,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			super(AbstractAutowireCapableBeanFactory.this, getInstantiationStrategy());
 		}
 
-		protected Map findMatchingBeans(Class requiredType) throws BeansException {
-			Map results = AbstractAutowireCapableBeanFactory.this.findMatchingBeans(requiredType);
-			filterMatchingBeans(results, null);
-			return results;
+		protected Map findAutowireCandidates(String beanName, Class requiredType) throws BeansException {
+			return AbstractAutowireCapableBeanFactory.this.findAutowireCandidates(beanName, requiredType);
 		}
 	}
 
