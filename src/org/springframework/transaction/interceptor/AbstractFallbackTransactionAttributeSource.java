@@ -44,22 +44,22 @@ import org.springframework.util.ObjectUtils;
  *
  * <p>This implementation caches attributes by method after they are first used.
  * If it's ever desirable to allow dynamic changing of transaction attributes
- * (unlikely) caching could be made configurable. Caching is desirable because
- * of the cost of evaluating rollback rules.
+ * (which is very unlikely), caching could be made configurable. Caching is
+ * desirable because of the cost of evaluating rollback rules.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 1.1
  */
 public abstract class AbstractFallbackTransactionAttributeSource implements TransactionAttributeSource {
-	
+
 	/**
 	 * Canonical value held in cache to indicate no transaction attribute was
 	 * found for this method, and we don't need to look again.
 	 */
 	private final static Object NULL_TRANSACTION_ATTRIBUTE = new Object();
-	
-	
+
+
 	/**
 	 * Logger available to subclasses.
 	 * <p>As this base class is not marked Serializable, the logger will be recreated
@@ -77,8 +77,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 
 	/**
 	 * Return the transaction attribute for this method invocation.
-	 * Defaults to the class's transaction attribute if no method
-	 * attribute is found
+	 * <p>Defaults to the class's transaction attribute if no method attribute is found.
 	 * @param method method for the current invocation. Can't be <code>null</code>
 	 * @param targetClass target class for this invocation. May be <code>null</code>.
 	 * @return TransactionAttribute for this method, or <code>null</code> if the method is non-transactional
@@ -118,29 +117,30 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * Determine a cache key for the given method and target class.
 	 * <p>Must not produce same key for overloaded methods.
 	 * Must produce same key for different instances of the same method.
-	 * @param method the method
+	 * @param method the method (never <code>null</code>)
 	 * @param targetClass the target class (may be <code>null</code>)
-	 * @return the cache key
+	 * @return the cache key (never <code>null</code>)
 	 */
 	protected Object getCacheKey(Method method, Class targetClass) {
 		return new DefaultCacheKey(method, targetClass);
 	}
 
 	/**
-	 * Same return as getTransactionAttribute method, but doesn't cache the result.
-	 * getTransactionAttribute is a caching decorator for this method.
+	 * Same signature as <code>getTransactionAttribute</code>, but doesn't cache the result.
+	 * <code>getTransactionAttribute</code> is effectively a caching decorator for this method.
+	 * @see #getTransactionAttribute
 	 */
 	private TransactionAttribute computeTransactionAttribute(Method method, Class targetClass) {
-		// don't allow no-public methods as required
-		if(allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
+		// Don't allow no-public methods as required.
+		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;
 		}
-		
+
 		// The method may be on an interface, but we need attributes from the target class.
 		// The AopUtils class provides a convenience method for this. If the target class
 		// is null, the method will be unchanged.
 		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
-		
+
 		// First try is the method in the target class.
 		TransactionAttribute txAtt = findTransactionAttribute(findAllAttributes(specificMethod));
 		if (txAtt != null) {
@@ -170,16 +170,14 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * Subclasses should implement this to return all attributes for this method.
 	 * We need all because of the need to analyze rollback rules.
 	 * @param method the method to retrieve attributes for
-	 * @return all attributes associated with this method.
-	 * May return null.
+	 * @return all attributes associated with this method (may be <code>null</code>)
 	 */
 	protected abstract Collection findAllAttributes(Method method);
 	
 	/**
 	 * Subclasses should implement this to return all attributes for this class.	 
 	 * @param clazz class to retrieve attributes for
-	 * @return all attributes associated with this class.
-	 * May return null.
+	 * @return all attributes associated with this class (may be <code>null</code>)
 	 */
 	protected abstract Collection findAllAttributes(Class clazz);
 
@@ -192,11 +190,9 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * affected by the values of other attributes.
 	 * <p>This implementation takes into account RollbackRuleAttributes,
 	 * if the TransactionAttribute is a RuleBasedTransactionAttribute.
-	 * Return null if it's not transactional. 
-	 * @param atts attributes attached to a method or class. May
-	 * be <code>null</code>, in which case a null TransactionAttribute will be returned.
-	 * @return TransactionAttribute configured transaction attribute, or <code>null</code>
-	 * if none was found
+	 * @param atts attributes attached to a method or class (may be <code>null</code>)
+	 * @return TransactionAttribute the corresponding transaction attribute,
+	 * or <code>null</code> if none was found
 	 */
 	protected TransactionAttribute findTransactionAttribute(Collection atts) {
 		if (atts == null) {
@@ -236,7 +232,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 
 	/**
 	 * Should only public methods be allowed to have transactional semantics?
-	 * Default implementation returns '<code>false</code>'.
+	 * Default implementation returns <code>false</code>.
 	 */
 	protected boolean allowPublicMethodsOnly() {
 		return false;
