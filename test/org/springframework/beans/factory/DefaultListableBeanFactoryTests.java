@@ -776,6 +776,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(ConstructorDependencyBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR));
 		try {
 			lbf.preInstantiateSingletons();
+			fail("Should have thrown UnsatisfiedDependencyException");
 		}
 		catch (UnsatisfiedDependencyException expected) {
 		}
@@ -786,6 +787,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(ConstructorDependencyFactoryBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR));
 		try {
 			lbf.preInstantiateSingletons();
+			fail("Should have thrown UnsatisfiedDependencyException");
 		}
 		catch (UnsatisfiedDependencyException expected) {
 		}
@@ -796,6 +798,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(ConstructorDependencyFactoryBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR));
 		try {
 			lbf.getBeansOfType(String.class);
+			fail("Should have thrown UnsatisfiedDependencyException");
 		}
 		catch (UnsatisfiedDependencyException expected) {
 		}
