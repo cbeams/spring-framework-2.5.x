@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,8 @@ import org.springframework.util.Assert;
 public class PluggableSchemaResolver implements EntityResolver {
 
 	/**
-	 * The location to look for the mapping files. Can be present in multiple
-	 * JAR files.
+	 * The location of the file that defines schema mappings.
+	 * Can be present in multiple JAR files.
 	 */
 	public static final String DEFAULT_SCHEMA_MAPPINGS_LOCATION = "META-INF/spring.schemas";
 
@@ -72,6 +72,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 	 * Loads the schema URL -> schema file location mappings using the default
 	 * mapping file pattern "META-INF/spring.schemas".
 	 * @param classLoader the ClassLoader to use for loading
+	 * (can be <code>null</code>) to use the default ClassLoader)
 	 * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)
 	 */
 	public PluggableSchemaResolver(ClassLoader classLoader) {
@@ -81,14 +82,17 @@ public class PluggableSchemaResolver implements EntityResolver {
 	/**
 	 * Loads the schema URL -> schema file location mappings using the given
 	 * mapping file pattern.
+	 * @param classLoader the ClassLoader to use for loading
+	 * (can be <code>null</code>) to use the default ClassLoader)
+	 * @param schemaMappingsLocation the location of the file that defines schema mappings
+	 * (must not be empty)
 	 * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)
 	 */
 	public PluggableSchemaResolver(ClassLoader classLoader, String schemaMappingsLocation) {
-		Assert.notNull(classLoader, "ClassLoader must not be null");
 		Assert.hasText(schemaMappingsLocation, "Schema mappings location must not be empty");
 		this.classLoader = classLoader;
 		if (logger.isDebugEnabled()) {
-			logger.debug("Loading schema mappings from [" + schemaMappingsLocation + "].");
+			logger.debug("Loading schema mappings from [" + schemaMappingsLocation + "]");
 		}
 		try {
 			this.schemaMappings =
@@ -99,7 +103,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 		}
 		catch (IOException e) {
 			throw new FatalBeanException(
-					"Unable to load schema mappings from location [" + schemaMappingsLocation + "].", e);
+					"Unable to load schema mappings from location [" + schemaMappingsLocation + "]", e);
 		}
 	}
 

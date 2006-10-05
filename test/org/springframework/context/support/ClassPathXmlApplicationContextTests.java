@@ -319,4 +319,18 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		ctx.close();
 	}
 
+	public void testGenericApplicationContextWithXmlBeanDefinitionsAndClassLoaderNull() {
+		GenericApplicationContext ctx = new GenericApplicationContext();
+		ctx.setClassLoader(null);
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(ctx);
+		reader.loadBeanDefinitions(new ClassPathResource("contextB.xml", getClass()));
+		reader.loadBeanDefinitions(new ClassPathResource("contextC.xml", getClass()));
+		reader.loadBeanDefinitions(new ClassPathResource("contextA.xml", getClass()));
+		ctx.refresh();
+		assertTrue(ctx.containsBean("service"));
+		assertTrue(ctx.containsBean("logicOne"));
+		assertTrue(ctx.containsBean("logicTwo"));
+		ctx.close();
+	}
+
 }
