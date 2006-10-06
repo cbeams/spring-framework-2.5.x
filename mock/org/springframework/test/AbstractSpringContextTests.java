@@ -24,7 +24,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Superclass for JUnit test cases using a Spring context.
+ * Superclass for JUnit test cases using Spring
+ * {@link org.springframework.context.ApplicationContext ApplicationContexts}.
  *
  * <p>Maintains a static cache of contexts by key. This has significant performance
  * benefit if initializing the context would take time. While initializing a
