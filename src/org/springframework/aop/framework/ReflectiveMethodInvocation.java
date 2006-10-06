@@ -187,6 +187,8 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	}
 
 	private ReflectiveMethodInvocation nextInvocation() throws CloneNotSupportedException {
+		// force creation of userAttributes before cloning...
+		getUserAttributes();
 		ReflectiveMethodInvocation invocation = (ReflectiveMethodInvocation) clone();
 		invocation.currentInterceptorIndex = this.currentInterceptorIndex + 1;
 		invocation.parent = this;
