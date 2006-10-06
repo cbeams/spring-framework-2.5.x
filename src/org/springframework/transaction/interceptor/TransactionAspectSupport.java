@@ -274,7 +274,7 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 		if (txAttr != null) {
 			// We need a transaction for this method
 			if (logger.isDebugEnabled()) {
-				logger.debug("Getting transaction for " + txInfo.getJoinpointIdentification());
+				logger.debug("Getting transaction for [" + txInfo.getJoinpointIdentification() + "]");
 			}
 
 			// The transaction manager will flag an error if an incompatible tx already exists
@@ -297,15 +297,14 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 	}
 
 	/**
-	 * Execute after successful completion of call, but not
-	 * after an exception was handled.
+	 * Execute after successful completion of call, but not after an exception was handled.
 	 * Do nothing if we didn't create a transaction.
 	 * @param txInfo information about the current transaction
 	 */
 	protected void commitTransactionAfterReturning(TransactionInfo txInfo) {
 		if (txInfo != null && txInfo.hasTransaction()) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking commit for transaction on " + txInfo.getJoinpointIdentification());
+				logger.debug("Completing transaction for [" + txInfo.getJoinpointIdentification() + "]");
 			}
 			this.transactionManager.commit(txInfo.getTransactionStatus());
 		}
@@ -319,11 +318,11 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 	 */
 	protected void completeTransactionAfterThrowing(TransactionInfo txInfo, Throwable ex) {
 		if (txInfo != null && txInfo.hasTransaction()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Completing transaction for [" + txInfo.getJoinpointIdentification() +
+						"] after exception: " + ex);
+			}
 			if (txInfo.transactionAttribute.rollbackOn(ex)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Invoking rollback for transaction on " + txInfo.getJoinpointIdentification() +
-							" due to throwable [" + ex + "]");
-				}
 				try {
 					this.transactionManager.rollback(txInfo.getTransactionStatus());
 				}
@@ -338,10 +337,6 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 			}
 			else {
 				// We don't roll back on this exception.
-				if (logger.isDebugEnabled()) {
-					logger.debug(txInfo.getJoinpointIdentification() + " threw throwable [" + ex +
-							"] but this does not force transaction rollback");
-				}
 				// Will still roll back if TransactionStatus.isRollbackOnly() is true.
 				try {
 					this.transactionManager.commit(txInfo.getTransactionStatus());
