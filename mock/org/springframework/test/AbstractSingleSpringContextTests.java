@@ -21,20 +21,23 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract test class that holds and exposes a single Spring ApplicationContext.
+ * Abstract JUnit test class that holds and exposes a single Spring
+ * {@link org.springframework.context.ApplicationContext ApplicationContext}.
  *
- * <p>This class will cache contexts based on a <i>context key</i>:
- * normally the config locations String array describing the Spring resource
- * descriptors making up the context. Unless the <code>setDirty()</code> method
- * is called by a test, the context will not be reloaded, even across different
- * subclasses of this test. This is particularly beneficial if your context is
- * slow to construct, for example if you are using Hibernate and the time taken
- * to load the mappings is an issue.
+ * <p>This class will cache contexts based on a <i>context key</i>: normally the
+ * config locations String array describing the Spring resource descriptors making
+ * up the context. Unless the {@link #setDirty()} method is called by a test, the
+ * context will not be reloaded, even across different subclasses of this test.
+ * This is particularly beneficial if your context is slow to construct, for example
+ * if you are using Hibernate and the time taken to load the mappings is an issue.
  *
- * <p>If you don't want this behavior, you can override the <code>contextKey()</code>
- * method, most likely to return the test class. In conjunction with this you would
- * probably override the <code>getContext</code> method, which by default loads
- * the locations specified in the <code>getConfigLocations()</code> method.
+ * <p>For such standard usage, simply override the {@link #getConfigLocations()}
+ * method and provide the desired config files.
+ *
+ * <p>If you don't want to load a standard context from an array of config locations,
+ * you can override the {@link #contextKey()} method. In conjunction with this you
+ * typically need to override the {@link #loadContext(Object)} method, which by
+ * default loads the locations specified in the {@link #getConfigLocations()} method.
  *
  * <p><b>WARNING:</b> When doing integration tests from within Eclipse, only use
  * classpath resource URLs. Else, you may see misleading failures when changing
@@ -42,6 +45,9 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see #getConfigLocations()
+ * @see #contextKey()
+ * @see #loadContext(Object)
  */
 public abstract class AbstractSingleSpringContextTests extends AbstractSpringContextTests {
 
@@ -94,6 +100,15 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
+	 * Called to say that the "applicationContext" instance variable is dirty and
+	 * should be reloaded. We need to do this if a test has modified the context
+	 * (for example, by replacing a bean definition).
+	 */
+	protected void setDirty() {
+		setDirty(contextKey());
+	}
+
+	/**
 	 * This implementation is final.
 	 * Override <code>onTearDown</code> for custom behavior.
 	 * @see #onTearDown()
@@ -111,18 +126,44 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 
 
 	/**
-	 * Return a key for this context. Default is the config location array.
+	 * Return a key for this context. Default is the config location array
+	 * as determined by {@link #getConfigLocations()}.
+	 * <p>If you override this method, you will typically have to override
+	 * {@link #loadContext(Object)} as well, being able to handle the key type
+	 * that this method returns.
 	 * @see #getConfigLocations()
 	 */
-	protected final Object contextKey() {
+	protected Object contextKey() {
 		return getConfigLocations();
 	}
 
 	/**
-	 * This implementation loads a context from the given String array.
+	 * This implementation assumes a key of type String array and loads
+	 * a context from the given locations.
+	 * <p>If you override {@link #contextKey()}, you will typically have to
+	 * override this method as well, being able to handle the key type
+	 * that <code>contextKey()</code> returns.
+	 * @see #getConfigLocations()
 	 */
-	protected final ConfigurableApplicationContext loadContext(Object key) throws Exception {
+	protected ConfigurableApplicationContext loadContext(Object key) throws Exception {
 		return loadContextLocations((String[]) key);
+	}
+
+	/**
+	 * Subclasses must implement this method to return the locations of their
+	 * config files, unless they override {@link #contextKey()} and
+	 * {@link #loadContext(Object)} instead.
+	 * <p>A plain path will be treated as class path location, e.g.:
+	 * "org/springframework/whatever/foo.xml". Note however that you may prefix path
+	 * locations with standard Spring resource prefixes. Therefore, a config location
+	 * path prefixed with "classpath:" with behave the same as a plain path, but a
+	 * config location such as "file:/some/path/path/location/appContext.xml" will
+	 * be treated as a filesystem location.
+	 * <p>The default implementation returns an empty array.
+	 * @return an array of config locations
+	 */
+	protected String[] getConfigLocations() {
+		return new String[0];
 	}
 
 	/**
@@ -144,28 +185,5 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	public final int getLoadCount() {
 		return loadCount;
 	}
-
-	/**
-	 * Called to say that the "applicationContext" instance variable is dirty and
-	 * should be reloaded. We need to do this if a test has modified the context
-	 * (for example, by replacing a bean definition).
-	 */
-	protected void setDirty() {
-		setDirty(contextKey());
-	}
-
-
-	/**
-	 * Subclasses must implement this method to return the locations of their
-	 * config files. A plain path will be treated as class path location.
-	 * E.g.: "org/springframework/whatever/foo.xml". Note however that you may
-	 * prefix path locations with standard Spring resource prefixes. Therefore,
-	 * a config location path prefixed with "classpath:" with behave the same
-	 * as a plain path, but a config location such as
-	 * "file:/some/path/path/location/appContext.xml" will be treated as a
-	 * filesystem location.
-	 * @return an array of config locations
-	 */
-	protected abstract String[] getConfigLocations();
 
 }
