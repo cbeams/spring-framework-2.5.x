@@ -15,11 +15,18 @@ Package org.springframework.beans
 * DefaultListableBeanFactory excludes beans which are not autowire candidates even before it obtains the instances
 * fixed PluggableSchemaResolver to accept a null ClassLoader argument (falling back to the default ClassLoader)
 
+Package org.springframework.mock
+* turned AbstractSingleSpringContextTests's "contextKey" and "loadContext" methods non-final again
+* AbstractSingleSpringContextTests provides empty default implementation of "getConfigLocations" (not abstract anymore)
+
 Package org.springframework.orm
 * fixed Hibernate3 LocalSessionFactoryBean's "schemaUpdate" behavior to not run into an IllegalStateException
 
 Package org.springframework.test
 * AbstractTransactionalSpringContextTests invokes "onTearDownAfterTransaction" even for a manually completed transaction
+
+Package org.springframework.transaction
+* JtaTransactionManager's "doRegisterAfterCompletionWithJtaTransaction" avoids NPE if no current JTA transaction active
 
 Package org.springframework.web
 * FreeMarkerView exposes all standard FreeMarker hash models now (including session and request parameters)
