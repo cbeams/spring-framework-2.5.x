@@ -1,3 +1,4 @@
 <Context path="/petclinic" reloadable="false">
-   <Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/>
+   <!-- useSystemClassLoaderAsParent attribute was added since Tomcat 5.5.20, for previous version, remove it -->
+   <Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader" useSystemClassLoaderAsParent="false"/>
 </Context>
