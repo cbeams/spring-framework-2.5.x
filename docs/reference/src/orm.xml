@@ -46,7 +46,7 @@
 
       <listitem>
         <para><emphasis>Common data access exceptions.</emphasis> Spring can
-        wrap exceptions from you O/R mapping tool of choice, converting them
+        wrap exceptions from your O/R mapping tool of choice, converting them
         from proprietary (potentially checked) exceptions to a common runtime
         DataAccessException hierarchy. This allows you to handle most
         persistence exceptions, which are non-recoverable, only in the

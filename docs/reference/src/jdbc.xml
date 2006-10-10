@@ -608,15 +608,15 @@ public class ExecuteAnUpdate {
 				<classname>DataSourceTransactionManager</classname>.
 			</para>
 			<para>
-				Note: the <literal>getDataSourceFromJndi(..)</literal> methods are
-				targeted at applications that do not use a bean factory or application
-				context. With the latter, it is preferable to preconfigure ones beans or
+				Note: the <methodname>getDataSourceFromJndi(..)</methodname> methods are
+				targeted at applications that do not use a Spring Framework IoC container.
+				With the latter, it is preferable to preconfigure one's beans or
 				even <classname>JdbcTemplate</classname> instances in the
-				factory: <classname>JndiObjectFactoryBean</classname> can be used to fetch
-				a <interfacename>DataSource</interfacename> from JNDI and give the
+				container itself: a <classname>JndiObjectFactoryBean</classname> instance
+				can be used to fetch a <interfacename>DataSource</interfacename> from JNDI and give the
 				<interfacename>DataSource</interfacename> bean reference to other
 				beans. Switching to another <interfacename>DataSource</interfacename>
-				is just a matter of configuration then: one can even replace the definition
+				then becomes just a matter of configuration; one can even replace the definition
 				of the <interfacename>FactoryBean</interfacename> with a non-JNDI
 				<interfacename>DataSource</interfacename>!
 			</para>

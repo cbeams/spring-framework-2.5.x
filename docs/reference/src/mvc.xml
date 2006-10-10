@@ -2835,7 +2835,7 @@ public class FileUploadBean {
                 </listitem>
                 <listitem>
                     <para>An <emphasis role="bold">empty</emphasis> <classname>java.util.ArrayList</classname>
-                    will not be added at all (i.e. the <literal>adObject(..)</literal> call will
+                    will not be added at all (i.e. the <methodname>addObject(..)</methodname> call will
                     essentially be a no-op).</para>
                 </listitem>
             </itemizedlist>

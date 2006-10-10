@@ -25,8 +25,8 @@
     Spring Framework and is used in a lot of places. However, you probably
     will not ever have the need to use the <interfacename>BeanWrapper</interfacename> directly. Because this
     is reference documentation however, we felt that some explanation might be
-    right. We're explaining the <interfacename>BeanWrapper</interfacename> in this chapter since if you were
-    going to use it at all, you would probably do that when trying to bind
+    in order. We're explaining the <interfacename>BeanWrapper</interfacename> in this chapter since if you were
+    going to use it at all, you would probably do so when trying to bind
     data to objects, which is strongly related to the <interfacename>BeanWrapper</interfacename>.</para>
 
     <para>Spring uses PropertyEditors all over the place. The concept of a

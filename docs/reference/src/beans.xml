@@ -2213,7 +2213,7 @@ public class ReplacementComputeValue implements MethodReplacer {
 			<section id="beans-factory-scopes-other-web-configuration">
 			    <title>Initial web configuration</title>
                 <para>In order to effect the scoping of beans at the <literal>request</literal>,
-                <literal>session</literal>, and <literal>global session</literal> level
+                <literal>session</literal>, and <literal>global session</literal> levels
                 (i.e. web-scoped beans), some minor initial configuration is required
                 before you can set about defining your bean definitions. Please note that
                 this extra setup is <emphasis>not</emphasis> required if you just want to use the
@@ -2222,7 +2222,7 @@ public class ReplacementComputeValue implements MethodReplacer {
                 initial setup depending on your particular servlet environment. If you are
                 using a Servlet 2.4+ web container, then you need only add the following
                 <interfacename>ContextListener</interfacename> to the XML declarations in
-                your web applications <literal>'web.xml'</literal> file.</para>
+                your web application's <literal>'web.xml'</literal> file.</para>
                 <programlisting><![CDATA[<web-app>
   ...
   <listener>
@@ -3007,7 +3007,7 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
             any beans which are defined in the configuration metadata which is supplied to it that
             implement the <interfacename>BeanPostProcessor</interfacename> interface, and register them
             as post-processors, to be then called appropriately by the container on bean creation. Nothing
-            else needs to be done other than deploying the post-processor in a similar fashion to any
+            else needs to be done other than deploying the post-processors in a similar fashion to any
             other bean. On the other hand, when using a <interfacename>BeanFactory</interfacename>
             implementation, bean post-processors explicitly have to be registered, with code like this:</para>
             <programlisting><![CDATA[ConfigurableBeanFactory factory = new XmlBeanFactory(...);
