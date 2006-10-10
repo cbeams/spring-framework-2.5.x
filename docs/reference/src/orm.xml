@@ -2298,7 +2298,7 @@
               file:</para>
 
               <programlisting>&lt;Context path="/myWebApp" docBase="/my/webApp/location" ...&gt;
-   &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/&gt;
+   &lt;Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader" useSystemClassLoaderAsParent="false"/&gt;
 ...
 &lt;/Context&gt;</programlisting>
 
@@ -2318,11 +2318,13 @@
               url="http://tomcat.apache.org/tomcat-5.5-doc/config/context.html">documentation</ulink>
               for more details about available context locations.</para>
 
-              <para>Note that at the moment (Tomcat 5.5.17), a bug in the XML
-              configuration parsing prevents usage of <literal>Loader
+              <para>Note that versions prior to 5.5.20 contained a bug in the
+              XML configuration parsing preventing usage of <literal>Loader
               </literal>tag inside<emphasis> server.xml </emphasis>(no matter
               if a classloader is specified or not (be it the official or a
-              custom one).</para>
+              custom one). See Tomcat's bugzilla for <ulink
+              url="http://issues.apache.org/bugzilla/show_bug.cgi?id=39704">more
+              details</ulink>.</para>
 
               <para>In Tomcat 4.x, one can use the same contex.xml and place
               it under <emphasis>$CATALINA_HOME</emphasis>/webapps or modify
@@ -2368,6 +2370,23 @@
   ...
   &lt;property name="loadTimeWeaver"&gt;
     &lt;bean class="org.springframework.instrument.classloading.oc4j.OC4JLoadTimeWeaver"/&gt;
+  &lt;/property&gt;
+  ...
+&lt;/bean&gt;</programlisting>
+        </section>
+
+        <section>
+          <title>GlassFish</title>
+
+          <para><ulink url="https://glassfish.dev.java.net/">GlassFish</ulink>
+          application server provides out of the box, an instrumentation cable
+          classloader. Spring supports it through
+          <literal>GlassFishLoadTimeWeaver</literal>:</para>
+
+          <programlisting>&lt;bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
+  ...
+  &lt;property name="loadTimeWeaver"&gt;
+    &lt;bean class="org.springframework.instrument.classloading.glassfish.GlassFishLoadTimeWeaver"/&gt;
   &lt;/property&gt;
   ...
 &lt;/bean&gt;</programlisting>
