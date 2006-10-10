@@ -5,6 +5,7 @@
 	<property name="name" value="petclinic"/>
 
 	<property name="war.dir" value="war"/>
+	<property name="ear.dir" value="ear"/>
 	<property name="src.dir" value="src"/>
 	<property name="build.dir" value=".classes"/>
 	<property name="docs.dir" value="${war.dir}/docs"/>
@@ -19,7 +20,7 @@
 	<property name="testhtml.dir" value="${testreports.dir}/html"/>
 
 	<property name="spring.root" value="../.."/>
-
+	<property name="domain.classes" value="org/springframework/samples/petclinic/*.class"/>
 	<property file="build.properties"/>
 
 
@@ -152,6 +153,7 @@
 		<delete dir="${testbuild.dir}"/>
 		<delete dir="${testreports.dir}"/>
 		<delete dir="${dist.dir}"/>
+		<delete dir="${ear.dir}/package"/>
 
 	</target>
 
@@ -177,10 +179,17 @@
 				<include name="META-INF/*"/>
 			</fileset>
 		</copy>
-		
+
+		<jar jarfile="${weblib.dir}/${name}-domain.jar" compress="true">
+			<fileset dir="${build.dir}">
+				<include name="${domain.classes}"/>
+			</fileset>
+		</jar>
+
 		<jar jarfile="${weblib.dir}/${name}.jar" compress="true">
 			<fileset dir="${build.dir}">
 				<include name="**/*"/>
+				<exclude name="${domain.classes}"/>
 			</fileset>
 		</jar>
 
@@ -269,6 +278,35 @@
 		-->
 	</target>
 
+	<target name="earfile" depends="build, warfile" description="Build the enterprise application archive" >
+
+		<mkdir dir="${ear.dir}/package"/>
+		
+		<copy file="${war.dir}/WEB-INF/lib/${name}-domain.jar" todir="${ear.dir}/package"/>
+			
+		<war warfile="${ear.dir}/package/${name}.war" basedir="${war.dir}" webxml="${war.dir}/WEB-INF/web.xml">
+			<include name="*"/>
+			<include name="docs/**"/>
+			<include name="html/**"/>
+			<include name="WEB-INF/*.*"/>
+			<exclude name="WEB-INF/web.xml"/>
+			<include name="WEB-INF/classes/*.*"/>
+			<include name="WEB-INF/classes/META-INF/**"/>
+			<include name="WEB-INF/lib/**"/>
+			<include name="WEB-INF/jsp/**"/>
+			<include name="META-INF/*"/>
+			<exclude name="**/petclinic-domain.jar"/>
+			<exclude name="**/.*"/>
+			<exclude name="WEB-INF/geronimo-web.xml"/>
+		</war>
+		
+		<ear earfile="${dist.dir}/${name}.ear" basedir="${ear.dir}/package" appxml="${ear.dir}/META-INF/application.xml" manifest="${ear.dir}/META-INF/MANIFEST.MF">
+			<include name="${name}.war" />
+
+			<include name="${name}-domain.jar"/>
+		</ear>
+
+	</target>
 
 	<target name="warfile" depends="build" description="Build the web application archive">
 
@@ -284,7 +322,7 @@
 			<include name="WEB-INF/classes/META-INF/**"/>
 			<include name="WEB-INF/lib/**"/>
 			<include name="WEB-INF/jsp/**"/>
-			<include name="META-INF/*"/>			
+			<include name="META-INF/*"/>
 			<exclude name="**/.*"/>
 			<exclude name="WEB-INF/geronimo-web.xml"/>
 		</war>
