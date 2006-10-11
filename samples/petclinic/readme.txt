@@ -91,10 +91,11 @@ The basic steps are:
 - if you're running on Tomcat 4.x or 5.x, modify "TOMCAT_HOME/conf/server.xml"
 and add a new "<Context>" element for petclinic (see below)
 - if you're running on Tomcat 5.x, you can also deploy the WAR including
-"META-INF/context.xml" from this application's "tomcat" directory
+"META-INF/context.xml" from this application's "war" directory
 
 <Context path="/petclinic" docBase="/petclinic/location" ...>
-  <Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader"/>
+  <!-- please note that useSystemClassLoaderAsParent is available since Tomcat 5.5.20 / remove if previous versions are being used -->
+  <Loader loaderClass="org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader" useSystemClassLoaderAsParent="false"/>
 ...
 </Context>
 

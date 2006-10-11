@@ -21,6 +21,8 @@
 
 	<property name="spring.root" value="../.."/>
 	<property name="domain.classes" value="org/springframework/samples/petclinic/*.class"/>
+	<property name="tomcat.context" value="tomcat/META-INF"/>
+	
 	<property file="build.properties"/>
 
 
@@ -180,12 +182,14 @@
 			</fileset>
 		</copy>
 
+		<!-- petclinic-domain.jar -->
 		<jar jarfile="${weblib.dir}/${name}-domain.jar" compress="true">
 			<fileset dir="${build.dir}">
 				<include name="${domain.classes}"/>
 			</fileset>
 		</jar>
 
+		<!-- rest of petclinic classes -->
 		<jar jarfile="${weblib.dir}/${name}.jar" compress="true">
 			<fileset dir="${build.dir}">
 				<include name="**/*"/>
@@ -193,6 +197,7 @@
 			</fileset>
 		</jar>
 
+		<!-- copy Tomcat META-INF -->
 		<copy todir="${weblib.dir}" preservelastmodified="true">
 			<fileset dir="${db.dir}/mysql">
 				<include name="mysql*.jar"/>

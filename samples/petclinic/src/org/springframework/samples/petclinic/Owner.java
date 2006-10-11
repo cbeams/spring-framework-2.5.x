@@ -12,13 +12,43 @@ import org.springframework.beans.support.PropertyComparator;
 
 /**
  * Simple JavaBean domain object representing an owner.
- *
+ * 
  * @author Ken Krebs
  * @author Juergen Hoeller
  */
 public class Owner extends Person {
 
+	private String address;
+
+	private String city;
+
+	private String telephone;
+
 	private Set pets;
+
+	public String getAddress() {
+		return this.address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getCity() {
+		return this.city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getTelephone() {
+		return this.telephone;
+	}
+
+	public void setTelephone(String telephone) {
+		this.telephone = telephone;
+	}
 
 	protected void setPetsInternal(Set pets) {
 		this.pets = pets;
@@ -43,8 +73,8 @@ public class Owner extends Person {
 	}
 
 	/**
-	 * Return the Pet with the given name,
-	 * or null if none found for this Owner.
+	 * Return the Pet with the given name, or null if none found for this Owner.
+	 * 
 	 * @param name to test
 	 * @return true if pet name is already in use
 	 */
@@ -53,8 +83,8 @@ public class Owner extends Person {
 	}
 
 	/**
-	 * Return the Pet with the given name,
-	 * or null if none found for this Owner.
+	 * Return the Pet with the given name, or null if none found for this Owner.
+	 * 
 	 * @param name to test
 	 * @return true if pet name is already in use
 	 */
