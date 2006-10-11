@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,17 @@ package org.springframework.web.servlet.view.freemarker;
 import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.ServletContext;
+
 import freemarker.cache.ClassTemplateLoader;
+import freemarker.ext.jsp.TaglibFactory;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import freemarker.ext.jsp.TaglibFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
 import org.springframework.web.context.ServletContextAware;
-
-import javax.servlet.ServletContext;
 
 /**
  * JavaBean to configure FreeMarker for web usage, via the "configLocation"
@@ -82,6 +82,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 
 	private TaglibFactory taglibFactory;
 
+
 	/**
 	 * Set a preconfigured Configuration to use for the FreeMarker web config, e.g. a
 	 * shared one for web and email usage, set up via FreeMarkerConfigurationFactoryBean.
@@ -94,11 +95,12 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	}
 
 	/**
-	 * Initialize the {@link TaglibFactory}.
+	 * Initialize the {@link TaglibFactory} for the given ServletContext.
 	 */
 	public void setServletContext(ServletContext servletContext) {
 		this.taglibFactory = new TaglibFactory(servletContext);
 	}
+
 
 	/**
 	 * Initialize FreeMarkerConfigurationFactory's Configuration
@@ -118,19 +120,23 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	 * for the Spring-provided macros, added to the end of the list.
 	 */
 	protected void postProcessTemplateLoaders(List templateLoaders) {
-		templateLoaders.add(new ClassTemplateLoader(getClass()));
+		templateLoaders.add(new ClassTemplateLoader(FreeMarkerConfigurer.class, ""));
 		logger.info("ClassTemplateLoader for Spring macros added to FreeMarker configuration");
 	}
 
+
 	/**
 	 * Return the Configuration object wrapped by this bean.
-	 * @see org.springframework.web.servlet.view.freemarker.FreeMarkerConfig#getConfiguration()
 	 */
 	public Configuration getConfiguration() {
 		return this.configuration;
 	}
 
+	/**
+	 * Return the TaglibFactory object wrapped by this bean.
+	 */
 	public TaglibFactory getTaglibFactory() {
 		return this.taglibFactory;
 	}
+
 }
