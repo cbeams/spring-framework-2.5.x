@@ -767,10 +767,13 @@
 			<packageset dir="${src.dir}">
 				<include name="org/springframework/**"/>
 			</packageset>
+			<packageset dir="${mock.dir}">
+				<include name="org/springframework/**"/>
+			</packageset>
 			<packageset dir="${tiger.src.dir}">
 				<include name="org/springframework/**"/>
 			</packageset>
-			<packageset dir="${mock.dir}">
+			<packageset dir="${tiger.mock.dir}">
 				<include name="org/springframework/**"/>
 			</packageset>
 			<link href="http://java.sun.com/j2ee/1.4/docs/api"/>
