@@ -252,7 +252,7 @@
         <programlisting><![CDATA[<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
   <property name="dataSource" ref="dataSource"/>
 </bean>]]></programlisting>
-        <para>If we use JTA in a J2EE container, as in the <filename>''dataAccessContext-jta.xml''</filename>
+        <para>If we use JTA in a J2EE container, as in the <filename>'dataAccessContext-jta.xml'</filename>
         file from the same sample application, we use a container <interfacename>DataSource</interfacename>,
         obtained via JNDI, in conjunction with Spring's <classname>JtaTransactionManager</classname>.
         The <classname>JtaTransactionManager</classname> doesn't need to know about the
