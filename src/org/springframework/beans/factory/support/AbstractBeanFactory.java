@@ -295,7 +295,10 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 					bean = getObjectForBeanInstance(scopedInstance, name, mergedBeanDefinition);
 				}
 				catch (IllegalStateException ex) {
-					throw new BeanCreationException(beanName, "Scope '" + scopeName + "' is not active", ex);
+					throw new BeanCreationException(beanName,
+							"Scope '" + scopeName + "' is not active for the current thread; " +
+							"consider defining a scoped proxy for this bean if you intend to refer to it from a singleton",
+							ex);
 				}
 			}
 		}
