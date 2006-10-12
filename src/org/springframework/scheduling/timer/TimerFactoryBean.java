@@ -24,18 +24,20 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.ObjectUtils;
 
 /**
- * FactoryBean that sets up a JDK 1.3+ Timer and exposes it for bean references.
+ * FactoryBean that sets up a {@link java.util.Timer} and exposes it for bean references.
  *
- * <p>Allows for registration of ScheduledTimerTasks, automatically starting
- * the Timer on initialization and cancelling it on destruction of the context.
- * In scenarios that just require static registration of tasks at startup,
- * there is no need to access the Timer instance itself in application code.
+ * <p>Allows for registration of {@link ScheduledTimerTask ScheduledTimerTasks},
+ * automatically starting the {@link Timer} on initialization and cancelling it
+ * on destruction of the context. In scenarios that just require static registration
+ * of tasks at startup, there is no need to access the {@link Timer} instance itself
+ * in application code at all.
  *
- * <p>Note that Timer uses a TimerTask instance that is shared between
- * repeated executions, in contrast to Quartz which instantiates a new
- * Job for each execution.
+ * <p>Note that the {@link Timer} mechanism uses a {@link java.util.TimerTask}
+ * instance that is shared between repeated executions, in contrast to Quartz
+ * which creates a new Job instance for each execution.
  *
  * @author Juergen Hoeller
  * @since 19.02.2004
@@ -84,26 +86,9 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 		logger.info("Initializing Timer");
 		this.timer = createTimer(this.daemon);
 
-		// Register all ScheduledTimerTasks.
-		if (this.scheduledTimerTasks != null) {
-			for (int i = 0; i < this.scheduledTimerTasks.length; i++) {
-				ScheduledTimerTask scheduledTask = this.scheduledTimerTasks[i];
-				if (scheduledTask.getPeriod() > 0) {
-					// repeated task execution
-					if (scheduledTask.isFixedRate()) {
-						this.timer.scheduleAtFixedRate(
-								scheduledTask.getTimerTask(), scheduledTask.getDelay(), scheduledTask.getPeriod());
-					}
-					else {
-						this.timer.schedule(
-								scheduledTask.getTimerTask(), scheduledTask.getDelay(), scheduledTask.getPeriod());
-					}
-				}
-				else {
-					// One-time task execution.
-					this.timer.schedule(scheduledTask.getTimerTask(), scheduledTask.getDelay());
-				}
-			}
+		// Register specified ScheduledTimerTasks, if necessary.
+		if (!ObjectUtils.isEmpty(this.scheduledTimerTasks)) {
+			registerTasks(this.scheduledTimerTasks, this.timer);
 		}
 	}
 
@@ -117,6 +102,31 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 	 */
 	protected Timer createTimer(boolean daemon) {
 		return new Timer(daemon);
+	}
+
+	/**
+	 * Register the specified {@link ScheduledTimerTask ScheduledTimerTasks}
+	 * on the given {@link Timer}.
+	 * @param tasks the specified ScheduledTimerTasks (never empty)
+	 * @param timer the Timer to register the tasks on.
+	 */
+	protected void registerTasks(ScheduledTimerTask[] tasks, Timer timer) {
+		for (int i = 0; i < tasks.length; i++) {
+			ScheduledTimerTask task = tasks[i];
+			if (task.getPeriod() > 0) {
+				// repeated task execution
+				if (task.isFixedRate()) {
+					timer.scheduleAtFixedRate(task.getTimerTask(), task.getDelay(), task.getPeriod());
+				}
+				else {
+					timer.schedule(task.getTimerTask(), task.getDelay(), task.getPeriod());
+				}
+			}
+			else {
+				// One-time task execution.
+				timer.schedule(task.getTimerTask(), task.getDelay());
+			}
+		}
 	}
 
 
