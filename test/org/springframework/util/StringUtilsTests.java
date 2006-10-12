@@ -43,7 +43,20 @@ public class StringUtilsTests extends TestCase {
 		assertEquals(true, StringUtils.hasText("t"));
 	}
 
+	public void testContainsWhitespace() throws Exception {
+		assertFalse(StringUtils.containsWhitespace(null));
+		assertFalse(StringUtils.containsWhitespace(""));
+		assertFalse(StringUtils.containsWhitespace("a"));
+		assertFalse(StringUtils.containsWhitespace("abc"));
+		assertTrue(StringUtils.containsWhitespace(" "));
+		assertTrue(StringUtils.containsWhitespace(" a"));
+		assertTrue(StringUtils.containsWhitespace("abc "));
+		assertTrue(StringUtils.containsWhitespace("a b"));
+		assertTrue(StringUtils.containsWhitespace("a  b"));
+	}
+
 	public void testTrimWhitespace() throws Exception {
+		assertEquals(null, StringUtils.trimWhitespace(null));
 		assertEquals("", StringUtils.trimWhitespace(""));
 		assertEquals("", StringUtils.trimWhitespace(" "));
 		assertEquals("", StringUtils.trimWhitespace("\t"));
@@ -55,6 +68,7 @@ public class StringUtilsTests extends TestCase {
 	}
 
 	public void testTrimLeadingWhitespace() throws Exception {
+		assertEquals(null, StringUtils.trimLeadingWhitespace(null));
 		assertEquals("", StringUtils.trimLeadingWhitespace(""));
 		assertEquals("", StringUtils.trimLeadingWhitespace(" "));
 		assertEquals("", StringUtils.trimLeadingWhitespace("\t"));
@@ -66,6 +80,7 @@ public class StringUtilsTests extends TestCase {
 	}
 
 	public void testTrimTrailingWhitespace() throws Exception {
+		assertEquals(null, StringUtils.trimTrailingWhitespace(null));
 		assertEquals("", StringUtils.trimTrailingWhitespace(""));
 		assertEquals("", StringUtils.trimTrailingWhitespace(" "));
 		assertEquals("", StringUtils.trimTrailingWhitespace("\t"));

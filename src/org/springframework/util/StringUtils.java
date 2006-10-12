@@ -64,24 +64,26 @@ public abstract class StringUtils {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Check if a String has length.
+	 * Check that the given String is neither <code>null</code> nor of length 0.
+	 * Note: Will return <code>true</code> for a String that purely consists of whitespace.
 	 * <p><pre>
 	 * StringUtils.hasLength(null) = false
 	 * StringUtils.hasLength("") = false
 	 * StringUtils.hasLength(" ") = true
 	 * StringUtils.hasLength("Hello") = true
 	 * </pre>
-	 * @param str the String to check, may be <code>null</code>
+	 * @param str the String to check (may be <code>null</code>)
 	 * @return <code>true</code> if the String is not null and has length
+	 * @see #hasText(String)
 	 */
 	public static boolean hasLength(String str) {
 		return (str != null && str.length() > 0);
 	}
 
 	/**
-	 * Check if a String has text. More specifically, returns <code>true</code>
-	 * if the string not <code>null<code>, it's <code>length is > 0</code>, and
-	 * it has at least one non-whitespace character.
+	 * Check whether the given String has actual text.
+	 * More specifically, returns <code>true</code> if the string not <code>null<code>,
+	 * its length is greater than 0, and it contains at least one non-whitespace character.
 	 * <p><pre>
 	 * StringUtils.hasText(null) = false
 	 * StringUtils.hasText("") = false
@@ -89,18 +91,38 @@ public abstract class StringUtils {
 	 * StringUtils.hasText("12345") = true
 	 * StringUtils.hasText(" 12345 ") = true
 	 * </pre>
-	 * @param str the String to check, may be <code>null</code>
-	 * @return <code>true</code> if the String is not null, length > 0,
-	 * and not whitespace only
+	 * @param str the String to check (may be <code>null</code>)
+	 * @return <code>true</code> if the String is not <code>null</code>, its length is
+	 * greater than 0, and is does not contain whitespace only
 	 * @see java.lang.Character#isWhitespace
 	 */
 	public static boolean hasText(String str) {
-		int strLen;
-		if (str == null || (strLen = str.length()) == 0) {
+		if (!hasLength(str)) {
 			return false;
 		}
+		int strLen = str.length();
 		for (int i = 0; i < strLen; i++) {
 			if (!Character.isWhitespace(str.charAt(i))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Check whether the given String contains any whitespace characters.
+	 * @param str the String to check (may be <code>null</code>)
+	 * @return <code>true</code> if the String is not empty and
+	 * contains at least 1 whitespace character
+	 * @see java.lang.Character#isWhitespace
+	 */
+	public static boolean containsWhitespace(String str) {
+		if (!hasLength(str)) {
+			return false;
+		}
+		int strLen = str.length();
+		for (int i = 0; i < strLen; i++) {
+			if (Character.isWhitespace(str.charAt(i))) {
 				return true;
 			}
 		}
