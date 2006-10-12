@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,20 +19,20 @@ package org.springframework.scheduling.concurrent;
 import java.util.concurrent.TimeUnit;
 
 /**
- * JavaBean that describes a scheduled executor task, consisting of
- * the Runnable and a delay plus period. Period needs to be specified;
+ * JavaBean that describes a scheduled executor task, consisting of the
+ * {@link Runnable} and a delay plus period. The period needs to be specified;
  * there is no point in a default for it.
  *
- * <p>The JDK 1.5 ScheduledExecutorService does not offer more sophisticated
- * scheduling options such as cron expressions. Consider using Quartz for
- * such advanced needs.
+ * <p>The JDK 1.5 {@link java.util.concurrent.ScheduledExecutorService} does
+ * not offer more sophisticated scheduling options such as cron expressions.
+ * Consider using Quartz for such advanced needs.
  *
- * <p>Note that ScheduledExecutorService uses a Runnable instance that is
- * shared between repeated executions, in contrast to Quartz which
- * instantiates a new Job for each execution.
+ * <p>Note that the {@link java.util.concurrent.ScheduledExecutorService} mechanism
+ * uses a {@link Runnable} instance that is shared between repeated executions,
+ * in contrast to Quartz which creates a new Job instance for each execution.
  *
- * <p>This is the direct analogon of the ScheduledTimerListener class for
- * the JDK 1.3 Timer mechanism.
+ * <p>This class is analogous to the {@link org.springframework.scheduling.timer.ScheduledTimerTask}
+ * class for the JDK 1.3 {@link java.util.Timer} facility.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -136,7 +136,7 @@ public class ScheduledExecutorTask {
 	 * <p>Note that the semantics of the period vary between fixed-rate
 	 * and fixed-delay execution.
 	 * @see #setFixedRate
-     * @see #isOneTimeTask() 
+	 * @see #isOneTimeTask()
 	 */
 	public void setPeriod(long period) {
 		this.period = period;
@@ -168,7 +168,7 @@ public class ScheduledExecutorTask {
 
 	/**
 	 * Set whether to schedule as fixed-rate execution, rather than
-	 * fixed-delay execution. Default is "false", i.e. fixed delay.
+	 * fixed-delay execution. Default is "false", that is, fixed delay.
 	 * <p>See ScheduledExecutorService javadoc for details on those execution modes.
 	 * @see java.util.concurrent.ScheduledExecutorService#scheduleWithFixedDelay(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
 	 * @see java.util.concurrent.ScheduledExecutorService#scheduleAtFixedRate(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
@@ -184,14 +184,13 @@ public class ScheduledExecutorTask {
 		return fixedRate;
 	}
 
-
-    /**
-     * Is this task only ever going to execute once?
-     * @return <code>true</code> if this task is only ever going to execute once.
-     * @see #getPeriod() 
-     */
-    public boolean isOneTimeTask() {
-        return this.period < 1;
-    }
+	/**
+	 * Is this task only ever going to execute once?
+	 * @return <code>true</code> if this task is only ever going to execute once.
+	 * @see #getPeriod()
+	 */
+	public boolean isOneTimeTask() {
+		return (this.period < 1);
+	}
 
 }
