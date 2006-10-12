@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,9 +16,9 @@
 
 package org.springframework.beans.propertyeditors;
 
-import java.util.Properties;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
@@ -36,7 +36,7 @@ public class PropertiesEditorTests extends TestCase {
 		String s = "foo=bar";
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(s);
-		Properties p= (Properties) pe.getValue();
+		Properties p = (Properties) pe.getValue();
 		assertTrue("contains one entry", p.entrySet().size() == 1);
 		assertTrue("foo=bar", p.get("foo").equals("bar"));
 	}
@@ -46,7 +46,7 @@ public class PropertiesEditorTests extends TestCase {
 			"me=mi";
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(s);
-		Properties p= (Properties) pe.getValue();
+		Properties p = (Properties) pe.getValue();
 		assertTrue("contains two entries", p.entrySet().size() == 2);
 		assertTrue("foo=bar with whitespace", p.get("foo").equals("bar with whitespace"));
 		assertTrue("me=mi", p.get("me").equals("mi"));
@@ -58,7 +58,7 @@ public class PropertiesEditorTests extends TestCase {
 			"x=y=z";
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(s);
-		Properties p= (Properties) pe.getValue();
+		Properties p = (Properties) pe.getValue();
 		assertTrue("contains two entries", p.entrySet().size() == 3);
 		assertTrue("foo=bar", p.get("foo").equals("bar"));
 		assertTrue("me=mi", p.get("me").equals("mi"));
@@ -69,7 +69,7 @@ public class PropertiesEditorTests extends TestCase {
 		String s = "foo=bar\nme=mi\nx=";
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(s);
-		Properties p= (Properties) pe.getValue();
+		Properties p = (Properties) pe.getValue();
 		assertTrue("contains two entries", p.entrySet().size() == 3);
 		assertTrue("foo=bar", p.get("foo").equals("bar"));
 		assertTrue("me=mi", p.get("me").equals("mi"));
@@ -80,7 +80,7 @@ public class PropertiesEditorTests extends TestCase {
 		String s = "foo\nme=mi\nx=x";
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(s);
-		Properties p= (Properties) pe.getValue();
+		Properties p = (Properties) pe.getValue();
 		assertTrue("contains three entries", p.entrySet().size() == 3);
 		assertTrue("foo is empty", p.get("foo").equals(""));
 		assertTrue("me=mi", p.get("me").equals("mi"));
@@ -98,7 +98,7 @@ public class PropertiesEditorTests extends TestCase {
 			"\n";
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(s);
-		Properties p= (Properties) pe.getValue();
+		Properties p = (Properties) pe.getValue();
 		assertTrue("contains three entries", p.entrySet().size() == 3);
 		assertTrue("foo is bar", p.get("foo").equals("bar"));
 		assertTrue("me=mi", p.get("me").equals("mi"));
@@ -119,7 +119,7 @@ public class PropertiesEditorTests extends TestCase {
 			"\n";
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(s);
-		Properties p= (Properties) pe.getValue();
+		Properties p = (Properties) pe.getValue();
 		assertTrue("contains 3 entries, not " + p.size(), p.size() == 3);
 		assertTrue("foo is bar", p.get("foo").equals("bar"));
 		assertTrue("me=mi", p.get("me").equals("mi"));
@@ -127,18 +127,15 @@ public class PropertiesEditorTests extends TestCase {
 	
 	public void testNull() {
 		PropertiesEditor pe= new PropertiesEditor();
-		try {
-			pe.setAsText(null);
-			fail("Must reject null");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		pe.setAsText(null);
+		Properties p = (Properties) pe.getValue();
+		assertEquals(0, p.size());
 	}
 	
 	public void testEmptyString() {
 		PropertiesEditor pe = new PropertiesEditor();
 		pe.setAsText("");
-		Properties p= (Properties) pe.getValue();
+		Properties p = (Properties) pe.getValue();
 		assertTrue("empty string means empty properties", p.isEmpty());
 	}
 

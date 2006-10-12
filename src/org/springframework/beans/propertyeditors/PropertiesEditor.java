@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,7 +25,7 @@ import java.util.Properties;
 
 /**
  * Custom {@link java.beans.PropertyEditor} for {@link Properties} objects.
- * 
+ *
  * <p>Handles conversion from content {@link String} to <code>Properties</code> object.
  * Also handles {@link Map} to <code>Properties</code> conversion, for populating
  * a <code>Properties</code> object via XML "map" entries.
@@ -52,19 +52,18 @@ public class PropertiesEditor extends PropertyEditorSupport {
 	 * @param text the text to be so converted
 	 */
 	public void setAsText(String text) throws IllegalArgumentException {
-		if (text == null) {
-			throw new IllegalArgumentException("Cannot set Properties to null");
-		}
 		Properties props = new Properties();
-		try {
-			// must use the ISO-8859-1 encosing because Properties.load(stream) does
-			props.load(new ByteArrayInputStream(text.getBytes("ISO-8859-1")));
-			dropComments(props);
-		}
-		catch (IOException ex) {
-			// Should never happen.
-			throw new IllegalArgumentException(
-					"Failed to parse [" + text + "] into Properties: " + ex.getMessage());
+		if (text != null) {
+			try {
+				// Must use the ISO-8859-1 encoding because Properties.load(stream) expects it.
+				props.load(new ByteArrayInputStream(text.getBytes("ISO-8859-1")));
+				dropComments(props);
+			}
+			catch (IOException ex) {
+				// Should never happen.
+				throw new IllegalArgumentException(
+						"Failed to parse [" + text + "] into Properties: " + ex.getMessage());
+			}
 		}
 		setValue(props);
 	}
