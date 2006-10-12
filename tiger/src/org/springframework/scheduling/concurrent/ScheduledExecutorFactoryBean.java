@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * {@link FactoryBean} that sets up a JDK 1.5 {@link ScheduledExecutorService}
@@ -46,9 +47,8 @@ import org.springframework.util.Assert;
  * that is shared between repeated executions, in contrast to Quartz which
  * instantiates a new Job for each execution.
  *
- * <p>This class is the direct analogue of the
- * {@link org.springframework.scheduling.timer.TimerFactoryBean} class for
- * the JDK 1.3 {@link java.util.Timer} mechanism.
+ * <p>This class is analogous to the {@link org.springframework.scheduling.timer.TimerFactoryBean}
+ * class for the JDK 1.3 {@link java.util.Timer} facility.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -89,6 +89,7 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, InitializingBe
 	 * Default is 1.
 	 */
 	public void setPoolSize(int poolSize) {
+		Assert.isTrue(poolSize > 0, "poolSize must be 1 or higher");
 		this.poolSize = poolSize;
 	}
 
@@ -112,34 +113,59 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, InitializingBe
 	}
 
 
-    public void afterPropertiesSet() {
-        Assert.isTrue(this.poolSize > 0, "The [poolSize] property cannot be set to a value less than 0 (zero).");
-        Assert.notEmpty(this.scheduledExecutorTasks, "At least one [ScheduledExecutorTask] must be provided via the [scheduledExecutorTasks] property");
+	public void afterPropertiesSet() {
+		logger.info("Initializing SchedulerExecutorService");
+		this.executor = createExecutor(this.poolSize, this.threadFactory, this.rejectedExecutionHandler);
 
-        logger.info("Initializing SchedulerExecutorService");
+		// Register specified ScheduledExecutorTasks, if necessary.
+		if (!ObjectUtils.isEmpty(this.scheduledExecutorTasks)) {
+			registerTasks(this.scheduledExecutorTasks, this.executor);
+		}
+	}
 
-        this.executor = createExecutor(this.poolSize, this.threadFactory, this.rejectedExecutionHandler);
-        registerAllScheduledExecutorTasks();
-    }
+	/**
+	 * Create a new {@link ScheduledExecutorService} instance.
+	 * Called by <code>afterPropertiesSet</code>.
+	 * <p>Default implementation creates a {@link ScheduledThreadPoolExecutor}.
+	 * Can be overridden in subclasses to provide custom
+	 * {@link ScheduledExecutorService} instances.
+	 * @param poolSize the specified pool size
+	 * @param threadFactory the ThreadFactory to use
+	 * @param rejectedExecutionHandler the RejectedExecutionHandler to use
+	 * @return a new ScheduledExecutorService instance
+	 * @see #afterPropertiesSet()
+	 * @see java.util.concurrent.ScheduledThreadPoolExecutor#ScheduledThreadPoolExecutor
+	 */
+	protected ScheduledExecutorService createExecutor(
+			int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
-    /**
-     * Create a new ScheduledExecutorService instance.
-     * Called by <code>afterPropertiesSet</code>.
-     * <p>Default implementation creates a ScheduledThreadPoolExecutor.
-     * Can be overridden in subclasses to provide custom
-     * ScheduledExecutorService instances.
-     * @param poolSize the specified pool size
-     * @param threadFactory the ThreadFactory to use
-     * @param rejectedExecutionHandler the RejectedExecutionHandler to use
-     * @return a new ScheduledExecutorService instance
-     * @see #afterPropertiesSet()
-     * @see java.util.concurrent.ScheduledThreadPoolExecutor#ScheduledThreadPoolExecutor
-     */
-    protected ScheduledExecutorService createExecutor(
-            int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
+		return new ScheduledThreadPoolExecutor(poolSize, threadFactory, rejectedExecutionHandler);
+	}
 
-        return new ScheduledThreadPoolExecutor(poolSize, threadFactory, rejectedExecutionHandler);
-    }
+	/**
+	 * Register the specified {@link ScheduledExecutorTask ScheduledExecutorTasks}
+	 * on the given {@link ScheduledExecutorService}.
+	 * @param tasks the specified ScheduledExecutorTasks (never empty)
+	 * @param executor the ScheduledExecutorService to register the tasks on.
+	 */
+	protected void registerTasks(ScheduledExecutorTask[] tasks, ScheduledExecutorService executor) {
+		for (int i = 0; i < tasks.length; i++) {
+			ScheduledExecutorTask task = tasks[i];
+			if (task.isOneTimeTask()) {
+				executor.schedule(task.getRunnable(), task.getDelay(), task.getTimeUnit());
+			}
+			else {
+				if (task.isFixedRate()) {
+					executor.scheduleAtFixedRate(
+							task.getRunnable(), task.getDelay(), task.getPeriod(), task.getTimeUnit());
+				}
+				else {
+					executor.scheduleWithFixedDelay(
+							task.getRunnable(), task.getDelay(), task.getPeriod(), task.getTimeUnit());
+				}
+			}
+		}
+	}
 
 
 	public Object getObject() {
@@ -164,28 +190,5 @@ public class ScheduledExecutorFactoryBean implements FactoryBean, InitializingBe
 		logger.info("Shutting down ScheduledExecutorService");
 		this.executor.shutdown();
 	}
-
-
-    private void registerAllScheduledExecutorTasks() {
-        for (int i = 0; i < this.scheduledExecutorTasks.length; i++) {
-            ScheduledExecutorTask scheduledTask = this.scheduledExecutorTasks[i];
-            if (scheduledTask.isOneTimeTask()) {
-                this.executor.schedule(
-                        scheduledTask.getRunnable(), scheduledTask.getDelay(), scheduledTask.getTimeUnit());
-            }
-            else {
-                if (scheduledTask.isFixedRate()) {
-                    this.executor.scheduleAtFixedRate(
-                            scheduledTask.getRunnable(), scheduledTask.getDelay(), scheduledTask.getPeriod(),
-                            scheduledTask.getTimeUnit());
-                }
-                else {
-                    this.executor.scheduleWithFixedDelay(
-                            scheduledTask.getRunnable(), scheduledTask.getDelay(), scheduledTask.getPeriod(),
-                            scheduledTask.getTimeUnit());
-                }
-            }
-        }
-    }
 
 }
