@@ -2112,10 +2112,10 @@ public class ReplacementComputeValue implements MethodReplacer {
 		    To define a bean as a singleton in XML, you would write configuration like so:</para>
 		    <programlisting><![CDATA[<bean id="accountService" class="com.foo.DefaultAccountService"/>
 
-]]><lineannotation>&lt;!-- the following is equivalent, though redundant (singleton scope is the default) --&gt;</lineannotation><![CDATA[
+]]><lineannotation>&lt;!-- the following is equivalent, though redundant (singleton scope is the default); using <literal>spring-beans-2.0.dtd</literal> --&gt;</lineannotation><![CDATA[
 <bean id="accountService" class="com.foo.DefaultAccountService" scope="singleton"/>
 
-]]><lineannotation>&lt;!-- the following is equivalent, though redundant (and preserved for backward compatibility) --&gt;</lineannotation><![CDATA[
+]]><lineannotation>&lt;!-- the following is equivalent and preserved for backward compatibility in <literal>spring-beans.dtd</literal> --&gt;</lineannotation><![CDATA[
 <bean id="accountService" class="com.foo.DefaultAccountService" singleton="true"/>]]></programlisting>
 		</section>
 
@@ -2144,9 +2144,10 @@ public class ReplacementComputeValue implements MethodReplacer {
 			    </mediaobject>
 		    </para>
 		    <para>To define a bean as a prototype in XML, you would write configuration like so:</para>
-		    <programlisting><![CDATA[<bean id="accountService" class="com.foo.DefaultAccountService" scope="prototype"/>
+		    <programlisting><lineannotation>&lt;!-- using <literal>spring-beans-2.0.dtd</literal> --&gt;</lineannotation><![CDATA[
+<bean id="accountService" class="com.foo.DefaultAccountService" scope="prototype"/>
 
-]]><lineannotation>&lt;!-- the following is equivalent too (and preserved for backward compatibility) --&gt;</lineannotation><![CDATA[
+]]><lineannotation>&lt;!-- the following is equivalent and preserved for backward compatibility in <literal>spring-beans.dtd</literal> --&gt;</lineannotation><![CDATA[
 <bean id="accountService" class="com.foo.DefaultAccountService" singleton="false"/>]]></programlisting>
 			<para>There is one quite important thing to be aware of when deploying a bean
 			in the prototype scope, in that the lifecycle of the bean changes slightly.
