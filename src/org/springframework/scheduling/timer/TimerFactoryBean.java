@@ -113,18 +113,16 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 	protected void registerTasks(ScheduledTimerTask[] tasks, Timer timer) {
 		for (int i = 0; i < tasks.length; i++) {
 			ScheduledTimerTask task = tasks[i];
-			if (task.getPeriod() > 0) {
-				// repeated task execution
+			if (task.isOneTimeTask()) {
+				timer.schedule(task.getTimerTask(), task.getDelay());
+			}
+			else {
 				if (task.isFixedRate()) {
 					timer.scheduleAtFixedRate(task.getTimerTask(), task.getDelay(), task.getPeriod());
 				}
 				else {
 					timer.schedule(task.getTimerTask(), task.getDelay(), task.getPeriod());
 				}
-			}
-			else {
-				// One-time task execution.
-				timer.schedule(task.getTimerTask(), task.getDelay());
 			}
 		}
 	}

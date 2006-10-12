@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,18 +19,18 @@ package org.springframework.scheduling.timer;
 import java.util.TimerTask;
 
 /**
- * JavaBean that describes a scheduled TimerTask, consisting of
- * the TimerTask itself (or a Runnable to create a TimerTask for)
- * and a delay plus period. Period needs to be specified;
- * there is no point in a default for it.
+ * JavaBean that describes a scheduled {@link TimerTask}, consisting of the
+ * {@link TimerTask} itself or a {@link Runnable} to create a {@link TimerTask}
+ * for and a delay plus period. The period needs to be specified; there is
+ * no point in a default for it.
  *
- * <p>The JDK Timer does not offer more sophisticated scheduling
- * options such as  cron expressions. Consider using Quartz for
+ * <p>The JDK's {@link java.util.Timer} facility does not offer sophisticated
+ * scheduling options such as cron expressions. Consider using Quartz for
  * such advanced needs.
  *
- * <p>Note that Timer uses a TimerTask instance that is shared
- * between repeated executions, in contrast to Quartz which
- * instantiates a new Job for each execution.
+ * <p>Note that the {@link java.util.Timer} mechanism uses a {@link TimerTask}
+ * instance that is shared between repeated executions, in contrast to Quartz
+ * which creates a new Job instance for each execution.
  *
  * @author Juergen Hoeller
  * @since 19.02.2004
@@ -175,6 +175,7 @@ public class ScheduledTimerTask {
 	 * <p>Note that the semantics of the period vary between fixed-rate
 	 * and fixed-delay execution.
 	 * @see #setFixedRate
+	 * @see #isOneTimeTask()
 	 */
 	public void setPeriod(long period) {
 		this.period = period;
@@ -189,7 +190,7 @@ public class ScheduledTimerTask {
 
 	/**
 	 * Set whether to schedule as fixed-rate execution, rather than
-	 * fixed-delay execution. Default is "false", i.e. fixed delay.
+	 * fixed-delay execution. Default is "false", that is, fixed delay.
 	 * <p>See Timer javadoc for details on those execution modes.
 	 * @see java.util.Timer#schedule(TimerTask, long, long)
 	 * @see java.util.Timer#scheduleAtFixedRate(TimerTask, long, long)
@@ -203,6 +204,15 @@ public class ScheduledTimerTask {
 	 */
 	public boolean isFixedRate() {
 		return fixedRate;
+	}
+
+	/**
+	 * Is this task only ever going to execute once?
+	 * @return <code>true</code> if this task is only ever going to execute once.
+	 * @see #getPeriod()
+	 */
+	public boolean isOneTimeTask() {
+		return (this.period < 1);
 	}
 
 }
