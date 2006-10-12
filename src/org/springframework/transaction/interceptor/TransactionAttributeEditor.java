@@ -53,11 +53,14 @@ public class TransactionAttributeEditor extends PropertyEditorSupport {
 			String[] tokens = StringUtils.commaDelimitedListToStringArray(text);
 			RuleBasedTransactionAttribute attr = new RuleBasedTransactionAttribute();
 			for (int i = 0; i < tokens.length; i++) {
-				String token = tokens[i].trim();
+				// Trim leading and trailing whitespace.
+				String token = StringUtils.trimWhitespace(tokens[i].trim());
+				// Check whether token contains illegal whitespace within text.
 				if (StringUtils.containsWhitespace(token)) {
 					throw new IllegalArgumentException(
 							"Transaction attribute token contains illegal whitespace: [" + token + "]");
 				}
+				// Check token type.
 				if (token.startsWith(RuleBasedTransactionAttribute.PREFIX_PROPAGATION)) {
 					attr.setPropagationBehaviorName(token);
 				}
