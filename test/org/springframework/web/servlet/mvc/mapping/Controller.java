@@ -20,15 +20,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.Controller;
 
 /**
- * @author Rob Harrop
+ * @author Juergen Hoeller
  */
-public class WelcomeController implements Controller {
+public class Controller implements org.springframework.web.servlet.mvc.Controller {
 
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) {
-		return new ModelAndView("welcomeView");
+		return new ModelAndView("indexView");
 	}
 
 }

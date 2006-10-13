@@ -17,11 +17,12 @@
 package org.springframework.web.servlet.mvc.mapping;
 
 import junit.framework.TestCase;
-import org.springframework.mock.web.MockServletContext;
+
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
-import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.HandlerMapping;
 
 /**
  * @author Rob Harrop
@@ -39,17 +40,24 @@ public class ControllerClassNameHandlerMappingTests extends TestCase {
 		MockServletContext sc = new MockServletContext("");
 		this.wac = new XmlWebApplicationContext();
 		this.wac.setServletContext(sc);
-		this.wac.setConfigLocations(new String[]{LOCATION});
+		this.wac.setConfigLocations(new String[] {LOCATION});
 		this.wac.refresh();
 
 		this.hm = (HandlerMapping) this.wac.getBean("mapping");
+	}
+
+	public void testIndexUri() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		HandlerExecutionChain chain = this.hm.getHandler(request);
+
+		assertEquals(this.wac.getBean("index"), chain.getHandler());
 	}
 
 	public void testMapSimpleUri() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
 
-		assertEquals("Incorrect controller.", this.wac.getBean("welcome"), chain.getHandler());
+		assertEquals(this.wac.getBean("welcome"), chain.getHandler());
 	}
 
 	public void testWithContextPath() throws Exception {
@@ -57,26 +65,26 @@ public class ControllerClassNameHandlerMappingTests extends TestCase {
 		request.setContextPath("/myapp");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
 
-		assertEquals("Incorrect controller with context path.", this.wac.getBean("welcome"), chain.getHandler());
+		assertEquals(this.wac.getBean("welcome"), chain.getHandler());
 	}
 
 	public void testWithMultiActionControllerMapping() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/admin/user");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
 
-		assertEquals("Incorrect controller.", this.wac.getBean("admin"), chain.getHandler());
+		assertEquals(this.wac.getBean("admin"), chain.getHandler());
 
 		request = new MockHttpServletRequest("GET", "/admin/product");
 		chain = this.hm.getHandler(request);
 
-		assertEquals("Incorrect controller.", this.wac.getBean("admin"), chain.getHandler());
+		assertEquals(this.wac.getBean("admin"), chain.getHandler());
 	}
 
 	public void testWithOutControllerSuffix() throws Exception {
 	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/buyform");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
 
-		assertEquals("Incorrect controller.", this.wac.getBean("buy"), chain.getHandler());
-
+		assertEquals(this.wac.getBean("buy"), chain.getHandler());
 	}
+
 }
