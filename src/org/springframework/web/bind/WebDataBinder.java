@@ -169,6 +169,7 @@ public class WebDataBinder extends DataBinder {
 						Class fieldType = getPropertyAccessor().getPropertyType(field);
 						mpvs.addPropertyValue(field, getEmptyValue(field, fieldType));
 					}
+					mpvs.removePropertyValue(pv);
 				}
 			}
 		}

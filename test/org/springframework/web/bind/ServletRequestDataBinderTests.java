@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,10 +23,10 @@ import org.springframework.beans.AbstractPropertyValuesTests;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class ServletRequestDataBinderTests extends AbstractPropertyValuesTests {
 
@@ -47,6 +47,54 @@ public class ServletRequestDataBinderTests extends AbstractPropertyValuesTests {
 
 		assertNotNull(tb.getSpouse());
 		assertEquals("test", tb.getSpouse().getName());
+	}
+
+	public void testFieldPrefixCausesFieldReset() throws Exception {
+		TestBean target = new TestBean();
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("_postProcessed", "visible");
+		request.addParameter("postProcessed", "on");
+		binder.bind(request);
+		assertTrue(target.isPostProcessed());
+
+		request.removeParameter("postProcessed");
+		binder.bind(request);
+		assertFalse(target.isPostProcessed());
+	}
+
+	public void testFieldPrefixCausesFieldResetWithIgnoreUnknownFields() throws Exception {
+		TestBean target = new TestBean();
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
+		binder.setIgnoreUnknownFields(false);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("_postProcessed", "visible");
+		request.addParameter("postProcessed", "on");
+		binder.bind(request);
+		assertTrue(target.isPostProcessed());
+
+		request.removeParameter("postProcessed");
+		binder.bind(request);
+		assertFalse(target.isPostProcessed());
+	}
+
+	public void testWithCommaSeparatedStringArray() throws Exception {
+		TestBean target = new TestBean();
+		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("stringArray", "bar");
+		request.addParameter("stringArray", "abc");
+		request.addParameter("stringArray", "123,def");
+		binder.bind(request);
+		assertEquals("Expected all three items to be bound", 3, target.getStringArray().length);
+
+		request.removeParameter("stringArray");
+		request.addParameter("stringArray", "123,def");
+		binder.bind(request);
+		assertEquals("Expected only 1 item to be bound", 1, target.getStringArray().length);
 	}
 
 	public void testBindingWithNestedObjectCreationAndWrongOrder() throws Exception {
@@ -110,20 +158,4 @@ public class ServletRequestDataBinderTests extends AbstractPropertyValuesTests {
 		assertEquals("Correct values", Arrays.asList(values), Arrays.asList(original));
 	}
 
-	public void testWithCommaSeparatedStringArray() throws Exception {
-		TestBean target = new TestBean();
-		ServletRequestDataBinder binder = new ServletRequestDataBinder(target);
-
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addParameter("stringArray", "bar");
-		request.addParameter("stringArray", "abc");
-		request.addParameter("stringArray", "123,def");
-		binder.bind(request);
-		assertEquals("Expected all three items to be bound", 3, target.getStringArray().length);
-
-		request.removeParameter("stringArray");
-		request.addParameter("stringArray", "123,def");
-		binder.bind(request);
-		assertEquals("Expected only 1 item to be bound", 1, target.getStringArray().length);
-	}
 }
