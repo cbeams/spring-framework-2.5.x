@@ -20,15 +20,15 @@ import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract {@link BeanDefinitionParser} implementation providing a number
- * of convenience methods and a
+ * Abstract {@link BeanDefinitionParser} implementation providing
+ * a number of convenience methods and a
  * {@link AbstractBeanDefinitionParser#parseInternal template method}
  * that subclasses must override to provide the actual parsing logic.
  *
@@ -41,14 +41,13 @@ import org.springframework.util.StringUtils;
  * {@link AbstractSimpleBeanDefinitionParser}.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @author Rick Evans
  * @since 2.0
  */
 public abstract class AbstractBeanDefinitionParser implements BeanDefinitionParser {
 
-	/**
-	 * Constant for the id attribute.
-	 */
+	/** Constant for the id attribute */
 	public static final String ID_ATTRIBUTE = "id";
 
 

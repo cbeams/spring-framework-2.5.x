@@ -28,7 +28,6 @@ import org.w3c.dom.NodeList;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.util.SystemPropertyUtils;
@@ -167,8 +166,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 				bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 				// Register the final decorated instance.
 				BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getRegistry());
-
-				// send registration event
+				// Send registration event.
 				getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));
 			}
 		}

@@ -1150,14 +1150,14 @@ public class BeanDefinitionParserDelegate {
 	public BeanDefinitionHolder decorateBeanDefinitionIfRequired(Element element, BeanDefinitionHolder definitionHolder) {
 		BeanDefinitionHolder finalDefinition = definitionHolder;
 
-		// decorate based on custom attributes first
+		// Decorate based on custom attributes first.
 		NamedNodeMap attributes = element.getAttributes();
 		for(int i = 0; i < attributes.getLength(); i++) {
 			Node node = attributes.item(i);
 			finalDefinition = decorateIfRequired(node, finalDefinition);
 		}
 
-		// decorate based on custom nested elements
+		// Decorate based on custom nested elements.
 		NodeList children = element.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			Node node = children.item(i);
