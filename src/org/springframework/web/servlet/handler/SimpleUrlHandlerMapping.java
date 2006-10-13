@@ -24,15 +24,15 @@ import java.util.Properties;
 import org.springframework.beans.BeansException;
 
 /**
- * Implementation of the HandlerMapping interface to map from URLs to
- * request handler beans. Supports both mapping to bean instances and
- * mapping to bean names: The latter is required for prototype handlers.
+ * Implementation of the {@link org.springframework.web.servlet.HandlerMapping HandlerMapping}
+ * interface to map from URLs to request handler beans. Supports both mapping to bean
+ * instances and mapping to bean names; the latter is required for non-singleton handlers.
  *
- * <p>The "urlMap" property is suitable for populating the handler map
- * with bean references, e.g. via the map element in XML bean definitions.
+ * <p>The "urlMap" property is suitable for populating the handler map with
+ * bean references, e.g. via the map element in XML bean definitions.
  *
- * <p>Mappings to bean names can be set via the "mappings" property, in a
- * form accepted by the java.util.Properties class, like as follows:<br>
+ * <p>Mappings to bean names can be set via the "mappings" property, in a form
+ * accepted by the <code>java.util.Properties</code> class, like as follows:<br>
  * <code>
  * /welcome.html=ticketController
  * /show.html=ticketController
@@ -40,11 +40,11 @@ import org.springframework.beans.BeansException;
  * The syntax is <code>PATH=HANDLER_BEAN_NAME</code>.
  * If the path doesn't begin with a slash, one is prepended.
  *
- * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
- * and various Ant-style pattern matches, e.g. a registered "/t*" pattern
- * matches both "/test" and "/team", "/test/*" matches all paths in the
- * "/test" directory, "/test/**" matches all paths below "/test".
- * For syntax details, see the AntPathMatcher class.
+ * <p>Supports direct matches, e.g. a registered "/test" matches "/test", and
+ * various Ant-style pattern matches, e.g. a registered "/t*" pattern matches
+ * both "/test" and "/team", "/test/*" matches all paths in the "/test" directory,
+ * "/test/**" matches all paths below "/test". For details, see the
+ * {@link org.springframework.util.AntPathMatcher AntPathMatcher} javadoc.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -70,8 +70,8 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	}
 
 	/**
-	 * Set a Map with URL paths as keys and handler beans as values.
-	 * Convenient for population with bean references.
+	 * Set a Map with URL paths as keys and handler beans (or handler bean names)
+	 * as values. Convenient for population with bean references.
 	 * <p>Supports direct URL matches and Ant-style pattern matches.
 	 * For syntax details, see the AntPathMatcher class.
 	 * @param urlMap map with URLs as keys and beans as values
@@ -79,6 +79,17 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	 */
 	public void setUrlMap(Map urlMap) {
 		this.urlMap.putAll(urlMap);
+	}
+
+	/**
+	 * Allow Map access to the URL path mappings, with the option to add or
+	 * override specific entries.
+	 * <p>Useful for specifying entries directly, for example via "urlMap[myKey]".
+	 * This is particularly useful for adding or overriding entries in child
+	 * bean definitions.
+	 */
+	public Map getUrlMap() {
+		return urlMap;
 	}
 
 

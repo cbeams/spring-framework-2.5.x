@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -30,19 +31,19 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Abstract base class for URL-mapped HandlerMapping implementations.
- * Provides infrastructure for mapping handlers to URLs and configurable URL
- * lookup. For information on the latter, see "alwaysUseFullPath" property.
+ * Abstract base class for URL-mapped {@link org.springframework.web.servlet.HandlerMapping}
+ * implementations. Provides infrastructure for mapping handlers to URLs and configurable
+ * URL lookup. For information on the latter, see "alwaysUseFullPath" property.
  *
- * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
- * and various Ant-style pattern matches, e.g. a registered "/t*" pattern
- * matches both "/test" and "/team", "/test/*" matches all paths in the
- * "/test" directory, "/test/**" matches all paths below "/test".
- * For details, see the AntPathMatcher javadoc.
+ * <p>Supports direct matches, e.g. a registered "/test" matches "/test", and
+ * various Ant-style pattern matches, e.g. a registered "/t*" pattern matches
+ * both "/test" and "/team", "/test/*" matches all paths in the "/test" directory,
+ * "/test/**" matches all paths below "/test". For details, see the
+ * {@link org.springframework.util.AntPathMatcher AntPathMatcher} javadoc.
  *
- * <p>Will search all path patterns to find the most exact match for
- * a request path. The most exact match is defined as the longest path
- * pattern that matches the request path.
+ * <p>Will search all path patterns to find the most exact match for the
+ * current request path. The most exact match is defined as the longest
+ * path pattern that matches the current request path.
  *
  * @author Juergen Hoeller
  * @since 16.04.2003
@@ -63,9 +64,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	/**
 	 * Set if URL lookup should always use the full path within the current servlet
-	 * context. Else, the path within the current servlet mapping is used
-	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
-	 * Default is "false".
+	 * context. Else, the path within the current servlet mapping is used if applicable
+	 * (that is, in the case of a ".../*" servlet mapping in web.xml).
+	 * <p>Default is "false".
 	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
 	 */
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
@@ -73,9 +74,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	}
 
 	/**
-	 * Set if context path and request URI should be URL-decoded.
-	 * Both are returned <i>undecoded</i> by the Servlet API,
-	 * in contrast to the servlet path.
+	 * Set if context path and request URI should be URL-decoded. Both are returned
+	 * <i>undecoded</i> by the Servlet API, in contrast to the servlet path.
 	 * <p>Uses either the request encoding or the default encoding according
 	 * to the Servlet spec (ISO-8859-1).
 	 * <p>Note: Setting this to "true" requires JDK 1.4 if the encoding differs
@@ -126,7 +126,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	/**
 	 * Look up a handler for the URL path of the given request.
 	 * @param request current HTTP request
-	 * @return the looked up handler instance, or <code>null</code>
+	 * @return the handler instance, or <code>null</code> if none found
 	 */
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
@@ -143,8 +143,10 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * both "/test" and "/team". For details, see the AntPathMatcher class.
 	 * <p>Looks for the most exact pattern, where most exact is defined as
 	 * the longest path pattern.
-		* @param urlPath URL the bean is mapped to
+	 * @param urlPath URL the bean is mapped to
+	 * @param request current HTTP request (to expose the path within the mapping to)
 	 * @return the associated handler instance, or <code>null</code> if not found
+	 * @see #exposePathWithinMapping
 	 * @see org.springframework.util.AntPathMatcher
 	 */
 	protected Object lookupHandler(String urlPath, HttpServletRequest request) {
@@ -156,13 +158,12 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			for (Iterator it = this.handlerMap.keySet().iterator(); it.hasNext();) {
 				String registeredPath = (String) it.next();
 				if (this.pathMatcher.match(registeredPath, urlPath) &&
-								(bestPathMatch == null || bestPathMatch.length() <= registeredPath.length())) {
-					handler = this.handlerMap.get(registeredPath);
+						(bestPathMatch == null || bestPathMatch.length() <= registeredPath.length())) {
 					bestPathMatch = registeredPath;
 				}
 			}
-
-			if (handler != null) {
+			if (bestPathMatch != null) {
+				handler = this.handlerMap.get(bestPathMatch);
 				exposePathWithinMapping(this.pathMatcher.extractPathWithinPattern(bestPathMatch, urlPath), request);
 			}
 		}
@@ -233,6 +234,17 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				logger.debug("Mapped URL path [" + urlPath + "] onto handler [" + handler + "]");
 			}
 		}
+	}
+
+
+	/**
+	 * Return the registered handlers as an unmodifiable Map, with the registered path
+	 * as key and the handler object (or handler bean name in case of a lazy-init handler)
+	 * as value.
+	 * @see #getDefaultHandler()
+	 */
+	public final Map getHandlerMap() {
+		return Collections.unmodifiableMap(this.handlerMap);
 	}
 
 }
