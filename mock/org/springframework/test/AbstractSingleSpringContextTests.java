@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
  * context locations.
  *
  * @author Juergen Hoeller
+ * @author Rod Johnson
  * @since 2.0
  * @see #getConfigLocations()
  * @see #contextKey()
@@ -85,6 +86,7 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 
 	/**
 	 * Prepare this test instance, for example populating its fields.
+	 * The context has already been loaded at the time of this callback.
 	 * <p>This implementation does nothing.
 	 */
 	protected void prepareTestInstance() throws Exception {
