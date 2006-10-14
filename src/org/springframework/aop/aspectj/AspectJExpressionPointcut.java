@@ -17,7 +17,6 @@
 package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -36,16 +35,17 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AbstractExpressionPointcut;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Spring pointcut that uses the AspectJ weaver.
+ * Spring pointcut implementation that uses the AspectJ weaver.
  *
  * <p>The pointcut expression value is an AspectJ string. This can reference
  * other pointcuts and use composition and other operations.
  *
- * <p>Naturally, as this is to be processed by Spring AOP's
- * proxy-based model, only method execution pointcuts are supported.
+ * <p>Naturally, as this is to be processed by Spring AOP's proxy-based model,
+ * only method execution pointcuts are supported.
  *
  * @author Rob Harrop
  * @author Adrian Colyer
@@ -69,6 +69,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		DEFAULT_SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_TARGET);
 	}
 
+
 	private final Map shadowMapCache = new HashMap();
 
 	private PointcutParser pointcutParser;
@@ -81,6 +82,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 
 	private PointcutExpression pointcutExpression;
 	
+
 	public AspectJExpressionPointcut() {
 		this.pointcutParser =
 				PointcutParser.getPointcutParserSupportingSpecifiedPrimitivesAndUsingContextClassloaderForResolution(
@@ -115,21 +117,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 	
 	public void setParameterTypes(Class[] types) {
 		this.pointcutParameterTypes = types;
-	}
-	
-	public void onSetExpression(String expression) {
-		// doing this now is too early - we may need to discover and set pointcut
-		// parameters from the associated advice
-		// we now do it lazily in checkReadyToMatch instead...
-
-//		PointcutParameter[] pointcutParameters = new PointcutParameter[this.pointcutParameterNames.length];
-//		for (int i = 0; i < pointcutParameters.length; i++) {
-//			pointcutParameters[i] = this.pointcutParser.createPointcutParameter(
-//					this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
-//		}
-//		this.pointcutExpression =
-//				this.pointcutParser.parsePointcutExpression(
-//						replaceBooleanOperators(expression), pointcutDeclarationScope, pointcutParameters);
 	}
 	
 	/**
@@ -222,7 +209,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 	 * @return
 	 */
 	private Method findMethodToMatchAgainst(Method method, Class targetClass) {
-		Class originalTargetClass = targetClass;
 		Class declaredClass = method.getDeclaringClass();
 		if (declaredClass.isInterface()) {
 			// find the *implementing* method and match on that instead.
@@ -308,6 +294,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		}
 	}
 
+
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("AspectJExpressionPointcut: ");
@@ -333,50 +320,26 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		return sb.toString();
 	}
 
-	public int hashCode() {
-		final int PRIME = 31;
-		int result = 1;
-		result = PRIME * result + ((this.pointcutDeclarationScope == null) ? 0 : this.pointcutDeclarationScope.hashCode());
-		result = PRIME * result + Arrays.hashCode(this.pointcutParameterNames);
-		result = PRIME * result + Arrays.hashCode(this.pointcutParameterTypes);
-		result = PRIME * result + ((this.getExpression() == null) ? 0 : this.getExpression().hashCode());
-		return result;
-	}
-
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj == null) {
+		if (!(other instanceof AspectJExpressionPointcut)) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final AspectJExpressionPointcut other = (AspectJExpressionPointcut) obj;
-		if (this.pointcutDeclarationScope == null) {
-			if (other.pointcutDeclarationScope != null) {
-				return false;
-			}
-		}
-		else if (!this.pointcutDeclarationScope.equals(other.pointcutDeclarationScope)) {
-			return false;
-		}
-		if (this.getExpression() == null) {
-			if (other.getExpression() != null) {
-				return false;
-			}
-		}
-		else if (!this.getExpression().equals(other.getExpression())) {
-			return false;
-		}
-		if (!Arrays.equals(this.pointcutParameterNames, other.pointcutParameterNames)) {
-			return false;
-		}
-		if (!Arrays.equals(this.pointcutParameterTypes, other.pointcutParameterTypes)) {
-			return false;
-		}
-		return true;
+		AspectJExpressionPointcut otherPc = (AspectJExpressionPointcut) other;
+		return ObjectUtils.nullSafeEquals(this.getExpression(), otherPc.getExpression()) &&
+				ObjectUtils.nullSafeEquals(this.pointcutDeclarationScope, otherPc.pointcutDeclarationScope) &&
+				ObjectUtils.nullSafeEquals(this.pointcutParameterNames, otherPc.pointcutParameterNames) &&
+				ObjectUtils.nullSafeEquals(this.pointcutParameterTypes, otherPc.pointcutParameterTypes);
+	}
+
+	public int hashCode() {
+		int hashCode = ObjectUtils.nullSafeHashCode(this.getExpression());
+		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutDeclarationScope);
+		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutParameterNames);
+		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutParameterTypes);
+		return hashCode;
 	}
 
 }
