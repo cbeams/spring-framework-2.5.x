@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2005 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -1030,7 +1030,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		tx.commit();
 		txControl.setVoidCallable(1);
 		session.isConnected();
-		sessionControl.setReturnValue(true, 2);
+		sessionControl.setReturnValue(true, 1);
 		con.isReadOnly();
 		conControl.setReturnValue(false, 1);
 
@@ -1115,9 +1115,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		tx.commit();
 		txControl.setVoidCallable(1);
 		session.isConnected();
-		sessionControl.setReturnValue(false, 2);
-		session.reconnect();
-		sessionControl.setVoidCallable(1);
+		sessionControl.setReturnValue(false, 1);
 
 		dsControl.replay();
 		conControl.replay();
@@ -1203,7 +1201,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		session.setFlushMode(FlushMode.NEVER);
 		sessionControl.setVoidCallable(2);
 		session.isConnected();
-		sessionControl.setReturnValue(true, 4);
+		sessionControl.setReturnValue(true, 2);
 		session.connection();
 		sessionControl.setReturnValue(con, 6);
 		con.isReadOnly();

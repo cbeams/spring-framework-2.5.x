@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -231,10 +231,10 @@ public class FreeMarkerConfigurationFactory {
 		Configuration config = newConfiguration();
 		Properties props = new Properties();
 
-		// Load config file if set.
+		// Load config file if specified.
 		if (this.configLocation != null) {
 			if (logger.isInfoEnabled()) {
-				logger.info("Loading FreeMarker config from [" + this.configLocation + "]");
+				logger.info("Loading FreeMarker configuration from " + this.configLocation);
 			}
 			InputStream is = this.configLocation.getInputStream();
 			try {
@@ -245,7 +245,7 @@ public class FreeMarkerConfigurationFactory {
 			}
 		}
 
-		// Merge local properties if set.
+		// Merge local properties if specified.
 		if (this.freemarkerSettings != null) {
 			props.putAll(this.freemarkerSettings);
 		}
@@ -255,6 +255,7 @@ public class FreeMarkerConfigurationFactory {
 		if (!props.isEmpty()) {
 			config.setSettings(props);
 		}
+
 		if (this.freemarkerVariables != null && this.freemarkerVariables.size() > 0) {
 			config.setAllSharedVariables(new SimpleHash(this.freemarkerVariables));
 		}
@@ -272,9 +273,6 @@ public class FreeMarkerConfigurationFactory {
 
 		TemplateLoader loader = getAggregateTemplateLoader(this.templateLoaders);
 		if (loader != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Setting TemplateLoader on Configuration to [" + loader + "]");
-			}
 			config.setTemplateLoader(loader);
 		}
 
@@ -301,6 +299,8 @@ public class FreeMarkerConfigurationFactory {
 	 * a SpringTemplateLoader.
 	 * @param templateLoaderPath the path to load templates from
 	 * @return an appropriate TemplateLoader
+	 * @see freemarker.cache.FileTemplateLoader
+	 * @see SpringTemplateLoader
 	 */
 	protected TemplateLoader getTemplateLoaderForPath(String templateLoaderPath) {
 		if (isPreferFileSystemAccess()) {
@@ -310,24 +310,22 @@ public class FreeMarkerConfigurationFactory {
 				Resource path = getResourceLoader().getResource(templateLoaderPath);
 				File file = path.getFile();  // will fail if not resolvable in the file system
 				if (logger.isDebugEnabled()) {
-					logger.debug("Template loader path [" + path + "] resolved to file [" + file.getAbsolutePath() + "]");
+					logger.debug(
+							"Template loader path [" + path + "] resolved to file path [" + file.getAbsolutePath() + "]");
 				}
 				return new FileTemplateLoader(file);
 			}
 			catch (IOException ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Cannot resolve template loader path [" + templateLoaderPath +
-							"] to java.io.File: using SpringTemplateLoader", ex);
+							"] to [java.io.File]: using SpringTemplateLoader as fallback", ex);
 				}
 				return new SpringTemplateLoader(getResourceLoader(), templateLoaderPath);
 			}
 		}
 		else {
-			// Always load via SpringTemplateLoader
-			// (without hot detection of template changes).
-			if (logger.isDebugEnabled()) {
-				logger.debug("File system access not preferred: using SpringTemplateLoader");
-			}
+			// Always load via SpringTemplateLoader (without hot detection of template changes).
+			logger.debug("File system access not preferred: using SpringTemplateLoader");
 			return new SpringTemplateLoader(getResourceLoader(), templateLoaderPath);
 		}
 	}
@@ -375,8 +373,7 @@ public class FreeMarkerConfigurationFactory {
 	 * @throws TemplateException on FreeMarker initialization failure
 	 * @see #createConfiguration()
 	 */
-	protected void postProcessConfiguration(Configuration config)
-			throws IOException, TemplateException {
+	protected void postProcessConfiguration(Configuration config) throws IOException, TemplateException {
 	}
 
 }

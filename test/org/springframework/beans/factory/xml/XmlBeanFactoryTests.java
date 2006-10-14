@@ -33,6 +33,7 @@ import javax.servlet.ServletException;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
+import org.apache.commons.logging.LogFactory;
 import org.xml.sax.InputSource;
 
 import org.springframework.beans.DerivedTestBean;
@@ -919,7 +920,9 @@ public class XmlBeanFactoryTests extends TestCase {
 		}
 		sw.stop();
 		System.out.println(sw);
-		assertTrue(sw.getTotalTimeMillis() < 1000);
+		if (!LogFactory.getLog(DefaultListableBeanFactory.class).isDebugEnabled()) {
+			assertTrue(sw.getTotalTimeMillis() < 1500);
+		}
 
 		// Now test distinct bean with swapped value in factory, to ensure the two are independent
 		OverrideOneMethod swappedOom = (OverrideOneMethod) xbf.getBean("overrideOneMethodSwappedReturnValues");

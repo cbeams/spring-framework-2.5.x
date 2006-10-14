@@ -117,7 +117,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	/**
 	 * Create a new JmsTemplate, given a ConnectionFactory.
-	 * @param connectionFactory the ConnectionFactory to obtain connections from
+	 * @param connectionFactory the ConnectionFactory to obtain Connections from
 	 */
 	public JmsTemplate(ConnectionFactory connectionFactory) {
 		this();

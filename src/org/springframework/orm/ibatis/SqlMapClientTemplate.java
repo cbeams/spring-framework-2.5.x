@@ -287,7 +287,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 			final String statementName, final Object parameterObject, final int pageSize)
 			throws DataAccessException {
 
-		// throw exception if lazy loading will not work
+		// Throw exception if lazy loading will not work.
 		if (this.sqlMapClient instanceof ExtendedSqlMapClient &&
 				((ExtendedSqlMapClient) this.sqlMapClient).getDelegate().getTxManager() == null) {
 			throw new InvalidDataAccessApiUsageException(

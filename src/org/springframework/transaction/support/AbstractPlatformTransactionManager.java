@@ -505,7 +505,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 					// marker but still didn't get a corresponding exception from commit.
 					if (globalRollbackOnly) {
 						throw new UnexpectedRollbackException(
-								"Transaction has been silently rolled back because it has been marked as rollback-only");
+								"Transaction silently rolled back because it has been marked as rollback-only");
 					}
 				}
 			}
@@ -799,7 +799,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * behavior for the new transaction. An existing transaction might get
 	 * suspended (in case of PROPAGATION_REQUIRES_NEW), or the new transaction
 	 * might participate in the existing one (in case of PROPAGATION_REQUIRED).
-	 * <p>Default implementation returns false, assuming that detection of or
+	 * <p>The default implementation returns <code>false</code>, assuming that
 	 * participating in existing transactions is generally not supported.
 	 * Subclasses are of course encouraged to provide such support.
 	 * @param transaction transaction object returned by doGetTransaction
@@ -854,7 +854,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * Suspend the resources of the current transaction.
 	 * Transaction synchronization will already have been suspended.
-	 * <p>Default implementation throws a TransactionSuspensionNotSupportedException,
+	 * <p>The default implementation throws a TransactionSuspensionNotSupportedException,
 	 * assuming that transaction suspension is generally not supported.
 	 * @param transaction transaction object returned by <code>doGetTransaction</code>
 	 * @return an object that holds suspended resources
@@ -872,7 +872,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * Resume the resources of the current transaction.
 	 * Transaction synchronization will be resumed afterwards.
-	 * <p>Default implementation throws a TransactionSuspensionNotSupportedException,
+	 * <p>The default implementation throws a TransactionSuspensionNotSupportedException,
 	 * assuming that transaction suspension is generally not supported.
 	 * @param transaction transaction object returned by <code>doGetTransaction</code>
 	 * @param suspendedResources the object that holds suspended resources,
@@ -946,7 +946,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * Set the given transaction rollback-only. Only called on rollback
 	 * if the current transaction participates in an existing one.
-	 * <p>Default implementation throws an IllegalTransactionStateException,
+	 * <p>The default implementation throws an IllegalTransactionStateException,
 	 * assuming that participating in existing transactions is generally not
 	 * supported. Subclasses are of course encouraged to provide such support.
 	 * @param status the status representation of the transaction
@@ -959,16 +959,13 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Register the given list of transaction synchronizations with the
-	 * existing transaction.
-	 * <p>Invoked when the control of the Spring transaction manager and thus
-	 * all Spring transaction synchronizations end, without the transaction
-	 * being completed yet. This is for example the case when participating
-	 * in an existing JTA or EJB CMT transaction.
-	 * <p>Default implementation simply invokes the <code>afterCompletion</code>
-	 * methods immediately, passing in "STATUS_UNKNOWN". This is the best we
-	 * can do if there's no chance to determine the actual outcome of the
-	 * outer transaction.
+	 * Register the given list of transaction synchronizations with the existing transaction.
+	 * <p>Invoked when the control of the Spring transaction manager and thus all Spring
+	 * transaction synchronizations end, without the transaction being completed yet. This
+	 * is for example the case when participating in an existing JTA or EJB CMT transaction.
+	 * <p>The default implementation simply invokes the <code>afterCompletion</code> methods
+	 * immediately, passing in "STATUS_UNKNOWN". This is the best we can do if there's no
+	 * chance to determine the actual outcome of the outer transaction.
 	 * @param transaction transaction object returned by <code>doGetTransaction</code>
 	 * @param synchronizations List of TransactionSynchronization objects
 	 * @throws TransactionException in case of system errors
@@ -980,14 +977,14 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			throws TransactionException {
 
 		logger.debug("Cannot register Spring after-completion synchronization with existing transaction - " +
-				"performing Spring after-completion callbacks immediately, with outcome status 'unknown'");
+				"processing Spring after-completion callbacks immediately, with outcome status 'unknown'");
 		invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
 	}
 
 	/**
 	 * Cleanup resources after transaction completion.
-	 * Called after <code>doCommit</code> and <code>doRollback</code> execution,
-	 * on any outcome. Default implementation does nothing.
+	 * <p>Called after <code>doCommit</code> and <code>doRollback</code> execution,
+	 * on any outcome. The default implementation does nothing.
 	 * <p>Should not throw any exceptions but just issue warnings on errors.
 	 * @param transaction transaction object returned by doGetTransaction
 	 */

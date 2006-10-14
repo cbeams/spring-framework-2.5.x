@@ -34,13 +34,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 /**
- * Factory for creating SQLErrorCodes based on the
- * "databaseProductName" taken from the DatabaseMetaData.
+ * Factory for creating {@link SQLErrorCodes} based on the
+ * "databaseProductName" taken from the {@link java.sql.DatabaseMetaData}.
  *
- * <p>Returns SQLErrorCodes populated with vendor codes
+ * <p>Returns <code>SQLErrorCodes</code> populated with vendor codes
  * defined in a configuration file named "sql-error-codes.xml".
  * Reads the default file in this package if not overridden by a file in
- * the root of the class path (e.g. in the "/WEB-INF/classes" directory).
+ * the root of the class path (for example in the "/WEB-INF/classes" directory).
  *
  * @author Thomas Risberg
  * @author Rod Johnson

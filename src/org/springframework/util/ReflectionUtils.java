@@ -16,14 +16,18 @@
 
 package org.springframework.util;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
 
 /**
  * Simple utility class for handling reflection exceptions.
  * Only intended for internal use.
  *
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 1.2.2
  */
 public abstract class ReflectionUtils {
@@ -72,6 +76,28 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
+	 * Attempt to find a {@link Method} on the supplied type with the supplied name and
+	 * parameter types. Searches all superclasses up to <code>Object</code>. Returns
+	 * '<code>null</code>' if no {@link Method} can be found.
+	 */
+	public static Method findMethod(Class type, String name, Class[] paramTypes) {
+		Assert.notNull(type, "'type' cannot be null.");
+		Assert.notNull(name, "'name' cannot be null.");
+		Class searchType = type;
+		while(!Object.class.equals(searchType) && searchType != null) {
+			Method[] methods = (type.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
+			for (int i = 0; i < methods.length; i++) {
+				Method method = methods[i];
+				if(name.equals(method.getName()) && Arrays.equals(paramTypes, method.getParameterTypes())) {
+					return method;
+				}
+			}
+			searchType = searchType.getSuperclass();
+		}
+		return null;
+	}
+
+	/**
 	 * Invoke the specified {@link Method} against the supplied target object with no arguments
 	 * The target object can be <code>null</code> when invoking a static {@link Method}.
 	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
@@ -99,6 +125,29 @@ public abstract class ReflectionUtils {
 			handleReflectionException(ex);
 			throw new IllegalStateException(
 					"Unexpected reflection exception - " + ex.getClass().getName() + ": " + ex.getMessage());
+		}
+	}
+
+	/**
+	 * Determine whether the given field is a "public static final" constant.
+	 * @param field the field to check
+	 */
+	public static boolean isPublicStaticFinal(Field field) {
+		int modifiers = field.getModifiers();
+		return (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers));
+	}
+
+	/**
+	 * Make the given field accessible, explicitly setting it accessible if necessary.
+	 * The <code>setAccessible(true)</code> method is only called when actually necessary,
+	 * to avoid unnecessary conflicts with a JVM SecurityManager (if active).
+	 * @param field the field to make accessible
+	 * @see java.lang.reflect.Field#setAccessible
+	 */
+	public static void makeAccessible(Field field) {
+		if (!Modifier.isPublic(field.getModifiers()) ||
+				!Modifier.isPublic(field.getDeclaringClass().getModifiers())) {
+			field.setAccessible(true);
 		}
 	}
 

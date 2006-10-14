@@ -24,7 +24,7 @@
 			<value>
 				org.springframework.beans.ITestBean.s*=PROPAGATION_MANDATORY
 				org.springframework.beans.ITestBean.setAg*=PROPAGATION_REQUIRED
-				org.springframework.beans.ITestBean.set*=PROPAGATION_SUPPORTS
+				org.springframework.beans.ITestBean.set*= PROPAGATION_SUPPORTS , readOnly
 			</value>
 		</property>
 	</bean>
@@ -47,7 +47,7 @@
 		<property name="transactionAttributes">
 			<props>
 				<prop key="s*">PROPAGATION_MANDATORY</prop>
-				<prop key="setAg*">PROPAGATION_REQUIRED</prop>
+				<prop key="setAg*">  PROPAGATION_REQUIRED  ,  readOnly  </prop>
 				<prop key="set*">PROPAGATION_SUPPORTS</prop>
 			</props>
 		</property>

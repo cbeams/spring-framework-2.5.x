@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,7 +43,6 @@ import org.springframework.util.StringUtils;
  * @see java.text.NumberFormat
  * @see org.springframework.validation.DataBinder#registerCustomEditor
  * @see org.springframework.web.servlet.mvc.BaseCommandController#initBinder
- * @see org.springframework.web.bind.BindInitializer#initBinder
  */
 public class CustomNumberEditor extends PropertyEditorSupport {
 
@@ -59,7 +58,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 * <code>valueOf</code> methods for parsing and <code>toString</code>
 	 * methods for rendering.
 	 * <p>The "allowEmpty" parameter states if an empty String should
-	 * be allowed for parsing, i.e. get interpreted as null value.
+	 * be allowed for parsing, i.e. get interpreted as <code>null</code>  value.
 	 * Else, an IllegalArgumentException gets thrown in that case.
 	 * @param numberClass Number subclass to generate
 	 * @param allowEmpty if empty strings should be allowed
@@ -68,21 +67,15 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 * @see Integer#valueOf
 	 * @see Integer#toString
 	 */
-	public CustomNumberEditor(Class numberClass, boolean allowEmpty)
-	    throws IllegalArgumentException {
-		if (numberClass == null || !Number.class.isAssignableFrom(numberClass)) {
-			throw new IllegalArgumentException("Property class must be a subclass of Number");
-		}
-		this.numberClass = numberClass;
-		this.numberFormat = null;
-		this.allowEmpty = allowEmpty;
+	public CustomNumberEditor(Class numberClass, boolean allowEmpty) throws IllegalArgumentException {
+		this(numberClass, null, allowEmpty);
 	}
 
 	/**
 	 * Create a new CustomNumberEditor instance, using the given NumberFormat
 	 * for parsing and rendering.
 	 * <p>The allowEmpty parameter states if an empty String should
-	 * be allowed for parsing, i.e. get interpreted as null value.
+	 * be allowed for parsing, i.e. get interpreted as <code>null</code>  value.
 	 * Else, an IllegalArgumentException gets thrown in that case.
 	 * @param numberClass Number subclass to generate
 	 * @param numberFormat NumberFormat to use for parsing and rendering
@@ -119,6 +112,18 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 		else {
 			// Use default valueOf methods for parsing text.
 			setValue(NumberUtils.parseNumber(text, this.numberClass));
+		}
+	}
+
+	/**
+	 * Coerce a Number value into the required target class, if necessary.
+	 */
+	public void setValue(Object value) {
+		if (value instanceof Number) {
+			super.setValue(NumberUtils.convertNumberToTargetClass((Number) value, this.numberClass));
+		}
+		else {
+			super.setValue(value);
 		}
 	}
 

@@ -807,9 +807,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					int matchingBeansCount = (matchingBeans != null ? matchingBeans.size() : 0);
 					throw new UnsatisfiedDependencyException(
 							mergedBeanDefinition.getResourceDescription(), beanName, j, argTypes[j],
-							"There are " + matchingBeansCount + " beans of type [" + argTypes[j] +
-							"] for autowiring " + methodType + ". There should have been 1 to be able to " +
-							"autowire " + methodType + " of bean '" + beanName + "'.");
+							"There are " + matchingBeans.size() + " beans of type [" + argTypes[j].getName() +
+							"] available for autowiring: " + matchingBeans.keySet() +
+							". There should have been exactly 1 to be able to autowire " +
+							methodType + " of bean '" + beanName + "'.");
 				}
 				String autowiredBeanName = (String) matchingBeans.keySet().iterator().next();
 				Object autowiredBean = matchingBeans.values().iterator().next();
@@ -919,8 +920,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			Class requiredType = bw.getPropertyDescriptor(propertyName).getPropertyType();
 			Map matchingBeans = findMatchingBeans(requiredType);
 			if (matchingBeans != null && matchingBeans.size() == 1) {
-				String autowiredBeanName = (String) matchingBeans.keySet().iterator().next();
-				Object autowiredBean = matchingBeans.values().iterator().next();
+				Map.Entry entry = (Map.Entry) matchingBeans.entrySet().iterator().next();
+				String autowiredBeanName = (String) entry.getKey();
+				Object autowiredBean = entry.getValue();
 				pvs.addPropertyValue(propertyName, autowiredBean);
 				if (mergedBeanDefinition.isSingleton()) {
 					registerDependentBean(autowiredBeanName, beanName);
@@ -933,9 +935,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			else if (matchingBeans != null && matchingBeans.size() > 1) {
 				throw new UnsatisfiedDependencyException(
 						mergedBeanDefinition.getResourceDescription(), beanName, propertyName,
-						"There are " + matchingBeans.size() + " beans of type [" + requiredType +
-						"] for autowire by type. There should have been 1 to be able to autowire property '" +
-						propertyName + "' of bean '" + beanName + "'.");
+						"There are " + matchingBeans.size() + " beans of type [" + requiredType.getName() +
+						"] available for autowiring by type: " + matchingBeans.keySet() +
+						". There should have been exactly 1 to be able to autowire property '" +
+						propertyName + "' of bean '" + beanName + "'. Consider using autowiring by name instead.");
 			}
 			else {
 				if (logger.isDebugEnabled()) {

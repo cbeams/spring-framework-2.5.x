@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -30,19 +31,19 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Abstract base class for URL-mapped HandlerMapping implementations.
- * Provides infrastructure for mapping handlers to URLs and configurable
- * URL lookup. For information on the latter, see alwaysUseFullPath property.
+ * Abstract base class for URL-mapped {@link org.springframework.web.servlet.HandlerMapping}
+ * implementations. Provides infrastructure for mapping handlers to URLs and configurable
+ * URL lookup. For information on the latter, see "alwaysUseFullPath" property.
  *
- * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
- * and various Ant-style pattern matches, e.g. a registered "/t*" pattern
- * matches both "/test" and "/team", "/test/*" matches all paths in the
- * "/test" directory, "/test/**" matches all paths below "/test".
- * For details, see the AntPathMatcher javadoc.
+ * <p>Supports direct matches, e.g. a registered "/test" matches "/test", and
+ * various Ant-style pattern matches, e.g. a registered "/t*" pattern matches
+ * both "/test" and "/team", "/test/*" matches all paths in the "/test" directory,
+ * "/test/**" matches all paths below "/test". For details, see the
+ * {@link org.springframework.util.AntPathMatcher AntPathMatcher} javadoc.
  *
- * <p>Will search all path patterns to find the most exact match for
- * a request path. The most exact match is defined as the longest path
- * pattern that matches the request path.
+ * <p>Will search all path patterns to find the most exact match for the
+ * current request path. The most exact match is defined as the longest
+ * path pattern that matches the current request path.
  *
  * @author Juergen Hoeller
  * @since 16.04.2003
@@ -63,9 +64,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	/**
 	 * Set if URL lookup should always use the full path within the current servlet
-	 * context. Else, the path within the current servlet mapping is used
-	 * if applicable (i.e. in the case of a ".../*" servlet mapping in web.xml).
-	 * Default is "false".
+	 * context. Else, the path within the current servlet mapping is used if applicable
+	 * (that is, in the case of a ".../*" servlet mapping in web.xml).
+	 * <p>Default is "false".
 	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
 	 */
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
@@ -73,9 +74,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	}
 
 	/**
-	 * Set if context path and request URI should be URL-decoded.
-	 * Both are returned <i>undecoded</i> by the Servlet API,
-	 * in contrast to the servlet path.
+	 * Set if context path and request URI should be URL-decoded. Both are returned
+	 * <i>undecoded</i> by the Servlet API, in contrast to the servlet path.
 	 * <p>Uses either the request encoding or the default encoding according
 	 * to the Servlet spec (ISO-8859-1).
 	 * <p>Note: Setting this to "true" requires JDK 1.4 if the encoding differs
@@ -126,7 +126,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	/**
 	 * Look up a handler for the URL path of the given request.
 	 * @param request current HTTP request
-	 * @return the looked up handler instance, or <code>null</code>
+	 * @return the handler instance, or <code>null</code> if none found
 	 */
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
@@ -166,12 +166,16 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	}
 
 	/**
-	 * Register the given handler instance for the given URL path.
-	 * @param urlPath URL the bean is mapped to
-	 * @param handler the handler instance
+	 * Register the specified handler for the given URL path.
+	 * @param urlPath the URL the bean should be mapped to
+	 * @param handler the handler instance or handler bean name String
+	 * (a bean name will automatically be resolved into the corrresponding handler bean)
 	 * @throws BeansException if the handler couldn't be registered
 	 */
 	protected void registerHandler(String urlPath, Object handler) throws BeansException {
+		Assert.notNull(urlPath, "URL path must not be null");
+		Assert.notNull(handler, "Handler object must not be null");
+
 		Object mappedHandler = this.handlerMap.get(urlPath);
 		if (mappedHandler != null) {
 			throw new ApplicationContextException(
@@ -179,7 +183,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 					"]: there's already handler [" + mappedHandler + "] mapped");
 		}
 
-		// eagerly resolve handler if referencing singleton via name
+		// Eagerly resolve handler if referencing singleton via name.
 		if (!this.lazyInitHandlers && handler instanceof String) {
 			String handlerName = (String) handler;
 			if (getApplicationContext().isSingleton(handlerName)) {
@@ -196,6 +200,17 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				logger.debug("Mapped URL path [" + urlPath + "] onto handler [" + handler + "]");
 			}
 		}
+	}
+
+
+	/**
+	 * Return the registered handlers as an unmodifiable Map, with the registered path
+	 * as key and the handler object (or handler bean name in case of a lazy-init handler)
+	 * as value.
+	 * @see #getDefaultHandler()
+	 */
+	public final Map getHandlerMap() {
+		return Collections.unmodifiableMap(this.handlerMap);
 	}
 
 }

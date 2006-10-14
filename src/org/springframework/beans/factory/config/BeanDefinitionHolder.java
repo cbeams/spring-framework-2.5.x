@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.beans.factory.config;
 
+import org.springframework.util.Assert;
+
 /**
  * Holder for a BeanDefinition with name and aliases.
+ * Can be registered as a placeholder for an inner bean.
  *
  * <p>Recognized by AbstractAutowireCapableBeanFactory for inner
  * bean definitions. Registered by DefaultXmlBeanDefinitionParser,
@@ -41,10 +44,11 @@ public class BeanDefinitionHolder {
 
 	private final String[] aliases;
 
+
 	/**
 	 * Create a new BeanDefinitionHolder.
-	 * @param beanDefinition the BeanDefinition
-	 * @param beanName the name of the bean
+	 * @param beanDefinition the BeanDefinition to wrap
+	 * @param beanName the name of the bean, as specified for the bean definition
 	 */
 	public BeanDefinitionHolder(BeanDefinition beanDefinition, String beanName) {
 		this(beanDefinition, beanName, null);
@@ -52,27 +56,41 @@ public class BeanDefinitionHolder {
 
 	/**
 	 * Create a new BeanDefinitionHolder.
-	 * @param beanDefinition the BeanDefinition
-	 * @param beanName the name of the bean
-	 * @param aliases alias names of the bean, or <code>null</code> if none
+	 * @param beanDefinition the BeanDefinition to wrap
+	 * @param beanName the name of the bean, as specified for the bean definition
+	 * @param aliases alias names for the bean, or <code>null</code> if none
 	 */
 	public BeanDefinitionHolder(BeanDefinition beanDefinition, String beanName, String[] aliases) {
+		Assert.notNull(beanDefinition, "BeanDefinition must not be null");
+		Assert.notNull(beanName, "Bean name must not be null");
 		this.beanDefinition = beanDefinition;
 		this.beanName = beanName;
 		this.aliases = aliases;
 	}
 
+
+	/**
+	 * Return the wrapped BeanDefinition.
+	 */
 	public BeanDefinition getBeanDefinition() {
-		return beanDefinition;
+		return this.beanDefinition;
 	}
 
+	/**
+	 * Return the primary name of the bean, as specified for the bean definition.
+	 */
 	public String getBeanName() {
-		return beanName;
+		return this.beanName;
 	}
 
+	/**
+	 * Return the alias names for the bean, as specified directly for the bean definition.
+	 * @return the array of alias names, or <code>null</code> if none
+	 */
 	public String[] getAliases() {
-		return aliases;
+		return this.aliases;
 	}
+
 
 	public String toString() {
 		return "Bean definition with name '" + this.beanName + "': " + this.beanDefinition;

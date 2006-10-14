@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.util.StringUtils;
 
 /**
- * PropertyEditor for TransactionAttribute objects. Takes Strings of form
+ * PropertyEditor for {@link TransactionAttribute} objects. Accepts a String of form
  * <p><code>PROPAGATION_NAME,ISOLATION_NAME,readOnly,timeout_NNNN,+Exception1,-Exception2</code>
  * <p>where only propagation code is required. For example:
  * <p><code>PROPAGATION_MANDATORY,ISOLATION_DEFAULT</code>
@@ -32,9 +32,8 @@ import org.springframework.util.StringUtils;
  * are in seconds. If no timeout is specified, the transaction manager will apply a default
  * timeout specific to the particular transaction manager.
  *
- * <p>A "+" before an exception name substring indicates that
- * transactions should commit even if this exception is thrown;
- * a "-" that they should roll back.
+ * <p>A "+" before an exception name substring indicates that transactions should commit
+ * even if this exception is thrown; a "-" that they should roll back.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -50,16 +49,19 @@ public class TransactionAttributeEditor extends PropertyEditorSupport {
 	 * @see java.beans.PropertyEditor#setAsText(java.lang.String)
 	 */
 	public void setAsText(String text) throws IllegalArgumentException {
-		if (text == null || "".equals(text)) {
-			setValue(null);
-		}
-		else {	
+		if (StringUtils.hasLength(text)) {
 			// tokenize it with ","
 			String[] tokens = StringUtils.commaDelimitedListToStringArray(text);
 			RuleBasedTransactionAttribute attr = new RuleBasedTransactionAttribute();
-
 			for (int i = 0; i < tokens.length; i++) {
-				String token = tokens[i].trim();
+				// Trim leading and trailing whitespace.
+				String token = StringUtils.trimWhitespace(tokens[i].trim());
+				// Check whether token contains illegal whitespace within text.
+				if (StringUtils.containsWhitespace(token)) {
+					throw new IllegalArgumentException(
+							"Transaction attribute token contains illegal whitespace: [" + token + "]");
+				}
+				// Check token type.
 				if (token.startsWith(TransactionDefinition.PROPAGATION_CONSTANT_PREFIX)) {
 					attr.setPropagationBehaviorName(token);
 				}
@@ -80,11 +82,13 @@ public class TransactionAttributeEditor extends PropertyEditorSupport {
 					attr.getRollbackRules().add(new RollbackRuleAttribute(token.substring(1)));
 				}
 				else {
-					throw new IllegalArgumentException("Illegal transaction attribute token: [" + token + "]");
+					throw new IllegalArgumentException("Invalid transaction attribute token: [" + token + "]");
 				}
 			}
-
 			setValue(attr);
+		}
+		else {
+			setValue(null);
 		}
 	}
 

@@ -766,13 +766,6 @@ public abstract class SessionFactoryUtils {
 			session.setFlushMode(FlushMode.NEVER);
 			Set sessions = (Set) holderMap.get(sessionFactory);
 			sessions.add(session);
-			if (!session.isConnected()) {
-				// We're running against Hibernate 3.1 RC1, where Hibernate will
-				// automatically disconnect the Session after a transaction.
-				// We'll reconnect it here, as the Session is likely gonna be
-				// used for lazy loading during an "open session in view" pase.
-				session.reconnect();
-			}
 		}
 		else {
 			doClose(session);

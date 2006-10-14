@@ -745,10 +745,6 @@ public class HibernateJtaTransactionTests extends TestCase {
 								sessionControl.setReturnValue(FlushMode.AUTO, 1);
 								session.flush();
 								sessionControl.setVoidCallable(1);
-								session.isConnected();
-								sessionControl.setReturnValue(false, 1);
-								session.reconnect();
-								sessionControl.setVoidCallable(1);
 								sessionControl.replay();
 							}
 							catch (Error err) {

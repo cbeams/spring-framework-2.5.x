@@ -25,12 +25,14 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Abstract base class for HandlerMapping implementations.
+ * Abstract base class for {@link HandlerMapping} implementations.
  * Supports ordering, a default handler, and handler interceptors.
  *
  * @author Juergen Hoeller
  * @since 07.04.2003
  * @see #getHandlerInternal
+ * @see #setDefaultHandler
+ * @see #setInterceptors
  * @see org.springframework.web.servlet.HandlerInterceptor
  */
 public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
@@ -68,7 +70,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * Return the default handler for this handler mapping.
 	 * @return the default handler instance, or <code>null</code> if none
 	 */
-	protected final Object getDefaultHandler() {
+	public final Object getDefaultHandler() {
 		return defaultHandler;
 	}
 

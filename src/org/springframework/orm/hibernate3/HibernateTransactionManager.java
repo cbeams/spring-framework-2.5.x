@@ -669,13 +669,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (txObject.getSessionHolder().getPreviousFlushMode() != null) {
 				session.setFlushMode(txObject.getSessionHolder().getPreviousFlushMode());
 			}
-			if (!session.isConnected()) {
-				// We're running against Hibernate 3.1 RC1, where Hibernate will
-				// automatically disconnect the Session after a transaction.
-				// We'll reconnect it here, as the Session is likely gonna be
-				// used for lazy loading during an "open session in view" phase.
-				session.reconnect();
-			}
 		}
 		txObject.getSessionHolder().clear();
 	}

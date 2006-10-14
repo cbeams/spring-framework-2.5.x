@@ -219,12 +219,12 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Create a new JtaTransactionManager instance, to be configured as bean.
-	 * Invoke afterPropertiesSet to activate the configuration.
+	 * Invoke <code>afterPropertiesSet</code> to activate the configuration.
 	 * @see #setUserTransactionName
 	 * @see #setUserTransaction
 	 * @see #setTransactionManagerName
 	 * @see #setTransactionManager
-	 * @see #afterPropertiesSet
+	 * @see #afterPropertiesSet()
 	 */
 	public JtaTransactionManager() {
 		setNestedTransactionAllowed(true);
@@ -868,14 +868,23 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			throws RollbackException, SystemException {
 
 		if (getTransactionManager() != null) {
-			getTransactionManager().getTransaction().registerSynchronization(
-					new JtaAfterCompletionSynchronization(synchronizations));
+			Transaction transaction = getTransactionManager().getTransaction();
+			if (transaction != null) {
+				transaction.registerSynchronization(new JtaAfterCompletionSynchronization(synchronizations));
+			}
+			else {
+				// No current JTA Transaction available.
+				logger.debug("Participating in existing JTA transaction, but no current JTA Transaction available: " +
+						"cannot register Spring after-completion callbacks with outer JTA transaction - " +
+						"processing Spring after-completion callbacks with outcome status 'unknown'");
+				invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
+			}
 		}
 		else {
 			// No JTA TransactionManager available.
 			logger.warn("Participating in existing JTA transaction, but no JTA TransactionManager available: " +
 					"cannot register Spring after-completion callbacks with outer JTA transaction - " +
-					"performing Spring after-completion callbacks with outcome status 'unknown'");
+					"processing Spring after-completion callbacks with outcome status 'unknown'");
 			invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);
 		}
 	}

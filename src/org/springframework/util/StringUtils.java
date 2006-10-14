@@ -64,24 +64,26 @@ public abstract class StringUtils {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Check if a String has length.
+	 * Check that the given String is neither <code>null</code> nor of length 0.
+	 * Note: Will return <code>true</code> for a String that purely consists of whitespace.
 	 * <p><pre>
 	 * StringUtils.hasLength(null) = false
 	 * StringUtils.hasLength("") = false
 	 * StringUtils.hasLength(" ") = true
 	 * StringUtils.hasLength("Hello") = true
 	 * </pre>
-	 * @param str the String to check, may be <code>null</code>
+	 * @param str the String to check (may be <code>null</code>)
 	 * @return <code>true</code> if the String is not null and has length
+	 * @see #hasText(String)
 	 */
 	public static boolean hasLength(String str) {
 		return (str != null && str.length() > 0);
 	}
 
 	/**
-	 * Check if a String has text. More specifically, returns <code>true</code>
-	 * if the string not <code>null<code>, it's <code>length is > 0</code>, and
-	 * it has at least one non-whitespace character.
+	 * Check whether the given String has actual text.
+	 * More specifically, returns <code>true</code> if the string not <code>null<code>,
+	 * its length is greater than 0, and it contains at least one non-whitespace character.
 	 * <p><pre>
 	 * StringUtils.hasText(null) = false
 	 * StringUtils.hasText("") = false
@@ -89,18 +91,38 @@ public abstract class StringUtils {
 	 * StringUtils.hasText("12345") = true
 	 * StringUtils.hasText(" 12345 ") = true
 	 * </pre>
-	 * @param str the String to check, may be <code>null</code>
-	 * @return <code>true</code> if the String is not null, length > 0,
-	 *         and not whitespace only
+	 * @param str the String to check (may be <code>null</code>)
+	 * @return <code>true</code> if the String is not <code>null</code>, its length is
+	 * greater than 0, and is does not contain whitespace only
 	 * @see java.lang.Character#isWhitespace
 	 */
 	public static boolean hasText(String str) {
-		int strLen;
-		if (str == null || (strLen = str.length()) == 0) {
+		if (!hasLength(str)) {
 			return false;
 		}
+		int strLen = str.length();
 		for (int i = 0; i < strLen; i++) {
 			if (!Character.isWhitespace(str.charAt(i))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Check whether the given String contains any whitespace characters.
+	 * @param str the String to check (may be <code>null</code>)
+	 * @return <code>true</code> if the String is not empty and
+	 * contains at least 1 whitespace character
+	 * @see java.lang.Character#isWhitespace
+	 */
+	public static boolean containsWhitespace(String str) {
+		if (!hasLength(str)) {
+			return false;
+		}
+		int strLen = str.length();
+		for (int i = 0; i < strLen; i++) {
+			if (Character.isWhitespace(str.charAt(i))) {
 				return true;
 			}
 		}
@@ -157,6 +179,30 @@ public abstract class StringUtils {
 		StringBuffer buf = new StringBuffer(str);
 		while (buf.length() > 0 && Character.isWhitespace(buf.charAt(buf.length() - 1))) {
 			buf.deleteCharAt(buf.length() - 1);
+		}
+		return buf.toString();
+	}
+
+	/**
+	 * Trim <i>all</i> whitespace from the given String:
+	 * leading, trailing, and inbetween characters.
+	 * @param str the String to check
+	 * @return the trimmed String
+	 * @see java.lang.Character#isWhitespace
+	 */
+	public static String trimAllWhitespace(String str) {
+		if (!hasLength(str)) {
+			return str;
+		}
+		StringBuffer buf = new StringBuffer(str);
+		int index = 0;
+		while (buf.length() > index) {
+			if (Character.isWhitespace(buf.charAt(index))) {
+				buf.deleteCharAt(index);
+			}
+			else {
+				index++;
+			}
 		}
 		return buf.toString();
 	}
@@ -535,6 +581,55 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Concatenate the given String arrays into one,
+	 * with overlapping array elements included twice.
+	 * <p>The order of elements in the original arrays is preserved.
+	 * @param array1 the first array (can be <code>null</code>)
+	 * @param array2 the second array (can be <code>null</code>)
+	 * @return the new array (<code>null</code> if both given arrays were <code>null</code>)
+	 */
+	public static String[] concatenateStringArrays(String[] array1, String[] array2) {
+		if (ObjectUtils.isEmpty(array1)) {
+			return array2;
+		}
+		if (ObjectUtils.isEmpty(array2)) {
+			return array1;
+		}
+		String[] newArr = new String[array1.length + array2.length];
+		System.arraycopy(array1, 0, newArr, 0, array1.length);
+		System.arraycopy(array2, 0, newArr, array1.length, array2.length);
+		return newArr;
+	}
+
+	/**
+	 * Merge the given String arrays into one, with overlapping
+	 * array elements only included once.
+	 * <p>The order of elements in the original arrays is preserved
+	 * (with the exception of overlapping elements, which are only
+	 * included on their first occurence).
+	 * @param array1 the first array (can be <code>null</code>)
+	 * @param array2 the second array (can be <code>null</code>)
+	 * @return the new array (<code>null</code> if both given arrays were <code>null</code>)
+	 */
+	public static String[] mergeStringArrays(String[] array1, String[] array2) {
+		if (ObjectUtils.isEmpty(array1)) {
+			return array2;
+		}
+		if (ObjectUtils.isEmpty(array2)) {
+			return array1;
+		}
+		List result = new ArrayList();
+		result.addAll(Arrays.asList(array1));
+		for (int i = 0; i < array2.length; i++) {
+			String str = array2[i];
+			if (!result.contains(str)) {
+				result.add(str);
+			}
+		}
+		return toStringArray(result);
+	}
+
+	/**
 	 * Turn given source String array into sorted array.
 	 * @param array the source array
 	 * @return the sorted array (never <code>null</code>)
@@ -627,15 +722,14 @@ public abstract class StringUtils {
 	 * prior to attempting the split operation (typically the quotation mark
 	 * symbol), or <code>null</code> if no removal should occur
 	 * @return a <code>Properties</code> instance representing the array contents,
-	 * or <code>null</code> if the array to process was null or empty
+	 * or <code>null</code> if the array to process was <code>null</code> or empty
 	 */
 	public static Properties splitArrayElementsIntoProperties(
 			String[] array, String delimiter, String charsToDelete) {
 
-		if (array == null || array.length == 0) {
+		if (ObjectUtils.isEmpty(array)) {
 			return null;
 		}
-
 		Properties result = new Properties();
 		for (int i = 0; i < array.length; i++) {
 			String element = array[i];
@@ -663,7 +757,7 @@ public abstract class StringUtils {
 	 * (each of those characters is individually considered as delimiter).
 	 * @return an array of the tokens
 	 * @see java.util.StringTokenizer
-	 * @see java.lang.String#trim
+	 * @see java.lang.String#trim()
 	 * @see #delimitedListToStringArray
 	 */
 	public static String[] tokenizeToStringArray(String str, String delimiters) {
@@ -685,7 +779,7 @@ public abstract class StringUtils {
 	 * will not consider subsequent delimiters as token in the first place).
 	 * @return an array of the tokens
 	 * @see java.util.StringTokenizer
-	 * @see java.lang.String#trim
+	 * @see java.lang.String#trim()
 	 * @see #delimitedListToStringArray
 	 */
 	public static String[] tokenizeToStringArray(
@@ -723,7 +817,6 @@ public abstract class StringUtils {
 		if (delimiter == null) {
 			return new String[] {str};
 		}
-
 		List result = new ArrayList();
 		if ("".equals(delimiter)) {
 			for (int i = 0; i < str.length(); i++) {
@@ -747,8 +840,8 @@ public abstract class StringUtils {
 
 	/**
 	 * Convert a CSV list into an array of Strings.
-	 * @param str CSV list
-	 * @return an array of Strings, or the empty array if s is null
+	 * @param str the input String
+	 * @return an array of Strings, or the empty array in case of empty input
 	 */
 	public static String[] commaDelimitedListToStringArray(String str) {
 		return delimitedListToStringArray(str, ",");
@@ -757,7 +850,7 @@ public abstract class StringUtils {
 	/**
 	 * Convenience method to convert a CSV string list to a set.
 	 * Note that this will suppress duplicates.
-	 * @param str CSV String
+	 * @param str the input String
 	 * @return a Set of String entries in the list
 	 */
 	public static Set commaDelimitedListToSet(String str) {
@@ -770,17 +863,57 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Convenience method to return a String array as a delimited (e.g. CSV)
-	 * String. E.g. useful for toString() implementations.
-	 * @param arr array to display. Elements may be of any type (toString
-	 * will be called on each element).
-	 * @param delim delimiter to use (probably a ",")
+	 * Convenience method to return a Collection as a delimited (e.g. CSV)
+	 * String. E.g. useful for <code>toString()</code> implementations.
+	 * @param coll the Collection to display
+	 * @param delim the delimiter to use (probably a ",")
+	 * @param prefix the String to start each element with
+	 * @param suffix the String to end each element with
 	 */
-	public static String arrayToDelimitedString(Object[] arr, String delim) {
-		if (arr == null) {
+	public static String collectionToDelimitedString(Collection coll, String delim, String prefix, String suffix) {
+		if (CollectionUtils.isEmpty(coll)) {
 			return "";
 		}
+		StringBuffer sb = new StringBuffer();
+		Iterator it = coll.iterator();
+		while (it.hasNext()) {
+			sb.append(prefix).append(it.next()).append(suffix);
+			if (it.hasNext()) {
+				sb.append(delim);
+			}
+		}
+		return sb.toString();
+	}
 
+	/**
+	 * Convenience method to return a Collection as a delimited (e.g. CSV)
+	 * String. E.g. useful for <code>toString()</code> implementations.
+	 * @param coll the Collection to display
+	 * @param delim the delimiter to use (probably a ",")
+	 */
+	public static String collectionToDelimitedString(Collection coll, String delim) {
+		return collectionToDelimitedString(coll, delim, "", "");
+	}
+
+	/**
+	 * Convenience method to return a Collection as a CSV String.
+	 * E.g. useful for <code>toString()</code> implementations.
+	 * @param coll the Collection to display
+	 */
+	public static String collectionToCommaDelimitedString(Collection coll) {
+		return collectionToDelimitedString(coll, ",");
+	}
+
+	/**
+	 * Convenience method to return a String array as a delimited (e.g. CSV)
+	 * String. E.g. useful for <code>toString()</code> implementations.
+	 * @param arr the array to display
+	 * @param delim the delimiter to use (probably a ",")
+	 */
+	public static String arrayToDelimitedString(Object[] arr, String delim) {
+		if (ObjectUtils.isEmpty(arr)) {
+			return "";
+		}
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < arr.length; i++) {
 			if (i > 0) {
@@ -792,58 +925,12 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Convenience method to return a Collection as a delimited (e.g. CSV)
-	 * String. E.g. useful for toString() implementations.
-	 * @param coll Collection to display
-	 * @param delim delimiter to use (probably a ",")
-	 * @param prefix string to start each element with
-	 * @param suffix string to end each element with
-	 */
-	public static String collectionToDelimitedString(Collection coll, String delim, String prefix, String suffix) {
-		if (coll == null) {
-			return "";
-		}
-
-		StringBuffer sb = new StringBuffer();
-		Iterator it = coll.iterator();
-		int i = 0;
-		while (it.hasNext()) {
-			if (i > 0) {
-				sb.append(delim);
-			}
-			sb.append(prefix).append(it.next()).append(suffix);
-			i++;
-		}
-		return sb.toString();
-	}
-
-	/**
-	 * Convenience method to return a Collection as a delimited (e.g. CSV)
-	 * String. E.g. useful for toString() implementations.
-	 * @param coll Collection to display
-	 * @param delim delimiter to use (probably a ",")
-	 */
-	public static String collectionToDelimitedString(Collection coll, String delim) {
-		return collectionToDelimitedString(coll, delim, "", "");
-	}
-
-	/**
 	 * Convenience method to return a String array as a CSV String.
-	 * E.g. useful for toString() implementations.
-	 * @param arr array to display. Elements may be of any type (toString
-	 * will be called on each element).
+	 * E.g. useful for <code>toString()</code> implementations.
+	 * @param arr the array to display
 	 */
 	public static String arrayToCommaDelimitedString(Object[] arr) {
 		return arrayToDelimitedString(arr, ",");
-	}
-
-	/**
-	 * Convenience method to return a Collection as a CSV String.
-	 * E.g. useful for toString() implementations.
-	 * @param coll Collection to display
-	 */
-	public static String collectionToCommaDelimitedString(Collection coll) {
-		return collectionToDelimitedString(coll, ",");
 	}
 
 }

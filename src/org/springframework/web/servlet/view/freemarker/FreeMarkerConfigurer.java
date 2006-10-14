@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	/**
 	 * Initialize FreeMarkerConfigurationFactory's Configuration
 	 * if not overridden by a preconfigured FreeMarker Configuation.
-   * <p>Sets up a ClassTemplateLoader to use for loading Spring macros.
+	 * <p>Sets up a ClassTemplateLoader to use for loading Spring macros.
 	 * @see #createConfiguration
 	 * @see #setConfiguration
 	 */
@@ -105,13 +105,13 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	 * for the Spring-provided macros, added to the end of the list.
 	 */
 	protected void postProcessTemplateLoaders(List templateLoaders) {
-		templateLoaders.add(new ClassTemplateLoader(getClass()));
+		templateLoaders.add(new ClassTemplateLoader(FreeMarkerConfigurer.class, ""));
 		logger.info("ClassTemplateLoader for Spring macros added to FreeMarker configuration");
 	}
 
+
 	/**
-   * Return the Configuration object wrapped by this bean.
-	 * @see org.springframework.web.servlet.view.freemarker.FreeMarkerConfig#getConfiguration()
+	 * Return the Configuration object wrapped by this bean.
 	 */
 	public Configuration getConfiguration() {
 		return this.configuration;

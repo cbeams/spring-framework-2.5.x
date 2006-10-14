@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,13 +51,13 @@ public abstract class NumberUtils {
 	public static Number convertNumberToTargetClass(Number number, Class targetClass)
 			throws IllegalArgumentException {
 
-		Assert.notNull(number, "number must not be null");
-		Assert.notNull(targetClass, "targetClass must not be null");
+		Assert.notNull(number, "Number must not be null");
+		Assert.notNull(targetClass, "Target class must not be null");
 
 		if (targetClass.isInstance(number)) {
 			return number;
 		}
-		else if(targetClass.equals(Byte.class)) {
+		else if (targetClass.equals(Byte.class)) {
 			return new Byte(number.byteValue());
 		}
 		else if (targetClass.equals(Short.class)) {
@@ -84,17 +84,16 @@ public abstract class NumberUtils {
 			return new BigDecimal(number.toString());
 		}
 		else {
-			throw new IllegalArgumentException("Couldn't convert number [" + number + "] of type [" +
-					number.getClass().getName() + "] to target class [" + targetClass.getName() + "]");
+			throw new IllegalArgumentException("Could not convert number [" + number + "] of type [" +
+					number.getClass().getName() + "] to unknown target class [" + targetClass.getName() + "]");
 		}
 	}
 
 	/**
 	 * Parse the given text into a number instance of the given target class,
 	 * using the corresponding default <code>decode</code> methods. Trims the
-	 * input <code>String</code> before attempting to parse the number.
-	 * Supports numbers in hex format (with leading 0x) and in octal format (with
-	 * leading 0).
+	 * input <code>String</code> before attempting to parse the number. Supports
+	 * numbers in hex format (with leading 0x) and in octal format (with leading 0).
 	 * @param text the text to convert
 	 * @param targetClass the target class to parse into
 	 * @return the parsed number
@@ -110,8 +109,8 @@ public abstract class NumberUtils {
 	 * @see java.math.BigDecimal#BigDecimal(String)
 	 */
 	public static Number parseNumber(String text, Class targetClass) {
-		Assert.notNull(text, "text must not be null");
-		Assert.notNull(targetClass, "targetClass must not be null");
+		Assert.notNull(text, "Text must not be null");
+		Assert.notNull(targetClass, "Target class must not be null");
 
 		String trimmed = text.trim();
 
@@ -162,8 +161,8 @@ public abstract class NumberUtils {
 	 */
 	public static Number parseNumber(String text, Class targetClass, NumberFormat numberFormat) {
 		if (numberFormat != null) {
-			Assert.notNull(text, "text must not be null");
-			Assert.notNull(targetClass, "targetClass must not be null");
+			Assert.notNull(text, "Text must not be null");
+			Assert.notNull(targetClass, "Target class must not be null");
 			try {
 				Number number = numberFormat.parse(text.trim());
 				return convertNumberToTargetClass(number, targetClass);
