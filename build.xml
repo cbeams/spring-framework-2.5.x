@@ -990,7 +990,7 @@
 	</target>
 
 
-	<target name="doc.htmlsingle" description="Compile reference documentation to single html">
+	<target name="doc.htmlsingle" depends="doc.prepare" description="Compile reference documentation to single html">
 
 		<mkdir dir="${dist.ref.dir}/html_single/images"/>
 
