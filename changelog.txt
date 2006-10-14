@@ -6,12 +6,13 @@ http://www.springframework.org
 Changes in version 1.2.9 (30.10.2006)
 -------------------------------------
 
-General:
+General
 * declared all internal ThreadLocal variables as final (to avoid class reloading issues)
 
 Package org.springframework.beans
 * Number objects (as property or argument values) are automatically coerced into the target Number type (if necessary)
 * refined PropertyAccessExceptionsException to show nested details even when wrapped in a standard JDK exception
+* deprecated BeanUtils's "canonicalName" in favor of PropertyAccessorUtils's "canonicalPropertyName"
 * ConfigurableBeanFactory's "setParentBeanFactory" throws IllegalStateException if already associated with a parent
 * UnsatisfiedDependencyException message for multiple matches mentions the names of all matching beans
 * AbstractBeanFactory keeps singleton beans in registration order (requires JDK 1.4 or Commons Collections)
@@ -62,6 +63,9 @@ Package org.springframework.orm
 * Hibernate3 LocalSessionFactoryBean registers filter definitions before loading any mapping files
 * removed special Session reconnection check for Hibernate 3.1 RC1
 
+Package org.springframework.mock
+* MockHttpServletRequest handles HTTP header names as case-insensitive
+
 Package org.springframework.scheduling
 * Quartz SchedulerFactoryBean uses given "nonTransactionalDataSource" as default DataSource if no "dataSource" specified
 * MethodInvokingJobDetailFactoryBean always creates durable JobDetails (just like it also sets the volatile flag)
@@ -79,6 +83,7 @@ Package org.springframework.transaction
 * JtaTransactionManager's "doRegisterAfterCompletionWithJtaTransaction" avoids NPE if no current JTA transaction active
 
 Package org.springframework.util
+* ClassUtils falls back to the system class loader if the thread context class loader is inaccessible
 * added "containsWhitespace", "trimAllWhitespace", "concatenateStringArrays" and "mergeStringArrays" to StringUtils
 * added "contains", "arrayToList", "mergePropertiesIntoMap", "containsAny", "findFirstMatch" to CollectionUtils
 
@@ -87,9 +92,11 @@ Package org.springframework.validation
 * "Errors.rejectValue" now accepts an empty field name to indicate the current object itself rather than a field of it
 * "Errors.addAllErrors" only accepts Errors instance with same object name
 * added public "getPropertyEditorRegistry()" method to BindException, for re-registering custom editors
+* DataBinder matches all field names using their canonical name (for required and allowed checks)
 * fixed BindUtils to not call "ValidatorUtils.invokeValidator" if no Validator given
 
 Package org.springframework.web
+* clarified MultipartFile constract details
 * WebDataBinder explicitly suppresses field marker prefix values in case of "ignoreUnknownFields" switched off
 * HttpServletBean overrides "getServletName"/"getServletContext" to return null when no config set yet
 * added "cookieSecure" property to CookieGenerator, indicating that cookies should only be sent using HTTPS connections
