@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,17 +17,20 @@
 package org.springframework.aop.support;
 
 /**
- * Abstract superclass for expression pointcuts.
+ * Abstract superclass for expression pointcuts,
+ * offering location and expression properties.
  *
  * @author Rod Johnson
  * @author Rob Harrop
  * @since 2.0
+ * @see #setLocation
+ * @see #setExpression
  */
 public abstract class AbstractExpressionPointcut implements ExpressionPointcut {
 
-	private String expression;
-	
 	private String location;
+
+	private String expression;
 
 
 	/**
@@ -44,7 +47,7 @@ public abstract class AbstractExpressionPointcut implements ExpressionPointcut {
 	 * or <code>null</code> if none is available
 	 */
 	public String getLocation() {
-		return location;
+		return this.location;
 	}
 
 	public void setExpression(String expression) {
@@ -53,11 +56,9 @@ public abstract class AbstractExpressionPointcut implements ExpressionPointcut {
 			onSetExpression(expression);
 		}
 		catch (IllegalArgumentException ex) {
-			// Fill in location information if possible
+			// Fill in location information if possible.
 			if (this.location != null) {
-				String msg = ex.getMessage();
-				msg += "; location is [" + this.location + "]";
-				throw new IllegalArgumentException(msg);
+				throw new IllegalArgumentException("Invalid expression at location [" + this.location + "]: " + ex);
 			}
 			else {
 				throw ex;
@@ -65,17 +66,22 @@ public abstract class AbstractExpressionPointcut implements ExpressionPointcut {
 		}
 	}
 
-	public String getExpression() {
-		return expression;
-	}
-
-
 	/**
-	 * Set the pointcut expression. The expression should be parsed
-	 * at this point if possible.
+	 * Called when a new pointcut expression is set.
+	 * The expression should be parsed at this point if possible.
+	 * <p>This implementation is empty.
 	 * @param expression expression to set
 	 * @throws IllegalArgumentException if the expression is invalid
+	 * @see #setExpression
 	 */
-	protected abstract void onSetExpression(String expression) throws IllegalArgumentException;
+	protected void onSetExpression(String expression) throws IllegalArgumentException {
+	}
+
+	/**
+	 * Return this pointcut's expression.
+	 */
+	public String getExpression() {
+		return this.expression;
+	}
 
 }
