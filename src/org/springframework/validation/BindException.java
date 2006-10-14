@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -167,7 +167,7 @@ public class BindException extends Exception implements Errors {
 		if (nestedPath == null) {
 			nestedPath = "";
 		}
-		nestedPath = BeanUtils.canonicalName(nestedPath);
+		nestedPath = PropertyAccessorUtils.canonicalPropertyName(nestedPath);
 		if (nestedPath.length() > 0 && !nestedPath.endsWith(NESTED_PATH_SEPARATOR)) {
 			nestedPath += NESTED_PATH_SEPARATOR;
 		}
@@ -179,7 +179,14 @@ public class BindException extends Exception implements Errors {
 	 * regarding the nested path of this instance.
 	 */
 	protected String fixedField(String field) {
-		return getNestedPath() + BeanUtils.canonicalName(field);
+		if (StringUtils.hasLength(field)) {
+			return getNestedPath() + PropertyAccessorUtils.canonicalPropertyName(field);
+		}
+		else {
+			String path = getNestedPath();
+			return (path.endsWith(Errors.NESTED_PATH_SEPARATOR) ?
+					path.substring(0, path.length() - NESTED_PATH_SEPARATOR.length()) : path);
+		}
 	}
 
 
