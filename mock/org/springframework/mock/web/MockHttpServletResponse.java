@@ -40,10 +40,11 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Mock implementation of the HttpServletResponse interface.
+ * Mock implementation of the {@link javax.servlet.http.HttpServletResponse}
+ * interface.
  *
- * <p>Used for testing the web framework; also useful
- * for testing application controllers.
+ * <p>Used for testing the web framework; also useful for testing
+ * application controllers.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

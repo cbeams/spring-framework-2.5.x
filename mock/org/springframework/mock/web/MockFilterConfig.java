@@ -25,10 +25,10 @@ import javax.servlet.ServletContext;
 import org.springframework.util.Assert;
 
 /**
- * Mock implementation of the FilterConfig interface.
+ * Mock implementation of the {@link javax.servlet.FilterConfig} interface.
  *
- * <p>Used for testing the web framework; typically not
- * necessary for testing application controllers.
+ * <p>Used for testing the web framework; typically not necessary for
+ * testing application controllers.
  *
  * @author Juergen Hoeller
  * @since 1.0.2

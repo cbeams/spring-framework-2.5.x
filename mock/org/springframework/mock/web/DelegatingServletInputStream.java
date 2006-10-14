@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,14 @@ import java.io.InputStream;
 import javax.servlet.ServletInputStream;
 
 /**
- * Delegating implementation of ServletInputStream.
+ * Delegating implementation of {@link javax.servlet.ServletInputStream}.
  *
- * <p>Used by MockHttpServletRequest; typically not
- * necessary for testing application controllers.
+ * <p>Used by {@link MockHttpServletRequest}; typically not directly
+ * used for testing application controllers.
  *
  * @author Juergen Hoeller
  * @since 1.0.2
- * @see org.springframework.mock.web.MockHttpServletRequest
+ * @see MockHttpServletRequest
  */
 public class DelegatingServletInputStream extends ServletInputStream {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ import javax.servlet.jsp.el.VariableResolver;
 import org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager;
 
 /**
- * Mock implementation of the JSP 2.0 ExpressionEvaluator,
- * delegating to the Jakarta JSTL ExpressionEvaluatorManager.
+ * Mock implementation of the JSP 2.0 {@link javax.servlet.jsp.el.ExpressionEvaluator}
+ * interface, delegating to the Jakarta JSTL ExpressionEvaluatorManager.
  *
- * <p>Used for testing the web framework; only necessary for
- * testing applications when testing custom JSP tags.
+ * <p>Used for testing the web framework; only necessary for testing
+ * applications when testing custom JSP tags.
  *
  * <p>Note that the Jakarta JSTL implementation (jstl.jar, standard.jar)
  * has to be available on the class path to use this expression evaluator.

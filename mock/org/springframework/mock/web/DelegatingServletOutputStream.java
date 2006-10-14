@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ import java.io.OutputStream;
 import javax.servlet.ServletOutputStream;
 
 /**
- * Delegating implementation of ServletOutputStream.
+ * Delegating implementation of {@link javax.servlet.ServletOutputStream}.
  *
- * <p>Used by MockHttpServletResponse; typically not
- * directly used for testing application controllers.
+ * <p>Used by {@link MockHttpServletResponse}; typically not directly
+ * used for testing application controllers.
  *
  * @author Juergen Hoeller
  * @since 1.0.2
