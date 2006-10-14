@@ -75,21 +75,22 @@ public interface ComponentDefinition extends BeanMetadataElement {
 
 	/**
 	 * Get the user visible name of this <code>ComponentDefinition</code>.
-	 * This should link back directly to the corresponding configuration data
+	 * <p>This should link back directly to the corresponding configuration data
 	 * for this component in a given context.
 	 */
 	String getName();
 
 	/**
-	 * Return a friendly description of the described component. Implementations are
-	 * encouraged to return the same value for <code>toString</code>.
+	 * Return a friendly description of the described component.
+	 * <p>Implementations are encouraged to return the same value from
+	 * <code>toString()</code>.
 	 */
 	String getDescription();
 
 	/**
 	 * Return the {@link BeanDefinition BeanDefinitions} that were registered
 	 * to form this <code>ComponentDefinition</code>.
-	 * It should be noted that a <code>ComponentDefinition</code> may well be related with
+	 * <p>It should be noted that a <code>ComponentDefinition</code> may well be related with
 	 * other {@link BeanDefinition BeanDefinitions} via {@link BeanReference references},
 	 * however these are <strong>not</strong> included as they may be not available immediately.
 	 * Important {@link BeanReference BeanReferences} are available from {@link #getBeanReferences()}.
@@ -99,17 +100,17 @@ public interface ComponentDefinition extends BeanMetadataElement {
 
 	/**
 	 * Return the {@link BeanDefinition BeanDefinitions} that represent all relevant
-	 * inner beans within this component. Other inner beans may exist within the
-	 * associated {@link BeanDefinition BeanDefinitions}, however these are not
-	 * considered to be needed for validation or for user visualization.
+	 * inner beans within this component.
+	 * <p>Other inner beans may exist within the associated {@link BeanDefinition BeanDefinitions},
+	 * however these are not considered to be needed for validation or for user visualization.
 	 * @return the array of BeanDefinitions, or an empty array if none
 	 */
 	BeanDefinition[] getInnerBeanDefinitions();
 
 	/**
 	 * Return the set of {@link BeanReference BeanReferences} that are considered
-	 * to be important to this <code>ComponentDefinition</code>. Other
-	 * {@link BeanReference BeanReferences} may exist within the associated
+	 * to be important to this <code>ComponentDefinition</code>.
+	 * <p>Other {@link BeanReference BeanReferences} may exist within the associated
 	 * {@link BeanDefinition BeanDefinitions}, however these are not considered
 	 * to be needed for validation or for user visualization.
 	 * @return the array of BeanReferences, or an empty array if none
