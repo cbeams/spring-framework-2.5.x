@@ -3,15 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.9 (13.10.2006)
+Changes in version 1.2.9 (30.10.2006)
 -------------------------------------
 
 General:
 * declared all internal ThreadLocal variables as final (to avoid class reloading issues)
 
 Package org.springframework.beans
+* Number objects (as property or argument values) are automatically coerced into the target Number type (if necessary)
 * refined PropertyAccessExceptionsException to show nested details even when wrapped in a standard JDK exception
 * ConfigurableBeanFactory's "setParentBeanFactory" throws IllegalStateException if already associated with a parent
+* UnsatisfiedDependencyException message for multiple matches mentions the names of all matching beans
 * AbstractBeanFactory keeps singleton beans in registration order (requires JDK 1.4 or Commons Collections)
 * AbstractBeanFactory does not explicitly register a given alias that is equal to the canonical bean name
 * fixed AbstractBeanFactory to accept re-registration of alias for same bean name (-> bean definition overriding)
@@ -44,6 +46,9 @@ Package org.springframework.jdbc
 
 Package org.springframework.jms
 * SingleConnectionFactory's Connection proxy implements "equals" and "hashCode" based on proxy equality
+* made AbstractHandlerMapping's "getDefaultHandler()" method public
+* added public "getHandlerMap()" method to AbstractUrlHandlerMapping, exposing a read-only map of registered handlers
+* added public "getUrlMap()" method to SimpleUrlHandlerMapping, to allow for adding or overriding individual entries
 
 Package org.springframework.jmx
 * MBeanExporter only logs a warning (no error) when an MBean does not exist anymore when trying to unregister
@@ -55,6 +60,7 @@ Package org.springframework.orm
 * LocalPersistenceManagerFactoryBean and JdoTemplate perform full exception translation even for reflective calls
 * removed warning for read-only from JdoTransactionManager, since a vendor dialect may support it
 * Hibernate3 LocalSessionFactoryBean registers filter definitions before loading any mapping files
+* removed special Session reconnection check for Hibernate 3.1 RC1
 
 Package org.springframework.scheduling
 * Quartz SchedulerFactoryBean uses given "nonTransactionalDataSource" as default DataSource if no "dataSource" specified
@@ -64,10 +70,17 @@ Package org.springframework.scheduling
 Package org.springframework.test
 * AbstractTransactionalSpringContextTests properly ends a started transaction early if "onSetupInTransaction" fails
 * AbstractTransactionalSpringContextTests only tries to end transaction on "tearDown" if the transaction is still active
+* AbstractTransactionalSpringContextTests invokes "onTearDownAfterTransaction" even for a manually completed transaction
 
 Package org.springframework.transaction
+* TransactionAttributeEditor does not accept transaction attributes with invalid whitespace anymore
 * added "timeout" attribute to Transactional annotation, allowing to specify a timeout in seconds within the annotation
 * JtaTransactionManager explicitly only calls "UserTransaction.setRollbackOnly()" if the transaction is still active
+* JtaTransactionManager's "doRegisterAfterCompletionWithJtaTransaction" avoids NPE if no current JTA transaction active
+
+Package org.springframework.util
+* added "containsWhitespace", "trimAllWhitespace", "concatenateStringArrays" and "mergeStringArrays" to StringUtils
+* added "contains", "arrayToList", "mergePropertiesIntoMap", "containsAny", "findFirstMatch" to CollectionUtils
 
 Package org.springframework.validation
 * clarified that "Errors.reject" always registers a global error for the entire target object
@@ -77,9 +90,11 @@ Package org.springframework.validation
 * fixed BindUtils to not call "ValidatorUtils.invokeValidator" if no Validator given
 
 Package org.springframework.web
+* WebDataBinder explicitly suppresses field marker prefix values in case of "ignoreUnknownFields" switched off
 * HttpServletBean overrides "getServletName"/"getServletContext" to return null when no config set yet
 * added "cookieSecure" property to CookieGenerator, indicating that cookies should only be sent using HTTPS connections
 * added "defaultLocale" property to CookieLocaleResolver and SessionLocaleResolver, for fallback to an explicit locale
+* FreeMarkerConfigurer always registers ClassTemplateLoader for its own package (rather than the package of a subclass)
 * deprecated XSLT view FormatHelper
 
 
