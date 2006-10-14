@@ -31,22 +31,20 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link ParameterNameDiscoverer} implementation that tries to deduce
- * parameter names for an advice method from the pointcut expression,
- * returning, and throwing clauses. If an unambiguous interpretation is
- * not available, it will return <code>null</code>.
- * 
- * <p>
- * This class interprets arguments in the following way:
+ * {@link ParameterNameDiscoverer} implementation that tries to deduce parameter names
+ * for an advice method from the pointcut expression, returning, and throwing clauses.
+ * If an unambiguous interpretation is not available, it returns <code>null</code>.
+ *
+ * <p>This class interprets arguments in the following way:
  * <ol>
  *   <li>If the first parameter of the method is of type {@link JoinPoint}
  * 	 or {@link ProceedingJoinPoint}, it is assumed to be for passing
  *   <code>thisJoinPoint</code> to the advice, and the parameter name will
  *   be assigned the value <code>"thisJoinPoint"</code>.</li>
- *   <li>If the first parameter of the method is of type {@link JoinPoint.StaticPart}
- *   it is assumed to be for passing <code>"thisJoinPointStaticPart"</code>
- *   to the advice, and the parameter name will be assigned the value
- *   <code>"thisJoinPointStaticPart"</code>.</li>
+ *   <li>If the first parameter of the method is of type
+ *   <code>JoinPoint.StaticPart</code>, it is assumed to be for passing
+ *   <code>"thisJoinPointStaticPart"</code> to the advice, and the parameter name
+ *   will be assigned the value <code>"thisJoinPointStaticPart"</code>.</li>
  *   <li>If a {@link #setThrowingName(String) throwingName} has been set, and
  *   there are no unbound arguments of type <code>Throwable+</code>, then an
  * 	 {@link IllegalArgumentException} is raised. If there is more than one
@@ -94,27 +92,24 @@ import org.springframework.util.StringUtils;
  *   assigned as the corresponding parameter name. If there are multiple
  *   possibilities, an <code>AmbiguousBindingException</code> is raised.</li>
  * </ol>
- * 
+ *
  * <p>The behavior on raising an <code>IllegalArgumentException</code> or
- * <code>AmbiguousBindingException</code> is configurable to allow this
- * discoverer to be used as part of a chain-of-responsibility. By default
- * the condition will be logged and the <code>getParameterNames(..)</code>
- * method will simply return <code>null</code>. If the
- * {@link #setRaiseExceptions(boolean) raiseExceptions} property is set to
- * <code>true</code>, the conditions will be thrown as
- * <code>IllegalArgumentException</code> and
- * <code>AmbiguousBindingException</code> respectively.
- * 
+ * <code>AmbiguousBindingException</code> is configurable to allow this discoverer
+ * to be used as part of a chain-of-responsibility. By default the condition will
+ * be logged and the <code>getParameterNames(..)</code> method will simply return
+ * <code>null</code>. If the {@link #setRaiseExceptions(boolean) raiseExceptions}
+ * property is set to <code>true</code>, the conditions will be thrown as
+ * <code>IllegalArgumentException</code> and <code>AmbiguousBindingException</code>,
+ * respectively.
+ *
  * <p>Was that perfectly clear? ;)
- * 
- * <p>Short version: if an unambiguous binding can be deduced, then it is.
- * If the advice requirements cannot possibly be satisfied then
- * <code>null</code>  is returned. By setting the
- * {@link #setRaiseExceptions(boolean) raiseExceptions} property to
- * <code>true</code>, more descriptive exceptions will be thrown instead
- * of returning <code>null</code> in the case that the parameter names
- * cannot be discovered.
- * 
+ *
+ * <p>Short version: If an unambiguous binding can be deduced, then it is.
+ * If the advice requirements cannot possibly be satisfied, then <code>null</code>
+ * is returned. By setting the {@link #setRaiseExceptions(boolean) raiseExceptions}
+ * property to <code>true</code>, descriptive exceptions will be thrown instead of
+ * returning <code>null</code> in the case that the parameter names cannot be discovered.
+ *
  * @author Adrian Colyer
  * @since 2.0
  */
