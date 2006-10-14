@@ -134,15 +134,15 @@ public abstract class BeanUtils {
 	 * As this method doesn't try to load classes by name, it should avoid
 	 * class-loading issues.
 	 * <p>Note that this method tries to set the constructor accessible
-	 * if given a non-accessible (i.e. non-public) constructor.
+	 * if given a non-accessible (that is, non-public) constructor.
 	 * @param clazz class to instantiate
 	 * @return the new instance
+	 * @throws BeanInstantiationException if the bean cannot be instantiated
 	 */
-	public static Object instantiateClass(Class clazz) throws BeansException {
-		Assert.notNull(clazz, "clazz must not be null");
+	public static Object instantiateClass(Class clazz) throws BeanInstantiationException {
+		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isInterface()) {
-			throw new FatalBeanException(
-					"Class [" + clazz.getName() + "] cannot be instantiated: it is an interface");
+			throw new BeanInstantiationException(clazz, "Specified class is an interface");
 		}
 		try {
 			return instantiateClass(clazz.getDeclaredConstructor((Class[]) null), null);
@@ -157,11 +157,12 @@ public abstract class BeanUtils {
 	 * As this method doesn't try to load classes by name, it should avoid
 	 * class-loading issues.
 	 * <p>Note that this method tries to set the constructor accessible
-	 * if given a non-accessible (i.e. non-public) constructor.
+	 * if given a non-accessible (that is, non-public) constructor.
 	 * @param ctor constructor to instantiate
 	 * @return the new instance
+	 * @throws BeanInstantiationException if the bean cannot be instantiated
 	 */
-	public static Object instantiateClass(Constructor ctor, Object[] args) throws BeansException {
+	public static Object instantiateClass(Constructor ctor, Object[] args) throws BeanInstantiationException {
 		Assert.notNull(ctor, "Constructor must not be null");
 		try {
 			if (!Modifier.isPublic(ctor.getModifiers()) ||
@@ -333,7 +334,7 @@ public abstract class BeanUtils {
 	 * @throws BeansException if PropertyDescriptor lookup fails
 	 */
 	public static PropertyDescriptor findPropertyForMethod(Method method) throws BeansException {
-		Assert.notNull(method, "method must not be null");
+		Assert.notNull(method, "Method must not be null");
 		PropertyDescriptor[] pds = getPropertyDescriptors(method.getDeclaringClass());
 		for (int i = 0; i < pds.length; i++) {
 			if (method.equals(pds[i].getReadMethod()) || method.equals(pds[i].getWriteMethod())) {
@@ -350,36 +351,11 @@ public abstract class BeanUtils {
 	 * <code>map["key"]</code> -> <code>map[key]</code>
 	 * @param propertyName the bean property path
 	 * @return the canonical representation of the property path
+	 * @deprecated as of Spring 1.2.9, in favor of
+	 * {@link PropertyAccessorUtils#canonicalPropertyName(String)}
 	 */
 	public static String canonicalName(String propertyName) {
-		if (propertyName == null) {
-			return "";
-		}
-
-		// The following code does not use JDK 1.4's StringBuffer.indexOf(String)
-		// method to retain JDK 1.3 compatibility. The slight loss in performance
-		// is not really relevant, as this code will typically just run on startup.
-
-		StringBuffer buf = new StringBuffer(propertyName);
-		int searchIndex = 0;
-		while (searchIndex != -1) {
-			int keyStart = buf.toString().indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX, searchIndex);
-			searchIndex = -1;
-			if (keyStart != -1) {
-				int keyEnd = buf.toString().indexOf(
-						PropertyAccessor.PROPERTY_KEY_SUFFIX, keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length());
-				if (keyEnd != -1) {
-					String key = buf.substring(keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length(), keyEnd);
-					if ((key.startsWith("'") && key.endsWith("'")) || (key.startsWith("\"") && key.endsWith("\""))) {
-						buf.delete(keyStart + 1, keyStart + 2);
-						buf.delete(keyEnd - 2, keyEnd - 1);
-						keyEnd = keyEnd - 2;
-					}
-					searchIndex = keyEnd + PropertyAccessor.PROPERTY_KEY_SUFFIX.length();
-				}
-			}
-		}
-		return buf.toString();
+		return PropertyAccessorUtils.canonicalPropertyName(propertyName);
 	}
 
 
@@ -486,7 +462,7 @@ public abstract class BeanUtils {
 						}
 						writeMethod.invoke(target, new Object[] {value});
 					}
-					catch (Exception ex) {
+					catch (Throwable ex) {
 						throw new FatalBeanException("Could not copy properties from source to target", ex);
 					}
 				}

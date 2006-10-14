@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +85,63 @@ public abstract class PropertyAccessorUtils {
 				i++;
 		}
 		return -1;
+	}
+
+	/**
+	 * Determine the canonical name for the given property path.
+	 * Removes surrounding quotes from map keys:<br>
+	 * <code>map['key']</code> -> <code>map[key]</code><br>
+	 * <code>map["key"]</code> -> <code>map[key]</code>
+	 * @param propertyName the bean property path
+	 * @return the canonical representation of the property path
+	 */
+	public static String canonicalPropertyName(String propertyName) {
+		if (propertyName == null) {
+			return "";
+		}
+
+		// The following code does not use JDK 1.4's StringBuffer.indexOf(String)
+		// method to retain JDK 1.3 compatibility. The slight loss in performance
+		// is not really relevant, as this code will typically just run on startup.
+
+		StringBuffer buf = new StringBuffer(propertyName);
+		int searchIndex = 0;
+		while (searchIndex != -1) {
+			int keyStart = buf.toString().indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX, searchIndex);
+			searchIndex = -1;
+			if (keyStart != -1) {
+				int keyEnd = buf.toString().indexOf(
+						PropertyAccessor.PROPERTY_KEY_SUFFIX, keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length());
+				if (keyEnd != -1) {
+					String key = buf.substring(keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length(), keyEnd);
+					if ((key.startsWith("'") && key.endsWith("'")) || (key.startsWith("\"") && key.endsWith("\""))) {
+						buf.delete(keyStart + 1, keyStart + 2);
+						buf.delete(keyEnd - 2, keyEnd - 1);
+						keyEnd = keyEnd - 2;
+					}
+					searchIndex = keyEnd + PropertyAccessor.PROPERTY_KEY_SUFFIX.length();
+				}
+			}
+		}
+		return buf.toString();
+	}
+
+	/**
+	 * Determine the canonical names for the given property paths.
+	 * @param propertyNames the bean property paths (as array)
+	 * @return the canonical representation of the property paths
+	 * (as array of the same size)
+	 * @see #canonicalPropertyName(String)
+	 */
+	public static String[] canonicalPropertyNames(String[] propertyNames) {
+		if (propertyNames == null) {
+			return null;
+		}
+		String[] result = new String[propertyNames.length];
+		for (int i = 0; i < propertyNames.length; i++) {
+			result[i] = canonicalPropertyName(propertyNames[i]);
+		}
+		return result;
 	}
 
 }
