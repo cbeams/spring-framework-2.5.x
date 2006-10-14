@@ -50,10 +50,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Mock implementation of the HttpServletRequest interface.
+ * Mock implementation of the {@link javax.servlet.http.HttpServletRequest}
+ * interface.
  *
- * <p>Used for testing the web framework; also useful
- * for testing application controllers.
+ * <p>Used for testing the web framework; also useful for testing
+ * application controllers.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -61,16 +62,34 @@ import org.springframework.util.StringUtils;
  */
 public class MockHttpServletRequest implements HttpServletRequest {
 
+	/**
+	 * The default protocol: 'http'.
+	 */
 	public static final String DEFAULT_PROTOCOL = "http";
 
+	/**
+	 * The default server address: '127.0.0.1'.
+	 */
 	public static final String DEFAULT_SERVER_ADDR = "127.0.0.1";
 
+	/**
+	 * The default server name: 'localhost'.
+	 */
 	public static final String DEFAULT_SERVER_NAME = "localhost";
 
+	/**
+	 * The default server port: '80'.
+	 */
 	public static final int DEFAULT_SERVER_PORT = 80;
 
+	/**
+	 * The default remote address: '127.0.0.1'.
+	 */
 	public static final String DEFAULT_REMOTE_ADDR = "127.0.0.1";
 
+	/**
+	 * The default remote host: 'localhost'.
+	 */
 	public static final String DEFAULT_REMOTE_HOST = "localhost";
 
 
@@ -86,7 +105,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private String contentType;
 
-	private final Map	parameters = CollectionFactory.createLinkedMapIfPossible(16);
+	private final Map parameters = CollectionFactory.createLinkedMapIfPossible(16);
 
 	private String protocol = DEFAULT_PROTOCOL;
 
@@ -136,7 +155,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private String remoteUser;
 
-	private final Set	userRoles = new HashSet();
+	private final Set userRoles = new HashSet();
 
 	private Principal userPrincipal;
 
@@ -160,19 +179,23 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	/**
 	 * Create a new MockHttpServletRequest.
 	 * @param servletContext the ServletContext that the request runs in
+	 * (may be <code>null</code> to use a default MockServletContext)
+	 * @see MockServletContext
 	 */
 	public MockHttpServletRequest(ServletContext servletContext) {
+		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 		this.locales.add(Locale.ENGLISH);
-		this.servletContext = servletContext;
 	}
 
 	/**
 	 * Create a new MockHttpServletRequest.
 	 * @param servletContext the ServletContext that the request runs in
-	 * @param method the request method
-	 * @param requestURI the request URI
+	 * (may be <code>null</code> to use a default MockServletContext)
+	 * @param method the request method (may be <code>null</code>)
+	 * @param requestURI the request URI (may be <code>null</code>)
 	 * @see #setMethod
 	 * @see #setRequestURI
+	 * @see MockServletContext
 	 */
 	public MockHttpServletRequest(ServletContext servletContext, String method, String requestURI) {
 		this(servletContext);
@@ -181,23 +204,23 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Create a new MockHttpServletRequest with a MockServletContext.
+	 * Create a new MockHttpServletRequest with a {@link MockServletContext}.
 	 * @see MockServletContext
 	 */
 	public MockHttpServletRequest() {
-		this(new MockServletContext());
+		this(null);
 	}
 
 	/**
-	 * Create a new MockHttpServletRequest with a MockServletContext.
-	 * @param method the request method
-	 * @param requestURI the request URI
+	 * Create a new MockHttpServletRequest with a {@link MockServletContext}.
+	 * @param method the request method (may be <code>null</code>)
+	 * @param requestURI the request URI (may be <code>null</code>)
 	 * @see #setMethod
 	 * @see #setRequestURI
 	 * @see MockServletContext
 	 */
 	public MockHttpServletRequest(String method, String requestURI) {
-		this(new MockServletContext(), method, requestURI);
+		this(null, method, requestURI);
 	}
 
 
@@ -356,7 +379,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		if (this.content != null) {
 			InputStream sourceStream = new ByteArrayInputStream(this.content);
 			Reader sourceReader = (this.characterEncoding != null) ?
-			    new InputStreamReader(sourceStream, this.characterEncoding) : new InputStreamReader(sourceStream);
+					new InputStreamReader(sourceStream, this.characterEncoding) : new InputStreamReader(sourceStream);
 			return new BufferedReader(sourceReader);
 		}
 		else {
@@ -500,7 +523,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public void addHeader(String name, Object value) {
 		Assert.notNull(name, "Header name must not be null");
 		Assert.notNull(value, "Header value must not be null");
-		Object oldValue = this.headers.get(name);
+		String canonicalName = name.toLowerCase();
+		Object oldValue = this.headers.get(canonicalName);
 		if (oldValue instanceof List) {
 			List list = (List) oldValue;
 			addHeaderValue(list, value);
@@ -509,15 +533,15 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			List list = new LinkedList();
 			list.add(oldValue);
 			addHeaderValue(list, value);
-			this.headers.put(name, list);
+			this.headers.put(canonicalName, list);
 		}
 		else if (value instanceof Collection || value.getClass().isArray()) {
 			List list = new LinkedList();
 			addHeaderValue(list, value);
-			this.headers.put(name, list);
+			this.headers.put(canonicalName, list);
 		}
 		else {
-			this.headers.put(name, value);
+			this.headers.put(canonicalName, value);
 		}
 	}
 
@@ -545,7 +569,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public long getDateHeader(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		Object value = this.headers.get(name);
+		Object value = this.headers.get(name.toLowerCase());
 		if (value instanceof Date) {
 			return ((Date) value).getTime();
 		}
@@ -563,7 +587,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public String getHeader(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		Object value = this.headers.get(name);
+		Object value = this.headers.get(name.toLowerCase());
 		if (value instanceof List) {
 			return StringUtils.collectionToCommaDelimitedString((List) value);
 		}
@@ -577,7 +601,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public Enumeration getHeaders(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		Object value = this.headers.get(name);
+		Object value = this.headers.get(name.toLowerCase());
 		if (value instanceof List) {
 			return Collections.enumeration((List) value);
 		}
@@ -597,9 +621,12 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public int getIntHeader(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		Object value = this.headers.get(name);
+		Object value = this.headers.get(name.toLowerCase());
 		if (value instanceof Number) {
 			return ((Number) value).intValue();
+		}
+		else if (value instanceof String) {
+			return Integer.parseInt((String) value);
 		}
 		else if (value != null) {
 			throw new NumberFormatException("Value for header '" + name + "' is not a Number: " + value);
