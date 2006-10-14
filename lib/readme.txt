@@ -84,6 +84,10 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's FreeMarker support
 
+* glassfish/glassfish-clapi.jar
+- GlassFish ClassLoader API extract (http://glassfish.dev.java.net)
+- required for building the framework
+
 * groovy/groovy-1.0-jsr-04.jar
 - Groovy 1.0 JSR-04 (http://groovy.codehaus.org)
 - required for building the framework
@@ -315,6 +319,10 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Log4J 1.2.14 (http://logging.apache.org/log4j)
 - required for building the framework
 - required at runtime when using Spring's Log4jConfigurer
+
+* oc4j/oc4j-clapi.jar
+- Oracle OC4J 10.1.3.1 ClassLoader API extract (http://www.oracle.com/technology/tech/java/oc4j)
+- required for building the framework
 
 * oro/jakarta-oro-2.0.8.jar
 - Jakarta ORO 2.0.8 (http://jakarta.apache.org/oro)
