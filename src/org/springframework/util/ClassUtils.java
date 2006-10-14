@@ -24,10 +24,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Miscellaneous class utility methods. Mainly for internal use within the
  * framework; consider Jakarta's Commons Lang for a more comprehensive suite
- * of utilities.
+ * of class utilities.
  *
  * @author Keith Donald
  * @author Rob Harrop
@@ -53,6 +56,9 @@ public abstract class ClassUtils {
 	private static final String CGLIB_CLASS_SEPARATOR = "$$";
 
 
+	private static final Log logger = LogFactory.getLog(ClassUtils.class);
+
+
 	/**
 	 * Return a default ClassLoader to use (never <code>null</code>).
 	 * Returns the thread context ClassLoader, if available.
@@ -65,7 +71,13 @@ public abstract class ClassUtils {
 	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	public static ClassLoader getDefaultClassLoader() {
-		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		ClassLoader cl = null;
+		try {
+			cl = Thread.currentThread().getContextClassLoader();
+		}
+		catch (Throwable ex) {
+			logger.debug("Cannot access thread context ClassLoader - falling back to system class loader", ex);
+		}
 		if (cl == null) {
 			// No thread context class loader -> use class loader of this class.
 			cl = ClassUtils.class.getClassLoader();
@@ -81,10 +93,11 @@ public abstract class ClassUtils {
 	 * @param name the name of the Class
 	 * @return Class instance for the supplied name
 	 * @throws ClassNotFoundException if the class was not found
+	 * @throws LinkageError if the class file could not be loaded
 	 * @see Class#forName(String, boolean, ClassLoader)
 	 * @see #getDefaultClassLoader()
 	 */
-	public static Class forName(String name) throws ClassNotFoundException {
+	public static Class forName(String name) throws ClassNotFoundException, LinkageError {
 		return forName(name, getDefaultClassLoader());
 	}
 
@@ -93,11 +106,13 @@ public abstract class ClassUtils {
 	 * for primitives (like "int") and array class names (like "String[]").
 	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
+	 * (may be <code>null</code>, which indicates the default class loader)
 	 * @return Class instance for the supplied name
 	 * @throws ClassNotFoundException if the class was not found
+	 * @throws LinkageError if the class file could not be loaded
 	 * @see Class#forName(String, boolean, ClassLoader)
 	 */
-	public static Class forName(String name, ClassLoader classLoader) throws ClassNotFoundException {
+	public static Class forName(String name, ClassLoader classLoader) throws ClassNotFoundException, LinkageError {
 		Assert.notNull(name, "Name must not be null");
 		Class clazz = resolvePrimitiveClassName(name);
 		if (clazz != null) {
@@ -106,7 +121,7 @@ public abstract class ClassUtils {
 		if (name.endsWith(ARRAY_SUFFIX)) {
 			// special handling for array class names
 			String elementClassName = name.substring(0, name.length() - ARRAY_SUFFIX.length());
-			Class elementClass = ClassUtils.forName(elementClassName, classLoader);
+			Class elementClass = forName(elementClassName, classLoader);
 			return Array.newInstance(elementClass, 0).getClass();
 		}
 		return Class.forName(name, true, classLoader);
@@ -180,13 +195,28 @@ public abstract class ClassUtils {
 	public static String getQualifiedName(Class clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isArray()) {
-			return clazz.getComponentType().getName() + ARRAY_SUFFIX;
+			return getQualifiedNameForArray(clazz);
 		}
 		else {
 			return clazz.getName();
 		}
 	}
 
+	/**
+	 * Build a nice qualified name for an array:
+	 * component type class name + "[]".
+	 * @param clazz the array class
+	 * @return a qualified name for the array class
+	 */
+	private static String getQualifiedNameForArray(Class clazz) {
+		StringBuffer buffer = new StringBuffer();
+		while (clazz.isArray()) {
+			clazz = clazz.getComponentType();
+			buffer.append(ClassUtils.ARRAY_SUFFIX);
+		}
+		buffer.insert(0, clazz.getName());
+		return buffer.toString();
+	}
 
 	/**
 	 * Return the qualified name of the given method, consisting of
@@ -321,7 +351,7 @@ public abstract class ClassUtils {
 	 * loading a resource file that is in the same package as a class file,
 	 * although {@link org.springframework.core.io.ClassPathResource} is usually
 	 * even more convenient.
-	 * @param clazz the Class whose package will be used as the base
+	 * @param clazz	the Class whose package will be used as the base
 	 * @param resourceName the resource name to append. A leading slash is optional.
 	 * @return the built-up resource path
 	 * @see java.lang.ClassLoader#getResource
