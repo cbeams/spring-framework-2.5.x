@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ import java.beans.PropertyEditor;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,7 +32,9 @@ import org.springframework.beans.PropertyAccessExceptionsException;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Binder that allows for binding property values to a target object.
@@ -193,13 +196,13 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * fields. Restrict this for example to avoid unwanted modifications
 	 * by malicious users when binding HTTP request parameters.
 	 * <p>Supports "xxx*" and "*xxx" patterns. More sophisticated matching
-	 * can be implemented by overriding the isAllowed method.
+	 * can be implemented by overriding the <code>isAllowed</code> method.
 	 * @param allowedFields array of field names
 	 * @see org.springframework.web.bind.ServletRequestDataBinder
 	 * @see #isAllowed
 	 */
 	public void setAllowedFields(String[] allowedFields) {
-		this.allowedFields = allowedFields;
+		this.allowedFields = PropertyAccessorUtils.canonicalPropertyNames(allowedFields);
 		if (logger.isDebugEnabled()) {
 			logger.debug("DataBinder restricted to binding allowed fields [" +
 					StringUtils.arrayToCommaDelimitedString(allowedFields) + "]");
@@ -225,7 +228,7 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @see DefaultBindingErrorProcessor#MISSING_FIELD_ERROR_CODE
 	 */
 	public void setRequiredFields(String[] requiredFields) {
-		this.requiredFields = requiredFields;
+		this.requiredFields = PropertyAccessorUtils.canonicalPropertyNames(requiredFields);
 		if (logger.isDebugEnabled()) {
 			logger.debug("DataBinder requires binding of required fields [" +
 					StringUtils.arrayToCommaDelimitedString(requiredFields) + "]");
@@ -334,13 +337,14 @@ public class DataBinder implements PropertyEditorRegistry {
 	 */
 	protected void checkAllowedFields(MutablePropertyValues mpvs) {
 		List allowedFieldsList = (getAllowedFields() != null) ? Arrays.asList(getAllowedFields()) : null;
-		PropertyValue[] pvArray = mpvs.getPropertyValues();
-		for (int i = 0; i < pvArray.length; i++) {
-			String field = pvArray[i].getName();
+		PropertyValue[] pvs = mpvs.getPropertyValues();
+		for (int i = 0; i < pvs.length; i++) {
+			PropertyValue pv = pvs[i];
+			String field = PropertyAccessorUtils.canonicalPropertyName(pv.getName());
 			if (!((allowedFieldsList != null && allowedFieldsList.contains(field)) || isAllowed(field))) {
-				mpvs.removePropertyValue(pvArray[i]);
+				mpvs.removePropertyValue(pv);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Field [" + pvArray[i] + "] has been removed from PropertyValues " +
+					logger.debug("Field [" + field + "] has been removed from PropertyValues " +
 							"and will not be bound, because it has not been found in the list of allowed fields " +
 							allowedFieldsList);
 				}
@@ -353,7 +357,7 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * Invoked for each passed-in property value.
 	 * <p>The default implementation checks for "xxx*" and "*xxx" matches.
 	 * Can be overridden in subclasses.
-	 * <p>If the field is found in the allowedFields array as direct match,
+	 * <p>If the field is found in the "allowedFields" array as direct match,
 	 * this method will not be invoked.
 	 * @param field the field to check
 	 * @return if the field is allowed
@@ -383,18 +387,28 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @see BindingErrorProcessor#processMissingFieldError
 	 */
 	protected void checkRequiredFields(MutablePropertyValues mpvs) {
-		if (getRequiredFields() != null) {
-			String[] requiredFields = getRequiredFields();
+		String[] requiredFields = getRequiredFields();
+		if (!ObjectUtils.isEmpty(requiredFields)) {
+			Map propertyValues = new HashMap();
+			PropertyValue[] pvs = mpvs.getPropertyValues();
+			for (int i = 0; i < pvs.length; i++) {
+				PropertyValue pv = pvs[i];
+				String canonicalName = PropertyAccessorUtils.canonicalPropertyName(pv.getName());
+				propertyValues.put(canonicalName, pv);
+			}
 			for (int i = 0; i < requiredFields.length; i++) {
-				PropertyValue pv = mpvs.getPropertyValue(requiredFields[i]);
+				String field = requiredFields[i];
+				PropertyValue pv = (PropertyValue) propertyValues.get(field);
 				if (pv == null || pv.getValue() == null ||
 						(pv.getValue() instanceof String && !StringUtils.hasText((String) pv.getValue()))) {
 					// Use bind error processor to create FieldError.
-					String field = requiredFields[i];
 					getBindingErrorProcessor().processMissingFieldError(field, getErrors());
 					// Remove property from property values to bind:
 					// It has already caused a field error with a rejected value.
-					mpvs.removePropertyValue(field);
+					if (pv != null) {
+						mpvs.removePropertyValue(pv);
+						propertyValues.remove(field);
+					}
 				}
 			}
 		}
@@ -402,9 +416,8 @@ public class DataBinder implements PropertyEditorRegistry {
 
 	/**
 	 * Apply given property values to the target object.
-	 * <p>Default implementation applies them all of them as bean property
-	 * values via the corresponding BeanWrapper. Unknown fields will by
-	 * default be ignored.
+	 * <p>Default implementation applies all of the supplied property values
+	 * as bean property values. By default, unknown fields will be ignored.
 	 * @param mpvs the property values to be bound (can be modified)
 	 * @see #getTarget
 	 * @see #getBeanWrapper
@@ -425,6 +438,7 @@ public class DataBinder implements PropertyEditorRegistry {
 			}
 		}
 	}
+
 
 	/**
 	 * Close this DataBinder, which may result in throwing
