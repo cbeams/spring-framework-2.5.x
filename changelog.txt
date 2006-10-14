@@ -9,9 +9,14 @@ Changes in version 2.0.1 (31.10.2006)
 General
 * included classes in the "test.annotation" and "test.jpa" packages (tiger mock directory) in the Spring API javadoc
 
+Package org.springframework.aop
+* removed unintended JDK 1.5 dependency in AspectJExpressionPointcut ("equals"/"hashCode" implementation)
+
 Package org.springframework.beans
 * introduced PatternEditor for "java.util.regex.Pattern", automatically registered when running on JDK 1.4 or higher
 * Number objects (as property or argument values) are automatically coerced into the target Number type (if necessary)
+* added "equals" and "hashCode" implementations to BeanDefinitionHolder
+* reworked BeanComponentDefinition into subclass of BeanDefinitionHolder, exposing aliases on the bean definition
 * re-added BeanReferenceFactoryBean, to allow for substituting the target bean name with a placeholder
 * UnsatisfiedDependencyException message for multiple matches mentions the names of all matching beans
 * improved "scope is not active" error message to explicitly hint at the singleton-refers-to-scoped-bean problem
