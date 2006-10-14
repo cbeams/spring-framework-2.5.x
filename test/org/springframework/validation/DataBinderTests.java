@@ -204,14 +204,13 @@ public class DataBinderTests extends TestCase {
 	public void testBindingWithAllowedFields() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod);
-		binder.setAllowedFields(new String[]{"name", "myparam"});
+		binder.setAllowedFields(new String[] {"name", "myparam"});
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
 		pvs.addPropertyValue(new PropertyValue("age", "32x"));
 
 		binder.bind(pvs);
 		binder.close();
-
 		assertTrue("changed name correctly", rod.getName().equals("Rod"));
 		assertTrue("did not change age", rod.getAge() == 0);
 
@@ -224,7 +223,8 @@ public class DataBinderTests extends TestCase {
 	public void testBindingWithAllowedFieldsUsingAsterisks() throws Exception {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
-		binder.setAllowedFields(new String[]{"nam*", "*ouchy"});
+		binder.setAllowedFields(new String[] {"nam*", "*ouchy"});
+
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
 		pvs.addPropertyValue(new PropertyValue("touchy", "Rod"));
@@ -241,6 +241,25 @@ public class DataBinderTests extends TestCase {
 		assertTrue("There is one element in map", m.size() == 2);
 		TestBean tb = (TestBean) m.get("person");
 		assertTrue("Same object", tb.equals(rod));
+	}
+
+	public void testBindingWithAllowedMapFields() throws Exception {
+		TestBean rod = new TestBean();
+		DataBinder binder = new DataBinder(rod);
+		binder.setAllowedFields(new String[] {"someMap['key1']", "someMap[key2]"});
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("someMap[key1]", "value1");
+		pvs.addPropertyValue("someMap['key2']", "value2");
+		pvs.addPropertyValue("someMap[key3]", "value3");
+		pvs.addPropertyValue("someMap['key4']", "value4");
+
+		binder.bind(pvs);
+		binder.close();
+		assertEquals("value1", rod.getSomeMap().get("key1"));
+		assertEquals("value2", rod.getSomeMap().get("key2"));
+		assertNull(rod.getSomeMap().get("key3"));
+		assertNull(rod.getSomeMap().get("key4"));
 	}
 
 	/**
@@ -274,6 +293,25 @@ public class DataBinderTests extends TestCase {
 		assertEquals("", ex.getFieldValue("date"));
 		assertEquals("required", ex.getFieldError("spouse.name").getCode());
 		assertEquals("", ex.getFieldValue("spouse.name"));
+	}
+
+	public void testBindingWithRequiredMapFields() throws Exception {
+		TestBean tb = new TestBean();
+		tb.setSpouse(new TestBean());
+
+		DataBinder binder = new DataBinder(tb, "person");
+		binder.setRequiredFields(new String[] {"someMap[key1]", "someMap[key2]", "someMap['key3']", "someMap[key4]"});
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("someMap[key1]", "value1");
+		pvs.addPropertyValue("someMap['key2']", "value2");
+		pvs.addPropertyValue("someMap[key3]", "value3");
+
+		binder.bind(pvs);
+
+		Errors errors = binder.getErrors();
+		assertEquals("Wrong number of errors", 1, errors.getErrorCount());
+		assertEquals("required", errors.getFieldError("someMap[key4]").getCode());
 	}
 
 	public void testBindingWithNestedObjectCreation() throws Exception {
@@ -480,7 +518,9 @@ public class DataBinderTests extends TestCase {
 		spouseValidator.validate(tb.getSpouse(), errors);
 
 		errors.setNestedPath("");
+		assertTrue(errors.hasErrors());
 		assertEquals(6, errors.getErrorCount());
+
 		assertEquals(2, errors.getGlobalErrorCount());
 		assertEquals("NAME_TOUCHY_MISMATCH", errors.getGlobalError().getCode());
 		assertEquals("NAME_TOUCHY_MISMATCH", ((ObjectError) errors.getGlobalErrors().get(0)).getCode());
@@ -492,6 +532,8 @@ public class DataBinderTests extends TestCase {
 		assertEquals("GENERAL_ERROR", ((ObjectError) errors.getGlobalErrors().get(1)).getCodes()[1]);
 		assertEquals("msg", ((ObjectError) errors.getGlobalErrors().get(1)).getDefaultMessage());
 		assertEquals("arg", ((ObjectError) errors.getGlobalErrors().get(1)).getArguments()[0]);
+
+		assertTrue(errors.hasFieldErrors("age"));
 		assertEquals(2, errors.getFieldErrorCount("age"));
 		assertEquals("TOO_YOUNG", errors.getFieldError("age").getCode());
 		assertEquals("TOO_YOUNG", ((FieldError) errors.getFieldErrors("age").get(0)).getCode());
@@ -499,6 +541,8 @@ public class DataBinderTests extends TestCase {
 		assertEquals("age", ((FieldError) errors.getFieldErrors("age").get(0)).getField());
 		assertEquals(new Integer(0), ((FieldError) errors.getFieldErrors("age").get(0)).getRejectedValue());
 		assertEquals("AGE_NOT_ODD", ((FieldError) errors.getFieldErrors("age").get(1)).getCode());
+
+		assertTrue(errors.hasFieldErrors("name"));
 		assertEquals(1, errors.getFieldErrorCount("name"));
 		assertEquals("NOT_ROD", errors.getFieldError("name").getCode());
 		assertEquals("NOT_ROD.tb.name", errors.getFieldError("name").getCodes()[0]);
@@ -507,10 +551,43 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_ROD", errors.getFieldError("name").getCodes()[3]);
 		assertEquals("name", ((FieldError) errors.getFieldErrors("name").get(0)).getField());
 		assertEquals(null, ((FieldError) errors.getFieldErrors("name").get(0)).getRejectedValue());
+
+		assertTrue(errors.hasFieldErrors("spouse.age"));
 		assertEquals(1, errors.getFieldErrorCount("spouse.age"));
 		assertEquals("TOO_YOUNG", errors.getFieldError("spouse.age").getCode());
 		assertEquals("tb", ((FieldError) errors.getFieldErrors("spouse.age").get(0)).getObjectName());
 		assertEquals(new Integer(0), ((FieldError) errors.getFieldErrors("spouse.age").get(0)).getRejectedValue());
+	}
+
+	public void testValidatorWithNestedObjectNull() {
+		TestBean tb = new TestBean();
+		Errors errors = new BindException(tb, "tb");
+		Validator testValidator = new TestBeanValidator();
+		testValidator.validate(tb, errors);
+		errors.setNestedPath("spouse.");
+		assertEquals("spouse.", errors.getNestedPath());
+		Validator spouseValidator = new SpouseValidator();
+		spouseValidator.validate(tb.getSpouse(), errors);
+		errors.setNestedPath("");
+
+		assertTrue(errors.hasFieldErrors("spouse"));
+		assertEquals(1, errors.getFieldErrorCount("spouse"));
+		assertEquals("SPOUSE_NOT_AVAILABLE", errors.getFieldError("spouse").getCode());
+		assertEquals("tb", ((FieldError) errors.getFieldErrors("spouse").get(0)).getObjectName());
+		assertEquals(null, ((FieldError) errors.getFieldErrors("spouse").get(0)).getRejectedValue());
+	}
+
+	public void testNestedValidatorWithoutNestedPath() {
+		TestBean tb = new TestBean();
+		tb.setName("XXX");
+		Errors errors = new BindException(tb, "tb");
+		Validator spouseValidator = new SpouseValidator();
+		spouseValidator.validate(tb, errors);
+
+		assertTrue(errors.hasGlobalErrors());
+		assertEquals(1, errors.getGlobalErrorCount());
+		assertEquals("SPOUSE_NOT_AVAILABLE", errors.getGlobalError().getCode());
+		assertEquals("tb", ((ObjectError) errors.getGlobalErrors().get(0)).getObjectName());
 	}
 
 	public void testBindingStringArrayToIntegerSet() {
@@ -980,10 +1057,10 @@ public class DataBinderTests extends TestCase {
 		public void validate(Object obj, Errors errors) {
 			TestBean tb = (TestBean) obj;
 			if (tb.getAge() < 32) {
-				errors.rejectValue("age", "TOO_YOUNG", null, "simply too young");
+				errors.rejectValue("age", "TOO_YOUNG", "simply too young");
 			}
 			if (tb.getAge() % 2 == 0) {
-				errors.rejectValue("age", "AGE_NOT_ODD", null, "your age isn't odd");
+				errors.rejectValue("age", "AGE_NOT_ODD", "your age isn't odd");
 			}
 			if (tb.getName() == null || !tb.getName().equals("Rod")) {
 				errors.rejectValue("name", "NOT_ROD", "are you sure you're not Rod?");
@@ -992,7 +1069,7 @@ public class DataBinderTests extends TestCase {
 				errors.reject("NAME_TOUCHY_MISMATCH", "name and touchy do not match");
 			}
 			if (tb.getAge() == 0) {
-				errors.reject("GENERAL_ERROR", new String[]{"arg"}, "msg");
+				errors.reject("GENERAL_ERROR", new String[] {"arg"}, "msg");
 			}
 		}
 	}
@@ -1006,8 +1083,12 @@ public class DataBinderTests extends TestCase {
 
 		public void validate(Object obj, Errors errors) {
 			TestBean tb = (TestBean) obj;
+			if (tb == null || "XXX".equals(tb.getName())) {
+				errors.rejectValue("", "SPOUSE_NOT_AVAILABLE");
+				return;
+			}
 			if (tb.getAge() < 32) {
-				errors.rejectValue("age", "TOO_YOUNG", null, "simply too young");
+				errors.rejectValue("age", "TOO_YOUNG", "simply too young");
 			}
 		}
 	}
