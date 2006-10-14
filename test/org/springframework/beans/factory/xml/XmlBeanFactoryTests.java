@@ -1007,7 +1007,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		sw.stop();
 		System.out.println(sw);
 		if (!LogFactory.getLog(DefaultListableBeanFactory.class).isDebugEnabled()) {
-			assertTrue(sw.getTotalTimeMillis() < 1000);
+			assertTrue(sw.getTotalTimeMillis() < 1500);
 		}
 
 		// Now test distinct bean with swapped value in factory, to ensure the two are independent
