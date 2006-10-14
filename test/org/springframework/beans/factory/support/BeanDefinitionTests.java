@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import junit.framework.TestCase;
 
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 
 /**
  * @author Juergen Hoeller
@@ -33,7 +34,6 @@ public class BeanDefinitionTests extends TestCase {
 		RootBeanDefinition otherBd = new RootBeanDefinition(TestBean.class);
 		assertTrue(!bd.equals(otherBd));
 		assertTrue(!otherBd.equals(bd));
-		otherBd.setAbstract(true);
 		otherBd.setAbstract(true);
 		otherBd.setLazyInit(true);
 		otherBd.setScope("request");
@@ -88,6 +88,23 @@ public class BeanDefinitionTests extends TestCase {
 		otherBd.getConstructorArgumentValues().addIndexedArgumentValue(1, new Integer(5), "long");
 		assertTrue(bd.equals(otherBd));
 		assertTrue(otherBd.equals(bd));
+	}
+
+	public void testBeanDefinitionHolderEquality() {
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setAbstract(true);
+		bd.setLazyInit(true);
+		bd.setScope("request");
+		BeanDefinitionHolder holder = new BeanDefinitionHolder(bd, "bd");
+		RootBeanDefinition otherBd = new RootBeanDefinition(TestBean.class);
+		assertTrue(!bd.equals(otherBd));
+		assertTrue(!otherBd.equals(bd));
+		otherBd.setAbstract(true);
+		otherBd.setLazyInit(true);
+		otherBd.setScope("request");
+		BeanDefinitionHolder otherHolder = new BeanDefinitionHolder(bd, "bd");
+		assertTrue(holder.equals(otherHolder));
+		assertTrue(otherHolder.equals(holder));
 	}
 
 }

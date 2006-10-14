@@ -24,7 +24,6 @@ import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanReference;
-import org.springframework.util.Assert;
 
 /**
  * ComponentDefinition based on a standard BeanDefinition, exposing the given bean
@@ -34,13 +33,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class BeanComponentDefinition extends AbstractComponentDefinition {
-
-	private final BeanDefinition beanDefinition;
-
-	private final String beanName;
-
-	private final String description;
+public class BeanComponentDefinition extends BeanDefinitionHolder implements ComponentDefinition {
 
 	private BeanDefinition[] innerBeanDefinitions;
 
@@ -53,12 +46,8 @@ public class BeanComponentDefinition extends AbstractComponentDefinition {
 	 * @param beanName the name of the bean
 	 */
 	public BeanComponentDefinition(BeanDefinition beanDefinition, String beanName) {
-		Assert.notNull(beanDefinition, "BeanDefinition must not be null");
-		Assert.notNull(beanName, "Bean name must not be null");
-		this.beanDefinition = beanDefinition;
-		this.beanName = beanName;
-		this.description = buildDescription(this.beanDefinition);
-		findInnerBeanDefinitionsAndBeanReferences();
+		super(beanDefinition, beanName);
+		findInnerBeanDefinitionsAndBeanReferences(beanDefinition);
 	}
 
 	/**
@@ -67,24 +56,15 @@ public class BeanComponentDefinition extends AbstractComponentDefinition {
 	 * bean definition as well as the name of the bean
 	 */
 	public BeanComponentDefinition(BeanDefinitionHolder holder) {
-		this(holder.getBeanDefinition(), holder.getBeanName());
+		super(holder);
+		findInnerBeanDefinitionsAndBeanReferences(holder.getBeanDefinition());
 	}
 
 
-	private String buildDescription(BeanDefinition beanDefinition) {
-		StringBuffer sb = new StringBuffer();
-		sb.append("Bean '").append(getName()).append("'");
-		String beanType = beanDefinition.getBeanClassName();
-		if (beanType != null) {
-			sb.append(" of type [" + beanType + "]");
-		}
-		return sb.toString();
-	}
-
-	private void findInnerBeanDefinitionsAndBeanReferences() {
+	private void findInnerBeanDefinitionsAndBeanReferences(BeanDefinition beanDefinition) {
 		List innerBeans = new ArrayList();
 		List references = new ArrayList();
-		PropertyValues propertyValues = this.beanDefinition.getPropertyValues();
+		PropertyValues propertyValues = beanDefinition.getPropertyValues();
 		for (int i = 0; i < propertyValues.getPropertyValues().length; i++) {
 			PropertyValue propertyValue = propertyValues.getPropertyValues()[i];
 			Object value = propertyValue.getValue();
@@ -104,27 +84,40 @@ public class BeanComponentDefinition extends AbstractComponentDefinition {
 
 
 	public String getName() {
-		return this.beanName;
+		return getBeanName();
 	}
 
 	public String getDescription() {
-		return this.description;
+		return getShortDescription();
 	}
 
 	public BeanDefinition[] getBeanDefinitions() {
-		return new BeanDefinition[] {this.beanDefinition};
+		return new BeanDefinition[] {getBeanDefinition()};
 	}
 
 	public BeanDefinition[] getInnerBeanDefinitions() {
-		return innerBeanDefinitions;
+		return this.innerBeanDefinitions;
 	}
 
 	public BeanReference[] getBeanReferences() {
 		return this.beanReferences;
 	}
 
-	public Object getSource() {
-		return this.beanDefinition.getSource();
+
+	/**
+	 * This implementation returns this ComponentDefinition's description.
+	 * @see #getDescription()
+	 */
+	public String toString() {
+		return getDescription();
+	}
+
+	/**
+	 * This implementations expects the other object to be of type BeanComponentDefinition
+	 * as well, in addition to the superclass's equality requirements.
+	 */
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof BeanComponentDefinition && super.equals(other)));
 	}
 
 }
