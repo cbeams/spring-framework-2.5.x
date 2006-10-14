@@ -132,6 +132,6 @@
 	<classpathentry kind="lib" path="lib/openjpa/openjpa-persistence-jdbc-0.9.0-incubating-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/openjpa/openjpa-xmlstore-0.9.0-incubating-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/serp/serp-1.11.0.jar"/>
-	<classpathentry kind="lib" path="lib/glassfish/glassfish-api.jar"/>
+	<classpathentry kind="lib" path="lib/glassfish/glassfish-clapi.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
