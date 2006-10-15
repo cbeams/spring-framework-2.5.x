@@ -28,6 +28,9 @@ Package org.springframework.instrument
 * added GlassFishLoadTimeWeaver for GlassFish / Sun Application Server
 
 Package org.springframework.mock
+* MockHttpServletResponse handles HTTP header names as case-insensitive (analogous to MockHttpServletRequest)
+* unified mock object constructors that take ServletContext/PortletContext/PortalContext arguments
+* added all of MockPortletRequest's overloaded constructors to MockActionRequest and MockRenderRequest
 * turned AbstractSingleSpringContextTests's "contextKey" and "loadContext" methods non-final again
 * AbstractSingleSpringContextTests provides empty default implementation of "getConfigLocations" (not abstract anymore)
 
@@ -43,6 +46,9 @@ Package org.springframework.test
 Package org.springframework.transaction
 * TransactionAttributeEditor does not accept transaction attributes with invalid whitespace anymore
 * JtaTransactionManager's "doRegisterAfterCompletionWithJtaTransaction" avoids NPE if no current JTA transaction active
+
+Package org.springframework.ui
+* deprecated FreeMarkerConfigurationFactory's "templateLoaders" property in favor of "pre/postTemplateLoaders"
 
 Package org.springframework.util
 * added "containsWhitespace" method to StringUtils
@@ -133,9 +139,11 @@ Package org.springframework.util
 * ClassUtils falls back to the system class loader if the thread context class loader is inaccessible
 * all class loading is done via "ClassLoader.loadClass(name)" rather than "Class.forName(name, true, ClassLoader)"
 
+Package org.springframework.validation
+* DataBinder matches all field names using their canonical name (for required, allowed and disallowed checks)
+
 Package org.springframework.web
 * clarified MultipartFile constract details
-* DataBinder matches all field names using their canonical name (for required, allowed and disallowed checks)
 * InternalResourceView correctly exports forward attributes on Servlet 2.3- (and preserves existing attributes on 2.4+)
 * OptionTag and ErrorsTag implement BodyTag interface directly to work around a bug in WebLogic Server 8.1's JSP engine
 * added "renderPhaseOnly" flag to Portlet WebRequestHandlerInterceptorAdapter, allowing to intercept action phase too
@@ -397,6 +405,9 @@ Package org.springframework.orm
 * added "determinePersistenceUnitInfo/postProcessPersistenceUnitInfo" methods to LocalContainerEntityManagerFactoryBean
 * reworked OpenSession/PersistenceManager/EntityManagerInViewInterceptor to build on WebRequestInterceptor abstraction
 * dropped PortletOpenSession/PersistenceManager/EntityManagerInViewInterceptor in favor of WebRequestInterceptor model
+
+Package org.springframework.mock
+* MockHttpServletRequest handles HTTP header names as case-insensitive
 
 Package org.springframework.remoting
 * added "registryClientSocketFactory" bean property to RmiClientInterceptor/RmiProxyFactoryBean
