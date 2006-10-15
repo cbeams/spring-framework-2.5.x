@@ -806,9 +806,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				throw new UnsatisfiedDependencyException(
 						mergedBeanDefinition.getResourceDescription(), beanName, propertyName,
 						"There are " + matchingBeans.size() + " beans of type [" + requiredType.getName() +
-						"] for autowire by type: " + matchingBeans.keySet() +
+						"] available for autowiring by type: " + matchingBeans.keySet() +
 						". There should have been exactly 1 to be able to autowire property '" +
-						propertyName + "' of bean '" + beanName + "'. Consider using autowire by name instead.");
+						propertyName + "' of bean '" + beanName + "'. Consider using autowiring by name instead.");
 			}
 			else {
 				if (logger.isDebugEnabled()) {

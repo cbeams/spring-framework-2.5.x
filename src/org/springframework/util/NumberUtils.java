@@ -57,7 +57,7 @@ public abstract class NumberUtils {
 		if (targetClass.isInstance(number)) {
 			return number;
 		}
-		else if(targetClass.equals(Byte.class)) {
+		else if (targetClass.equals(Byte.class)) {
 			long value = number.longValue();
 			if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
 				raiseOverflowException(number, targetClass);

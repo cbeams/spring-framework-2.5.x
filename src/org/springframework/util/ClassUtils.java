@@ -96,7 +96,7 @@ public abstract class ClassUtils {
 	 * for example, for class path resource loading (but not necessarily for
 	 * <code>Class.forName</code>, which accepts a <code>null</code> ClassLoader
 	 * reference as well).
-	 * @see Thread#getContextClassLoader()
+	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	public static ClassLoader getDefaultClassLoader() {
 		ClassLoader cl = null;
@@ -494,8 +494,8 @@ public abstract class ClassUtils {
 	 * @param clazz	the Class whose package will be used as the base
 	 * @param resourceName the resource name to append. A leading slash is optional.
 	 * @return the built-up resource path
-	 * @see ClassLoader#getResource
-	 * @see Class#getResource
+	 * @see java.lang.ClassLoader#getResource
+	 * @see java.lang.Class#getResource
 	 */
 	public static String addResourcePathToPackagePath(Class clazz, String resourceName) {
 		Assert.notNull(resourceName, "Resource name must not be null");

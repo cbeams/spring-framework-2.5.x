@@ -57,7 +57,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
-	private boolean lazyInitHandlers;
+	private boolean lazyInitHandlers = false;
 
 	private final Map handlerMap = new HashMap();
 
@@ -214,7 +214,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		if (mappedHandler != null) {
 			throw new IllegalStateException(
 					"Cannot map handler [" + handler + "] to URL path [" + urlPath +
-					"]: There's already handler [" + mappedHandler + "] mapped.");
+					"]: There is already handler [" + mappedHandler + "] mapped.");
 		}
 
 		// Eagerly resolve handler if referencing singleton via name.

@@ -892,7 +892,6 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return new TestBean();
 			}
-
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
 				return bean;
 			}

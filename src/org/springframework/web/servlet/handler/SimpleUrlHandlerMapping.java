@@ -89,7 +89,7 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	 * bean definitions.
 	 */
 	public Map getUrlMap() {
-		return urlMap;
+		return this.urlMap;
 	}
 
 
