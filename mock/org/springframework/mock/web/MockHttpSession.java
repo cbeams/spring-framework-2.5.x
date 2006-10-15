@@ -30,10 +30,10 @@ import javax.servlet.http.HttpSessionContext;
 import org.springframework.util.Assert;
 
 /**
- * Mock implementation of the HttpSession interface.
+ * Mock implementation of the {@link javax.servlet.http.HttpSession} interface.
  *
- * <p>Used for testing the web framework; also useful
- * for testing application controllers.
+ * <p>Used for testing the web framework; also useful for testing
+ * application controllers.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -64,19 +64,19 @@ public class MockHttpSession implements HttpSession {
 
 
 	/**
+	 * Create a new MockHttpSession with a default {@link MockServletContext}.
+	 * @see MockServletContext
+	 */
+	public MockHttpSession() {
+		this(null);
+	}
+
+	/**
 	 * Create a new MockHttpSession.
 	 * @param servletContext the ServletContext that the session runs in
 	 */
 	public MockHttpSession(ServletContext servletContext) {
-		this.servletContext = servletContext;
-	}
-
-	/**
-	 * Create a new MockHttpSession with a MockServletContext.
-	 * @see MockServletContext
-	 */
-	public MockHttpSession() {
-		this(new MockServletContext());
+		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 	}
 
 

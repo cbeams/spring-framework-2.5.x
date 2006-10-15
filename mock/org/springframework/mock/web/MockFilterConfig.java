@@ -25,10 +25,10 @@ import javax.servlet.ServletContext;
 import org.springframework.util.Assert;
 
 /**
- * Mock implementation of the {@link FilterConfig} interface.
+ * Mock implementation of the {@link javax.servlet.FilterConfig} interface.
  *
- * <p>Used for testing the web framework; typically not
- * necessary for testing application controllers.
+ * <p>Used for testing the web framework; typically not necessary for
+ * testing application controllers.
  *
  * @author Juergen Hoeller
  * @since 1.0.2
@@ -43,14 +43,22 @@ public class MockFilterConfig implements FilterConfig {
 
 
 	/**
-	 * Create a new {@link MockFilterConfig} with a default {@link MockServletContext}.
+	 * Create a new MockFilterConfig with a default {@link MockServletContext}.
 	 */
 	public MockFilterConfig() {
-		this(new MockServletContext());
+		this(null, "");
 	}
 
-    /**
-	 * Create a new {@link MockFilterConfig} with empty String as name.
+	/**
+	 * Create a new MockFilterConfig with a default {@link MockServletContext}.
+	 * @param filterName the name of the filter
+	 */
+	public MockFilterConfig(String filterName) {
+		this(null, filterName);
+	}
+
+	/**
+	 * Create a new MockFilterConfig.
 	 * @param servletContext the ServletContext that the servlet runs in
 	 */
 	public MockFilterConfig(ServletContext servletContext) {
@@ -58,20 +66,12 @@ public class MockFilterConfig implements FilterConfig {
 	}
 
 	/**
-	 * Create a new {@link MockFilterConfig} with a default {@link MockServletContext}.
-	 * @param filterName the name of the filter
-	 */
-	public MockFilterConfig(String filterName) {
-		this(new MockServletContext(), filterName);
-	}
-
-	/**
-	 * Create a new {@link MockFilterConfig}.
+	 * Create a new MockFilterConfig.
 	 * @param servletContext the ServletContext that the servlet runs in
 	 * @param filterName the name of the filter
 	 */
 	public MockFilterConfig(ServletContext servletContext, String filterName) {
-		this.servletContext = servletContext;
+		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 		this.filterName = filterName;
 	}
 
