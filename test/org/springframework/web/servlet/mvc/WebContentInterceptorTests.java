@@ -16,21 +16,20 @@
 
 package org.springframework.web.servlet.mvc;
 
+import java.util.List;
+import java.util.Properties;
+
 import junit.framework.TestCase;
+
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.AssertThrows;
 import org.springframework.web.servlet.support.WebContentGenerator;
 
-import java.util.List;
-import java.util.Properties;
-
 /**
- * Unit tests for the {@link WebContentInterceptor} class.
- *
  * @author Rick Evans
  */
-public final class WebContentInterceptorTests extends TestCase {
+public class WebContentInterceptorTests extends TestCase {
 
 	private MockHttpServletRequest request;
 

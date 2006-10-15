@@ -28,8 +28,8 @@ import org.springframework.core.JdkVersion;
 import org.springframework.util.StringUtils;
 
 /**
- * Helper class for URL path matching. Provides support for URL paths
- * in RequestDispatcher includes, and support for URL decoding.
+ * Helper class for URL path matching. Provides support for URL paths in
+ * RequestDispatcher includes and support for consistent URL decoding.
  *
  * <p>Used by AbstractUrlHandlerMapping, AbstractUrlMethodNameResolver
  * and RequestContext for path matching and/or URI determination.
@@ -44,19 +44,19 @@ import org.springframework.util.StringUtils;
 public class UrlPathHelper {
 
 	/**
-	 * @deprecated in favor of <code>WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE</code>
+	 * @deprecated as of Spring 2.0, in favor of <code>WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE</code>
 	 * @see org.springframework.web.util.WebUtils#INCLUDE_REQUEST_URI_ATTRIBUTE
 	 */
 	public static final String INCLUDE_URI_REQUEST_ATTRIBUTE = WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE;
 
 	/**
-	 * @deprecated in favor of <code>WebUtils.INCLUDE_CONTEXT_PATH_ATTRIBUTE</code>
+	 * @deprecated as of Spring 2.0, in favor of <code>WebUtils.INCLUDE_CONTEXT_PATH_ATTRIBUTE</code>
 	 * @see org.springframework.web.util.WebUtils#INCLUDE_CONTEXT_PATH_ATTRIBUTE
 	 */
 	public static final String INCLUDE_CONTEXT_PATH_REQUEST_ATTRIBUTE = WebUtils.INCLUDE_CONTEXT_PATH_ATTRIBUTE;
 
 	/**
-	 * @deprecated in favor of <code>WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE</code>
+	 * @deprecated as of Spring 2.0, in favor of <code>WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE</code>
 	 * @see org.springframework.web.util.WebUtils#INCLUDE_SERVLET_PATH_ATTRIBUTE
 	 */
 	public static final String INCLUDE_SERVLET_PATH_REQUEST_ATTRIBUTE = WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE;
@@ -189,7 +189,7 @@ public class UrlPathHelper {
 		if (StringUtils.startsWithIgnoreCase(requestUri, contextPath)) {
 			// Normal case: URI contains context path.
 			String path = requestUri.substring(contextPath.length());
-			return StringUtils.hasText(path) ? path : "/";
+			return (StringUtils.hasText(path) ? path : "/");
 		}
 		else {
 			// Special case: rather unusual.
