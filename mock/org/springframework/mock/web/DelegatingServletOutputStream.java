@@ -22,10 +22,10 @@ import java.io.OutputStream;
 import javax.servlet.ServletOutputStream;
 
 /**
- * Delegating implementation of ServletOutputStream.
+ * Delegating implementation of {@link javax.servlet.ServletOutputStream}.
  *
- * <p>Used by MockHttpServletResponse; typically not
- * directly used for testing application controllers.
+ * <p>Used by {@link MockHttpServletResponse}; typically not directly
+ * used for testing application controllers.
  *
  * @author Juergen Hoeller
  * @since 1.0.2

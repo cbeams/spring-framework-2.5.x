@@ -26,7 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 /**
- * Mock implementation of the MultipartHttpServletRequest interface.
+ * Mock implementation of the
+ * {@link org.springframework.web.multipart.MultipartHttpServletRequest} interface.
  *
  * <p>Useful for testing application controllers that access multipart uploads.
  * The {@link MockMultipartFile} can be used to populate these mock requests

@@ -22,14 +22,14 @@ import java.io.InputStream;
 import javax.servlet.ServletInputStream;
 
 /**
- * Delegating implementation of ServletInputStream.
+ * Delegating implementation of {@link javax.servlet.ServletInputStream}.
  *
- * <p>Used by MockHttpServletRequest; typically not
- * necessary for testing application controllers.
+ * <p>Used by {@link MockHttpServletRequest}; typically not directly
+ * used for testing application controllers.
  *
  * @author Juergen Hoeller
  * @since 1.0.2
- * @see org.springframework.mock.web.MockHttpServletRequest
+ * @see MockHttpServletRequest
  */
 public class DelegatingServletInputStream extends ServletInputStream {
 

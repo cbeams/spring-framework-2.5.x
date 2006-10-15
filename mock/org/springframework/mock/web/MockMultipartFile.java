@@ -26,7 +26,8 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Mock implementation of the MultipartFile interface.
+ * Mock implementation of the {@link org.springframework.web.multipart.MultipartFile}
+ * interface.
  *
  * <p>Useful in conjunction with a {@link MockMultipartHttpServletRequest}
  * for testing application controllers that access multipart uploads.
