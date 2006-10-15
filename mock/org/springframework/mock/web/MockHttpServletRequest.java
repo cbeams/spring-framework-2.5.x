@@ -23,7 +23,16 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -34,9 +43,11 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
- * Stub implementation of the {@link HttpServletRequest} interface.
+ * Mock implementation of the {@link javax.servlet.http.HttpServletRequest}
+ * interface.
  *
  * <p>Used for testing the web framework; also useful for testing
  * application controllers.
@@ -44,7 +55,6 @@ import org.springframework.util.Assert;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rick Evans
- * @author Tamas Szabo
  * @since 1.0.2
  */
 public class MockHttpServletRequest implements HttpServletRequest {
@@ -131,9 +141,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private Cookie[] cookies;
 
 	/**
-	 * The key is the lowercase header name; the value is a {@link HttpHeader} object.
+	 * The key is the lowercase header name; the value is a {@link HeaderValueHolder} object.
 	 */
-	private final Map headers = new Hashtable();
+	private final Hashtable headers = new Hashtable();
 
 	private String method;
 
@@ -149,7 +159,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private Principal userPrincipal;
 
-	private String requestURI = "";
+	private String requestURI;
 
 	private String servletPath = "";
 
@@ -167,46 +177,52 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Create a new MockHttpServletRequest.
-	 * @param servletContext the ServletContext that the request runs in (can be <code>null</code>) 
-	 */
-	public MockHttpServletRequest(ServletContext servletContext) {
-		this.locales.add(Locale.ENGLISH);
-		this.servletContext = servletContext;
-	}
-
-	/**
-	 * Create a new MockHttpServletRequest.
-	 * @param servletContext the ServletContext that the request runs in (can be <code>null</code>)
-	 * @param method the request method
-	 * @param requestURI the request URI
-	 * @see #setMethod
-	 * @see #setRequestURI
-	 */
-	public MockHttpServletRequest(ServletContext servletContext, String method, String requestURI) {
-		this(servletContext);
-		this.method = method;
-		this.requestURI = requestURI;
-	}
-
-	/**
-	 * Create a new MockHttpServletRequest with a {@link MockServletContext}.
+	 * Create a new MockHttpServletRequest with a default
+	 * {@link MockServletContext}.
 	 * @see MockServletContext
 	 */
 	public MockHttpServletRequest() {
-		this(new MockServletContext());
+		this(null, "", "");
 	}
 
 	/**
-	 * Create a new MockHttpServletRequest with a MockServletContext.
-	 * @param method the request method
-	 * @param requestURI the request URI
+	 * Create a new MockHttpServletRequest with a default
+	 * {@link MockServletContext}.
+	 * @param method the request method (may be <code>null</code>)
+	 * @param requestURI the request URI (may be <code>null</code>)
 	 * @see #setMethod
 	 * @see #setRequestURI
 	 * @see MockServletContext
 	 */
 	public MockHttpServletRequest(String method, String requestURI) {
-		this(new MockServletContext(), method, requestURI);
+		this(null, method, requestURI);
+	}
+
+	/**
+	 * Create a new MockHttpServletRequest.
+	 * @param servletContext the ServletContext that the request runs in
+	 * (may be <code>null</code> to use a default MockServletContext)
+	 * @see MockServletContext
+	 */
+	public MockHttpServletRequest(ServletContext servletContext) {
+		this(servletContext, "", "");
+	}
+
+	/**
+	 * Create a new MockHttpServletRequest.
+	 * @param servletContext the ServletContext that the request runs in
+	 * (may be <code>null</code> to use a default MockServletContext)
+	 * @param method the request method (may be <code>null</code>)
+	 * @param requestURI the request URI (may be <code>null</code>)
+	 * @see #setMethod
+	 * @see #setRequestURI
+	 * @see MockServletContext
+	 */
+	public MockHttpServletRequest(ServletContext servletContext, String method, String requestURI) {
+		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
+		this.method = method;
+		this.requestURI = requestURI;
+		this.locales.add(Locale.ENGLISH);
 	}
 
 
@@ -365,7 +381,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		if (this.content != null) {
 			InputStream sourceStream = new ByteArrayInputStream(this.content);
 			Reader sourceReader = (this.characterEncoding != null) ?
-				new InputStreamReader(sourceStream, this.characterEncoding) : new InputStreamReader(sourceStream);
+					new InputStreamReader(sourceStream, this.characterEncoding) : new InputStreamReader(sourceStream);
 			return new BufferedReader(sourceReader);
 		}
 		else {
@@ -509,16 +525,17 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public void addHeader(String name, Object value) {
 		Assert.notNull(name, "Header name must not be null");
 		Assert.notNull(value, "Header value must not be null");
-		HttpHeader header = (HttpHeader) this.headers.get(name.toLowerCase());
+		String canonicalName = name.toLowerCase();
+		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(canonicalName);
 		if (header == null) {
-			header = new HttpHeader(name);
-			this.headers.put(name.toLowerCase(), header);
+			header = new HeaderValueHolder();
+			this.headers.put(canonicalName, header);
 		}
 		if (value instanceof Collection) {
 			header.addValues((Collection) value);
 		}
 		else if (value.getClass().isArray()) {
-			header.addValues((Object[]) value);
+			header.addValues(CollectionUtils.arrayToList(value));
 		}
 		else {
 			header.addValue(value);
@@ -527,8 +544,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public long getDateHeader(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		HttpHeader header = (HttpHeader) this.headers.get(name.toLowerCase());
-		Object value = (header == null) ? null : header.getValue();
+		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(name.toLowerCase());
+		Object value = (header != null ? header.getValue() : null);
 		if (value instanceof Date) {
 			return ((Date) value).getTime();
 		}
@@ -545,24 +562,23 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getHeader(String name) {
-		HttpHeader header = (HttpHeader) this.headers.get(name.toLowerCase());
-		return header == null ? null : header.getValue().toString();
+		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(name.toLowerCase());
+		return (header != null ? header.getValue().toString() : null);
 	}
 
 	public Enumeration getHeaders(String name) {
-		HttpHeader header = (HttpHeader) this.headers.get(name.toLowerCase());
-		return Collections.enumeration(
-				(header == null) ? Collections.EMPTY_LIST : header.getValues());
+		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(name.toLowerCase());
+		return Collections.enumeration(header != null ? header.getValues() : Collections.EMPTY_LIST);
 	}
 
 	public Enumeration getHeaderNames() {
-		return new HttpHeaderNamesEnumerator(this.headers.values());
+		return this.headers.keys();
 	}
 
 	public int getIntHeader(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		HttpHeader header = (HttpHeader)this.headers.get(name.toLowerCase());
-        Object value = (header == null) ? null : header.getValue();
+		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(name.toLowerCase());
+		Object value = (header != null ? header.getValue() : null);
 		if (value instanceof Number) {
 			return ((Number) value).intValue();
 		}
@@ -570,7 +586,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			return Integer.parseInt((String) value);
 		}
 		else if (value != null) {
-			throw new NumberFormatException("Value for header '" + name + "' is not a Number : " + value);
+			throw new NumberFormatException("Value for header '" + name + "' is not a Number: " + value);
 		}
 		else {
 			return -1;
@@ -682,11 +698,11 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public HttpSession getSession(boolean create) {
-		// reset session if invalidated
+		// Reset session if invalidated.
 		if (this.session instanceof MockHttpSession && ((MockHttpSession) this.session).isInvalid()) {
 			this.session = null;
 		}
-		// create new session if necessary
+		// Create new session if necessary.
 		if (this.session == null && create) {
 			this.session = new MockHttpSession(this.servletContext);
 		}
@@ -723,73 +739,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public boolean isRequestedSessionIdFromUrl() {
 		return isRequestedSessionIdFromURL();
-	}
-
-
-	private static final class HttpHeader {
-
-		private String name;
-		private List values = new LinkedList();
-
-
-		HttpHeader(String name) {
-			Assert.notNull(name, "The header name cannot be null.");
-			this.name = name;
-		}
-
-
-		void addValue(Object value) {
-			Assert.notNull(values, "Value must not be null.");
-			this.values.add(value);
-		}
-
-		void addValues(Collection values) {
-			Assert.notNull(values, "Values collection must not be null.");
-			for (Iterator it = values.iterator(); it.hasNext();) {
-				Object element = it.next();
-				Assert.notNull(element, "Value collection must not contain null elements.");
-				this.values.add(element);
-			}
-		}
-
-		void addValues(Object[] values) {
-			this.values.addAll(Arrays.asList(values));
-		}
-
-		String getName() {
-			return this.name;
-		}
-
-		List getValues() {
-			return this.values;
-		}
-
-		Object getValue() {
-			return this.values.isEmpty() ? null : this.values.get(0);
-		}
-
-	}
-
-
-	private static final class HttpHeaderNamesEnumerator implements Enumeration {
-
-		private Iterator httpHeaderIterator;
-
-
-		HttpHeaderNamesEnumerator(Collection headers) {
-			Assert.notNull("Headers must not be null.");
-			this.httpHeaderIterator = headers.iterator();
-		}
-
-
-		public boolean hasMoreElements() {
-			return this.httpHeaderIterator.hasNext();
-		}
-
-		public Object nextElement() {
-			return ((HttpHeader) this.httpHeaderIterator.next()).getName();
-		}
-
 	}
 
 }

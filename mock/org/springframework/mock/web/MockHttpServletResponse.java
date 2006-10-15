@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -40,10 +39,11 @@ import org.springframework.util.Assert;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Mock implementation of the HttpServletResponse interface.
+ * Mock implementation of the {@link javax.servlet.http.HttpServletResponse}
+ * interface.
  *
- * <p>Used for testing the web framework; also useful
- * for testing application controllers.
+ * <p>Used for testing the web framework; also useful for testing
+ * application controllers.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -85,6 +85,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private final List cookies = new ArrayList();
 
+	/**
+	 * The key is the lowercase header name; the value is a {@link HeaderValueHolder} object.
+	 */
 	private final Map headers = new HashMap();
 
 	private int status = HttpServletResponse.SC_OK;
@@ -242,30 +245,38 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	public boolean containsHeader(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		return this.headers.containsKey(name);
+		return this.headers.containsKey(name.toLowerCase());
 	}
 
+	/**
+	 * Return the names of all specified headers as a Set of Strings.
+	 * @return the Set of header name Strings, or an empty Set if none
+	 */
 	public Set getHeaderNames() {
 		return this.headers.keySet();
 	}
 
+	/**
+	 * Return the primary value for the given header, if any.
+	 * <p>Will return the first value in case of multiple values.
+	 * @param name the name of the header
+	 * @return the associated header value, or <code>null<code> if none
+	 */
 	public Object getHeader(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		return this.headers.get(name);
+		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(name.toLowerCase());
+		return (header != null ? header.getValue() : null);
 	}
 
+	/**
+	 * Return all values for the given header as a List of value objects.
+	 * @param name the name of the header
+	 * @return the associated header values, or an empty List if none
+	 */
 	public List getHeaders(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		Object value = this.headers.get(name);
-		if (value instanceof List) {
-			return (List) value;
-		}
-		else if (value != null) {
-			return Collections.singletonList(value);
-		}
-		else {
-			return Collections.EMPTY_LIST;
-		}
+		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(name.toLowerCase());
+		return (header != null ? header.getValues() : Collections.EMPTY_LIST);
 	}
 
 	public String encodeURL(String url) {
@@ -315,48 +326,51 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public void setDateHeader(String name, long value) {
-		Assert.notNull(name, "Header name must not be null");
-		this.headers.put(name, new Long(value));
+		setHeaderValue(name, new Long(value));
 	}
 
 	public void addDateHeader(String name, long value) {
-		doAddHeader(name, new Long(value));
+		addHeaderValue(name, new Long(value));
 	}
 
 	public void setHeader(String name, String value) {
-		Assert.notNull(name, "Header name must not be null");
-		this.headers.put(name, value);
+		setHeaderValue(name, value);
 	}
 
 	public void addHeader(String name, String value) {
-		doAddHeader(name, value);
+		addHeaderValue(name, value);
 	}
 
 	public void setIntHeader(String name, int value) {
-		Assert.notNull(name, "Header name must not be null");
-		this.headers.put(name, new Integer(value));
+		setHeaderValue(name, new Integer(value));
 	}
 
 	public void addIntHeader(String name, int value) {
-		doAddHeader(name, new Integer(value));
+		addHeaderValue(name, new Integer(value));
 	}
 
-	private void doAddHeader(String name, Object value) {
+	private void setHeaderValue(String name, Object value) {
+		doAddHeaderValue(name, value, true);
+	}
+
+	private void addHeaderValue(String name, Object value) {
+		doAddHeaderValue(name, value, false);
+	}
+
+	private void doAddHeaderValue(String name, Object value, boolean replace) {
 		Assert.notNull(name, "Header name must not be null");
 		Assert.notNull(value, "Header value must not be null");
-		Object oldValue = this.headers.get(name);
-		if (oldValue instanceof List) {
-			List list = (List) oldValue;
-			list.add(value);
+		String canonicalName = name.toLowerCase();
+		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(canonicalName);
+		if (header == null) {
+			header = new HeaderValueHolder();
+			this.headers.put(canonicalName, header);
 		}
-		else if (oldValue != null) {
-			List list = new LinkedList();
-			list.add(oldValue);
-			list.add(value);
-			this.headers.put(name, list);
+		if (replace) {
+			header.setValue(value);
 		}
 		else {
-			this.headers.put(name, value);
+			header.addValue(value);
 		}
 	}
 
