@@ -23,7 +23,7 @@ import javax.portlet.PortletContext;
 import javax.portlet.PortletSession;
 
 /**
- * Mock implementation of the PortletSession interface.
+ * Mock implementation of the {@link javax.portlet.PortletSession} interface.
  *
  * @author John A. Lewis
  * @author Juergen Hoeller
@@ -54,19 +54,19 @@ public class MockPortletSession implements PortletSession {
 
 
 	/**
+	 * Create a new MockPortletSession with a default {@link MockPortletContext}.
+	 * @see MockPortletContext
+	 */
+	public MockPortletSession() {
+		this(null);
+	}
+
+	/**
 	 * Create a new MockPortletSession.
 	 * @param portletContext the PortletContext that the session runs in
 	 */
 	public MockPortletSession(PortletContext portletContext) {
-		this.portletContext = portletContext;
-	}
-
-	/**
-	 * Create a new MockPortletSession with a MockPortletContext.
-	 * @see MockPortletContext
-	 */
-	public MockPortletSession() {
-		this(new MockPortletContext());
+		this.portletContext = (portletContext != null ? portletContext : new MockPortletContext());
 	}
 
 	

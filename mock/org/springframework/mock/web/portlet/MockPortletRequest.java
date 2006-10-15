@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,7 +42,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Mock implementation of the PortletRequest interface.
+ * Mock implementation of the {@link javax.portlet.PortletRequest} interface.
  *
  * @author John A. Lewis
  * @author Juergen Hoeller
@@ -94,34 +94,34 @@ public class MockPortletRequest implements PortletRequest {
 
 
 	/**
+	 * Create a new MockPortletRequest with a default {@link MockPortalContext}
+	 * and a default {@link MockPortletContext}.
+	 * @see MockPortalContext
+	 * @see MockPortletContext
+	 */
+	public MockPortletRequest() {
+		this(null, null);
+	}
+
+	/**
+	 * Create a new MockPortletRequest with a default {@link MockPortalContext}.
+	 * @param portletContext the PortletContext that the request runs in
+	 * @see MockPortalContext
+	 */
+	public MockPortletRequest(PortletContext portletContext) {
+		this(null, portletContext);
+	}
+
+	/**
 	 * Create a new MockPortletRequest.
 	 * @param portalContext the PortalContext that the request runs in
 	 * @param portletContext the PortletContext that the request runs in
 	 */
 	public MockPortletRequest(PortalContext portalContext, PortletContext portletContext) {
-		this.portalContext = portalContext;
-		this.portletContext = portletContext;
+		this.portalContext = (portalContext != null ? portalContext : new MockPortalContext());
+		this.portletContext = (portletContext != null ? portletContext : new MockPortletContext());
 		this.responseContentTypes.add("text/html");
 		this.locales.add(Locale.ENGLISH);
-	}
-
-	/**
-	 * Create a new MockPortletRequest with a MockPortalContext.
-	 * @param portletContext the PortletContext that the request runs in
-	 * @see MockPortalContext
-	 */
-	public MockPortletRequest(PortletContext portletContext) {
-		this(new MockPortalContext(), portletContext);
-	}
-
-	/**
-	 * Create a new MockPortletRequest with a MockPortalContext
-	 * and a MockPortletContext.
-	 * @see MockPortalContext
-	 * @see MockPortletContext
-	 */
-	public MockPortletRequest() {
-		this(new MockPortletContext());
 	}
 
 	

@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,9 +25,11 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 
 import javax.portlet.ActionRequest;
+import javax.portlet.PortalContext;
+import javax.portlet.PortletContext;
 
 /**
- * Mock implementation of the ActionRequest interface.
+ * Mock implementation of the {@link javax.portlet.ActionRequest} interface.
  *
  * @author John A. Lewis
  * @author Juergen Hoeller
@@ -41,7 +43,36 @@ public class MockActionRequest extends MockPortletRequest implements ActionReque
 
 	private String contentType;
 
-	
+
+	/**
+	 * Create a new MockActionRequest with a default {@link MockPortalContext}
+	 * and a default {@link MockPortletContext}.
+	 * @see MockPortalContext
+	 * @see MockPortletContext
+	 */
+	public MockActionRequest() {
+		super();
+	}
+
+	/**
+	 * Create a new MockActionRequest with a default {@link MockPortalContext}.
+	 * @param portletContext the PortletContext that the request runs in
+	 * @see MockPortalContext
+	 */
+	public MockActionRequest(PortletContext portletContext) {
+		super(portletContext);
+	}
+
+	/**
+	 * Create a new MockActionRequest.
+	 * @param portalContext the PortalContext that the request runs in
+	 * @param portletContext the PortletContext that the request runs in
+	 */
+	public MockActionRequest(PortalContext portalContext, PortletContext portletContext) {
+		super(portalContext, portletContext);
+	}
+
+
 	public void setContent(byte[] content) {
 		this.content = content;
 	}

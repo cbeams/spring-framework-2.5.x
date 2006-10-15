@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,8 +28,8 @@ import javax.portlet.PortletContext;
 import org.springframework.util.Assert;
 
 /**
- * Mock implementation of the PortletConfig interface.
- * 
+ * Mock implementation of the {@link javax.portlet.PortletConfig} interface.
+ *
  * @author John A. Lewis
  * @author Juergen Hoeller
  * @since 2.0
@@ -59,7 +59,7 @@ public class MockPortletConfig implements PortletConfig {
 	 * @param portletName the name of the portlet
 	 */
 	public MockPortletConfig(PortletContext portletContext, String portletName) {
-		this.portletContext = portletContext;
+		this.portletContext = (portletContext != null ? portletContext : new MockPortletContext());
 		this.portletName = portletName;
 	}
 

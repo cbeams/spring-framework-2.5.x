@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,7 +32,7 @@ import javax.portlet.RenderResponse;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Mock implementation of the RenderResponse interface.
+ * Mock implementation of the {@link javax.portlet.RenderResponse} interface.
  *
  * @author John A. Lewis
  * @author Juergen Hoeller
@@ -62,20 +62,20 @@ public class MockRenderResponse extends MockPortletResponse implements RenderRes
 
 
 	/**
+	 * Create a new MockRenderResponse with a default {@link MockPortalContext}.
+	 * @see MockPortalContext
+	 */
+	public MockRenderResponse() {
+		super();
+	}
+
+	/**
 	 * Create a new MockRenderResponse.
 	 * @param portalContext the PortalContext defining the supported
 	 * PortletModes and WindowStates
 	 */
 	public MockRenderResponse(PortalContext portalContext) {
 		super(portalContext);
-	}
-
-	/**
-	 * Create a new MockRenderResponse with a MockPortalContext.
-	 * @see MockPortalContext
-	 */
-	public MockRenderResponse() {
-		super();
 	}
 
 
