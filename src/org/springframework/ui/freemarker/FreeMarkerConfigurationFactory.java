@@ -86,6 +86,10 @@ public class FreeMarkerConfigurationFactory {
 
 	private final List templateLoaders = new ArrayList();
 
+	private List preTemplateLoaders;
+
+	private List postTemplateLoaders;
+
 	private String[] templateLoaderPaths;
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
@@ -136,17 +140,46 @@ public class FreeMarkerConfigurationFactory {
 	/**
 	 * Set a List of <code>TemplateLoader<code>s that will be used to search
 	 * for templates. For example, one or more custom loaders such as database
-	 * loaders can be configured.
-	 * <p>Note: Setting a "templateLoaderPath" will override this list and cause
-	 * the configuration to search only the path given.
-	 * @param templateLoaders the List of templateLoaders that this Configuration
-	 * should use to search for templates
-	 * @see #setTemplateLoaderPath
+	 * loaders could be configured and injected here.
+	 * @deprecated as of Spring 2.0.1, in favor of the "preTemplateLoaders"
+	 * and "postTemplateLoaders" properties
+	 * @see #setPreTemplateLoaders
+	 * @see #setPostTemplateLoaders
 	 */
 	public void setTemplateLoaders(TemplateLoader[] templateLoaders) {
 		if (templateLoaders != null) {
 			this.templateLoaders.addAll(Arrays.asList(templateLoaders));
 		}
+	}
+
+	/**
+	 * Set a List of <code>TemplateLoader<code>s that will be used to search
+	 * for templates. For example, one or more custom loaders such as database
+	 * loaders could be configured and injected here.
+	 * <p>The {@link TemplateLoader TemplateLoaders} specified here will be
+	 * registered <i>before</i> the default template loaders that this factory
+	 * registers (such as loaders for specified "templateLoaderPaths" or any
+	 * loaders registered in {@link #postProcessTemplateLoaders}).
+	 * @see #setTemplateLoaderPaths
+	 * @see #postProcessTemplateLoaders
+	 */
+	public void setPreTemplateLoaders(TemplateLoader[] preTemplateLoaders) {
+		this.preTemplateLoaders = Arrays.asList(preTemplateLoaders);
+	}
+
+	/**
+	 * Set a List of <code>TemplateLoader<code>s that will be used to search
+	 * for templates. For example, one or more custom loaders such as database
+	 * loaders can be configured.
+	 * <p>The {@link TemplateLoader TemplateLoaders} specified here will be
+	 * registered <i>after</i> the default template loaders that this factory
+	 * registers (such as loaders for specified "templateLoaderPaths" or any
+	 * loaders registered in {@link #postProcessTemplateLoaders}).
+	 * @see #setTemplateLoaderPaths
+	 * @see #postProcessTemplateLoaders
+	 */
+	public void setPostTemplateLoaders(TemplateLoader[] postTemplateLoaders) {
+		this.postTemplateLoaders = Arrays.asList(postTemplateLoaders);
 	}
 
 	/**
@@ -259,12 +292,23 @@ public class FreeMarkerConfigurationFactory {
 			config.setDefaultEncoding(this.defaultEncoding);
 		}
 
+		// Register template loaders that are supposed to kick in early.
+		if (this.preTemplateLoaders != null) {
+			this.templateLoaders.addAll(this.preTemplateLoaders);
+		}
+
+		// Register default template loaders.
 		if (this.templateLoaderPaths != null) {
 			for (int i = 0; i < this.templateLoaderPaths.length; i++) {
 				this.templateLoaders.add(getTemplateLoaderForPath(this.templateLoaderPaths[i]));
 			}
 		}
 		postProcessTemplateLoaders(this.templateLoaders);
+
+		// Register template loaders that are supposed to kick in late.
+		if (this.postTemplateLoaders != null) {
+			this.templateLoaders.addAll(this.postTemplateLoaders);
+		}
 
 		TemplateLoader loader = getAggregateTemplateLoader(this.templateLoaders);
 		if (loader != null) {
@@ -329,10 +373,14 @@ public class FreeMarkerConfigurationFactory {
 	 * To be overridden by subclasses that want to to register custom
 	 * TemplateLoader instances after this factory created its default
 	 * template loaders.
-	 * <p>Called by <code>createConfiguration()</code>.
+	 * <p>Called by <code>createConfiguration()</code>. Note that specified
+	 * "postTemplateLoaders" will be registered <i>after</i> any loaders
+	 * registered by this callback; as a consequence, they are are <i>not</i>
+	 * included in the given List.
 	 * @param templateLoaders the current List of TemplateLoader instances,
 	 * to be modified by a subclass
 	 * @see #createConfiguration()
+	 * @see #setPostTemplateLoaders
 	 */
 	protected void postProcessTemplateLoaders(List templateLoaders) {
 	}
