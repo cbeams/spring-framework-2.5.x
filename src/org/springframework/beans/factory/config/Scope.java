@@ -30,29 +30,41 @@ import org.springframework.beans.factory.ObjectFactory;
  * <p><code>Scope</code> implementations are expected to be thread-safe.
  * One <code>Scope</code> can be used with multiple bean factories, if desired.
  *
- * <p>Can be implemented on top of a session API such as the
- * Servlet API's {@link javax.servlet.http.HttpSession} interface.
+ * <p>An example of a possible underlying storage mechansim would be a session
+ * API such as the Servlet API's {@link javax.servlet.http.HttpSession} interface.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 2.0
  * @see ConfigurableBeanFactory#registerScope
  * @see org.springframework.aop.scope.ScopedProxyFactoryBean
- * @see javax.servlet.http.HttpSession
+ * @see CustomScopeConfigurer
  */
 public interface Scope {
 
 	/**
 	 * Return the conversation id for the current underlying scope, if any.
+	 * <p>The exact value of the converation id is totally dependent on the
+	 * underlying storage mechanism (of course). In the case of session scoped
+	 * beans a good conversation id probably would be the
+	 * {@link javax.servlet.http.HttpSession#getId() session id}; in the case
+	 * of a JCache scope a good conversation id probably would be the name of
+	 * the associated cache.
+	 * <p>It is perfectly valid to return <code>null</code> in an
+	 * implementation of this method if the underlying storage mechanism has
+	 * no obvious good candidate for a conversation id.
 	 * @return the conversation id, or <code>null</code> if there is no
 	 * conversation id concept for this scope
 	 */
 	String getConversationId();
 
 	/**
-	 * Return the object from the underlying scope, creating it if not found.
-	 * @param name the name to bind with
-	 * @param objectFactory the {@link ObjectFactory} used to create the scoped object if not present
+	 * Return the object with the given name from the underlying scope,
+	 * {@link org.springframework.beans.factory.ObjectFactory#getObject() creating it}
+	 * if not found in the underlying storage mechanism.
+	 * @param name the name of the object to retrieve
+	 * @param objectFactory the {@link ObjectFactory} to use to create the scoped object if it is not present in the
+	 * underlying storage mechanism
 	 * @return the desired object
 	 */
 	Object get(String name, ObjectFactory objectFactory);
@@ -72,8 +84,8 @@ public interface Scope {
 	 * destroy individual objects but rather only terminate in its entirety).
 	 * <p>Implementations should do their best to execute the callback
 	 * at the appropriate time. If such a callback is not supported
-	 * by the underlying runtime environment, the callback must be
-	 * ignored and a corresponding warning should be logged.
+	 * by the underlying runtime environment, the callback <i>must be
+	 * ignored</i> and a corresponding warning should be logged.
 	 * @param name the name of the object to execute the destruction callback for
 	 * @param callback the destruction callback to be executed
 	 */
