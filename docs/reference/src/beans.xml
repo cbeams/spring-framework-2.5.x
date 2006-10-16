@@ -2462,51 +2462,54 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		</section>
 		<section id="beans-factory-scopes-custom">
 			<title>Custom scopes</title>
-			<para>As of Spring 2.0, the bean scoping mechanism in Spring is extensible.
-			This means that you are not limited to just the bean scopes that Spring
-			provides out of the box; you can define your own scopes, or even redefine
-			the existing scopes (although that last one would probably be considered
-			bad practice - please note that you <emphasis>cannot</emphasis> override the
-			built-in <literal>singleton</literal> and <literal>prototype</literal> scopes).</para>
-			<para>Scopes are defined by the
-			<interfacename>org.springframework.beans.factory.config.Scope</interfacename>
-			interface. This is the interface that you will need to implement in order
-			to integrate your own custom scope(s) into the Spring container. The interface
-			itself is quite simple, with two methods to get and remove an object from
-			an underlying storage mechanism respectively. Possible custom scopes are
-			beyond the scope of this reference manual. You may wish to look at the
-			<interfacename>Scope</interfacename> implementations that are supplied with
-			Spring for an idea of how to go about implementing your own.</para>
-			<para>The remainder of this section details how, after you have written and
-			tested one or more custom <interfacename>Scope</interfacename> implementations,
-			you then go about making the Spring container aware of your new scope. The
-			central method to register a new <interfacename>Scope</interfacename> with the
-			Spring container is declared on the <interfacename>ConfigurableBeanFactory</interfacename>
-			interface (implemented by most of the concrete <interfacename>BeanFactory</interfacename>
-			implementations that ship with Spring); this central method is displayed below:</para>
-			<programlisting><![CDATA[void registerScope(String scopeName, Scope scope);]]></programlisting>
-			<para>The first argument to the <methodname>registerScope(..)</methodname> method is the
-			unique name associated with a scope; examples of such names in the Spring container
-			itself are <literal>'singleton'</literal> and <literal>'prototype'</literal>.
-			The second argument to the <methodname>registerScope(..)</methodname> method is an
-			actual instance of the custom <interfacename>Scope</interfacename> implementation
-			that you wish to register and use.</para>
-			<para>Let's assume that you have written your own custom
-			<interfacename>Scope</interfacename> implementation, and you have registered it
-			like so:</para>
-			    <programlisting><lineannotation>// note: the <classname>ThreadScope</classname> class does <emphasis role="bold">not</emphasis> exist; I made it up for the sake of this example</lineannotation><![CDATA[
+			<para>As of Spring 2.0, the bean scoping mechanism in Spring is extensible. This means
+			that you are not limited to just the bean scopes that Spring provides out of the box;
+			you can define your own scopes, or even redefine the existing scopes (although that last
+			one would probably be considered bad practice - please note that you
+			<emphasis>cannot</emphasis> override the built-in <literal>singleton</literal> and
+			<literal>prototype</literal> scopes).</para>
+			<section id="beans-factory-scopes-custom-creating">
+			    <title>Creating your own custom scope</title>
+			    <para>Scopes are defined by the
+			    <interfacename>org.springframework.beans.factory.config.Scope</interfacename>
+			    interface. This is the interface that you will need to implement in order
+			    to integrate your own custom scope(s) into the Spring container, and is described
+			    in detail below. You may wish to look at the <interfacename>Scope</interfacename>
+			    implementations that are supplied with the Spring Framework itself for an idea of
+			    how to go about implementing your own.</para>
+			    <para><ulink url="http://opensource.atlassian.com/projects/spring/browse/SPR-2600">SPR-2600 - TODO</ulink></para>
+			</section>
+			<section id="beans-factory-scopes-custom-using">
+			    <title>Using a custom scope</title>
+			    <para>After you have written and tested one or more custom <interfacename>Scope</interfacename>
+			    implementations, you then need to make the Spring container aware of your new scope(s).
+			    The central method to register a new <interfacename>Scope</interfacename> with the
+			    Spring container is declared on the <interfacename>ConfigurableBeanFactory</interfacename>
+			    interface (implemented by most of the concrete <interfacename>BeanFactory</interfacename>
+			    implementations that ship with Spring); this central method is displayed below:</para>
+			    <programlisting><![CDATA[void registerScope(String scopeName, Scope scope);]]></programlisting>
+			    <para>The first argument to the <methodname>registerScope(..)</methodname> method is the
+			    unique name associated with a scope; examples of such names in the Spring container
+			    itself are <literal>'singleton'</literal> and <literal>'prototype'</literal>.
+			    The second argument to the <methodname>registerScope(..)</methodname> method is an
+			    actual instance of the custom <interfacename>Scope</interfacename> implementation
+			    that you wish to register and use.</para>
+			    <para>Let's assume that you have written your own custom
+			    <interfacename>Scope</interfacename> implementation, and you have registered it
+			    like so:</para>
+			    <programlisting><lineannotation>// note: the <classname>ThreadScope</classname> class does <emphasis role="bold">not</emphasis> ship with the Spring Framework</lineannotation><![CDATA[
 Scope customScope = new ThreadScope();
 beanFactory.registerScope("]]><emphasis role="bold">thread</emphasis><![CDATA[", scope);]]></programlisting>
-            <para>You can then create bean definitions that adhere to the scoping rules of your
-            custom <interfacename>Scope</interfacename> like so:</para>
-            <programlisting>&lt;bean id="..." class="..." <emphasis role="bold">scope="thread"</emphasis>/&gt;</programlisting>
-            <para>If you have your own custom <interfacename>Scope</interfacename> implementation(s),
-            you are not just limited to only programmatic registration of said custom scope(s).
-            You can also do the <interfacename>Scope</interfacename> registration declaratively,
-            using the <classname>CustomScopeConfigurer</classname> class.</para>
-            <para>The declarative registration of custom <interfacename>Scope</interfacename>
-            implementations using the <classname>CustomScopeConfigurer</classname> class is
-            shown below:</para>
+                <para>You can then create bean definitions that adhere to the scoping rules of your
+                custom <interfacename>Scope</interfacename> like so:</para>
+                <programlisting>&lt;bean id="..." class="..." <emphasis role="bold">scope="thread"</emphasis>/&gt;</programlisting>
+                <para>If you have your own custom <interfacename>Scope</interfacename> implementation(s),
+                you are not just limited to only programmatic registration of said custom scope(s).
+                You can also do the <interfacename>Scope</interfacename> registration declaratively,
+                using the <classname>CustomScopeConfigurer</classname> class.</para>
+                <para>The declarative registration of custom <interfacename>Scope</interfacename>
+                implementations using the <classname>CustomScopeConfigurer</classname> class is
+                shown below:</para>
                 <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop"
@@ -2534,6 +2537,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     </bean>
 
 </beans>]]></programlisting>
+            </section>
 		</section>
     </section>
     <section id="beans-factory-nature">
@@ -3781,7 +3785,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 			as the listener does.</para>
         </section>
     </section>
-    <section>
+    <section id="beans-glue-code-and-singletons">
         <title>Glue code and the evil singleton</title>
         <para>The majority of the code inside an application is best written in a
 		DI style, where that code is served out of a Spring IoC container, has its own
@@ -3828,14 +3832,13 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
         which may then be used as the parents of the web-application Spring IoC
         container instances. The result is that bean definitions for lower layers are
         loaded only as needed, and loaded only once.</para>
-        <section>
+        <section id="beans-singleton-helper">
             <title>Using the Singleton-helper classes</title>
             <para>You can see a detailed example of their usage in
             <ulink url="http://www.springframework.org/docs/api/org/springframework/beans/factory/access/SingletonBeanFactoryLocator.html">SingletonBeanFactoryLocator</ulink>
             and
             <ulink url="http://www.springframework.org/docs/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html">ContextSingletonBeanFactoryLocator</ulink>
-            by viewing their respective Javadocs.
-            </para>
+            by viewing their respective Javadocs.</para>
             <para>As mentioned in the <link linkend="ejb">chapter on EJBs</link>, the
             Spring convenience base classes for EJBs normally use a non-singleton
             <interfacename>BeanFactoryLocator</interfacename> implementation, which is
