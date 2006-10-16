@@ -21,6 +21,7 @@ import org.springframework.test.AssertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collection;
 
 /**
  * Unit tests for the {@link CustomCollectionEditor} class.
@@ -65,6 +66,15 @@ public final class CustomCollectionEditorTests extends TestCase {
 		assertEquals(new Integer(0), list.get(0));
 		assertEquals(new Integer(1), list.get(1));
 		assertEquals(new Integer(2), list.get(2));
+	}
+
+	public void testWhenTargetTypeIsExactlyTheCollectionInterfaceUsesFallbackCollectionType() throws Exception {
+		CustomCollectionEditor editor = new CustomCollectionEditor(Collection.class);
+		editor.setValue("0, 1, 2");
+		Collection value = (Collection) editor.getValue();
+		assertNotNull(value);
+		assertEquals("There must be 1 element in the converted collection", 1, value.size());
+		assertEquals("0, 1, 2", value.iterator().next());
 	}
 
 	public void testSunnyDaySetAsTextYieldsSingleValue() throws Exception {
