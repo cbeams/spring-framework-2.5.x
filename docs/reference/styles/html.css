@@ -138,7 +138,9 @@ table[summary^="Navigation footer"] {
     width: 100%;
 }
 
-table[summary^="Note"], table[summary^="Warning"], table[summary^="Tip"] {
+table[summary^="Note"],
+table[summary^="Warning"],
+table[summary^="Tip"] {
     border-collapse: collapse;
     border-spacing: 0;
     border: 1px black;
@@ -263,7 +265,8 @@ td code {
 
 div.note * td,
 div.tip * td,
-div.warning * td {
+div.warning * td,
+div.calloutlist * td {
 	text-align: justify;
 	font-size: 100%;
 }
