@@ -67,20 +67,21 @@
             server with powerful JTA capabilities, you may well decide that the Spring Framework's
             declarative transactions offer more power and a much more productive
             programming model than EJB CMT.</para>
-            <para>You need an application server's JTA capability only if you need to
+            <para>Typically you need an application server's JTA capability only if you need to
             enlist multiple transactional resources, and for many applications being able
             to handle transactions across multiple resources isn't a requirement. 
             For example, many high-end applications use a single, highly scalable 
-            database (such as Oracle 9i RAC).</para>
-            <para>(Of course you may need other application server capabilities such as
-            JMS and JCA.)</para>
+            database (such as Oracle 9i RAC). Standalone transaction managers such as
+            <ulink url="http://www.atomikos.com/">Atomikos Transactions</ulink> and
+            <ulink url="http://jotm.objectweb.org/">JOTM</ulink> are other options. (Of course
+            you may need other application server capabilities such as JMS and JCA.)</para>
             <para>The most important point is that with the Spring Framework <emphasis>you can
             choose when to scale your application up to a full-blown application
             server</emphasis>. Gone are the days when the only alternative to using
             EJB CMT or JTA was to write code using local transactions such as those
             on JDBC connections, and face a hefty rework if you ever needed that code
-            to run within global, container-managed transactions. With the Spring Framework, only
-            configuration needs to change so that your code doesn't have to.</para>
+            to run within global, container-managed transactions. With the Spring Framework,
+            only configuration needs to change so that your code doesn't have to.</para>
         </sidebar>
         <para>Traditionally, J2EE developers have had two choices for transaction
         management: <emphasis>global</emphasis> or <emphasis>local</emphasis> transactions.
