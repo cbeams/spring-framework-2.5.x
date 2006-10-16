@@ -31,9 +31,9 @@ import org.springframework.context.ApplicationContextAware;
  * Convenience subclass of Quartz' JobDetail class that eases bean-style
  * usage.
  *
- * <p>JobDetail itself is already a JavaBean but lacks sensible defaults.
- * This class uses the Spring bean name as job name, and the Quartz
- * default group ("DEFAULT") as job group if not specified.
+ * <p><code>JobDetail</code> itself is already a JavaBean but lacks
+ * sensible defaults. This class uses the Spring bean name as job name,
+ * and the Quartz default group ("DEFAULT") as job group if not specified.
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
@@ -123,7 +123,7 @@ public class JobDetailBean extends JobDetail
 	 * to a "setApplicationContext" method in that scenario.
 	 * <p>Note that BeanFactory callback interfaces like ApplicationContextAware
 	 * are not automatically applied to Quartz Job instances, because Quartz
-	 * itself is reponsible for the lifecycle of its Jobs.
+	 * itself is responsible for the lifecycle of its Jobs.
 	 * <p><b>Note: When using persistent job stores where JobDetail contents will
 	 * be kept in the database, do not put an ApplicationContext reference into
 	 * the JobDataMap but rather into the SchedulerContext.</b>
