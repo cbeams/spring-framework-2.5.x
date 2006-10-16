@@ -768,7 +768,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
   </tx:attributes>
 </tx:advice>]]></programlisting>
             <para>The second way to indicate to the Spring Framework's transaction infrastructure
-            that a transaction's work is to be rolled back is to do so <emphasis>programmatically</emphasis>
+            that a transaction's work is to be rolled back is to do so <emphasis>programmatically</emphasis>.
             Although very simple, this way is quite invasive, and tightly couples your code to the
             Spring Framework's transaction infrastructure. Find below a snippet of code that does
             programmatic rollback of a Spring Framework-managed transaction:</para>
@@ -781,7 +781,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
     }
 }]]></programlisting>
             <para>You are strongly encouraged to use the declarative approach to rollback if at
-            all possible. The programmtic means of rolling back is, as you can see, available to
+            all possible. The programmatic means of rolling back is, as you can see, available to
             you should you need it, but it's usage flies in the face of achieving a clean
             POJO-based model in your application.</para>
         </section>
