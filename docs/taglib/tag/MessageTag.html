@@ -134,6 +134,20 @@
 				<tr>
 					<td>
 						A MessageSourceResolvable argument (direct or through JSP EL).
+						<p>
+						Fits nicely when used in conjunction with Spring's own validation error
+						classes which all implement the MessageSourceResolvable interface. For
+						example, this allows you to iterate over all of the errors in a form,
+						passing each error (using a runtime expression) as the value of this
+						'message' attribute, thus effecting the easy display of such error messages.
+						<p>
+						For example:
+						<pre>
+&lt;c:forEach items="${errors.allErrors}" var="err"&gt;
+	&lt;spring:message message="${err}"/&gt;
+&lt;/c:forEach&gt;
+
+</pre>
 					</td>
 				</tr>
 				<tr>
