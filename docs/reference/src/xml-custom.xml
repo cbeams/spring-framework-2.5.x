@@ -278,6 +278,189 @@ http://www.springframework.org/schema/myns http://www.springframework.org/schema
 
 </beans>]]></programlisting>
 	</section>
+	<section id="extensible-xml-meat">
+		<title>Meatier examples</title>
+		<para>Find below some much meatier examples of custom XML extensions.</para>
+	    <section id="extensible-xml-custom-nested">
+		    <title>Nesting custom tags within custom tags</title>
+		    <para>This example illustrates how you might go about writing the various artifacts
+		    required to satisfy a target of the following configuration:</para>
+		    <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:foo="http://www.foo.com/schema/component"
+      xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+http://www.foo.com/schema/component http://www.foo.com/schema/component/component.xsd">
+
+   ]]><lineannotation><![CDATA[<foo:component id="bionic-family" name="Bionic-1">
+      <foo:component name="Sport-1"/>
+      <foo:component name="Rock-1"/>
+   </foo:component>]]></lineannotation><![CDATA[
+
+</beans>]]></programlisting>
+            <para>The above configuration actually nests custom extensions within each other. The class
+            that is actually configured by the above <literal>&lt;foo:component/&gt;</literal>
+            element is the <classname>Component</classname> class (shown directly below). Notice
+            how the <classname>Component</classname> class does <emphasis>not</emphasis> expose
+            a setter method for the <literal>'components'</literal> property; this makes it hard
+            (or rather impossible) to configure a bean definition for the <classname>Component</classname>
+            class using setter injection.</para>
+            <programlisting><![CDATA[package com.foo;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Component {
+
+   private String name;
+   private List components = new ArrayList();
+
+   ]]><lineannotation>// mmm, there is no setter method for the <literal>'components'</literal></lineannotation><![CDATA[
+   public void addComponent(Component component) {
+      this.components.add(component);
+   }
+
+   public List getComponents() {
+      return components;
+   }
+
+   public String getName() {
+      return name;
+   }
+
+   public void setName(String name) {
+      this.name = name;
+   }
+}]]></programlisting>
+            <para>The typical solution to this issue is to create a custom <interfacename>FactoryBean</interfacename>
+            that exposes a setter property for the <literal>'components'</literal> property.</para>
+            <programlisting><![CDATA[package com.foo;
+
+import org.springframework.beans.factory.FactoryBean;
+
+import java.util.Iterator;
+import java.util.List;
+
+public class ComponentFactoryBean implements FactoryBean {
+
+   private Component parent;
+   private List children;
+
+   public void setParent(Component parent) {
+      this.parent = parent;
+   }
+
+   public void setChildren(List children) {
+      this.children = children;
+   }
+
+   public Object getObject() throws Exception {
+      if (this.children != null &amp;&&amp; this.children.size() > 0) {
+         for (Iterator it = children.iterator(); it.hasNext();) {
+            Component childComponent = (Component) it.next();
+            this.parent.addComponent(childComponent);
+         }
+      }
+      return this.parent;
+   }
+
+   public Class getObjectType() {
+      return Component.class;
+   }
+
+   public boolean isSingleton() {
+      return true;
+   }
+}]]></programlisting>
+            <para>This is all very well, and does work nicely, but exposes a lot of Spring plumbing to the
+            end user. What we are going to do is write a custom extension that hides away all of this
+            Spring plumbing. If we stick to <link linkend="extensible-xml-introduction">the steps described
+            previously</link>, we'll start off by creating the XSD schema to define the structure of
+            our custom tag.</para>
+            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<xsd:schema xmlns="http://www.foo.com/schema/component"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         targetNamespace="http://www.foo.com/schema/component"
+         elementFormDefault="qualified"
+         attributeFormDefault="unqualified">
+
+   <xsd:element name="component">
+      <xsd:complexType>
+         <xsd:choice minOccurs="0" maxOccurs="unbounded">
+            <xsd:element ref="component"/>
+         </xsd:choice>
+         <xsd:attribute name="id" type="xsd:ID"/>
+         <xsd:attribute name="name" use="required" type="xsd:string"/>
+      </xsd:complexType>
+   </xsd:element>
+
+</xsd:schema>
+]]></programlisting>
+            <para>We'll then create a custom <interfacename>NamespaceHandler</interfacename>.</para>
+            <programlisting><![CDATA[package com.foo;
+
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+
+public class ComponentNamespaceHandler extends NamespaceHandlerSupport {
+
+   public void init() {
+      registerBeanDefinitionParser("component", new ComponentBeanDefinitionParser());
+   }
+}]]></programlisting>
+            <para>Next up is the custom <interfacename>BeanDefinitionParser</interfacename>. Remember
+            that what we are creating is a <interfacename>BeanDefinition</interfacename> describing
+            a <classname>ComponentFactoryBean</classname>.</para>
+            <programlisting><![CDATA[package com.foo;
+
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.ManagedList;
+import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
+import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.util.xml.DomUtils;
+import org.w3c.dom.Element;
+
+import java.util.List;
+
+public class ComponentBeanDefinitionParser extends AbstractBeanDefinitionParser {
+
+   protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+      BeanDefinitionBuilder factory = BeanDefinitionBuilder.rootBeanDefinition(ComponentFactoryBean.class);
+      BeanDefinitionBuilder parent = parseComponent(element);
+      factory.addPropertyValue("parent", parent.getBeanDefinition());
+
+      List childElements = DomUtils.getChildElementsByTagName(element, "component");
+      if (childElements != null &amp;&amp; childElements.size() > 0) {
+         parseChildComponents(childElements, factory);
+      }
+      return factory.getBeanDefinition();
+   }
+
+   private static BeanDefinitionBuilder parseComponent(Element element) {
+      BeanDefinitionBuilder component = BeanDefinitionBuilder.rootBeanDefinition(Component.class);
+      component.addPropertyValue("name", element.getAttribute("name"));
+      return component;
+   }
+
+   private static void parseChildComponents(List childElements, BeanDefinitionBuilder factory) {
+      ManagedList children = new ManagedList(childElements.size());
+      for (int i = 0; i < childElements.size(); ++i) {
+         Element childElement = (Element) childElements.get(i);
+         BeanDefinitionBuilder child = parseComponent(childElement);
+         children.add(child.getBeanDefinition());
+      }
+      factory.addPropertyValue("children", children);
+   }
+}]]></programlisting>
+            <para>Lastly, the various artifacts need to be registered with the Spring XML infrastructure.</para>
+            <programlisting><lineannotation># in <filename>'META-INF/spring.handlers'</filename></lineannotation><![CDATA[
+http\://www.foo.com/schema/component=com.foo.ComponentNamespaceHandler]]></programlisting>
+            <programlisting><lineannotation># in <filename>'META-INF/spring.schemas'</filename></lineannotation><![CDATA[
+http\://www.foo.com/schema/component/component.xsd=com/foo/component.xsd]]></programlisting>
+	    </section>
+	</section>
 	<section id="extensible-xml-resources">
 		<title>Further Resources</title>
 		<para>Find below links to further resources concerning XML Schema and the extensible XML support
