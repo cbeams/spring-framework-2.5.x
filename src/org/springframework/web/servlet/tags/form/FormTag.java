@@ -20,6 +20,7 @@ import org.springframework.core.Conventions;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
@@ -313,7 +314,7 @@ public class FormTag extends AbstractHtmlElementTag {
 				requestUri = ((HttpServletResponse) response).encodeURL(requestUri);
 				String queryString = getRequestContext().getQueryString();
 				if (StringUtils.hasText(queryString)) {
-					requestUri += "?" + queryString;
+					requestUri += "?" + HtmlUtils.htmlEscapeQueryStringParameters(queryString);
 				}
 			}
 			if (StringUtils.hasText(requestUri)) {

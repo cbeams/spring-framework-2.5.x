@@ -16,6 +16,8 @@
 
 package org.springframework.web.util;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Utility class for HTML escaping. Escapes and unescapes
  * based on the W3C HTML 4.01 recommendation, handling
@@ -44,6 +46,8 @@ public abstract class HtmlUtils {
 	 */
 	private static final HtmlCharacterEntityReferences characterEntityReferences =
 			new HtmlCharacterEntityReferences();
+	
+	private static final String PARAMETER_DELIMETER = "&";
 
 
 	/**
@@ -105,6 +109,33 @@ public abstract class HtmlUtils {
 			}
 		}
 		return escaped.toString();
+	}
+
+	/**
+	 * HTML escapes <i>just</i> the parameters of the supplied query string.
+	 * <p>For example, given the query string
+	 * <code>foo=bar&amp;baz=&lt;boz&gt;</code>, the return value will be
+	 * <code>foo=bar&amp;baz=&amp;lt;boz&amp;gt;</code> (the &amp; parameter
+	 * delimeters are thus preserved).
+	 * @param queryString the query string to be so escaped
+	 * @return the escaped query string, or the empty string if the supplied query string is <code>null</code> or empty 
+	 */
+	public static String htmlEscapeQueryStringParameters(String queryString) {
+		if (!StringUtils.hasText(queryString)) {
+			return "";
+		}
+		StringBuffer buffer = new StringBuffer(queryString.length() * 2);
+		String[] parameters = StringUtils.tokenizeToStringArray(queryString, PARAMETER_DELIMETER);
+		if (parameters.length > 0) {
+			for (int i = 0; i < parameters.length; ++i) {
+				String parameter = parameters[i];
+				buffer.append(HtmlUtils.htmlEscape(parameter));
+				if (i < parameters.length - 1) {
+					buffer.append(PARAMETER_DELIMETER);
+				}
+			}
+		}
+		return buffer.toString();
 	}
 
 	/**

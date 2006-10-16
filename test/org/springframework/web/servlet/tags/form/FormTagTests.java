@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.tags.form;
 
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.test.AssertThrows;
 
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
@@ -36,6 +37,8 @@ public final class FormTagTests extends AbstractHtmlElementTagTests {
 
 
 	private FormTag tag;
+	
+	private MockHttpServletRequest request;
 
 
 	protected void onSetUp() {
@@ -51,6 +54,7 @@ public final class FormTagTests extends AbstractHtmlElementTagTests {
 	protected void extendRequest(MockHttpServletRequest request) {
 		request.setRequestURI(REQUEST_URI);
 		request.setQueryString(QUERY_STRING);
+		this.request = request;
 	}
 
 
@@ -136,13 +140,24 @@ public final class FormTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testWithNullResolvedCommand() throws Exception {
-		this.tag.setCommandName("${null}");
-		try {
-			this.tag.doStartTag();
-			fail("Must not be able to have a command name that resolves to null.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		new AssertThrows(IllegalArgumentException.class,
+				"Must not be able to have a command name that resolves to null.") {
+			public void test() throws Exception {
+				tag.setCommandName("${null}");
+				tag.doStartTag();
+			}
+		}.runTest();
+	}
+
+	/*
+	 * See http://opensource.atlassian.com/projects/spring/browse/SPR-2645
+	 */
+	public void testXSSScriptingExploitWhenActionIsResolvedFromQueryString() throws Exception {
+		String xssQueryString = QUERY_STRING + "&stuff=\"><script>alert('XSS!')</script>";
+		request.setQueryString(xssQueryString);
+		tag.doStartTag();
+		assertEquals("<form id=\"command\" method=\"post\" action=\"/my/form?foo=bar&stuff=&quot;&gt;&lt;script&gt;alert('XSS!')&lt;/script&gt;\">",
+				getWriter().toString());
 	}
 
 
