@@ -2207,7 +2207,7 @@ public class ReplacementComputeValue implements MethodReplacer {
             a bean definition file(s), and you are being explicit about the lifecycle scope
             of your bean(s) you must use the "<literal>singleton</literal>" attribute to
             express the lifecycle scope (remembering that the
-            <link linkend="beans-factory-lifecycle-singleton">singleton lifecycle scope</link> is
+            <link linkend="beans-factory-scopes-singleton">singleton lifecycle scope</link> is
             the default). If you are referencing the <filename>'spring-beans-2.0.dtd'</filename>
             DTD or the Spring 2.0 XSD schema, then you will need to use the "<literal>scope</literal>"
             attribute (because the "<literal>singleton</literal>" attribute was removed from the
