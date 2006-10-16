@@ -3193,7 +3193,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961]]></programlisting>
                 container, even if both containers are part of the same hierarchy.</para>
             </note>
             <para>A bean factory post-processor is executed manually (in the case of a
-            <interfacename>BeanFactory</interfacename>) or automatically (in the case of a
+            <interfacename>BeanFactory</interfacename>) or automatically (in the case of an
             <interfacename>ApplicationContext</interfacename>) to apply changes of
             some sort to the configuration metadata that defines a container. Spring
             includes a number of pre-existing bean factory post-processors, such as
