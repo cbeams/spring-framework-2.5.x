@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,22 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
- * Base interface used by the {@link DefaultBeanDefinitionDocumentReader} handling custom namespaces
- * in a Spring XML configuration file. Implementations are expected to return implementations
- * of the {@link BeanDefinitionParser} interface for custom top-level
- * tags and implementations of the {@link BeanDefinitionDecorator} interface for custom nested tags.
- * <p/>
- * <p>The parser will call {@link #parse} when it encounters a custom tag directly
- * under the <code>&lt;beans&gt;</code> tags and {@link #decorate} when it encounters
- * a custom tag directly under a <code>&lt;bean&gt;</code> tag.
+ * Base interface used by the {@link DefaultBeanDefinitionDocumentReader} for
+ * handling custom namespaces in a Spring XML configuration file.
+ * 
+ * <p>Implementations are expected to return implementations of the
+ * {@link BeanDefinitionParser} interface for custom top-level tags and
+ * implementations of the {@link BeanDefinitionDecorator} interface for
+ * custom nested tags.
+ * 
+ * <p>The parser will call {@link #parse} when it encounters a custom tag
+ * directly under the <code>&lt;beans&gt;</code> tags and {@link #decorate}
+ * when it encounters a custom tag directly under a <code>&lt;bean&gt;</code>
+ * tag.
+ * 
+ * <p>Developers writing their own custom element extensions typically will
+ * not implement this interface drectly, but rather make use of the provided
+ * {@link NamespaceHandlerSupport} class.
  *
  * @author Rob Harrop
  * @author Erik Wiersma
@@ -40,32 +48,43 @@ import org.w3c.dom.Node;
 public interface NamespaceHandler {
 
 	/**
-	 * Invoked by the {@link DefaultBeanDefinitionDocumentReader} after construction but before
-	 * any custom elements are parsed.
+	 * Invoked by the {@link DefaultBeanDefinitionDocumentReader} after
+	 * construction but before any custom elements are parsed.
+	 * @see NamespaceHandlerSupport#registerBeanDefinitionParser(String, BeanDefinitionParser) 
 	 */
 	void init();
 
 	/**
-	 * Parse the specified {@link Element} and register resulting <code>BeanDefinitions</code>
-	 * with the {@link org.springframework.beans.factory.support.BeanDefinitionRegistry} embedded in the supplied {@link ParserContext}.
-	 * <p>Implementations should return the primary <code>BeanDefinition</code> that results
-	 * from the parse phase if they which to be used nested inside <code>&lt;property&gt;</code> tag.
-	 * Implementations may return <code>null</code> if they will <strong>not</strong> be used in
-	 * a nested scenario.
-	 *
-	 * @return the primary <code>BeanDefinition</code>
+	 * Parse the specified {@link Element} and register any resulting
+	 * {@link BeanDefinition BeanDefinitions} with the
+	 * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
+	 * that is embedded in the supplied {@link ParserContext}.
+	 * <p>Implementations should return the primary <code>BeanDefinition</code>
+	 * that results from the parse phase if they wish to be used nested
+	 * inside (for example) a <code>&lt;property&gt;</code> tag.
+	 * <p>Implementations may return <code>null</code> if they will
+	 * <strong>not</strong> be used in a nested scenario.
+	 * @param element the element that is to be parsed into one or more <code>BeanDefinitions</code>
+	 * @param parserContext the object encapsulating the current state of the parsing process
+	 * @return the primary <code>BeanDefinition</code> (can be <code>null</code> as explained above) 
 	 */
 	BeanDefinition parse(Element element, ParserContext parserContext);
 
 	/**
-	 * Parse the specified {@link Node} and decorate the supplied <code>BeanDefinition</code>,
-	 * returning the decorated definition. The {@link Node} may be either an {@link org.w3c.dom.Attr} or an
-	 * {@link Element}.
-	 * <p>Implementations may choose to return a completely new definition, which will replace
-	 * the original definition in the resulting <code>BeanFactory</code>.
-	 * <p>The supplied {@link ParserContext} can be used to register any additional beans
-	 * needed to support the main definition.
+	 * Parse the specified {@link Node} and decorate the supplied
+	 * {@link BeanDefinitionHolder}, returning the decorated definition.
+	 * <p>The {@link Node} may be either an {@link org.w3c.dom.Attr} or an
+	 * {@link Element}, depending on whether a custom attribute or element
+	 * is being parsed.
+	 * <p>Implementations may choose to return a completely new definition,
+	 * which will replace the original definition in the resulting
+	 * {@link org.springframework.beans.factory.BeanFactory}.
+	 * <p>The supplied {@link ParserContext} can be used to register any
+	 * additional beans needed to support the main definition.
+	 * @param source the source element or attribute that is to be parsed
+	 * @param definition the current bean definition
+	 * @param parserContext the object encapsulating the current state of the parsing process
 	 */
-	BeanDefinitionHolder decorate(Node element, BeanDefinitionHolder definition, ParserContext parserContext);
+	BeanDefinitionHolder decorate(Node source, BeanDefinitionHolder definition, ParserContext parserContext);
 
 }
