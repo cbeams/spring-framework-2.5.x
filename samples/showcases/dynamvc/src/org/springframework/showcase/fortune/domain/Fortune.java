@@ -29,10 +29,6 @@ public class Fortune implements Serializable {
     private String source = "";
 
 
-    public Fortune() {
-    }
-
-
     public void setFortune(String fortune) {
         this.fortune = fortune;
     }
