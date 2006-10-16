@@ -469,7 +469,7 @@ http\://www.foo.com/schema/component/component.xsd=com/foo/component.xsd]]></pro
 		    to the existing bean definition element.</para>
 		    <para>By way of another example, let's say that the service class that you are defining a bean
 		    definition for a service object that will (unknown to it) be accessing a clustered
-		    <link linkend="http://jcp.org/en/jsr/detail?id=107">JCache</link>, and you want to ensure that
+		    <ulink url="http://jcp.org/en/jsr/detail?id=107">JCache</ulink>, and you want to ensure that
 		    the named JCache instance is eagerly started within the surrounding cluster:</para>
 		    <programlisting><![CDATA[<bean id="checkingAccountService" class="com.foo.DefaultCheckingAccountService"
        ]]><lineannotation><emphasis role="bold">jcache:cache-name="checking.account"&gt;</emphasis></lineannotation><![CDATA[

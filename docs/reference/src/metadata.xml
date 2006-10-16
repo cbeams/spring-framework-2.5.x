@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <chapter id="metadata">
 	<title>Annotations and Source Level Metadata Support</title>
-	<section id="metadata-concepts">
+	<section id="metadata-introduction">
 		<title>Introduction</title>
 		<para>Source-level metadata is the addition of <emphasis>attributes</emphasis> or
 		<emphasis>annotations</emphasis> to program elements - usually, classes
@@ -241,7 +241,7 @@ public void echoException(Exception ex) throws Exception {
     <property name="requiredAnnotationType" value="your.company.package.Mandatory"/>
 </bean>]]></programlisting>
         </section>
-		<section>
+		<section id="metadata-annotations-other">
 			<title>Other @Annotations in Spring</title>
 			<para>
 				Annotations are also used in a number of other places throughout Spring.
@@ -411,7 +411,7 @@ public void echoException(Exception ex) throws Exception {
 			supported out of the box by the framework, as in the case of declarative
 			transaction management, or can be custom.
 		</para>
-		<section>
+		<section id="metadata-fundamentals">
 			<title>Fundamentals</title>
 			<para>
 				This builds on the Spring AOP autoproxy functionality.
@@ -585,7 +585,7 @@ public class MyClass {]]></programlisting>
 			</remark>
 		</section>
 	</section>
-	<section>
+	<section id="metadata-attributes-mvc">
 		<title>Using attributes to minimize MVC web tier configuration</title>
 		<para>
 			The other main use of Spring metadata as of 1.0 is to provide an
@@ -816,33 +816,6 @@ public class FooController extends AbstractController {
 			compilation and attribute indexing. Use of the attribute indexer task was
 			shown above. Note that Commons Attributes presently requires a jar file as
 			input to indexing.
-		</para>
-	</section>
-	<section>
-		<title>Other uses of metadata attributes</title>
-		<para>
-			Other uses of metadata attributes appear to be growing in
-			popularity. As of Spring 1.2, metadata attributes for JMX exposure are
-			supported, through both Commons Attributes (on JDK 1.3+) and JSR-175
-			annotations (on JDK 1.5).
-		</para>
-	</section>
-	<section>
-		<title>Adding support for additional metadata APIs</title>
-		<para>
-			Should you wish to provide support for another metadata API it is
-			easy to do so.
-		</para>
-		<para>
-			Simply implement the
-			<classname>org.springframework.metadata.Attributes</classname> interface as a
-			facade for your metadata API. You can then include this object in your
-			bean definitions as shown above.
-		</para>
-		<para>
-			All framework services that use metadata, such as AOP
-			metadata-driven autoproxying, will then automatically be able to use your
-			new metadata provider.
 		</para>
 	</section>
 </chapter>

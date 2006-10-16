@@ -257,7 +257,7 @@ public class OrderManagerImpl implements OrderManager {
         See the chapter entitled <xref linkend="aop"/>.</para>
     </note>
 
-    <section>
+    <section id="mail-mailsender">
       <title>Pluggable <interfacename>MailSender</interfacename> implementations</title>
 
       <para>Spring comes with two <interfacename>MailSender</interfacename> implementations
@@ -269,20 +269,15 @@ public class OrderManagerImpl implements OrderManager {
     </section>
   </section>
   
-  <section>
+  <section id="mail-javamail-mime">
   	<title>Using the JavaMail <classname>MimeMessageHelper</classname></title>
-  	<para>
-  		One of the components that comes in pretty handy when dealing with
-  		JavaMail messages is the <classname>org.springframework.mail.javamail.MimeMessageHelper</classname>.
-  		It prevents you from having to use the nasty APIs of the <literal>javax.mail.internet</literal> classes.
-  		Find below a couple of possible scenarios:
-  	</para>
-  	<section>
-  		<title>Creating a simple <classname>MimeMessage</classname> and sending it</title>
-  		<para>
-  			Using the <classname>MimeMessageHelper</classname> it's pretty easy to setup
-  			and send a <classname>MimeMessage</classname>:</para>
-  			<programlisting><lineannotation>// of course you would use DI in any real-world cases</lineannotation><![CDATA[
+  	<para>One of the components that comes in pretty handy when dealing with
+	JavaMail messages is the <classname>org.springframework.mail.javamail.MimeMessageHelper</classname>.
+	It prevents you from having to use the nasty APIs of the <literal>javax.mail.internet</literal> classes.
+	Find below a couple of possible scenarios:</para>
+  	<para>Using the <classname>MimeMessageHelper</classname> it's pretty easy to setup
+	and send a <classname>MimeMessage</classname>:</para>
+	<programlisting><lineannotation>// of course you would use DI in any real-world cases</lineannotation><![CDATA[
 JavaMailSenderImpl sender = new JavaMailSenderImpl();
 sender.setHost("mail.host.com");
 
@@ -292,16 +287,15 @@ helper.setTo("test@host.com");
 helper.setText("Thank you for ordering!");
 
 sender.send(message);]]></programlisting>
-	</section>
-	<section>
+	<section id="mail-attachments">
 		<title>Sending attachments and inline resources</title>
 		<para>
-			Email allows for attachments, but also for inline resources in multipart
-			messages. Inline resources could for example be images or stylesheet you
-			want to use in your message, but don't want displayed as an attachment.
-			The following shows you how to use the <classname>MimeMessageHelper</classname>
-			to send an email along with an inline image.</para>
-			<programlisting><![CDATA[JavaMailSenderImpl sender = new JavaMailSenderImpl();
+		Email allows for both attachments and also for inline resources in multipart
+		messages. Inline resources could for example be images or stylesheet you
+		want to use in your message, but that you don't want displayed as an attachment.
+		The following example shows you how to use the <classname>MimeMessageHelper</classname>
+		to send an email along with an inline image.</para>
+		<programlisting><![CDATA[JavaMailSenderImpl sender = new JavaMailSenderImpl();
 sender.setHost("mail.host.com");
 
 MimeMessage message = sender.createMimeMessage();
@@ -318,15 +312,16 @@ FileSystemResource res = new FileSystemResource(new File("c:/Sample.jpg"));
 helper.addInline("identifier1234", res);
 
 ]]><lineannotation>// if you would need to include the file as an attachment, use
-// the various addAttachment() methods on the MimeMessageHelper</lineannotation><![CDATA[
+// the various <methodname>addAttachment()</methodname> methods on the <classname>MimeMessageHelper</classname></lineannotation><![CDATA[
 
 sender.send(message);]]></programlisting>
 
         <warning>
             <para>Inline resources are added to the mime message using the Content-ID specified
             as you've seen just now (<literal>identifier1234</literal> in this case). The order in 
-            which you're adding the text and the resource are VERY important. First add the text
-            and after that the resources. If you're doing it the other way around, it won't work!</para>
+            which you're adding the text and the resource are <emphasis role="bold">very</emphasis>
+            important. First add the text and after that the resources. If you're doing it the other
+            way around, it won't work!</para>
 		</warning>
 	</section>
   </section>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <chapter id="dynamic-language">
 	<title>Dynamic language support</title>
-    <section>
+    <section id="dynamic-language-introduction">
 		<title>Introduction</title>
 		<para>Spring 2.0 introduces comprehensive support for using classes and objects that have
 		been defined using a dynamic language (such as JRuby) with Spring.</para>
@@ -202,7 +202,7 @@ http://www.springframework.org/schema/lang http://www.springframework.org/schema
 	            support does make some (small) assumptions about the contents of your dynamic
 	            language source files.
 			</para>
-			<section>
+			<section id="dynamic-language-beans-concepts-xml-language-element">
 				<title>The <literal>&lt;lang:language/&gt;</literal> element</title>
 				<sidebar>
 					<title>XML Schema</title>
@@ -451,7 +451,7 @@ end
     <lang:property name="message" value="Hello World!" />
 </lang:jruby>]]></programlisting>
 			</section>
-			<section>
+			<section id="dynamic-language-beans-ctor-injection">
 				<title>Understanding Constructor Injection in the context of dynamic-language-backed beans</title>
 				<para>
 					There is one <emphasis>very</emphasis> important thing to be aware of
@@ -967,13 +967,12 @@ public class TestBeanValidator implements Validator {
 				<para>The <ulink url="http://www.beanshell.org/">BeanShell</ulink> homepage</para>
 			</listitem>
 		</itemizedlist>
-		<para>
-		    Some of the more active members of the Spring community have also added support for
-		    a number of additional dynamic languages above and beyond the ones covered in this
-		    chapter. While it is possible that such third party contributions may be added to the
-		    list of languages supported by the main Spring distribution, your best bet for seeing
-		    if your favourite scripting language is supported is the
-		    <ulink url="https://springmodules.dev.java.net/">Spring Modules project</ulink>.
-		    </para>
+		<para>Some of the more active members of the Spring community have also added support for
+		a number of additional dynamic languages above and beyond the ones covered in this
+		chapter. While it is possible that such third party contributions may be added to the
+		list of languages supported by the main Spring distribution, your best bet for seeing
+		if your favourite scripting language is supported is the
+		<ulink url="https://springmodules.dev.java.net/">Spring Modules project</ulink>.
+		</para>
 	</section>
 </chapter>

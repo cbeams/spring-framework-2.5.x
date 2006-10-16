@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <appendix id="xsd-config">
     <title>XML Schema-based configuration</title>
-    <section>
+    <section id="xsd-config-introduction">
         <title>Introduction</title>
         <para>This appendix details the XML Schema-based configuration introduced in Spring 2.0.</para>
         <sidebar>
@@ -249,7 +249,7 @@ public class Client {
 <util:property-path id="name" path="testBean.age"/>]]></programlisting>
                 <para>The value of the <literal>'path'</literal> attribute of the
                 <literal>&lt;property-path/&gt;</literal> tag follows the form <literal>'beanName.beanProperty'</literal>.</para>
-                <section>
+                <section id="xsd-config-body-schemas-util-property-path-dependency">
                     <title>Using <literal>&lt;util:property-path/&gt;</literal> to set a bean property or constructor-argument</title>
                     <para><classname>PropertyPathFactoryBean</classname> is a
 			        <interfacename>FactoryBean</interfacename> that evaluates a property path on a given
@@ -788,7 +788,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 as plain text. There is no XML editing support out of the box in Eclipse,
                 and as such there is not even any syntax highlighting of elements and attributes.
                 To address this, you will have to install an XML editor plugin for Eclipse...</para>
-		        <table>
+		        <table id="xsd-config-setup-eclipse-plugins">
 			        <title>Eclipse XML editors</title>
 			        <tgroup cols="2">
 				        <colspec align="left" />
@@ -1001,8 +1001,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             It has been included in the Spring documentation as a convenience to Spring users
             so that if you encounter an issue when switching over to the XSD-style in some
             specific environment you can refer to this section for the authoritative answer.</para>
-            
-            <section>
+            <section id="xsd-config-integration-resin">
                 <title>XML parsing errors in the Resin v.3 application server</title>
                 <para>If you are using the XSD-style for Spring 2.0 XML configuration
                 and deploying to v.3 of Caucho's Resin application server, you will need
