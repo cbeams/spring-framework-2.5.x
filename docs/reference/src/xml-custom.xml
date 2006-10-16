@@ -574,9 +574,9 @@ public class JCacheInitializingBeanDefinitionDecorator implements BeanDefinition
 ]]></programlisting>
             <para>Lastly, the various artifacts need to be registered with the Spring XML infrastructure.</para>
             <programlisting><lineannotation># in <filename>'META-INF/spring.handlers'</filename></lineannotation><![CDATA[
-http\://www.foo.com/schema/component=com.foo.JCacheNamespaceHandler]]></programlisting>
+http\://www.foo.com/schema/jcache=com.foo.JCacheNamespaceHandler]]></programlisting>
             <programlisting><lineannotation># in <filename>'META-INF/spring.schemas'</filename></lineannotation><![CDATA[
-http\://www.foo.com/schema/component/jcache.xsd=com/foo/jcache.xsd]]></programlisting>
+http\://www.foo.com/schema/jcache/jcache.xsd=com/foo/jcache.xsd]]></programlisting>
 		</section>
 	</section>
 	<section id="extensible-xml-resources">
