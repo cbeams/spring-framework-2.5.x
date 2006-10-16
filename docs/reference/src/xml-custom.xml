@@ -460,6 +460,124 @@ http\://www.foo.com/schema/component=com.foo.ComponentNamespaceHandler]]></progr
             <programlisting><lineannotation># in <filename>'META-INF/spring.schemas'</filename></lineannotation><![CDATA[
 http\://www.foo.com/schema/component/component.xsd=com/foo/component.xsd]]></programlisting>
 	    </section>
+	    <section id="extensible-xml-custom-just-attributes">
+		    <title>Custom attributes on 'normal' elements</title>
+		    <para>Writing your own custom parser and the associated artifacts isn't hard, but sometimes it
+		    is not the right thing to do. Consider the scenario where you need to add metadata to already
+		    existing bean definitions. In this case you certainly don't want to have to go off and write
+		    your own entire custom extension; rather you just want to add an additional attribute
+		    to the existing bean definition element.</para>
+		    <para>By way of another example, let's say that the service class that you are defining a bean
+		    definition for a service object that will (unknown to it) be accessing a clustered
+		    <link linkend="http://jcp.org/en/jsr/detail?id=107">JCache</link>, and you want to ensure that
+		    the named JCache instance is eagerly started within the surrounding cluster:</para>
+		    <programlisting><![CDATA[<bean id="checkingAccountService" class="com.foo.DefaultCheckingAccountService"
+       ]]><lineannotation><emphasis role="bold">jcache:cache-name="checking.account"&gt;</emphasis></lineannotation><![CDATA[
+   ]]><lineannotation>&lt;!-- other dependencies here... --&gt;</lineannotation><![CDATA[
+</bean>]]></programlisting>
+            <para>What we are going to do here is create another <interfacename>BeanDefinition</interfacename>
+            when the <literal>'cache:cache-name'</literal> attribute is parsed; this
+            <interfacename>BeanDefinition</interfacename> will then initialize the named JCache
+            for us. We will also modify the existing <interfacename>BeanDefinition</interfacename> for the
+            <literal>'checkingAccountService'</literal> so that it will have a dependency on this
+            new JCache-initializing <interfacename>BeanDefinition</interfacename>.</para>
+            <programlisting><![CDATA[package com.foo;
+
+public class JCacheInitializer {
+
+   private String name;
+
+   public JCacheInitializer(String name) {
+      this.name = name;
+   }
+
+   public void initialize() {
+      ]]><lineannotation>// lots of JCache API calls to initialize the named cache...</lineannotation><![CDATA[
+   }
+}]]></programlisting>
+            <para>Now onto the custom extension. Firstly, the authoring of the XSD schema describing the
+            custom attribute (quite easy in this case).</para>
+            <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<xsd:schema xmlns="http://www.foo.com/schema/jcache"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://www.foo.com/schema/jcache"
+            elementFormDefault="qualified">
+
+   <xsd:attribute name="jcache-name" type="xsd:string"/>
+
+</xsd:schema>
+]]></programlisting>
+            <para>Next, the associated <interfacename>NamespaceHandler</interfacename>.</para>
+            <programlisting><![CDATA[package com.foo;
+
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+
+public class JCacheNamespaceHandler extends NamespaceHandlerSupport {
+
+   public void init() {
+      super.registerBeanDefinitionDecoratorForAttribute("jcache-name",
+            new JCacheInitializingBeanDefinitionDecorator());
+   }
+}
+]]></programlisting>
+            <para>Next, the parser. Note that in this case, because we are going to be parsing an XML
+            attribute, we write a <interfacename>BeanDefinitionDecorator</interfacename> rather than a
+            <interfacename>BeanDefinitionParser</interfacename>.</para>
+            <programlisting><![CDATA[package com.foo;
+
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
+import org.springframework.beans.factory.xml.ParserContext;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Node;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class JCacheInitializingBeanDefinitionDecorator implements BeanDefinitionDecorator {
+   
+   private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+   public BeanDefinitionHolder decorate(
+         Node source, BeanDefinitionHolder holder, ParserContext ctx) {
+      String initializerBeanName = registerJCacheInitializer(source, ctx);
+      createDependencyOnJCacheInitializer(holder, initializerBeanName);
+      return holder;
+   }
+
+   private void createDependencyOnJCacheInitializer(BeanDefinitionHolder holder, String initializerBeanName) {
+      AbstractBeanDefinition definition = ((AbstractBeanDefinition) holder.getBeanDefinition());
+      String[] dependsOn = definition.getDependsOn();
+      if (dependsOn == null) {
+         dependsOn = new String[]{initializerBeanName};
+      } else {
+         List dependencies = new ArrayList(Arrays.asList(dependsOn));
+         dependencies.add(initializerBeanName);
+         dependsOn = (String[]) dependencies.toArray(EMPTY_STRING_ARRAY);
+      }
+      definition.setDependsOn(dependsOn);
+   }
+
+   private String registerJCacheInitializer(Node source, ParserContext ctx) {
+      String cacheName = ((Attr) source).getValue();
+      BeanDefinitionBuilder initializer = BeanDefinitionBuilder.rootBeanDefinition(JCacheInitializer.class);
+      initializer.addConstructorArg(cacheName);
+      String beanName = cacheName + "-initializer";
+      ctx.getRegistry().registerBeanDefinition(beanName, initializer.getBeanDefinition());
+      return beanName;
+   }
+}
+]]></programlisting>
+            <para>Lastly, the various artifacts need to be registered with the Spring XML infrastructure.</para>
+            <programlisting><lineannotation># in <filename>'META-INF/spring.handlers'</filename></lineannotation><![CDATA[
+http\://www.foo.com/schema/component=com.foo.JCacheNamespaceHandler]]></programlisting>
+            <programlisting><lineannotation># in <filename>'META-INF/spring.schemas'</filename></lineannotation><![CDATA[
+http\://www.foo.com/schema/component/jcache.xsd=com/foo/jcache.xsd]]></programlisting>
+		</section>
 	</section>
 	<section id="extensible-xml-resources">
 		<title>Further Resources</title>
