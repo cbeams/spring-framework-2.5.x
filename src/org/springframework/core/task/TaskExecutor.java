@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,28 +18,27 @@ package org.springframework.core.task;
 
 /**
  * Simple task executor interface that abstracts the execution
- * of a Runnable. Implementations can use all sorts of different
- * execution strategies, such as: synchronous, asynchronous,
- * using a thread pool, etc.
+ * of a {@link Runnable}.
+ * 
+ * <p>Implementations can use all sorts of different execution strategies,
+ * such as: synchronous, asynchronous, using a thread pool, and more.
  *
- * <p>Identical to JDK 1.5's <code>java.util.concurrent.Executor</code>
+ * <p>Identical to JDK 1.5's {@link java.util.concurrent.Executor}
  * interface. Separate mainly for compatibility with JDK 1.3+.
- * Implementations can simply implement the JDK 1.5 Executor interface
- * as well, as it defines the exact same method signature.
+ * Implementations can simply implement the JDK 1.5 <code>Executor</code>
+ * interface as well, as it defines the exact same method signature.
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see java.util.concurrent.Executor
  */
 public interface TaskExecutor {
 
 	/**
-	 * Execute the given task.
-	 * <p>The call might return immediately if the
-	 * executor uses an asynchronous execution strategy,
-	 * or might block in case synchronous execution.
-	 * @param task the Runnable to execute
-	 * @see java.util.concurrent.Executor#execute(Runnable)
+	 * Execute the given <code>task</code>.
+	 * <p>The call might return immediately if the implementation uses
+	 * an asynchronous execution strategy, or might block in the case
+	 * of synchronous execution.
+	 * @param task the <code>Runnable</code> to execute
 	 */
 	void execute(Runnable task);
 
