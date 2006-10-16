@@ -7,7 +7,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
   <head>
-    <title>Spring 2.0 form tag showcase application</title>
+    <title><spring:message code="form.title"/></title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <link rel="icon" href="<c:url value="/favicon.ico"/>" type="image/x-icon" />
     <link rel="shortcut icon" href="<c:url value="/favicon.ico"/>" type="image/x-icon" />
@@ -26,7 +26,8 @@
     </div>
 
     <div id="content">
-       <h1>Edit apprentice magician <c:out value="${command.firstName}"/> <c:out value="${command.lastName}" /></h1>
+	
+	   <h1>Edit apprentice magician <c:out value="${command.firstName}"/> <c:out value="${command.lastName}" /></h1>
        <form:form>
            <form:errors path="*" cssClass="errorBox" />
 
