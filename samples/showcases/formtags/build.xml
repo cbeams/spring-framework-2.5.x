@@ -128,5 +128,13 @@
 
 
 	<target name="all" depends="clean,build,warfile" description="Clean,build,warfile"/>
+	
+	<!-- helper target to ease deployment to Tomcat -->
+	<target name="deploy.tomcat" depends="all" description="Deploys the WAR to Tomcat">
+		<fail unless="tomcat.dir" message="The 'tomcat.dir' property needs to be set: it obviously isn't."/>
+		<delete file="${tomcat.dir}/webapps/${name}.war" failonerror="false"/>
+		<delete dir="${tomcat.dir}/webapps/${name}" failonerror="false"/>
+		<copy file="${dist.dir}/${name}.war" todir="${tomcat.dir}/webapps"/>
+	</target>
 
 </project>
