@@ -1049,13 +1049,13 @@ public class ExampleBean {
             <section id="beans-value-element">
                 <title>Straight values (primitives, <literal>Strings</literal>, etc.)</title>
                 <para>The <literal>&lt;value/&gt;</literal> element specifies a property or
-				constructor argument as a human-readable string representation. As
-				mentioned in detail <link linkend="beans-factory-collaborators-propertyeditor">previously</link>,
+				constructor argument as a human-readable string representation.
+				<link linkend="beans-factory-collaborators-propertyeditor">As mentioned previously</link>,
 				JavaBeans <literal>PropertyEditors</literal> are used to convert these
-				string values from a <classname>java.lang.String</classname> to the
-				actual property or argument type.</para>
-			    <programlisting><![CDATA[<bean id="myDataSource" destroy-method="close"
-    class="org.apache.commons.dbcp.BasicDataSource">
+				string values from a <classname>String</classname> to the actual type of the
+				property or argument.</para>
+			    <programlisting><![CDATA[<bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+  
   ]]><lineannotation>&lt;!-- results in a <methodname>setDriverClassName(String)</methodname> call --&gt;</lineannotation><![CDATA[
   <property name="driverClassName">
     <value>com.mysql.jdbc.Driver</value>
@@ -1066,11 +1066,46 @@ public class ExampleBean {
   <property name="username">
     <value>root</value>
   </property>
+  <property name="password">
+    <value>masterkaoli</value>
+  </property>
 </bean>]]></programlisting>
+            <para>The <literal>&lt;property/&gt;</literal> and <literal>&lt;constructor-arg/&gt;</literal>
+            elements also support the use of the <literal>'value'</literal> attribute, which can lead
+            to much more succinct configuration. When using the <literal>'value'</literal> attribute,
+            the above bean definition reads like so:</para>
+            <programlisting><![CDATA[<bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+  
+  ]]><lineannotation>&lt;!-- results in a <methodname>setDriverClassName(String)</methodname> call --&gt;</lineannotation><![CDATA[
+  <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+  <property name="url" value="jdbc:mysql://localhost:3306/mydb"/>
+  <property name="username" value="root"/>
+  <property name="password" value="masterkaoli"/>
+</bean>]]></programlisting>
+            <para>The Spring team generally prefer the attribute style over the use of nested
+            <literal>&lt;value/&gt;</literal> elements. If you are reading this reference manual
+            straight through from top to bottom (wow!) then we are getting slightly ahead of ourselves here,
+            but did you know that you can specify a <classname>java.util.Properties</classname>
+            instance like this?</para>
+            <programlisting><![CDATA[<bean id="mappings" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+            
+   ]]><lineannotation>&lt;!-- typed as a <classname>java.util.Properties</classname> --&gt;</lineannotation><![CDATA[
+   <property name="properties">
+      <value>
+         jdbc.driver.className=com.mysql.jdbc.Driver
+         jdbc.url=jdbc:mysql://localhost:3306/mydb
+      </value>
+   </property>
+</bean>]]></programlisting>
+                <para>Can you see what is happening? The Spring container is converting the text inside
+                the <literal>&lt;value/&gt;</literal> element into a <classname>java.util.Properties</classname>
+                instance using the JavaBeans <interfacename>PropertEditor</interfacename> mechanism.
+                This is a nice shortcut, and is one of a few places where the Spring team do favor the
+                use of the nested <literal>&lt;value/&gt;</literal> element over the <literal>'value'</literal>
+                attribute style.</para>
             <section id="beans-idref-element">
                 <title>The <literal>idref</literal> element</title>
-                <para>
-                The <literal>idref</literal> element is simply an error-proof way to
+                <para>The <literal>idref</literal> element is simply an error-proof way to
                 pass the <emphasis>id</emphasis> of another bean in the container (to
                 a <literal>&lt;constructor-arg/&gt;</literal> or <literal>&lt;property/&gt;</literal>
                 element).</para>
@@ -1081,10 +1116,8 @@ public class ExampleBean {
         <idref bean="theTargetBean" />
     </property>
 </bean>]]></programlisting>
-        <para>
-            The above bean definition snippet is <emphasis>exactly</emphasis> equivalent
-            (at runtime) to the following snippet:
-        </para>
+        <para>The above bean definition snippet is <emphasis>exactly</emphasis> equivalent
+        (at runtime) to the following snippet:</para>
         <programlisting><![CDATA[<bean id="theTargetBean" class="..."/>
 
 <bean id="client" class="...">
@@ -1092,32 +1125,33 @@ public class ExampleBean {
         <value>theTargetBean</value>
     </property>
 </bean>]]></programlisting>
-		<para>The main reason the first form is preferable to
-        the second is that using the <literal>idref</literal> tag allows the
-        container to validate <emphasis>at deployment time</emphasis> that the
-        referenced, named bean actually exists. In the second variation,
-        no validation is performed on the value that is passed to the
-        <literal>'targetName'</literal> property of the <literal>'client'</literal>
-        bean. Any typo will only be discovered (with most likely fatal results)
-        when the <literal>'client'</literal> bean is actually instantiated.
-        If the <literal>'client'</literal> bean is a
-        <link linkend="beans-factory-scopes">prototype</link> bean, this typo
-        (and the resulting exception) may only be discovered long after the
-        container is actually deployed.</para>
-        <para>Additionally, if the bean being referred to is in the same XML unit, and
-        the bean name is the bean <emphasis>id</emphasis>, the <literal>'local'</literal>
-        attribute may be used, which allows the XML parser itself to validate the bean
-        id even earlier, at XML document parse time.</para>
-        <programlisting><![CDATA[<property name="targetName">
-   ]]><lineannotation>&lt;!-- a bean with an id of 'theTargetBean' must exist, else an XML exception will be thrown --&gt;</lineannotation><![CDATA[
+		        <para>The main reason the first form is preferable to
+                the second is that using the <literal>idref</literal> tag allows the
+                container to validate <emphasis>at deployment time</emphasis> that the
+                referenced, named bean actually exists. In the second variation,
+                no validation is performed on the value that is passed to the
+                <literal>'targetName'</literal> property of the <literal>'client'</literal>
+                bean. Any typo will only be discovered (with most likely fatal results)
+                when the <literal>'client'</literal> bean is actually instantiated.
+                If the <literal>'client'</literal> bean is a
+                <link linkend="beans-factory-scopes">prototype</link> bean, this typo
+                (and the resulting exception) may only be discovered long after the
+                container is actually deployed.</para>
+                <para>Additionally, if the bean being referred to is in the same XML unit, and
+                the bean name is the bean <emphasis>id</emphasis>, the <literal>'local'</literal>
+                attribute may be used, which allows the XML parser itself to validate the bean
+                id even earlier, at XML document parse time.</para>
+                <programlisting><![CDATA[<property name="targetName">
+   ]]><lineannotation>&lt;!-- a bean with an id of '<literal>theTargetBean</literal>' must exist,
+                otherwise an XML exception will be thrown --&gt;</lineannotation><![CDATA[
    <idref local="theTargetBean"/>
 </property>]]></programlisting>
-        <para>By way of an example, one common place (at least in pre-Spring 2.0
-        configuration) where the &lt;idref/&gt; element brings value is in the
-        configuration of <link linkend="aop-pfb-1">AOP interceptors</link> in a
-        <classname>ProxyFactoryBean</classname> bean definition. If you use
-        &lt;idref/&gt; elements when specifying the interceptor names, there is
-        no chance of inadvertently misspelling an interceptor id.</para>
+                <para>By way of an example, one common place (at least in pre-Spring 2.0
+                configuration) where the &lt;idref/&gt; element brings value is in the
+                configuration of <link linkend="aop-pfb-1">AOP interceptors</link> in a
+                <classname>ProxyFactoryBean</classname> bean definition. If you use
+                &lt;idref/&gt; elements when specifying the interceptor names, there is
+                no chance of inadvertently misspelling an interceptor id.</para>
             </section>
             </section>
             <section id="beans-ref-element">
@@ -1189,7 +1223,7 @@ public class ExampleBean {
                 will simply be ignored by the container.</para>
                 <para>Find below an example of an inner bean.</para>
                 <programlisting><![CDATA[<bean id="outer" class="...">
-  ]]><lineannotation>&lt;!-- instead of using a reference to a target bean, simply define the target inline --&gt;</lineannotation><![CDATA[
+  ]]><lineannotation>&lt;!-- instead of using a reference to a target bean, simply define the target bean inline --&gt;</lineannotation><![CDATA[
   <property name="target">
     <bean class="com.mycompany.Person"> ]]><lineannotation>&lt;!-- this is the inner bean --&gt;</lineannotation><![CDATA[
       <property name="name" value="Fiona Apple"/>
@@ -1203,7 +1237,7 @@ public class ExampleBean {
                 are <emphasis>always</emphasis> scoped as
                 <link linkend="beans-factory-scopes-prototype">prototypes</link>. Please also note
                 that it is <emphasis>not</emphasis> possible to inject inner beans into
-                collaborating beans other than into the enclosing bean.</para>
+                collaborating beans other than the enclosing bean.</para>
             </section>
             <section id="beans-collection-elements">
                 <title>Collections</title>
@@ -1338,17 +1372,16 @@ support=support@somecompany.co.uk]]></programlisting>
                 <section>
                     <title>Strongly-typed collection (Java5+ only)</title>
                     <para>If you are one of the lucky few to be using Java5 (Tiger), you will be aware
-                    that it is possible (and I daresay recommended) to have strongly typed collections.
-                    That is, it is possible to declare a <interfacename>Collection</interfacename> type
-                    such that it can only contain <classname>String</classname> elements (for example).</para>
+                    that it is possible to have strongly typed collections. That is, it is possible to
+                    declare a <interfacename>Collection</interfacename> type such that it can only
+                    contain <classname>String</classname> elements (for example).</para>
                     <para>If you are using Spring to dependency inject a strongly-typed
                     <interfacename>Collection</interfacename> into a bean, you can take advantage
                     of Spring's type-conversion support such that the elements of your strongly-typed
                     <interfacename>Collection</interfacename> instances will be converted to the
-                    appropriate type prior to being added to the
-                    <interfacename>Collection</interfacename>.</para>
+                    appropriate type prior to being added to the <interfacename>Collection</interfacename>.</para>
                     <para>An example will make this clear; consider the following class definition, and
-                    it's attendant (XML) configuration...</para>
+                    it's attendant (XML) configuration:</para>
                     <programlisting><![CDATA[public class Foo {
                 
     private Map<String, Float> accounts;
@@ -1356,7 +1389,6 @@ support=support@somecompany.co.uk]]></programlisting>
     public void setAccounts(Map<String, Float> accounts) {
         this.accounts = accounts;
     }
-
 }]]></programlisting>
                 <programlisting><![CDATA[<beans>
     <bean id="foo" class="x.y.Foo">
@@ -1374,9 +1406,9 @@ support=support@somecompany.co.uk]]></programlisting>
                     type of the strongly-typed <classname>Map&lt;String, Float&gt;</classname> is
                     actually available via reflection, and so Spring's type conversion infrastructure
                     will actually recognize the various value elements as being of type
-                    <classname>Float</classname>
-                    and so the string values <literal>'9.99', '2.75'</literal>, and <literal>'3.99'</literal>
-                    will be converted into an actual <classname>Float</classname> type.</para>
+                    <classname>Float</classname> and so the string values <literal>'9.99', '2.75'</literal>,
+                    and <literal>'3.99'</literal> will be converted into an actual <classname>Float</classname>
+                    type.</para>
                 </section>
             </section>
             <section id="beans-null-element">
@@ -1390,25 +1422,23 @@ support=support@somecompany.co.uk]]></programlisting>
   <property name="email"><value></value></property>
 </bean>]]></programlisting>
                 <para>This is equivalent to the following Java code:
-                <literal>exampleBean.setEmail("")</literal>. The special
+                <methodname>exampleBean.setEmail("")</methodname>. The special
                 <literal>&lt;null&gt;</literal> element may be used to indicate a
                 <literal>null</literal> value. For example:</para>
                 <programlisting><![CDATA[<bean class="ExampleBean">
   <property name="email"><null/></property>
 </bean>]]></programlisting>
                 <para>The above configuration is equivalent to the following Java code:
-                <literal>exampleBean.setEmail(null)</literal>.</para>
+                <methodname>exampleBean.setEmail(null)</methodname>.</para>
             </section>
             <section>
                 <title id="beans-value-ref-shortcuts">XML-based configuration metadata shortcuts</title>
-                <para>It is so common to need to configure a value or a bean
-                reference, that there exist some shortcut forms which are less verbose
-                than using the full <literal>&lt;value/&gt;</literal> and
-                <literal>&lt;ref/&gt;</literal> elements. The <literal>&lt;property/&gt;</literal>,
-                <literal>&lt;constructor-arg/&gt;</literal>, and <literal>&lt;entry/&gt;</literal>
-                elements all support a <literal>'value'</literal> attribute which may be
-                used instead of embedding a full <literal>&lt;value/&gt;</literal> element.
-                Therefore, the following:</para>
+                <para>There exist some shortcut forms which are less verbose than using the full
+                <literal>&lt;value/&gt;</literal> and <literal>&lt;ref/&gt;</literal> elements. The
+                <literal>&lt;property/&gt;</literal>, <literal>&lt;constructor-arg/&gt;</literal>, and
+                <literal>&lt;entry/&gt;</literal> elements all support a <literal>'value'</literal>
+                attribute which may be used instead of embedding a full <literal>&lt;value/&gt;</literal>
+                element. Therefore, the following:</para>
                 <programlisting><![CDATA[<property name="myProperty">
   <value>hello</value>
 </property>]]></programlisting>
@@ -1435,7 +1465,7 @@ support=support@somecompany.co.uk]]></programlisting>
                 <programlisting><![CDATA[<constructor-arg>
   <ref bean="myBean">
 </constructor-arg>]]></programlisting>
-                <para>are equivalent to:</para>
+                <para>... are equivalent to:</para>
                 <programlisting><![CDATA[<property name="myProperty" ref="myBean"/>]]></programlisting>
                 <programlisting><![CDATA[<constructor-arg ref="myBean"/>]]></programlisting>
                 <para>Note however that the shortcut form is equivalent to a
