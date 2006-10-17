@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2005 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,9 +38,9 @@ import org.springframework.aop.support.AopUtils;
  *
  * <p>It is possible to clone an invocation, to invoke <code>proceed</code> repeatedly
  * (once per clone), using the <code>invocableClone</code> method. It is also possible to
- * add custom attributes to the invocation (since 1.2.6) using the 
+ * add custom attributes to the invocation (since 1.2.6) using the
  * <code>getUserAttributes()</code> method.
- * 
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #invokeJoinpoint
@@ -54,13 +54,11 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	protected final Object target;
 
 	protected final Method method;
-	
+
 	protected Object[] arguments;
-	
+
 	private final Class targetClass;
 
-	private ReflectiveMethodInvocation parent;
-	
 	/**
 	 * Lazily initialized map of user-specific attributes for this invocation.
 	 */
@@ -71,14 +69,14 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * that need dynamic checks.
 	 */
 	protected final List interceptorsAndDynamicMethodMatchers;
-	
+
 	/**
 	 * Index from 0 of the current interceptor we're invoking.
 	 * -1 until we invoke: then the current interceptor
 	 */
-	private int currentInterceptorIndex;
+	private int currentInterceptorIndex = -1;
 
-	
+
 	/**
 	 * Construct a new MethodInvocation with given arguments
 	 * @param interceptorsAndDynamicMethodMatchers interceptors that should be applied,
@@ -135,64 +133,48 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * @return any user attributes associated with this invocation
 	 * (never <code>null</code>)
 	 */
-	protected Map getUserAttributes() {
+	public Map getUserAttributes() {
 		if (this.userAttributes == null) {
 			this.userAttributes = new HashMap();
 		}
 		return this.userAttributes;
 	}
 
-	public Object getUserAttribute(String key) {
-		return getUserAttributes().get(key);
+	public void setUserAttribute(String name, Object value) {
+		getUserAttributes().put(name, value);
 	}
 
-	public void setUserAttribute(String key, Object value) {
-		if(this.parent != null) {
-			Object valueInParent = this.parent.getUserAttribute(key);
-			if(valueInParent == null) {
-				this.parent.setUserAttribute(key, value);
-			}
-		}
-		getUserAttributes().put(key, value);
+	public Object getUserAttribute(String name) {
+		return getUserAttributes().get(name);
 	}
 
 	public Object proceed() throws Throwable {
 		//	We start with an index of -1 and increment early.
-		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size()) {
+		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
 			return invokeJoinpoint();
 		}
 
 		Object interceptorOrInterceptionAdvice =
-		    this.interceptorsAndDynamicMethodMatchers.get(this.currentInterceptorIndex);
+		    this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
 		if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) {
 			// Evaluate dynamic method matcher here: static part will already have
 			// been evaluated and found to match.
 			InterceptorAndDynamicMethodMatcher dm =
 			    (InterceptorAndDynamicMethodMatcher) interceptorOrInterceptionAdvice;
 			if (dm.methodMatcher.matches(this.method, this.targetClass, this.arguments)) {
-				return dm.interceptor.invoke(nextInvocation());
+				return dm.interceptor.invoke(this);
 			}
 			else {
 				// Dynamic matching failed.
 				// Skip this interceptor and invoke the next in the chain.
-				this.currentInterceptorIndex++;
 				return proceed();
 			}
 		}
 		else {
 			// It's an interceptor, so we just invoke it: The pointcut will have
 			// been evaluated statically before this object was constructed.
-			return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(nextInvocation());
+			return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
 		}
-	}
-
-	private ReflectiveMethodInvocation nextInvocation() throws CloneNotSupportedException {
-		// force creation of userAttributes before cloning...
-		getUserAttributes();
-		ReflectiveMethodInvocation invocation = (ReflectiveMethodInvocation) clone();
-		invocation.currentInterceptorIndex = this.currentInterceptorIndex + 1;
-		invocation.parent = this;
-		return invocation;
 	}
 
 	/**
@@ -213,7 +195,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * <p>This method returns a shallow copy, except for the argument array, which is
 	 * deep-copied to allow for independent modification. We want a shallow copy in this case:
 	 * We want to use the same interceptor-chain and other object references, but we want an
-	 * independent value for the current interceptor index. 
+	 * independent value for the current interceptor index.
 	 * @see java.lang.Object#clone()
 	 * @return an invocable clone of this invocation. proceed() can be called once per clone.
 	 */
