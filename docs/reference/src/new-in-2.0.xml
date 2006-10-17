@@ -276,7 +276,7 @@
       <title>Task scheduling</title>
 
       <para>Spring 2.0 offers an abstraction around the scheduling of tasks.
-      For the interested developer, the section entitled <xref linkend="taskexecutor"/>
+      For the interested developer, the section entitled <xref linkend="scheduling-task-executor"/>
       contains all of the details.</para>
     </section>
 
