@@ -422,6 +422,20 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
             </section>
             <section id="beans-factory-class">
                 <title>Instantiating beans</title>
+                <sidebar>
+                    <title>Inner class names</title>
+                    <para>If for whatever reason you want to configure a bean definition
+                    for a <literal>static</literal> inner class, you have to use the
+                    <emphasis>binary</emphasis> name of the inner class.</para>
+                    <para>For example, if you have a class called <classname>Foo</classname>
+                    in the <literal>com.example</literal> package, and this <classname>Foo</classname>
+                    class has a <literal>static</literal> inner class called <classname>Bar</classname>,
+                    the value of the <literal>'class'</literal> attribute on a bean definition would
+                    be...</para>
+                    <para><classname>com.example.Foo$Bar</classname></para>
+                    <para>Notice the use of the binary <literal>$</literal> character in the name to
+                    separate the inner class name from the outer class name.</para>
+                </sidebar>
                 <para>So far as a Spring IoC container is concerned, a bean definition
                 is basically a recipe for creating one or more actual objects. The 
                 container looks at the recipe for a named bean when asked, and uses
