@@ -118,7 +118,7 @@
         </section>
 		
 		<note>
-		    <para>The Spring distibution ships with a complete Spring Portlet MVC
+		    <para>The Spring distribution ships with a complete Spring Portlet MVC
 		    sample application that demonstrates all of the features and functionality
 		    of the Spring Portlet MVC framework. This 'petportal' application can be found
 		    in the <filename class="directory">'samples/petportal'</filename> directory of
