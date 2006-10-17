@@ -62,9 +62,6 @@
 
     <entity class="Vet">
         <table name="VETS"/>
-        <attribute-override name="city">
-        	<column/>
-        </attribute-override>
         <attributes>
             <many-to-many name="specialtiesInternal" target-entity="Specialty" fetch="EAGER">
                 <join-table name="VET_SPECIALTIES">
@@ -86,7 +83,10 @@
     <entity class="Owner">
         <table name="OWNERS"/>
         <attributes>
-
+            <basic name="address"/>
+            <basic name="city"/>
+            <basic name="telephone"/>
+	
             <one-to-many name="petsInternal" target-entity="Pet" mapped-by="owner" fetch="EAGER">
                 <cascade><cascade-all/></cascade>
             </one-to-many>
