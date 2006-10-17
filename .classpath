@@ -122,16 +122,8 @@
 	<classpathentry kind="lib" path="lib/jpa/persistence.jar"/>
 	<classpathentry kind="lib" path="lib/caucho/hessian-3.0.20.jar"/>
 	<classpathentry kind="lib" path="lib/oc4j/oc4j-clapi.jar"/>
-	<classpathentry kind="lib" path="lib/openjpa/openjpa-jdbc-0.9.0-incubating-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/openjpa/openjpa-jdbc-5-0.9.0-incubating-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/openjpa/openjpa-kernel-0.9.0-incubating-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/openjpa/openjpa-kernel-4-0.9.0-incubating-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/openjpa/openjpa-kernel-5-0.9.0-incubating-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/openjpa/openjpa-lib-0.9.0-incubating-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/openjpa/openjpa-persistence-0.9.0-incubating-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/openjpa/openjpa-persistence-jdbc-0.9.0-incubating-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/openjpa/openjpa-xmlstore-0.9.0-incubating-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/serp/serp-1.11.0.jar"/>
 	<classpathentry kind="lib" path="lib/glassfish/glassfish-clapi.jar"/>
+	<classpathentry kind="lib" path="lib/openjpa/openjpa-0.9.6-incubating-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
