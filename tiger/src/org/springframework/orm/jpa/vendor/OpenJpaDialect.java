@@ -55,7 +55,7 @@ public class OpenJpaDialect extends DefaultJpaDialect {
 		super.beginTransaction(entityManager, definition);
 		if (!definition.isReadOnly()) {
 			// like in Toplink/Kodo case, make sure to start the logic transaction early so that
-			// other participants using the connection (like JdbcTemplate) run
+			// other participants using the connection (such as JdbcTemplate) run
 			// in a transaction.
 			OpenJPAEntityManager manager = getOpenJpaEntityManager(entityManager);
 			// start tx

@@ -38,8 +38,8 @@ public class OpenJpaEntityManagerFactoryIntegrationTests extends AbstractContain
 		assertTrue("native EMF expected", emfi.getNativeEntityManagerFactory() instanceof OpenJPAEntityManagerFactory);
 	}
 
-	public void testCannotCastSharedEntityManagerProxyToOpenJpaEntityManager() {
-		assertFalse("native EM expected", sharedEntityManager instanceof OpenJPAEntityManager);
+	public void testCanCastSharedEntityManagerProxyToOpenJpaEntityManager() {
+		assertTrue("native EM expected", sharedEntityManager instanceof OpenJPAEntityManager);
 	}
 
 	public void testCanGetSharedOpenJpaEntityManagerProxy() {

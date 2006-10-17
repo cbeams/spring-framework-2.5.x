@@ -85,6 +85,8 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	@ExpectedException(RuntimeException.class)
 	public void testBogusQuery() {
 		Query query = sharedEntityManager.createQuery("It's raining toads");
+		// required in OpenJPA case
+		query.executeUpdate();
 	}
 	
 	@ExpectedException(EntityNotFoundException.class)
