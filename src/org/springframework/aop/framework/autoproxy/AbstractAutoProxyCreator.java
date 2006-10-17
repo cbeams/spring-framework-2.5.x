@@ -26,6 +26,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
@@ -240,6 +241,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 */
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		if (isInfrastructureClass(bean.getClass(), beanName) || shouldSkip(bean.getClass(), beanName)) {
+			return bean;
+		}
+
+		if (AopUtils.isAopProxy(bean)) {
 			return bean;
 		}
 

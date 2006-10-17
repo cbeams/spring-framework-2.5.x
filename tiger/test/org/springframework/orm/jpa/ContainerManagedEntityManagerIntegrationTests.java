@@ -17,6 +17,7 @@
 package org.springframework.orm.jpa;
 
 import java.util.List;
+import java.lang.reflect.Proxy;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
@@ -62,7 +63,7 @@ public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntit
 	
 	public void testEntityManagerProxyIsProxy() {
 		EntityManager em = createContainerManagedEntityManager();
-		assertTrue(AopUtils.isAopProxy(em));
+		assertTrue(Proxy.isProxyClass(em.getClass()));
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
 		assertTrue(people.isEmpty());

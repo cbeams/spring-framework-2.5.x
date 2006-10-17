@@ -37,6 +37,7 @@ import org.springframework.aop.IntroductionAwareMethodMatcher;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
+import org.springframework.aop.framework.SpringProxy;
 import org.springframework.core.OrderComparator;
 import org.springframework.util.ClassUtils;
 
@@ -74,7 +75,7 @@ public abstract class AopUtils {
 	 * @see java.lang.reflect.Proxy#isProxyClass
 	 */
 	public static boolean isJdkDynamicProxy(Object object) {
-		return (object != null && Proxy.isProxyClass(object.getClass()));
+		return (object != null && object instanceof SpringProxy && Proxy.isProxyClass(object.getClass()));
 	}
 
 	/**
@@ -82,7 +83,7 @@ public abstract class AopUtils {
 	 * @param object the object to check
 	 */
 	public static boolean isCglibProxy(Object object) {
-		return (object != null && isCglibProxyClass(object.getClass()));
+		return (object != null && object instanceof SpringProxy && isCglibProxyClass(object.getClass()));
 	}
     
 	/**

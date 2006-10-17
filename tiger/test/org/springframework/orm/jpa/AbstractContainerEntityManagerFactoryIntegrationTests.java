@@ -73,7 +73,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	
 	@Transactional(readOnly=true)
 	public void testEntityManagerProxyIsProxy() {
-		assertTrue(AopUtils.isAopProxy(sharedEntityManager));
+		assertTrue(Proxy.isProxyClass(sharedEntityManager.getClass()));
 		Query q = sharedEntityManager.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
 		
@@ -132,7 +132,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		String firstName = "Tony";
 		insertPerson(firstName);
 		
-		assertTrue(AopUtils.isAopProxy(sharedEntityManager));
+		assertTrue(Proxy.isProxyClass(sharedEntityManager.getClass()));
 		Query q = sharedEntityManager.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
 		

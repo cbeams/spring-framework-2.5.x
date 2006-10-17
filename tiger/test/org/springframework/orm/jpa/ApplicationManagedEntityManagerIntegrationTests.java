@@ -17,6 +17,7 @@
 package org.springframework.orm.jpa;
 
 import java.util.List;
+import java.lang.reflect.Proxy;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -39,13 +40,13 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 	
 	@NotTransactional
 	public void testEntityManagerIsProxy() {
-		assertTrue("EntityManagerFactory is proxied", AopUtils.isAopProxy(entityManagerFactory));
+		assertTrue("EntityManagerFactory is proxied", Proxy.isProxyClass(entityManagerFactory.getClass()));
 	}
 
 	@Transactional(readOnly=true)
 	public void testEntityManagerProxyIsProxy() {
 		EntityManager em = entityManagerFactory.createEntityManager();
-		assertTrue(AopUtils.isAopProxy(em));
+		assertTrue(Proxy.isProxyClass(em.getClass()));
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
 		

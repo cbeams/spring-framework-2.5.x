@@ -35,15 +35,17 @@ public class AopProxyUtilsTests extends TestCase {
 	public void testCompleteProxiedInterfacesWorksWithNull() {
 		AdvisedSupport as = new AdvisedSupport();
 		Class[] completedInterfaces = AopProxyUtils.completeProxiedInterfaces(as);
-		assertEquals(1, completedInterfaces.length);
-		assertEquals(Advised.class, completedInterfaces[0]);
+		assertEquals(2, completedInterfaces.length);
+		List ifaces = Arrays.asList(completedInterfaces);
+		assertTrue(ifaces.contains(Advised.class));
+		assertTrue(ifaces.contains(SpringProxy.class));
 	}
 	
 	public void testCompleteProxiedInterfacesWorksWithNullOpaque() {
 		AdvisedSupport as = new AdvisedSupport();
 		as.setOpaque(true);
 		Class[] completedInterfaces = AopProxyUtils.completeProxiedInterfaces(as);
-		assertEquals(0, completedInterfaces.length);
+		assertEquals(1, completedInterfaces.length);
 	}
 	
 	public void testCompleteProxiedInterfacesAdvisedNotIncluded() {
@@ -51,7 +53,7 @@ public class AopProxyUtilsTests extends TestCase {
 		as.addInterface(ITestBean.class);
 		as.addInterface(Comparable.class);
 		Class[] completedInterfaces = AopProxyUtils.completeProxiedInterfaces(as);
-		assertEquals(3, completedInterfaces.length);
+		assertEquals(4, completedInterfaces.length);
 		
 		// Can't assume ordering for others, so use a list
 		List l = Arrays.asList(completedInterfaces);
@@ -66,7 +68,7 @@ public class AopProxyUtilsTests extends TestCase {
 		as.addInterface(Comparable.class);
 		as.addInterface(Advised.class);
 		Class[] completedInterfaces = AopProxyUtils.completeProxiedInterfaces(as);
-		assertEquals(3, completedInterfaces.length);
+		assertEquals(4, completedInterfaces.length);
 		
 		// Can't assume ordering for others, so use a list
 		List l = Arrays.asList(completedInterfaces);
@@ -81,7 +83,7 @@ public class AopProxyUtilsTests extends TestCase {
 		as.addInterface(ITestBean.class);
 		as.addInterface(Comparable.class);
 		Class[] completedInterfaces = AopProxyUtils.completeProxiedInterfaces(as);
-		assertEquals(2, completedInterfaces.length);
+		assertEquals(3, completedInterfaces.length);
 		
 		// Can't assume ordering for others, so use a list
 		List l = Arrays.asList(completedInterfaces);
