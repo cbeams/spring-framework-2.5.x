@@ -17,6 +17,9 @@
 package org.springframework.aop.framework;
 
 import java.util.Arrays;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Collections;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.util.Assert;
@@ -55,19 +58,37 @@ public abstract class AopProxyUtils {
 
 	/**
 	 * Get complete set of interfaces to proxy. This will always add the Advised interface
-	 * unless the AdvisedSupport's "opaque" flag is on.
+	 * unless the AdvisedSupport's "opaque" flag is on. Always adds the {@link SpringProxy}
+	 * interface.
 	 * @return the complete set of interfaces to proxy
 	 */
 	public static Class[] completeProxiedInterfaces(AdvisedSupport advised) {
 		// Won't include Advised, which may be necessary.
 		Class[] specifiedInterfaces = advised.getProxiedInterfaces();
-		Class[] proxiedInterfaces = specifiedInterfaces;
-		if (!advised.isOpaque() && !advised.isInterfaceProxied(Advised.class)) {
-			// We need to add the Advised interface.
-			proxiedInterfaces = new Class[specifiedInterfaces.length + 1];
-			proxiedInterfaces[0] = Advised.class;
-			System.arraycopy(specifiedInterfaces, 0, proxiedInterfaces, 1, specifiedInterfaces.length);
+
+		boolean addSpringProxy = !advised.isInterfaceProxied(SpringProxy.class);
+		boolean addAdvised = !advised.isOpaque() && !advised.isInterfaceProxied(Advised.class);
+
+		int offset = 0;
+		if(addSpringProxy && addAdvised) {
+			offset = 2;
+		} else if (addSpringProxy || addAdvised) {
+			offset = 1;
 		}
+
+		Class[] proxiedInterfaces = new Class[specifiedInterfaces.length + offset];
+
+		if(addSpringProxy) {
+			proxiedInterfaces[0] = SpringProxy.class;
+			if(addAdvised) {
+				proxiedInterfaces[1] = Advised.class;
+			}
+		} else if (addAdvised) {
+			proxiedInterfaces[0] = Advised.class;
+		}
+
+		System.arraycopy(specifiedInterfaces, 0, proxiedInterfaces, offset, specifiedInterfaces.length);
+
 		return proxiedInterfaces;
 	}
 
@@ -81,18 +102,21 @@ public abstract class AopProxyUtils {
 	 */
 	public static Class[] proxiedUserInterfaces(Object proxy) {
 		Class[] proxyInterfaces = proxy.getClass().getInterfaces();
-		if (proxy instanceof Advised) {
-			Assert.isTrue((proxyInterfaces.length > 1),
-					"JDK proxy must implement at least 1 interface aside from Advised");
-			Class[] beanInterfaces = new Class[proxyInterfaces.length - 1];
-			System.arraycopy(proxyInterfaces, 1, beanInterfaces, 0, beanInterfaces.length);
-			return beanInterfaces;
+
+		boolean isSpringProxy = proxy instanceof SpringProxy;
+		boolean isAdvised = proxy instanceof Advised;
+
+		int cut = 0;
+		if (isAdvised && isSpringProxy) {
+			cut = 2;
 		}
-		else {
-			Assert.notEmpty(proxyInterfaces,
-					"JDK proxy must implement at least 1 interface aside from Advised");
-			return proxyInterfaces;
+		else if (isAdvised || isSpringProxy) {
+			cut = 1;
 		}
+		Class[] beanInterfaces = new Class[proxyInterfaces.length - cut];
+		System.arraycopy(proxyInterfaces, cut, beanInterfaces, 0, beanInterfaces.length);
+		Assert.notEmpty(beanInterfaces, "JDK proxy must have one or more interface.");
+		return beanInterfaces;
 	}
 
 	/**

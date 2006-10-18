@@ -66,7 +66,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	}
 
 	public Object proceed() throws Throwable {
-		return methodInvocation.proceed();
+		return ((ReflectiveMethodInvocation)methodInvocation).invocableClone().proceed();
 	}
 
 	public Object proceed(Object[] args) throws Throwable {
