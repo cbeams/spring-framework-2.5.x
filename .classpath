@@ -125,5 +125,6 @@
 	<classpathentry kind="lib" path="lib/serp/serp-1.11.0.jar"/>
 	<classpathentry kind="lib" path="lib/glassfish/glassfish-clapi.jar"/>
 	<classpathentry kind="lib" path="lib/openjpa/openjpa-0.9.6-incubating-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/tomcat/naming-resources.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
