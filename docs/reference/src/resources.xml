@@ -460,7 +460,7 @@
       follows:</para>
 
       <programlisting><![CDATA[ApplicationContext ctx =
-    new FileSystemClassPathXmlApplicationContext("conf/appContext.xml");]]></programlisting>
+    new FileSystemXmlApplicationContext("conf/appContext.xml");]]></programlisting>
 
       <para>The bean definition will be loaded from a filesystem location, in
       this case relative to the current working directory.</para>
@@ -690,10 +690,10 @@
       or not. In practice, this means the following are equivalent:</para>
 
       <programlisting><![CDATA[ApplicationContext ctx =
-    new FileSystemClassPathXmlApplicationContext("conf/context.xml");]]></programlisting>
+    new FileSystemXmlApplicationContext("conf/context.xml");]]></programlisting>
 
       <programlisting><![CDATA[ApplicationContext ctx =
-    new FileSystemClassPathXmlApplicationContext("/conf/context.xml");]]></programlisting>
+    new FileSystemXmlApplicationContext("/conf/context.xml");]]></programlisting>
 
       <para>As are the following: (Even though it would make sense for them to
       be different, as one case is relative and the other absolute.)</para>
