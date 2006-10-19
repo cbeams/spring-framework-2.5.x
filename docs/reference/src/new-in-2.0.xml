@@ -409,7 +409,7 @@
     directory of the full Spring distribution
     (<filename>'spring-with-dependecies.[zip|tar.gz]'</filename>).</para>
 
-    <para>Said distribution also ships with a number of so-called
+    <para>The Spring Framework distribution also ships with a number of so-called
     <emphasis>showcase</emphasis> applications. Each showcase application provides
     fully working examples, focussed on demonstrating exactly one new Spring 2.0 feature
     at a time. The idea is that you can take the code in these showcases and experiment

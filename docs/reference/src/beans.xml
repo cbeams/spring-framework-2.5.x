@@ -3,12 +3,11 @@
     <title>The IoC container</title>
     <section id="beans-introduction">
         <title>Introduction</title>
-        <para>This chapter is devoted to covering (in detail) the Spring Framework's
-        implementation of the Inversion of Control (IoC)
+        <para>This chapter covers the Spring Framework's implementation of the
+		Inversion of Control (IoC)
 		<footnote><para>See the section entitled <xref linkend="background-ioc" /></para></footnote>
-		principle. IoC underpins a lot of the surrounding functionality that is provided by
-		the Spring Framework as a whole, and so a thorough treatment of this rich, yet
-		conceptually very simple, technology is in order.</para>
+		principle. IoC underpins a lot of the functionality provided by Spring, so it is
+		important to understand.</para>
         <sidebar>
 			<title>Which interface?</title>
             <para>Users are sometimes unsure whether a <interfacename>BeanFactory</interfacename>
