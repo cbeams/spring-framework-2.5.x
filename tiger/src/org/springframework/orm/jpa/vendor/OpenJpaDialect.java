@@ -15,12 +15,6 @@
  */
 package org.springframework.orm.jpa.vendor;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
-
 import org.apache.openjpa.persistence.OpenJPAEntityManager;
 import org.springframework.jdbc.datasource.ConnectionHandle;
 import org.springframework.jdbc.datasource.SimpleConnectionHandle;
@@ -28,26 +22,30 @@ import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
+import java.sql.Connection;
+import java.sql.SQLException;
+
 /**
- * OpenJPA specific dialect.
- * 
- * @author Costin Leau
+ * OpenJPA-specific {@link org.springframework.orm.jpa.JpaDialect dialect}.
  *
+ * @author Costin Leau
+ * @since 2.0
  */
 public class OpenJpaDialect extends DefaultJpaDialect {
 
 	@Override
 	public ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly) throws PersistenceException, SQLException {
 		Connection connection = (Connection) getOpenJpaEntityManager(entityManager).getConnection();
-
 		return new SimpleConnectionHandle(connection);
 	}
 
 	@Override
 	public void releaseJdbcConnection(ConnectionHandle conHandle, EntityManager em) throws PersistenceException, SQLException {
-		// be preventive
-		if (conHandle != null && conHandle.getConnection() != null)
+		if (conHandle != null && conHandle.getConnection() != null) {
 			conHandle.getConnection().close();
+		}
 	}
 
 	@Override
@@ -55,22 +53,21 @@ public class OpenJpaDialect extends DefaultJpaDialect {
 		super.beginTransaction(entityManager, definition);
 		if (!definition.isReadOnly()) {
 			// like in Toplink/Kodo case, make sure to start the logic transaction early so that
-			// other participants using the connection (such as JdbcTemplate) run
-			// in a transaction.
+			// other participants using the connection (such as JdbcTemplate) run in a transaction.
 			OpenJPAEntityManager manager = getOpenJpaEntityManager(entityManager);
-			// start tx
 			manager.beginStore();
 		}
-
 		return null;
 	}
 
+
 	/**
-	 * Return the OpenJPA specific interface of EntityManager.
-	 * @param em
-	 * @return
+	 * Return the OpenJPA-specific interface of <code>EntityManager</code>.
+	 * @param em the generic <code>EntityManager</code> instance
+	 * @return the OpenJPA-specific interface of <code>EntityManager</code>
 	 */
 	protected OpenJPAEntityManager getOpenJpaEntityManager(EntityManager em) {
-		return ((OpenJPAEntityManager) em);
+		return (OpenJPAEntityManager) em;
 	}
+
 }
