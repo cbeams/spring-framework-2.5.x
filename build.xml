@@ -1553,6 +1553,7 @@
 				<include name="docs/reference/images/admons/*.gif"/>
 				<include name="docs/reference/images/admons/*.tif"/>
 				<include name="docs/reference/styles/html.css"/>
+				<include name="docs/reference/readme.txt"/>
 				<include name="docs/MVC-step-by-step/**"/>
 				<include name="docs/taglib/**"/>
 				<include name="docs/api/**"/>
