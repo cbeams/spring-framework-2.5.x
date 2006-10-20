@@ -71,7 +71,7 @@ public class TimerSupportTests extends TestCase {
 		};
 
 		TimerFactoryBean timerFactoryBean = new TimerFactoryBean() {
-			protected Timer createTimer(boolean daemon) {
+			protected Timer createTimer(String name, boolean daemon) {
 				return timer;
 			}
 		};
