@@ -113,14 +113,15 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			String id = element.getAttribute("id");
 			String listClass = element.getAttribute("list-class");
 
-			List parsedList = parserContext.getDelegate().parseListElement(element, null);
 			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ListFactoryBean.class);
+			AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
+			List parsedList = parserContext.getDelegate().parseListElement(element, beanDefinition);
 			builder.setSource(parserContext.extractSource(element));
 			builder.addPropertyValue("sourceList", parsedList);
 			if (StringUtils.hasText(listClass)) {
 				builder.addPropertyValue("targetListClass", listClass);
 			}
-			parserContext.getRegistry().registerBeanDefinition(id, builder.getBeanDefinition());
+			parserContext.getRegistry().registerBeanDefinition(id, beanDefinition);
 			// cannot be used in a 'inner-bean' setting (use plain <list>)
 			return null;
 		}
@@ -133,14 +134,15 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			String id = element.getAttribute("id");
 			String setClass = element.getAttribute("set-class");
 
-			Set parsedSet = parserContext.getDelegate().parseSetElement(element, null);
 			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(SetFactoryBean.class);
+			AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
+			Set parsedSet = parserContext.getDelegate().parseSetElement(element, beanDefinition);
 			builder.setSource(parserContext.extractSource(element));
 			builder.addPropertyValue("sourceSet", parsedSet);
 			if (StringUtils.hasText(setClass)) {
 				builder.addPropertyValue("targetSetClass", setClass);
 			}
-			parserContext.getRegistry().registerBeanDefinition(id, builder.getBeanDefinition());
+			parserContext.getRegistry().registerBeanDefinition(id, beanDefinition);
 			// cannot be used in a 'inner-bean' setting (use plain <set>)
 			return null;
 		}
@@ -153,14 +155,15 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			String id = element.getAttribute("id");
 			String mapClass = element.getAttribute("map-class");
 
-			Map parsedMap = parserContext.getDelegate().parseMapElement(element, null);
 			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(MapFactoryBean.class);
+			AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
+			Map parsedMap = parserContext.getDelegate().parseMapElement(element, beanDefinition);
 			builder.setSource(parserContext.extractSource(element));
 			builder.addPropertyValue("sourceMap", parsedMap);
 			if (StringUtils.hasText(mapClass)) {
 				builder.addPropertyValue("targetMapClass", mapClass);
 			}
-			parserContext.getRegistry().registerBeanDefinition(id, builder.getBeanDefinition());
+			parserContext.getRegistry().registerBeanDefinition(id, beanDefinition);
 			// cannot be used in a 'inner-bean' setting (use plain <map>)
 			return null;
 		}

@@ -16,11 +16,7 @@
 
 package org.springframework.beans.factory.xml.support;
 
-import java.io.IOException;
-
 import junit.framework.TestCase;
-import org.xml.sax.InputSource;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.DebugInterceptor;
@@ -36,13 +32,21 @@ import org.springframework.beans.factory.xml.PluggableSchemaResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.xml.sax.InputSource;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Rob Harrop
+ * @author Rick Evans
  */
-public class CustomNamespaceHandlerTests extends TestCase {
+public final class CustomNamespaceHandlerTests extends TestCase {
 
 	private DefaultListableBeanFactory beanFactory;
+
 
 	protected void setUp() throws Exception {
 		String location = "org/springframework/beans/factory/xml/support/customNamespace.properties";
@@ -54,6 +58,7 @@ public class CustomNamespaceHandlerTests extends TestCase {
 		reader.setEntityResolver(new DummySchemaResolver());
 		reader.loadBeanDefinitions(getResource());
 	}
+
 
 	public void testSimpleParser() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
@@ -85,9 +90,37 @@ public class CustomNamespaceHandlerTests extends TestCase {
 	}
 
 	public void testDecorationViaAttribute() throws Exception {
-		RootBeanDefinition beanDefinition = (RootBeanDefinition)this.beanFactory.getBeanDefinition("decorateWithAttribute");
+		RootBeanDefinition beanDefinition = (RootBeanDefinition) this.beanFactory.getBeanDefinition("decorateWithAttribute");
 		assertEquals("foo", beanDefinition.getAttribute("objectName"));
 	}
+
+	/**
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2728
+	 */
+	public void testCustomElementNestedWithinUtilList() throws Exception {
+		List things = (List) this.beanFactory.getBean("list.of.things");
+		assertNotNull(things);
+		assertEquals(2, things.size());
+	}
+
+	/**
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2728
+	 */
+	public void testCustomElementNestedWithinUtilSet() throws Exception {
+		Set things = (Set) this.beanFactory.getBean("set.of.things");
+		assertNotNull(things);
+		assertEquals(2, things.size());
+	}
+
+	/**
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2728
+	 */
+	public void testCustomElementNestedWithinUtilMap() throws Exception {
+		Map things = (Map) this.beanFactory.getBean("map.of.things");
+		assertNotNull(things);
+		assertEquals(2, things.size());
+	}
+
 
 	private void assetTestBean(ITestBean bean) {
 		assertEquals("Invalid name", "Rob Harrop", bean.getName());
@@ -99,11 +132,12 @@ public class CustomNamespaceHandlerTests extends TestCase {
 	}
 
 
-	private class DummySchemaResolver extends PluggableSchemaResolver {
+	private final class DummySchemaResolver extends PluggableSchemaResolver {
 
 		public DummySchemaResolver() {
 			super(CustomNamespaceHandlerTests.this.getClass().getClassLoader());
 		}
+
 
 		public InputSource resolveEntity(String publicId, String systemId) throws IOException {
 			InputSource source = super.resolveEntity(publicId, systemId);

@@ -24,15 +24,16 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.Attr;
 
 /**
  * @author Rob Harrop
@@ -41,6 +42,7 @@ public class TestNamespaceHandler extends NamespaceHandlerSupport {
 
 	public void init() {
 		registerBeanDefinitionParser("testBean", new TestBeanDefinitionParser());
+		registerBeanDefinitionParser("person", new PersonDefinitionParser());
 
 		registerBeanDefinitionDecorator("set", new PropertyModifyingBeanDefinitionDecorator());
 		registerBeanDefinitionDecorator("debug", new DebugBeanDefinitionDecorator());
@@ -65,10 +67,22 @@ public class TestNamespaceHandler extends NamespaceHandlerSupport {
 		}
 	}
 
+	private static final class PersonDefinitionParser extends AbstractSingleBeanDefinitionParser {
+
+		protected Class getBeanClass(Element element) {
+			return TestBean.class;
+		}
+
+		protected void doParse(Element element, BeanDefinitionBuilder builder) {
+			builder.addPropertyValue("name", element.getAttribute("name"));
+			builder.addPropertyValue("age", element.getAttribute("age"));
+		}
+	}
+
 	private static class PropertyModifyingBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
 		public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
-			Element element = (Element)node;
+			Element element = (Element) node;
 			BeanDefinition def = definition.getBeanDefinition();
 
 			MutablePropertyValues mpvs = (def.getPropertyValues() == null) ? new MutablePropertyValues() : def.getPropertyValues();
@@ -97,7 +111,7 @@ public class TestNamespaceHandler extends NamespaceHandlerSupport {
 	private static class ObjectNameBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
 		public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
-			Attr objectNameAttribute = (Attr)node;
+			Attr objectNameAttribute = (Attr) node;
 			definition.getBeanDefinition().setAttribute("objectName", objectNameAttribute.getValue());
 			return definition;
 		}
