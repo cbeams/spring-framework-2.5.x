@@ -21,10 +21,13 @@ import java.util.Timer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.JdkVersion;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * FactoryBean that sets up a {@link java.util.Timer} and exposes it for bean references.
@@ -45,13 +48,15 @@ import org.springframework.util.ObjectUtils;
  * @see java.util.Timer
  * @see java.util.TimerTask
  */
-public class TimerFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
+public class TimerFactoryBean implements FactoryBean, BeanNameAware, InitializingBean, DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private ScheduledTimerTask[] scheduledTimerTasks;
 
 	private boolean daemon = false;
+
+	private String beanName;
 
 	private Timer timer;
 
@@ -81,10 +86,14 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 		this.daemon = daemon;
 	}
 
+	public void setBeanName(String beanName) {
+		this.beanName = beanName;
+	}
+
 
 	public void afterPropertiesSet() {
 		logger.info("Initializing Timer");
-		this.timer = createTimer(this.daemon);
+		this.timer = createTimer(this.beanName, this.daemon);
 
 		// Register specified ScheduledTimerTasks, if necessary.
 		if (!ObjectUtils.isEmpty(this.scheduledTimerTasks)) {
@@ -95,13 +104,35 @@ public class TimerFactoryBean implements FactoryBean, InitializingBean, Disposab
 	/**
 	 * Create a new Timer instance. Called by <code>afterPropertiesSet</code>.
 	 * Can be overridden in subclasses to provide custom Timer subclasses.
+	 * <p>Uses the specified name as Timer thread name on JDK 1.5,
+	 * simply falling back to a default Timer thread on JDK 1.3 and 1.4.
+	 * @param name the desired name of the Timer's associated thread
+	 * (applied on JDK 1.5 and higher; ignored on JDK 1.3 and 1.4)
 	 * @param daemon whether to create a Timer that runs as daemon thread
 	 * @return a new Timer instance
 	 * @see #afterPropertiesSet()
 	 * @see java.util.Timer#Timer(boolean)
 	 */
+	protected Timer createTimer(String name, boolean daemon) {
+		Timer timer = createTimer(daemon);
+		if (timer != null) {
+			return timer;
+		}
+		if (StringUtils.hasText(name) && JdkVersion.isAtLeastJava15()) {
+			return new Timer(name, daemon);
+		}
+		else {
+			return new Timer(daemon);
+		}
+	}
+
+	/**
+	 * Create a new Timer instance. Called by <code>afterPropertiesSet</code>.
+	 * Can be overridden in subclasses to provide custom Timer subclasses.
+	 * @deprecated as of Spring 2.0.1, in favor of {@link #createTimer(String, boolean)}
+	 */
 	protected Timer createTimer(boolean daemon) {
-		return new Timer(daemon);
+		return null;
 	}
 
 	/**
