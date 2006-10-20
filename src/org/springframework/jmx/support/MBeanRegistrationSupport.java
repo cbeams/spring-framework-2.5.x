@@ -24,6 +24,7 @@ import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
 import javax.management.MBeanServer;
+import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
 import org.apache.commons.logging.Log;
@@ -156,8 +157,9 @@ public class MBeanRegistrationSupport {
 	 * @throws JMException if the registration failed
 	 */
 	protected void doRegister(Object mbean, ObjectName objectName) throws JMException {
+		ObjectInstance registeredBean = null;
 		try {
-			this.server.registerMBean(mbean, objectName);
+			registeredBean = this.server.registerMBean(mbean, objectName);
 		}
 		catch (InstanceAlreadyExistsException ex) {
 			if (this.registrationBehavior == REGISTRATION_IGNORE_EXISTING) {
@@ -171,7 +173,7 @@ public class MBeanRegistrationSupport {
 						logger.debug("Replacing existing MBean at [" + objectName + "]");
 					}
 					this.server.unregisterMBean(objectName);
-					this.server.registerMBean(mbean, objectName);
+					registeredBean = this.server.registerMBean(mbean, objectName);
 				}
 				catch (InstanceNotFoundException ex2) {
 					logger.error("Unable to replace existing MBean at [" + objectName + "]", ex2);
@@ -184,8 +186,12 @@ public class MBeanRegistrationSupport {
 		}
 
 		// Track registration and notify listeners.
-		this.registeredBeans.add(objectName);
-		onRegister(objectName);
+		ObjectName actualObjectName = (registeredBean != null ? registeredBean.getObjectName() : null);
+		if (actualObjectName == null) {
+			actualObjectName = objectName;
+		}
+		this.registeredBeans.add(actualObjectName);
+		onRegister(actualObjectName);
 	}
 
 	/**
