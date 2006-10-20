@@ -29,6 +29,7 @@ import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperPrint;
 
 import org.springframework.ui.jasperreports.JasperReportsUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -65,7 +66,7 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 
 		// Set exporter parameters - overriding with values from the Model.
 		Map mergedExporterParameters = mergeExporterParameters(model);
-		if (mergedExporterParameters != null) {
+		if (!CollectionUtils.isEmpty(mergedExporterParameters)) {
 			exporter.setParameters(mergedExporterParameters);
 		}
 
@@ -115,12 +116,12 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	 */
 	protected Map mergeExporterParameters(Map model) {
 		Map mergedParameters = new HashMap();
-		if(getConvertedExporterParameters() != null) {
-			mergedParameters.putAll(getConvertedExporterParameters());
+		Map convertedExporterParameters = getConvertedExporterParameters();
+		if (!CollectionUtils.isEmpty(convertedExporterParameters)) {
+			mergedParameters.putAll(convertedExporterParameters);
 		}
 		for (Iterator iterator = model.keySet().iterator(); iterator.hasNext();) {
 			Object key = iterator.next();
-
 			if (key instanceof JRExporterParameter) {
 				Object value = model.get(key);
 				if (value instanceof String) {
