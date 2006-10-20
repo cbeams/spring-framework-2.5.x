@@ -36,16 +36,23 @@ import org.springframework.util.Assert;
  */
 public class DelegatingJob implements Job {
 
-	private final Runnable runnable;
+	private final Runnable delegate;
 
 
 	/**
 	 * Create a new DelegatingJob.
-	 * @param runnable the Runnable implementation to delegate to
+	 * @param delegate the Runnable implementation to delegate to
 	 */
-	public DelegatingJob(Runnable runnable) {
-		Assert.notNull(runnable, "Runnable must not be null");
-		this.runnable = runnable;
+	public DelegatingJob(Runnable delegate) {
+		Assert.notNull(delegate, "Delegate must not be null");
+		this.delegate = delegate;
+	}
+
+	/**
+	 * Return the wrapped Runnable implementation.
+	 */
+	public final Runnable getDelegate() {
+		return delegate;
 	}
 
 
@@ -56,7 +63,7 @@ public class DelegatingJob implements Job {
 	 */
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		try {
-			this.runnable.run();
+			this.delegate.run();
 		}
 		catch (Exception ex) {
 			throw new JobExecutionException(ex);

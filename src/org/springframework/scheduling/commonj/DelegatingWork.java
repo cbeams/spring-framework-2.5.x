@@ -31,19 +31,26 @@ import org.springframework.util.Assert;
  */
 public class DelegatingWork implements Work {
 
-	private final Runnable runnable;
+	private final Runnable delegate;
 
 
 	/**
 	 * Create a new DelegatingWork.
-	 * @param runnable the Runnable implementation to delegate to
+	 * @param delegate the Runnable implementation to delegate to
 	 * (may be a SchedulingAwareRunnable for extended support)
 	 * @see org.springframework.scheduling.SchedulingAwareRunnable
 	 * @see #isDaemon()
 	 */
-	public DelegatingWork(Runnable runnable) {
-		Assert.notNull(runnable, "Runnable must not be null");
-		this.runnable = runnable;
+	public DelegatingWork(Runnable delegate) {
+		Assert.notNull(delegate, "Delegate must not be null");
+		this.delegate = delegate;
+	}
+
+	/**
+	 * Return the wrapped Runnable implementation.
+	 */
+	public final Runnable getDelegate() {
+		return delegate;
 	}
 
 
@@ -51,7 +58,7 @@ public class DelegatingWork implements Work {
 	 * Delegates execution to the underlying Runnable.
 	 */
 	public void run() {
-		this.runnable.run();
+		this.delegate.run();
 	}
 
 	/**
@@ -60,8 +67,8 @@ public class DelegatingWork implements Work {
 	 * @see org.springframework.scheduling.SchedulingAwareRunnable#isLongLived()
 	 */
 	public boolean isDaemon() {
-		if (this.runnable instanceof SchedulingAwareRunnable) {
-			return ((SchedulingAwareRunnable) this.runnable).isLongLived();
+		if (this.delegate instanceof SchedulingAwareRunnable) {
+			return ((SchedulingAwareRunnable) this.delegate).isLongLived();
 		}
 		return false;
 	}

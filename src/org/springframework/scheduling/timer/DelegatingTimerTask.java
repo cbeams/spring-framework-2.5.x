@@ -33,16 +33,23 @@ import org.springframework.util.Assert;
  */
 public class DelegatingTimerTask extends TimerTask {
 
-	private final Runnable runnable;
+	private final Runnable delegate;
 
 
 	/**
 	 * Create a new DelegatingTimerTask.
-	 * @param runnable the Runnable implementation to delegate to
+	 * @param delegate the Runnable implementation to delegate to
 	 */
-	public DelegatingTimerTask(Runnable runnable) {
-		Assert.notNull(runnable, "Runnable must not be null");
-		this.runnable = runnable;
+	public DelegatingTimerTask(Runnable delegate) {
+		Assert.notNull(delegate, "Delegate must not be null");
+		this.delegate = delegate;
+	}
+
+	/**
+	 * Return the wrapped Runnable implementation.
+	 */
+	public final Runnable getDelegate() {
+		return delegate;
 	}
 
 
@@ -50,7 +57,7 @@ public class DelegatingTimerTask extends TimerTask {
 	 * Delegates execution to the underlying Runnable.
 	 */
 	public void run() {
-		this.runnable.run();
+		this.delegate.run();
 	}
 
 }
