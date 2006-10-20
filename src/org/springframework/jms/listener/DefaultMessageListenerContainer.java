@@ -24,6 +24,7 @@ import javax.jms.MessageConsumer;
 import javax.jms.Session;
 import javax.jms.Topic;
 
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.core.Constants;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
@@ -95,7 +96,7 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer
  * @see DefaultMessageListenerContainer102
  */
-public class DefaultMessageListenerContainer extends AbstractMessageListenerContainer {
+public class DefaultMessageListenerContainer extends AbstractMessageListenerContainer implements BeanNameAware {
 
 	/**
 	 * Default thread name prefix: "SimpleAsyncTaskExecutor-".
@@ -165,6 +166,8 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	private long recoveryInterval = DEFAULT_RECOVERY_INTERVAL;
 
 	private Integer cacheLevel;
+
+	private String beanName;
 
 	private Object currentRecoveryMarker = new Object();
 
@@ -330,6 +333,10 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		return (this.cacheLevel != null ? this.cacheLevel.intValue() : CACHE_NONE);
 	}
 
+	public void setBeanName(String beanName) {
+		this.beanName = beanName;
+	}
+
 
 	/**
 	 * Validates this instance's configuration.
@@ -364,7 +371,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 		// Prepare taskExecutor and maxMessagesPerTask.
 		if (this.taskExecutor == null) {
-			this.taskExecutor = new SimpleAsyncTaskExecutor(DEFAULT_THREAD_NAME_PREFIX);
+			this.taskExecutor = createDefaultTaskExecutor();
 		}
 		else if (this.taskExecutor instanceof SchedulingTaskExecutor &&
 				((SchedulingTaskExecutor) this.taskExecutor).prefersShortLivedTasks() &&
@@ -377,6 +384,17 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 		// Proceed with actual listener initialization.
 		super.initialize();
+	}
+
+	/**
+	 * Create a default TaskExecutor. Called if no explicit TaskExecutor has been specified.
+	 * <p>The default implementation builds a {@link org.springframework.core.task.SimpleAsyncTaskExecutor}
+	 * with the specified bean name (or the class name, if no bean name specified) as thread name prefix.
+	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor#SimpleAsyncTaskExecutor(String)
+	 */
+	protected TaskExecutor createDefaultTaskExecutor() {
+		String threadNamePrefix = (this.beanName != null ? this.beanName + "-" : DEFAULT_THREAD_NAME_PREFIX);
+		return new SimpleAsyncTaskExecutor(threadNamePrefix);
 	}
 
 	/**
