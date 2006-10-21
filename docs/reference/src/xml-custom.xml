@@ -152,7 +152,7 @@ public class MyNamespaceHandler extends NamespaceHandlerSupport {
         registerBeanDefinitionParser("dateformat", new SimpleDateFormatBeanDefinitionParser());        
     ]]></emphasis>}
 }</programlisting>
-        <para>The observant reader will notice that there isnlt actually a whole lot of
+        <para>The observant reader will notice that there isn't actually a whole lot of
         parsing logic in this class. Indeed... the <classname>NamespaceHandlerSupport</classname>
         class has a built in notion of delegation. It supports the registration of any number
         of <interfacename>BeanDefinitionParser</interfacename> instances, to which it will delegate
