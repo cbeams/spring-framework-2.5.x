@@ -844,14 +844,13 @@ public interface IntroductionInfo {
       <para>
 		Some key properties are inherited from
 		<classname>org.springframework.aop.framework.ProxyConfig</classname> (the
-		superclass for all AOP proxy factories in Spring). These key properties
-		include:
+		superclass for all AOP proxy factories in Spring). These key properties include:
       </para>
       <itemizedlist>
         <listitem>
           <para>
 			<literal>proxyTargetClass</literal>: <literal>true</literal> if the
-			target class is to be proxied, rather than the target class's interfaces.
+			target class is to be proxied, rather than the target class' interfaces.
 			If this property value is set to <literal>true</literal>, then CGLIB proxies
 			will be created (but see also below the section entitled
 			<xref linkend="aop-pfb-proxy-types"/>).
@@ -863,27 +862,25 @@ public interface IntroductionInfo {
 			optimizations are applied to proxies <emphasis>created via CGLIB</emphasis>.
 			One should not blithely use this setting unless one fully understands
 			how the relevant AOP proxy handles optimization. This is currently used only
-			for CGLIB proxies; it has no effect with JDK dynamic proxies (the default).
+			for CGLIB proxies; it has no effect with JDK dynamic proxies.
           </para>
         </listitem>
         <listitem>
-          <para>
-			<literal>frozen</literal>: controls whether or not advice changes
-			should be disallowed once the proxy factory has been configured. The
-			default is <literal>false</literal> (i.e. no changes to the proxy
-			configuration are allowed after the proxy has been configured).
-		  </para>
+            <para><literal>frozen</literal>: if a proxy configuration is <literal>frozen</literal>,
+			then changes to said configuration are no longer allowed. This is useful both as
+			a slight optimization and for those cases when you don't want callers to be able
+			to manipulate the proxy (via the <interfacename>Advised</interfacename> interface)
+			after the proxy has been created. The default value of this property is
+			<literal>false</literal>, so changes such as adding additional advice are allowed.</para>
         </listitem>
         <listitem>
           <para>
 			<literal>exposeProxy</literal>: determines whether or not the current
 			proxy should be exposed in a <classname>ThreadLocal</classname> so that
-			it can be accessed by the target. (It's available via the
-			<interfacename>MethodInvocation</interfacename> without the need
-			for a <classname>ThreadLocal</classname>.) If a target needs to obtain
+			it can be accessed by the target. If a target needs to obtain
 			the proxy and the <literal>exposeProxy</literal> property is set to
 			<literal>true</literal>, the target can use the
-			<literal>AopContext.currentProxy()</literal> method.
+			<methodname>AopContext.currentProxy()</methodname> method.
           </para>
         </listitem>
         <listitem>
