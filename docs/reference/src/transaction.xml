@@ -517,7 +517,8 @@ xsi:schemaLocation="
             <note>
                 <para>Although knowledge of AOP (and specifically Spring AOP) is not required
                 in order to use Spring's declarative transaction support, it can help.
-                Spring AOP is thoroughly covered in the chapter entitled <xref linkend="aop"/>.</para>
+                Spring AOP is thoroughly covered in the chapter entitled <xref linkend="aop"/>.
+                (The section entitled <xref linkend="aop-understanding-aop-proxies"/> is particularly recommended.)</para>
             </note>
             <para>Conceptually, calling a method on a transactional proxy looks like this...</para>
 		    <para>

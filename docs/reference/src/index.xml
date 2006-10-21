@@ -120,7 +120,7 @@
 	<toc />
 	&overview;
 	&whats-new-in-2.0;
-	<part>
+	<part id="spring-core">
 		<title>Core Technologies</title>
 		<partintro>
 			<para>
@@ -186,7 +186,7 @@
 		&aop-api;
 		&testing;
 	</part>
-	<part>
+	<part id="spring-middle-tier">
 		<title>Middle Tier Data Access</title>
 		<partintro>
 			<para>
@@ -220,7 +220,7 @@
 		&jdbc;
 		&orm;
 	</part>
-	<part>
+	<part id="spring-web">
 		<title>The Web</title>
 		<partintro>
 			<para>
@@ -261,7 +261,7 @@
 		&webintegration;
 		&portlet;
 	</part>
-	<part>
+	<part id="spring-integration">
 		<title>Integration</title>
 		<partintro>
 			<para>
