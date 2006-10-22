@@ -5,9 +5,8 @@
   <section id="cci-introduction">
     <title>Introduction</title>
 
-    <para>J2EE provides a specification to standardize access to EIS: JCA
-    (Java Connector Architecture). This specification is divided into several
-    different parts:</para>
+    <para>J2EE provides a specification to standardize access to enterprise information systems (EIS):
+    the JCA (Java Connector Architecture). This specification is divided into several different parts:</para>
 
     <itemizedlist>
       <listitem>
@@ -29,7 +28,7 @@
     </itemizedlist>
 
     <para>The aim of the Spring CCI support is to provide classes to access
-    a CCI connector in typical Spring style, leveraging's Spring general
+    a CCI connector in typical Spring style, leveraging the Spring Framework's general
     resource and transaction management facilities.</para>
 
     <note>
