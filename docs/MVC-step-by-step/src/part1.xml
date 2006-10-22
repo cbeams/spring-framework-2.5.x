@@ -564,7 +564,7 @@ public class HelloController implements Controller {
     we will create next. The model that this class returns is actually resolved
     via a <interfacename>ViewResolver</interfacename>. Since we have not explicitly
     defined a <interfacename>ViewResolver</interfacename>, we are going to
-    get given a default one by Spring that simply forwards to a URL matching the name of the
+    be given a default one by Spring that simply forwards to a URL matching the name of the
     view specified. We will modify this later on. We have also specified a
     logger so we can verify that we actually got into the handler. Using Tomcat, these log
     messages should show up in the <filename>'catalina.out'</filename> log

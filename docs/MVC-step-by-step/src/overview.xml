@@ -77,9 +77,12 @@
     can concentrate on the specifics of Spring Web MVC and Spring, and not the finer
     details of inventory management.</para>
 
+    <!-- spacer -->
+    <para> </para>
+
 	<mediaobject>
 		<imageobject role="fo">
-			<imagedata fileref="images/usecase.svg" format="SVG" align="center" />
+			<imagedata fileref="images/usecase.png" format="PNG" width="350" align="center" />
 		</imageobject>
 		<imageobject role="html">
 			<imagedata fileref="images/usecase.png" format="PNG" align="center" />

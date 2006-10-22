@@ -3,7 +3,7 @@
     <title>Developing and Configuring the Views and the Controller</title>
     <para>This is Part 2 of a step-by-step tutorial on how to develop a web
     application from scratch using the Spring Framework. In
-    <link linkend="part1">Part 1 (Steps 1 – 12)</link> we configured the
+    <link linkend="part1">Part 1</link> we configured the
     environment and set up a basic application that we will now flesh out.</para>
     <para>This is what we have implemented so far:</para>
     <itemizedlist>
@@ -112,8 +112,8 @@
         <para>First we create the header file for inclusion in all the JSPs we create.</para>
         <para><filename>'springapp/war/WEB-INF/jsp/include.jsp'</filename>:</para>
         <programlisting><![CDATA[<%@ page session="false"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jstl/fmt" %>]]></programlisting>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>]]></programlisting>
         <para>Now we can update <filename>'index.jsp'</filename> to use this include file
         and since we are using JSTL, we can use the <literal>&lt;c:redirect/&gt;</literal>
         tag for redirecting to our front <interfacename>Controller</interfacename>.
@@ -136,11 +136,11 @@
 <programlisting><![CDATA[<%@ include file="/WEB-INF/jsp/include.jsp" %>
 
 <html>
-<head><title>Hello :: Spring Application</title></head>
-<body>
-<h1>Hello - Spring Application</h1>
-<p>Greetings, it is now <c:out value="${now}"/></p>
-</body>
+  <head><title>Hello :: Spring Application</title></head>
+  <body>
+    <h1>Hello - Spring Application</h1>
+    <p>Greetings, it is now <c:out value="${now}"/></p>
+  </body>
 </html>]]></programlisting>
         
     </section>
