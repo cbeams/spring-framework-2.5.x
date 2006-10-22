@@ -20,7 +20,8 @@ import org.springframework.core.JdkVersion;
 
 /**
  * General utilities for handling remote invocations.
- * Mainly intended for use within the remoting framework.
+ * 
+ * <p>Mainly intended for use within the remoting framework.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -32,14 +33,14 @@ public abstract class RemoteInvocationUtils {
 	 * <p>The given exception is typically thrown on the server and serialized
 	 * as-is, with the client wanting it to contain the client-side portion
 	 * of the stack trace as well. What we can do here is to update the
-	 * StackTraceElement array with the current client-side stack trace,
-	 * provided that we run on JDK 1.4+.
+	 * <code>StackTraceElement</code> array with the current client-side stack
+	 * trace, provided that we run on JDK 1.4+.
 	 * @param ex the exception to update
 	 * @see java.lang.Throwable#getStackTrace()
 	 * @see java.lang.Throwable#setStackTrace(StackTraceElement[])
 	 */
 	public static void fillInClientStackTraceIfPossible(Throwable ex) {
-		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_14) {
+		if (JdkVersion.isAtLeastJava14() && ex != null) {
 			StackTraceElement[] clientStack = new Throwable().getStackTrace();
 			Throwable exToUpdate = ex;
 			while (exToUpdate != null) {
