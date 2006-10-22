@@ -99,17 +99,17 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's Hibernate 2.1 support
 
 * hibernate/hibernate3.jar
-- Hibernate 3.2.0 CR4 (http://www.hibernate.org)
+- Hibernate 3.2.0 (http://www.hibernate.org)
 - required for building the framework
 - required at runtime when using Spring's Hibernate 3.x support
 
 * hibernate/hibernate-annotation.jar
-- Hibernate Annotations 3.2.0 CR2 (http://www.hibernate.org)
+- Hibernate Annotations 3.2.0 (http://www.hibernate.org)
 - required for building the "tiger" part of the framework
 - required at runtime when using Spring's Hibernate Annotations support
 
 * hibernate/hibernate-entitymanager.jar
-- Hibernate EntityManager 3.2.0 CR2 (http://www.hibernate.org)
+- Hibernate EntityManager 3.2.0 (http://www.hibernate.org)
 - required for building the "tiger" part of the framework
 - required at runtime when using Spring's Hibernate-specific JPA support
 
@@ -324,6 +324,11 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Oracle OC4J 10.1.3.1 ClassLoader API extract (http://www.oracle.com/technology/tech/java/oc4j)
 - required for building the framework
 
+* openjpa/openjpa-0.9.6-incubating-SNAPSHOT.jar
+- OpenJPA 0.9.6 snapshot (http://incubator.apache.org/openjpa)
+- required for building the framework
+- required at runtime when using Spring's JPA support with OpenJPA as provider
+
 * oro/jakarta-oro-2.0.8.jar
 - Jakarta ORO 2.0.8 (http://jakarta.apache.org/oro)
 - required for building the framework
@@ -367,7 +372,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 * toplink/toplink-essentials.jar
 - Oracle TopLink Essentials v2 b16 (http://www.oracle.com/technology/products/ias/toplink/jpa)
 - required for building the framework
-- required at runtime when using Spring's JPA TopLink support
+- required at runtime when using Spring's JPA support with TopLink as provider
 
 * velocity/velocity-1.4.jar
 - Velocity 1.4 (http://jakarta.apache.org/velocity)
