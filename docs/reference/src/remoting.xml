@@ -333,7 +333,7 @@ public class SimpleObject {
 	</section>
 	
 	<section id="remoting-web-services">
-		<title>web services</title>
+		<title>Web services</title>
 		<para>Spring has support for:</para>
 		<itemizedlist>
 			<listitem><para>Exposing services using JAX-RPC</para></listitem>
@@ -599,8 +599,127 @@ public class AccountServiceEndpoint extends ServletEndpointSupport implements Re
             <ulink url="http://docs.codehaus.org/display/XFIRE/Spring">docs.codehaus.org/display/XFIRE/Spring</ulink>.</para>
         </section>
 	</section>
+	
+	<section id="remoting-jms">
+	    <title>JMS</title>
+	    <para>It is also possible to expose services transparently using JMS as the underlying
+	    communication protocol. The JMS remoting support in the Spring Framework is pretty basic -
+	    it sends and receives on the <interfacename>same thread</interfacename> and in the
+	    <emphasis>same non-transactional</emphasis> <interfacename>Session</interfacename>, and as
+	    such throughput will be very implementation dependent.</para>
+	    <para>The following interface is used on both the server and the client side.</para>
+	    <programlisting><![CDATA[package com.foo;
 
-	<section>
+public interface CheckingAccountService {
+
+   void cancelAccount(Long accountId);
+}]]></programlisting>
+        <para>The following simple implementation of the above interface is used on the server-side.</para>
+        <programlisting><![CDATA[package com.foo;
+
+public class SimpleCheckingAccountService implements CheckingAccountService {
+
+   public void cancelAccount(Long accountId) {
+      System.out.println("Cancelling account [" + accountId + "]");
+   }
+}]]></programlisting>
+        <para>This configuration file contains the JMS-infrastructure beans that are shared on both
+        the client and server.</para>
+        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+   <bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+      <property name="brokerURL" value="tcp://ep-t43:61616"/>
+   </bean>
+
+   <bean id="queue" class="org.apache.activemq.command.ActiveMQQueue">
+      <constructor-arg value="mmm"/>
+   </bean>
+
+</beans>]]></programlisting>
+	    <section id="remoting-jms-server">
+	        <title>Server-side configuration</title>
+	        <para>On the server, you just need to expose the service object using the
+	        <classname>JmsInvokerServiceExporter</classname>.</para>
+	        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+   <bean id="checkingAccountService"
+        class="org.springframework.jms.remoting.JmsInvokerServiceExporter">
+      <property name="serviceInterface" value="com.foo.CheckingAccountService"/>
+      <property name="service">
+         <bean class="com.foo.SimpleCheckingAccountService"/>
+      </property>
+   </bean>
+
+   <bean class="org.springframework.jms.listener.SimpleMessageListenerContainer">
+      <property name="connectionFactory" ref="connectionFactory"/>
+      <property name="destination" ref="queue"/>
+      <property name="concurrentConsumers" value="3"/>
+      <property name="messageListener" ref="checkingAccountService"/>
+   </bean>
+
+</beans>]]></programlisting>
+            <programlisting><![CDATA[package com.foo;
+
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class Server {
+
+   public static void main(String[] args) throws Exception {
+      new ClassPathXmlApplicationContext(new String[]{"com/foo/server.xml", "com/foo/jms.xml"});
+   }
+}]]></programlisting>
+	    </section>
+	    <section id="remoting-jms-client">
+	        <title>Client-side configuration</title>
+	        <para>The client merely needs to create a client-side proxy that will implement the agreed
+	        upon interface (<interfacename>CheckingAccountService</interfacename>). The resulting
+	        object created off the back of the following bean definition can be injected into other
+	        client side objects, and the proxy will take care of forwarding the call to the
+	        server-side object via JMS.</para>
+	        <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+   <bean id="checkingAccountService"
+        class="org.springframework.jms.remoting.JmsInvokerProxyFactoryBean">
+      <property name="serviceInterface" value="com.foo.CheckingAccountService"/>
+      <property name="connectionFactory" ref="connectionFactory"/>
+      <property name="queue" ref="queue"/>
+   </bean>
+
+</beans>]]></programlisting>
+            <programlisting><![CDATA[package com.foo;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class Client {
+
+   public static void main(String[] args) throws Exception {
+      ApplicationContext ctx = new ClassPathXmlApplicationContext(
+               new String[]{"com/foo/client.xml", "com/foo/jms.xml"});
+      CheckingAccountService service = (CheckingAccountService) ctx.getBean("checkingAccountService");
+      service.cancelAccount(new Long(10));
+   }
+}]]></programlisting>
+	    </section>
+	    <para>You may also wish to investigate the support provided by the
+	    <ulink url="http://lingo.codehaus.org/">Lingo</ulink> project, which (to quote the
+	    homepage blurb) <quote><emphasis>... is a lightweight POJO based remoting and messaging library
+	    based on the Spring Framework's remoting libraries which extends it to support JMS.</emphasis></quote></para>
+	</section>
+
+	<section id="remoting-autodection-remote-interfaces">
         <title>Auto-detection is not implemented for remote interfaces</title>
         <para>
             The main reason why auto-detection of implemented interfaces does not occur for
