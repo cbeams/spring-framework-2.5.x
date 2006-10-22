@@ -76,7 +76,7 @@
 		<classname>DispatcherPortlet</classname> exposes the current locale in 
 		the same way as <classname>DispatcherServlet</classname>.</para>
 		
-		<section>		
+		<section id="portlet-introduction-controller">		
 		    <title>Controllers - The C in MVC</title>
 		    <para>The default handler is still a very simple
 		    <interfacename>Controller</interfacename> interface, offering just two 
@@ -96,7 +96,7 @@
 		    same as in the servlet framework.</para>
 		</section>
 		
-		<section>		
+		<section id="portlet-introduction-view">		
 		    <title>Views - The V in MVC</title>
 		    <para>All the view rendering capabilities of the servlet framework are 
 		    used directly via a special bridge servlet named 
@@ -107,7 +107,7 @@
 		    within the portlet.</para>
 		</section>
 
-		<section>		
+		<section id="portlet-introduction-scope">		
             <title>Web-scoped beans</title>
             <para>Spring Portlet MVC supports beans whose lifecycle is scoped to the
             current HTTP request or HTTP <interfacename>Session</interfacename> (both
@@ -192,8 +192,7 @@
 
 		<table frame="all">
 		
-			<title>Special beans in the 
-			<interfacename>WebApplicationContext</interfacename></title>
+			<title>Special beans in the <interfacename>WebApplicationContext</interfacename></title>
 
 			<tgroup cols="2">
 				<colspec colname="c1" colwidth="1*" align="left" />
@@ -288,7 +287,7 @@
 		by adding context parameters in the <literal>portlet.xml</literal> file or
 		portlet init-parameters. The possibilities are listed below.</para>
 
-		<table frame="all">
+		<table frame="all" id="portlet-dpp-init-params">
 
 			<title><classname>DispatcherPortlet</classname> initialization parameters</title>
 
@@ -472,7 +471,7 @@
 			<interfacename>ApplicationContext</interfacename> and control over 
 			caching.</para>
 
-			<table frame="all">
+			<table frame="all" id="portlet-ac-features">
 
 				<title>Features offered by the <classname>AbstractController</classname></title>
 
