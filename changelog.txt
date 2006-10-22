@@ -27,6 +27,12 @@ Package org.springframework.beans
 Package org.springframework.instrument
 * added GlassFishLoadTimeWeaver for GlassFish / Sun Application Server
 
+Package org.springframework.jms
+* DefaultMessageListenerContainer uses its bean name (if specified) as thread name prefix for its default TaskExecutor
+
+Package org.springframework.jmx
+* MBeanExporter uses ObjectName as exposed by returned ObjectInstance after registration (which differs on WebSphere)
+
 Package org.springframework.mock
 * MockHttpServletResponse handles HTTP header names as case-insensitive (analogous to MockHttpServletRequest)
 * unified mock object constructors that take ServletContext/PortletContext/PortalContext arguments
@@ -36,9 +42,13 @@ Package org.springframework.mock
 
 Package org.springframework.orm
 * fixed Hibernate3 LocalSessionFactoryBean's "schemaUpdate" behavior to not run into an IllegalStateException
+* LocalContainerEntityManagerFactoryBean detects jar file URL in WebLogic jar entry URLs correctly
 
 Package org.springframework.scheduling
+* TimerFactoryBean uses its bean name as Timer thread name (on JDK 1.5, falling back to a default Timer on JDK 1.3/1.4)
+* deprecated TimerFactoryBean's "createTimer(daemon)" method in favor of "createTimer(name, daemon)"
 * ScheduledExecutorFactoryBean does not insist on statically specified ScheduledExecutorTasks anymore
+* DelegatingWork/Job/TimerTask exposes the wrapped Runnable implementation through a "getDelegate()" method
 
 Package org.springframework.test
 * AbstractTransactionalSpringContextTests invokes "onTearDownAfterTransaction" even for a manually completed transaction
@@ -61,6 +71,7 @@ Package org.springframework.web
 * FreeMarkerView exposes all standard FreeMarker hash models now (including session and request parameters)
 * FreeMarkerView uses the ObjectWrapper as specified in the FreeMarker configuration, rather than always the default
 * FreeMarkerConfigurer always registers ClassTemplateLoader for its own package (rather than the package of a subclass)
+* AbstractJasperReportsSingleFormatView only sets parameter Map on JRExporter instance in case of actual parameters
 
 
 Changes in version 2.0 final (3.10.2006)
