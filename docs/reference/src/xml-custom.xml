@@ -165,7 +165,7 @@ public class MyNamespaceHandler extends NamespaceHandlerSupport {
 	</section>
 	<section id="extensible-xml-parser">
 		<title>Coding a <interfacename>BeanDefinitionParser</interfacename></title>
-		<para>A <interfacename>BeanDefinitionParser</interfacename> will be used if the attendant
+		<para>A <interfacename>BeanDefinitionParser</interfacename> will be used if the
 		<interfacename>NamespaceHandler</interfacename> encounters an XML element of the type
 		that has been mapped to the specific bean definition parser (which is <literal>'dateformat'</literal>
 		in this case). In other words, the <interfacename>BeanDefinitionParser</interfacename> is
@@ -248,7 +248,7 @@ public class SimpleDateFormatBeanDefinitionParser extends AbstractSingleBeanDefi
 			in the <literal>'org.springframework.samples.xml'</literal> package):</para>
 			<programlisting><![CDATA[http\://www.mycompany.com/schema/myns/myns.xsd=org/springframework/samples/xml/myns.xsd]]></programlisting>
 			<para>The upshot of this is that you are encouraged to deploy your XSD file(s) right alongside
-			the attendant <interfacename>NamespaceHandler</interfacename> and <interfacename>BeanDefinitionParser</interfacename>
+			the <interfacename>NamespaceHandler</interfacename> and <interfacename>BeanDefinitionParser</interfacename>
 			classes on the classpath.</para>
 		</section>
 	</section>

@@ -378,8 +378,8 @@ public class NotVeryUsefulAspect {
 	  to control when advice executes. <emphasis>Spring AOP only supports method execution
 	  join points for Spring beans</emphasis>, so you can think of a pointcut as matching
 	  the execution of methods on Spring beans. A pointcut declaration has two parts: a
-	  signature comprising a name and any parameters, and an attendant pointcut expression
-	  that actually determines exactly which method executions we are interested in. In the
+	  signature comprising a name and any parameters, and a pointcut expression
+	  that determines <emphasis>exactly</emphasis> which method executions we are interested in. In the
 	  @AspectJ annotation-style of AOP, a pointcut signature is provided by a regular method
 	  definition, and the pointcut expression is indicated using the
 	  <interfacename>@Pointcut</interfacename> annotation (the method serving as the pointcut
@@ -1712,17 +1712,12 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 	illustrates some around advice used in conjunction with a number of strongly typed
 	parameters.</para>
 	
-	<para>First off, the service interface and implementation of said interface that will
-	be being advised:</para>
-	
 	<programlisting><![CDATA[package x.y.service;
 
 public interface FooService {
 
    Foo getFoo(String fooName, int age);
 }
-
-]]><lineannotation>// the attendant implementation (defined in another file of course)</lineannotation><![CDATA[
 
 public class DefaultFooService implements FooService {
 
@@ -1731,7 +1726,7 @@ public class DefaultFooService implements FooService {
    }
 }]]></programlisting>
 
-    <para>Next up is the (admittedly simple) aspect. Notice the fact that the
+    <para>Next up is the aspect. Notice the fact that the
     <methodname>profile(..)</methodname> method accepts a number of strongly-typed parameters,
     the first of which happens to be the join point used to proceed with the method call: the
     presence of this parameter is an indication that the <methodname>profile(..)</methodname>

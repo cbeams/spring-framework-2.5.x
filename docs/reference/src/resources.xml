@@ -56,7 +56,7 @@
       <listitem>
         <para><methodname>getInputStream()</methodname>: locates and opens the
         resource, returning an <classname>InputStream</classname> for reading
-        from said resource. It is expected that each invocation returns a
+        from the resource. It is expected that each invocation returns a
         fresh <classname>InputStream</classname>. It is the responsibility of
         the caller to close the stream.</para>
       </listitem>

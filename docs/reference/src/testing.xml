@@ -90,7 +90,7 @@
 			Spring itself, but because the objects instantiated by the Spring
 			container will themselves take time to instantiate. For example, a
 			project with 50-100 Hibernate mapping files might take 10-20 seconds to
-			load said mapping files, and incurring that cost before running every
+			load the mapping files, and incurring that cost before running every
 			single test case in every single test fixture leads to slower overall test
 			runs that could (and probably will) reduce productivity.</para>
 			<para>To address this issue, the
@@ -142,8 +142,7 @@
 					does this class perform as anticipated?</para>
 				</listitem>
 			</itemizedlist>
-			<para>Let's look at the test class itself (we will look at the attendant configuration
-		    immediately afterwards).</para>
+			<para>Let's look at the test class itself (we will look at the configuration immediately afterwards).</para>
 			<programlisting><![CDATA[public class HibernateTitleDaoTests ]]><emphasis role="bold">extends AbstractDependencyInjectionSpringContextTests</emphasis><![CDATA[  {
 
     ]]><lineannotation>// this instance will be (automatically) dependency injected</lineannotation><![CDATA[    
@@ -167,7 +166,7 @@
     }
 
 }]]></programlisting>
-			<para>The attendant file referenced by the <literal>getConfigLocations()</literal> method
+			<para>The file referenced by the <literal>getConfigLocations()</literal> method
 			(<literal>'classpath:com/foo/daos.xml'</literal>) might look like so...</para>
 			<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC  "-//SPRING//DTD BEAN 2.0//EN"

@@ -716,7 +716,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             the appendix entitled <xref linkend="extensible-xml"/>).</para>
             <para>Find below an example of the <literal>&lt;meta/&gt;</literal> tag in the context
             of a surrounding <literal>&lt;bean/&gt;</literal> (please note that without any logic
-            to interpret it said metadata is effectively useless as-is).</para>
+            to interpret it the metadata is effectively useless as-is).</para>
             <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -741,7 +741,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         configuration files. If your favourite Java IDE or editor is not included in the
 		list of documented IDEs, then please do
         <ulink url="http://opensource.atlassian.com/projects/spring/secure/Dashboard.jspa">raise an issue</ulink>
-        and an example with said favorite IDE/editor <emphasis>may</emphasis> be included
+        and an example with your favorite IDE/editor <emphasis>may</emphasis> be included
 		in the next release.</para>
         <section id="xsd-config-setup-eclipse">
         <title>Setting up Eclipse</title>
@@ -759,8 +759,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 <title>Step One</title>
                 <para>Create a new XML file. You can name this file whatever you want. In the
                 example below, the file is named <literal>'context.xml'</literal>.
-                Copy and paste the following text into the file so that it matches
-                the attendant screenshot.</para>
+                Copy and paste the following text into the file so that it matches the screenshot.</para>
                 <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -866,7 +865,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <title>Step One</title>
                 <para>Create a new XML file (you can name this file whatever you want). In the
                 example below, the file is named <literal>'context.xml'</literal>. Copy and paste
-                the following text into the file so that it matches the attendant screenshot.</para>
+                the following text into the file so that it matches the screenshot.</para>
                 <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -915,8 +914,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <title>Step Three</title>
                 <para>If the external resource could not be fetched (maybe no active Internet
                 connection is available), you can manually configure the resource to
-                reference a local copy of the attendant XSD file. Simply open up
-                the <literal>'Settings'</literal> dialog
+                reference a local copy of the XSD file. Simply open up the <literal>'Settings'</literal> dialog
                 (using the <keycombo action='open'>
                     <keycap>Ctrl</keycap>
                     <keycap>A</keycap>

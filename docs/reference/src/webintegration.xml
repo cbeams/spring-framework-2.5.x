@@ -579,10 +579,8 @@ UserService userService = (UserService) appContext.getBean("userService");
 			<para>
 				This mechanism does work... having said that, it can be made a
 				lot less verbose by encapsulating most of the functionality in a
-				method in the base class for the page or component.	However, in
-				some respects it goes against the Inversion of Control approach
-				which Spring encourages, which is being used in other layers
-				of this application, in that ideally you would like the page to
+				method in the base class for the page or component. However, in
+				some respects it goes against the IoC principal; ideally you would like the page to
 				not have to ask the context for a specific bean by name, and in
 				fact, the page would ideally not know about the context at all.
 			</para>
@@ -726,7 +724,7 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
 					Now in the Java class definition for the page or component
 					itself, all we need to do is add an abstract getter method
 					for the properties we have defined (in order to be able to
-					access said properties).
+					access the properties).
 				</para>
 				<programlisting><![CDATA[// our UserService implementation; will come from page definition
 public abstract UserService getUserService();
@@ -980,9 +978,9 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
             Note that the Spring-WebWork integration code was developed (and continues
             to be maintained and improved) by the WebWork developers themselves, so in the
             first instance please do refer to the WebWork site and forums if you are having
-            issues with said integration. Having said that, do feel free to post comments and
-            queries regarding the Spring-WebWork integration on the
-            <ulink url="http://forum.springframework.org/forumdisplay.php?f=25">Spring support forums</ulink>
+            issues with the integration. Do feel free to post comments and queries regarding
+			the Spring-WebWork integration on the
+			<ulink url="http://forum.springframework.org/forumdisplay.php?f=25">Spring support forums</ulink>
             too.
         </para>
 	</section>

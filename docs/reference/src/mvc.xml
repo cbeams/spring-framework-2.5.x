@@ -508,7 +508,7 @@
     <para>The notion of a controller is part of the MVC design pattern (more specifically
     it is the <emphasis>'C'</emphasis> in MVC. Controllers provide access to the application
     behavior which is typically defined by a service interface. Controllers interpret user
-    input and transform said input into a sensible model which will be represented to the
+    input and transform such input into a sensible model which will be represented to the
     user by the view. Spring has implemented the notion of a controller in a very abstract
     way enabling a wide variety of different kinds of controllers to be created. Spring
     contains form-specific controllers, command-based controllers, and controllers
@@ -2739,13 +2739,9 @@ public class FileUploadBean {
             <para>The <classname>ModelMap</classname> class is an essentially glorified
             <interfacename>Map</interfacename> that can make adding objects that are
             to be displayed in (or on) a <interfacename>View</interfacename> adhere to
-            a common naming convention. The idea is simple so that rather than trying to
-            explain it in prose, I will show you some examples (and then do the prose bit
-            afterwards).</para>
-            <para>Consider the following <interfacename>Controller</interfacename>
-            implementation. Notice that objects are added to the
-            <classname>ModelAndView</classname> without any associated name
-            being specified.</para>
+            a common naming convention. Consider the following <interfacename>Controller</interfacename>
+            implementation; notice that objects are added to the <classname>ModelAndView</classname>
+			without any associated name being specified.</para>
             <programlisting><![CDATA[public class DisplayShoppingCartController implements Controller {
 
     public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) {
@@ -2845,13 +2841,12 @@ public class FileUploadBean {
             <title>The View - <interfacename>RequestToViewNameTranslator</interfacename></title>
             <para>The <interfacename>RequestToViewNameTranslator</interfacename> interface
             is responsible for determining a logical <interfacename>View</interfacename> name
-            when no such logical view name is explicitly supplied. It has but one implementation,
+            when no such logical view name is explicitly supplied. It has just one implementation,
             the rather cunningly named <classname>DefaultRequestToViewNameTranslator</classname>
             class.</para>
             <para>The <classname>DefaultRequestToViewNameTranslator</classname> maps request
             URLs to logical view names in a fashion that is probably best explained by recourse
-            to an example. Consider the following <interfacename>Controller</interfacename>
-            implementation, and the attendant Spring Web MVC XML configuration.</para>
+            to an example.</para>
             <programlisting><![CDATA[public class RegistrationController implements Controller {
                 
     public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) {

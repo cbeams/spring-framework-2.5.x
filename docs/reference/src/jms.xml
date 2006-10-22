@@ -527,7 +527,7 @@ public class ExampleListener implements MessageListener {
 		<programlisting><lineannotation>&lt;!-- this is the Message Driven POJO (MDP) --&gt;</lineannotation>
 <![CDATA[<bean id="messageListener" class="jmsexample.ExampleListener" />
 
-]]><lineannotation>&lt;!-- and this is the attendant message listener container --&gt;</lineannotation><![CDATA[
+]]><lineannotation>&lt;!-- and this is the message listener container --&gt;</lineannotation><![CDATA[
 <bean id="listenerContainer"
   class="org.springframework.jms.listener.DefaultMessageListenerContainer">
   <property name="concurrentConsumers" value="5"/>
@@ -613,7 +613,7 @@ public interface SessionAwareMessageListener {
     </constructor-arg>
 </bean>]]></emphasis>
 
-<lineannotation>&lt;!-- and this is the attendant message listener container... --&gt;</lineannotation><![CDATA[
+<lineannotation>&lt;!-- and this is the message listener container... --&gt;</lineannotation><![CDATA[
 <bean id="listenerContainer"
   class="org.springframework.jms.listener.DefaultMessageListenerContainer">
   <property name="concurrentConsumers" value="5"/>
@@ -654,7 +654,7 @@ public interface SessionAwareMessageListener {
         <para>Another of the capabilities of the <classname>MessageListenerAdapter</classname>
         class is the ability to automatically send back a response <interfacename>Message</interfacename>
         if a handler method returns a non-void value.</para>
-        <para>Consider the following interface and its attendant implementation:</para>
+        <para>Consider the following interface and it's implementation:</para>
         <programlisting><![CDATA[public interface ResponsiveTextMessageDelegate {
 
     ]]><lineannotation><emphasis role="bold">// notice the return type...</emphasis></lineannotation><![CDATA[

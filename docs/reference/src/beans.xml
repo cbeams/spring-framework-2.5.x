@@ -71,7 +71,7 @@
             responsible for containing and otherwise managing the aforementioned beans.</para>
             <para>The <interfacename>BeanFactory</interfacename> interface is the central IoC container
             interface in Spring. Its responsibilities include instantiating or sourcing application
-            objects, configuring said objects, and assembling the dependencies between these objects.</para>
+            objects, configuring such objects, and assembling the dependencies between these objects.</para>
 			<para>There are a number of implementations of the <interfacename>BeanFactory</interfacename>
 			interface that come supplied straight out-of-the-box with Spring. The most commonly used
 			<interfacename>BeanFactory</interfacename> implementation is the
@@ -103,7 +103,7 @@
 					application]</emphasis></quote>. This configuration metadata is typically supplied in a
 					simple and intuitive XML format. When using XML-based configuration metadata, you
 					write <emphasis>bean definitions</emphasis> for those beans that you want the
-					Spring IoC container to manage, and then let said container do its stuff.
+					Spring IoC container to manage, and then let the container do it's stuff.
 				</para>
 				<note>
 					<para>XML-based metadata is by far the most commonly used form of configuration
@@ -138,8 +138,8 @@
 				explicit user code is not required to instantiate one or more instances
 				of a Spring IoC container. For example, in a web application scenario, a simple
 				eight (or so) lines of absolutely boilerplate J2EE web descriptor XML in the
-				attendant <literal>web.xml</literal> file of the application will typically
-				suffice (see <xref linkend="context-create" />).</para>
+				<literal>web.xml</literal> file of the application will typically suffice
+				(see <xref linkend="context-create" />).</para>
 			</section>
             <para>At its most basic level, a Spring IoC container configuration consists of the
             definition of at least one bean that the container must manage, but typically there
@@ -839,8 +839,8 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 				collaborating bean is <emphasis>totally</emphasis> configured prior to being
 				passed (via one of the DI flavors) to the dependent bean.
 				This means that if bean A has a dependency on bean B, the Spring IoC container
-				will <emphasis>totally</emphasis> configure bean B prior to invoking (for example)
-				the attendant setter method on bean A; you can read '<emphasis>totally configure</emphasis>'
+				will <emphasis>totally</emphasis> configure bean B prior to invoking the setter method
+				on bean A; you can read '<emphasis>totally configure</emphasis>'
 				to mean that the bean will be instantiated (if not a pre-instantiated singleton),
 				all of its dependencies will be set, and the relevant lifecycle methods (such as
 				a <link linkend="beans-factory-lifecycle-initializingbean">configured init method</link>
@@ -1232,8 +1232,8 @@ public class ExampleBean {
                 <literal>&lt;property/&gt;</literal> or <literal>&lt;constructor-arg/&gt;</literal>
                 elements is used to define a so-called <firstterm>inner bean</firstterm>. An
                 inner bean definition does not need to have any id or name defined, and it is
-                best not to even specify any id or name value because said id or name value
-                will simply be ignored by the container.</para>
+                best not to even specify any id or name value because the id or name value
+                simply will be ignored by the container.</para>
                 <para>Find below an example of an inner bean.</para>
                 <programlisting><![CDATA[<bean id="outer" class="...">
   ]]><lineannotation>&lt;!-- instead of using a reference to a target bean, simply define the target bean inline --&gt;</lineannotation><![CDATA[
@@ -1357,8 +1357,7 @@ support=support@somecompany.co.uk]]></programlisting>
                     <para>Notice how the child <classname>Properties</classname> collection's
                     value set will have inherited all the property elements from the parent
                     <literal>&lt;props/&gt;</literal>. Notice also how the child's value for
-                    the <literal>support</literal> value overrides the attendant value in the
-                    parent collection.</para>
+                    the <literal>support</literal> value overrides the value in the parent collection.</para>
                     <para>This merging behavior applies similarly to the <literal>&lt;list/&gt;</literal>,
                     <literal>&lt;map/&gt;</literal>, and <literal>&lt;set/&gt;</literal> collection
                     types. In the specific case of the <literal>&lt;list/&gt;</literal> element, the
@@ -1393,8 +1392,7 @@ support=support@somecompany.co.uk]]></programlisting>
                     of Spring's type-conversion support such that the elements of your strongly-typed
                     <interfacename>Collection</interfacename> instances will be converted to the
                     appropriate type prior to being added to the <interfacename>Collection</interfacename>.</para>
-                    <para>An example will make this clear; consider the following class definition, and
-                    it's attendant (XML) configuration:</para>
+                    <para>Consider the following example::</para>
                     <programlisting><![CDATA[public class Foo {
                 
     private Map<String, Float> accounts;
@@ -1560,7 +1558,7 @@ support=support@somecompany.co.uk]]></programlisting>
             at startup. Pre-instantiation means that an <interfacename>ApplicationContext</interfacename>
             implementation instance will eagerly create and configure all of it's singleton beans
             as part of its initialization process. This is generally <emphasis>a good thing</emphasis>,
-            because it means that any errors in the configuration or in the attendant environment
+            because it means that any errors in the configuration or in the surrounding environment
             will be discovered immediately (as opposed to possibly hours or even days down the line).</para>
             <para>However, there are times when this behavior is <emphasis>not</emphasis> what is wanted.
             If you do not want a singleton bean to be pre-instantiated when using
@@ -1588,7 +1586,7 @@ support=support@somecompany.co.uk]]></programlisting>
             definition may be marked up as being lazy-initialized, if the lazy-initialized bean
             is the dependency of a singleton bean that is not lazy-initialized, when the
             <interfacename>ApplicationContext</interfacename> is eagerly pre-instantiating the
-            singleton, it will (of course) have to satisfy all of said singletons dependencies,
+            singleton, it will (of course) have to satisfy all of the singletons dependencies,
             one of which will be the lazy-initialized bean! So don't be confused if the IoC
             container creates one of the beans that you have explicitly configured as
             lazy-initialized at startup; all that means is that the lazy-initialized bean
@@ -2517,7 +2515,7 @@ beanFactory.registerScope("]]><emphasis role="bold">thread</emphasis><![CDATA[",
                 custom <interfacename>Scope</interfacename> like so:</para>
                 <programlisting>&lt;bean id="..." class="..." <emphasis role="bold">scope="thread"</emphasis>/&gt;</programlisting>
                 <para>If you have your own custom <interfacename>Scope</interfacename> implementation(s),
-                you are not just limited to only programmatic registration of said custom scope(s).
+                you are not just limited to only programmatic registration of the custom scope(s).
                 You can also do the <interfacename>Scope</interfacename> registration declaratively,
                 using the <classname>CustomScopeConfigurer</classname> class.</para>
                 <para>The declarative registration of custom <interfacename>Scope</interfacename>
@@ -2687,11 +2685,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         }
     }
 }]]></programlisting>
-            <para>
-                The attendant XML configuration for the above class, and making use of the
-                by-convention initialization callback method configuration, would look like
-                so:
-            </para>
             <programlisting><![CDATA[<beans ]]><emphasis role="bold">default-init-method="init"</emphasis><![CDATA[>
 
     <bean id="blogService" class="com.foo.DefaultBlogService">
@@ -3112,7 +3105,6 @@ public class InstantiationTracingBeanPostProcessor implements BeanPostProcessor 
         return bean;
     }
 }]]></programlisting>
-                <para>Here is the attendant XML-based configuration:</para>
                 <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -3792,10 +3784,9 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 			When it <emphasis>does</emphasis> exist, it'll separate the String using
 			predefined delimiters (comma, semi-colon and whitespace) and use the values as
 			locations where application contexts will be searched for. The
-			<classname>ContextLoaderServlet</classname> can - as said - be used
-			instead of the <classname>ContextLoaderListener</classname>. The servlet
-			will use the <literal>'contextConfigLocation'</literal> parameter just
-			as the listener does.</para>
+			<classname>ContextLoaderServlet</classname> can be used instead of the
+			<classname>ContextLoaderListener</classname>. The servlet will use the
+			<literal>'contextConfigLocation'</literal> parameter just as the listener does.</para>
         </section>
     </section>
     <section id="beans-glue-code-and-singletons">

@@ -242,7 +242,7 @@ public class JmxTestBean implements IJmxTestBean {
       <classname>MBeanExporter</classname> that is also configured for lazy
       initialization, then the <classname>MBeanExporter</classname> will
       <emphasis role="bold">not</emphasis> break this contract and will avoid
-      instantiating the attendant bean. Instead, it will register a proxy with
+      instantiating the bean. Instead, it will register a proxy with
       the <interfacename>MBeanServer</interfacename> and will defer obtaining the bean
       from the container until the first invocation on the proxy occurs.</para>
     </section>
@@ -647,9 +647,6 @@ public class AnnotationTestBean implements IJmxTestBean {
       classes used by Commons Attributes. However, this is only a one-off cost
       and JDK 5.0 annotations give you the added (and valuable) benefit of
       compile-time checking.</para>
-
-      <para>The attendant XML configuration for the above annotated class can
-      be found below.</para>
 
       <programlisting><![CDATA[<beans>
     <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
@@ -1596,7 +1593,7 @@ public class ConsoleLoggingNotificationListener
       access to a <classname>NotificationPublisher</classname> instance. The
       <classname>NotificationPublisherAware</classname> interface simply
       supplies an instance of a <classname>NotificationPublisher</classname>
-      to the implementing bean via a simple setter method, which said bean can
+      to the implementing bean via a simple setter method, which the bean can
       then use to publish <classname>Notifications</classname>.</para>
 
       <para>As stated in the Javadoc for the
@@ -1618,7 +1615,7 @@ public class ConsoleLoggingNotificationListener
       quite straightforward... one simply creates a JMX
       <classname>Notification</classname> instance (or an instance of an
       appropriate <classname>Notification</classname> subclass), populates
-      said notification with the data pertinent to the event that is to be
+      the notification with the data pertinent to the event that is to be
       published, and one then invokes the
       <literal>sendNotification(Notification)</literal> on the
       <classname>NotificationPublisher</classname> instance, passing in the
@@ -1660,12 +1657,11 @@ public class JmxTestBean implements IJmxTestBean, NotificationPublisherAware {
 }]]></programlisting>
 
       <para>The <classname>NotificationPublisher</classname> interface and the
-      attendant machinery to get it all working is one of the nicer features
-      of Spring's JMX support. It does however come with the price tag of
-      coupling your classes to both Spring and JMX; as always, the advice here
-      is to be pragmatic... if you need the functionality offered by the
-      <classname>NotificationPublisher</classname> and you can accept the
-      coupling to both Spring and JMX, then do so.</para>
+      machinery to get it all working is one of the nicer features of Spring's JMX support.
+	  It does however come with the price tag of coupling your classes to both Spring and JMX; as
+	  always, the advice here is to be pragmatic... if you need the functionality offered by the
+      <classname>NotificationPublisher</classname> and you can accept the coupling to both Spring
+	  and JMX, then do so.</para>
     </section>
   </section>
 

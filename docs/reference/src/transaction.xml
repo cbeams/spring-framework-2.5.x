@@ -438,8 +438,7 @@ xsi:schemaLocation="
             </listitem>
             <listitem>
                 <para>Spring enables declarative transaction management to be applied
-                to any class (and attendant instances of that class), not merely
-                special classes such as EJBs.</para>
+                to any class, not merely special classes such as EJBs.</para>
             </listitem>
             <listitem>
                 <para>Spring offers declarative <emphasis>rollback rules</emphasis>: a
@@ -534,10 +533,10 @@ xsi:schemaLocation="
 		</section>
         <section id="transaction-declarative-first-example">
             <title>A first example</title>
-            <para>Consider the following interface, and its attendant implementation.
-            The intent is to convey the concepts, and using the rote <classname>Foo</classname> and
+            <para>Consider the following interface, and it's attendant implementation.
+            (The intent is to convey the concepts, and using the rote <classname>Foo</classname> and
             <classname>Bar</classname> tropes means that you can concentrate on the transaction
-            usage and not have to worry about the domain model.</para>
+            usage and not have to worry about the domain model.)</para>
             <programlisting><lineannotation>&lt;!-- the service interface that we want to make transactional --&gt;</lineannotation><![CDATA[
             
 package x.y.service;
@@ -704,7 +703,7 @@ public class DefaultFooService implements FooService {
     }
 }]]></programlisting>
             <para>The output from running the above program will look something
-            like this. <emphasis>(Please note that the Log4J output and the attendant stacktrace
+            like this. <emphasis>(Please note that the Log4J output and the stacktrace
             from the <exceptionname>UnsupportedOperationException</exceptionname> thrown by the
             <methodname>insertFoo(..)</methodname> method of the
             <classname>DefaultFooService</classname> class have been truncated in
@@ -797,7 +796,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
             attribute values.</para>
             <para>By way of an example, let's assume that all of your service layer classes
             are defined in a root <literal>'x.y.service'</literal> package. To make all
-            beans that are instances of classes defined in said package (or in subpackages)
+            beans that are instances of classes defined in the package (or in subpackages)
             and that have names ending in <literal>'Service'</literal> have the default
             transactional semantics, you could write the following configuration:</para>
             <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -998,7 +997,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
             <title>Using <interfacename>@Transactional</interfacename></title>
 			<note>
 				<para>The functionality offered by the <interfacename>@Transactional</interfacename>
-				annotation and the attendant support classes is only available to you if you
+				annotation and the support classes is only available to you if you
 				are using at least Java 5 (Tiger).</para>
 			</note>
             <para>In addition to the XML-based declarative approach to transaction configuration,
@@ -1022,7 +1021,7 @@ public class DefaultFooService implements FooService {
 
     void updateFoo(Foo foo);
 }]]></programlisting>
-            <para>When the above POJO is defined as a bean in a Spring IoC container, said bean
+            <para>When the above POJO is defined as a bean in a Spring IoC container, the bean
             instance can be made transactional by adding merely <emphasis>one</emphasis> line of
             XML configuration, like so:</para>
             <programlisting><lineannotation>&lt;!-- from the file <literal>'context.xml'</literal> --&gt;</lineannotation><![CDATA[
@@ -1076,7 +1075,7 @@ public class DefaultFooService implements FooService {
             enough to actually turn on the transactional behavior - the
             <interfacename>@Transactional</interfacename> annotation <emphasis>is simply metadata</emphasis>
             that can be consumed by something that is <interfacename>@Transactional</interfacename>-aware
-            and that can use said metadata to configure the appropriate beans with transactional
+            and that can use the metadata to configure the appropriate beans with transactional
             behavior. In the case of the above example, it is the presence of the
             <literal>&lt;tx:annotation-driven/&gt;</literal> element that
             <emphasis>switches on</emphasis> the transactional behavior.</para>
@@ -1096,8 +1095,8 @@ public class DefaultFooService implements FooService {
                 <para>When using the <interfacename>@Transactional</interfacename> style of
                 declarative transaction demarcation you can control whether or not interface-
                 or class-based proxies are created via the presence and value of the
-                "<literal>proxy-target-class</literal>" attribute on the attendant
-                <literal>&lt;tx:annotation-driven/&gt;</literal> element. If the value
+                "<literal>proxy-target-class</literal>" attribute on the
+				<literal>&lt;tx:annotation-driven/&gt;</literal> element. If the value
                 of the boolean-style value of the "<literal>proxy-target-class</literal>"
                 attribute is set to "<literal>true</literal>", then class-based proxying will
                 be in effect (and this currently requires the presence of the CGLIB library
@@ -1313,7 +1312,6 @@ public class SimpleProfiler implements Ordered {
     }
 }
 ]]></programlisting>
-            <para>Here is the attendant configuration that will effect what we want.</para>
             <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

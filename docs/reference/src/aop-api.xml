@@ -867,7 +867,7 @@ public interface IntroductionInfo {
         </listitem>
         <listitem>
             <para><literal>frozen</literal>: if a proxy configuration is <literal>frozen</literal>,
-			then changes to said configuration are no longer allowed. This is useful both as
+			then changes to the configuration are no longer allowed. This is useful both as
 			a slight optimization and for those cases when you don't want callers to be able
 			to manipulate the proxy (via the <interfacename>Advised</interfacename> interface)
 			after the proxy has been created. The default value of this property is

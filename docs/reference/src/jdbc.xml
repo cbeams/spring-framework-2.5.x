@@ -573,8 +573,7 @@ public class RunAQuery {
 				this example an SQL statement is used that has place holders for row
 				parameters (most of the query and update methods have this
 				functionality). Note that the parameter values are passed in as an array of
-				objects (and this primitives have to be wrapped in the attendant wrapper
-				reference classes).
+				objects (and this primitives have to be wrapped in the primitive wrapper classes).
 			</para>
 			<programlisting><![CDATA[import javax.sql.DataSource;
 
@@ -777,7 +776,7 @@ public class ExecuteAnUpdate {
 			<para>
 				It must be stressed however that this is just a <emphasis>view</emphasis>...
 				if you feel that you are getting measurable value from using the RDBMS
-				operation classes, feel free to continue using said classes.
+				operation classes, feel free to continue using these classes.
 			</para>
 		</note>
 		<section id="jdbc-SqlQuery">

@@ -2,7 +2,7 @@
 <chapter id="cci">
   <title>JCA CCI</title>
 
-  <section>
+  <section id="cci-introduction">
     <title>Introduction</title>
 
     <para>J2EE provides a specification to standardize access to EIS: JCA
@@ -41,10 +41,10 @@
     </note>
   </section>
 
-  <section>
+  <section id="cci-config">
     <title>Configuring CCI</title>
 
-    <section>
+    <section id="cci-config-connector">
       <title>Connector configuration</title>
 
       <para>The base resource to use JCA CCI is the
@@ -84,7 +84,7 @@
 	  </note>
     </section>
 
-    <section>
+    <section id="cci-config-connectionfactory">
       <title><interfacename>ConnectionFactory</interfacename> configuration in Spring</title>
 
       <para>In order to make connections to the EIS, you need to obtain a
@@ -125,7 +125,7 @@
       </note>
     </section>
 
-    <section>
+    <section id="cci-config-cci-connections">
       <title>Configuring CCI connections</title>
 
       <para>JCA CCI allow the developer to configure the connections to the
@@ -180,7 +180,7 @@
 </bean>]]></programlisting>
     </section>
 
-    <section>
+    <section id="cci-config-single-connection">
       <title>Using a single CCI connection</title>
 
       <para>If you want to use a single CCI connection, Spring provides a further
@@ -219,7 +219,7 @@
     </section>
   </section>
 
-  <section>
+  <section id="cci-using">
     <title>Using Spring's CCI access support</title>
 
     <section id="cci-record-creator">
@@ -284,7 +284,7 @@
 }]]></programlisting>
     </section>
 
-    <section>
+    <section id="cci-using-template">
       <title>The <classname>CciTemplate</classname></title>
 
       <para>The <classname>CciTemplate</classname> is the central class of the core CCI support package
@@ -335,13 +335,13 @@
       <interfacename>Interaction</interfacename> interface.</para>
 
       <programlisting><![CDATA[public class CciTemplate implements CciOperations {
-  ...
+
   public Record execute(InteractionSpec spec, Record inputRecord)
       throws DataAccessException { ... }
 
   public void execute(InteractionSpec spec, Record inputRecord, Record outputRecord)
       throws DataAccessException { ... }
-  ...
+
 }]]></programlisting>
 
       <para>With the second approach, we need to specify the record creation
@@ -351,7 +351,7 @@
       following:</para>
 
       <programlisting><![CDATA[public class CciTemplate implements CciOperations {
-  ...
+
   public Record execute(InteractionSpec spec, RecordCreator inputCreator)
       throws DataAccessException { ... }
 
@@ -360,7 +360,7 @@
 
   public Object execute(InteractionSpec spec, RecordCreator creator, RecordExtractor extractor)
       throws DataAccessException { ... }
-  ...
+
 }]]></programlisting>
 
       <para>Unless the <literal>outputRecordCreator</literal> property is
@@ -381,15 +381,15 @@
       <literal>CciTemplate.execute(..)</literal> methods.</para>
 
       <programlisting><![CDATA[public class CciTemplate implements CciOperations {
-  ...
+
   public IndexedRecord createIndexedRecord(String name) throws DataAccessException { ... }
 
   public MappedRecord createMappedRecord(String name) throws DataAccessException { ... }
-  ...
+
 }]]></programlisting>
     </section>
 
-    <section>
+    <section id="cci-using-dao">
       <title>DAO support</title>
 
       <para>Spring's CCI support provides a abstract class for DAOs,
@@ -403,13 +403,13 @@
       it to concrete data access implementations in subclasses.</para>
 
       <programlisting><![CDATA[public abstract class CciDaoSupport {
-  ...
+
   public void setConnectionFactory(ConnectionFactory connectionFactory) { ... }
   public ConnectionFactory getConnectionFactory() { ... }
 
   public void setCciTemplate(CciTemplate cciTemplate) { ... }
   public CciTemplate getCciTemplate() { ... }
-  ...
+
 }]]></programlisting>
     </section>
 
@@ -417,7 +417,7 @@
       <title>Automatic output record generation</title>
 
       <para>If the connector used only supports the
-			<literal>Interaction.execute(..)</literal> method with input and output
+	  <methodname>Interaction.execute(..)</methodname> method with input and output
       records as parameters (that is, it requires the desired output record
       to be passed in instead of returning an appropriate output record),
       you can set the <literal>outputRecordCreator</literal> property of the
@@ -457,7 +457,7 @@
       <para>The following table summarizes the mechanisms of the
       <classname>CciTemplate</classname> class and the corresponding methods
       called on the CCI <interfacename>Interaction</interfacename> interface:<table
-          frame="all">
+          frame="all" id="cci-interaction-execute-methods">
           <title>Usage of <interfacename>Interaction</interfacename> execute methods</title>
 
           <tgroup cols="3">
@@ -578,7 +578,7 @@
         </table></para>
     </section>
 
-    <section>
+    <section id="cci-straight">
       <title>Using a CCI <interfacename>Connection</interfacename> and <interfacename>Interaction</interfacename> directly</title>
 
       <para><classname>CciTemplate</classname> also offers the possibility to
@@ -618,7 +618,7 @@
       </note>
     </section>
 
-    <section>
+    <section id="cci-template-example">
       <title>Example for <classname>CciTemplate</classname> usage</title>
 
       <para>In this section, the usage of the <classname>CciTemplate</classname>
@@ -671,7 +671,8 @@ interactionSpec.setInteractionVerb(ECIInteractionSpec.SYNC_SEND_RECEIVE);]]></pr
         new ConnectionCallback() {
           public Object doInConnection(Connection connection, ConnectionFactory factory)
               throws ResourceException {
-            ...
+              
+            ]]><lineannotation>// do something...</lineannotation><![CDATA[
           }
         });
     }
@@ -742,7 +743,7 @@ interactionSpec.setInteractionVerb(ECIInteractionSpec.SYNC_SEND_RECEIVE);]]></pr
     </section>
   </section>
 
-  <section>
+  <section id="cci-object">
     <title>Modeling CCI access as operation objects</title>
 
     <para>The <literal>org.springframework.jca.cci.object</literal> package
@@ -758,7 +759,7 @@ interactionSpec.setInteractionVerb(ECIInteractionSpec.SYNC_SEND_RECEIVE);]]></pr
      / <interfacename>RecordExtractor</interfacename> interfaces, reusing the machinery of
      Spring's core CCI support.</para>
 
-    <section>
+    <section id="cci-object-mapping-record">
       <title><classname>MappingRecordOperation</classname></title>
 
       <para><classname>MappingRecordOperation</classname> essentially performs the
@@ -802,7 +803,7 @@ interactionSpec.setInteractionVerb(ECIInteractionSpec.SYNC_SEND_RECEIVE);]]></pr
 }]]></programlisting>
 
       <para>As you can see, contrary to the <classname>CciTemplate</classname> class,
-			this <literal>execute</literal> method does not have an
+			this <methodname>execute(..)</methodname> method does not have an
 			<interfacename>InteractionSpec</interfacename> as argument. Instead, the
 			<interfacename>InteractionSpec</interfacename> is global to the operation.
 			The following constructor must be used to instantiate an operation
@@ -813,7 +814,7 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
 ...]]></programlisting>
     </section>
 
-    <section>
+    <section id="cci-object-mapping-comm-area">
       <title><classname>MappingCommAreaOperation</classname></title>
 
       <para>Some connectors use records based on a COMMAREA which represents
@@ -838,7 +839,7 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
 }]]></programlisting>
     </section>
 
-    <section>
+    <section id="cci-automatic-record-gen">
       <title>Automatic output record generation</title>
 
       <para>As every <classname>MappingRecordOperation</classname> subclass is
@@ -849,11 +850,13 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
 			see  the section entitled <xref linkend="automatic-output-generation"/>.</para>
     </section>
 
-    <section>
+    <section id="cci-object-summary">
       <title>Summary</title>
 
       <para>The operation object approach uses records in the same manner
-      as the <classname>CciTemplate</classname> class.<table frame="all">
+      as the <classname>CciTemplate</classname> class.</para>
+      
+      <table frame="all" id="cci-interaction-methods">
           <title>Usage of Interaction execute methods</title>
 
           <tgroup cols="3">
@@ -863,10 +866,10 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
                 signature</entry>
 
                 <entry align="center"><classname>MappingRecordOperation</classname>
-                outputRecordCreator property</entry>
+                <literal>outputRecordCreator</literal> property</entry>
 
                 <entry align="center">execute method called on the CCI
-                Interaction</entry>
+                <interfacename>Interaction</interfacename></entry>
               </row>
             </thead>
 
@@ -890,10 +893,10 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
               </row>
             </tbody>
           </tgroup>
-        </table></para>
+        </table>
     </section>
 
-    <section>
+    <section id="cci-objects-mappring-record-example">
       <title>Example for <classname>MappingRecordOperation</classname> usage</title>
 
       <para>In this section, the usage of the
@@ -1008,7 +1011,7 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
 </bean>]]></programlisting>
     </section>
 
-    <section>
+    <section id="cci-objects-mapping-comm-area-example">
       <title>Example for <classname>MappingCommAreaOperation</classname> usage</title>
 
       <para>In this section, the usage of the
@@ -1094,7 +1097,7 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
     </section>
   </section>
 
-  <section>
+  <section id="cci-tx">
     <title>Transactions</title>
 
     <para>JCA specifies several levels of transaction support for resource adapters.
@@ -1105,15 +1108,15 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
     IMS connector).</para>
 
     <programlisting><![CDATA[<connector>
-  ...
+
   <resourceadapter>
-    ...
-    <!-- transaction-support>NoTransaction</transaction-support -->
-    <!-- transaction-support>LocalTransaction</transaction-support -->
+
+    ]]><lineannotation>&lt;!-- &lt;transaction-support&gt;NoTransaction&lt;/transaction-support&gt; --&gt;</lineannotation><![CDATA[
+    ]]><lineannotation>&lt;!-- &lt;transaction-support&gt;LocalTransaction&lt;/transaction-support&gt; --&gt;</lineannotation><![CDATA[
     <transaction-support>XATransaction</transaction-support>
-    ...
+
   <resourceadapter>
-  ...
+
 <connector>]]></programlisting>
 
     <para>For global transactions, you can use Spring's generic transaction
@@ -1139,15 +1142,15 @@ MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnecti
 </bean>]]></programlisting>
 
 		<para>Both transaction strategies can be used with any of Spring's
-    transaction demarcation facilities, be it declarative or programmatic.
-    This is a consequence of Spring's generic
-    <interfacename>PlatformTransactionManager</interfacename> abstraction, which
+        transaction demarcation facilities, be it declarative or programmatic.
+        This is a consequence of Spring's generic
+        <interfacename>PlatformTransactionManager</interfacename> abstraction, which
 		decouples transaction demarcation from the actual execution strategy.
 		Simply switch between <classname>JtaTransactionManager</classname> and
 		<classname>CciLocalTransactionManager</classname> as needed, keeping
 		your transaction demarcation as-is.</para>
 
-    <para>For more information on Spring's transaction facilities, see the
+        <para>For more information on Spring's transaction facilities, see the
 		chapter entitled <xref linkend="transaction"/>.</para>
   </section>
 </chapter>

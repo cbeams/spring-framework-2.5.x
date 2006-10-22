@@ -74,7 +74,7 @@
 
       <para>It should be noted that although the underlying (and internal)
       implementation for singleton- and prototype-scoped beans has been
-      changed, said change is totally transparent to the end user... no
+      changed, this change is totally transparent to the end user... no
       existing configuration needs to change, and no existing configuration
       will break.</para>
 

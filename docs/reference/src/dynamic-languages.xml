@@ -364,7 +364,7 @@ class GroovyMessenger implements Messenger {
 				</para>
 				<para>
 		            It is important to understand that changes to a script will
-		            <emphasis>not</emphasis> trigger a refresh if said changes occur
+		            <emphasis>not</emphasis> trigger a refresh if the changes occur
 		            within the window of the <literal>'refresh-check-delay'</literal> value.
 		            It is equally important to understand that changes to the script are
 		            <emphasis>not</emphasis> actually 'picked up' until a method is called
@@ -551,9 +551,8 @@ class GroovyMessenger implements Messenger {
 	            <literal>'script-interfaces'</literal> attribute value of the
 	            <literal>&lt;lang:ruby&gt;</literal> element (this is why
 	            you <emphasis>must</emphasis> supply at least one interface in the value
-	            of said attribute, and (accordingly) program to interfaces when using
-	            JRuby-backed beans).
-			</para>
+	            of the attribute, and (accordingly) program to interfaces when using
+	            JRuby-backed beans).</para>
 			<para>
 	            Let's look at a fully working example of using a JRuby-based bean. Here is
 	            the JRuby implementation of the <interfacename>Messenger</interfacename>
@@ -694,9 +693,6 @@ class GroovyCalculator implements Calculator {
         x + y
     }
 }]]></programlisting>
-			<para>
-            And here is the attendant Spring configuration (XML).
-        </para>
 			<programlisting><lineannotation>&lt;-- from the file 'beans.xml' --&gt;</lineannotation><![CDATA[
 <beans>
     <lang:groovy id="calculator" script-source="classpath:calculator.groovy"/>
@@ -776,7 +772,7 @@ public class Main {
 	            <literal>'script-interfaces'</literal> attribute value of the
 	            <literal>&lt;lang:bsh&gt;</literal> element (this is why
 	            you <emphasis>must</emphasis> supply at least one interface in the value
-	            of said attribute, and (accordingly) program to interfaces when using
+	            of the attribute, and (accordingly) program to interfaces when using
 	            BeanShell-backed beans). This means that every method call on a BeanShell-backed
 	            object is going through the JDK dynamic proxy invocation mechanism.
 			</para>
@@ -850,7 +846,7 @@ void setMessage(String aMessage) {
 				allows you to change presentation layer logic by simply editing and saving
 				text files; any changes to such dynamic language source files will (depending
 				on the configuration) automatically be reflected in the beans that are backed
-	            by said dynamic language source files.
+	            by dynamic language source files.
 			</para>
 			<note>
 				<para>
@@ -892,8 +888,6 @@ public class FortuneController implements Controller {
     }
 
 }]]></programlisting>
-			<para>The attendant bean definition for the above <interfacename>Controller</interfacename>
-			might look like this:</para>
 			<programlisting><![CDATA[<lang:groovy id="fortune"
              refresh-check-delay="3000"
              script-source="/WEB-INF/groovy/FortuneController.groovy">
