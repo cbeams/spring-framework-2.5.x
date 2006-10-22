@@ -17,19 +17,18 @@
 package org.springframework.aop.framework;
 
 import java.util.Arrays;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Collections;
 
+import org.springframework.aop.SpringProxy;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Miscellaneous utilities for AOP proxy users and AOP proxy implementations.
  * Mainly for internal use within the framework.
  *
- * <p>See AopUtils for a collection of generic AOP utility methods
- * which do not depend on the AOP framework itself.
+ * <p>See {@link org.springframework.aop.support.AopUtils} for a collection of
+ * generic AOP utility methods which do not depend on the AOP framework itself.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -58,8 +57,8 @@ public abstract class AopProxyUtils {
 
 	/**
 	 * Get complete set of interfaces to proxy. This will always add the Advised interface
-	 * unless the AdvisedSupport's "opaque" flag is on. Always adds the {@link SpringProxy}
-	 * interface.
+	 * unless the AdvisedSupport's "opaque" flag is on. Always adds the
+	 * {@link org.springframework.aop.SpringProxy} interface.
 	 * @return the complete set of interfaces to proxy
 	 */
 	public static Class[] completeProxiedInterfaces(AdvisedSupport advised) {
@@ -128,16 +127,8 @@ public abstract class AopProxyUtils {
 		if (a == b) {
 			return true;
 		}
-		if (!equalsProxiedInterfaces(a, b)) {
-			return false;
-		}
-		if (!equalsAdvisors(a, b)) {
-			return false;
-		}
-		if (a.getTargetSource() == null) {
-			return (b.getTargetSource() == null);
-		}
-		return a.getTargetSource().equals(b.getTargetSource());
+		return equalsProxiedInterfaces(a, b) && equalsAdvisors(a, b) &&
+				ObjectUtils.nullSafeEquals(a.getTargetSource(), b.getTargetSource());
 	}
 
 	/**

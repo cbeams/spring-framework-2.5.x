@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.framework;
+package org.springframework.aop;
 
 /**
  * Marker interface implemented by all proxies. Used to detect

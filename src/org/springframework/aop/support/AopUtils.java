@@ -37,7 +37,7 @@ import org.springframework.aop.IntroductionAwareMethodMatcher;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
-import org.springframework.aop.framework.SpringProxy;
+import org.springframework.aop.SpringProxy;
 import org.springframework.core.OrderComparator;
 import org.springframework.util.ClassUtils;
 
@@ -59,23 +59,23 @@ public abstract class AopUtils {
 
 
 	/**
-	 * Return whether the given object is either a J2SE dynamic
-	 * proxy or a CGLIB proxy.
+	 * Return whether the given object is either a JDK dynamic proxy or a CGLIB proxy.
 	 * @param object the object to check
 	 * @see #isJdkDynamicProxy
 	 * @see #isCglibProxy
 	 */
 	public static boolean isAopProxy(Object object) {
-		return isJdkDynamicProxy(object) || isCglibProxy(object);
+		return (object instanceof SpringProxy &&
+				(Proxy.isProxyClass(object.getClass()) || isCglibProxyClass(object.getClass())));
 	}
 
 	/**
-	 * Return whether the given object is a J2SE dynamic proxy.
+	 * Return whether the given object is a JDK dynamic proxy.
 	 * @param object the object to check
 	 * @see java.lang.reflect.Proxy#isProxyClass
 	 */
 	public static boolean isJdkDynamicProxy(Object object) {
-		return (object != null && object instanceof SpringProxy && Proxy.isProxyClass(object.getClass()));
+		return (object instanceof SpringProxy && Proxy.isProxyClass(object.getClass()));
 	}
 
 	/**
@@ -83,9 +83,9 @@ public abstract class AopUtils {
 	 * @param object the object to check
 	 */
 	public static boolean isCglibProxy(Object object) {
-		return (object != null && object instanceof SpringProxy && isCglibProxyClass(object.getClass()));
+		return (object instanceof SpringProxy && isCglibProxyClass(object.getClass()));
 	}
-    
+
 	/**
 	 * Return whether the specified class is a CGLIB-generated class.
 	 * @param clazz the class to check
