@@ -37,6 +37,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.parsing.ComponentDefinition;
+import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.parsing.ParseState;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -79,8 +81,6 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String REF = "ref";
 
-	private static final String KIND = "kind";
-
 	private static final String BEFORE = "before";
 
 	private static final String DECLARE_PARENTS = "declare-parents";
@@ -92,10 +92,6 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private static final String IMPLEMENT_INTERFACE = "implement-interface";
 
 	private static final String AFTER = "after";
-
-	private static final String AFTER_RETURNING = "afterReturning";
-
-	private static final String AFTER_THROWING = "afterThrowing";
 
 	private static final String AFTER_RETURNING_ELEMENT = "after-returning";
 
@@ -140,6 +136,10 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		CompositeComponentDefinition compositeDef =
+				new CompositeComponentDefinition(element.getTagName(), parserContext.extractSource(element));
+		parserContext.setContainingComponent(compositeDef);
+
 		configureAutoProxyCreator(parserContext, element);
 
 		NodeList childNodes = element.getChildNodes();
@@ -159,6 +159,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			}
 		}
 
+		parserContext.setContainingComponent(null);
+		parserContext.registerComponent(compositeDef);
 		return null;
 	}
 
@@ -221,7 +223,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			BeanDefinition pointcutDefinition = parserContext.getRegistry().getBeanDefinition(pointcutBeanName);
 			componentDefinition = new AdvisorComponentDefinition(advisorBeanName, advisorDefinition, pointcutDefinition);
 		}
-		parserContext.getReaderContext().fireComponentRegistered(componentDefinition);
+		parserContext.registerComponent(componentDefinition);
 	}
 
 	/**
@@ -291,7 +293,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		BeanDefinition[] beanDefArray = (BeanDefinition[]) beanDefs.toArray(new BeanDefinition[beanDefs.size()]);
 		BeanReference[] beanRefArray = (BeanReference[]) beanRefs.toArray(new BeanReference[beanRefs.size()]);
 		Object source = parserContext.extractSource(aspectElement);
-		parserContext.getReaderContext().fireComponentRegistered(
+		parserContext.registerComponent(
 				new AspectComponentDefinition(aspectId, beanDefArray, beanRefArray, source));
 	}
 
@@ -470,11 +472,10 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			if (!StringUtils.hasText(id)) {
 				id = BeanDefinitionReaderUtils.generateBeanName(pointcutDefinition, registry);
 			}
-
 			registry.registerBeanDefinition(id, pointcutDefinition);
 
-			PointcutComponentDefinition componentDef = new PointcutComponentDefinition(id, pointcutDefinition, expression);
-			parserContext.getReaderContext().fireComponentRegistered(componentDef);
+			parserContext.registerComponent(
+					new PointcutComponentDefinition(id, pointcutDefinition, expression));
 		}
 		finally {
 			this.parseState.pop();
