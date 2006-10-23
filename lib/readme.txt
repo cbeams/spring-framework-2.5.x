@@ -302,7 +302,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's JPA support
 
 * jruby/jruby.jar
-- JRuby 0.8.3 (http://jruby.sourceforge.net)
+- JRuby 0.9.1 (http://jruby.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's JRuby support
 
