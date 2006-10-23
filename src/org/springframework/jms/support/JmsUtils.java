@@ -16,25 +16,30 @@
 
 package org.springframework.jms.support;
 
-import java.lang.reflect.Constructor;
-
 import javax.jms.Connection;
 import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.QueueRequestor;
 import javax.jms.Session;
-import javax.jms.TransactionInProgressException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.jms.InvalidClientIDException;
+import org.springframework.jms.InvalidDestinationException;
+import org.springframework.jms.InvalidSelectorException;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.JmsSecurityException;
+import org.springframework.jms.MessageEOFException;
+import org.springframework.jms.MessageFormatException;
+import org.springframework.jms.MessageNotReadableException;
+import org.springframework.jms.MessageNotWriteableException;
+import org.springframework.jms.ResourceAllocationException;
+import org.springframework.jms.TransactionInProgressException;
+import org.springframework.jms.TransactionRolledBackException;
 import org.springframework.jms.UncategorizedJmsException;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * Generic utility methods for working with JMS. Mainly for internal use
@@ -178,7 +183,7 @@ public abstract class JmsUtils {
 		try {
 			session.commit();
 		}
-		catch (TransactionInProgressException ex) {
+		catch (javax.jms.TransactionInProgressException ex) {
 			// Ignore -> can only happen in case of a JTA transaction.
 		}
 		catch (javax.jms.IllegalStateException ex) {
@@ -196,7 +201,7 @@ public abstract class JmsUtils {
 		try {
 			session.rollback();
 		}
-		catch (TransactionInProgressException ex) {
+		catch (javax.jms.TransactionInProgressException ex) {
 			// Ignore -> can only happen in case of a JTA transaction.
 		}
 		catch (javax.jms.IllegalStateException ex) {
@@ -209,39 +214,49 @@ public abstract class JmsUtils {
 	 * a Spring runtime {@link org.springframework.jms.JmsException JmsException}
 	 * equivalent.
 	 * @param ex the original checked JMSException to convert
-	 * @return the Spring runtime JmsException wrapping <code>ex</code>.
+	 * @return the Spring runtime JmsException wrapping the given exception
 	 */
 	public static JmsException convertJmsAccessException(JMSException ex) {
 		Assert.notNull(ex, "JMSException must not be null");
 
-		if (ex instanceof JMSSecurityException) {
-			return new JmsSecurityException((JMSSecurityException) ex);
+		if (ex instanceof javax.jms.IllegalStateException) {
+			return new org.springframework.jms.IllegalStateException((javax.jms.IllegalStateException) ex);
+		}
+		if (ex instanceof javax.jms.InvalidClientIDException) {
+			return new InvalidClientIDException((javax.jms.InvalidClientIDException) ex);
+		}
+		if (ex instanceof javax.jms.InvalidDestinationException) {
+			return new InvalidDestinationException((javax.jms.InvalidDestinationException) ex);
+		}
+		if (ex instanceof javax.jms.InvalidSelectorException) {
+			return new InvalidSelectorException((javax.jms.InvalidSelectorException) ex);
+		}
+		if (ex instanceof javax.jms.JMSSecurityException) {
+			return new JmsSecurityException((javax.jms.JMSSecurityException) ex);
+		}
+		if (ex instanceof javax.jms.MessageEOFException) {
+			return new MessageEOFException((javax.jms.MessageEOFException) ex);
+		}
+		if (ex instanceof javax.jms.MessageFormatException) {
+			return new MessageFormatException((javax.jms.MessageFormatException) ex);
+		}
+		if (ex instanceof javax.jms.MessageNotReadableException) {
+			return new MessageNotReadableException((javax.jms.MessageNotReadableException) ex);
+		}
+		if (ex instanceof javax.jms.MessageNotWriteableException) {
+			return new MessageNotWriteableException((javax.jms.MessageNotWriteableException) ex);
+		}
+		if (ex instanceof javax.jms.ResourceAllocationException) {
+			return new ResourceAllocationException((javax.jms.ResourceAllocationException) ex);
+		}
+		if (ex instanceof javax.jms.TransactionInProgressException) {
+			return new TransactionInProgressException((javax.jms.TransactionInProgressException) ex);
+		}
+		if (ex instanceof javax.jms.TransactionRolledBackException) {
+			return new TransactionRolledBackException((javax.jms.TransactionRolledBackException) ex);
 		}
 
-		if (JMSException.class.equals(ex.getClass().getSuperclass())) {
-			// All other exceptions in our Jms runtime exception hierarchy have the
-			// same unqualified names as their javax.jms counterparts, so just
-			// construct the converted exception dynamically based on name.
-			String shortName = ClassUtils.getShortName(ex.getClass());
-
-			// All JmsException subclasses reside in the same package.
-			String longName = JmsException.class.getPackage().getName() + "." + shortName;
-
-			try {
-				Class clazz = ClassUtils.forName(longName, JmsException.class.getClassLoader());
-				Constructor ctor = clazz.getConstructor(new Class[] {ex.getClass()});
-				Object counterpart = ctor.newInstance(new Object[] {ex});
-				return (JmsException) counterpart;
-			}
-			catch (Throwable ex2) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Couldn't resolve JmsException class [" + longName + "]", ex2);
-				}
-				return new UncategorizedJmsException(ex);
-			}
-		}
-
-		// Fallback: uncategorized exception.
+		// fallback
 		return new UncategorizedJmsException(ex);
 	}
 
