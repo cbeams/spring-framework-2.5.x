@@ -21,8 +21,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
 
 /**
- * Describes the logical view of a set of {@link BeanDefinition BeanDefinitions} and
- * {@link BeanReference BeanReferences} as presented in some configuration context.
+ * Interface that describes the logical view of a set of {@link BeanDefinition BeanDefinitions}
+ * and {@link BeanReference BeanReferences} as presented in some configuration context.
  *
  * <p>With the introduction of {@link org.springframework.beans.factory.xml.NamespaceHandler pluggable custom XML tags},
  * it is now possible for a single logical configuration entity, in this case an XML tag, to
@@ -69,12 +69,15 @@ import org.springframework.beans.factory.config.BeanReference;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
+ * @see AbstractComponentDefinition
+ * @see CompositeComponentDefinition
+ * @see BeanComponentDefinition
  * @see ReaderEventListener#componentRegistered(ComponentDefinition)
  */
 public interface ComponentDefinition extends BeanMetadataElement {
 
 	/**
-	 * Get the user visible name of this <code>ComponentDefinition</code>.
+	 * Get the user-visible name of this <code>ComponentDefinition</code>.
 	 * <p>This should link back directly to the corresponding configuration data
 	 * for this component in a given context.
 	 */

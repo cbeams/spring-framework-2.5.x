@@ -22,8 +22,8 @@ import java.lang.reflect.Method;
 import org.springframework.util.Assert;
 
 /**
- * Composite TransactionAttributeSource implementation that iterates over
- * a given array of TransactionAttributeSource instances.
+ * Composite {@link TransactionAttributeSource} implementation that iterates
+ * over a given array of {@link TransactionAttributeSource} instances.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -35,8 +35,7 @@ public class CompositeTransactionAttributeSource implements TransactionAttribute
 
 	/**
 	 * Create a new CompositeTransactionAttributeSource for the given sources.
-	 * @param transactionAttributeSources the TransactionAttributeSource instances
-	 * to combine
+	 * @param transactionAttributeSources the TransactionAttributeSource instances to combine
 	 */
 	public CompositeTransactionAttributeSource(TransactionAttributeSource[] transactionAttributeSources) {
 		Assert.notNull(transactionAttributeSources, "TransactionAttributeSource array must not be null");
@@ -48,7 +47,7 @@ public class CompositeTransactionAttributeSource implements TransactionAttribute
 	 * CompositeTransactionAttributeSource combines.
 	 */
 	public final TransactionAttributeSource[] getTransactionAttributeSources() {
-		return transactionAttributeSources;
+		return this.transactionAttributeSources;
 	}
 
 
