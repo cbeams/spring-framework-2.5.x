@@ -991,7 +991,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				Object result = (new RowMapperResultSetExtractor(rowMapper)).extractData(rsToUse);
 				returnedResults.put(param.getName(), result);
 			}
-			if (param.getRowCallbackHandler() != null) {
+			else if (param.getRowCallbackHandler() != null) {
 				RowCallbackHandler rch = param.getRowCallbackHandler();
 				(new RowCallbackHandlerResultSetExtractor(rch)).extractData(rsToUse);
 				returnedResults.put(param.getName(), "ResultSet returned from stored procedure was processed");
