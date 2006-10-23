@@ -42,6 +42,13 @@ public abstract class AbstractComponentDefinition implements ComponentDefinition
 	/**
 	 * Returns an empty array.
 	 */
+	public BeanDefinition[] getBeanDefinitions() {
+		return new BeanDefinition[0];
+	}
+
+	/**
+	 * Returns an empty array.
+	 */
 	public BeanDefinition[] getInnerBeanDefinitions() {
 		return new BeanDefinition[0];
 	}
