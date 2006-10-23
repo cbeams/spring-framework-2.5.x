@@ -754,19 +754,14 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param response current HTTP response
 	 * @throws Exception in case of any kind of processing failure
 	 */
-	protected void doDispatch(final HttpServletRequest request, HttpServletResponse response) throws Exception {
+	protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		HttpServletRequest processedRequest = request;
 		HandlerExecutionChain mappedHandler = null;
 		int interceptorIndex = -1;
 
-
 		// Expose current LocaleResolver and request as LocaleContext.
 		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
-		LocaleContextHolder.setLocaleContext(new LocaleContext() {
-			public Locale getLocale() {
-				return localeResolver.resolveLocale(request);
-			}
-		});
+		LocaleContextHolder.setLocaleContext(buildLocaleContext(request));
 
 		// Expose current RequestAttributes to current thread.
 		RequestAttributes previousRequestAttributes = RequestContextHolder.getRequestAttributes();
@@ -851,8 +846,8 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		finally {
 			// Clean up any resources used by a multipart request.
-			if (processedRequest instanceof MultipartHttpServletRequest && processedRequest != request) {
-				this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
+			if (processedRequest != request) {
+				cleanupMultipart(request);
 			}
 
 			// Reset thread-bound RequestAttributes.
@@ -897,10 +892,25 @@ public class DispatcherServlet extends FrameworkServlet {
 
 
 	/**
+	 * Build a LocaleContext for the given request, exposing the request's
+	 * primary locale as current locale.
+	 * @param request current HTTP request
+	 * @return the correspondign LocaleContext
+	 */
+	protected LocaleContext buildLocaleContext(final HttpServletRequest request) {
+		return new LocaleContext() {
+			public Locale getLocale() {
+				return localeResolver.resolveLocale(request);
+			}
+		};
+	}
+
+	/**
 	 * Convert the request into a multipart request, and make multipart resolver available.
 	 * If no multipart resolver is set, simply use the existing request.
 	 * @param request current HTTP request
 	 * @return the processed request (multipart wrapper if necessary)
+	 * @see MultipartResolver#resolveMultipart
 	 */
 	protected HttpServletRequest checkMultipart(HttpServletRequest request) throws MultipartException {
 		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
@@ -914,6 +924,17 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		// If not returned before: return original request.
 		return request;
+	}
+
+	/**
+	 * Clean up any resources used by the given multipart request (if any).
+	 * @param request current HTTP request
+	 * @see MultipartResolver#cleanupMultipart
+	 */
+	protected void cleanupMultipart(HttpServletRequest request) {
+		if (request instanceof MultipartHttpServletRequest) {
+			this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) request);
+		}
 	}
 
 	/**
