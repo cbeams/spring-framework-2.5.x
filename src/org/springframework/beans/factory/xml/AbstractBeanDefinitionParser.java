@@ -63,7 +63,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 		if (shouldFireEvents()) {
 			BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
 			postProcessComponentDefinition(componentDefinition);
-			parserContext.getReaderContext().fireComponentRegistered(componentDefinition);
+			parserContext.registerComponent(componentDefinition);
 		}
 		return definition;
 	}

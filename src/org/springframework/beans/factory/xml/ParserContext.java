@@ -17,6 +17,8 @@
 package org.springframework.beans.factory.xml;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.parsing.ComponentDefinition;
+import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 
 /**
@@ -29,11 +31,14 @@ public final class ParserContext {
 
 	private final BeanDefinitionParserDelegate delegate;
 
-	private final BeanDefinition containingBeanDefinition;
+	private BeanDefinition containingBeanDefinition;
+
+	private CompositeComponentDefinition containingComponent;
 
 
 	public ParserContext(XmlReaderContext readerContext, BeanDefinitionParserDelegate delegate) {
-		this(readerContext, delegate, null);
+		this.readerContext = readerContext;
+		this.delegate = delegate;
 	}
 
 	public ParserContext(XmlReaderContext readerContext, BeanDefinitionParserDelegate delegate,
@@ -61,12 +66,30 @@ public final class ParserContext {
 		return this.containingBeanDefinition;
 	}
 
+	public void setContainingComponent(CompositeComponentDefinition containingComponent) {
+		this.containingComponent = containingComponent;
+	}
+
+	public CompositeComponentDefinition getContainingComponent() {
+		return this.containingComponent;
+	}
+
 	public boolean isNested() {
 		return (getContainingBeanDefinition() != null);
 	}
 
 	public Object extractSource(Object sourceCandidate) {
 		return getReaderContext().extractSource(sourceCandidate);
+	}
+
+	public void registerComponent(ComponentDefinition component) {
+		CompositeComponentDefinition containingComponent = getContainingComponent();
+		if (containingComponent != null) {
+			containingComponent.addNestedComponent(component);
+		}
+		else {
+			getReaderContext().fireComponentRegistered(component);
+		}
 	}
 
 }

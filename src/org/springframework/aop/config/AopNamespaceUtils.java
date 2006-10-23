@@ -114,7 +114,7 @@ public abstract class AopNamespaceUtils {
 			// Notify of bean registration.
 			BeanComponentDefinition componentDefinition =
 					new BeanComponentDefinition(beanDefinition, AUTO_PROXY_CREATOR_BEAN_NAME);
-			parserContext.getReaderContext().fireComponentRegistered(componentDefinition);
+			parserContext.registerComponent(componentDefinition);
 		}
 	}
 
