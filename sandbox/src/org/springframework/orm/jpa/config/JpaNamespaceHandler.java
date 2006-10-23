@@ -78,7 +78,7 @@ public class JpaNamespaceHandler extends NamespaceHandlerSupport {
 			}
 
 			BeanDefinitionRegistry registry = parserContext.getRegistry();
-			BeanDefinition def = builder.getBeanDefinition();
+			AbstractBeanDefinition def = builder.getBeanDefinition();
 			String id = resolveId(def, parserContext, element);
 			registry.registerBeanDefinition(id, def);
 
@@ -102,10 +102,10 @@ public class JpaNamespaceHandler extends NamespaceHandlerSupport {
 			}
 		}
 
-		private String resolveId(BeanDefinition definition, ParserContext parserContext, Element element) {
+		private String resolveId(AbstractBeanDefinition definition, ParserContext parserContext, Element element) {
 			if (false) {
-				return BeanDefinitionReaderUtils.generateBeanName((AbstractBeanDefinition) definition,
-						parserContext.getRegistry(), parserContext.isNested());
+				return BeanDefinitionReaderUtils.generateBeanName(
+						definition, parserContext.getRegistry(), parserContext.isNested());
 			}
 			else {
 				return extractId(element);
