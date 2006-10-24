@@ -19,24 +19,21 @@ package org.springframework.transaction;
 import java.sql.Connection;
 
 /**
- * Defines Spring-compliant transaction properties.
- * 
- * <p>Based on the propagation behavior definitions analogous to EJB
- * CMT attributes.
+ * Interface that defines Spring-compliant transaction properties.
+ * Based on the propagation behavior definitions analogous to EJB CMT attributes.
  *
- * <p>Note that isolation level and timeout settings will not get applied
- * unless an actual new transaction gets started. As only
- * {@link #PROPAGATION_REQUIRED} and {@link #PROPAGATION_REQUIRES_NEW} can
- * cause that, it usually doesn't make sense to specify those settings in
- * all other cases. Furthermore, be aware that not all transaction managers
- * will support those advanced features and thus might throw corresponding
- * exceptions when given non-default values.
+ * <p>Note that isolation level and timeout settings will not get applied unless
+ * an actual new transaction gets started. As only {@link #PROPAGATION_REQUIRED},
+ * {@link #PROPAGATION_REQUIRES_NEW} and {@link #PROPAGATION_NESTED} can cause
+ * that, it usually doesn't make sense to specify those settings in other cases.
+ * Furthermore, be aware that not all transaction managers will support those
+ * advanced features and thus might throw corresponding exceptions when given
+ * non-default values.
  *
- * <p>The {@link #isReadOnly() read-only flag} applies to any transaction
- * context, whether backed by an actual resource transaction or operating
- * non-transactionally at the resource level. In the latter case, the flag
- * will only apply to managed resources within the application, such as a
- * Hibernate <code>Session</code>.
+ * <p>The {@link #isReadOnly() read-only flag} applies to any transaction context,
+ * whether backed by an actual resource transaction or operating non-transactionally
+ * at the resource level. In the latter case, the flag will only apply to managed
+ * resources within the application, such as a Hibernate <code>Session</code>.
  *
  * @author Juergen Hoeller
  * @since 08.05.2003
@@ -54,8 +51,8 @@ public interface TransactionDefinition {
 	int PROPAGATION_REQUIRED = 0;
 
 	/**
-	 * Support a current transaction, execute non-transactionally if no
-	 * current exists. Analogous to the EJB transaction attribute of the
+	 * Support a current transaction, execute non-transactionally if no current
+	 * transaction exists. Analogous to the EJB transaction attribute of the
 	 * same name.
 	 * <p>Note: For transaction managers with transaction synchronization,
 	 * <code>PROPAGATION_SUPPORTS</code> is slightly different from no
@@ -142,8 +139,8 @@ public interface TransactionDefinition {
 	int ISOLATION_READ_UNCOMMITTED = Connection.TRANSACTION_READ_UNCOMMITTED;
 
 	/**
-	 * Indicates that dirty reads are prevented; non-repeatable reads
-	 * and phantom reads can occur.
+	 * Indicates that dirty reads are prevented; non-repeatable reads and
+	 * phantom reads can occur.
 	 * <p>This level only prohibits a transaction from reading a row
 	 * with uncommitted changes in it.
 	 * @see java.sql.Connection#TRANSACTION_READ_COMMITTED
@@ -151,8 +148,8 @@ public interface TransactionDefinition {
 	int ISOLATION_READ_COMMITTED = Connection.TRANSACTION_READ_COMMITTED;
 
 	/**
-	 * Indicates that dirty reads and non-repeatable reads are
-	 * prevented; phantom reads can occur.
+	 * Indicates that dirty reads and non-repeatable reads are prevented;
+	 * phantom reads can occur.
 	 * <p>This level prohibits a transaction from reading a row with
 	 * uncommitted changes in it, and it also prohibits the situation
 	 * where one transaction reads a row, a second transaction alters
@@ -163,8 +160,8 @@ public interface TransactionDefinition {
 	int ISOLATION_REPEATABLE_READ = Connection.TRANSACTION_REPEATABLE_READ;
 
 	/**
-	 * Indicates that dirty reads, non-repeatable reads and phantom
-	 * reads are prevented.
+	 * Indicates that dirty reads, non-repeatable reads and phantom reads
+	 * are prevented.
 	 * <p>This level includes the prohibitions in
 	 * {@link #ISOLATION_REPEATABLE_READ} and further prohibits the
 	 * situation where one transaction reads all rows that satisfy a
