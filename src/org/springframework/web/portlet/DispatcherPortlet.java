@@ -236,6 +236,9 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	/** URL that points to the ViewRendererServlet */
 	private String viewRendererUrl = DEFAULT_VIEW_RENDERER_URL;
 
+	/** Expose LocaleContext and RequestAttributes as inheritable for child threads? */
+	private boolean threadContextInheritable = false;
+
 
 	/** MultipartResolver used by this servlet */
 	private PortletMultipartResolver multipartResolver;
@@ -303,6 +306,22 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 */
 	public void setViewRendererUrl(String viewRendererUrl) {
 		this.viewRendererUrl = viewRendererUrl;
+	}
+
+	/**
+	 * Set whether to expose the LocaleContext and RequestAttributes as inheritable
+	 * for child threads (using an {@link java.lang.InheritableThreadLocal}).
+	 * <p>Default is "false", to avoid side effects on spawned background threads.
+	 * Switch this to "true" to enable inheritance for custom child threads which
+	 * are spawned during request processing and only used for this request
+	 * (that is, ending after their initial task, without reuse of the thread).
+	 * <p><b>WARNING:</b> Do not use inheritance for child threads if you are
+	 * accessing a thread pool which is configured to potentially add new threads
+	 * on demand (e.g. a JDK {@link java.util.concurrent.ThreadPoolExecutor}),
+	 * since this will expose the inherited context to such a pooled thread.
+	 */
+	public void setThreadContextInheritable(boolean threadContextInheritable) {
+		this.threadContextInheritable = threadContextInheritable;
 	}
 
 
@@ -578,11 +597,12 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		int interceptorIndex = -1;
 
 		// Expose current Locale as LocaleContext.
-		LocaleContextHolder.setLocaleContext(new SimpleLocaleContext(request.getLocale()));
+		LocaleContextHolder.setLocaleContext(
+				new SimpleLocaleContext(request.getLocale()), this.threadContextInheritable);
 
 		// Expose current RequestAttributes to current thread.
 		PortletRequestAttributes requestAttributes = new PortletRequestAttributes(request);
-		RequestContextHolder.setRequestAttributes(requestAttributes);
+		RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Bound request context to thread: " + request);
@@ -643,10 +663,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 			// Reset thread-bound RequestAttributes.
 			requestAttributes.requestCompleted();
-			RequestContextHolder.setRequestAttributes(null);
+			RequestContextHolder.resetRequestAttributes();
 
 			// Reset thread-bound LocaleContext.
-			LocaleContextHolder.setLocaleContext(null);
+			LocaleContextHolder.resetLocaleContext();
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cleared thread-bound request context: " + request);

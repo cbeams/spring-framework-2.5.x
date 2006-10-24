@@ -272,6 +272,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** Perform cleanup of request attributes after include request? */
 	private boolean cleanupAfterInclude = true;
 
+	/** Expose LocaleContext and RequestAttributes as inheritable for child threads? */
+	private boolean threadContextInheritable = false;
+
 
 	/** MultipartResolver used by this servlet */
 	private MultipartResolver multipartResolver;
@@ -344,8 +347,8 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Set whether to perform cleanup of request attributes after an include request,
-	 * i.e. whether to reset the original state of all request attributes after the
-	 * DispatcherServlet has processed within an include request. Else, just the
+	 * that is, whether to reset the original state of all request attributes after
+	 * the DispatcherServlet has processed within an include request. Else, just the
 	 * DispatcherServlet's own request attributes will be reset, but not model
 	 * attributes for JSPs or special attributes set by views (for example, JSTL's).
 	 * <p>Default is "true", which is strongly recommended. Views should not rely on
@@ -357,6 +360,22 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	public void setCleanupAfterInclude(boolean cleanupAfterInclude) {
 		this.cleanupAfterInclude = cleanupAfterInclude;
+	}
+
+	/**
+	 * Set whether to expose the LocaleContext and RequestAttributes as inheritable
+	 * for child threads (using an {@link java.lang.InheritableThreadLocal}).
+	 * <p>Default is "false", to avoid side effects on spawned background threads.
+	 * Switch this to "true" to enable inheritance for custom child threads which
+	 * are spawned during request processing and only used for this request
+	 * (that is, ending after their initial task, without reuse of the thread).
+	 * <p><b>WARNING:</b> Do not use inheritance for child threads if you are
+	 * accessing a thread pool which is configured to potentially add new threads
+	 * on demand (e.g. a JDK {@link java.util.concurrent.ThreadPoolExecutor}),
+	 * since this will expose the inherited context to such a pooled thread.
+	 */
+	public void setThreadContextInheritable(boolean threadContextInheritable) {
+		this.threadContextInheritable = threadContextInheritable;
 	}
 
 
@@ -761,12 +780,12 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Expose current LocaleResolver and request as LocaleContext.
 		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
-		LocaleContextHolder.setLocaleContext(buildLocaleContext(request));
+		LocaleContextHolder.setLocaleContext(buildLocaleContext(request), this.threadContextInheritable);
 
 		// Expose current RequestAttributes to current thread.
 		RequestAttributes previousRequestAttributes = RequestContextHolder.getRequestAttributes();
 		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
-		RequestContextHolder.setRequestAttributes(requestAttributes);
+		RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Bound request context to thread: " + request);
@@ -814,7 +833,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 			catch (Exception ex) {
 				Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);
-				mv = processHandlerException(request, response, handler, ex);
+				mv = processHandlerException(processedRequest, response, handler, ex);
 			}
 
 			// Did the handler return a view to render?
@@ -847,15 +866,15 @@ public class DispatcherServlet extends FrameworkServlet {
 		finally {
 			// Clean up any resources used by a multipart request.
 			if (processedRequest != request) {
-				cleanupMultipart(request);
+				cleanupMultipart(processedRequest);
 			}
 
 			// Reset thread-bound RequestAttributes.
 			requestAttributes.requestCompleted();
-			RequestContextHolder.setRequestAttributes(previousRequestAttributes);
+			RequestContextHolder.setRequestAttributes(previousRequestAttributes, this.threadContextInheritable);
 
 			// Reset thread-bound LocaleContext.
-			LocaleContextHolder.setLocaleContext(previousLocaleContext);
+			LocaleContextHolder.setLocaleContext(previousLocaleContext, this.threadContextInheritable);
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cleared thread-bound request context: " + request);
