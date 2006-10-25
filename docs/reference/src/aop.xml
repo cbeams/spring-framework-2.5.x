@@ -1607,7 +1607,7 @@ public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 
     <aop:after-throwing 
       pointcut-ref="dataAccessOperation"
-      thowing="dataAccessEx" 
+      throwing="dataAccessEx" 
       method="doRecoveryActions"/>
           
     ...
