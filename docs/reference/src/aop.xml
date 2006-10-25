@@ -2215,7 +2215,7 @@ public @interface Idempotent {
     <programlisting><![CDATA[public class SimplePojo implements Pojo {
 
    public void foo() {
-      ]]><lineannotation>// this too is a <emphasis role="bold">direct</emphasis> method call on the 'this' reference</lineannotation><![CDATA[
+      ]]><lineannotation>// this is a <emphasis role="bold">direct</emphasis> method call on the 'this' reference</lineannotation><![CDATA[
       this.bar();
    }
    
@@ -2303,7 +2303,7 @@ public @interface Idempotent {
 }]]></programlisting>
     <para>This totally couples your code to Spring AOP, <emphasis>and</emphasis> it makes the class
     itself aware of the fact that it is being used in an AOP context, which flies in the face of AOP.
-    it also requires some additional configuration when the proxy is being created:</para>
+    It also requires some additional configuration when the proxy is being created:</para>
 	<programlisting><![CDATA[public class Main {
 
    public static void main(String[] args) {
