@@ -49,14 +49,13 @@ import org.springframework.test.annotation.AbstractAnnotationAwareTransactionalT
 import org.springframework.util.StringUtils;
 
 /**
- * Convenient support class for JPA-related tests.
- * Offers the same contract as AbstractTransactionalDataSourceSpringContextTests
- * and equally good performance, even when performing the instrumentation
- * required by the JPA specification.
+ * Convenient support class for JPA-related tests. Offers the same contract as
+ * AbstractTransactionalDataSourceSpringContextTests and equally good performance,
+ * even when performing the instrumentation required by the JPA specification.
  *
  * <p>Exposes an EntityManagerFactory and a shared EntityManager.
- * Requires EntityManagerFactory to be injected, plus DataSource and
- * JpaTransactionManager from superclass.
+ * Requires an EntityManagerFactory to be injected, plus the DataSource and
+ * JpaTransactionManager through the superclass.
  *
  * @author Rod Johnson
  * @author Rob Harrop
@@ -170,51 +169,52 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 				Thread.currentThread().setContextClassLoader(shadowingClassLoader);
 				String[] configLocations = getConfigLocations();
 
-				// Do not strongly type, to avoid ClassCastException
+				// Do not strongly type, to avoid ClassCastException.
 				Object cachedContext = contextCache.get(combinationOfContextLocationsForThisTestClass);
 
 				if (cachedContext == null) {
 
-					// create load time weaver
+					// Create the LoadTimeWeaver.
 					Class shadowingLoadTimeWeaverClass = shadowingClassLoader.loadClass(ShadowingLoadTimeWeaver.class.getName());
 					Constructor constructor = shadowingLoadTimeWeaverClass.getConstructor(ClassLoader.class);
 					constructor.setAccessible(true);
 					Object ltw = constructor.newInstance(shadowingClassLoader);
 
-					// create the bean factory
+					// Create the BeanFactory.
 					Class beanFactoryClass = shadowingClassLoader.loadClass(DefaultListableBeanFactory.class.getName());
 					Object beanFactory = BeanUtils.instantiateClass(beanFactoryClass);
 
-					// create the BeanDefinitionReader
+					// Create the BeanDefinitionReader.
 					Class beanDefinitionReaderClass = shadowingClassLoader.loadClass(XmlBeanDefinitionReader.class.getName());
 					Class beanDefinitionRegistryClass = shadowingClassLoader.loadClass(BeanDefinitionRegistry.class.getName());
 					Object reader = beanDefinitionReaderClass.getConstructor(beanDefinitionRegistryClass).newInstance(beanFactory);
 
-					// load the bean definitions into the bean factory
+					// Load the bean definitions into the BeanFactory.
 					Method loadBeanDefinitions = beanDefinitionReaderClass.getMethod("loadBeanDefinitions", String[].class);
 					loadBeanDefinitions.invoke(reader, new Object[]{configLocations});
 
-					// create BeanPostProcessor
+					// Create LoadTimeWeaver-injecting BeanPostProcessor.
 					Class loadTimeWeaverInjectingBeanPostProcessorClass = shadowingClassLoader.loadClass(LoadTimeWeaverInjectingBeanPostProcessor.class.getName());
 					Class loadTimeWeaverClass = shadowingClassLoader.loadClass(LoadTimeWeaver.class.getName());
 					Constructor bppConstructor = loadTimeWeaverInjectingBeanPostProcessorClass.getConstructor(loadTimeWeaverClass);
 					bppConstructor.setAccessible(true);
 					Object beanPostProcessor = bppConstructor.newInstance(ltw);
 
-					// add BeanPostProcessor
+					// Add LoadTimeWeaver-injecting BeanPostProcessor.
 					Class beanPostProcessorClass = shadowingClassLoader.loadClass(BeanPostProcessor.class.getName());
 					Method addBeanPostProcessor = beanFactoryClass.getMethod("addBeanPostProcessor", beanPostProcessorClass);
 					addBeanPostProcessor.invoke(beanFactory, beanPostProcessor);
 
-					// create the GenericApplicationContext
+					// Create the GenericApplicationContext.
 					Class genericApplicationContextClass = shadowingClassLoader.loadClass(GenericApplicationContext.class.getName());
 					Class defaultListableBeanFactoryClass = shadowingClassLoader.loadClass(DefaultListableBeanFactory.class.getName());
 					cachedContext = genericApplicationContextClass.getConstructor(defaultListableBeanFactoryClass).newInstance(beanFactory);
-					contextCache.put(combinationOfContextLocationsForThisTestClass, cachedContext);
 
-					// refresh
+					// Invoke the context's "refresh" method.
 					genericApplicationContextClass.getMethod("refresh").invoke(cachedContext);
 
+					// Store the context reference in the cache.
+					contextCache.put(combinationOfContextLocationsForThisTestClass, cachedContext);
 				}
 				// create the shadowed test
 				Class shadowedTestClass = shadowingClassLoader.loadClass(getClass().getName());
