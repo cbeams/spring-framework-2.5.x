@@ -768,7 +768,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * <p>This implementation accepts any JMS 1.1 Connection.
 	 * @param holder the JmsResourceHolder
 	 * @return an appropriate Connection fetched from the holder,
-	 *         or <code>null</code> if none found
+	 * or <code>null</code> if none found
 	 */
 	protected Connection getConnection(JmsResourceHolder holder) {
 		return holder.getConnection();
@@ -779,7 +779,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * <p>This implementation accepts any JMS 1.1 Session.
 	 * @param holder the JmsResourceHolder
 	 * @return an appropriate Session fetched from the holder,
-	 *         or <code>null</code> if none found
+	 * or <code>null</code> if none found
 	 */
 	protected Session getSession(JmsResourceHolder holder) {
 		return holder.getSession();
@@ -797,8 +797,8 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		// Only pass in the NoLocal flag in case of a Topic:
 		// Some JMS providers, such as WebSphere MQ 6.0, throw IllegalStateException
 		// in case of the NoLocal flag being specified for a Queue.
-		if (destination instanceof Topic) {
-			if (isSubscriptionDurable()) {
+		if (isPubSubDomain()) {
+			if (isSubscriptionDurable() && destination instanceof Topic) {
 				return session.createDurableSubscriber(
 						(Topic) destination, getDurableSubscriptionName(), getMessageSelector(), isPubSubNoLocal());
 			}
