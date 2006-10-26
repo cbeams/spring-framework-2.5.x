@@ -50,6 +50,8 @@ import org.springframework.util.CollectionUtils;
  */
 public class MockPortletRequest implements PortletRequest {
 
+	private boolean active = true;
+
 	private final PortalContext portalContext;
 
 	private final PortletContext portletContext;
@@ -124,7 +126,36 @@ public class MockPortletRequest implements PortletRequest {
 		this.locales.add(Locale.ENGLISH);
 	}
 
-	
+
+	//---------------------------------------------------------------------
+	// Lifecycle methods
+	//---------------------------------------------------------------------
+
+	/**
+	 * Return whether this request is still active (that is, not completed yet).
+	 */
+	public boolean isActive() {
+		return this.active;
+	}
+
+	/**
+	 * Mark this request as completed.
+	 */
+	public void close() {
+		this.active = false;
+	}
+
+	/**
+	 * Check whether this request is still active (that is, not completed yet),
+	 * throwing an IllegalStateException if not active anymore.
+	 */
+	protected void checkActive() throws IllegalStateException {
+		if (!this.active) {
+			throw new IllegalStateException("Request is not active anymore");
+		}
+	}
+
+
 	//---------------------------------------------------------------------
 	// PortletRequest methods
 	//---------------------------------------------------------------------
@@ -174,6 +205,7 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	public PortletSession getPortletSession(boolean create) {
+		checkActive();
 		// Reset session if invalidated.
 		if (this.session instanceof MockPortletSession && ((MockPortletSession) this.session).isInvalid()) {
 			this.session = null;
@@ -275,10 +307,12 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	public Object getAttribute(String name) {
+		checkActive();
 		return this.attributes.get(name);
 	}
 
 	public Enumeration getAttributeNames() {
+		checkActive();
 		return this.attributes.keys();
 	}
 
@@ -348,6 +382,7 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	public void setAttribute(String name, Object value) {
+		checkActive();
 		if (value != null) {
 			this.attributes.put(name, value);
 		}
@@ -357,6 +392,7 @@ public class MockPortletRequest implements PortletRequest {
 	}
 
 	public void removeAttribute(String name) {
+		checkActive();
 		this.attributes.remove(name);
 	}
 

@@ -90,6 +90,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public static final String DEFAULT_REMOTE_HOST = "localhost";
 
 
+	private boolean active = true;
+
+
 	//---------------------------------------------------------------------
 	// ServletRequest properties
 	//---------------------------------------------------------------------
@@ -227,14 +230,45 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 
 	//---------------------------------------------------------------------
+	// Lifecycle methods
+	//---------------------------------------------------------------------
+
+	/**
+	 * Return whether this request is still active (that is, not completed yet).
+	 */
+	public boolean isActive() {
+		return this.active;
+	}
+
+	/**
+	 * Mark this request as completed.
+	 */
+	public void close() {
+		this.active = false;
+	}
+
+	/**
+	 * Check whether this request is still active (that is, not completed yet),
+	 * throwing an IllegalStateException if not active anymore.
+	 */
+	protected void checkActive() throws IllegalStateException {
+		if (!this.active) {
+			throw new IllegalStateException("Request is not active anymore");
+		}
+	}
+
+
+	//---------------------------------------------------------------------
 	// ServletRequest interface
 	//---------------------------------------------------------------------
 
 	public Object getAttribute(String name) {
+		checkActive();
 		return this.attributes.get(name);
 	}
 
 	public Enumeration getAttributeNames() {
+		checkActive();
 		return this.attributes.keys();
 	}
 
@@ -406,6 +440,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public void setAttribute(String name, Object value) {
+		checkActive();
 		Assert.notNull(name, "Attribute name must not be null");
 		if (value != null) {
 			this.attributes.put(name, value);
@@ -416,6 +451,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public void removeAttribute(String name) {
+		checkActive();
 		Assert.notNull(name, "Attribute name must not be null");
 		this.attributes.remove(name);
 	}
@@ -662,7 +698,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getRequestedSessionId() {
-		HttpSession session = this.getSession();
+		HttpSession session = getSession();
 		return (session != null ? session.getId() : null);
 	}
 
@@ -698,6 +734,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public HttpSession getSession(boolean create) {
+		checkActive();
 		// Reset session if invalidated.
 		if (this.session instanceof MockHttpSession && ((MockHttpSession) this.session).isInvalid()) {
 			this.session = null;
