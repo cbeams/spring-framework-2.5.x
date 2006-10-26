@@ -59,7 +59,7 @@ public class MethodExclusionMBeanInfoAssembler extends AbstractConfigurableMBean
 
 	private Set ignoredMethods;
 
-	private Map ignoredMethodsMappings;
+	private Map ignoredMethodMappings;
 
 
 	/**
@@ -74,17 +74,17 @@ public class MethodExclusionMBeanInfoAssembler extends AbstractConfigurableMBean
 
 	/**
 	 * Set the mappings of bean keys to a comma-separated list of method names.
-	 * <p>The method names are <b>ignored</b> when creating the management interface.
+	 * <p>These method names are <b>ignored</b> when creating the management interface.
 	 * <p>The property key must match the bean key and the property value must match
 	 * the list of method names. When searching for method names to ignore for a bean,
 	 * Spring will check these mappings first.
 	 */
 	public void setIgnoredMethodMappings(Properties mappings) {
-		this.ignoredMethodsMappings = new HashMap();
+		this.ignoredMethodMappings = new HashMap();
 		for (Enumeration en = mappings.keys(); en.hasMoreElements();) {
 			String beanKey = (String) en.nextElement();
 			String[] methodNames = StringUtils.commaDelimitedListToStringArray(mappings.getProperty(beanKey));
-			this.ignoredMethodsMappings.put(beanKey, new HashSet(Arrays.asList(methodNames)));
+			this.ignoredMethodMappings.put(beanKey, new HashSet(Arrays.asList(methodNames)));
 		}
 	}
 
@@ -101,17 +101,24 @@ public class MethodExclusionMBeanInfoAssembler extends AbstractConfigurableMBean
 		return isNotIgnored(method, beanKey);
 	}
 
+	/**
+	 * Determine whether the given method is supposed to be included,
+	 * that is, not configured as to be ignored.
+	 * @param method the operation method
+	 * @param beanKey the key associated with the MBean in the beans map
+	 * of the <code>MBeanExporter</code>
+	 */
 	protected boolean isNotIgnored(Method method, String beanKey) {
-		boolean isNotIgnored = true;
-		if (this.ignoredMethodsMappings != null) {
-			Set methodNames = (Set) this.ignoredMethodsMappings.get(beanKey);
+		if (this.ignoredMethodMappings != null) {
+			Set methodNames = (Set) this.ignoredMethodMappings.get(beanKey);
 			if (methodNames != null) {
-				isNotIgnored = !methodNames.contains(method.getName());
+				return !methodNames.contains(method.getName());
 			}
-		} else if (this.ignoredMethods != null) {
-			isNotIgnored = !this.ignoredMethods.contains(method.getName());
 		}
-		return isNotIgnored;
+		if (this.ignoredMethods != null) {
+			return !this.ignoredMethods.contains(method.getName());
+		}
+		return true;
 	}
 
 }
