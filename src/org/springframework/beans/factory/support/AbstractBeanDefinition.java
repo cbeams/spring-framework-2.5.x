@@ -770,7 +770,10 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 
 	public boolean equals(Object other) {
-		if (!(other instanceof AbstractBeanDefinition) || !super.equals(other)) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof AbstractBeanDefinition)) {
 			return false;
 		}
 
@@ -801,17 +804,18 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 		if (!ObjectUtils.nullSafeEquals(this.source, that.source)) return false;
 		if (this.role != that.role) return false;
 
-		return true;
+		return super.equals(other);
 	}
 
 	public int hashCode() {
-		int result = ObjectUtils.nullSafeHashCode(this.beanClass);
-		result = 29 * result + ObjectUtils.nullSafeHashCode(this.scope);
-		result = 29 * result + ObjectUtils.nullSafeHashCode(this.constructorArgumentValues);
-		result = 29 * result + ObjectUtils.nullSafeHashCode(this.propertyValues);
-		result = 29 * result + ObjectUtils.nullSafeHashCode(this.factoryBeanName);
-		result = 29 * result + ObjectUtils.nullSafeHashCode(this.factoryMethodName);
-		return result;
+		int hashCode = ObjectUtils.nullSafeHashCode(this.beanClass);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.scope);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.constructorArgumentValues);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.propertyValues);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.factoryBeanName);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.factoryMethodName);
+		hashCode = 29 * hashCode + super.hashCode();
+		return hashCode;
 	}
 
 	public String toString() {
