@@ -26,6 +26,7 @@ import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.Topic;
 
@@ -186,7 +187,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	public void setDestination(Destination destination) {
 		Assert.notNull(destination, "destination must not be null");
 		this.destination = destination;
-		setPubSubDomain(destination instanceof Topic);
+		setPubSubDomain(destination instanceof Topic && !(destination instanceof Queue));
 	}
 
 	/**
