@@ -1,14 +1,38 @@
+/*
+ * Copyright 2002-2006 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.jmx.export.assembler;
+
+import org.springframework.jmx.JmxTestBean;
 
 import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
+import java.util.Properties;
+import java.lang.reflect.Method;
 
 /**
- * @author robh
+ * Unit tests for the {@link MethodExclusionMBeanInfoAssembler} class.
+ * 
+ * @author Rob Harrop
+ * @author Rick Evans
  */
-public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssemblerTests {
+public final class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssemblerTests {
 
-	protected static final String OBJECT_NAME = "bean:name=testBean5";
+	private static final String OBJECT_NAME = "bean:name=testBean5";
+
 
 	protected String getObjectName() {
 		return OBJECT_NAME;
@@ -28,6 +52,7 @@ public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssembler
 		return assembler;
 	}
 
+
 	public void testSupermanIsReadOnly() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute("Superman");
@@ -36,7 +61,24 @@ public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssembler
 		assertFalse(attr.isWritable());
 	}
 
+	/*
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2754
+	 */
+	public void testIsNotIgnoredDoesntIgnoreUnspecifiedBeanMethods() throws Exception {
+		final String beanKey = "myTestBean";	
+		MethodExclusionMBeanInfoAssembler assembler = new MethodExclusionMBeanInfoAssembler();
+		Properties ignored = new Properties();
+		ignored.setProperty(beanKey, "dontExposeMe,setSuperman");
+		assembler.setIgnoredMethodMappings(ignored);
+		Method method = JmxTestBean.class.getMethod("dontExposeMe", null);
+		assertFalse(assembler.isNotIgnored(method, beanKey));
+		// this bean does not have any ignored methods on it, so must obviously not be ignored...
+		assertTrue(assembler.isNotIgnored(method, "someOtherBeanKey"));
+	}
+
+
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/assembler/methodExclusionAssembler.xml";
 	}
+
 }
