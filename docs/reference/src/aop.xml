@@ -2275,15 +2275,13 @@ public @interface Idempotent {
 	<methodname>main(..)</methodname> of the <classname>Main</classname> class
 	<emphasis>has a reference to the proxy</emphasis>. This means that method calls on that object
 	reference will be calls on the proxy, and as such the proxy will be able to delegate to
-	all of the interceptors (advice) that are relevant to that particular method call.</para>
-	<para>However, once the call has finally reached the target object, the <classname>SimplePojo</classname>
+	all of the interceptors (advice) that are relevant to that particular method call.
+	However, once the call has finally reached the target object, the <classname>SimplePojo</classname>
 	reference in this case, any method calls that it may make on itself, such as
 	<methodname>this.bar()</methodname> or <methodname>this.foo()</methodname>, are going to be
 	invoked against the <emphasis><literal>this</literal></emphasis> reference, and <emphasis>not</emphasis>
-	the proxy.</para>
-	<para>This has important implications. It means that self-invocation is <emphasis>not</emphasis>
-	going to result in the advice associated with a method invocation getting a chance to execute.
-	This can (and has) taken some developers by surprise, hence this section in the documentation.</para>
+	the proxy. This has important implications. It means that self-invocation is <emphasis>not</emphasis>
+	going to result in the advice associated with a method invocation getting a chance to execute.</para>
 	<para>Okay, so what is to be done about this? The best approach (the term best is used loosely here)
 	is to refactor your code such that the self-invocation does not happen. For sure, this does entail
 	some work on your part, but it is the best, least-invasive approach. The next approach is
