@@ -309,7 +309,19 @@ public class ConstructorArgumentValues {
 	}
 
 	public int hashCode() {
-		return (this.genericArgumentValues.size() * 29 + this.indexedArgumentValues.size());
+		int hashCode = 7;
+		for (Iterator it = this.genericArgumentValues.iterator(); it.hasNext();) {
+			ValueHolder valueHolder = (ValueHolder) it.next();
+			hashCode = 31 * hashCode + valueHolder.contentHashCode();
+		}
+		hashCode = 29 * hashCode;
+		for (Iterator it = this.indexedArgumentValues.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			Integer key = (Integer) entry.getKey();
+			ValueHolder value = (ValueHolder) entry.getValue();
+			hashCode = 31 * hashCode + (value.contentHashCode() ^ key.hashCode());
+		}
+		return hashCode;
 	}
 
 
@@ -399,6 +411,16 @@ public class ConstructorArgumentValues {
 		private boolean contentEquals(ValueHolder other) {
 			return (this == other ||
 					(ObjectUtils.nullSafeEquals(this.value, other.value) && ObjectUtils.nullSafeEquals(this.type, other.type)));
+		}
+
+		/**
+		 * Determine whether the hash code of the content of this ValueHolder.
+		 * <p>Note that ValueHolder does not implement <code>hashCode</code>
+		 * directly, to allow for multiple ValueHolder instances with the
+		 * same content to reside in the same Set.
+		 */
+		private int contentHashCode() {
+			return ObjectUtils.nullSafeHashCode(this.value) * 29 + ObjectUtils.nullSafeHashCode(this.type);
 		}
 	}
 
