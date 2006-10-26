@@ -320,7 +320,7 @@
     Whether the upgrade is seamless or not depends on how much of the Spring APIs you are using in your
     code. Spring 2.0 removed pretty much all of the classes and methods previously marked as
     deprecated in the Spring 1.2.x codebase, so if you have been using such classes and methods, you
-    will of course have to use alternative classes and methods (some of which are summarised below).</para>
+    will of course have to use alternative classes and methods (some of which are summarized below).</para>
     
     <para>With regards to configuration, Spring 1.2.x style XML configuration is 100%,
     satisfaction-guaranteed compatible with the Spring 2.0 library. Of course if you are still using
@@ -331,7 +331,7 @@
     but nothing will blow up.</para>
     
     <para>The suggested migration strategy is to drop in the Spring 2.0 jar(s) to benefit from
-    the improved code present in the release (bug fixes, optimisations, etc.). You can then, on an
+    the improved code present in the release (bug fixes, optimizations, etc.). You can then, on an
     incremental basis, choose to start using the new Spring 2.0 features and configuration. For
     example, you could choose to start configuring just your aspects in the new Spring 2.0 style; it
     is perfectly valid to have 90% of your configuration using the old-school Spring 1.2.x configuration
@@ -353,7 +353,7 @@
         <section id="new-in-2-migrating-xml-configuration">
 		    <title>XML configuration</title>
 		    <para>Spring 2.0 ships with XSDs that describe Spring's XML metadata format in
-		    a much richer fashion than the DTD that shiiped with previous versions. The old DTD
+		    a much richer fashion than the DTD that shipped with previous versions. The old DTD
 		    is still fully supported, but if possible you are encouraged to reference the XSD
 		    files at the top of your bean definition files.</para>
 		    <para>One thing that has changed in a (somewhat) breaking fashion is the way that
@@ -369,7 +369,7 @@
 		    <literal>@deprecated</literal> have been removed from the Spring 2.0 codebase.
 		    The Spring team decided that the 2.0 release marked a fresh start of sorts, and that any
 		    deprecated 'cruft' was better excised now instead of continuing to haunt the codebase for
-		    the forseeable future.</para>
+		    the foreseeable future.</para>
             <para>As mentioned previously, for a comprehensive list of changes, consult the
             <filename>'changelog.txt'</filename> file that is located in the top level directory of
             the Spring Framework 2.0 distribution.</para>
@@ -411,7 +411,7 @@
 
     <para>The Spring Framework distribution also ships with a number of so-called
     <emphasis>showcase</emphasis> applications. Each showcase application provides
-    fully working examples, focussed on demonstrating exactly one new Spring 2.0 feature
+    fully working examples, focused on demonstrating exactly one new Spring 2.0 feature
     at a time. The idea is that you can take the code in these showcases and experiment
     with it, as opposed to having to create your own small project to test out each new
     Spring 2.0 feature. Please be advised that the scope of these showcase applications is
