@@ -29,10 +29,11 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see #requestCompleted
+ * @see #requestCompleted()
  */
 public abstract class AbstractRequestAttributes implements RequestAttributes {
 
+	/** Map from attribute name String to destruction callback Runnable */
 	protected final Map requestDestructionCallbacks = CollectionFactory.createLinkedMapIfPossible(8);
 
 
@@ -67,13 +68,14 @@ public abstract class AbstractRequestAttributes implements RequestAttributes {
 	}
 
 	/**
-	 * Execute all callback that haven been registered for execution
+	 * Execute all callbacks that have been registered for execution
 	 * after request completion.
 	 */
 	private void executeRequestDestructionCallbacks() {
 		for (Iterator it = this.requestDestructionCallbacks.values().iterator(); it.hasNext();) {
 			((Runnable) it.next()).run();
 		}
+		this.requestDestructionCallbacks.clear();
 	}
 
 	/**
