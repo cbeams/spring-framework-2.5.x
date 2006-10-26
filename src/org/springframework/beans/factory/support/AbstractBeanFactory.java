@@ -119,7 +119,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	/** Map from alias to canonical bean name */
 	private final Map aliasMap = new HashMap();
 
-	/** Map from ChildBeanDefinition to merged RootBeanDefinition */
+	/** Map from bean name to merged RootBeanDefinition */
 	private final Map mergedBeanDefinitions = new HashMap();
 
 	/** Names of beans that have already been created at least once */
@@ -816,7 +816,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			throws BeanDefinitionStoreException {
 
 		synchronized (this.mergedBeanDefinitions) {
-			RootBeanDefinition mbd = (RootBeanDefinition) this.mergedBeanDefinitions.get(bd);
+			RootBeanDefinition mbd = (RootBeanDefinition) this.mergedBeanDefinitions.get(beanName);
 			if (mbd == null) {
 
 				if (bd instanceof RootBeanDefinition) {
@@ -862,7 +862,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 				// Only cache the merged bean definition if we're already about to create an
 				// instance of the bean, or at least have already created an instance before.
 				if (isCacheBeanMetadata() && this.alreadyCreated.contains(beanName)) {
-					this.mergedBeanDefinitions.put(bd, mbd);
+					this.mergedBeanDefinitions.put(beanName, mbd);
 				}
 			}
 
