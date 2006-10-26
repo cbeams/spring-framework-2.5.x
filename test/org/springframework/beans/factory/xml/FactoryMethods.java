@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,9 +26,14 @@ import org.springframework.beans.TestBean;
  * factory methods, rather than constructors.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class FactoryMethods {
 	
+	public static FactoryMethods nullInstance() {
+		return null;
+	}
+
 	public static FactoryMethods defaultInstance() {
 		TestBean tb = new TestBean();
 		tb.setName("defaultInstance");
@@ -106,7 +111,7 @@ public class FactoryMethods {
 	}
 	
 	/**
-	 * Set via Setter Injection once instance is created
+	 * Set via Setter Injection once instance is created.
 	 */
 	public void setName(String name) {
 		this.name = name;

@@ -23,6 +23,14 @@
 		<constructor-arg><ref local="juergen"/></constructor-arg>
 	</bean>
 
+	<bean id="null" class="org.springframework.beans.factory.xml.FactoryMethods"
+			factory-method="nullInstance"/>
+
+	<bean id="nullWithProperty" class="org.springframework.beans.factory.xml.FactoryMethods"
+			factory-method="nullInstance" init-method="getName" scope="prototype">
+		<property name="stringValue"><value>setterString</value></property>
+	</bean>
+
 	<bean id="full" class="org.springframework.beans.factory.xml.FactoryMethods"
 			factory-method="newInstance">
 		<constructor-arg index="0"><ref local="juergen"/></constructor-arg>
