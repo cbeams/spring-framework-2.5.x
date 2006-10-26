@@ -84,6 +84,7 @@ public class BeanWrapperGenericsTests extends TestCase {
 		gb.setShortMap(new HashMap<Short,Integer>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("shortMap[4]", "5");
+		assertEquals(new Integer(5), bw.getPropertyValue("shortMap[4]"));
 		assertEquals(new Integer(5), gb.getShortMap().get(new Short("4")));
 	}
 
@@ -141,6 +142,7 @@ public class BeanWrapperGenericsTests extends TestCase {
 		gb.setListOfLists(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfLists[0][0]", new Integer(5));
+		assertEquals(new Integer(5), bw.getPropertyValue("listOfLists[0][0]"));
 		assertEquals(new Integer(5), gb.getListOfLists().get(0).get(0));
 	}
 
@@ -151,6 +153,7 @@ public class BeanWrapperGenericsTests extends TestCase {
 		gb.setListOfLists(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfLists[0][0]", "5");
+		assertEquals(new Integer(5), bw.getPropertyValue("listOfLists[0][0]"));
 		assertEquals(new Integer(5), gb.getListOfLists().get(0).get(0));
 	}
 
@@ -161,6 +164,7 @@ public class BeanWrapperGenericsTests extends TestCase {
 		gb.setListOfMaps(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfMaps[0][10]", new Long(5));
+		assertEquals(new Long(5), bw.getPropertyValue("listOfMaps[0][10]"));
 		assertEquals(new Long(5), gb.getListOfMaps().get(0).get(10));
 	}
 
@@ -171,6 +175,7 @@ public class BeanWrapperGenericsTests extends TestCase {
 		gb.setListOfMaps(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfMaps[0][10]", "5");
+		assertEquals(new Long(5), bw.getPropertyValue("listOfMaps[0][10]"));
 		assertEquals(new Long(5), gb.getListOfMaps().get(0).get(10));
 	}
 
@@ -181,6 +186,7 @@ public class BeanWrapperGenericsTests extends TestCase {
 		gb.setMapOfMaps(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfMaps[mykey][10]", new Long(5));
+		assertEquals(new Long(5), bw.getPropertyValue("mapOfMaps[mykey][10]"));
 		assertEquals(new Long(5), gb.getMapOfMaps().get("mykey").get(10));
 	}
 
@@ -191,27 +197,30 @@ public class BeanWrapperGenericsTests extends TestCase {
 		gb.setMapOfMaps(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfMaps[mykey][10]", "5");
+		assertEquals(new Long(5), bw.getPropertyValue("mapOfMaps[mykey][10]"));
 		assertEquals(new Long(5), gb.getMapOfMaps().get("mykey").get(10));
 	}
 
 	public void testGenericMapOfLists() throws MalformedURLException {
 		GenericBean gb = new GenericBean();
-		Map<String, List<Integer>> map = new HashMap<String, List<Integer>>();
-		map.put("mykey", new LinkedList<Integer>());
+		Map<Integer, List<Integer>> map = new HashMap<Integer, List<Integer>>();
+		map.put(new Integer(1), new LinkedList<Integer>());
 		gb.setMapOfLists(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
-		bw.setPropertyValue("mapOfLists[mykey][0]", new Integer(5));
-		assertEquals(new Integer(5), gb.getMapOfLists().get("mykey").get(0));
+		bw.setPropertyValue("mapOfLists[1][0]", new Integer(5));
+		assertEquals(new Integer(5), bw.getPropertyValue("mapOfLists[1][0]"));
+		assertEquals(new Integer(5), gb.getMapOfLists().get(new Integer(1)).get(0));
 	}
 
 	public void testGenericMapOfListsWithElementConversion() throws MalformedURLException {
 		GenericBean gb = new GenericBean();
-		Map<String, List<Integer>> map = new HashMap<String, List<Integer>>();
-		map.put("mykey", new LinkedList<Integer>());
+		Map<Integer, List<Integer>> map = new HashMap<Integer, List<Integer>>();
+		map.put(new Integer(1), new LinkedList<Integer>());
 		gb.setMapOfLists(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
-		bw.setPropertyValue("mapOfLists[mykey][0]", "5");
-		assertEquals(new Integer(5), gb.getMapOfLists().get("mykey").get(0));
+		bw.setPropertyValue("mapOfLists[1][0]", "5");
+		assertEquals(new Integer(5), bw.getPropertyValue("mapOfLists[1][0]"));
+		assertEquals(new Integer(5), gb.getMapOfLists().get(new Integer(1)).get(0));
 	}
 
 }

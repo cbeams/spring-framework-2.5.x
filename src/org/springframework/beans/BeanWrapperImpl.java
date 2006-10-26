@@ -557,8 +557,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						Map map = (Map) value;
 						Class mapKeyType = null;
 						if (JdkVersion.isAtLeastJava15()) {
-							mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(
-									pd.getReadMethod(), tokens.keys.length);
+							mapKeyType = GenericCollectionTypeResolver.getMapKeyReturnType(pd.getReadMethod(), i + 1);
 						}
 						// IMPORTANT: Do not pass full property name in here - property editors
 						// must not kick in for map keys but rather only for map values.
