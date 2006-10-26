@@ -39,6 +39,7 @@ public class BeanDefinitionTests extends TestCase {
 		otherBd.setScope("request");
 		assertTrue(bd.equals(otherBd));
 		assertTrue(otherBd.equals(bd));
+		assertTrue(bd.hashCode() == otherBd.hashCode());
 	}
 
 	public void testBeanDefinitionEqualityWithPropertyValues() {
@@ -55,6 +56,7 @@ public class BeanDefinitionTests extends TestCase {
 		otherBd.getPropertyValues().addPropertyValue("age", "99");
 		assertTrue(bd.equals(otherBd));
 		assertTrue(otherBd.equals(bd));
+		assertTrue(bd.hashCode() == otherBd.hashCode());
 	}
 
 	public void testBeanDefinitionEqualityWithConstructorArguments() {
@@ -71,6 +73,7 @@ public class BeanDefinitionTests extends TestCase {
 		otherBd.getConstructorArgumentValues().addIndexedArgumentValue(1, new Integer(5));
 		assertTrue(bd.equals(otherBd));
 		assertTrue(otherBd.equals(bd));
+		assertTrue(bd.hashCode() == otherBd.hashCode());
 	}
 
 	public void testBeanDefinitionEqualityWithTypedConstructorArguments() {
@@ -88,6 +91,7 @@ public class BeanDefinitionTests extends TestCase {
 		otherBd.getConstructorArgumentValues().addIndexedArgumentValue(1, new Integer(5), "long");
 		assertTrue(bd.equals(otherBd));
 		assertTrue(otherBd.equals(bd));
+		assertTrue(bd.hashCode() == otherBd.hashCode());
 	}
 
 	public void testBeanDefinitionHolderEquality() {
@@ -105,6 +109,7 @@ public class BeanDefinitionTests extends TestCase {
 		BeanDefinitionHolder otherHolder = new BeanDefinitionHolder(bd, "bd");
 		assertTrue(holder.equals(otherHolder));
 		assertTrue(otherHolder.equals(holder));
+		assertTrue(holder.hashCode() == otherHolder.hashCode());
 	}
 
 }
