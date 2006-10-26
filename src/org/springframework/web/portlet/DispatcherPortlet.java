@@ -592,10 +592,6 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			logger.debug("DispatcherPortlet with name '" + getPortletName() + "' received action request");
 		}
 
-		ActionRequest processedRequest = request;
-		HandlerExecutionChain mappedHandler = null;
-		int interceptorIndex = -1;
-
 		// Expose current Locale as LocaleContext.
 		LocaleContextHolder.setLocaleContext(
 				new SimpleLocaleContext(request.getLocale()), this.threadContextInheritable);
@@ -605,8 +601,12 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Bound request context to thread: " + request);
+			logger.debug("Bound action request context to thread: " + request);
 		}
+
+		ActionRequest processedRequest = request;
+		HandlerExecutionChain mappedHandler = null;
+		int interceptorIndex = -1;
 
 		try {
 			processedRequest = checkMultipart(request);
@@ -669,7 +669,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			LocaleContextHolder.resetLocaleContext();
 
 			if (logger.isDebugEnabled()) {
-				logger.debug("Cleared thread-bound request context: " + request);
+				logger.debug("Cleared thread-bound action request context: " + request);
 			}
 		}
 	}
@@ -688,12 +688,21 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			logger.debug("DispatcherPortlet with name '" + getPortletName() + "' received render request");
 		}
 
+		// Expose current Locale as LocaleContext.
+		LocaleContextHolder.setLocaleContext(
+				new SimpleLocaleContext(request.getLocale()), this.threadContextInheritable);
+
+		// Expose current RequestAttributes to current thread.
+		PortletRequestAttributes requestAttributes = new PortletRequestAttributes(request);
+		RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Bound render request context to thread: " + request);
+		}
+
 		RenderRequest processedRequest = request;
 		HandlerExecutionChain mappedHandler = null;
 		int interceptorIndex = -1;
-
-		// Expose current Locale as LocaleContext.
-		LocaleContextHolder.setLocaleContext(new SimpleLocaleContext(request.getLocale()));
 
 		try {
 			ModelAndView mv = null;
@@ -782,8 +791,16 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		}
 
 		finally {
+			// Reset thread-bound RequestAttributes.
+			requestAttributes.requestCompleted();
+			RequestContextHolder.resetRequestAttributes();
+
 			// Reset thread-bound LocaleContext.
-			LocaleContextHolder.setLocaleContext(null);
+			LocaleContextHolder.resetLocaleContext();
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Cleared thread-bound render request context: " + request);
+			}
 		}
 	}
 
