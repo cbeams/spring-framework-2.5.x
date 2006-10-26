@@ -16,16 +16,15 @@
 
 package org.springframework.jmx.export.assembler;
 
+import java.lang.reflect.Method;
+import java.util.Properties;
+
+import javax.management.modelmbean.ModelMBeanAttributeInfo;
+import javax.management.modelmbean.ModelMBeanInfo;
+
 import org.springframework.jmx.JmxTestBean;
 
-import javax.management.modelmbean.ModelMBeanInfo;
-import javax.management.modelmbean.ModelMBeanAttributeInfo;
-import java.util.Properties;
-import java.lang.reflect.Method;
-
 /**
- * Unit tests for the {@link MethodExclusionMBeanInfoAssembler} class.
- * 
  * @author Rob Harrop
  * @author Rick Evans
  */
@@ -46,12 +45,15 @@ public final class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAss
 		return 4;
 	}
 
+	protected String getApplicationContextPath() {
+		return "org/springframework/jmx/export/assembler/methodExclusionAssembler.xml";
+	}
+
 	protected MBeanInfoAssembler getAssembler() {
 		MethodExclusionMBeanInfoAssembler assembler = new MethodExclusionMBeanInfoAssembler();
 		assembler.setIgnoredMethods(new String[] {"dontExposeMe", "setSuperman"});
 		return assembler;
 	}
-
 
 	public void testSupermanIsReadOnly() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
@@ -74,11 +76,6 @@ public final class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAss
 		assertFalse(assembler.isNotIgnored(method, beanKey));
 		// this bean does not have any ignored methods on it, so must obviously not be ignored...
 		assertTrue(assembler.isNotIgnored(method, "someOtherBeanKey"));
-	}
-
-
-	protected String getApplicationContextPath() {
-		return "org/springframework/jmx/export/assembler/methodExclusionAssembler.xml";
 	}
 
 }
