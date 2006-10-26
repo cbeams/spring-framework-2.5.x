@@ -105,7 +105,6 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 */
 	protected void addSingleton(String beanName, Object sharedBean) {
 		Assert.hasText(beanName, "Bean name must not be empty");
-		Assert.notNull(sharedBean, "Singleton object must not be null");
 		synchronized (this.singletonCache) {
 			this.singletonCache.put(beanName, sharedBean);
 		}

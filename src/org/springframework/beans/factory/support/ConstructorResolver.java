@@ -281,10 +281,7 @@ abstract class ConstructorResolver {
 		Object beanInstance = this.instantiationStrategy.instantiate(
 				mergedBeanDefinition, beanName, this.beanFactory, factoryBean, factoryMethodToUse, argsToUse);
 		if (beanInstance == null) {
-			throw new BeanCreationException(
-					mergedBeanDefinition.getResourceDescription(), beanName,
-					"Factory method '" + mergedBeanDefinition.getFactoryMethodName() + "' on class [" +
-					factoryClass.getName() + "] returned null");
+			return null;
 		}
 
 		bw.setWrappedInstance(beanInstance);

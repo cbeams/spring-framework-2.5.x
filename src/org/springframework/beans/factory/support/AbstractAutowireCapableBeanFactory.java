@@ -380,7 +380,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (instanceWrapper == null) {
 				instanceWrapper = createBeanInstance(beanName, mergedBeanDefinition, args);
 			}
-			Object bean = instanceWrapper.getWrappedInstance();
+			Object bean = (instanceWrapper != null ? instanceWrapper.getWrappedInstance() : null);
 
 			// Eagerly cache singletons to be able to resolve circular references
 			// even when triggered by lifecycle interfaces like BeanFactoryAware.
@@ -395,8 +395,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// Initialize the bean instance.
 			errorMessage = "Initialization of bean failed";
 
-			// Give any InstantiationAwareBeanPostProcessors the opportunity to modify the state
-			// of the bean before properties are set. This can be used, for example,
+			// Give any InstantiationAwareBeanPostProcessors the opportunity to modify the
+			// state of the bean before properties are set. This can be used, for example,
 			// to support styles of field injection.
 			boolean continueWithPropertyPopulation = true;
 
@@ -695,6 +695,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeansException {
 
 		PropertyValues pvs = mergedBeanDefinition.getPropertyValues();
+
+		if (bw == null) {
+			if (!pvs.isEmpty()) {
+				throw new BeanCreationException(beanName, "Cannot apply property values to null instance");
+			}
+			else {
+				// Skip property population phase for null instance.
+				return;
+			}
+		}
 
 		if (mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_NAME ||
 				mergedBeanDefinition.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
