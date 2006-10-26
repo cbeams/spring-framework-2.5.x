@@ -29,6 +29,7 @@ import org.springframework.test.AssertThrows;
 
 /**
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
 public final class ServletRequestAttributesTests extends TestCase {
 
@@ -66,12 +67,37 @@ public final class ServletRequestAttributesTests extends TestCase {
 		assertSame(VALUE, value);
 	}
 
+	public void testSetRequestScopedAttributeAfterCompletion() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
+		request.close();
+		try {
+			attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_REQUEST);
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
+	}
+
 	public void testSetSessionScopedAttribute() throws Exception {
 		MockHttpSession session = new MockHttpSession();
 		session.setAttribute(KEY, VALUE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
+		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_SESSION);
+		Object value = session.getAttribute(KEY);
+		assertSame(VALUE, value);
+	}
+
+	public void testSetSessionScopedAttributeAfterCompletion() throws Exception {
+		MockHttpSession session = new MockHttpSession();
+		session.setAttribute(KEY, VALUE);
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setSession(session);
+		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
+		request.close();
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_SESSION);
 		Object value = session.getAttribute(KEY);
 		assertSame(VALUE, value);
@@ -88,11 +114,23 @@ public final class ServletRequestAttributesTests extends TestCase {
 		assertSame(VALUE, value);
 	}
 
+	public void testSetGlobalSessionScopedAttributeAfterCompletion() throws Exception {
+		MockHttpSession session = new MockHttpSession();
+		session.setAttribute(KEY, VALUE);
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setSession(session);
+		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
+		request.close();
+		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_GLOBAL_SESSION);
+		Object value = session.getAttribute(KEY);
+		assertSame(VALUE, value);
+	}
+
 	public void testGetSessionScopedAttributeDoesNotForceCreationOfSession() throws Exception {
 		MockControl mockRequest = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) mockRequest.getMock();
 		request.getSession(false);
-		mockRequest.setReturnValue(null);
+		mockRequest.setReturnValue(null, 2);
 		mockRequest.replay();
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
@@ -117,7 +155,7 @@ public final class ServletRequestAttributesTests extends TestCase {
 		MockControl mockRequest = MockControl.createControl(HttpServletRequest.class);
 		HttpServletRequest request = (HttpServletRequest) mockRequest.getMock();
 		request.getSession(false);
-		mockRequest.setReturnValue(null);
+		mockRequest.setReturnValue(null, 2);
 		mockRequest.replay();
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);

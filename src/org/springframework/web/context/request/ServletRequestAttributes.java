@@ -62,6 +62,8 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	private final HttpServletRequest request;
 
+	private HttpSession session;
+
 	private final Map sessionAttributesToUpdate = new HashMap();
 
 
@@ -72,14 +74,55 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	public ServletRequestAttributes(HttpServletRequest request) {
 		Assert.notNull(request, "Request must not be null");
 		this.request = request;
+		// Fetch existing session reference early, to have it available even
+		// after request completion (for example, in a custom child thread).
+		this.session = request.getSession(false);
+	}
+
+
+	/**
+	 * Exposes the {@link HttpServletRequest} that we're wrapping.
+	 */
+	protected final HttpServletRequest getRequest() {
+		return this.request;
 	}
 
 	/**
-	 * Exposes the {@link HttpServletRequest} that we're wrapping to
-	 * subclasses.
+	 * Exposes the {@link HttpSession} that we're wrapping.
+	 * @param allowCreate whether to allow creation of a new session if none exists yet
 	 */
-	protected final HttpServletRequest getRequest() {
-		return request;
+	protected final HttpSession getSession(boolean allowCreate) {
+		try {
+			this.session = this.request.getSession(allowCreate);
+			return this.session;
+		}
+		catch (IllegalStateException ex) {
+			// Couldn't access session... let's check why.
+			if (this.session == null) {
+				// No matter what happened - we cannot offer a session.
+				throw ex;
+			}
+			// We have a fallback session reference...
+			// Let's see whether it is appropriate to return it.
+			if (allowCreate) {
+				boolean canAskForExistingSession = false;
+				try {
+					this.session = this.request.getSession(false);
+					canAskForExistingSession = true;
+				}
+				catch (IllegalStateException ex2) {
+				}
+				if (canAskForExistingSession) {
+					// Could ask for existing session, hence the IllegalStateException
+					// came from trying to create a new session too late -> rethrow.
+					throw ex;
+				}
+			}
+			// Else: Could not even ask for existing session, hence we assume that
+			// the request has been completed and the session is accessed later on
+			// (for example, in a custom child thread).
+			return this.session;
+		}
 	}
 
 
@@ -88,7 +131,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 			return this.request.getAttribute(name);
 		}
 		else {
-			HttpSession session = this.request.getSession(false);
+			HttpSession session = getSession(false);
 			if (session != null) {
 				Object value = session.getAttribute(name);
 				if (value != null) {
@@ -107,7 +150,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 			this.request.setAttribute(name, value);
 		}
 		else {
-			HttpSession session = this.request.getSession(true);
+			HttpSession session = getSession(true);
 			session.setAttribute(name, value);
 			this.sessionAttributesToUpdate.remove(name);
 		}
@@ -119,7 +162,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 			removeRequestDestructionCallback(name);
 		}
 		else {
-			HttpSession session = this.request.getSession(false);
+			HttpSession session = getSession(false);
 			if (session != null) {
 				session.removeAttribute(name);
 				this.sessionAttributesToUpdate.remove(name);
@@ -139,11 +182,11 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	}
 
 	public String getSessionId() {
-		return this.request.getSession().getId();
+		return getSession(true).getId();
 	}
 
 	public Object getSessionMutex() {
-		return WebUtils.getSessionMutex(this.request.getSession());
+		return WebUtils.getSessionMutex(getSession(true));
 	}
 
 
@@ -152,7 +195,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 * calls, explicitly indicating to the container that they might have been modified.
 	 */
 	protected void updateAccessedSessionAttributes() {
-		HttpSession session = this.request.getSession(false);
+		HttpSession session = getSession(false);
 		if (session != null) {
 			for (Iterator it = this.sessionAttributesToUpdate.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
@@ -174,7 +217,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 */
 	private void registerSessionDestructionCallback(String name, Runnable callback) {
 		if (bindingListenerAvailable) {
-			HttpSession session = this.request.getSession();
+			HttpSession session = getSession(true);
 			session.setAttribute(DESTRUCTION_CALLBACK_NAME_PREFIX + name,
 					new DestructionCallbackBindingListener(callback));
 		}

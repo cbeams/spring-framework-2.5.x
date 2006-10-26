@@ -68,12 +68,37 @@ public final class PortletRequestAttributesTests extends TestCase {
 		assertSame(VALUE, value);
 	}
 
+	public void testSetRequestScopedAttributeAfterCompletion() throws Exception {
+		MockPortletRequest request = new MockPortletRequest();
+		PortletRequestAttributes attrs = new PortletRequestAttributes(request);
+		request.close();
+		try {
+			attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_REQUEST);
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
+	}
+
 	public void testSetSessionScopedAttribute() throws Exception {
 		MockPortletSession session = new MockPortletSession();
 		session.setAttribute(KEY, VALUE);
 		MockPortletRequest request = new MockPortletRequest();
 		request.setSession(session);
 		PortletRequestAttributes attrs = new PortletRequestAttributes(request);
+		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_SESSION);
+		Object value = session.getAttribute(KEY);
+		assertSame(VALUE, value);
+	}
+
+	public void testSetSessionScopedAttributeAfterCompletion() throws Exception {
+		MockPortletSession session = new MockPortletSession();
+		session.setAttribute(KEY, VALUE);
+		MockPortletRequest request = new MockPortletRequest();
+		request.setSession(session);
+		PortletRequestAttributes attrs = new PortletRequestAttributes(request);
+		request.close();
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_SESSION);
 		Object value = session.getAttribute(KEY);
 		assertSame(VALUE, value);
@@ -90,11 +115,23 @@ public final class PortletRequestAttributesTests extends TestCase {
 		assertSame(VALUE, value);
 	}
 
+	public void testSetGlobalSessionScopedAttributeAfterCompletion() throws Exception {
+		MockPortletSession session = new MockPortletSession();
+		session.setAttribute(KEY, VALUE);
+		MockPortletRequest request = new MockPortletRequest();
+		request.setSession(session);
+		PortletRequestAttributes attrs = new PortletRequestAttributes(request);
+		request.close();
+		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_GLOBAL_SESSION);
+		Object value = session.getAttribute(KEY);
+		assertSame(VALUE, value);
+	}
+
 	public void testGetSessionScopedAttributeDoesNotForceCreationOfSession() throws Exception {
 		MockControl mockRequest = MockControl.createControl(PortletRequest.class);
 		PortletRequest request = (PortletRequest) mockRequest.getMock();
 		request.getPortletSession(false);
-		mockRequest.setReturnValue(null);
+		mockRequest.setReturnValue(null, 2);
 		mockRequest.replay();
 
 		PortletRequestAttributes attrs = new PortletRequestAttributes(request);
@@ -119,7 +156,7 @@ public final class PortletRequestAttributesTests extends TestCase {
 		MockControl mockRequest = MockControl.createControl(PortletRequest.class);
 		PortletRequest request = (PortletRequest) mockRequest.getMock();
 		request.getPortletSession(false);
-		mockRequest.setReturnValue(null);
+		mockRequest.setReturnValue(null, 2);
 		mockRequest.replay();
 
 		PortletRequestAttributes attrs = new PortletRequestAttributes(request);

@@ -57,6 +57,8 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 
 	private final PortletRequest request;
 
+	private PortletSession session;
+
 	private final Map sessionAttributesToUpdate = new HashMap();
 
 	private final Map globalSessionAttributesToUpdate = new HashMap();
@@ -69,13 +71,55 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 	public PortletRequestAttributes(PortletRequest request) {
 		Assert.notNull(request, "Request must not be null");
 		this.request = request;
+		// Fetch existing session reference early, to have it available even
+		// after request completion (for example, in a custom child thread).
+		this.session = request.getPortletSession(false);
 	}
+
 
 	/**
 	 * Expose the PortletRequest that we're wrapping to subclasses.
 	 */
 	protected final PortletRequest getRequest() {
-		return request;
+		return this.request;
+	}
+
+	/**
+	 * Exposes the {@link PortletSession} that we're wrapping.
+	 * @param allowCreate whether to allow creation of a new session if none exists yet
+	 */
+	protected final PortletSession getSession(boolean allowCreate) {
+		try {
+			this.session = this.request.getPortletSession(allowCreate);
+			return this.session;
+		}
+		catch (IllegalStateException ex) {
+			// Couldn't access session... let's check why.
+			if (this.session == null) {
+				// No matter what happened - we cannot offer a session.
+				throw ex;
+			}
+			// We have a fallback session reference...
+			// Let's see whether it is appropriate to return it.
+			if (allowCreate) {
+				boolean canAskForExistingSession = false;
+				try {
+					this.session = this.request.getPortletSession(false);
+					canAskForExistingSession = true;
+				}
+				catch (IllegalStateException ex2) {
+				}
+				if (canAskForExistingSession) {
+					// Could ask for existing session, hence the IllegalStateException
+					// came from trying to create a new session too late -> rethrow.
+					throw ex;
+				}
+			}
+			// Else: Could not even ask for existing session, hence we assume that
+			// the request has been completed and the session is accessed later on
+			// (for example, in a custom child thread).
+			return this.session;
+		}
 	}
 
 
@@ -84,7 +128,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 			return this.request.getAttribute(name);
 		}
 		else {
-			PortletSession session = this.request.getPortletSession(false);
+			PortletSession session = getSession(false);
 			if (session != null) {
 				if (scope == SCOPE_GLOBAL_SESSION) {
 					Object value = session.getAttribute(name, PortletSession.APPLICATION_SCOPE);
@@ -112,7 +156,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 			this.request.setAttribute(name, value);
 		}
 		else {
-			PortletSession session = this.request.getPortletSession(true);
+			PortletSession session = getSession(true);
 			if (scope == SCOPE_GLOBAL_SESSION) {
 				session.setAttribute(name, value, PortletSession.APPLICATION_SCOPE);
 				this.globalSessionAttributesToUpdate.remove(name);
@@ -130,7 +174,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 			removeRequestDestructionCallback(name);
 		}
 		else {
-			PortletSession session = this.request.getPortletSession(false);
+			PortletSession session = getSession(false);
 			if (session != null) {
 				if (scope == SCOPE_GLOBAL_SESSION) {
 					session.removeAttribute(name, PortletSession.APPLICATION_SCOPE);
@@ -154,11 +198,11 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 	}
 
 	public String getSessionId() {
-		return this.request.getPortletSession().getId();
+		return getSession(true).getId();
 	}
 
 	public Object getSessionMutex() {
-		return PortletUtils.getSessionMutex(this.request.getPortletSession());
+		return PortletUtils.getSessionMutex(getSession(true));
 	}
 
 
