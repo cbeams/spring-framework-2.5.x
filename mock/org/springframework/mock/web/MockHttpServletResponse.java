@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.Enumeration;
-import java.util.HashSet;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
@@ -61,6 +59,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	//---------------------------------------------------------------------
 	// ServletResponse properties
 	//---------------------------------------------------------------------
+
+	private boolean outputStreamAccessAllowed = true;
+
+	private boolean writerAccessAllowed = true;
 
 	private String characterEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
@@ -107,6 +109,36 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	// ServletResponse interface
 	//---------------------------------------------------------------------
 
+	/**
+	 * Set whether {@link #getOutputStream()} access is allowed.
+	 * <p>Default is <code>true</code>.
+	 */
+	public void setOutputStreamAccessAllowed(boolean outputStreamAccessAllowed) {
+		this.outputStreamAccessAllowed = outputStreamAccessAllowed;
+	}
+
+	/**
+	 * Return whether {@link #getOutputStream()} access is allowed.
+	 */
+	public boolean isOutputStreamAccessAllowed() {
+		return outputStreamAccessAllowed;
+	}
+
+	/**
+	 * Set whether {@link #getWriter()} access is allowed.
+	 * <p>Default is <code>true</code>.
+	 */
+	public void setWriterAccessAllowed(boolean writerAccessAllowed) {
+		this.writerAccessAllowed = writerAccessAllowed;
+	}
+
+	/**
+	 * Return whether {@link #getOutputStream()} access is allowed.
+	 */
+	public boolean isWriterAccessAllowed() {
+		return writerAccessAllowed;
+	}
+
 	public void setCharacterEncoding(String characterEncoding) {
 		this.characterEncoding = characterEncoding;
 	}
@@ -116,16 +148,22 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public ServletOutputStream getOutputStream() {
+		if (!this.outputStreamAccessAllowed) {
+			throw new IllegalStateException("OutputStream access not allowed");
+		}
 		return this.outputStream;
 	}
 
 	public PrintWriter getWriter() throws UnsupportedEncodingException {
+		if (!this.writerAccessAllowed) {
+			throw new IllegalStateException("Writer access not allowed");
+		}
 		if (this.writer == null) {
 			Writer targetWriter = (this.characterEncoding != null ?
 					new OutputStreamWriter(this.content, this.characterEncoding) : new OutputStreamWriter(this.content));
 			this.writer = new PrintWriter(targetWriter);
 		}
-		return writer;
+		return this.writer;
 	}
 
 	public byte[] getContentAsByteArray() {
@@ -246,24 +284,15 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public boolean containsHeader(String name) {
-		Assert.notNull(name, "Header name must not be null");
-		return this.headers.containsKey(name.toLowerCase());
+		return (HeaderValueHolder.getByName(this.headers, name) != null);
 	}
 
 	/**
 	 * Return the names of all specified headers as a Set of Strings.
-	 * <p>The return value of this method is (relatively) expensive to calculate,
-	 * but since the {@link MockHttpServletResponse} class is not meant to be used
-	 * in production code it is not a big deal.
 	 * @return the <code>Set</code> of header name <code>Strings</code>, or an empty <code>Set</code> if none
 	 */
 	public Set getHeaderNames() {
-		Set names = new HashSet(this.headers.size());
-		Enumeration enumerator = new HttpHeaderNamesEnumerator(this.headers.values());
-		while (enumerator.hasMoreElements()) {
-			names.add(enumerator.nextElement());
-		}
-		return names;
+		return this.headers.keySet();
 	}
 
 	/**
@@ -274,7 +303,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 */
 	public Object getHeader(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(name.toLowerCase());
+		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		return (header != null ? header.getValue() : null);
 	}
 
@@ -285,7 +314,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 */
 	public List getHeaders(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(name.toLowerCase());
+		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		return (header != null ? header.getValues() : Collections.EMPTY_LIST);
 	}
 
@@ -370,11 +399,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	private void doAddHeaderValue(String name, Object value, boolean replace) {
 		Assert.notNull(name, "Header name must not be null");
 		Assert.notNull(value, "Header value must not be null");
-		String canonicalName = name.toLowerCase();
-		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(canonicalName);
+		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		if (header == null) {
-			header = new HeaderValueHolder(name);
-			this.headers.put(canonicalName, header);
+			header = new HeaderValueHolder();
+			this.headers.put(name, header);
 		}
 		if (replace) {
 			header.setValue(value);
