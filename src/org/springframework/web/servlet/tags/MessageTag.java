@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,7 @@ import javax.servlet.jsp.JspTagException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 import org.springframework.web.util.HtmlUtils;
@@ -215,27 +216,8 @@ public class MessageTag extends HtmlEscapingAwareTag {
 
 		if (resolvedCode != null) {
 			// We have a code that we need to resolve.
-			Object[] argumentsArray = null;
-			if (this.arguments instanceof String) {
-				String[] stringArray =
-						StringUtils.delimitedListToStringArray((String) this.arguments, this.argumentSeparator);
-				argumentsArray = new Object[stringArray.length];
-				for (int i = 0; i < stringArray.length; i++) {
-					argumentsArray[i] =
-							ExpressionEvaluationUtils.evaluate("argument[" + i + "]", stringArray[i], pageContext);
-				}
-			}
-			else if (this.arguments instanceof Object[]) {
-				argumentsArray = (Object[]) this.arguments;
-			}
-			else if (this.arguments instanceof Collection) {
-				argumentsArray = ((Collection) this.arguments).toArray();
-			}
-			else if (this.arguments != null) {
-				// Assume a single argument object.
-				argumentsArray = new Object[] {this.arguments};
-			}
-			if (resolvedText != null) {
+			Object[] argumentsArray = resolveArguments(this.arguments);
+				if (resolvedText != null) {
 				// We have a fallback text to consider.
 				return messageSource.getMessage(
 						resolvedCode, argumentsArray, resolvedText, getRequestContext().getLocale());
@@ -249,6 +231,50 @@ public class MessageTag extends HtmlEscapingAwareTag {
 
 		// All we have is a specified literal text.
 		return resolvedText;
+	}
+
+	/**
+	 * Resolve the given arguments Object into an arguments array.
+	 * @param arguments the specified arguments Object
+	 * @return the resolved arguments as array
+	 * @throws JspException if argument conversion failed
+	 * @see #setArguments
+	 */
+	protected Object[] resolveArguments(Object arguments) throws JspException {
+		if (arguments instanceof String) {
+			String[] stringArray =
+					StringUtils.delimitedListToStringArray((String) arguments, this.argumentSeparator);
+			if (stringArray.length == 1) {
+				Object argument = ExpressionEvaluationUtils.evaluate("argument", stringArray[0], pageContext);
+				if (argument != null && argument.getClass().isArray()) {
+					return ObjectUtils.toObjectArray(argument);
+				}
+				else {
+					return new Object[] {argument};
+				}
+			}
+			else {
+				Object[] argumentsArray = new Object[stringArray.length];
+				for (int i = 0; i < stringArray.length; i++) {
+					argumentsArray[i] =
+							ExpressionEvaluationUtils.evaluate("argument[" + i + "]", stringArray[i], pageContext);
+				}
+				return argumentsArray;
+			}
+		}
+		else if (arguments instanceof Object[]) {
+			return (Object[]) arguments;
+		}
+		else if (arguments instanceof Collection) {
+			return ((Collection) arguments).toArray();
+		}
+		else if (arguments != null) {
+			// Assume a single argument object.
+			return new Object[] {arguments};
+		}
+		else {
+			return null;
+		}
 	}
 
 	/**
