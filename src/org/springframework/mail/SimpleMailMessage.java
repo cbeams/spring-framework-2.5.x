@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,14 @@ import java.util.Date;
 
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.Assert;
 
 /**
- * Encapsulates properties of a simple mail such as from, to, cc,
- * subject, text. To be sent with a MailSender implementation.
+ * Models a simple mail message, including data such as the from, to, cc, subject, and text fields.
  *
- * <p>Consider JavaMailSender and JavaMail MimeMessages for creating
- * more sophisticated messages, for example with attachments, special
+ * <p>Consider <code>JavaMailSender</code> and JavaMail <code>MimeMessages</code> for creating
+ * more sophisticated messages, for example messages with attachments, special
  * character encodings, or personal names that accompany mail addresses.
- *
- * <p>This simple message class implements the MailMessage interface,
- * to let message population code interact with a simple message or a
- * MIME message through a common interface.
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
@@ -63,28 +59,28 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 
 
 	/**
-	 * Create a new SimpleMailMessage.
+	 * Create a new <code>SimpleMailMessage</code>.
 	 */
 	public SimpleMailMessage() {
 	}
 
 	/**
-	 * Copy constructor.
+	 * Copy constructor for creating a new <code>SimpleMailMessage</code> from the state
+	 * of an existing <code>SimpleMailMessage</code> instance.
+	 * @throws IllegalArgumentException if the supplied message is <code>null</code> 
 	 */
 	public SimpleMailMessage(SimpleMailMessage original) {
+		Assert.notNull(original, "The 'original' message argument cannot be null");
 		this.from = original.getFrom();
 		this.replyTo = original.getReplyTo();
 		if (original.getTo() != null) {
-			this.to = new String[original.getTo().length];
-			System.arraycopy(original.getTo(), 0, this.to, 0, original.getTo().length);
+			this.to = copy(original.getTo());
 		}
 		if (original.getCc() != null) {
-			this.cc = new String[original.getCc().length];
-			System.arraycopy(original.getCc(), 0, this.cc, 0, original.getCc().length);
+			this.cc = copy(original.getCc());
 		}
 		if (original.getBcc() != null) {
-			this.bcc = new String[original.getBcc().length];
-			System.arraycopy(original.getBcc(), 0, this.bcc, 0, original.getBcc().length);
+			this.bcc = copy(original.getBcc());
 		}
 		this.sentDate = original.getSentDate();
 		this.subject = original.getSubject();
@@ -171,9 +167,11 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 
 	/**
 	 * Copy the contents of this message to the given target message.
-	 * @param target the MailMessage to copy to
+	 * @param target the <code>MailMessage</code> to copy to
+	 * @throws IllegalArgumentException if the supplied <code>target</code> is <code>null</code> 
 	 */
 	public void copyTo(MailMessage target) {
+		Assert.notNull(target, "The 'target' message argument cannot be null");
 		if (getFrom() != null) {
 			target.setFrom(getFrom());
 		}
@@ -248,6 +246,13 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		hashCode = 29 * hashCode + (this.subject == null ? 0 : this.subject.hashCode());
 		hashCode = 29 * hashCode + (this.text == null ? 0 : this.text.hashCode());
 		return hashCode;
+	}
+
+
+	private static String[] copy(String[] state) {
+		String[] copy = new String[state.length];
+		System.arraycopy(state, 0, copy, 0, state.length);
+		return copy;
 	}
 
 }
