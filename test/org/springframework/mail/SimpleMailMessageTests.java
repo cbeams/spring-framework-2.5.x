@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,25 @@
 
 package org.springframework.mail;
 
+import junit.framework.TestCase;
+import org.springframework.mail.cos.CosMailSenderImpl;
+import org.springframework.test.AssertThrows;
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import junit.framework.TestCase;
-
-import org.springframework.mail.cos.CosMailSenderImpl;
-
 /**
+ * Unit tests for the <code>SimpleMailMessage</code> class.
+ *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
+ * @author Rick Evans
  * @since 10.09.2003
  */
-public class SimpleMailMessageTests extends TestCase {
+public final class SimpleMailMessageTests extends TestCase {
 
-	public void testSimpleMessage() {
+	public void testSimpleMessageCopyCtor() {
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setFrom("me@mail.org");
 		message.setTo("you@mail.org");
@@ -41,8 +44,8 @@ public class SimpleMailMessageTests extends TestCase {
 		assertEquals("you@mail.org", messageCopy.getTo()[0]);
 
 		message.setReplyTo("reply@mail.org");
-		message.setCc(new String[] {"he@mail.org", "she@mail.org"});
-		message.setBcc(new String[] {"us@mail.org", "them@mail.org"});
+		message.setCc(new String[]{"he@mail.org", "she@mail.org"});
+		message.setBcc(new String[]{"us@mail.org", "them@mail.org"});
 		Date sentDate = new Date();
 		message.setSentDate(sentDate);
 		message.setSubject("my subject");
@@ -76,6 +79,24 @@ public class SimpleMailMessageTests extends TestCase {
 		assertEquals("my text", messageCopy.getText());
 	}
 
+	public void testDeepCopyOfStringArrayTypedFieldsOnCopyCtor() throws Exception {
+
+		SimpleMailMessage original = new SimpleMailMessage();
+		original.setTo(new String[]{"fiona@mail.org", "apple@mail.org"});
+		original.setCc(new String[]{"he@mail.org", "she@mail.org"});
+		original.setBcc(new String[]{"us@mail.org", "them@mail.org"});
+
+		SimpleMailMessage copy = new SimpleMailMessage(original);
+
+		original.getTo()[0] = "mmm@mmm.org";
+		original.getCc()[0] = "mmm@mmm.org";
+		original.getBcc()[0] = "mmm@mmm.org";
+
+		assertEquals("fiona@mail.org", copy.getTo()[0]);
+		assertEquals("he@mail.org", copy.getCc()[0]);
+		assertEquals("us@mail.org", copy.getBcc()[0]);
+	}
+
 	/**
 	 * Tests that two equal SimpleMailMessages have equal hash codes.
 	 */
@@ -97,9 +118,6 @@ public class SimpleMailMessageTests extends TestCase {
 		assertEquals(message1.hashCode(), message2.hashCode());
 	}
 
-	/**
-	 * Tests {@link SimpleMailMessage#equals(Object).
-	 */
 	public final void testEqualsObject() {
 		SimpleMailMessage message1;
 		SimpleMailMessage message2;
@@ -136,21 +154,35 @@ public class SimpleMailMessageTests extends TestCase {
 	}
 
 	public void testCosMailSenderImplWithSimpleMessageAndBadHostName() throws MailException {
-		SimpleMailMessage message = new SimpleMailMessage();
-		message.setFrom("a@a.com");
-		message.setTo("b@b.com");
-		message.setSubject("test");
-		message.setText("another test");
+		new AssertThrows(MailSendException.class) {
+			public void test() throws Exception {
+				SimpleMailMessage message = new SimpleMailMessage();
+				message.setFrom("a@a.com");
+				message.setTo("b@b.com");
+				message.setSubject("test");
+				message.setText("another test");
 
-		CosMailSenderImpl sender = new CosMailSenderImpl();
-		sender.setHost("hostxyzdoesnotexist");
-		try {
-			sender.send(message);
-			fail("Should have thrown MailSendException");
-		}
-		catch (Exception ex) {
-			assertTrue(ex instanceof MailSendException);
-		}
+				CosMailSenderImpl sender = new CosMailSenderImpl();
+				sender.setHost("hostxyzdoesnotexist");
+				sender.send(message);
+			}
+		}.runTest();
+	}
+
+	public void testCopyCtorChokesOnNullOriginalMessage() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				new SimpleMailMessage(null);
+			}
+		}.runTest();
+	}
+
+	public void testCopyToChokesOnNullTargetMessage() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				new SimpleMailMessage().copyTo(null);
+			}
+		}.runTest();
 	}
 
 }
