@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.Enumeration;
+import java.util.HashSet;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
@@ -250,10 +252,18 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Return the names of all specified headers as a Set of Strings.
-	 * @return the Set of header name Strings, or an empty Set if none
+	 * <p>The return value of this method is (relatively) expensive to calculate,
+	 * but since the {@link MockHttpServletResponse} class is not meant to be used
+	 * in production code it is not a big deal.
+	 * @return the <code>Set</code> of header name <code>Strings</code>, or an empty <code>Set</code> if none
 	 */
 	public Set getHeaderNames() {
-		return this.headers.keySet();
+		Set names = new HashSet(this.headers.size());
+		Enumeration enumerator = new HttpHeaderNamesEnumerator(this.headers.values());
+		while (enumerator.hasMoreElements()) {
+			names.add(enumerator.nextElement());
+		}
+		return names;
 	}
 
 	/**
@@ -363,7 +373,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		String canonicalName = name.toLowerCase();
 		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(canonicalName);
 		if (header == null) {
-			header = new HeaderValueHolder();
+			header = new HeaderValueHolder(name);
 			this.headers.put(canonicalName, header);
 		}
 		if (replace) {

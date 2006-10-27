@@ -564,7 +564,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		String canonicalName = name.toLowerCase();
 		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(canonicalName);
 		if (header == null) {
-			header = new HeaderValueHolder();
+			header = new HeaderValueHolder(name);
 			this.headers.put(canonicalName, header);
 		}
 		if (value instanceof Collection) {
@@ -608,7 +608,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public Enumeration getHeaderNames() {
-		return this.headers.keys();
+		return new HttpHeaderNamesEnumerator(this.headers.values());
 	}
 
 	public int getIntHeader(String name) {

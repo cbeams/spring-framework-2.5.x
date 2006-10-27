@@ -26,11 +26,18 @@ import java.util.List;
  *
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Tamas Szabo
  * @since 2.0.1
  */
 class HeaderValueHolder {
 
+	private String name;
 	private final List values = new LinkedList();
+
+
+	public HeaderValueHolder(String name) {
+		this.name = name;
+	}
 
 
 	public void setValue(Object value) {
@@ -52,6 +59,10 @@ class HeaderValueHolder {
 
 	public Object getValue() {
 		return (!this.values.isEmpty() ? this.values.get(0) : null);
+	}
+
+	public String getName() {
+		return name;
 	}
 
 }

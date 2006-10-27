@@ -17,14 +17,18 @@
 package org.springframework.mock.web;
 
 import junit.framework.TestCase;
-
 import org.springframework.web.util.WebUtils;
 
+import java.util.Set;
+
 /**
+ * Unit tests for the <code>MockHttpServletResponse</code> class.
+ *
  * @author Juergen Hoeller
+ * @author Rick Evans
  * @since 19.02.2006
  */
-public class MockHttpServletResponseTests extends TestCase {
+public final class MockHttpServletResponseTests extends TestCase {
 
 	public void testSetContentTypeWithNoEncoding() {
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -37,6 +41,17 @@ public class MockHttpServletResponseTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setContentType("test/plain; charset=UTF-8");
 		assertEquals("Character encoding should be 'UTF-8'", "UTF-8", response.getCharacterEncoding());
+	}
+
+	public void testHttpHeaderNameCasingIsPreserved() throws Exception {
+		final String headerName = "Header1";
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		response.addHeader(headerName, "value1");
+		Set responseHeaders = response.getHeaderNames();
+		assertNotNull(responseHeaders);
+		assertEquals(1, responseHeaders.size());
+		assertEquals("HTTP header casing not being preserved", headerName, responseHeaders.iterator().next());
 	}
 
 }
