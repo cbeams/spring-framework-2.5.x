@@ -20,6 +20,8 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
@@ -71,6 +73,26 @@ public class RequestScopeTests extends TestCase {
 
 			requestAttributes.requestCompleted();
 			assertTrue(bean.wasDestroyed());
+		}
+		finally {
+			RequestContextHolder.setRequestAttributes(null);
+		}
+	}
+
+	public void testCircleLeadsToException() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		RequestAttributes requestAttributes = new ServletRequestAttributes(request);
+		RequestContextHolder.setRequestAttributes(requestAttributes);
+
+		try {
+			String name = "requestScopedObjectCircle1";
+			assertNull(request.getAttribute(name));
+			this.beanFactory.getBean(name);
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			// expected
+			assertTrue(ex.contains(BeanCurrentlyInCreationException.class));
 		}
 		finally {
 			RequestContextHolder.setRequestAttributes(null);

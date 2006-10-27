@@ -255,6 +255,29 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertTrue("Specified singletons equal", kerry1 == kerry2);
 	}
 
+	public void testPrototypeCircleLeadsToException() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		Properties p = new Properties();
+		p.setProperty("kerry.(class)", "org.springframework.beans.TestBean");
+		p.setProperty("kerry.(singleton)", "false");
+		p.setProperty("kerry.age", "35");
+		p.setProperty("kerry.spouse", "*rod");
+		p.setProperty("rod.(class)", "org.springframework.beans.TestBean");
+		p.setProperty("rod.(singleton)", "false");
+		p.setProperty("rod.age", "34");
+		p.setProperty("rod.spouse", "*kerry");
+
+		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
+		try {
+			lbf.getBean("kerry");
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			// expected
+			assertTrue(ex.contains(BeanCurrentlyInCreationException.class));
+		}
+	}
+
 	public void testPrototypeExtendsPrototype() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		Properties p = new Properties();

@@ -207,9 +207,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		}
 
 		else {
-			// Fail if we're already creating this singleton instance:
+			// Fail if we're already creating this bean instance:
 			// We're assumably within a circular reference.
-			if (isSingletonCurrentlyInCreation(beanName)) {
+			if (isCurrentlyInCreation(beanName)) {
 				throw new BeanCurrentlyInCreationException(beanName);
 			}
 
