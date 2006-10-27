@@ -526,7 +526,7 @@ class GroovyMessenger implements Messenger {
                     </listitem>
                 </itemizedlist>
                 <para>
-                    All of these libraries are available in the Spring-with-dependecies
+                    All of these libraries are available in the Spring-with-dependencies
                     distribution of Spring (in addition to also being freely available
                     on the web).
                 </para>
@@ -739,10 +739,6 @@ public class Main {
 			    <para>
 			        The BeanShell scripting support in Spring requires the following
 			        additional jars to be on the classpath of your application.
-			        (The specific library versions listed just happen to be the
-			        versions that the Spring team used in the development of the
-			        scripting support; you may well be able to use an earlier or
-			        later version of a specific library.)
 			    </para>
 			    <itemizedlist>
                     <listitem>
@@ -752,7 +748,7 @@ public class Main {
                         <para><filename>cglib-nodep-2.1_3.jar</filename></para>
                     </listitem>
                 </itemizedlist>
-                <para>All of these libraries are available in the Spring-with-dependecies
+                <para>All of these libraries are available in the Spring-with-dependencies
                 distribution of Spring (in addition to also being freely available
                 on the web).</para>
 			</sidebar>

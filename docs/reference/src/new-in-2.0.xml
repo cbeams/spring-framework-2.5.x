@@ -407,7 +407,7 @@
     improved features of Spring 2.0, so do take the time to investigate them. The aforementioned
     sample applications can be found in the <filename class="directory">'samples'</filename>
     directory of the full Spring distribution
-    (<filename>'spring-with-dependecies.[zip|tar.gz]'</filename>).</para>
+    (<filename>'spring-with-dependencies.[zip|tar.gz]'</filename>).</para>
 
     <para>The Spring Framework distribution also ships with a number of so-called
     <emphasis>showcase</emphasis> applications. Each showcase application provides

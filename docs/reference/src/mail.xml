@@ -16,7 +16,7 @@
 				<para>The <ulink url="http://java.sun.com/products/javabeans/jaf/downloads/index.html">JAF</ulink> <filename class="libraryfile">activation.jar</filename> library</para>
 			</listitem>
 		</itemizedlist>
-		<para>All of these libraries are available in the Spring-with-dependecies
+		<para>All of these libraries are available in the Spring-with-dependencies
 		distribution of the Spring Framework (in addition to also being freely
 		available on the web).</para>
 	</sidebar>
