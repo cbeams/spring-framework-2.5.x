@@ -28,19 +28,24 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 
 /**
- * Reusable object to represent a SQL query. Like all RdbsOperation
- * objects, SqlQuery objects are threadsafe after their initialization is
- * complete. That is, after they are constructed and configured via their
- * setter methods, they can be used safely from multiple threads.
+ * Reusable object to represent a SQL query.
  *
- * <p>Subclasses must implement the <code>newRowMapper</code> method to provide an object
- * that can extract the results of iterating over the ResultSet.
+ * <p>Subclasses must implement the {@link #newRowMapper} method to provide
+ * an object that can extract the results of iterating over the
+ * <code>ResultSet</code> created during the execution of the query.
  *
  * <p>This class provides a number of public <code>execute</code> methods that are
  * analogous to the different convenient JDO query execute methods. Subclasses
  * can either rely on one of these inherited methods, or can add their own
- * custom execution methods, with meaningful names and typed parameters. Each
- * custom query method will invoke one of this class's untyped query methods.
+ * custom execution methods, with meaningful names and typed parameters
+ * (definitely a best practice). Each custom query method will invoke one of
+ * this class's untyped query methods.
+ * 
+ * <p>Like all <code>RdbmsOperation</code> classes that ship with the Spring
+ * Framework, <code>SqlQuery</code> instances are threadsafe after their
+ * initialization is complete. That is, after they are constructed and
+ * configured via their setter methods, they can be used safely from multiple
+ * threads.
  *
  * @author Rod Johnson
  * @author Thomas Risberg
@@ -48,22 +53,23 @@ import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
  */
 public abstract class SqlQuery extends SqlOperation {
 
-	/** Number of rows to expect. If 0, unknown. */
+	/** The number of rows to expect; if 0, unknown. */
 	private int rowsExpected = 0;
 
 
 	/**
-	 * Constructor to allow use as a JavaBean. DataSource and SQL
-	 * must be supplied before compilation and use.
+	 * Constructor to allow use as a JavaBean.
+	 * <p>The <code>DataSource</code> and SQL must be supplied before
+	 * compilation and use.
 	 */
 	public SqlQuery() {
 	}
 
 	/**
-	 * Convenient constructor with DataSource and SQL string.
-	 * @param ds DataSource to use to get connections
-	 * @param sql to execute. SQL can also be supplied at runtime
-	 * by overriding the getSql() method.
+	 * Convenient constructor with a <code>DataSource</code> and SQL string.
+	 * @param ds the <code>DataSource</code> to use to get connections
+	 * @param sql the SQL to execute; SQL can also be supplied at runtime
+	 * by overriding the {@link #getSql()} method.
 	 */
 	public SqlQuery(DataSource ds, String sql) {
 		setDataSource(ds);
@@ -72,9 +78,9 @@ public abstract class SqlQuery extends SqlOperation {
 
 
 	/**
-	 * Set the number of rows expected. This can be used to ensure
-	 * efficient storage of results. The default behavior is not to
-	 * expect any specific number of rows.
+	 * Set the number of rows expected.
+	 * <p>This can be used to ensure efficient storage of results. The
+	 * default behavior is not to expect any specific number of rows.
 	 */
 	public void setRowsExpected(int rowsExpected) {
 		this.rowsExpected = rowsExpected;
@@ -336,16 +342,15 @@ public abstract class SqlQuery extends SqlOperation {
 	}
 
 
-	//-------------------------------------------------------------------------
-	// Methods to be implemented by subclasses
-	//-------------------------------------------------------------------------
-
 	/**
 	 * Subclasses must implement this method to extract an object per row,
-	 * to be returned by the execute method as aggregated List.
-	 * @param parameters parameters to the <code>execute()</code> method,
-	 * in case subclass is interested. May be <code>null</code> if there
+	 * to be returned by the execute method as an aggregated {@link List}.
+	 * @param parameters the parameters to the <code>execute()</code> method,
+	 * in case subclass is interested; may be <code>null</code> if there
 	 * were no parameters.
+	 * @param context contextual information passed to the callback
+	 * <code>mapRow</code> method; the JDBC operation itself doesn't rely on
+	 * this parameter, but it can be useful for creating the objects of the result list
 	 * @see #execute
 	 */
 	protected abstract RowMapper newRowMapper(Object[] parameters, Map context);

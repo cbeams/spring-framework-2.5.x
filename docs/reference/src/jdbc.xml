@@ -289,7 +289,7 @@ public int countOfActors(Actor exampleActor) {
 			</para>
 			<para>
 				The value-add of the <classname>SimpleJdbcTemplate</classname> class
-				in the area of syntactic-sugar is definitely best illustrated with a
+				in the area of syntactic-sugar definitely is best illustrated with a
 				<emphasis>'before and after'</emphasis> example. The following code
 				snippet shows first some data access code using the classic Spring
 				<classname>JdbcTemplate</classname>, followed immediately thereafter
@@ -356,8 +356,7 @@ public Actor findActor(long id) {
 				the database, that is the responsibility for the administrator that sets
 				up the datasource. You will most likely have to fulfill both roles while
 				you are developing and testing you code though, but you will not
-				necessarily have to know how the production data source is
-				configured.
+				necessarily have to know how the production data source is configured.
 			</para>
 			<para>
 				When using Spring's JDBC layer, you can either obtain a data
@@ -458,14 +457,14 @@ dataSource.setPassword("");]]></programlisting>
 				where this translator is needed. Here is an example of how this custom
 				translator can be used:
 			</para>
-            <programlisting><![CDATA[// create a JdbcTemplate and set data source 
+            <programlisting><lineannotation>// create a <classname>JdbcTemplate</classname> and set data source</lineannotation><![CDATA[ 
 JdbcTemplate jt = new JdbcTemplate(); 
 jt.setDataSource(dataSource); 
-// create a custom translator and set the DataSource for the default translation lookup 
+]]><lineannotation>// create a custom translator and set the <interfacename>DataSource</interfacename> for the default translation lookup</lineannotation><![CDATA[ 
 MySQLErrorCodesTransalator tr = new MySQLErrorCodesTransalator(); 
 tr.setDataSource(dataSource); 
 jt.setExceptionTranslator(tr); 
-// use the JdbcTemplate for this SqlUpdate 
+]]><lineannotation>// use the <classname>JdbcTemplate</classname> for this <classname>SqlUpdate</classname></lineannotation><![CDATA[
 SqlUpdate su = new SqlUpdate(); 
 su.setJdbcTemplate(jt); 
 su.setSql("update orders set shipping_charge = shipping_charge * 1.05"); 
@@ -513,14 +512,13 @@ public class ExecuteAStatement {
 				query methods. Some of these methods are intended to be used for queries
 				that return a single value. Maybe you want to retrieve a count or a
 				specific value from one row. If that is the case then you can use
-				<literal>queryForInt(..)</literal>,<literal>queryForLong</literal> or
-				<literal>queryForObject(..)</literal>. The latter will convert the returned
-				JDBC Type to the Java class that is passed in as an argument. If the
+				<methodname>queryForInt(..)</methodname>, <methodname>queryForLong(..)</methodname> or
+				<methodname>queryForObject(..)</methodname>. The latter will convert the returned
+				JDBC <classname>Type</classname> to the Java class that is passed in as an argument. If the
 				type conversion is invalid, then an
-				<classname>InvalidDataAccessApiUsageException</classname> will be thrown.
+				<exceptionname>InvalidDataAccessApiUsageException</exceptionname> will be thrown.
 				Here is an example that contains two query methods, one for an
-				<literal>int</literal> and one that queries for a
-				<classname>String</classname>.
+				<classname>int</classname> and one that queries for a <classname>String</classname>.
 			</para>
 			<programlisting><![CDATA[import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -549,7 +547,7 @@ public class RunAQuery {
 			<para>
 				In addition to the single results query methods there are several
 				methods that return a List with an entry for each row that the query
-				returned. The most generic one is <literal>queryForList</literal> which
+				returned. The most generic method is <methodname>queryForList(..)</methodname> which
 				returns a <interfacename>List</interfacename> where each entry is a
 				<interfacename>Map</interfacename> with each entry in the map representing the
 				column value for that row. If we add a method to the above example to
@@ -570,10 +568,9 @@ public class RunAQuery {
 			<para>
 				There are also a number of update methods that you can use. Find below
 				an example where a column is updated for a certain primary key. In
-				this example an SQL statement is used that has place holders for row
-				parameters (most of the query and update methods have this
-				functionality). Note that the parameter values are passed in as an array of
-				objects (and this primitives have to be wrapped in the primitive wrapper classes).
+				this example an SQL statement is used that has placeholders for row
+				parameters. Note that the parameter values are passed in as an array of
+				objects (and thus primitives have to be wrapped in the primitive wrapper classes).
 			</para>
 			<programlisting><![CDATA[import javax.sql.DataSource;
 
@@ -581,16 +578,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 public class ExecuteAnUpdate {
 
-    private JdbcTemplate jt;
-    private DataSource dataSource;
+    private JdbcTemplate template;
 
     public void setName(int id, String name) {
-        jt = new JdbcTemplate(dataSource);
-        jt.update("update mytable set name = ? where id = ?", new Object[] {name, new Integer(id)});
+        template.update("update mytable set name = ? where id = ?", new Object[] {name, new Integer(id)});
     }
 
     public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
+        this.template = new JdbcTemplate(dataSource);
     }
 }]]></programlisting>
 		</section>
@@ -603,12 +598,12 @@ public class ExecuteAnUpdate {
 				The <classname>DataSourceUtils</classname> class is a convenient and
 				powerful helper class that provides <literal>static</literal> methods to
 				obtain connections from JNDI and close connections if necessary. It has
-				support for thread-bound connections, e.g. for use with
+				support for thread-bound connections, for example for use with
 				<classname>DataSourceTransactionManager</classname>.
 			</para>
-			<para>
-				Note: the <methodname>getDataSourceFromJndi(..)</methodname> methods are
-				targeted at applications that do not use a Spring Framework IoC container.
+			<note>
+				<para>The <methodname>getDataSourceFromJndi(..)</methodname> methods are
+				targeted at applications that do not use the Spring Framework's IoC container.
 				With the latter, it is preferable to preconfigure one's beans or
 				even <classname>JdbcTemplate</classname> instances in the
 				container itself: a <classname>JndiObjectFactoryBean</classname> instance
@@ -617,8 +612,8 @@ public class ExecuteAnUpdate {
 				beans. Switching to another <interfacename>DataSource</interfacename>
 				then becomes just a matter of configuration; one can even replace the definition
 				of the <interfacename>FactoryBean</interfacename> with a non-JNDI
-				<interfacename>DataSource</interfacename>!
-			</para>
+				<interfacename>DataSource</interfacename>!</para>
+			</note>
 		</section>
 		<section id="jdbc-SmartDataSource">
 			<title><interfacename>SmartDataSource</interfacename></title>
@@ -645,17 +640,18 @@ public class ExecuteAnUpdate {
 			<title><classname>SingleConnectionDataSource</classname></title>
 			<para>
 				The <classname>SingleConnectionDataSource</classname> class is an
-				implementation of <literal>SmartDataSource</literal> that wraps a
-				single connection which is not closed after use. Obviously, this is not
-				multi-threading capable.
+				implementation of the <interfacename>SmartDataSource</interfacename>
+				interface that wraps a <emphasis>single</emphasis>
+				<interfacename>Connection</interfacename> that is <emphasis>not</emphasis>
+				closed after use. Obviously, this is not multi-threading capable.
 			</para>
 			<para>
 				If client code will call close in the assumption of a pooled
 				connection, like when using persistence tools, set
-				<literal>suppressClose</literal> to true. This will return a
-				close-suppressing proxy instead of the physical connection. Be aware
-				that you will not be able to cast this to a native Oracle Connection or
-				the like anymore.
+				<literal>suppressClose</literal> to <literal>true</literal>. This will
+				return a close-suppressing proxy instead of the physical connection.
+				Be aware that you will not be able to cast this to a native Oracle
+				<interfacename>Connection</interfacename> or the like anymore.
 			</para>
 			<para>
 				This is primarily a test class. For example, it enables easy
@@ -677,7 +673,7 @@ public class ExecuteAnUpdate {
 			<para>
 				This is potentially useful for test or standalone environments
 				outside of a J2EE container, either as a <interfacename>DataSource</interfacename>
-				bean in a respective ApplicationContext, or in conjunction with a simple
+				bean in a Spring IoC container, or in conjunction with a simple
 				JNDI environment. Pool-assuming <literal>Connection.close()</literal>
 				calls will simply close the connection, so any <interfacename>DataSource</interfacename>-aware
 				persistence code should work. However, using JavaBean style connection
@@ -697,16 +693,14 @@ public class ExecuteAnUpdate {
 				server.
 			</para>
 			<note>
-				<para>
-				It should almost never be necessary or desireable to use this
+				<para>It should almost never be necessary or desireable to use this
 				class, except when existing code exists which must be called and passed
 				a standard JDBC <interfacename>DataSource</interfacename> interface implementation.
 				In this case, it's possible to still have this code be usable, but
 				participating in Spring managed transactions. It is generally preferable
 				to write your own new code using the higher level abstractions for
 				resource management, such as <classname>JdbcTemplate</classname> or
-				<classname>DataSourceUtils</classname>.
-				</para>
+				<classname>DataSourceUtils</classname>.</para>
 			</note>
 			<para>
 				<emphasis>(See the <classname>TransactionAwareDataSourceProxy</classname>
@@ -728,7 +722,7 @@ public class ExecuteAnUpdate {
 				J2EE's standard <literal>DataSource.getConnection</literal>. This is
 				recommended anyway, as it throws unchecked
 				<literal>org.springframework.dao</literal> exceptions instead of checked
-				<classname>SQLException</classname>s. All framework classes like
+				<exceptionname>SQLExceptions</exceptionname>. All framework classes like
 				<classname>JdbcTemplate</classname> use this strategy implicitly. If not
 				used with this transaction manager, the lookup strategy behaves exactly
 				like the common one - it can thus be used in any case.
@@ -738,7 +732,7 @@ public class ExecuteAnUpdate {
 				custom isolation levels, and timeouts that get applied as
 				appropriate JDBC statement query timeouts. To support the latter,
 				application code must either use <classname>JdbcTemplate</classname> or call
-				<literal>DataSourceUtils.applyTransactionTimeout</literal> method for
+				<literal>DataSourceUtils.applyTransactionTimeout(..)</literal> method for
 				each created statement.
 			</para>
 			<para>
@@ -764,12 +758,12 @@ public class ExecuteAnUpdate {
 		</para>
 		<note>
 			<para>
-				There is a view (borne from experience acquired in the field)
+				There is a view borne from experience acquired in the field
 				amongst some of the Spring developers that the various RDBMS
 				operation classes described below (with the exception of the
 				<link linkend="jdbc-StoredProcedure"><classname>StoredProcedure</classname></link>
 				class) can often be replaced with straight <classname>JdbcTemplate</classname>
-				calls... often it is just simpler to use (and plain easier to read) a DAO method
+				calls... often it is simpler to use and plain easier to read a DAO method
 				that simply calls a method on a <classname>JdbcTemplate</classname> direct
 				(as opposed to encapsulating a query as a full-blown class).
 			</para>
@@ -784,35 +778,27 @@ public class ExecuteAnUpdate {
 			<para>
 				<classname>SqlQuery</classname> is a reusable, threadsafe class that
 				encapsulates an SQL query. Subclasses must implement the
-				<literal>newResultReader()</literal> method to provide an object that
-				can save the results while iterating over a supplied
-				<interfacename>ResultSet</interfacename>. The
-				<classname>SqlQuery</classname> class is rarely used directly since the
-				<classname>MappingSqlQuery</classname> subclass provides a much more
-				convenient implementation for mapping rows to Java classes. Other
-				implementations that extend <classname>SqlQuery</classname> are
+				<methodname>newRowMapper(..)</methodname> method to provide a
+				<interfacename>RowMapper</interfacename> instance that
+				can create one object per row obtained from iterating over the
+				<interfacename>ResultSet</interfacename> that is created during the
+				execution of the query. The <classname>SqlQuery</classname> class is
+				rarely used directly since the <classname>MappingSqlQuery</classname>
+				subclass provides a much more convenient implementation for mapping
+				rows to Java classes. Other	implementations that extend
+				<classname>SqlQuery</classname> are
 				<classname>MappingSqlQueryWithParameters</classname> and
 				<classname>UpdatableSqlQuery</classname>.
 			</para>
 		</section>
 		<section id="jdbc-MappingSqlQuery">
 			<title><classname>MappingSqlQuery</classname></title>
-			<para>
-				<classname>MappingSqlQuery</classname> is a reusable query in which
-				concrete subclasses must implement the abstract
-      <literal>mapRow(ResultSet, int)</literal> method to convert each row of
-      the supplied <interfacename>ResultSet</interfacename> into an object.</para>
-			<para>
-				Of all the various <interfacename>SqlQuery</interfacename> implementations,
-				the <classname>MappingSqlQuery</classname> is
-				the one used most often, and it is also the one that is the easiest to
-				use.
-			</para>
-			<para>
-				Find below a (brief) example of a custom query that maps the data from
-				the customer table to an instance of the <classname>Customer</classname>
-				class.
-			</para>
+			<para><classname>MappingSqlQuery</classname> is a reusable query in which
+			concrete subclasses must implement the abstract
+			<methodname>mapRow(..)</methodname> method to convert each row of
+			the supplied <interfacename>ResultSet</interfacename> into an object.
+			Find below a brief example of a custom query that maps the data from the customer
+			relation to an instance of the <classname>Customer</classname> class.</para>
 			<programlisting><![CDATA[private class CustomerMappingQuery extends MappingSqlQuery {
 
     public CustomerMappingQuery(DataSource ds) {
@@ -843,10 +829,6 @@ public class ExecuteAnUpdate {
 				defined we call the <literal>compile()</literal> method so the statement
 				can be prepared and later be executed.
 			</para>
-			<para>
-				Let's take a look at the code where this custom query is
-				instantiated and executed:
-			</para>
 			<programlisting><![CDATA[public Customer getCustomer(Integer id) {
     CustomerMappingQuery custQry = new CustomerMappingQuery(dataSource); 
     Object[] parms = new Object[1];
@@ -874,21 +856,15 @@ public class ExecuteAnUpdate {
 		</section>
 		<section id="jdbc-SqlUpdate">
 			<title><classname>SqlUpdate</classname></title>
-			<para>
-				The <classname>SqlUpdate</classname> class encapsulates an SQL update.
-				Like a query, an update object is reusable. Like all
-				<classname>RdbmsOperation</classname> classes, an update
-				can have parameters and is defined in SQL.
-			</para>
-			<para>
-				This class provides a number of <literal>update()</literal> methods
-				analogous to the <literal>execute()</literal> methods of query objects.
-			</para>
-			<para>
-				This class is concrete. Although it can be subclassed (for example
-				to add a custom update method) it can easily be parameterized by setting
-				SQL and declaring parameters.
-			</para>
+			<para>The <classname>SqlUpdate</classname> class encapsulates an SQL update.
+			Like a query, an update object is reusable, and like all
+			<classname>RdbmsOperation</classname> classes, an update
+			can have parameters and is defined in SQL. This class provides a number of
+			<methodname>update(..)</methodname> methods analogous to the
+			<methodname>execute(..)</methodname> methods of query objects.
+			This class is concrete. Although it can be subclassed (for example
+			to add a custom update method) it can easily be parameterized by setting
+			SQL and declaring parameters.</para>
 			<programlisting><![CDATA[import java.sql.Types;
 
 import javax.sql.DataSource;
@@ -906,11 +882,11 @@ public class UpdateCreditRating extends SqlUpdate {
         compile();
     }
 
-    /**
+    <lineannotation>/**
      * @param id for the Customer to be updated
      * @param rating the new value for credit rating
      * @return number of rows updated
-     */
+     */</lineannotation>
     public int run(int id, int rating) {
         Object[] params =
             new Object[] {
@@ -1056,11 +1032,9 @@ public final class TitleMapper implements RowMapper {
         return title;
     }
 }]]></programlisting>
-			<para>
-				Secondly, the <classname>GenreMapper</classname> class, which again simply
-				maps a <interfacename>ResultSet</interfacename> to a <classname>Genre</classname>
-				domain object for each row in the supplied <interfacename>ResultSet</interfacename>.
-			</para>
+			<para>Secondly, the <classname>GenreMapper</classname> class, which again simply
+			maps a <interfacename>ResultSet</interfacename> to a <classname>Genre</classname>
+			domain object for each row in the supplied <interfacename>ResultSet</interfacename>.</para>
 			<programlisting><![CDATA[import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
