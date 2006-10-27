@@ -49,8 +49,8 @@ import org.springframework.util.ObjectUtils;
  * <p>Interceptors and Advisors are identified by a list of bean names in the current
  * bean factory. These beans should be of type Interceptor or Advisor. The last entry
  * in the list can be the name of any bean in the factory. If it's neither an
- * Interceptor nor an Advisor, a new SingletonTargetSource is added to wrap it. If it;s
- * a TargetSource, it is used as this proxy factory's TargetSource. It's normally preferred
+ * Interceptor nor an Advisor, a new SingletonTargetSource is added to wrap it. If it is
+ * a TargetSource, it is used as this proxy factory's TargetSource. It is normally preferred
  * to use the "targetSource" property to set the TargetSource. It is not possible to use
  * both the targetSource property and an interceptor name: this is treated as a
  * configuration error.
