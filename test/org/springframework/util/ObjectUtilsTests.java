@@ -105,12 +105,8 @@ public final class ObjectUtilsTests extends TestCase {
 	}
 
 	public void testToObjectArrayWithNonPrimitiveArray() {
-		try {
-			ObjectUtils.toObjectArray(new String[] {"Bingo"});
-			fail("Must have thrown an IllegalArgumentException by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		String[] source = new String[] {"Bingo"};
+		assertEquals(source, ObjectUtils.toObjectArray(source));
 	}
 
 	public void testAddObjectToArraySunnyDay() {

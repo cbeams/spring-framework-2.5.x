@@ -123,7 +123,7 @@ public class DefaultValueStyler implements ValueStyler {
 
 	String visit(Object value) {
 		if (value.getClass().isArray()) {
-			return styleArray(getObjectArray(value));
+			return styleArray(ObjectUtils.toObjectArray(value));
 		}
 		else {
 			return String.valueOf(value);
@@ -149,15 +149,6 @@ public class DefaultValueStyler implements ValueStyler {
 		}
 		buffer.append("]");
 		return buffer.toString();
-	}
-
-	private Object[] getObjectArray(Object value) {
-		if (value.getClass().getComponentType().isPrimitive()) {
-			return ObjectUtils.toObjectArray(value);
-		}
-		else {
-			return (Object[]) value;
-		}
 	}
 
 }

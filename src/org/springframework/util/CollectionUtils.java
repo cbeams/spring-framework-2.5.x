@@ -181,18 +181,16 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Convert the supplied array into a List. Primitive arrays are
-	 * correctly converted into Lists of the appropriate wrapper type.
-	 * @param source the original array
+	 * Convert the supplied array into a List. A primitive array gets
+	 * converted into a List of the appropriate wrapper type.
+	 * <p>A <code>null</code> source value will be converted to an
+	 * empty List.
+	 * @param source the (potentially primitive) array
 	 * @return the converted List result
+	 * @see ObjectUtils#toObjectArray(Object)
 	 */
 	public static List arrayToList(Object source) {
-		if (source == null || !source.getClass().isArray()) {
-			throw new IllegalArgumentException("Source is not an array: " + source);
-		}
-		boolean primitive = source.getClass().getComponentType().isPrimitive();
-		Object[] array = (primitive ? ObjectUtils.toObjectArray(source) : (Object[]) source);
-		return Arrays.asList(array);
+		return Arrays.asList(ObjectUtils.toObjectArray(source));
 	}
 
 	/**
