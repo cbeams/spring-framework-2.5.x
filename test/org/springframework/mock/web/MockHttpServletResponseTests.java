@@ -22,8 +22,6 @@ import org.springframework.web.util.WebUtils;
 import java.util.Set;
 
 /**
- * Unit tests for the <code>MockHttpServletResponse</code> class.
- *
  * @author Juergen Hoeller
  * @author Rick Evans
  * @since 19.02.2006

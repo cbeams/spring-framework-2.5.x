@@ -33,8 +33,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Extends <code>AbstractJasperReportsView</code> to provide basic rendering logic for
- * views that are fixed format, i.e. always PDF or always HTML.
+ * Extends <code>AbstractJasperReportsView</code> to provide basic rendering logic
+ * for views that use a fixed format, e.g. always PDF or always HTML.
  *
  * <p>Subclasses need to implement two template methods: <code>createExporter</code>
  * to create a JasperReports exporter for a specific output format, and
@@ -55,8 +55,8 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 
 
 	/**
-	 * Perform rendering for a single Jasper Reports exporter,
-	 * i.e. a pre-defined output format.
+	 * Perform rendering for a single Jasper Reports exporter, that is,
+	 * for a pre-defined output format.
 	 */
 	protected void renderReport(JasperPrint populatedReport, Map model, HttpServletResponse response)
 			throws Exception {
@@ -120,8 +120,8 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 		if (!CollectionUtils.isEmpty(convertedExporterParameters)) {
 			mergedParameters.putAll(convertedExporterParameters);
 		}
-		for (Iterator iterator = model.keySet().iterator(); iterator.hasNext();) {
-			Object key = iterator.next();
+		for (Iterator it = model.keySet().iterator(); it.hasNext();) {
+			Object key = it.next();
 			if (key instanceof JRExporterParameter) {
 				Object value = model.get(key);
 				if (value instanceof String) {
@@ -143,7 +143,7 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	 * which will be used to render the report to the HTTP response.
 	 * <p>The <code>useWriter</code> method determines whether the
 	 * output will be written as text or as binary content.
-	 * @see #useWriter
+	 * @see #useWriter()
 	 */
 	protected abstract JRExporter createExporter();
 
@@ -151,8 +151,8 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	 * Return whether to use a <code>java.io.Writer</code> to write text content
 	 * to the HTTP response. Else, a <code>java.io.OutputStream</code> will be used,
 	 * to write binary content to the response.
-	 * @see javax.servlet.ServletResponse#getWriter
-	 * @see javax.servlet.ServletResponse#getOutputStream
+	 * @see javax.servlet.ServletResponse#getWriter()
+	 * @see javax.servlet.ServletResponse#getOutputStream()
 	 */
 	protected abstract boolean useWriter();
 
