@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -561,11 +562,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public void addHeader(String name, Object value) {
 		Assert.notNull(name, "Header name must not be null");
 		Assert.notNull(value, "Header value must not be null");
-		String canonicalName = name.toLowerCase();
-		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(canonicalName);
+		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		if (header == null) {
-			header = new HeaderValueHolder(name);
-			this.headers.put(canonicalName, header);
+			header = new HeaderValueHolder();
+			this.headers.put(name, header);
 		}
 		if (value instanceof Collection) {
 			header.addValues((Collection) value);
@@ -580,7 +580,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public long getDateHeader(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(name.toLowerCase());
+		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		Object value = (header != null ? header.getValue() : null);
 		if (value instanceof Date) {
 			return ((Date) value).getTime();
@@ -598,22 +598,22 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getHeader(String name) {
-		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(name.toLowerCase());
+		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		return (header != null ? header.getValue().toString() : null);
 	}
 
 	public Enumeration getHeaders(String name) {
-		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(name.toLowerCase());
+		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		return Collections.enumeration(header != null ? header.getValues() : Collections.EMPTY_LIST);
 	}
 
 	public Enumeration getHeaderNames() {
-		return new HttpHeaderNamesEnumerator(this.headers.values());
+		return this.headers.keys();
 	}
 
 	public int getIntHeader(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		HeaderValueHolder header = (HeaderValueHolder) this.headers.get(name.toLowerCase());
+		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		Object value = (header != null ? header.getValue() : null);
 		if (value instanceof Number) {
 			return ((Number) value).intValue();

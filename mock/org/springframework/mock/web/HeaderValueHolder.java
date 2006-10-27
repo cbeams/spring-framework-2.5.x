@@ -18,26 +18,23 @@ package org.springframework.mock.web;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.util.Assert;
 
 /**
  * Internal helper class that serves as value holder for request headers.
  *
  * @author Juergen Hoeller
  * @author Rick Evans
- * @author Tamas Szabo
  * @since 2.0.1
  */
 class HeaderValueHolder {
 
-	private String name;
 	private final List values = new LinkedList();
-
-
-	public HeaderValueHolder(String name) {
-		this.name = name;
-	}
 
 
 	public void setValue(Object value) {
@@ -61,8 +58,23 @@ class HeaderValueHolder {
 		return (!this.values.isEmpty() ? this.values.get(0) : null);
 	}
 
-	public String getName() {
-		return name;
+
+	/**
+	 * Find a HeaderValueHolder by name, ignoring casing.
+	 * @param headers the Map of header names to HeaderValueHolders
+	 * @param name the name of the desired header
+	 * @return the corresponding HeaderValueHolder,
+	 * or <code>null</code> if none found
+	 */
+	public static HeaderValueHolder getByName(Map headers, String name) {
+		Assert.notNull(name, "Header name must not be null");
+		for (Iterator it = headers.keySet().iterator(); it.hasNext();) {
+			String headerName = (String) it.next();
+			if (headerName.equalsIgnoreCase(name)) {
+				return (HeaderValueHolder) headers.get(headerName);
+			}
+		}
+		return null;
 	}
 
 }
