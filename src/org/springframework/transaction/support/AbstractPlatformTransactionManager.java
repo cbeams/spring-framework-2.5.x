@@ -350,8 +350,21 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				logger.debug("Suspending current transaction, creating new transaction with name [" +
 						definition.getName() + "]");
 			}
-			Object suspendedResources = suspend(transaction);
-			doBegin(transaction, definition);
+			SuspendedResourcesHolder suspendedResources = suspend(transaction);
+			try {
+				doBegin(transaction, definition);
+			}
+			catch (TransactionException beginEx) {
+				try {
+					resume(transaction, suspendedResources);
+				}
+				catch (TransactionException resumeEx) {
+					logger.error(
+							"Inner transaction begin exception overridden by outer transaction resume exception", beginEx);
+					throw resumeEx;
+				}
+				throw beginEx;
+			}
 			boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 			return newTransactionStatus(
 					definition, transaction, true, newSynchronization, debugEnabled, suspendedResources);
@@ -431,13 +444,20 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				((TransactionSynchronization) it.next()).suspend();
 			}
 			TransactionSynchronizationManager.clearSynchronization();
-			String name = TransactionSynchronizationManager.getCurrentTransactionName();
-			TransactionSynchronizationManager.setCurrentTransactionName(null);
-			boolean readOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
-			TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
-			TransactionSynchronizationManager.setActualTransactionActive(false);
-			Object holder = doSuspend(transaction);
-			return new SuspendedResourcesHolder(holder, suspendedSynchronizations, name, readOnly);
+			try {
+				Object holder = doSuspend(transaction);
+				String name = TransactionSynchronizationManager.getCurrentTransactionName();
+				TransactionSynchronizationManager.setCurrentTransactionName(null);
+				boolean readOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
+				TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
+				TransactionSynchronizationManager.setActualTransactionActive(false);
+				return new SuspendedResourcesHolder(holder, suspendedSynchronizations, name, readOnly);
+			}
+			catch (TransactionException ex) {
+				// doSuspend failed - original transaction is still active...
+				resumeSynchronizations(suspendedSynchronizations);
+				throw ex;
+			}
 		}
 		else {
 			Object holder = doSuspend(transaction);
@@ -460,12 +480,20 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			TransactionSynchronizationManager.setActualTransactionActive(true);
 			TransactionSynchronizationManager.setCurrentTransactionReadOnly(resourcesHolder.isReadOnly());
 			TransactionSynchronizationManager.setCurrentTransactionName(resourcesHolder.getName());
-			TransactionSynchronizationManager.initSynchronization();
-			for (Iterator it = resourcesHolder.getSuspendedSynchronizations().iterator(); it.hasNext();) {
-				TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
-				synchronization.resume();
-				TransactionSynchronizationManager.registerSynchronization(synchronization);
-			}
+			resumeSynchronizations(resourcesHolder.getSuspendedSynchronizations());
+		}
+	}
+
+	/**
+	 * Resume all given synchronizations.
+	 * @param suspendedSynchronizations List of TransactionSynchronization objects
+	 */
+	private void resumeSynchronizations(List suspendedSynchronizations) {
+		TransactionSynchronizationManager.initSynchronization();
+		for (Iterator it = suspendedSynchronizations.iterator(); it.hasNext();) {
+			TransactionSynchronization synchronization = (TransactionSynchronization) it.next();
+			synchronization.resume();
+			TransactionSynchronizationManager.registerSynchronization(synchronization);
 		}
 	}
 

@@ -22,6 +22,7 @@ import java.util.List;
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
@@ -38,6 +39,7 @@ import org.hibernate.engine.SessionImplementor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.MockJtaTransaction;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.jta.JtaTransactionManager;
@@ -814,6 +816,96 @@ public class HibernateJtaTransactionTests extends TestCase {
 		sfControl.verify();
 		session1Control.verify();
 		session2Control.verify();
+	}
+
+	public void testJtaTransactionWithWithRequiresNewAndSuspendException() throws Exception {
+		doTestJtaTransactionWithWithRequiresNewAndException(true);
+	}
+
+	public void testJtaTransactionWithWithRequiresNewAndBeginException() throws Exception {
+		doTestJtaTransactionWithWithRequiresNewAndException(false);
+	}
+
+	protected void doTestJtaTransactionWithWithRequiresNewAndException(boolean suspendException) throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		MockControl txControl = MockControl.createControl(javax.transaction.Transaction.class);
+		javax.transaction.Transaction tx = (javax.transaction.Transaction) txControl.getMock();
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		final SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl session1Control = MockControl.createControl(Session.class);
+		final Session session1 = (Session) session1Control.getMock();
+
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		ut.begin();
+		utControl.setVoidCallable(1);
+		if (suspendException) {
+			tm.suspend();
+			tmControl.setThrowable(new SystemException(), 1);
+		}
+		else {
+			tm.suspend();
+			tmControl.setReturnValue(tx, 1);
+			ut.begin();
+			utControl.setThrowable(new SystemException(), 1);
+			tm.resume(tx);
+			tmControl.setVoidCallable(1);
+		}
+		ut.rollback();
+		utControl.setVoidCallable(1);
+
+		sf.openSession();
+		sfControl.setReturnValue(session1, 1);
+		session1.getSessionFactory();
+		session1Control.setReturnValue(sf, 1);
+		session1.close();
+		session1Control.setReturnValue(null, 1);
+
+		utControl.replay();
+		tmControl.replay();
+		sfControl.replay();
+		session1Control.replay();
+
+		JtaTransactionManager ptm = new JtaTransactionManager();
+		ptm.setUserTransaction(ut);
+		ptm.setTransactionManager(tm);
+		final TransactionTemplate tt = new TransactionTemplate(ptm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		try {
+			tt.execute(new TransactionCallback() {
+				public Object doInTransaction(TransactionStatus status) {
+					org.hibernate.Session outerSession = SessionFactoryUtils.getSession(sf, false);
+					assertSame(session1, outerSession);
+					SessionHolder holder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
+					assertTrue("Has thread session", holder != null);
+					tt.execute(new TransactionCallback() {
+						public Object doInTransaction(TransactionStatus status) {
+							return null;
+						}
+					});
+					return null;
+				}
+			});
+			fail("Should have thrown TransactionException");
+		}
+		catch (TransactionException ex) {
+			// expected
+		}
+		finally {
+			assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		}
+
+		utControl.verify();
+		tmControl.verify();
+		sfControl.verify();
+		session1Control.verify();
 	}
 
 	public void testJtaTransactionCommitWithWithRequiresNewAndJtaTm() throws Exception {
