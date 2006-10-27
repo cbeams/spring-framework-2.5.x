@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -263,6 +263,7 @@ public abstract class AbstractXsltView extends AbstractView {
 		}
 	}
 
+
 	protected final void renderMergedOutputModel(
 			Map model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
@@ -341,22 +342,28 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * Perform the actual transformation, writing to the HTTP response.
 	 * <p>The default implementation delegates to the
 	 * {@link #doTransform(javax.xml.transform.Source, java.util.Map, javax.xml.transform.Result, String)}
-	 * method , building a StreamResult for the ServletResponse OutputStream.
+	 * method, building a StreamResult for the ServletResponse OutputStream
+	 * or for the ServletResponse Writer (according to {@link #useWriter()}).
 	 * @param model the model Map
 	 * @param source the Source to transform
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @throws Exception if an error occurs
 	 * @see javax.xml.transform.stream.StreamResult
-	 * @see javax.servlet.ServletResponse#getOutputStream
+	 * @see javax.servlet.ServletResponse#getOutputStream()
+	 * @see javax.servlet.ServletResponse#getWriter()
+	 * @see #useWriter()
 	 */
 	protected void doTransform(
 			Map model, Source source, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		doTransform(source, getParameters(request),
-				new StreamResult(new BufferedOutputStream(response.getOutputStream())),
-				response.getCharacterEncoding());
+		Map parameters = getParameters(request);
+		Result result = (useWriter() ?
+				new StreamResult(response.getWriter()) :
+				new StreamResult(new BufferedOutputStream(response.getOutputStream())));
+		String encoding = response.getCharacterEncoding();
+		doTransform(source, parameters, result, encoding);
 	}
 
 	/**
@@ -448,6 +455,19 @@ public abstract class AbstractXsltView extends AbstractView {
 	 */
 	protected Map getParameters() {
 		return null;
+	}
+
+	/**
+	 * Return whether to use a <code>java.io.Writer</code> to write text content
+	 * to the HTTP response. Else, a <code>java.io.OutputStream</code> will be used,
+	 * to write binary content to the response.
+	 * <p>The default implementation returns <code>false</code>, indicating a
+	 * a <code>java.io.OutputStream</code>.
+	 * @see javax.servlet.ServletResponse#getWriter()
+	 * @see javax.servlet.ServletResponse#getOutputStream()
+	 */
+	protected boolean useWriter() {
+		return false;
 	}
 
 }

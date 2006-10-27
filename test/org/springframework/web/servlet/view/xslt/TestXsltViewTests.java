@@ -104,7 +104,6 @@ public class TestXsltViewTests extends TestCase {
 		}
 
 		view.setErrorListener(new ErrorListener() {
-
 			public void warning(TransformerException ex) {
 				incWarnings();
 			}
@@ -139,7 +138,6 @@ public class TestXsltViewTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		AbstractXsltView view = new AbstractXsltView() {
-
 			protected Source createXsltSource(Map model, String root, HttpServletRequest request, HttpServletResponse response) throws Exception {
 				Hero hero = (Hero) model.get("hero");
 				Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
@@ -149,8 +147,8 @@ public class TestXsltViewTests extends TestCase {
 				node.setAttribute("catchphrase", hero.getCatchphrase());
 				return new DOMSource(node);
 			}
-
 		};
+
 		view.setStylesheetLocation(
 				new DefaultResourceLoader().getResource("classpath:org/springframework/web/servlet/view/xslt/sunnyDay.xsl"));
 		view.setIndent(true);
@@ -169,14 +167,13 @@ public class TestXsltViewTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		AbstractXsltView view = new AbstractXsltView() {
-
 			protected Map getParameters() {
 				Map parameters = new HashMap();
 				parameters.put("sex", "Male");
 				return parameters;
 			}
-
 		};
+
 		view.setStylesheetLocation(
 				new DefaultResourceLoader().getResource("classpath:org/springframework/web/servlet/view/xslt/sunnyDay.xsl"));
 		Properties outputProperties = new Properties();
@@ -203,15 +200,14 @@ public class TestXsltViewTests extends TestCase {
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
+		response.setWriterAccessAllowed(false);
 
 		AbstractXsltView view = new AbstractXsltView() {
-
 			protected Map getParameters() {
 				Map parameters = new HashMap();
 				parameters.put("sex", "Male");
 				return parameters;
 			}
-
 		};
 		view.setStylesheetLocation(
 				new DefaultResourceLoader().getResource("classpath:org/springframework/web/servlet/view/xslt/sunnyDay.xsl"));
@@ -236,9 +232,9 @@ public class TestXsltViewTests extends TestCase {
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
+		response.setOutputStreamAccessAllowed(false);
 
 		AbstractXsltView view = new AbstractXsltView() {
-
 			protected Source createXsltSource(Map model, String root, HttpServletRequest request, HttpServletResponse response) throws Exception {
 				Hero hero = (Hero) model.get("hero");
 				Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
@@ -248,14 +244,16 @@ public class TestXsltViewTests extends TestCase {
 				node.setAttribute("catchphrase", hero.getCatchphrase());
 				return new DOMSource(node);
 			}
-
 			protected Map getParameters() {
 				Map parameters = new HashMap();
 				parameters.put("sex", "Male");
 				return parameters;
 			}
-
+			protected boolean useWriter() {
+				return true;
+			}
 		};
+
 		view.setStylesheetLocation(
 				new DefaultResourceLoader().getResource("classpath:org/springframework/web/servlet/view/xslt/sunnyDayExplicitRoot.xsl"));
 		view.setUseSingleModelNameAsRoot(false);
@@ -296,8 +294,8 @@ public class TestXsltViewTests extends TestCase {
 				}
 				return new DOMSource(root);
 			}
-
 		};
+
 		view.setStylesheetLocation(
 				new DefaultResourceLoader().getResource("classpath:org/springframework/web/servlet/view/xslt/firstWords.xsl"));
 		view.setIndent(true);
