@@ -93,7 +93,7 @@
 					</caption>
 				</mediaobject>
 			</para>
-			<section>
+			<section id="beans-factory-metadata">
 				<title>Configuration metadata</title>
 				<para>
 					As can be seen in the above image, the Spring IoC container consumes some form of
@@ -168,7 +168,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   </bean>
   ]]><lineannotation>&lt;!-- more bean definitions go here... --&gt;</lineannotation><![CDATA[
 </beans>]]></programlisting>
-			<section>
+			<section id="beans-factory-instantiation">
 				<title>Instantiating a container</title>
 				<para>Instantiating a Spring IoC container is easy; find below some examples of how
 				to do just that:</para>
@@ -264,7 +264,7 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
             <para>The concepts listed above directly translate to a set of properties
 			that each bean definition consists of. Some of these properties are listed
 			below, along with a link to further documentation about each of them.</para>
-			<table>
+			<table id="beans-factory-bean-definition-tbl">
                 <title>The bean definition</title>
                 <tgroup cols="2">
                     <colspec colname="c1" colwidth="2*" />
@@ -964,7 +964,7 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
 			</para>
         </section>
 		</section>
-        <section>
+        <section id="beans-factory-ctor-arguments-resolution">
             <title>Constructor Argument Resolution</title>
             <para>
 				Constructor argument resolution matching occurs using the
@@ -1024,7 +1024,7 @@ public class ExampleBean {
         this.ultimateAnswer = ultimateAnswer;
     }
 }]]></programlisting>
-            <section>
+            <section id="beans-factory-ctor-arguments-type">
                 <title>Constructor Argument Type Matching</title>
                 <para>The above scenario <emphasis>can</emphasis> use type matching
 				with simple types by explicitly specifying the type of the constructor
@@ -1034,7 +1034,7 @@ public class ExampleBean {
   <constructor-arg type="java.lang.String" value="42"/>
 </bean>]]></programlisting>
             </section>
-            <section>
+            <section id="beans-factory-ctor-arguments-index">
                 <title>Constructor Argument Index</title>
                 <para>Constructor arguments can have their index specified explicitly by use of
                 the <literal>index</literal> attribute. For example:</para>
@@ -1381,7 +1381,7 @@ support=support@somecompany.co.uk]]></programlisting>
                     note that this merging feature is only available in Spring 2.0 (and later
                     versions).</para>
                 </section>
-                <section>
+                <section id="beans-collection-elements-strongly-typed">
                     <title>Strongly-typed collection (Java5+ only)</title>
                     <para>If you are one of the lucky few to be using Java5 (Tiger), you will be aware
                     that it is possible to have strongly typed collections. That is, it is possible to
@@ -1442,8 +1442,8 @@ support=support@somecompany.co.uk]]></programlisting>
                 <para>The above configuration is equivalent to the following Java code:
                 <methodname>exampleBean.setEmail(null)</methodname>.</para>
             </section>
-            <section>
-                <title id="beans-value-ref-shortcuts">XML-based configuration metadata shortcuts</title>
+            <section id="beans-value-ref-shortcuts">
+                <title>XML-based configuration metadata shortcuts</title>
                 <para>There exist some shortcut forms which are less verbose than using the full
                 <literal>&lt;value/&gt;</literal> and <literal>&lt;ref/&gt;</literal> elements. The
                 <literal>&lt;property/&gt;</literal>, <literal>&lt;constructor-arg/&gt;</literal>, and
@@ -1499,8 +1499,8 @@ support=support@somecompany.co.uk]]></programlisting>
                 <literal>&lt;ref bean="xxx"&gt;</literal> element; there is no shortcut for
                 <literal>&lt;ref local="xxx"</literal>&gt;.</para>
             </section>
-            <section>
-                <title id="beans-compound-property-names">Compound property names</title>
+            <section id="beans-compound-property-names">
+                <title>Compound property names</title>
                 <para>Compound or nested property names are perfectly legal
                 when setting bean properties, as long as all components of the path
                 except the final property name are non-null. For example, in this bean
@@ -1614,7 +1614,7 @@ support=support@somecompany.co.uk]]></programlisting>
             When using XML-based configuration metadata, the autowire mode for a bean definition
             is specified by using the <literal>autowire</literal> attribute of the
             <literal>&lt;bean/&gt;</literal> element. The following values are allowed:</para>
-            <table>
+            <table id="beans-factory-autowiring-modes-tbl">
                 <title>Autowiring modes</title>
                 <tgroup cols="2">
                     <colspec colname="c1" colwidth="1*" />
@@ -1770,7 +1770,7 @@ support=support@somecompany.co.uk]]></programlisting>
 			XML-based configuration metadata, this is specified via the
 			<literal>'dependency-check'</literal> attribute in a bean definition,
 			which may have the following values.</para>
-			<table frame="all">
+			<table id="beans-factory-dependency-check-modes-tbl">
                 <title>Dependency checking modes</title>
                 <tgroup cols="2">
                     <colspec colname="c1" colwidth="1*" />
@@ -1874,7 +1874,7 @@ public class CommandManager implements BeanFactoryAware {
             business code is then aware of and coupled to the Spring Framework. Method Injection,
             a somewhat advanced feature of the Spring IoC container, allows this use case to be
             handled in a clean fashion.</para>
-            <section>
+            <section id="beans-factory-lookup-method-injection">
                 <title>Lookup method injection</title>
                 <sidebar>
                     <title>Isn't this Method Injection...</title>
@@ -1902,9 +1902,9 @@ public class CommandManager implements BeanFactoryAware {
 
 ]]><lineannotation>// no more Spring imports! </lineannotation><![CDATA[
 
-public class CommandManager {
+public abstract class CommandManager {
 
-   public Object process(Object command) {
+   public Object process(Object commandState) {
       ]]><lineannotation>// grab a new instance of the appropriate <interfacename>Command</interfacename> interface</lineannotation><![CDATA[
       Command command = createCommand();
       ]]><lineannotation>// set the state on the (hopefully brand new) <interfacename>Command</interfacename> instance</lineannotation><![CDATA[
@@ -1912,9 +1912,8 @@ public class CommandManager {
       return command.execute();
    }
 
-    ]]><lineannotation>// mmm, but where is the implementation of this method?</lineannotation><![CDATA[
-   protected abstract CommandHelper createCommand();
-
+    ]]><lineannotation>// okay... but where is the implementation of this method?</lineannotation><![CDATA[
+   protected abstract Command createCommand();
 }]]></programlisting>
                 <para>In the client class containing the method to be injected (the
                 <classname>CommandManager</classname> in this case), the method that
@@ -1965,7 +1964,7 @@ public class CommandManager {
                     reduce the coupling to Spring).</para>
                 </tip>
             </section>
-            <section>
+            <section id="beans-factory-arbitrary-method-replacement">
                 <title>Arbitrary method replacement</title>
                 <para>A less commonly useful form of method injection than Lookup
                 Method Injection is the ability to replace arbitrary methods in a
@@ -2049,7 +2048,7 @@ public class ReplacementComputeValue implements MethodReplacer {
         three are available only if you are using a web-aware Spring
         <interfacename>ApplicationContext</interfacename>).</para>
 		<para>The scopes supported out of the box are listed below:</para>
-		<table>
+		<table id="beans-factory-scopes-tbl">
 			<title>Bean scopes</title>
 			<tgroup cols="2">
 				<thead>
@@ -2721,7 +2720,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
                         element itself.
                     </para>
                 </section>
-                <section>
+                <section id="beans-factory-shutdown">
                     <title>Shutting down the Spring IoC container gracefully in non-web applications</title>
                     <note>
                         <para>This next section does not apply to web applications (in case the title of this section
@@ -3578,7 +3577,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
 			gets published to the <interfacename>ApplicationContext</interfacename>, that
 			bean will be notified. Essentially, this is the standard <emphasis>Observer</emphasis>
 			design pattern. Spring provides	three standard events:</para>
-			<table frame="all">
+			<table id="beans-ctx-events-tbl">
                 <title>Built-in Events</title>
                 <tgroup cols="2">
                     <colspec colname="c1" colwidth="2*" />
