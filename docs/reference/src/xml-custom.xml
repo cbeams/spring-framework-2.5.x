@@ -356,7 +356,7 @@ public class ComponentFactoryBean implements FactoryBean {
    }
 
    public Object getObject() throws Exception {
-      if (this.children != null &amp;&&amp; this.children.size() > 0) {
+      if (this.children != null && this.children.size() > 0) {
          for (Iterator it = children.iterator(); it.hasNext();) {
             Component childComponent = (Component) it.next();
             this.parent.addComponent(childComponent);
@@ -432,7 +432,7 @@ public class ComponentBeanDefinitionParser extends AbstractBeanDefinitionParser 
       factory.addPropertyValue("parent", parent.getBeanDefinition());
 
       List childElements = DomUtils.getChildElementsByTagName(element, "component");
-      if (childElements != null &amp;&amp; childElements.size() > 0) {
+      if (childElements != null && childElements.size() > 0) {
          parseChildComponents(childElements, factory);
       }
       return factory.getBeanDefinition();
@@ -472,7 +472,7 @@ http\://www.foo.com/schema/component/component.xsd=com/foo/component.xsd]]></pro
 		    <ulink url="http://jcp.org/en/jsr/detail?id=107">JCache</ulink>, and you want to ensure that
 		    the named JCache instance is eagerly started within the surrounding cluster:</para>
 		    <programlisting><![CDATA[<bean id="checkingAccountService" class="com.foo.DefaultCheckingAccountService"
-       ]]><lineannotation><emphasis role="bold">jcache:cache-name="checking.account"&gt;</emphasis></lineannotation><![CDATA[
+      ]]><lineannotation><emphasis role="bold">jcache:cache-name="checking.account"&gt;</emphasis></lineannotation><![CDATA[
    ]]><lineannotation>&lt;!-- other dependencies here... --&gt;</lineannotation><![CDATA[
 </bean>]]></programlisting>
             <para>What we are going to do here is create another <interfacename>BeanDefinition</interfacename>
@@ -564,10 +564,12 @@ public class JCacheInitializingBeanDefinitionDecorator implements BeanDefinition
 
    private String registerJCacheInitializer(Node source, ParserContext ctx) {
       String cacheName = ((Attr) source).getValue();
-      BeanDefinitionBuilder initializer = BeanDefinitionBuilder.rootBeanDefinition(JCacheInitializer.class);
-      initializer.addConstructorArg(cacheName);
       String beanName = cacheName + "-initializer";
-      ctx.getRegistry().registerBeanDefinition(beanName, initializer.getBeanDefinition());
+      if (!ctx.getRegistry().containsBeanDefinition(beanName)) {
+         BeanDefinitionBuilder initializer = BeanDefinitionBuilder.rootBeanDefinition(JCacheInitializer.class);
+         initializer.addConstructorArg(cacheName);
+         ctx.getRegistry().registerBeanDefinition(beanName, initializer.getBeanDefinition());
+      }
       return beanName;
    }
 }
