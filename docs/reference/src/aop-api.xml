@@ -22,7 +22,7 @@
 
     <para>Let's look at how Spring handles the crucial pointcut concept.</para>
 
-    <section>
+    <section id="aop-api-concepts">
       <title>Concepts</title>
 
       <para>Spring's pointcut model enables pointcut reuse independent of
@@ -90,7 +90,7 @@
 			</tip>				
     </section>
 
-    <section>
+    <section id="aop-api-pointcut-ops">
       <title>Operations on pointcuts</title>
 
       <para>Spring supports operations on pointcuts: notably,
@@ -117,7 +117,7 @@
 
     </section>
 
-    <section>
+    <section id="aop-api-pointcuts-aspectj">
       <title>AspectJ expression pointcuts</title>
 
       <para>Since 2.0, the most important type of pointcut used by Spring is
@@ -130,14 +130,14 @@
       </para>
     </section>
 
-    <section>
+    <section id="aop-api-pointcuts-impls">
       <title>Convenience pointcut implementations</title>
 
       <para>Spring provides several convenient pointcut implementations. Some
       can be used out of the box; others are intended to be subclassed in
       application-specific pointcuts.</para>
 
-      <section>
+      <section id="aop-api-pointcuts-static">
         <title>Static pointcuts</title>
 
         <para>Static pointcuts are based on method and target class, and
@@ -150,7 +150,7 @@
         <para>Let's consider some static pointcut implementations included
         with Spring.</para>
 
-        <section>
+        <section id="aop-api-pointcuts-regex">
           <title>Regular expression pointcuts</title>
 
           <para>One obvious way to specify static pointcuts is regular
@@ -210,7 +210,7 @@
           with any Advice type.</para>
         </section>
 
-        <section>
+        <section id="aop-api-pointcuts-attribute-driven">
           <title>Attribute-driven pointcuts</title>
 
           <para>An important type of static pointcut is a
@@ -219,7 +219,7 @@
         </section>
       </section>
 
-      <section>
+      <section id="aop-api-pointcuts-dynamic">
         <title>Dynamic pointcuts</title>
 
         <para>Dynamic pointcuts are costlier to evaluate than static
@@ -231,7 +231,7 @@
         <para>The main example is the <literal>control flow</literal>
         pointcut.</para>
 
-        <section>
+        <section id="aop-api-pointcuts-cflow">
           <title>Control flow pointcuts</title>
 
           <para>Spring control flow pointcuts are conceptually similar to
@@ -254,7 +254,7 @@
       </section>
     </section>
 
-    <section>
+    <section id="aop-api-pointcuts-superclasses">
       <title>Pointcut superclasses</title>
 
       <para>Spring provides useful pointcut superclasses to help you to
@@ -276,7 +276,7 @@
       RC2 and above.</para>
     </section>
 
-    <section>
+    <section id="aop-api-pointcuts-custom">
       <title>Custom pointcuts</title>
 
       <para>Because pointcuts in Spring AOP are Java classes, rather than
@@ -293,12 +293,12 @@
     </section>
   </section>
 
-  <section>
+  <section id="aop-api-advice">
     <title>Advice API in Spring</title>
 
     <para>Let's now look at how Spring AOP handles advice.</para>
 
-    <section>
+    <section id="aop-api-advice-lifecycle">
       <title>Advice lifecycles</title>
 
       <para>Each advice is a Spring bean. An advice instance can be shared across all 
@@ -327,7 +327,7 @@
       extensible to support arbitrary advice types. Let us look at the basic
       concepts and standard advice types.</para>
 
-      <section>
+      <section id="aop-api-advice-around">
         <title>Interception around advice</title>
 
         <para>The most fundamental advice type in Spring is
@@ -380,7 +380,7 @@
         pointcut interfaces.</para></note>
       </section>
 
-      <section>
+      <section id="aop-api-advice-before">
         <title>Before advice</title>
 
         <para>A simpler advice type is a <emphasis role="bold">before
@@ -431,7 +431,7 @@
         <tip><para>Before advice can be used with any pointcut.</para></tip>
       </section>
 
-      <section>
+      <section id="aop-api-advice-throws">
         <title>Throws advice</title>
 
         <para><emphasis role="bold">Throws advice</emphasis> is invoked after
@@ -492,7 +492,7 @@
 				<tip><para>Throws advice can be used with any pointcut.</para></tip>        
       </section>
 
-      <section>
+      <section id="aop-api-advice-after-returning">
         <title>After Returning advice</title>
 
         <para>An after returning advice in Spring must implement the
@@ -533,30 +533,18 @@
 				<tip><para>After returning advice can be used with any pointcut.</para></tip>
       </section>
 
-      <section>
-         
-
+      <section id="aop-api-advice-introduction">
         <title>Introduction advice</title>
-
-         
-
         <para>Spring treats introduction advice as a special kind of
         interception advice.</para>
-
-         
-
         <para>Introduction requires an <literal>IntroductionAdvisor</literal>,
         and an <literal>IntroductionInterceptor</literal>, implementing the
         following interface:</para>
-
-         
 
         <programlisting>public interface IntroductionInterceptor extends MethodInterceptor {
 
     boolean implementsInterface(Class intf);
 }</programlisting>
-
-         
 
         <para>The <literal>invoke() </literal>method inherited from the AOP
         Alliance <literal>MethodInterceptor</literal> interface must implement
@@ -764,7 +752,7 @@ public interface IntroductionInfo {
     </section>
   </section>
 
-  <section>
+  <section id="aop-api-advisor">
     <title>Advisor API in Spring</title>
 
     <para>In Spring, an Advisor is an aspect that contains just a single advice
@@ -1017,7 +1005,7 @@ public interface IntroductionInfo {
 
     </section>
 
-    <section>
+    <section id="aop-api-proxying-intf">
       <title>Proxying interfaces</title>
 
       <para>
@@ -1141,7 +1129,7 @@ public interface IntroductionInfo {
       example, in certain test scenarios.</para>
     </section>
 
-    <section>
+    <section id="aop-api-proxying-class">
       <title>Proxying classes</title>
 
       <para>What if you need to proxy a class, rather than one or more
@@ -1310,7 +1298,7 @@ MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();</programlisti
 		</tip>			
   </section>
 
-  <section>
+  <section id="aop-api-advised">
     <title>Manipulating advised objects</title>
 
     <para>However you create AOP proxies, you can manipulate them using the
@@ -1441,7 +1429,7 @@ assertEquals("Added two advisors",
       <para>The <literal>org.springframework.aop.framework.autoproxy</literal>
       package provides the following standard autoproxy creators.</para>
 
-      <section>
+      <section id="aop-api-autoproxy">
         <title>BeanNameAutoProxyCreator</title>
 
         <para>The BeanNameAutoProxyCreator automatically creates AOP proxies
@@ -1476,7 +1464,7 @@ assertEquals("Added two advisors",
         differently to different beans.</para>
       </section>
 
-      <section>
+      <section id="aop-api-autoproxy-default">
         <title>DefaultAdvisorAutoProxyCreator</title>
 
         <para>A more general and extremely powerful auto proxy creator is
@@ -1555,7 +1543,7 @@ assertEquals("Added two advisors",
         configurable order value; the default setting is unordered.</para>
       </section>
 
-      <section>
+      <section id="aop-api-autoproxy-abstract">
         <title>AbstractAdvisorAutoProxyCreator</title>
 
         <para>This is the superclass of DefaultAdvisorAutoProxyCreator. You
@@ -1942,7 +1930,7 @@ System.out.println("Max pool size is " + conf.getMaxSize());]]></programlisting>
     Javadocs for further information.</para>
   </section>
 
-  <section>
+  <section id="aop-api-resources">
     <title>Further resources</title>
 
     <para>Please refer to the Spring sample applications for further examples

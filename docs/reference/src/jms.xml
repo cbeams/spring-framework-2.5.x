@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter id="jms">
   <title>JMS</title>
-  <section>
+  <section id="jms-introduction">
   	<title>Introduction</title>
   	<para>Spring provides a JMS abstraction framework that simplifies the use
     of the JMS API and shields the user from differences between the JMS 1.0.2
@@ -70,10 +70,10 @@
     Spring's transaction management mechanisms.</para>
   </section>
   
-  <section>
+  <section id="jms-using">
   	<title>Using Spring JMS</title>
   	
-  	<section>
+  	<section id="jms-jmstemplate">
   		<title><classname>JmsTemplate</classname></title> 
   		
   		<para>Two implementations of the <classname>JmsTemplate</classname> class are
@@ -110,8 +110,8 @@
     	to <literal>true</literal>.</para> 		
 	</section>
   	
-  	<section>
-  		<title>Connection Factory</title>
+  	<section id="jms-connections">
+  		<title>Connections</title>
   		
   		<para>The <classname>JmsTemplate</classname> requires a reference to a
       	<classname>ConnectionFactory</classname>. The
@@ -145,7 +145,7 @@
       	that would typically come from JNDI.</para>
   	</section>
   	
-  	<section>
+  	<section id="jms-destinations">
   		<title>Destination Management</title>
   		
   		<para>Destinations, like ConnectionFactories, are JMS administered
@@ -210,7 +210,7 @@
       	destination.</para>
   	</section>
   	
-  	<section>
+  	<section id="jms-mdp">
   		<title>Message Listener Containers</title>
   		
   		<para>One of the most common uses of JMS messages in the EJB world is to
@@ -236,7 +236,7 @@
 		<classname>AbstractMessageListenerContainer</classname> packaged
 		with Spring, each with its specialised feature set.</para>
 		
-		<section>
+		<section id="jms-mdp-simple">
 			<title><classname>SimpleMessageListenerContainer</classname></title>
 			
 			<para>This message listener container is the simplest of the
@@ -249,7 +249,7 @@
 			behaviors.</para>
 		</section>
 		
-		<section>
+		<section id="jms-mdp-default">
 			<title><classname>DefaultMessageListenerContainer</classname></title>
 			
 			<para>This message listener container is the one used in most
@@ -263,7 +263,7 @@
 			transaction participation.</para>
 		</section>
 		
-		<section>
+		<section id="jms-mdp-server-session">
 			<title><classname>ServerSessionMessageListenerContainer</classname></title>
 			
 			<para>This subclass is the most powerful of the three.  It
@@ -278,7 +278,7 @@
 		</section>
   	</section>
   	
-  	<section>
+  	<section id="jms-tx">
   		<title>Transaction management</title>
   		
   		<para>Spring provides a <classname>JmsTransactionManager</classname>
@@ -318,8 +318,8 @@
   	</section>
   </section>
   
-  <section>
-  	<title>Sending a Message</title>
+  <section id="jms-sending">
+  	<title>Sending a <interfacename>Message</interfacename></title>
   	
   	<para>The <classname>JmsTemplate</classname> contains many convenience
     methods to send a message. There are send methods that specify the
@@ -390,7 +390,7 @@ public class JmsQueueSender {
     specified a default destination, the <methodname>send(MessageCreator c)</methodname>
     sends a message to that destination.</para>
   	
-  	<section>
+  	<section id="jms-msg-conversion">
   		<title>Using Message Converters</title>
   		
   		<para>In order to facilitate the sending of domain model objects, the
@@ -455,7 +455,7 @@ public class JmsQueueSender {
 }]]></programlisting>
   	</section>
   	
-  	<section>
+  	<section id="jms-callbacks">
   		<title><interfacename>SessionCallback</interfacename> and <interfacename>ProducerCallback</interfacename></title>
   		
   		<para>While the send operations cover many common usage scenarios, there
@@ -472,10 +472,10 @@ public class JmsQueueSender {
   	</section>
   </section>
   
-  <section>
+  <section id="jms-receiving">
   	<title>Receiving a message</title>
   	
-  	<section>
+  	<section id="jms-receiving-sync">
   		<title>Synchronous Reception</title>
   		
   		<para>While JMS is typically associated with asynchronous processing, it
@@ -539,7 +539,7 @@ public class ExampleListener implements MessageListener {
         listener containers for a full description of the features supported by each implementation.</para>
   	</section>
   	
-  	<section>
+  	<section id="jms-receiving-async-session-aware-message-listener">
   	    <title>The <interfacename>SessionAwareMessageListener</interfacename> interface</title>
   	    <para>The <interfacename>SessionAwareMessageListener</interfacename> interface
   	    is a Spring-specific interface that provides a similar contract the JMS
@@ -571,7 +571,7 @@ public interface SessionAwareMessageListener {
         of the client code to handle any exceptions thrown.</para>
   	</section>
   	
-  	<section>
+  	<section id="jms-receiving-async-message-listener-adapter">
   	    <title>The <classname>MessageListenerAdapter</classname></title>
   	    <para>The <classname>MessageListenerAdapter</classname> class is the final component in
   	    Spring's asynchronous messaging support: in a nutshell, it allows you to 
@@ -678,7 +678,7 @@ public interface SessionAwareMessageListener {
         <emphasis>will</emphasis> propagate up the call stack).</para>
   	</section>
   	
-  	<section>
+  	<section id="jms-tx-participation">
   		<title>Participating in transactions</title>
   	
   		<para>Participation in transactions requires only a couple of minor

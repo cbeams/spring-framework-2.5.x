@@ -222,7 +222,7 @@ public class Person {
       the Javadoc Spring comes with. What's important to know is that there
       are a couple of conventions for indicating properties of an object. A
       couple of examples:</para>
-	  <table frame="all">
+	  <table id="beans-beans-conventions-properties-tbl">
           <title>Examples of properties</title>
 
           <tgroup cols="2">
@@ -240,9 +240,9 @@ public class Person {
                 <entry><literal>name</literal></entry>
 
                 <entry>Indicates the property <literal>name</literal>
-                corresponding to the methods <literal>getName()</literal> or
-                <literal>isName()</literal> and
-                <literal>setName()</literal></entry>
+                corresponding to the methods <methodname>getName()</methodname> or
+                <methodname>isName()</methodname> and
+                <methodname>setName(..)</methodname></entry>
               </row>
 
               <row>
@@ -380,7 +380,7 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
       fashion, you can of course still register your own variant to override
       the default one:</para>
       
-      <table frame="all">
+      <table id="beans-beans-property-editors-tbl">
           <title>Built-in <literal>PropertyEditors</literal></title>
 
           <tgroup cols="2">

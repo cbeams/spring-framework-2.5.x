@@ -61,7 +61,7 @@
 			a subset of the whole, rich, <classname>DataAccessException</classname> hierarchy.)
 		</para>
 	</section>
-	<section>
+	<section id="dao-abstract-superclasses">
 		<title>Consistent abstract classes for DAO support</title>
 		<para>
 			To make it easier to work with a variety of data access technologies

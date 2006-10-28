@@ -337,7 +337,7 @@
     about the <classname>DispatcherServlet</classname>. For most of the beans, sensible
     defaults are provided so you don't (initially) have to worry about configuring them.</para>
 
-    <table frame="all">
+    <table id="mvc-webappctx-special-beans-tbl">
       <title>Special beans in the <interfacename>WebApplicationContext</interfacename></title>
       <tgroup cols="2">
         <colspec colname="c1" colwidth="1*" />
@@ -464,7 +464,7 @@
     adding context parameters in the <literal>web.xml</literal> file or servlet
     initialization parameters. The possibilities are listed below.</para>
 
-    <table frame="all">
+    <table id="mvc-disp-servlet-init-params-tbl">
       <title><classname>DispatcherServlet</classname> initialization parameters</title>
       <tgroup cols="2">
         <colspec colname="c1" colwidth="1*" />
@@ -1264,7 +1264,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       quite a few view resolvers. We'll list most of them and then provide a
       couple of examples.</para>
 
-      <table frame="all">
+      <table id="mvc-view-resolvers-tbl">
         <title>View resolvers</title>
 
         <tgroup cols="2">
@@ -1438,7 +1438,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <emphasis>always</emphasis> return a view!</para>
     </section>
 
-    <section>
+    <section id="mvc-redirecting">
       <title>Redirecting to views</title>
 
       <para>As has been mentioned, a controller normally returns a logical
@@ -1468,7 +1468,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       re-<literal>POST</literal> the same data by doing a refresh. The refresh would just force a
       <literal>GET</literal> of the result page, not a resend of the initial <literal>POST</literal> data.</para>
 
-      <section>
+      <section id="mvc-redirecting-redirect-view">
         <title><classname>RedirectView</classname></title>
 
         <para>One way to force a redirect as the result of a controller
@@ -1492,7 +1492,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         in the context along with the view names.</para>
       </section>
 
-      <section>
+      <section id="mvc-redirecting-redirect-prefix">
         <title>The <literal>redirect:</literal> prefix</title>
 
         <para>While the use of <classname>RedirectView</classname> works fine, if
@@ -1521,7 +1521,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         redirection is happening.</para>
       </section>
 
-      <section>
+      <section id="mvc-redirecting-forward-prefix">
         <title>The <literal>forward:</literal> prefix</title>
 
         <para>It is also possible to use a special <literal>forward:</literal> prefix for view
@@ -1597,7 +1597,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
 </bean>]]></programlisting>
 
-      <table frame="all">
+      <table id="mvc-cookie-locale-resolver-props-tbl">
         <title><classname>CookieLocaleResolver</classname> properties</title>
 
         <tgroup cols="3">
@@ -1758,7 +1758,7 @@ background=/themes/cool/img/coolBg.jpg]]></programlisting>
       also alter the request's theme. The following theme resolvers are
       provided by Spring:</para>
 
-      <table frame="all">
+      <table id="mvc-theme-resolver-impls-tbl">
         <title><interfacename>ThemeResolver</interfacename> implementations</title>
 
         <tgroup cols="2">

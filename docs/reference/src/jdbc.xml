@@ -42,7 +42,7 @@
 			Spring takes care of all the grungy, low-level details that can make
 			JDBC such a tedious API to develop against.
 		</para>
-		<section>
+		<section id="jdbc-packages">
 			<title>The package hierarchy</title>
 			<para>
 				The JDBC abstraction framework provided by Spring consists of four
@@ -342,7 +342,7 @@ public Actor findActor(long id) {
     return simpleJdbcTemplate.queryForObject(sql, mapper, id);
 }]]></programlisting>
 		</section>
-		<section>
+		<section id="jdbc-datasource">
 			<title><interfacename>DataSource</interfacename></title>
 			<para>
 				In order to work with data from a database, one needs to obtain a
@@ -476,7 +476,7 @@ su.update();]]></programlisting>
 				<literal>sql-error-codes.xml</literal>.
 			</para>
 		</section>
-		<section>
+		<section id="jdbc-statements-executing">
 			<title>Executing statements</title>
 			<para>
 				To execute an SQL statement, there is very little code needed. All
@@ -505,7 +505,7 @@ public class ExecuteAStatement {
     }
 }]]></programlisting>
 		</section>
-		<section>
+		<section id="jdbc-statements-querying">
 			<title>Running Queries</title>
 			<para>
 				In addition to the execute methods, there is a large number of
@@ -563,7 +563,7 @@ public class RunAQuery {
 			</para>
 			<programlisting><![CDATA[[{name=Bob, id=1}, {name=Mary, id=2}]]]></programlisting>
 		</section>
-		<section>
+		<section id="jdbc-updates">
 			<title>Updating the database</title>
 			<para>
 				There are also a number of update methods that you can use. Find below

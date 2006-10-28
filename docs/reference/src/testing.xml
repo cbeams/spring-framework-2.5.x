@@ -81,7 +81,7 @@
 		and other projects since late 2004 have demonstrated the power and utility
 		of this approach. Let's look at some of the important areas of functionality 
 		in detail.</para>
-		<section>
+		<section id="testing-ctx-management">
 			<title>Context management and caching</title>
 			<para>The <literal>org.springframework.test</literal> package provides
 			support for consistent loading of Spring contexts, and caching of loaded
@@ -113,7 +113,7 @@
 			reload the configurations and rebuild the application context before executing the
 			next test case.</para>
 		</section>
-		<section>
+		<section id="testing-fixture-di">
 			<title>Dependency Injection of test fixtures</title>
 			<para>When <classname>AbstractDependencyInjectionSpringContextTests</classname>
 			(and subclasses) load your application context, they can optionally
@@ -196,7 +196,7 @@
 			It merely contains convenience methods to load Spring contexts, and performs
 			no Dependency Injection of the test fixture.</para>
 		</section>
-		<section>
+		<section id="testing-tx">
 			<title>Transaction management</title>
 			<para>
 				One common issue in tests that access a real database is their
@@ -253,7 +253,7 @@
 				<para>These test support classes are designed to work with a single	database.</para>
 			</remark>
 		</section>
-		<section>
+		<section id="testing-superclasses">
 			<title>Convenience variables</title>
 			<para>When you extend the
 			<classname>AbstractTransactionalDataSourceSpringContextTests</classname> class
@@ -282,7 +282,7 @@
 			<para>Often you will provide an application-wide superclass for integration tests
 			that provides further useful instance variables used in many tests.</para>
 		</section>
-		<section>
+		<section id="testing-example">
 			<title>Example</title>
 			<para>The PetClinic sample application included with the Spring
 			distribution illustrates the use of these test superclasses (Spring
@@ -398,7 +398,7 @@
 				test and production environments.
 			</para>
 		</section>
-		<section>
+		<section id="testing-integration">
 			<title>Running integration tests</title>
 			<para>
 				Integration tests naturally have more environmental dependencies

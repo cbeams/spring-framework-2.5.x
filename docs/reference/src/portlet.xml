@@ -190,7 +190,7 @@
 		defaults are provided so you don't have to worry about configuring 
 		them.</para>
 
-		<table frame="all">
+		<table id="portlet-webappctx-special-beans-tbl">
 		
 			<title>Special beans in the <interfacename>WebApplicationContext</interfacename></title>
 

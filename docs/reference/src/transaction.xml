@@ -327,7 +327,7 @@ xsi:schemaLocation="
             transactions or vice versa.</para>
         </remark>
     </section>
-    <section>
+    <section id="tx-resource-synchronization">
         <title>Resource synchronization with transactions</title>
         <para>It should now be clear how different transaction managers are
         created, and how they are linked to related resources which need to be
@@ -340,7 +340,7 @@ xsi:schemaLocation="
         are obtained and handled properly in terms of proper
         creation/reuse/cleanup and trigger (optionally) transaction
         synchronization via the relevant <interfacename>PlatformTransactionManager</interfacename>.</para>
-        <section>
+        <section id="tx-resource-synchronization-high">
             <title>High-level approach</title>
             <para>The preferred approach is to use Spring's highest level
             persistence integration APIs. These do not replace the native APIs, but
@@ -354,7 +354,7 @@ xsi:schemaLocation="
             and <classname>JdoTemplate</classname> classes (detailed in subsequent chapters
             of this reference documentation.</para>
         </section>
-        <section>
+        <section id="tx-resource-synchronization-low">
             <title>Low-level approach</title>
             <para>At a lower level exist classes such as
             <classname>DataSourceUtils</classname> (for JDBC),
@@ -396,7 +396,7 @@ xsi:schemaLocation="
             package to simplify your use of JDBC, correct connection retrieval happens
             behind the scenes and you won't need to write any special code.</para>
         </section>
-        <section>
+        <section id="tx-resource-synchronization-tadsp">
             <title><classname>TransactionAwareDataSourceProxy</classname></title>
             <para>At the very lowest level exists the
             <classname>TransactionAwareDataSourceProxy</classname> class. This is a
@@ -490,7 +490,7 @@ xsi:schemaLocation="
         While the Spring default behavior for declarative transaction management follows
         EJB convention (roll back is automatic only on unchecked exceptions), it's often useful
         to customize this.</para>
-        <section>
+        <section id="tx-decl-explained">
             <title>Understanding Spring's declarative transaction implementation</title>
             <para>The aim of this section is to dispel the mystique
             that is sometimes associated with the use of declarative transactions. 
@@ -918,7 +918,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
             <literal>&lt;tx:advice/&gt;</literal> and <literal>&lt;tx:attributes/&gt;</literal>
             tags are summarized below:</para>
             <para>
-                <table>
+                <table id="tx-method-settings">
                     <title><literal>&lt;tx:method/&gt;</literal> settings</title>
                     <tgroup cols="4">
                         <thead>
@@ -1157,7 +1157,7 @@ public class DefaultFooService implements FooService {
                 properties of the <interfacename>@Transactional</interfacename> annotation
                 are summarized in the following table:</para>
                 <para>
-                    <table>
+                    <table id="tx-attransactional-properties">
                         <title><interfacename>@Transactional</interfacename> properties</title>
                         <tgroup cols="3">
                             <thead>
@@ -1481,7 +1481,7 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager (txManager); ]]></p
         <classname>TransactionTemplate</classname>). The second approach is similar to
         using the JTA <interfacename>UserTransaction</interfacename> API (although
         exception handling is less cumbersome).</para>
-        <section>
+        <section id="tx-prog-template">
             <title>Using the <classname>TransactionTemplate</classname></title>
             <para>The <classname>TransactionTemplate</classname> adopts the same
             approach as other Spring <emphasis>templates</emphasis> such as
@@ -1549,7 +1549,7 @@ catch (MyException ex) {
 txManager.commit(status);]]></programlisting>
         </section>
     </section>
-    <section>
+    <section id="tx-decl-vs-prog">
         <title>Choosing between programmatic and declarative transaction management</title>
         <para>Programmatic transaction management is usually a good idea only if
         you have a small number of transactional operations. For example, if you
@@ -1575,7 +1575,7 @@ txManager.commit(status);]]></programlisting>
         access to the <literal>TransactionManager</literal> instance does allow
         enhanced transaction semantics. Please see the
         <classname>JtaTransactionManager</classname> Javadocs for more details.</para>
-        <section>
+        <section id="transaction-application-server-integration-weblogic">
             <title>BEA WebLogic</title>
             <para>In a WebLogic 7.0, 8.1 or higher environment, you will generally
             prefer to use <classname>WebLogicJtaTransactionManager</classname> instead
@@ -1587,7 +1587,7 @@ txManager.commit(status);]]></programlisting>
             names, per-transaction isolation levels, and proper resuming of
             transactions in all cases.</para>
         </section>
-        <section>
+        <section id="transaction-application-server-integration-websphere">
             <title>IBM WebSphere</title>
             <para>In a WebSphere 5.1, 5.0 and 4 environment, you may wish to use
             Spring's <classname>WebSphereTransactionManagerFactoryBean</classname>
@@ -1605,7 +1605,7 @@ txManager.commit(status);]]></programlisting>
     </section>
     <section id="transaction-solutions-to-common-problems">
         <title>Solutions to common problems</title>
-        <section>
+        <section id="transaction-solutions-to-common-problems-wrong-ptm">
             <title>Use of the wrong transaction manager for a specific <interfacename>DataSource</interfacename></title>
             <para>Developers should take care to use the correct
             <emphasis><interfacename>PlatformTransactionManager</interfacename></emphasis>

@@ -355,7 +355,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
         <filename>'velocity.properties'</filename> file itself.</para>
       </section>
 
-      <section>
+      <section id="views-freemarker">
         <title>FreeMarker</title>
 
         <para>FreeMarker 'Settings' and 'SharedVariables' can be passed
@@ -543,7 +543,7 @@ recommend sticking to 'spring' --&gt;
         the next section.</para>
       </section>
 
-      <section>
+      <section id="views-form-macros">
         <title>form input generation macros</title>
 
         <para>Additional convenience macros for both languages simplify both
@@ -555,8 +555,8 @@ recommend sticking to 'spring' --&gt;
         <para>The following table of available macros show the VTL and FTL
         definitions and the parameter list that each takes.</para>
 
-        <table>
-          <title>table of macro definitions</title>
+        <table id="views-macros-defs-tbl">
+          <title>Table of macro definitions</title>
 
           <tgroup cols="3">
             <colspec align="left" />
@@ -769,7 +769,7 @@ recommend sticking to 'spring' --&gt;
         in VTL. Where usage differences exist between the two languages, they
         are explained in the notes.</para>
 
-        <section>
+        <section id="views-form-macros-input">
           <title>Input Fields</title>
 
           <para><programlisting>&lt;!-- the Name field example from above using form macros in VTL --&gt;
@@ -817,7 +817,7 @@ recommend sticking to 'spring' --&gt;
           rows and cols attributes for the textarea.</para>
         </section>
 
-        <section>
+        <section id="views-form-macros-select">
           <title>Selection Fields</title>
 
           <para>Four selection field macros can be used to generate common UI
@@ -914,9 +914,8 @@ New York</programlisting>
         </section>
       </section>
 
-      <section>
-        <title>Overriding HTML escaping and making tags XHTML
-        compliant</title>
+      <section id="views-form-macros-html-escaping">
+        <title>HTML escaping and XHTML compliance</title>
 
         <para>Default usage of the form macros above will result in HTML tags
         that are HTML 4.01 compliant and that use the default value for HTML
