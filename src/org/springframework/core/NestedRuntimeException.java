@@ -20,20 +20,21 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 /**
- * Handy class for wrapping runtime Exceptions with a root cause.
+ * Handy class for wrapping runtime <code>Exceptions</code> with a root cause.
  *
  * <p>This time-honoured technique is no longer necessary in Java 1.4, which
  * finally provides built-in support for exception nesting. Thus exceptions in
  * applications written to use Java 1.4 need not extend this class. To ease
  * migration, this class mirrors Java 1.4's nested exceptions as closely as possible.
  *
- * <p>Abstract to force the programmer to extend the class. <code>getMessage</code>
- * will include nested exception information; <code>printStackTrace</code> etc will
+ * <p>This class is <code>abstract</code> to force the programmer to extend
+ * the class. <code>getMessage</code> will include nested exception
+ * information; <code>printStackTrace</code> and other like methods will
  * delegate to the wrapped exception, if any.
  *
- * <p>The similarity between this class and the NestedCheckedException class is
- * unavoidable, as Java forces these two classes to have different superclasses
- * (ah, the inflexibility of concrete inheritance!).
+ * <p>The similarity between this class and the <code>NestedCheckedException</code>
+ * class is unavoidable, as Java forces these two classes to have different
+ * superclasses (ah, the inflexibility of concrete inheritance!).
  *
  * <p>As discussed in
  * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>,
@@ -132,9 +133,10 @@ public abstract class NestedRuntimeException extends RuntimeException {
 
 	/**
 	 * Retrieve the innermost cause of this exception, if any.
-	 * <p>Currently just traverses NestedRuntimeException causes. Will use
-	 * the JDK 1.4 exception cause mechanism once Spring requires JDK 1.4.
+	 * <p>Currently just traverses <code>NestedRuntimeException</code> causes.
+	 * Will use the JDK 1.4 exception cause mechanism once Spring requires JDK 1.4.
 	 * @return the innermost exception, or <code>null</code> if none
+	 * @since 2.0
 	 */
 	public Throwable getRootCause() {
 		Throwable cause = getCause();
@@ -150,8 +152,8 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	 * Check whether this exception contains an exception of the given class:
 	 * either it is of the given class itself or it contains a nested cause
 	 * of the given class.
-	 * <p>Currently just traverses NestedRuntimeException causes. Will use
-	 * the JDK 1.4 exception cause mechanism once Spring requires JDK 1.4.
+	 * <p>Currently just traverses <code>NestedRuntimeException</code> causes.
+	 * Will use the JDK 1.4 exception cause mechanism once Spring requires JDK 1.4.
 	 * @param exClass the exception class to look for
 	 */
 	public boolean contains(Class exClass) {
