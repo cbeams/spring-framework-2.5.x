@@ -3,8 +3,8 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.1 (31.10.2006)
--------------------------------------
+Changes in version 2.0.1 (3.11.2006)
+------------------------------------
 
 General
 * included classes in the "test.annotation" and "test.jpa" packages (tiger mock directory) in the Spring API javadoc
@@ -13,6 +13,7 @@ Package org.springframework.aop
 * removed unintended JDK 1.5 dependency in AspectJExpressionPointcut ("equals"/"hashCode" implementation)
 
 Package org.springframework.beans
+* fixed BeanWrapperImpl to correctly determine generic type for each key in a chain (e.g. "myMap[myKey][myInnerKey]")
 * introduced PatternEditor for "java.util.regex.Pattern", automatically registered when running on JDK 1.4 or higher
 * Number objects (as property or argument values) are automatically coerced into the target Number type (if necessary)
 * added "equals" and "hashCode" implementations to BeanDefinitionHolder
@@ -20,24 +21,38 @@ Package org.springframework.beans
 * re-added BeanReferenceFactoryBean, to allow for substituting the target bean name with a placeholder
 * UnsatisfiedDependencyException message for multiple matches mentions the names of all matching beans
 * improved "scope is not active" error message to explicitly hint at the singleton-refers-to-scoped-bean problem
+* factory methods are allowed to return null, with the null value exposed as bean reference
+* AbstractBeanFactory uses bean name as cache key for merged bean definitions, to avoid equality matching overhead
+* AbstractBeanFactory detects circular references between non-singletons and throws a corresponding exception
 * added "findAutowireCandidates" template method to AbstractAutowireCapableBeanFactory, superseding "findMatchingBeans"
 * DefaultListableBeanFactory excludes beans which are not autowire candidates even before it obtains the instances
 * fixed PluggableSchemaResolver to accept a null ClassLoader argument (falling back to the default ClassLoader)
 * introduced CompositeComponentDefinition for holding nested components (applied e.g. for "aop:config" element)
 * introduced "registerComponent" method on ParserContext, for transparent registration of top-level or nested components
 
+Package org.springframework.context
+* added serialVersionUID to ApplicationEvent, for serialization compatibility with Spring 1.2
+* LocaleContextHolder supports standard ThreadLocal as well as InheritableThreadLocal
+
+Package org.springframework.core
+* introduced TaskRejectedException, thrown from a TaskExecutor if it does not accept a given task
+
 Package org.springframework.instrument
 * added GlassFishLoadTimeWeaver for GlassFish / Sun Application Server
 
 Package org.springframework.jms
 * reimplemented JMSException translation to handle subclasses of standard JMSExceptions in a specific fashion as well
+* refined AbstractMessageListenerContainer's autodetection of "pubSubDomain" flag to handle WebLogic Topic correctly
 * DefaultMessageListenerContainer uses its bean name (if specified) as thread name prefix for its default TaskExecutor
 
 Package org.springframework.jmx
 * MBeanExporter uses ObjectName as exposed by returned ObjectInstance after registration (which differs on WebSphere)
+* MethodExclusionMBeanInfoAssembler operates correctly in case of no "ignoredMethods" specified
 
 Package org.springframework.mock
+* added "isActive()" and "close()" methods to MockHttpServletRequest and MockPortletRequest
 * MockHttpServletResponse handles HTTP header names as case-insensitive (analogous to MockHttpServletRequest)
+* added "setOutputStreamAccessAllowed" and "setWriterAccessAllowed" methods to MockHttpServletResponse
 * unified mock object constructors that take ServletContext/PortletContext/PortalContext arguments
 * added all of MockPortletRequest's overloaded constructors to MockActionRequest and MockRenderRequest
 * turned AbstractSingleSpringContextTests's "contextKey" and "loadContext" methods non-final again
@@ -52,30 +67,42 @@ Package org.springframework.scheduling
 * deprecated TimerFactoryBean's "createTimer(daemon)" method in favor of "createTimer(name, daemon)"
 * ScheduledExecutorFactoryBean does not insist on statically specified ScheduledExecutorTasks anymore
 * DelegatingWork/Job/TimerTask exposes the wrapped Runnable implementation through a "getDelegate()" method
+* Concurrent/ThreadPoolTaskExecutor and WorkManagerTaskExecutor throw Spring's TaskRejectedException (when appropriate)
 
 Package org.springframework.test
 * AbstractTransactionalSpringContextTests invokes "onTearDownAfterTransaction" even for a manually completed transaction
+* fixed AbstractJpaTests to not keep context reference in cache if context refresh failed
 
 Package org.springframework.transaction
 * TransactionAttributeEditor does not accept transaction attributes with invalid whitespace anymore
+* AbstractPlatformTransactionManager does not activate transaction synchronization for PROPAGATION_NOT_SUPPORTED/NEVER
+* AbstractPlatformTransactionManager properly resumes all synchronizations even after suspend or inner begin failure
 * JtaTransactionManager's "doRegisterAfterCompletionWithJtaTransaction" avoids NPE if no current JTA transaction active
 
 Package org.springframework.ui
 * deprecated FreeMarkerConfigurationFactory's "templateLoaders" property in favor of "pre/postTemplateLoaders"
 
 Package org.springframework.util
+* "ObjectUtils.toObjectArray(Object)" returns a given Object[] as-is instead of throwing an IllegalArgumentException
 * added "containsWhitespace" method to StringUtils
 
 Package org.springframework.web
 * WebDataBinder explicitly suppresses field marker prefix values in case of "ignoreUnknownFields" switched off
+* Servlet/PortletRequestAttributes allow for accessing the session even after the request has been completed
+* RequestContextHolder supports standard ThreadLocal as well as InheritableThreadLocal
+* DispatcherServlet/Portlet do not expose LocaleContext/RequestAttributes as inheritable for child threads anymore
+* added "threadContextInheritable" property to DispatcherServlet and DispatcherPortlet, for explicit choice
 * factored out protected "buildLocaleContext" and "cleanupMultipart" methods in DispatcherServlet
 * made AbstractHandlerMapping's "getDefaultHandler()" method public
 * added public "getHandlerMap()" method to AbstractUrlHandlerMapping, exposing a read-only map of registered handlers
 * added public "getUrlMap()" method to SimpleUrlHandlerMapping, to allow for adding or overriding individual entries
+* JSP MessageTag detects a single expression argument that resolves to an array and processes it as arguments array
 * FreeMarkerView exposes all standard FreeMarker hash models now (including session and request parameters)
 * FreeMarkerView uses the ObjectWrapper as specified in the FreeMarker configuration, rather than always the default
 * FreeMarkerConfigurer always registers ClassTemplateLoader for its own package (rather than the package of a subclass)
 * AbstractJasperReportsSingleFormatView only sets parameter Map on JRExporter instance in case of actual parameters
+* added "boolean useWriter()" method to AbstractXsltView, allowing to prefer Writer access over OutputStream access
+* DispatcherPortlet exposes thread-bound request attributes for render requests as well (not just action requests)
 
 
 Changes in version 2.0 final (3.10.2006)

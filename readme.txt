@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 2.0.1 (October 2006)
---------------------------------------------------
+THE SPRING FRAMEWORK, release 2.0.1 (November 2006)
+---------------------------------------------------
 http://www.springframework.org
 
 
@@ -60,11 +60,11 @@ JCA 1.0, Hibernate 2.1/3.0/3.1/3.2, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, JPA 1.0, 
 Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.5, EHCache 1.1, JSTL 1.0, Velocity 1.4,
 FreeMarker 2.3, JasperReports 1.2, Struts/Tiles 1.1/1.2, JSF 1.1/1.2, Jakarta Commons FileUpload 1.1, etc.
 
-Basic release contents (~ 10 MB):
+Basic release contents (~10 MB):
 * "dist" contains the Spring distribution jar files, as well as a zip of all Java source files
 * "docs" contains the Spring reference documentation as a PDF file
 
-Contents of the "-with-dependencies" distribution (~ 57 MB):
+Contents of the "-with-dependencies" distribution (~60 MB):
 * "dist" contains the Spring distribution jar files, as well as a zip of all Java source files
 * "docs" contains the Spring reference documentation in PDF and HTML format, as well as the complete API javadocs
 * "lib" contains all third-party libraries needed for building the framework and/or running the samples
@@ -99,7 +99,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2485 KB)
+* "spring" (~2500 KB)
 - Convenient jar file combining all standard modules (except for Portlet and Hibernate2 support)
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar, aspects jar, spring-portlet jar, and spring-hibernate2 jar!
@@ -150,7 +150,7 @@ MODULE JARS (dist/modules):
 - Contents: Struts support
 - Dependencies: spring-web, Struts
 
-* "spring-remoting" (~105 KB)
+* "spring-remoting" (~110 KB)
 - Contents: remoting support, EJB support
 - Dependencies: spring-aop, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB API)
 
@@ -170,7 +170,7 @@ MODULE JARS (dist/modules):
 - Contents: JDO 1.0/2.0 support
 - Dependencies: spring-jdbc, JDO API, (spring-web)
 
-* "spring-jpa" (~90 KB)
+* "spring-jpa" (~95 KB)
 - Contents: JPA 1.0 support
 - Dependencies: spring-jdbc, JPA API, (spring-web)
 
