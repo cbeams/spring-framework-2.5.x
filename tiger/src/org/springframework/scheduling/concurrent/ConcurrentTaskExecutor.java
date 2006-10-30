@@ -18,18 +18,27 @@ package org.springframework.scheduling.concurrent;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
+import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 
 /**
- * Adapter that takes a JDK 1.5 <code>java.util.concurrent.Executor</code>
- * and exposes a Spring TaskExecutor for it.
+ * Adapter that takes a JDK 1.5 <code>java.util.concurrent.Executor</code> and
+ * exposes a Spring {@link org.springframework.core.task.TaskExecutor} for it.
  *
- * <p>Note that there is a pre-built ThreadPoolTaskExecutor that allows
- * for defining a JDK 1.5 ThreadPoolExecutor in bean style, exposing
- * it as both Spring TaskExecutor and JDK 1.5 Executor. This is a
- * convenient alternative to a direct ThreadPoolExecutor definition
- * with separate ConcurrentTaskExecutor adapter definition.
+ * <p><b>NOTE:</b> This class implements Spring's
+ * {@link org.springframework.core.task.TaskExecutor} interface as well as the JDK 1.5
+ * {@link java.util.concurrent.Executor} interface, with the former being the primary
+ * interface, the other just serving as secondary convenience. For this reason, the
+ * exception handling follows the TaskExecutor contract rather than the Executor contract,
+ * in particular regarding the {@link org.springframework.core.task.TaskRejectedException}.
+ *
+ * <p>Note that there is a pre-built {@link ThreadPoolTaskExecutor} that allows for
+ * defining a JDK 1.5 {@link java.util.concurrent.ThreadPoolExecutor in bean style,
+ * exposing it as a Spring {@link org.springframework.core.task.TaskExecutor} directly.
+ * This is a convenient alternative to a raw ThreadPoolExecutor definition with
+ * a separate definition of the present adapter class.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -75,7 +84,13 @@ public class ConcurrentTaskExecutor implements SchedulingTaskExecutor, Executor 
 	 * @see java.util.concurrent.Executor#execute(Runnable)
 	 */
 	public void execute(Runnable task) {
-		this.concurrentExecutor.execute(task);
+		try {
+			this.concurrentExecutor.execute(task);
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException(
+					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
+		}
 	}
 
 	/**

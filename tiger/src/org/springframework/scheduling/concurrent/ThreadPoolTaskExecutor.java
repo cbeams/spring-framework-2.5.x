@@ -20,6 +20,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
@@ -31,20 +32,30 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
 
 /**
- * JavaBean that allows for configuring a JDK 1.5 ThreadPoolExecutor in bean style
- * (through "corePoolSize", "maxPoolSize", "keepAliveSeconds", "queueCapacity" properties),
- * exposing it as both Spring TaskExecutor and JDK 1.5 Executor. This is an alternative
- * to configuring a ThreadPoolExecutor instance directly using constructor injection,
- * with a separate ConcurrentTaskExecutor adapter if necessary.
+ * JavaBean that allows for configuring a JDK 1.5 {@link java.util.concurrent.ThreadPoolExecutor}
+ * in bean style (through its "corePoolSize", "maxPoolSize", "keepAliveSeconds", "queueCapacity"
+ * properties), exposing it as a Spring {@link org.springframework.core.task.TaskExecutor}.
+ * This is an alternative to configuring a ThreadPoolExecutor instance directly using constructor
+ * injection, with a separate {@link ConcurrentTaskExecutor} adapter wrapping it.
  *
- * <p>For any custom needs, in particular for defining a ScheduledThreadPoolExecutor,
- * it is recommended to use a straight definition of the JDK 1.5 Executor implementation
- * instance or a factory method definition that points to the JDK 1.5 Executors class.
- * To expose it as a Spring TaskExecutor, wrap it with a ConcurrentTaskExecutor adapter.
+ * <p>For any custom needs, in particular for defining a
+ * {@link java.util.concurrent.ScheduledThreadPoolExecutor}, it is recommended to
+ * use a straight definition of the Executor instance or a factory method definition
+ * that points to the JDK 1.5 {@link java.util.concurrent.Executors} class.
+ * To expose such a raw Executor as a Spring {@link org.springframework.core.task.TaskExecutor},
+ * simply wrap it with a {@link ConcurrentTaskExecutor} adapter.
+ *
+ * <p><b>NOTE:</b> This class implements Spring's
+ * {@link org.springframework.core.task.TaskExecutor} interface as well as the JDK 1.5
+ * {@link java.util.concurrent.Executor} interface, with the former being the primary
+ * interface, the other just serving as secondary convenience. For this reason, the
+ * exception handling follows the TaskExecutor contract rather than the Executor contract,
+ * in particular regarding the {@link org.springframework.core.task.TaskRejectedException}.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -178,7 +189,13 @@ public class ThreadPoolTaskExecutor implements SchedulingTaskExecutor, Executor,
 	 */
 	public void execute(Runnable task) {
 		Assert.notNull(this.executorService, "ThreadPoolTaskExecutor not initialized");
-		this.executorService.execute(task);
+		try {
+			this.executorService.execute(task);
+		}
+		catch (RejectedExecutionException ex) {
+			throw new TaskRejectedException(
+					"Executor [" + this.executorService + "] did not accept task: " + task, ex);
+		}
 	}
 
 	/**

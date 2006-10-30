@@ -25,8 +25,10 @@ import commonj.work.WorkException;
 import commonj.work.WorkItem;
 import commonj.work.WorkListener;
 import commonj.work.WorkManager;
+import commonj.work.WorkRejectedException;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.task.TaskRejectedException;
 import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.scheduling.SchedulingException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
@@ -124,6 +126,9 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		Assert.notNull(this.workManager, "WorkManager is required");
 		try {
 			this.workManager.schedule(new DelegatingWork(task));
+		}
+		catch (WorkRejectedException ex) {
+			throw new TaskRejectedException("CommonJ WorkManager did not accept task: " + task, ex);
 		}
 		catch (WorkException ex) {
 			throw new SchedulingException("Could not schedule work on CommonJ WorkManager", ex);
