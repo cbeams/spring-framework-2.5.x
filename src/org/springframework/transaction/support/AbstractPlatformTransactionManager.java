@@ -89,7 +89,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * that result from PROPAGATION_SUPPORTS with no existing backend transaction.
 	 * <p><b>NOTE:</b> Transaction synchronization will <i>not</i> be activated for
 	 * transaction scopes marked with <code>PROPAGATION_NOT_SUPPORTED</code> or
-	 * <code>PROPAGATION_NEVER</code>
+	 * <code>PROPAGATION_NEVER</code>, even in "always" mode.
+	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_SUPPORTS
 	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_NOT_SUPPORTED
 	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_NEVER
 	 */
@@ -99,6 +100,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Activate transaction synchronization only for actual transactions,
 	 * that is, not for empty ones that result from PROPAGATION_SUPPORTS with
 	 * no existing backend transaction.
+	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRED
+	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_MANDATORY
+	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRES_NEW
 	 */
 	public static final int SYNCHRONIZATION_ON_ACTUAL_TRANSACTION = 1;
 
@@ -306,7 +310,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			throw new InvalidTimeoutException("Invalid transaction timeout", definition.getTimeout());
 		}
 
-		// No existing transaction found -> check propagation behavior to find out how to behave.
+		// No existing transaction found -> check propagation behavior to find out how to proceed.
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY) {
 			throw new IllegalTransactionStateException(
 					"No existing transaction found for transaction marked with propagation 'mandatory'");
@@ -323,7 +327,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 		else {
 			// Create "empty" transaction: no actual transaction, but potentially synchronization.
-			boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
+			boolean newSynchronization =
+					(definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_SUPPORTS &&
+					getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
 			return newTransactionStatus(definition, null, false, newSynchronization, debugEnabled, null);
 		}
 	}
@@ -728,7 +734,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 
 	/**
-	 * Trigger beforeCommit callbacks.
+	 * Trigger <code>beforeCommit</code> callbacks.
 	 * @param status object representing the transaction
 	 */
 	private void triggerBeforeCommit(DefaultTransactionStatus status) {
@@ -741,7 +747,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Trigger beforeCompletion callbacks.
+	 * Trigger <code>beforeCompletion</code> callbacks.
 	 * @param status object representing the transaction
 	 */
 	private void triggerBeforeCompletion(DefaultTransactionStatus status) {
@@ -754,7 +760,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Trigger afterCommit callbacks.
+	 * Trigger <code>afterCommit</code> callbacks.
 	 * @param status object representing the transaction
 	 */
 	private void triggerAfterCommit(DefaultTransactionStatus status) {
@@ -767,7 +773,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Trigger afterCompletion callbacks.
+	 * Trigger <code>afterCompletion</code> callbacks.
 	 * @param status object representing the transaction
 	 * @param completionStatus completion status according to TransactionSynchronization constants
 	 */

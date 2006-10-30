@@ -44,64 +44,77 @@ import java.sql.Connection;
 public interface TransactionDefinition {
 
 	/**
-	 * Support a current transaction, create a new one if none exists.
+	 * Support a current transaction; create a new one if none exists.
 	 * Analogous to the EJB transaction attribute of the same name.
-	 * <p>This is typically the default setting of a transaction definition.
+	 * <p>This is typically the default setting of a transaction definition,
+	 * and typically defines a transaction synchronization scope.
 	 */
 	int PROPAGATION_REQUIRED = 0;
 
 	/**
-	 * Support a current transaction, execute non-transactionally if no current
-	 * transaction exists. Analogous to the EJB transaction attribute of the
-	 * same name.
-	 * <p>Note: For transaction managers with transaction synchronization,
-	 * <code>PROPAGATION_SUPPORTS</code> is slightly different from no
-	 * transaction at all, as it defines a transaction scope that
-	 * synchronization will apply for. As a consequence, the same resources
-	 * (a JDBC <code>Connection</code>, a Hibernate <code>Session</code>,
-	 * etc.) will be shared for the entire specified scope. Note that this
-	 * depends on the actual synchronization configuration of the
-	 * transaction manager.
+	 * Support a current transaction; execute non-transactionally if none exists.
+	 * Analogous to the EJB transaction attribute of the same name.
+	 * <p><b>NOTE:</b> For transaction managers with transaction synchronization,
+	 * <code>PROPAGATION_SUPPORTS</code> is slightly different from no transaction
+	 * at all, as it defines a transaction scope that synchronization might apply to.
+	 * As a consequence, the same resources (a JDBC <code>Connection</code>, a
+	 * Hibernate <code>Session</code>, etc) will be shared for the entire specified
+	 * scope. Note that the exact behavior depends on the actual synchronization
+	 * configuration of the transaction manager!
+	 * <p>In general, use <code>PROPAGATION_SUPPORTS</code> with care! In particular, do
+	 * not rely on <code>PROPAGATION_REQUIRED</code> or <code>PROPAGATION_REQUIRES_NEW</code>
+	 * <i>within</i> a <code>PROPAGATION_SUPPORTS</code> scope (which may lead to
+	 * synchronization conflicts at runtime). If such nesting is unavoidable, make sure
+	 * to configure your transaction manager appropriately (typically switching to
+	 * "synchronization on actual transaction").
 	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#setTransactionSynchronization
+	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#SYNCHRONIZATION_ON_ACTUAL_TRANSACTION
 	 */
 	int PROPAGATION_SUPPORTS = 1;
 
 	/**
-	 * Support a current transaction, throw an exception if no current
-	 * transaction exists. Analogous to the EJB transaction attribute
-	 * of the same name.
+	 * Support a current transaction; throw an exception if no current transaction
+	 * exists. Analogous to the EJB transaction attribute of the same name.
+	 * <p>Note that transaction synchronization within a <code>PROPAGATION_MANDATORY</code>
+	 * scope will always be driven by the surrounding transaction.
 	 */
 	int PROPAGATION_MANDATORY = 2;
 
 	/**
-	 * Create a new transaction, suspend the current transaction if one exists.
+	 * Create a new transaction, suspending the current transaction if one exists.
 	 * Analogous to the EJB transaction attribute of the same name.
-	 * <p>Note: Actual transaction suspension will not work out-of-the-box
+	 * <p><b>NOTE:</b> Actual transaction suspension will not work out-of-the-box
 	 * on all transaction managers. This in particular applies to
 	 * {@link org.springframework.transaction.jta.JtaTransactionManager},
 	 * which requires the <code>javax.transaction.TransactionManager</code>
-	 * to be made available it to it (which is server-specific in standard
-	 * J2EE).
+	 * to be made available it to it (which is server-specific in standard J2EE).
+	 * <p>A <code>PROPAGATION_REQUIRES_NEW</code> scope always defines its own
+	 * transaction synchronizations. Existing synchronizations will be suspended
+	 * and resumed appropriately.
 	 * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
 	 */
 	int PROPAGATION_REQUIRES_NEW = 3;
 
 	/**
-	 * Execute non-transactionally, suspend the current transaction if one
-	 * exists. Analogous to the EJB transaction attribute of the same name.
-	 * <p>Note: Actual transaction suspension will not work out-of-the-box
+	 * Do not support a current transaction; rather always execute non-transactionally.
+	 * Analogous to the EJB transaction attribute of the same name.
+	 * <p><b>NOTE:</b> Actual transaction suspension will not work out-of-the-box
 	 * on all transaction managers. This in particular applies to
 	 * {@link org.springframework.transaction.jta.JtaTransactionManager},
 	 * which requires the <code>javax.transaction.TransactionManager</code>
-	 * to be made available it to it (which is server-specific in standard
-	 * J2EE).
+	 * to be made available it to it (which is server-specific in standard J2EE).
+	 * <p>Note that transaction synchronization is <i>not</i> available within a
+	 * <code>PROPAGATION_NOT_SUPPORTED</code> scope. Existing synchronizations
+	 * will be suspended and resumed appropriately.
 	 * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
 	 */
 	int PROPAGATION_NOT_SUPPORTED = 4;
 
 	/**
-	 * Execute non-transactionally, throw an exception if a transaction exists.
-	 * Analogous to the EJB transaction attribute of the same name.
+	 * Do not support a current transaction; throw an exception if a current transaction
+	 * exists. Analogous to the EJB transaction attribute of the same name.
+	 * <p>Note that transaction synchronization is <i>not</i> available within a
+	 * <code>PROPAGATION_NEVER</code> scope.
 	 */
 	int PROPAGATION_NEVER = 5;
 
@@ -109,9 +122,8 @@ public interface TransactionDefinition {
 	 * Execute within a nested transaction if a current transaction exists,
 	 * behave like {@link #PROPAGATION_REQUIRED} else. There is no analogous
 	 * feature in EJB.
-	 * <p>Note: Actual creation of a nested transaction will only work on
-	 * specific transaction managers. Out of the box, this only applies to
-	 * the JDBC
+	 * <p><b>NOTE:</b> Actual creation of a nested transaction will only work on specific
+	 * transaction managers. Out of the box, this only applies to the JDBC
 	 * {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}
 	 * when working on a JDBC 3.0 driver. Some JTA providers might support
 	 * nested transactions as well.
