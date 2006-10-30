@@ -2379,27 +2379,11 @@ MyInterfaceType proxy = factory.getProxy();]]></programlisting>
 		  application context. It is also possible to ask a bean factory to configure
 		  a <emphasis>pre-existing</emphasis> object given the name of a bean definition 
 		  containing the configuration to be applied. The <filename class="libraryfile">spring-aspects.jar</filename>
-		   contains an annotation-driven aspect that exploits this capability to allow dependency-injection
+		  contains an annotation-driven aspect that exploits this capability to allow dependency-injection
 		  of any object. The support is intended to be used for objects created 
 		  <emphasis>outside of the control of any container</emphasis>. Domain objects
 		  often fall into this category: they may be created programmatically using the
 		  <literal>new</literal> operator, or by an ORM tool as a result of a database query.
-		</para>
-		
-		<para>
-			The <classname>DependencyInjectionInterceptorFactoryBean</classname>
-			in the <literal>org.springframework.orm.hibernate.support</literal> package
-			can be used to have Spring create and configure prototype domain objects for 
-			Hibernate (using either autowiring or named prototype bean definitions).
-			The interceptor does not of course support 
-			configuration of objects that you create yourself programmatically rather than
-			retrieve from the database. Similar techniques may be possible with other
-			frameworks. As ever, be pragramatic and choose the simplest thing
-			that meets your requirements. Please note that the aforementioned class does
-			<emphasis role="bold">not</emphasis> ship with the Spring distribution. If you
-			want to make use of it, you will have to download it from the Spring CVS repository
-			and compile it yourself; the file itself can be found in the <literal>'sandbox'</literal>
-			directory of the Spring CVS repository tree.
 		</para>
 		  
 		<para>
