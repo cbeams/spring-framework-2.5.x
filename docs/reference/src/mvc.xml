@@ -493,9 +493,9 @@
             defined twice, the latest takes precedence).</entry>
           </row>
           <row>
-            <entry>namespace</entry>
+            <entry><literal>namespace</literal></entry>
             <entry>the namespace of the <interfacename>WebApplicationContext</interfacename>.
-            Defaults to <literal>[server-name]-servlet</literal>.</entry>
+            Defaults to <literal>[servlet-name]-servlet</literal>.</entry>
           </row>
         </tbody>
       </tgroup>
