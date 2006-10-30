@@ -719,6 +719,98 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.verify();
 	}
 
+	public void testTransactionWithPropagationSupportsAndInnerTransaction() throws Exception {
+		MockControl sfControl = MockControl.createControl(SessionFactory.class);
+		final SessionFactory sf = (SessionFactory) sfControl.getMock();
+		MockControl sessionControl = MockControl.createControl(Session.class);
+		final Session session = (Session) sessionControl.getMock();
+		MockControl conControl = MockControl.createControl(Connection.class);
+		Connection con = (Connection) conControl.getMock();
+		MockControl txControl = MockControl.createControl(Transaction.class);
+		Transaction tx = (Transaction) txControl.getMock();
+
+		sf.openSession();
+		sfControl.setReturnValue(session, 1);
+		session.getSessionFactory();
+		sessionControl.setReturnValue(sf, 1);
+		session.beginTransaction();
+		sessionControl.setReturnValue(tx, 1);
+		session.isOpen();
+		sessionControl.setReturnValue(true, 2);
+		session.connection();
+		sessionControl.setReturnValue(con, 2);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO, 4);
+		session.flush();
+		sessionControl.setVoidCallable(3);
+		tx.commit();
+		txControl.setVoidCallable(1);
+		session.isConnected();
+		sessionControl.setReturnValue(true, 1);
+		if (hibernateSetTimeoutAvailable) {
+			// only on Hibernate 3.1+
+			session.disconnect();
+			sessionControl.setReturnValue(null, 1);
+		}
+		session.close();
+		sessionControl.setReturnValue(null, 1);
+		sfControl.replay();
+		sessionControl.replay();
+
+		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
+			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
+				return sf;
+			}
+		};
+		lsfb.afterPropertiesSet();
+		final SessionFactory sfProxy = (SessionFactory) lsfb.getObject();
+
+		PlatformTransactionManager tm = new HibernateTransactionManager(sfProxy);
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+		final TransactionTemplate tt2 = new TransactionTemplate(tm);
+		tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+		tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
+				assertTrue("Is not new transaction", !status.isNewTransaction());
+				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+				assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
+				HibernateTemplate ht = new HibernateTemplate(sfProxy);
+				ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
+				ht.execute(new HibernateCallback() {
+					public Object doInHibernate(org.hibernate.Session session) {
+						return null;
+					}
+				});
+				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sfProxy));
+				assertEquals(session, sfProxy.getCurrentSession());
+				tt2.execute(new TransactionCallback() {
+					public Object doInTransaction(TransactionStatus status) {
+						HibernateTemplate ht = new HibernateTemplate(sfProxy);
+						ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
+						return ht.executeFind(new HibernateCallback() {
+							public Object doInHibernate(org.hibernate.Session session) {
+								assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+								//assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
+								return null;
+							}
+						});
+					}
+				});
+				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+				assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
+				return null;
+			}
+		});
+		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
+
+		sfControl.verify();
+		sessionControl.verify();
+	}
+
 	public void testTransactionCommitWithEntityInterceptor() throws Exception {
 		MockControl interceptorControl = MockControl.createControl(org.hibernate.Interceptor.class);
 		Interceptor entityInterceptor = (Interceptor) interceptorControl.getMock();
