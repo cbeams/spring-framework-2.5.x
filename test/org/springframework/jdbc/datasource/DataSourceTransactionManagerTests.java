@@ -556,7 +556,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 				tt.execute(new TransactionCallbackWithoutResult() {
 					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 						assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
-						assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
+						assertFalse("Synchronization not active", TransactionSynchronizationManager.isSynchronizationActive());
 						assertTrue("Isn't new transaction", !status.isNewTransaction());
 						assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 						assertFalse(TransactionSynchronizationManager.isActualTransactionActive());

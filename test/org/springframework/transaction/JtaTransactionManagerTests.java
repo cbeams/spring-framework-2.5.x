@@ -673,7 +673,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+				assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 				status.setRollbackOnly();
 			}
 		});

@@ -87,18 +87,23 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	/**
 	 * Always activate transaction synchronization, even for "empty" transactions
 	 * that result from PROPAGATION_SUPPORTS with no existing backend transaction.
+	 * <p><b>NOTE:</b> Transaction synchronization will <i>not</i> be activated for
+	 * transaction scopes marked with <code>PROPAGATION_NOT_SUPPORTED</code> or
+	 * <code>PROPAGATION_NEVER</code>
+	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_NOT_SUPPORTED
+	 * @see org.springframework.transaction.TransactionDefinition#PROPAGATION_NEVER
 	 */
 	public static final int SYNCHRONIZATION_ALWAYS = 0;
 
 	/**
 	 * Activate transaction synchronization only for actual transactions,
-	 * i.e. not for empty ones that result from PROPAGATION_SUPPORTS with no
-	 * existing backend transaction.
+	 * that is, not for empty ones that result from PROPAGATION_SUPPORTS with
+	 * no existing backend transaction.
 	 */
 	public static final int SYNCHRONIZATION_ON_ACTUAL_TRANSACTION = 1;
 
 	/**
-	 * Never active transaction synchronization.
+	 * Never active transaction synchronization, not even for actual transactions.
 	 */
 	public static final int SYNCHRONIZATION_NEVER = 2;
 
@@ -304,7 +309,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		// No existing transaction found -> check propagation behavior to find out how to behave.
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY) {
 			throw new IllegalTransactionStateException(
-					"Transaction propagation 'mandatory' but no existing transaction found");
+					"No existing transaction found for transaction marked with propagation 'mandatory'");
 		}
 		else if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED ||
 				definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW ||
@@ -332,7 +337,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NEVER) {
 			throw new IllegalTransactionStateException(
-					"Transaction propagation 'never' but existing transaction found");
+					"Existing transaction found for transaction marked with propagation 'never'");
 		}
 
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) {
@@ -340,9 +345,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				logger.debug("Suspending current transaction");
 			}
 			Object suspendedResources = suspend(transaction);
-			boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
 			return newTransactionStatus(
-					definition, null, false, newSynchronization, debugEnabled, suspendedResources);
+					definition, null, false, false, debugEnabled, suspendedResources);
 		}
 
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW) {
