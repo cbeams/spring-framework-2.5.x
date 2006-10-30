@@ -21,6 +21,7 @@ import org.quartz.simpl.SimpleThreadPool;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.scheduling.SchedulingException;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
 
@@ -62,7 +63,9 @@ public class SimpleThreadPoolTaskExecutor extends SimpleThreadPool
 
 	public void execute(Runnable task) {
 		Assert.notNull(task, "Runnable must not be null");
-		runInThread(task);
+		if (!runInThread(task)) {
+			throw new SchedulingException("Quartz SimpleThreadPool already shut down");
+		}
 	}
 
 	/**

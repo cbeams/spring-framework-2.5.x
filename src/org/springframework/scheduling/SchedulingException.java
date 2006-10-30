@@ -19,7 +19,8 @@ package org.springframework.scheduling;
 import org.springframework.core.NestedRuntimeException;
 
 /**
- * General exception to be thrown on scheduling errors.
+ * General exception to be thrown on scheduling failures,
+ * such as the scheduler already having shut down.
  * Unchecked since scheduling failures are usually fatal.
  *
  * @author Juergen Hoeller
