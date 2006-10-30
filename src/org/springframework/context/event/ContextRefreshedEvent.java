@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 
 /**
- * Event raised when an ApplicationContext gets initialized or refreshed.
+ * Event raised when an <code>ApplicationContext</code> is initialized or refreshed.
  *
  * @author Juergen Hoeller
  * @since 04.03.2003
@@ -28,13 +28,18 @@ import org.springframework.context.ApplicationEvent;
 public class ContextRefreshedEvent extends ApplicationEvent {
 
 	/**
-	 * Creates a new ContextRefreshedEvent.
-	 * @param source the ApplicationContext
+	 * Create a new instance of the <code>ContextRefreshedEvent</code> class.
+	 * @param source the <code>ApplicationContext</code> that has been initialized or refreshed (must not be <code>null</code>)
 	 */
 	public ContextRefreshedEvent(ApplicationContext source) {
 		super(source);
 	}
 
+
+	/**
+	 * Gets the <code>ApplicationContext</code> that has been initialized or refreshed.
+	 * @return the <code>ApplicationContext</code> that has been initialized or refreshed (never <code>null</code>)
+	 */
 	public ApplicationContext getApplicationContext() {
 		return (ApplicationContext) getSource();
 	}
