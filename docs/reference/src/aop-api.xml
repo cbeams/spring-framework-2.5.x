@@ -461,16 +461,16 @@
 }</programlisting>
 
         <para>The following advice is invoked if a
-        <emphasis>ServletException</emphasis> is thrown. Unlike the above
+        <exceptionname>ServletException</exceptionname> is thrown. Unlike the above
         advice, it declares 4 arguments, so that it has access to the invoked
         method, method arguments and target object:</para>
 
-        <programlisting>public class ServletThrowsAdviceWithArguments implements ThrowsAdvice {
+        <programlisting><![CDATA[public class ServletThrowsAdviceWithArguments implements ThrowsAdvice {
 
     public void afterThrowing(Method m, Object[] args, Object target, ServletException ex) {
-        // Do something will all arguments
+        ]]><lineannotation>// Do something with all arguments</lineannotation><![CDATA[
     }
-}</programlisting>
+}]]></programlisting>
 
         <para>The final example illustrates how these two methods could be
         used in a single class, which handles both
