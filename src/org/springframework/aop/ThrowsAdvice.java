@@ -21,11 +21,17 @@ import org.aopalliance.aop.Advice;
 /**
  * Tag interface for throws advice.
  *
- * <p>There aren't any methods on this interface, as methods are invoked by reflection.
- * Implementing classes should implement methods of the form:<br>
- * <code>
- * afterThrowing([Method], [args], [target], Throwable subclass) 
- * </code>
+ * <p>There are not any methods on this interface, as methods are invoked by
+ * reflection. Implementing classes must implement methods of the form:<br>
+ * 
+ * <code>void afterThrowing([Method, args, target], ThrowableSubclass);</code>
+ * 
+ * <p>Some examples of valid methods would be:
+ * 
+ * <pre class="code">public void afterThrowing(Exception ex)</pre>
+ * <pre class="code">public void afterThrowing(RemoteException)</pre>
+ * <pre class="code">public void afterThrowing(Method method, Object[] args, Object target, Exception ex)</pre>
+ * <pre class="code">public void afterThrowing(Method method, Object[] args, Object target, ServletException ex)</pre>
  *
  * <p>The first three arguments are optional, and only useful if
  * we want further information about the joinpoint, as in AspectJ

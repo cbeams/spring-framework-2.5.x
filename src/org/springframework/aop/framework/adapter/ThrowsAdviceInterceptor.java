@@ -27,24 +27,31 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Interceptor to wrap an after throwing advice.
+ * Interceptor to wrap an after-throwing advice.
  *
- * <p>The signatures on handler methods on the throwsAdvice constructor argument
- * must be of form:<br>
- * <code>void afterThrowing([Method], [args], [target], ThrowableSubclass);</code><br>
- * Only the last argument is required.
+ * <p>The signatures on handler methods on the <code>ThrowsAdvice</code>
+ * implementation method argument must be of the form:<br>
+ * 
+ * <code>void afterThrowing([Method, args, target], ThrowableSubclass);</code>
+ * 
+ * <p>Only the last argument is required.
+ * 
+ * <p>Some examples of valid methods would be:
+ * 
+ * <pre class="code">public void afterThrowing(Exception ex)</pre>
+ * <pre class="code">public void afterThrowing(RemoteException)</pre>
+ * <pre class="code">public void afterThrowing(Method method, Object[] args, Object target, Exception ex)</pre>
+ * <pre class="code">public void afterThrowing(Method method, Object[] args, Object target, ServletException ex)</pre>
  *
  * <p>This is a framework class that need not be used directly by Spring users.
  * 
- * <p>You can, however, use this class to wrap Spring ThrowsAdvice implementations
- * for use in other AOP frameworks supporting the AOP Alliance
+ * <p>You can, however, use this class to wrap Spring <code>ThrowsAdvice</code>
+ * implementations for use in other AOP frameworks supporting the AOP Alliance
  * interfaces.
  *
  * @author Rod Johnson
  */
 public final class ThrowsAdviceInterceptor implements MethodInterceptor {
-	
-	// TODO make serializable (methods are not serializable)
 	
 	private static final String AFTER_THROWING = "afterThrowing";
 	

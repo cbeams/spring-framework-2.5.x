@@ -442,23 +442,22 @@
         given object implements one or more typed throws advice methods. These
         should be in the form of:</para>
 
-        <programlisting>afterThrowing([Method], [args], [target], subclassOfThrowable) </programlisting>
+        <programlisting>afterThrowing([Method, args, target], subclassOfThrowable) </programlisting>
 
-        <para>Only the last argument is required. The method signatures vary from having one to four
-        arguments, depending on whether the advice method is interested in the
-        method and arguments. The following are examples of throws
-        advice.</para>
+        <para>Only the last argument is required. The method signatures may
+		have either one or four arguments, depending on whether the advice
+		method is interested in the method and arguments. The following
+		classes are examples of throws advice.</para>
 
-        <para>The advice below is invoked if a
-        <literal>RemoteException</literal> is thrown (including
-        subclasses):</para>
+        <para>The advice below is invoked if a <exceptionname>RemoteException</exceptionname>
+		is thrown (including subclasses):</para>
 
-        <programlisting>public class RemoteThrowsAdvice implements ThrowsAdvice {
+        <programlisting><![CDATA[public class RemoteThrowsAdvice implements ThrowsAdvice {
 
     public void afterThrowing(RemoteException ex) throws Throwable {
-        // Do something with remote exception
+        ]]><lineannotation>// Do something with remote exception</lineannotation><![CDATA[
     }
-}</programlisting>
+}]]></programlisting>
 
         <para>The following advice is invoked if a
         <exceptionname>ServletException</exceptionname> is thrown. Unlike the above
