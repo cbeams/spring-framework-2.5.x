@@ -20,12 +20,14 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 
 /**
- * Interceptor that publishes an ApplicationEvent to all ApplicationListeners
- * registered with an ApplicationEventPublisher (typically an ApplicationContext),
- * after each successful method invocation.
+ * {@link MethodInterceptor Interceptor} that publishes an
+ * <code>ApplicationEvent</code> to all <code>ApplicationListeners</code>
+ * registered with an <code>ApplicationEventPublisher</code> after each
+ * <i>successful</i> method invocation.
  *
  * <p>Note that this interceptor is only capable of publishing <i>stateless</i>
- * events configured statically via the "applicationEventClass" property.
+ * events configured via the
+ * {@link #setApplicationEventClass "applicationEventClass"} property.
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
@@ -39,38 +41,50 @@ public class EventPublicationInterceptor
 		implements MethodInterceptor, ApplicationEventPublisherAware, InitializingBean {
 
 	private Class applicationEventClass;
+	
+	private Constructor cachedApplicationEventClassConstructor;
 
 	private ApplicationEventPublisher applicationEventPublisher;
 
+
 	/**
 	 * Set the application event class to publish.
-	 * <p>The event class must have a constructor with a single Object argument
-	 * for the event source. The interceptor will pass in the invoked object.
+	 * <p>The event class <b>must</b> have a constructor with a single
+	 * <code>Object</code> argument for the event source. The interceptor
+	 * will pass in the invoked object.
+	 * @throws IllegalArgumentException if the supplied <code>Class</code> is <code>null</code>; or if it
+	 * is not an <code>ApplicationEvent</code> subclass; or if it does not expose
+	 * a constructor that takes a single <code>Object</code> argument
 	 */
 	public void setApplicationEventClass(Class applicationEventClass) {
-		if (!ApplicationEvent.class.isAssignableFrom(applicationEventClass)) {
+		if (ApplicationEvent.class.equals(applicationEventClass) ||
+			!ApplicationEvent.class.isAssignableFrom(applicationEventClass)) {
 			throw new IllegalArgumentException("applicationEventClass needs to extend ApplicationEvent");
 		}
 		this.applicationEventClass = applicationEventClass;
+		try {
+			this.cachedApplicationEventClassConstructor = this.applicationEventClass.getConstructor(new Class[] {Object.class});
+		} catch (NoSuchMethodException ex) {
+			throw new IllegalArgumentException("applicationEventClass does not have the required constructor", ex);
+		}
 	}
+
 
 	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
 		this.applicationEventPublisher = applicationEventPublisher;
 	}
 
-	public void afterPropertiesSet() {
+	public void afterPropertiesSet() throws Exception {
 		if (this.applicationEventClass == null) {
 			throw new IllegalArgumentException("applicationEventClass is required");
 		}
 	}
 
+
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		// Invoke target method.
 		Object retVal = invocation.proceed();
 
-		// Publish specified event.
-		Constructor constructor = this.applicationEventClass.getConstructor(new Class[] {Object.class});
-		ApplicationEvent event = (ApplicationEvent) constructor.newInstance(new Object[] {invocation.getThis()});
+		ApplicationEvent event = (ApplicationEvent) this.cachedApplicationEventClassConstructor.newInstance(new Object[] {invocation.getThis()});
 		this.applicationEventPublisher.publishEvent(event);
 
 		return retVal;

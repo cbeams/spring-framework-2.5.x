@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.context;
 
 import junit.framework.TestCase;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.ITestBean;
@@ -26,34 +25,62 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.event.EventPublicationInterceptor;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.test.AssertThrows;
 
-/** 
+/**
+ * Unit tests for the <code>EventPublicationInterceptor</code> class.
+ *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
+ * @author Rick Evans
  */
-public class EventPublicationInterceptorTests extends TestCase {
+public final class EventPublicationInterceptorTests extends TestCase {
 
-	public void testWithIncorrectRequiredProperties() throws Exception {
-		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
-		ApplicationContext ctx = new StaticApplicationContext();
-		interceptor.setApplicationEventPublisher(ctx);
+	public void testWithNoApplicationEventClassSupplied() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+				ApplicationContext ctx = new StaticApplicationContext();
+				interceptor.setApplicationEventPublisher(ctx);
+				interceptor.afterPropertiesSet();
+			}
+		}.runTest();
+	}
 
-		try {
-			interceptor.afterPropertiesSet();
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+	public void testWithNonApplicationEventClassSupplied() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+				ApplicationContext ctx = new StaticApplicationContext();
+				interceptor.setApplicationEventPublisher(ctx);
+				interceptor.setApplicationEventClass(getClass());
+				interceptor.afterPropertiesSet();
+			}
+		}.runTest();
+	}
 
-		try {
-			interceptor.setApplicationEventClass(getClass());
-			interceptor.afterPropertiesSet();
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-		    // expected
-		}
+	public void testWithAbstractStraightApplicationEventClassSupplied() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+				ApplicationContext ctx = new StaticApplicationContext();
+				interceptor.setApplicationEventPublisher(ctx);
+				interceptor.setApplicationEventClass(ApplicationEvent.class);
+				interceptor.afterPropertiesSet();
+			}
+		}.runTest();
+	}
+
+	public void testWithApplicationEventClassThatDoesntExposeAValidCtor() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
+				ApplicationContext ctx = new StaticApplicationContext();
+				interceptor.setApplicationEventPublisher(ctx);
+				interceptor.setApplicationEventClass(TestEventWithNoValidOneArgObjectCtor.class);
+				interceptor.afterPropertiesSet();
+			}
+		}.runTest();
 	}
 
 	public void testExpectedBehavior() throws Exception {
@@ -88,9 +115,9 @@ public class EventPublicationInterceptorTests extends TestCase {
 		testBean.getAge();
 
 		// two events: ContextRefreshedEvent and TestEvent
-		assertTrue("Interceptor should have published 2 events", listener.getEventCount() == 2);
+		assertTrue("Interceptor must have published 2 events", listener.getEventCount() == 2);
 		TestListener otherListener = (TestListener) ctx.getBean("&otherListener");
-		assertTrue("Interceptor should have published 2 events", otherListener.getEventCount() == 2);
+		assertTrue("Interceptor must have published 2 events", otherListener.getEventCount() == 2);
 	}
 
 
@@ -98,6 +125,14 @@ public class EventPublicationInterceptorTests extends TestCase {
 
 		public TestEvent(Object source) {
 			super(source);
+		}
+	}
+
+
+	public static final class TestEventWithNoValidOneArgObjectCtor extends ApplicationEvent {
+
+		public TestEventWithNoValidOneArgObjectCtor() {
+			super("");
 		}
 	}
 
