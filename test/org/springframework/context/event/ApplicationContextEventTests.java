@@ -126,8 +126,7 @@ public class ApplicationContextEventTests extends TestCase {
 		ctrl.verify();
 	}
 
-	public void testEvenPublicationInterceptor()
-			throws Throwable {
+	public void testEvenPublicationInterceptor() throws Throwable {
 
 		MockControl invCtrl = MockControl.createControl(MethodInvocation.class);
 		MethodInvocation invocation = (MethodInvocation) invCtrl.getMock();
@@ -156,23 +155,6 @@ public class ApplicationContextEventTests extends TestCase {
 
 		ctxCtrl.verify();
 		invCtrl.verify();
-	}
-
-	public void testEventPublicationInterceptorIllegalState() {
-		EventPublicationInterceptor interceptor =
-				new EventPublicationInterceptor();
-
-		try {
-			interceptor.afterPropertiesSet();
-			fail("IllegalArgumentException must have been thrown");
-		} catch (IllegalArgumentException expected) {
-		}
-
-		try {
-			interceptor.setApplicationEventClass(String.class);
-			fail("IllegalArgumentException must have been thrown");
-		} catch (IllegalArgumentException expected) {
-		}
 	}
 
 
