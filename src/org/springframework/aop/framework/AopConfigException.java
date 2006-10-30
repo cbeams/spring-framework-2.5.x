@@ -27,7 +27,7 @@ import org.springframework.core.NestedRuntimeException;
 public class AopConfigException extends NestedRuntimeException {
 
 	/**
-	 * Constructor for EjbAccessException.
+	 * Constructor for AopConfigException.
 	 * @param msg the detail message
 	 */
 	public AopConfigException(String msg) {
@@ -35,7 +35,7 @@ public class AopConfigException extends NestedRuntimeException {
 	}
 
 	/**
-	 * Constructor for EjbAccessException.
+	 * Constructor for AopConfigException.
 	 * @param msg the detail message
 	 * @param cause the root cause
 	 */
