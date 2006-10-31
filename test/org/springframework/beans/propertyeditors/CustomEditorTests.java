@@ -476,6 +476,10 @@ public class CustomEditorTests extends TestCase {
 
 		bw.setPropertyValue("myChar", "\\u0022");
 		assertEquals('"', cb.getMyChar());
+		
+		CharacterEditor editor = new CharacterEditor(false);
+		editor.setAsText("M");
+		assertEquals("M", editor.getAsText());
 	}
 
 	public void testCharacterEditorWithAllowEmpty() {
@@ -1292,13 +1296,37 @@ public class CustomEditorTests extends TestCase {
 		assertEquals("-a,b-", tb.getName());
 	}
 
-	public void testClassArrayEditor() throws Exception {
+	public void testClassArrayEditorSunnyDay() throws Exception {
 		ClassArrayEditor classArrayEditor = new ClassArrayEditor();
 		classArrayEditor.setAsText("java.lang.String,java.util.HashMap");
 		Class[] classes = (Class[]) classArrayEditor.getValue();
 		assertEquals(2, classes.length);
 		assertEquals(String.class, classes[0]);
 		assertEquals(HashMap.class, classes[1]);
+		assertEquals("java.lang.String,java.util.HashMap", classArrayEditor.getAsText());
+		// ensure setAsText can consume the return value of getAsText
+		classArrayEditor.setAsText(classArrayEditor.getAsText());
+	}
+
+	public void testClassArrayEditorSetAsTextWithNull() throws Exception {
+		ClassArrayEditor classArrayEditor = new ClassArrayEditor();
+		classArrayEditor.setAsText(null);
+		assertNull(classArrayEditor.getValue());
+		assertEquals("", classArrayEditor.getAsText());
+	}
+
+	public void testClassArrayEditorSetAsTextWithEmptyString() throws Exception {
+		ClassArrayEditor classArrayEditor = new ClassArrayEditor();
+		classArrayEditor.setAsText("");
+		assertNull(classArrayEditor.getValue());
+		assertEquals("", classArrayEditor.getAsText());
+	}
+
+	public void testClassArrayEditorSetAsTextWithWhitespaceString() throws Exception {
+		ClassArrayEditor classArrayEditor = new ClassArrayEditor();
+		classArrayEditor.setAsText("\n");
+		assertNull(classArrayEditor.getValue());
+		assertEquals("", classArrayEditor.getAsText());
 	}
 
 	private static class TestBeanEditor extends PropertyEditorSupport {

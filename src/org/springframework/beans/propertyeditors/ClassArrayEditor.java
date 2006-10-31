@@ -22,12 +22,12 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Property editor for an array of {@link java.lang.Class java.lang.Class}, to enable the direct
- * population of a <code>Class[]</code> property without recourse to having to use a
- * String class name property as bridge.
+ * Property editor for an array of {@link java.lang.Class Classes}, to enable
+ * the direct population of a <code>Class[]</code> property without having to
+ * use a <code>String</code> class name property as bridge.
  *
- * <p>Also supports "java.lang.String[]"-style array class names, in contrast to the
- * standard {@link Class#forName(String)} method.
+ * <p>Also supports "java.lang.String[]"-style array class names, in contrast
+ * to the standard {@link Class#forName(String)} method.
  *
  * @author Rob Harrop
  * @since 2.0
@@ -36,21 +36,24 @@ public class ClassArrayEditor extends PropertyEditorSupport {
 
 	private final ClassLoader classLoader;
 
+
 	/**
-	 * Create a default <code>ClassEditor</code>, using the thread context ClassLoader.
+	 * Create a default <code>ClassEditor</code>, using the thread
+	 * context <code>ClassLoader</code>.
 	 */
 	public ClassArrayEditor() {
 		this(null);
 	}
 
 	/**
-	 * Create a default <code>ClassArrayEditor</code>, using the given ClassLoader.
-	 * @param classLoader the ClassLoader to use
-	 * (or <code>null</code> for the thread context ClassLoader)
+	 * Create a default <code>ClassArrayEditor</code>, using the given
+	 * <code>ClassLoader</code>.
+	 * @param classLoader the <code>ClassLoader</code> to use
+	 * (or pass <code>null</code> for the thread context <code>ClassLoader</code>)
 	 */
 	public ClassArrayEditor(ClassLoader classLoader) {
-		this.classLoader =
-				(classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
+		this.classLoader = classLoader != null
+				? classLoader : ClassUtils.getDefaultClassLoader();
 	}
 
 
@@ -71,9 +74,22 @@ public class ClassArrayEditor extends PropertyEditorSupport {
 
 	public String getAsText() {
 		Class[] classes = (Class[]) getValue();
-		if (classes == null) {
+		if (classes == null || classes.length == 0) {
 			return "";
 		}
-		return StringUtils.arrayToCommaDelimitedString(classes);
+		return toCommaDelimitedString(classes);
 	}
+
+
+	private static String toCommaDelimitedString(Class[] classes) {
+		StringBuffer buffer = new StringBuffer();
+		for (int i = 0; i < classes.length; ++i) {
+			if (i > 0) {
+				buffer.append(",");
+			}
+			buffer.append(classes[i].getName());
+		}
+		return buffer.toString();
+	}
+
 }
