@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ import org.springframework.web.util.WebUtils;
  * <p>In contrast to classic forms, wizards have more than one form view page.
  * Therefore, there are various actions instead of one single submit action:
  * <ul>
- * <li>finish: trying to leave the wizard successfully, i.e. performing its
- * final action, and thus needing a valid state;
+ * <li>finish: trying to leave the wizard successfully, that is, perform its
+ * final action, and thus requiring a valid state;
  * <li>cancel: leaving the wizard without performing its final action, and
  * thus without regard to the validity of its current state;
  * <li>page change: showing another wizard page, e.g. the next or previous
@@ -60,7 +60,7 @@ import org.springframework.web.util.WebUtils;
  * validated again to guarantee a consistent state.
  *
  * <p>Note that a validator's default validate method is not executed when using
- * this class! Rather, the <code>validatePage</code> implementation should call
+ * this class! Rather, the {@link #validatePage} implementation should call
  * special <code>validateXXX</code> methods that the validator needs to provide,
  * validating certain pieces of the object. These can be combined to validate
  * the elements of individual pages.
@@ -146,7 +146,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Return the wizard pages, i.e. the view names for the pages.
 	 * The array index corresponds to the page number.
 	 * <p>Note that a concrete wizard form controller might override
-	 * <code>getViewName(HttpServletRequest, Object, int)</code> to
+	 * {@link #getViewName(HttpServletRequest, Object, int)} to
 	 * determine the view name for each page dynamically.
 	 * @see #getViewName(javax.servlet.http.HttpServletRequest, Object, int)
 	 */
@@ -158,7 +158,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * Return the number of wizard pages.
 	 * Useful to check whether the last page has been reached.
 	 * <p>Note that a concrete wizard form controller might override
-	 * <code>getPageCount(HttpServletRequest, Object)</code> to determine
+	 * {@link #getPageCount(HttpServletRequest, Object)} to determine
 	 * the page count dynamically. The default implementation of that extended
 	 * <code>getPageCount</code> variant returns the static page count as
 	 * determined by this <code>getPageCount()</code> method.
@@ -188,7 +188,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	}
 
 	/**
-	 * Set if "dirty back" is allowed, i.e. if moving to a former wizard
+	 * Set if "dirty back" is allowed, that is, if moving to a former wizard
 	 * page is allowed in case of validation errors for the current page.
 	 * @param allowDirtyBack if "dirty back" is allowed
 	 */
@@ -204,7 +204,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	}
 
 	/**
-	 * Set if "dirty forward" is allowed, i.e. if moving to a later wizard
+	 * Set if "dirty forward" is allowed, that is, if moving to a later wizard
 	 * page is allowed in case of validation errors for the current page.
 	 * @param allowDirtyForward if "dirty forward" is allowed
 	 */
@@ -270,7 +270,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Create a reference data map for the given request, consisting of
 	 * bean name/bean instance pairs as expected by ModelAndView.
-	 * <p>Default implementation delegates to referenceData(HttpServletRequest, int).
+	 * <p>The default implementation delegates to referenceData(HttpServletRequest, int).
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current HTTP request
 	 * @param command form object with request parameters bound onto it
@@ -290,7 +290,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Create a reference data map for the given request, consisting of
 	 * bean name/bean instance pairs as expected by ModelAndView.
-	 * <p>Default implementation returns null.
+	 * <p>The default implementation returns <code>null</code>.
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current HTTP request
 	 * @param page current wizard page
@@ -315,7 +315,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Prepare the form model and view, including reference and error data,
-	 * for the given page. Can be used in <code>processFinish</code> implementations,
+	 * for the given page. Can be used in {@link #processFinish} implementations,
 	 * to show the corresponding page in case of validation errors.
 	 * @param request current HTTP request
 	 * @param errors validation errors holder
@@ -358,7 +358,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Return the page count for this wizard form controller.
-	 * Default implementation delegates to <code>getPageCount()</code>.
+	 * The default implementation delegates to {@link #getPageCount()}.
 	 * <p>Can be overridden to dynamically adapt the page count.
 	 * @param request current HTTP request
 	 * @param command the command object as returned by formBackingObject
@@ -371,7 +371,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Return the name of the view for the specified page of this wizard form controller.
-	 * Default implementation takes the view name from the <code>getPages()</code> array.
+	 * <p>The default implementation takes the view name from the {@link #getPages()} array.
 	 * <p>Can be overridden to dynamically switch the page view or to return view names
 	 * for dynamically defined pages.
 	 * @param request current HTTP request
@@ -384,8 +384,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	}
 
 	/**
-	 * Return the initial page of the wizard, i.e. the page shown at wizard startup.
-	 * Default implementation delegates to <code>getInitialPage(HttpServletRequest)</code>.
+	 * Return the initial page of the wizard, that is, the page shown at wizard startup.
+	 * <p>The default implementation delegates to {@link #getInitialPage(HttpServletRequest)}.
 	 * @param request current HTTP request
 	 * @param command the command object as returned by formBackingObject
 	 * @return the initial page number
@@ -397,8 +397,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	}
 
 	/**
-	 * Return the initial page of the wizard, i.e. the page shown at wizard startup.
-	 * Default implementation returns 0 for first page.
+	 * Return the initial page of the wizard, that is, the page shown at wizard startup.
+	 * <p>The default implementation returns 0 for first page.
 	 * @param request current HTTP request
 	 * @return the initial page number
 	 */
@@ -409,8 +409,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Return the name of the HttpSession attribute that holds the page object
 	 * for this wizard form controller.
-	 * <p>Default implementation delegates to the <code>getPageSessionAttributeName</code>
-	 * version without arguments.
+	 * <p>The default implementation delegates to the {@link #getPageSessionAttributeName()}
+	 * variant without arguments.
 	 * @param request current HTTP request
 	 * @return the name of the form session attribute, or <code>null</code> if not in session form mode
 	 * @see #getPageSessionAttributeName
@@ -439,7 +439,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Handle an invalid submit request, e.g. when in session form mode but no form object
 	 * was found in the session (like in case of an invalid resubmit by the browser).
-	 * <p>Default implementation for wizard form controllers simply shows the initial page
+	 * <p>The default implementation for wizard form controllers simply shows the initial page
 	 * of a new wizard form. If you want to show some "invalid submit" message, you need
 	 * to override this method.
 	 * @param request current HTTP request
@@ -491,7 +491,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 		}
 
 		// Normal submit: validate current page and show specified target page.
-		if (!suppressValidation(request)) {
+		if (!suppressValidation(request, command)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Validating wizard page " + currentPage + " for form bean '" + getCommandName() + "'");
 			}
@@ -582,8 +582,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Return the target page specified in the request.
-	 * <p>Default implementation delegates to
-	 * <code>getTargetPage(HttpServletRequest, int)</code>.
+	 * <p>The default implementation delegates to {@link #getTargetPage(HttpServletRequest, int)}.
 	 * Subclasses can override this for customized target page determination.
 	 * @param request current HTTP request
 	 * @param command form object with request parameters bound onto it
@@ -599,7 +598,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Return the target page specified in the request.
-	 * <p>Default implementation examines "_target" parameter (e.g. "_target1").
+	 * <p>The default implementation examines "_target" parameter (e.g. "_target1").
 	 * Subclasses can override this for customized target page determination.
 	 * @param request current HTTP request
 	 * @param currentPage the current page, to be returned as fallback
@@ -637,7 +636,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			return showPage(request, errors, currentPage);
 		}
 
-		if (!suppressValidation(request)) {
+		if (!suppressValidation(request, command)) {
 			// In case of remaining errors on a page -> show the page.
 			for (int page = 0; page < getPageCount(request, command); page++) {
 				validatePage(command, errors, page, true);
@@ -654,7 +653,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Template method for custom validation logic for individual pages.
-	 * Default implementation calls <code>validatePage(command, errors, page)</code>.
+	 * The default implementation calls {@link #validatePage(Object, Errors, int)}.
 	 * <p>Implementations will typically call fine-granular <code>validateXXX</code>
 	 * methods of this instance's Validator, combining them to validation of the
 	 * corresponding pages. The Validator's default <code>validate</code> method
@@ -673,7 +672,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Template method for custom validation logic for individual pages.
-	 * Default implementation is empty.
+	 * The default implementation is empty.
 	 * <p>Implementations will typically call fine-granular validateXXX methods of this
 	 * instance's validator, combining them to validation of the corresponding pages.
 	 * The validator's default <code>validate</code> method will not be called by a
@@ -707,7 +706,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
 	 * with the command and the Errors instance, under the specified command name,
 	 * as expected by the "spring:bind" tag.
-	 * <p>You can call the <code>showPage</code> method to return back to the wizard,
+	 * <p>You can call the {@link #showPage} method to return back to the wizard,
 	 * in case of last-minute validation errors having been found that you would
 	 * like to present to the user within the original wizard form.
 	 * @param request current HTTP request
@@ -726,7 +725,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Template method for processing the cancel action of this wizard.
-	 * <p>Default implementation throws a ServletException, saying that a cancel
+	 * <p>The default implementation throws a ServletException, saying that a cancel
 	 * operation is not supported by this controller. Thus, you do not need to
 	 * implement this template method if you do not support a cancel operation.
 	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model

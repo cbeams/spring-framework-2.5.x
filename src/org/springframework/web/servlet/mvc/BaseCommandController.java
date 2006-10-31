@@ -250,8 +250,8 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Set the strategy to use for processing binding errors, that is,
 	 * required field errors and <code>PropertyAccessException</code>s.
-	 * <p>Default is <code>null</code>, i.e. using the default strategy of
-	 * the data binder.
+	 * <p>Default is <code>null</code>, that is, using the default strategy
+	 * of the data binder.
 	 * @see #createBinder
 	 * @see org.springframework.validation.DataBinder#setBindingErrorProcessor
 	 */
@@ -270,7 +270,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Specify a single PropertyEditorRegistrar to be applied
 	 * to every DataBinder that this controller uses.
 	 * <p>Allows for factoring out the registration of PropertyEditors
-	 * to separate objects, as an alternative to <code>initBinder</code>.
+	 * to separate objects, as an alternative to {@link #initBinder}.
 	 * @see #initBinder
 	 */
 	public final void setPropertyEditorRegistrar(PropertyEditorRegistrar propertyEditorRegistrar) {
@@ -281,7 +281,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Specify multiple PropertyEditorRegistrars to be applied
 	 * to every DataBinder that this controller uses.
 	 * <p>Allows for factoring out the registration of PropertyEditors
-	 * to separate objects, as an alternative to <code>initBinder</code>.
+	 * to separate objects, as an alternative to {@link #initBinder}.
 	 * @see #initBinder
 	 */
 	public final void setPropertyEditorRegistrars(PropertyEditorRegistrar[] propertyEditorRegistrars) {
@@ -311,7 +311,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Retrieve a command object for the given request.
-	 * <p>Default implementation calls <code>createCommand</code>.
+	 * <p>The default implementation calls {@link #createCommand}.
 	 * Subclasses can override this.
 	 * @param request current HTTP request
 	 * @return object command to bind onto
@@ -368,7 +368,7 @@ public abstract class BaseCommandController extends AbstractController {
 		if (!suppressBinding(request)) {
 			binder.bind(request);
 			onBind(request, command, errors);
-			if (this.validators != null && isValidateOnBinding() && !suppressValidation(request)) {
+			if (this.validators != null && isValidateOnBinding() && !suppressValidation(request, command)) {
 				for (int i = 0; i < this.validators.length; i++) {
 					ValidationUtils.invokeValidator(this.validators[i], command, errors);
 				}
@@ -380,7 +380,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Return whether to suppress binding for the given request.
-	 * <p>Default implementation always returns "false". Can be overridden
+	 * <p>The default implementation always returns "false". Can be overridden
 	 * in subclasses to suppress validation, for example, if a special
 	 * request parameter is set.
 	 * @param request current HTTP request
@@ -393,12 +393,12 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Create a new binder instance for the given command and request.
-	 * <p>Called by <code>bindAndValidate</code>. Can be overridden to plug in
+	 * <p>Called by {@link #bindAndValidate}. Can be overridden to plug in
 	 * custom ServletRequestDataBinder instances.
-	 * <p>The default implementation creates a standard ServletRequestDataBinder and
-	 * invokes <code>prepareBinder</code> and <code>initBinder</code>.
-	 * <p>Note that neither <code>prepareBinder</code> nor <code>initBinder</code>
-	 * will be invoked automatically if you override this method! Call those methods
+	 * <p>The default implementation creates a standard ServletRequestDataBinder
+	 * and invokes {@link #prepareBinder} and {@link #initBinder}.
+	 * <p>Note that neither {@link #prepareBinder} nor {@link #initBinder} will
+	 * be invoked automatically if you override this method! Call those methods
 	 * at appropriate points of your overridden method.
 	 * @param request current HTTP request
 	 * @param command the command to bind onto
@@ -420,7 +420,7 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Prepare the given binder, applying the specified MessageCodesResolver,
 	 * BindingErrorProcessor and PropertyEditorRegistrars (if any).
-	 * Called by <code>createBinder</code>.
+	 * Called by {@link #createBinder}.
 	 * @param binder the new binder instance
 	 * @see #createBinder
 	 * @see #setMessageCodesResolver
@@ -445,7 +445,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Determine whether to use direct field access instead of bean property access.
-	 * Applied by <code>prepareBinder</code>.
+	 * Applied by {@link #prepareBinder}.
 	 * <p>Default is "false". Can be overridden in subclasses.
 	 * @see #prepareBinder
 	 * @see org.springframework.validation.DataBinder#initDirectFieldAccess()
@@ -456,12 +456,12 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Initialize the given binder instance, for example with custom editors.
-	 * Called by <code>createBinder</code>.
+	 * Called by {@link #createBinder}.
 	 * <p>This method allows you to register custom editors for certain fields of your
 	 * command class. For instance, you will be able to transform Date objects into a
 	 * String pattern and back, in order to allow your JavaBeans to have Date properties
 	 * and still be able to set and display them in an HTML interface.
-	 * <p>Default implementation is empty.
+	 * <p>The default implementation is empty.
 	 * @param request current HTTP request
 	 * @param binder the new binder instance
 	 * @throws Exception in case of invalid state or arguments
@@ -476,7 +476,7 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Callback for custom post-processing in terms of binding.
 	 * Called on each submit, after standard binding but before validation.
-	 * <p>Default implementation delegates to <code>onBind(request, command)</code>.
+	 * <p>The default implementation delegates to {@link #onBind(HttpServletRequest, Object)}.
 	 * @param request current HTTP request
 	 * @param command the command object to perform further binding on
 	 * @param errors validation errors holder, allowing for additional
@@ -493,9 +493,10 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Callback for custom post-processing in terms of binding.
-	 * Called by the default implementation of the <code>onBind</code> version
+	 * <p>Called by the default implementation of the
+	 * {@link #onBind(HttpServletRequest, Object, BindException)} variant
 	 * with all parameters, after standard binding but before validation.
-	 * <p>Default implementation is empty.
+	 * <p>The default implementation is empty.
 	 * @param request current HTTP request
 	 * @param command the command object to perform further binding on
 	 * @throws Exception in case of invalid state or arguments
@@ -506,9 +507,21 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Return whether to suppress validation for the given request.
-	 * <p>Default implementation always returns "false". Can be overridden
-	 * in subclasses to suppress validation, for example, if a special
-	 * request parameter is set.
+	 * <p>The default implementation delegates to {@link #suppressValidation(HttpServletRequest)}.
+	 * @param request current HTTP request
+	 * @param command the command object to validate
+	 * @return whether to suppress validation for the given request
+	 */
+	protected boolean suppressValidation(HttpServletRequest request, Object command) {
+		return suppressValidation(request);
+	}
+
+	/**
+	 * Return whether to suppress validation for the given request.
+	 * <p>Called by the default implementation of the
+	 * {@link #suppressValidation(HttpServletRequest, Object)} variant
+	 * with all parameters.
+	 * <p>The default implementation is empty.
 	 * @param request current HTTP request
 	 * @return whether to suppress validation for the given request
 	 */
@@ -520,7 +533,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Callback for custom post-processing in terms of binding and validation.
 	 * Called on each submit, after standard binding and validation,
 	 * but before error evaluation.
-	 * <p>Default implementation is empty.
+	 * <p>The default implementation is empty.
 	 * @param request current HTTP request
 	 * @param command the command object, still allowing for further binding
 	 * @param errors validation errors holder, allowing for additional
