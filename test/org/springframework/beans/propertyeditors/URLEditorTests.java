@@ -39,6 +39,13 @@ public final class URLEditorTests extends TestCase {
 		assertEquals(url.toExternalForm(), urlEditor.getAsText());
 	}
 
+	public void testSetAsTextWithNull() throws Exception {
+		PropertyEditor urlEditor = new URLEditor();
+		urlEditor.setAsText(null);
+		assertNull(urlEditor.getValue());
+		assertEquals("", urlEditor.getAsText());
+	}
+
 	public void testGetAsTextReturnsEmptyStringIfValueNotSet() throws Exception {
 		PropertyEditor urlEditor = new URLEditor();
 		assertEquals("", urlEditor.getAsText());
