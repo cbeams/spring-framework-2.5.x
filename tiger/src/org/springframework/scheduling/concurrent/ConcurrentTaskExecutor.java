@@ -35,7 +35,7 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
  * in particular regarding the {@link org.springframework.core.task.TaskRejectedException}.
  *
  * <p>Note that there is a pre-built {@link ThreadPoolTaskExecutor} that allows for
- * defining a JDK 1.5 {@link java.util.concurrent.ThreadPoolExecutor in bean style,
+ * defining a JDK 1.5 {@link java.util.concurrent.ThreadPoolExecutor} in bean style,
  * exposing it as a Spring {@link org.springframework.core.task.TaskExecutor} directly.
  * This is a convenient alternative to a raw ThreadPoolExecutor definition with
  * a separate definition of the present adapter class.
