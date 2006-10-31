@@ -25,9 +25,9 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
+import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.HttpSessionRequiredException;
 
 /**
  * <p>Form controller that auto-populates a form bean from the request.
@@ -180,8 +180,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * Create a new AbstractFormController.
 	 * <p>Subclasses should set the following properties, either in the constructor
 	 * or via a BeanFactory: commandName, commandClass, bindOnNewForm, sessionForm.
-	 * Note that commandClass doesn't need to be set when overriding
-	 * <code>formBackingObject</code>, as the latter determines the class anyway.
+	 * Note that "commandClass" doesn't need to be set when overriding
+	 * {@link #formBackingObject}, since the latter determines the class anyway.
 	 * <p>"cacheSeconds" is by default set to 0 (-> no caching for all form controllers).
 	 * @see #setCommandName
 	 * @see #setCommandClass
@@ -230,7 +230,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 	/**
 	 * Handles two cases: form submissions and showing a new form.
-	 * Delegates the decision between the two to <code>isFormSubmission</code>,
+	 * Delegates the decision between the two to {@link #isFormSubmission},
 	 * always treating requests without existing form session attribute
 	 * as new form when using session form mode.
 	 * @see #isFormSubmission
@@ -266,7 +266,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 	/**
 	 * Determine if the given request represents a form submission.
-	 * <p>Default implementation treats a POST request as form submission.
+	 * <p>The default implementation treats a POST request as form submission.
 	 * Note: If the form session attribute doesn't exist when using session form
 	 * mode, the request is always treated as new form by handleRequestInternal.
 	 * <p>Subclasses can override this to use a custom strategy, e.g. a specific
@@ -281,8 +281,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 	/**
 	 * Return the name of the HttpSession attribute that holds the form object
 	 * for this form controller.
-	 * <p>Default implementation delegates to the <code>getFormSessionAttributeName</code>
-	 * version without arguments.
+	 * <p>The default implementation delegates to the {@link #getFormSessionAttributeName()}
+	 * variant without arguments.
 	 * @param request current HTTP request
 	 * @return the name of the form session attribute, or <code>null</code> if not in session form mode
 	 * @see #getFormSessionAttributeName
@@ -325,11 +325,12 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 	/**
 	 * Create a BindException instance for a new form.
-	 * Called by <code>showNewForm</code>.
+	 * Called by {@link #showNewForm}.
 	 * <p>Can be used directly when intending to show a new form but with
 	 * special errors registered on it (for example, on invalid submit).
 	 * Usually, the resulting BindException will be passed to
-	 * <code>showForm</code>, after registering the errors on it.
+	 * {@link #showForm(HttpServletRequest, HttpServletResponse, BindException)},
+	 * after registering the errors on it.
 	 * @param request current HTTP request
 	 * @return the BindException instance
 	 * @throws Exception in case of an invalid new form object
@@ -364,14 +365,14 @@ public abstract class AbstractFormController extends BaseCommandController {
 	/**
 	 * Callback for custom post-processing in terms of binding for a new form.
 	 * Called when preparing a new form if <code>bindOnNewForm</code> is <code>true</code>.
-	 * <p>Default implementation delegates to <code>onBindOnNewForm(request, command)</code>.
+	 * <p>The default implementation delegates to <code>onBindOnNewForm(request, command)</code>.
 	 * @param request current HTTP request
 	 * @param command the command object to perform further binding on
 	 * @param errors validation errors holder, allowing for additional
 	 * custom registration of binding errors
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #onBindOnNewForm(javax.servlet.http.HttpServletRequest, Object)
-	 * @see #setBindOnNewForm(boolean)
+	 * @see #setBindOnNewForm
 	 */
 	protected void onBindOnNewForm(HttpServletRequest request, Object command, BindException errors)
 			throws Exception {
@@ -381,10 +382,11 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 	/**
 	 * Callback for custom post-processing in terms of binding for a new form.
-	 * Called by the default implementation of the <code>onBindOnNewForm</code> version
+	 * <p>Called by the default implementation of the
+	 * {@link #onBindOnNewForm(HttpServletRequest, Object, BindException)} variant
 	 * with all parameters, after standard binding when displaying the form view.
 	 * Only called if <code>bindOnNewForm</code> is set to <code>true</code>.
-	 * <p>Default implementation is empty.
+	 * <p>The default implementation is empty.
 	 * @param request current HTTP request
 	 * @param command the command object to perform further binding on
 	 * @throws Exception in case of invalid state or arguments
@@ -397,7 +399,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 	/**
 	 * Return the form object for the given request.
-	 * <p>Calls <code>formBackingObject</code> if not in session form mode.
+	 * <p>Calls {@link #formBackingObject} if not in session form mode.
 	 * Else, retrieves the form object from the session. Note that the form object
 	 * gets removed from the session, but it will be re-added when showing the
 	 * form for resubmission.
@@ -446,8 +448,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * object across the entire form workflow. Else, a new instance of the command
 	 * class will be created for each submission attempt, just using this backing
 	 * object as template for the initial form.
-	 * <p>Default implementation calls <code>BaseCommandController.createCommand</code>,
-	 * creating a new empty instance of the command class.
+	 * <p>The default implementation calls {@link #createCommand()},
+	 * creating a new empty instance of the specified command class.
 	 * Subclasses can override this to provide a preinitialized backing object.
 	 * @param request current HTTP request
 	 * @return the backing object
@@ -485,7 +487,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * <p>For building a custom ModelAndView, call <code>errors.getModel()</code>
 	 * to populate the ModelAndView model with the command and the Errors instance,
 	 * under the specified command name, as expected by the "spring:bind" tag.
-	 * You also need to include the model returned by <code>referenceData</code>.
+	 * You also need to include the model returned by {@link #referenceData}.
 	 * <p>Note: If you decide to have a "formView" property specifying the
 	 * view name, consider using SimpleFormController.
 	 * @param request current HTTP request
@@ -571,7 +573,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	/**
 	 * Create a reference data map for the given request, consisting of
 	 * bean name/bean instance pairs as expected by ModelAndView.
-	 * <p>Default implementation returns null.
+	 * <p>The default implementation returns <code>null</code>.
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current HTTP request
 	 * @param command form object with request parameters bound onto it
@@ -586,17 +588,19 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 
 	/**
-	 * Process form submission request. Called by <code>handleRequestInternal</code>
+	 * Process form submission request. Called by {@link #handleRequestInternal}
 	 * in case of a form submission, with or without binding errors. Implementations
 	 * need to proceed properly, typically showing a form view in case of binding
 	 * errors or performing a submit action else.
-	 * <p>Subclasses can implement this to provide custom submission handling
-	 * like triggering a custom action. They can also provide custom validation
-	 * and call <code>showForm</code> or proceed with the submission accordingly.
+	 * <p>Subclasses can implement this to provide custom submission handling like
+	 * triggering a custom action. They can also provide custom validation and call
+	 * {@link #showForm(HttpServletRequest, HttpServletResponse, BindException)}
+	 * or proceed with the submission accordingly.
 	 * <p>For a success view, call <code>errors.getModel()</code> to populate the
 	 * ModelAndView model with the command and the Errors instance, under the
 	 * specified command name, as expected by the "spring:bind" tag. For a form view,
-	 * simply return the ModelAndView object provided by <code>showForm</code>.
+	 * simply return the ModelAndView object provided by
+	 * {@link #showForm(HttpServletRequest, HttpServletResponse, BindException)}.
 	 * @param request current servlet request
 	 * @param response current servlet response
 	 * @param command form object with request parameters bound onto it
@@ -616,11 +620,11 @@ public abstract class AbstractFormController extends BaseCommandController {
 	/**
 	 * Handle an invalid submit request, e.g. when in session form mode but no form object
 	 * was found in the session (like in case of an invalid resubmit by the browser).
-	 * <p>Default implementation simply tries to resubmit the form with a new form object.
-	 * This should also work if the user hit the back button, changed some form data,
-	 * and resubmitted the form.
+	 * <p>The default implementation simply tries to resubmit the form with a new
+	 * form object. This should also work if the user hit the back button, changed
+	 * some form data, and resubmitted the form.
 	 * <p>Note: To avoid duplicate submissions, you need to override this method.
-	 * Either show some "invalid submit" message, or call <code>showNewForm</code> for
+	 * Either show some "invalid submit" message, or call {@link #showNewForm} for
 	 * resetting the form (prepopulating it with the current values if "bindOnNewForm"
 	 * is true). In this case, the form object in the session serves as transaction token.
 	 * <pre>
