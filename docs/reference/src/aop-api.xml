@@ -484,7 +484,7 @@
     }
  
     public void afterThrowing(Method m, Object[] args, Object target, ServletException ex) {
-        // Do something will all arguments
+        // Do something with all arguments
     }
 }</programlisting>
 
