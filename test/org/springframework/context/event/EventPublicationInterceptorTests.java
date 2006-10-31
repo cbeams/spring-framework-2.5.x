@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context;
+package org.springframework.context.event;
 
 import junit.framework.TestCase;
 import org.springframework.aop.framework.ProxyFactory;
@@ -25,6 +25,9 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.event.EventPublicationInterceptor;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.TestListener;
 import org.springframework.test.AssertThrows;
 
 /**
