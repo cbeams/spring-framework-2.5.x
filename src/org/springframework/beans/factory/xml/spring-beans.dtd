@@ -155,7 +155,7 @@
 	Note: This attribute will not be inherited by child bean definitions.
 	Hence, it needs to be specified per concrete bean definition.
 -->
-<!ATTLIST bean abstract (true | false) "false">
+<!ATTLIST bean abstract (true | false) #IMPLIED>
 
 <!--
 	Is this bean a "singleton" (one shared instance, which will
@@ -169,7 +169,7 @@
 	Note: This attribute will not be inherited by child bean definitions.
 	Hence, it needs to be specified per concrete bean definition.
 -->
-<!ATTLIST bean singleton (true | false) "true">
+<!ATTLIST bean singleton (true | false) #IMPLIED>
 
 <!--
 	If this bean should be lazily initialized.
