@@ -23,12 +23,8 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
-import javax.mail.Session;
 import javax.servlet.ServletException;
 
 import junit.framework.AssertionFailedError;
@@ -998,16 +994,16 @@ public class XmlBeanFactoryTests extends TestCase {
 
 		// Check cost of repeated construction of beans with method overrides
 		// Will pick up misuse of CGLIB
-		int howmany = 100;
+		int howMany = 100;
 		StopWatch sw = new StopWatch();
-		sw.start("Look up " + howmany + " prototype bean instances with method overrides");
-		for (int i = 0; i < howmany; i++) {
+		sw.start("Look up " + howMany + " prototype bean instances with method overrides");
+		for (int i = 0; i < howMany; i++) {
 			testLookupOverrideMethodsWithSetterInjection(xbf, "overrideOnPrototype", false);
 		}
 		sw.stop();
 		System.out.println(sw);
 		if (!LogFactory.getLog(DefaultListableBeanFactory.class).isDebugEnabled()) {
-			assertTrue(sw.getTotalTimeMillis() < 1500);
+			assertTrue(sw.getTotalTimeMillis() < 2000);
 		}
 
 		// Now test distinct bean with swapped value in factory, to ensure the two are independent
