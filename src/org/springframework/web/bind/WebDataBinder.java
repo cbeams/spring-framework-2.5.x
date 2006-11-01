@@ -50,10 +50,11 @@ public class WebDataBinder extends DataBinder {
 	/**
 	 * Default prefix that field marker parameters start with, followed by the field
 	 * name: e.g. "_subscribeToNewsletter" for a field "subscribeToNewsletter".
-	 * <p>Such a marker parameter indicates that the field was visible respectively
+	 * <p>Such a marker parameter indicates that the field was visible, that is,
 	 * existed in the form that caused the submission. If no corresponding field
-	 * value parameter was found, the field will be reset. This is particularly
-	 * useful for HTML checkboxes and select options.
+	 * value parameter was found, the field will be reset. The value of the field
+	 * marker parameter does not matter in this case; an arbitrary value can be used.
+	 * This is particularly useful for HTML checkboxes and select options.
 	 * @see #setFieldMarkerPrefix
 	 */
 	public static final String DEFAULT_FIELD_MARKER_PREFIX = "_";
