@@ -141,6 +141,17 @@ public abstract class RdbmsOperation implements InitializingBean {
 	}
 
 	/**
+	 * Set the query timeout for statements that this RDBMS operation executes.
+	 * <p>Default is 0, indicating to use the JDBC driver's default.
+	 * <p>Note: Any timeout specified here will be overridden by the remaining
+	 * transaction timeout when executing within a transaction that has a
+	 * timeout specified at the transaction level.
+	 */
+	public void setQueryTimeout(int queryTimeout) {
+		this.jdbcTemplate.setQueryTimeout(queryTimeout);
+	}
+
+	/**
 	 * Set whether to use statements that return a specific type of ResultSet.
 	 * @param resultSetType the ResultSet type
 	 * @see java.sql.ResultSet#TYPE_FORWARD_ONLY

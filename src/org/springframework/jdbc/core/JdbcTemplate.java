@@ -108,6 +108,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	private int maxRows = 0;
 
 	/**
+	 * If this variable is set to a non-zero value, it will be used for setting the
+	 * queryTimeout property on statements used for query processing.
+	 */
+	private int queryTimeout = 0;
+
+	/**
 	 * If this variable is set to true then all results checking will be bypassed for any
 	 * callable statement processing.  This can be used to avoid a bug in some older Oracle
 	 * JDBC drivers like 10.1.0.2.
@@ -187,6 +193,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * processing speed at the cost of memory consumption; setting this lower can
 	 * avoid transferring row data that will never be read by the application.
 	 * <p>Default is 0, indicating to use the JDBC driver's default.
+	 * @see java.sql.Statement#setFetchSize
 	 */
 	public void setFetchSize(int fetchSize) {
 		this.fetchSize = fetchSize;
@@ -206,6 +213,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * never interested in the entire result in the first place (for example,
 	 * when performing searches that might return a large number of matches).
 	 * <p>Default is 0, indicating to use the JDBC driver's default.
+	 * @see java.sql.Statement#setMaxRows
 	 */
 	public void setMaxRows(int maxRows) {
 		this.maxRows = maxRows;
@@ -216,6 +224,25 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 */
 	public int getMaxRows() {
 		return maxRows;
+	}
+
+	/**
+	 * Set the query timeout for statements that this JdbcTemplate executes.
+	 * <p>Default is 0, indicating to use the JDBC driver's default.
+	 * <p>Note: Any timeout specified here will be overridden by the remaining
+	 * transaction timeout when executing within a transaction that has a
+	 * timeout specified at the transaction level.
+	 * @see java.sql.Statement#setQueryTimeout
+	 */
+	public void setQueryTimeout(int queryTimeout) {
+		this.queryTimeout = queryTimeout;
+	}
+
+	/**
+	 * Return the query timeout for statements that this JdbcTemplate executes.
+	 */
+	public int getQueryTimeout() {
+		return queryTimeout;
 	}
 
 	/**
@@ -234,6 +261,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	public boolean isSkipResultsProcessing() {
 		return skipResultsProcessing;
 	}
+
 
 	//-------------------------------------------------------------------------
 	// Methods dealing with a plain java.sql.Connection
@@ -1037,16 +1065,19 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @param stmt the JDBC Statement to prepare
 	 * @see #setFetchSize
 	 * @see #setMaxRows
+	 * @see #setQueryTimeout
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#applyTransactionTimeout
 	 */
 	protected void applyStatementSettings(Statement stmt) throws SQLException {
-		if (getFetchSize() > 0) {
-			stmt.setFetchSize(getFetchSize());
+		int fetchSize = getFetchSize();
+		if (fetchSize > 0) {
+			stmt.setFetchSize(fetchSize);
 		}
-		if (getMaxRows() > 0) {
-			stmt.setMaxRows(getMaxRows());
+		int maxRows = getMaxRows();
+		if (maxRows > 0) {
+			stmt.setMaxRows(maxRows);
 		}
-		DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
+		DataSourceUtils.applyTimeout(stmt, getDataSource(), getQueryTimeout());
 	}
 
 	/**
