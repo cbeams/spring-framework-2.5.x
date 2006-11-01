@@ -378,15 +378,6 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertTrue(lbf.getBean("test") instanceof NestedTestBean);
 	}
 
-	public void testBeanDefinitionOverridingWithAlias() {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
-		lbf.registerAlias("test", "testAlias");
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
-		lbf.registerAlias("test", "testAlias");
-		assertTrue(lbf.getBean("test") instanceof NestedTestBean);
-	}
-
 	public void testBeanDefinitionOverridingNotAllowed() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.setAllowBeanDefinitionOverriding(false);
@@ -399,6 +390,28 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			assertEquals("test", ex.getBeanName());
 			// expected
 		}
+	}
+
+	public void testBeanDefinitionOverridingWithAlias() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
+		lbf.registerAlias("test", "testAlias");
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
+		lbf.registerAlias("test", "testAlias");
+		assertTrue(lbf.getBean("test") instanceof NestedTestBean);
+		assertTrue(lbf.getBean("testAlias") instanceof NestedTestBean);
+	}
+
+	public void testAliasChaining() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
+		lbf.registerAlias("test", "testAlias");
+		lbf.registerAlias("testAlias", "testAlias2");
+		lbf.registerAlias("testAlias2", "testAlias3");
+		Object bean = lbf.getBean("test");
+		assertSame(bean, lbf.getBean("testAlias"));
+		assertSame(bean, lbf.getBean("testAlias2"));
+		assertSame(bean, lbf.getBean("testAlias3"));
 	}
 
 	public void testBeanReferenceWithNewSyntax() {
