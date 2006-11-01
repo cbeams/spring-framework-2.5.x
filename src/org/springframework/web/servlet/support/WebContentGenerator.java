@@ -30,8 +30,8 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
 
 /**
  * Convenient superclass for any kind of web content generator,
- * like AbstractController and WebContentInterceptor. Can also be
- * used for custom handlers that have their own
+ * like AbstractController and WebContentInterceptor. Can also
+ * be used for custom handlers that have their own
  * {@link org.springframework.web.servlet.HandlerAdapter}.
  *
  * <p>Supports HTTP cache control options. The usage of corresponding
@@ -201,13 +201,13 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 			HttpServletRequest request, HttpServletResponse response, int cacheSeconds, boolean lastModified)
 	    throws ServletException {
 
-		// check whether we should support the request method
+		// Check whether we should support the request method.
 		String method = request.getMethod();
 		if (!this.supportedMethods.contains(method)) {
 			throw new HttpRequestMethodNotSupportedException(method);
 		}
 
-		// check whether session is required
+		// Check whether a session is required.
 		if (this.requireSession) {
 			if (request.getSession(false) == null) {
 				throw new HttpSessionRequiredException("Pre-existing session required but none found");
