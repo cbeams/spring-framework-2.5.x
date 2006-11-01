@@ -216,10 +216,28 @@ public abstract class DataSourceUtils {
 	 * @see java.sql.Statement#setQueryTimeout
 	 */
 	public static void applyTransactionTimeout(Statement stmt, DataSource dataSource) throws SQLException {
-		Assert.notNull(stmt, "No statement specified");
+		applyTimeout(stmt, dataSource, 0);
+	}
+
+	/**
+	 * Apply the specified timeout - overridden by the current transaction timeout,
+	 * if any - to the given JDBC Statement object.
+	 * @param stmt the JDBC Statement object
+	 * @param dataSource DataSource that the Connection came from
+	 * @param timeout the timeout to apply (or 0 for no timeout outside of a transaction)
+	 * @see java.sql.Statement#setQueryTimeout
+	 */
+	public static void applyTimeout(Statement stmt, DataSource dataSource, int timeout) throws SQLException {
+		Assert.notNull(stmt, "No Statement specified");
+		Assert.notNull(dataSource, "No DataSource specified");
 		ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
 		if (holder != null && holder.hasTimeout()) {
+			// Remaining transaction timeout overrides specified value.
 			stmt.setQueryTimeout(holder.getTimeToLiveInSeconds());
+		}
+		else if (timeout > 0) {
+			// No current transaction timeout -> apply specified value.
+			stmt.setQueryTimeout(timeout);
 		}
 	}
 
