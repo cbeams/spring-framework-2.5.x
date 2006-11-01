@@ -1524,6 +1524,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertNull(TransactionSynchronizationManager.getCurrentTransactionName());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+		assertNull(TransactionSynchronizationManager.getCurrentTransactionIsolationLevel());
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 	}
 

@@ -90,6 +90,8 @@ public abstract class TransactionSynchronizationManager {
 
 	private static final ThreadLocal currentTransactionReadOnly = new ThreadLocal();
 
+	private static final ThreadLocal currentTransactionIsolationLevel= new ThreadLocal();
+
 	private static final ThreadLocal actualTransactionActive = new ThreadLocal();
 
 
@@ -260,7 +262,7 @@ public abstract class TransactionSynchronizationManager {
 
 	/**
 	 * Deactivate transaction synchronization for the current thread.
-	 * Called by transaction manager on transaction cleanup.
+	 * Called by the transaction manager on transaction cleanup.
 	 * @throws IllegalStateException if synchronization is not active
 	 */
 	public static void clearSynchronization() throws IllegalStateException {
@@ -278,7 +280,7 @@ public abstract class TransactionSynchronizationManager {
 
 	/**
 	 * Expose the name of the current transaction, if any.
-	 * Called by transaction manager on transaction begin and on cleanup.
+	 * Called by the transaction manager on transaction begin and on cleanup.
 	 * @param name the name of the transaction, or <code>null</code> to reset it
 	 */
 	public static void setCurrentTransactionName(String name) {
@@ -296,9 +298,9 @@ public abstract class TransactionSynchronizationManager {
 
 	/**
 	 * Expose a read-only flag for the current transaction.
-	 * Called by transaction manager on transaction begin and on cleanup.
-	 * @param readOnly true to mark the current transaction as read-only;
-	 * false to reset such a read-only marker
+	 * Called by the transaction manager on transaction begin and on cleanup.
+	 * @param readOnly <code>true</code> to mark the current transaction
+	 * as read-only; <code>false</code> to reset such a read-only marker
 	 * @see org.springframework.transaction.TransactionDefinition#isReadOnly
 	 */
 	public static void setCurrentTransactionReadOnly(boolean readOnly) {
@@ -313,7 +315,7 @@ public abstract class TransactionSynchronizationManager {
 	 * as argument for the <code>beforeCommit</code> callback, to be able
 	 * to suppress change detection on commit. The present method is meant
 	 * to be used for earlier read-only checks, for example to set the
-	 * flush mode of a Hibernate Session to FlushMode.NEVER upfront.
+	 * flush mode of a Hibernate Session to "FlushMode.NEVER" upfront.
 	 * @see TransactionSynchronization#beforeCommit(boolean)
 	 * @see org.hibernate.Session#flush
 	 * @see org.hibernate.Session#setFlushMode
@@ -324,8 +326,32 @@ public abstract class TransactionSynchronizationManager {
 	}
 
 	/**
+	 * Expose an isolation level for the current transaction.
+	 * Called by the transaction manager on transaction begin and on cleanup.
+	 * @param isolationLevel the isolation level to expose, according
+	 * to the TransactionDefinition / JDBC Connection constants,
+	 * or <code>null</code> to reset it
+	 */
+	public static void setCurrentTransactionIsolationLevel(Integer isolationLevel) {
+		currentTransactionIsolationLevel.set(isolationLevel);
+	}
+
+	/**
+	 * Return the isolation level for the current transaction, if any.
+	 * To be called by resource management code when preparing a newly
+	 * created resource (for example, a JDBC Connection).
+	 * @see TransactionSynchronization#beforeCommit(boolean)
+	 * @see org.hibernate.Session#flush
+	 * @see org.hibernate.Session#setFlushMode
+	 * @see org.hibernate.FlushMode#NEVER
+	 */
+	public static Integer getCurrentTransactionIsolationLevel() {
+		return (Integer) currentTransactionIsolationLevel.get();
+	}
+
+	/**
 	 * Expose whether there currently is an actual transaction active.
-	 * Called by transaction manager on transaction begin and on cleanup.
+	 * Called by the transaction manager on transaction begin and on cleanup.
 	 * @param active true to mark the current thread as being associated
 	 * with an actual transaction; false to reset that marker
 	 */

@@ -430,6 +430,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			if (newTransaction) {
 				TransactionSynchronizationManager.setActualTransactionActive(true);
 			}
+			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
+				TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(
+						new Integer(definition.getIsolationLevel()));
+			}
 			TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
 			TransactionSynchronizationManager.setCurrentTransactionName(definition.getName());
 			TransactionSynchronizationManager.initSynchronization();
@@ -460,8 +464,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				TransactionSynchronizationManager.setCurrentTransactionName(null);
 				boolean readOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
 				TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
+				Integer isolationLevel = TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
+				TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(null);
 				TransactionSynchronizationManager.setActualTransactionActive(false);
-				return new SuspendedResourcesHolder(holder, suspendedSynchronizations, name, readOnly);
+				return new SuspendedResourcesHolder(holder, suspendedSynchronizations, name, readOnly, isolationLevel);
 			}
 			catch (TransactionException ex) {
 				// doSuspend failed - original transaction is still active...
@@ -471,7 +477,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 		else {
 			Object holder = doSuspend(transaction);
-			return new SuspendedResourcesHolder(holder, null, null, false);
+			return new SuspendedResourcesHolder(holder, null, null, false, null);
 		}
 	}
 
@@ -488,6 +494,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		doResume(transaction, resourcesHolder.getSuspendedResources());
 		if (resourcesHolder.getSuspendedSynchronizations() != null) {
 			TransactionSynchronizationManager.setActualTransactionActive(true);
+			TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(resourcesHolder.getIsolationLevel());
 			TransactionSynchronizationManager.setCurrentTransactionReadOnly(resourcesHolder.isReadOnly());
 			TransactionSynchronizationManager.setCurrentTransactionName(resourcesHolder.getName());
 			resumeSynchronizations(resourcesHolder.getSuspendedSynchronizations());
@@ -826,6 +833,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			TransactionSynchronizationManager.clearSynchronization();
 			TransactionSynchronizationManager.setCurrentTransactionName(null);
 			TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
+			TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(null);
 			if (status.isNewTransaction()) {
 				TransactionSynchronizationManager.setActualTransactionActive(false);
 			}
@@ -1097,13 +1105,17 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 		private final boolean readOnly;
 
+		private final Integer isolationLevel;
+
 		public SuspendedResourcesHolder(
-				Object suspendedResources, List suspendedSynchronizations, String name, boolean readOnly) {
+				Object suspendedResources, List suspendedSynchronizations,
+				String name, boolean readOnly, Integer isolationLevel) {
 
 			this.suspendedResources = suspendedResources;
 			this.suspendedSynchronizations = suspendedSynchronizations;
 			this.name = name;
 			this.readOnly = readOnly;
+			this.isolationLevel = isolationLevel;
 		}
 
 		public Object getSuspendedResources() {
@@ -1120,6 +1132,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 		public boolean isReadOnly() {
 			return readOnly;
+		}
+
+		public Integer getIsolationLevel() {
+			return isolationLevel;
 		}
 	}
 
