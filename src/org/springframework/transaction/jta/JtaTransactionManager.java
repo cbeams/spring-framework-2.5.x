@@ -51,12 +51,12 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronization;
 
 /**
- * PlatformTransactionManager implementation for JTA, i.e. J2EE container transactions.
- * Can also work with a locally configured JTA implementation.
+ * PlatformTransactionManager implementation for JTA, that is, typically J2EE
+ * container transactions. Can also work with a locally configured JTA provider.
  *
  * <p>This transaction manager is appropriate for handling distributed transactions,
- * i.e. transactions that span multiple resources, and for managing transactions
- * on a J2EE Connector (e.g. a persistence toolkit registered as JCA Connector).
+ * i.e. transactions that span multiple resources, and for controlling transactions on
+ * application server resources (e.g. JDBC DataSources available in JNDI) in general.
  * For a single JDBC DataSource, DataSourceTransactionManager is perfectly sufficient,
  * and for accessing a single resource with Hibernate (including transactional cache),
  * HibernateTransactionManager is appropriate, for example.
@@ -185,6 +185,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	private String transactionManagerName;
 
 	private boolean autodetectTransactionManager = true;
+
+	private boolean allowCustomIsolationLevels = false;
 
 
 	/**
@@ -361,6 +363,18 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		this.autodetectTransactionManager = autodetectTransactionManager;
 	}
 
+	/**
+	 * Set whether to allow custom isolation levels to be specified.
+	 * <p>Default is "false", throwing an exception if a non-default isolation level
+	 * is specified for a transaction. Turn this flag on if affected resource adapters
+	 * check the thread-bound transaction context and apply the specified isolation
+	 * levels individually (e.g. through a IsolationLevelDataSourceRouter).
+	 * @see org.springframework.jdbc.datasource.lookup.IsolationLevelDataSourceRouter
+	 */
+	public void setAllowCustomIsolationLevels(boolean allowCustomIsolationLevels) {
+		this.allowCustomIsolationLevels = allowCustomIsolationLevels;
+	}
+
 
 	public void afterPropertiesSet() throws TransactionSystemException {
 		// Fetch JTA UserTransaction from JNDI, if necessary.
@@ -479,7 +493,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Allows subclasses to retrieve the JTA UserTransaction in a vendor-specific manner.
 	 * Only called if no "userTransaction" or "userTransactionName" specified.
-	 * <p>Default implementation simply returns null.
+	 * <p>The default implementation simply returns <code>null</code>.
 	 * @return the JTA UserTransaction handle to use, or <code>null</code> if none found
 	 * @throws TransactionSystemException in case of errors
 	 * @see #setUserTransaction
@@ -492,7 +506,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Allows subclasses to retrieve the JTA TransactionManager in a vendor-specific manner.
 	 * Only called if no "transactionManager" or "transactionManagerName" specified.
-	 * <p>Default implementation simply returns null.
+	 * <p>The default implementation simply returns <code>null</code>.
 	 * @return the JTA TransactionManager handle to use, or <code>null</code> if none found
 	 * @throws TransactionSystemException in case of errors
 	 * @see #setTransactionManager
@@ -503,9 +517,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	/**
-	 * Find the JTA TransactionManager through autodetection:
-	 * checking whether the UserTransaction object implements the
-	 * TransactionManager, and checking the fallback JNDI locations.
+	 * Find the JTA TransactionManager through autodetection: checking whether the
+	 * UserTransaction object implements the TransactionManager, and checking the
+	 * fallback JNDI locations.
 	 * @param ut the JTA UserTransaction object
 	 * @return the JTA TransactionManager reference, or <code>null</code> if not found
 	 * @see #FALLBACK_TRANSACTION_MANAGER_NAMES
@@ -641,7 +655,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	/**
-	 * Apply the given transaction isolation level. Default implementation
+	 * Apply the given transaction isolation level. The default implementation
 	 * will throw an exception for any level other than ISOLATION_DEFAULT.
 	 * <p>To be overridden in subclasses for specific JTA implementations,
 	 * as alternative to overriding the full <code>doJtaBegin</code> method.
@@ -657,14 +671,15 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	protected void applyIsolationLevel(JtaTransactionObject txObject, int isolationLevel)
 	    throws InvalidIsolationLevelException, SystemException {
 
-		if (isolationLevel != TransactionDefinition.ISOLATION_DEFAULT) {
+		if (!this.allowCustomIsolationLevels && isolationLevel != TransactionDefinition.ISOLATION_DEFAULT) {
 			throw new InvalidIsolationLevelException(
-			    "JtaTransactionManager does not support custom isolation levels");
+			    "JtaTransactionManager does not support custom isolation levels by default - " +
+					"switch 'allowCustomIsolationLevels' to 'true'");
 		}
 	}
 
 	/**
-	 * Apply the given transaction timeout. Default implementation will call
+	 * Apply the given transaction timeout. The default implementation will call
 	 * <code>setTransactionTimeout</code> for a non-default timeout value.
 	 * @param txObject the JtaTransactionObject containing the UserTransaction
 	 * @param timeout timeout value taken from transaction definition

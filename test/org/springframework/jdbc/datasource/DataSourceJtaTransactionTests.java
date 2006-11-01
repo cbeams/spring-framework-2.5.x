@@ -18,21 +18,26 @@ package org.springframework.jdbc.datasource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 import javax.transaction.Status;
+import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
-import javax.transaction.SystemException;
 
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
+import org.springframework.jdbc.datasource.lookup.BeanFactoryDataSourceLookup;
+import org.springframework.jdbc.datasource.lookup.IsolationLevelDataSourceRouter;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionException;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.jta.JtaTransactionObject;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -553,10 +558,109 @@ public class DataSourceJtaTransactionTests extends TestCase {
 		}
 	}
 
+	public void testJtaTransactionWithIsolationLevelDataSourceRouter() throws Exception {
+		doTestJtaTransactionWithIsolationLevelDataSourceRouter(false);
+	}
+
+	public void testJtaTransactionWithIsolationLevelDataSourceRouterWithDataSourceLookup() throws Exception {
+		doTestJtaTransactionWithIsolationLevelDataSourceRouter(true);
+	}
+
+	private void doTestJtaTransactionWithIsolationLevelDataSourceRouter(boolean dataSourceLookup) throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		ut.begin();
+		utControl.setVoidCallable(1);
+		ut.commit();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		ut.begin();
+		utControl.setVoidCallable(1);
+		ut.commit();
+		utControl.setVoidCallable(1);
+		utControl.replay();
+
+		MockControl ds1Control = MockControl.createControl(DataSource.class);
+		final DataSource ds1 = (DataSource) ds1Control.getMock();
+		MockControl con1Control = MockControl.createControl(Connection.class);
+		final Connection con1 = (Connection) con1Control.getMock();
+		ds1.getConnection();
+		ds1Control.setReturnValue(con1, 1);
+		con1.close();
+		con1Control.setVoidCallable(1);
+		con1Control.replay();
+		ds1Control.replay();
+
+		MockControl ds2Control = MockControl.createControl(DataSource.class);
+		final DataSource ds2 = (DataSource) ds2Control.getMock();
+		MockControl con2Control = MockControl.createControl(Connection.class);
+		final Connection con2 = (Connection) con2Control.getMock();
+		ds2.getConnection();
+		ds2Control.setReturnValue(con2, 1);
+		con2.close();
+		con2Control.setVoidCallable(1);
+		con2Control.replay();
+		ds2Control.replay();
+
+		final IsolationLevelDataSourceRouter dsToUse = new IsolationLevelDataSourceRouter();
+		Map targetDataSources = new HashMap();
+		if (dataSourceLookup) {
+			targetDataSources.put("ISOLATION_REPEATABLE_READ", "ds2");
+			dsToUse.setDefaultTargetDataSource("ds1");
+			StaticListableBeanFactory beanFactory = new StaticListableBeanFactory();
+			beanFactory.addBean("ds1", ds1);
+			beanFactory.addBean("ds2", ds2);
+			dsToUse.setDataSourceLookup(new BeanFactoryDataSourceLookup(beanFactory));
+		}
+		else {
+			targetDataSources.put("ISOLATION_REPEATABLE_READ", ds2);
+			dsToUse.setDefaultTargetDataSource(ds1);
+		}
+		dsToUse.setTargetDataSources(targetDataSources);
+		dsToUse.afterPropertiesSet();
+
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		ptm.setAllowCustomIsolationLevels(true);
+
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+				Connection c = DataSourceUtils.getConnection(dsToUse);
+				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
+				assertSame(con1, c);
+				DataSourceUtils.releaseConnection(c, dsToUse);
+			}
+		});
+
+		tt.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+				Connection c = DataSourceUtils.getConnection(dsToUse);
+				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
+				assertSame(con2, c);
+				DataSourceUtils.releaseConnection(c, dsToUse);
+			}
+		});
+
+		ds1Control.verify();
+		con1Control.verify();
+		ds2Control.verify();
+		con2Control.verify();
+		utControl.verify();
+	}
+
 	protected void tearDown() {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		assertNull(TransactionSynchronizationManager.getCurrentTransactionName());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+		assertNull(TransactionSynchronizationManager.getCurrentTransactionIsolationLevel());
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 	}
 
