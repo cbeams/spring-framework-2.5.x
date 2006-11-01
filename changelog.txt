@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.1 (3.11.2006)
+Changes in version 2.0.1 (4.11.2006)
 ------------------------------------
 
 General
@@ -22,8 +22,11 @@ Package org.springframework.beans
 * UnsatisfiedDependencyException message for multiple matches mentions the names of all matching beans
 * improved "scope is not active" error message to explicitly hint at the singleton-refers-to-scoped-bean problem
 * factory methods are allowed to return null, with the null value exposed as bean reference
+* AbstractBeanFactory supports alias chaining, with an alias registered for a bean name that is itself an alias
 * AbstractBeanFactory uses bean name as cache key for merged bean definitions, to avoid equality matching overhead
 * AbstractBeanFactory detects circular references between non-singletons and throws a corresponding exception
+* AbstractBeanFactory overrides an inner bean's singleton status from the merged outer bean (potentially a child def)
+* removed default for "abstract"/"singleton" attributes in "spring-beans.dtd", for 2.0-style inheritance for inner beans
 * added "findAutowireCandidates" template method to AbstractAutowireCapableBeanFactory, superseding "findMatchingBeans"
 * DefaultListableBeanFactory excludes beans which are not autowire candidates even before it obtains the instances
 * fixed PluggableSchemaResolver to accept a null ClassLoader argument (falling back to the default ClassLoader)
@@ -39,6 +42,10 @@ Package org.springframework.core
 
 Package org.springframework.instrument
 * added GlassFishLoadTimeWeaver for GlassFish / Sun Application Server
+
+Package org.springframework.jdbc
+* introduced AbstractRoutingDataSource and IsolationLevelDataSourceRouter
+* added "setQueryTimeout" method to JdbcTemplate and RdbmsOperation, for specifying a timeout outside of a transaction
 
 Package org.springframework.jms
 * reimplemented JMSException translation to handle subclasses of standard JMSExceptions in a specific fashion as well
@@ -61,6 +68,7 @@ Package org.springframework.mock
 Package org.springframework.orm
 * fixed Hibernate3 LocalSessionFactoryBean's "schemaUpdate" behavior to not run into an IllegalStateException
 * LocalContainerEntityManagerFactoryBean detects jar file URL in WebLogic jar entry URLs correctly
+* included OpenJPA support classes (OpenJpaDialect, OpenJpaVendorAdapter), tested against OpenJPA 0.9.6
 
 Package org.springframework.scheduling
 * TimerFactoryBean uses its bean name as Timer thread name (on JDK 1.5, falling back to a default Timer on JDK 1.3/1.4)
@@ -75,6 +83,7 @@ Package org.springframework.test
 
 Package org.springframework.transaction
 * TransactionAttributeEditor does not accept transaction attributes with invalid whitespace anymore
+* AbstractPlatformTransactionManager exposes current transaction isolation level via TransactionSynchronizationManager
 * AbstractPlatformTransactionManager does not activate transaction synchronization for PROPAGATION_NOT_SUPPORTED/NEVER
 * AbstractPlatformTransactionManager properly resumes all synchronizations even after suspend or inner begin failure
 * JtaTransactionManager's "doRegisterAfterCompletionWithJtaTransaction" avoids NPE if no current JTA transaction active
@@ -96,6 +105,8 @@ Package org.springframework.web
 * made AbstractHandlerMapping's "getDefaultHandler()" method public
 * added public "getHandlerMap()" method to AbstractUrlHandlerMapping, exposing a read-only map of registered handlers
 * added public "getUrlMap()" method to SimpleUrlHandlerMapping, to allow for adding or overriding individual entries
+* added overloaded "suppressValidation" version with command object argument to BaseCommandController
+* added overloaded "isFormChangeRequest" version with command object argument to SimpleFormController
 * JSP MessageTag detects a single expression argument that resolves to an array and processes it as arguments array
 * FreeMarkerView exposes all standard FreeMarker hash models now (including session and request parameters)
 * FreeMarkerView uses the ObjectWrapper as specified in the FreeMarker configuration, rather than always the default
