@@ -813,14 +813,31 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	}
 
 	/**
-	 * Return a RootBeanDefinition for the given bean name, by merging with the
-	 * parent if the given original bean definition is a child bean definition.
+	 * Return a RootBeanDefinition for the given top-level bean, by merging with
+	 * the parent if the given bean's definition is a child bean definition.
 	 * @param beanName the name of the bean definition
 	 * @param bd the original bean definition (Root/ChildBeanDefinition)
 	 * @return a (potentially merged) RootBeanDefinition for the given bean
 	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
 	 */
 	protected RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition bd)
+			throws BeanDefinitionStoreException {
+
+		return getMergedBeanDefinition(beanName, bd, null);
+	}
+
+	/**
+	 * Return a RootBeanDefinition for the given bean, by merging with the
+	 * parent if the given bean's definition is a child bean definition.
+	 * @param beanName the name of the bean definition
+	 * @param bd the original bean definition (Root/ChildBeanDefinition)
+	 * @param containingBd the containing bean definition in case of inner bean,
+	 * or <code>null</code> in case of a top-level bean
+	 * @return a (potentially merged) RootBeanDefinition for the given bean
+	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
+	 */
+	protected RootBeanDefinition getMergedBeanDefinition(
+			String beanName, BeanDefinition bd, BeanDefinition containingBd)
 			throws BeanDefinitionStoreException {
 
 		synchronized (this.mergedBeanDefinitions) {
@@ -864,12 +881,20 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 				else {
 					throw new BeanDefinitionStoreException(bd.getResourceDescription(), beanName,
-							"Definition is neither a RootBeanDefinition nor a ChildBeanDefinition");
+							"Definition is neither a RootBeanDefinition nor a ChildBeanDefinition: " + bd);
+				}
+
+				// A bean contained in a non-singleton bean cannot be a singleton itself.
+				// Let's correct this on the fly here, since this might be the result of
+				// parent-child merging for the outer bean, in which case the original inner bean
+				// definition will not have inherited the merged outer bean's singleton status.
+				if (containingBd != null && !containingBd.isSingleton() && mbd.isSingleton()) {
+					mbd.setSingleton(false);
 				}
 
 				// Only cache the merged bean definition if we're already about to create an
 				// instance of the bean, or at least have already created an instance before.
-				if (isCacheBeanMetadata() && this.alreadyCreated.contains(beanName)) {
+				if (containingBd == null && isCacheBeanMetadata() && this.alreadyCreated.contains(beanName)) {
 					this.mergedBeanDefinitions.put(beanName, mbd);
 				}
 			}

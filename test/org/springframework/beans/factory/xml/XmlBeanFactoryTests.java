@@ -984,7 +984,6 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testLookupOverrideMethodsWithSetterInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
 
 		testLookupOverrideMethodsWithSetterInjection(xbf, "overrideOneMethod", true);
@@ -1050,7 +1049,6 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testReplaceMethodOverrideWithSetterInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("delegationOverrides.xml", getClass()));
 
 		OverrideOneMethod oom = (OverrideOneMethod) xbf.getBean("overrideOneMethod");
@@ -1098,7 +1096,6 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testLookupOverrideOneMethodWithConstructorInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("constructorOverrides.xml", getClass()));
 
 		ConstructorInjectedOverrides cio = (ConstructorInjectedOverrides) xbf.getBean("constructorOverrides");
@@ -1122,7 +1119,6 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testRejectsOverrideOfBogusMethodName() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		try {
 			reader.loadBeanDefinitions(new ClassPathResource("invalidOverridesNoSuchMethod.xml", getClass()));
 			xbf.getBean("constructorOverrides");
@@ -1150,7 +1146,6 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void BUGtestSerializableMethodReplacerAndSuperclass() throws IOException, ClassNotFoundException {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("delegationOverrides.xml", getClass()));
 		SerializableMethodReplacerCandidate s = (SerializableMethodReplacerCandidate) xbf.getBean("serializableReplacer");
 		String forwards = "this is forwards";
@@ -1164,7 +1159,6 @@ public class XmlBeanFactoryTests extends TestCase {
 	public void testCannotSpecifyFactoryMethodArgumentsExceptWithFactoryMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_AUTO);
 		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
 		try {
 			xbf.getBean("overrideOnPrototype", new Object[]{new TestBean()});
@@ -1173,6 +1167,15 @@ public class XmlBeanFactoryTests extends TestCase {
 		catch (BeanDefinitionStoreException ex) {
 			// OK
 		}
+	}
+
+	public void testInnerBeanInheritsScopeFromConcreteChildDefinition() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
+		TestBean jenny = (TestBean) xbf.getBean("jennyChild");
+		assertEquals(1, jenny.getFriends().size());
+		assertTrue(jenny.getFriends().iterator().next() instanceof TestBean);
 	}
 
 	public void testConstructorArgWithSingleSimpleTypeMatch() {

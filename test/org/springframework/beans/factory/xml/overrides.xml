@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <beans>
 
 	<bean id="overrideOneMethod"  class="org.springframework.beans.factory.xml.OverrideOneMethod">
-		<lookup-method name="getPrototypeDependency" bean="jenny" />
-		<lookup-method name="protectedOverrideSingleton" bean="david" />
+		<lookup-method name="getPrototypeDependency" bean="jenny"/>
+		<lookup-method name="protectedOverrideSingleton" bean="david"/>
 	</bean>
 	
 	<!--
 		Test that overrides work on an inherited method
 	-->
 	<bean id="overrideInheritedMethod" class="org.springframework.beans.factory.xml.OverrideOneMethodSubclass">
-		<lookup-method name="getPrototypeDependency" bean="jenny" />
-		<lookup-method name="protectedOverrideSingleton" bean="david" />
+		<lookup-method name="getPrototypeDependency" bean="jenny"/>
+		<lookup-method name="protectedOverrideSingleton" bean="david"/>
 	</bean>
 	
 	<!--
@@ -21,8 +21,8 @@
 	-->
 	<bean id="overrideOnPrototype" singleton="false"
 			class="org.springframework.beans.factory.xml.OverrideOneMethod">
-		<lookup-method name="getPrototypeDependency" bean="jenny" />
-		<lookup-method name="protectedOverrideSingleton" bean="david" />
+		<lookup-method name="getPrototypeDependency" bean="jenny"/>
+		<lookup-method name="protectedOverrideSingleton" bean="david"/>
 	</bean>
 
 	<!--
@@ -30,8 +30,8 @@
 	-->
 	<bean id="overrideOneMethodSwappedReturnValues"
 			class="org.springframework.beans.factory.xml.OverrideOneMethod">
-		<lookup-method name="getPrototypeDependency" bean="david" />
-		<lookup-method name="protectedOverrideSingleton" bean="jenny" />
+		<lookup-method name="getPrototypeDependency" bean="david"/>
+		<lookup-method name="protectedOverrideSingleton" bean="jenny"/>
 	</bean>
 	
 	
@@ -39,12 +39,28 @@
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 		<property name="spouse">
-		<!-- Could use id and href -->
 			<ref local="david"/>
+		</property>
+		<property name="friends">
+			<bean class="org.springframework.beans.TestBean"/>
 		</property>
 	</bean>
 	
-	<bean id="david" class="org.springframework.beans.TestBean" singleton="true">
+	<bean id="jennyParent" class="org.springframework.beans.TestBean">
+		<property name="name"><value>Jenny</value></property>
+		<property name="age"><value>30</value></property>
+		<property name="friends">
+			<bean class="org.springframework.beans.TestBean"/>
+		</property>
+	</bean>
+
+	<bean id="jennyChild" class="org.springframework.beans.TestBean" parent="jennyParent" singleton="false">
+		<property name="spouse">
+			<ref local="david"/>
+		</property>
+	</bean>
+
+	<bean id="david" class="org.springframework.beans.TestBean">
 		<description>
 			Simple bean, without any collections.
 		</description>

@@ -189,17 +189,12 @@ class BeanDefinitionValueResolver {
 			logger.debug("Resolving inner bean definition '" + innerBeanName + "' of bean '" + this.beanName + "'");
 		}
 		try {
-			RootBeanDefinition mergedInnerBd = this.beanFactory.getMergedBeanDefinition(innerBeanName, innerBd);
+			RootBeanDefinition mergedInnerBd =
+					this.beanFactory.getMergedBeanDefinition(innerBeanName, innerBd, this.beanDefinition);
 			// Check given bean name whether it is unique. If not already unique,
 			// add counter - increasing the counter until the name is unique.
 			String actualInnerBeanName = innerBeanName;
 			if (mergedInnerBd.isSingleton()) {
-				if (!this.beanDefinition.isSingleton()) {
-					throw new BeanDefinitionStoreException(
-							"Inner bean definition '" + innerBeanName + "' for " + argName +
-							" has scope 'singleton' but containing bean definition '" + this.beanName +
-							"' does not. Mark the inner bean definition with scope 'prototype' instead.");
-				}
 				actualInnerBeanName = adaptInnerBeanName(innerBeanName);
 			}
 			Object innerBean = this.beanFactory.createBean(actualInnerBeanName, mergedInnerBd, null);
