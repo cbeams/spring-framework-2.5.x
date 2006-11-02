@@ -81,7 +81,9 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Disposa
 	 */
 	public void destroy() {
 		this.beanFactory = null;
-		this.beanWiringInfoResolver = null;
+		// do not set beanWiringInfoResolver to null, allowing repeated injection with
+		// different application context instances
+		//this.beanWiringInfoResolver = null;
 	}
 
 
