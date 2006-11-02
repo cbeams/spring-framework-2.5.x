@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.util.Assert;
 
@@ -41,13 +42,12 @@ import org.springframework.util.Assert;
  * @author Adrian Colyer
  * @since 2.0
  */
-public abstract class BeanConfigurerSupport implements BeanFactoryAware, DisposableBean  {
+public abstract class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean, DisposableBean  {
 
 	/** Logger available to subclasses */
 	protected Log logger = LogFactory.getLog(getClass());
 
-
-	private BeanWiringInfoResolver beanWiringInfoResolver = new ClassNameBeanWiringInfoResolver();
+	private BeanWiringInfoResolver beanWiringInfoResolver;
 
 	private AutowireCapableBeanFactory beanFactory;
 
@@ -76,14 +76,22 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Disposa
 	}
 
 	/**
+	 * If no BeanWiringInfoResolver was set by the user, we use a 
+	 * ClassInfoBeanWiringInfoResolver as the default.
+	 */
+	public void afterPropertiesSet() throws Exception {
+		if (this.beanWiringInfoResolver == null) {
+			this.beanWiringInfoResolver = new ClassNameBeanWiringInfoResolver();
+		}		
+	}
+	
+	/**
 	 * Release references to BeanFactory and BeanWiringInfoResolver when
 	 * application context is destroyed
 	 */
 	public void destroy() {
 		this.beanFactory = null;
-		// do not set beanWiringInfoResolver to null, allowing repeated injection with
-		// different application context instances
-		//this.beanWiringInfoResolver = null;
+		this.beanWiringInfoResolver = null;
 	}
 
 
@@ -95,6 +103,17 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Disposa
 	 * @param beanInstance the bean instance to configure (must <b>not</b> be <code>null</code>
 	 */
 	protected void configureBean(Object beanInstance) {
+		if (this.beanWiringInfoResolver == null) {
+			if(logger.isWarnEnabled()) {
+				logger.warn("[" + getClass().getName() + "] has not been configured by Spring " +
+					"and is unable to configure bean instances. Object with identity " +
+					"hashcode " + System.identityHashCode(beanInstance) + " has not been configured: " +
+					"Make sure this configurer runs in a Spring container. " +
+					"For example, add it to a Spring application context as an XML bean definition.");
+			}
+			return;
+		}
+		
 		BeanWiringInfo bwi = this.beanWiringInfoResolver.resolveWiringInfo(beanInstance);
 		if (bwi == null) {
 			// Skip the bean if no wiring info given.

@@ -84,6 +84,7 @@ public final class BeanConfigurerSupportTests extends TestCase {
 
 		BeanConfigurerSupport configurer = new StubBeanConfigurerSupport();
 		configurer.setBeanFactory(factory);
+		configurer.afterPropertiesSet();
 		configurer.configureBean(beanInstance);
 		assertEquals("Bean is evidently not being configured (for some reason).", "Harriet Wheeler", beanInstance.getName());
 	}
