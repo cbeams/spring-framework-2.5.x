@@ -128,8 +128,7 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
 	public DataBinder(Object target) {
-		this.target = target;
-		this.objectName = DEFAULT_OBJECT_NAME;
+		this(target, DEFAULT_OBJECT_NAME);
 	}
 
 	/**
@@ -138,6 +137,7 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @param objectName name of the target object
 	 */
 	public DataBinder(Object target, String objectName) {
+		Assert.notNull(target, "Target must not be null");
 		this.target = target;
 		this.objectName = objectName;
 	}
@@ -147,19 +147,20 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * Return the wrapped target object.
 	 */
 	public Object getTarget() {
-		return target;
+		return this.target;
 	}
 
 	/**
 	 * Return the name of the bound object.
 	 */
 	public String getObjectName() {
-		return objectName;
+		return this.objectName;
 	}
 
 	/**
 	 * Initialize standard JavaBean property access for this DataBinder.
 	 * <p>This is the default; an explicit call just leads to eager initialization.
+	 * @see #initDirectFieldAccess()
 	 */
 	public void initBeanPropertyAccess() {
 		Assert.isNull(this.bindingResult,
@@ -168,8 +169,9 @@ public class DataBinder implements PropertyEditorRegistry {
 	}
 
 	/**
-	 * Initialize direct field access for this DataBinder.
-	 * <p>This is the default; an explicit call just leads to eager initialization.
+	 * Initialize direct field access for this DataBinder,
+	 * as alternative to the default bean property access.
+	 * @see #initBeanPropertyAccess()
 	 */
 	public void initDirectFieldAccess() {
 		Assert.isNull(this.bindingResult,
