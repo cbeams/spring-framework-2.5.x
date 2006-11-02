@@ -41,15 +41,14 @@ import org.springframework.web.context.request.SessionScope;
  * <p><b>If you intend to implement a WebApplicationContext that reads bean definitions
  * from configuration files, consider deriving from AbstractRefreshableWebApplicationContext,
  * reading the bean definitions in an implementation of the <code>loadBeanDefinitions</code>
- * method.
+ * method.</b>
  *
  * <p>Interprets resource paths as servlet context resources, i.e. as paths beneath
  * the web application root. Absolute paths, e.g. for files outside the web app root,
  * can be accessed via "file:" URLs, as implemented by AbstractApplicationContext.
  *
  * <p>In addition to the special beans detected by AbstractApplicationContext,
- * this class detects a ThemeSource bean in the context, with the name
- * "themeSource".
+ * this class detects a ThemeSource bean in the context, with the name "themeSource".
  *
  * @author Juergen Hoeller
  * @since 1.2
