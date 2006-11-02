@@ -89,7 +89,7 @@ public abstract class ReflectionUtils {
 		Assert.notNull(name, "'name' cannot be null.");
 		Class searchType = type;
 		while(!Object.class.equals(searchType) && searchType != null) {
-			Method[] methods = (type.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
+			Method[] methods = (searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
 			for (int i = 0; i < methods.length; i++) {
 				Method method = methods[i];
 				if(name.equals(method.getName()) && Arrays.equals(paramTypes, method.getParameterTypes())) {

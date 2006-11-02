@@ -123,6 +123,9 @@ public abstract class BridgeMethodResolver {
 	 * supplied candidate {@link Method}.
 	 */
 	static boolean isBridgeMethodFor(Method bridgeMethod, Method candidateMethod, Map typeVariableMap) {
+		if(isResolvedTypeMatch(candidateMethod, bridgeMethod, typeVariableMap)) {
+			return true;
+		}
 		Method method = findGenericDeclaration(bridgeMethod);
 		return (method != null ? isResolvedTypeMatch(method, candidateMethod, typeVariableMap) : false);
 	}

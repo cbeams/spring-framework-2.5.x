@@ -196,6 +196,17 @@ public class BridgeMethodResolverTests extends TestCase {
 
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
 	}
+
+	public void testSPR2763() throws Exception {
+		Method bridgedMethod = AbstractDao.class.getDeclaredMethod("save", Object.class);
+		assertFalse(bridgedMethod.isBridge());
+		
+		Method bridgeMethod = UserDaoImpl.class.getDeclaredMethod("save", User.class);
+		assertTrue(bridgeMethod.isBridge());
+
+		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+	}
+
 	private Method findMethodWithReturnType(String name, Class returnType, Class targetType) {
 		Method[] methods = targetType.getMethods();
 		for (Method m : methods) {
@@ -429,7 +440,7 @@ public class BridgeMethodResolverTests extends TestCase {
 			throw new UnsupportedOperationException();
 		}
 
-		public <T>T[] toArray(T[] a) {
+		public <T> T[] toArray(T[] a) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -829,6 +840,7 @@ public class BridgeMethodResolverTests extends TestCase {
 	}
 
 	public interface GenericDao<T> {
+
 		public void saveOrUpdate(T t);
 	}
 
@@ -836,7 +848,7 @@ public class BridgeMethodResolverTests extends TestCase {
 
 	}
 
-	public class GenericSqlMapDao<T extends Serializable> implements ConvenienceGenericDao<T>{
+	public class GenericSqlMapDao<T extends Serializable> implements ConvenienceGenericDao<T> {
 
 		public void saveOrUpdate(T t) {
 			throw new UnsupportedOperationException();
@@ -844,9 +856,40 @@ public class BridgeMethodResolverTests extends TestCase {
 	}
 
 	public class GenericSqlMapIntegerDao<T extends Integer> extends GenericSqlMapDao<T> {
-	  public void saveOrUpdate(T t) {
+
+		public void saveOrUpdate(T t) {
 
 		}
-  }
+	}
 
+	public class Permission {
+
+	}
+
+	public class User {
+
+	}
+
+	public interface UserDao {
+
+		@Transactional
+		void save(User user);
+
+		@Transactional
+		void save(Permission perm);
+	}
+
+	public abstract class AbstractDao<T> {
+
+		public void save(T t) {
+
+		}
+	}
+
+	public class UserDaoImpl extends AbstractDao<User> implements UserDao {
+
+		public void save(Permission perm) {
+
+		}
+	}
 }
