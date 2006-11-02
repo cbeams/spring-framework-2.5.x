@@ -17,6 +17,7 @@ Package org.springframework.beans
 * introduced PatternEditor for "java.util.regex.Pattern", automatically registered when running on JDK 1.4 or higher
 * Number objects (as property or argument values) are automatically coerced into the target Number type (if necessary)
 * added "equals" and "hashCode" implementations to BeanDefinitionHolder
+* ConstructorArgumentValues enforces uniqueness of generic ValueHolder instances, to allow for proper (re-)merging
 * reworked BeanComponentDefinition into subclass of BeanDefinitionHolder, exposing aliases on the bean definition
 * re-added BeanReferenceFactoryBean, to allow for substituting the target bean name with a placeholder
 * UnsatisfiedDependencyException message for multiple matches mentions the names of all matching beans
@@ -36,6 +37,7 @@ Package org.springframework.beans
 Package org.springframework.context
 * added serialVersionUID to ApplicationEvent, for serialization compatibility with Spring 1.2
 * LocaleContextHolder supports standard ThreadLocal as well as InheritableThreadLocal
+* EventPublicationInterceptor caches the application event constructor
 
 Package org.springframework.core
 * introduced TaskRejectedException, thrown from a TaskExecutor if it does not accept a given task
@@ -82,11 +84,12 @@ Package org.springframework.test
 * fixed AbstractJpaTests to not keep context reference in cache if context refresh failed
 
 Package org.springframework.transaction
-* TransactionAttributeEditor does not accept transaction attributes with invalid whitespace anymore
 * AbstractPlatformTransactionManager exposes current transaction isolation level via TransactionSynchronizationManager
-* AbstractPlatformTransactionManager does not activate transaction synchronization for PROPAGATION_NOT_SUPPORTED/NEVER
 * AbstractPlatformTransactionManager properly resumes all synchronizations even after suspend or inner begin failure
+* active transaction synchronization gets suspended when going from SUPPORTS/NOT_SUPPORTED into REQUIRED/REQUIRES_NEW
 * JtaTransactionManager's "doRegisterAfterCompletionWithJtaTransaction" avoids NPE if no current JTA transaction active
+* TransactionAttributeEditor does not accept transaction attributes with invalid whitespace anymore
+* AnnotationTransactionAspect supports protected methods that carry Spring's @Transactional annotation
 
 Package org.springframework.ui
 * deprecated FreeMarkerConfigurationFactory's "templateLoaders" property in favor of "pre/postTemplateLoaders"
