@@ -61,11 +61,19 @@ public class ConstructorArgumentValues {
 
 	/**
 	 * Copy all given argument values into this object.
+	 * <p>Note: Identical ValueHolder instances will only be registered once,
+	 * to allow for merging and re-merging of argument value definitions. Distinct
+	 * ValueHolder instances carrying the same content are of course allowed.
 	 */
 	public void addArgumentValues(ConstructorArgumentValues other) {
 		if (other != null) {
-			this.genericArgumentValues.addAll(other.genericArgumentValues);
 			this.indexedArgumentValues.putAll(other.indexedArgumentValues);
+			for (Iterator it = other.genericArgumentValues.iterator(); it.hasNext();) {
+				ValueHolder valueHolder = (ValueHolder) it.next();
+				if (!this.genericArgumentValues.contains(valueHolder)) {
+					this.genericArgumentValues.add(valueHolder);
+				}
+			}
 		}
 	}
 
@@ -157,10 +165,15 @@ public class ConstructorArgumentValues {
 	 * <p>Note: A single generic argument value will just be used once,
 	 * rather than matched multiple times (as of Spring 1.1).
 	 * @param valueHolder the argument value in the form of a ValueHolder
+	 * <p>Note: Identical ValueHolder instances will only be registered once,
+	 * to allow for merging and re-merging of argument value definitions. Distinct
+	 * ValueHolder instances carrying the same content are of course allowed.
 	 */
 	public void addGenericArgumentValue(ValueHolder valueHolder) {
 		Assert.notNull(valueHolder, "ValueHolder must not be null");
-		this.genericArgumentValues.add(valueHolder);
+		if (!this.genericArgumentValues.contains(valueHolder)) {
+			this.genericArgumentValues.add(valueHolder);
+		}
 	}
 
 	/**
@@ -285,7 +298,7 @@ public class ConstructorArgumentValues {
 		}
 		ConstructorArgumentValues that = (ConstructorArgumentValues) other;
 		if (this.genericArgumentValues.size() != that.genericArgumentValues.size() ||
-				this.indexedArgumentValues.size() != (that.indexedArgumentValues.size())) {
+				this.indexedArgumentValues.size() != that.indexedArgumentValues.size()) {
 			return false;
 		}
 		Iterator it1 = this.genericArgumentValues.iterator();
