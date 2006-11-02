@@ -30,19 +30,23 @@ import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute
 import org.springframework.transaction.interceptor.TransactionAttribute;
 
 /**
- * Implementation of <code>TransactionAttributeSource</code> for working with
- * transaction metadata in JDK 1.5+ annotation format.
+ * Implementation of the
+ * {@link org.springframework.transaction.interceptor.TransactionAttributeSource}
+ * interface for working with transaction metadata in JDK 1.5+ annotation format.
  *
- * <p>This class reads the JDK 1.5+ <code>Transactional</code> annotation and
+ * <p>This class reads Spring's JDK 1.5+ {@link Transactional} annotation and
  * exposes corresponding transaction attributes to Spring's transaction infrastructure.
+ * Can also be used as base class for a custom annotation-based TransactionAttributeSource.
  *
- * <p>This is a direct alternative to <code>AttributesTransactionAttributeSource</code>,
+ * <p>This is a direct alternative to
+ * {@link org.springframework.transaction.interceptor.AttributesTransactionAttributeSource},
  * which is able to read in source-level attributes via Commons Attributes.
  *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 1.2
  * @see Transactional
+ * @see #findTransactionAttribute
  * @see org.springframework.transaction.interceptor.TransactionInterceptor#setTransactionAttributeSource
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean#setTransactionAttributeSource
  * @see org.springframework.transaction.interceptor.AttributesTransactionAttributeSource
@@ -50,6 +54,29 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
  */
 public class AnnotationTransactionAttributeSource
 		extends AbstractFallbackTransactionAttributeSource implements Serializable {
+
+	private final boolean publicMethodsOnly;
+
+
+	/**
+	 * Create a default AnnotationTransactionAttributeSource, supporting
+	 * public methods that carry the <code>Transactional</code> annotation.
+	 */
+	public AnnotationTransactionAttributeSource() {
+		this.publicMethodsOnly = true;
+	}
+
+	/**
+	 * Create a custom AnnotationTransactionAttributeSource.
+	 * @param publicMethodsOnly whether to support public methods that carry
+	 * the <code>Transactional</code> annotation only (typically for use
+	 * with proxy-based AOP), or protected/private methods as well
+	 * (typically used with AspectJ class weaving)
+	 */
+	public AnnotationTransactionAttributeSource(boolean publicMethodsOnly) {
+		this.publicMethodsOnly = publicMethodsOnly;
+	}
+
 
 	/**
 	 * Returns all JDK 1.5+ annotations found for the given method.
@@ -68,12 +95,14 @@ public class AnnotationTransactionAttributeSource
 	/**
 	 * Return the transaction attribute, given this set of attributes
 	 * attached to a method or class. Overrides method from parent class.
-	 * This version actually converts JDK 5.0+ Annotations to the Spring
-	 * classes. Returns null if it's not transactional.
-	 * @param atts attributes attached to a method or class. May
-	 * be <code>null</code>, in which case a null TransactionAttribute will be returned.
-	 * @return TransactionAttribute configured transaction attribute,
+	 * <p>This implementation converts Spring's <code>Transactional</code> annotation
+	 * to the Spring metadata classes. Returns <code>null</code> if it's not transactional.
+	 * <p>Can be overridden to support custom annotations that carry transaction metadata.
+	 * @param atts attributes attached to a method or class. May be <code>null</code>,
+	 * in which case a <code>null</code> TransactionAttribute will be returned.
+	 * @return TransactionAttribute the configured transaction attribute,
 	 * or <code>null</code> if none was found
+	 * @see Transactional
 	 */
 	protected TransactionAttribute findTransactionAttribute(Collection atts) {
 		if (atts == null) {
@@ -127,11 +156,13 @@ public class AnnotationTransactionAttributeSource
 	}
 
 	/**
-	 * Only public methods can be made transactional using {@link Transactional}.
+	 * By default, only public methods can be made transactional using
+	 * {@link Transactional}.
 	 */
 	protected boolean allowPublicMethodsOnly() {
-		return true;
+		return this.publicMethodsOnly;
 	}
+
 
 	public boolean equals(Object other) {
 		return (this == other || other instanceof AnnotationTransactionAttributeSource);
