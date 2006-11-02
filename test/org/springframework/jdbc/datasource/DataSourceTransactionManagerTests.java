@@ -556,7 +556,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 				tt.execute(new TransactionCallbackWithoutResult() {
 					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 						assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
-						assertFalse("Synchronization not active", TransactionSynchronizationManager.isSynchronizationActive());
+						assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
 						assertTrue("Isn't new transaction", !status.isNewTransaction());
 						assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 						assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
@@ -623,23 +623,32 @@ public class DataSourceTransactionManagerTests extends TestCase {
 	}
 
 	public void testPropagationRequiresNewWithExistingConnection() throws Exception {
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		con.getAutoCommit();
-		conControl.setReturnValue(false, 1);
-		con.commit();
-		conControl.setVoidCallable(1);
-		con.isReadOnly();
-		conControl.setReturnValue(false, 1);
-		con.close();
-		conControl.setVoidCallable(1);
+		MockControl con1Control = MockControl.createControl(Connection.class);
+		final Connection con1 = (Connection) con1Control.getMock();
+		con1.close();
+		con1Control.setVoidCallable(1);
+
+		MockControl con2Control = MockControl.createControl(Connection.class);
+		final Connection con2 = (Connection) con2Control.getMock();
+		con2.getAutoCommit();
+		con2Control.setReturnValue(false, 1);
+		con2.commit();
+		con2Control.setVoidCallable(1);
+		con2.isReadOnly();
+		con2Control.setReturnValue(false, 1);
+		con2.close();
+		con2Control.setVoidCallable(1);
 
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		final DataSource ds = (DataSource) dsControl.getMock();
 		ds.getConnection();
-		dsControl.setReturnValue(con, 1);
-		conControl.replay();
+		dsControl.setReturnValue(con1, 1);
+		ds.getConnection();
+		dsControl.setReturnValue(con2, 1);
+
 		dsControl.replay();
+		con1Control.replay();
+		con2Control.replay();
 
 		PlatformTransactionManager tm = new DataSourceTransactionManager(ds);
 		final TransactionTemplate tt = new TransactionTemplate(tm);
@@ -650,24 +659,26 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
-				Connection con = DataSourceUtils.getConnection(ds);
-				DataSourceUtils.releaseConnection(con, ds);
+				assertSame(con1, DataSourceUtils.getConnection(ds));
+				assertSame(con1, DataSourceUtils.getConnection(ds));
 				tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 				tt.execute(new TransactionCallbackWithoutResult() {
 					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 						assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 						assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
 						assertTrue("Is new transaction", status.isNewTransaction());
-						Connection con = DataSourceUtils.getConnection(ds);
-						DataSourceUtils.releaseConnection(con, ds);
+						assertSame(con2, DataSourceUtils.getConnection(ds));
+						assertSame(con2, DataSourceUtils.getConnection(ds));
 					}
 				});
+				assertSame(con1, DataSourceUtils.getConnection(ds));
 			}
 		});
 
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
-		conControl.verify();
 		dsControl.verify();
+		con1Control.verify();
+		con2Control.verify();
 	}
 
 	public void testTransactionWithIsolationAndReadOnly() throws Exception {

@@ -673,7 +673,7 @@ public class JtaTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		tt.execute(new TransactionCallbackWithoutResult() {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 				status.setRollbackOnly();
 			}
 		});
@@ -766,17 +766,21 @@ public class JtaTransactionManagerTests extends TestCase {
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+				assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 
 				TransactionTemplate tt2 = new TransactionTemplate(ptm);
 				tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 				tt2.execute(new TransactionCallbackWithoutResult() {
 					protected void doInTransactionWithoutResult(TransactionStatus status) {
 						assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+						assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+						assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 					}
 				});
 
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+				assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 			}
 		});
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());

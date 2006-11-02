@@ -597,8 +597,10 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(tx, 1);
 		session.isOpen();
 		sessionControl.setReturnValue(true, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO, 2);
 		session.flush();
-		sessionControl.setVoidCallable(1);
+		sessionControl.setVoidCallable(2);
 		session.close();
 		sessionControl.setReturnValue(null, 2);
 		tx.commit();
@@ -722,40 +724,50 @@ public class HibernateTransactionManagerTests extends TestCase {
 	public void testTransactionWithPropagationSupportsAndInnerTransaction() throws Exception {
 		MockControl sfControl = MockControl.createControl(SessionFactory.class);
 		final SessionFactory sf = (SessionFactory) sfControl.getMock();
-		MockControl sessionControl = MockControl.createControl(Session.class);
-		final Session session = (Session) sessionControl.getMock();
+		MockControl session1Control = MockControl.createControl(Session.class);
+		final Session session1 = (Session) session1Control.getMock();
+		MockControl session2Control = MockControl.createControl(Session.class);
+		final Session session2 = (Session) session2Control.getMock();
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		MockControl txControl = MockControl.createControl(Transaction.class);
 		Transaction tx = (Transaction) txControl.getMock();
 
 		sf.openSession();
-		sfControl.setReturnValue(session, 1);
-		session.getSessionFactory();
-		sessionControl.setReturnValue(sf, 1);
-		session.beginTransaction();
-		sessionControl.setReturnValue(tx, 1);
-		session.isOpen();
-		sessionControl.setReturnValue(true, 2);
-		session.connection();
-		sessionControl.setReturnValue(con, 2);
-		session.getFlushMode();
-		sessionControl.setReturnValue(FlushMode.AUTO, 4);
-		session.flush();
-		sessionControl.setVoidCallable(3);
+		sfControl.setReturnValue(session1, 1);
+		session1.getSessionFactory();
+		session1Control.setReturnValue(sf, 1);
+		session1.getFlushMode();
+		session1Control.setReturnValue(FlushMode.AUTO, 2);
+		session1.flush();
+		session1Control.setVoidCallable(2);
+		session1.isOpen();
+		session1Control.setReturnValue(true, 1);
+		session1.close();
+		session1Control.setReturnValue(null, 1);
+
+		sf.openSession();
+		sfControl.setReturnValue(session2, 1);
+		session2.beginTransaction();
+		session2Control.setReturnValue(tx, 1);
+		session2.connection();
+		session2Control.setReturnValue(con, 2);
+		session2.getFlushMode();
+		session2Control.setReturnValue(FlushMode.AUTO, 1);
+		session2.flush();
+		session2Control.setVoidCallable(1);
+		session2.isOpen();
+		session2Control.setReturnValue(true, 2);
 		tx.commit();
 		txControl.setVoidCallable(1);
-		session.isConnected();
-		sessionControl.setReturnValue(true, 1);
-		if (hibernateSetTimeoutAvailable) {
-			// only on Hibernate 3.1+
-			session.disconnect();
-			sessionControl.setReturnValue(null, 1);
-		}
-		session.close();
-		sessionControl.setReturnValue(null, 1);
+		session2.isConnected();
+		session2Control.setReturnValue(true, 1);
+		session2.close();
+		session2Control.setReturnValue(null, 1);
 		sfControl.replay();
-		sessionControl.replay();
+		session1Control.replay();
+		session2Control.replay();
+		txControl.replay();
 
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
 			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
@@ -771,6 +783,10 @@ public class HibernateTransactionManagerTests extends TestCase {
 		final TransactionTemplate tt2 = new TransactionTemplate(tm);
 		tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
+		final HibernateTemplate ht = new HibernateTemplate(sfProxy);
+		ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
+		ht.setExposeNativeSession(true);
+
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		tt.execute(new TransactionCallback() {
 			public Object doInTransaction(TransactionStatus status) {
@@ -778,23 +794,22 @@ public class HibernateTransactionManagerTests extends TestCase {
 				assertTrue("Is not new transaction", !status.isNewTransaction());
 				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 				assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
-				HibernateTemplate ht = new HibernateTemplate(sfProxy);
-				ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
 				ht.execute(new HibernateCallback() {
 					public Object doInHibernate(org.hibernate.Session session) {
+						assertSame(session1, session);
 						return null;
 					}
 				});
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sfProxy));
-				assertEquals(session, sfProxy.getCurrentSession());
+				assertEquals(session1, sfProxy.getCurrentSession());
 				tt2.execute(new TransactionCallback() {
 					public Object doInTransaction(TransactionStatus status) {
-						HibernateTemplate ht = new HibernateTemplate(sfProxy);
-						ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
+						assertSame(session2, sfProxy.getCurrentSession());
 						return ht.executeFind(new HibernateCallback() {
 							public Object doInHibernate(org.hibernate.Session session) {
 								assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
-								//assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
+								assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
+								assertSame(session2, session);
 								return null;
 							}
 						});
@@ -808,7 +823,9 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 
 		sfControl.verify();
-		sessionControl.verify();
+		session1Control.verify();
+		session2Control.verify();
+		txControl.verify();
 	}
 
 	public void testTransactionCommitWithEntityInterceptor() throws Exception {

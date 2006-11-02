@@ -542,8 +542,10 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.setReturnValue(true, 1);
 		session.beginTransaction();
 		sessionControl.setReturnValue(tx, 1);
+		session.getFlushMode();
+		sessionControl.setReturnValue(FlushMode.AUTO, 2);
 		session.flush();
-		sessionControl.setVoidCallable(1);
+		sessionControl.setVoidCallable(2);
 		session.close();
 		sessionControl.setReturnValue(null, 2);
 		tx.commit();
@@ -696,7 +698,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 				HibernateTemplate ht = new HibernateTemplate(sf);
 				return ht.executeFind(new HibernateCallback() {
-					public Object doInHibernate(Session session) throws HibernateException {
+					public Object doInHibernate(Session session) {
 						return l;
 					}
 				});
@@ -774,7 +776,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 					HibernateTemplate ht = new HibernateTemplate(sf);
 					ht.execute(new HibernateCallback() {
-						public Object doInHibernate(Session session) throws HibernateException {
+						public Object doInHibernate(Session session) {
 							return null;
 						}
 					});
@@ -843,7 +845,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				HibernateTemplate ht = new HibernateTemplate(sf);
 				return ht.executeFind(new HibernateCallback() {
-					public Object doInHibernate(Session session) throws HibernateException {
+					public Object doInHibernate(Session session) {
 						return l;
 					}
 				});
@@ -905,7 +907,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 					HibernateTemplate ht = new HibernateTemplate(sf);
 					return ht.executeFind(new HibernateCallback() {
-						public Object doInHibernate(Session session) throws HibernateException {
+						public Object doInHibernate(Session session) {
 							return l;
 						}
 					});
@@ -988,7 +990,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 				HibernateTemplate ht = new HibernateTemplate(sf);
 				ht.setExposeNativeSession(true);
 				return ht.executeFind(new HibernateCallback() {
-					public Object doInHibernate(Session sess) throws HibernateException {
+					public Object doInHibernate(Session sess) {
 						assertEquals(session, sess);
 						return l;
 					}
@@ -1077,7 +1079,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 							HibernateTemplate ht = new HibernateTemplate(sf);
 							ht.setExposeNativeSession(true);
 							ht.execute(new HibernateCallback() {
-								public Object doInHibernate(Session sess) throws HibernateException {
+								public Object doInHibernate(Session sess) {
 									assertEquals(session, sess);
 									return null;
 								}
@@ -1106,7 +1108,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 				HibernateTemplate ht = new HibernateTemplate(sf);
 				ht.setExposeNativeSession(true);
 				ht.execute(new HibernateCallback() {
-					public Object doInHibernate(Session sess) throws HibernateException {
+					public Object doInHibernate(Session sess) {
 						assertEquals(session, sess);
 						return null;
 					}

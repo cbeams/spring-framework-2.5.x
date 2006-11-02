@@ -301,7 +301,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 		try {
 			JdoTransactionObject txObject = (JdoTransactionObject) transaction;
-			if (txObject.getPersistenceManagerHolder() == null) {
+			if (txObject.getPersistenceManagerHolder() == null ||
+					txObject.getPersistenceManagerHolder().isSynchronizedWithTransaction()) {
 				PersistenceManager newPm = getPersistenceManagerFactory().getPersistenceManager();
 				if (logger.isDebugEnabled()) {
 					logger.debug("Opened new PersistenceManager [" + newPm + "] for JDO transaction");

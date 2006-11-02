@@ -418,7 +418,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		try {
 			HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
-			if (txObject.getSessionHolder() == null) {
+			if (txObject.getSessionHolder() == null ||
+					txObject.getSessionHolder().isSynchronizedWithTransaction()) {
 				Interceptor entityInterceptor = getEntityInterceptor();
 				Session newSession = (entityInterceptor != null ?
 						getSessionFactory().openSession(entityInterceptor) : getSessionFactory().openSession());

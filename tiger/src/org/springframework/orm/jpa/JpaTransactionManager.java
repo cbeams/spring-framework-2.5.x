@@ -295,8 +295,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 
 		try {
 			JpaTransactionObject txObject = (JpaTransactionObject) transaction;
-			if (txObject.getEntityManagerHolder() == null) {
-				// Create a new EntityManager with PersistenceContextType.TRANSACTION
+			if (txObject.getEntityManagerHolder() == null ||
+					txObject.getEntityManagerHolder().isSynchronizedWithTransaction()) {
 				EntityManager newEm = createEntityManagerForTransaction();
 				if (logger.isDebugEnabled()) {
 					logger.debug("Opened new EntityManager [" + newEm + "] for JPA transaction");
