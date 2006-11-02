@@ -37,12 +37,18 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 	
 	private TransactionalAnnotationOnlyOnClassWithNoInterface annotationOnlyOnClassWithNoInterface;
 	
+	private ClassWithProtectedAnnotatedMember beanWithAnnotatedProtectedMethod;
+	
 	private MethodAnnotationOnClassWithNoInterface methodAnnotationOnly = new MethodAnnotationOnClassWithNoInterface();
 
 
 	public void setAnnotationOnlyOnClassWithNoInterface(
 			TransactionalAnnotationOnlyOnClassWithNoInterface annotationOnlyOnClassWithNoInterface) {
 		this.annotationOnlyOnClassWithNoInterface = annotationOnlyOnClassWithNoInterface;
+	}
+	
+	public void setClassWithAnnotatedProtectedMethod(ClassWithProtectedAnnotatedMember aBean) {
+		this.beanWithAnnotatedProtectedMethod = aBean;
 	}
 
 	public TransactionAspectSupport getTransactionAspect() {
@@ -66,8 +72,20 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 		annotationOnlyOnClassWithNoInterface.echo(null);
 		assertEquals(1, txManager.commits);
 	}
-	
 
+	public void testCommitOnAnnotatedProtectedMethod() throws Throwable {
+		txManager.clear();
+		assertEquals(0, txManager.begun);
+		beanWithAnnotatedProtectedMethod.doInTransaction();
+		assertEquals(1, txManager.commits);		
+	}
+
+	public void testNoCommitOnNonAnnotatedNonPublicMethodInTransactionalType() throws Throwable {
+		txManager.clear();
+		assertEquals(0,txManager.begun);
+		annotationOnlyOnClassWithNoInterface.nonTransactionalMethod();
+		assertEquals(0,txManager.begun);
+	}
 	
 	public void testCommitOnAnnotatedMethod() throws Throwable {
 		txManager.clear();
@@ -75,6 +93,7 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 		methodAnnotationOnly.echo(null);
 		assertEquals(1, txManager.commits);
 	}
+	
 	
 	public static class NotTransactional {
 		public void noop() {

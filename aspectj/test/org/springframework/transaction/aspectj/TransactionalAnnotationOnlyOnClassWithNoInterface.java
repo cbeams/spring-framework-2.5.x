@@ -11,5 +11,10 @@ public class TransactionalAnnotationOnlyOnClassWithNoInterface {
 		}
 		return t;
 	}
+	
+	void nonTransactionalMethod() {
+		// no-op
+	}
 
 }
+

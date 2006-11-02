@@ -11,4 +11,6 @@
 	
 	<bean class="org.springframework.transaction.aspectj.TransactionalAnnotationOnlyOnClassWithNoInterface"/>
 
+    <bean class="org.springframework.transaction.aspectj.ClassWithProtectedAnnotatedMember"/>
+
 </beans>
