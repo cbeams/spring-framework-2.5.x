@@ -46,7 +46,11 @@ import org.springframework.transaction.annotation.Transactional;
 public aspect AnnotationTransactionAspect extends AbstractTransactionAspect {
 	
 	public AnnotationTransactionAspect() {
-		super(new AnnotationTransactionAttributeSource());
+		super(new AnnotationTransactionAttributeSource() {
+			protected boolean allowPublicMethodsOnly() {
+				return false;
+			}		
+		});
 	}
 
 	/**
