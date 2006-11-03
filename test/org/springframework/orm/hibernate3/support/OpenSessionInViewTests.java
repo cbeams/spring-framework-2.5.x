@@ -23,7 +23,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.transaction.Status;
 import javax.transaction.TransactionManager;
 
 import junit.framework.TestCase;
@@ -132,10 +131,8 @@ public class OpenSessionInViewTests extends TestCase {
 
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
-		tm.getStatus();
-		tmControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 2);
 		tm.getTransaction();
-		tmControl.setReturnValue(null, 1);
+		tmControl.setReturnValue(null, 2);
 
 		OpenSessionInViewInterceptor rawInterceptor = new OpenSessionInViewInterceptor();
 		rawInterceptor.setSessionFactory(sf);

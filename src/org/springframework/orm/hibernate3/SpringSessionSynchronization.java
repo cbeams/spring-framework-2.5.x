@@ -16,7 +16,6 @@
 
 package org.springframework.orm.hibernate3;
 
-import javax.transaction.Status;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
@@ -83,13 +82,10 @@ class SpringSessionSynchronization extends TransactionSynchronizationAdapter imp
 			// (just necessary for JTA transaction suspension, with an individual
 			// Hibernate Session per currently active/suspended transaction).
 			try {
-				int jtaStatus = jtaTm.getStatus();
-				if (jtaStatus == Status.STATUS_ACTIVE || jtaStatus == Status.STATUS_MARKED_ROLLBACK) {
-					this.jtaTransaction = jtaTm.getTransaction();
-				}
+				this.jtaTransaction = jtaTm.getTransaction();
 			}
 			catch (SystemException ex) {
-				throw new DataAccessResourceFailureException("Could not check JTA transaction", ex);
+				throw new DataAccessResourceFailureException("Could not access JTA transaction", ex);
 			}
 		}
 	}
