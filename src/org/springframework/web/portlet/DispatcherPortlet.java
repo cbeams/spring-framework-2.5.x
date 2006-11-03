@@ -42,6 +42,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.core.OrderComparator;
@@ -49,6 +50,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.portlet.context.PortletRequestAttributes;
@@ -592,11 +594,12 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			logger.debug("DispatcherPortlet with name '" + getPortletName() + "' received action request");
 		}
 
-		// Expose current Locale as LocaleContext.
-		LocaleContextHolder.setLocaleContext(
-				new SimpleLocaleContext(request.getLocale()), this.threadContextInheritable);
+		// Expose current LocaleResolver and request as LocaleContext.
+		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
+		LocaleContextHolder.setLocaleContext(buildLocaleContext(request), this.threadContextInheritable);
 
 		// Expose current RequestAttributes to current thread.
+		RequestAttributes previousRequestAttributes = RequestContextHolder.getRequestAttributes();
 		PortletRequestAttributes requestAttributes = new PortletRequestAttributes(request);
 		RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
 
@@ -663,10 +666,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 			// Reset thread-bound RequestAttributes.
 			requestAttributes.requestCompleted();
-			RequestContextHolder.resetRequestAttributes();
+			RequestContextHolder.setRequestAttributes(previousRequestAttributes, this.threadContextInheritable);
 
 			// Reset thread-bound LocaleContext.
-			LocaleContextHolder.resetLocaleContext();
+			LocaleContextHolder.setLocaleContext(previousLocaleContext, this.threadContextInheritable);
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cleared thread-bound action request context: " + request);
@@ -688,11 +691,12 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			logger.debug("DispatcherPortlet with name '" + getPortletName() + "' received render request");
 		}
 
-		// Expose current Locale as LocaleContext.
-		LocaleContextHolder.setLocaleContext(
-				new SimpleLocaleContext(request.getLocale()), this.threadContextInheritable);
+		// Expose current LocaleResolver and request as LocaleContext.
+		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
+		LocaleContextHolder.setLocaleContext(buildLocaleContext(request), this.threadContextInheritable);
 
 		// Expose current RequestAttributes to current thread.
+		RequestAttributes previousRequestAttributes = RequestContextHolder.getRequestAttributes();
 		PortletRequestAttributes requestAttributes = new PortletRequestAttributes(request);
 		RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
 
@@ -793,10 +797,10 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		finally {
 			// Reset thread-bound RequestAttributes.
 			requestAttributes.requestCompleted();
-			RequestContextHolder.resetRequestAttributes();
+			RequestContextHolder.setRequestAttributes(previousRequestAttributes, this.threadContextInheritable);
 
 			// Reset thread-bound LocaleContext.
-			LocaleContextHolder.resetLocaleContext();
+			LocaleContextHolder.setLocaleContext(previousLocaleContext, this.threadContextInheritable);
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cleared thread-bound render request context: " + request);
@@ -804,6 +808,16 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		}
 	}
 
+
+	/**
+	 * Build a LocaleContext for the given request, exposing the request's
+	 * primary locale as current locale.
+	 * @param request current HTTP request
+	 * @return the corresponding LocaleContext
+	 */
+	protected LocaleContext buildLocaleContext(PortletRequest request) {
+		return new SimpleLocaleContext(request.getLocale());
+	}
 
 	/**
 	 * Convert the request into a multipart request, and make multipart resolver available.

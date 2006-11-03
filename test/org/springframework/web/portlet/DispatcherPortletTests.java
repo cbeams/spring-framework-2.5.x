@@ -16,6 +16,7 @@
 
 package org.springframework.web.portlet;
 
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 
@@ -30,6 +31,10 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.mock.web.portlet.MockActionRequest;
 import org.springframework.mock.web.portlet.MockActionResponse;
 import org.springframework.mock.web.portlet.MockPortletConfig;
@@ -38,6 +43,9 @@ import org.springframework.mock.web.portlet.MockPortletSession;
 import org.springframework.mock.web.portlet.MockRenderRequest;
 import org.springframework.mock.web.portlet.MockRenderResponse;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.portlet.context.PortletApplicationContextUtils;
@@ -49,6 +57,7 @@ import org.springframework.web.servlet.view.InternalResourceView;
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Dan McCallum
  */
 public class DispatcherPortletTests extends TestCase {
 
@@ -777,6 +786,100 @@ public class DispatcherPortletTests extends TestCase {
 		catch (IllegalStateException ex) {
 			fail("Should not have thrown IllegalStateException: " + ex.getMessage());
 		}
+	}
+
+	public void testValidActionRequestWithExistingThreadLocalRequestContext() throws IOException, PortletException {
+		MockServletContext servletContext = new MockServletContext();
+		MockHttpServletRequest httpRequest = new MockHttpServletRequest(servletContext);
+		httpRequest.addPreferredLocale(Locale.GERMAN);
+
+		// see RequestContextListener.requestInitialized()
+		LocaleContextHolder.setLocale(httpRequest.getLocale());
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpRequest));
+
+		LocaleContext servletLocaleContext = LocaleContextHolder.getLocaleContext();
+		RequestAttributes servletRequestAttrs = RequestContextHolder.getRequestAttributes();
+
+		MockActionRequest request = new MockActionRequest();
+		MockActionResponse response = new MockActionResponse();
+		request.setParameter("action", "form");
+		request.setParameter("age", "29");
+		simpleDispatcherPortlet.processAction(request, response);
+
+		assertSame(servletLocaleContext, LocaleContextHolder.getLocaleContext());
+		assertSame(servletRequestAttrs, RequestContextHolder.getRequestAttributes());
+	}
+
+	public void testValidRenderRequestWithExistingThreadLocalRequestContext() throws IOException, PortletException {
+		MockServletContext servletContext = new MockServletContext();
+		MockHttpServletRequest httpRequest = new MockHttpServletRequest(servletContext);
+		httpRequest.addPreferredLocale(Locale.GERMAN);
+
+		// see RequestContextListener.requestInitialized()
+		LocaleContextHolder.setLocale(httpRequest.getLocale());
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpRequest));
+
+		LocaleContext servletLocaleContext = LocaleContextHolder.getLocaleContext();
+		RequestAttributes servletRequestAttrs = RequestContextHolder.getRequestAttributes();
+
+		MockRenderRequest request = new MockRenderRequest();
+		MockRenderResponse response = new MockRenderResponse();
+		request.setParameter("action", "form");
+		request.setParameter("age", "29");
+		simpleDispatcherPortlet.doDispatch(request, response);
+
+		assertSame(servletLocaleContext, LocaleContextHolder.getLocaleContext());
+		assertSame(servletRequestAttrs, RequestContextHolder.getRequestAttributes());
+
+	}
+
+	public void testInvalidActionRequestWithExistingThreadLocalRequestContext() throws IOException, PortletException {
+   	MockServletContext servletContext = new MockServletContext();
+		MockHttpServletRequest httpRequest = new MockHttpServletRequest(servletContext);
+		httpRequest.addPreferredLocale(Locale.GERMAN);
+
+		// see RequestContextListener.requestInitialized()
+		LocaleContextHolder.setLocale(httpRequest.getLocale());
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpRequest));
+
+		LocaleContext servletLocaleContext = LocaleContextHolder.getLocaleContext();
+		RequestAttributes servletRequestAttrs = RequestContextHolder.getRequestAttributes();
+
+		MockActionRequest request = new MockActionRequest();
+		MockActionResponse response = new MockActionResponse();
+		request.setParameter("action", "invalid");
+		simpleDispatcherPortlet.processAction(request, response);
+		String exceptionParam = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
+		assertNotNull(exceptionParam); // ensure that an exceptional condition occured
+
+		assertSame(servletLocaleContext, LocaleContextHolder.getLocaleContext());
+		assertSame(servletRequestAttrs, RequestContextHolder.getRequestAttributes());
+	}
+
+	public void testInvalidRenderRequestWithExistingThreadLocalRequestContext() throws IOException, PortletException {
+		MockServletContext servletContext = new MockServletContext();
+		MockHttpServletRequest httpRequest = new MockHttpServletRequest(servletContext);
+		httpRequest.addPreferredLocale(Locale.GERMAN);
+
+		// see RequestContextListener.requestInitialized()
+		LocaleContextHolder.setLocale(httpRequest.getLocale());
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpRequest));
+
+		LocaleContext servletLocaleContext = LocaleContextHolder.getLocaleContext();
+		RequestAttributes servletRequestAttrs = RequestContextHolder.getRequestAttributes();
+
+		MockRenderRequest request = new MockRenderRequest();
+		MockRenderResponse response = new MockRenderResponse();
+		try {
+			simpleDispatcherPortlet.doDispatch(request, response);
+			fail("should have failed to find a handler and raised an UnavailableException");
+		}
+		catch (UnavailableException ex) {
+			// expected
+		}
+
+		assertSame(servletLocaleContext, LocaleContextHolder.getLocaleContext());
+		assertSame(servletRequestAttrs, RequestContextHolder.getRequestAttributes());
 	}
 
 }
