@@ -18,6 +18,8 @@ package org.springframework.web.servlet.view;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.LinkedHashMap;
+
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -107,7 +109,8 @@ public class RedirectViewTests extends TestCase {
 		String val = "bar";
 		String key2 = "thisIsKey2";
 		String val2 = "andThisIsVal2";
-		Map m = new HashMap();
+		//FIX: IBM JVM 1.5.0 HashMap/HashSet ordering difference, so use LinkedHashMap().
+		Map m = new LinkedHashMap();
 		m.put(key, val);
 		m.put(key2, val2);
 		String expectedUrlForEncoding = url + "?" + key + "=" + val + "&" + key2 + "=" + val2;
@@ -130,7 +133,8 @@ public class RedirectViewTests extends TestCase {
 		String val = "bar";
 		String key2 = "int2";
 		Object val2 = new Long(611);
-		Map m = new HashMap();
+		//FIX: IBM JVM 1.5.0 HashMap/HashSet ordering difference, so use LinkedHashMap().
+		Map m = new LinkedHashMap();
 		m.put(key, val);
 		m.put(key2, val2);
 		String expectedUrlForEncoding = url + "?" + key + "=" + val + "&" + key2 + "=" + val2;

@@ -82,7 +82,9 @@ public class FormatHelperTests extends TestCase {
 		// prove a different locale changes the output
 		e = (Element) FormatHelper.dateTimeElement(testTime, Locale.FRANCE);
 		el = (Element) e.getElementsByTagName("day-of-week").item(0);
-		assertTrue("mercredi".equals(el.getFirstChild().getNodeValue()));
+	
+		//FIX: IBM JVM 1.5.0 SR3 will return "Mercredi".
+		assertTrue("mercredi".equals(el.getFirstChild().getNodeValue()) || "Mercredi".equals(el.getFirstChild().getNodeValue()) );
 
 		// reset TZ in case later tests have a problem
 		TimeZone.setDefault(curr);
