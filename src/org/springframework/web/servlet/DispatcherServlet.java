@@ -913,8 +913,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Build a LocaleContext for the given request, exposing the request's
 	 * primary locale as current locale.
+	 * <p>The default implementation uses the dispatcher's LocaleResolver
+	 * to obtain the current locale, which might change during a request.
 	 * @param request current HTTP request
-	 * @return the correspondign LocaleContext
+	 * @return the corresponding LocaleContext
 	 */
 	protected LocaleContext buildLocaleContext(final HttpServletRequest request) {
 		return new LocaleContext() {
