@@ -402,8 +402,8 @@ public abstract class ExpressionEvaluationUtils {
 			catch (ELException ex) {
 				throw new JspException("Parsing of JSP EL expression \"" + attrValue + "\" failed", ex);
 			}
-			catch (NoSuchMethodError err) {
-				logger.debug("JSP 2.0 ExpressionEvaluator API present but not implemented - using fallback");
+			catch (LinkageError err) {
+				logger.debug("JSP 2.0 ExpressionEvaluator API present but not implemented - using fallback", err);
 				setFallbackNecessary();
 				return this.fallback.evaluate(attrName, attrValue, resultClass, pageContext);
 			}
