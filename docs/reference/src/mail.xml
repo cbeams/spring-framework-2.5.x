@@ -360,7 +360,7 @@ public class SimpleRegistrationService implements RegistrationService {
          public void prepare(MimeMessage mimeMessage) throws Exception {
             MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
             message.setTo(user.getEmailAddress());
-            message.setFrom("webmaster@csonth.gov.uk"); ]]><lineannotation>// could be paramterized...</lineannotation><![CDATA[
+            message.setFrom("webmaster@csonth.gov.uk"); ]]><lineannotation>// could be parameterized...</lineannotation><![CDATA[
             Map model = new HashMap();
             model.put("user", user);
             String text = VelocityEngineUtils.mergeTemplateIntoString(
