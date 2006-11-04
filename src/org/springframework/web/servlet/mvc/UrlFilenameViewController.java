@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.web.util.WebUtils;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.util.StringUtils;
@@ -28,13 +27,16 @@ import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Controller that transforms the virtual filename at the end of a URL
- * into a view name and returns that view. Can optionally prepend a prefix
- * and/or append a suffix to build the viewname from the URL filename.
+ * <code>Controller</code> that transforms the virtual filename at the end
+ * of a URL into a view name and returns that view.
+ * 
+ * <p>Can optionally prepend a prefix and/or append a suffix to build the
+ * viewname from the URL filename.
  *
- * <p>Example: "/index" -> "index"
- * Example: "/index.html" -> "index"
- * Example: "/index.html" + prefix "pre_" and suffix "_suf" -> "pre_index_suf".
+ * <p>Example: <code>"/index" -> "index"</code>
+ * <p>Example: <code>"/index.html" -> "index"</code>
+ * <p>Example: <code>"/index.html"</code> + prefix <code>"pre_"</code>
+ * 		and suffix <code>"_suf" -> "pre_index_suf"</code>
  *
  * <p>Thanks to David Barri for suggesting prefix/suffix support!
  *
@@ -114,10 +116,8 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 
 	/**
 	 * Extract the URL filename from the given request URI.
-	 * Delegates to <code>WebUtils.extractViewNameFromUrlPath(String)</code>.
-	 * @param uri the request URI (e.g. "/index.html")
-	 * @return the extracted URI filename (e.g. "index")
-	 * @see WebUtils#extractFilenameFromUrlPath
+	 * @param uri the request URI; for example <code>"/index.html"</code>
+	 * @return the extracted URI filename; for example <code>"index"</code>
 	 */
 	protected String extractViewNameFromUrlPath(String uri) {
 		int start = (uri.charAt(0) == '/' ? 1 : 0);
