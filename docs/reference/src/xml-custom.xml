@@ -17,18 +17,18 @@
     	<para>
     	    <orderedlist numeration="arabic">
                 <listitem>
-                    <para>Authoring an XML schema to describe your custom element(s).</para>
+                    <para><link linkend="extensible-xml-schema">Authoring</link> an XML schema to describe your custom element(s).</para>
                 </listitem>
                 <listitem>
-                    <para>Coding a custom <interfacename>NamespaceHandler</interfacename>
+                    <para><link linkend="extensible-xml-namespacehandler">Coding</link> a custom <interfacename>NamespaceHandler</interfacename>
                     implementation (this is an easy step, don't worry).</para>
                 </listitem>
                 <listitem>
-                    <para>Coding one or more <interfacename>BeanDefinitionParser</interfacename>
+                    <para><link linkend="extensible-xml-parser">Coding</link> one or more <interfacename>BeanDefinitionParser</interfacename>
                     implementations (this is where the real work is done).</para>
                 </listitem>
                 <listitem>
-                    <para>Finally, registering the above artifacts with Spring (this too is an easy step).</para>
+                    <para><link linkend="extensible-xml-registration">Registering</link> the above artifacts with Spring (this too is an easy step).</para>
                 </listitem>
     	    </orderedlist>
     	</para>
