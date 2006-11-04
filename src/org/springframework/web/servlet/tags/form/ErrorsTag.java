@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.tags.form;
 
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.util.TagUtils;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTag;
@@ -84,13 +83,6 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 */
 	protected boolean shouldRender() throws JspException {
 		return getBindStatus().isError();
-	}
-
-	/**
-	 * Make sure we are under a '<code>form</code>' tag before proceeding.
-	 */
-	protected void onWriteTagContent() {
-		TagUtils.assertHasAncestorOfType(this, FormTag.class, "errors", "form");
 	}
 
 	protected void renderDefaultContent(TagWriter tagWriter) throws JspException {
