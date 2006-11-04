@@ -27,21 +27,26 @@ import org.springframework.util.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * <code>Controller</code> that transforms the virtual filename at the end
- * of a URL into a view name and returns that view.
+ * Simple <code>Controller</code> implementation that transforms the virtual
+ * path of a URL into a view name and returns that view.
  * 
- * <p>Can optionally prepend a prefix and/or append a suffix to build the
- * viewname from the URL filename.
+ * <p>Can optionally prepend a {@link #setPrefix prefix} and/or append a
+ * {@link #setSuffix suffix} to build the viewname from the URL filename.
  *
- * <p>Example: <code>"/index" -> "index"</code>
- * <p>Example: <code>"/index.html" -> "index"</code>
- * <p>Example: <code>"/index.html"</code> + prefix <code>"pre_"</code>
- * 		and suffix <code>"_suf" -> "pre_index_suf"</code>
+ * <p>Find below some examples:
+ *
+ * <ol>
+ *		<li><code>"/index" -> "index"</code></li>
+ *		<li><code>"/index.html" -> "index"</code></li>
+ *		<li><code>"/index.html"</code> + prefix <code>"pre_"</code> and suffix <code>"_suf" -> "pre_index_suf"</code></li>
+ * 		<li><code>"/products/view.html" -> "products/view"</code></li>
+ * </ol>
  *
  * <p>Thanks to David Barri for suggesting prefix/suffix support!
  *
  * @author Alef Arendsen
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @see #setPrefix
  * @see #setSuffix
  */

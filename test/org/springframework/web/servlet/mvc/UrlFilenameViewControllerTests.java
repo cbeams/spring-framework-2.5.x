@@ -17,17 +17,16 @@
 package org.springframework.web.servlet.mvc;
 
 import junit.framework.TestCase;
-
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.util.PathMatcher;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
+import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Unit tests for the {@link UrlFilenameViewController} class.
- * 
+ *
  * @author Juergen Hoeller
  * @author Rick Evans
  * @since 14.09.2005
@@ -37,7 +36,21 @@ public class UrlFilenameViewControllerTests extends TestCase {
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
 
-    public void testWithPlainFilename() throws Exception {
+	/**
+	 * This is the expected behaviour, and it now has a test to prove it.
+	 *
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2789
+	 */
+	public void testNestedPathisUsedAsViewName_InBreakingChangeFromSpring12Line() throws Exception {
+		UrlFilenameViewController ctrl = new UrlFilenameViewController();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/products/view.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = ctrl.handleRequest(request, response);
+		assertEquals("products/view", mv.getViewName());
+		assertTrue(mv.getModel().isEmpty());
+	}
+
+	public void testWithPlainFilename() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -106,7 +119,7 @@ public class UrlFilenameViewControllerTests extends TestCase {
 	}
 
 	public void testMultiLevelMappingWithFallback() throws Exception {
-	  UrlFilenameViewController ctrl = new UrlFilenameViewController();
+		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/docs/cvs/commit.html");
 		exposePathInMapping(request, "/docs/cvs/commit.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -125,22 +138,22 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		assertTrue(mv.getModel().isEmpty());
 	}
 
-    public void testSettingPrefixToNullCausesEmptyStringToBeUsed() throws Exception {
-        UrlFilenameViewController ctrl = new UrlFilenameViewController();
-        ctrl.setPrefix(null);
-        assertNotNull("When setPrefix(..) is called with a null argument, the empty string value must be used instead.", ctrl.getPrefix());
-        assertEquals("When setPrefix(..) is called with a null argument, the empty string value must be used instead.", "", ctrl.getPrefix());
-    }
+	public void testSettingPrefixToNullCausesEmptyStringToBeUsed() throws Exception {
+		UrlFilenameViewController ctrl = new UrlFilenameViewController();
+		ctrl.setPrefix(null);
+		assertNotNull("When setPrefix(..) is called with a null argument, the empty string value must be used instead.", ctrl.getPrefix());
+		assertEquals("When setPrefix(..) is called with a null argument, the empty string value must be used instead.", "", ctrl.getPrefix());
+	}
 
-    public void testSettingSuffixToNullCausesEmptyStringToBeUsed() throws Exception {
-        UrlFilenameViewController ctrl = new UrlFilenameViewController();
-        ctrl.setSuffix(null);
-        assertNotNull("When setSuffix(..) is called with a null argument, the empty string value must be used instead.", ctrl.getSuffix());
-        assertEquals("When setSuffix(..) is called with a null argument, the empty string value must be used instead.", "", ctrl.getSuffix());
-    }
+	public void testSettingSuffixToNullCausesEmptyStringToBeUsed() throws Exception {
+		UrlFilenameViewController ctrl = new UrlFilenameViewController();
+		ctrl.setSuffix(null);
+		assertNotNull("When setSuffix(..) is called with a null argument, the empty string value must be used instead.", ctrl.getSuffix());
+		assertEquals("When setSuffix(..) is called with a null argument, the empty string value must be used instead.", "", ctrl.getSuffix());
+	}
 
 
-    private void exposePathInMapping(MockHttpServletRequest request, String mapping) {
+	private void exposePathInMapping(MockHttpServletRequest request, String mapping) {
 		String pathInMapping = this.pathMatcher.extractPathWithinPattern(mapping, request.getRequestURI());
 		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathInMapping);
 	}
