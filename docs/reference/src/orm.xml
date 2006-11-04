@@ -212,7 +212,7 @@
     </property>
     <property name="hibernateProperties">
       <value>
-        hibernate.dialect=org.hibernate.dialect.MySQLDialect
+        hibernate.dialect=org.hibernate.dialect.HSQLDialect
       </value>
     </property>
   </bean>
