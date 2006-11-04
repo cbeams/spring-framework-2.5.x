@@ -87,7 +87,7 @@ public class ClassArrayEditor extends PropertyEditorSupport {
 			if (i > 0) {
 				buffer.append(",");
 			}
-			buffer.append(classes[i].getName());
+			buffer.append(ClassUtils.getQualifiedName(classes[i]));
 		}
 		return buffer.toString();
 	}
