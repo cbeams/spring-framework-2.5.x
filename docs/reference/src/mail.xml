@@ -274,7 +274,7 @@ sender.send(message);]]></programlisting>
 			<para>The code in the previous examples explicitly has been creating the
 			content of the email message, using methods calls such as
 			<methodname>message.setText(..)</methodname>. This is fine for
-			simple cases, and it is okay in the content of the aforementioned
+			simple cases, and it is okay in the context of the aforementioned
 			examples, where the intent was to show you the very basics of the API.</para>
 			<para>In your typical enterprise application though, you are not going
 			to create the content of your emails using the above approach for a number
