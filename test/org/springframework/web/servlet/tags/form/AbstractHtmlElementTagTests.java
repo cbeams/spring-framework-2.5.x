@@ -16,19 +16,19 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.web.servlet.tags.AbstractTagTests;
-import org.springframework.web.servlet.tags.RequestContextAwareTag;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockPageContext;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.servlet.support.JspAwareRequestContext;
 import org.springframework.web.servlet.support.RequestContext;
-import org.springframework.mock.web.MockPageContext;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.validation.Errors;
-import org.springframework.validation.BindingResult;
+import org.springframework.web.servlet.tags.AbstractTagTests;
+import org.springframework.web.servlet.tags.RequestContextAwareTag;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.StringWriter;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Rob Harrop
@@ -53,20 +53,20 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 	protected final void assertContainsAttribute(String output, String attributeName, String attributeValue) {
 		String attributeString = attributeName + "=\"" + attributeValue + "\"";
 		assertTrue("Expected to find attribute '" + attributeName +
-						"' with value '" + attributeValue +
-						"' in output + '" + output + "'",
-						output.indexOf(attributeString) > -1);
+				"' with value '" + attributeValue +
+				"' in output + '" + output + "'",
+				output.indexOf(attributeString) > -1);
 	}
 
 	protected final void assertAttributeNotPresent(String output, String attributeName) {
 		assertTrue("Unexpected attribute '" + attributeName + "' in output '" + output + "'.",
-						output.indexOf(attributeName + "=\"") < 0);
+				output.indexOf(attributeName + "=\"") < 0);
 	}
 
 	protected final void assertBlockTagContains(String output, String desiredContents) {
 		String contents = output.substring(output.indexOf(">") + 1, output.lastIndexOf("<"));
 		assertTrue("Expected to find '" + desiredContents + "' in the contents of block tag '" + output + "'",
-						contents.indexOf(desiredContents) > -1);
+				contents.indexOf(desiredContents) > -1);
 	}
 
 	protected final RequestContext getRequestContext() {
@@ -77,7 +77,7 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 		MockPageContext pageContext = createPageContext();
 		MockHttpServletRequest request = (MockHttpServletRequest) pageContext.getRequest();
 		RequestContext requestContext = new JspAwareRequestContext(pageContext);
-	  pageContext.setAttribute(RequestContextAwareTag.REQUEST_CONTEXT_PAGE_ATTRIBUTE, requestContext);
+		pageContext.setAttribute(RequestContextAwareTag.REQUEST_CONTEXT_PAGE_ATTRIBUTE, requestContext);
 		extendRequest(request);
 		extendPageContext(pageContext);
 		return pageContext;
@@ -99,7 +99,8 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 		onSetUp();
 	}
 
-	protected void onSetUp(){}
+	protected void onSetUp() {
+	}
 
 	protected void exposeBindingResult(Errors errors) {
 		// wrap errors in a Model

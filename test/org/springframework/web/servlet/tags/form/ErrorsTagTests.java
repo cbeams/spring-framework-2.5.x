@@ -18,13 +18,15 @@ package org.springframework.web.servlet.tags.form;
 
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockPageContext;
+import org.springframework.test.AssertThrows;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
-import org.springframework.test.AssertThrows;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTag;
 import javax.servlet.jsp.tagext.Tag;
 import java.util.HashMap;
@@ -212,14 +214,74 @@ public final class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		assertEquals(existingAttribute, getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
 	}
 
-
-	private void assertSpanTagOpened(String output) {
-		assertTrue(output.startsWith("<span "));
+	/**
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2788
+	 */
+	public void testAsBodyTagWithErrorsAndExistingMessagesAttributeInNonPageScopeAreNotClobbered() throws Exception {
+		String existingAttribute = "something";
+		getPageContext().setAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, existingAttribute, PageContext.APPLICATION_SCOPE);
+		Errors errors = new BindException(new TestBean(), "COMMAND_NAME");
+		errors.rejectValue("name", "some.code", "Default Message");
+		errors.rejectValue("name", "too.short", "Too Short");
+		exposeBindingResult(errors);
+		int result = this.tag.doStartTag();
+		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		assertNotNull(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
+		assertTrue(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE) instanceof List);
+		String bodyContent = "Foo";
+		this.tag.setBodyContent(new MockBodyContent(bodyContent, getWriter()));
+		this.tag.doEndTag();
+		this.tag.doFinally();
+		assertEquals(bodyContent, getWriter().toString());
+		assertEquals(existingAttribute, getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, PageContext.APPLICATION_SCOPE));
 	}
 
-	private void assertSpanTagClosed(String output) {
-		assertTrue(output.endsWith("</span>"));
+	/**
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2788
+	 */
+	public void testAsBodyTagWithNoErrorsAndExistingMessagesAttributeInApplicationScopeAreNotClobbered() throws Exception {
+		assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(PageContext.APPLICATION_SCOPE);
 	}
+
+	/**
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2788
+	 */
+	public void testAsBodyTagWithNoErrorsAndExistingMessagesAttributeInSessionScopeAreNotClobbered() throws Exception {
+		assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(PageContext.SESSION_SCOPE);
+	}
+
+	/**
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2788
+	 */
+	public void testAsBodyTagWithNoErrorsAndExistingMessagesAttributeInPageScopeAreNotClobbered() throws Exception {
+		assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(PageContext.PAGE_SCOPE);
+	}
+
+	/**
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2788
+	 */
+	public void testAsBodyTagWithNoErrorsAndExistingMessagesAttributeInRequestScopeAreNotClobbered() throws Exception {
+		assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(PageContext.REQUEST_SCOPE);
+	}
+
+	private void assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(int scope) throws JspException {
+		String existingAttribute = "something";
+		getPageContext().setAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, existingAttribute, scope);
+
+		Errors errors = new BindException(new TestBean(), "COMMAND_NAME");
+		exposeBindingResult(errors);
+		int result = this.tag.doStartTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		result = this.tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, result);
+
+		String output = getWriter().toString();
+		assertEquals(0, output.length());
+
+		assertEquals(existingAttribute, getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, scope));
+	}
+
 
 	protected void exposeBindingResult(Errors errors) {
 		// wrap errors in a Model
@@ -234,6 +296,15 @@ public final class ErrorsTagTests extends AbstractHtmlElementTagTests {
 
 	protected void extendPageContext(MockPageContext pageContext) {
 		pageContext.getRequest().setAttribute(FormTag.COMMAND_NAME_VARIABLE_NAME, COMMAND_NAME);
+	}
+
+
+	private static void assertSpanTagOpened(String output) {
+		assertTrue(output.startsWith("<span "));
+	}
+
+	private static void assertSpanTagClosed(String output) {
+		assertTrue(output.endsWith("</span>"));
 	}
 
 }

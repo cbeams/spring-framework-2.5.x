@@ -19,6 +19,7 @@ package org.springframework.web.servlet.tags.form;
 import org.springframework.util.ObjectUtils;
 
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyTag;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,10 +29,11 @@ import java.util.List;
  * Form tag for displaying errors for a particular field or object.
  * 
  * <p>This tag supports three main usage patterns:
+ *
  * <ol>
- * <li>Field only - set '<code>path</code>' to the field name (or path)</li>
- * <li>Object errors only - omit '<code>path</code>'</li>
- * <li>All errors - set '<code>path</code>' to '<code>*</code>'</li>
+ *	<li>Field only - set '<code>path</code>' to the field name (or path)</li>
+ *	<li>Object errors only - omit '<code>path</code>'</li>
+ *	<li>All errors - set '<code>path</code>' to '<code>*</code>'</li>
  * </ol>
  *
  * @author Rob Harrop
@@ -39,8 +41,11 @@ import java.util.List;
  */
 public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
+	/**
+	 * The key under which this tag exposes error messages in
+	 * the {@link PageContext#PAGE_SCOPE page context scope}.
+	 */
 	public static final String MESSAGES_ATTRIBUTE = "messages";
-
 
 	/**
 	 * The HTML '<code>span</code>' tag.
@@ -55,6 +60,8 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 * Stores any value that existed in the 'errors messages' before the tag was started.
 	 */
 	private Object oldMessages;
+	
+	private boolean errorMessagesWereExposed;
 
 	/**
 	 * Sets what delimiter must be used between error messages.
@@ -100,20 +107,33 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 		tagWriter.endTag();
 	}
 
+	/**
+	 * Exposes any bind status error messages under {@link #MESSAGES_ATTRIBUTE this key}
+	 * in the {@link PageContext#PAGE_SCOPE}.
+	 * <p>Only called if {@link #shouldRender()} returns <code>true</code>.
+	 * @see #removeAttributes()
+	 */
 	protected void exposeAttributes() throws JspException {
 		List errorMessages = new ArrayList();
 		errorMessages.addAll(Arrays.asList(getBindStatus().getErrorMessages()));
-		this.oldMessages = this.pageContext.getAttribute(MESSAGES_ATTRIBUTE);
-		this.pageContext.setAttribute(MESSAGES_ATTRIBUTE, errorMessages);
+		this.oldMessages = this.pageContext.getAttribute(MESSAGES_ATTRIBUTE, PageContext.PAGE_SCOPE);
+		this.pageContext.setAttribute(MESSAGES_ATTRIBUTE, errorMessages, PageContext.PAGE_SCOPE);
+		this.errorMessagesWereExposed = true;
 	}
 
+	/**
+	 * Removes any bind status error messages that were previously stored under
+	 * {@link #MESSAGES_ATTRIBUTE this key} in the {@link PageContext#PAGE_SCOPE}.
+	 * @see #exposeAttributes()
+	 */
 	protected void removeAttributes() {
-		if (this.oldMessages != null) {
-			this.pageContext.setAttribute(MESSAGES_ATTRIBUTE, this.oldMessages);
-			this.oldMessages = null;
-		}
-		else {
-			this.pageContext.removeAttribute(MESSAGES_ATTRIBUTE);
+		if (this.errorMessagesWereExposed) {
+			if (this.oldMessages != null) {
+				this.pageContext.setAttribute(MESSAGES_ATTRIBUTE, this.oldMessages, PageContext.PAGE_SCOPE);
+				this.oldMessages = null;
+			} else {
+				this.pageContext.removeAttribute(MESSAGES_ATTRIBUTE, PageContext.PAGE_SCOPE);
+			}
 		}
 	}
 
