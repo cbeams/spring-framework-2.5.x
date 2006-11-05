@@ -198,14 +198,17 @@ public class MockPageContext extends PageContext {
 
 	public void removeAttribute(String name) {
 		Assert.notNull(name, "Attribute name must not be null");
-		this.attributes.remove(name);
+		this.removeAttribute(name, PageContext.PAGE_SCOPE);
+		this.removeAttribute(name, PageContext.REQUEST_SCOPE);
+		this.removeAttribute(name, PageContext.SESSION_SCOPE);
+		this.removeAttribute(name, PageContext.APPLICATION_SCOPE);
 	}
 
 	public void removeAttribute(String name, int scope) {
 		Assert.notNull(name, "Attribute name must not be null");
 		switch (scope) {
 			case PAGE_SCOPE:
-				removeAttribute(name);
+				this.attributes.remove(name);
 				break;
 			case REQUEST_SCOPE:
 				this.request.removeAttribute(name);
