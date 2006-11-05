@@ -590,7 +590,7 @@ public class ExecuteAnUpdate {
 }]]></programlisting>
 		</section>
 	</section>
-	<section id="jdbc-datasource">
+	<section id="jdbc-connections">
 		<title>Controlling database connections</title>
 		<section id="jdbc-DataSourceUtils">
 			<title><classname>DataSourceUtils</classname></title>
