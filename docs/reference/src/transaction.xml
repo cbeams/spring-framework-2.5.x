@@ -507,17 +507,17 @@ xsi:schemaLocation="
                 application(s) during development to better see what goes on under the hood.</para>
             </tip>
             <para>The most important concepts to grasp with regard to Spring's declarative transaction
-            support are that this support is enabled via AOP <emphasis>proxies</emphasis>, and that the
-            transactional advice is driven by <emphasis>metadata</emphasis> (currently XML- or
-            annotation-based). The combination of a proxy with transactional metadata yields an
-            AOP proxy that uses a <classname>TransactionInterceptor</classname> in conjunction
+            support are that this support is enabled
+            <link linkend="aop-understanding-aop-proxies"><emphasis>via AOP proxies</emphasis></link>,
+            and that the transactional advice is driven by <emphasis>metadata</emphasis> (currently
+            XML- or annotation-based). The combination of a proxy with transactional metadata yields
+            an AOP proxy that uses a <classname>TransactionInterceptor</classname> in conjunction
             with an appropriate <classname>PlatformTransactionManager</classname> implementation
-            to drive transactions around <emphasis>method invocations</emphasis>.</para>
+            to drive transactions <emphasis>around method invocations</emphasis>.</para>
             <note>
-                <para>Although knowledge of AOP (and specifically Spring AOP) is not required
-                in order to use Spring's declarative transaction support, it can help.
-                Spring AOP is thoroughly covered in the chapter entitled <xref linkend="aop"/>.
-                (The section entitled <xref linkend="aop-understanding-aop-proxies"/> is particularly recommended.)</para>
+                <para>Although knowledge of Spring AOP is not required to use Spring's declarative
+                transaction support, it can help. Spring AOP is thoroughly covered in the chapter
+                entitled <xref linkend="aop"/>.</para>
             </note>
             <para>Conceptually, calling a method on a transactional proxy looks like this...</para>
 		    <para>
@@ -533,11 +533,11 @@ xsi:schemaLocation="
 		</section>
         <section id="transaction-declarative-first-example">
             <title>A first example</title>
-            <para>Consider the following interface, and it's attendant implementation.
+            <para>Consider the following interface, and its attendant implementation.
             (The intent is to convey the concepts, and using the rote <classname>Foo</classname> and
             <classname>Bar</classname> tropes means that you can concentrate on the transaction
             usage and not have to worry about the domain model.)</para>
-            <programlisting><lineannotation>&lt;!-- the service interface that we want to make transactional --&gt;</lineannotation><![CDATA[
+            <programlisting><lineannotation>// the service interface that we want to make transactional</lineannotation><![CDATA[
             
 package x.y.service;
             
@@ -552,7 +552,7 @@ public interface FooService {
     void updateFoo(Foo foo);
 
 }]]></programlisting>
-            <programlisting><lineannotation>&lt;!-- an implementation of the above interface --&gt;</lineannotation><![CDATA[
+            <programlisting><lineannotation>// an implementation of the above interface</lineannotation><![CDATA[
             
 package x.y.service;
 
@@ -575,10 +575,10 @@ public class DefaultFooService implements FooService {
     }
 
 }]]></programlisting>
-            <para><emphasis>(For the purposes of this example, the fact that the implementation class
-            (<classname>DefaultFooService</classname>) throws
+            <para><emphasis>(For the purposes of this example, the fact that the
+            <classname>DefaultFooService</classname> class throws
             <exceptionname>UnsupportedOperationException</exceptionname> instances in the body
-            of each implemented method is good; it allows us to see transactions being created
+            of each implemented method is good; it will allow us to see transactions being created
             and then rolled back in response to the <exceptionname>UnsupportedOperationException</exceptionname>
             instance being thrown.)</emphasis></para>
             <para>Let's assume that the first two methods of the <interfacename>FooService</interfacename>
@@ -586,10 +586,9 @@ public class DefaultFooService implements FooService {
             have to execute in the context of a transaction with read-only semantics, and that
             the other methods (<literal>insertFoo(Foo)</literal> and
             <literal>updateFoo(Foo)</literal>) have to execute in the context of
-            a transaction with read-write semantics.</para>
-            <para>To configure this scenario in a declarative fashion using XML-based metadata,
-            you would write the following configuration (don't worry about taking it in all at once; 
-            everything will be explained in detail in the next few paragraphs).</para>
+            a transaction with read-write semantics. To configure this scenario in a declarative fashion
+            using XML-based metadata, you would write the following configuration (don't worry about
+            taking it in all at once; everything will be explained in detail in the next few paragraphs).</para>
             <programlisting><lineannotation>&lt;!-- from the file <literal>'context.xml'</literal> --&gt;</lineannotation><![CDATA[
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -630,7 +629,7 @@ public class DefaultFooService implements FooService {
     <property name="password" value="tiger"/>
   </bean>
 
-  ]]><lineannotation>&lt;!-- similarly, don't forget the (particular) <interfacename>PlatformTransactionManager</interfacename> --&gt;</lineannotation><![CDATA[
+  ]]><lineannotation>&lt;!-- similarly, don't forget the <interfacename>PlatformTransactionManager</interfacename> --&gt;</lineannotation><![CDATA[
   <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
     <property name="dataSource" ref="dataSource"/>
   </bean>
@@ -660,15 +659,14 @@ public class DefaultFooService implements FooService {
                 that you want to wire in has any other name, then you have to be explicit
                 and use the <literal>'transaction-manager'</literal> attribute as in the example above.</para>
             </tip>
-            <para>The final piece of the configuration is the <literal>&lt;aop:config/&gt;</literal>
-            definition. This ensures that the transactional advice defined by the
-            <literal>'txAdvice'</literal> bean actually gets to execute at the appropriate points
-            in the application. First we define a pointcut that matches the execution of any
+            <para>The <literal>&lt;aop:config/&gt;</literal> definition ensures that the transactional
+            advice defined by the <literal>'txAdvice'</literal> bean actually executes at the appropriate
+            points in the program. First we define a pointcut that matches the execution of any
             operation defined in the <interfacename>FooService</interfacename> interface
-            (and we called this pointcut <literal>'fooServiceOperation'</literal>). Then we
-            combine the pointcut with the <literal>'txAdvice'</literal> using an advisor.
-            The result indicates that at the execution of a <literal>'fooServiceOperation'</literal>,
-            the advice defined by <literal>'txAdvice'</literal> will be run.</para>
+            (<literal>'fooServiceOperation'</literal>). Then we associate the pointcut with the
+            <literal>'txAdvice'</literal> using an advisor. The result indicates that at the execution
+            of a <literal>'fooServiceOperation'</literal>, the advice defined by <literal>'txAdvice'</literal>
+            will be run.</para>
             <para>The expression defined within the <literal>&lt;aop:pointcut/&gt;</literal>
             element is an AspectJ pointcut expression; see the chapter entitled <xref linkend="aop"/>
             for more details on pointcut expressions in Spring 2.0.</para>
@@ -680,7 +678,7 @@ public class DefaultFooService implements FooService {
     <aop:advisor advice-ref="txAdvice" pointcut-ref="fooServiceMethods"/>
   </aop:config>]]></programlisting>
             <para><emphasis>(This example assumes that all your service interfaces are defined
-            in the <literal>'x.y.service'</literal> package, again, see the chapter entitled
+            in the <literal>'x.y.service'</literal> package; see the chapter entitled
             <xref linkend="aop"/> for more details.)</emphasis></para>
             <para>Now that we've analyzed the configuration, you may be asking
             yourself, <quote><emphasis>Okay... but what does all this configuration actually
@@ -691,9 +689,8 @@ public class DefaultFooService implements FooService {
             with the transactional advice, so that when an appropriate method is invoked
             <emphasis>on the proxy</emphasis>, a transaction <emphasis>may</emphasis>
             be started, suspended, be marked as read-only, etc, depending on the
-            transaction semantics associated with that method.</para>
-            <para>Let's consider the following driver program to test the above
-            configuration.</para>
+            transaction semantics associated with that method. Consider the following program
+            that test drives the above configuration.</para>
             <programlisting><![CDATA[public final class Boot {
 
     public static void main(final String[] args) throws Exception {
@@ -782,23 +779,21 @@ Exception in thread "main" java.lang.UnsupportedOperationException
     }
 }]]></programlisting>
             <para>You are strongly encouraged to use the declarative approach to rollback if at
-            all possible. The programmatic means of rolling back is, as you can see, available to
-            you should you need it, but it's usage flies in the face of achieving a clean
-            POJO-based model in your application.</para>
+            all possible. The programmatic means of rolling back is available should you need it,
+            but its usage flies in the face of achieving a clean POJO-based application model.</para>
         </section>
         <section id="transaction-declarative-diff-tx">
             <title>Configuring different transactional semantics for different beans</title>
-            <para>Let's now consider the scenario where you have a number of service layer objects,
-            and you want to apply <emphasis>totally different</emphasis> transactional semantics
-            to each group of those objects. You can effect this in Spring by defining
-            any number of distinct <literal>&lt;aop:advisor/&gt;</literal> elements
-            with differing <literal>'pointcut'</literal> and <literal>'advice-ref'</literal>
+            <para>Consider the scenario where you have a number of service layer objects,
+            and you want to apply <emphasis>totally different</emphasis> transactional configuration
+            to each of them. This is achieved by defining distinct <literal>&lt;aop:advisor/&gt;</literal>
+            elements with differing <literal>'pointcut'</literal> and <literal>'advice-ref'</literal>
             attribute values.</para>
-            <para>By way of an example, let's assume that all of your service layer classes
-            are defined in a root <literal>'x.y.service'</literal> package. To make all
-            beans that are instances of classes defined in the package (or in subpackages)
-            and that have names ending in <literal>'Service'</literal> have the default
-            transactional semantics, you could write the following configuration:</para>
+            <para>Let's assume that all of your service layer classes are defined in a root
+            <literal>'x.y.service'</literal> package. To make all beans that are instances of classes
+            defined in that package (or in subpackages) and that have names ending in
+            <literal>'Service'</literal> have the default transactional configuration, you would write
+            the following:</para>
             <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -862,7 +857,7 @@ Exception in thread "main" java.lang.UnsupportedOperationException
 
     </aop:config>
 
-    ]]><lineannotation>&lt;!-- this bean will be transactional (c.f. the <literal>'defaultServiceOperation'</literal> pointcut) --&gt;</lineannotation><![CDATA[
+    ]]><lineannotation>&lt;!-- this bean will be transactional (see the <literal>'defaultServiceOperation'</literal> pointcut) --&gt;</lineannotation><![CDATA[
     <bean id="fooService" class="x.y.service.DefaultFooService"/>
 
     ]]><lineannotation>&lt;!-- this bean will also be transactional, but with totally different transactional settings --&gt;</lineannotation><![CDATA[
