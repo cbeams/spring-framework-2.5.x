@@ -29,8 +29,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 
 /**
- * FactoryBean that exposes a EHCache CacheManager instance (independent or shared),
- * configured from a specified config location.
+ * FactoryBean that exposes an EHCache {@link net.sf.ehcache.CacheManager} instance
+ * (independent or shared), configured from a specified config location.
  *
  * <p>If no config location is specified, a CacheManager will be configured from
  * "ehcache.xml" in the root of the class path (that is, default EHCache initialization
