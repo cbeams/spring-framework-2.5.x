@@ -21,6 +21,12 @@ import java.io.IOException;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheException;
 import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Ehcache;
+import net.sf.ehcache.constructs.blocking.BlockingCache;
+import net.sf.ehcache.constructs.blocking.CacheEntryFactory;
+import net.sf.ehcache.constructs.blocking.SelfPopulatingCache;
+import net.sf.ehcache.constructs.blocking.UpdatingCacheEntryFactory;
+import net.sf.ehcache.constructs.blocking.UpdatingSelfPopulatingCache;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,7 +37,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 /**
- * FactoryBean that creates a named EHCache Cache instance, representing a cache region.
+ * FactoryBean that creates a named EHCache {@link net.sf.ehcache.Cache} instance
+ * (or a decorator that implements the {@link net.sf.ehcache.Ehcache} interface),
+ * representing a cache region within an EHCache {@link net.sf.ehcache.CacheManager}.
  *
  * <p>If the specified named cache is not configured in the cache configuration descriptor,
  * this FactoryBean will construct an instance of a Cache with the provided name and the
@@ -41,8 +49,9 @@ import org.springframework.util.Assert;
  * <p>Note: If the named Cache instance is found, the properties will be ignored and the
  * Cache instance will be retrieved from the CacheManager.
  *
- * <p>Note: As of Spring 2.0, this FactoryBean uses EHCache 1.2's extended Cache constructor.
- * It is not compatible with EHCache 1.1 anymore; please upgrade to EHCache 1.2.3 or higher.
+ * <p>Note: As of Spring 2.0, this FactoryBean is based on EHCache 1.2's API (in particular
+ * the Ehcache interface and the extended Cache constructor). It is not compatible with
+ * EHCache 1.1 anymore; please upgrade to EHCache 1.2.3 or higher.
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
@@ -77,9 +86,13 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 
 	private int diskExpiryThreadIntervalSeconds = 120;
 
+	private boolean blocking = false;
+
+	private CacheEntryFactory cacheEntryFactory;
+
 	private String beanName;
 
-	private Cache cache;
+	private Ehcache cache;
 
 
 	/**
@@ -182,6 +195,36 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 		this.diskExpiryThreadIntervalSeconds = diskExpiryThreadIntervalSeconds;
 	}
 
+	/**
+	 * Set whether to use a blocking cache that lets read attempts block
+	 * until the requested element is created.
+	 * <p>If you intend to build a self-populating blocking cache,
+	 * consider specifying a {@link #setCacheEntryFactory CacheEntryFactory}.
+	 * @see net.sf.ehcache.constructs.blocking.BlockingCache
+	 * @see #setCacheEntryFactory
+	 */
+	public void setBlocking(boolean blocking) {
+		this.blocking = blocking;
+	}
+
+	/**
+	 * Set an EHCache {@link net.sf.ehcache.constructs.blocking.CacheEntryFactory}
+	 * to use for a self-populating cache. If such a factory is specified,
+	 * the cache will be decorated with EHCache's
+	 * {@link net.sf.ehcache.constructs.blocking.SelfPopulatingCache}.
+	 * <p>The specified factory can be of type
+	 * {@link net.sf.ehcache.constructs.blocking.UpdatingCacheEntryFactory},
+	 * which will lead to the use of an
+	 * {@link net.sf.ehcache.constructs.blocking.UpdatingSelfPopulatingCache}.
+	 * <p>Note: Any such self-populating cache is automatically a blocking cache.
+	 * @see net.sf.ehcache.constructs.blocking.SelfPopulatingCache
+	 * @see net.sf.ehcache.constructs.blocking.UpdatingSelfPopulatingCache
+	 * @see net.sf.ehcache.constructs.blocking.UpdatingCacheEntryFactory
+	 */
+	public void setCacheEntryFactory(CacheEntryFactory cacheEntryFactory) {
+		this.cacheEntryFactory = cacheEntryFactory;
+	}
+
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
@@ -207,18 +250,49 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using existing EHCache cache region '" + this.cacheName + "'");
 			}
-			this.cache = this.cacheManager.getCache(this.cacheName);
+			this.cache = this.cacheManager.getEhcache(this.cacheName);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Creating new EHCache cache region '" + this.cacheName + "'");
 			}
-			this.cache = new Cache(
-					this.cacheName, this.maxElementsInMemory, this.memoryStoreEvictionPolicy,
-					this.overflowToDisk, this.diskStorePath, this.eternal, this.timeToLive, this.timeToIdle,
-					this.diskPersistent, this.diskExpiryThreadIntervalSeconds, null);
-			this.cacheManager.addCache(this.cache);
+			Cache rawCache = createCache();
+			this.cacheManager.addCache(rawCache);
+			Ehcache decoratedCache = decorateCache(rawCache);
+			this.cacheManager.replaceCacheWithDecoratedCache(rawCache, decoratedCache);
+			this.cache = decoratedCache;
 		}
+	}
+
+	/**
+	 * Create a raw Cache object based on the configuration of this FactoryBean.
+	 */
+	private Cache createCache() {
+		return new Cache(
+				this.cacheName, this.maxElementsInMemory, this.memoryStoreEvictionPolicy,
+				this.overflowToDisk, this.diskStorePath, this.eternal, this.timeToLive, this.timeToIdle,
+				this.diskPersistent, this.diskExpiryThreadIntervalSeconds, null);
+	}
+
+	/**
+	 * Decorate the given Cache, if necessary.
+	 * <p>The default implementation simply returns the given cache object as-is.
+	 * @param cache the raw Cache object, based on the configuration of this FactoryBean
+	 * @return the (potentially decorated) cache object to be registered with the CacheManager
+	 */
+	protected Ehcache decorateCache(Cache cache) {
+		if (this.cacheEntryFactory != null) {
+			if (this.cacheEntryFactory instanceof UpdatingCacheEntryFactory) {
+				return new UpdatingSelfPopulatingCache(cache, (UpdatingCacheEntryFactory) this.cacheEntryFactory);
+			}
+			else {
+				return new SelfPopulatingCache(cache, this.cacheEntryFactory);
+			}
+		}
+		if (this.blocking) {
+			return new BlockingCache(cache);
+		}
+		return cache;
 	}
 
 
@@ -227,7 +301,7 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware, Initializ
 	}
 
 	public Class getObjectType() {
-		return (this.cache != null ? this.cache.getClass() : Cache.class);
+		return (this.cache != null ? this.cache.getClass() : Ehcache.class);
 	}
 
 	public boolean isSingleton() {

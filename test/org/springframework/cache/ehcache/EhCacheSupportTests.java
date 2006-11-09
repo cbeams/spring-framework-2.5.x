@@ -19,6 +19,12 @@ package org.springframework.cache.ehcache;
 import junit.framework.TestCase;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Ehcache;
+import net.sf.ehcache.constructs.blocking.BlockingCache;
+import net.sf.ehcache.constructs.blocking.CacheEntryFactory;
+import net.sf.ehcache.constructs.blocking.SelfPopulatingCache;
+import net.sf.ehcache.constructs.blocking.UpdatingSelfPopulatingCache;
+import net.sf.ehcache.constructs.blocking.UpdatingCacheEntryFactory;
 
 import org.springframework.core.io.ClassPathResource;
 
@@ -74,7 +80,7 @@ public class EhCacheSupportTests extends TestCase {
 		EhCacheManagerFactoryBean cacheManagerFb = null;
 		try {
 			EhCacheFactoryBean cacheFb = new EhCacheFactoryBean();
-			assertEquals(Cache.class, cacheFb.getObjectType());
+			assertEquals(Ehcache.class, cacheFb.getObjectType());
 			assertTrue("Singleton property", cacheFb.isSingleton());
 			if (useCacheManagerFb) {
 				cacheManagerFb = new EhCacheManagerFactoryBean();
@@ -143,6 +149,72 @@ public class EhCacheSupportTests extends TestCase {
 			else {
 				CacheManager.getInstance().shutdown();
 			}
+		}
+	}
+
+	public void testEhCacheFactoryBeanWithBlockingCache() throws Exception {
+		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
+		cacheManagerFb.afterPropertiesSet();
+		try {
+			CacheManager cm = (CacheManager) cacheManagerFb.getObject();
+			EhCacheFactoryBean cacheFb = new EhCacheFactoryBean();
+			cacheFb.setCacheManager(cm);
+			cacheFb.setCacheName("myCache1");
+			cacheFb.setBlocking(true);
+			cacheFb.afterPropertiesSet();
+			Ehcache myCache1 = cm.getEhcache("myCache1");
+			assertTrue(myCache1 instanceof BlockingCache);
+		}
+		finally {
+			cacheManagerFb.destroy();
+		}
+	}
+
+	public void testEhCacheFactoryBeanWithSelfPopulatingCache() throws Exception {
+		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
+		cacheManagerFb.afterPropertiesSet();
+		try {
+			CacheManager cm = (CacheManager) cacheManagerFb.getObject();
+			EhCacheFactoryBean cacheFb = new EhCacheFactoryBean();
+			cacheFb.setCacheManager(cm);
+			cacheFb.setCacheName("myCache1");
+			cacheFb.setCacheEntryFactory(new CacheEntryFactory() {
+				public Object createEntry(Object key) throws Exception {
+					return key;
+				}
+			});
+			cacheFb.afterPropertiesSet();
+			Ehcache myCache1 = cm.getEhcache("myCache1");
+			assertTrue(myCache1 instanceof SelfPopulatingCache);
+			assertEquals("myKey1", myCache1.get("myKey1").getValue());
+		}
+		finally {
+			cacheManagerFb.destroy();
+		}
+	}
+
+	public void testEhCacheFactoryBeanWithUpdatingSelfPopulatingCache() throws Exception {
+		EhCacheManagerFactoryBean cacheManagerFb = new EhCacheManagerFactoryBean();
+		cacheManagerFb.afterPropertiesSet();
+		try {
+			CacheManager cm = (CacheManager) cacheManagerFb.getObject();
+			EhCacheFactoryBean cacheFb = new EhCacheFactoryBean();
+			cacheFb.setCacheManager(cm);
+			cacheFb.setCacheName("myCache1");
+			cacheFb.setCacheEntryFactory(new UpdatingCacheEntryFactory() {
+				public Object createEntry(Object key) throws Exception {
+					return key;
+				}
+				public void updateEntryValue(Object key, Object value) throws Exception {
+				}
+			});
+			cacheFb.afterPropertiesSet();
+			Ehcache myCache1 = cm.getEhcache("myCache1");
+			assertTrue(myCache1 instanceof UpdatingSelfPopulatingCache);
+			assertEquals("myKey1", myCache1.get("myKey1").getValue());
+		}
+		finally {
+			cacheManagerFb.destroy();
 		}
 	}
 
