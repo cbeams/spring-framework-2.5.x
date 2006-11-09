@@ -113,7 +113,7 @@ public class Person {
 
    private final Validator addressValidator;
 
-   public UserValidator(Validator addressValidator) {
+   public CustomerValidator(Validator addressValidator) {
       if (addressValidator == null) {
           throw new IllegalArgumentException("The supplied [Validator] is required and must not be null.");
       }
