@@ -42,7 +42,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	/**
 	 * Creates a new empty MutablePropertyValues object.
-	 * Property values can be added with the addPropertyValue methods.
+	 * Property values can be added with the <code>addPropertyValue</code> methods.
 	 * @see #addPropertyValue(PropertyValue)
 	 * @see #addPropertyValue(String, Object)
 	 */
@@ -75,8 +75,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	/**
 	 * Construct a new PropertyValues object from a Map.
-	 * @param original Map with property values keyed by property name,
-	 * which must be a String
+	 * @param original Map with property values keyed by property name Strings
 	 * @see #addPropertyValues(Map)
 	 */
 	public MutablePropertyValues(Map original) {
