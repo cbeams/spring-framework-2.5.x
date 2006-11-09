@@ -34,6 +34,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 13 May 2001
  * @see PropertyValues
  * @see BeanWrapper
@@ -62,13 +63,14 @@ public class PropertyValue extends AttributeAccessorSupport implements BeanMetad
 
 	/**
 	 * Copy constructor.
-	 * @param source the PropertyValue to copy
+	 * @param original the PropertyValue to copy
 	 */
-	public PropertyValue(PropertyValue source) {
-		Assert.notNull(source, "Source must not be null");
-		this.name = source.getName();
-		this.value = source.getValue();
-		copyAttributesFrom(source);
+	public PropertyValue(PropertyValue original) {
+		Assert.notNull(original, "Original must not be null");
+		this.name = original.getName();
+		this.value = original.getValue();
+		this.source = original.getSource();
+		copyAttributesFrom(original);
 	}
 
 
