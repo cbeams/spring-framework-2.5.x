@@ -1603,6 +1603,7 @@
 				<include name="lib/junit/**"/>
 				<include name="lib/log4j/**"/>
 				<include name="lib/oc4j/**"/>
+				<include name="lib/openjpa/**"/>
 				<include name="lib/oro/**"/>
 				<include name="lib/poi/**"/>
 				<include name="lib/portlet/**"/>
