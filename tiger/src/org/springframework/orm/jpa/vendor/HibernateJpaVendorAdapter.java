@@ -36,11 +36,16 @@ import org.hibernate.ejb.HibernatePersistence;
 import org.springframework.orm.jpa.JpaDialect;
 
 /**
- * Hibernate-specific JpaVendorAdapter implementation.
+ * JpaVendorAdapter implementation for Hibernate EntityManager.
+ *
+ * <p>Exposes Hibernate's persistence provider and EntityManager extension interface,
+ * and supports AbstractJpaVendorAdapter's common configuration settings.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since 2.0
+ * @see org.hibernate.ejb.HibernatePersistence
+ * @see org.hibernate.ejb.HibernateEntityManager
  */
 public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 

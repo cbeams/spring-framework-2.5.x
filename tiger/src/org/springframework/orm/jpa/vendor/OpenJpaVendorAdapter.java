@@ -23,13 +23,20 @@ import javax.persistence.spi.PersistenceProvider;
 
 import org.apache.openjpa.persistence.OpenJPAEntityManager;
 import org.apache.openjpa.persistence.PersistenceProviderImpl;
+
 import org.springframework.orm.jpa.JpaDialect;
 
 /**
- * OpenJPA-specific JpaVendorAdapter implementation.
+ * JpaVendorAdapter implementation for Apache OpenJPA.
+ *
+ * <p>Exposes OpenJPA's persistence provider and EntityManager extension interface,
+ * and supports AbstractJpaVendorAdapter's common configuration settings.
  *
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 2.0
+ * @see org.apache.openjpa.persistence.PersistenceProviderImpl
+ * @see org.apache.openjpa.persistence.OpenJPAEntityManager
  */
 public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
@@ -42,13 +49,9 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		return this.persistenceProvider;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.orm.jpa.JpaVendorAdapter#getJpaPropertyMap()
-	 */
 	public Map getJpaPropertyMap() {
 		Properties jpaProperties = new Properties();
 
-		// For db properties seems we have to specify dialects (though they come with special properties).
 		if (getDatabasePlatform() != null) {
 			jpaProperties.setProperty("openjpa.jdbc.DBDictionary", getDatabasePlatform());
 		}
@@ -71,6 +74,11 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		return jpaProperties;
 	}
 
+	/**
+	 * Determine the OpenJPA database dictionary name for the given database.
+	 * @param database the specified database
+	 * @return the OpenJPA database dictionary name, or <code>null<code> if none found
+	 */
 	protected String determineDatabaseDictionary(Database database) {
 		switch (database) {
 			case DB2: return "db2";
@@ -90,7 +98,7 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	}
 
 	public JpaDialect getJpaDialect() {
-		return jpaDialect;
+		return this.jpaDialect;
 	}
 
 }

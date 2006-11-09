@@ -29,11 +29,16 @@ import oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider;
 import org.springframework.orm.jpa.JpaDialect;
 
 /**
- * TopLink-specific JpaVendorAdapter implementation.
+ * JpaVendorAdapter implementation for TopLink Essentials.
+ *
+ * <p>Exposes TopLink's persistence provider and EntityManager extension interface,
+ * and supports AbstractJpaVendorAdapter's common configuration settings.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 2.0
+ * @see oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider
+ * @see oracle.toplink.essentials.ejb.cmp3.EntityManager
  */
 public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
