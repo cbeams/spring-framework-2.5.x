@@ -21,9 +21,7 @@
     <para>Spring provides a couple of out-of-the-box solutions for JSP and
     JSTL views. Using JSP or JSTL is done using a normal view resolver defined
     in the <interfacename>WebApplicationContext</interfacename>. Furthermore,
-    of course you need to write some JSPs that will actually render the view.
-    This part describes some of the additional features Spring provides to
-    facilitate JSP development.</para>
+    of course you need to write some JSPs that will actually render the view.</para>
 
     <section id="view-jsp-resolver">
       <title>View resolvers</title>
@@ -1351,12 +1349,10 @@ public class PDFPage extends AbstractPdfView {
   <section id="view-jasper-reports">
     <title>JasperReports</title>
 
-    <para>JasperReports (<ulink
-    url="http://jasperreports.sourceforge.net"></ulink>) is a powerful,
-    open-source reporting engine that supports the creation of report designs
-    using an easily understood XML file formats. JasperReports is capable of
-    rendering reports output into four different formats: CSV, Excel, HTML and
-    PDF.</para>
+    <para>JasperReports (<ulink url="http://jasperreports.sourceforge.net"></ulink>)
+    is a powerful open-source reporting engine that supports the creation of report
+    designs using an easily understood XML file format. JasperReports is capable of
+    rendering reports output into four different formats: CSV, Excel, HTML and PDF.</para>
 
     <section id="view-jasper-reports-dependencies">
       <title>Dependencies</title>
@@ -1369,27 +1365,21 @@ public class PDFPage extends AbstractPdfView {
         <listitem>
           <para>BeanShell</para>
         </listitem>
-
         <listitem>
           <para>Commons BeanUtils</para>
         </listitem>
-
         <listitem>
           <para>Commons Collections</para>
         </listitem>
-
         <listitem>
           <para>Commons Digester</para>
         </listitem>
-
         <listitem>
           <para>Commons Logging</para>
         </listitem>
-
         <listitem>
           <para>iText</para>
         </listitem>
-
         <listitem>
           <para>POI</para>
         </listitem>
@@ -1401,40 +1391,35 @@ public class PDFPage extends AbstractPdfView {
     <section id="view-jasper-reports-configuration">
       <title>Configuration</title>
 
-      <para>To configure JasperReports views in your
-      <literal>ApplicationContext</literal> you have to define a
-      <interfacename>ViewResolver</interfacename> to map view names to the appropriate
-      view class depending on which format you want your report rendered
-      in.</para>
+      <para>To configure JasperReports views in your Spring container configuration
+      you need to define a <interfacename>ViewResolver</interfacename> to map view
+      names to the appropriate view class depending on which format you want your
+      report rendered in.</para>
 
       <section id="view-jasper-reports-configuration-resolver">
         <title>Configuring the <interfacename>ViewResolver</interfacename></title>
 
-        <para>Typically, you will use the
-        <classname>ResourceBundleViewResolver</classname> to map view names to
-        view classes and files in a properties file.</para>
+        <para>Typically, you will use the <classname>ResourceBundleViewResolver</classname>
+        to map view names to view classes and files in a properties file.</para>
         
         <programlisting><![CDATA[<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
     <property name="basename" value="views"/>
 </bean>]]></programlisting>
 
-        <para>Here we've configured an instance of
-        <classname>ResourceBundleViewResolver</classname> which will look for view
-        mappings in the resource bundle with base name
-        <literal>views</literal>. The exact contents of this file is described
-        in the next section.</para>
+        <para>Here we've configured an instance of the <classname>ResourceBundleViewResolver</classname>
+        class that will look for view  mappings in the resource bundle with base name
+        <literal>views</literal>. (The content of this file is described in the next section.)</para>
       </section>
 
       <section id="view-jasper-reports-configuration-views">
         <title>Configuring the <literal>View</literal>s</title>
 
-        <para>Spring contains five different View implementations for
-        JasperReports four of which corresponds to one of the four output
-        formats supported by JasperReports and one that allows for the format
-        to be determined at runtime:</para>
+        <para>The Spring Framework contains five different <interfacename>View</interfacename>
+        implementations for JasperReports, four of which correspond to one of the four output
+        formats supported by JasperReports, and one that allows for the format to be determined at runtime:</para>
 
         <table id="view-jasper-reports-configuration-views-classes">
-          <title>JasperReports <literal>View</literal> Classes</title>
+          <title>JasperReports <interfacename>View</interfacename> classes</title>
 
           <tgroup cols="2">
             <colspec colname="c1" colwidth="1*" />
@@ -1444,60 +1429,47 @@ public class PDFPage extends AbstractPdfView {
             <thead>
               <row>
                 <entry>Class Name</entry>
-
                 <entry>Render Format</entry>
               </row>
             </thead>
 
             <tbody>
               <row>
-                <entry><literal>JasperReportsCsvView</literal></entry>
-
+                <entry><classname>JasperReportsCsvView</classname></entry>
                 <entry>CSV</entry>
               </row>
-
               <row>
-                <entry><literal>JasperReportsHtmlView</literal></entry>
-
+                <entry><classname>JasperReportsHtmlView</classname></entry>
                 <entry>HTML</entry>
               </row>
-
               <row>
-                <entry><literal>JasperReportsPdfView</literal></entry>
-
+                <entry><classname>JasperReportsPdfView</classname></entry>
                 <entry>PDF</entry>
               </row>
 
               <row>
-                <entry><literal>JasperReportsXlsView</literal></entry>
-
+                <entry><classname>JasperReportsXlsView</classname></entry>
                 <entry>Microsoft Excel</entry>
               </row>
-
               <row>
-                <entry><literal>JasperReportsMultiFormatView</literal></entry>
-
-                <entry>Decided at runtime (see <xref
-                linkend="view-jasper-reports-configuration-multiformat-view" />)</entry>
+                <entry><classname>JasperReportsMultiFormatView</classname></entry>
+                <entry>The view is <link linkend="view-jasper-reports-configuration-multiformat-view">decided upon at runtime</link></entry>
               </row>
             </tbody>
           </tgroup>
         </table>
 
-        <para>Mapping one of these classes to a view name and a report file is
-        simply a matter of adding the appropriate entries into the resource
-        bundle configured in the previous section as shown here:</para>
+        <para>Mapping one of these classes to a view name and a report file is a matter of
+        adding the appropriate entries into the resource bundle configured in the previous
+        section as shown here:</para>
 
-        <programlisting>simpleReport.class=org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView
-simpleReport.url=/WEB-INF/reports/DataSourceReport.jasper
-              </programlisting>
+        <programlisting><![CDATA[simpleReport.class=org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView
+simpleReport.url=/WEB-INF/reports/DataSourceReport.jasper]]></programlisting>
 
-        <para>Here you can see that the view with name,
-        <literal>simpleReport</literal>, is mapped to the
-        <literal>JasperReportsPdfView</literal> class. This will cause the
-        output of this report to be rendered in PDF format. The
-        <literal>url</literal> property of the view is set to the location of
-        the underlying report file.</para>
+        <para>Here you can see that the view with name <literal>simpleReport</literal>
+        is mapped to the <classname>JasperReportsPdfView</classname> class, causing the
+        output of this report to be rendered in PDF format. The <literal>url</literal>
+        property of the view is set to the location of the underlying report file.</para>
       </section>
 
       <section id="view-jasper-reports-configuration-report-files">
@@ -1509,33 +1481,33 @@ simpleReport.url=/WEB-INF/reports/DataSourceReport.jasper
         extension. Typically, you use the JasperReports Ant task to compile
         your <literal>.jrxml</literal> design file into a
         <literal>.jasper</literal> file before deploying it into your
-        application. With Spring you can map either of these files to your
-        report file and Spring will take care of compiling the
+        application. With the Spring Framework you can map either of these files to your
+        report file and the framework will take care of compiling the
         <literal>.jrxml</literal> file on the fly for you. You should note
-        that after a <literal>.jrxml</literal> file is compiled by Spring, the
-        compiled report is cached for the life of the application. To make
+        that after a <literal>.jrxml</literal> file is compiled by the Spring Framework,
+        the compiled report is cached for the lifetime of the application. To make
         changes to the file you will need to restart your application.</para>
       </section>
 
       <section id="view-jasper-reports-configuration-multiformat-view">
-        <title>Using <literal>JasperReportsMultiFormatView</literal></title>
+        <title>Using <classname>JasperReportsMultiFormatView</classname></title>
 
-        <para>The <literal>JasperReportsMultiFormatView</literal> allows for
+        <para>The <classname>JasperReportsMultiFormatView</classname> allows for
         report format to be specified at runtime. The actual rendering of the
         report is delegated to one of the other JasperReports view classes -
-        the <literal>JasperReportsMultiFormatView</literal> class simply adds
+        the <classname>JasperReportsMultiFormatView</classname> class simply adds
         a wrapper layer that allows for the exact implementation to be
         specified at runtime.</para>
 
-        <para>The <literal>JasperReportsMultiFormatView</literal> class
+        <para>The <classname>JasperReportsMultiFormatView</classname> class
         introduces two concepts: the format key and the discriminator key. The
-        <literal>JasperReportsMultiFormatView</literal> class uses the mapping
+        <classname>JasperReportsMultiFormatView</classname> class uses the mapping
         key to lookup the actual view implementation class and uses the format
         key to lookup up the mapping key. From a coding perspective you add an
         entry to your model with the formay key as the key and the mapping key
         as the value, for example:</para>
 
-        <programlisting>public ModelAndView handleSimpleReportMulti(HttpServletRequest request,
+        <programlisting><![CDATA[public ModelAndView handleSimpleReportMulti(HttpServletRequest request,
 HttpServletResponse response) throws Exception {
 
   String uri = request.getRequestURI();
@@ -1545,20 +1517,20 @@ HttpServletResponse response) throws Exception {
   model.put("format", format);
 
   return new ModelAndView("simpleReportMulti", model);
-}</programlisting>
+}]]></programlisting>
 
         <para>In this example, the mapping key is determined from the
         extension of the request URI and is added to the model under the
         default format key: <literal>format</literal>. If you wish to use a
         different format key then you can configure this using the
         <literal>formatKey</literal> property of the
-        <literal>JasperReportsMultiFormatView</literal> class.</para>
+        <classname>JasperReportsMultiFormatView</classname> class.</para>
 
         <para>By default the following mapping key mappings are configured in
-        <literal>JasperReportsMultiFormatView</literal>: <table
-            id="view-jasper-reports-configuration-multiformat-view-mappings">
-            <title>JasperReportsMultiFormatView Default Mapping Key
-            Mappings</title>
+        <classname>JasperReportsMultiFormatView</classname>:</para>
+        
+        <table id="view-jasper-reports-configuration-multiformat-view-mappings">
+            <title><classname>JasperReportsMultiFormatView</classname> Default Mapping Key Mappings</title>
 
             <tgroup cols="2">
               <colspec colname="c1" colwidth="1*" />
@@ -1568,7 +1540,6 @@ HttpServletResponse response) throws Exception {
               <thead>
                 <row>
                   <entry>Mapping Key</entry>
-
                   <entry>View Class</entry>
                 </row>
               </thead>
@@ -1577,38 +1548,40 @@ HttpServletResponse response) throws Exception {
                 <row>
                   <entry>csv</entry>
 
-                  <entry><literal>JasperReportsCsvView</literal></entry>
+                  <entry><classname>JasperReportsCsvView</classname></entry>
                 </row>
 
                 <row>
                   <entry>html</entry>
 
-                  <entry><literal>JasperReportsHtmlView</literal></entry>
+                  <entry><classname>JasperReportsHtmlView</classname></entry>
                 </row>
 
                 <row>
                   <entry>pdf</entry>
 
-                  <entry><literal>JasperReportsPdfView</literal></entry>
+                  <entry><classname>JasperReportsPdfView</classname></entry>
                 </row>
 
                 <row>
                   <entry>xls</entry>
 
-                  <entry><literal>JasperReportsXlsView</literal></entry>
+                  <entry><classname>JasperReportsXlsView</classname></entry>
                 </row>
               </tbody>
             </tgroup>
-          </table> So in the example above a request to URI /foo/myReport.pdf
-        would be mapped to the <literal>JasperReportsPdfView</literal> class.
-        You can override the mapping key to view class mappings using the
-        <literal>formatMappings</literal> property of
-        <literal>JasperReportsMultiFormatView</literal>.</para>
+          </table>
+          
+            <para>So in the example above a request to URI /foo/myReport.pdf
+            would be mapped to the <literal>JasperReportsPdfView</literal> class.
+            You can override the mapping key to view class mappings using the
+            <literal>formatMappings</literal> property of
+            <classname>JasperReportsMultiFormatView</classname>.</para>
       </section>
     </section>
 
     <section id="view-jasper-reports-model">
-      <title>Populating the <literal>ModelAndView</literal></title>
+      <title>Populating the <classname>ModelAndView</classname></title>
 
       <para>In order to render your report correctly in the format you have
       chosen, you must supply Spring with all of the data needed to populate
@@ -1620,36 +1593,41 @@ HttpServletResponse response) throws Exception {
 
       <para>When adding the datasource to the model you have two approaches to
       choose from. The first approach is to add an instance of
-      <literal>JRDataSource</literal> or <literal>Collection</literal> to the
+      <classname>JRDataSource</classname> or a <interfacename>Collection</interfacename> type to the
       model <interfacename>Map</interfacename> under any arbitrary key. Spring will then
       locate this object in the model and treat it as the report datasource.
-      For example, you may populate your model like this: <programlisting>private Map getModel() {
+      For example, you may populate your model like so:</para>
+      
+      <programlisting><![CDATA[private Map getModel() {
   Map model = new HashMap();
   Collection beanData = getBeanData();
   model.put("myBeanData", beanData);
   return model;
-}</programlisting></para>
+}]]></programlisting>
 
       <para>The second approach is to add the instance of
       <literal>JRDataSource</literal> or <literal>Collection</literal> under a
       specific key and then configure this key using the
       <literal>reportDataKey</literal> property of the view class. In both
       cases Spring will instances of <literal>Collection</literal> in a
-      <literal>JRBeanCollectionDataSource</literal> instance. For example:
-      <programlisting>private Map getModel() {
+      <literal>JRBeanCollectionDataSource</literal> instance. For example:</para>
+      
+      <programlisting><![CDATA[private Map getModel() {
   Map model = new HashMap();
   Collection beanData = getBeanData();
   Collection someData = getSomeData();
   model.put("myBeanData", beanData);
   model.put("someData", someData);
   return model;
-}</programlisting> Here you can see that two <literal>Collection</literal>
+}]]></programlisting>
+
+        <para>Here you can see that two <literal>Collection</literal>
       instances are being added to the model. To ensure that the correct one
-      is used, we simply modify our view configuration as appropriate:
-      <programlisting>simpleReport.class=org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView
+      is used, we simply modify our view configuration as appropriate:</para>
+      
+      <programlisting><![CDATA[simpleReport.class=org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView
 simpleReport.url=/WEB-INF/reports/DataSourceReport.jasper
-simpleReport.reportDataKey=myBeanData
-              </programlisting></para>
+simpleReport.reportDataKey=myBeanData]]></programlisting>
 
       <para>Be aware that when using the first approach, Spring will use the
       first instance of <literal>JRDataSource</literal> or
@@ -1678,8 +1656,11 @@ simpleReport.reportDataKey=myBeanData
         <para>To control which sub-report files are included in a master
         report using Spring, your report file must be configured to accept
         sub-reports from an external source. To do this you declare a
-        parameter in your report file like this: <programlisting>&lt;parameter name="ProductsSubReport" class="net.sf.jasperreports.engine.JasperReport"/&gt;</programlisting>
-        Then, you define your sub-report to use this sub-report parameter:
+        parameter in your report file like so:</para>
+        
+        <programlisting><![CDATA[<parameter name="ProductsSubReport" class="net.sf.jasperreports.engine.JasperReport"/>]]></programlisting>
+        
+        <para>Then, you define your sub-report to use this sub-report parameter:</para>
         <programlisting>&lt;subreport&gt;
     &lt;reportElement isPrintRepeatedValues="false" x="5" y="25" width="325"
         height="20" isRemoveLineWhenBlank="true" backcolor="#ffcc99"/&gt;
@@ -1689,17 +1670,23 @@ simpleReport.reportDataKey=myBeanData
     &lt;dataSourceExpression&gt;&lt;![CDATA[$P{SubReportData}]]&gt;&lt;/dataSourceExpression&gt;
     &lt;subreportExpression class="net.sf.jasperreports.engine.JasperReport"&gt;
                   &lt;![CDATA[$P{ProductsSubReport}]]&gt;&lt;/subreportExpression&gt;
-&lt;/subreport&gt;</programlisting> This defines a master report file that
+&lt;/subreport&gt;</programlisting>
+        
+        <para>This defines a master report file that
         expects the sub-report to be passed in as an instance of
         <literal>net.sf.jasperreports.engine.JasperReports</literal> under the
         parameter <literal>ProductsSubReport</literal>. When configuring your
         Jasper view class, you can instruct Spring to load a report file and
         pass into the JasperReports engine as a sub-report using the
-        <literal>subReportUrls</literal> property: <programlisting>&lt;property name="subReportUrls"&gt;
-    &lt;map&gt;
-        &lt;entry key="ProductsSubReport" value="/WEB-INF/reports/subReportChild.jrxml"/&gt;
-    &lt;/map&gt;
-&lt;/property&gt;</programlisting> Here, the key of the <interfacename>Map</interfacename>
+        <literal>subReportUrls</literal> property:</para>
+        
+        <programlisting><![CDATA[<property name="subReportUrls">
+    <map>
+        <entry key="ProductsSubReport" value="/WEB-INF/reports/subReportChild.jrxml"/>
+    </map>
+</property>]]></programlisting>
+
+        <para>Here, the key of the <interfacename>Map</interfacename>
         corresponds to the name of the sub-report parameter in th report
         design file, and the entry is the URL of the report file. Spring will
         load this report file, compiling it if necessary, and will pass into
