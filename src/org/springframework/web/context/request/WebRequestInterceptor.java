@@ -21,7 +21,7 @@ import org.springframework.ui.ModelMap;
 /**
  * Interface for general web request interception. Allows for being applied
  * to Servlet request as well as Portlet request environments, through
- * building on the WebRequest abstraction.
+ * building on the {@link WebRequest} abstraction.
  *
  * <p>This interface assumes MVC-style request processing: A handler gets executed,
  * exposes a set of model objects, then a view gets rendered based on that model.
@@ -32,14 +32,14 @@ import org.springframework.ui.ModelMap;
  * generic request interceptors as minimal as feasible.
  *
  * <p><b>NOTE:</b> While this interceptor is applied to the entire request processing
- * in a Servlet environment, it is only applied to the <b>render</b> phase in a
- * Portlet environment, which is dealing with preparing and rendering a Portlet view.
- * The Portlet action phase <i>cannot</i> be intercepted with this mechanism;
- * use the Portlet-specific HandlerInterceptor mechanism for such needs.
+ * in a Servlet environment, it is by default only applied to the <i>render</i> phase
+ * in a Portlet environment, preparing and rendering a Portlet view. To apply
+ * WebRequestInterceptors to the <i>action</i> phase as well, set the HandlerMapping's
+ * "applyWebRequestInterceptorsToRenderPhaseOnly" flag to "false". Alternatively,
+ * consider using the Portlet-specific HandlerInterceptor mechanism for such needs.
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see WebRequest
  * @see ServletWebRequest
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.servlet.handler.AbstractHandlerMapping#setInterceptors
@@ -47,6 +47,7 @@ import org.springframework.ui.ModelMap;
  * @see org.springframework.web.portlet.context.PortletWebRequest
  * @see org.springframework.web.portlet.DispatcherPortlet
  * @see org.springframework.web.portlet.handler.AbstractHandlerMapping#setInterceptors
+ * @see org.springframework.web.portlet.handler.AbstractHandlerMapping#setApplyWebRequestInterceptorsToRenderPhaseOnly
  * @see org.springframework.web.portlet.HandlerInterceptor
  */
 public interface WebRequestInterceptor {
