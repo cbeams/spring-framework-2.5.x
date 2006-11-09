@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper for resolving synthetic {@link Method#isBridge bridge Methods} to the
@@ -44,12 +44,11 @@ import org.springframework.util.ClassUtils;
  * <p>See <a href="http://java.sun.com/docs/books/jls/third_edition/html/expressions.html#15.12.4.5">
  * The Java Language Specification</a> for more details on the use of bridge methods.
  *
- * <p>Only usable on Java 5. Use an appropriate JdkVersion check before
- * calling this class, if a fallback for JDK 1.3/1.4 is desirable.
+ * <p>Only usable on Java 5. Use an appropriate {@link JdkVersion} check
+ * before calling this class, if a fallback for JDK 1.3/1.4 is desirable.
  *
  * @author Rob Harrop
  * @since 2.0
- * @see org.springframework.core.annotation.AnnotationUtils
  * @see JdkVersion
  */
 public abstract class BridgeMethodResolver {
@@ -87,7 +86,7 @@ public abstract class BridgeMethodResolver {
 			result = searchCandidates(candidateMethods, bridgeMethod);
 		}
 
-		if(result == null) {
+		if (result == null) {
 			throw new IllegalStateException(
 					"Unable to locate bridged method for bridge method '" + bridgeMethod + "'");
 		}
@@ -123,7 +122,7 @@ public abstract class BridgeMethodResolver {
 	 * supplied candidate {@link Method}.
 	 */
 	static boolean isBridgeMethodFor(Method bridgeMethod, Method candidateMethod, Map typeVariableMap) {
-		if(isResolvedTypeMatch(candidateMethod, bridgeMethod, typeVariableMap)) {
+		if (isResolvedTypeMatch(candidateMethod, bridgeMethod, typeVariableMap)) {
 			return true;
 		}
 		Method method = findGenericDeclaration(bridgeMethod);
@@ -270,12 +269,11 @@ public abstract class BridgeMethodResolver {
 				typeVariableMap.put(typeVariables[i].getName(), (Class) actualTypeArgument);
 			}
 			else if (actualTypeArgument instanceof TypeVariable) {
-				// we have a type that is parameterized at instantiation time
-				// the nearest match on the bridge method will be the bounded type
+				// We have a type that is parameterized at instantiation time
+				// the nearest match on the bridge method will be the bounded type.
 				TypeVariable typeVariableArgument = (TypeVariable) actualTypeArgument;
-				Type[] bounds = typeVariableArgument.getBounds();
 				Class boundClass = extractClassTypeVariable(typeVariableArgument);
-				if(boundClass != null) {
+				if (boundClass != null) {
 					typeVariableMap.put(typeVariables[i].getName(), boundClass);
 				}
 			}
@@ -300,7 +298,7 @@ public abstract class BridgeMethodResolver {
 				result =  extractClassTypeVariable((TypeVariable)bound);
 			}
 		}
-		return (result instanceof Class) ? (Class) result : null;
+		return (result instanceof Class ? (Class) result : null);
 	}
 
 }
