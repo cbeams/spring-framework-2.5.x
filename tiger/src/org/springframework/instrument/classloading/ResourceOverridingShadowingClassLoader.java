@@ -34,25 +34,26 @@ import java.util.Map;
 public class ResourceOverridingShadowingClassLoader extends ShadowingClassLoader {
 	
 	private static final Enumeration<URL> EMPTY_URL_ENUMERATION = new Enumeration<URL>() {
-
 		public boolean hasMoreElements() {
 			return false;
 		}
-
 		public URL nextElement() {
-			throw new UnsupportedOperationException("Should not be called. I am empty");
+			throw new UnsupportedOperationException("Should not be called. I am empty.");
 		}
 	};
 	
+
 	/**
 	 * Key is asked for value: value is actual value
 	 */
 	private Map<String, String> overrides = new HashMap<String, String>(); 
 	
+
 	public ResourceOverridingShadowingClassLoader(ClassLoader loader) {
 		super(loader);
 	}
 	
+
 	/**
 	 * Return the resource (if any) at the new path
 	 * on an attempt to locate a resource at the old path
@@ -60,7 +61,7 @@ public class ResourceOverridingShadowingClassLoader extends ShadowingClassLoader
 	 * @param newPath path looked up
 	 */
 	public void override(String oldPath, String newPath) {
-		overrides.put(oldPath, newPath);
+		this.overrides.put(oldPath, newPath);
 	}
 	
 	/**
@@ -69,21 +70,19 @@ public class ResourceOverridingShadowingClassLoader extends ShadowingClassLoader
 	 * in the parent class loader
 	 */
 	public void suppress(String oldPath) {
-		overrides.put(oldPath, null);
+		this.overrides.put(oldPath, null);
 	}
 	
 	public void copyOverrides(ResourceOverridingShadowingClassLoader other) {
-		overrides.putAll(other.overrides);
+		this.overrides.putAll(other.overrides);
 	}
 
 
 	@Override
 	public URL getResource(String requestedPath) {
-		if (overrides.containsKey(requestedPath)) {
-			String overriddenPath = overrides.get(requestedPath);
-			return overriddenPath == null ? 
-					null : 
-					super.getResource(overriddenPath);
+		if (this.overrides.containsKey(requestedPath)) {
+			String overriddenPath = this.overrides.get(requestedPath);
+			return (overriddenPath != null ? super.getResource(overriddenPath) : null);
 		}
 		else {
 			return super.getResource(requestedPath);
@@ -92,11 +91,9 @@ public class ResourceOverridingShadowingClassLoader extends ShadowingClassLoader
 
 	@Override
 	public InputStream getResourceAsStream(String requestedPath) {
-		if (overrides.containsKey(requestedPath)) {
-			String overriddenPath = overrides.get(requestedPath);
-			return overriddenPath == null ? 
-					null : 
-					super.getResourceAsStream(overriddenPath);
+		if (this.overrides.containsKey(requestedPath)) {
+			String overriddenPath = this.overrides.get(requestedPath);
+			return (overriddenPath != null ? super.getResourceAsStream(overriddenPath) : null);
 		}
 		else {
 			return super.getResourceAsStream(requestedPath);
@@ -105,11 +102,10 @@ public class ResourceOverridingShadowingClassLoader extends ShadowingClassLoader
 	
 	@Override
 	public Enumeration<URL> getResources(String requestedPath) throws IOException {
-		if (overrides.containsKey(requestedPath)) {
-			String overriddenLocation = overrides.get(requestedPath);
-			return overriddenLocation == null ? 
-					EMPTY_URL_ENUMERATION :
-					super.getResources(overriddenLocation);
+		if (this.overrides.containsKey(requestedPath)) {
+			String overriddenLocation = this.overrides.get(requestedPath);
+			return (overriddenLocation != null ?
+					super.getResources(overriddenLocation) : EMPTY_URL_ENUMERATION);
 		}
 		else {
 			return super.getResources(requestedPath);

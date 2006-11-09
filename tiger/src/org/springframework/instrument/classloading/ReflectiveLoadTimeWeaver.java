@@ -35,13 +35,17 @@ import org.springframework.util.ReflectionUtils;
  * (optional; ReflectiveLoadTimeWeaver will fall back to a
  * SimpleThrowawayClassLoader if that method isn't available)
  * </ul>
- * 
+ *
  * <p>Please note that the above methods <i>must</i> reside in a class
  * that is publicly accessible.
  *
- * <p>Useful when the underlying class loader implementation is loaded in a
- * different class loader (such as the application server's class loader
- * which is not visible to the web application).
+ * <p>The reflective nature of this LoadTimeWeaver is particularly useful
+ * when the underlying class loader implementation is loaded in a different
+ * class loader (such as the application server's class loader which is
+ * not visible to the web application).
+ *
+ * <p>This is the LoadTimeWeaver to use in combination with Spring's
+ * {@link org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader}.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -49,6 +53,7 @@ import org.springframework.util.ReflectionUtils;
  * @see #addTransformer(java.lang.instrument.ClassFileTransformer)
  * @see #getThrowawayClassLoader()
  * @see SimpleThrowawayClassLoader
+ * @see org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader
  */
 public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 

@@ -21,8 +21,7 @@ import java.lang.instrument.ClassFileTransformer;
 /**
  * Defines the contract for adding one or more
  * {@link ClassFileTransformer ClassFileTransformers} to a
- * {@link ClassLoader class loader} - typically the current context class
- * loader.
+ * {@link ClassLoader} - typically the current context class loader.
  * 
  * <p>Implementations may of course provide their own class loader as well.
  *
@@ -33,20 +32,18 @@ import java.lang.instrument.ClassFileTransformer;
 public interface LoadTimeWeaver {
 
 	/**
-	 * Add a class file transformer to be applied by this load time weaver.
+	 * Add a class file transformer to be applied by this load-time weaver.
 	 * @param transformer the class file transformer to add
 	 */
 	void addTransformer(ClassFileTransformer transformer);
 	
 	/**
-	 * Return a class loader that supports instrumentation through AspectJ-style
-	 * load time weaving based on user-defined
-	 * {@link ClassFileTransformer ClassFileTransformers}.
+	 * Return a class loader that supports instrumentation through AspectJ-style load-time
+	 * weaving based on user-defined {@link ClassFileTransformer ClassFileTransformers}.
 	 * <p>May be the current class loader, or a class loader created by this
 	 * {@link LoadTimeWeaver} instance.
-	 * @return a class loader that supports instrumentation through AspectJ-style
-	 * load time weaving based on user-defined
-	 * {@link ClassFileTransformer ClassFileTransformers}
+	 * @return a class loader that supports instrumentation through AspectJ-style load-time
+	 * weaving based on user-defined {@link ClassFileTransformer ClassFileTransformers}
 	 */
 	ClassLoader getInstrumentableClassLoader();
 	
