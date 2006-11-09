@@ -184,7 +184,7 @@ public class DefaultPersistenceUnitManager implements PersistenceUnitManager, Re
 	/**
 	 * Specify the Spring LoadTimeWeaver to use for class instrumentation according
 	 * to the JPA class transformer contract.
-	 * <p>It is a not required to specify a LoadTimeWeaver: Most providers will be
+	 * <p>It is not required to specify a LoadTimeWeaver: Most providers will be
 	 * able to provide a subset of their functionality without class instrumentation
 	 * as well, or operate with their VM agent specified on JVM startup.
 	 * <p>In terms of Spring-provided weaving options, the most important ones are
