@@ -187,6 +187,11 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 		PersistenceProvider provider = getPersistenceProvider();
 		if (provider == null) {
 			String providerClassName = this.persistenceUnitInfo.getPersistenceProviderClassName();
+			if (providerClassName == null) {
+				throw new IllegalArgumentException(
+						"No PersistenceProvider specified in EntityManagerFactory configuration, " +
+						"and chosen PersistenceUnitInfo does not specify a provider class name either");
+			}
 			Class providerClass = ClassUtils.resolveClassName(providerClassName, this.beanClassLoader);
 			provider = (PersistenceProvider) BeanUtils.instantiateClass(providerClass);
 		}
