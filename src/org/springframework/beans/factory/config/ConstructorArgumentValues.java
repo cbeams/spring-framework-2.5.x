@@ -30,10 +30,10 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Holder for constructor argument values, as part of a bean definition.
+ * Holder for constructor argument values, typically as part of a bean definition.
  *
- * <p>Supports values for a specific index in the constructor argument
- * list and for generic matches by type.
+ * <p>Supports values for a specific index in the constructor argument list
+ * as well as for generic argument matches by type.
  *
  * @author Juergen Hoeller
  * @since 09.11.2003
@@ -47,31 +47,37 @@ public class ConstructorArgumentValues {
 
 
 	/**
-	 * Create new ConstructorArgumentValues.
+	 * Create a new empty ConstructorArgumentValues object.
 	 */
 	public ConstructorArgumentValues() {
 	}
 
 	/**
 	 * Deep copy constructor.
+	 * @param original the ConstructorArgumentValues to copy
 	 */
-	public ConstructorArgumentValues(ConstructorArgumentValues other) {
-		addArgumentValues(other);
+	public ConstructorArgumentValues(ConstructorArgumentValues original) {
+		addArgumentValues(original);
 	}
 
 	/**
-	 * Copy all given argument values into this object.
+	 * Copy all given argument values into this object, using separate holder
+	 * instances to keep the values independent from the original object.
 	 * <p>Note: Identical ValueHolder instances will only be registered once,
 	 * to allow for merging and re-merging of argument value definitions. Distinct
 	 * ValueHolder instances carrying the same content are of course allowed.
 	 */
 	public void addArgumentValues(ConstructorArgumentValues other) {
 		if (other != null) {
-			this.indexedArgumentValues.putAll(other.indexedArgumentValues);
+			for (Iterator it = other.indexedArgumentValues.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				ValueHolder valueHolder = (ValueHolder) entry.getValue();
+				this.indexedArgumentValues.put(entry.getKey(), valueHolder.copy());
+			}
 			for (Iterator it = other.genericArgumentValues.iterator(); it.hasNext();) {
 				ValueHolder valueHolder = (ValueHolder) it.next();
 				if (!this.genericArgumentValues.contains(valueHolder)) {
-					this.genericArgumentValues.add(valueHolder);
+					this.genericArgumentValues.add(valueHolder.copy());
 				}
 			}
 		}
@@ -434,6 +440,16 @@ public class ConstructorArgumentValues {
 		 */
 		private int contentHashCode() {
 			return ObjectUtils.nullSafeHashCode(this.value) * 29 + ObjectUtils.nullSafeHashCode(this.type);
+		}
+
+		/**
+		 * Create a copy of this ValueHolder: that is, an independent
+		 * ValueHolder instance with the same contents.
+		 */
+		public ValueHolder copy() {
+			ValueHolder copy = new ValueHolder(this.value, this.type);
+			copy.setSource(this.source);
+			return copy;
 		}
 	}
 

@@ -112,4 +112,23 @@ public class BeanDefinitionTests extends TestCase {
 		assertTrue(holder.hashCode() == otherHolder.hashCode());
 	}
 
+	public void testBeanDefinitionMerging() {
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.getConstructorArgumentValues().addGenericArgumentValue("test");
+		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, new Integer(5));
+		bd.getPropertyValues().addPropertyValue("name", "myName");
+		bd.getPropertyValues().addPropertyValue("age", "99");
+
+		ChildBeanDefinition childBd = new ChildBeanDefinition("bd");
+
+		RootBeanDefinition mergedBd = new RootBeanDefinition(bd);
+		mergedBd.overrideFrom(childBd);
+		assertEquals(2, mergedBd.getConstructorArgumentValues().getArgumentCount());
+		assertEquals(2, mergedBd.getPropertyValues().size());
+		assertEquals(bd, mergedBd);
+
+		mergedBd.getConstructorArgumentValues().getArgumentValue(1, null).setValue(new Integer(9));
+		assertEquals(new Integer(5), bd.getConstructorArgumentValues().getArgumentValue(1, null).getValue());
+	}
+
 }
