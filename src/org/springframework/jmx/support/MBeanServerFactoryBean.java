@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,22 +28,23 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.MBeanServerNotFoundException;
 
 /**
- * FactoryBean that obtains an <code>MBeanServer</code> instance
- * through the standard JMX 1.2 <code>MBeanServerFactory</code> API
- * (which is available on JDK 1.5 or as part of a JMX 1.2 provider).
+ * FactoryBean that obtains an {@link javax.management.MBeanServer} reference
+ * through the standard JMX 1.2 {@link javax.management.MBeanServerFactory}
+ * API (which is available on JDK 1.5 or as part of a JMX 1.2 provider).
  * Exposes the <code>MBeanServer</code> for bean references.
  *
  * <p>By default, <code>MBeanServerFactoryBean</code> will always create
  * a new <code>MBeanServer</code> even if one is already running. To have
  * the <code>MBeanServerFactoryBean</code> attempt to locate a running
  * <code>MBeanServer</code> first, set the value of the
- * <code>locateExistingServerIfPossible</code> property to <code>true</code>.
+ * "locateExistingServerIfPossible" property to "true".
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
  * @see #setLocateExistingServerIfPossible
  * @see #locateMBeanServer
+ * @see javax.management.MBeanServer
  * @see javax.management.MBeanServerFactory#findMBeanServer
  * @see javax.management.MBeanServerFactory#createMBeanServer
  * @see javax.management.MBeanServerFactory#newMBeanServer
