@@ -3,8 +3,8 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.1 (4.11.2006)
-------------------------------------
+Changes in version 2.0.1 (13.11.2006)
+-------------------------------------
 
 General
 * included classes in the "test.annotation" and "test.jpa" packages (tiger mock directory) in the Spring API javadoc
@@ -17,7 +17,8 @@ Package org.springframework.beans
 * introduced PatternEditor for "java.util.regex.Pattern", automatically registered when running on JDK 1.4 or higher
 * Number objects (as property or argument values) are automatically coerced into the target Number type (if necessary)
 * added "equals" and "hashCode" implementations to BeanDefinitionHolder
-* ConstructorArgumentValues enforces uniqueness of generic ValueHolder instances, to allow for proper (re-)merging
+* PropertyValue's copy constructor copies source object as well
+* ConstructorArgumentValues copies ValueHolder content when merging, and enforces uniqueness of merged ValueHolders
 * reworked BeanComponentDefinition into subclass of BeanDefinitionHolder, exposing aliases on the bean definition
 * re-added BeanReferenceFactoryBean, to allow for substituting the target bean name with a placeholder
 * UnsatisfiedDependencyException message for multiple matches mentions the names of all matching beans
@@ -34,12 +35,18 @@ Package org.springframework.beans
 * introduced CompositeComponentDefinition for holding nested components (applied e.g. for "aop:config" element)
 * introduced "registerComponent" method on ParserContext, for transparent registration of top-level or nested components
 
+Package org.springframework.cache
+* reworked EhCacheFactoryBean to be based on EHCache 1.2's Ehcache interface rather than the concrete Cache class
+* added "blocking" flag to EhCacheFactoryBean, for decorating the cache with EHCache 1.2's BlockingCache
+* added "cacheEntryFactory" flag to EhCacheFactoryBean, for decorating with EHCache 1.2's (Updating)SelfPopulatingCache
+
 Package org.springframework.context
 * added serialVersionUID to ApplicationEvent, for serialization compatibility with Spring 1.2
 * LocaleContextHolder supports standard ThreadLocal as well as InheritableThreadLocal
 * EventPublicationInterceptor caches the application event constructor
 
 Package org.springframework.core
+* fixed BridgeMethodResolver to always identify an appropriate bridge method (avoid IllegalStateException)
 * introduced TaskRejectedException, thrown from a TaskExecutor if it does not accept a given task
 
 Package org.springframework.instrument
@@ -47,6 +54,7 @@ Package org.springframework.instrument
 
 Package org.springframework.jdbc
 * introduced AbstractRoutingDataSource and IsolationLevelDataSourceRouter
+* JdbcTemplate logs all warnings in case of "ignoreWarnings"=true, not just the first warning in the chain
 * added "setQueryTimeout" method to JdbcTemplate and RdbmsOperation, for specifying a timeout outside of a transaction
 
 Package org.springframework.jms
@@ -68,6 +76,7 @@ Package org.springframework.mock
 * AbstractSingleSpringContextTests provides empty default implementation of "getConfigLocations" (not abstract anymore)
 
 Package org.springframework.orm
+* reworked Hibernate session synchronization to properly work with WebSphereExtendedJTATransactionLookup on WAS 6.0/6.1
 * fixed Hibernate3 LocalSessionFactoryBean's "schemaUpdate" behavior to not run into an IllegalStateException
 * LocalContainerEntityManagerFactoryBean detects jar file URL in WebLogic jar entry URLs correctly
 * included OpenJPA support classes (OpenJpaDialect, OpenJpaVendorAdapter), tested against OpenJPA 0.9.6
@@ -89,7 +98,8 @@ Package org.springframework.transaction
 * active transaction synchronization gets suspended when going from SUPPORTS/NOT_SUPPORTED into REQUIRED/REQUIRES_NEW
 * JtaTransactionManager's "doRegisterAfterCompletionWithJtaTransaction" avoids NPE if no current JTA transaction active
 * TransactionAttributeEditor does not accept transaction attributes with invalid whitespace anymore
-* AnnotationTransactionAspect supports protected methods that carry Spring's @Transactional annotation
+* fixed AnnotationTransactionAspect to not throw a NoTransactionException in case of transaction begin failure
+* AnnotationTransactionAspect supports protected and private methods that carry Spring's @Transactional annotation
 
 Package org.springframework.ui
 * deprecated FreeMarkerConfigurationFactory's "templateLoaders" property in favor of "pre/postTemplateLoaders"
@@ -99,6 +109,7 @@ Package org.springframework.util
 * added "containsWhitespace" method to StringUtils
 
 Package org.springframework.web
+* ExpressionEvaluationUtils catches any linkage error for the JSP 2.0 API, always falling back to the Jakarta JSTL
 * WebDataBinder explicitly suppresses field marker prefix values in case of "ignoreUnknownFields" switched off
 * Servlet/PortletRequestAttributes allow for accessing the session even after the request has been completed
 * RequestContextHolder supports standard ThreadLocal as well as InheritableThreadLocal
@@ -110,13 +121,15 @@ Package org.springframework.web
 * added public "getUrlMap()" method to SimpleUrlHandlerMapping, to allow for adding or overriding individual entries
 * added overloaded "suppressValidation" version with command object argument to BaseCommandController
 * added overloaded "isFormChangeRequest" version with command object argument to SimpleFormController
-* JSP MessageTag detects a single expression argument that resolves to an array and processes it as arguments array
+* "spring:message" tag detects single expression argument that resolves to an array and processes it as arguments array
+* "form:errors" tag can now be used in a nested JSP outside the scope of a "form:form" tag
 * FreeMarkerView exposes all standard FreeMarker hash models now (including session and request parameters)
 * FreeMarkerView uses the ObjectWrapper as specified in the FreeMarker configuration, rather than always the default
 * FreeMarkerConfigurer always registers ClassTemplateLoader for its own package (rather than the package of a subclass)
 * AbstractJasperReportsSingleFormatView only sets parameter Map on JRExporter instance in case of actual parameters
 * added "boolean useWriter()" method to AbstractXsltView, allowing to prefer Writer access over OutputStream access
 * DispatcherPortlet exposes thread-bound request attributes for render requests as well (not just action requests)
+* DispatcherPortlet restores LocaleContextHolder/RequestContextHolder state (e.g. from surrounding DispatcherServlet)
 
 
 Changes in version 2.0 final (3.10.2006)
