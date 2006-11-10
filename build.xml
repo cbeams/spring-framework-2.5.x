@@ -204,7 +204,6 @@
 	  	<classpath>
 	  		<path refid="all-libs"/>
   			<path location="${target.classes.dir}"/>
-				<path location="${target.classes.dir}"/>
 	  	</classpath>
 	  </iajc>
 
