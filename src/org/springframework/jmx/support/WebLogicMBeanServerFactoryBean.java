@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,23 +26,28 @@ import org.springframework.jmx.MBeanServerNotFoundException;
 import org.springframework.util.ClassUtils;
 
 /**
- * FactoryBean that obtains a specified WebLogic <code>MBeanServer</code> instance
- * through WebLogic's proprietary <code>Helper</code> / <code>MBeanHome</code>
- * API, which is available on WebLogic 6.1 and higher.
+ * FactoryBean that obtains a specified WebLogic {@link javax.management.MBeanServer}
+ * reference through WebLogic's proprietary <code>Helper</code> /
+ * <code>MBeanHome</code> API, which is available on WebLogic 6.1 and higher.
  *
  * <p>Exposes the <code>MBeanServer</code> for bean references.
- * This FactoryBean is a direct alternative to <code>MBeanServerFactoryBean</code>,
+ * This FactoryBean is a direct alternative to {@link MBeanServerFactoryBean},
  * which uses standard JMX 1.2 API to access the platform's MBeanServer.
  *
- * <p>Note: There is also an <code>WebLogicJndiMBeanServerFactoryBean</code> for
+ * <p>Note: There is also a {@link WebLogicJndiMBeanServerFactoryBean} for
  * accessing the WebLogic <code>MBeanServer</code> instance through a WebLogic
  * <code>MBeanHome</code> obtained via a JNDI lookup, typical a local one.
+ *
+ * <p><b>NOTE: This class is only intended for use with WebLogic 8.1.</b>
+ * On WebLogic 9.x, simply obtain the MBeanServer directly from JNDI
+ * through a {@link org.springframework.jndi.JndiObjectFactoryBean}.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
  * @see weblogic.management.Helper#getMBeanHome(String, String, String, String)
  * @see weblogic.management.MBeanHome#getMBeanServer()
+ * @see javax.management.MBeanServer
  * @see MBeanServerFactoryBean
  * @see WebLogicJndiMBeanServerFactoryBean
  */
