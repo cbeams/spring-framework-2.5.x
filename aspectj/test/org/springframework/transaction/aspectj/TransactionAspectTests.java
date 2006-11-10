@@ -38,6 +38,8 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 	private TransactionalAnnotationOnlyOnClassWithNoInterface annotationOnlyOnClassWithNoInterface;
 	
 	private ClassWithProtectedAnnotatedMember beanWithAnnotatedProtectedMethod;
+
+	private ClassWithPrivateAnnotatedMember beanWithAnnotatedPrivateMethod;
 	
 	private MethodAnnotationOnClassWithNoInterface methodAnnotationOnly = new MethodAnnotationOnClassWithNoInterface();
 
@@ -49,6 +51,10 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 	
 	public void setClassWithAnnotatedProtectedMethod(ClassWithProtectedAnnotatedMember aBean) {
 		this.beanWithAnnotatedProtectedMethod = aBean;
+	}
+
+	public void setClassWithAnnotatedPrivateMethod(ClassWithPrivateAnnotatedMember aBean) {
+		this.beanWithAnnotatedPrivateMethod = aBean;
 	}
 
 	public TransactionAspectSupport getTransactionAspect() {
@@ -77,6 +83,13 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 		txManager.clear();
 		assertEquals(0, txManager.begun);
 		beanWithAnnotatedProtectedMethod.doInTransaction();
+		assertEquals(1, txManager.commits);		
+	}
+
+	public void testCommitOnAnnotatedPrivateMethod() throws Throwable {
+		txManager.clear();
+		assertEquals(0, txManager.begun);
+		beanWithAnnotatedPrivateMethod.doSomething();
 		assertEquals(1, txManager.commits);		
 	}
 

@@ -33,8 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
  * semantics for the execution of any <b>public</b> operation in the class.</p>
  * <p>A @Transactional annotation on a method within the class overrides the
  * default transaction semantics given by the class annotation (if present). 
- * Methods with public, protected, and default visibility may all be annotated.
- * Annotating protected and default visibility methods directly is the only way
+ * Any method may be annotated (regardless of visibility).
+ * Annotating non-public methods directly is the only way
  * to get transaction demarcation for the execution of such operations.</p> 
  *
  * @author Rod Johnson
@@ -58,11 +58,11 @@ public aspect AnnotationTransactionAspect extends AbstractTransactionAspect {
 		execution(public * ((@Transactional *)+).*(..)) && @this(Transactional);
 	
 	/**
-	 * Matches the execution of any non-private method with the 
+	 * Matches the execution of any method with the 
 	 * Transactional annotation.
 	 */
-	private pointcut executionOfTransactionalNonPrivateMethod() :
-		execution(!private * *(..)) && @annotation(Transactional);
+	private pointcut executionOfTransactionalMethod() :
+		execution(* *(..)) && @annotation(Transactional);
 	
 	/**
 	 * Definition of pointcut from super aspect - matched join points
@@ -70,16 +70,7 @@ public aspect AnnotationTransactionAspect extends AbstractTransactionAspect {
 	 */	
 	protected pointcut transactionalMethodExecution(Object txObject) :
 		(executionOfAnyPublicMethodInAtTransactionalType()
-		 || executionOfTransactionalNonPrivateMethod() )
+		 || executionOfTransactionalMethod() )
 		 && this(txObject);
 
-	/**
-	 * Annotating private methods with @Transactional has no effect...
-	 */
-	declare warning 
-	    // note, we should be able to say the following in one execution pcd, but
-	    // aj doesn't like it...
-		: execution(@Transactional * *(..)) &&
-		  execution(private * *(..))
-		: "@Transactional annotation on private method will be ignored";
 }

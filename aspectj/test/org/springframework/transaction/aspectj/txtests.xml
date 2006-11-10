@@ -13,4 +13,6 @@
 
     <bean class="org.springframework.transaction.aspectj.ClassWithProtectedAnnotatedMember"/>
 
+    <bean class="org.springframework.transaction.aspectj.ClassWithPrivateAnnotatedMember"/>
+
 </beans>

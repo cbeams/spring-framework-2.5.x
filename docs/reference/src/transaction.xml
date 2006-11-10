@@ -1445,12 +1445,11 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager (txManager); ]]></p
 	        <para>The <interfacename>@Transactional</interfacename> annotation on a class specifies
 	        the default transaction semantics for the execution of any <emphasis>public</emphasis>
 	        method in the class.</para>
-	        <para>The <interfacename>@Transactional</interfacename> on a method within the class
+	        <para>The <interfacename>@Transactional</interfacename> annotation on a method within the class
 	        overrides the default transaction semantics given by the class annotation (if present). 
-	        Methods with <literal>public</literal>, <literal>protected</literal>, and default
-	        visibility may all be annotated. Annotating <literal>protected</literal> and default
-	        visibility methods directly is the only way to get transaction demarcation for the
-	        execution of such method.</para> 
+	        Any method may be annotated, regardless of visibility.
+	        Annotating non-public methods directly is the only way to get 
+	        transaction demarcation for the execution of such method.</para> 
            
             <para>To weave your applications with the <classname>AnnotationTransactionAspect</classname>
             you must either build your application with AspectJ (see the
