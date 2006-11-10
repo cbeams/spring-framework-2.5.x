@@ -66,19 +66,8 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 	 * (e.g. before and after advice) if the aspect involves more than a
 	 * single method (as will be the case for around advice).
 	 */
-	private static final ThreadLocal currentTransactionInfo = new ThreadLocal();
+	private static final ThreadLocal transactionInfoHolder = new ThreadLocal();
 
-
-	/**
-	 * Return the transaction status of the current method invocation.
-	 * Mainly intended for code that wants to set the current transaction
-	 * rollback-only but not throw an application exception.
-	 * @throws NoTransactionException if the transaction info cannot be found,
-	 * because the method was invoked outside an AOP invocation context
-	 */
-	public static TransactionStatus currentTransactionStatus() throws NoTransactionException {
-		return currentTransactionInfo().transactionStatus;
-	}
 
 	/**
 	 * Subclasses can use this to return the current TransactionInfo.
@@ -92,18 +81,27 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 	 * <p>To find out about specific transaction characteristics, consider using
 	 * TransactionSynchronizationManager's <code>isSynchronizationActive()</code>
 	 * and/or <code>isActualTransactionActive()</code> methods.
-	 * @return TransactionInfo bound to this thread
-	 * @throws NoTransactionException if no transaction has been created by an aspect
+	 * @return TransactionInfo bound to this thread, or <code>null</code> if none
 	 * @see TransactionInfo#hasTransaction()
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isSynchronizationActive()
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isActualTransactionActive()
 	 */
 	protected static TransactionInfo currentTransactionInfo() throws NoTransactionException {
-		TransactionInfo info = (TransactionInfo) currentTransactionInfo.get();
+		return (TransactionInfo) transactionInfoHolder.get();
+	}
+	/**
+	 * Return the transaction status of the current method invocation.
+	 * Mainly intended for code that wants to set the current transaction
+	 * rollback-only but not throw an application exception.
+	 * @throws NoTransactionException if the transaction info cannot be found,
+	 * because the method was invoked outside an AOP invocation context
+	 */
+	public static TransactionStatus currentTransactionStatus() throws NoTransactionException {
+		TransactionInfo info = currentTransactionInfo();
 		if (info == null) {
 			throw new NoTransactionException("No transaction aspect-managed TransactionStatus in scope");
 		}
-		return info;
+		return currentTransactionInfo().transactionStatus;
 	}
 
 
@@ -413,16 +411,16 @@ public abstract class TransactionAspectSupport implements InitializingBean {
 		}
 
 		private void bindToThread() {
-			// Expose current TransactionStatus, preserving any existing transactionStatus for
-			// restoration after this transaction is complete.
-			this.oldTransactionInfo = (TransactionInfo) currentTransactionInfo.get();
-			currentTransactionInfo.set(this);
+			// Expose current TransactionStatus, preserving any existing TransactionStatus
+			// for restoration after this transaction is complete.
+			this.oldTransactionInfo = (TransactionInfo) transactionInfoHolder.get();
+			transactionInfoHolder.set(this);
 		}
 
 		private void restoreThreadLocalStatus() {
 			// Use stack to restore old transaction TransactionInfo.
-			// Will be <code>null</code> if none was set.
-			currentTransactionInfo.set(this.oldTransactionInfo);
+			// Will be null if none was set.
+			transactionInfoHolder.set(this.oldTransactionInfo);
 		}
 	}
 
