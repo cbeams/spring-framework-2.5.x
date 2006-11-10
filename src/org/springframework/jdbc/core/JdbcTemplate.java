@@ -1089,8 +1089,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		if (warning != null) {
 			if (isIgnoreWarnings()) {
 				if (logger.isWarnEnabled()) {
-					logger.warn("SQLWarning ignored: SQL state '" + warning.getSQLState() + "', error code '" +
-							warning.getErrorCode() + "', message [" + warning.getMessage() + "]");
+					SQLWarning warningToLog = warning;
+					while (warningToLog != null) {
+						logger.warn("SQLWarning ignored: SQL state '" + warningToLog.getSQLState() + "', error code '" +
+								warningToLog.getErrorCode() + "', message [" + warningToLog.getMessage() + "]");
+						warningToLog = warningToLog.getNextWarning();
+					}
 				}
 			}
 			else {
