@@ -41,8 +41,13 @@ import org.springframework.util.ClassUtils;
  * potentially a remote one.
  *
  * <p><b>NOTE: This class is only intended for use with WebLogic 8.1.</b>
- * On WebLogic 9.x, simply obtain the MBeanServer directly from JNDI
- * through a {@link org.springframework.jndi.JndiObjectFactoryBean}.
+ * On WebLogic 9.x, simply obtain the MBeanServer directly from the JNDI location
+ * "java:comp/env/jmx/runtime", for example through the following configuration:
+ *
+ * <pre>
+ * &lt;bean class="org.springframework.jndi.JndiObjectFactoryBean"&gt;
+ *   &lt;property name="jndiName" value="java:comp/env/jmx/runtime"/&gt;
+ * &lt;/bean&gt;</pre>
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
