@@ -21,9 +21,9 @@ import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,23 +32,59 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
 /**
+ * ClassLoader decorator that shadows an enclosing ClassLoader,
+ * applying registered transformers to all affected classes.
+ *
  * @author Rob Harrop
  * @author Rod Johnson
  * @author Costin Leau
  * @since 2.0
+ * @see #addTransformer
+ * @see #isClassNameExcludedFromShadowing(String)
  */
 public class ShadowingClassLoader extends ClassLoader {
 
+	/** Packages that are excluded by default */
+	public static final String[] DEFAULT_EXCLUDED_PACKAGES = new String[] {
+		"java.", "javax.", "sun.", "org.w3c.", "org.xml.", "org.dom4j.", "org.aspectj.",
+		"org.apache.xerces.", "org.apache.commons.logging."};
+
+
 	private final ClassLoader enclosingClassLoader;
 
-	private final List<ClassFileTransformer> classFileTransformers = new ArrayList<ClassFileTransformer>();
+	private final List<ClassFileTransformer> classFileTransformers = new LinkedList<ClassFileTransformer>();
 
 	private final Map<String, Class> classCache = new HashMap<String, Class>();
 
 
+	/**
+	 * Create a new ShadowingClassLoader, decorating the given ClassLoader.
+	 * @param enclosingClassLoader the ClassLoader to decorate
+	 */
 	public ShadowingClassLoader(ClassLoader enclosingClassLoader) {
 		Assert.notNull(enclosingClassLoader, "Enclosing ClassLoader must not be null");
 		this.enclosingClassLoader = enclosingClassLoader;
+	}
+
+
+	/**
+	 * Add the given ClassFileTransformer to the list of
+	 * transformers that this ClassLoader will apply.
+	 * @param transformer the ClassFileTransformer
+	 */
+	public void addTransformer(ClassFileTransformer transformer) {
+		Assert.notNull(transformer, "Transformer must not be null");
+		this.classFileTransformers.add(transformer);
+	}
+
+	/**
+	 * Copy all ClassFileTransformers from the given ClassLoader
+	 * to the list of transformers that this ClassLoader will apply.
+	 * @param other the ClassLoader to copy from
+	 */
+	public void copyTransformers(ShadowingClassLoader other) {
+		Assert.notNull(other, "Other ClassLoader must not be null");
+		this.classFileTransformers.addAll(other.classFileTransformers);
 	}
 
 
@@ -65,37 +101,41 @@ public class ShadowingClassLoader extends ClassLoader {
 		}
 	}
 
-	private boolean shouldShadow(String name) {
-		return !isExcluded(name);
+	/**
+	 * Determine whether the given class should be excluded from shadowing.
+	 * @param className the name of the class
+	 */
+	private boolean shouldShadow(String className) {
+		return (!className.equals(getClass().getName()) && !className.endsWith("ShadowingClassLoader") &&
+				!isExcludedPackage(className) && !isClassNameExcludedFromShadowing(className));
 	}
-	
-	private boolean isExcluded(String name) {
-		return name.equals(getClass().getName()) || 
-						name.endsWith("ShadowingClassLoader") ||
-						name.startsWith("org.dom4j") ||
-			 			name.startsWith("org.aspectj") ||
-			 			name.startsWith("org.apache.xerces") ||
-						name.startsWith("java.") ||
-						name.startsWith("javax.") ||
-						name.startsWith("org.apache.commons.logging") ||
-						name.startsWith("org.xml.sax") ||
-						name.startsWith("org.w3c") ||
-						name.startsWith("sun") ||
-						isClassNameExcludedFromShadowing(name);
+
+	/**
+	 * Determine whether the given class is defined in an excluded package.
+	 * @param className the name of the class
+	 */
+	private boolean isExcludedPackage(String className) {
+		for (int i = 0; i < DEFAULT_EXCLUDED_PACKAGES.length; i++) {
+			if (className.startsWith(DEFAULT_EXCLUDED_PACKAGES[i])) {
+				return true;
+			}
+		}
+		return false;
 	}
-	
+
 	/**
 	 * Subclasses can override this method to specify whether or not
-	 * particular classes are excluded from shadowing
-	 * @param className class name to test
+	 * a particular class should be excluded from shadowing.
+	 * @param className the class name to test
 	 */
 	protected boolean isClassNameExcludedFromShadowing(String className) {
 		return false;
 	}
 
+
 	private Class doLoadClass(String name) throws ClassNotFoundException {
 		String internalName = StringUtils.replace(name, ".", "/") + ".class";
-		InputStream is = enclosingClassLoader.getResourceAsStream(internalName);
+		InputStream is = this.enclosingClassLoader.getResourceAsStream(internalName);
 		if (is == null) {
 			throw new ClassNotFoundException(name);
 		}
@@ -111,10 +151,6 @@ public class ShadowingClassLoader extends ClassLoader {
 		}
 	}
 	
-	public void addTransformers(ShadowingClassLoader other) {
-		classFileTransformers.addAll(other.classFileTransformers);
-	}
-
 	private byte[] applyTransformers(String name, byte[] bytes) {
 		String internalName = StringUtils.replace(name, ".", "/");
 		try {
@@ -130,26 +166,16 @@ public class ShadowingClassLoader extends ClassLoader {
 	}
 
 
-	public void addTransformer(ClassFileTransformer transformer) {
-		this.classFileTransformers.add(transformer);
-	}
-
-
 	public URL getResource(String name) {
-		return enclosingClassLoader.getResource(name);
+		return this.enclosingClassLoader.getResource(name);
 	}
-
 
 	public InputStream getResourceAsStream(String name) {
-		return enclosingClassLoader.getResourceAsStream(name);
+		return this.enclosingClassLoader.getResourceAsStream(name);
 	}
-
 
 	public Enumeration<URL> getResources(String name) throws IOException {
-		return enclosingClassLoader.getResources(name);
+		return this.enclosingClassLoader.getResources(name);
 	}
 
-
-	
-	
 }

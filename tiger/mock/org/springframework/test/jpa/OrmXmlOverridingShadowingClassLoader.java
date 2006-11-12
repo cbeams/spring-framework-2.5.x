@@ -34,22 +34,28 @@ import org.springframework.instrument.classloading.ResourceOverridingShadowingCl
  */
 class OrmXmlOverridingShadowingClassLoader extends ResourceOverridingShadowingClassLoader {
 	
-	private List<String> providerPrefixes = new LinkedList<String>(); {
-		// Automatically exclude classes from these well-known persistence providers
-		providerPrefixes.add("oracle.toplink.essentials");
-		
+	/**
+	 * Default location of the <code>orm.xml</code> file in the class path:
+	 * "META-INF/orm.xml"
+	 */
+	public static final String DEFAULT_ORM_XML_LOCATION = "META-INF/orm.xml";
 
-		// Do NOT exclude Hibernate classes --
-		// this causes class casts due to use of
-		// CGLIB by Hibernate
+
+	private final List<String> providerPrefixes = new LinkedList<String>();
+
+	{
+		// Automatically exclude classes from these well-known persistence providers.
+		this.providerPrefixes.add("oracle.toplink.essentials");
 		
-		// Same goes for OpenJPA which will not enhance the domain classes
+		// Do NOT exclude Hibernate classes --
+		// this causes class casts due to use of CGLIB by Hibernate.
+		// Same goes for OpenJPA which will not enhance the domain classes.
 	}
 	
 
 	public OrmXmlOverridingShadowingClassLoader(ClassLoader loader, String realOrmXmlLocation) {
 		super(loader);
-		override("META-INF/orm.xml", realOrmXmlLocation);
+		override(DEFAULT_ORM_XML_LOCATION, realOrmXmlLocation);
 	}
 	
 	@Override
@@ -60,13 +66,12 @@ class OrmXmlOverridingShadowingClassLoader extends ResourceOverridingShadowingCl
 			}
 		}
 		
-		// Also do not shadow JUnit infrastructure
+		// Also do not shadow JUnit infrastructure.
 		if (className.startsWith("junit")) {
 			return true;
 		}
 		
 		return false;
 	}
-	
 	
 }

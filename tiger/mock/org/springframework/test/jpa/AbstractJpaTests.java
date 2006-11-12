@@ -265,12 +265,11 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	}
 	
 	/**
-	 * Customize the shadowing class loader
+	 * Customize the shadowing class loader.
 	 * @param shadowingClassLoader this parameter is actually of type
-	 * ResourceOverridingShadowingClassLoader, and can safely to be
-	 * cast to that type. However, the signature must not be of that
-	 * type as that would cause the present class loader to load
-	 * that type.
+	 * ResourceOverridingShadowingClassLoader, and can safely to be cast to
+	 * that type. However, the signature must not be of that type as that
+	 * would cause the present class loader to load that type.
 	 */
 	protected void customizeResourceOverridingShadowingClassLoader(ClassLoader shadowingClassLoader) {
 		// empty
@@ -331,7 +330,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 				roscl.copyOverrides((ResourceOverridingShadowingClassLoader) shadowingClassLoader);
 			}
 			if (shadowingClassLoader instanceof ShadowingClassLoader) {
-				roscl.addTransformers((ShadowingClassLoader) shadowingClassLoader);
+				roscl.copyTransformers((ShadowingClassLoader) shadowingClassLoader);
 			}
 			return roscl;
 		}

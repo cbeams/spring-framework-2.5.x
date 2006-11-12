@@ -23,6 +23,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.util.Assert;
+
 /**
  * Subclass of ShadowingClassLoader that overrides attempts to
  * locate certain files.
@@ -46,34 +48,44 @@ public class ResourceOverridingShadowingClassLoader extends ShadowingClassLoader
 	/**
 	 * Key is asked for value: value is actual value
 	 */
-	private Map<String, String> overrides = new HashMap<String, String>(); 
-	
+	private Map<String, String> overrides = new HashMap<String, String>();
 
-	public ResourceOverridingShadowingClassLoader(ClassLoader loader) {
-		super(loader);
+
+	/**
+	 * Create a new ResourceOverridingShadowingClassLoader,
+	 * decorating the given ClassLoader.
+	 * @param enclosingClassLoader the ClassLoader to decorate
+	 */
+	public ResourceOverridingShadowingClassLoader(ClassLoader enclosingClassLoader) {
+		super(enclosingClassLoader);
 	}
 	
 
 	/**
 	 * Return the resource (if any) at the new path
-	 * on an attempt to locate a resource at the old path
-	 * @param oldPath path requested
-	 * @param newPath path looked up
+	 * on an attempt to locate a resource at the old path.
+	 * @param oldPath the path requested
+	 * @param newPath the actual path to be looked up
 	 */
 	public void override(String oldPath, String newPath) {
 		this.overrides.put(oldPath, newPath);
 	}
 	
 	/**
-	 * Ensure that a resource with the given path is not found
-	 * @param oldPath path of resource to hide even if it exists
-	 * in the parent class loader
+	 * Ensure that a resource with the given path is not found.
+	 * @param oldPath the path of the resource to hide even if
+	 * it exists in the parent ClassLoader
 	 */
 	public void suppress(String oldPath) {
 		this.overrides.put(oldPath, null);
 	}
-	
+
+	/**
+	 * Copy all overrides from the given ClassLoader.
+	 * @param other the other ClassLoader to copy from
+	 */
 	public void copyOverrides(ResourceOverridingShadowingClassLoader other) {
+		Assert.notNull(other, "Other ClassLoader must not be null");
 		this.overrides.putAll(other.overrides);
 	}
 
