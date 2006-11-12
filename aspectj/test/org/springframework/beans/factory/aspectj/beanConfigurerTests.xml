@@ -5,43 +5,34 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 	   http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
-	<!--
-	<bean id="beanConfigurer" 
-	      class="org.springframework.beans.factory.aspectj.BeanConfigurer"
-	      factory-method="aspectOf"/>
-	-->
 	<aop:spring-configured/>
-	
+
 	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$WireArbitraryExistingPojo"
 	      factory-method="aspectOf"/>
 
-	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$DIOnDeserialization"
-		factory-method="aspectOf">
+	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$DIOnDeserialization" factory-method="aspectOf">
 		<property name="beanWiringInfoResolver">
 			<bean class="org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver"/>
 		</property>
 	</bean>	
 
-	<bean id="beanOne" 
-	      class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$ShouldBeConfiguredBySpring"
-	      lazy-init="true">
+	<bean id="beanOne" class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$ShouldBeConfiguredBySpring"
+			lazy-init="true">
 		<property name="name" value="Rod"/>
 	</bean>
-	
+
 	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$ShouldBeConfiguredBySpringUsingTypeNameAsBeanName"
-	      lazy-init="true">
-	    <property name="name" value="Rob"/>
+			lazy-init="true">
+		<property name="name" value="Rob"/>
 	</bean>
-	
-	<!--
-		Used as a target for autowiring by type
-	-->
+
+	<!-- Used as a target for autowiring by type -->
 	<bean id="ramnivas" class="org.springframework.beans.TestBean" >
 		<property name="name" value="Ramnivas"/>
 	</bean>
-	
+
 	<bean class="org.springframework.beans.factory.aspectj.BeanConfigurerTests$ArbitraryExistingPojo">
 		<property name="friend" ref="ramnivas"/>
 	</bean>
-	
+
 </beans>

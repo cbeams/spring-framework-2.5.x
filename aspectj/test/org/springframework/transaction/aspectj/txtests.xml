@@ -4,15 +4,15 @@
 <beans>
 
 	<bean id="transactionManager" class="org.springframework.transaction.CallCountingTransactionManager"/>
-	
+
 	<bean class="org.springframework.transaction.aspectj.AnnotationTransactionAspect" factory-method="aspectOf">
 		<property name="transactionManager" ref="transactionManager"/>
 	</bean>
-	
+
 	<bean class="org.springframework.transaction.aspectj.TransactionalAnnotationOnlyOnClassWithNoInterface"/>
 
-    <bean class="org.springframework.transaction.aspectj.ClassWithProtectedAnnotatedMember"/>
+	<bean class="org.springframework.transaction.aspectj.ClassWithProtectedAnnotatedMember"/>
 
-    <bean class="org.springframework.transaction.aspectj.ClassWithPrivateAnnotatedMember"/>
+	<bean class="org.springframework.transaction.aspectj.ClassWithPrivateAnnotatedMember"/>
 
 </beans>
