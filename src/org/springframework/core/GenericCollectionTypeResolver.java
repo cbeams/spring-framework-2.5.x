@@ -16,6 +16,8 @@
 
 package org.springframework.core;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -234,7 +236,15 @@ public abstract class GenericCollectionTypeResolver {
 		if (paramType instanceof ParameterizedType) {
 			paramType = ((ParameterizedType) paramType).getRawType();
 		}
-		if (paramType instanceof Class) {
+		if (paramType instanceof GenericArrayType) {
+			// A generic array type... Let's turn it into a straight array type if possible.
+			Type compType = ((GenericArrayType) paramType).getGenericComponentType();
+			if (compType instanceof Class) {
+				return Array.newInstance((Class) compType, 0).getClass();
+			}
+		}
+		else if (paramType instanceof Class) {
+			// We finally got a straight Class...
 			return (Class) paramType;
 		}
 		return null;

@@ -29,6 +29,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 
@@ -155,6 +156,29 @@ public class BeanWrapperGenericsTests extends TestCase {
 		bw.setPropertyValue("listOfLists[0][0]", "5");
 		assertEquals(new Integer(5), bw.getPropertyValue("listOfLists[0][0]"));
 		assertEquals(new Integer(5), gb.getListOfLists().get(0).get(0));
+	}
+
+	public void testGenericListOfArrays() throws MalformedURLException {
+		GenericBean gb = new GenericBean();
+		List<String[]> list = new LinkedList<String[]>();
+		list.add(new String[] {"str1", "str2"});
+		gb.setListOfArrays(list);
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setPropertyValue("listOfArrays[0][1]", "str3 ");
+		assertEquals("str3 ", bw.getPropertyValue("listOfArrays[0][1]"));
+		assertEquals("str3 ", gb.getListOfArrays().get(0)[1]);
+	}
+
+	public void testGenericListOfArraysWithElementConversion() throws MalformedURLException {
+		GenericBean gb = new GenericBean();
+		List<String[]> list = new LinkedList<String[]>();
+		list.add(new String[] {"str1", "str2"});
+		gb.setListOfArrays(list);
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.registerCustomEditor(String.class, new StringTrimmerEditor(false));
+		bw.setPropertyValue("listOfArrays[0][1]", "str3 ");
+		assertEquals("str3", bw.getPropertyValue("listOfArrays[0][1]"));
+		assertEquals("str3", gb.getListOfArrays().get(0)[1]);
 	}
 
 	public void testGenericListOfMaps() throws MalformedURLException {

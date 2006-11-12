@@ -36,6 +36,8 @@ public class GenericBean {
 
 	private List<List<Integer>> listOfLists;
 
+	private List<String[]> listOfArrays;
+
 	private List<Map<Integer, Long>> listOfMaps;
 
 	private Map plainMap;
@@ -105,6 +107,14 @@ public class GenericBean {
 
 	public List<List<Integer>> getListOfLists() {
 		return listOfLists;
+	}
+
+	public List<String[]> getListOfArrays() {
+		return listOfArrays;
+	}
+
+	public void setListOfArrays(List<String[]> listOfArrays) {
+		this.listOfArrays = listOfArrays;
 	}
 
 	public void setListOfLists(List<List<Integer>> listOfLists) {

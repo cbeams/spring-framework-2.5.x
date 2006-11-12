@@ -27,7 +27,9 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.springframework.beans.GenericBean;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.UrlResource;
 
 /**
@@ -82,6 +84,17 @@ public class BeanFactoryGenericsTests extends TestCase {
 
 		assertEquals(new Integer(5), gb.getShortMap().get(new Short("4")));
 		assertEquals(new Integer(7), gb.getShortMap().get(new Short("6")));
+	}
+
+	public void testGenericListOfArraysProperty() throws MalformedURLException {
+		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
+		GenericBean gb = (GenericBean) bf.getBean("listOfArrays");
+
+		assertEquals(1, gb.getListOfArrays().size());
+		String[] array = gb.getListOfArrays().get(0);
+		assertEquals(2, array.length);
+		assertEquals("value1", array[0]);
+		assertEquals("value2", array[1]);
 	}
 
 
