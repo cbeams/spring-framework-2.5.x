@@ -102,7 +102,7 @@ public class Person {
 		simple example of a <emphasis>'rich'</emphasis> object would be a
 		<classname>Customer</classname> that is composed of two <classname>String</classname>
 		properties (a first and second name) and a complex <classname>Address</classname> object.
-        <classname>Address</classname> objects may be used independant of
+        <classname>Address</classname> objects may be used independantly of
         <classname>Customer</classname> objects, and so a distinct
         <classname>AddressValidator</classname> has been implemented. If you want your
         <classname>CustomerValidator</classname> to reuse the logic contained within the
