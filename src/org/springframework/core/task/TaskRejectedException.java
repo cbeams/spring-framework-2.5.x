@@ -40,8 +40,9 @@ public class TaskRejectedException extends NestedRuntimeException {
 	 * Create a new <code>TaskRejectedException</code>
 	 * with the specified detail message and the given root cause.
 	 * @param msg the detail message
-	 * @param cause the root cause (usually from using a underlying
+	 * @param cause the root cause (usually from using an underlying
 	 * API such as the <code>java.util.concurrent</code> package)
+	 * @see java.util.concurrent.RejectedExecutionException
 	 */
 	public TaskRejectedException(String msg, Throwable cause) {
 		super(msg, cause);
