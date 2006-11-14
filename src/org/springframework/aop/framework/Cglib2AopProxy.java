@@ -47,7 +47,7 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * CGLIB2-based {@link AopProxy} implementation for the Spring AOP framework.
- * 
+ *
  * <p><i>Requires CGLIB2 on the class path</i>.
  *
  * <p>Objects of this type should be obtained through proxy factories,
@@ -67,7 +67,7 @@ import org.springframework.util.ObjectUtils;
  * @see DefaultAopProxyFactory
  * @see AdvisedSupport#setProxyTargetClass
  */
-public class Cglib2AopProxy implements AopProxy, Serializable {
+final class Cglib2AopProxy implements AopProxy, Serializable {
 
 	// Constants for CGLIB callback array indices
 	private static final int AOP_PROXY = 0;
