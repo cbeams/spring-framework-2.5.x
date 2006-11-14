@@ -29,56 +29,55 @@ import org.springframework.util.StringUtils;
  * Convenience base class for when there exists a one-to-one mapping
  * between attribute names on the element that is to be parsed and
  * the property names on the {@link Class} being configured.
- * 
+ *
  * <p>Extend this parser class when you want to create a single
  * bean definition from a relatively simple custom XML element. The
  * resulting <code>BeanDefinition</code> will be automatically
  * registered with the relevant
  * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}.
- * 
+ *
  * <p>An example will hopefully make the use of this particular parser
  * class immediately clear. Consider the following class definition:
- * 
- * <pre class="code"> public class SimpleCache implements Cache {
+ *
+ * <pre class="code">public class SimpleCache implements Cache {
  * 
  *     public void setName(String name) {...}
  *     public void setTimeout(int timeout) {...}
  *     public void setEvictionPolicy(EvictionPolicy policy) {...}
  * 
  *     // remaining class definition elided for clarity...
- * 
  * }</pre>
- * 
+ *
  * <p>Then let us assume the following XML tag has been defined to
  * permit the easy configuration of instances of the above class;
- * 
+ *
  * <pre class="code">&lt;caching:cache name="..." timeout="..." eviction-policy="..."/&gt;</pre>
- * 
+ *
  * <p>All that is required of the Java developer tasked with writing
  * the parser to parse the above XML tag into an actual
  * <code>SimpleCache</code> bean definition is the following:
- * 
- * <pre class="code"> public class SimpleCacheBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
- * 
+ *
+ * <pre class="code">public class SimpleCacheBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
+ *
  *     protected Class getBeanClass(Element element) {
  *         return SimpleCache.class;
  *     }
  * }</pre> 
- * 
+ *
  * <p>Please note that the <code>AbstractSimpleBeanDefinitionParser</code>
  * is limited to populating the created bean definition with property values.
  * if you want to parse constructor arguments and nested elements from the
  * supplied XML element, then you will have to implement the
  * {@link #postProcess(org.springframework.beans.factory.support.BeanDefinitionBuilder, org.w3c.dom.Element)}
- * element and do such parsing yourself, or (more likely) subclass the
+ * method and do such parsing yourself, or (more likely) subclass the
  * {@link AbstractSingleBeanDefinitionParser} or {@link AbstractBeanDefinitionParser}
  * classes directly.
- * 
+ *
  * <p>The process of actually registering the
  * <code>SimpleCacheBeanDefinitionParser</code> with the Spring XML parsing
  * infrastructure is described in the Spring Framework reference documentation
  * (in one of the appendices).
- * 
+ *
  * <p>For an example of this parser in action (so to speak), do look at
  * the source code for the
  * {@link org.springframework.beans.factory.xml.UtilNamespaceHandler.PropertiesBeanDefinitionParser};
@@ -87,9 +86,9 @@ import org.springframework.util.StringUtils;
  * <code>PropertiesBeanDefinitionParser</code> populates a
  * {@link org.springframework.beans.factory.config.PropertiesFactoryBean}
  * from an XML element that looks like this:
- * 
- * <pre class="code">&lt;util:properties location="jdbc.properties" /&gt;</pre>
- * 
+ *
+ * <pre class="code">&lt;util:properties location="jdbc.properties"/&gt;</pre>
+ *
  * <p>The observant reader will notice that the sole attribute on the
  * <code>&lt;util:properties/&gt;</code> element matches the
  * {@link org.springframework.beans.factory.config.PropertiesFactoryBean#setLocation(org.springframework.core.io.Resource)}
@@ -99,7 +98,7 @@ import org.springframework.util.StringUtils;
  * actually do is supply an implementation of the
  * {@link #getBeanClass(org.w3c.dom.Element)} method to return the
  * <code>PropertiesFactoryBean</code> type.
- * 
+ *
  * @author Rob Harrop
  * @author Rick Evans
  * @since 2.0
