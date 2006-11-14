@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,9 +32,9 @@ import org.springframework.util.ClassUtils;
 
 /**
  * InvocationHandler implementation for the Spring AOP framework,
- * based on J2SE 1.3+ dynamic proxies.
+ * based on JDK 1.3+ dynamic proxies.
  *
- * <p>Creates a J2SE proxy, implementing the interfaces exposed by the
+ * <p>Creates a JDK proxy, implementing the interfaces exposed by the
  * proxy. Dynamic proxies cannot be used to proxy methods defined in
  * classes, rather than interface.
  *
@@ -42,12 +42,11 @@ import org.springframework.util.ClassUtils;
  * configured by an AdvisedSupport class. This class is internal
  * to the Spring framework and need not be used directly by client code.
  *
- * <p>Proxies created using this class will be threadsafe if the
+ * <p>Proxies created using this class will be thread-safe if the
  * underlying (target) class is threadsafe.
  * 
- * <p>Proxies are serializable so long as all Advisors
- * are serializable (meaning both Advices and Pointcuts)
- * and the TargetSource is serializable.
+ * <p>Proxies are serializable so long as all Advisors are serializable
+ * (including Advices and Pointcuts) and the TargetSource is serializable.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -57,7 +56,7 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.aop.framework.ProxyFactory
  */
 final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializable {
-	
+
 	/*
 	 * NOTE: We could avoid the code duplication between this class and the CGLIB
 	 * proxies by refactoring invoke() into a template method. However, this approach
@@ -66,7 +65,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	 * proxies behave the same :-)
 	 * This way, we can also more easily take advantage of minor optimizations in each class.
 	 */
-	
+
 	/** We use a static Log to avoid serialization issues */
 	private static Log logger = LogFactory.getLog(JdkDynamicAopProxy.class);
 
@@ -82,11 +81,13 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	 * Is the {@link #hashCode} method defined on the proxied interfaces?
 	 */
 	private boolean hashCodeDefined;
+
+
 	/**
 	 * Construct a new JDK proxy.
-	 * @throws AopConfigException if the config is invalid. We try
-	 * to throw an informative exception in this case, rather than let
-	 * a mysterious failure happen later.
+	 * @throws AopConfigException if the config is invalid.
+	 * We try to throw an informative exception in this case,
+	 * rather than let a mysterious failure happen later.
 	 */
 	protected JdkDynamicAopProxy(AdvisedSupport config) throws AopConfigException {
 		if (config == null) {
@@ -139,9 +140,9 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 
 
 	/**
-	 * Implementation of InvocationHandler.invoke.
-	 * Callers will see exactly the exception thrown by the target, unless a hook
-	 * method throws an exception.
+	 * Implementation of <code>InvocationHandler.invoke</code>.
+	 * <p>Callers will see exactly the exception thrown by the target,
+	 * unless a hook method throws an exception.
 	 */
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		MethodInvocation invocation = null;
@@ -241,8 +242,8 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 
 	/**
 	 * Equality means interfaces, advisors and TargetSource are equal.
-	 * @see java.lang.Object#equals(java.lang.Object)
 	 * @param other may be a dynamic proxy wrapping an instance of this class
+	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object other) {
 		if (other == null) {
@@ -264,7 +265,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			aopr2 = (JdkDynamicAopProxy) ih;
 		}
 		else {
-			// not a valid comparison
+			// Not a valid comparison...
 			return false;
 		}
 		
