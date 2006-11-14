@@ -29,6 +29,8 @@ import java.util.Comparator;
  * @author Juergen Hoeller
  * @since 07.04.2003
  * @see Ordered
+ * @see java.util.Collections#sort(java.util.List, java.util.Comparator)
+ * @see java.util.Arrays#sort(Object[], java.util.Comparator)
  */
 public class OrderComparator implements Comparator {
 
@@ -40,7 +42,14 @@ public class OrderComparator implements Comparator {
 		return (i1 < i2) ? -1 : (i1 > i2) ? 1 : 0;
 	}
 
-	private int getOrder(Object obj) {
+	/**
+	 * Determine the order value for the given object.
+	 * <p>The default implementation checks against the {@link Ordered}
+	 * interface. Can be overridden in subclasses.
+	 * @param obj the object to check
+	 * @return the order value, or <code>Ordered.LOWEST_PRECEDENCE</code> as fallback
+	 */
+	protected int getOrder(Object obj) {
 		return (obj instanceof Ordered ? ((Ordered) obj).getOrder() : Ordered.LOWEST_PRECEDENCE);
 	}
 

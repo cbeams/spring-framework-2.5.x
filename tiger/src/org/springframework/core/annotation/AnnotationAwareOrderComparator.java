@@ -16,30 +16,34 @@
 
 package org.springframework.core.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
+import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 
 /**
- * Annotation to define ordering.
+ * {@link java.util.Comparator} implementation that checks
+ * {@link org.springframework.core.Ordered} as well as the
+ * {@link Order} annotation, with an order value provided by an
+ * <code>Ordered</code> instance overriding a statically defined
+ * annotation value (if any).
  *
- * <p>Value is optional, and represents order value as defined
- * in the Ordered interface. Lower values have higher priority.
- * Default value is <code>Integer.MAX_VALUE</code>, indicating lowest
- * priority (losing to any other specified order value).
- * 
- * @author Rod Johnson
- * @since 2.0
+ * @author Juergen Hoeller
+ * @since 2.0.1
  * @see org.springframework.core.Ordered
- * @see AnnotationAwareOrderComparator
+ * @see Order
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
-public @interface Order {
+public class AnnotationAwareOrderComparator extends OrderComparator {
 
-	int value() default Ordered.LOWEST_PRECEDENCE;
+	protected int getOrder(Object obj) {
+		if (obj instanceof Ordered) {
+			return ((Ordered) obj).getOrder();
+		}
+		if (obj != null) {
+			Order order = obj.getClass().getAnnotation(Order.class);
+			if (order != null) {
+				return order.value();
+			}
+		}
+		return Ordered.LOWEST_PRECEDENCE;
+	}
 
 }

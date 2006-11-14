@@ -26,6 +26,8 @@ package org.springframework.core;
  *
  * @author Juergen Hoeller
  * @since 07.04.2003
+ * @see OrderComparator
+ * @see org.springframework.core.annotation.Order
  */
 public interface Ordered {
 
