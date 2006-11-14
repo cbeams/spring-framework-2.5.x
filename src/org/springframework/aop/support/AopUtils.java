@@ -20,15 +20,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AopInvocationException;
@@ -38,7 +34,6 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.SpringProxy;
-import org.springframework.core.OrderComparator;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -55,9 +50,6 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class AopUtils {
 	
-	private static Log logger = LogFactory.getLog(AopUtils.class);
-
-
 	/**
 	 * Return whether the given object is either a JDK dynamic proxy or a CGLIB proxy.
 	 * @param object the object to check
@@ -145,6 +137,7 @@ public abstract class AopUtils {
 		}
 		return method;
 	}
+
 
 	/**
 	 * Can the given pointcut apply at all on the given class?
@@ -237,16 +230,21 @@ public abstract class AopUtils {
 		}
 	}
 
-	
 	/**
-	 * Convenience method to return the sublist of the candidateAdvisors list
-	 * that are applicable to the given class.
-	 * @param candidateAdvisors advisors to evaluate
-	 * @param clazz target class
-	 * @return sublist of advisors that could apply to an object of the given class
+	 * Determine the sublist of the <code>candidateAdvisors</code> list
+	 * that is applicable to the given class.
+	 * @param candidateAdvisors Advisors to evaluate
+	 * @param clazz the target class
+	 * @return sublist of Advisors that can apply to an object of the given class
 	 */
 	public static List findAdvisorsThatCanApply(List candidateAdvisors, Class clazz) {
-		List eligibleAdvisors = findIntroductionAdvisorsThatCanApply(candidateAdvisors, clazz);
+		List eligibleAdvisors = new LinkedList();
+		for (Iterator it = candidateAdvisors.iterator(); it.hasNext();) {
+			Advisor candidate = (Advisor) it.next();
+			if (candidate instanceof IntroductionAdvisor && canApply(candidate, clazz)) {
+				eligibleAdvisors.add(candidate);
+			}
+		}
 		boolean hasIntroductions = !eligibleAdvisors.isEmpty();
 		for (Iterator it = candidateAdvisors.iterator(); it.hasNext();) {
 			Advisor candidate = (Advisor) it.next();
@@ -254,48 +252,11 @@ public abstract class AopUtils {
 				// already processed
 				continue;
 			}
-			if (AopUtils.canApply(candidate, clazz, hasIntroductions)) {
+			if (canApply(candidate, clazz, hasIntroductions)) {
 				eligibleAdvisors.add(candidate);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Candidate advisor [" + candidate + "] accepted for class [" + clazz.getName() + "]");
-				}
-			}
-			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Candidate advisor [" + candidate + "] rejected for class [" + clazz.getName() + "]");
-				}
 			}
 		}
 		return eligibleAdvisors;
-	}
-	
-	private static List findIntroductionAdvisorsThatCanApply(List candidateAdvisors, Class clazz) {
-		List eligibleAdvisors = new LinkedList();
-		for (Iterator it = candidateAdvisors.iterator(); it.hasNext();) {
-			Advisor candidate = (Advisor) it.next();
-			if ((candidate instanceof IntroductionAdvisor) && AopUtils.canApply(candidate, clazz)) {
-				eligibleAdvisors.add(candidate);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Candidate advisor [" + candidate + "] accepted for class [" + clazz.getName() + "]");
-				}
-			}
-			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Candidate advisor [" + candidate + "] rejected for class [" + clazz.getName() + "]");
-				}
-			}
-		}
-		return eligibleAdvisors;		
-	}
-	
-	/**
-	 * Sort the given list of advisors by order value
-	 * @param advisors Spring AOP advisors to sort
-	 * @return sorted list of advisors
-	 */
-	public static List sortAdvisorsByOrder(List advisors) {
-		Collections.sort(advisors, new OrderComparator());
-		return advisors;
 	}
 
 
