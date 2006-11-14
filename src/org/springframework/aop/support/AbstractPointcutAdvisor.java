@@ -34,7 +34,7 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordered, Serializable {
 
-	private int order = Integer.MAX_VALUE;
+	private int order = Ordered.LOWEST_PRECEDENCE;
 
 
 	public void setOrder(int order) {
