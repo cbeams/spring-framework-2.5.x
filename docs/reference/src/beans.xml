@@ -3261,7 +3261,7 @@ cfg.postProcessBeanFactory(factory);]]></programlisting>
       class="org.apache.commons.dbcp.BasicDataSource">
     <property name="driverClassName" value="]]><emphasis role="bold">${jdbc.driverClassName}</emphasis><![CDATA["/>
     <property name="url" value="]]><emphasis role="bold">${jdbc.url}</emphasis><![CDATA["/>
-    <property name="username" value="]]><emphasis role="bold">jdbc.username</emphasis><![CDATA["/>
+    <property name="username" value="]]><emphasis role="bold">${jdbc.username}</emphasis><![CDATA["/>
     <property name="password" value="]]><emphasis role="bold">${jdbc.password}</emphasis><![CDATA["/>
 </bean>]]></programlisting>
                 <para>The actual values come from another file in the standard Java
