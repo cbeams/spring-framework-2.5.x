@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 package org.springframework.scheduling.quartz;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.quartz.SchedulerConfigException;
 import org.quartz.spi.ThreadPool;
 
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.task.TaskRejectedException;
 
 /**
  * Quartz ThreadPool adapter that delegates to a Spring-managed
@@ -30,6 +33,9 @@ import org.springframework.core.task.TaskExecutor;
  * @see SchedulerFactoryBean#setTaskExecutor
  */
 public class LocalTaskExecutorThreadPool implements ThreadPool {
+
+	/** Logger available to subclasses */
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private TaskExecutor taskExecutor;
 
@@ -56,8 +62,23 @@ public class LocalTaskExecutorThreadPool implements ThreadPool {
 		if (runnable == null) {
 			return false;
 		}
-		this.taskExecutor.execute(runnable);
-		return true;
+		try {
+			this.taskExecutor.execute(runnable);
+			return true;
+		}
+		catch (TaskRejectedException ex) {
+			logger.error("Task has been rejected by TaskExecutor", ex);
+			return false;
+		}
+	}
+
+	public int blockForAvailableThreads() {
+		// The present implementation always returns 1, making Quartz (1.6)
+		// always schedule any tasks that it feels like scheduling.
+		// This could be made smarter for specific TaskExecutors,
+		// for example calling <code>getMaximumPoolSize() - getActiveCount()</code>
+		// on a <code>java.util.concurrent.ThreadPoolExecutor</code>.
+		return 1;
 	}
 
 }
