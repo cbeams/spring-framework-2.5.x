@@ -51,7 +51,7 @@
 	<classpathentry kind="lib" path="lib/jdo/jdo2-api.jar"/>
 	<classpathentry kind="lib" path="lib/jotm/jotm.jar"/>
 	<classpathentry kind="lib" path="lib/jotm/xapool.jar"/>
-	<classpathentry kind="lib" path="lib/quartz/quartz-1.5.2.jar"/>
+	<classpathentry kind="lib" path="lib/quartz/quartz-1.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/ibatis/ibatis-sqlmap-2.jar"/>
 	<classpathentry kind="lib" path="lib/freemarker/freemarker.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/aopalliance/aopalliance.jar"/>

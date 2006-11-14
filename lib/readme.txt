@@ -349,8 +349,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - used by Commons Attributes 2.2 to parse source-level metadata in the build process
 - required for building the framework and the attributes version of JPetStore
 
-* quartz/quartz-1.5.2.jar
-- Quartz 1.5.2 (http://www.opensymphony.com/quartz)
+* quartz/quartz-1.6.0.jar
+- Quartz 1.6.0 (http://www.opensymphony.com/quartz)
 - required for building the framework
 - required at runtime when using Spring's Quartz scheduling support
 
