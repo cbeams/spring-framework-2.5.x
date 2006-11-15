@@ -117,23 +117,22 @@
 	</xsd:element>
 
 	<xsd:complexType name="aspectType">
-		<xsd:sequence>
-			<xsd:element name="pointcut" type="pointcutType" minOccurs="0" maxOccurs="1">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	A named pointcut definition.
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:element>
-			<xsd:element name="declare-parents" type="declareParentsType" minOccurs="0" maxOccurs="unbounded">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	Allows this aspect to introduce additional interfaces that the advised
-	object will transparently implement.
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:element>
-			<xsd:choice minOccurs="0" maxOccurs="unbounded">
+ 		   <xsd:choice minOccurs="0" maxOccurs="unbounded">
+              <xsd:element name="pointcut" type="pointcutType">
+               <xsd:annotation>
+                <xsd:documentation><![CDATA[
+            A named pointcut definition.
+                ]]></xsd:documentation>
+                </xsd:annotation>
+               </xsd:element>
+               <xsd:element name="declare-parents" type="declareParentsType">
+                      <xsd:annotation>
+                        <xsd:documentation><![CDATA[
+    Allows this aspect to introduce additional interfaces that the advised
+    object will transparently implement.
+                         ]]></xsd:documentation>
+                      </xsd:annotation>
+                </xsd:element>
 				<xsd:element name="before" type="basicAdviceType">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
@@ -169,8 +168,7 @@
 						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:element>
-			</xsd:choice>
-		</xsd:sequence>
+  	 </xsd:choice>
 		<!-- Rick : ID type written explicitly as opposed to being imported (c.f. [SPR-2290] -->
 		<xsd:attribute name="id" type="xsd:ID">
 			<xsd:annotation>
