@@ -53,17 +53,19 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 
 	public final BeanDefinition parse(Element element, ParserContext parserContext) {
 		AbstractBeanDefinition definition = parseInternal(element, parserContext);
-		String id = resolveId(element, definition, parserContext);
-		if (!StringUtils.hasText(id) && !parserContext.isNested()) {
-			throw new IllegalArgumentException(
-					"Id is required for element '" + element.getLocalName() + "' when used as a top-level tag");
-		}
-		BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
-		registerBeanDefinition(holder, parserContext.getRegistry(), parserContext.isNested());
-		if (shouldFireEvents()) {
-			BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
-			postProcessComponentDefinition(componentDefinition);
-			parserContext.registerComponent(componentDefinition);
+		if (!parserContext.isNested()) {
+			String id = resolveId(element, definition, parserContext);
+			if (!StringUtils.hasText(id) && !parserContext.isNested()) {
+				throw new IllegalArgumentException(
+						"Id is required for element '" + element.getLocalName() + "' when used as a top-level tag");
+			}
+			BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
+			registerBeanDefinition(holder, parserContext.getRegistry());
+			if (shouldFireEvents()) {
+				BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
+				postProcessComponentDefinition(componentDefinition);
+				parserContext.registerComponent(componentDefinition);
+			}
 		}
 		return definition;
 	}
@@ -94,14 +96,10 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	 * to be registered as top level beans.
 	 * @param bean the bean to be registered
 	 * @param registry the registry that the bean is to be registered with 
-	 * @param isNested <code>true</code> if the supplied {@link BeanDefinitionHolder bean}
-	 * was created from a nested element
 	 * @see BeanDefinitionReaderUtils#registerBeanDefinition(BeanDefinitionHolder, BeanDefinitionRegistry)
 	 */
-	protected void registerBeanDefinition(BeanDefinitionHolder bean, BeanDefinitionRegistry registry, boolean isNested) {
-		if (!isNested) {
-			BeanDefinitionReaderUtils.registerBeanDefinition(bean, registry);
-		}
+	protected void registerBeanDefinition(BeanDefinitionHolder bean, BeanDefinitionRegistry registry) {
+		BeanDefinitionReaderUtils.registerBeanDefinition(bean, registry);
 	}
 
 
@@ -130,7 +128,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	 * {@link org.springframework.beans.factory.parsing.ReaderContext#fireComponentRegistered(org.springframework.beans.factory.parsing.ComponentDefinition) fire an event}
 	 * when a bean definition has been totally parsed?
 	 * <p>Implementations must return <code>true</code> if they want an event
-	 * will be fired when a bean definition has been totally parsed; returning
+	 * to be fired when a bean definition has been totally parsed; returning
 	 * <code>false</code> means that an event will not be fired.
 	 * <p>This implementation returns <code>true</code> by default; that is, an event
 	 * will be fired when a bean definition has been totally parsed.
