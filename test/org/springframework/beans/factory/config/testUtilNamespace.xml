@@ -39,15 +39,25 @@
 		<property name="name" value="Rob Harrop"/>
 	</bean>
 
+	<bean id="nestedCollectionsBean" class="org.springframework.beans.TestBean">
+		<property name="someList">
+			<util:list>
+				<value>foo</value>
+			</util:list>
+		</property>
+		<property name="someSet">
+			<util:set>
+				<value>foo</value>
+			</util:set>
+		</property>
+		<property name="someMap">
+			<util:map>
+				<entry key="foo" value="bar"/>
+			</util:map>
+		</property>
+	</bean>
+
 	<bean id="nestedCustomTagBean" class="org.springframework.beans.TestBean" scope="prototype">
-	  <property name="someMap">
-			<map>
-				<entry>
-					<key><value>min</value></key>
-					<util:constant static-field="java.lang.Integer.MIN_VALUE"/>
-				</entry>
-			</map>
-	  </property>
 		<property name="someList">
 			<list>
 				<util:constant static-field="java.lang.Integer.MIN_VALUE"/>
@@ -58,6 +68,14 @@
 				<util:constant static-field="java.lang.Integer.MIN_VALUE"/>
 			</set>
 		</property>
+	  <property name="someMap">
+			<map>
+				<entry>
+					<key><value>min</value></key>
+					<util:constant static-field="java.lang.Integer.MIN_VALUE"/>
+				</entry>
+			</map>
+	  </property>
 	</bean>
 
 	<util:map id="simpleMap">

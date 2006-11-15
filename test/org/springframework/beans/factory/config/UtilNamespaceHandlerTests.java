@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class UtilNamespaceHandlerTests extends TestCase {
 
@@ -46,6 +47,7 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setEventListener(this.listener);
 		reader.loadBeanDefinitions(new ClassPathResource("testUtilNamespace.xml", getClass()));
+		assertEquals(13, this.beanFactory.getBeanDefinitionCount());
 	}
 
 	public void testLoadProperties() throws Exception {
@@ -112,23 +114,42 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertEquals(this.beanFactory.getBean("testBean"), map.get("bean"));
 	}
 
-	public void testNestedInCollections() throws Exception {
-		TestBean bean = (TestBean) this.beanFactory.getBean("nestedCustomTagBean");
-
-		Integer min = new Integer(Integer.MIN_VALUE);
-
-		Map map = bean.getSomeMap();
-		assertEquals(min, map.get("min"));
+	public void testNestedCollections() throws Exception {
+		TestBean bean = (TestBean) this.beanFactory.getBean("nestedCollectionsBean");
 
 		List list = bean.getSomeList();
+		assertEquals(1, list.size());
+		assertEquals("foo", list.get(0));
+
+		Set set = bean.getSomeSet();
+		assertEquals(1, set.size());
+		assertTrue(set.contains("foo"));
+
+		Map map = bean.getSomeMap();
+		assertEquals(1, map.size());
+		assertEquals("bar", map.get("foo"));
+	}
+
+	public void testNestedInCollections() throws Exception {
+		TestBean bean = (TestBean) this.beanFactory.getBean("nestedCustomTagBean");
+		Integer min = new Integer(Integer.MIN_VALUE);
+
+		List list = bean.getSomeList();
+		assertEquals(1, list.size());
 		assertEquals(min, list.get(0));
 
 		Set set = bean.getSomeSet();
+		assertEquals(1, set.size());
 		assertTrue(set.contains(min));
+
+		Map map = bean.getSomeMap();
+		assertEquals(1, map.size());
+		assertEquals(min, map.get("min"));
 	}
 
 	public void testNestedInConstructor() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("constructedTestBean");
 		assertEquals("Rob Harrop", bean.getName());
 	}
+
 }

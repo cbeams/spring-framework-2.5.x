@@ -22,7 +22,6 @@ import java.util.Set;
 
 import org.w3c.dom.Element;
 
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.FieldRetrievingFactoryBean;
 import org.springframework.beans.factory.config.ListFactoryBean;
 import org.springframework.beans.factory.config.MapFactoryBean;
@@ -31,7 +30,6 @@ import org.springframework.beans.factory.config.PropertyPathFactoryBean;
 import org.springframework.beans.factory.config.SetFactoryBean;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -56,8 +54,6 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class ConstantBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
-		private static final String STATIC_FIELD_ATTRIBUTE = "static-field";
-
 		protected Class getBeanClass(Element element) {
 			return FieldRetrievingFactoryBean.class;
 		}
@@ -65,107 +61,89 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 		protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
 			String id = super.resolveId(element, definition, parserContext);
 			if (!StringUtils.hasText(id)) {
-				id = element.getAttribute(STATIC_FIELD_ATTRIBUTE);
+				id = element.getAttribute("static-field");
 			}
 			return id;
 		}
 	}
 
 
-	private static class PropertyPathBeanDefinitionParser implements BeanDefinitionParser {
+	private static class PropertyPathBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
-		public BeanDefinition parse(Element element, ParserContext parserContext) {
-			String id = element.getAttribute("id");
+		protected Class getBeanClass(Element element) {
+			return PropertyPathFactoryBean.class;
+		}
+
+		protected void doParse(Element element, BeanDefinitionBuilder builder) {
 			String path = element.getAttribute("path");
-
 			Assert.hasText(path, "Attribute 'path' must not be null or zero length");
 			int dotIndex = path.indexOf(".");
 			if (dotIndex == -1) {
 				throw new IllegalArgumentException("Attribute 'path' must follow pattern 'beanName.propertyName'");
 			}
-
 			String beanName = path.substring(0, dotIndex);
 			String propertyPath = path.substring(dotIndex + 1);
-
-			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(PropertyPathFactoryBean.class);
-			builder.setSource(parserContext.extractSource(element));
-			if (parserContext.isNested()) {
-				// Inner bean definition should receive same singleton status as containing bean.
-				builder.setSingleton(parserContext.getContainingBeanDefinition().isSingleton());
-			}
 			builder.addPropertyValue("targetBeanName", beanName);
 			builder.addPropertyValue("propertyPath", propertyPath);
+		}
 
-			AbstractBeanDefinition definition = builder.getBeanDefinition();
-			id = (StringUtils.hasText(id) ? id :
-					BeanDefinitionReaderUtils.generateBeanName(
-							definition, parserContext.getRegistry(), parserContext.isNested()));
-			parserContext.getRegistry().registerBeanDefinition(id, definition);
-
-			return definition;
+		protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
+			String id = super.resolveId(element, definition, parserContext);
+			if (!StringUtils.hasText(id)) {
+				id = element.getAttribute("path");
+			}
+			return id;
 		}
 	}
 
 
-	private static class ListBeanDefinitionParser implements BeanDefinitionParser {
+	private static class ListBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
-		public BeanDefinition parse(Element element, ParserContext parserContext) {
-			String id = element.getAttribute("id");
+		protected Class getBeanClass(Element element) {
+			return ListFactoryBean.class;
+		}
+
+		protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 			String listClass = element.getAttribute("list-class");
-
-			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ListFactoryBean.class);
-			AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
-			List parsedList = parserContext.getDelegate().parseListElement(element, beanDefinition);
-			builder.setSource(parserContext.extractSource(element));
+			List parsedList = parserContext.getDelegate().parseListElement(element, builder.getRawBeanDefinition());
 			builder.addPropertyValue("sourceList", parsedList);
 			if (StringUtils.hasText(listClass)) {
 				builder.addPropertyValue("targetListClass", listClass);
 			}
-			parserContext.getRegistry().registerBeanDefinition(id, beanDefinition);
-			// cannot be used in a 'inner-bean' setting (use plain <list>)
-			return null;
 		}
 	}
 
 
-	private static class SetBeanDefinitionParser implements BeanDefinitionParser {
+	private static class SetBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
-		public BeanDefinition parse(Element element, ParserContext parserContext) {
-			String id = element.getAttribute("id");
+		protected Class getBeanClass(Element element) {
+			return SetFactoryBean.class;
+		}
+
+		protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 			String setClass = element.getAttribute("set-class");
-
-			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(SetFactoryBean.class);
-			AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
-			Set parsedSet = parserContext.getDelegate().parseSetElement(element, beanDefinition);
-			builder.setSource(parserContext.extractSource(element));
+			Set parsedSet = parserContext.getDelegate().parseSetElement(element, builder.getRawBeanDefinition());
 			builder.addPropertyValue("sourceSet", parsedSet);
 			if (StringUtils.hasText(setClass)) {
 				builder.addPropertyValue("targetSetClass", setClass);
 			}
-			parserContext.getRegistry().registerBeanDefinition(id, beanDefinition);
-			// cannot be used in a 'inner-bean' setting (use plain <set>)
-			return null;
 		}
 	}
 
 
-	private static class MapBeanDefinitionParser implements BeanDefinitionParser {
+	private static class MapBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
-		public BeanDefinition parse(Element element, ParserContext parserContext) {
-			String id = element.getAttribute("id");
+		protected Class getBeanClass(Element element) {
+			return MapFactoryBean.class;
+		}
+
+		protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 			String mapClass = element.getAttribute("map-class");
-
-			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(MapFactoryBean.class);
-			AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
-			Map parsedMap = parserContext.getDelegate().parseMapElement(element, beanDefinition);
-			builder.setSource(parserContext.extractSource(element));
+			Map parsedMap = parserContext.getDelegate().parseMapElement(element, builder.getRawBeanDefinition());
 			builder.addPropertyValue("sourceMap", parsedMap);
 			if (StringUtils.hasText(mapClass)) {
 				builder.addPropertyValue("targetMapClass", mapClass);
 			}
-			parserContext.getRegistry().registerBeanDefinition(id, beanDefinition);
-			// cannot be used in a 'inner-bean' setting (use plain <map>)
-			return null;
 		}
 	}
 
