@@ -270,12 +270,16 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 
 	/**
 	 * Return the class of the wrapped bean.
-	 * @throws IllegalStateException if the bean definition
-	 * does not carry a resolved bean class
+	 * @throws IllegalStateException if the bean definition does not define a bean class,
+	 * or a specified bean class name has not been resolved into an actual Class
 	 */
 	public Class getBeanClass() throws IllegalStateException {
+		if (this.beanClass == null) {
+			throw new IllegalStateException("No bean class specified on bean definition");
+		}
 		if (!(this.beanClass instanceof Class)) {
-			throw new IllegalStateException("Bean definition does not carry a resolved bean class");
+			throw new IllegalStateException(
+					"Bean class name [" + this.beanClass + "] has not been resolved into an actual Class");
 		}
 		return (Class) this.beanClass;
 	}
