@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,16 @@
 
 package org.springframework.scheduling.commonj;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.naming.NamingException;
 
+import commonj.timers.Timer;
 import commonj.timers.TimerManager;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiLocatorSupport;
@@ -47,13 +53,16 @@ import org.springframework.jndi.JndiLocatorSupport;
  * @see commonj.timers.TimerManager
  * @see commonj.timers.TimerListener
  */
-public class TimerManagerFactoryBean extends JndiLocatorSupport implements FactoryBean, InitializingBean {
+public class TimerManagerFactoryBean extends JndiLocatorSupport
+		implements FactoryBean, InitializingBean, DisposableBean {
 
 	private TimerManager timerManager;
 
 	private String timerManagerName;
 
 	private ScheduledTimerListener[] scheduledTimerListeners;
+
+	private final List timers = new LinkedList();
 
 
 	/**
@@ -102,21 +111,23 @@ public class TimerManagerFactoryBean extends JndiLocatorSupport implements Facto
 		// register all ScheduledTimerListeners
 		for (int i = 0; i < this.scheduledTimerListeners.length; i++) {
 			ScheduledTimerListener scheduledTask = this.scheduledTimerListeners[i];
+			Timer timer = null;
 			if (scheduledTask.getPeriod() > 0) {
 				// repeated task execution
 				if (scheduledTask.isFixedRate()) {
-					this.timerManager.scheduleAtFixedRate(
+					timer = this.timerManager.scheduleAtFixedRate(
 							scheduledTask.getTimerListener(), scheduledTask.getDelay(), scheduledTask.getPeriod());
 				}
 				else {
-					this.timerManager.schedule(
+					timer = this.timerManager.schedule(
 							scheduledTask.getTimerListener(), scheduledTask.getDelay(), scheduledTask.getPeriod());
 				}
 			}
 			else {
 				// one-time task execution
-				this.timerManager.schedule(scheduledTask.getTimerListener(), scheduledTask.getDelay());
+				timer = this.timerManager.schedule(scheduledTask.getTimerListener(), scheduledTask.getDelay());
 			}
+			this.timers.add(timer);
 		}
 	}
 
@@ -131,6 +142,23 @@ public class TimerManagerFactoryBean extends JndiLocatorSupport implements Facto
 
 	public boolean isSingleton() {
 		return true;
+	}
+
+
+	/**
+	 * Cancel all statically registered Timers on shutdown.
+	 */
+	public void destroy() {
+		for (Iterator it = this.timers.iterator(); it.hasNext();) {
+			Timer timer = (Timer) it.next();
+			try {
+				timer.cancel();
+			}
+			catch (Throwable ex) {
+				logger.warn("Could not cancel CommonJ Timer", ex);
+			}
+		}
+		this.timers.clear();
 	}
 
 }
