@@ -131,7 +131,6 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate delegate) {
 		if (delegate.isDefaultNamespace(root.getNamespaceURI())) {
 			NodeList nl = root.getChildNodes();
-
 			for (int i = 0; i < nl.getLength(); i++) {
 				Node node = nl.item(i);
 				if (node instanceof Element) {
@@ -145,7 +144,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 					}
 				}
 			}
-		} else {
+		}
+		else {
 			delegate.parseCustomElement(root);
 		}
 	}

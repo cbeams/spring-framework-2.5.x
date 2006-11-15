@@ -113,7 +113,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 			super.setValue(value);
 		}
 		else if (value instanceof Collection) {
-			// Convert Collection elements to array elements.
+			// Convert Collection elements.
 			Collection source = (Collection) value;
 			Collection target = createCollection(this.collectionType, source.size());
 			for (Iterator it = source.iterator(); it.hasNext();) {
@@ -185,11 +185,11 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 	 * should be converted to a Set of Integer objects.
 	 * <p>Only called if actually creating a new Collection!
 	 * This is by default not the case if the type of the passed-in Collection
-	 * already matches. Override <code>alwaysCreateNewCollection</code> to
+	 * already matches. Override {@link #alwaysCreateNewCollection()} to
 	 * enforce creating a new Collection in every case.
 	 * @param element the source element
 	 * @return the element to be used in the target Collection
-	 * @see #alwaysCreateNewCollection
+	 * @see #alwaysCreateNewCollection()
 	 */
 	protected Object convertElement(Object element) {
 		return element;

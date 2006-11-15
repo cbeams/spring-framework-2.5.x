@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,15 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.Attr;
 
-import java.util.Map;
-import java.util.HashMap;
-
-import org.springframework.beans.factory.xml.BeanDefinitionDecorator;
-import org.springframework.beans.factory.xml.BeanDefinitionParser;
-import org.springframework.beans.factory.xml.NamespaceHandler;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 
 /**
  * Support class for implementing custom {@link NamespaceHandler NamespaceHandlers}. Parsing and
@@ -107,13 +104,13 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 			decorator = (BeanDefinitionDecorator) this.attributeDecorators.get(node.getLocalName());
 		}
 		else {
-			throw new IllegalArgumentException("Cannot decorate based on Nodes of type '" + node.getClass().getName() + "'");
+			throw new IllegalArgumentException(
+					"Cannot decorate based on Nodes of type [" + node.getClass().getName() + "]");
 		}
 
 		if (decorator == null) {
-			throw new IllegalArgumentException("Cannot locate BeanDefinitionDecorator for "
-							+ (node instanceof Element ? "element" : "attribute") + " [" +
-							node.getLocalName() + "].");
+			throw new IllegalArgumentException("Cannot locate BeanDefinitionDecorator for " +
+					(node instanceof Element ? "element" : "attribute") + " [" + node.getLocalName() + "]");
 		}
 
 		return decorator;
@@ -145,4 +142,5 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	protected final void registerBeanDefinitionDecoratorForAttribute(String attributeName, BeanDefinitionDecorator decorator) {
 		this.attributeDecorators.put(attributeName, decorator);
 	}
+
 }
