@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.regex.Pattern;
 
@@ -41,6 +42,7 @@ import org.springframework.beans.propertyeditors.ClassArrayEditor;
 import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.beans.propertyeditors.CustomBooleanEditor;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
+import org.springframework.beans.propertyeditors.CustomMapEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
@@ -92,6 +94,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @see org.springframework.beans.propertyeditors.CustomBooleanEditor
 	 * @see org.springframework.beans.propertyeditors.CustomNumberEditor
 	 * @see org.springframework.beans.propertyeditors.CustomCollectionEditor
+	 * @see org.springframework.beans.propertyeditors.CustomMapEditor
 	 * @see org.springframework.beans.propertyeditors.FileEditor
 	 * @see org.springframework.beans.propertyeditors.InputStreamEditor
 	 * @see org.springframework.jndi.JndiTemplateEditor
@@ -129,6 +132,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(Set.class, new CustomCollectionEditor(Set.class));
 		this.defaultEditors.put(SortedSet.class, new CustomCollectionEditor(SortedSet.class));
 		this.defaultEditors.put(List.class, new CustomCollectionEditor(List.class));
+		this.defaultEditors.put(SortedMap.class, new CustomMapEditor(SortedMap.class));
 
 		// Default editors for primitive arrays.
 		this.defaultEditors.put(byte[].class, new ByteArrayPropertyEditor());

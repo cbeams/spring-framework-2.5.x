@@ -32,6 +32,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import junit.framework.TestCase;
 import net.sf.hibernate.FlushMode;
@@ -1050,10 +1052,10 @@ public class BeanWrapperTests extends TestCase {
 		List list = new LinkedList();
 		list.add("list1");
 		bw.setPropertyValue("list", list);
-		assertEquals(coll, tb.getCollection());
-		assertEquals(set, tb.getSet());
-		assertEquals(sortedSet, tb.getSortedSet());
-		assertEquals(list, tb.getList());
+		assertSame(coll, tb.getCollection());
+		assertSame(set, tb.getSet());
+		assertSame(sortedSet, tb.getSortedSet());
+		assertSame(list, tb.getList());
 	}
 
 	public void testNonMatchingCollections() {
@@ -1194,6 +1196,34 @@ public class BeanWrapperTests extends TestCase {
 
 		bw.setPropertyValue("list", Arrays.asList(new String[] {"list1 "}));
 		assertTrue(tb.getList().contains("list1"));
+	}
+
+	public void testMatchingMaps() {
+		IndexedTestBean tb = new IndexedTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		Map map = new HashMap();
+		map.put("key", "value");
+		bw.setPropertyValue("map", map);
+		SortedMap sortedMap = new TreeMap();
+		map.put("sortedKey", "sortedValue");
+		bw.setPropertyValue("sortedMap", sortedMap);
+		assertSame(map, tb.getMap());
+		assertSame(sortedMap, tb.getSortedMap());
+	}
+
+	public void testNonMatchingMaps() {
+		IndexedTestBean tb = new IndexedTestBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		Map map = new TreeMap();
+		map.put("key", "value");
+		bw.setPropertyValue("map", map);
+		Map sortedMap = new HashMap();
+		sortedMap.put("sortedKey", "sortedValue");
+		bw.setPropertyValue("sortedMap", sortedMap);
+		assertEquals(1, tb.getMap().size());
+		assertEquals("value", tb.getMap().get("key"));
+		assertEquals(1, tb.getSortedMap().size());
+		assertEquals("sortedValue", tb.getSortedMap().get("sortedKey"));
 	}
 
 	public void testSetNumberProperties() {

@@ -25,11 +25,14 @@ import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
-import java.util.StringTokenizer;
 import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.Vector;
 import java.util.regex.Pattern;
 
 import junit.framework.TestCase;
@@ -1256,6 +1259,22 @@ public class CustomEditorTests extends TestCase {
 		assertEquals("test", bean.getList().get(0));
 	}
 
+	public void testConversionToOldCollections() throws PropertyVetoException {
+		OldCollectionsBean tb = new OldCollectionsBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		bw.registerCustomEditor(Vector.class, new CustomCollectionEditor(Vector.class));
+		bw.registerCustomEditor(Hashtable.class, new CustomMapEditor(Hashtable.class));
+
+		bw.setPropertyValue("vector", new String[] {"a", "b"});
+		assertEquals(2, tb.getVector().size());
+		assertEquals("a", tb.getVector().get(0));
+		assertEquals("b", tb.getVector().get(1));
+
+		bw.setPropertyValue("hashtable", Collections.singletonMap("foo", "bar"));
+		assertEquals(1, tb.getHashtable().size());
+		assertEquals("bar", tb.getHashtable().get("foo"));
+	}
+
 	public void testUninitializedArrayPropertyWithCustomEditor() {
 		IndexedTestBean bean = new IndexedTestBean(false);
 		BeanWrapper bw = new BeanWrapperImpl(bean);
@@ -1279,7 +1298,7 @@ public class CustomEditorTests extends TestCase {
 				setValue(new TestBean(text, 99));
 			}
 		});
-		bw.setPropertyValue("array", new String[]{"a", "b"});
+		bw.setPropertyValue("array", new String[] {"a", "b"});
 		assertEquals(2, tb.getArray().length);
 		assertEquals("a", tb.getArray()[0].getName());
 		assertEquals("b", tb.getArray()[1].getName());
@@ -1293,7 +1312,7 @@ public class CustomEditorTests extends TestCase {
 				setValue("-" + text + "-");
 			}
 		});
-		bw.setPropertyValue("name", new String[]{"a", "b"});
+		bw.setPropertyValue("name", new String[] {"a", "b"});
 		assertEquals("-a,b-", tb.getName());
 	}
 
@@ -1343,6 +1362,7 @@ public class CustomEditorTests extends TestCase {
 		assertNull(classArrayEditor.getValue());
 		assertEquals("", classArrayEditor.getAsText());
 	}
+
 
 	private static class TestBeanEditor extends PropertyEditorSupport {
 
@@ -1414,6 +1434,30 @@ public class CustomEditorTests extends TestCase {
 
 		public void setMyCharacter(Character myCharacter) {
 			this.myCharacter = myCharacter;
+		}
+	}
+
+
+	private static class OldCollectionsBean {
+
+		private Vector vector;
+
+		private Hashtable hashtable;
+
+		public Vector getVector() {
+			return vector;
+		}
+
+		public void setVector(Vector vector) {
+			this.vector = vector;
+		}
+
+		public Hashtable getHashtable() {
+			return hashtable;
+		}
+
+		public void setHashtable(Hashtable hashtable) {
+			this.hashtable = hashtable;
 		}
 	}
 
