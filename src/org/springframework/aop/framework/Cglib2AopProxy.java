@@ -48,24 +48,26 @@ import org.springframework.util.ObjectUtils;
 /**
  * CGLIB2-based {@link AopProxy} implementation for the Spring AOP framework.
  *
- * <p><i>Requires CGLIB2 on the class path</i>.
+ * <p><i>Requires CGLIB 2.1+ on the classpath.</i>.
+ * As of Spring 2.0, earlier CGLIB versions are not supported anymore.
  *
  * <p>Objects of this type should be obtained through proxy factories,
- * configured by an {@link AdvisedSupport} object. This class is internal to the
- * Spring AOP framework and need not be used directly by client code.
- * {@link DefaultAopProxyFactory} will automatically create CGLIB2-based proxies
- * if necessary, for example in case of proxying a target class (see the
- * {@link DefaultAopProxyFactory attendant javadoc} for details).
+ * configured by an {@link AdvisedSupport} object. This class is internal
+ * to Spring's AOP framework and need not be used directly by client code.
+ *
+ * <p>{@link DefaultAopProxyFactory} will automatically create CGLIB2-based
+ * proxies if necessary, for example in case of proxying a target class
+ * (see the {@link DefaultAopProxyFactory attendant javadoc} for details).
  *
  * <p>Proxies created using this class are thread-safe if the underlying
- * (target) class is thread-safe. Built and tested against CGLIB 2.1, as
- * of Spring 2.0. Earlier CGLIB versions are not supported anymore.
+ * (target) class is thread-safe.
  *
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Juergen Hoeller
- * @see DefaultAopProxyFactory
+ * @see net.sf.cglib.proxy.Enhancer
  * @see AdvisedSupport#setProxyTargetClass
+ * @see DefaultAopProxyFactory
  */
 final class Cglib2AopProxy implements AopProxy, Serializable {
 
@@ -110,7 +112,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 	 * @throws AopConfigException if the config is invalid. We try to throw an informative
 	 * exception in this case, rather than let a mysterious failure happen later.
 	 */
-	protected Cglib2AopProxy(AdvisedSupport config) throws AopConfigException {
+	public Cglib2AopProxy(AdvisedSupport config) throws AopConfigException {
 		if (config == null) {
 			throw new AopConfigException("Cannot create AopProxy with null ProxyConfig");
 		}
@@ -949,8 +951,9 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			return ObjectUtils.nullSafeEquals(((PointcutAdvisor) a).getPointcut(), ((PointcutAdvisor) b).getPointcut());
 		}
 		else {
-			// can't sensibly make any other assumptions here.
+			// Can't sensibly make any other assumptions here.
 			return false;
 		}
 	}
+
 }

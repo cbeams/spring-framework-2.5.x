@@ -34,13 +34,13 @@ import org.springframework.util.ClassUtils;
  * InvocationHandler implementation for the Spring AOP framework,
  * based on JDK 1.3+ dynamic proxies.
  *
- * <p>Creates a JDK proxy, implementing the interfaces exposed by the
- * proxy. Dynamic proxies cannot be used to proxy methods defined in
- * classes, rather than interface.
+ * <p>Creates a JDK proxy, implementing the interfaces exposed by
+ * the proxy. Dynamic proxies <i>cannot</i> be used to proxy methods
+ * defined in classes, rather than interfaces.
  *
  * <p>Objects of this type should be obtained through proxy factories,
- * configured by an AdvisedSupport class. This class is internal
- * to the Spring framework and need not be used directly by client code.
+ * configured by an {@link AdvisedSupport} class. This class is internal
+ * to Spring's AOP framework and need not be used directly by client code.
  *
  * <p>Proxies created using this class will be thread-safe if the
  * underlying (target) class is threadsafe.
@@ -52,8 +52,8 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @see java.lang.reflect.Proxy
- * @see org.springframework.aop.framework.AdvisedSupport
- * @see org.springframework.aop.framework.ProxyFactory
+ * @see AdvisedSupport
+ * @see ProxyFactory
  */
 final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializable {
 
@@ -89,7 +89,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	 * We try to throw an informative exception in this case,
 	 * rather than let a mysterious failure happen later.
 	 */
-	protected JdkDynamicAopProxy(AdvisedSupport config) throws AopConfigException {
+	public JdkDynamicAopProxy(AdvisedSupport config) throws AopConfigException {
 		if (config == null) {
 			throw new AopConfigException("Cannot create AopProxy with null ProxyConfig");
 		}
