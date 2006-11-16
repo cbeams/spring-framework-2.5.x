@@ -194,7 +194,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 
 	/**
 	 * Set whether to ignore unresolvable placeholders. Default is "false":
-	 * An exception will be thrown if a placeholder cannot not be resolved.
+	 * An exception will be thrown if a placeholder cannot be resolved.
 	 */
 	public void setIgnoreUnresolvablePlaceholders(boolean ignoreUnresolvablePlaceholders) {
 		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
@@ -387,8 +387,8 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 
 	/**
 	 * BeanDefinitionVisitor that resolves placeholders in String values,
-	 * deleagating to the <code>parseStringValue</code> method of the
-	 * containing clas.
+	 * delegating to the <code>parseStringValue</code> method of the
+	 * containing class.
 	 */
 	private class PlaceholderResolvingBeanDefinitionVisitor extends BeanDefinitionVisitor {
 
