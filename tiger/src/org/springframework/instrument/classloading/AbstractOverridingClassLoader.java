@@ -27,10 +27,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 
 /**
- * Abstract superclass for class loaders that do <i>not</i> always delegate to
- * their parent loader, as normal class loaders do. This enables, for example,
- * instrumentation to be forced, or a "throwaway" class loader behavior, where
- * selected classes are loaded by a child loader but not loaded by the parent.
+ * Abstract superclass for <code>ClassLoaders</code> that do <i>not</i>
+ * always delegate to their parent loader, as normal class loaders do.
+ * This enables, for example, instrumentation to be forced, or a "throwaway"
+ * class loading behavior, where selected classes are loaded by a child loader
+ * but not loaded by the parent.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -51,7 +52,8 @@ public abstract class AbstractOverridingClassLoader extends ClassLoader {
 	 */
 	protected AbstractOverridingClassLoader(ClassLoader parent) {
 		super(parent);
-		this.excludedPackages.add("java");
+		this.excludedPackages.add("java.");
+		this.excludedPackages.add("javax.");
 	}
 
 
