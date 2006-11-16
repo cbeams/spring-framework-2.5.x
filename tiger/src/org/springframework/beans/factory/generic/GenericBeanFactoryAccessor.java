@@ -16,22 +16,23 @@
 
 package org.springframework.beans.factory.generic;
 
-import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.util.Assert;
-
-import java.util.Map;
-import java.util.HashMap;
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.util.Assert;
 
 /**
  * Simple wrapper around a {@link ListableBeanFactory} that provides typed, generics-based
  * access to key methods. This removes the need for casting in many cases and should
  * increase compile-time type safety.
- * <p/>
- * Provides a simple mechanism for accessing all beans with a particular {@link Annotation}.
+ *
+ * <p>Provides a simple mechanism for accessing all beans with a particular {@link Annotation}.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class GenericBeanFactoryAccessor {
@@ -41,12 +42,35 @@ public class GenericBeanFactoryAccessor {
 	 */
 	private final ListableBeanFactory beanFactory;
 
+
 	/**
 	 * Constructs a <code>GenericBeanFactoryAccessor</code> that wraps the supplied {@link ListableBeanFactory}.
 	 */
 	public GenericBeanFactoryAccessor(ListableBeanFactory beanFactory) {
-		Assert.notNull(beanFactory, "'beanFactory' cannot be null.");
+		Assert.notNull(beanFactory, "Bean factory must not be null");
 		this.beanFactory = beanFactory;
+	}
+
+	/**
+	 * Return the wrapped {@link ListableBeanFactory}.
+	 */
+	public final ListableBeanFactory getBeanFactory() {
+		return this.beanFactory;
+	}
+
+
+	/**
+	 * @see org.springframework.beans.factory.BeanFactory#getBean(String)
+	 */
+	public <T> T getBean(String name) throws BeansException {
+		return (T) getBeanFactory().getBean(name);
+	}
+
+	/**
+	 * @see org.springframework.beans.factory.BeanFactory#getBean(String, Class)
+	 */
+	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
+		return (T) getBeanFactory().getBean(name, requiredType);
 	}
 
 	/**
@@ -59,30 +83,21 @@ public class GenericBeanFactoryAccessor {
 	/**
 	 * @see ListableBeanFactory#getBeansOfType(Class, boolean, boolean)
 	 */
-	public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includePrototypes, boolean includeFactoryBeans) throws BeansException {
-		return getBeanFactory().getBeansOfType(type, includePrototypes, includeFactoryBeans);
+	public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includePrototypes, boolean allowEagerInit)
+			throws BeansException {
+
+		return getBeanFactory().getBeansOfType(type, includePrototypes, allowEagerInit);
 	}
 
 	/**
-	 * @see org.springframework.beans.factory.BeanFactory#getBean(String, Class)
-	 */
-	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
-		return (T)getBeanFactory().getBean(name, requiredType);
-	}
-
-	/**
-	 * @see org.springframework.beans.factory.BeanFactory#getBean(String)
-	 */
-	public <T> T getBean(String name) throws BeansException {
-		return (T)getBeanFactory().getBean(name);
-	}
-
-	/**
-	 * Returns all beans whose <code>Class</code> has the supplied {@link Annotation} type.
+	 * Find all beans whose <code>Class</code> has the supplied {@link Annotation} type.
+	 * @param annotationType the type of annotation to look for
+	 * @return a Map with the matching beans, containing the bean names as
+	 * keys and the corresponding bean instances as values
 	 */
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
 		Map<String, Object> results = new HashMap<String, Object>();
-		for (String beanName : getBeanFactory().getBeanDefinitionNames()) {
+		for (String beanName : getBeanFactory().getBeanNamesForType(null)) {
 			Class beanType = getBeanFactory().getType(beanName);
 			if (beanType.getAnnotation(annotationType) != null) {
 				results.put(beanName, getBeanFactory().getBean(beanName));
@@ -91,10 +106,4 @@ public class GenericBeanFactoryAccessor {
 		return results;
 	}
 
-	/**
-	 * Returns the wrapped {@link ListableBeanFactory}.
-	 */
-	public ListableBeanFactory getBeanFactory() {
-		return this.beanFactory;
-	}
 }
