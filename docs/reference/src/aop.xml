@@ -2696,14 +2696,14 @@ public class Account {
    	  <programlisting><![CDATA[<!DOCTYPE aspectj PUBLIC    
   "-//AspectJ//DTD//EN"    "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">    
 
-<aspectj>
-  <aspects>
-    <include within="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"/>
-  </aspects>    
+<aspectj>   
   <weaver 
     options="-showWeaveInfo -XmessageHandlerClass:org.springframework.aop.aspectj.AspectJWeaverMessageHandler">
     <include within="com.xyz.myapp..*"/>
   </weaver>
+  <aspects>
+    <include within="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect"/>
+  </aspects> 
 </aspectj>]]></programlisting>
 	<para>On the Java 5 platform, load-time weaving is enabled by specifying the following
 	VM argument when launching the Java virtual machine:</para>	  
