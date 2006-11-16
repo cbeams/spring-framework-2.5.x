@@ -166,6 +166,19 @@ public interface BeanFactory {
 	boolean isSingleton(String name) throws NoSuchBeanDefinitionException;
 
 	/**
+	 * Check whether the bean with the given name matches the specified type.
+	 * @param name the name of the bean to query
+	 * @param targetType the type to match against
+	 * @return <code>true</code> if the bean type matches,
+	 * <code>false</code> if it doesn't match or cannot be determined yet
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @since 2.0.1
+	 * @see #getBean
+	 * @see #getType
+	 */
+	boolean isTypeMatch(String name, Class targetType) throws NoSuchBeanDefinitionException;
+
+	/**
 	 * Determine the type of the bean with the given name.
 	 * More specifically, checks the type of object that <code>getBean</code> would return.
 	 * For a FactoryBean, returns the type of object that the FactoryBean creates.

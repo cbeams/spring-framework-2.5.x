@@ -41,7 +41,7 @@ import org.springframework.util.StringUtils;
  * interface, managing existing bean instances rather than creating new ones
  * based on bean definitions.
  *
- * <p>For a full-fledged bean factory based on bean definitions, have a look
+ * <p>For a full-fledged BeanFactory based on bean definitions, have a look
  * at DefaultListableBeanFactory.
  *
  * @author Rod Johnson
@@ -117,6 +117,11 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		else {
 			return true;
 		}
+	}
+
+	public boolean isTypeMatch(String name, Class targetType) throws NoSuchBeanDefinitionException {
+		Class type = getType(name);
+		return (targetType == null || (type != null && targetType.isAssignableFrom(type)));
 	}
 
 	public Class getType(String name) throws NoSuchBeanDefinitionException {

@@ -156,17 +156,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			// Only consider bean as eligible if the bean name
 			// is not defined as alias for some other bean.
 			if (!isAlias(beanName)) {
-				RootBeanDefinition rbd = getMergedBeanDefinition(beanName, false);
+				RootBeanDefinition mbd = getMergedBeanDefinition(beanName, false);
 				// Only check bean definition if it is complete.
-				if (!rbd.isAbstract() &&
-						(allowEagerInit || rbd.hasBeanClass() || !rbd.isLazyInit() || this.allowEagerClassLoading)) {
+				if (!mbd.isAbstract() &&
+						(allowEagerInit || mbd.hasBeanClass() || !mbd.isLazyInit() || this.allowEagerClassLoading)) {
 					// In case of FactoryBean, match object created by FactoryBean.
 					try {
-						Class beanClass = resolveBeanClass(rbd, beanName);
-						boolean isFactoryBean = (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
-						if (isFactoryBean || rbd.getFactoryBeanName() != null) {
-							if (allowEagerInit && (includePrototypes || isSingleton(beanName)) &&
-									isBeanTypeMatch(beanName, type)) {
+						boolean isFactoryBean = isBeanClassMatch(beanName, mbd, FactoryBean.class);
+						if (isFactoryBean || mbd.getFactoryBeanName() != null) {
+							if (allowEagerInit && (includePrototypes || isSingleton(beanName)) && isTypeMatch(beanName, type)) {
 								result.add(beanName);
 								// Match found for this bean: do not match FactoryBean itself anymore.
 								continue;
@@ -179,12 +177,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							beanName = FACTORY_BEAN_PREFIX + beanName;
 						}
 						// Match raw bean instance (might be raw FactoryBean).
-						if ((includePrototypes || rbd.isSingleton()) && isBeanTypeMatch(beanName, type)) {
+						if ((includePrototypes || mbd.isSingleton()) && isTypeMatch(beanName, type)) {
 							result.add(beanName);
 						}
 					}
 					catch (CannotLoadBeanClassException ex) {
-						if (rbd.isLazyInit()) {
+						if (mbd.isLazyInit()) {
 							if (logger.isDebugEnabled()) {
 								logger.debug("Ignoring bean class loading failure for lazy-init bean '" + beanName + "'", ex);
 							}
@@ -205,7 +203,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (!containsBeanDefinition(beanName)) {
 				// In case of FactoryBean, match object created by FactoryBean.
 				if (isFactoryBean(beanName)) {
-					if ((includePrototypes || isSingleton(beanName)) && isBeanTypeMatch(beanName, type)) {
+					if ((includePrototypes || isSingleton(beanName)) && isTypeMatch(beanName, type)) {
 						result.add(beanName);
 						// Match found for this bean: do not match FactoryBean itself anymore.
 						continue;
@@ -214,7 +212,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					beanName = FACTORY_BEAN_PREFIX + beanName;
 				}
 				// Match raw bean instance (might be raw FactoryBean).
-				if (isBeanTypeMatch(beanName, type)) {
+				if (isTypeMatch(beanName, type)) {
 					result.add(beanName);
 				}
 			}
@@ -251,21 +249,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		return result;
-	}
-
-	/**
-	 * Check whether the specified bean matches the given type.
-	 * @param beanName the name of the bean to check
-	 * @param type the type to check for
-	 * @return whether the bean matches the given type
-	 * @see #getType
-	 */
-	private boolean isBeanTypeMatch(String beanName, Class type) {
-		if (type == null) {
-			return true;
-		}
-		Class beanType = getType(beanName);
-		return (beanType != null && type.isAssignableFrom(beanType));
 	}
 
 

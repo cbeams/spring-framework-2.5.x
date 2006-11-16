@@ -399,7 +399,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		List orderedFactoryProcessors = new ArrayList();
 		List nonOrderedFactoryProcessorNames = new ArrayList();
 		for (int i = 0; i < factoryProcessorNames.length; i++) {
-			if (Ordered.class.isAssignableFrom(getType(factoryProcessorNames[i]))) {
+			if (isTypeMatch(factoryProcessorNames[i], Ordered.class)) {
 				orderedFactoryProcessors.add(getBean(factoryProcessorNames[i]));
 			}
 			else {
@@ -650,6 +650,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
 		return getBeanFactory().isSingleton(name);
+	}
+
+	public boolean isTypeMatch(String name, Class targetType) throws NoSuchBeanDefinitionException {
+		return getBeanFactory().isTypeMatch(name, targetType);
 	}
 
 	public Class getType(String name) throws NoSuchBeanDefinitionException {
