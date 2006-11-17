@@ -26,11 +26,11 @@ import org.aopalliance.intercept.MethodInterceptor;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
@@ -74,7 +74,9 @@ import org.springframework.util.ClassUtils;
  * @author Rob Harrop
  * @since 13.10.2003
  * @see #setInterceptorNames
+ * @see #getAdvicesAndAdvisorsForBean
  * @see BeanNameAutoProxyCreator
+ * @see DefaultAdvisorAutoProxyCreator
  */
 public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware, Ordered {
@@ -269,8 +271,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	}
 
 	/**
-	 * Return whether the given bean class and bean name represents an
-	 * infrastructure class that should never be proxied.
+	 * Return whether the given bean class represents an infrastructure class
+	 * that should never be proxied.
 	 * <p>Default implementation considers Advisors, MethodInterceptors
 	 * and AbstractAutoProxyCreators as infrastructure classes.
 	 * @param beanClass the class of the bean
@@ -284,7 +286,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 				MethodInterceptor.class.isAssignableFrom(beanClass) ||
 				AbstractAutoProxyCreator.class.isAssignableFrom(beanClass);
 		if (retVal && logger.isDebugEnabled()) {
-			logger.debug("Did not attempt to autoproxy infrastructure class [" + beanClass.getName() + "]");
+			logger.debug("Did not attempt to auto-proxy infrastructure class [" + beanClass.getName() + "]");
 		}
 		return retVal;
 	}
@@ -366,17 +368,16 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 			}
 		}
 		if (logger.isDebugEnabled()) {
-			int nrOfCommonInterceptors = commonInterceptors != null ? commonInterceptors.length : 0;
-			int nrOfSpecificInterceptors = specificInterceptors != null ? specificInterceptors.length : 0;
-			logger.debug(
-					"Creating implicit proxy for bean '" + beanName + "' with " + nrOfCommonInterceptors +
+			int nrOfCommonInterceptors = (commonInterceptors != null ? commonInterceptors.length : 0);
+			int nrOfSpecificInterceptors = (specificInterceptors != null ? specificInterceptors.length : 0);
+			logger.debug("Creating implicit proxy for bean '" + beanName + "' with " + nrOfCommonInterceptors +
 					" common interceptors and " + nrOfSpecificInterceptors + " specific interceptors");
 		}
 
 		ProxyFactory proxyFactory = new ProxyFactory();
-		// Copy our properties (proxyTargetClass) inherited from ProxyConfig.
+		// Copy our properties (proxyTargetClass etc) inherited from ProxyConfig.
 		proxyFactory.copyFrom(this);
-		
+
 		if (!isProxyTargetClass()) {
 			// Must allow for introductions; can't just set interfaces to
 			// the target's interfaces only.
