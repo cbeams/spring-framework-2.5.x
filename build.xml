@@ -1608,6 +1608,7 @@
 				<include name="lib/portlet/**"/>
 				<include name="lib/qdox/**"/>
 				<include name="lib/quartz/**"/>
+				<include name="lib/serp/**"/>
 				<include name="lib/struts/**"/>
 				<include name="lib/tomcat/**"/>
 				<include name="lib/toplink/**"/>
