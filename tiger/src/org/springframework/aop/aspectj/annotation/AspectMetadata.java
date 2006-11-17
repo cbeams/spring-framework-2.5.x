@@ -21,12 +21,11 @@ import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
 
-import org.springframework.aop.ClassFilter;
-import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.TypePatternClassFilter;
 import org.springframework.aop.framework.AopConfigException;
+import org.springframework.aop.support.ComposablePointcut;
 
 /**
  * Metadata for an AspectJ aspect class, with an additional Spring AOP pointcut
@@ -37,13 +36,17 @@ import org.springframework.aop.framework.AopConfigException;
  * "singleton", "pertarget" and "perthis".
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.aop.aspectj.AspectJExpressionPointcut
  */
 public class AspectMetadata {
-	
+
+	/**
+	 * AspectJ reflection information (AspectJ 5 / Java 5 specific).
+	 */
 	private final AjType ajType;
-	
+
 	/**
 	 * Spring AOP pointcut corresponding to the per clause of the
 	 * aspect. Will be the Pointcut.TRUE canonical instance in the
@@ -59,104 +62,105 @@ public class AspectMetadata {
 	private String aspectName;
 
 
-	public AspectMetadata(Class<?> aspectClass, String aspectName) {
+	/**
+	 * Create a new AspectMetadata instance for the given aspect class.
+	 * @param aspectClass the aspect class
+	 * @param aspectName the name of the aspect
+	 */
+	public AspectMetadata(Class aspectClass, String aspectName) {
 		this.aspectName = aspectName;
 		this.ajType = AjTypeSystem.getAjType(aspectClass);
 		
-		if (!ajType.isAspect()) {
+		if (!this.ajType.isAspect()) {
 			throw new IllegalArgumentException("Class '" + aspectClass.getName() + "' is not an @AspectJ aspect");
 		}
-		validate();
+		if (this.ajType.getDeclarePrecedence().length > 0) {
+			throw new IllegalArgumentException("DeclarePrecendence not presently supported in Spring AOP");
+		}
 
-		switch (ajType.getPerClause().getKind()) {
+		switch (this.ajType.getPerClause().getKind()) {
 			case SINGLETON :
 				this.perClausePointcut = Pointcut.TRUE;
 				return;
-				
 			case PERTARGET : case PERTHIS :
 				AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 				ajexp.setLocation("@Aspect annotation on " + aspectClass.getName());
 				ajexp.setExpression(findPerClause(aspectClass));
 				this.perClausePointcut = ajexp;
 				return;
-				
 			case PERTYPEWITHIN :
 				// Works with a type pattern
-				final ClassFilter typePatternClassFilter = new TypePatternClassFilter(findPerClause(aspectClass));
-				this.perClausePointcut = new Pointcut() {
-					public ClassFilter getClassFilter() {
-						return typePatternClassFilter;
-					}
-					
-					public MethodMatcher getMethodMatcher() {
-						return MethodMatcher.TRUE;
-					}
-				};
+				this.perClausePointcut = new ComposablePointcut(new TypePatternClassFilter(findPerClause(aspectClass)));
 				return;
-				
 			default :
-				throw new AopConfigException("PerClause " + ajType.getPerClause().getKind() + " not supported by Spring AOP for class " +
-						aspectClass.getName());
+				throw new AopConfigException(
+						"PerClause " + ajType.getPerClause().getKind() + " not supported by Spring AOP for " + aspectClass);
 		}
-	}
-
-
-	private void validate() throws IllegalArgumentException {
-		if (this.ajType.getDeclarePrecedence().length > 0) {
-			throw new IllegalArgumentException("DeclarePrecendence not presently supported in Spring AOP");
-		}
-	}
-	
-	public boolean isPerThisOrPerTarget() {
-		PerClauseKind kind = getAjType().getPerClause().getKind();
-		return (kind == PerClauseKind.PERTARGET || kind == PerClauseKind.PERTHIS);
-	}
-	
-	public boolean isPerTypeWithin() {
-		PerClauseKind kind = getAjType().getPerClause().getKind();
-		return (kind == PerClauseKind.PERTYPEWITHIN);
-	}
-	
-	public boolean isLazilyInstantiated() {
-		return isPerThisOrPerTarget() || isPerTypeWithin();
 	}
 
 	/**
-	 * Extract contents from string of form pertarget(contents)
-	 * @param aspectClass
-	 * @return
+	 * Extract contents from String of form <code>pertarget(contents)</code>.
 	 */
 	private String findPerClause(Class<?> aspectClass) {
 		// TODO when AspectJ provides this, we can remove this hack. Hence we don't
 		// bother to make it elegant. Or efficient. Or robust :-)
-		String s = aspectClass.getAnnotation(Aspect.class).value();
-		s = s.substring(s.indexOf("(") + 1);
-		s = s.substring(0, s.length() - 1);
-		return s;
+		String str = aspectClass.getAnnotation(Aspect.class).value();
+		str = str.substring(str.indexOf("(") + 1);
+		str = str.substring(0, str.length() - 1);
+		return str;
 	}
-	
+
+
 	/**
-	 * Return AspectJ reflection information
-	 * @return information from AspectJ about the aspect
+	 * Return AspectJ reflection information.
 	 */
 	public AjType getAjType() {
 		return this.ajType;
 	}
-	
-	public Class<?> getAspectClass() {
+
+	/**
+	 * Return the aspect class.
+	 */
+	public Class getAspectClass() {
 		return this.ajType.getJavaClass();
 	}
-	
+
+	/**
+	 * Return the aspect class.
+	 */
 	public String getAspectName() {
 		return this.aspectName;
 	}
-	
+
 	/**
-	 * Return a Spring pointcut expression for a singleton aspect
-	 * @return Pointcut.TRUE if it's a singleton
+	 * Return a Spring pointcut expression for a singleton aspect.
+	 * (e.g. <code>Pointcut.TRUE</code> if it's a singleton).
 	 */
 	public Pointcut getPerClausePointcut() {
 		return this.perClausePointcut;
+	}
+
+	/**
+	 * Return whether the aspect is defined as "perthis" or "pertarget".
+	 */
+	public boolean isPerThisOrPerTarget() {
+		PerClauseKind kind = getAjType().getPerClause().getKind();
+		return (kind == PerClauseKind.PERTARGET || kind == PerClauseKind.PERTHIS);
+	}
+
+	/**
+	 * Return whether the aspect is defined as "pertypewithin".
+	 */
+	public boolean isPerTypeWithin() {
+		PerClauseKind kind = getAjType().getPerClause().getKind();
+		return (kind == PerClauseKind.PERTYPEWITHIN);
+	}
+
+	/**
+	 * Return whether the aspect needs to be lazily instantiated.
+	 */
+	public boolean isLazilyInstantiated() {
+		return (isPerThisOrPerTarget() || isPerTypeWithin());
 	}
 
 }
