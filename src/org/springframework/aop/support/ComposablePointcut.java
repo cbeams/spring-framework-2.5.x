@@ -21,6 +21,7 @@ import java.io.Serializable;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -36,22 +37,59 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 11.11.2003
  * @see Pointcuts#union(org.springframework.aop.Pointcut, org.springframework.aop.Pointcut)
  */
 public class ComposablePointcut implements Pointcut, Serializable {
+
+	/** use serialVersionUID from Spring 1.2 for interoperability */
+	private static final long serialVersionUID = -2743223737633663832L;
 
 	private ClassFilter classFilter;
 
 	private MethodMatcher methodMatcher;
 
 
+	/**
+	 * Create a default ComposablePointcut, with <code>ClassFilter.TRUE</code>
+	 * and <code>MethodMatcher.TRUE</code>.
+	 */
 	public ComposablePointcut() {
-		this.classFilter =  ClassFilter.TRUE;
+		this.classFilter = ClassFilter.TRUE;
 		this.methodMatcher = MethodMatcher.TRUE;
 	}
 
+	/**
+	 * Create a ComposablePointcut for the given ClassFilter,
+	 * with <code>MethodMatcher.TRUE</code>.
+	 * @param classFilter the ClassFilter to use
+	 */
+	public ComposablePointcut(ClassFilter classFilter) {
+		Assert.notNull(classFilter, "ClassFilter must not be null");
+		this.classFilter = classFilter;
+		this.methodMatcher = MethodMatcher.TRUE;
+	}
+
+	/**
+	 * Create a ComposablePointcut for the given MethodMatcher,
+	 * with <code>ClassFilter.TRUE</code>.
+	 * @param methodMatcher the MethodMatcher to use
+	 */
+	public ComposablePointcut(MethodMatcher methodMatcher) {
+		Assert.notNull(methodMatcher, "MethodMatcher must not be null");
+		this.classFilter = ClassFilter.TRUE;
+		this.methodMatcher = methodMatcher;
+	}
+
+	/**
+	 * Create a ComposablePointcut for the given ClassFilter and MethodMatcher.
+	 * @param classFilter the ClassFilter to use
+	 * @param methodMatcher the MethodMatcher to use
+	 */
 	public ComposablePointcut(ClassFilter classFilter, MethodMatcher methodMatcher) {
+		Assert.notNull(classFilter, "ClassFilter must not be null");
+		Assert.notNull(methodMatcher, "MethodMatcher must not be null");
 		this.classFilter = classFilter;
 		this.methodMatcher = methodMatcher;
 	}
@@ -115,6 +153,11 @@ public class ComposablePointcut implements Pointcut, Serializable {
 			code = 37 * code + this.methodMatcher.hashCode();
 		}
 		return code;
+	}
+
+	public String toString() {
+		return "ComposablePointcut consisting of ClassFilter [" + this.classFilter +
+				"] and MethodMatcher [" + this.methodMatcher + "]";
 	}
 
 }
