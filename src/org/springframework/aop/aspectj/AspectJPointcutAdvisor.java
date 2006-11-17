@@ -16,80 +16,80 @@
 
 package org.springframework.aop.aspectj;
 
+import java.io.Serializable;
+
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.PointcutAdvisor;
+import org.springframework.core.Ordered;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
- * AspectJPointcutAdvisor enforces the rule that the pointcut reference
- * held by this advisor must be to the same pointcut instance as that
- * held by the associated (AspectJ) advice.
- * 
+ * AspectJPointcutAdvisor that adapts an {@link AbstractAspectJAdvice}
+ * to the {@link org.springframework.aop.PointcutAdvisor} interface.
+ *
  * @author Adrian Colyer
+ * @author Juergen Hoeller
  * @since 2.0
  */
-public class AspectJPointcutAdvisor extends DefaultPointcutAdvisor {
+public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered, Serializable {
+
+	private AbstractAspectJAdvice advice;
+
+	private Integer order;
+
 
 	/**
-	 * Ensure pointcut instance in this advisor and the associated advice point to the
-	 * same instance.
+	 * Create a new AspectJPointcutAdvisor for the given advice
+	 * @param advice the AbstractAspectJAdvice to wrap
 	 */
-	public void setPointcut(Pointcut pointcut) {
-		if (!(pointcut instanceof AspectJExpressionPointcut)) {
-			throw new IllegalArgumentException(
-					"AspectJPointcutAdvisor requires an AspectJExpressionPointcut but " +
-					"was passed an instance of '" + pointcut.getClass().getName() + "'");
-		}
-		
-		AspectJExpressionPointcut newPointcut = (AspectJExpressionPointcut) pointcut;
-		
-		Advice myAdvice = getAdvice();
-		if (myAdvice instanceof AbstractAspectJAdvice) {
-			AbstractAspectJAdvice myAjAdvice = (AbstractAspectJAdvice) myAdvice;
-			String adviceExpression = myAjAdvice.getPointcut().getExpression();
-			if (newPointcut.getExpression().equals(adviceExpression)) {
-				// Same expression, safe to use same instance.
-				super.setPointcut(myAjAdvice.getPointcut());
-			}
-			else {
-				throw new IllegalStateException(
-						"Pointcut expression in advisor must match expression in associated advice:\n" +
-						"expression is '" + newPointcut.getExpression() + "'\n" +
-						"and expression in advice is '" + adviceExpression + "'");
-			}
+	public AspectJPointcutAdvisor(AbstractAspectJAdvice advice) {
+		Assert.notNull(advice, "Advice must not be null");
+		this.advice = advice;
+	}
+
+	public void setOrder(int order) {
+		this.order = new Integer(order);
+	}
+
+
+	public boolean isPerInstance() {
+		return true;
+	}
+
+	public Advice getAdvice() {
+		return this.advice;
+	}
+
+	public Pointcut getPointcut() {
+		return (this.advice != null ? this.advice.getPointcut() : null);
+	}
+
+	public int getOrder() {
+		if (this.order != null) {
+			return this.order.intValue();
 		}
 		else {
-			super.setPointcut(newPointcut);
-		}
-	}
-	
-	/**
-	 * Ensure pointcut instance in this advisor and the associated advice point to the
-	 * same instance.
-	 */
-	public void setAdvice(Advice advice) {
-		super.setAdvice(advice);
-		
-		if (advice instanceof AbstractAspectJAdvice) {
-			AbstractAspectJAdvice ajAdvice = (AbstractAspectJAdvice) advice;
-			ensureAdviceAndPointcutReferToSamePointcutInstance(ajAdvice);	
-			setOrder(ajAdvice.getOrder());
+			return this.advice.getOrder();
 		}
 	}
 
-	private void ensureAdviceAndPointcutReferToSamePointcutInstance(AbstractAspectJAdvice ajAdvice) {
-		if (getPointcut() != null) {
-			AspectJExpressionPointcut ajPointcut = (AspectJExpressionPointcut) getPointcut();
-			if (!ajPointcut.getExpression().equals(ajAdvice.getPointcut().getExpression())) {
-				String msg = "Pointcut expression in advisor must match expression in associated advice:\n" +
-	             "expression is '" + ajPointcut.getExpression() + "'\n" +
-	             "and expression in advice is '" + ajAdvice.getPointcut().getExpression() + "'";
-				throw new IllegalStateException(msg);
-			}
+
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
 		}
-		
-		setPointcut(ajAdvice.getPointcut());
+		if (!(other instanceof AspectJPointcutAdvisor)) {
+			return false;
+		}
+		AspectJPointcutAdvisor otherAdvisor = (AspectJPointcutAdvisor) other;
+		return (ObjectUtils.nullSafeEquals(this.advice, otherAdvisor.advice));
 	}
-	
+
+	public int hashCode() {
+		return AspectJPointcutAdvisor.class.hashCode();
+	}
+
 }

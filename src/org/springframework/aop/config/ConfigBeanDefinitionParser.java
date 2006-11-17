@@ -32,12 +32,11 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.aop.aspectj.AspectJPointcutAdvisor;
 import org.springframework.aop.aspectj.DeclareParentsAdvisor;
-import org.springframework.beans.MutablePropertyValues;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.parsing.ParseState;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -47,7 +46,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
@@ -117,8 +115,6 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String ASPECT_NAME_PROPERTY = "aspectName";
 
-	private static final String ASPECT_BEAN_PROPERTY = "aspectBean";
-
 	private static final String DECLARATION_ORDER_PROPERTY = "declarationOrder";
 
 	private static final String ORDER_PROPERTY = "order";
@@ -180,7 +176,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 	/**
 	 * Parses the supplied <code>&lt;advisor&gt;</code> element and registers the resulting
-	 * {@link org.springframework.aop.Advisor} and any resultant {@link org.springframework.aop.Pointcut}
+	 * {@link org.springframework.aop.Advisor} and any resulting {@link org.springframework.aop.Pointcut}
 	 * with the supplied {@link BeanDefinitionRegistry}.
 	 */
 	private void parseAdvisor(Element advisorElement, ParserContext parserContext) {
@@ -194,7 +190,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 		try {
 			this.parseState.push(new AdvisorEntry(advisorBeanName));
-			String pointcutBeanName = parsePointcutProperty(advisorElement, advisorDef.getPropertyValues(), parserContext);
+			String pointcutBeanName = parsePointcutProperty(advisorElement, parserContext);
+			advisorDef.getPropertyValues().addPropertyValue(POINTCUT, new RuntimeBeanReference(pointcutBeanName));
 			registry.registerBeanDefinition(advisorBeanName, advisorDef);
 			boolean pointcutRef = advisorElement.hasAttribute(POINTCUT_REF);
 			if (pointcutBeanName != null) {
@@ -231,16 +228,16 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * parse any associated '<code>pointcut</code>' or '<code>pointcut-ref</code>' attributes.
 	 */
 	private AbstractBeanDefinition createAdvisorBeanDefinition(Element advisorElement, ParserContext parserContext) {
-		RootBeanDefinition advisorDefinition = new RootBeanDefinition(AspectJPointcutAdvisor.class);
+		RootBeanDefinition advisorDefinition = new RootBeanDefinition(DefaultPointcutAdvisor.class);
 		advisorDefinition.setSource(parserContext.extractSource(advisorElement));
 
-		MutablePropertyValues mpvs = advisorDefinition.getPropertyValues();
 		if (advisorElement.hasAttribute(ORDER_PROPERTY)) {
-			mpvs.addPropertyValue(ORDER_PROPERTY, advisorElement.getAttribute(ORDER_PROPERTY));
+			advisorDefinition.getPropertyValues().addPropertyValue(
+					ORDER_PROPERTY, advisorElement.getAttribute(ORDER_PROPERTY));
 		}
-		advisorDefinition.setPropertyValues(mpvs);
 
-		mpvs.addPropertyValue(ADVICE, new RuntimeBeanReference(advisorElement.getAttribute(ADVICE_REF)));
+		advisorDefinition.getPropertyValues().addPropertyValue(
+				ADVICE, new RuntimeBeanReference(advisorElement.getAttribute(ADVICE_REF)));
 		return advisorDefinition;
 	}
 
@@ -266,18 +263,15 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 				beanDefinitions.add(parseDeclareParents(declareParentsElement, parserContext));
 			}
 
-			// we have to parse "advice" and all the advice kinds in one loop, to get the
-			// ordering semantics right
+			// We have to parse "advice" and all the advice kinds in one loop, to get the
+			// ordering semantics right.
 			NodeList nodeList = aspectElement.getChildNodes();
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				Node node = nodeList.item(i);
 				if (isAdviceNode(node)) {
-					AbstractBeanDefinition adviceDefinition = parseAdvice(aspectName, i, (Element) node, parserContext);
-					Object pointcut = adviceDefinition.getPropertyValues().getPropertyValue(POINTCUT).getValue();
-					if (pointcut instanceof RuntimeBeanReference) {
-						beanReferences.add(pointcut);
-					}
-					beanDefinitions.add(adviceDefinition);
+					AbstractBeanDefinition advisorDefinition =
+							parseAdvice(aspectName, i, aspectElement, (Element) node, parserContext, beanReferences);
+					beanDefinitions.add(advisorDefinition);
 				}
 			}
 			fireAspectEvent(aspectElement, aspectId, beanDefinitions, beanReferences, parserContext);
@@ -336,17 +330,12 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * BeanDefinition with the supplied BeanDefinitionRegistry.
 	 * @return the generated advice RootBeanDefinition
 	 */
-	private AbstractBeanDefinition parseAdvice(
-			String aspectName, int order, Element adviceElement, ParserContext parserContext) {
-
-		RootBeanDefinition advisorDefinition = null;
+	private AbstractBeanDefinition parseAdvice(String aspectName, int order,
+			Element aspectElement, Element adviceElement, ParserContext parserContext, List beanReferences) {
 
 		try {
 			this.parseState.push(new AdviceEntry(adviceElement.getLocalName()));
 
-			// create the properties for the advisor
-			MutablePropertyValues advisorProperties = new MutablePropertyValues();
-	
 			// create the method factory bean
 			RootBeanDefinition methodDefinition = new RootBeanDefinition(MethodLocatingFactoryBean.class);
 			methodDefinition.getPropertyValues().addPropertyValue("targetBeanName", aspectName);
@@ -354,29 +343,32 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			methodDefinition.setSynthetic(true);
 
 			// create instance factory definition
-			RootBeanDefinition instanceFactoryDefinition = new RootBeanDefinition(BeanFactoryAspectInstanceFactory.class);
-			instanceFactoryDefinition.getPropertyValues().addPropertyValue("aspectBeanName", aspectName);
-			instanceFactoryDefinition.setSynthetic(true);
-	
+			RootBeanDefinition aspectFactoryDef = new RootBeanDefinition(SimpleBeanFactoryAwareAspectInstanceFactory.class);
+			aspectFactoryDef.getPropertyValues().addPropertyValue("aspectBeanName", aspectName);
+			aspectFactoryDef.setSynthetic(true);
+
 			// register the pointcut
-			AbstractBeanDefinition adviceDefinition = createAdviceDefinition(adviceElement, advisorProperties,
-							parserContext, aspectName, order, methodDefinition, instanceFactoryDefinition);
-	
+			AbstractBeanDefinition adviceDef = createAdviceDefinition(
+					adviceElement, parserContext, aspectName, order, methodDefinition, aspectFactoryDef, beanReferences);
+
 			// configure the advisor
-			advisorDefinition = new RootBeanDefinition(AspectJPointcutAdvisor.class);
+			RootBeanDefinition advisorDefinition = new RootBeanDefinition(AspectJPointcutAdvisor.class);
 			advisorDefinition.setSource(parserContext.extractSource(adviceElement));
-			advisorDefinition.setPropertyValues(advisorProperties);
-			advisorDefinition.getPropertyValues().addPropertyValue(ADVICE, adviceDefinition);
-	
+			advisorDefinition.getConstructorArgumentValues().addGenericArgumentValue(adviceDef);
+			if (aspectElement.hasAttribute(ORDER_PROPERTY)) {
+				advisorDefinition.getPropertyValues().addPropertyValue(
+						ORDER_PROPERTY, aspectElement.getAttribute(ORDER_PROPERTY));
+			}
+
 			// register the final advisor
 			BeanDefinitionRegistry registry = parserContext.getRegistry();
 			BeanDefinitionReaderUtils.registerWithGeneratedName(advisorDefinition, registry);
+
+			return advisorDefinition;
 		}
 		finally {
 			this.parseState.pop();
 		}
-
-		return advisorDefinition;
 	}
 
 	/**
@@ -386,19 +378,17 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * Advisor definition using the supplied MutablePropertyValues.
 	 */
 	private AbstractBeanDefinition createAdviceDefinition(
-			Element adviceElement, MutablePropertyValues advisorProperties,
-			ParserContext parserContext, String aspectName, int order,
-			RootBeanDefinition methodDefinition, RootBeanDefinition instanceFactoryDefinition) {
+			Element adviceElement, ParserContext parserContext, String aspectName, int order,
+			RootBeanDefinition methodDef, RootBeanDefinition aspectFactoryDef, List beanReferences) {
 
-		boolean isAroundAdvice;
-		String pointcutBeanName = parsePointcutProperty(adviceElement, advisorProperties, parserContext);
+		String pointcutBeanName = parsePointcutProperty(adviceElement, parserContext);
+		RuntimeBeanReference pointcutRef = new RuntimeBeanReference(pointcutBeanName);
+		beanReferences.add(pointcutRef);
 
 		RootBeanDefinition adviceDefinition = new RootBeanDefinition(getAdviceClass(adviceElement));
 		adviceDefinition.setSource(parserContext.extractSource(adviceElement));
 
-		isAroundAdvice = AROUND.equals(adviceElement.getLocalName());
 		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_NAME_PROPERTY, aspectName);
-		adviceDefinition.getPropertyValues().addPropertyValue(ASPECT_BEAN_PROPERTY, new RuntimeBeanReference(aspectName));
 		adviceDefinition.getPropertyValues().addPropertyValue(DECLARATION_ORDER_PROPERTY, new Integer(order));
 		if (adviceElement.hasAttribute(RETURNING)) {
 			adviceDefinition.getPropertyValues().addPropertyValue(RETURNING_PROPERTY, adviceElement.getAttribute(RETURNING));
@@ -410,22 +400,12 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			adviceDefinition.getPropertyValues().addPropertyValue(ARG_NAMES_PROPERTY, adviceElement.getAttribute(ARG_NAMES));
 		}
 
-		ConstructorArgumentValues cav = new ConstructorArgumentValues();
-		cav.addIndexedArgumentValue(METHOD_INDEX, methodDefinition);
-		cav.addIndexedArgumentValue(POINTCUT_INDEX, new RuntimeBeanReference(pointcutBeanName));
-		cav.addIndexedArgumentValue(ASPECT_INSTANCE_FACTORY_INDEX, instanceFactoryDefinition);
+		ConstructorArgumentValues cav = adviceDefinition.getConstructorArgumentValues();
+		cav.addIndexedArgumentValue(METHOD_INDEX, methodDef);
+		cav.addIndexedArgumentValue(POINTCUT_INDEX, pointcutRef);
+		cav.addIndexedArgumentValue(ASPECT_INSTANCE_FACTORY_INDEX, aspectFactoryDef);
 
-		if (isAroundAdvice) {
-			extendAdviceConstructorArgs(cav);
-		}
-
-		adviceDefinition.setConstructorArgumentValues(cav);
 		return adviceDefinition;
-	}
-
-	private void extendAdviceConstructorArgs(ConstructorArgumentValues cav) {
-		RootBeanDefinition discovererDefinition = new RootBeanDefinition(PrioritizedParameterNameDiscoverer.class);
-		cav.addIndexedArgumentValue(PARAMETER_NAME_DISCOVERER, discovererDefinition);
 	}
 
 	/**
@@ -490,14 +470,11 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * {@link org.springframework.beans.factory.config.BeanDefinition} for the pointcut if  necessary
 	 * and returns its bean name, otherwise returns the bean name of the referred pointcut.
 	 */
-	public String parsePointcutProperty(
-					Element element, MutablePropertyValues mpvs, ParserContext parserContext) {
-
+	private String parsePointcutProperty(Element element, ParserContext parserContext) {
 		if (element.hasAttribute(POINTCUT) && element.hasAttribute(POINTCUT_REF)) {
 			parserContext.getReaderContext().error(
-							"Cannot define both 'pointcut' and 'pointcut-ref' on 'advisor' tag.", 
-							element, 
-							this.parseState.snapshot());
+					"Cannot define both 'pointcut' and 'pointcut-ref' on 'advisor' tag.",
+					element, this.parseState.snapshot());
 			return null;
 		}
 		else if (element.hasAttribute(POINTCUT)) {
@@ -510,7 +487,6 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			try {
 				this.parseState.push(new PointcutEntry(pointcutName));
 				registry.registerBeanDefinition(pointcutName, pointcutDefinition);
-				mpvs.addPropertyValue(POINTCUT, new RuntimeBeanReference(pointcutName));
 			}
 			finally {
 				this.parseState.pop();
@@ -521,7 +497,6 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			String pointcutRef = element.getAttribute(POINTCUT_REF);
 			try {
 				this.parseState.push(new PointcutEntry(pointcutRef));
-				mpvs.addPropertyValue(POINTCUT, new RuntimeBeanReference(pointcutRef));
 			}
 			finally {
 				this.parseState.pop();

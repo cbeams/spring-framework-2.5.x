@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.aop.config;
 import org.springframework.aop.aspectj.AspectInstanceFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.core.Ordered;
 import org.springframework.util.StringUtils;
 
 /**
@@ -26,15 +27,14 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.beans.factory.BeanFactory} using a configured bean name.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
-public class BeanFactoryAspectInstanceFactory implements AspectInstanceFactory, BeanFactoryAware {
+public class SimpleBeanFactoryAwareAspectInstanceFactory implements AspectInstanceFactory, BeanFactoryAware {
 
 	private String aspectBeanName;
 
 	private BeanFactory beanFactory;
-
-	private int instantiationCount;
 
 
 	/**
@@ -48,7 +48,7 @@ public class BeanFactoryAspectInstanceFactory implements AspectInstanceFactory, 
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 		if (!StringUtils.hasText(this.aspectBeanName)) {
-			throw new IllegalArgumentException("Property 'aspectBeanName' is required");
+			throw new IllegalArgumentException("aspectBeanName is required");
 		}
 	}
 
@@ -58,12 +58,15 @@ public class BeanFactoryAspectInstanceFactory implements AspectInstanceFactory, 
 	 * @see #setAspectBeanName
 	 */
 	public Object getAspectInstance() {
-		this.instantiationCount++;
 		return this.beanFactory.getBean(this.aspectBeanName);
 	}
 
-	public int getInstantiationCount() {
-		return instantiationCount;
+	public int getOrder() {
+		if (this.beanFactory.isSingleton(this.aspectBeanName) &&
+				this.beanFactory.isTypeMatch(this.aspectBeanName, Ordered.class)) {
+			return ((Ordered) this.beanFactory.getBean(this.aspectBeanName)).getOrder();
+		}
+		return Ordered.LOWEST_PRECEDENCE;
 	}
 
 }
