@@ -19,7 +19,7 @@ package org.springframework.aop.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.aop.aspectj.autoproxy.AspectJInvocationContextExposingAdvisorAutoProxyCreator;
+import org.springframework.aop.aspectj.autoproxy.AspectJAwareAdvisorAutoProxyCreator;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -70,7 +70,7 @@ public abstract class AopNamespaceUtils {
 	 */
 	static {
 		APC_PRIORITY_LIST.add(DefaultAdvisorAutoProxyCreator.class.getName());
-		APC_PRIORITY_LIST.add(AspectJInvocationContextExposingAdvisorAutoProxyCreator.class.getName());
+		APC_PRIORITY_LIST.add(AspectJAwareAdvisorAutoProxyCreator.class.getName());
 		APC_PRIORITY_LIST.add(ASPECTJ_AUTO_PROXY_CREATOR_CLASS_NAME);
 	}
 
@@ -81,7 +81,7 @@ public abstract class AopNamespaceUtils {
 
 	public static void registerAspectJAutoProxyCreatorIfNecessary(ParserContext parserContext, Object sourceElement) {
 		registryOrEscalateApcAsRequired(
-				AspectJInvocationContextExposingAdvisorAutoProxyCreator.class, parserContext, sourceElement);
+				AspectJAwareAdvisorAutoProxyCreator.class, parserContext, sourceElement);
 	}
 
 	public static void registerAtAspectJAutoProxyCreatorIfNecessary(ParserContext parserContext, Object sourceElement) {

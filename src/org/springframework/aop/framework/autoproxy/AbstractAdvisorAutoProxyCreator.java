@@ -58,35 +58,29 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 		if (advisors.isEmpty()) {
 			return DO_NOT_PROXY;
 		}
-		advisors = sortAdvisors(advisors);
 		return advisors.toArray();
 	}
 
 	/**
 	 * Find all eligible advices for auto-proxying this class.
-	 * @return the empty list, not null, if there are no pointcuts or interceptors
+	 * @return the empty list, not <code>null</code>,
+	 * if there are no pointcuts or interceptors
 	 * @see #findCandidateAdvisors
+	 * @see #sortAdvisors
+	 * @see #extendAdvisors
 	 */
 	protected List findEligibleAdvisors(Class clazz) {
 		List eligibleAdvisors = AopUtils.findAdvisorsThatCanApply(findCandidateAdvisors(), clazz);
-		extendCandidateAdvisors(eligibleAdvisors);
+		if (!eligibleAdvisors.isEmpty()) {
+			eligibleAdvisors = sortAdvisors(eligibleAdvisors);
+		}
+		extendAdvisors(eligibleAdvisors);
 		return eligibleAdvisors;
 	}
 
 	/**
-	 * Sort advisors based on ordering. Subclasses may choose to override this
-	 * method to customize the sorting strategy.
-	 * @see org.springframework.core.Ordered
-	 * @see org.springframework.core.OrderComparator
-	 */
-	protected List sortAdvisors(List advisors) {
-		Collections.sort(advisors, new OrderComparator());
-		return advisors;
-	}
-
-	/**
 	 * Find all candidate advisors to use in auto-proxying.
-	 * @return list of Advisors
+	 * @return list of candidate Advisors
 	 */
 	protected List findCandidateAdvisors() {
 		if (!(getBeanFactory() instanceof ConfigurableListableBeanFactory)) {
@@ -132,15 +126,26 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
-	 * Extension hook that subclasses can choose to use to additional Advisors,
-	 * given the sorted Advisors obtained to date.
+	 * Sort advisors based on ordering. Subclasses may choose to override this
+	 * method to customize the sorting strategy.
+	 * @see org.springframework.core.Ordered
+	 * @see org.springframework.core.OrderComparator
+	 */
+	protected List sortAdvisors(List advisors) {
+		Collections.sort(advisors, new OrderComparator());
+		return advisors;
+	}
+
+	/**
+	 * Extension hook that subclasses can choose to register additional Advisors,
+	 * given the sorted Advisors obtained to date. The default implementation
+	 * is empty.
 	 * <p>Typically used to add Advisors that expose contextual information
 	 * required by some of the later advisors.
 	 * @param candidateAdvisors Advisors that have already been identified as
 	 * applying to a given bean
 	 */
-	protected void extendCandidateAdvisors(List candidateAdvisors) {
-		// Empty default implementation.
+	protected void extendAdvisors(List candidateAdvisors) {
 	}
 
 }

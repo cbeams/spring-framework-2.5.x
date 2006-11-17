@@ -1,25 +1,25 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Created on 15-Feb-2006 by Adrian Colyer
  */
+
 package org.springframework.aop.aspectj.autoproxy;
 
 import java.lang.reflect.Method;
 
-import org.aopalliance.aop.Advice;
+import junit.framework.TestCase;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.BeforeAdvice;
@@ -33,17 +33,15 @@ import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.aop.aspectj.AspectJPointcutAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 
-import junit.framework.TestCase;
-
 /**
  * @author Adrian Colyer
  * @since 2.0
  */
-public class AspectJPrecedenceAwareOrderComparatorTests extends TestCase {
+public class AspectJPrecedenceComparatorTests extends TestCase {
 
 	/*
 	 * Specification for the comparator (as defined in the 
-	 * AspectJPrecedenceAwareOrderComparator class)
+	 * AspectJPrecedenceComparator class)
 	 * 
 	 * <p>
 	 * Orders AspectJ advice/advisors by invocation order.
@@ -69,13 +67,13 @@ public class AspectJPrecedenceAwareOrderComparatorTests extends TestCase {
 	private static final int EARLY_ADVICE_DECLARATION_ORDER = 5;
 	private static final int LATE_ADVICE_DECLARATION_ORDER = 10;
 	
-	private AspectJPrecedenceAwareOrderComparator comparator;
+	private AspectJPrecedenceComparator comparator;
 	private Method anyOldMethod;
 	private AspectJExpressionPointcut anyOldPointcut;
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		this.comparator = new AspectJPrecedenceAwareOrderComparator();
+		this.comparator = new AspectJPrecedenceComparator();
 		this.anyOldMethod = getClass().getMethods()[0];
 		this.anyOldPointcut = new AspectJExpressionPointcut();
 		this.anyOldPointcut.setExpression("get(* *");
@@ -110,7 +108,6 @@ public class AspectJPrecedenceAwareOrderComparatorTests extends TestCase {
 		Advisor advisor2 = createAspectJBeforeAdvice(HIGH_PRECEDENCE_ADVISOR_ORDER,LATE_ADVICE_DECLARATION_ORDER,"someAspect");
 		
 		assertEquals("advisor1 and advisor2 not comparable",0,this.comparator.compare(advisor1, advisor2));
-		
 	}
 	
 	public void testSameAdvisorPrecedenceDifferentAspectNoAfterAdvice() {
@@ -188,61 +185,53 @@ public class AspectJPrecedenceAwareOrderComparatorTests extends TestCase {
 	
 	// helpers...
 	private Advisor createAspectJBeforeAdvice(int advisorOrder, int adviceDeclarationOrder, String aspectName) {
-		AspectJMethodBeforeAdvice advice = 
-			new AspectJMethodBeforeAdvice(this.anyOldMethod,this.anyOldPointcut,null);
+		AspectJMethodBeforeAdvice advice =  new AspectJMethodBeforeAdvice(this.anyOldMethod, this.anyOldPointcut, null);
 		return createAspectJAdvice(advisorOrder, adviceDeclarationOrder, aspectName, advice);
 	}
 
 	private Advisor createAspectJAroundAdvice(int advisorOrder, int adviceDeclarationOrder, String aspectName) {
-		AspectJAroundAdvice advice = 
-			new AspectJAroundAdvice(this.anyOldMethod,this.anyOldPointcut,null,null);
+		AspectJAroundAdvice advice = new AspectJAroundAdvice(this.anyOldMethod, this.anyOldPointcut, null);
 		return createAspectJAdvice(advisorOrder, adviceDeclarationOrder, aspectName, advice);
 	}
 
 	private Advisor createAspectJAfterAdvice(int advisorOrder, int adviceDeclarationOrder, String aspectName) {
-		AspectJAfterAdvice advice = 
-			new AspectJAfterAdvice(this.anyOldMethod,this.anyOldPointcut,null);
+		AspectJAfterAdvice advice = new AspectJAfterAdvice(this.anyOldMethod, this.anyOldPointcut, null);
 		return createAspectJAdvice(advisorOrder, adviceDeclarationOrder, aspectName, advice);
 	}
 
 	private Advisor createAspectJAfterReturningAdvice(int advisorOrder, int adviceDeclarationOrder, String aspectName) {
-		AspectJAfterReturningAdvice advice = 
-			new AspectJAfterReturningAdvice(this.anyOldMethod,this.anyOldPointcut,null);
+		AspectJAfterReturningAdvice advice =  new AspectJAfterReturningAdvice(this.anyOldMethod, this.anyOldPointcut, null);
 		return createAspectJAdvice(advisorOrder, adviceDeclarationOrder, aspectName, advice);
 	}
 	
 	private Advisor createAspectJAfterThrowingAdvice(int advisorOrder, int adviceDeclarationOrder, String aspectName) {
-		AspectJAfterThrowingAdvice advice = 
-			new AspectJAfterThrowingAdvice(this.anyOldMethod,this.anyOldPointcut,null);
+		AspectJAfterThrowingAdvice advice = new AspectJAfterThrowingAdvice(this.anyOldMethod, this.anyOldPointcut, null);
 		return createAspectJAdvice(advisorOrder, adviceDeclarationOrder, aspectName, advice);
 	}
 
 	private Advisor createAspectJAdvice(int advisorOrder, int adviceDeclarationOrder, String aspectName, AbstractAspectJAdvice advice) {
 		advice.setDeclarationOrder(adviceDeclarationOrder);
 		advice.setAspectName(aspectName);
-		AspectJPointcutAdvisor advisor = new AspectJPointcutAdvisor();
-		advisor.setPointcut(this.anyOldPointcut);
-		advisor.setAdvice((Advice)advice);
+		AspectJPointcutAdvisor advisor = new AspectJPointcutAdvisor(advice);
 		advisor.setOrder(advisorOrder);
 		return advisor;
 	}
 	
 	private Advisor createSpringAOPAfterAdvice(int order) {
 		AfterReturningAdvice advice = new AfterReturningAdvice() {
-
 			public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
-				// TODO Auto-generated method stub
-				
-			} };
-		DefaultPointcutAdvisor advisor = new DefaultPointcutAdvisor(this.anyOldPointcut,advice);
+			}
+		};
+		DefaultPointcutAdvisor advisor = new DefaultPointcutAdvisor(this.anyOldPointcut, advice);
 		advisor.setOrder(order);
 		return advisor;
 	}
 	
 	private Advisor createSpringAOPBeforeAdvice(int order) {
 		BeforeAdvice advice = new BeforeAdvice() { };
-		DefaultPointcutAdvisor advisor = new DefaultPointcutAdvisor(this.anyOldPointcut,advice);
+		DefaultPointcutAdvisor advisor = new DefaultPointcutAdvisor(this.anyOldPointcut, advice);
 		advisor.setOrder(order);
 		return advisor;		
 	}
+
 }

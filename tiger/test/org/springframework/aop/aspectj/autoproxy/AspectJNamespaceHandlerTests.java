@@ -66,7 +66,7 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 
 		BeanDefinition definition = registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		assertEquals("Incorrect APC class",
-				AspectJInvocationContextExposingAdvisorAutoProxyCreator.class.getName(), definition.getBeanClassName());
+				AspectJAwareAdvisorAutoProxyCreator.class.getName(), definition.getBeanClassName());
 	}
 
 	public void testRegisterAspectJAutoProxyCreatorWithExistingAutoProxyCreator() throws Exception {
@@ -78,7 +78,7 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 
 		BeanDefinition definition = registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		assertEquals("APC class not switched",
-				AspectJInvocationContextExposingAdvisorAutoProxyCreator.class.getName(), definition.getBeanClassName());
+				AspectJAwareAdvisorAutoProxyCreator.class.getName(), definition.getBeanClassName());
 	}
 
 	public void testRegisterAutoProxyCreatorWhenAspectJAutoProxyCreatorAlreadyExists() throws Exception {
@@ -90,7 +90,7 @@ public class AspectJNamespaceHandlerTests extends TestCase {
 
 		BeanDefinition definition = registry.getBeanDefinition(AopNamespaceUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		assertEquals("Incorrect APC class",
-				AspectJInvocationContextExposingAdvisorAutoProxyCreator.class.getName(), definition.getBeanClassName());
+				AspectJAwareAdvisorAutoProxyCreator.class.getName(), definition.getBeanClassName());
 	}
 
 }
