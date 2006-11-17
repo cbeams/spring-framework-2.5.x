@@ -34,22 +34,20 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
 /**
- * TopLink implementation of the JpaDialect interface. Main value add is the
- * ability to obtain a JDBC Connection from the current TopLink session, which
- * enables the mixing of JDBC and TopLink JPA operations in the same transaction,
- * as per Spring's normal data access contract. Spring's JPA support will work
- * correctly, except for mixing JPA with JDBC operations, with the default
- * JpaDialect implementation.
+ * {@link org.springframework.orm.jpa.JpaDialect} implementation for
+ * Oracle TopLink Essentials. Developed and tested against TopLink Essentials v2.
  *
  * <p>By default, this class acquires a TopLink transaction to get the JDBC connection
  * early. This allows mixing JDBC and JPA/TopLink operations in the same transaction.
  * In some cases, this eager acquisition of a transaction/connection may impact
- * scalability. In that case, set the "lazyDatabaseTransaction" flag to true if
- * you do not require mixing JDBC and JPA operations in the same transaction.
- * Otherwise, use a LazyConnectionDataSourceProxy to ensure that the cost of
- * connection acquisition is near zero until code really needs a connection.
+ * scalability. In that case, set the "lazyDatabaseTransaction" flag to true if you
+ * do not require mixing JDBC and JPA operations in the same transaction. Otherwise,
+ * use a {@link org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy}
+ * to ensure that the cost of connection acquisition is near zero until code actually
+ * needs a JDBC Connection.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  * @see #setLazyDatabaseTransaction
  * @see LazyConnectionDataSourceProxy

@@ -30,8 +30,9 @@ import org.springframework.jdbc.datasource.SimpleConnectionHandle;
 import org.springframework.orm.jpa.DefaultJpaDialect;
 
 /**
- * Hibernate-specific JpaDialect implementation.
- * 
+ * {@link org.springframework.orm.jpa.JpaDialect} implementation for
+ * Hibernate EntityManager. Developed and tested against Hibernate 3.2.
+ *
  * @author Costin Leau
  * @author Juergen Hoeller
  * @since 2.0

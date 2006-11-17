@@ -31,7 +31,8 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
 /**
- * OpenJPA-specific {@link org.springframework.orm.jpa.JpaDialect dialect}.
+ * {@link org.springframework.orm.jpa.JpaDialect} implementation for
+ * Apache OpenJPA. Developed and tested against OpenJPA 0.9.6.
  *
  * @author Costin Leau
  * @since 2.0
@@ -67,7 +68,6 @@ public class OpenJpaDialect extends DefaultJpaDialect {
 		}
 		return null;
 	}
-
 
 	/**
 	 * Return the OpenJPA-specific interface of <code>EntityManager</code>.
