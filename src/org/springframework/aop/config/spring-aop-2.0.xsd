@@ -117,58 +117,58 @@
 	</xsd:element>
 
 	<xsd:complexType name="aspectType">
- 		   <xsd:choice minOccurs="0" maxOccurs="unbounded">
-              <xsd:element name="pointcut" type="pointcutType">
-               <xsd:annotation>
-                <xsd:documentation><![CDATA[
-            A named pointcut definition.
-                ]]></xsd:documentation>
-                </xsd:annotation>
-               </xsd:element>
-               <xsd:element name="declare-parents" type="declareParentsType">
-                      <xsd:annotation>
-                        <xsd:documentation><![CDATA[
-    Allows this aspect to introduce additional interfaces that the advised
-    object will transparently implement.
-                         ]]></xsd:documentation>
-                      </xsd:annotation>
-                </xsd:element>
-				<xsd:element name="before" type="basicAdviceType">
-					<xsd:annotation>
-						<xsd:documentation><![CDATA[
+		<xsd:choice minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="pointcut" type="pointcutType">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	A named pointcut definition.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="declare-parents" type="declareParentsType">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Allows this aspect to introduce additional interfaces that the advised
+	object will transparently implement.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="before" type="basicAdviceType">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
 	A before advice definition.
-						]]></xsd:documentation>
-					</xsd:annotation>
-				</xsd:element>
-				<xsd:element name="after" type="basicAdviceType">
-					<xsd:annotation>
-						<xsd:documentation><![CDATA[
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="after" type="basicAdviceType">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
 	An after advice definition.
-						]]></xsd:documentation>
-					</xsd:annotation>
-				</xsd:element>
-				<xsd:element name="after-returning" type="afterReturningAdviceType">
-					<xsd:annotation>
-						<xsd:documentation><![CDATA[
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="after-returning" type="afterReturningAdviceType">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
 	An after-returning advice definition.
-						]]></xsd:documentation>
-					</xsd:annotation>
-				</xsd:element>
-				<xsd:element name="after-throwing" type="afterThrowingAdviceType">
-					<xsd:annotation>
-						<xsd:documentation><![CDATA[
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="after-throwing" type="afterThrowingAdviceType">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
 	An after-throwing advice definition.
-						]]></xsd:documentation>
-					</xsd:annotation>
-				</xsd:element>
-				<xsd:element name="around" type="basicAdviceType">
-					<xsd:annotation>
-						<xsd:documentation><![CDATA[
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="around" type="basicAdviceType">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
 	An around advice definition.
-						]]></xsd:documentation>
-					</xsd:annotation>
-				</xsd:element>
-  	 </xsd:choice>
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+	 </xsd:choice>
 		<!-- Rick : ID type written explicitly as opposed to being imported (c.f. [SPR-2290] -->
 		<xsd:attribute name="id" type="xsd:ID">
 			<xsd:annotation>
@@ -181,6 +181,14 @@
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
 	The name of the (backing) bean that encapsulates the aspect.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="order" type="xsd:int">
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.core.Ordered"><![CDATA[
+	Controls the ordering of the execution of this aspect when multiple
+	advice executes at a specific joinpoint.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>

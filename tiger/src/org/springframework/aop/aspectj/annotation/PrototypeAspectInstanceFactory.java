@@ -17,19 +17,21 @@
 package org.springframework.aop.aspectj.annotation;
 
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.aop.aspectj.annotation.BeanFactoryAspectInstanceFactory;
+import org.springframework.core.Ordered;
 
 /**
- * AspectInstanceFactory backed by Spring IoC prototype, and enforcing
- * prototype semantics.
+ * AspectInstanceFactory backed by a BeanFactory-provided prototype,
+ * enforcing prototype semantics.
  *
- * <p>Note that this may instantiate multiple times, which probably won't give
- * the semantics you expect. Use a LazySingletonMetadataAwareAspectInstanceFactoryDecorator
+ * <p>Note that this may instantiate multiple times, which probably won't give the
+ * semantics you expect. Use a {@link LazySingletonAspectInstanceFactoryDecorator}
  * to wrap this to ensure only one new aspect comes back.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
- * @see org.springframework.aop.aspectj.annotation.LazySingletonMetadataAwareAspectInstanceFactoryDecorator
+ * @see org.springframework.beans.factory.BeanFactory
+ * @see LazySingletonAspectInstanceFactoryDecorator
  */
 public class PrototypeAspectInstanceFactory extends BeanFactoryAspectInstanceFactory {
 	
@@ -39,6 +41,12 @@ public class PrototypeAspectInstanceFactory extends BeanFactoryAspectInstanceFac
 			throw new IllegalArgumentException(
 					"Cannot use PrototypeAspectInstanceFactory with bean named '" + name + "': not a prototype");
 		}
+	}
+
+	@Override
+	public int getOrder() {
+		// Never a singleton - never an order value.
+		return Ordered.LOWEST_PRECEDENCE;
 	}
 
 }

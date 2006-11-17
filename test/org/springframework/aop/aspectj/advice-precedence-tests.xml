@@ -11,40 +11,42 @@
 			advice-ref="lowPrecedenceSpringAdvice"
 			pointcut="execution(* getAge(..))"
 			order="900"/>
-		
-		<aop:advisor id="highPrecedenceAdvisor" 
+
+		<aop:advisor id="highPrecedenceAdvisor"
 			advice-ref="highPrecedenceSpringAdvice"
 			pointcut="execution(* getAge(..))"
 			order="90"/>		
-		
-		<aop:aspect ref="lowPrecedenceAspect">
+
+		<aop:aspect ref="lowPrecedenceAspect" order="1000">
+
 			<aop:before
 				method="beforeAdviceOne"
-				pointcut="execution(* getAge())"/>		
-									
+				pointcut="execution(* getAge())"/>
+
 			<aop:before
 				method="beforeAdviceTwo"
-				pointcut="execution(* getAge())"/>				
-			
+				pointcut="execution(* getAge())"/>
+
 			<aop:around
 				method="aroundAdviceOne"
-				pointcut="execution(* getAge())"/>				
-			
+				pointcut="execution(* getAge())"/>
+
 			<aop:around
 				method="aroundAdviceTwo"
-				pointcut="execution(* getAge())"/>				
-			
+				pointcut="execution(* getAge())"/>
+
 			<aop:after-returning
 				method="afterAdviceOne"
-				pointcut="execution(* getAge())"/>				
-			
+				pointcut="execution(* getAge())"/>
+
 			<aop:after-returning
 				method="afterAdviceTwo"
-				pointcut="execution(* getAge())"/>				
-						
+				pointcut="execution(* getAge())"/>
+
 		</aop:aspect>
-		
+
 		<aop:aspect ref="highPrecedenceAspect">
+
 			<aop:before
 				method="beforeAdviceOne"
 				pointcut="execution(* getAge())"/>				
@@ -80,11 +82,9 @@
 	<bean id="highPrecedenceAspect" class="org.springframework.aop.aspectj.PrecedenceTestAspect">
 		<property name="order" value="10"/>
 	</bean>
-	
-	<bean id="lowPrecedenceAspect" class="org.springframework.aop.aspectj.PrecedenceTestAspect">
-		<property name="order" value="1000"/>		
-	</bean>
-	
+
+	<bean id="lowPrecedenceAspect" class="org.springframework.aop.aspectj.PrecedenceTestAspect"/>
+
 	<bean id="testBean" class="org.springframework.beans.TestBean"/>
 	
 </beans>
