@@ -16,6 +16,8 @@
 
 package org.springframework.aop.support;
 
+import java.io.Serializable;
+
 /**
  * Abstract superclass for expression pointcuts,
  * offering location and expression properties.
@@ -26,7 +28,7 @@ package org.springframework.aop.support;
  * @see #setLocation
  * @see #setExpression
  */
-public abstract class AbstractExpressionPointcut implements ExpressionPointcut {
+public abstract class AbstractExpressionPointcut implements ExpressionPointcut, Serializable {
 
 	private String location;
 
