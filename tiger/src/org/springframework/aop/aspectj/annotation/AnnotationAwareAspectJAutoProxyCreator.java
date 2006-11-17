@@ -24,21 +24,15 @@ import java.util.regex.Pattern;
 import org.aspectj.lang.reflect.PerClauseKind;
 
 import org.springframework.aop.Advisor;
-import org.springframework.aop.aspectj.InstantiationModelAwarePointcutAdvisor;
-import org.springframework.aop.aspectj.autoproxy.AspectJInvocationContextExposingAdvisorAutoProxyCreator;
+import org.springframework.aop.aspectj.autoproxy.AspectJAwareAdvisorAutoProxyCreator;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 
 /**
- * AspectJInvocationContextExposingAdvisorAutoProxyCreator subclass that processes all
- * AspectJ annotation classes in the current application context, as well as Spring Advisors.
+ * AspectJAwareAdvisorAutoProxyCreator subclass that processes all AspectJ
+ * annotation classes in the current application context, as well as Spring Advisors.
  *
  * <p>Any AspectJ annotated classes will automatically be recognized, and their advice
  * applied if Spring AOP's proxy-based model is capable of applying it.
@@ -56,10 +50,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator
  * @see org.springframework.aop.aspectj.annotation.AspectJAdvisorFactory
  */
-public class AnnotationAwareAspectJAutoProxyCreator extends AspectJInvocationContextExposingAdvisorAutoProxyCreator {
-
-	private static final String ORDER_PROPERTY = "order";
-
+public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorAutoProxyCreator {
 
 	private AspectJAdvisorFactory aspectJAdvisorFactory = new ReflectiveAspectJAdvisorFactory();
 
@@ -176,7 +167,6 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJInvocationCon
 					factory = new PrototypeAspectInstanceFactory(beanFactory, beanName);
 				}
 				List<Advisor> classAdvisors = aspectJAdvisorFactory.getAdvisors(factory);
-				setAdvisorOrderIfNecessary(classAdvisors, beanFactory, beanName);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Found " + classAdvisors.size() +
 							" AspectJ advice methods in bean with name '" + beanName + "'");
@@ -185,45 +175,6 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJInvocationCon
 			}
 		}
 		return advisors;
-	}
-
-	private void setAdvisorOrderIfNecessary(List<Advisor> advisors, BeanFactory beanFactory, String beanName) {
-		// We can't instantiate a bean instance, so we look for an order property value
-		// and use that instead...
-		if (beanFactory instanceof ConfigurableListableBeanFactory) {
-			ConfigurableListableBeanFactory lbf = (ConfigurableListableBeanFactory) beanFactory;
-			if (lbf.containsBeanDefinition(beanName)) {
-				BeanDefinition bd = lbf.getBeanDefinition(beanName);
-				MutablePropertyValues mpvs = bd.getPropertyValues();
-				if (mpvs.contains(ORDER_PROPERTY)) {
-					Object value = mpvs.getPropertyValue(ORDER_PROPERTY).getValue();
-					if (value != null) {
-						try {
-							int order = Integer.parseInt(value.toString());
-							applyOrderToAdvisors(advisors, order);
-						}
-						catch (NumberFormatException ex) {
-							// Ignoring non-integer order value...
-						}
-					}
-				}
-			}
-			else if (beanFactory.isSingleton(beanName)) {
-				Object beanInstance = beanFactory.getBean(beanName);
-				if (beanInstance instanceof Ordered) {
-					int order = ((Ordered) beanInstance).getOrder();
-					applyOrderToAdvisors(advisors, order);
-				}
-			}
-		}
-	}
-
-	private void applyOrderToAdvisors(List<Advisor> advisors, int order) {
-		for (Advisor advisor : advisors) {
-			if (advisor instanceof InstantiationModelAwarePointcutAdvisor) {
-				((InstantiationModelAwarePointcutAdvisor) advisor).setOrder(order);
-			}
-		}
 	}
 
 }
