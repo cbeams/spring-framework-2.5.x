@@ -18,6 +18,7 @@ package org.springframework.aop.aspectj.annotation;
 
 import java.lang.reflect.UndeclaredThrowableException;
 import java.rmi.RemoteException;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,6 +45,7 @@ import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 
 /**
@@ -56,19 +58,12 @@ import org.springframework.core.Ordered;
 public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 	
 	/**
-	 * To be overridden by concrete test subclasses
+	 * To be overridden by concrete test subclasses.
 	 * @return the fixture
 	 */
 	protected abstract AspectJAdvisorFactory getFixture();
 	
-	@Aspect("percflow(execution(* *(..)))")
-	public static class PerCflowAspect {	
-	}
-	
-	@Aspect("percflowbelow(execution(* *(..)))")
-	public static class PerCflowBelowAspect {	
-	}
-	
+
 	public void testRejectsPerCflowAspect() {
 		try {
 			getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new PerCflowAspect(),"someBean"));
@@ -88,40 +83,13 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 			assertTrue(ex.getMessage().indexOf("PERCFLOWBELOW") != -1);
 		}
 	}
-	
-	@Aspect("pertarget(execution(* *.getSpouse()))")
-	public static class PerTargetAspect implements Ordered {
-		public int count;
-		private int order = Ordered.LOWEST_PRECEDENCE;
-		
-		@Around("execution(int *.getAge())")
-		public int returnCountAsAge() {
-			return count++;
-		}
-		
-		@Before("execution(void *.set*(int))")
-		public void countSetter() {
-			++count;
-		}
-
-		/* (non-Javadoc)
-		 * @see org.springframework.core.Ordered#getOrder()
-		 */
-		public int getOrder() {
-			return this.order;
-		}
-		
-		public void setOrder(int order) {
-			this.order = order;
-		}
-	}
 
 	public void testPerTargetAspect() throws SecurityException, NoSuchMethodException {
 		TestBean target = new TestBean();
 		int realAge = 65;
 		target.setAge(realAge);
 		TestBean itb = (TestBean) createProxy(target, 
-				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new PerTargetAspect(),"someBean")), 
+				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new PerTargetAspect(), "someBean")),
 				TestBean.class);
 		assertEquals("Around advice must NOT apply", realAge, itb.getAge());
 		
@@ -129,9 +97,10 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		SyntheticInstantiationAdvisor sia = (SyntheticInstantiationAdvisor) advised.getAdvisors()[1];
 		assertTrue(sia.getPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
 		InstantiationModelAwarePointcutAdvisorImpl imapa = (InstantiationModelAwarePointcutAdvisorImpl) advised.getAdvisors()[3];
-		MetadataAwareAspectInstanceFactory maaif = imapa.getAspectInstanceFactory();
-		assertEquals(0, maaif.getInstantiationCount());
-		
+		LazySingletonAspectInstanceFactoryDecorator maaif =
+				(LazySingletonAspectInstanceFactoryDecorator) imapa.getAspectInstanceFactory();
+		assertFalse(maaif.isMaterialized());
+
 		// Check that the perclause pointcut is valid
 		assertTrue(maaif.getAspectMetadata().getPerClausePointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
 		assertNotSame(imapa.getDeclaredPointcut(), imapa.getPointcut());
@@ -139,30 +108,37 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		// Hit the method in the per clause to instantiate the aspect
 		itb.getSpouse();
 		
-		assertEquals(1, maaif.getInstantiationCount());
-		
+		assertTrue(maaif.isMaterialized());
+
 		assertEquals("Around advice must apply", 0, itb.getAge());
 		assertEquals("Around advice must apply", 1, itb.getAge());
 	}
 
-	@Aspect("perthis(execution(* *.getSpouse()))")
-	public static class PerThisAspect {
-		public int count;
+	public void testMultiplePerTargetAspects() throws SecurityException, NoSuchMethodException {
+		TestBean target = new TestBean();
+		int realAge = 65;
+		target.setAge(realAge);
 
-		/**
-		 * Just to check that this doesn't cause problems with introduction processing
-		 */
-		private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
+		List<Advisor> advisors = new LinkedList<Advisor>();
+		PerTargetAspect aspect1 = new PerTargetAspect();
+		aspect1.count = 100;
+		aspect1.setOrder(10);
+		advisors.addAll(
+				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(aspect1, "someBean1")));
+		PerTargetAspect aspect2 = new PerTargetAspect();
+		aspect2.setOrder(5);
+		advisors.addAll(
+				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(aspect2, "someBean2")));
+		Collections.sort(advisors, new OrderComparator());
 
-		@Around("execution(int *.getAge())")
-		public int returnCountAsAge() {
-			return count++;
-		}
+		TestBean itb = (TestBean) createProxy(target, advisors, TestBean.class);
+		assertEquals("Around advice must NOT apply", realAge, itb.getAge());
 
-		@Before("execution(void *.set*(int))")
-		public void countSetter() {
-			++count;
-		}
+		// Hit the method in the per clause to instantiate the aspect
+		itb.getSpouse();
+
+		assertEquals("Around advice must apply", 0, itb.getAge());
+		assertEquals("Around advice must apply", 1, itb.getAge());
 	}
 
 	public void testPerThisAspect() throws SecurityException, NoSuchMethodException {
@@ -170,7 +146,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		int realAge = 65;
 		target.setAge(realAge);
 		TestBean itb = (TestBean) createProxy(target, 
-				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new PerThisAspect(),"someBean")), 
+				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new PerThisAspect(), "someBean")),
 				TestBean.class);
 		assertEquals("Around advice must NOT apply", realAge, itb.getAge());
 		
@@ -180,9 +156,10 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		SyntheticInstantiationAdvisor sia = (SyntheticInstantiationAdvisor) advised.getAdvisors()[1];
 		assertTrue(sia.getPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
 		InstantiationModelAwarePointcutAdvisorImpl imapa = (InstantiationModelAwarePointcutAdvisorImpl) advised.getAdvisors()[2];
-		MetadataAwareAspectInstanceFactory maaif = imapa.getAspectInstanceFactory();
-		assertEquals(0, maaif.getInstantiationCount());
-		
+		LazySingletonAspectInstanceFactoryDecorator maaif =
+				(LazySingletonAspectInstanceFactoryDecorator) imapa.getAspectInstanceFactory();
+		assertFalse(maaif.isMaterialized());
+
 		// Check that the perclause pointcut is valid
 		assertTrue(maaif.getAspectMetadata().getPerClausePointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
 		assertNotSame(imapa.getDeclaredPointcut(), imapa.getPointcut());
@@ -190,42 +167,12 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		// Hit the method in the per clause to instantiate the aspect
 		itb.getSpouse();
 		
-		assertEquals(1, maaif.getInstantiationCount());
-		
+		assertTrue(maaif.isMaterialized());
+
 		assertTrue(imapa.getDeclaredPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getAge"), null));
 	
 		assertEquals("Around advice must apply", 0, itb.getAge());
 		assertEquals("Around advice must apply", 1, itb.getAge());
-	}
-	
-	@Aspect("pertypewithin(org.springframework.beans.IOther+)")
-	public static class PerTypeWithinAspect {
-		public int count;
-		
-		@Around("execution(int *.getAge())")
-		public int returnCountAsAge() {
-			return count++;
-		}
-		
-		@Before("execution(void *.*(..))")
-		public void countAnythingVoid() {
-			++count;
-		}
-	}
-	
-	private class PerTypeWithinAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
-		private int count;
-		public Object getAspectInstance() {
-			++count;
-			return new PerTypeWithinAspect();
-		}
-		
-		public int getInstantiationCount() {
-			return count;
-		}
-		public AspectMetadata getAspectMetadata() {
-			return new AspectMetadata(PerTypeWithinAspect.class,"perTypeWithin");
-		}
 	}
 	
 	public void testPerTypeWithinAspect() throws SecurityException, NoSuchMethodException {
@@ -245,9 +192,10 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		SyntheticInstantiationAdvisor sia = (SyntheticInstantiationAdvisor) advised.getAdvisors()[1];
 		assertTrue(sia.getPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
 		InstantiationModelAwarePointcutAdvisorImpl imapa = (InstantiationModelAwarePointcutAdvisorImpl) advised.getAdvisors()[2];
-		MetadataAwareAspectInstanceFactory maaif = imapa.getAspectInstanceFactory();
-		assertEquals(1, maaif.getInstantiationCount());
-		
+		LazySingletonAspectInstanceFactoryDecorator maaif =
+				(LazySingletonAspectInstanceFactoryDecorator) imapa.getAspectInstanceFactory();
+		assertTrue(maaif.isMaterialized());
+
 		// Check that the perclause pointcut is valid
 		assertTrue(maaif.getAspectMetadata().getPerClausePointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
 		assertNotSame(imapa.getDeclaredPointcut(), imapa.getPointcut());
@@ -255,8 +203,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		// Hit the method in the per clause to instantiate the aspect
 		itb.getSpouse();
 		
-		assertEquals(1, maaif.getInstantiationCount());
-		
+		assertTrue(maaif.isMaterialized());
+
 		assertTrue(imapa.getDeclaredPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getAge"), null));
 	
 		assertEquals("Around advice must still apply", 1, itb.getAge());
@@ -269,83 +217,19 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals("Around advice be independent for second instance", 0, itb2.getAge());
 		assertEquals(2, aif.getInstantiationCount());
 	}
-	
-	
-	@Aspect
-	public static class NamedPointcutAspectWithFQN {
-		
-		@SuppressWarnings("unused")
-		private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
-		
-		@Pointcut("execution(* getAge())")
-		public void getAge() {			
-		}
-		
-		@Around("org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.NamedPointcutAspectWithFQN.getAge()")
-		public int changeReturnValue(ProceedingJoinPoint pjp) {
-			return -1;
-		}
-	}
-	
+
 	public void testNamedPointcutAspectWithFQN() {
 		testNamedPointcuts(new NamedPointcutAspectWithFQN());
 	}
-	
-	@Aspect
-	public static class NamedPointcutAspectWithoutFQN {
-		@Pointcut("execution(* getAge())")
-		public void getAge() {			
-		}
-		
-		@Around("getAge()")
-		public int changeReturnValue(ProceedingJoinPoint pjp) {
-			return -1;
-		}
-	}
-	
+
 	public void testNamedPointcutAspectWithoutFQN() {
 		testNamedPointcuts(new NamedPointcutAspectWithoutFQN());
 	}
-	
-	@Aspect
-	public static class NamedPointcutAspectFromLibrary {
 
-		@Around("org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.Library.propertyAccess()")
-		public int changeReturnType(ProceedingJoinPoint pjp) {
-			return -1;
-		}
-		
-		@Around(value="org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.Library.integerArgOperation(x)", argNames="x")
-		public void doubleArg(ProceedingJoinPoint pjp, int x) throws Throwable {
-			pjp.proceed(new Object[]{x*2});
-		}
-	}
-
-	@Aspect
-	public static class Library {
-		
-		@Pointcut("execution(!void get*())")
-		public void propertyAccess() {}
-		
-		@Pointcut("execution(* *(..)) && args(i)")
-		public void integerArgOperation(int i) {}
-		
-	}
-	
 	public void testNamedPointcutFromAspectLibrary() {
 		testNamedPointcuts(new NamedPointcutAspectFromLibrary());
 	}
-	
-	
-	@Aspect
-	public static class NamedPointcutAspectFromLibraryWithBinding {
-		
-		@Around(value="org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.Library.integerArgOperation(x)", argNames="x")
-		public void doubleArg(ProceedingJoinPoint pjp, int x) throws Throwable {
-			pjp.proceed(new Object[]{x*2});
-		}
-	}
-	
+
 	public void testNamedPointcutFromAspectLibraryWithBinding() {
 		TestBean target = new TestBean();
 		ITestBean itb = (ITestBean) createProxy(target, 
@@ -366,20 +250,6 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals("Around advice must apply", -1, itb.getAge());
 		assertEquals(realAge, target.getAge());
 	}
-	
-	@Aspect
-	public static class BindingAspectWithSingleArg {
-		
-		@Pointcut(value="args(a)", argNames="a")
-		public void setAge(int a) {}
-		
-		@Around(value="setAge(age)",argNames="age")
-//		@ArgNames({"age"})   // AMC needs more work here? ignoring pjp arg... ok??
-//		                       // argNames should be suported in Around as it is in Pointcut
-		public void changeReturnType(ProceedingJoinPoint pjp, int age) throws Throwable {
-			pjp.proceed(new Object[]{age*2});
-		}
-	}
 
 	public void testBindingWithSingleArg() {
 		TestBean target = new TestBean();
@@ -390,22 +260,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals("Around advice must apply", 20, itb.getAge());
 		assertEquals(20,target.getAge());
 	}
-	
-	
-	@Aspect
-	public static class ManyValuedArgs {
-		public String mungeArgs(String a, int b, int c, String d, StringBuffer e) {
-			return a + b + c + d + e;
-		}
-		
-		@Around(value="execution(String mungeArgs(..)) && args(a, b, c, d, e)",
-				argNames="b,c,d,e,a")
-		public String reverseAdvice(ProceedingJoinPoint pjp, int b, int c, String d, StringBuffer e, String a) throws Throwable {
-			assertEquals(a + b+ c+ d+ e, pjp.proceed());
-			return a + b + c + d + e;
-		}
-	}
-	
+
 	public void testBindingWithMultipleArgsDifferentlyOrdered() {
 		ManyValuedArgs target = new ManyValuedArgs();
 		ManyValuedArgs mva = (ManyValuedArgs) createProxy(target, 
@@ -542,21 +397,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		lockable.unlock();
 		itb.setName("Tony");
 	}
-	
-	@Aspect
-	public static class ExceptionAspect {
-		private final Exception ex;
-		
-		public ExceptionAspect(Exception ex) {
-			this.ex = ex;
-		}
-		
-		@Before("execution(* getAge())")		
-		public void throwException() throws Exception {
-			throw ex;
-		}
-	}
-		
+
 	public void testAspectMethodThrowsExceptionLegalOnSignature() {
 		TestBean target = new TestBean();
 		UnsupportedOperationException expectedException = new UnsupportedOperationException();
@@ -612,22 +453,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		pf.setExposeProxy(true);
 		return pf.getProxy();
 	}
-	
-	@Aspect
-	public static class TwoAdviceAspect {
-		private int totalCalls;
-		
-		@Around("execution(* getAge())")		
-		public int returnCallCount(ProceedingJoinPoint pjp) throws Exception {
-			return totalCalls;
-		}
-		
-		@Before("execution(* setAge(int)) && args(newAge)")		
-		public void countSet(int newAge) throws Exception {
-			++totalCalls;
-		}
-	}
-		
+
 	public void testTwoAdvicesOnOneAspect() {
 		TestBean target = new TestBean();
 	
@@ -644,37 +470,6 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals(1, itb.getAge());
 	}
 
-	public static class Echo {
-		public Object echo(Object o) throws Exception {
-			if (o instanceof Exception) {
-				throw (Exception) o;
-			}
-			return o;
-		}
-	}
-	
-	@Aspect
-	public static class ExceptionHandling {
-		public int successCount;
-		public int failureCount;
-		public int afterCount;
-		
-		@AfterReturning("execution(* echo(*))")
-		public void succeeded() {
-			++successCount;
-		}
-		
-		@AfterThrowing("execution(* echo(*))")
-		public void failed() {
-			++failureCount;
-		}
-		
-		@After("execution(* echo(*))")
-		public void invoked() {
-			++afterCount;
-		}
-	}
-	
 	public void testAfterAdviceTypes() throws Exception {
 		Echo target = new Echo();
 	
@@ -701,45 +496,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		assertEquals(1, afterReturningAspect.failureCount);
 		assertEquals(afterReturningAspect.failureCount + afterReturningAspect.successCount, afterReturningAspect.afterCount);
 	}
-	
-	@Aspect
-	public static class NoDeclarePrecedenceShouldFail {
-		
-		@Pointcut("execution(int *.getAge())")
-		public void getAge() {
-		}
-		
-		@Before("getAge()")
-		public void blowUpButDoesntMatterBecauseAroundAdviceWontLetThisBeInvoked() {
-			throw new IllegalStateException();
-		}
-		
-		@Around("getAge()")
-		public int preventExecution(ProceedingJoinPoint pjp) {
-			return 666;
-		}
-	}
-	
-	@Aspect
-	@DeclarePrecedence("org.springframework..*")
-	public static class DeclarePrecedenceShouldSucceed {
-		
-		@Pointcut("execution(int *.getAge())")
-		public void getAge() {
-		}
-		
-//		@Before("getAge()")
-//		public void blowUpButDoesntMatterBecauseAroundAdviceWontLetThisBeInvoked() {
-//			throw new IllegalStateException();
-//		}
-//		
-//		@Around("getAge()")
-//
-//		public int preventExecution(ProceedingJoinPoint pjp) {
-//			return 666;
-//		}
-	}
-	
+
 	public void testFailureWithoutExplicitDeclarePrecedence() {
 		TestBean target = new TestBean();
 		ITestBean itb = (ITestBean) createProxy(target, 
@@ -777,5 +534,306 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 //				ITestBean.class);
 //		assertEquals(666, itb.getAge());
 //	}
+
+
+	@Aspect("percflow(execution(* *(..)))")
+	public static class PerCflowAspect {
+	}
+
+
+	@Aspect("percflowbelow(execution(* *(..)))")
+	public static class PerCflowBelowAspect {
+	}
+
+
+	@Aspect("pertarget(execution(* *.getSpouse()))")
+	public static class PerTargetAspect implements Ordered {
+
+		public int count;
+
+		private int order = Ordered.LOWEST_PRECEDENCE;
+
+		@Around("execution(int *.getAge())")
+		public int returnCountAsAge() {
+			return count++;
+		}
+
+		@Before("execution(void *.set*(int))")
+		public void countSetter() {
+			++count;
+		}
+
+		public int getOrder() {
+			return this.order;
+		}
+
+		public void setOrder(int order) {
+			this.order = order;
+		}
+	}
+
+
+	@Aspect("perthis(execution(* *.getSpouse()))")
+	public static class PerThisAspect {
+
+		public int count;
+
+		/**
+		 * Just to check that this doesn't cause problems with introduction processing
+		 */
+		private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
+
+		@Around("execution(int *.getAge())")
+		public int returnCountAsAge() {
+			return count++;
+		}
+
+		@Before("execution(void *.set*(int))")
+		public void countSetter() {
+			++count;
+		}
+	}
+
+
+	@Aspect("pertypewithin(org.springframework.beans.IOther+)")
+	public static class PerTypeWithinAspect {
+
+		public int count;
+
+		@Around("execution(int *.getAge())")
+		public int returnCountAsAge() {
+			return count++;
+		}
+
+		@Before("execution(void *.*(..))")
+		public void countAnythingVoid() {
+			++count;
+		}
+	}
+
+
+	private class PerTypeWithinAspectInstanceFactory implements MetadataAwareAspectInstanceFactory {
+
+		private int count;
+
+		public Object getAspectInstance() {
+			++count;
+			return new PerTypeWithinAspect();
+		}
+
+		public int getInstantiationCount() {
+			return count;
+		}
+
+		public int getOrder() {
+			return Ordered.LOWEST_PRECEDENCE;
+		}
+
+		public AspectMetadata getAspectMetadata() {
+			return new AspectMetadata(PerTypeWithinAspect.class, "perTypeWithin");
+		}
+	}
+
+
+	@Aspect
+	public static class NamedPointcutAspectWithFQN {
+
+		@SuppressWarnings("unused")
+		private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
+
+		@Pointcut("execution(* getAge())")
+		public void getAge() {
+		}
+
+		@Around("org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.NamedPointcutAspectWithFQN.getAge()")
+		public int changeReturnValue(ProceedingJoinPoint pjp) {
+			return -1;
+		}
+	}
+
+
+	@Aspect
+	public static class NamedPointcutAspectWithoutFQN {
+		@Pointcut("execution(* getAge())")
+		public void getAge() {
+		}
+
+		@Around("getAge()")
+		public int changeReturnValue(ProceedingJoinPoint pjp) {
+			return -1;
+		}
+	}
+
+
+	@Aspect
+	public static class NamedPointcutAspectFromLibrary {
+
+		@Around("org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.Library.propertyAccess()")
+		public int changeReturnType(ProceedingJoinPoint pjp) {
+			return -1;
+		}
+
+		@Around(value="org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.Library.integerArgOperation(x)", argNames="x")
+		public void doubleArg(ProceedingJoinPoint pjp, int x) throws Throwable {
+			pjp.proceed(new Object[]{x*2});
+		}
+	}
+
+
+	@Aspect
+	public static class Library {
+
+		@Pointcut("execution(!void get*())")
+		public void propertyAccess() {}
+
+		@Pointcut("execution(* *(..)) && args(i)")
+		public void integerArgOperation(int i) {}
+
+	}
+
+
+	@Aspect
+	public static class NamedPointcutAspectFromLibraryWithBinding {
+
+		@Around(value="org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.Library.integerArgOperation(x)", argNames="x")
+		public void doubleArg(ProceedingJoinPoint pjp, int x) throws Throwable {
+			pjp.proceed(new Object[]{x*2});
+		}
+	}
+
+
+	@Aspect
+	public static class BindingAspectWithSingleArg {
+
+		@Pointcut(value="args(a)", argNames="a")
+		public void setAge(int a) {}
+
+		@Around(value="setAge(age)",argNames="age")
+		//		@ArgNames({"age"})   // AMC needs more work here? ignoring pjp arg... ok??
+		//		                       // argNames should be suported in Around as it is in Pointcut
+		public void changeReturnType(ProceedingJoinPoint pjp, int age) throws Throwable {
+			pjp.proceed(new Object[]{age*2});
+		}
+	}
+
+
+	@Aspect
+	public static class ManyValuedArgs {
+		public String mungeArgs(String a, int b, int c, String d, StringBuffer e) {
+			return a + b + c + d + e;
+		}
+
+		@Around(value="execution(String mungeArgs(..)) && args(a, b, c, d, e)",
+				argNames="b,c,d,e,a")
+		public String reverseAdvice(ProceedingJoinPoint pjp, int b, int c, String d, StringBuffer e, String a) throws Throwable {
+			assertEquals(a + b+ c+ d+ e, pjp.proceed());
+			return a + b + c + d + e;
+		}
+	}
+
+
+	@Aspect
+	public static class ExceptionAspect {
+		private final Exception ex;
+
+		public ExceptionAspect(Exception ex) {
+			this.ex = ex;
+		}
+
+		@Before("execution(* getAge())")
+		public void throwException() throws Exception {
+			throw ex;
+		}
+	}
+
+
+	@Aspect
+	public static class TwoAdviceAspect {
+		private int totalCalls;
+
+		@Around("execution(* getAge())")
+		public int returnCallCount(ProceedingJoinPoint pjp) throws Exception {
+			return totalCalls;
+		}
+
+		@Before("execution(* setAge(int)) && args(newAge)")
+		public void countSet(int newAge) throws Exception {
+			++totalCalls;
+		}
+	}
+
+
+	public static class Echo {
+
+		public Object echo(Object o) throws Exception {
+			if (o instanceof Exception) {
+				throw (Exception) o;
+			}
+			return o;
+		}
+	}
+
+
+	@Aspect
+	public static class ExceptionHandling {
+		public int successCount;
+		public int failureCount;
+		public int afterCount;
+
+		@AfterReturning("execution(* echo(*))")
+		public void succeeded() {
+			++successCount;
+		}
+
+		@AfterThrowing("execution(* echo(*))")
+		public void failed() {
+			++failureCount;
+		}
+
+		@After("execution(* echo(*))")
+		public void invoked() {
+			++afterCount;
+		}
+	}
+
+
+	@Aspect
+	public static class NoDeclarePrecedenceShouldFail {
+
+		@Pointcut("execution(int *.getAge())")
+		public void getAge() {
+		}
+
+		@Before("getAge()")
+		public void blowUpButDoesntMatterBecauseAroundAdviceWontLetThisBeInvoked() {
+			throw new IllegalStateException();
+		}
+
+		@Around("getAge()")
+		public int preventExecution(ProceedingJoinPoint pjp) {
+			return 666;
+		}
+	}
+
+
+	@Aspect
+	@DeclarePrecedence("org.springframework..*")
+	public static class DeclarePrecedenceShouldSucceed {
+
+		@Pointcut("execution(int *.getAge())")
+		public void getAge() {
+		}
+
+		//		@Before("getAge()")
+		//		public void blowUpButDoesntMatterBecauseAroundAdviceWontLetThisBeInvoked() {
+		//			throw new IllegalStateException();
+		//		}
+		//
+		//		@Around("getAge()")
+		//
+		//		public int preventExecution(ProceedingJoinPoint pjp) {
+		//			return 666;
+		//		}
+	}
 
 }
