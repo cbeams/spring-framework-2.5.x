@@ -20,8 +20,8 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * Assert utility class that assists in validating arguments. Useful for
- * identifying programmer errors early and obviously at runtime.
+ * Assertion utility class that assists in validating arguments.
+ * Useful for identifying programmer errors early and clearly at runtime.
  *
  * <p>For example, if the contract of a public method states it does not
  * allow <code>null</code> arguments, Assert can be used to validate that
@@ -121,7 +121,7 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object is <code>null</code>
 	 */
 	public static void notNull(Object object) {
-		notNull(object, "[Assertion failed] - this argument is required; it cannot be null");
+		notNull(object, "[Assertion failed] - this argument is required; it must not null");
 	}
 
 	/**
@@ -145,7 +145,7 @@ public abstract class Assert {
 	 */
 	public static void hasLength(String text) {
 		hasLength(text,
-				"[Assertion failed] - this String argument must have length; it cannot be <code>null</code> or empty");
+				"[Assertion failed] - this String argument must have length; it must not be <code>null</code> or empty");
 	}
 
 	/**
@@ -171,7 +171,7 @@ public abstract class Assert {
 	 */
 	public static void hasText(String text) {
 		hasText(text,
-				"[Assertion failed] - this String argument must have text; it cannot be <code>null</code>, empty, or blank");
+				"[Assertion failed] - this String argument must have text; it must not be <code>null</code>, empty, or blank");
 	}
 
 	/**
@@ -292,7 +292,7 @@ public abstract class Assert {
 	/**
 	 * Assert that the provided object is an instance of the provided class.
 	 * <pre class="code">Assert.instanceOf(Foo.class, foo);</pre>
-	 * @param clazz the required class
+	 * @param type the type to check against
 	 * @param obj the object to check
 	 * @param message a message which will be prepended to the message produced by
 	 * the function itself, and which may be used to provide context. It should
@@ -301,11 +301,13 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the object is not an instance of clazz
 	 * @see Class#isInstance
 	 */
-	public static void isInstanceOf(Class clazz, Object obj, String message) {
-		Assert.notNull(clazz, "The clazz to perform the instanceof assertion cannot be null");
-		Assert.isTrue(clazz.isInstance(obj), message +
-				"Object of class '" + (obj != null ? obj.getClass().getName() : "[null]") +
-				"' must be an instance of '" + clazz.getName() + "'");
+	public static void isInstanceOf(Class type, Object obj, String message) {
+		notNull(type, "Type to check against must not be null");
+		if (!type.isInstance(obj)) {
+			throw new IllegalArgumentException(message +
+					"Object of class [" + (obj != null ? obj.getClass().getName() : "null") +
+					"] must be an instance of " + type);
+		}
 	}
 
 	/**
@@ -322,7 +324,7 @@ public abstract class Assert {
 	/**
 	 * Assert that <code>superType.isAssignableFrom(subType)</code> is <code>true</code>.
 	 * <pre class="code">Assert.isAssignable(Number.class, myClass);</pre>
-	 * @param superType the super type to check
+	 * @param superType the super type to check against
 	 * @param subType the sub type to check
 	 * @param message a message which will be prepended to the message produced by
 	 * the function itself, and which may be used to provide context. It should
@@ -331,10 +333,10 @@ public abstract class Assert {
 	 * @throws IllegalArgumentException if the classes are not assignable
 	 */
 	public static void isAssignable(Class superType, Class subType, String message) {
-		Assert.notNull(superType, "superType cannot be null");
-		Assert.notNull(subType, "subType cannot be null");
-		Assert.isTrue(superType.isAssignableFrom(subType), message + "Type [" + subType.getName()
-						+ "] is not assignable to type [" + superType.getName() + "]");
+		notNull(superType, "Type to check against must not be null");
+		if (subType == null || !superType.isAssignableFrom(subType)) {
+			throw new IllegalArgumentException(message + subType + " is not assignable to " + superType);
+		}
 	}
 
 
@@ -356,7 +358,7 @@ public abstract class Assert {
 	/**
 	 * Assert a boolean expression, throwing {@link IllegalStateException}
 	 * if the test result is <code>false</code>.
-     * <p>Call {@link #isTrue(boolean)} if you wish to
+	 * <p>Call {@link #isTrue(boolean)} if you wish to
 	 * throw {@link IllegalArgumentException} on an assertion failure.
 	 * <pre class="code">Assert.state(id == null);</pre>
 	 * @param expression a boolean expression
