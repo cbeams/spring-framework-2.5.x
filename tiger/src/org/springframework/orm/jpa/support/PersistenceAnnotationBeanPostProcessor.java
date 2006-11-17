@@ -51,14 +51,17 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * BeanPostProcessor that processes PersistenceUnit and PersistenceContext
- * annotations for injection of JPA interfaces. Any such annotated fields
- * or methods in any Spring-managed object will automatically be injected.
- * Will inject subinterfaces of EntityManager and EntityManagerFactory if possible.
+ * BeanPostProcessor that processes {@link javax.persistence.PersistenceUnit}
+ * and {@link javax.persistence.PersistenceContext} annotations, for injection of
+ * the corresponding JPA resources {@link javax.persistence.EntityManagerFactory}
+ * and {@link javax.persistence.EntityManager}. Any such annotated fields or methods
+ * in any Spring-managed object will automatically be injected.
  *
- * <p>May align with JSR-250 (Common Annotations for the Java Platform) in the
- * future. Note that this support can be used along with that support, as there
- * should be no conflict in implementation.
+ * <p>This post-processor will inject sub-interfaces of <code>EntityManagerFactory</code>
+ * and <code>EntityManager</code> if the annotated fields or methods are declared as such.
+ * The actual type will be verified early, with the exception of a shared ("transactional")
+ * <code>EntityManager</code> reference, where type mismatches might be detected as late
+ * as on the first actual invocation.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -193,7 +196,6 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 
 		private final Properties properties;
 
-
 		public AnnotatedMember(AccessibleObject member, String unitName) {
 			this(member, unitName, null, null);
 		}
@@ -211,7 +213,6 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 				throw new IllegalArgumentException("Cannot inject " + member + ": not a supported JPA type");
 			}
 		}
-
 
 		public void inject(Object instance) {
 			Object value = resolve();
@@ -266,7 +267,7 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 		 * Resolve the object against the application context.
 		 */
 		protected Object resolve() {
-			// Resolves to EM or EMF.
+			// Resolves to EntityManagerFactory or EntityManager.
 			EntityManagerFactory emf = findEntityManagerFactory(this.unitName);
 			if (EntityManagerFactory.class.isAssignableFrom(getMemberType())) {
 				if (!getMemberType().isInstance(emf)) {
@@ -277,14 +278,29 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 			}
 			else {
 				// We need to inject an EntityManager.
+				EntityManager em = null;
 				if (this.type == PersistenceContextType.TRANSACTION) {
 					// Inject a shared transactional EntityManager proxy.
-					return SharedEntityManagerCreator.createSharedEntityManager(emf, this.properties, getMemberType());
+					if (emf instanceof EntityManagerFactoryInfo &&
+							!EntityManager.class.equals(((EntityManagerFactoryInfo) emf).getEntityManagerInterface())) {
+						// Create EntityManager based on the info's vendor-specific type
+						// (which might be more specific than the field's type).
+						em = SharedEntityManagerCreator.createSharedEntityManager(emf, this.properties);
+					}
+					else {
+						// Create EntityManager based on the field's type.
+						em = SharedEntityManagerCreator.createSharedEntityManager(emf, this.properties, getMemberType());
+					}
 				}
 				else {
-					// Type is container-managed extended.
-					return ExtendedEntityManagerCreator.createContainerManagedEntityManager(emf, this.properties);
+					// Inject a container-managed extended EntityManager.
+					em = ExtendedEntityManagerCreator.createContainerManagedEntityManager(emf, this.properties);
 				}
+				if (!getMemberType().isInstance(em)) {
+					throw new IllegalArgumentException("Cannot inject [" + this.member +
+							"] with EntityManager [" + em + "]: type mismatch");
+				}
+				return em;
 			}
 		}
 	}
