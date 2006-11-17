@@ -18,8 +18,7 @@ package org.springframework.aop.aspectj.autoproxy;
 
 import junit.framework.TestCase;
 
-import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.PerTargetAspect;
-import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.TwoAdviceAspect;
+import org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
 import org.springframework.aop.config.AopNamespaceUtils;
@@ -126,7 +125,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals("Setter does not initiate advice", explicitlySetAge, adrian1.getAge());
 		// Fire aspect
 
-		AspectMetadata am = new AspectMetadata(PerTargetAspect.class, "someBean");
+		AspectMetadata am = new AspectMetadata(AbstractAspectJAdvisorFactoryTests.PerTargetAspect.class, "someBean");
 		assertTrue(am.getPerClausePointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null));
 
 		adrian1.getSpouse();
@@ -160,7 +159,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 	private void testTwoAdviceAspectWith(String location) {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/" + location);
-		boolean aspectSingleton = bf.isSingleton(TwoAdviceAspect.class.getName());
+		boolean aspectSingleton = bf.isSingleton(AbstractAspectJAdvisorFactoryTests.TwoAdviceAspect.class.getName());
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
 		testPrototype(adrian1, 0);
@@ -230,4 +229,5 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals(1, aspect.getRollbackCalls());
 		assertEquals(1, aspect.getCommitCalls());
 	}
+
 }

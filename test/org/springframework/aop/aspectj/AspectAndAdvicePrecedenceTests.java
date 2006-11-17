@@ -1,20 +1,19 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Created on 14-Feb-2006 by Adrian Colyer
  */
+
 package org.springframework.aop.aspectj;
 
 import org.springframework.beans.ITestBean;
@@ -24,20 +23,19 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
  * @author Adrian Colyer
  * @since 2.0
  */
-public class AspectAndAdvicePrecedenceTests extends
-		AbstractDependencyInjectionSpringContextTests {
+public class AspectAndAdvicePrecedenceTests extends AbstractDependencyInjectionSpringContextTests {
 
-	public AspectAndAdvicePrecedenceTests() {
-		setAutowireMode(AUTOWIRE_BY_NAME);
-	}
-	
-	
 	private PrecedenceTestAspect highPrecedenceAspect;
 	private PrecedenceTestAspect lowPrecedenceAspect;
 	private SimpleSpringBeforeAdvice lowPrecedenceSpringAdvice;
 	private SimpleSpringBeforeAdvice highPrecedenceSpringAdvice;
 	private ITestBean testBean;
 	
+
+	public AspectAndAdvicePrecedenceTests() {
+		setAutowireMode(AUTOWIRE_BY_NAME);
+	}
+
 	protected String[] getConfigLocations() {
 		return new String[] {"org/springframework/aop/aspectj/advice-precedence-tests.xml"};
 	}
@@ -50,23 +48,18 @@ public class AspectAndAdvicePrecedenceTests extends
 		this.lowPrecedenceAspect = lowPrecedenceAspect;
 	}
 
-	public void setLowPrecedenceSpringAdvice(
-			SimpleSpringBeforeAdvice lowPrecedenceSpringAdvice) {
+	public void setLowPrecedenceSpringAdvice(SimpleSpringBeforeAdvice lowPrecedenceSpringAdvice) {
 		this.lowPrecedenceSpringAdvice = lowPrecedenceSpringAdvice;
 	}
 
-	public void setHighPrecedenceSpringAdvice(
-			SimpleSpringBeforeAdvice highPrecedenceSpringAdvice) {
+	public void setHighPrecedenceSpringAdvice(SimpleSpringBeforeAdvice highPrecedenceSpringAdvice) {
 		this.highPrecedenceSpringAdvice = highPrecedenceSpringAdvice;
 	}
 	
 	public void setTestBean(ITestBean testBean) {
 		this.testBean = testBean;
 	}
-	
-	protected void onSetUp() throws Exception {
-		super.onSetUp();
-	}
+
 
 	// ========== end of test case set up, start of tests proper ===================
 
@@ -75,11 +68,12 @@ public class AspectAndAdvicePrecedenceTests extends
 		this.highPrecedenceAspect.setCollaborator(collaborator);
 		this.lowPrecedenceAspect.setCollaborator(collaborator);
 		this.highPrecedenceSpringAdvice.setCollaborator(collaborator);
-		this.lowPrecedenceSpringAdvice.setCollaborator(collaborator);		
+		this.lowPrecedenceSpringAdvice.setCollaborator(collaborator);
 		this.testBean.getAge();
 	}
-	
-	static class PrecedenceVerifyingCollaborator implements PrecedenceTestAspect.Collaborator {
+
+
+	private static class PrecedenceVerifyingCollaborator implements PrecedenceTestAspect.Collaborator {
 
 		private static final String[] EXPECTED = {
 			// this order confirmed by running the same aspects (minus the Spring AOP advisors)
@@ -103,13 +97,13 @@ public class AspectAndAdvicePrecedenceTests extends
 			"afterAdviceOne(highPrecedenceAspect)",            // 17
 			"afterAdviceTwo(highPrecedenceAspect)"             // 18
 		};
-		
+
 		private int adviceInvocationNumber = 0;
-		
+
 		private void checkAdvice(String whatJustHappened) {
 			//System.out.println("[" + adviceInvocationNumber + "] " + whatJustHappened + " ==> " + EXPECTED[adviceInvocationNumber]);
 			if (adviceInvocationNumber > (EXPECTED.length - 1)) {
-				fail("Too many advice invocations, expecting " + EXPECTED.length 
+				fail("Too many advice invocations, expecting " + EXPECTED.length
 						+ " but had " + adviceInvocationNumber);
 			}
 			String expecting = EXPECTED[adviceInvocationNumber++];
@@ -118,7 +112,7 @@ public class AspectAndAdvicePrecedenceTests extends
 						" but got '" + whatJustHappened + "'");
 			}
 		}
-		
+
 		public void beforeAdviceOne(String beanName) {
 			checkAdvice("beforeAdviceOne(" + beanName + ")");
 		}
@@ -141,6 +135,7 @@ public class AspectAndAdvicePrecedenceTests extends
 
 		public void afterAdviceTwo(String beanName) {
 			checkAdvice("afterAdviceTwo(" + beanName + ")");
-		}		
+		}
 	}
+
 }
