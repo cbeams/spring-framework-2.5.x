@@ -31,7 +31,6 @@ import org.aspectj.lang.annotation.Pointcut;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
-import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.aspectj.AbstractAspectJAdvice;
 import org.springframework.aop.aspectj.AspectJAfterAdvice;
 import org.springframework.aop.aspectj.AspectJAfterReturningAdvice;
@@ -58,7 +57,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 	/**
 	 * Create Spring Advisors for all At AspectJ methods on the given aspect instance.
-	 * @return a list of advisors for this class
+	 * @return a list of Advisors for this class
 	 */
 	public List<Advisor> getAdvisors(MetadataAwareAspectInstanceFactory maaif) {
 		final Class<?> aspectClass = maaif.getAspectMetadata().getAspectClass();
@@ -68,35 +67,34 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		// We need to wrap the MetadataAwareAspectInstanceFactory with a decorator
 		// so that it will only instantiate once.
 		final MetadataAwareAspectInstanceFactory lazySingletonAspectInstanceFactory =
-				new LazySingletonMetadataAwareAspectInstanceFactoryDecorator(maaif);
+				new LazySingletonAspectInstanceFactoryDecorator(maaif);
 
 		final List<Advisor> advisors = new LinkedList<Advisor>();
-		//final AspectInstanceFactory aif = new AspectInstanceFactory.SingletonAspectInstanceFactory(aspectInstance);
 		ReflectionUtils.doWithMethods(aspectClass, new ReflectionUtils.MethodCallback() {
-			public void doWith(Method m) throws IllegalArgumentException {
+			public void doWith(Method method) throws IllegalArgumentException {
 				// Exclude pointcuts
-				if (AnnotationUtils.getAnnotation(m, Pointcut.class) == null) {
-					PointcutAdvisor pa = getAdvisor(m, lazySingletonAspectInstanceFactory, advisors.size(), aspectName);
-					if (pa != null) {
-						advisors.add(pa);
+				if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
+					Advisor advisor = getAdvisor(method, lazySingletonAspectInstanceFactory, advisors.size(), aspectName);
+					if (advisor != null) {
+						advisors.add(advisor);
 					}
 				}
 			}
 		});
 
-		// If it's a per target aspect, emit the dummy instantiating aspect
+		// If it's a per target aspect, emit the dummy instantiating aspect.
 		if (!advisors.isEmpty() && lazySingletonAspectInstanceFactory.getAspectMetadata().isLazilyInstantiated()) {
 			Advisor instantiationAdvisor = new SyntheticInstantiationAdvisor(lazySingletonAspectInstanceFactory);
 			advisors.add(0, instantiationAdvisor);
 		}
 
-		//	Find introduction fields
-		for (Field f : aspectClass.getDeclaredFields()) {
+		//Find introduction fields
+		for (Field field : aspectClass.getDeclaredFields()) {
 			// AMC: not sure why this test is here? AspectJ doesn't enforce this...
 			//if (Modifier.isStatic(f.getModifiers()) && Modifier.isPublic(f.getModifiers())) {
-				Advisor a = getDeclareParentsAdvisor(f);
-				if (a != null) {
-					advisors.add(a);
+				Advisor advisor = getDeclareParentsAdvisor(field);
+				if (advisor != null) {
+					advisors.add(advisor);
 				}
 			//}
 		}
@@ -126,7 +124,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	}
 
 
-	public InstantiationModelAwarePointcutAdvisorImpl getAdvisor(
+	public Advisor getAdvisor(
 			Method candidateAspectJAdviceMethod, MetadataAwareAspectInstanceFactory aif,
 			int declarationOrderInAspect, String aspectName) {
 
@@ -194,7 +192,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 				}
 				break;
 			case AtAround:
-				springAdvice = new AspectJAroundAdvice(candidateAspectJAdviceMethod, ajexp, aif, parameterNameDiscoverer);
+				springAdvice = new AspectJAroundAdvice(candidateAspectJAdviceMethod, ajexp, aif);
 				break;
 			case AtPointcut:
 				if (logger.isDebugEnabled()) {
@@ -258,8 +256,6 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	 * The advice has no effect.
 	 */
 	protected static class SyntheticInstantiationAdvisor extends DefaultPointcutAdvisor {
-
-		private static final long serialVersionUID = -7789221134469113954L;
 
 		public SyntheticInstantiationAdvisor(final MetadataAwareAspectInstanceFactory aif) {
 			super(aif.getAspectMetadata().getPerClausePointcut(), new MethodBeforeAdvice() {
