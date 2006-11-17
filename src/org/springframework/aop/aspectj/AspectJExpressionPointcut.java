@@ -52,7 +52,8 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @since 2.0
  */
-public class AspectJExpressionPointcut extends AbstractExpressionPointcut implements ClassFilter, IntroductionAwareMethodMatcher {
+public class AspectJExpressionPointcut extends AbstractExpressionPointcut
+		implements ClassFilter, IntroductionAwareMethodMatcher {
 
 	private static final Set DEFAULT_SUPPORTED_PRIMITIVES = new HashSet();
 
@@ -81,23 +82,51 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 	private Class[] pointcutParameterTypes = new Class[0];
 
 	private PointcutExpression pointcutExpression;
-	
 
+
+	/**
+	 * Create a new default AspectJExpressionPointcut.
+	 */
 	public AspectJExpressionPointcut() {
-		this.pointcutParser =
-				PointcutParser.getPointcutParserSupportingSpecifiedPrimitivesAndUsingContextClassloaderForResolution(
-						getSupportedPrimitives());
+		this(DEFAULT_SUPPORTED_PRIMITIVES);
 	}
 
-	public AspectJExpressionPointcut(Class scope, String[] paramNames, Class[] paramTypes) {
-		this();
-		this.pointcutDeclarationScope = scope;
+	/**
+	 * Create a new AspectJExpressionPointcut with the given supported primitives.
+	 * @param supportedPrimitives Set of {@link org.aspectj.weaver.tools.PointcutPrimitive}
+	 * instances
+	 */
+	public AspectJExpressionPointcut(Set supportedPrimitives) {
+		this.pointcutParser =
+				PointcutParser.getPointcutParserSupportingSpecifiedPrimitivesAndUsingContextClassloaderForResolution(
+						supportedPrimitives);
+	}
+
+	/**
+	 * Create a new AspectJExpressionPointcut with the given settings.
+	 */
+	public AspectJExpressionPointcut(Class declarationScope, String[] paramNames, Class[] paramTypes) {
+		this(DEFAULT_SUPPORTED_PRIMITIVES);
+		this.pointcutDeclarationScope = declarationScope;
 		if (paramNames.length != paramTypes.length) {
 			throw new IllegalStateException(
 					"Number of pointcut parameter names must match number of pointcut parameter types");
 		}
 		this.pointcutParameterNames = paramNames;
 		this.pointcutParameterTypes = paramTypes;
+	}
+
+
+	public void setPointcutDeclarationScope(Class pointcutDeclarationScope) {
+		this.pointcutDeclarationScope = pointcutDeclarationScope;
+	}
+
+	public void setParameterNames(String[] names) {
+		this.pointcutParameterNames = names;
+	}
+
+	public void setParameterTypes(Class[] types) {
+		this.pointcutParameterTypes = types;
 	}
 
 
@@ -111,35 +140,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		return this;
 	}
 
-	public void setParameterNames(String[] names) {
-		this.pointcutParameterNames = names;
-	}
-	
-	public void setParameterTypes(Class[] types) {
-		this.pointcutParameterTypes = types;
-	}
-	
-	/**
-	 * If a pointcut expression has been specified in xml, the user can't 
-	 * write and as "&&" (though &amp;&amp; will work). We also allow
-	 * ' and ' between two pointcut sub-expressions. This method converts
-	 * and back to && for the AspectJ pointcut parser.
-	 */
-	private String replaceBooleanOperators(String pcExpr) {
-		pcExpr = StringUtils.replace(pcExpr," and "," && ");
-		pcExpr = StringUtils.replace(pcExpr, " or ", " || ");
-		pcExpr = StringUtils.replace(pcExpr, " not ", " ! ");
-		return pcExpr;
-	}
-
-	public PointcutExpression getPointcutExpression() {
-		checkReadyToMatch();
-		return this.pointcutExpression;
-	}
-
-	protected Set getSupportedPrimitives() {
-		return DEFAULT_SUPPORTED_PRIMITIVES;
-	}
 
 	private void checkReadyToMatch() {
 		if (getExpression() == null) {
@@ -161,9 +161,32 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 					replaceBooleanOperators(getExpression()), pointcutDeclarationScope, pointcutParameters);
 	}
 
+	/**
+	 * If a pointcut expression has been specified in xml, the user can't 
+	 * write and as "&&" (though &amp;&amp; will work). We also allow
+	 * ' and ' between two pointcut sub-expressions. This method converts
+	 * and back to && for the AspectJ pointcut parser.
+	 */
+	private String replaceBooleanOperators(String pcExpr) {
+		pcExpr = StringUtils.replace(pcExpr," and "," && ");
+		pcExpr = StringUtils.replace(pcExpr, " or ", " || ");
+		pcExpr = StringUtils.replace(pcExpr, " not ", " ! ");
+		return pcExpr;
+	}
+
+	public PointcutExpression getPointcutExpression() {
+		checkReadyToMatch();
+		return this.pointcutExpression;
+	}
+
+
 	public boolean matches(Class targetClass) {
 		checkReadyToMatch();
 		return this.pointcutExpression.couldMatchJoinPointsInType(targetClass);
+	}
+
+	public boolean matches(Method method, Class targetClass) {
+		return matches(method, targetClass, false);
 	}
 
 	public boolean isRuntime() {
@@ -195,18 +218,11 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		}
 	}
 
-	public boolean matches(Method method, Class targetClass) {
-		return matches(method,targetClass,false);
-	}
-
 	/**
 	 * If we are proxying an interface, the declaring type of the
 	 * method may not match the declaring type of the targetClass -
 	 * because we got the method from a proxy. We need to find the
 	 * corresponding targetClass method and match on that instead.
-	 * @param method
-	 * @param targetClass
-	 * @return
 	 */
 	private Method findMethodToMatchAgainst(Method method, Class targetClass) {
 		Class declaredClass = method.getDeclaringClass();
@@ -223,10 +239,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 				}
 			}
 			while (targetClass != null);
-			// this odd situation can arise as a result of declare parents
-			// statements.
+			// this odd situation can arise as a result of declare parents statements
 			return method;
-		} else {
+		}
+		else {
 			return method;
 		}
 	}
@@ -236,7 +252,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 	 * involved in the test (this, target, at_this, at_target, at_annotation) then
 	 * we say this is not a match as in Spring there will never be a different 
 	 * runtime subtype.
-	 * @return
 	 */
 	private boolean matchesIgnoringSubtypes(ShadowMatch shadowMatch) {
 		return !(new RuntimeTestWalker(shadowMatch).testsSubtypeSensitiveVars());
@@ -271,9 +286,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		}
 		return joinPointMatch.matches();
 	}
-	
+
 	private void bindParameters(ReflectiveMethodInvocation invocation, JoinPointMatch jpm) {
-		// note - can't use JoinPointMatch.getClass().getName() as the key, since
+		// Note: Can't use JoinPointMatch.getClass().getName() as the key, since
 		// Spring AOP does all the matching at a join point, and then all the invocations
 		// under this scenario, if we just use JoinPointMatch as the key, then
 		// 'last man wins' which is not what we want at all.
@@ -295,31 +310,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 	}
 
 
-	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("AspectJExpressionPointcut: ");
-		if (this.pointcutParameterNames != null && this.pointcutParameterTypes != null) {
-			sb.append("(");
-			for (int i = 0; i < this.pointcutParameterTypes.length; i++) {
-				sb.append(this.pointcutParameterTypes[i].getName());
-				sb.append(" ");
-				sb.append(this.pointcutParameterNames[i]);
-				if ((i+1) < this.pointcutParameterTypes.length) {
-					sb.append(", ");
-				}
-			}
-			sb.append(")");
-		}
-		sb.append(" ");
-		if (getExpression() != null) {
-			sb.append(getExpression());
-		} 
-		else {
-			sb.append("<pointcut expression not set>");
-		}
-		return sb.toString();
-	}
-
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -340,6 +330,31 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut implem
 		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutParameterNames);
 		hashCode = 31 * hashCode + ObjectUtils.nullSafeHashCode(this.pointcutParameterTypes);
 		return hashCode;
+	}
+
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("AspectJExpressionPointcut: ");
+		if (this.pointcutParameterNames != null && this.pointcutParameterTypes != null) {
+			sb.append("(");
+			for (int i = 0; i < this.pointcutParameterTypes.length; i++) {
+				sb.append(this.pointcutParameterTypes[i].getName());
+				sb.append(" ");
+				sb.append(this.pointcutParameterNames[i]);
+				if ((i+1) < this.pointcutParameterTypes.length) {
+					sb.append(", ");
+				}
+			}
+			sb.append(")");
+		}
+		sb.append(" ");
+		if (getExpression() != null) {
+			sb.append(getExpression());
+		}
+		else {
+			sb.append("<pointcut expression not set>");
+		}
+		return sb.toString();
 	}
 
 }
