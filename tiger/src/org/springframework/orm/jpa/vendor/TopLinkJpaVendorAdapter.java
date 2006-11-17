@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 
+import javax.persistence.EntityManager;
 import javax.persistence.spi.PersistenceProvider;
 
 import oracle.toplink.essentials.config.TargetDatabase;
@@ -29,7 +30,8 @@ import oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider;
 import org.springframework.orm.jpa.JpaDialect;
 
 /**
- * JpaVendorAdapter implementation for TopLink Essentials.
+ * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for
+ * Oracle TopLink Essentials. Developed and tested against TopLink Essentials v2.
  *
  * <p>Exposes TopLink's persistence provider and EntityManager extension interface,
  * and supports AbstractJpaVendorAdapter's common configuration settings.
@@ -96,7 +98,7 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 	}
 
-	public Class getEntityManagerInterface() {
+	public Class<? extends EntityManager> getEntityManagerInterface() {
 		return oracle.toplink.essentials.ejb.cmp3.EntityManager.class;
 	}
 

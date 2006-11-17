@@ -18,6 +18,7 @@ package org.springframework.orm.jpa;
 
 import java.util.Map;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 
@@ -29,6 +30,7 @@ import javax.persistence.spi.PersistenceProvider;
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since 2.0
+ * @see AbstractEntityManagerFactoryBean#setJpaVendorAdapter
  */
 public interface JpaVendorAdapter {
 
@@ -39,25 +41,39 @@ public interface JpaVendorAdapter {
 
 	/**
 	 * Return a Map of vendor-specific JPA properties,
-	 * based on settings in this JpaVendorAdapter instance.
+	 * typically based on settings in this JpaVendorAdapter instance.
+	 * <p>Note that there might be further JPA properties defined on
+	 * the EntityManagerFactory bean, which might potentially override
+	 * individual JPA property values specified here.
+	 * @return a Map of JPA properties, as as accepted by the standard
+	 * JPA bootstrap facilities, or <code>null</code> or an empty Map
+	 * if there are no such properties to expose
+	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
+	 * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
 	 */
 	Map getJpaPropertyMap();
 
 	/**
 	 * Return the vendor-specific EntityManager interface that this
-	 * factory's EntityManagers will implement.
+	 * provider's EntityManagers will implement.
+	 * <p>If the provider does not offer any EntityManager extensions,
+	 * the adapter should simply return the standard
+	 * {@link javax.persistence.EntityManager} class here.
 	 */
-	Class getEntityManagerInterface();
+	Class<? extends EntityManager> getEntityManagerInterface();
 
 	/**
 	 * Return the vendor-specific JpaDialect implementation for this
-	 * EntityManagerFactory, or <code>null</code> if not known.
+	 * provider, or <code>null</code> if there is none.
 	 */
 	JpaDialect getJpaDialect();
 
 	/**
 	 * Optional callback for post-processing the native EntityManagerFactory
 	 * before active use.
+	 * <p>This can be used for triggering vendor-specific initialization processes.
+	 * While this is not expected to be used for most providers, it is included
+	 * here as a general extension hook.
 	 */
 	void postProcessEntityManagerFactory(EntityManagerFactory emf);
 

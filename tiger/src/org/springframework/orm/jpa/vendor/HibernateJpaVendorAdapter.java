@@ -19,6 +19,7 @@ package org.springframework.orm.jpa.vendor;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.persistence.EntityManager;
 import javax.persistence.spi.PersistenceProvider;
 
 import org.hibernate.cfg.Environment;
@@ -36,7 +37,8 @@ import org.hibernate.ejb.HibernatePersistence;
 import org.springframework.orm.jpa.JpaDialect;
 
 /**
- * JpaVendorAdapter implementation for Hibernate EntityManager.
+ * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for
+ * Hibernate EntityManager. Developed and tested against Hibernate 3.2.
  *
  * <p>Exposes Hibernate's persistence provider and EntityManager extension interface,
  * and supports AbstractJpaVendorAdapter's common configuration settings.
@@ -100,7 +102,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 	}
 
-	public Class getEntityManagerInterface() {
+	public Class<? extends EntityManager> getEntityManagerInterface() {
 		return HibernateEntityManager.class;
 	}
 

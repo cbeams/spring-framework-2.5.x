@@ -16,6 +16,7 @@
 
 package org.springframework.orm.jpa;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
@@ -80,7 +81,7 @@ public interface EntityManagerFactoryInfo {
 	 * Return the (potentially vendor-specific) EntityManager interface
 	 * that this factory's EntityManagers will implement.
 	 */
-	Class getEntityManagerInterface();
+	Class<? extends EntityManager> getEntityManagerInterface();
 
 	/**
 	 * Return the vendor-specific JpaDialect implementation for this

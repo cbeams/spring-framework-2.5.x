@@ -19,6 +19,7 @@ package org.springframework.orm.jpa.vendor;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.persistence.EntityManager;
 import javax.persistence.spi.PersistenceProvider;
 
 import org.apache.openjpa.persistence.OpenJPAEntityManager;
@@ -27,7 +28,8 @@ import org.apache.openjpa.persistence.PersistenceProviderImpl;
 import org.springframework.orm.jpa.JpaDialect;
 
 /**
- * JpaVendorAdapter implementation for Apache OpenJPA.
+ * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for
+ * Apache OpenJPA. Developed and tested against OpenJPA 0.9.6.
  *
  * <p>Exposes OpenJPA's persistence provider and EntityManager extension interface,
  * and supports AbstractJpaVendorAdapter's common configuration settings.
@@ -93,7 +95,7 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 	}
 
-	public Class getEntityManagerInterface() {
+	public Class<? extends EntityManager> getEntityManagerInterface() {
 		return OpenJPAEntityManager.class;
 	}
 
