@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.aopalliance.aop.Advice;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.weaver.tools.JoinPointMatch;
@@ -31,7 +32,6 @@ import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
-import org.springframework.core.Ordered;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -42,9 +42,10 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Adrian Colyer
+ * @author Juergen Hoeller
  * @since 2.0
  */
-public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformation, InitializingBean {
+public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedenceInformation, InitializingBean {
 	
 	/**
 	 * Key used in ReflectiveMethodInvocation userAtributes map for the current joinpoint.
@@ -75,7 +76,7 @@ public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformat
 	
 	private final AspectJExpressionPointcut pointcutExpression;
 	
-	private final AspectInstanceFactory aif;
+	private final AspectInstanceFactory aspectInstanceFactory;
 
 	/**
 	 * The name of the aspect (ref bean) in which this advice was defined (used
@@ -85,17 +86,7 @@ public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformat
 	private String aspectName;
 	
 	/**
-	 * The bean that is the aspect (state + behaviour) backing this advice.
-	 * If the bean has a non-singleton scope, this advice method may refer
-	 * to a different instance of the bean to the one on which the advice is
-	 * actually dispatched. This should not matter as we only use the bean
-	 * for determining ordering (and all prototypes will be configured with
-	 * the same order)
-	 */
-	private Object aspectBean;
-
-	/**
-	 * the order of declaration of this advice within the aspect
+	 * The order of declaration of this advice within the aspect.
 	 */
 	private int declarationOrder;
 	
@@ -133,7 +124,7 @@ public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformat
 	 */
 	private int joinPointStaticPartArgumentIndex = -1;
 	
-	private final Map/*<adviceArgumentName,argumentIndex>*/ argumentBindings = new HashMap();
+	private final Map argumentBindings = new HashMap();
 
 
 	public AbstractAspectJAdvice(
@@ -145,18 +136,27 @@ public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformat
 		}
 		this.numAdviceInvocationArguments = this.aspectJAdviceMethod.getParameterTypes().length;
 		this.pointcutExpression = pointcutExpression;
-		this.aif = aif;
+		this.aspectInstanceFactory = aif;
 	}
 
 
-	public Method getAspectJAdviceMethod() {
+	public final Method getAspectJAdviceMethod() {
 		return this.aspectJAdviceMethod;
 	}
 
-	public AspectJExpressionPointcut getPointcut() {
+	public final AspectJExpressionPointcut getPointcut() {
 		return this.pointcutExpression;
 	}
-	
+
+	public final AspectInstanceFactory getAspectInstanceFactory() {
+		return this.aspectInstanceFactory;
+	}
+
+	public int getOrder() {
+		return this.aspectInstanceFactory.getOrder();
+	}
+
+
 	public void setAspectName(String name) {
 		this.aspectName = name;
 	}
@@ -165,20 +165,6 @@ public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformat
 		return this.aspectName;
 	}
 
-	public void setAspectBean(Object bean) {
-		this.aspectBean = bean;
-	}
-	
-	/**
-	 * Get the precedence (order) associated with the aspect declaring this advice.
-	 */
-	public int getOrder() {
-		if (this.aspectBean != null && (this.aspectBean instanceof Ordered)) {
-			return ((Ordered) this.aspectBean).getOrder();
-		}
-		return Ordered.LOWEST_PRECEDENCE;
-	}
-	
 	/**
 	 * Sets the <b>declaration order</b> of this advice within the aspect
 	 */
@@ -557,13 +543,14 @@ public abstract class AbstractAspectJAdvice implements AspectJPrecedenceInformat
 	}
 
 	protected Object invokeAdviceMethodWithGivenArgs(Object[] args) throws Throwable {
+		Object[] actualArgs = args;
 		if (this.aspectJAdviceMethod.getParameterTypes().length == 0) {
-			args = null;
+			actualArgs = null;
 		}
 		
 		try {
 			// TODO AopUtils.invokeJoinpointUsingReflection
-			return this.aspectJAdviceMethod.invoke(aif.getAspectInstance(), args);
+			return this.aspectJAdviceMethod.invoke(this.aspectInstanceFactory.getAspectInstance(), actualArgs);
 		}
 		catch (IllegalArgumentException ex) {
 			throw new AopConfigException("Mismatch on arguments to advice method [" + this.aspectJAdviceMethod + "]; " +
