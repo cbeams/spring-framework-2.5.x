@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,16 +28,17 @@ import org.aopalliance.intercept.MethodInvocation;
  * @since 2.0
  */
 public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice implements MethodInterceptor {
-	
+
 	public AspectJAfterThrowingAdvice(
 			Method aspectJBeforeAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
+
 		super(aspectJBeforeAdviceMethod, pointcut, aif);
 	}
-	
+
 	public boolean isBeforeAdvice() {
 		return false;
 	}
-	
+
 	public boolean isAfterAdvice() {
 		return true;
 	}
@@ -45,14 +46,14 @@ public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice implements
 	public void setThrowingName(String name) {
 		setThrowingNameNoCheck(name);
 	}
-	
+
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		try {
 			return mi.proceed();
 		}
 		catch (Throwable t) {
 			if (shouldInvokeOnThrowing(t)) {
-				invokeAdviceMethod(getJoinPointMatch(),null,t);
+				invokeAdviceMethod(getJoinPointMatch(), null, t);
 			}
 			throw t;
 		}
@@ -61,11 +62,10 @@ public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice implements
 	/**
 	 * In AspectJ semantics, after throwing advice that specifies a throwing clause
 	 * is only invoked if the thrown exception is a subtype of the given throwing type.
-	 * @param t
-	 * @return
 	 */
 	private boolean shouldInvokeOnThrowing(Throwable t) {
 		Class throwingType = getDiscoveredThrowingType();
-		return (throwingType.isAssignableFrom(t.getClass()));
+		return throwingType.isAssignableFrom(t.getClass());
 	}
+
 }
