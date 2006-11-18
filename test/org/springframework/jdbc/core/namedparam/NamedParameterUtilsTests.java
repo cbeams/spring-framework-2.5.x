@@ -34,6 +34,7 @@ public final class NamedParameterUtilsTests extends TestCase {
 	public void testParseSql() {
 		String sql = "xxx :a yyyy :b :c :a zzzzz";
 		String sql2 = "xxx &a yyyy ? zzzzz";
+		String sql3 = "xxx &a+:b" + '\t' +":c yyyy ? zzzzz";
 		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
 		assertEquals("xxx ? yyyy ? ? ? zzzzz", psql.getNewSql());
 		assertEquals("a", psql.getParameterNames()[0]);
@@ -46,6 +47,10 @@ public final class NamedParameterUtilsTests extends TestCase {
 		assertEquals("a", psql2.getParameterNames()[0]);
 		assertEquals(2, psql2.getTotalParameterCount());
 		assertEquals(1, psql2.getNamedParameterCount());
+		ParsedSql psql3 = NamedParameterUtils.parseSqlStatement(sql3);
+		assertEquals("a", psql3.getParameterNames()[0]);
+		assertEquals("b", psql3.getParameterNames()[1]);
+		assertEquals("b", psql3.getParameterNames()[1]);
 	}
 
 	public void testSubstituteNamedParameters() {

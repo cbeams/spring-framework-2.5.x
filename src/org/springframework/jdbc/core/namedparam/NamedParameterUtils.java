@@ -264,7 +264,10 @@ public abstract class NamedParameterUtils {
 	private static boolean parameterNameContinues(char[] statement, int pos) {
 		return (statement[pos] != ' ' && statement[pos] != ',' && statement[pos] != ')' &&
 				statement[pos] != '"' && statement[pos] != '\'' && statement[pos] != '|' &&
-				statement[pos] != ';' && statement[pos] != '\n' && statement[pos] != '\r');
+				statement[pos] != '+' && statement[pos] != '-' && statement[pos] != '*' &&
+				statement[pos] != '/' && statement[pos] != '%' && statement[pos] != '=' &&
+				statement[pos] != '<' && statement[pos] != '>' && statement[pos] != ';' &&
+				statement[pos] != '\t' && statement[pos] != '\n' && statement[pos] != '\r');
 	}
 
 }
