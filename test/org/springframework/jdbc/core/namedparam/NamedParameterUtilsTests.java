@@ -25,39 +25,11 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.AssertThrows;
 
 /**
- * Unit tests for the {@link NamedParameterUtils} class.
- * 
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @author Rick Evans
  */
 public final class NamedParameterUtilsTests extends TestCase {
-
-	public void testCountParameterPlaceholders() {
-		assertEquals(0, NamedParameterUtils.countParameterPlaceholders(null));
-		assertEquals(0, NamedParameterUtils.countParameterPlaceholders(""));
-		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("?"));
-		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("The \"big\" ? 'bad wolf'"));
-		assertEquals(2, NamedParameterUtils.countParameterPlaceholders("The big ?? bad wolf"));
-		assertEquals(3, NamedParameterUtils.countParameterPlaceholders("The big ? ? bad ? wolf"));
-		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("The \"big?\" 'ba''ad?' ? wolf"));
-		assertEquals(1, NamedParameterUtils.countParameterPlaceholders(":parameter"));
-		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("The \"big\" :parameter 'bad wolf'"));
-		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("The big :parameter :parameter bad wolf"));
-		assertEquals(2, NamedParameterUtils.countParameterPlaceholders("The big :parameter :newpar :parameter bad wolf"));
-		assertEquals(2, NamedParameterUtils.countParameterPlaceholders("The big :parameter, :newpar, :parameter bad wolf"));
-		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("The \"big:\" 'ba''ad:p' :parameter wolf"));
-		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("&parameter"));
-		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("The \"big\" &parameter 'bad wolf'"));
-		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("The big &parameter &parameter bad wolf"));
-		assertEquals(2, NamedParameterUtils.countParameterPlaceholders("The big &parameter &newparameter &parameter bad wolf"));
-		assertEquals(2, NamedParameterUtils.countParameterPlaceholders("The big &parameter, &newparameter, &parameter bad wolf"));
-		assertEquals(1, NamedParameterUtils.countParameterPlaceholders("The \"big &x  \" 'ba''ad&p' &parameter wolf"));
-		assertEquals(2, NamedParameterUtils.countParameterPlaceholders("The big :parameter, &newparameter, &parameter bad wolf"));
-		assertEquals(2, NamedParameterUtils.countParameterPlaceholders("The big :parameter, &sameparameter, &sameparameter bad wolf"));
-		assertEquals(2, NamedParameterUtils.countParameterPlaceholders("The big :parameter, :sameparameter, :sameparameter bad wolf"));
-		assertEquals(0, NamedParameterUtils.countParameterPlaceholders("xxx & yyy"));
-	}
 
 	public void testParseSql() {
 		String sql = "xxx :a yyyy :b :c :a zzzzz";
@@ -116,10 +88,6 @@ public final class NamedParameterUtilsTests extends TestCase {
 				NamedParameterUtils.buildValueArray(sql, new HashMap());
 			}
 		}.runTest();
-	}
-
-	public void testCountParameterPlaceholdersWithNullSqlString() throws Exception {
-		assertEquals(0, NamedParameterUtils.countParameterPlaceholders(null));
 	}
 
 	public void testSubstituteNamedParametersWithStringContainingQuotes() throws Exception {

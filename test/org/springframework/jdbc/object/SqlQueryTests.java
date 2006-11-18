@@ -21,7 +21,11 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -186,31 +190,6 @@ public class SqlQueryTests extends AbstractJdbcTests {
 			params.put(COLUMN_NAMES[0], "Value");
 			List list = query.executeByNamedParam(params);
 			fail("Shouldn't succeed in running query with missing params");
-		}
-		catch (InvalidDataAccessApiUsageException ex) {
-			// OK
-		}
-	}
-
-	public void testBindVariableCountWrong() {
-		replay();
-
-		MappingSqlQuery query = new MappingSqlQuery() {
-			protected Object mapRow(ResultSet rs, int rownum)
-				throws SQLException {
-				return new Integer(rs.getInt(1));
-			}
-		};
-		query.setDataSource(mockDataSource);
-		query.setSql(SELECT_ID_WHERE);
-		query.declareParameter(
-			new SqlParameter(COLUMN_NAMES[0], COLUMN_TYPES[0]));
-		query.declareParameter(
-			new SqlParameter(COLUMN_NAMES[1], COLUMN_TYPES[1]));
-		query.declareParameter(new SqlParameter("NONEXISTENT", Types.VARCHAR));
-		try {
-			query.compile();
-			fail("Shouldn't succeed in compiling query with bind var mismatch");
 		}
 		catch (InvalidDataAccessApiUsageException ex) {
 			// OK

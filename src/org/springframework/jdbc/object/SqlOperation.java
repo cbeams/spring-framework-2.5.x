@@ -16,7 +16,6 @@
 
 package org.springframework.jdbc.object;
 
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementCreatorFactory;
 import org.springframework.jdbc.core.PreparedStatementSetter;
@@ -47,14 +46,6 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * based on our declared parameters.
 	 */
 	protected final void compileInternal() {
-		// Validate parameter count.
-		int bindVarCount = NamedParameterUtils.countParameterPlaceholders(getSql());
-		if (bindVarCount != getDeclaredParameters().size()) {
-			throw new InvalidDataAccessApiUsageException(
-					"SQL '" + getSql() + "' requires " + bindVarCount + " bind variables, but " +
-					getDeclaredParameters().size() + " variables were declared for this object");
-		}
-
 		this.preparedStatementFactory = new PreparedStatementCreatorFactory(getSql(), getDeclaredParameters());
 		this.preparedStatementFactory.setResultSetType(getResultSetType());
 		this.preparedStatementFactory.setUpdatableResults(isUpdatableResults());

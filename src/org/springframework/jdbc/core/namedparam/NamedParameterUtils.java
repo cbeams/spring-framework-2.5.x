@@ -36,65 +36,6 @@ import org.springframework.util.Assert;
 public abstract class NamedParameterUtils {
 
 	/**
-	 * Count the occurrences of the character <code>placeholder</code> in an SQL string
-	 * <code>sql</code>. The character <code>placeholder</code> is not counted if it appears
-	 * within a literal, that is, surrounded by single or double quotes. This method will
-	 * count traditional placeholders in the form of a question mark ('?') as well as
-	 * named parameters indicated with a leading ':' or '&'.
-	 * @param sql String to search in. Returns 0 if the given String is <code>null</code>.
-	 */
-	public static int countParameterPlaceholders(String sql) {
-		if (sql == null) {
-			return 0;
-		}
-
-		char[] statement = sql.toCharArray();
-		boolean withinQuotes = false;
-		Map namedParameters = new HashMap();
-		char currentQuote = '-';
-		int parameterCount = 0;
-		int i = 0;
-		while (i < statement.length) {
-			if (withinQuotes) {
-				if (statement[i] == currentQuote) {
-					withinQuotes = false;
-					currentQuote = '-';
-				}
-			}
-			else {
-				if (statement[i] == '"' || statement[i] == '\'') {
-					withinQuotes = true;
-					currentQuote = (char) statement[i];
-				}
-				else {
-					if (statement[i] == ':' || statement[i] == '&') {
-						int j = i + 1;
-						StringBuffer parameter = new StringBuffer();
-						while (j < statement.length && parameterNameContinues(statement, j)) {
-							parameter.append(statement[j]);
-							j++;
-						}
-						if (j - i > 1) {
-							if (!namedParameters.containsKey(parameter.toString())) {
-								parameterCount++;
-								namedParameters.put(parameter.toString(), parameter);
-								i = j - 1;
-							}
-						}
-					}
-					else {
-						if (statement[i] == '?') {
-							parameterCount++;
-						}
-					}
-				}
-			}
-			i++;
-		}
-		return parameterCount;
-	}
-
-	/**
 	 * Parse the SQL statement and locate any placeholders or named parameters.
 	 * Named parameters are substituted for a JDBC placeholder.
 	 * @param sql the SQL statement
