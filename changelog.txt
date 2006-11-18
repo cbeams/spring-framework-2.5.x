@@ -3,19 +3,24 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.1 (13.11.2006)
+Changes in version 2.0.1 (19.11.2006)
 -------------------------------------
 
 General
 * included classes in the "test.annotation" and "test.jpa" packages (tiger mock directory) in the Spring API javadoc
 
 Package org.springframework.aop
+* reworked AbstractAdvisorAutoProxyCreator's "extendCandidateAdvisors" into "extendAdvisors", operating on sorted list
+* renamed AspectJInvocationContextExposingAdvisorAutoProxyCreator to AspectJAwareAdvisorAutoProxyCreator
 * removed unintended JDK 1.5 dependency in AspectJExpressionPointcut ("equals"/"hashCode" implementation)
+* added "order" attribute to "aspect" tag in AOP schema, allowing to declaratively specify ordering for aspect instances
+* reworked aspect ordering to allow aspect instances to depend on beans that in turn get advised by the same aspect
 
 Package org.springframework.beans
 * fixed BeanWrapperImpl to correctly determine generic type for each key in a chain (e.g. "myMap[myKey][myInnerKey]")
 * introduced PatternEditor for "java.util.regex.Pattern", automatically registered when running on JDK 1.4 or higher
 * Number objects (as property or argument values) are automatically coerced into the target Number type (if necessary)
+* added CustomMapEditor for Map-to-Map conversion, with a default instance registered for SortedMap
 * added "equals" and "hashCode" implementations to BeanDefinitionHolder
 * PropertyValue's copy constructor copies source object as well
 * ConstructorArgumentValues copies ValueHolder content when merging, and enforces uniqueness of merged ValueHolders
@@ -24,6 +29,7 @@ Package org.springframework.beans
 * UnsatisfiedDependencyException message for multiple matches mentions the names of all matching beans
 * improved "scope is not active" error message to explicitly hint at the singleton-refers-to-scoped-bean problem
 * factory methods are allowed to return null, with the null value exposed as bean reference
+* introduced "isTypeMatch" method on BeanFactory interface, allowing for type checks without actually loading the Class
 * AbstractBeanFactory supports alias chaining, with an alias registered for a bean name that is itself an alias
 * AbstractBeanFactory uses bean name as cache key for merged bean definitions, to avoid equality matching overhead
 * AbstractBeanFactory detects circular references between non-singletons and throws a corresponding exception
@@ -34,6 +40,8 @@ Package org.springframework.beans
 * fixed PluggableSchemaResolver to accept a null ClassLoader argument (falling back to the default ClassLoader)
 * introduced CompositeComponentDefinition for holding nested components (applied e.g. for "aop:config" element)
 * introduced "registerComponent" method on ParserContext, for transparent registration of top-level or nested components
+* reworked AbstractBeanDefinitionParser to only determine id and build holder for top-level bean definition
+* "util:list/set/map" are now allowed as nested elements as well and do not require an id anymore
 
 Package org.springframework.cache
 * reworked EhCacheFactoryBean to be based on EHCache 1.2's Ehcache interface rather than the concrete Cache class
@@ -46,6 +54,7 @@ Package org.springframework.context
 * EventPublicationInterceptor caches the application event constructor
 
 Package org.springframework.core
+* GenericCollectionTypeResolver correctly detects an array type as element type of a generic collection type
 * fixed BridgeMethodResolver to always identify an appropriate bridge method (avoid IllegalStateException)
 * introduced TaskRejectedException, thrown from a TaskExecutor if it does not accept a given task
 
@@ -79,6 +88,7 @@ Package org.springframework.orm
 * reworked Hibernate session synchronization to properly work with WebSphereExtendedJTATransactionLookup on WAS 6.0/6.1
 * fixed Hibernate3 LocalSessionFactoryBean's "schemaUpdate" behavior to not run into an IllegalStateException
 * LocalContainerEntityManagerFactoryBean detects jar file URL in WebLogic jar entry URLs correctly
+* PersistenceAnnotationBeanPostProcessor always injects transactional EntityManager with extended interfaces (if any)
 * included OpenJPA support classes (OpenJpaDialect, OpenJpaVendorAdapter), tested against OpenJPA 0.9.6
 
 Package org.springframework.scheduling
@@ -87,6 +97,8 @@ Package org.springframework.scheduling
 * ScheduledExecutorFactoryBean does not insist on statically specified ScheduledExecutorTasks anymore
 * DelegatingWork/Job/TimerTask exposes the wrapped Runnable implementation through a "getDelegate()" method
 * Concurrent/ThreadPoolTaskExecutor and WorkManagerTaskExecutor throw Spring's TaskRejectedException (when appropriate)
+* CommonJ TimerManagerFactoryBean cancels all statically registered Timers on shutdown
+* updated LocalTaskExecutorThreadPool to be compatible with Quartz 1.6
 
 Package org.springframework.test
 * AbstractTransactionalSpringContextTests invokes "onTearDownAfterTransaction" even for a manually completed transaction
