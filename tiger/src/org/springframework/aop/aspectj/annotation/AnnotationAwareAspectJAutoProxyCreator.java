@@ -106,17 +106,15 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected List findCandidateAdvisors() {
-		List<Advisor> advisors = new LinkedList<Advisor>();
+		List advisors = new LinkedList();
 
-		// Add all the Spring advisors found according to superclass rules
+		// Add all the Spring advisors found according to superclass rules.
 		advisors.addAll(super.findCandidateAdvisors());
 
 		// Safety of cast is already checked in superclass.
 		ListableBeanFactory lbf = (ListableBeanFactory) getBeanFactory();
-
 		advisors.addAll(createAspectJAdvisors(this.aspectJAdvisorFactory, lbf));
 
 		return advisors;
@@ -131,7 +129,7 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 	 * @return a list of Spring AOP advisors resulting from AspectJ annotated
 	 * classes in the current Spring bean factory
 	 */
-	public List<Advisor> createAspectJAdvisors (
+	protected List<Advisor> createAspectJAdvisors (
 			AspectJAdvisorFactory aspectJAdvisorFactory, ListableBeanFactory beanFactory)
 			throws BeansException, IllegalStateException {
 
@@ -147,7 +145,7 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 			// We must be careful not to instantiate beans eagerly as in this
 			// case they would be cached by the Spring container but would not
 			// have been weaved
-			Class<?> beanType = beanFactory.getType(beanName);
+			Class beanType = beanFactory.getType(beanName);
 			if (beanType == null) {
 				continue;
 			}

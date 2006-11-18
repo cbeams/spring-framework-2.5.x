@@ -88,23 +88,20 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 			advisors.add(0, instantiationAdvisor);
 		}
 
-		//Find introduction fields
+		// Find introduction fields.
 		for (Field field : aspectClass.getDeclaredFields()) {
-			// AMC: not sure why this test is here? AspectJ doesn't enforce this...
-			//if (Modifier.isStatic(f.getModifiers()) && Modifier.isPublic(f.getModifiers())) {
-				Advisor advisor = getDeclareParentsAdvisor(field);
-				if (advisor != null) {
-					advisors.add(advisor);
-				}
-			//}
+			Advisor advisor = getDeclareParentsAdvisor(field);
+			if (advisor != null) {
+				advisors.add(advisor);
+			}
 		}
 
 		return advisors;
 	}
 
 	/**
-	 * Resulting advisors will need to be evaluated for targets.
-	 * @return <code>null</code> if not an advisor
+	 * Resulting Advisors will need to be evaluated for targets.
+	 * @return <code>null</code> if not an Advisor
 	 */
 	private Advisor getDeclareParentsAdvisor(Field introductionField) {
 		DeclareParents declareParents = (DeclareParents) introductionField.getAnnotation(DeclareParents.class);
@@ -163,7 +160,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		// Check that it's an AspectJ-annotated class
 		if (!isAspect(candidateAspectClass)) {
 			throw new AopConfigException("Advice must be declared inside an aspect type: " +
-					"Offending method '" + candidateAspectJAdviceMethod + "' in class " + candidateAspectClass.getName());
+					"Offending method '" + candidateAspectJAdviceMethod + "' in class [" + candidateAspectClass.getName() + "]");
 		}
 
 		logger.debug("Found AspectJ method " + candidateAspectJAdviceMethod);
