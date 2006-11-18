@@ -26,19 +26,19 @@ import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.ProxyMethodInvocation;
 
 /**
- * Convenient implementation of the IntroductionInterceptor interface.
+ * Convenient implementation of the
+ * {@link org.springframework.aop.IntroductionInterceptor} interface.
  *
- * <p>This differs from DelegatingIntroductionInterceptor in that a single instance
- * of this class can be used to advise multiple target objects, and each target
+ * <p>This differs from {@link DelegatingIntroductionInterceptor} in that a single
+ * instance of this class can be used to advise multiple target objects, and each target
  * object will have its <i>own</i> delegate (whereas DelegatingIntroductionInterceptor
  * shares the same delegate, and hence the same state across all targets).
  *
  * <p>The <code>suppressInterface</code> method can be used to suppress interfaces
- * implemented by the delegate class but which should not be introduced to the owning
- * AOP proxy.
+ * implemented by the delegate class but which should not be introduced to the
+ * owning AOP proxy.
  *
- * <p>A DelegatePerTargetObjectDelegatingIntroductionInterceptor is serializable
- * if the delegates are.
+ * <p>An instance of this class is serializable if the delegates are.
  *
  * <p><i>Note: There are some implementation similarities between this class and
  * DelegatingIntroductionInterceptor that suggest a possible refactoring to extract
@@ -49,7 +49,7 @@ import org.springframework.aop.ProxyMethodInvocation;
  * @see #suppressInterface
  * @see DelegatingIntroductionInterceptor
  */
-public class DelegatePerTargetObjectDelegatingIntroductionInterceptor extends IntroductionInfoSupport
+public class DelegatePerTargetObjectIntroductionInterceptor extends IntroductionInfoSupport
 		implements IntroductionInterceptor {
 
 	/** 
@@ -62,11 +62,11 @@ public class DelegatePerTargetObjectDelegatingIntroductionInterceptor extends In
 	private Class interfaceType;
 
 
-	public DelegatePerTargetObjectDelegatingIntroductionInterceptor(Class defaultImplType, Class interfaceType) {
+	public DelegatePerTargetObjectIntroductionInterceptor(Class defaultImplType, Class interfaceType) {
 		this.defaultImplType = defaultImplType;
 		this.interfaceType = interfaceType;
-		// create a new delegate now (but don't store it in the map)
-		// we do this for two reasons: 
+		// cCeate a new delegate now (but don't store it in the map).
+		// We do this for two reasons:
 		// 1) to fail early if there is a problem instantiating delegates
 		// 2) to populate the interface map once and once only
 		Object delegate = createNewDelegate();
@@ -77,7 +77,7 @@ public class DelegatePerTargetObjectDelegatingIntroductionInterceptor extends In
 
 
 	/**
-	 * Subclasses may need to override this if they want to  perform custom
+	 * Subclasses may need to override this if they want to perform custom
 	 * behaviour in around advice. However, subclasses should invoke this
 	 * method, which handles introduced interfaces and forwarding to the target.
 	 */
@@ -85,8 +85,8 @@ public class DelegatePerTargetObjectDelegatingIntroductionInterceptor extends In
 		if (isMethodOnIntroducedInterface(mi)) {
 			Object delegate = getIntroductionDelegateFor(mi.getThis());
 			
-			// Using the following method rather than direct reflection, we
-			// get correct handling of InvocationTargetException
+			// Using the following method rather than direct reflection,
+			// we get correct handling of InvocationTargetException
 			// if the introduced method throws an exception.
 			Object retVal = AopUtils.invokeJoinpointUsingReflection(delegate, mi.getMethod(), mi.getArguments());
 			
@@ -130,7 +130,7 @@ public class DelegatePerTargetObjectDelegatingIntroductionInterceptor extends In
 		try {
 			return this.defaultImplType.newInstance();
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new IllegalArgumentException("Cannot create default implementation for '" +
 					this.interfaceType.getName() + "' mixin (" + this.defaultImplType.getName() + "): " + ex);
 		}

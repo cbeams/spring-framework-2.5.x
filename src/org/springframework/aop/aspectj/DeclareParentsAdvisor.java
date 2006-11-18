@@ -21,7 +21,7 @@ import org.aopalliance.aop.Advice;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.support.ClassFilters;
-import org.springframework.aop.support.DelegatePerTargetObjectDelegatingIntroductionInterceptor;
+import org.springframework.aop.support.DelegatePerTargetObjectIntroductionInterceptor;
 
 /**
  * Introduction advisor delegating to the given object.
@@ -35,7 +35,7 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 	private final Class introducedInterface;
 
 	private final ClassFilter typePatternClassFilter;
-	
+
 	private final Advice advice;
 
 
@@ -49,7 +49,7 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 		this.introducedInterface = interfaceType;
 		ClassFilter typePatternFilter = new TypePatternClassFilter(typePattern);
 
-		// Excludes methods implemented
+		// Excludes methods implemented.
 		ClassFilter exclusion = new ClassFilter() {
 			public boolean matches(Class clazz) {
 				return !(introducedInterface.isAssignableFrom(clazz));
@@ -57,16 +57,15 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 		};
 
 		this.typePatternClassFilter = ClassFilters.intersection(typePatternFilter, exclusion);
-
-		this.advice = new DelegatePerTargetObjectDelegatingIntroductionInterceptor(defaultImpl,interfaceType);
+		this.advice = new DelegatePerTargetObjectIntroductionInterceptor(defaultImpl, interfaceType);
 	}
 
 
 	public ClassFilter getClassFilter() {
-		return typePatternClassFilter;
+		return this.typePatternClassFilter;
 	}
 
-	public void validateInterfaces() throws IllegalArgumentException {			
+	public void validateInterfaces() throws IllegalArgumentException {
 		// Do nothing
 	}
 
@@ -79,7 +78,7 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 	}
 
 	public Class[] getInterfaces() {
-		return new Class[] { this.introducedInterface };
+		return new Class[] {this.introducedInterface};
 	}
 
 }
