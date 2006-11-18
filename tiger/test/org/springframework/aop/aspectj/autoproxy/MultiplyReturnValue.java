@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,24 +20,27 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 
+/**
+ * @author Rod Johnson
+ */
 @Aspect
 public class MultiplyReturnValue {
-	
+
 	private int multiple = 2;
-	
+
 	public int invocations;
-	
+
 	public void setMultiple(int multiple) {
 		this.multiple = multiple;
 	}
-	
+
 	public int getMultiple() {
 		return this.multiple;
 	}
-	
+
 	@Around("execution(int *.getAge())")
 	public Object doubleReturnValue(ProceedingJoinPoint pjp) throws Throwable {
-		++invocations;
+		++this.invocations;
 		int result = (Integer) pjp.proceed();
 		return result * this.multiple;
 	}
