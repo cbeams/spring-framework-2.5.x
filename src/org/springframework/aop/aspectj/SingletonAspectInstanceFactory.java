@@ -45,10 +45,29 @@ public class SingletonAspectInstanceFactory implements AspectInstanceFactory {
 		return this.aspectInstance;
 	}
 
+	/**
+	 * Determine the order for this factory's aspect instance,
+	 * either an instance-specific order expressed through implementing
+	 * the {@link org.springframework.core.Ordered} interface,
+	 * or a fallback order.
+	 * @see org.springframework.core.Ordered
+	 * @see #getOrderForAspectClass
+	 */
 	public int getOrder() {
 		if (this.aspectInstance instanceof Ordered) {
 			return ((Ordered) this.aspectInstance).getOrder();
 		}
+		return getOrderForAspectClass(this.aspectInstance.getClass());
+	}
+
+	/**
+	 * Determine a fallback order for the case that the aspect instance
+	 * does not express an instance-specific order through implementing
+	 * the {@link org.springframework.core.Ordered} interface.
+	 * <p>The default implementation simply returns <code>Ordered.LOWEST_PRECEDENCE</code>.
+	 * @param aspectClass the aspect class
+	 */
+	protected int getOrderForAspectClass(Class aspectClass) {
 		return Ordered.LOWEST_PRECEDENCE;
 	}
 

@@ -47,6 +47,7 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 /**
  * Abstract tests for AspectJAdvisorFactory. See subclasses
@@ -127,6 +128,31 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(aspect1, "someBean1")));
 		PerTargetAspect aspect2 = new PerTargetAspect();
 		aspect2.setOrder(5);
+		advisors.addAll(
+				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(aspect2, "someBean2")));
+		Collections.sort(advisors, new OrderComparator());
+
+		TestBean itb = (TestBean) createProxy(target, advisors, TestBean.class);
+		assertEquals("Around advice must NOT apply", realAge, itb.getAge());
+
+		// Hit the method in the per clause to instantiate the aspect
+		itb.getSpouse();
+
+		assertEquals("Around advice must apply", 0, itb.getAge());
+		assertEquals("Around advice must apply", 1, itb.getAge());
+	}
+
+	public void testMultiplePerTargetAspectsWithOrderAnnotation() throws SecurityException, NoSuchMethodException {
+		TestBean target = new TestBean();
+		int realAge = 65;
+		target.setAge(realAge);
+
+		List<Advisor> advisors = new LinkedList<Advisor>();
+		PerTargetAspectWithOrderAnnotation10 aspect1 = new PerTargetAspectWithOrderAnnotation10();
+		aspect1.count = 100;
+		advisors.addAll(
+				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(aspect1, "someBean1")));
+		PerTargetAspectWithOrderAnnotation5 aspect2 = new PerTargetAspectWithOrderAnnotation5();
 		advisors.addAll(
 				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(aspect2, "someBean2")));
 		Collections.sort(advisors, new OrderComparator());
@@ -327,7 +353,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 				// Ensure that we exclude
 				AopUtils.findAdvisorsThatCanApply(
 						getFixture().getAdvisors(
-								new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(),"someBean")),
+								new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(), "someBean")),
 						CannotBeUnlocked.class
 				),
 				CannotBeUnlocked.class);
@@ -350,7 +376,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		LinkedList target = new LinkedList();
 		List proxy = (List) createProxy(target,
 				AopUtils.findAdvisorsThatCanApply(
-						getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(),"someBean")),
+						getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(), "someBean")),
 						List.class
 				),
 				CannotBeUnlocked.class);
@@ -434,7 +460,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		}
 	}
 	
-	protected Object createProxy(Object target, List<Advisor> advisors, Class ... interfaces) {
+	protected Object createProxy(Object target, List advisors, Class ... interfaces) {
 		ProxyFactory pf = new ProxyFactory(target);
 		if (interfaces.length > 1 || interfaces[0].isInterface()) {
 			pf.setInterfaces(interfaces);
@@ -442,21 +468,21 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		else {
 			pf.setProxyTargetClass(true);
 		}
-		
+
 		// Required everywhere we use AspectJ proxies
 		pf.addAdvice(ExposeInvocationInterceptor.INSTANCE);
-		
-		for (Advisor a : advisors) {
-			pf.addAdvisor(a);
+
+		for (Object a : advisors) {
+			pf.addAdvisor((Advisor) a);
 		}
-		
+
 		pf.setExposeProxy(true);
 		return pf.getProxy();
 	}
 
 	public void testTwoAdvicesOnOneAspect() {
 		TestBean target = new TestBean();
-	
+
 		TwoAdviceAspect twoAdviceAspect = new TwoAdviceAspect();
 		List<Advisor> advisors = getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(twoAdviceAspect,"someBean"));
 		assertEquals("Two advice methods found", 2, advisors.size());
@@ -472,7 +498,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 
 	public void testAfterAdviceTypes() throws Exception {
 		Echo target = new Echo();
-	
+
 		ExceptionHandling afterReturningAspect = new ExceptionHandling();
 		List<Advisor> advisors = getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(afterReturningAspect,"someBean"));
 		Echo echo = (Echo) createProxy(target, 
@@ -500,14 +526,14 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 	public void testFailureWithoutExplicitDeclarePrecedence() {
 		TestBean target = new TestBean();
 		ITestBean itb = (ITestBean) createProxy(target, 
-				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new NoDeclarePrecedenceShouldFail(),"someBean")), 
+				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new NoDeclarePrecedenceShouldFail(), "someBean")),
 				ITestBean.class);
 		try {
 			itb.getAge();
 			fail();
 		}
 		catch (IllegalStateException ex) {
-			
+			// expected
 		}
 	}
 	
@@ -521,19 +547,19 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 			fail();
 		}
 		catch (IllegalArgumentException ex) {
-			// Not supported in M1
+			// Not supported in 2.0
 		}
 	}
 
-// TODO in 2.0M1 precedence is out of scope
-//	public void testExplicitDeclarePrecedencePreventsFailure() {
-//		TestBean target = new TestBean();
-//		ITestBean itb = (ITestBean) createProxy(target, 
-//				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(
-//						new DeclarePrecedenceShouldSucceed())), 
-//				ITestBean.class);
-//		assertEquals(666, itb.getAge());
-//	}
+	/** Not supported in 2.0!
+	public void testExplicitDeclarePrecedencePreventsFailure() {
+		TestBean target = new TestBean();
+		ITestBean itb = (ITestBean) createProxy(target,
+				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new DeclarePrecedenceShouldSucceed(), "someBean")),
+				ITestBean.class);
+		assertEquals(666, itb.getAge());
+	}
+	*/
 
 
 	@Aspect("percflow(execution(* *(..)))")
@@ -569,6 +595,42 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 
 		public void setOrder(int order) {
 			this.order = order;
+		}
+	}
+
+
+	@Aspect("pertarget(execution(* *.getSpouse()))")
+	@Order(10)
+	public static class PerTargetAspectWithOrderAnnotation10 {
+
+		public int count;
+
+		@Around("execution(int *.getAge())")
+		public int returnCountAsAge() {
+			return count++;
+		}
+
+		@Before("execution(void *.set*(int))")
+		public void countSetter() {
+			++count;
+		}
+	}
+
+
+	@Aspect("pertarget(execution(* *.getSpouse()))")
+	@Order(5)
+	public static class PerTargetAspectWithOrderAnnotation5 {
+
+		public int count;
+
+		@Around("execution(int *.getAge())")
+		public int returnCountAsAge() {
+			return count++;
+		}
+
+		@Before("execution(void *.set*(int))")
+		public void countSetter() {
+			++count;
 		}
 	}
 
@@ -824,16 +886,15 @@ public abstract class AbstractAspectJAdvisorFactoryTests extends TestCase {
 		public void getAge() {
 		}
 
-		//		@Before("getAge()")
-		//		public void blowUpButDoesntMatterBecauseAroundAdviceWontLetThisBeInvoked() {
-		//			throw new IllegalStateException();
-		//		}
-		//
-		//		@Around("getAge()")
-		//
-		//		public int preventExecution(ProceedingJoinPoint pjp) {
-		//			return 666;
-		//		}
+		@Before("getAge()")
+		public void blowUpButDoesntMatterBecauseAroundAdviceWontLetThisBeInvoked() {
+			throw new IllegalStateException();
+		}
+
+		@Around("getAge()")
+		public int preventExecution(ProceedingJoinPoint pjp) {
+			return 666;
+		}
 	}
 
 }

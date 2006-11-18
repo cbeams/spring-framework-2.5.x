@@ -17,11 +17,14 @@
 package org.springframework.aop.aspectj.annotation;
 
 import org.springframework.aop.aspectj.SingletonAspectInstanceFactory;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 /**
  * Implementation of AspectInstanceFactory that wraps a singleton instance.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspectInstanceFactory
@@ -43,6 +46,20 @@ public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspect
 
 	public AspectMetadata getAspectMetadata() {
 		return this.metadata;
+	}
+
+	/**
+	 * Check whether the aspect class carries an
+	 * {@link org.springframework.core.annotation.Order} annotation,
+	 * falling back to <code>Ordered.LOWEST_PRECEDENCE</code>.
+	 * @see org.springframework.core.annotation.Order
+	 */
+	protected int getOrderForAspectClass(Class aspectClass) {
+		Order order = (Order) aspectClass.getAnnotation(Order.class);
+		if (order != null) {
+			return order.value();
+		}
+		return Ordered.LOWEST_PRECEDENCE;
 	}
 
 }

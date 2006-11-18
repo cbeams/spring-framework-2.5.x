@@ -38,15 +38,25 @@ import org.springframework.context.support.GenericApplicationContext;
  * to demonstrate that existing autoproxying contract is honoured.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class AspectJAutoProxyCreatorTests extends TestCase {
 
 	public void testAspectsAreApplied() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/aspects.xml");
+		ITestBean tb = (ITestBean) bf.getBean("adrian");
+		assertEquals(68, tb.getAge());
 		MethodInvokingFactoryBean factoryBean = (MethodInvokingFactoryBean) bf.getBean("&factoryBean");
 		assertTrue(AopUtils.isAopProxy(factoryBean.getTargetObject()));
 		assertEquals(68, ((ITestBean) factoryBean.getTargetObject()).getAge());
+	}
+
+	public void testAspectsAreAppliedInDefinedOrder() {
+		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
+				"/org/springframework/aop/aspectj/autoproxy/aspectsWithOrdering.xml");
+		ITestBean tb = (ITestBean) bf.getBean("adrian");
+		assertEquals(71, tb.getAge());
 	}
 
 	public void testAspectsAndAdvisorAreApplied() {

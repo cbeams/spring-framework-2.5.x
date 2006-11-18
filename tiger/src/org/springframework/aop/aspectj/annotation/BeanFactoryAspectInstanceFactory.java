@@ -18,6 +18,7 @@ package org.springframework.aop.aspectj.annotation;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 /**
  * AspectInstanceFactory backed by a Spring
@@ -44,9 +45,9 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 
 
 	/**
-	 * Create a BeanFactoryAspectInstance factory. AspectJ will be called to
-	 * introspect to create AJType metadata using the type returned for the given bean name
-	 * from the BeanFactory. 
+	 * Create a BeanFactoryAspectInstanceFactory. AspectJ will be called to
+	 * introspect to create AJType metadata using the type returned for the
+	 * given bean name from the BeanFactory.
 	 * @param beanFactory BeanFactory to obtain instance(s) from
 	 * @param name name of the bean
 	 */
@@ -55,7 +56,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	}
 	
 	/**
-	 * Create a BeanFactoryAspectInstance factory, providing a type that AspectJ should
+	 * Create a BeanFactoryAspectInstanceFactory, providing a type that AspectJ should
 	 * introspect to create AJType metadata. Use if the BeanFactory may consider the type
 	 * to be a subclass (as when using CGLIB), and the information should relate to a superclass.
 	 * @param beanFactory BeanFactory to obtain instance(s) from
@@ -77,10 +78,26 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 		return this.aspectMetadata;
 	}
 
+	/**
+	 * Determine the order for this factory's target aspect, either
+	 * an instance-specific order expressed through implementing the
+	 * {@link org.springframework.core.Ordered} interface (only
+	 * checked for singleton beans), or an order expressed through the
+	 * {@link org.springframework.core.annotation.Order} annotation
+	 * at the class level.
+	 * @see org.springframework.core.Ordered
+	 * @see org.springframework.core.annotation.Order
+	 */
 	public int getOrder() {
-		if (this.beanFactory.isSingleton(this.name) &&
-				this.beanFactory.isTypeMatch(this.name, Ordered.class)) {
-			return ((Ordered) this.beanFactory.getBean(this.name)).getOrder();
+		Class type = this.beanFactory.getType(this.name);
+		if (type != null) {
+			if (Ordered.class.isAssignableFrom(type) && this.beanFactory.isSingleton(this.name)) {
+				return ((Ordered) this.beanFactory.getBean(this.name)).getOrder();
+			}
+			Order order = (Order) type.getAnnotation(Order.class);
+			if (order != null) {
+				return order.value();
+			}
 		}
 		return Ordered.LOWEST_PRECEDENCE;
 	}
