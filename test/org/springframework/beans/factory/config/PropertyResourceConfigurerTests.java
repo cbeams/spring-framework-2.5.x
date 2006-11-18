@@ -456,19 +456,44 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("age", "${age}");
 		pvs.addPropertyValue("name", "name${var}");
-		pvs.addPropertyValue("spouse", new RuntimeBeanReference("${ref}"));
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("properties", "age=99\nvar=${m}var\nm=${var}");
+		ac.registerSingleton("configurer1", PropertyPlaceholderConfigurer.class, pvs);
+		try {
+			ac.refresh();
+			fail("Should have thrown BeanDefinitionStoreException");
+		}
+		catch (BeanDefinitionStoreException ex) {
+			// expected
+		}
+	}
+
+	public void testPropertyPlaceholderConfigurerWithMultiLevelCircularReference() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("name", "name${var}");
 		ac.registerSingleton("tb1", TestBean.class, pvs);
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "${age}");
-		pvs.addPropertyValue("name", "name${age}");
-		ac.registerSingleton("tb2", TestBean.class, pvs);
-		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("properties", "age=99\nvar=${m}var\nref=tb2\nm=${var}");
+		pvs.addPropertyValue("properties", "var=${m}var\nm=${var2}\nvar2=${var}");
 		ac.registerSingleton("configurer1", PropertyPlaceholderConfigurer.class, pvs);
+		try {
+			ac.refresh();
+			fail("Should have thrown BeanDefinitionStoreException");
+		}
+		catch (BeanDefinitionStoreException ex) {
+			// expected
+		}
+	}
+
+	public void testPropertyPlaceholderConfigurerWithNestedCircularReference() {
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("name", "name${var}");
+		ac.registerSingleton("tb1", TestBean.class, pvs);
 		pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("properties", "age=98");
-		pvs.addPropertyValue("order", "0");
-		ac.registerSingleton("configurer2", PropertyPlaceholderConfigurer.class, pvs);
+		pvs.addPropertyValue("properties", "var=${m}var\nm=${var2}\nvar2=${m}");
+		ac.registerSingleton("configurer1", PropertyPlaceholderConfigurer.class, pvs);
 		try {
 			ac.refresh();
 			fail("Should have thrown BeanDefinitionStoreException");

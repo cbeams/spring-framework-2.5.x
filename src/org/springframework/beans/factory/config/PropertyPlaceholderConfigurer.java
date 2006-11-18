@@ -16,7 +16,9 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -251,13 +253,13 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 * placeholders again).
 	 * @param strVal the String value to parse
 	 * @param props the Properties to resolve placeholders against
-	 * @param originalPlaceholder the original placeholder, used to detect
-	 * circular references between placeholders. Only non-null if we're
-	 * parsing a nested placeholder.
+	 * @param visitedPlaceholders the placeholders that have already been visited
+	 * during the current resolution attempt (used to detect circular references
+	 * between placeholders). Only non-null if we're parsing a nested placeholder.
 	 * @throws BeanDefinitionStoreException if invalid values are encountered
 	 * @see #resolvePlaceholder(String, java.util.Properties, int)
 	 */
-	protected String parseStringValue(String strVal, Properties props, String originalPlaceholder)
+	protected String parseStringValue(String strVal, Properties props, Set visitedPlaceholders)
 	    throws BeanDefinitionStoreException {
 
 		StringBuffer buf = new StringBuffer(strVal);
@@ -272,24 +274,15 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 			    this.placeholderSuffix, startIndex + this.placeholderPrefix.length());
 			if (endIndex != -1) {
 				String placeholder = buf.substring(startIndex + this.placeholderPrefix.length(), endIndex);
-				String originalPlaceholderToUse = null;
-
-				if (originalPlaceholder != null) {
-					originalPlaceholderToUse = originalPlaceholder;
-					if (placeholder.equals(originalPlaceholder)) {
-						throw new BeanDefinitionStoreException(
-								"Circular placeholder reference '" + placeholder + "' in property definitions");
-					}
+				if (!visitedPlaceholders.add(placeholder)) {
+					throw new BeanDefinitionStoreException(
+							"Circular placeholder reference '" + placeholder + "' in property definitions");
 				}
-				else {
-					originalPlaceholderToUse = placeholder;
-				}
-
 				String propVal = resolvePlaceholder(placeholder, props, this.systemPropertiesMode);
 				if (propVal != null) {
 					// Recursive invocation, parsing placeholders contained in the
 					// previously resolved placeholder value.
-					propVal = parseStringValue(propVal, props, originalPlaceholderToUse);
+					propVal = parseStringValue(propVal, props, visitedPlaceholders);
 					buf.replace(startIndex, endIndex + this.placeholderSuffix.length(), propVal);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Resolved placeholder '" + placeholder + "' to value [" + propVal + "]");
@@ -303,6 +296,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 				else {
 					throw new BeanDefinitionStoreException("Could not resolve placeholder '" + placeholder + "'");
 				}
+				visitedPlaceholders.remove(placeholder);
 			}
 			else {
 				startIndex = -1;
@@ -399,7 +393,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 		}
 
 		protected String resolveStringValue(String strVal) throws BeansException {
-			return parseStringValue(strVal, this.props, null);
+			return parseStringValue(strVal, this.props, new HashSet());
 		}
 	}
 
