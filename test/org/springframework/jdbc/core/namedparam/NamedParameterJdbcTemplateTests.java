@@ -17,33 +17,31 @@
 package org.springframework.jdbc.core.namedparam;
 
 import junit.framework.TestCase;
+
 import org.springframework.test.AssertThrows;
 import org.springframework.jdbc.core.JdbcOperations;
 
 import javax.sql.DataSource;
 
 /**
- * Unit tests for the
- * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate} class.
- *
  * @author Rick Evans
  */
 public final class NamedParameterJdbcTemplateTests extends TestCase {
 
-    public void testNullDataSourceProvidedToCtor() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                new NamedParameterJdbcTemplate((DataSource) null);
-            }
-        }.runTest();
-    }
+	public void testNullDataSourceProvidedToCtor() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				new NamedParameterJdbcTemplate((DataSource) null);
+			}
+		}.runTest();
+	}
 
-    public void testNullJdbcTemplateProvidedToCtor() throws Exception {
-        new AssertThrows(IllegalArgumentException.class) {
-            public void test() throws Exception {
-                new NamedParameterJdbcTemplate((JdbcOperations) null);
-            }
-        }.runTest();
-    }
+	public void testNullJdbcTemplateProvidedToCtor() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				new NamedParameterJdbcTemplate((JdbcOperations) null);
+			}
+		}.runTest();
+	}
 
 }
