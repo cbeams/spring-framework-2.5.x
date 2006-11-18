@@ -23,11 +23,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
- * Check that an aspect that depends on another bean, where the advised bean
+ * Check that an aspect that depends on another bean, where the referenced bean
  * itself is advised by the same aspect, works correctly.
  *
  * @author Ramnivas Laddad
- * @since 2.0
+ * @author Juergen Hoeller
  */
 public class PropertyDependentAspectTests extends TestCase {
 
@@ -39,8 +39,6 @@ public class PropertyDependentAspectTests extends TestCase {
 		checkXmlAspect("org/springframework/aop/aspectj/property-dependent-aspect-property-after-aspect-test.xml");
 	}
 
-	// Property bean declared before or after the aspect doesn't matter in this case
-	// But adding a test anyway to ensure continued correctness
 	public void testPropertyDependentAtAspectJAspectWithPropertyDeclaredBeforeAdvice() throws Exception {
 		checkAtAspectJAspect("org/springframework/aop/aspectj/property-dependent-atAspectJ-aspect-property-before-aspect-test.xml");
 	}
@@ -51,29 +49,24 @@ public class PropertyDependentAspectTests extends TestCase {
 
 	private void checkXmlAspect(String appContextFile) {
 		ApplicationContext context = new ClassPathXmlApplicationContext(appContextFile);
-
-		ICounter counter = (ICounter)context.getBean("counter");
+		ICounter counter = (ICounter) context.getBean("counter");
 		assertTrue("Proxy didn't get created", counter instanceof Advised);
 
 		counter.increment();
-		
 		JoinPointMonitorAspect callCountingAspect = (JoinPointMonitorAspect)context.getBean("monitoringAspect");
-		assertEquals("Advise didn't got executed", 1, callCountingAspect.beforeExecutions);
-		// The around advised in appContext is currently commented out
-		//assertEquals("Advise didn't got executed", 1, callCountingAspect.aroundExecutions);
+		assertEquals("Advise didn't get executed", 1, callCountingAspect.beforeExecutions);
+		assertEquals("Advise didn't get executed", 1, callCountingAspect.aroundExecutions);
 	}
 
 	private void checkAtAspectJAspect(String appContextFile) {
 		ApplicationContext context = new ClassPathXmlApplicationContext(appContextFile);
-
-		ICounter counter = (ICounter)context.getBean("counter");
+		ICounter counter = (ICounter) context.getBean("counter");
 		assertTrue("Proxy didn't get created", counter instanceof Advised);
 
 		counter.increment();
-
 		JoinPointMonitorAtAspectJAspect callCountingAspect = (JoinPointMonitorAtAspectJAspect)context.getBean("monitoringAspect");
-		assertEquals("Advise didn't got executed", 1, callCountingAspect.beforeExecutions);
-		assertEquals("Advise didn't got executed", 1, callCountingAspect.aroundExecutions);
+		assertEquals("Advise didn't get executed", 1, callCountingAspect.beforeExecutions);
+		assertEquals("Advise didn't get executed", 1, callCountingAspect.aroundExecutions);
 	}
 
 }

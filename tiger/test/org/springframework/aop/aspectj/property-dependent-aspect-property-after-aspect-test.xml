@@ -9,16 +9,8 @@
 	<aop:config>
 		<aop:aspect ref="monitoringAspect">
 			<aop:before method="before" pointcut="execution(* increment*())" />
+			<aop:around method="around" pointcut="execution(* increment*())" />
 		</aop:aspect>
-
-		<!-- Putting an additional advice creates even more complex scenario,
-			uncomment this (and the corresponding line in test when the one-advice issue is fixed -->
-		<!--
-		<aop:aspect ref="callCountingAspect">
-			<aop:before method="around"
-				pointcut="execution(* increment*())" />
-		</aop:aspect>
-		-->
 	</aop:config>
 
 	<bean id="monitoringAspect" class="org.springframework.aop.aspectj.JoinPointMonitorAspect">
