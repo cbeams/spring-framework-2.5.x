@@ -17,7 +17,6 @@
 package org.springframework.transaction.config;
 
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
-import org.springframework.core.Conventions;
 
 /**
  * @author Rob Harrop

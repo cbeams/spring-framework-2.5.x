@@ -16,10 +16,7 @@
 
 package org.springframework.ejb.config;
 
-import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
 import org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean;
-import org.springframework.ejb.config.AbstractJndiLocatedBeanDefinitionParser;
-
 import org.w3c.dom.Element;
 
 /**
