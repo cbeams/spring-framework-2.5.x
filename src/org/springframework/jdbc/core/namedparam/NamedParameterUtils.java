@@ -36,6 +36,14 @@ import org.springframework.util.Assert;
 public abstract class NamedParameterUtils {
 
 	/**
+	 * Set of characters that qualify as parameter separators,
+	 * indicating that a parameter name in a SQL String has ended.
+	 */
+	private static final char[] PARAMETER_SEPARATORS =
+			new char[] {'"', '\'', ':', '&', ',', ';', '(', ')', '|', '=', '+', '-', '*', '%', '/', '\\', '<', '>', '^'};
+
+
+	/**
 	 * Parse the SQL statement and locate any placeholders or named parameters.
 	 * Named parameters are substituted for a JDBC placeholder.
 	 * @param sql the SQL statement
@@ -67,23 +75,24 @@ public abstract class NamedParameterUtils {
 
 		int i = 0;
 		while (i < statement.length) {
+			char c = statement[i];
 			if (withinQuotes) {
-				if (statement[i] == currentQuote) {
+				if (c == currentQuote) {
 					withinQuotes = false;
 					currentQuote = '-';
 				}
-				newSql.append((char) statement[i]);
+				newSql.append(c);
 			}
 			else {
-				if (statement[i] == '"' || statement[i] == '\'') {
+				if (c == '"' || c == '\'') {
 					withinQuotes = true;
-					currentQuote = (char) statement[i];
-					newSql.append((char) statement[i]);
+					currentQuote = c;
+					newSql.append(c);
 				}
 				else {
-					if (statement[i] == ':' || statement[i] == '&') {
+					if (c == ':' || c == '&') {
 						int j = i + 1;
-						while (j < statement.length && parameterNameContinues(statement, j)) {
+						while (j < statement.length && !isParameterSeparator(statement[j])) {
 							j++;
 						}
 						if (j - i > 1) {
@@ -96,13 +105,13 @@ public abstract class NamedParameterUtils {
 							parameters.add(parameter);
 							totalParameterCount++;
 						} else {
-							newSql.append(statement[i]);
+							newSql.append(c);
 						}
 						i = j - 1;
 					}
 					else {
-						newSql.append((char) statement[i]);
-						if (statement[i] == '?') {
+						newSql.append(c);
+						if (c == '?') {
 							unnamedParameterCount++;
 							totalParameterCount++;
 						}
@@ -141,23 +150,24 @@ public abstract class NamedParameterUtils {
 
 		int i = 0;
 		while (i < statement.length) {
+			char c = statement[i];
 			if (withinQuotes) {
-				if (statement[i] == currentQuote) {
+				if (c == currentQuote) {
 					withinQuotes = false;
 					currentQuote = '-';
 				}
-				newSql.append((char) statement[i]);
+				newSql.append(c);
 			}
 			else {
-				if (statement[i] == '"' || statement[i] == '\'') {
+				if (c == '"' || c == '\'') {
 					withinQuotes = true;
-					currentQuote = (char) statement[i];
-					newSql.append((char) statement[i]);
+					currentQuote = c;
+					newSql.append(c);
 				}
 				else {
-					if (statement[i] == ':' || statement[i] == '&') {
+					if (c == ':' || c == '&') {
 						int j = i + 1;
-						while (j < statement.length && parameterNameContinues(statement, j)) {
+						while (j < statement.length && !isParameterSeparator(statement[j])) {
 							j++;
 						}
 						if (j - i > 1) {
@@ -180,13 +190,14 @@ public abstract class NamedParameterUtils {
 							else {
 								newSql.append("?");
 							}
-						} else {
-							newSql.append(statement[i]);
+						}
+						else {
+							newSql.append(c);
 						}
 						i = j - 1;
 					}
 					else {
-						newSql.append((char) statement[i]);
+						newSql.append(c);
 					}
 				}
 			}
@@ -256,18 +267,19 @@ public abstract class NamedParameterUtils {
 	}
 
 	/**
-	 * Determine whether a parameter name continues at the current position,
-	 * that is, does not end delimited by any whitespace character yet.
-	 * @param statement the SQL statement
-	 * @param pos the position within the statement
+	 * Determine whether a parameter name ends at the current position,
+	 * that is, whether the given character qualifies as a separator.
 	 */
-	private static boolean parameterNameContinues(char[] statement, int pos) {
-		return (statement[pos] != ' ' && statement[pos] != ',' && statement[pos] != ')' &&
-				statement[pos] != '"' && statement[pos] != '\'' && statement[pos] != '|' &&
-				statement[pos] != '+' && statement[pos] != '-' && statement[pos] != '*' &&
-				statement[pos] != '/' && statement[pos] != '%' && statement[pos] != '=' &&
-				statement[pos] != '<' && statement[pos] != '>' && statement[pos] != ';' &&
-				statement[pos] != '\t' && statement[pos] != '\n' && statement[pos] != '\r');
+	private static boolean isParameterSeparator(char c) {
+		if (Character.isWhitespace(c)) {
+			return true;
+		}
+		for (int i = 0; i < PARAMETER_SEPARATORS.length; i++) {
+			if (c == PARAMETER_SEPARATORS[i]) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
