@@ -22,14 +22,9 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.xml.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
-import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.core.Conventions;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -49,7 +44,7 @@ public class JpaNamespaceHandler extends NamespaceHandlerSupport {
 	}
 
 
-	private class ConfigBeanDefinitionParser implements BeanDefinitionParser {
+	private class ConfigBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 		private static final String VENDOR = "vendor";
 
@@ -61,10 +56,12 @@ public class JpaNamespaceHandler extends NamespaceHandlerSupport {
 
 		private static final String LOAD_TIME_WEAVER = "load-time-weaver";
 
-		public BeanDefinition parse(Element element, ParserContext parserContext) {
-			BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(LocalEntityManagerFactoryBean.class);
-			builder.setSource(parserContext.extractSource(element));
-			configureAttributes(parserContext, element, builder);
+		protected Class getBeanClass(Element element) {
+			return LocalEntityManagerFactoryBean.class;
+		}
+
+		protected void doParse(Element element, BeanDefinitionBuilder builder) {
+			configureAttributes(element, builder);
 
 			NodeList childNodes = element.getChildNodes();
 			for (int i = 0; i < childNodes.getLength(); i++) {
@@ -72,20 +69,13 @@ public class JpaNamespaceHandler extends NamespaceHandlerSupport {
 				if (node.getNodeType() == Node.ELEMENT_NODE) {
 					String localName = node.getLocalName();
 					if (VENDOR.equals(localName)) {
-						parseVendor((Element) node, parserContext, builder);
+						parseVendor((Element) node, builder);
 					}
 				}
 			}
-
-			BeanDefinitionRegistry registry = parserContext.getRegistry();
-			AbstractBeanDefinition def = builder.getBeanDefinition();
-			String id = resolveId(def, parserContext, element);
-			registry.registerBeanDefinition(id, def);
-
-			return null;
 		}
 
-		private void configureAttributes(ParserContext parserContext, Element element, BeanDefinitionBuilder builder) {
+		private void configureAttributes(Element element, BeanDefinitionBuilder builder) {
 			NamedNodeMap attributes = element.getAttributes();
 			for (int x = 0; x < attributes.getLength(); x++) {
 				Attr attribute = (Attr) attributes.item(x);
@@ -102,30 +92,15 @@ public class JpaNamespaceHandler extends NamespaceHandlerSupport {
 			}
 		}
 
-		private String resolveId(AbstractBeanDefinition definition, ParserContext parserContext, Element element) {
-			if (false) {
-				return BeanDefinitionReaderUtils.generateBeanName(
-						definition, parserContext.getRegistry(), parserContext.isNested());
-			}
-			else {
-				return extractId(element);
-			}
-		}
-
-		protected String extractId(Element element) {
-			return element.getAttribute(ID_ATTRIBUTE);
-		}
-
 		private String extractPropertyName(String attributeName) {
 			return Conventions.attributeNameToPropertyName(attributeName);
 		}
 
-		private void parseVendor(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
+		private void parseVendor(Element element, BeanDefinitionBuilder builder) {
 			BeanDefinitionBuilder vendorBuilder = BeanDefinitionBuilder.rootBeanDefinition(JpaVendorAdapter.class);
-			configureAttributes(parserContext, element, vendorBuilder);
+			configureAttributes(element, vendorBuilder);
 
 			NodeList childNodes = element.getChildNodes();
-
 			for (int i = 0; i < childNodes.getLength(); i++) {
 				Node node = childNodes.item(i);
 				if (node.getNodeType() == Node.ELEMENT_NODE) {
