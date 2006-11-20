@@ -22,9 +22,9 @@ import java.util.List;
 import org.springframework.util.Assert;
 
 /**
- * {@link ComponentDefinition} implementation that holds one or more
- * nested {@link ComponentDefinition} instances, aggregating them
- * into a named group of components.
+ * {@link ComponentDefinition} implementation that holds one or more nested
+ * {@link ComponentDefinition} instances, aggregating them into a named group
+ * of components.
  *
  * @author Juergen Hoeller
  * @since 2.0.1
@@ -40,7 +40,7 @@ public class CompositeComponentDefinition extends AbstractComponentDefinition {
 
 
 	/**
-	 * Create a new CompositeComponentDefinition
+	 * Create a new CompositeComponentDefinition.
 	 * @param name the name of the composite component
 	 * @param source the source element that defines the root of the composite component
 	 */
@@ -52,11 +52,11 @@ public class CompositeComponentDefinition extends AbstractComponentDefinition {
 
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public Object getSource() {
-		return source;
+		return this.source;
 	}
 
 
