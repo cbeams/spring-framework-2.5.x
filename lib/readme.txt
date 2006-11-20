@@ -195,7 +195,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Commons Collections 3.2 (http://jakarta.apache.org/commons/collections)
 - required for building the framework
 - optional for using linked/identity maps in Spring core (on JDK < 1.4)
-- required for running PetClinic, JPetStore (by Commons DBCP, Hibernate, OJB)
+- required for running PetClinic, JPetStore (by Commons DBCP, Hibernate)
 
 * jakarta-commons/commons-dbcp.jar
 - Commons DBCP 1.2.1 (http://jakarta.apache.org/commons/dbcp)
@@ -230,9 +230,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's JasperReports support (by JasperReports)
 
 * jakarta-commons/commons-lang.jar
-- Commons Lang 2.1 (http://jakarta.apache.org/commons/lang)
-- required for building the framework (by OJB)
-- required at runtime when using Spring's OJB support (by OJB)
+- Commons Lang 2.2 (http://jakarta.apache.org/commons/lang)
+- required at runtime when using Spring's OpenJPA support (by OpenJPA)
 
 * jakarta-commons/commons-logging.jar
 - Commons Logging 1.1 (http://jakarta.apache.org/commons/logging)
@@ -324,8 +323,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Oracle OC4J 10.1.3.1 ClassLoader API extract (http://www.oracle.com/technology/tech/java/oc4j)
 - required for building the framework
 
-* openjpa/openjpa-0.9.6-incubating-SNAPSHOT.jar
-- OpenJPA 0.9.6 snapshot (http://incubator.apache.org/openjpa)
+* openjpa/openjpa-all-0.9.6-incubating.jar
+- OpenJPA 0.9.6 Nov 8 snapshot (http://incubator.apache.org/openjpa)
 - required for building the framework
 - required at runtime when using Spring's JPA support with OpenJPA as provider
 
@@ -353,6 +352,10 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - Quartz 1.6.0 (http://www.opensymphony.com/quartz)
 - required for building the framework
 - required at runtime when using Spring's Quartz scheduling support
+
+* serp/serp-1.12.1.jar
+- Serp 1.12.1 (http://http://serp.sourceforge.net)
+- required at runtime when using Spring's OpenJPA support (by OpenJPA)
 
 * struts/struts.jar
 - Apache Struts 1.2.9 (http://jakarta.apache.org/struts)
