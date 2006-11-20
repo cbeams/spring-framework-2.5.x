@@ -124,17 +124,16 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	}
 
 	/**
-	 * Controls whether this instance is to
-	 * {@link org.springframework.beans.factory.parsing.ReaderContext#fireComponentRegistered(org.springframework.beans.factory.parsing.ComponentDefinition) fire an event}
-	 * when a bean definition has been totally parsed?
-	 * <p>Implementations must return <code>true</code> if they want an event
-	 * to be fired when a bean definition has been totally parsed; returning
-	 * <code>false</code> means that an event will not be fired.
-	 * <p>This implementation returns <code>true</code> by default; that is, an event
-	 * will be fired when a bean definition has been totally parsed.
-	 * @return <code>true</code> if this instance is to
-	 * {@link org.springframework.beans.factory.parsing.ReaderContext#fireComponentRegistered(org.springframework.beans.factory.parsing.ComponentDefinition) fire an event}
-	 * when a bean definition has been totally parsed
+	 * Controls whether this parser is supposed to fire a
+	 * {@link org.springframework.beans.factory.parsing.BeanComponentDefinition}
+	 * event after parsing the bean definition.
+	 * <p>This implementation returns <code>true</code> by default; that is,
+	 * an event will be fired when a bean definition has been completely parsed.
+	 * Override this to return <code>false</code> in order to suppress the event.
+	 * @return <code>true</code> in order to fire a component registration event
+	 * after parsing the bean definition; <code>false</code> to suppress the event
+	 * @see #postProcessComponentDefinition
+	 * @see org.springframework.beans.factory.parsing.ReaderContext#fireComponentRegistered
 	 */
 	protected boolean shouldFireEvents() {
 		return true;
@@ -145,7 +144,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	 * {@link BeanComponentDefinition} but before the
 	 * {@link BeanComponentDefinition} has been registered with a
 	 * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}.
-	 * <p>Derived classes can override this emthod to supply any custom logic that
+	 * <p>Derived classes can override this method to supply any custom logic that
 	 * is to be executed after all the parsing is finished.
 	 * <p>The default implementation is a no-op.
 	 * @param componentDefinition the {@link BeanComponentDefinition} that is to be processed
