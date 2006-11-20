@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
@@ -36,6 +36,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
@@ -273,8 +274,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	/**
 	 * Return whether the given bean class represents an infrastructure class
 	 * that should never be proxied.
-	 * <p>Default implementation considers Advisors, MethodInterceptors
-	 * and AbstractAutoProxyCreators as infrastructure classes.
+	 * <p>Default implementation considers Advisors, Advices and
+	 * AbstractAutoProxyCreators as infrastructure classes.
 	 * @param beanClass the class of the bean
 	 * @return whether the bean represents an infrastructure class
 	 * @see org.springframework.aop.Advisor
@@ -283,7 +284,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 */
 	protected boolean isInfrastructureClass(Class beanClass) {
 		boolean retVal = Advisor.class.isAssignableFrom(beanClass) ||
-				MethodInterceptor.class.isAssignableFrom(beanClass) ||
+				Advice.class.isAssignableFrom(beanClass) ||
 				AbstractAutoProxyCreator.class.isAssignableFrom(beanClass);
 		if (retVal && logger.isDebugEnabled()) {
 			logger.debug("Did not attempt to auto-proxy infrastructure class [" + beanClass.getName() + "]");
@@ -403,12 +404,17 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @see #setInterceptorNames
 	 */
 	private Advisor[] resolveInterceptorNames() {
-		Advisor[] advisors = new Advisor[this.interceptorNames.length];
+		ConfigurableBeanFactory cbf =
+				(this.beanFactory instanceof ConfigurableBeanFactory ? (ConfigurableBeanFactory) this.beanFactory : null);
+		List advisors = new ArrayList();
 		for (int i = 0; i < this.interceptorNames.length; i++) {
-			Object next = this.beanFactory.getBean(this.interceptorNames[i]);
-			advisors[i] = this.advisorAdapterRegistry.wrap(next);
+			String beanName = this.interceptorNames[i];
+			if (cbf == null || !cbf.isCurrentlyInCreation(beanName)) {
+				Object next = this.beanFactory.getBean(beanName);
+				advisors.add(this.advisorAdapterRegistry.wrap(next));
+			}
 		}
-		return advisors;
+		return (Advisor[]) advisors.toArray(new Advisor[advisors.size()]);
 	}
 
 	/**
