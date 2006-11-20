@@ -794,20 +794,26 @@ public class DispatcherPortletTests extends TestCase {
 		httpRequest.addPreferredLocale(Locale.GERMAN);
 
 		// see RequestContextListener.requestInitialized()
-		LocaleContextHolder.setLocale(httpRequest.getLocale());
-		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpRequest));
+		try {
+			LocaleContextHolder.setLocale(httpRequest.getLocale());
+			RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpRequest));
 
-		LocaleContext servletLocaleContext = LocaleContextHolder.getLocaleContext();
-		RequestAttributes servletRequestAttrs = RequestContextHolder.getRequestAttributes();
+			LocaleContext servletLocaleContext = LocaleContextHolder.getLocaleContext();
+			RequestAttributes servletRequestAttrs = RequestContextHolder.getRequestAttributes();
 
-		MockActionRequest request = new MockActionRequest();
-		MockActionResponse response = new MockActionResponse();
-		request.setParameter("action", "form");
-		request.setParameter("age", "29");
-		simpleDispatcherPortlet.processAction(request, response);
+			MockActionRequest request = new MockActionRequest();
+			MockActionResponse response = new MockActionResponse();
+			request.setParameter("action", "form");
+			request.setParameter("age", "29");
+			simpleDispatcherPortlet.processAction(request, response);
 
-		assertSame(servletLocaleContext, LocaleContextHolder.getLocaleContext());
-		assertSame(servletRequestAttrs, RequestContextHolder.getRequestAttributes());
+			assertSame(servletLocaleContext, LocaleContextHolder.getLocaleContext());
+			assertSame(servletRequestAttrs, RequestContextHolder.getRequestAttributes());
+		}
+		finally {
+			RequestContextHolder.resetRequestAttributes();
+			LocaleContextHolder.resetLocaleContext();
+		}
 	}
 
 	public void testValidRenderRequestWithExistingThreadLocalRequestContext() throws IOException, PortletException {
@@ -816,21 +822,26 @@ public class DispatcherPortletTests extends TestCase {
 		httpRequest.addPreferredLocale(Locale.GERMAN);
 
 		// see RequestContextListener.requestInitialized()
-		LocaleContextHolder.setLocale(httpRequest.getLocale());
-		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpRequest));
+		try {
+			LocaleContextHolder.setLocale(httpRequest.getLocale());
+			RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpRequest));
 
-		LocaleContext servletLocaleContext = LocaleContextHolder.getLocaleContext();
-		RequestAttributes servletRequestAttrs = RequestContextHolder.getRequestAttributes();
+			LocaleContext servletLocaleContext = LocaleContextHolder.getLocaleContext();
+			RequestAttributes servletRequestAttrs = RequestContextHolder.getRequestAttributes();
 
-		MockRenderRequest request = new MockRenderRequest();
-		MockRenderResponse response = new MockRenderResponse();
-		request.setParameter("action", "form");
-		request.setParameter("age", "29");
-		simpleDispatcherPortlet.doDispatch(request, response);
+			MockRenderRequest request = new MockRenderRequest();
+			MockRenderResponse response = new MockRenderResponse();
+			request.setParameter("action", "form");
+			request.setParameter("age", "29");
+			simpleDispatcherPortlet.doDispatch(request, response);
 
-		assertSame(servletLocaleContext, LocaleContextHolder.getLocaleContext());
-		assertSame(servletRequestAttrs, RequestContextHolder.getRequestAttributes());
-
+			assertSame(servletLocaleContext, LocaleContextHolder.getLocaleContext());
+			assertSame(servletRequestAttrs, RequestContextHolder.getRequestAttributes());
+		}
+		finally {
+			RequestContextHolder.resetRequestAttributes();
+			LocaleContextHolder.resetLocaleContext();
+		}
 	}
 
 	public void testInvalidActionRequestWithExistingThreadLocalRequestContext() throws IOException, PortletException {
@@ -839,21 +850,27 @@ public class DispatcherPortletTests extends TestCase {
 		httpRequest.addPreferredLocale(Locale.GERMAN);
 
 		// see RequestContextListener.requestInitialized()
-		LocaleContextHolder.setLocale(httpRequest.getLocale());
-		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpRequest));
+		try {
+			LocaleContextHolder.setLocale(httpRequest.getLocale());
+			RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpRequest));
 
-		LocaleContext servletLocaleContext = LocaleContextHolder.getLocaleContext();
-		RequestAttributes servletRequestAttrs = RequestContextHolder.getRequestAttributes();
+			LocaleContext servletLocaleContext = LocaleContextHolder.getLocaleContext();
+			RequestAttributes servletRequestAttrs = RequestContextHolder.getRequestAttributes();
 
-		MockActionRequest request = new MockActionRequest();
-		MockActionResponse response = new MockActionResponse();
-		request.setParameter("action", "invalid");
-		simpleDispatcherPortlet.processAction(request, response);
-		String exceptionParam = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
-		assertNotNull(exceptionParam); // ensure that an exceptional condition occured
+			MockActionRequest request = new MockActionRequest();
+			MockActionResponse response = new MockActionResponse();
+			request.setParameter("action", "invalid");
+			simpleDispatcherPortlet.processAction(request, response);
+			String exceptionParam = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
+			assertNotNull(exceptionParam); // ensure that an exceptional condition occured
 
-		assertSame(servletLocaleContext, LocaleContextHolder.getLocaleContext());
-		assertSame(servletRequestAttrs, RequestContextHolder.getRequestAttributes());
+			assertSame(servletLocaleContext, LocaleContextHolder.getLocaleContext());
+			assertSame(servletRequestAttrs, RequestContextHolder.getRequestAttributes());
+		}
+		finally {
+			RequestContextHolder.resetRequestAttributes();
+			LocaleContextHolder.resetLocaleContext();
+		}
 	}
 
 	public void testInvalidRenderRequestWithExistingThreadLocalRequestContext() throws IOException, PortletException {
@@ -862,24 +879,30 @@ public class DispatcherPortletTests extends TestCase {
 		httpRequest.addPreferredLocale(Locale.GERMAN);
 
 		// see RequestContextListener.requestInitialized()
-		LocaleContextHolder.setLocale(httpRequest.getLocale());
-		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpRequest));
-
-		LocaleContext servletLocaleContext = LocaleContextHolder.getLocaleContext();
-		RequestAttributes servletRequestAttrs = RequestContextHolder.getRequestAttributes();
-
-		MockRenderRequest request = new MockRenderRequest();
-		MockRenderResponse response = new MockRenderResponse();
 		try {
-			simpleDispatcherPortlet.doDispatch(request, response);
-			fail("should have failed to find a handler and raised an UnavailableException");
-		}
-		catch (UnavailableException ex) {
-			// expected
-		}
+			LocaleContextHolder.setLocale(httpRequest.getLocale());
+			RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpRequest));
 
-		assertSame(servletLocaleContext, LocaleContextHolder.getLocaleContext());
-		assertSame(servletRequestAttrs, RequestContextHolder.getRequestAttributes());
+			LocaleContext servletLocaleContext = LocaleContextHolder.getLocaleContext();
+			RequestAttributes servletRequestAttrs = RequestContextHolder.getRequestAttributes();
+
+			MockRenderRequest request = new MockRenderRequest();
+			MockRenderResponse response = new MockRenderResponse();
+			try {
+				simpleDispatcherPortlet.doDispatch(request, response);
+				fail("should have failed to find a handler and raised an UnavailableException");
+			}
+			catch (UnavailableException ex) {
+				// expected
+			}
+
+			assertSame(servletLocaleContext, LocaleContextHolder.getLocaleContext());
+			assertSame(servletRequestAttrs, RequestContextHolder.getRequestAttributes());
+		}
+		finally {
+			RequestContextHolder.resetRequestAttributes();
+			LocaleContextHolder.resetLocaleContext();
+		}
 	}
 
 }
