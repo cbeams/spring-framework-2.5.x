@@ -109,18 +109,18 @@ public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor 
 
 	/**
 	 * Convenience method when we have only a single pattern.
-	 * Use either this method or setPatterns, not both.
+	 * Use either this method or <code>setPatterns</code>, not both.
 	 * <p>To be passed through to the pointcut implementation.
 	 * @see #setPatterns
 	 */
 	public void setPattern(String pattern) {
-		setPatterns(new String[] { pattern });
+		setPatterns(new String[] {pattern});
 	}
 
 	/**
 	 * Set the regular expressions defining methods to match.
-	 * Matching will be the union of all these; if any match,
-	 * the pointcut matches.
+	 * <p>Matching will be the union of all these; if any of the
+	 * patterns matches, the pointcut matches.
 	 * <p>To be passed through to the pointcut implementation.
 	 * @param patterns regular expressions describing methods to match
 	 */
@@ -181,6 +181,9 @@ public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor 
 	}
 
 
+	/**
+	 * Empty class used for a serializable monitor object.
+	 */
 	private static class SerializableMonitor implements Serializable {
 	}
 
