@@ -3,18 +3,24 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.1 (19.11.2006)
+Changes in version 2.0.1 (21.11.2006)
 -------------------------------------
 
 General
 * included classes in the "test.annotation" and "test.jpa" packages (tiger mock directory) in the Spring API javadoc
 
 Package org.springframework.aop
+* HashMapCachingAdvisorChainFactory uses synchronized access to its method cache Map
+* AbstractAutoProxyCreator considers all Advices (not just MethodInterceptors) as infrastructure classes to ignore
+* fixed AbstractAutoProxyCreator to only obtain beans for "interceptorNames" that have been fully initialized already
 * reworked AbstractAdvisorAutoProxyCreator's "extendCandidateAdvisors" into "extendAdvisors", operating on sorted list
 * renamed AspectJInvocationContextExposingAdvisorAutoProxyCreator to AspectJAwareAdvisorAutoProxyCreator
 * removed unintended JDK 1.5 dependency in AspectJExpressionPointcut ("equals"/"hashCode" implementation)
 * added "order" attribute to "aspect" tag in AOP schema, allowing to declaratively specify ordering for aspect instances
 * reworked aspect ordering to allow aspect instances to depend on beans that in turn get advised by the same aspect
+* added @Order annotation support for @AspectJ style aspects, as alternative to implementing the Ordered interface
+* redesigned AspectJ support SPI: AspectInstanceFactory, AspectJPointcutAdvisor, AspectJAwareAdvisorAutoProxyCreator
+* renamed DelegatePerTargetObjectDelegatingIntroductionInterceptor to DelegatePerTargetObjectIntroductionInterceptor
 
 Package org.springframework.beans
 * fixed BeanWrapperImpl to correctly determine generic type for each key in a chain (e.g. "myMap[myKey][myInnerKey]")
@@ -37,6 +43,7 @@ Package org.springframework.beans
 * removed default for "abstract"/"singleton" attributes in "spring-beans.dtd", for 2.0-style inheritance for inner beans
 * added "findAutowireCandidates" template method to AbstractAutowireCapableBeanFactory, superseding "findMatchingBeans"
 * DefaultListableBeanFactory excludes beans which are not autowire candidates even before it obtains the instances
+* fixed PropertyPlaceholderConfigurer to throw a BeanDefinitionStoreException in case of any circular reference
 * fixed PluggableSchemaResolver to accept a null ClassLoader argument (falling back to the default ClassLoader)
 * introduced CompositeComponentDefinition for holding nested components (applied e.g. for "aop:config" element)
 * introduced "registerComponent" method on ParserContext, for transparent registration of top-level or nested components
@@ -60,11 +67,13 @@ Package org.springframework.core
 
 Package org.springframework.instrument
 * added GlassFishLoadTimeWeaver for GlassFish / Sun Application Server
+* refactored Java-5-only AbstractOverridingClassLoader into JDK-1.3-compatible OverridingClassLoader in "core" package
 
 Package org.springframework.jdbc
 * introduced AbstractRoutingDataSource and IsolationLevelDataSourceRouter
 * JdbcTemplate logs all warnings in case of "ignoreWarnings"=true, not just the first warning in the chain
 * added "setQueryTimeout" method to JdbcTemplate and RdbmsOperation, for specifying a timeout outside of a transaction
+* removed bind parameter check from SqlOperation, not parsing the SQL anymore at all (relying on JDBC driver instead)
 
 Package org.springframework.jms
 * reimplemented JMSException translation to handle subclasses of standard JMSExceptions in a specific fashion as well
