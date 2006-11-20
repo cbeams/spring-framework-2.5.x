@@ -67,9 +67,9 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		if (isGenerateDdl()) {
 			jpaProperties.setProperty("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=true)");
 		}
-		
-		// Taken from the docs (under the name "Standard OpenJPA Log Configuration + All SQL Statements").
+
 		if (isShowSql()) {
+			// Taken from the OpenJPA 0.9.6 docs ("Standard OpenJPA Log Configuration + All SQL Statements")
 			jpaProperties.setProperty("openjpa.Log", "DefaultLevel=WARN, Runtime=INFO, Tool=INFO, SQL=TRACE");
 		}
 
