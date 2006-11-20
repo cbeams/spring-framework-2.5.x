@@ -32,7 +32,7 @@ import org.springframework.core.CollectionFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.core.CollectionFactory#createIdentityMapIfPossible
- * @see java.lang.reflect.Method#hashCode
+ * @see java.lang.reflect.Method#hashCode()
  */
 public final class HashMapCachingAdvisorChainFactory implements AdvisorChainFactory {
 
@@ -43,21 +43,24 @@ public final class HashMapCachingAdvisorChainFactory implements AdvisorChainFact
 	public List getInterceptorsAndDynamicInterceptionAdvice(
 			Advised config, Object proxy, Method method, Class targetClass) {
 
-		List cached = (List) this.methodCache.get(method);
-		if (cached == null) {
-			// recalculate
-			cached = AdvisorChainFactoryUtils.calculateInterceptorsAndDynamicInterceptionAdvice(
-					config, proxy, method, targetClass);
-			this.methodCache.put(method, cached);
+		synchronized (this.methodCache) {
+			List cached = (List) this.methodCache.get(method);
+			if (cached == null) {
+				cached = AdvisorChainFactoryUtils.calculateInterceptorsAndDynamicInterceptionAdvice(
+						config, proxy, method, targetClass);
+				this.methodCache.put(method, cached);
+			}
+			return cached;
 		}
-		return cached;
 	}
 
 	public void activated(AdvisedSupport advisedSupport) {
 	}
 
 	public void adviceChanged(AdvisedSupport advisedSupport) {
-		this.methodCache.clear();
+		synchronized (this.methodCache) {
+			this.methodCache.clear();
+		}
 	}
 
 }
