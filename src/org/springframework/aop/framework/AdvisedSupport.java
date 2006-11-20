@@ -51,6 +51,7 @@ import org.springframework.util.ClassUtils;
  * This class is used to hold snapshots of proxies.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -461,19 +462,21 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @return the count of the interceptors of this class or subclasses
 	 */
 	public final int countAdvicesOfType(Class interceptorClass) {
+		Assert.notNull(interceptorClass, "Interceptor class must not be null");
 		if (this.advisors.size() == 0) {
 			return 0;
 		}
 		int count = 0;
 		for (int i = 0; i < this.advisors.size(); i++) {
 			Advisor advisor = (Advisor) this.advisors.get(i);
-			if (interceptorClass.isAssignableFrom(advisor.getAdvice().getClass())) {
-				++count;
+			if (advisor.getAdvice() != null &&
+					interceptorClass.isAssignableFrom(advisor.getAdvice().getClass())) {
+				count++;
 			}
 		}
 		return count;
 	}
-	
+
 	/**
 	 * Invoked when advice has changed.
 	 */
@@ -484,7 +487,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 			}
 		}
 	}
-	
+
 	private void activate() {
 		this.isActive = true;
 		for (int i = 0; i < this.listeners.size(); i++) {
