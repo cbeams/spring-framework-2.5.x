@@ -15,12 +15,12 @@
 		</description>
 	  <property name="beanNames"><value>jdk*,onlyJdk</value></property>
 	  <property name="interceptorNames">
-		<list>
-		  <value>nopInterceptor</value>
-		</list>
+			<list>
+				<value>nopInterceptor</value>
+			</list>
 	  </property>
 	</bean>
-	
+
 	<bean id="_cglibBeanNameProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
 	  <property name="beanNames"><value>cglib*</value></property>
 	  <property name="proxyTargetClass">
@@ -28,71 +28,57 @@
 	  	<value>true</value>
 	  </property>
 		<property name="interceptorNames">
-		<description>Interceptors and Advisors to apply automatically</description>
-		<list>
-		  <value>nopInterceptor</value>
-		  <value>countingBeforeAdvice</value>
-		</list>
+			<description>Interceptors and Advisors to apply automatically</description>
+			<list>
+				<value>nopInterceptor</value>
+				<value>countingBeforeAdvice</value>
+			</list>
 		</property>
 	</bean>
-	
+
 	<bean id="introductionBeanNameProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
 		<description>
 			Illustrates a JDK introduction
 		</description>
 	  <property name="beanNames"><value>*introductionUsingJdk</value></property>
 	  <property name="interceptorNames">
-		<list>
-		  <value>introductionNopInterceptor</value>
-		  <value>timestampIntroduction</value>
-		  <value>lockableAdvisor</value>
-		</list>
+			<list>
+				<value>introductionNopInterceptor</value>
+				<value>timestampIntroduction</value>
+				<value>lockableAdvisor</value>
+			</list>
 	  </property>
 	</bean>
-	
-	<bean id="timestampIntroduction"
-		class="org.springframework.aop.framework.TimestampIntroductionAdvisor">
-	</bean>
-	
+
+	<bean id="timestampIntroduction" class="org.springframework.aop.framework.TimestampIntroductionAdvisor"/>
+
 	<!--
-		Stateful mixin.
-		Note that singleton property is false.
+		Stateful mixin. Note that singleton property is false.
 	-->
-	<bean id="lockableAdvisor"
-		class="org.springframework.aop.framework.LockMixinAdvisor"
-		scope="prototype"
-	>
-	</bean>
-	
-	
-	<bean id="countingBeforeAdvice"
-		class="org.springframework.aop.framework.CountingBeforeAdvice"
-	/>
-	
-	<bean id="nopInterceptor" class="org.springframework.aop.interceptor.NopInterceptor">
-	</bean>
-	
-	<bean id="introductionNopInterceptor" class="org.springframework.aop.interceptor.NopInterceptor">
-	</bean>
-	
-	
-	<bean id="introductionUsingJdk" class="org.springframework.beans.TestBean">	
+	<bean id="lockableAdvisor" class="org.springframework.aop.framework.LockMixinAdvisor"
+			scope="prototype"/>
+
+	<bean id="countingBeforeAdvice" class="org.springframework.aop.framework.CountingBeforeAdvice"/>
+
+	<bean id="nopInterceptor" class="org.springframework.aop.interceptor.NopInterceptor"/>
+
+	<bean id="introductionNopInterceptor" class="org.springframework.aop.interceptor.NopInterceptor"/>
+
+	<bean id="introductionUsingJdk" class="org.springframework.beans.TestBean">
 		<property name="name"><value>introductionUsingJdk</value></property>
 	</bean>
-	
+
 	<bean id="second-introductionUsingJdk" class="org.springframework.beans.TestBean">	
 		<property name="name"><value>second-introductionUsingJdk</value></property>
 	</bean>
-	
+
 	<!--
-		Lazy only because it breaks other tests until this
-		test is fixed
+		Lazy only because it breaks other tests until this test is fixed
 	-->
-	<bean id="factory-introductionUsingJdk" 
-		lazy-init="true"
-		class="org.springframework.aop.framework.autoproxy.CreatesTestBean">	
+	<bean id="factory-introductionUsingJdk" class="org.springframework.aop.framework.autoproxy.CreatesTestBean"
+			lazy-init="true">
 	</bean>
-	
+
 	<bean id="jdk1" class="org.springframework.beans.TestBean">	
 		<property name="name"><value>jdk1</value></property>
 	</bean>
@@ -100,20 +86,17 @@
 	<bean id="frozenBean" class="org.springframework.beans.TestBean">
 		<property name="name" value="frozenBean"/>
 	</bean>
-	
+
 	<bean id="cglib1" class="org.springframework.beans.TestBean">	
 		<property name="name"><value>cglib1</value></property>
 	</bean>
-	
+
 	<bean id="onlyJdk" class="org.springframework.beans.TestBean">	
 		<property name="name"><value>onlyJdk</value></property>
 	</bean>
-	
+
 	<bean id="noproxy" class="org.springframework.beans.TestBean">	
 		<property name="name"><value>noproxy</value></property>
 	</bean>
-	
-	
+
 </beans>		
-	
-	
