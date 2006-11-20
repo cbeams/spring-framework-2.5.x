@@ -26,6 +26,7 @@ import org.springframework.core.CollectionFactory;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class CollectingReaderEventListener implements ReaderEventListener {
 
@@ -55,7 +56,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 			aliases = new ArrayList();
 			this.aliasMap.put(aliasDefinition.getBeanName(), aliases);
 		}
-		aliases.add(aliasDefinition.getAlias());
+		aliases.add(aliasDefinition);
 	}
 
 	public List getAliases(String beanName) {
@@ -64,7 +65,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 	}
 
 	public void importProcessed(ImportDefinition importDefinition) {
-		this.imports.add(importDefinition.getImportedResource());
+		this.imports.add(importDefinition);
 	}
 
 	public List getImports() {
