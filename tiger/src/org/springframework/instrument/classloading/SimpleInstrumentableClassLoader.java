@@ -18,6 +18,8 @@ package org.springframework.instrument.classloading;
 
 import java.lang.instrument.ClassFileTransformer;
 
+import org.springframework.core.OverridingClassLoader;
+
 /**
  * Simplistic implementation of an instrumentable ClassLoader.
  * Usable in tests and standalone environments.
@@ -26,7 +28,7 @@ import java.lang.instrument.ClassFileTransformer;
  * @author Costin Leau
  * @since 2.0
  */
-public class SimpleInstrumentableClassLoader extends AbstractOverridingClassLoader  {
+public class SimpleInstrumentableClassLoader extends OverridingClassLoader  {
 
 	private final WeavingTransformer weavingTransformer;
 

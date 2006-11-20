@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.instrument.classloading;
+package org.springframework.core;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,30 +27,31 @@ import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 
 /**
- * Abstract superclass for <code>ClassLoaders</code> that do <i>not</i>
- * always delegate to their parent loader, as normal class loaders do.
- * This enables, for example, instrumentation to be forced, or a "throwaway"
- * class loading behavior, where selected classes are loaded by a child loader
- * but not loaded by the parent.
+ * <code>ClassLoader</code> that does <i>not</i> always delegate to the
+ * parent loader, as normal class loaders do. This enables, for example,
+ * instrumentation to be forced in the overriding ClassLoader, or a
+ * "throwaway" class loading behavior, where selected classes are
+ * temporarily loaded in the overriding ClassLoader, in order to be load
+ * an instrumented version of the class in the parent ClassLoader later on.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 2.0
+ * @since 2.0.1
  */
-public abstract class AbstractOverridingClassLoader extends ClassLoader {
+public class OverridingClassLoader extends ClassLoader {
 
 	private static final String CLASS_FILE_SUFFIX = ".class";
 
-	private final Set<String> excludedPackages = Collections.synchronizedSet(new HashSet<String>());
+	private final Set excludedPackages = Collections.synchronizedSet(new HashSet());
 
-	private final Set<String> excludedClasses = Collections.synchronizedSet(new HashSet<String>());
+	private final Set excludedClasses = Collections.synchronizedSet(new HashSet());
 
 
 	/**
-	 * Create a new AbstractOverridingClassLoader for the given class loader.
+	 * Create a new OverridingClassLoader for the given class loader.
 	 * @param parent the ClassLoader to build an overriding ClassLoader for
 	 */
-	protected AbstractOverridingClassLoader(ClassLoader parent) {
+	public OverridingClassLoader(ClassLoader parent) {
 		super(parent);
 		this.excludedPackages.add("java.");
 		this.excludedPackages.add("javax.");
@@ -80,9 +81,8 @@ public abstract class AbstractOverridingClassLoader extends ClassLoader {
 	}
 
 
-	@Override
-	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		Class<?> result = null;
+	protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
+		Class result = null;
 
 		if (isEligibleForOverriding(name)) {
 			result = findLoadedClass(name);
@@ -128,8 +128,8 @@ public abstract class AbstractOverridingClassLoader extends ClassLoader {
 		if (this.excludedClasses.contains(className)) {
 			return false;
 		}
-		for (Iterator<String> it = this.excludedPackages.iterator(); it.hasNext();) {
-			String packageName = it.next();
+		for (Iterator it = this.excludedPackages.iterator(); it.hasNext();) {
+			String packageName = (String) it.next();
 			if (className.startsWith(packageName)) {
 				return false;
 			}
@@ -140,11 +140,14 @@ public abstract class AbstractOverridingClassLoader extends ClassLoader {
 
 	/**
 	 * Transformation hook to be implemented by subclasses.
+	 * <p>The default implementation simply returns the given bytes as-is.
 	 * @param name FQN of class being transformed
 	 * @param bytes class bytes
 	 * @return transformed bytes. Return same as input bytes if
 	 * the transformation produced no changes.
 	 */
-	protected abstract byte[] transformIfNecessary(String name, byte[] bytes);
+	protected byte[] transformIfNecessary(String name, byte[] bytes) {
+		return bytes;
+	}
 
 }
