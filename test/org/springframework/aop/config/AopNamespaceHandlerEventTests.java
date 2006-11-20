@@ -33,6 +33,7 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class AopNamespaceHandlerEventTests extends TestCase {
 
@@ -56,6 +57,7 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 
 		CompositeComponentDefinition compositeDef = (CompositeComponentDefinition) componentDefinitions[0];
 		assertEquals("aop:config", compositeDef.getName());
+
 		ComponentDefinition[] nestedComponentDefs = compositeDef.getNestedComponents();
 		assertEquals("Incorrect number of inner components", 2, nestedComponentDefs.length);
 		PointcutComponentDefinition pcd = null;
@@ -67,7 +69,7 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 			}
 		}
 		assertNotNull("PointcutComponentDefinition not found", pcd);
-		assertEquals("Incorrect number of BeanDefintions", 1, pcd.getBeanDefinitions().length);
+		assertEquals("Incorrect number of BeanDefinitions", 1, pcd.getBeanDefinitions().length);
 	}
 
 	public void testAdvisorEventsWithPointcutRef() throws Exception {
@@ -78,6 +80,7 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 		assertTrue("No holder with nested components", componentDefinitions[0] instanceof CompositeComponentDefinition);
 		CompositeComponentDefinition compositeDef = (CompositeComponentDefinition) componentDefinitions[0];
 		assertEquals("aop:config", compositeDef.getName());
+
 		ComponentDefinition[] nestedComponentDefs = compositeDef.getNestedComponents();
 		assertEquals("Incorrect number of inner components", 3, nestedComponentDefs.length);
 		AdvisorComponentDefinition acd = null;
@@ -105,6 +108,7 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 		assertTrue("No holder with nested components", componentDefinitions[0] instanceof CompositeComponentDefinition);
 		CompositeComponentDefinition compositeDef = (CompositeComponentDefinition) componentDefinitions[0];
 		assertEquals("aop:config", compositeDef.getName());
+
 		ComponentDefinition[] nestedComponentDefs = compositeDef.getNestedComponents();
 		assertEquals("Incorrect number of inner components", 2, nestedComponentDefs.length);
 		AdvisorComponentDefinition acd = null;
@@ -132,8 +136,9 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 		assertTrue("No holder with nested components", componentDefinitions[0] instanceof CompositeComponentDefinition);
 		CompositeComponentDefinition compositeDef = (CompositeComponentDefinition) componentDefinitions[0];
 		assertEquals("aop:config", compositeDef.getName());
+
 		ComponentDefinition[] nestedComponentDefs = compositeDef.getNestedComponents();
-		assertEquals("Incorrect number of inner components", 3, nestedComponentDefs.length);
+		assertEquals("Incorrect number of inner components", 2, nestedComponentDefs.length);
 		AspectComponentDefinition acd = null;
 		for (int i = 0; i < nestedComponentDefs.length; i++) {
 			ComponentDefinition componentDefinition = nestedComponentDefs[i];
@@ -145,9 +150,10 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 
 		assertNotNull("AspectComponentDefinition not found", acd);
 		BeanDefinition[] beanDefinitions = acd.getBeanDefinitions();
-		assertEquals(6, beanDefinitions.length);
+		assertEquals(5, beanDefinitions.length);
 		BeanReference[] beanReferences = acd.getBeanReferences();
 		assertEquals(6, beanReferences.length);
+
 		Set expectedReferences = new HashSet();
 		expectedReferences.add("pc");
 		expectedReferences.add("countingAdvice");
@@ -160,6 +166,12 @@ public class AopNamespaceHandlerEventTests extends TestCase {
 		for (int i = 1; i < componentDefinitions.length; i++) {
 			assertTrue(componentDefinitions[i] instanceof BeanComponentDefinition);
 		}
+
+		ComponentDefinition[] nestedComponentDefs2 = acd.getNestedComponents();
+		assertEquals("Inner PointcutComponentDefinition not found", 1, nestedComponentDefs2.length);
+		assertTrue(nestedComponentDefs2[0] instanceof PointcutComponentDefinition);
+		PointcutComponentDefinition pcd = (PointcutComponentDefinition) nestedComponentDefs2[0];
+		assertEquals("Incorrect number of BeanDefinitions", 1, pcd.getBeanDefinitions().length);
 	}
 
 	private void loadBeansFrom(String path) {

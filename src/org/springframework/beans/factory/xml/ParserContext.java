@@ -16,14 +16,23 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.util.Stack;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 
 /**
+ * Context that gets passed along a bean definition parsing process,
+ * encapsulating all relevant configuration as well as state.
+ * Nested inside an {@link XmlReaderContext}.
+ *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
+ * @see XmlReaderContext
+ * @see BeanDefinitionParserDelegate
  */
 public final class ParserContext {
 
@@ -33,7 +42,7 @@ public final class ParserContext {
 
 	private BeanDefinition containingBeanDefinition;
 
-	private CompositeComponentDefinition containingComponent;
+	private final Stack containingComponents = new Stack();
 
 
 	public ParserContext(XmlReaderContext readerContext, BeanDefinitionParserDelegate delegate) {
@@ -66,20 +75,29 @@ public final class ParserContext {
 		return this.containingBeanDefinition;
 	}
 
-	public void setContainingComponent(CompositeComponentDefinition containingComponent) {
-		this.containingComponent = containingComponent;
-	}
-
-	public CompositeComponentDefinition getContainingComponent() {
-		return this.containingComponent;
-	}
-
 	public boolean isNested() {
 		return (getContainingBeanDefinition() != null);
 	}
 
 	public Object extractSource(Object sourceCandidate) {
 		return getReaderContext().extractSource(sourceCandidate);
+	}
+
+	public CompositeComponentDefinition getContainingComponent() {
+		return (!this.containingComponents.isEmpty() ?
+				(CompositeComponentDefinition) this.containingComponents.lastElement() : null);
+	}
+
+	public void pushContainingComponent(CompositeComponentDefinition containingComponent) {
+		this.containingComponents.push(containingComponent);
+	}
+
+	public CompositeComponentDefinition popContainingComponent() {
+		return (CompositeComponentDefinition) this.containingComponents.pop();
+	}
+
+	public void popAndRegisterContainingComponent() {
+		registerComponent(popContainingComponent());
 	}
 
 	public void registerComponent(ComponentDefinition component) {

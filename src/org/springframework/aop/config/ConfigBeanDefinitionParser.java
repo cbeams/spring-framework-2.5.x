@@ -125,8 +125,6 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final int ASPECT_INSTANCE_FACTORY_INDEX = 2;
 
-	private static final int PARAMETER_NAME_DISCOVERER = 3;
-
 	
 	private ParseState parseState = new ParseState();
 	
@@ -134,7 +132,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		CompositeComponentDefinition compositeDef =
 				new CompositeComponentDefinition(element.getTagName(), parserContext.extractSource(element));
-		parserContext.setContainingComponent(compositeDef);
+		parserContext.pushContainingComponent(compositeDef);
 
 		configureAutoProxyCreator(parserContext, element);
 
@@ -155,8 +153,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			}
 		}
 
-		parserContext.setContainingComponent(null);
-		parserContext.registerComponent(compositeDef);
+		parserContext.popAndRegisterContainingComponent();
 		return null;
 	}
 
@@ -251,12 +248,6 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			List beanReferences = new ArrayList();
 			beanReferences.add(new RuntimeBeanReference(aspectName));
 	
-			List pointcuts = DomUtils.getChildElementsByTagName(aspectElement, POINTCUT);
-			for (int i = 0; i < pointcuts.size(); i++) {
-				Element pointcutElement = (Element) pointcuts.get(i);
-				beanDefinitions.add(parsePointcut(pointcutElement, parserContext));
-			}
-	
 			List declareParents = DomUtils.getChildElementsByTagName(aspectElement, DECLARE_PARENTS);
 			for (int i = METHOD_INDEX; i < declareParents.size(); i++) {
 				Element declareParentsElement = (Element) declareParents.get(i);
@@ -274,21 +265,30 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 					beanDefinitions.add(advisorDefinition);
 				}
 			}
-			fireAspectEvent(aspectElement, aspectId, beanDefinitions, beanReferences, parserContext);
+
+			AspectComponentDefinition aspectComponentDefinition = createAspectComponentDefinition(aspectElement, aspectId, beanDefinitions, beanReferences, parserContext);
+			parserContext.pushContainingComponent(aspectComponentDefinition);
+
+			List pointcuts = DomUtils.getChildElementsByTagName(aspectElement, POINTCUT);
+			for (int i = 0; i < pointcuts.size(); i++) {
+				Element pointcutElement = (Element) pointcuts.get(i);
+				parsePointcut(pointcutElement, parserContext);
+			}
+
+			parserContext.popAndRegisterContainingComponent();
 		}
 		finally {
 			this.parseState.pop();
 		}
 	}
 
-	private void fireAspectEvent(
+	private AspectComponentDefinition createAspectComponentDefinition(
 			Element aspectElement, String aspectId, List beanDefs, List beanRefs, ParserContext parserContext) {
 
 		BeanDefinition[] beanDefArray = (BeanDefinition[]) beanDefs.toArray(new BeanDefinition[beanDefs.size()]);
 		BeanReference[] beanRefArray = (BeanReference[]) beanRefs.toArray(new BeanReference[beanRefs.size()]);
 		Object source = parserContext.extractSource(aspectElement);
-		parserContext.registerComponent(
-				new AspectComponentDefinition(aspectId, beanDefArray, beanRefArray, source));
+		return new AspectComponentDefinition(aspectId, beanDefArray, beanRefArray, source);
 	}
 
 	/**

@@ -18,38 +18,31 @@ package org.springframework.aop.config;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
-import org.springframework.beans.factory.parsing.AbstractComponentDefinition;
-import org.springframework.util.Assert;
+import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 
 /**
+ * {@link org.springframework.beans.factory.parsing.ComponentDefinition}
+ * implementation that holds an aspect definition, including its nested pointcuts.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
+ * @see #getNestedComponents()
+ * @see PointcutComponentDefinition
  */
-public class AspectComponentDefinition extends AbstractComponentDefinition {
-
-	private final String aspectName;
+public class AspectComponentDefinition extends CompositeComponentDefinition {
 
 	private final BeanDefinition[] beanDefinitions;
 
 	private final BeanReference[] beanReferences;
 
-	private final Object source;
-
 
 	public AspectComponentDefinition(
 			String aspectName, BeanDefinition[] beanDefinitions, BeanReference[] beanReferences, Object source) {
 
-		Assert.notNull(aspectName, "Aspect name must not be null");
-		this.aspectName = aspectName;
+		super(aspectName, source);
 		this.beanDefinitions = (beanDefinitions != null ? beanDefinitions : new BeanDefinition[0]);
 		this.beanReferences = (beanReferences != null ? beanReferences : new BeanReference[0]);
-		this.source = source;
-	}
-
-
-	public String getName() {
-		return this.aspectName;
 	}
 
 	public BeanDefinition[] getBeanDefinitions() {
@@ -58,10 +51,6 @@ public class AspectComponentDefinition extends AbstractComponentDefinition {
 
 	public BeanReference[] getBeanReferences() {
 		return this.beanReferences;
-	}
-
-	public Object getSource() {
-		return this.source;
 	}
 
 }
