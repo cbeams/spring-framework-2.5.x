@@ -57,7 +57,7 @@ J2EE 1.2 (Servlet 2.2, JSP 1.1) is sufficient when not using Spring's JSP tag li
 
 Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1/2.2, AspectJ 5, JMX 1.0/1.2,
 JCA 1.0, Hibernate 2.1/3.0/3.1/3.2, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, JPA 1.0, iBATIS SQL Maps 2.1/2.2,
-Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.5, EHCache 1.1, JSTL 1.0, Velocity 1.4,
+Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.5/1.6, EHCache 1.1, JSTL 1.0, Velocity 1.4,
 FreeMarker 2.3, JasperReports 1.2, Struts/Tiles 1.1/1.2, JSF 1.1/1.2, Jakarta Commons FileUpload 1.1, etc.
 
 Basic release contents (~10 MB):
@@ -99,18 +99,18 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2500 KB)
+* "spring" (~2510 KB)
 - Convenient jar file combining all standard modules (except for Portlet and Hibernate2 support)
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar, aspects jar, spring-portlet jar, and spring-hibernate2 jar!
 
 MODULE JARS (dist/modules):
 
-* "spring-core" (~165 KB)
+* "spring-core" (~170 KB)
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~360 KB)
+* "spring-beans" (~365 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
