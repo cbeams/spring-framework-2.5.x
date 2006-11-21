@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,8 +18,6 @@ package org.springframework.web.servlet.view;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.LinkedHashMap;
-
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -110,7 +109,7 @@ public class RedirectViewTests extends TestCase {
 		String key2 = "thisIsKey2";
 		String val2 = "andThisIsVal2";
 		//FIX: IBM JVM 1.5.0 HashMap/HashSet ordering difference, so use LinkedHashMap().
-		Map m = new LinkedHashMap();
+		Map m = CollectionFactory.createLinkedMapIfPossible(2);
 		m.put(key, val);
 		m.put(key2, val2);
 		String expectedUrlForEncoding = url + "?" + key + "=" + val + "&" + key2 + "=" + val2;
@@ -134,7 +133,7 @@ public class RedirectViewTests extends TestCase {
 		String key2 = "int2";
 		Object val2 = new Long(611);
 		//FIX: IBM JVM 1.5.0 HashMap/HashSet ordering difference, so use LinkedHashMap().
-		Map m = new LinkedHashMap();
+		Map m = CollectionFactory.createLinkedMapIfPossible(2);
 		m.put(key, val);
 		m.put(key2, val2);
 		String expectedUrlForEncoding = url + "?" + key + "=" + val + "&" + key2 + "=" + val2;
