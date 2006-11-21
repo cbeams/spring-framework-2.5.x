@@ -37,21 +37,21 @@ import org.springframework.core.Constants;
  *
  * Example XML context definition:
  *
- * <pre class="code"> &lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
+ * <pre class="code">&lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
  *   &lt;property name="driverClassName"&gt;&lt;value&gt;${driver}&lt;/value&gt;&lt;/property&gt;
  *   &lt;property name="url"&gt;&lt;value&gt;jdbc:${dbname}&lt;/value&gt;&lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
  * Example properties file:
  *
- * <pre class="code"> driver=com.mysql.jdbc.Driver
+ * <pre class="code">driver=com.mysql.jdbc.Driver
  * dbname=mysql:mydb</pre>
  *
  * PropertyPlaceholderConfigurer checks simple property values, lists, maps,
  * props, and bean names in bean references. Furthermore, placeholder values can
  * also cross-reference other placeholders, like:
  *
- * <pre class="code"> rootPath=myrootdir
+ * <pre class="code">rootPath=myrootdir
  * subPath=${rootPath}/subdir</pre>
  *
  * In contrast to PropertyOverrideConfigurer, this configurer allows to fill in

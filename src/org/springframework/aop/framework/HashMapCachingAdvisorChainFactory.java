@@ -25,8 +25,8 @@ import org.springframework.core.CollectionFactory;
 /**
  * AdvisorChainFactory implementation that caches by method.
  *
- * <p>Uses IdentityHashMap on JDK >= 1.4 or Commons Collections 3.x' IdentityMap
- * (if available), which skip expensive <code>Method.hashCode()</code> calls.
+ <p>Uses IdentityHashMap on JDK 1.4+ or Commons Collections 3.x IdentityMap
+ * * (if available), which skip expensive <code>Method.hashCode()</code> calls.
  * Falls back to standard HashMap on plain JDK 1.3.
  *
  * @author Rod Johnson

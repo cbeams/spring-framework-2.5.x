@@ -28,7 +28,7 @@ import org.springframework.jmx.JmxTestBean;
  * @author Rob Harrop
  * @author Rick Evans
  */
-public final class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssemblerTests {
+public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssemblerTests {
 
 	private static final String OBJECT_NAME = "bean:name=testBean5";
 

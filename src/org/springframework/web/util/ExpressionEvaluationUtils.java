@@ -199,7 +199,7 @@ public abstract class ExpressionEvaluationUtils {
 	 * @throws JspException in case of parsing errors
 	 */
 	public static int evaluateInteger(String attrName, String attrValue, PageContext pageContext)
-		throws JspException {
+			throws JspException {
 
 		if (isExpressionLanguage(attrValue)) {
 			return ((Integer) doEvaluate(attrName, attrValue, Integer.class, pageContext)).intValue();

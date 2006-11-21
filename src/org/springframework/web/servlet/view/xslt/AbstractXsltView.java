@@ -168,7 +168,6 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * {@link org.springframework.util.xml.SimpleTransformErrorListener} is
 	 * used that simply logs warnings using the logger instance of the view class,
 	 * and rethrows errors to discontinue the XML transformation.
-     * @param errorListener the {@link javax.xml.transform.ErrorListener} to be used (can be <code>null</code>)
 	 * @see org.springframework.util.xml.SimpleTransformErrorListener
 	 */
 	public void setErrorListener(ErrorListener errorListener) {
@@ -180,7 +179,6 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * outputting the result tree.
 	 * <p>Default is <code>true</code> (on); set this to <code>false</code> (off)
 	 * to not specify an "indent" key, leaving the choice up to the stylesheet.
-     * @param indent <code>true</code> if indenting is to be switched on
 	 * @see javax.xml.transform.OutputKeys#INDENT
 	 */
 	public void setIndent(boolean indent) {
@@ -191,7 +189,6 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * Set arbitrary transformer output properties to be applied to the stylesheet.
 	 * <p>Any values specified here will override defaults that this view sets
 	 * programmatically.
-	 * @param outputProperties output properties to apply to the transformation process
 	 * @see javax.xml.transform.Transformer#setOutputProperty
 	 */
 	public void setOutputProperties(Properties outputProperties) {
@@ -200,7 +197,6 @@ public abstract class AbstractXsltView extends AbstractView {
 
 	/**
 	 * Set whether to activate the cache. Default is <code>true</code>.
-	 * @param cache <code>true</code> if the cache is to be activated 
 	 */
 	public void setCache(boolean cache) {
 		this.cache = cache;
@@ -246,7 +242,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * Load the stylesheet.
 	 * @param stylesheetLocation the stylesheet resource to be loaded
 	 * @return the stylesheet source
-     * @throws ApplicationContextException if the stylesheet resource could not be loaded
+	 * @throws ApplicationContextException if the stylesheet resource could not be loaded
 	 */
 	protected Source getStylesheetSource(Resource stylesheetLocation) throws ApplicationContextException {
 		if (logger.isDebugEnabled()) {
@@ -371,7 +367,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @param source the Source to transform
 	 * @param parameters a Map of parameters to be applied to the stylesheet
 	 * @param result the result to write to
-     * @param encoding the preferred character encoding that the underlying Transformer should use
+	 * @param encoding the preferred character encoding that the underlying Transformer should use
 	 * @throws Exception if an error occurs
 	 */
 	protected void doTransform(Source source, Map parameters, Result result, String encoding)
@@ -433,8 +429,8 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * Return a Map of transformer parameters to be applied to the stylesheet.
 	 * <p>Subclasses can override this method in order to apply one or more
 	 * parameters to the transformation process.
-	 * <p>The default implementation delegates to the simple {@link #getParameters()}
-	 * version.
+	 * <p>The default implementation delegates to the simple
+	 * {@link #getParameters()} variant.
 	 * @param request current HTTP request
 	 * @return a Map of parameters to apply to the transformation process
 	 * @see #getParameters()

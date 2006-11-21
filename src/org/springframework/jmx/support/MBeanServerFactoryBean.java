@@ -84,7 +84,6 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean, Di
 	 * and (importantly) if said MBeanServer cannot be located no
 	 * attempt will be made to create a new MBeanServer (and an
 	 * MBeanServerNotFoundException will be thrown at resolution time).
-	 * 
 	 * @see javax.management.MBeanServerFactory#findMBeanServer(String)
 	 */
 	public void setAgentId(String agentId) {
