@@ -86,7 +86,7 @@ public abstract class AdvisorChainFactoryUtils {
 				if (pointcutAdvisor.getPointcut().getClassFilter().matches(targetClass)) {
 					Interceptor[] interceptors = registry.getInterceptors(advisor);
 					MethodMatcher mm = pointcutAdvisor.getPointcut().getMethodMatcher();
-					if (methodMatches(mm,method, targetClass,hasIntroductions)) {
+					if (methodMatches(mm, method, targetClass, hasIntroductions)) {
 						if (mm.isRuntime()) {
 							// Creating a new object instance in the getInterceptors() method
 							// isn't a problem as we normally cache created chains.
