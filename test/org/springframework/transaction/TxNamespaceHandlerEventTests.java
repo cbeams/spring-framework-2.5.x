@@ -47,15 +47,6 @@ public class TxNamespaceHandlerEventTests extends TestCase {
 	public void testComponentEventReceived() {
 		ComponentDefinition component = this.eventListener.getComponentDefinition("txAdvice");
 		assertTrue(component instanceof BeanComponentDefinition);
-		/*
-		ComponentDefinition component = this.eventListener.getComponentDefinition("tx:advice");
-		assertTrue("No holder with nested component 'tx:advice'", component instanceof CompositeComponentDefinition);
-		CompositeComponentDefinition compositeDef = (CompositeComponentDefinition) component;
-
-		ComponentDefinition[] nestedComponentDefs = compositeDef.getNestedComponents();
-		assertEquals("Incorrect number of inner components", 1, nestedComponentDefs.length);
-		assertTrue(compositeDef.getNestedComponents()[0] instanceof BeanComponentDefinition);
-		*/
 	}
 
 }

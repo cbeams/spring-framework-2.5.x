@@ -47,43 +47,16 @@ public class JeeNamespaceHandlerEventTests extends TestCase {
 	public void testJndiLookupComponentEventReceived() {
 		ComponentDefinition component = this.eventListener.getComponentDefinition("simple");
 		assertTrue(component instanceof BeanComponentDefinition);
-		/*
-		ComponentDefinition component = this.eventListener.getComponentDefinition("jee:jndi-lookup");
-		assertTrue("No holder with nested component 'jee:jndi-lookup'", component instanceof CompositeComponentDefinition);
-		CompositeComponentDefinition compositeDef = (CompositeComponentDefinition) component;
-
-		ComponentDefinition[] nestedComponentDefs = compositeDef.getNestedComponents();
-		assertEquals("Incorrect number of inner components", 1, nestedComponentDefs.length);
-		assertTrue(compositeDef.getNestedComponents()[0] instanceof BeanComponentDefinition);
-		*/
 	}
 
 	public void testLocalSlsbComponentEventReceived() {
 		ComponentDefinition component = this.eventListener.getComponentDefinition("simpleLocalEjb");
 		assertTrue(component instanceof BeanComponentDefinition);
-		/*
-		ComponentDefinition component = this.eventListener.getComponentDefinition("jee:local-slsb");
-		assertTrue("No holder with nested component 'jee:local-slsb'", component instanceof CompositeComponentDefinition);
-		CompositeComponentDefinition compositeDef = (CompositeComponentDefinition) component;
-
-		ComponentDefinition[] nestedComponentDefs = compositeDef.getNestedComponents();
-		assertEquals("Incorrect number of inner components", 1, nestedComponentDefs.length);
-		assertTrue(compositeDef.getNestedComponents()[0] instanceof BeanComponentDefinition);
-		*/
 	}
 
 	public void testRemoteSlsbComponentEventReceived() {
 		ComponentDefinition component = this.eventListener.getComponentDefinition("simpleRemoteEjb");
 		assertTrue(component instanceof BeanComponentDefinition);
-		/*
-		ComponentDefinition component = this.eventListener.getComponentDefinition("jee:remote-slsb");
-		assertTrue("No holder with nested component 'jee:remote-slsb'", component instanceof CompositeComponentDefinition);
-		CompositeComponentDefinition compositeDef = (CompositeComponentDefinition) component;
-
-		ComponentDefinition[] nestedComponentDefs = compositeDef.getNestedComponents();
-		assertEquals("Incorrect number of inner components", 1, nestedComponentDefs.length);
-		assertTrue(compositeDef.getNestedComponents() [0] instanceof BeanComponentDefinition);
-		*/
 	}
 
 }
