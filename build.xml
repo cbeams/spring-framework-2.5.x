@@ -52,7 +52,6 @@
 
 	</path>
 
-
 	<path id="attribute-compiler-classpath">
 
 		<fileset dir="lib/jakarta-commons">
@@ -102,17 +101,14 @@
 	</target>
 
 
-	<!--
-		Use Jakarta Commons Attributes to compile the attributes for the main source tree.
-	-->
-	<target name="compileattr">
+	<target name="compileattr" description="Apply Commons Attributes compiler to main source files">
 
 		<!-- Bring in Jakarta Commons attribute compilation -->
 		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
 			<classpath refid="attribute-compiler-classpath"/>
 		</taskdef>
 
-		<!-- Compile to a temp directory: Commons Attributes will place Java Source here. -->
+		<!-- Compile to a temp directory: Commons Attributes will place Java sources here -->
 		<attribute-compiler destdir="${commons.attributes.tempdir.src}">
 		<!--
 	 	 	Only the PathMap attribute in the org.springframework.web.servlet.handler.metadata
@@ -129,13 +125,13 @@
 		This task depends on the Commons Attributes compile step,
 		as some classes must ship with attributes.
 	-->
-	<target name="buildmain" depends="compileattr" description="Compile main source tree java files into class files">
+	<target name="buildmain" depends="compileattr" description="Compile main source files">
 
 		<mkdir dir="${target.classes.dir}"/>
 		<mkdir dir="${target.classes.dir}/META-INF"/>
 
 		<javac destdir="${target.classes.dir}" source="1.3" target="1.3" debug="${debug}"
-					 deprecation="false" optimize="false" failonerror="true">
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
 			<!-- Include Commons Attributes generated Java sources -->
 			<src path="${commons.attributes.tempdir.src}"/>
@@ -171,11 +167,10 @@
 	<!--
 		Compile the JDK 1.5 source tree.
 	-->
-	<target name="buildtiger" depends="buildmain" if="tiger.available"
-					description="Compile JDK 1.5 source tree java files into class files">
+	<target name="buildtiger" depends="buildmain" if="tiger.available" description="Compile JDK 1.5 source files">
 
 		<javac destdir="${target.classes.dir}" source="1.5" target="1.5" debug="${debug}"
-					 deprecation="false" optimize="false" failonerror="true">
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${tiger.src.dir}"/>
 			<classpath refid="all-libs"/>
 		</javac>
@@ -187,7 +182,7 @@
 		Compile the main and the JDK 1.5 source tree.
 	-->
 	<target name="build" depends="buildmain,buildtiger" if="tiger.available"
-					description="Compile main and JDK 1.5 sources"/>
+			description="Compile main and JDK 1.5 source files"/>
 
 
 	<target name="initdist" description="Initialize the distribution directory">
@@ -378,12 +373,12 @@
 	</target>
 
 
-	<target name="buildmock" depends="build" description="Compile mock source tree Java files into class files">
+	<target name="buildmock" depends="build" description="Compile all mock source files">
 
 		<mkdir dir="${target.mockclasses.dir}"/>
 
 		<javac destdir="${target.mockclasses.dir}" source="1.3" target="1.3" debug="${debug}"
-					 deprecation="false" optimize="false" failonerror="true">
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${mock.dir}"/>
 			<classpath refid="all-libs"/>
 			<classpath location="${target.classes.dir}"/>
@@ -445,16 +440,16 @@
 	<target name="distfiles" depends="initdist" description="Copy dtd, tld and co to dist directory">
 
 		<copy file="${src.dir}/org/springframework/beans/factory/xml/spring-beans.dtd"
-					todir="${dist.dir}" preservelastmodified="true"/>
+				todir="${dist.dir}" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/web/servlet/tags/spring.tld"
-					todir="${dist.dir}" preservelastmodified="true"/>
+				todir="${dist.dir}" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/web/servlet/view/velocity/spring.vm"
-					todir="${dist.dir}" preservelastmodified="true"/>
+				todir="${dist.dir}" preservelastmodified="true"/>
 
 		<copy file="${src.dir}/org/springframework/web/servlet/view/freemarker/spring.ftl"
-					todir="${dist.dir}" preservelastmodified="true"/>
+				todir="${dist.dir}" preservelastmodified="true"/>
 
 	</target>
 
@@ -478,7 +473,7 @@
 		<mkdir dir="${javadoc.dir}"/>
 
 		<javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" windowtitle="Spring Framework"
-						 source="1.3" access="package" author="true" version="true" use="true" defaultexcludes="true">
+				source="1.3" access="package" author="true" version="true" use="true" defaultexcludes="true">
 			<arg value="-breakiterator"/>
 			<arg value="${javadoc.proxyhost}"/>
 			<arg value="${javadoc.proxyport}"/>
@@ -541,7 +536,7 @@
 		<mkdir dir="${javadoc.dir}"/>
 
 		<javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" windowtitle="Spring Framework"
-						 source="1.5" access="package" author="true" version="true" use="true" defaultexcludes="true">
+				source="1.5" access="package" author="true" version="true" use="true" defaultexcludes="true">
 			<arg value="-breakiterator"/>
 			<arg value="${javadoc.proxyhost}"/>
 			<arg value="${javadoc.proxyport}"/>
@@ -604,7 +599,7 @@
 	<target name="javadoc" depends="javadoc14,javadoc15" description="Generate framework Javadocs"/>
 
 
-	<target name="compiletestattr" depends="buildmock">
+	<target name="compiletestattr" description="Apply Commons Attributes compiler to test source files">
 
 		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
 			<classpath refid="attribute-compiler-classpath"/>
@@ -624,13 +619,12 @@
 		This task depends on the Commons Attributes compile step,
 		as some tests require source-level attribute support.
 	-->
-	<target name="buildmaintests" depends="compiletestattr"
-					description="Compile test source tree java files into class files">
+	<target name="buildmaintests" depends="buildmock,compiletestattr" description="Compile test source files">
 
 		<mkdir dir="${target.testclasses.dir}"/>
 
 		<javac destdir="${target.testclasses.dir}" source="1.3" target="1.3" debug="${debug}"
-					 deprecation="false" optimize="false" failonerror="true">
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${test.dir}"/>
 			<!-- Include Commons Attributes generated Java sources -->
 			<src path="${commons.attributes.tempdir.test}"/>
@@ -639,7 +633,7 @@
 			<classpath location="${target.mockclasses.dir}"/>
 		</javac>
 
-		<!-- Pick up logging config from test directory -->
+		<!-- Pick up config files from test directory -->
 		<copy todir="${target.testclasses.dir}" preservelastmodified="true">
 			<fileset dir="${test.dir}">
 				<include name="**/*.properties"/>
@@ -655,14 +649,11 @@
 	</target>
 
 
-	<!--
-		Compile the JDK 1.5 test tree.
-	-->
 	<target name="buildtigertests" depends="buildmaintests" if="tiger.available"
-					description="Compile test source tree java files into class files">
+			description="Compile JDK 1.5 test source files">
 
 		<javac destdir="${target.testclasses.dir}" source="1.5" target="1.5" debug="${debug}"
-					 deprecation="false" optimize="false" failonerror="true">
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${tiger.test.dir}"/>
 			<classpath refid="all-libs"/>
 			<classpath location="${target.classes.dir}"/>
@@ -672,11 +663,8 @@
 	</target>
 
 
-	<!--
-		Compile the main and the JDK 1.5 test source tree.
-	-->
 	<target name="buildtests" depends="buildmaintests,buildtigertests"
-					description="Compile main and JDK 1.5 test source tree"/>
+			description="Compile main and JDK 1.5 test source files"/>
 
 
 	<!--
@@ -692,7 +680,7 @@
 
 		<mkdir dir="${reports.dir}"/>
 
-		<junit forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
+		<junit dir="${basedir}" forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
 			<jvmarg line="-Djava.awt.headless=true -XX:MaxPermSize=128m -Xmx128m"/>
 
@@ -730,7 +718,7 @@
 		<mkdir dir="${reports.dir}"/>
 		<mkdir dir="${summary.dir}"/>
 
-		<junit printsummary="yes" haltonfailure="no" haltonerror="no">
+		<junit dir="${basedir}" printsummary="yes" haltonfailure="no" haltonerror="no">
 
 			<jvmarg line="-Djava.awt.headless=true"/>
 
@@ -765,10 +753,10 @@
 	</target>
 
 
-	<target name="clean_tests" depends="clean, tests"/>
+	<target name="clean_tests" depends="clean,tests"/>
 
 
-	<target name="clover.build" description="Compile main source tree java files WITH CLOVER into class files">
+	<target name="clover.build" description="Compile main source files WITH CLOVER">
 
 		<!-- switch on Clover by specifying it as the compiler to use -->
 		<property name="build.compiler" value="org.apache.tools.ant.taskdefs.CloverCompilerAdapter"/>
@@ -776,7 +764,7 @@
 		<mkdir dir="${target.clover.dir}"/>
 
 		<javac destdir="${target.clover.dir}" source="1.3" target="1.3" debug="${debug}"
-					 deprecation="false" optimize="false" failonerror="true">
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${src.dir}"/>
 			<classpath refid="all-libs"/>
 		</javac>
@@ -794,7 +782,8 @@
 
 	</target>
 
-	<target name="clover.buildtiger" description="Compile main source tree java files WITH CLOVER into class files" if="tiger.available">
+
+	<target name="clover.buildtiger" description="Compile the tiger source files WITH CLOVER">
 
 		<!-- switch on Clover by specifying it as the compiler to use -->
 		<property name="build.compiler" value="org.apache.tools.ant.taskdefs.CloverCompilerAdapter"/>
@@ -802,7 +791,7 @@
 		<mkdir dir="${target.clover.dir}"/>
 
 		<javac destdir="${target.clover.dir}" source="1.5" target="1.5" debug="${debug}"
-					 deprecation="false" optimize="false" failonerror="true">
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${tiger.src.dir}"/>
 			<classpath refid="all-libs"/>
 		</javac>
@@ -827,7 +816,7 @@
 
 		<mkdir dir="${reports.dir}"/>
 
-		<junit printsummary="yes" haltonfailure="yes" haltonerror="yes">
+		<junit dir="${basedir}" forkmode="perBatch" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
 			<jvmarg line="-Djava.awt.headless=true"/>
 
@@ -861,7 +850,7 @@
 
 		<echo>Launching Clover coverage viewer</echo>
 
-		<java classname="com.cortexeb.tools.clover.reporters.jfc.Viewer" fork="yes">
+		<java classname="com.cenqua.clover.reporters.jfc.Viewer" fork="yes">
 			<arg value="${clover.initstring}"/>
 			<classpath refid="all-libs"/>
 		</java>
@@ -1018,7 +1007,7 @@
 
 
 	<target name="doc.all" depends="doc.html,doc.htmlsingle,doc.pdf"
-					description="Generate and copy reference documentation"/>
+			description="Generate and copy reference documentation"/>
 
 
 	<target name="release" depends="alljars,distfiles,javadoc,doc.all" description="Generate release zips">
@@ -1127,7 +1116,7 @@
 	</target>
 
 
-	<target name="sandbox.build" description="Compile sandbox source tree java files into class files">
+	<target name="sandbox.build" description="Compile sandbox source files">
 
 		<echo message="WARNING: To keep things speedy, there's no Ant dependency on the build target"/>
 
@@ -1135,7 +1124,7 @@
 		<mkdir dir="${sandbox.target.classes.dir}/META-INF"/>
 
 		<javac destdir="${sandbox.target.classes.dir}" source="1.3" target="1.3" debug="${debug}"
-					 deprecation="false" optimize="false" failonerror="true">
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${sandbox.src.dir}"/>
 			<classpath refid="all-libs"/>
 			<classpath location="${target.classes.dir}"/>
@@ -1184,10 +1173,7 @@
 	</target>
 
 
-	<!--
-		Use Jakarta Commons Attributes to compile the attributes for the sandbox test tree.
-	-->
-	<target name="sandbox.compiletestattr">
+	<target name="sandbox.compiletestattr" description="Apply Commons Attributes compiler to sandbox test files">
 
 		<!-- Bring in Jakarta Commons attribute compilation -->
 		<taskdef resource="org/apache/commons/attributes/anttasks.properties">
@@ -1202,13 +1188,12 @@
 	</target>
 
 
-	<target name="sandbox.buildtests" depends="sandbox.compiletestattr"
-					description="Compile test source tree Java files into class files">
+	<target name="sandbox.buildtests" depends="sandbox.compiletestattr" description="Compile sandbox test files">
 
 		<mkdir dir="${sandbox.target.testclasses.dir}"/>
 
 		<javac destdir="${sandbox.target.testclasses.dir}" source="1.3" target="1.3" debug="${debug}"
-					 deprecation="false" optimize="false" failonerror="true">
+				deprecation="false" optimize="false" failonerror="true">
 			<src path="${sandbox.test.dir}"/>
 			<src path="${commons.attributes.tempdir.sandbox.test}"/>
 			<classpath refid="all-libs"/>
@@ -1243,7 +1228,7 @@
 
 		<mkdir dir="${sandbox.reports.dir}"/>
 
-		<junit printsummary="yes" haltonfailure="yes" haltonerror="yes">
+		<junit dir="${basedir}" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
 			<classpath location="${sandbox.target.testclasses.dir}"/>
@@ -1270,7 +1255,7 @@
 
 
 	<target name="sandbox.testsummary" depends="sandbox.build,sandbox.buildtests"
-					description="Run tests and generate test summary">
+			description="Run tests and generate test summary">
 
 		<property name="sandbox.reports.dir" value="${sandbox.target.junit.reports.dir}"/>
 
@@ -1282,7 +1267,7 @@
 		<mkdir dir="${reports.dir}"/>
 		<mkdir dir="${summary.dir}"/>
 
-		<junit printsummary="yes" haltonfailure="no" haltonerror="no">
+		<junit dir="${basedir}" printsummary="yes" haltonfailure="no" haltonerror="no">
 			<jvmarg line="-Djava.awt.headless=true"/>
 
 			<!-- Must go first to ensure any jndi.properties files etc take precedence  -->
@@ -1316,15 +1301,17 @@
 
 	</target>
 
-	<target name="sandbox.clean_tests" depends="sandbox.clean, sandbox.tests"/>
 
-	<target name="sandbox.javadoc" description="Generate framework Javadocs.">
+	<target name="sandbox.clean_tests" depends="sandbox.clean,sandbox.tests"/>
+
+
+	<target name="sandbox.javadoc" description="Generate sandbox Javadocs">
 
 		<mkdir dir="${sandbox.javadoc.dir}"/>
 
 		<javadoc sourcepath="${sandbox.src.dir}" destdir="${sandbox.javadoc.dir}" windowtitle="Spring Framework"
-						 additionalparam="-breakiterator" source="1.3" access="package" author="true" version="true" use="true"
-						 defaultexcludes="true">
+				additionalparam="-breakiterator" source="1.3" access="package" author="true" version="true" use="true"
+				defaultexcludes="true">
 			<doctitle><![CDATA[<h1>Spring Framework Sandbox</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Copyright (c) 2003-2006 The Spring Framework Project.</i>]]></bottom>
 			<classpath refid="all-libs"/>
