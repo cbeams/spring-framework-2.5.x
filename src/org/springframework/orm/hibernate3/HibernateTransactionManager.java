@@ -383,19 +383,20 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		HibernateTransactionObject txObject = new HibernateTransactionObject();
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
 
-		if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
-			SessionHolder sessionHolder =
-					(SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
+		SessionHolder sessionHolder =
+				(SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
+		if (sessionHolder != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found thread-bound Session [" +
 						SessionFactoryUtils.toString(sessionHolder.getSession()) + "] for Hibernate transaction");
 			}
 			txObject.setSessionHolder(sessionHolder, false);
-			if (getDataSource() != null) {
-				ConnectionHolder conHolder = (ConnectionHolder)
-						TransactionSynchronizationManager.getResource(getDataSource());
-				txObject.setConnectionHolder(conHolder);
-			}
+		}
+
+		if (getDataSource() != null) {
+			ConnectionHolder conHolder = (ConnectionHolder)
+					TransactionSynchronizationManager.getResource(getDataSource());
+			txObject.setConnectionHolder(conHolder);
 		}
 
 		return txObject;
@@ -406,9 +407,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
-		if (getDataSource() != null && TransactionSynchronizationManager.hasResource(getDataSource())) {
+		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
+
+		if (txObject.hasConnectionHolder() && !txObject.getConnectionHolder().isSynchronizedWithTransaction()) {
 			throw new IllegalTransactionStateException(
-					"Pre-bound JDBC Connection found - HibernateTransactionManager does not support " +
+					"Pre-bound JDBC Connection found! HibernateTransactionManager does not support " +
 					"running within DataSourceTransactionManager if told to manage the DataSource itself. " +
 					"It is recommended to use a single HibernateTransactionManager for all transactions " +
 					"on a single DataSource, no matter whether Hibernate or JDBC access.");
@@ -417,9 +420,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		Session session = null;
 
 		try {
-			HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
-			if (txObject.getSessionHolder() == null ||
-					txObject.getSessionHolder().isSynchronizedWithTransaction()) {
+			if (txObject.getSessionHolder() == null || txObject.getSessionHolder().isSynchronizedWithTransaction()) {
 				Interceptor entityInterceptor = getEntityInterceptor();
 				Session newSession = (entityInterceptor != null ?
 						getSessionFactory().openSession(entityInterceptor) : getSessionFactory().openSession());
@@ -529,6 +530,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		txObject.setSessionHolder(null, false);
 		SessionHolder sessionHolder =
 				(SessionHolder) TransactionSynchronizationManager.unbindResource(getSessionFactory());
+		txObject.setConnectionHolder(null);
 		ConnectionHolder connectionHolder = null;
 		if (getDataSource() != null) {
 			connectionHolder = (ConnectionHolder) TransactionSynchronizationManager.unbindResource(getDataSource());
@@ -731,14 +733,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		public void setRollbackOnly() {
 			getSessionHolder().setRollbackOnly();
-			if (getConnectionHolder() != null) {
+			if (hasConnectionHolder()) {
 				getConnectionHolder().setRollbackOnly();
 			}
 		}
 
 		public boolean isRollbackOnly() {
 			return getSessionHolder().isRollbackOnly() ||
-					(getConnectionHolder() != null && getConnectionHolder().isRollbackOnly());
+					(hasConnectionHolder() && getConnectionHolder().isRollbackOnly());
 		}
 	}
 

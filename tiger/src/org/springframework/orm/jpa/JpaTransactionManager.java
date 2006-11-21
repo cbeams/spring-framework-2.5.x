@@ -260,19 +260,20 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 		JpaTransactionObject txObject = new JpaTransactionObject();
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
 
-		if (TransactionSynchronizationManager.hasResource(getEntityManagerFactory())) {
-			EntityManagerHolder emHolder = (EntityManagerHolder)
-					TransactionSynchronizationManager.getResource(getEntityManagerFactory());
+		EntityManagerHolder emHolder = (EntityManagerHolder)
+				TransactionSynchronizationManager.getResource(getEntityManagerFactory());
+		if (emHolder != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found thread-bound EntityManager [" +
 						emHolder.getEntityManager() + "] for JPA transaction");
 			}
 			txObject.setEntityManagerHolder(emHolder, false);
-			if (getDataSource() != null) {
-				ConnectionHolder conHolder = (ConnectionHolder)
-						TransactionSynchronizationManager.getResource(getDataSource());
-				txObject.setConnectionHolder(conHolder);
-			}
+		}
+
+		if (getDataSource() != null) {
+			ConnectionHolder conHolder = (ConnectionHolder)
+					TransactionSynchronizationManager.getResource(getDataSource());
+			txObject.setConnectionHolder(conHolder);
 		}
 
 		return txObject;
@@ -283,9 +284,11 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
-		if (getDataSource() != null && TransactionSynchronizationManager.hasResource(getDataSource())) {
+		JpaTransactionObject txObject = (JpaTransactionObject) transaction;
+
+		if (txObject.hasConnectionHolder() && !txObject.getConnectionHolder().isSynchronizedWithTransaction()) {
 			throw new IllegalTransactionStateException(
-					"Pre-bound JDBC Connection found - JpaTransactionManager does not support " +
+					"Pre-bound JDBC Connection found! JpaTransactionManager does not support " +
 					"running within DataSourceTransactionManager if told to manage the DataSource itself. " +
 					"It is recommended to use a single JpaTransactionManager for all transactions " +
 					"on a single DataSource, no matter whether JPA or JDBC access.");
@@ -294,7 +297,6 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 		EntityManager em = null;
 
 		try {
-			JpaTransactionObject txObject = (JpaTransactionObject) transaction;
 			if (txObject.getEntityManagerHolder() == null ||
 					txObject.getEntityManagerHolder().isSynchronizedWithTransaction()) {
 				EntityManager newEm = createEntityManagerForTransaction();
@@ -381,6 +383,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 		txObject.setEntityManagerHolder(null, false);
 		EntityManagerHolder entityManagerHolder = (EntityManagerHolder)
 				TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
+		txObject.setConnectionHolder(null);
 		ConnectionHolder connectionHolder = null;
 		if (getDataSource() != null) {
 			connectionHolder = (ConnectionHolder) TransactionSynchronizationManager.unbindResource(getDataSource());
@@ -539,7 +542,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 			if (tx.isActive()) {
 				tx.setRollbackOnly();
 			}
-			if (getConnectionHolder() != null) {
+			if (hasConnectionHolder()) {
 				getConnectionHolder().setRollbackOnly();
 			}
 		}
