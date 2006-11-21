@@ -78,18 +78,16 @@ public class JdoTransactionManagerTests extends TestCase {
 
 	protected void tearDown() {
 		try {
-			//pmfControl.verify();
-			//pmControl.verify();
+			pmfControl.verify();
+			pmControl.verify();
 		}
 		catch (IllegalStateException ex) {
 			// ignore: test method didn't call replay
 		}
-		/*
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
-		*/
 	}
 
 	public void testTransactionCommit() {
@@ -886,7 +884,7 @@ public class JdoTransactionManagerTests extends TestCase {
 
 		pmfControl.reset();
 		pmf.getConnectionFactory();
-		pmfControl.setReturnValue(ds, 3);
+		pmfControl.setReturnValue(ds, 2);
 		con.getMetaData();
 		conControl.setReturnValue(null, 1);
 		pmf.getPersistenceManager();
@@ -954,7 +952,7 @@ public class JdoTransactionManagerTests extends TestCase {
 
 		pmfControl.reset();
 		pmf.getConnectionFactory();
-		pmfControl.setReturnValue(ds, 3);
+		pmfControl.setReturnValue(ds, 1);
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
 		pm.currentTransaction();
