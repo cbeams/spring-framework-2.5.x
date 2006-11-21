@@ -324,7 +324,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 
 * openjpa/openjpa-all-0.9.6-incubating.jar
-- OpenJPA 0.9.6 Nov 8 snapshot (http://incubator.apache.org/openjpa)
+- OpenJPA 0.9.6 Nov 20 snapshot (http://incubator.apache.org/openjpa)
 - required for building the framework
 - required at runtime when using Spring's JPA support with OpenJPA as provider
 
