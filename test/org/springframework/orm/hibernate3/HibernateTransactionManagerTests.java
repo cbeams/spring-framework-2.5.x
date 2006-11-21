@@ -171,6 +171,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sfControl.verify();
 		sessionControl.verify();
 		txControl.verify();
+		queryControl.verify();
 	}
 
 	public void testTransactionRollback() throws Exception {
