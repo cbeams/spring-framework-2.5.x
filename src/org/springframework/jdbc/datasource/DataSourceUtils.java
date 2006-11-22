@@ -216,9 +216,11 @@ public abstract class DataSourceUtils {
 	 * @see java.sql.Statement#setQueryTimeout
 	 */
 	public static void applyTransactionTimeout(Statement stmt, DataSource dataSource) throws SQLException {
-		Assert.notNull(stmt, "No statement specified");
+		Assert.notNull(stmt, "No Statement specified");
+		Assert.notNull(dataSource, "No DataSource specified");
 		ConnectionHolder holder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
 		if (holder != null && holder.hasTimeout()) {
+			// Remaining transaction timeout overrides specified value.
 			stmt.setQueryTimeout(holder.getTimeToLiveInSeconds());
 		}
 	}
@@ -362,7 +364,7 @@ public abstract class DataSourceUtils {
 		}
 
 		public int getOrder() {
-			return order;
+			return this.order;
 		}
 
 		public void suspend() {
@@ -413,7 +415,7 @@ public abstract class DataSourceUtils {
 				this.holderActive = false;
 				if (this.connectionHolder.hasConnection()) {
 					releaseConnection(this.connectionHolder.getConnection(), this.dataSource);
-					// Reset the ConnectionHolder - it might remain bound to the thread.
+					// Reset the ConnectionHolder: It might remain bound to the thread.
 					this.connectionHolder.setConnection(null);
 				}
 				this.connectionHolder.reset();

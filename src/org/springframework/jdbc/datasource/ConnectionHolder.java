@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -69,7 +69,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	 * Return the ConnectionHandle held by this ConnectionHolder.
 	 */
 	public ConnectionHandle getConnectionHandle() {
-		return connectionHandle;
+		return this.connectionHandle;
 	}
 
 	/**
@@ -80,14 +80,15 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	}
 
 	/**
-	 * Set whether this holder represents an active transaction.
+	 * Set whether this holder represents an active, JDBC-managed transaction.
+	 * @see DataSourceTransactionManager
 	 */
 	protected void setTransactionActive(boolean transactionActive) {
 		this.transactionActive = transactionActive;
 	}
 
 	/**
-	 * Return whether this holder represents an active transaction.
+	 * Return whether this holder represents an active, JDBC-managed transaction.
 	 */
 	protected boolean isTransactionActive() {
 		return this.transactionActive;
