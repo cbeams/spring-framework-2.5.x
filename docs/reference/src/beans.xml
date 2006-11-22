@@ -2789,7 +2789,7 @@ public final class Boot {
                 <interfacename>BeanFactoryAware</interfacename>-based approach is to use the
                 <classname>org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean</classname>.
                 (It should be noted that this approach still does not reduce the coupling to Spring,
-                but it does not violate the central principal of IoC as much as the
+                but it does not violate the central principle of IoC as much as the
                 <interfacename>BeanFactoryAware</interfacename>-based approach.)</para>
                 <para>The <classname>ObjectFactoryCreatingFactoryBean</classname> is a
                 <link linkend="beans-factory-extension-factorybean"><interfacename>FactoryBean</interfacename></link>

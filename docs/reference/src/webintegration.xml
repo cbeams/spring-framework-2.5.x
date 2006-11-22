@@ -580,7 +580,7 @@ UserService userService = (UserService) appContext.getBean("userService");
 				This mechanism does work... having said that, it can be made a
 				lot less verbose by encapsulating most of the functionality in a
 				method in the base class for the page or component. However, in
-				some respects it goes against the IoC principal; ideally you would like the page to
+				some respects it goes against the IoC principle; ideally you would like the page to
 				not have to ask the context for a specific bean by name, and in
 				fact, the page would ideally not know about the context at all.
 			</para>

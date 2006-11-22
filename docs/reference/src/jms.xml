@@ -38,7 +38,7 @@
     the core functionality for using JMS. It contains JMS template classes
     that simplifies the use of the JMS by handling the creation and release of
     resources, much like the <classname>JdbcTemplate</classname> does for
-    JDBC. The design principal common to Spring template classes is to provide
+    JDBC. The design principle common to Spring template classes is to provide
     helper methods to perform common operations and for more sophisticated
     usage, delegate the essence of the processing task to user implemented
     callback interfaces. The JMS template follows the same design. The classes
