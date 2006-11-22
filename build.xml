@@ -1573,6 +1573,7 @@
 				<include name="lib/easymock/**"/>
 				<include name="lib/ehcache/**"/>
 				<include name="lib/freemarker/**"/>
+				<include name="lib/glassfish/**"/>
 				<include name="lib/groovy/**"/>
 				<include name="lib/hibernate/**"/>
 				<include name="lib/hsqldb/**"/>
