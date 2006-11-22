@@ -1,5 +1,5 @@
-THE SPRING FRAMEWORK, release 1.2.9 (October 2006)
---------------------------------------------------
+THE SPRING FRAMEWORK, release 1.2.9 (November 2006)
+---------------------------------------------------
 http://www.springframework.org
 
 
@@ -23,7 +23,7 @@ SQLException), simplifies error handling, and greatly reduces the amount of code
 You'll never need to write another finally block to use JDBC again. The JDBC-oriented exceptions comply to
 Spring's generic DAO exception hierarchy.
 
-* Integration with Hibernate, JDO, TopLink, Apache OJB, and iBATIS SQL Maps: in terms of resource holders,
+* Integration with JDO, Hibernate, TopLink, Apache OJB, and iBATIS SQL Maps: in terms of resource holders,
 DAO implementation support, and transaction strategies. First-class Hibernate and JDO support with many
 IoC convenience features, addressing many typical Hibernate/JDO integration issues. All of these comply
 to Spring's generic transaction and DAO exception hierarchies.
