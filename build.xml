@@ -497,9 +497,8 @@
 			<!-- EasyMock -->
 			<!-- EHCache -->
 			<link href="http://freemarker.sourceforge.net/docs/api/"/>
-			<link href="http://www.hibernate.org/hib_docs/api/"/>
-			<link href="http://httpunit.sourceforge.net/doc/api/"/>
-			<link href="http://www.ibatis.com/common/javadocs/"/>
+			<link href="http://www.hibernate.org/hib_docs/v3/api"/>
+			<!-- iBATIS -->
 			<!-- iText -->
 			<!-- Commons Attributes (api + compiler -->
 			<link href="http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/"/>
@@ -563,16 +562,15 @@
 			<!-- EasyMock -->
 			<!-- EHCache -->
 			<link href="http://freemarker.sourceforge.net/docs/api/"/>
-			<link href="http://www.hibernate.org/hib_docs/api/"/>
-			<link href="http://httpunit.sourceforge.net/doc/api/"/>
-			<link href="http://www.ibatis.com/common/javadocs/"/>
+			<link href="http://www.hibernate.org/hib_docs/v3/api"/>
+			<!-- iBATIS -->
 			<!-- iText -->
 			<!-- Commons Attributes (api + compiler -->
 			<link href="http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/"/>
 			<link href="http://jakarta.apache.org/commons/dbcp/apidocs/"/>
 			<link href="http://jakarta.apache.org/commons/fileupload/apidocs/"/>
 			<link href="http://jakarta.apache.org/commons/httpclient/apidocs/"/>
-			<link href="http://jakarta.apache.org/commons/logging/api/"/>
+			<link href="http://jakarta.apache.org/commons/logging/apidocs/"/>
 			<link href="http://jakarta.apache.org/commons/pool/apidocs/"/>
 			<!-- JasperReports -->
 			<!-- JDO -->
@@ -586,7 +584,7 @@
 			<!-- Portlet -->
 			<link href="http://quartz.sourceforge.net/javadoc/"/>
 			<link href="http://jakarta.apache.org/regexp/apidocs/"/>
-			<link href="http://struts.apache.org/api/"/>
+			<link href="http://struts.apache.org/struts-doc-1.2.9/api/"/>
 			<link href="http://jakarta.apache.org/velocity/api/"/>
 		</javadoc>
 
