@@ -94,6 +94,13 @@ public interface TransactionSynchronization {
 	 * <i>after</i> the main transaction has <i>successfully</i> committed.
 	 * <p>Can e.g. commit further operations that are supposed to follow on a successful
 	 * commit of the main transaction, like confirmation messages or emails.
+	 * <p><b>NOTE:</b> The transaction will have been committed already, but the
+	 * transactional resources might still be active and accessible. As a consequence,
+	 * any data access code triggered at this point will still "participate" in the
+	 * original transaction, allowing to perform some cleanup (with no commit following
+	 * anymore!), unless it explicitly declares that it needs to run in a separate
+	 * transaction. Hence: <b>Use <code>PROPAGATION_REQUIRES_NEW</code> for any
+	 * transactional operation that is called from here.</b>
 	 * @throws RuntimeException in case of errors; will be <b>propagated to the caller</b>
 	 * (note: do not throw TransactionException subclasses here!)
 	 */
@@ -102,6 +109,13 @@ public interface TransactionSynchronization {
 	/**
 	 * Invoked after transaction commit/rollback.
 	 * Can perform resource cleanup <i>after</i> transaction completion.
+	 * <p><b>NOTE:</b> The transaction will have been committed or rolled back already,
+	 * but the transactional resources might still be active and accessible. As a
+	 * consequence, any data access code triggered at this point will still "participate"
+	 * in the original transaction, allowing to perform some cleanup (with no commit
+	 * following anymore!), unless it explicitly declares that it needs to run in a
+	 * separate transaction. Hence: <b>Use <code>PROPAGATION_REQUIRES_NEW</code>
+	 * for any transactional operation that is called from here.</b>
 	 * @param status completion status according to the <code>STATUS_*</code> constants
 	 * @throws RuntimeException in case of errors; will be <b>logged but not propagated</b>
 	 * (note: do not throw TransactionException subclasses here!)
