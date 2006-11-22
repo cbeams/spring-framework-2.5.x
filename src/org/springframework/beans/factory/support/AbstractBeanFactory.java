@@ -592,10 +592,18 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory {
 	 */
 	protected String transformedBeanName(String name) {
 		String beanName = BeanFactoryUtils.transformedBeanName(name);
-		// handle aliasing
+		// Handle aliasing.
 		synchronized (this.aliasMap) {
-			String canonicalName = (String) this.aliasMap.get(beanName);
-			return canonicalName != null ? canonicalName : beanName;
+			String canonicalName = beanName;
+			String resolvedName = null;
+			do {
+				resolvedName = (String) this.aliasMap.get(canonicalName);
+				if (resolvedName != null) {
+					canonicalName = resolvedName;
+				}
+			}
+			while (resolvedName != null);
+			return canonicalName;
 		}
 	}
 

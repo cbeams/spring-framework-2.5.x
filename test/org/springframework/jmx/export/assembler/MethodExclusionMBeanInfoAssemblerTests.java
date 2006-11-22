@@ -1,14 +1,21 @@
 package org.springframework.jmx.export.assembler;
 
-import javax.management.modelmbean.ModelMBeanInfo;
+import java.lang.reflect.Method;
+import java.util.Properties;
+
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
+import javax.management.modelmbean.ModelMBeanInfo;
+
+import org.springframework.jmx.JmxTestBean;
 
 /**
- * @author robh
+ * @author Rob Harrop
+ * @author Rick Evans
  */
 public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssemblerTests {
 
-	protected static final String OBJECT_NAME = "bean:name=testBean5";
+	private static final String OBJECT_NAME = "bean:name=testBean5";
+
 
 	protected String getObjectName() {
 		return OBJECT_NAME;
@@ -20,6 +27,10 @@ public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssembler
 
 	protected int getExpectedAttributeCount() {
 		return 4;
+	}
+
+	protected String getApplicationContextPath() {
+		return "org/springframework/jmx/export/assembler/methodExclusionAssembler.xml";
 	}
 
 	protected MBeanInfoAssembler getAssembler() {
@@ -36,7 +47,19 @@ public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssembler
 		assertFalse(attr.isWritable());
 	}
 
-	protected String getApplicationContextPath() {
-		return "org/springframework/jmx/export/assembler/methodExclusionAssembler.xml";
+	/*
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2754
+	 */
+	public void testIsNotIgnoredDoesntIgnoreUnspecifiedBeanMethods() throws Exception {
+		final String beanKey = "myTestBean";
+		MethodExclusionMBeanInfoAssembler assembler = new MethodExclusionMBeanInfoAssembler();
+		Properties ignored = new Properties();
+		ignored.setProperty(beanKey, "dontExposeMe,setSuperman");
+		assembler.setIgnoredMethodMappings(ignored);
+		Method method = JmxTestBean.class.getMethod("dontExposeMe", null);
+		assertFalse(assembler.isNotIgnored(method, beanKey));
+		// this bean does not have any ignored methods on it, so must obviously not be ignored...
+		assertTrue(assembler.isNotIgnored(method, "someOtherBeanKey"));
 	}
+
 }

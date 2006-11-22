@@ -41,6 +41,7 @@ public class PropertyValue implements Serializable {
 
 	private final Object value;
 
+
 	/**
 	 * Create a new PropertyValue instance.
 	 * @param name name of the property
@@ -53,6 +54,7 @@ public class PropertyValue implements Serializable {
 		this.name = name;
 		this.value = value;
 	}
+
 
 	/**
 	 * Return the name of the property.
@@ -71,9 +73,6 @@ public class PropertyValue implements Serializable {
 		return value;
 	}
 
-	public String toString() {
-		return "PropertyValue: name='" + this.name + "', value=[" + this.value + "]";
-	}
 
 	public boolean equals(Object other) {
 		if (this == other) {
@@ -88,6 +87,10 @@ public class PropertyValue implements Serializable {
 
 	public int hashCode() {
 		return this.name.hashCode() * 29 + (this.value == null ? 0 : this.value.hashCode());
+	}
+
+	public String toString() {
+		return "PropertyValue: name='" + this.name + "', value=[" + this.value + "]";
 	}
 
 }

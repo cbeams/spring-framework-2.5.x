@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,52 +31,52 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * PlatformTransactionManager implementation for a single JDBC DataSource.
- * Able to work in any environment with any JDBC driver, as long as the setup uses
- * a JDBC 2.0 Standard Extensions / JDBC 3.0 <code>javax.sql.DataSource</code>
- * as its Connection factory mechanism. Binds a JDBC Connection from the
- * specified DataSource to the thread, potentially allowing for one thread
+ * capable of working in any environment with any JDBC driver, as long as the setup
+ * uses a JDBC 2.0 Standard Extensions / JDBC 3.0 <code>javax.sql.DataSource</code>
+ * as its Connection factory mechanism. Binds a JDBC Connection from the specified
+ * DataSource to the current thread, potentially allowing for one thread-bound
  * Connection per DataSource.
  *
  * <p>Application code is required to retrieve the JDBC Connection via
- * <code>DataSourceUtils.getConnection(DataSource)</code> instead of J2EE's standard
- * <code>DataSource.getConnection()</code>. This is recommended anyway, as it throws
- * unchecked org.springframework.dao exceptions instead of checked SQLException.
- * All framework classes like JdbcTemplate use this strategy implicitly.
- * If not used with this transaction manager, the lookup strategy behaves exactly
- * like the common one - it can thus be used in any case.
+ * {@link DataSourceUtils#getConnection(DataSource)} instead of J2EE's standard
+ * {@link DataSource#getConnection()}. This is recommended anyway, as it throws
+ * unchecked <code>org.springframework.dao</code> exceptions instead of checked
+ * SQLException. Spring classes such as JdbcTemplate use this strategy implicitly.
+ * If not used with this transaction manager, the DataSourceUtils lookup strategy
+ * behaves exactly like the common one; it can thus be used in any case.
  *
  * <p>Alternatively, you can also allow application code to work with the standard
- * J2EE lookup pattern <code>DataSource.getConnection()</code>, for example for
+ * J2EE lookup pattern {@link DataSource#getConnection()}, for example for
  * legacy code that is not aware of Spring at all. In that case, define a
- * TransactionAwareDataSourceProxy for your target DataSource, and pass that proxy
- * DataSource to your DAOs, which will automatically participate in Spring-managed
- * transactions through it. Note that DataSourceTransactionManager still needs to
- * be wired with the target DataSource, driving transactions for it.
+ * {@link TransactionAwareDataSourceProxy} for your target DataSource, and pass that
+ * proxy DataSource to your DAOs, which will automatically participate in Spring-managed
+ * transactions when accessing it. Note that DataSourceTransactionManager still needs
+ * to be wired with the target DataSource, driving transactions for it.
  *
  * <p>Supports custom isolation levels, and timeouts that get applied as
  * appropriate JDBC statement timeouts. To support the latter, application code
- * must either use JdbcTemplate, call <code>DataSourceUtils.applyTransactionTimeout</code>
- * for each created statement, or go through a TransactionAwareDataSourceProxy
+ * must either use JdbcTemplate, call {@link DataSourceUtils#applyTransactionTimeout}
+ * for each created Statement, or go through a {@link TransactionAwareDataSourceProxy}
  * which will create timeout-aware Connections and Statements.
  *
- * <p>Consider defining a LazyConnectionDataSourceProxy for your target DataSource,
- * pointing both this transaction manager and your DAOs to it. This will lead to
- * optimized handling of "empty" transactions, that is, transactions without any
- * statements executed. LazyConnectionDataSourceProxy will not fetch a JDBC
- * Connection from the target DataSource until the first statement execution,
+ * <p>Consider defining a {@link LazyConnectionDataSourceProxy} for your target
+ * DataSource, pointing both this transaction manager and your DAOs to it.
+ * This will lead to optimized handling of "empty" transactions, i.e. transactions
+ * without any JDBC statements executed. LazyConnectionDataSourceProxy will not fetch
+ * a JDBC Connection from the target DataSource until the first Statement execution,
  * lazily applying the specified transaction settings to the target Conection.
  *
- * <p>On JDBC 3.0, this transaction manager supports nested transactions via JDBC
- * 3.0 Savepoints. The "nestedTransactionAllowed" flag defaults to true, as nested
- * transactions work without restrictions on JDBC drivers that support Savepoints
- * (such as the Oracle JDBC driver).
+ * <p>On JDBC 3.0, this transaction manager supports nested transactions via the
+ * JDBC 3.0 {@link java.sql.Savepoint} mechanism. The "nestedTransactionAllowed" flag
+ * defaults to "true", since nested transactions work without restrictions on JDBC
+ * drivers that support savepoints (such as the Oracle JDBC driver).
  *
- * <p>This implementation can be used as a replacement for JtaTransactionManager in the
- * single resource case, as it does not require a container that supports JTA: typically,
+ * <p>This implementation can be used as a replacement for the
+ * {@link org.springframework.transaction.jta.JtaTransactionManager} in the single
+ * resource case, as it does not require a container that supports JTA: typically
  * in combination with a locally defined JDBC DataSource (e.g. a Jakarta Commons DBCP
  * connection pool). Switching between this local strategy and a JTA environment is
- * just a matter of configuration, if you stick to the required connection lookup
- * pattern. Note that JTA does not support custom isolation levels!
+ * just a matter of configuration!
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
@@ -174,11 +174,11 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	 */
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
-
 		Connection con = null;
 
 		try {
-			if (txObject.getConnectionHolder() == null) {
+			if (txObject.getConnectionHolder() == null ||
+					txObject.getConnectionHolder().isSynchronizedWithTransaction()) {
 				Connection newCon = this.dataSource.getConnection();
 				if (logger.isDebugEnabled()) {
 					logger.debug("Acquired Connection [" + newCon + "] for JDBC transaction");
@@ -344,6 +344,6 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		public boolean isRollbackOnly() {
 			return getConnectionHolder().isRollbackOnly();
 		}
-
 	}
+
 }

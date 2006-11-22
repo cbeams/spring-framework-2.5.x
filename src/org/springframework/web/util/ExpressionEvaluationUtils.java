@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,8 +28,9 @@ import org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager;
  * Convenience methods for easy access to the JSP 2.0 ExpressionEvaluator or
  * the ExpressionEvaluatorManager of Jakarta's JSTL implementation.
  *
- * <p>Automatically detects JSP 2.0 or Jakarta JSTL; falls back to throwing
- * an exception on actual EL expressions if none of the two is available.
+ * <p>Automatically detects JSP 2.0 or Jakarta JSTL, preferring the JSP 2.0
+ * mechanism if available. Falls back to throwing an exception on actual EL
+ * expressions if none of the two is available.
  *
  * <p>The evaluation methods check if the value contains "${"
  * before invoking the EL evaluator, treating the value as "normal"
@@ -117,7 +118,7 @@ public abstract class ExpressionEvaluationUtils {
 	}
 
 	/**
-	 * Evaluate the given expression to an Object, be it EL or a conventional String.
+	 * Evaluate the given expression (be it EL or a literal String value) to an Object.
 	 * @param attrName name of the attribute (typically a JSP tag attribute)
 	 * @param attrValue value of the attribute
 	 * @param pageContext current JSP PageContext
@@ -136,7 +137,7 @@ public abstract class ExpressionEvaluationUtils {
 	}
 
 	/**
-	 * Evaluate the given expression to a String, be it EL or a conventional String.
+	 * Evaluate the given expression (be it EL or a literal String value) to a String.
 	 * @param attrName name of the attribute (typically a JSP tag attribute)
 	 * @param attrValue value of the attribute
 	 * @param pageContext current JSP PageContext
@@ -155,7 +156,7 @@ public abstract class ExpressionEvaluationUtils {
 	}
 
 	/**
-	 * Evaluate the given expression to an integer, be it EL or a conventional String.
+	 * Evaluate the given expression (be it EL or a literal String value) to an integer.
 	 * @param attrName name of the attribute (typically a JSP tag attribute)
 	 * @param attrValue value of the attribute
 	 * @param pageContext current JSP PageContext
@@ -174,7 +175,7 @@ public abstract class ExpressionEvaluationUtils {
 	}
 
 	/**
-	 * Evaluate the given expression to a boolean, be it EL or a conventional String.
+	 * Evaluate the given expression (be it EL or a literal String value) to a boolean.
 	 * @param attrName name of the attribute (typically a JSP tag attribute)
 	 * @param attrValue value of the attribute
 	 * @param pageContext current JSP PageContext

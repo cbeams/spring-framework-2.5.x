@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,10 @@ import java.util.Set;
 import org.springframework.util.StringUtils;
 
 /**
- * Subclass of <code>AbstractReflectiveMBeanInfoAssembler</code> that allows to
- * specify method names to be explicitly excluded as MBean operations and attributes.
- * Any method not explicitly excluded from the management interface will be exposed to
+ * <code>AbstractReflectiveMBeanInfoAssembler</code> subclass that allows
+ * method names to be explicitly excluded as MBean operations and attributes.
+ *
+ * <p>Any method not explicitly excluded from the management interface will be exposed to
  * JMX. JavaBean getters and setters will automatically be exposed as JMX attributes.
  *
  * <p>You can supply an array of method names via the <code>ignoredMethods</code>
@@ -58,12 +59,12 @@ public class MethodExclusionMBeanInfoAssembler extends AbstractReflectiveMBeanIn
 
 	private Set ignoredMethods;
 
-	private Map ignoredMethodsMappings;
+	private Map ignoredMethodMappings;
 
 
 	/**
 	 * Set the array of method names to be <b>ignored</b> when creating the management info.
-	 * These method names will be used for a bean if no entry corresponding to
+	 * <p>These method names will be used for a bean if no entry corresponding to
 	 * that bean is found in the <code>ignoredMethodsMappings</code> property.
 	 * @see #setIgnoredMethodMappings(java.util.Properties)
 	 */
@@ -73,17 +74,17 @@ public class MethodExclusionMBeanInfoAssembler extends AbstractReflectiveMBeanIn
 
 	/**
 	 * Set the mappings of bean keys to a comma-separated list of method names.
-	 * The method names are <b>ignored</b> when creating the management interface.
-	 * <p>The property key should match the bean key and the property value should match
+	 * <p>These method names are <b>ignored</b> when creating the management interface.
+	 * <p>The property key must match the bean key and the property value must match
 	 * the list of method names. When searching for method names to ignore for a bean,
 	 * Spring will check these mappings first.
 	 */
 	public void setIgnoredMethodMappings(Properties mappings) {
-		this.ignoredMethodsMappings = new HashMap();
+		this.ignoredMethodMappings = new HashMap();
 		for (Enumeration en = mappings.keys(); en.hasMoreElements();) {
 			String beanKey = (String) en.nextElement();
 			String[] methodNames = StringUtils.commaDelimitedListToStringArray(mappings.getProperty(beanKey));
-			this.ignoredMethodsMappings.put(beanKey, new HashSet(Arrays.asList(methodNames)));
+			this.ignoredMethodMappings.put(beanKey, new HashSet(Arrays.asList(methodNames)));
 		}
 	}
 
@@ -100,14 +101,24 @@ public class MethodExclusionMBeanInfoAssembler extends AbstractReflectiveMBeanIn
 		return isNotIgnored(method, beanKey);
 	}
 
+	/**
+	 * Determine whether the given method is supposed to be included,
+	 * that is, not configured as to be ignored.
+	 * @param method the operation method
+	 * @param beanKey the key associated with the MBean in the beans map
+	 * of the <code>MBeanExporter</code>
+	 */
 	protected boolean isNotIgnored(Method method, String beanKey) {
-		if (this.ignoredMethodsMappings != null) {
-			Set methodNames = (Set) this.ignoredMethodsMappings.get(beanKey);
+		if (this.ignoredMethodMappings != null) {
+			Set methodNames = (Set) this.ignoredMethodMappings.get(beanKey);
 			if (methodNames != null) {
-				return ! methodNames.contains(method.getName());
+				return !methodNames.contains(method.getName());
 			}
 		}
-		return (this.ignoredMethods != null && ! this.ignoredMethods.contains(method.getName()));
+		if (this.ignoredMethods != null) {
+			return !this.ignoredMethods.contains(method.getName());
+		}
+		return true;
 	}
 
 }

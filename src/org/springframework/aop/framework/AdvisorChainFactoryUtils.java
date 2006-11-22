@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,11 +18,11 @@ package org.springframework.aop.framework;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
-import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.Interceptor;
+import org.aopalliance.intercept.MethodInterceptor;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.IntroductionAdvisor;
@@ -34,27 +34,31 @@ import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 /**
  * Utility methods for use by AdviceChainFactory implementations.
  *
- * <p>The calculateInterceptorsAndDynamicInterceptionAdvice method is the
- * definitive way of working out an advice chain for a Method, given an
- * Advised object.
+ * <p>The {@link #calculateInterceptorsAndDynamicInterceptionAdvice} method
+ * is the definitive way of working out an advice chain for a Method,
+ * given an {@link Advised} object.
  *
  * @author Rod Johnson
+ * @see AdvisorChainFactory
  */
 public abstract class AdvisorChainFactoryUtils {
 
-	public static final AdvisorChainFactory SIMPLE_ADVISOR_CHAIN_FACTORY = new AdvisorChainFactory() {
-
-		public List getInterceptorsAndDynamicInterceptionAdvice(Advised config, Object proxy,
-																														Method method, Class targetClass) {
-			return calculateInterceptorsAndDynamicInterceptionAdvice(config, proxy, method, targetClass);
-		}
-
-		public void activated(AdvisedSupport advisedSupport) {
-		}
-
-		public void adviceChanged(AdvisedSupport advisedSupport) {
-		}
-	};
+	/**
+	 * Canonical instance of a simple AdvisorChainFactory implementation that
+	 * delegates to the {@link #calculateInterceptorsAndDynamicInterceptionAdvice}
+	 * method.
+	 */
+	public static final AdvisorChainFactory SIMPLE_ADVISOR_CHAIN_FACTORY =
+			new AdvisorChainFactory() {
+				public List getInterceptorsAndDynamicInterceptionAdvice(
+						Advised config, Object proxy, Method method, Class targetClass) {
+					return calculateInterceptorsAndDynamicInterceptionAdvice(config, proxy, method, targetClass);
+				}
+				public void activated(AdvisedSupport advisedSupport) {
+				}
+				public void adviceChanged(AdvisedSupport advisedSupport) {
+				}
+			};
 
 
 	/**
@@ -68,10 +72,11 @@ public abstract class AdvisorChainFactoryUtils {
 
 		List interceptorList = new ArrayList(config.getAdvisors().length);
 		AdvisorAdapterRegistry registry = GlobalAdvisorAdapterRegistry.getInstance();
-		for (int i = 0; i < config.getAdvisors().length; i++) {
-			Advisor advisor = config.getAdvisors()[i];
+		Advisor[] advisors = config.getAdvisors();
+		for (int i = 0; i < advisors.length; i++) {
+			Advisor advisor = advisors[i];
 			if (advisor instanceof PointcutAdvisor) {
-				// add it conditionally
+				// Add it conditionally.
 				PointcutAdvisor pointcutAdvisor = (PointcutAdvisor) advisor;
 				if (pointcutAdvisor.getPointcut().getClassFilter().matches(targetClass)) {
 					Interceptor[] interceptors = registry.getInterceptors(advisor);

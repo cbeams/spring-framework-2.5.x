@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -697,7 +697,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 				HibernateTemplate ht = new HibernateTemplate(sf);
 				return ht.executeFind(new HibernateCallback() {
-					public Object doInHibernate(Session session) throws HibernateException {
+					public Object doInHibernate(Session session) {
 						return l;
 					}
 				});
@@ -775,7 +775,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 					HibernateTemplate ht = new HibernateTemplate(sf);
 					ht.execute(new HibernateCallback() {
-						public Object doInHibernate(Session session) throws HibernateException {
+						public Object doInHibernate(Session session) {
 							return null;
 						}
 					});
@@ -844,7 +844,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				HibernateTemplate ht = new HibernateTemplate(sf);
 				return ht.executeFind(new HibernateCallback() {
-					public Object doInHibernate(Session session) throws HibernateException {
+					public Object doInHibernate(Session session) {
 						return l;
 					}
 				});
@@ -906,7 +906,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 					HibernateTemplate ht = new HibernateTemplate(sf);
 					return ht.executeFind(new HibernateCallback() {
-						public Object doInHibernate(Session session) throws HibernateException {
+						public Object doInHibernate(Session session) {
 							return l;
 						}
 					});
@@ -989,7 +989,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 				HibernateTemplate ht = new HibernateTemplate(sf);
 				ht.setExposeNativeSession(true);
 				return ht.executeFind(new HibernateCallback() {
-					public Object doInHibernate(Session sess) throws HibernateException {
+					public Object doInHibernate(Session sess) {
 						assertEquals(session, sess);
 						return l;
 					}
@@ -1078,7 +1078,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 							HibernateTemplate ht = new HibernateTemplate(sf);
 							ht.setExposeNativeSession(true);
 							ht.execute(new HibernateCallback() {
-								public Object doInHibernate(Session sess) throws HibernateException {
+								public Object doInHibernate(Session sess) {
 									assertEquals(session, sess);
 									return null;
 								}
@@ -1107,7 +1107,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 				HibernateTemplate ht = new HibernateTemplate(sf);
 				ht.setExposeNativeSession(true);
 				ht.execute(new HibernateCallback() {
-					public Object doInHibernate(Session sess) throws HibernateException {
+					public Object doInHibernate(Session sess) {
 						assertEquals(session, sess);
 						return null;
 					}

@@ -37,36 +37,83 @@ import java.util.Locale;
  */
 public abstract class LocaleContextHolder {
 
-	private static final ThreadLocal localeContextHolder = new InheritableThreadLocal();
+	private static final ThreadLocal localeContextHolder = new ThreadLocal();
 
+	private static final ThreadLocal inheritableLocaleContextHolder = new InheritableThreadLocal();
+
+
+	/**
+	 * Reset the LocaleContext for the current thread.
+	 */
+	public static void resetLocaleContext() {
+		localeContextHolder.set(null);
+		inheritableLocaleContextHolder.set(null);
+	}
+
+	/**
+	 * Associate the given LocaleContext with the current thread,
+	 * <i>not</i> exposing it as inheritable for child threads.
+	 * @param localeContext the current LocaleContext, or <code>null</code> to reset
+	 * the thread-bound context
+	 */
+	public static void setLocaleContext(LocaleContext localeContext) {
+		setLocaleContext(localeContext, false);
+	}
 
 	/**
 	 * Associate the given LocaleContext with the current thread.
 	 * @param localeContext the current LocaleContext, or <code>null</code> to reset
 	 * the thread-bound context
+	 * @param inheritable whether to expose the LocaleContext as inheritable
+	 * for child threads (using an {@link java.lang.InheritableThreadLocal})
 	 */
-	public static void setLocaleContext(LocaleContext localeContext) {
-		localeContextHolder.set(localeContext);
+	public static void setLocaleContext(LocaleContext localeContext, boolean inheritable) {
+		if (inheritable) {
+			inheritableLocaleContextHolder.set(localeContext);
+			localeContextHolder.set(null);
+		}
+		else {
+			localeContextHolder.set(localeContext);
+			inheritableLocaleContextHolder.set(null);
+		}
 	}
 
 	/**
-	 * Return the LocaleContext associated with the current thread,
-	 * if any.
+	 * Return the LocaleContext associated with the current thread, if any.
 	 * @return the current LocaleContext, or <code>null</code> if none
 	 */
 	public static LocaleContext getLocaleContext() {
-		return (LocaleContext) localeContextHolder.get();
+		LocaleContext localeContext = (LocaleContext) localeContextHolder.get();
+		if (localeContext == null) {
+			localeContext = (LocaleContext) inheritableLocaleContextHolder.get();
+		}
+		return localeContext;
 	}
 
 	/**
 	 * Associate the given Locale with the current thread.
-	 * Will implicitly create a LocaleContext for the given Locale.
+	 * <p>Will implicitly create a LocaleContext for the given Locale,
+	 * <i>not</i> exposing it as inheritable for child threads.
 	 * @param locale the current Locale, or <code>null</code> to reset
 	 * the thread-bound context
 	 * @see SimpleLocaleContext#SimpleLocaleContext(java.util.Locale)
 	 */
 	public static void setLocale(Locale locale) {
-		localeContextHolder.set(locale != null ? new SimpleLocaleContext(locale) : null);
+		setLocale(locale, false);
+	}
+
+	/**
+	 * Associate the given Locale with the current thread.
+	 * <p>Will implicitly create a LocaleContext for the given Locale.
+	 * @param locale the current Locale, or <code>null</code> to reset
+	 * the thread-bound context
+	 * @param inheritable whether to expose the LocaleContext as inheritable
+	 * for child threads (using an {@link java.lang.InheritableThreadLocal})
+	 * @see SimpleLocaleContext#SimpleLocaleContext(java.util.Locale)
+	 */
+	public static void setLocale(Locale locale, boolean inheritable) {
+		LocaleContext localeContext = (locale != null ? new SimpleLocaleContext(locale) : null);
+		setLocaleContext(localeContext, inheritable);
 	}
 
 	/**
@@ -78,7 +125,7 @@ public abstract class LocaleContextHolder {
 	 * @see java.util.Locale#getDefault()
 	 */
 	public static Locale getLocale() {
-		LocaleContext localeContext = (LocaleContext) localeContextHolder.get();
+		LocaleContext localeContext = getLocaleContext();
 		return (localeContext != null ? localeContext.getLocale() : Locale.getDefault());
 	}
 

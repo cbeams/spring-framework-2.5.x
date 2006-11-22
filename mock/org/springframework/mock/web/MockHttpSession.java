@@ -60,19 +60,19 @@ public class MockHttpSession implements HttpSession {
 
 
 	/**
+	 * Create a new MockHttpSession with a default {@link MockServletContext}.
+	 * @see MockServletContext
+	 */
+	public MockHttpSession() {
+		this(null);
+	}
+
+	/**
 	 * Create a new MockHttpSession.
 	 * @param servletContext the ServletContext that the session runs in
 	 */
 	public MockHttpSession(ServletContext servletContext) {
-		this.servletContext = servletContext;
-	}
-
-	/**
-	 * Create a new MockHttpSession with a MockServletContext.
-	 * @see MockServletContext
-	 */
-	public MockHttpSession() {
-		this(new MockServletContext());
+		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 	}
 
 

@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -53,6 +53,7 @@ import org.springframework.util.StringUtils;
  * This class is used to hold snapshots of proxies.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
@@ -76,10 +77,10 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	/**
 	 * List of Advice. If an Interceptor is added, it will be wrapped
-	 * in an Advice before being added to this List. 
+	 * in an Advice before being added to this List.
 	 */
 	private List advisors = new LinkedList();
-	
+
 	/**
 	 * Array updated on changes to the advisors list, which is easier
 	 * to manipulate internally.
@@ -395,7 +396,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	private void updateAdvisorArray() {
 		this.advisorArray = (Advisor[]) this.advisors.toArray(new Advisor[this.advisors.size()]);
 	}
-	
+
 	public final Advisor[] getAdvisors() {
 		return this.advisorArray;
 	}
@@ -445,19 +446,21 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @return the count of the interceptors of this class or subclasses
 	 */
 	public final int countAdvicesOfType(Class interceptorClass) {
+		Assert.notNull(interceptorClass, "Interceptor class must not be null");
 		if (this.advisors.size() == 0) {
 			return 0;
 		}
 		int count = 0;
 		for (int i = 0; i < this.advisors.size(); i++) {
 			Advisor advisor = (Advisor) this.advisors.get(i);
-			if (interceptorClass.isAssignableFrom(advisor.getAdvice().getClass())) {
-				++count;
+			if (advisor.getAdvice() != null &&
+					interceptorClass.isAssignableFrom(advisor.getAdvice().getClass())) {
+				count++;
 			}
 		}
 		return count;
 	}
-	
+
 	/**
 	 * Invoked when advice has changed.
 	 */
@@ -468,7 +471,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 			}
 		}
 	}
-	
+
 	private void activate() {
 		this.isActive = true;
 		for (int i = 0; i < this.listeners.size(); i++) {
@@ -500,26 +503,23 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	//---------------------------------------------------------------------
 	
 	/**
-	 * Serialize a copy of the state of this class, ignoring
-	 * subclass state.
+	 * Serializes a copy of the state of this class, ignoring subclass state.
 	 */
 	protected Object writeReplace() throws ObjectStreamException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Disconnecting " + this);
 		}
 
-		// Copy state to avoid dependencies
-		// on BeanFactories etc. that subclasses may have.
+		// Copy state to avoid dependencies on BeanFactory etc that subclasses may have.
 		AdvisedSupport copy = this;
 
-		// If we're in a non-serializable subclass,
-		// copy into an AdvisedSupport object.
-		if (getClass() != AdvisedSupport.class) {
+		// If we're in a non-serializable subclass, copy into an AdvisedSupport object.
+		if (!getClass().equals(AdvisedSupport.class)) {
 			copy = new AdvisedSupport();
 			copy.copyConfigurationFrom(this);
 		}
 
-		// may return this
+		// May return this.
 		return copy;
 	}
 	 

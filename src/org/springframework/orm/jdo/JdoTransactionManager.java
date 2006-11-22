@@ -199,6 +199,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	 * Set the JDO dialect to use for this transaction manager.
 	 * <p>The dialect object can be used to retrieve the underlying JDBC connection
 	 * and thus allows for exposing JDO transactions as JDBC transactions.
+	 * <p>Default is a DefaultJdoDialect based on the PersistenceManagerFactory's
+	 * underlying DataSource, if any.
 	 * @see JdoDialect#getJdbcConnection
 	 */
 	public void setJdoDialect(JdoDialect jdoDialect) {
@@ -207,7 +209,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 	/**
 	 * Return the JDO dialect to use for this transaction manager.
-	 * Creates a default one for the specified PersistenceManagerFactory if none set.
+	 * <p>Creates a default one for the specified PersistenceManagerFactory if none set.
 	 */
 	public JdoDialect getJdoDialect() {
 		if (this.jdoDialect == null) {
@@ -246,19 +248,20 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		JdoTransactionObject txObject = new JdoTransactionObject();
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
 
-		if (TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory())) {
-			PersistenceManagerHolder pmHolder = (PersistenceManagerHolder)
-					TransactionSynchronizationManager.getResource(getPersistenceManagerFactory());
+		PersistenceManagerHolder pmHolder = (PersistenceManagerHolder)
+				TransactionSynchronizationManager.getResource(getPersistenceManagerFactory());
+		if (pmHolder != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found thread-bound PersistenceManager [" +
 						pmHolder.getPersistenceManager() + "] for JDO transaction");
 			}
 			txObject.setPersistenceManagerHolder(pmHolder, false);
-			if (getDataSource() != null) {
-				ConnectionHolder conHolder = (ConnectionHolder)
-						TransactionSynchronizationManager.getResource(getDataSource());
-				txObject.setConnectionHolder(conHolder);
-			}
+		}
+
+		if (getDataSource() != null) {
+			ConnectionHolder conHolder = (ConnectionHolder)
+					TransactionSynchronizationManager.getResource(getDataSource());
+			txObject.setConnectionHolder(conHolder);
 		}
 
 		return txObject;
@@ -269,9 +272,11 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 	}
 
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
-		if (getDataSource() != null && TransactionSynchronizationManager.hasResource(getDataSource())) {
+		JdoTransactionObject txObject = (JdoTransactionObject) transaction;
+
+		if (txObject.hasConnectionHolder() && !txObject.getConnectionHolder().isSynchronizedWithTransaction()) {
 			throw new IllegalTransactionStateException(
-					"Pre-bound JDBC Connection found - JdoTransactionManager does not support " +
+					"Pre-bound JDBC Connection found! JdoTransactionManager does not support " +
 					"running within DataSourceTransactionManager if told to manage the DataSource itself. " +
 					"It is recommended to use a single JdoTransactionManager for all transactions " +
 					"on a single DataSource, no matter whether JDO or JDBC access.");
@@ -280,8 +285,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		PersistenceManager pm = null;
 
 		try {
-			JdoTransactionObject txObject = (JdoTransactionObject) transaction;
-			if (txObject.getPersistenceManagerHolder() == null) {
+			if (txObject.getPersistenceManagerHolder() == null ||
+					txObject.getPersistenceManagerHolder().isSynchronizedWithTransaction()) {
 				PersistenceManager newPm = getPersistenceManagerFactory().getPersistenceManager();
 				if (logger.isDebugEnabled()) {
 					logger.debug("Opened new PersistenceManager [" + newPm + "] for JDO transaction");
@@ -345,6 +350,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 		txObject.setPersistenceManagerHolder(null, false);
 		PersistenceManagerHolder persistenceManagerHolder = (PersistenceManagerHolder)
 				TransactionSynchronizationManager.unbindResource(getPersistenceManagerFactory());
+		txObject.setConnectionHolder(null);
 		ConnectionHolder connectionHolder = null;
 		if (getDataSource() != null) {
 			connectionHolder = (ConnectionHolder) TransactionSynchronizationManager.unbindResource(getDataSource());
@@ -500,7 +506,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 
 		public void setRollbackOnly() {
 			getPersistenceManagerHolder().setRollbackOnly();
-			if (getConnectionHolder() != null) {
+			if (hasConnectionHolder()) {
 				getConnectionHolder().setRollbackOnly();
 			}
 		}

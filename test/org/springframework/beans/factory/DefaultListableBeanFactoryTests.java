@@ -360,6 +360,28 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		}
 	}
 
+	public void testBeanDefinitionOverridingWithAlias() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
+		lbf.registerAlias("test", "testAlias");
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
+		lbf.registerAlias("test", "testAlias");
+		assertTrue(lbf.getBean("test") instanceof NestedTestBean);
+		assertTrue(lbf.getBean("testAlias") instanceof NestedTestBean);
+	}
+
+	public void testAliasChaining() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(NestedTestBean.class));
+		lbf.registerAlias("test", "testAlias");
+		lbf.registerAlias("testAlias", "testAlias2");
+		lbf.registerAlias("testAlias2", "testAlias3");
+		Object bean = lbf.getBean("test");
+		assertSame(bean, lbf.getBean("testAlias"));
+		assertSame(bean, lbf.getBean("testAlias2"));
+		assertSame(bean, lbf.getBean("testAlias3"));
+	}
+
 	public void testBeanReferenceWithNewSyntax() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		Properties p = new Properties();
@@ -485,6 +507,78 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		}
 	}
 
+	public void testAutowireWithNoDependencies() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());
+		lbf.registerBeanDefinition("rod", bd);
+		assertEquals(1, lbf.getBeanDefinitionCount());
+		Object registered = lbf.autowire(NoDependencies.class, AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT, false);
+		assertEquals(1, lbf.getBeanDefinitionCount());
+		assertTrue(registered instanceof NoDependencies);
+	}
+
+	public void testAutowireWithSatisfiedJavaBeanDependency() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("name", "Rod");
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, pvs);
+		lbf.registerBeanDefinition("rod", bd);
+		assertEquals(1, lbf.getBeanDefinitionCount());
+		// Depends on age, name and spouse (TestBean)
+		Object registered = lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT, true);
+		assertEquals(1, lbf.getBeanDefinitionCount());
+		DependenciesBean kerry = (DependenciesBean) registered;
+		TestBean rod = (TestBean) lbf.getBean("rod");
+		assertSame(rod, kerry.getSpouse());
+	}
+
+	public void testAutowireWithSatisfiedConstructorDependency() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("name", "Rod");
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, pvs);
+		lbf.registerBeanDefinition("rod", bd);
+		assertEquals(1, lbf.getBeanDefinitionCount());
+		Object registered = lbf.autowire(ConstructorDependency.class, AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT, false);
+		assertEquals(1, lbf.getBeanDefinitionCount());
+		ConstructorDependency kerry = (ConstructorDependency) registered;
+		TestBean rod = (TestBean) lbf.getBean("rod");
+		assertSame(rod, kerry.spouse);
+	}
+
+	public void testAutowireWithTwoMatchesForConstructorDependency() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		lbf.registerBeanDefinition("rod", bd);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		lbf.registerBeanDefinition("rod2", bd2);
+		try {
+			lbf.autowire(ConstructorDependency.class, AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT, false);
+			fail("Should have thrown UnsatisfiedDependencyException");
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			// expected
+			assertTrue(ex.getMessage().indexOf("rod") != -1);
+			assertTrue(ex.getMessage().indexOf("rod2") != -1);
+		}
+	}
+
+	public void testAutowireWithUnsatisfiedConstructorDependency() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, pvs);
+		lbf.registerBeanDefinition("rod", bd);
+		assertEquals(1, lbf.getBeanDefinitionCount());
+		try {
+			lbf.autowire(UnsatisfiedConstructorDependency.class, AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT, true);
+			fail("Should have unsatisfied constructor dependency on SideEffectBean");
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			// Ok
+		}
+	}
+
 	public void testAutowireConstructor() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());
@@ -537,6 +631,23 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 				lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
 		TestBean test = (TestBean) lbf.getBean("test");
 		assertEquals(test, bean.getSpouse());
+	}
+
+	public void testAutowireBeanByTypeWithTwoMatches() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());
+		lbf.registerBeanDefinition("test", bd);
+		lbf.registerBeanDefinition("test2", bd2);
+		try {
+			lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
+			fail("Should have thrown UnsatisfiedDependencyException");
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			// expected
+			assertTrue(ex.getMessage().indexOf("test") != -1);
+			assertTrue(ex.getMessage().indexOf("test2") != -1);
+		}
 	}
 
 	public void testAutowireBeanByTypeWithDependencyCheck() {
@@ -629,63 +740,28 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		}
 	}
 
-	public void testAutowireWithNoDependencies() {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, new MutablePropertyValues());
-		lbf.registerBeanDefinition("rod", bd);
-		assertEquals(1, lbf.getBeanDefinitionCount());
-		Object registered = lbf.autowire(
-		    NoDependencies.class, AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT, false);
-		assertEquals(1, lbf.getBeanDefinitionCount());
-		assertTrue(registered instanceof NoDependencies);
-	}
-
-	public void testAutowireWithSatisfiedJavaBeanDependency() {
+	public void testApplyBeanPropertyValues() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, pvs);
-		lbf.registerBeanDefinition("rod", bd);
-		assertEquals(1, lbf.getBeanDefinitionCount());
-		// Depends on age, name and spouse (TestBean)
-		Object registered = lbf.autowire(
-		    DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT, true);
-		assertEquals(1, lbf.getBeanDefinitionCount());
-		DependenciesBean kerry = (DependenciesBean) registered;
-		TestBean rod = (TestBean) lbf.getBean("rod");
-		assertSame(rod, kerry.getSpouse());
+		pvs.addPropertyValue("age", "99");
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class, pvs));
+		TestBean tb = new TestBean();
+		assertEquals(0, tb.getAge());
+		lbf.applyBeanPropertyValues(tb, "test");
+		assertEquals(99, tb.getAge());
 	}
 
-	public void testAutowireWithSatisfiedConstructorDependency() {
+	public void testApplyBeanPropertyValuesWithIncompleteDefinition() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, pvs);
-		lbf.registerBeanDefinition("rod", bd);
-		assertEquals(1, lbf.getBeanDefinitionCount());
-		Object registered = lbf.autowire(
-		    ConstructorDependency.class, AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT, false);
-		assertEquals(1, lbf.getBeanDefinitionCount());
-		ConstructorDependency kerry = (ConstructorDependency) registered;
-		TestBean rod = (TestBean) lbf.getBean("rod");
-		assertSame(rod, kerry.spouse);
-	}
-
-	public void testAutowireWithUnsatisfiedConstructorDependency() {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue(new PropertyValue("name", "Rod"));
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, pvs);
-		lbf.registerBeanDefinition("rod", bd);
-		assertEquals(1, lbf.getBeanDefinitionCount());
-		try {
-			lbf.autowire(
-			    UnsatisfiedConstructorDependency.class, AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT, true);
-			fail("Should have unsatisfied constructor dependency on SideEffectBean");
-		}
-		catch (UnsatisfiedDependencyException ex) {
-			// Ok
-		}
+		pvs.addPropertyValue("age", "99");
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(null, pvs));
+		TestBean tb = new TestBean();
+		assertEquals(0, tb.getAge());
+		lbf.applyBeanPropertyValues(tb, "test");
+		assertEquals(99, tb.getAge());
+		assertNull(tb.getBeanFactory());
+		assertNull(tb.getSpouse());
 	}
 
 	public void testExtensiveCircularReference() {
@@ -706,8 +782,7 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 	public void testCircularReferenceThroughAutowiring() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(
-		    ConstructorDependencyBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR));
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(ConstructorDependencyBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR));
 		try {
 			lbf.preInstantiateSingletons();
 			fail("Should have thrown UnsatisfiedDependencyException");
@@ -727,34 +802,23 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		}
 	}
 
+	public void testCircularReferenceThroughFactoryBeanTypeCheck() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(ConstructorDependencyFactoryBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR));
+		try {
+			lbf.getBeansOfType(String.class);
+			fail("Should have thrown UnsatisfiedDependencyException");
+		}
+		catch (UnsatisfiedDependencyException expected) {
+		}
+	}
+
 	public void testAvoidCircularReferenceThroughAutowiring() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.registerBeanDefinition("test", new RootBeanDefinition(ConstructorDependencyFactoryBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR));
 		lbf.registerBeanDefinition("string",
 				new RootBeanDefinition(String.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR));
 		lbf.preInstantiateSingletons();
-	}
-
-	public void testApplyPropertyValues() {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "99");
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class, pvs));
-		TestBean tb = new TestBean();
-		assertEquals(0, tb.getAge());
-		lbf.applyBeanPropertyValues(tb, "test");
-		assertEquals(99, tb.getAge());
-	}
-
-	public void testApplyPropertyValuesWithIncompleteDefinition() {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.addPropertyValue("age", "99");
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(null, pvs));
-		TestBean tb = new TestBean();
-		assertEquals(0, tb.getAge());
-		lbf.applyBeanPropertyValues(tb, "test");
-		assertEquals(99, tb.getAge());
 	}
 
 	public void testBeanDefinitionWithInterface() {
@@ -781,6 +845,12 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 			assertEquals("test", ex.getBeanName());
 			assertTrue(ex.getMessage().toLowerCase().indexOf("abstract") != -1);
 		}
+	}
+
+	public void testPrototypeFactoryBeanNotEagerlyCalled() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("test", new RootBeanDefinition(FactoryBeanThatShouldntBeCalled.class));
+		lbf.preInstantiateSingletons();
 	}
 
 	public void testBeanPostProcessorWithWrappedObjectAndDisposableBean() {
@@ -1008,6 +1078,22 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 
 		public Object createGeneric() {
 			return create();
+		}
+	}
+
+
+	public static class FactoryBeanThatShouldntBeCalled implements FactoryBean {
+
+		public Object getObject() {
+			throw new IllegalStateException();
+		}
+
+		public Class getObjectType() {
+			return null;
+		}
+
+		public boolean isSingleton() {
+			return false;
 		}
 	}
 

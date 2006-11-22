@@ -159,7 +159,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private Principal userPrincipal;
 
-	private String requestURI = "";
+	private String requestURI;
 
 	private String servletPath = "";
 
@@ -177,14 +177,35 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	//---------------------------------------------------------------------
 
 	/**
+	 * Create a new MockHttpServletRequest with a default
+	 * {@link MockServletContext}.
+	 * @see MockServletContext
+	 */
+	public MockHttpServletRequest() {
+		this(null, "", "");
+	}
+
+	/**
+	 * Create a new MockHttpServletRequest with a default
+	 * {@link MockServletContext}.
+	 * @param method the request method (may be <code>null</code>)
+	 * @param requestURI the request URI (may be <code>null</code>)
+	 * @see #setMethod
+	 * @see #setRequestURI
+	 * @see MockServletContext
+	 */
+	public MockHttpServletRequest(String method, String requestURI) {
+		this(null, method, requestURI);
+	}
+
+	/**
 	 * Create a new MockHttpServletRequest.
 	 * @param servletContext the ServletContext that the request runs in
 	 * (may be <code>null</code> to use a default MockServletContext)
 	 * @see MockServletContext
 	 */
 	public MockHttpServletRequest(ServletContext servletContext) {
-		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
-		this.locales.add(Locale.ENGLISH);
+		this(servletContext, "", "");
 	}
 
 	/**
@@ -198,29 +219,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * @see MockServletContext
 	 */
 	public MockHttpServletRequest(ServletContext servletContext, String method, String requestURI) {
-		this(servletContext);
+		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 		this.method = method;
 		this.requestURI = requestURI;
-	}
-
-	/**
-	 * Create a new MockHttpServletRequest with a {@link MockServletContext}.
-	 * @see MockServletContext
-	 */
-	public MockHttpServletRequest() {
-		this(null);
-	}
-
-	/**
-	 * Create a new MockHttpServletRequest with a {@link MockServletContext}.
-	 * @param method the request method (may be <code>null</code>)
-	 * @param requestURI the request URI (may be <code>null</code>)
-	 * @see #setMethod
-	 * @see #setRequestURI
-	 * @see MockServletContext
-	 */
-	public MockHttpServletRequest(String method, String requestURI) {
-		this(null, method, requestURI);
+		this.locales.add(Locale.ENGLISH);
 	}
 
 
@@ -705,7 +707,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getRequestedSessionId() {
-		HttpSession session = this.getSession();
+		HttpSession session = getSession();
 		return (session != null ? session.getId() : null);
 	}
 

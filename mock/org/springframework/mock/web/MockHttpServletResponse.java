@@ -121,7 +121,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 					new OutputStreamWriter(this.content, this.characterEncoding) : new OutputStreamWriter(this.content));
 			this.writer = new PrintWriter(targetWriter);
 		}
-		return writer;
+		return this.writer;
 	}
 
 	public byte[] getContentAsByteArray() {

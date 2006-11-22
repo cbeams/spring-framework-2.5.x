@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
@@ -71,7 +71,9 @@ import org.springframework.util.ClassUtils;
  * @author Rob Harrop
  * @since 13.10.2003
  * @see #setInterceptorNames
+ * @see #getAdvicesAndAdvisorsForBean
  * @see BeanNameAutoProxyCreator
+ * @see DefaultAdvisorAutoProxyCreator
  */
 public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware, Ordered {
@@ -129,10 +131,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	  return order;
 	}
 
-	public boolean isFrozen() {
-		return this.freezeProxy;
-	}
-
 	/**
 	 * Sets whether or not the proxy should be frozen, preventing advice from being added to it
 	 * once it is created. Overridden from the super class to prevent the proxy configuration from
@@ -140,6 +138,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 */
 	public void setFrozen(boolean frozen) {
 		this.freezeProxy = frozen;
+	}
+
+	public boolean isFrozen() {
+		return this.freezeProxy;
 	}
 
 	/**
@@ -242,11 +244,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 
 	/**
-	 * Return whether the given bean class and bean name represents an
-	 * infrastructure class that should never be proxied.
-	 * <p>Default implementation considers Advisors, MethodInterceptors
-	 * and AbstractAutoProxyCreators as infrastructure classes, and
-	 * consults the <code>shouldSkip</coide> method.
+	 * Return whether the given bean class represents an infrastructure class
+	 * that should never be proxied.
+	 * <p>Default implementation considers Advisors, Advices and
+	 * AbstractAutoProxyCreators as infrastructure classes.
 	 * @param beanClass the class of the bean
 	 * @param beanName the name of the bean
 	 * @return whether the bean represents an infrastructure class
@@ -256,20 +257,20 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 */
 	protected boolean isInfrastructureClass(Class beanClass, String beanName) {
 		boolean retVal = Advisor.class.isAssignableFrom(beanClass) ||
-				MethodInterceptor.class.isAssignableFrom(beanClass) ||
+				Advice.class.isAssignableFrom(beanClass) ||
 				AbstractAutoProxyCreator.class.isAssignableFrom(beanClass) ||
 				shouldSkip(beanClass, beanName);
 
 		if (retVal && logger.isDebugEnabled()) {
-			logger.debug("Did not attempt to autoproxy infrastructure class [" + beanClass.getName() + "]");
+			logger.debug("Did not attempt to auto-proxy infrastructure class [" + beanClass.getName() + "]");
 		}
 		return retVal;
 	}
 
 	/**
-	 * Subclasses should override this method to return true if this
-	 * bean should not be considered for auto-proxying by this post processor.
-	 * Sometimes we need to be able to avoid this happening if it will lead to
+	 * Subclasses should override this method to return <code>true</code> if the
+	 * given bean should not be considered for auto-proxying by this post-processor.
+	 * <p>Sometimes we need to be able to avoid this happening if it will lead to
 	 * a circular reference. This implementation returns <code>false</code>.
 	 * @param beanClass the class of the bean
 	 * @param beanName the name of the bean
@@ -343,15 +344,14 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 			}
 		}
 		if (logger.isDebugEnabled()) {
-			int nrOfCommonInterceptors = commonInterceptors != null ? commonInterceptors.length : 0;
-			int nrOfSpecificInterceptors = specificInterceptors != null ? specificInterceptors.length : 0;
-			logger.debug(
-					"Creating implicit proxy for bean '" + beanName + "' with " + nrOfCommonInterceptors +
+			int nrOfCommonInterceptors = (commonInterceptors != null ? commonInterceptors.length : 0);
+			int nrOfSpecificInterceptors = (specificInterceptors != null ? specificInterceptors.length : 0);
+			logger.debug("Creating implicit proxy for bean '" + beanName + "' with " + nrOfCommonInterceptors +
 					" common interceptors and " + nrOfSpecificInterceptors + " specific interceptors");
 		}
 
 		ProxyFactory proxyFactory = new ProxyFactory();
-		// Copy our properties (proxyTargetClass) inherited from ProxyConfig.
+		// Copy our properties (proxyTargetClass etc) inherited from ProxyConfig.
 		proxyFactory.copyFrom(this);
 
 		if (!isProxyTargetClass()) {

@@ -29,6 +29,7 @@ import javax.management.JMException;
 import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.management.modelmbean.ModelMBean;
@@ -367,7 +368,6 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 				String beanKey = (String) entry.getKey();
 				Object value = entry.getValue();
 				ObjectName objectName = registerBeanNameOrInstance(value, beanKey);
-
 				if (objectName != null) {
 					this.registeredBeans.add(objectName);
 					notifyListenersOfRegistration(objectName);
@@ -483,8 +483,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 			if (logger.isDebugEnabled()) {
 				logger.debug("Registering MBean [" + objectName + "]");
 			}
-			doRegister(mbean, objectName);
-			return objectName;
+			return doRegister(mbean, objectName);
 		}
 		catch (MalformedObjectNameException ex) {
 			if (logger.isDebugEnabled()) {
@@ -517,8 +516,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 		mbean.setModelMBeanInfo(getMBeanInfo(bean, beanKey));
 		mbean.setManagedResource(bean, MR_TYPE_OBJECT_REFERENCE);
 
-		doRegister(mbean, objectName);
-		return objectName;
+		return doRegister(mbean, objectName);
 	}
 
 	/**
@@ -553,8 +551,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 		mbean.setModelMBeanInfo(getMBeanInfo(proxy, beanKey));
 		mbean.setManagedResource(proxy, MR_TYPE_OBJECT_REFERENCE);
 
-		doRegister(mbean, objectName);
-		return objectName;
+		return doRegister(mbean, objectName);
 	}
 
 	/**
@@ -562,9 +559,10 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 	 * an existing MBean can be configured using the {@link #setRegistrationBehavior(int)}
 	 * and {@link #setRegistrationBehaviorName(String)} methods.
 	 */
-	protected void doRegister(Object mbean, ObjectName objectName) throws JMException {
+	private ObjectName doRegister(Object mbean, ObjectName objectName) throws JMException {
+		ObjectInstance registeredBean = null;
 		try {
-			this.server.registerMBean(mbean, objectName);
+			registeredBean = this.server.registerMBean(mbean, objectName);
 		}
 		catch (InstanceAlreadyExistsException ex) {
 			if (this.registrationBehavior == REGISTRATION_IGNORE_EXISTING) {
@@ -578,7 +576,7 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 						logger.debug("Replacing existing MBean at [" + objectName + "]");
 					}
 					this.server.unregisterMBean(objectName);
-					this.server.registerMBean(mbean, objectName);
+					registeredBean = this.server.registerMBean(mbean, objectName);
 				}
 				catch (InstanceNotFoundException ex2) {
 					throw new IllegalStateException(
@@ -589,6 +587,12 @@ public class MBeanExporter implements BeanFactoryAware, InitializingBean, Dispos
 				throw ex;
 			}
 		}
+		// Track registration and notify listeners.
+		ObjectName actualObjectName = (registeredBean != null ? registeredBean.getObjectName() : null);
+		if (actualObjectName == null) {
+			actualObjectName = objectName;
+		}
+		return actualObjectName;
 	}
 
 	/**

@@ -681,15 +681,15 @@ public class HibernateJtaTransactionTests extends TestCase {
 		sessionControl.verify();
 	}
 
-	public void testJtaTransactionCommitWithWithRequiresNew() throws Exception {
-		doTestJtaTransactionWithWithRequiresNew(false);
+	public void testJtaTransactionCommitWithRequiresNew() throws Exception {
+		doTestJtaTransactionWithRequiresNew(false);
 	}
 
-	public void testJtaTransactionRollbackWithWithRequiresNew() throws Exception {
-		doTestJtaTransactionWithWithRequiresNew(true);
+	public void testJtaTransactionRollbackWithRequiresNew() throws Exception {
+		doTestJtaTransactionWithRequiresNew(true);
 	}
 
-	protected void doTestJtaTransactionWithWithRequiresNew(final boolean rollback) throws Exception {
+	protected void doTestJtaTransactionWithRequiresNew(final boolean rollback) throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
@@ -813,15 +813,15 @@ public class HibernateJtaTransactionTests extends TestCase {
 		session2Control.verify();
 	}
 
-	public void testJtaTransactionCommitWithWithRequiresNewAndJtaTm() throws Exception {
-		doTestJtaTransactionWithWithRequiresNewAndJtaTm(false);
+	public void testJtaTransactionCommitWithRequiresNewAndJtaTm() throws Exception {
+		doTestJtaTransactionWithRequiresNewAndJtaTm(false);
 	}
 
-	public void testJtaTransactionRollbackWithWithRequiresNewAndJtaTm() throws Exception {
-		doTestJtaTransactionWithWithRequiresNewAndJtaTm(true);
+	public void testJtaTransactionRollbackWithRequiresNewAndJtaTm() throws Exception {
+		doTestJtaTransactionWithRequiresNewAndJtaTm(true);
 	}
 
-	protected void doTestJtaTransactionWithWithRequiresNewAndJtaTm(final boolean rollback) throws Exception {
+	protected void doTestJtaTransactionWithRequiresNewAndJtaTm(final boolean rollback) throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);

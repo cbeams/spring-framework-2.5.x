@@ -69,7 +69,7 @@ import org.springframework.web.util.UrlPathHelper;
  *
  * <li>It can use any HandlerMapping implementation - whether standard, or provided
  * as part of an application - to control the routing of requests to handler objects.
- * Default is BeanNameUrlHandlerMapping. HandlerMapping objects can be define as beans
+ * Default is BeanNameUrlHandlerMapping. HandlerMapping objects can be defined as beans
  * in the servlet's application context that implement the HandlerMapping interface.
  * HandlerMappings can be given any bean name (they are tested by type).
  *
@@ -182,7 +182,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	public static final String HANDLER_EXECUTION_CHAIN_ATTRIBUTE = DispatcherServlet.class.getName() + ".HANDLER";
 
 	/**
-	 * Request attribute to hold current web application context.
+	 * Request attribute to hold the current web application context.
 	 * Otherwise only the global web app context is obtainable by tags etc.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getWebApplicationContext
 	 */
@@ -195,13 +195,13 @@ public class DispatcherServlet extends FrameworkServlet {
 	public static final String MULTIPART_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".MULTIPART";
 
 	/**
-	 * Request attribute to hold current locale, retrievable by views.
+	 * Request attribute to hold the current LocaleResolver, retrievable by views.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocaleResolver
 	 */
 	public static final String LOCALE_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".LOCALE";
 
 	/**
-	 * Request attribute to hold current theme, retrievable by views.
+	 * Request attribute to hold the current ThemeResolver, retrievable by views.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeResolver
 	 */
 	public static final String THEME_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME";
@@ -260,6 +260,9 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/** Perform cleanup of request attributes after include request? */
 	private boolean cleanupAfterInclude = true;
+
+	/** Expose LocaleContext and RequestAttributes as inheritable for child threads? */
+	private boolean threadContextInheritable = false;
 
 
 	/** MultipartResolver used by this servlet */
@@ -330,8 +333,8 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Set whether to perform cleanup of request attributes after an include request,
-	 * i.e. whether to reset the original state of all request attributes after the
-	 * DispatcherServlet has processed within an include request. Else, just the
+	 * that is, whether to reset the original state of all request attributes after
+	 * the DispatcherServlet has processed within an include request. Else, just the
 	 * DispatcherServlet's own request attributes will be reset, but not model
 	 * attributes for JSPs or special attributes set by views (for example, JSTL's).
 	 * <p>Default is "true", which is strongly recommended. Views should not rely on
@@ -343,6 +346,22 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	public void setCleanupAfterInclude(boolean cleanupAfterInclude) {
 		this.cleanupAfterInclude = cleanupAfterInclude;
+	}
+
+	/**
+	 * Set whether to expose the LocaleContext as inheritable for child threads
+	 * (using an {@link java.lang.InheritableThreadLocal}).
+	 * <p>Default is "true", to enable inheritance for custom child threads which
+	 * are spawned during request processing and only used for this request
+	 * (that is, ending after their initial task, without reuse of the thread).
+	 * Switch this to "false" to avoid side effects on spawned background threads!
+	 * <p><b>WARNING:</b> Do not use inheritance for child threads if you are
+	 * accessing a thread pool which is configured to potentially add new threads
+	 * on demand (e.g. a JDK {@link java.util.concurrent.ThreadPoolExecutor}),
+	 * since this will expose the inherited context to such a pooled thread.
+	 */
+	public void setThreadContextInheritable(boolean threadContextInheritable) {
+		this.threadContextInheritable = threadContextInheritable;
 	}
 
 
@@ -654,7 +673,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
-		// Make framework objects available for handlers.
+		// Make framework objects available to handlers and view objects.
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
@@ -688,11 +707,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Expose current LocaleResolver and request as LocaleContext.
 		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
-		LocaleContextHolder.setLocaleContext(new LocaleContext() {
-			public Locale getLocale() {
-				return localeResolver.resolveLocale(request);
-			}
-		});
+		LocaleContextHolder.setLocaleContext(buildLocaleContext(request), this.threadContextInheritable);
 
 		try {
 			ModelAndView mv = null;
@@ -736,7 +751,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 			catch (Exception ex) {
 				Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);
-				mv = processHandlerException(request, response, handler, ex);
+				mv = processHandlerException(processedRequest, response, handler, ex);
 			}
 
 			// Did the handler return a view to render?
@@ -772,7 +787,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) processedRequest);
 			}
 			// Reset thread-bound LocaleContext.
-			LocaleContextHolder.setLocaleContext(previousLocaleContext);
+			LocaleContextHolder.setLocaleContext(previousLocaleContext, this.threadContextInheritable);
 		}
 	}
 
@@ -805,15 +820,32 @@ public class DispatcherServlet extends FrameworkServlet {
 
 
 	/**
+	 * Build a LocaleContext for the given request, exposing the request's
+	 * primary locale as current locale.
+	 * <p>The default implementation uses the dispatcher's LocaleResolver
+	 * to obtain the current locale, which might change during a request.
+	 * @param request current HTTP request
+	 * @return the corresponding LocaleContext
+	 */
+	protected LocaleContext buildLocaleContext(final HttpServletRequest request) {
+		return new LocaleContext() {
+			public Locale getLocale() {
+				return localeResolver.resolveLocale(request);
+			}
+		};
+	}
+
+	/**
 	 * Convert the request into a multipart request, and make multipart resolver available.
 	 * If no multipart resolver is set, simply use the existing request.
 	 * @param request current HTTP request
 	 * @return the processed request (multipart wrapper if necessary)
+	 * @see MultipartResolver#resolveMultipart
 	 */
 	protected HttpServletRequest checkMultipart(HttpServletRequest request) throws MultipartException {
 		if (this.multipartResolver != null && this.multipartResolver.isMultipart(request)) {
 			if (request instanceof MultipartHttpServletRequest) {
-				logger.info("Request is already a MultipartHttpServletRequest - if not in a forward, " +
+				logger.debug("Request is already a MultipartHttpServletRequest - if not in a forward, " +
 						"this typically results from an additional MultipartFilter in web.xml");
 			}
 			else {
@@ -868,7 +900,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	protected void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		if (pageNotFoundLogger.isWarnEnabled()) {
-			pageNotFoundLogger.warn("No mapping for [" + request.getRequestURI() +
+			String requestUri = new UrlPathHelper().getRequestUri(request);
+			pageNotFoundLogger.warn("No mapping for [" + requestUri +
 					"] in DispatcherServlet with name '" + getServletName() + "'");
 		}
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);

@@ -42,7 +42,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	/**
 	 * Creates a new empty MutablePropertyValues object.
-	 * Property values can be added with the addPropertyValue methods.
+	 * Property values can be added with the <code>addPropertyValue</code> methods.
 	 * @see #addPropertyValue(PropertyValue)
 	 * @see #addPropertyValue(String, Object)
 	 */
@@ -54,17 +54,18 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * Deep copy constructor. Guarantees PropertyValue references
 	 * are independent, although it can't deep copy objects currently
 	 * referenced by individual PropertyValue objects.
-	 * @param source the PropertyValues to copy
+	 * @param original the PropertyValues to copy
 	 * @see #addPropertyValues(PropertyValues)
 	 */
-	public MutablePropertyValues(PropertyValues source) {
+	public MutablePropertyValues(PropertyValues original) {
 		// We can optimize this because it's all new:
 		// There is no replacement of existing property values.
-		if (source != null) {
-			PropertyValue[] pvs = source.getPropertyValues();
+		if (original != null) {
+			PropertyValue[] pvs = original.getPropertyValues();
 			this.propertyValueList = new ArrayList(pvs.length);
 			for (int i = 0; i < pvs.length; i++) {
-				PropertyValue newPv = new PropertyValue(pvs[i].getName(), pvs[i].getValue());
+				PropertyValue pv = pvs[i];
+				PropertyValue newPv = new PropertyValue(pv.getName(), pv.getValue());
 				this.propertyValueList.add(newPv);
 			}
 		}
@@ -75,16 +76,15 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	/**
 	 * Construct a new PropertyValues object from a Map.
-	 * @param source Map with property values keyed by property name,
-	 * which must be a String
+	 * @param original Map with property values keyed by property name Strings
 	 * @see #addPropertyValues(Map)
 	 */
-	public MutablePropertyValues(Map source) {
+	public MutablePropertyValues(Map original) {
 		// We can optimize this because it's all new:
 		// There is no replacement of existing property values.
-		if (source != null) {
-			this.propertyValueList = new ArrayList(source.size());
-			Iterator it = source.entrySet().iterator();
+		if (original != null) {
+			this.propertyValueList = new ArrayList(original.size());
+			Iterator it = original.entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry entry = (Map.Entry) it.next();
 				PropertyValue newPv = new PropertyValue((String) entry.getKey(), entry.getValue());
@@ -101,15 +101,16 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * Copy all given PropertyValues into this object. Guarantees PropertyValue
 	 * references are independent, although it can't deep copy objects currently
 	 * referenced by individual PropertyValue objects.
-	 * @param source the PropertyValues to copy
+	 * @param other the PropertyValues to copy
 	 * @return this object to allow creating objects, adding multiple PropertyValues
 	 * in a single statement
 	 */
-	public MutablePropertyValues addPropertyValues(PropertyValues source) {
-		if (source != null) {
-			PropertyValue[] pvs = source.getPropertyValues();
+	public MutablePropertyValues addPropertyValues(PropertyValues other) {
+		if (other != null) {
+			PropertyValue[] pvs = other.getPropertyValues();
 			for (int i = 0; i < pvs.length; i++) {
-				PropertyValue newPv = new PropertyValue(pvs[i].getName(), pvs[i].getValue());
+				PropertyValue pv = pvs[i];
+				PropertyValue newPv = new PropertyValue(pv.getName(), pv.getValue());
 				addPropertyValue(newPv);
 			}
 		}
@@ -118,14 +119,14 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	/**
 	 * Add all property values from the given Map.
-	 * @param source Map with property values keyed by property name,
+	 * @param other Map with property values keyed by property name,
 	 * which must be a String
 	 * @return this object to allow creating objects, adding multiple
 	 * PropertyValues in a single statement
 	 */
-	public MutablePropertyValues addPropertyValues(Map source) {
-		if (source != null) {
-			Iterator it = source.entrySet().iterator();
+	public MutablePropertyValues addPropertyValues(Map other) {
+		if (other != null) {
+			Iterator it = other.entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry entry = (Map.Entry) it.next();
 				PropertyValue newPv = new PropertyValue((String) entry.getKey(), entry.getValue());

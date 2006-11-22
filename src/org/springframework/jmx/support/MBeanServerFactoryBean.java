@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,22 +28,23 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.MBeanServerNotFoundException;
 
 /**
- * FactoryBean that obtains an <code>MBeanServer</code> instance
- * through the standard JMX 1.2 <code>MBeanServerFactory</code> API
- * (which is available on JDK 1.5 or as part of a JMX 1.2 provider).
+ * FactoryBean that obtains an {@link javax.management.MBeanServer} reference
+ * through the standard JMX 1.2 {@link javax.management.MBeanServerFactory}
+ * API (which is available on JDK 1.5 or as part of a JMX 1.2 provider).
  * Exposes the <code>MBeanServer</code> for bean references.
  *
  * <p>By default, <code>MBeanServerFactoryBean</code> will always create
  * a new <code>MBeanServer</code> even if one is already running. To have
  * the <code>MBeanServerFactoryBean</code> attempt to locate a running
- * <code>MBeanServer</code> first, set <code>locateExistingServerIfPossible</code>
- * to <code>true</code>.
+ * <code>MBeanServer</code> first, set the value of the
+ * "locateExistingServerIfPossible" property to "true".
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
  * @see #setLocateExistingServerIfPossible
  * @see #locateMBeanServer
+ * @see javax.management.MBeanServer
  * @see javax.management.MBeanServerFactory#findMBeanServer
  * @see javax.management.MBeanServerFactory#createMBeanServer
  * @see javax.management.MBeanServerFactory#newMBeanServer
@@ -78,7 +79,12 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean, Di
 
 	/**
 	 * Set the agent id of the <code>MBeanServer</code> to locate.
-	 * <p>Default is none. If specified, this will automatically
+	 * <p>Default is none. If specified, this will result in an
+	 * automatic attempt being made to locate the attendant MBeanServer,
+	 * and (importantly) if said MBeanServer cannot be located no
+	 * attempt will be made to create a new MBeanServer (and an
+	 * MBeanServerNotFoundException will be thrown at resolution time).
+	 * @see javax.management.MBeanServerFactory#findMBeanServer(String)
 	 */
 	public void setAgentId(String agentId) {
 		this.agentId = agentId;
@@ -118,7 +124,8 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean, Di
 				this.server = locateMBeanServer(this.agentId);
 			}
 			catch (MBeanServerNotFoundException ex) {
-				// If agent id was specified, we were only supposed to
+				// If agentId was specified, we were only supposed to locate that
+				// specific MBeanServer; so let's bail if we can't find it.
 				if (this.agentId != null) {
 					throw ex;
 				}
@@ -137,9 +144,10 @@ public class MBeanServerFactoryBean implements FactoryBean, InitializingBean, Di
 	 * Attempt to locate an existing <code>MBeanServer</code>.
 	 * Called if <code>locateExistingServerIfPossible</code> is set to <code>true</code>.
 	 * <p>Default implementation attempts to find an <code>MBeanServer</code> using
-	 * a standard lookup. Subclasses may override to additional location logic.
+	 * a standard lookup. Subclasses may override to add additional location logic.
 	 * @param agentId the agent identifier of the MBeanServer to retrieve.
-	 * If this parameter is null, all registered MBeanServers are considered.
+	 * If this parameter is <code>null</code>, all registered MBeanServers are
+	 * considered.
 	 * @return the <code>MBeanServer</code> if found
 	 * @throws org.springframework.jmx.MBeanServerNotFoundException
 	 * if no <code>MBeanServer</code> could be found

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,7 +170,7 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		if (getDataSource() != null && TransactionSynchronizationManager.hasResource(getDataSource())) {
 			throw new IllegalTransactionStateException(
-					"Pre-bound JDBC Connection found - PersistenceBrokerTransactionManager does not support " +
+					"Pre-bound JDBC Connection found! PersistenceBrokerTransactionManager does not support " +
 					"running within DataSourceTransactionManager if told to manage the DataSource itself. " +
 					"It is recommended to use a single PersistenceBrokerTransactionManager for all transactions " +
 					"on a single DataSource, no matter whether PersistenceBroker or JDBC access.");
@@ -221,6 +221,7 @@ public class PersistenceBrokerTransactionManager extends AbstractPlatformTransac
 		txObject.setPersistenceBrokerHolder(null);
 		PersistenceBrokerHolder pbHolder =
 				(PersistenceBrokerHolder) TransactionSynchronizationManager.unbindResource(getPbKey());
+		txObject.setConnectionHolder(null);
 		ConnectionHolder connectionHolder = null;
 		if (getDataSource() != null) {
 			connectionHolder = (ConnectionHolder) TransactionSynchronizationManager.unbindResource(getDataSource());

@@ -805,6 +805,78 @@ public class JtaTransactionManagerTests extends TestCase {
 		tmControl.verify();
 	}
 
+	public void testJtaTransactionManagerWithPropagationRequiresNewAndExistingWithSuspendException() throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		tm.suspend();
+		tmControl.setThrowable(new SystemException());
+		utControl.replay();
+		tmControl.replay();
+
+		JtaTransactionManager ptm = new JtaTransactionManager(ut, tm);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		try {
+			tt.execute(new TransactionCallbackWithoutResult() {
+				protected void doInTransactionWithoutResult(TransactionStatus status) {
+					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+				}
+			});
+			fail("Should have thrown TransactionSystemException");
+		}
+		catch (TransactionSystemException ex) {
+			// expected
+		}
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+
+		utControl.verify();
+		tmControl.verify();
+	}
+
+	public void testJtaTransactionManagerWithPropagationRequiresNewAndExistingWithBeginException() throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		MockControl tmControl = MockControl.createControl(TransactionManager.class);
+		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		MockControl txControl = MockControl.createControl(Transaction.class);
+		Transaction tx = (Transaction) txControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		tm.suspend();
+		tmControl.setReturnValue(tx, 1);
+		ut.begin();
+		utControl.setThrowable(new SystemException());
+		tm.resume(tx);
+		tmControl.setVoidCallable(1);
+		utControl.replay();
+		tmControl.replay();
+
+		JtaTransactionManager ptm = new JtaTransactionManager(ut, tm);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		try {
+			tt.execute(new TransactionCallbackWithoutResult() {
+				protected void doInTransactionWithoutResult(TransactionStatus status) {
+					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+				}
+			});
+			fail("Should have thrown CannotCreateTransactionException");
+		}
+		catch (CannotCreateTransactionException ex) {
+			// expected
+		}
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+
+		utControl.verify();
+		tmControl.verify();
+	}
+
 	public void testJtaTransactionManagerWithPropagationRequiresNewAndAdapter() throws Exception {
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();

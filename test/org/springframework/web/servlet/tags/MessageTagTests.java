@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -114,7 +114,22 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "null", message.toString());
 	}
 
-	public void testMessageTagWithCodeAndStringArgument() throws JspException {
+	public void testMessageTagWithCodeAndArgument() throws JspException {
+		PageContext pc = createPageContext();
+		final StringBuffer message = new StringBuffer();
+		MessageTag tag = new MessageTag() {
+			protected void writeMessage(String msg) {
+				message.append(msg);
+			}
+		};
+		tag.setPageContext(pc);
+		tag.setCode("testArgs");
+		tag.setArguments("arg1");
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct message", "test arg1 message {1}", message.toString());
+	}
+
+	public void testMessageTagWithCodeAndArguments() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -204,6 +219,22 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setArguments("${arg1},${arg2}");
 		pc.setAttribute("arg1", "my,value");
 		pc.setAttribute("arg2", new Integer(5));
+		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
+		assertEquals("Correct message", "test my,value message 5", message.toString());
+	}
+
+	public void testMessageTagWithCodeAndExpressionArgumentArray() throws JspException {
+		PageContext pc = createPageContext();
+		final StringBuffer message = new StringBuffer();
+		MessageTag tag = new MessageTag() {
+			protected void writeMessage(String msg) {
+				message.append(msg);
+			}
+		};
+		tag.setPageContext(pc);
+		tag.setCode("testArgs");
+		tag.setArguments("${argArray}");
+		pc.setAttribute("argArray", new Object[] {"my,value", new Integer(5)});
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
 		assertEquals("Correct message", "test my,value message 5", message.toString());
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -31,29 +33,25 @@ import org.springframework.core.Constants;
  *
  * <p>The default placeholder syntax follows the Ant / Log4J / JSP EL style:
  *
- * <pre>
- * ${...}</pre>
+ * <pre class="code">${...}</pre>
  *
- * <p>Example XML context definition:
+ * Example XML context definition:
  *
- * <pre>
- * &lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
+ * <pre class="code">&lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
  *   &lt;property name="driverClassName"&gt;&lt;value&gt;${driver}&lt;/value&gt;&lt;/property&gt;
  *   &lt;property name="url"&gt;&lt;value&gt;jdbc:${dbname}&lt;/value&gt;&lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
  * Example properties file:
  *
- * <pre>
- * driver=com.mysql.jdbc.Driver
+ * <pre class="code">driver=com.mysql.jdbc.Driver
  * dbname=mysql:mydb</pre>
  *
  * PropertyPlaceholderConfigurer checks simple property values, lists, maps,
  * props, and bean names in bean references. Furthermore, placeholder values can
  * also cross-reference other placeholders, like:
  *
- * <pre>
- * rootPath=myrootdir
+ * <pre class="code">rootPath=myrootdir
  * subPath=${rootPath}/subdir</pre>
  *
  * In contrast to PropertyOverrideConfigurer, this configurer allows to fill in
@@ -72,7 +70,9 @@ import org.springframework.core.Constants;
  * of the specified properties. This can be customized via "systemPropertiesMode".
  *
  * <p>Note that the context definition <i>is</i> aware of being incomplete;
- * this is immediately obvious when looking at the XML definition file.
+ * this is immediately obvious to users when looking at the XML definition file.
+ * Hence, placeholders have to be resolved; any desired defaults have to be
+ * defined as placeholder values as well (for example in a default properties file).
  *
  * <p>Property values can be converted after reading them in, through overriding
  * the <code>convertPropertyValue</code> method. For example, encrypted values
@@ -196,7 +196,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 
 	/**
 	 * Set whether to ignore unresolvable placeholders. Default is "false":
-	 * An exception will be thrown if a placeholder cannot not be resolved.
+	 * An exception will be thrown if a placeholder cannot be resolved.
 	 */
 	public void setIgnoreUnresolvablePlaceholders(boolean ignoreUnresolvablePlaceholders) {
 		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
@@ -253,13 +253,13 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 * placeholders again).
 	 * @param strVal the String value to parse
 	 * @param props the Properties to resolve placeholders against
-	 * @param originalPlaceholder the original placeholder, used to detect
-	 * circular references between placeholders. Only non-null if we're
-	 * parsing a nested placeholder.
+	 * @param visitedPlaceholders the placeholders that have already been visited
+	 * during the current resolution attempt (used to detect circular references
+	 * between placeholders). Only non-null if we're parsing a nested placeholder.
 	 * @throws BeanDefinitionStoreException if invalid values are encountered
 	 * @see #resolvePlaceholder(String, java.util.Properties, int)
 	 */
-	protected String parseStringValue(String strVal, Properties props, String originalPlaceholder)
+	protected String parseStringValue(String strVal, Properties props, Set visitedPlaceholders)
 	    throws BeanDefinitionStoreException {
 
 		StringBuffer buf = new StringBuffer(strVal);
@@ -274,24 +274,15 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 			    this.placeholderSuffix, startIndex + this.placeholderPrefix.length());
 			if (endIndex != -1) {
 				String placeholder = buf.substring(startIndex + this.placeholderPrefix.length(), endIndex);
-				String originalPlaceholderToUse = null;
-
-				if (originalPlaceholder != null) {
-					originalPlaceholderToUse = originalPlaceholder;
-					if (placeholder.equals(originalPlaceholder)) {
-						throw new BeanDefinitionStoreException(
-								"Circular placeholder reference '" + placeholder + "' in property definitions");
-					}
+				if (!visitedPlaceholders.add(placeholder)) {
+					throw new BeanDefinitionStoreException(
+							"Circular placeholder reference '" + placeholder + "' in property definitions");
 				}
-				else {
-					originalPlaceholderToUse = placeholder;
-				}
-
 				String propVal = resolvePlaceholder(placeholder, props, this.systemPropertiesMode);
 				if (propVal != null) {
 					// Recursive invocation, parsing placeholders contained in the
 					// previously resolved placeholder value.
-					propVal = parseStringValue(propVal, props, originalPlaceholderToUse);
+					propVal = parseStringValue(propVal, props, visitedPlaceholders);
 					buf.replace(startIndex, endIndex + this.placeholderSuffix.length(), propVal);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Resolved placeholder '" + placeholder + "' to value [" + propVal + "]");
@@ -305,6 +296,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 				else {
 					throw new BeanDefinitionStoreException("Could not resolve placeholder '" + placeholder + "'");
 				}
+				visitedPlaceholders.remove(placeholder);
 			}
 			else {
 				startIndex = -1;
@@ -381,8 +373,8 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 
 	/**
 	 * BeanDefinitionVisitor that resolves placeholders in String values,
-	 * deleagating to the <code>parseStringValue</code> method of the
-	 * containing clas.
+	 * delegating to the <code>parseStringValue</code> method of the
+	 * containing class.
 	 */
 	private class PlaceholderResolvingBeanDefinitionVisitor extends BeanDefinitionVisitor {
 
@@ -393,7 +385,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 		}
 
 		protected String resolveStringValue(String strVal) throws BeansException {
-			return parseStringValue(strVal, this.props, null);
+			return parseStringValue(strVal, this.props, new HashSet());
 		}
 	}
 

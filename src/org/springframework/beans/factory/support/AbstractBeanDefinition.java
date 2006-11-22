@@ -4,9 +4,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -229,7 +229,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 
 	/**
-	 * Return whether this definitions specifies a bean class.
+	 * Return whether this definition specifies a bean class.
 	 */
 	public boolean hasBeanClass() {
 		return (this.beanClass instanceof Class);
@@ -244,12 +244,16 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 	/**
 	 * Return the class of the wrapped bean.
-	 * @throws IllegalStateException if the bean definition
-	 * does not carry a resolved bean class
+	 * @throws IllegalStateException if the bean definition does not define a bean class,
+	 * or a specified bean class name has not been resolved into an actual Class
 	 */
 	public Class getBeanClass() throws IllegalStateException {
+		if (this.beanClass == null) {
+			throw new IllegalStateException("No bean class specified on bean definition");
+		}
 		if (!(this.beanClass instanceof Class)) {
-			throw new IllegalStateException("Bean definition does not carry a resolved bean class");
+			throw new IllegalStateException(
+					"Bean class name [" + this.beanClass + "] has not been resolved into an actual Class");
 		}
 		return (Class) this.beanClass;
 	}
@@ -294,10 +298,10 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 	/**
 	 * Set if this a <b>Singleton</b>, with a single, shared instance returned
-	 * on all calls. If false, the BeanFactory will apply the <b>Prototype</b>
-	 * design pattern, with each caller requesting an instance getting an
-	 * independent instance. How this is defined will depend on the BeanFactory.
-	 * <p>"Singletons" are the commoner type, so the default is true.
+	 * on all calls. In case of "false", the BeanFactory will apply the <b>Prototype</b>
+	 * design pattern, with each caller requesting an instance getting an independent
+	 * instance. How this is exactly defined will depend on the BeanFactory.
+	 * <p>"Singletons" are the commoner type, so the default is "true".
 	 */
 	public void setSingleton(boolean singleton) {
 		this.singleton = singleton;
@@ -305,7 +309,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 	/**
 	 * Return whether this a <b>Singleton</b>, with a single, shared instance
-	 * returned on all calls.
+	 * returned from all calls.
 	 */
 	public boolean isSingleton() {
 		return singleton;
@@ -313,9 +317,8 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 
 	/**
 	 * Set whether this bean should be lazily initialized.
-	 * Only applicable to a singleton bean.
-	 * If false, it will get instantiated on startup by bean factories
-	 * that perform eager initialization of singletons.
+	 * <p>If <code>false</code>, the bean will get instantiated on startup by bean
+	 * factories that perform eager initialization of singletons.
 	 */
 	public void setLazyInit(boolean lazyInit) {
 		this.lazyInit = lazyInit;
@@ -425,7 +428,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Return constructor argument values for this bean, if any.
+	 * Return constructor argument values for this bean (never <code>null</code>).
 	 */
 	public ConstructorArgumentValues getConstructorArgumentValues() {
 		return constructorArgumentValues;
@@ -435,7 +438,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	 * Return if there are constructor argument values defined for this bean.
 	 */
 	public boolean hasConstructorArgumentValues() {
-		return (constructorArgumentValues != null && !constructorArgumentValues.isEmpty());
+		return !this.constructorArgumentValues.isEmpty();
 	}
 
 	/**
@@ -446,17 +449,17 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Return property values for this bean, if any.
+	 * Return property values for this bean (never <code>null</code>).
 	 */
 	public MutablePropertyValues getPropertyValues() {
-		return propertyValues;
+		return this.propertyValues;
 	}
 
 	/**
 	 * Specify method overrides for the bean, if any.
 	 */
 	public void setMethodOverrides(MethodOverrides methodOverrides) {
-		this.methodOverrides = (methodOverrides != null) ? methodOverrides : new MethodOverrides();
+		this.methodOverrides = (methodOverrides != null ? methodOverrides : new MethodOverrides());
 	}
 
 	/**
@@ -519,7 +522,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Specifies whether or not the configured init method is the default.
+	 * Specify whether or not the configured init method is the default.
 	 * Default value is <code>false</code>.
 	 * @see #setInitMethodName
 	 */
@@ -528,7 +531,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Indicates whether the configured init method is the default.
+	 * Indicate whether the configured init method is the default.
 	 * @see #getInitMethodName()
 	 */
 	public boolean isEnforceInitMethod() {
@@ -551,7 +554,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Specifies whether or not the configured destroy method is the default.
+	 * Specify whether or not the configured destroy method is the default.
 	 * Default value is <code>false</code>.
 	 * @see #setDestroyMethodName
 	 */
@@ -560,7 +563,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 	}
 
 	/**
-	 * Indicates whether the configured destroy method is the default.
+	 * Indicate whether the configured destroy method is the default.
 	 * @see #getDestroyMethodName
 	 */
 	public boolean isEnforceDestroyMethod() {
@@ -647,4 +650,5 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
 		}
 		return sb.toString();
 	}
+
 }
