@@ -3,11 +3,15 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.9 (30.10.2006)
+Changes in version 1.2.9 (30.11.2006)
 -------------------------------------
 
 General
 * declared all internal ThreadLocal variables as final (to avoid class reloading issues)
+
+Package org.springframework.aop
+* HashMapCachingAdvisorChainFactory uses synchronized access to its method cache Map
+* AbstractAutoProxyCreator considers all Advices (not just MethodInterceptors) as infrastructure classes to ignore
 
 Package org.springframework.beans
 * Number objects (as property or argument values) are automatically coerced into the target Number type (if necessary)
@@ -17,9 +21,12 @@ Package org.springframework.beans
 * UnsatisfiedDependencyException message for multiple matches mentions the names of all matching beans
 * AbstractBeanFactory keeps singleton beans in registration order (requires JDK 1.4 or Commons Collections)
 * AbstractBeanFactory does not explicitly register a given alias that is equal to the canonical bean name
+* AbstractBeanFactory supports alias chaining, with an alias registered for a bean name that is itself an alias
 * fixed AbstractBeanFactory to accept re-registration of alias for same bean name (-> bean definition overriding)
 * AbstractAutowireCapableBeanFactory creates "depends-on" beans even before "postProcessBeforeInstantiation"
 * fixed method overrides check to accept methods declared on interfaces as well
+* fixed PropertyPlaceholderConfigurer to throw a BeanDefinitionStoreException in case of any circular reference
+* removed default for "abstract"/"singleton" attributes in "spring-beans.dtd", for 2.0-style inheritance for inner beans
 
 Package org.springframework.context
 * synchronized AbstractApplicationContext's "refresh()" method, for hot refreshing in concurrent environments
@@ -44,16 +51,17 @@ Package org.springframework.jdbc
 * worked around "oracle.sql.DATE" problem on certain Oracle driver versions, extracting it as timestamp when appropriate
 * JdbcTemplate uses "PreparedStatement.setObject(index, null)" for null values with unknown SQL type on Informix
 * JdbcTemplate does not check static SQL for bind parameters anymore, to avoid overhead of double parsing
+* JdbcTemplate logs all warnings in case of "ignoreWarnings"=true, not just the first warning in the chain
 
 Package org.springframework.jms
 * SingleConnectionFactory's Connection proxy implements "equals" and "hashCode" based on proxy equality
-* made AbstractHandlerMapping's "getDefaultHandler()" method public
-* added public "getHandlerMap()" method to AbstractUrlHandlerMapping, exposing a read-only map of registered handlers
-* added public "getUrlMap()" method to SimpleUrlHandlerMapping, to allow for adding or overriding individual entries
+* reimplemented JMSException translation to handle subclasses of standard JMSExceptions in a specific fashion as well
 
 Package org.springframework.jmx
 * MBeanExporter only logs a warning (no error) when an MBean does not exist anymore when trying to unregister
 * MBeanExporter's MBean autodetection properly registers multiple beans even if their instances as equal
+* MBeanExporter uses ObjectName as exposed by returned ObjectInstance after registration (which differs on WebSphere)
+* MethodExclusionMBeanInfoAssembler operates correctly in case of no "ignoredMethods" specified
 
 Package org.springframework.orm
 * iBATIS support works correctly with "useTransactionAwareDataSource" and JTA transaction resume with subsequent access
@@ -77,6 +85,8 @@ Package org.springframework.test
 * AbstractTransactionalSpringContextTests invokes "onTearDownAfterTransaction" even for a manually completed transaction
 
 Package org.springframework.transaction
+* active transaction synchronization gets suspended when going from SUPPORTS/NOT_SUPPORTED into REQUIRED/REQUIRES_NEW
+* AbstractPlatformTransactionManager properly resumes all synchronizations even after suspend or inner begin failure
 * TransactionAttributeEditor does not accept transaction attributes with invalid whitespace anymore
 * added "timeout" attribute to Transactional annotation, allowing to specify a timeout in seconds within the annotation
 * JtaTransactionManager explicitly only calls "UserTransaction.setRollbackOnly()" if the transaction is still active
@@ -99,9 +109,16 @@ Package org.springframework.web
 * clarified MultipartFile constract details
 * WebDataBinder explicitly suppresses field marker prefix values in case of "ignoreUnknownFields" switched off
 * HttpServletBean overrides "getServletName"/"getServletContext" to return null when no config set yet
+* DispatcherServlet logs its page-not-found warnings with the actual lookup URL even for import requests
+* added "threadContextInheritable" property to DispatcherServlet, for turning off locale exposure to child threads
 * added "cookieSecure" property to CookieGenerator, indicating that cookies should only be sent using HTTPS connections
 * added "defaultLocale" property to CookieLocaleResolver and SessionLocaleResolver, for fallback to an explicit locale
+* made AbstractHandlerMapping's "getDefaultHandler()" method public
+* added public "getHandlerMap()" method to AbstractUrlHandlerMapping, exposing a read-only map of registered handlers
+* added public "getUrlMap()" method to SimpleUrlHandlerMapping, to allow for adding or overriding individual entries
+* JSP MessageTag detects a single expression argument that resolves to an array and processes it as arguments array
 * FreeMarkerConfigurer always registers ClassTemplateLoader for its own package (rather than the package of a subclass)
+* added "boolean useWriter()" method to AbstractXsltView, allowing to prefer Writer access over OutputStream access
 * deprecated XSLT view FormatHelper
 
 
