@@ -370,7 +370,7 @@ public abstract class DataSourceUtils {
 		}
 
 		public int getOrder() {
-			return order;
+			return this.order;
 		}
 
 		public void suspend() {
@@ -421,7 +421,7 @@ public abstract class DataSourceUtils {
 				this.holderActive = false;
 				if (this.connectionHolder.hasConnection()) {
 					releaseConnection(this.connectionHolder.getConnection(), this.dataSource);
-					// Reset the ConnectionHolder - it might remain bound to the thread.
+					// Reset the ConnectionHolder: It might remain bound to the thread.
 					this.connectionHolder.setConnection(null);
 				}
 				this.connectionHolder.reset();

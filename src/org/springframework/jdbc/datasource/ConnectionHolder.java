@@ -77,7 +77,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	 * Return the ConnectionHandle held by this ConnectionHolder.
 	 */
 	public ConnectionHandle getConnectionHandle() {
-		return connectionHandle;
+		return this.connectionHandle;
 	}
 
 	/**
@@ -88,14 +88,15 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	}
 
 	/**
-	 * Set whether this holder represents an active transaction.
+	 * Set whether this holder represents an active, JDBC-managed transaction.
+	 * @see DataSourceTransactionManager
 	 */
 	protected void setTransactionActive(boolean transactionActive) {
 		this.transactionActive = transactionActive;
 	}
 
 	/**
-	 * Return whether this holder represents an active transaction.
+	 * Return whether this holder represents an active, JDBC-managed transaction.
 	 */
 	protected boolean isTransactionActive() {
 		return this.transactionActive;
