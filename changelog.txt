@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.1 (21.11.2006)
+Changes in version 2.0.1 (23.11.2006)
 -------------------------------------
 
 General
