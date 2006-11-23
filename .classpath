@@ -111,7 +111,7 @@
 	<classpathentry kind="lib" path="lib/asm/asm-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/asm/asm-commons-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/asm/asm-util-2.2.2.jar"/>
-	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-1.2.6.jar"/>
+	<classpathentry kind="lib" path="lib/jasperreports/jasperreports-1.2.8.jar"/>
 	<classpathentry kind="lib" path="lib/easymock/easymockclassextension.jar"/>
 	<classpathentry kind="lib" path="lib/dom4j/dom4j-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/osgi/org.eclipse.osgi_3.1.1.jar"/>
