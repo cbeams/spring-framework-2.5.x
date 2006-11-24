@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanCreationNotAllowedException;
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
@@ -135,8 +136,8 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
 				}
+				beforeSingletonCreation(beanName);
 				try {
-					beforeSingletonCreation(beanName);
 					sharedInstance = singletonFactory.getObject();
 				}
 				finally {
@@ -188,7 +189,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 */
 	protected void beforeSingletonCreation(String beanName) {
 		if (!this.singletonsCurrentlyInCreation.add(beanName)) {
-			throw new IllegalStateException("Singleton '" + beanName + "' is already in creation");
+			throw new BeanCurrentlyInCreationException("Singleton '" + beanName + "' is already in creation");
 		}
 	}
 
