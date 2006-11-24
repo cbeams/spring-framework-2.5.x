@@ -28,7 +28,9 @@ import java.util.Map;
 
 import org.easymock.MockControl;
 
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.AbstractJdbcTests;
+import org.springframework.jdbc.IncorrectResultSetColumnCountException;
 
 /**
  * @author Juergen Hoeller
@@ -257,6 +259,63 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		assertEquals("Wow is Integer", 11, ((Integer) map.get("age")).intValue());
 	}
 
+	/** 
+	 * Test showing behavior for JdbcTemplate.queryForObject() not throwing
+	 * an exception when just more than one result is returned. This should 
+	 * be fixed (I guess) by adding DataAccessUtils.requireUniqueResult()
+	 * to several queryForObject() method. This also affects 
+	 * queryForLong and several other methods.
+	 * 
+	 * Related to bug 
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2874
+	 */
+	public void testBugSPR2874_QueryForObjectIncorrectResultSetSizeBecauseMoreThanOne() throws Exception {
+		
+		String sql = "select pass from t_account where first_name='Alef'";
+		
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getString(1);
+		ctrlResultSet.setReturnValue("pass");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData);
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+		mockResultSet.getString(1);
+		ctrlResultSet.setReturnValue("pass");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		mockStatement.executeQuery(sql);
+		ctrlStatement.setReturnValue(mockResultSet);
+		mockStatement.getWarnings();
+		ctrlStatement.setReturnValue(null);
+		mockStatement.close();
+		ctrlStatement.setVoidCallable();
+
+		mockConnection.createStatement();
+		ctrlConnection.setReturnValue(mockStatement);
+
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+
+		try {
+			String str = (String)template.queryForObject(sql, String.class);
+			fail("SPR-2874 Should have thrown IncorrectResultSizeDataAccessException (result size cannot be 0 or more than 1");
+		} catch (IncorrectResultSizeDataAccessException e) {
+			// this is expected and okay!
+		}
+	}
 
 	public void testQueryForObjectWithRowMapper() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
