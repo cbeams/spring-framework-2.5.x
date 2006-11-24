@@ -122,9 +122,9 @@
 	<classpathentry kind="lib" path="lib/jpa/persistence.jar"/>
 	<classpathentry kind="lib" path="lib/caucho/hessian-3.0.20.jar"/>
 	<classpathentry kind="lib" path="lib/oc4j/oc4j-clapi.jar"/>
-	<classpathentry kind="lib" path="lib/serp/serp-1.11.0.jar"/>
 	<classpathentry kind="lib" path="lib/glassfish/glassfish-clapi.jar"/>
 	<classpathentry kind="lib" path="lib/tomcat/naming-resources.jar"/>
 	<classpathentry kind="lib" path="lib/openjpa/openjpa-all-0.9.6-incubating.jar"/>
+	<classpathentry kind="lib" path="lib/serp/serp-1.12.1.jar"/>
 	<classpathentry kind="output" path="target/other-classes"/>
 </classpath>
