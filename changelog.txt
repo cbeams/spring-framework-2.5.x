@@ -3,6 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.0.2 (30.12.2006)
+-------------------------------------
+
+Package org.springframework.beans
+* refined currently-in-creation check for lazy-init singletons, to avoid unintended BeanCurrentlyInCreationException
+
+
 Changes in version 2.0.1 (23.11.2006)
 -------------------------------------
 
