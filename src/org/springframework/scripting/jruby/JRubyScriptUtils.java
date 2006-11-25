@@ -20,9 +20,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
+import java.util.Collections;
 
 import org.jruby.IRuby;
-import org.jruby.Ruby;
 import org.jruby.RubyNil;
 import org.jruby.ast.ClassNode;
 import org.jruby.ast.Colon2Node;
@@ -30,6 +30,7 @@ import org.jruby.ast.NewlineNode;
 import org.jruby.ast.Node;
 import org.jruby.exceptions.JumpException;
 import org.jruby.javasupport.JavaUtil;
+import org.jruby.javasupport.JavaEmbedUtils;
 import org.jruby.runtime.builtin.IRubyObject;
 
 import org.springframework.aop.support.AopUtils;
@@ -54,7 +55,7 @@ public abstract class JRubyScriptUtils {
 	 * @throws JumpException in case of JRuby parsing failure
 	 */
 	public static Object createJRubyObject(String scriptSource, Class[] interfaces) throws JumpException {
-		IRuby ruby = Ruby.getDefaultInstance();
+		IRuby ruby = initializeRuntime();
 
 		Node scriptRootNode = ruby.parse(scriptSource, "");
 		IRubyObject rubyObject = ruby.eval(scriptRootNode);
@@ -72,8 +73,15 @@ public abstract class JRubyScriptUtils {
 						interfaces, new RubyObjectInvocationHandler(rubyObject, ruby));
 	}
 
+	/**
+	 * Initializes an instance of the {@link IRuby} runtime.
+	 */
+	private static IRuby initializeRuntime() {
+		return JavaEmbedUtils.initialize(Collections.EMPTY_LIST);
+	}
 
-    /**
+
+	/**
 	 * Given the root {@link Node} in a JRuby AST will locate the name of the class defined
 	 * by that AST.
 	 * @throws IllegalArgumentException if no class is defined by the supplied AST.
@@ -149,7 +157,11 @@ public abstract class JRubyScriptUtils {
 			if (javaArgs == null || javaArgs.length == 0) {
 				return new IRubyObject[0];
 			}
-			return JavaUtil.convertJavaArrayToRuby(this.ruby, javaArgs);
+			IRubyObject[] rubyArgs = new IRubyObject[javaArgs.length];
+			for (int i = 0; i < javaArgs.length; i++) {
+				rubyArgs[i] = JavaEmbedUtils.javaToRuby(this.ruby, javaArgs[i]);
+			}
+			return rubyArgs;
 		}
 	}
 

@@ -192,4 +192,25 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertEquals("Hello World!", messenger.getMessage());
 		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
 	}
+
+	public void testWithComplexArg() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContext.xml", getClass());
+		Printer printer = (Printer) ctx.getBean("printer");
+		CountingPrintable printable = new CountingPrintable();
+		printer.print(printable);
+		assertEquals(1, printable.count);
+	}
+
+	private static class CountingPrintable implements Printable {
+
+		public int count;
+
+		public String getContent() {
+			this.count++;
+			return "Hello World!";
+		}
+	}
 }

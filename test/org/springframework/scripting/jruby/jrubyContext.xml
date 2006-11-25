@@ -18,7 +18,7 @@ class RubyCalculator &lt; Calculator
     x + y
  end
 
-end
+end                                                                                          
 			</value>
 		</constructor-arg>
 		<constructor-arg value="org.springframework.scripting.Calculator"/>
@@ -30,4 +30,8 @@ end
 		<property name="message" value="Hello World!"/>
 	</bean>
 
+	<bean id="printer" class="org.springframework.scripting.jruby.JRubyScriptFactory">
+		<constructor-arg value="classpath:org/springframework/scripting/jruby/Printer.rb"/>
+		<constructor-arg value="org.springframework.scripting.jruby.Printer"/>
+	</bean>
 </beans>
