@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,13 +243,13 @@ public class DataAccessUtilsTests extends TestCase {
 			// expected
 		}
 	}
-	
+
 	public void testExceptionTranslationWithNoTranslation() {
 		MapPersistenceExceptionTranslator mpet = new MapPersistenceExceptionTranslator();
 		RuntimeException in = new RuntimeException();
 		assertSame(in, DataAccessUtils.translateIfNecessary(in, mpet));
 	}
-	
+
 	public void testExceptionTranslationWithTranslation() {
 		MapPersistenceExceptionTranslator mpet = new MapPersistenceExceptionTranslator();
 		RuntimeException in = new RuntimeException("in");
@@ -257,19 +257,19 @@ public class DataAccessUtilsTests extends TestCase {
 		mpet.addTranslation(in, out);
 		assertSame(out, DataAccessUtils.translateIfNecessary(in, mpet));
 	}
-	
-	
+
+
 	public static class MapPersistenceExceptionTranslator implements PersistenceExceptionTranslator {
-		
+
 		/**
 		 * Map<RuntimeException,RuntimeException>: in to out
 		 */
 		private Map translations = new HashMap();
-		
+
 		public void addTranslation(RuntimeException in, RuntimeException out) {
 			this.translations.put(in, out);
 		}
-		
+
 		public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 			return (DataAccessException) translations.get(ex);
 		}
