@@ -7,7 +7,18 @@ Changes in version 2.0.2 (30.12.2006)
 -------------------------------------
 
 Package org.springframework.beans
+* BeanWrapperImpl converts nested collection value (e.g. List within Map) to declared generic type, if applicable
 * refined currently-in-creation check for lazy-init singletons, to avoid unintended BeanCurrentlyInCreationException
+
+Package org.springframework.dao
+* added "singleResult" and "requiredSingleResult" methods to DataAccessUtils, distinct from "uniqueResult"'s contract
+
+Package org.springframework.jdbc
+* JdbcTemplate's "queryForObject" uses "requiredSingleResult" to never accept more than 1 row in result (as per its c.)
+* SqlQuery's "findObject" explicitly uses "singleResult" to never accept more than 1 row in result (as per its contract)
+
+Package org.springframework.scripting
+* fixed JRubyScriptFactory to correctly wrap Java objects that get passed into a JRuby script proxy
 
 
 Changes in version 2.0.1 (23.11.2006)
