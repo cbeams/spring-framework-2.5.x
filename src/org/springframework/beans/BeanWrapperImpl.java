@@ -561,8 +561,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						}
 						// IMPORTANT: Do not pass full property name in here - property editors
 						// must not kick in for map keys but rather only for map values.
-						Object convertedMapKey = this.typeConverterDelegate.convertIfNecessary(
-								null, null, key, mapKeyType);
+						Object convertedMapKey = this.typeConverterDelegate.convertIfNecessary(key, mapKeyType);
 						// Pass full property name and old value in here, since we want full
 						// conversion ability for map values.
 						value = map.get(convertedMapKey);
@@ -715,8 +714,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				try {
 					// IMPORTANT: Do not pass full property name in here - property editors
 					// must not kick in for map keys but rather only for map values.
-					convertedMapKey = this.typeConverterDelegate.convertIfNecessary(
-							null, null, key, mapKeyType);
+					convertedMapKey = this.typeConverterDelegate.convertIfNecessary(key, mapKeyType);
 				}
 				catch (IllegalArgumentException ex) {
 					PropertyChangeEvent pce =
