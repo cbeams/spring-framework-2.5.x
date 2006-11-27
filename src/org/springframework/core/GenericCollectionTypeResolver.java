@@ -149,10 +149,12 @@ public abstract class GenericCollectionTypeResolver {
 		Assert.notNull(methodParam, "MethodParameter must not be null");
 		int idx = methodParam.getParameterIndex();
 		if (methodParam.getConstructor() != null) {
-			return extractType(methodParam.getConstructor().getGenericParameterTypes()[idx], source, typeIndex, 1);
+			return extractType(methodParam.getConstructor().getGenericParameterTypes()[idx],
+					source, typeIndex, methodParam.getNestingLevel());
 		}
 		else {
-			return extractType(methodParam.getMethod().getGenericParameterTypes()[idx], source, typeIndex, 1);
+			return extractType(methodParam.getMethod().getGenericParameterTypes()[idx],
+					source, typeIndex, methodParam.getNestingLevel());
 		}
 	}
 

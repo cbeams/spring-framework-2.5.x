@@ -18,6 +18,7 @@ package org.springframework.beans;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -82,7 +83,7 @@ public class BeanWrapperGenericsTests extends TestCase {
 
 	public void testGenericMapElement() {
 		GenericBean gb = new GenericBean();
-		gb.setShortMap(new HashMap<Short,Integer>());
+		gb.setShortMap(new HashMap<Short, Integer>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("shortMap[4]", "5");
 		assertEquals(new Integer(5), bw.getPropertyValue("shortMap[4]"));
@@ -102,7 +103,7 @@ public class BeanWrapperGenericsTests extends TestCase {
 
 	public void testGenericMapElementWithKeyType() {
 		GenericBean gb = new GenericBean();
-		gb.setLongMap(new HashMap<Long,Integer>());
+		gb.setLongMap(new HashMap<Long, Integer>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("longMap[4]", "5");
 		assertEquals("5", gb.getLongMap().get(new Long("4")));
@@ -127,7 +128,7 @@ public class BeanWrapperGenericsTests extends TestCase {
 
 	public void testGenericMapElementWithCollectionValue() {
 		GenericBean gb = new GenericBean();
-		gb.setCollectionMap(new HashMap<Number,Collection<? extends Object>>());
+		gb.setCollectionMap(new HashMap<Number, Collection<? extends Object>>());
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
 		HashSet value1 = new HashSet();
@@ -245,6 +246,81 @@ public class BeanWrapperGenericsTests extends TestCase {
 		bw.setPropertyValue("mapOfLists[1][0]", "5");
 		assertEquals(new Integer(5), bw.getPropertyValue("mapOfLists[1][0]"));
 		assertEquals(new Integer(5), gb.getMapOfLists().get(new Integer(1)).get(0));
+	}
+
+	public void testGenericTypeNestingMapOfInteger() throws Exception {
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("testKey", "100");
+
+		NestedGenericCollectionBean gb = new NestedGenericCollectionBean();
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setPropertyValue("mapOfInteger", map);
+
+		Object obj = gb.getMapOfInteger().get("testKey");
+		assertTrue(obj instanceof Integer);
+	}
+
+	public void testGenericTypeNestingMapOfListOfInteger() throws Exception {
+		Map<String, List<String>> map = new HashMap<String, List<String>>();
+		List<String> list = Arrays.asList(new String[] {"1", "2", "3"});
+		map.put("testKey", list);
+
+		NestedGenericCollectionBean gb = new NestedGenericCollectionBean();
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setPropertyValue("mapOfListOfInteger", map);
+
+		Object obj = gb.getMapOfListOfInteger().get("testKey").get(0);
+		assertTrue(obj instanceof Integer);
+		assertEquals(1, ((Integer) obj).intValue());
+	}
+
+	public void testGenericTypeNestingListOfMapOfInteger() throws Exception {
+		List<Map<String, String>> list = new LinkedList<Map<String, String>>();
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("testKey", "5");
+		list.add(map);
+
+		NestedGenericCollectionBean gb = new NestedGenericCollectionBean();
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setPropertyValue("listOfMapOfInteger", list);
+
+		Object obj = gb.getListOfMapOfInteger().get(0).get("testKey");
+		assertTrue(obj instanceof Integer);
+		assertEquals(5, ((Integer) obj).intValue());
+	}
+
+
+	private static class NestedGenericCollectionBean {
+
+		private Map<String, Integer> mapOfInteger;
+
+		private Map<String, List<Integer>> mapOfListOfInteger;
+
+		private List<Map<String, Integer>> listOfMapOfInteger;
+
+		public Map<String, Integer> getMapOfInteger() {
+			return mapOfInteger;
+		}
+
+		public void setMapOfInteger(Map<String, Integer> mapOfInteger) {
+			this.mapOfInteger = mapOfInteger;
+		}
+
+		public Map<String, List<Integer>> getMapOfListOfInteger() {
+			return mapOfListOfInteger;
+		}
+
+		public void setMapOfListOfInteger(Map<String, List<Integer>> mapOfListOfInteger) {
+			this.mapOfListOfInteger = mapOfListOfInteger;
+		}
+
+		public List<Map<String, Integer>> getListOfMapOfInteger() {
+			return listOfMapOfInteger;
+		}
+
+		public void setListOfMapOfInteger(List<Map<String, Integer>> listOfMapOfInteger) {
+			this.listOfMapOfInteger = listOfMapOfInteger;
+		}
 	}
 
 }

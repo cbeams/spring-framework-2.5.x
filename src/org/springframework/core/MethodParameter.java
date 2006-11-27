@@ -42,33 +42,61 @@ public class MethodParameter {
 
 	private final int parameterIndex;
 
+	private int nestingLevel;
+
+
+	/**
+	 * Create a new MethodParameter for the given method, with nesting level 1.
+	 * @param method the Method to specify a parameter for
+	 * @param parameterIndex the index of the parameter
+	 */
+	public MethodParameter(Method method, int parameterIndex) {
+		this(method, parameterIndex, 1);
+	}
 
 	/**
 	 * Create a new MethodParameter for the given method.
 	 * @param method the Method to specify a parameter for
 	 * @param parameterIndex the index of the parameter
+	 * @param nestingLevel the nesting level of the target type
+	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
+	 * nested List, whereas 2 would indicate the element of the nested List)
 	 */
-	public MethodParameter(Method method, int parameterIndex) {
+	public MethodParameter(Method method, int parameterIndex, int nestingLevel) {
 		Assert.notNull(method, "Method must not be null");
 		Assert.isTrue(parameterIndex >= 0, "Parameter index must not be negative");
 		Assert.isTrue(parameterIndex < method.getParameterTypes().length,
 				"Parameter index must not exceed " + (method.getParameterTypes().length - 1));
 		this.method = method;
 		this.parameterIndex = parameterIndex;
+		this.nestingLevel = nestingLevel;
+	}
+
+	/**
+	 * Create a new MethodParameter for the given constructor, with nesting level 1.
+	 * @param constructor the Constructor to specify a parameter for
+	 * @param parameterIndex the index of the parameter
+	 */
+	public MethodParameter(Constructor constructor, int parameterIndex) {
+		this(constructor, parameterIndex, 1);
 	}
 
 	/**
 	 * Create a new MethodParameter for the given constructor.
 	 * @param constructor the Constructor to specify a parameter for
 	 * @param parameterIndex the index of the parameter
+	 * @param nestingLevel the nesting level of the target type
+	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
+	 * nested List, whereas 2 would indicate the element of the nested List)
 	 */
-	public MethodParameter(Constructor constructor, int parameterIndex) {
+	public MethodParameter(Constructor constructor, int parameterIndex, int nestingLevel) {
 		Assert.notNull(constructor, "Constructor must not be null");
 		Assert.isTrue(parameterIndex >= 0, "Parameter index must not be negative");
 		Assert.isTrue(parameterIndex < constructor.getParameterTypes().length,
 				"Parameter index must not exceed " + (constructor.getParameterTypes().length - 1));
 		this.constructor = constructor;
 		this.parameterIndex = parameterIndex;
+		this.nestingLevel = nestingLevel;
 	}
 
 
@@ -78,7 +106,7 @@ public class MethodParameter {
 	 * @return the Method, or <code>null</code> if none
 	 */
 	public Method getMethod() {
-		return method;
+		return this.method;
 	}
 
 	/**
@@ -87,7 +115,7 @@ public class MethodParameter {
 	 * @return the Constructor, or <code>null</code> if none
 	 */
 	public Constructor getConstructor() {
-		return constructor;
+		return this.constructor;
 	}
 
 	/**
@@ -95,7 +123,32 @@ public class MethodParameter {
 	 * @return the parameter index (never negative)
 	 */
 	public int getParameterIndex() {
-		return parameterIndex;
+		return this.parameterIndex;
+	}
+
+	/**
+	 * Return the nesting level of the target type
+	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
+	 * nested List, whereas 2 would indicate the element of the nested List).
+	 */
+	public int getNestingLevel() {
+		return this.nestingLevel;
+	}
+
+	/**
+	 * Increase this parameter's nesting level.
+	 * @see #getNestingLevel()
+	 */
+	public void increaseNestingLevel() {
+		this.nestingLevel++;
+	}
+
+	/**
+	 * Decrease this parameter's nesting level.
+	 * @see #getNestingLevel()
+	 */
+	public void decreaseNestingLevel() {
+		this.nestingLevel--;
 	}
 
 

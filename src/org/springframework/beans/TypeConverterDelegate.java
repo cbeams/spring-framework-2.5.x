@@ -84,6 +84,18 @@ class TypeConverterDelegate {
 	 * @param newValue proposed change value
 	 * @param requiredType the type we must convert to
 	 * (or <code>null</code> if not known, for example in case of a collection element)
+	 * @return the new value, possibly the result of type conversion
+	 * @throws IllegalArgumentException if type conversion failed
+	 */
+	public Object convertIfNecessary(Object newValue, Class requiredType) throws IllegalArgumentException {
+		return convertIfNecessary(null, null, newValue, requiredType, null, null);
+	}
+
+	/**
+	 * Convert the value to the specified required type.
+	 * @param newValue proposed change value
+	 * @param requiredType the type we must convert to
+	 * (or <code>null</code> if not known, for example in case of a collection element)
 	 * @param methodParam the method parameter that is the target of the conversion
 	 * (may be <code>null</code>)
 	 * @return the new value, possibly the result of type conversion
@@ -200,7 +212,7 @@ class TypeConverterDelegate {
 					Field enumField = requiredType.getField((String) convertedValue);
 					convertedValue = enumField.get(null);
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Field [" + convertedValue + "] isn't an enum value", ex);
 					}
@@ -317,7 +329,14 @@ class TypeConverterDelegate {
 		for (; it.hasNext(); i++) {
 			Object element = it.next();
 			String indexedPropertyName = buildIndexedPropertyName(propertyName, i);
-			Object convertedElement = convertIfNecessary(indexedPropertyName, null, element, elementType);
+			if (methodParam != null) {
+				methodParam.increaseNestingLevel();
+			}
+			Object convertedElement =
+					convertIfNecessary(indexedPropertyName, null, element, elementType, null, methodParam);
+			if (methodParam != null) {
+				methodParam.decreaseNestingLevel();
+			}
 			convertedCopy.add(convertedElement);
 			actuallyConverted = actuallyConverted || (element != convertedElement);
 		}
@@ -350,8 +369,14 @@ class TypeConverterDelegate {
 			Object key = entry.getKey();
 			Object value = entry.getValue();
 			String keyedPropertyName = buildKeyedPropertyName(propertyName, key);
-			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key, keyType);
-			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value, valueType);
+			if (methodParam != null) {
+				methodParam.increaseNestingLevel();
+			}
+			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key, keyType, null, methodParam);
+			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value, valueType, null, methodParam);
+			if (methodParam != null) {
+				methodParam.decreaseNestingLevel();
+			}
 			convertedCopy.put(convertedKey, convertedValue);
 			actuallyConverted = actuallyConverted || (key != convertedKey) || (value != convertedValue);
 		}
