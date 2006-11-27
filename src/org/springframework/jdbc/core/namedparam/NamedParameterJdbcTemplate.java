@@ -135,7 +135,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		String sqlToUse = NamedParameterUtils.substituteNamedParameters(sql, paramSource);
 		List results = (List) getJdbcOperations().query(
 				sqlToUse, args, argTypes, new RowMapperResultSetExtractor(rowMapper, 1));
-		return DataAccessUtils.requiredUniqueResult(results);
+		return DataAccessUtils.requiredSingleResult(results);
 	}
 
 	public Object queryForObject(String sql, Map paramMap, RowMapper rowMapper) throws DataAccessException {

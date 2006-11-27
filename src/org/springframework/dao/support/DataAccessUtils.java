@@ -36,13 +36,55 @@ import org.springframework.util.NumberUtils;
 public abstract class DataAccessUtils {
 
 	/**
+	 * Return a single result object from the given Collection.
+	 * <p>Returns <code>null</code> if 0 result objects found;
+	 * throws an exception if more than 1 element found.
+	 * @param results the result Collection (can be <code>null</code>)
+	 * @return the single result object, or <code>null</code> if none
+	 * @throws IncorrectResultSizeDataAccessException if more than one
+	 * element has been found in the given Collection
+	 */
+	public static Object singleResult(Collection results) throws IncorrectResultSizeDataAccessException {
+		int size = (results != null ? results.size() : 0);
+		if (size == 0) {
+			return null;
+		}
+		if (results.size() > 1) {
+			throw new IncorrectResultSizeDataAccessException(1, size);
+		}
+		return results.iterator().next();
+	}
+
+	/**
+	 * Return a single result object from the given Collection.
+	 * <p>Throws an exception if 0 or more than 1 element found.
+	 * @param results the result Collection (can be <code>null</code>)
+	 * @return the single result object
+	 * @throws IncorrectResultSizeDataAccessException if more than one
+	 * element has been found in the given Collection
+	 * @throws EmptyResultDataAccessException if no element at all
+	 * has been found in the given Collection
+	 */
+	public static Object requiredSingleResult(Collection results) throws IncorrectResultSizeDataAccessException {
+		int size = (results != null ? results.size() : 0);
+		if (size == 0) {
+			throw new EmptyResultDataAccessException(1);
+		}
+		if (results.size() > 1) {
+			throw new IncorrectResultSizeDataAccessException(1, size);
+		}
+		return results.iterator().next();
+	}
+
+	/**
 	 * Return a unique result object from the given Collection.
-	 * Returns null if 0 result objects found; throws an exception
-	 * if more than 1 found.
+	 * <p>Returns <code>null</code> if 0 result objects found;
+	 * throws an exception if more than 1 instance found.
 	 * @param results the result Collection (can be <code>null</code>)
 	 * @return the unique result object, or <code>null</code> if none
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object has been found in the given Collection
+	 * @see org.springframework.util.CollectionUtils#hasUniqueObject
 	 */
 	public static Object uniqueResult(Collection results) throws IncorrectResultSizeDataAccessException {
 		int size = (results != null ? results.size() : 0);
@@ -57,13 +99,14 @@ public abstract class DataAccessUtils {
 
 	/**
 	 * Return a unique result object from the given Collection.
-	 * Throws an exception if 0 or more than 1 result objects found.
+	 * <p>Throws an exception if 0 or more than 1 instance found.
 	 * @param results the result Collection (can be <code>null</code>)
 	 * @return the unique result object
 	 * @throws IncorrectResultSizeDataAccessException if more than one
 	 * result object has been found in the given Collection
-	 * @throws EmptyResultDataAccessException if no result object
-	 * at all has been found in the given Collection
+	 * @throws EmptyResultDataAccessException if no result object at all
+	 * has been found in the given Collection
+	 * @see org.springframework.util.CollectionUtils#hasUniqueObject
 	 */
 	public static Object requiredUniqueResult(Collection results) throws IncorrectResultSizeDataAccessException {
 		int size = (results != null ? results.size() : 0);

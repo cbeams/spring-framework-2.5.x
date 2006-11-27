@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,9 @@ import org.springframework.util.Assert;
  *     "select * from user",
  *     new RowMapperResultSetExtractor(rowMapper, 10));
  *
- * List userResults = jdbcTemplate.query(
+ * User user = (User) jdbcTemplate.queryForObject(
  *     "select * from user where id=?", new Object[] {id},
- *     new RowMapperResultSetExtractor(rowMapper, 1));
- * User user = (User) DataAccessUtils.uniqueResult(userResults);</pre>
+ *     new RowMapperResultSetExtractor(rowMapper, 1));</pre>
  *
  * <p>Alternatively, consider subclassing MappingSqlQuery from the <code>jdbc.object</code>
  * package: Instead of working with separate JdbcTemplate and RowMapper objects,
@@ -56,7 +55,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 1.0.2
  * @see RowMapper
- * @see org.springframework.dao.support.DataAccessUtils#uniqueResult
+ * @see JdbcTemplate
  * @see org.springframework.jdbc.object.MappingSqlQuery
  */
 public class RowMapperResultSetExtractor implements ResultSetExtractor {

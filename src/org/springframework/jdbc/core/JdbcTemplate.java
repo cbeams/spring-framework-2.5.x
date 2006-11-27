@@ -414,7 +414,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	public Object queryForObject(String sql, RowMapper rowMapper) throws DataAccessException {
 		List results = query(sql, rowMapper);
-		return DataAccessUtils.requiredUniqueResult(results);
+		return DataAccessUtils.requiredSingleResult(results);
 	}
 
 	public Object queryForObject(String sql, Class requiredType) throws DataAccessException {
@@ -654,12 +654,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			throws DataAccessException {
 
 		List results = (List) query(sql, args, argTypes, new RowMapperResultSetExtractor(rowMapper, 1));
-		return DataAccessUtils.requiredUniqueResult(results);
+		return DataAccessUtils.requiredSingleResult(results);
 	}
 
 	public Object queryForObject(String sql, Object[] args, RowMapper rowMapper) throws DataAccessException {
 		List results = (List) query(sql, args, new RowMapperResultSetExtractor(rowMapper, 1));
-		return DataAccessUtils.requiredUniqueResult(results);
+		return DataAccessUtils.requiredSingleResult(results);
 	}
 
 	public Object queryForObject(String sql, Object[] args, int[] argTypes, Class requiredType)

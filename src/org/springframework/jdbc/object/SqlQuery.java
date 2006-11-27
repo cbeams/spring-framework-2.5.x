@@ -99,9 +99,9 @@ public abstract class SqlQuery extends SqlOperation {
 	 * @param params parameters, similar to JDO query parameters.
 	 * Primitive parameters must be represented by their Object wrapper type.
 	 * The ordering of parameters is significant.
-	 * @param context contextual information passed to the callback <code>mapRow</code> method.
-	 * The JDBC operation itself doesn't rely on this parameter, but can be useful for
-	 * creating the objects of the result list.
+	 * @param context contextual information passed to the <code>mapRow</code>
+	 * callback method. The JDBC operation itself doesn't rely on this parameter,
+	 * but it can be useful for creating the objects of the result list.
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
 	 * will be of the same class, although it is possible to use different types.
 	 */
@@ -212,9 +212,9 @@ public abstract class SqlQuery extends SqlOperation {
 	 * the SqlParameters. Primitive parameters must be represented by their Object wrapper
 	 * type. The ordering of parameters is not significant since they are supplied in a
 	 * SqlParameterMap which is an implementation of the Map interface.
-	 * @param context contextual information passed to the callback <code>mapRow</code> method.
-	 * The JDBC operation itself doesn't reyl on this parameter, but can be useful for
-	 * creating the objects of the result list.
+	 * @param context contextual information passed to the <code>mapRow</code>
+	 * callback method. The JDBC operation itself doesn't rely on this parameter,
+	 * but it can be useful for creating the objects of the result list.
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
 	 * will be of the same class, although it is possible to use different types.
 	 */
@@ -243,11 +243,11 @@ public abstract class SqlQuery extends SqlOperation {
 	 * considered an error if they return more than one result.
 	 * @return the result object, or <code>null</code> if not found. Subclasses may
 	 * choose to treat this as an error and throw an exception.
-	 * @see org.springframework.dao.support.DataAccessUtils#uniqueResult
+	 * @see org.springframework.dao.support.DataAccessUtils#singleResult
 	 */
 	public Object findObject(Object[] parameters, Map context) throws DataAccessException {
 		List results = execute(parameters, context);
-		return DataAccessUtils.uniqueResult(results);
+		return DataAccessUtils.singleResult(results);
 	}
 
 	/**
@@ -322,13 +322,15 @@ public abstract class SqlQuery extends SqlOperation {
 	 * @param paramMap Map of parameter name to parameter object,
 	 * matching named parameters specified in the SQL statement.
 	 * Ordering is not significant.
-	 * @param context contextual information passed to the callback mapRow method.
+	 * @param context contextual information passed to the <code>mapRow</code>
+	 * callback method. The JDBC operation itself doesn't rely on this parameter,
+	 * but it can be useful for creating the objects of the result list.
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
 	 * will be of the same class, although it is possible to use different types.
 	 */
 	public Object findObjectByNamedParam(Map paramMap, Map context) throws DataAccessException {
 		List results = executeByNamedParam(paramMap, context);
-		return DataAccessUtils.uniqueResult(results);
+		return DataAccessUtils.singleResult(results);
 	}
 
 	/**
@@ -343,14 +345,14 @@ public abstract class SqlQuery extends SqlOperation {
 
 
 	/**
-	 * Subclasses must implement this method to extract an object per row,
-	 * to be returned by the execute method as an aggregated {@link List}.
+	 * Subclasses must implement this method to extract an object per row, to be
+	 * returned by the <cod>execute</code> method as an aggregated {@link List}.
 	 * @param parameters the parameters to the <code>execute()</code> method,
 	 * in case subclass is interested; may be <code>null</code> if there
 	 * were no parameters.
-	 * @param context contextual information passed to the callback
-	 * <code>mapRow</code> method; the JDBC operation itself doesn't rely on
-	 * this parameter, but it can be useful for creating the objects of the result list
+	 * @param context contextual information passed to the <code>mapRow</code>
+	 * callback method. The JDBC operation itself doesn't rely on this parameter,
+	 * but it can be useful for creating the objects of the result list.
 	 * @see #execute
 	 */
 	protected abstract RowMapper newRowMapper(Object[] parameters, Map context);

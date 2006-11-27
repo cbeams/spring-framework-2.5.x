@@ -277,8 +277,7 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		mockResultSetMetaData.getColumnCount();
 		ctrlResultSetMetaData.setReturnValue(1);
 		mockResultSet.getString(1);
-		// TODO: fails if returning the same value ("pass") here
-		ctrlResultSet.setReturnValue("pass2");
+		ctrlResultSet.setReturnValue("pass");
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
