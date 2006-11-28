@@ -249,8 +249,6 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * <p>If specified, this will usually be a Spring JtaTransactionManager,
 	 * in combination with a JTA-aware ConnectionFactory that this message
 	 * listener container fetches its Connections from.
-	 * <p>Alternatively, pass in a fully configured Spring TransactionTemplate
-	 * into the "transactionTemplate" property.
 	 */
 	public void setTransactionManager(PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
