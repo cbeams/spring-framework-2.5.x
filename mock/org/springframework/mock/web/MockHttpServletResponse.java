@@ -302,7 +302,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @return the associated header value, or <code>null<code> if none
 	 */
 	public Object getHeader(String name) {
-		Assert.notNull(name, "Header name must not be null");
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		return (header != null ? header.getValue() : null);
 	}
@@ -313,7 +312,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @return the associated header values, or an empty List if none
 	 */
 	public List getHeaders(String name) {
-		Assert.notNull(name, "Header name must not be null");
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		return (header != null ? header.getValues() : Collections.EMPTY_LIST);
 	}
@@ -397,9 +395,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	private void doAddHeaderValue(String name, Object value, boolean replace) {
-		Assert.notNull(name, "Header name must not be null");
-		Assert.notNull(value, "Header value must not be null");
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		Assert.notNull(value, "Header value must not be null");
 		if (header == null) {
 			header = new HeaderValueHolder();
 			this.headers.put(name, header);

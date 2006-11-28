@@ -29,7 +29,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -560,9 +559,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * @see #getIntHeader
 	 */
 	public void addHeader(String name, Object value) {
-		Assert.notNull(name, "Header name must not be null");
-		Assert.notNull(value, "Header value must not be null");
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		Assert.notNull(value, "Header value must not be null");
 		if (header == null) {
 			header = new HeaderValueHolder();
 			this.headers.put(name, header);
@@ -579,7 +577,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public long getDateHeader(String name) {
-		Assert.notNull(name, "Header name must not be null");
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		Object value = (header != null ? header.getValue() : null);
 		if (value instanceof Date) {
@@ -612,7 +609,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public int getIntHeader(String name) {
-		Assert.notNull(name, "Header name must not be null");
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		Object value = (header != null ? header.getValue() : null);
 		if (value instanceof Number) {
