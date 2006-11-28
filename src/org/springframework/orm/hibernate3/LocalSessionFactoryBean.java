@@ -48,6 +48,7 @@ import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.FilterDefinition;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
+import org.hibernate.transaction.JTATransactionFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
@@ -62,9 +63,8 @@ import org.springframework.jdbc.support.lob.LobHandler;
 
 /**
  * FactoryBean that creates a local Hibernate SessionFactory instance.
- * Behaves like a SessionFactory instance when used as bean reference, e.g.
- * for HibernateTemplate's "sessionFactory" property. Note that switching
- * to JndiObjectFactoryBean is just a matter of configuration!
+ * Behaves like a SessionFactory instance when used as bean reference,
+ * e.g. for HibernateTemplate's "sessionFactory" property.
  *
  * <p>The typical usage will be to register this as singleton factory
  * (for a certain underlying JDBC DataSource) in an application context,
@@ -84,12 +84,6 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * JtaTransactionManager can be used for transaction demarcation, the latter
  * only being necessary for transactions that span multiple databases.
  *
- * <p>Registering a SessionFactory with JNDI is only advisable when using
- * Hibernate's JCA Connector, i.e. when the application server cares for
- * initialization. Else, portability is rather limited: Manual JNDI binding
- * isn't supported by some application servers (e.g. Tomcat). Unfortunately,
- * JCA has drawbacks too: Its setup is container-specific and can be tedious.
- *
  * <p>This factory bean will by default expose a transaction-aware SessionFactory
  * proxy, letting data access code work with the plain Hibernate SessionFactory
  * and its <code>getCurrentSession()</code> method, while still being able to
@@ -99,8 +93,9 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * <code>getCurrentSession()</code> will also seamlessly work with
  * a request-scoped Session managed by OpenSessionInViewFilter/Interceptor.
  *
- * <p>Requires Hibernate 3.0.3 or later. Note that this factory will always use
- * "on_close" as default Hibernate connection release mode, for the reason that
+ * <p>Requires Hibernate 3.0.3 or later. Note that this factory will use
+ * "on_close" as default Hibernate connection release mode, unless in the
+ * case of a "jtaTransactionManager" specified, for the reason that
  * this is appropriate for most Spring-based applications (in particular when
  * using Spring's HibernateTransactionManager). Hibernate 3.0 used "on_close"
  * as its own default too; however, Hibernate 3.1 changed this to "auto"
@@ -110,8 +105,8 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * @since 1.2
  * @see HibernateTemplate#setSessionFactory
  * @see HibernateTransactionManager#setSessionFactory
- * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see #setExposeTransactionAwareSessionFactory
+ * @see #setJtaTransactionManager
  * @see org.hibernate.SessionFactory#getCurrentSession()
  * @see HibernateTransactionManager
  */
@@ -618,12 +613,21 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 		}
 
 		try {
-			// Set connection release mode "on_close" as default.
-			// This was the case for Hibernate 3.0; Hibernate 3.1 changed
-			// it to "auto" (i.e. "after_statement" or "after_transaction").
-			// However, for Spring's resource management (in particular for
-			// HibernateTransactionManager), "on_close" is the better default.
-			config.setProperty(Environment.RELEASE_CONNECTIONS, ConnectionReleaseMode.ON_CLOSE.toString());
+			if (this.jtaTransactionManager != null) {
+				// Set Spring-provided JTA TransactionManager as Hibernate property.
+				config.setProperty(
+						Environment.TRANSACTION_MANAGER_STRATEGY, LocalTransactionManagerLookup.class.getName());
+				config.setProperty(
+						Environment.TRANSACTION_STRATEGY, JTATransactionFactory.class.getName());
+			}
+			else {
+				// Set connection release mode "on_close" as default.
+				// This was the case for Hibernate 3.0; Hibernate 3.1 changed
+				// it to "auto" (i.e. "after_statement" or "after_transaction").
+				// However, for Spring's resource management (in particular for
+				// HibernateTransactionManager), "on_close" is the better default.
+				config.setProperty(Environment.RELEASE_CONNECTIONS, ConnectionReleaseMode.ON_CLOSE.toString());
+			}
 
 			if (this.entityInterceptor != null) {
 				// Set given entity interceptor at SessionFactory level.
@@ -671,12 +675,6 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 						actuallyTransactionAware ?
 						TransactionAwareDataSourceConnectionProvider.class.getName() :
 						LocalDataSourceConnectionProvider.class.getName());
-			}
-
-			if (this.jtaTransactionManager != null) {
-				// Set Spring-provided JTA TransactionManager as Hibernate property.
-				config.setProperty(
-						Environment.TRANSACTION_MANAGER_STRATEGY, LocalTransactionManagerLookup.class.getName());
 			}
 
 			if (this.mappingLocations != null) {
