@@ -88,7 +88,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		
 		TestBean derivedDavid = (TestBean)xbf.getBean("magicDavidDerived");
 		// this fails while it inherits from the child bean
-		assertNotNull(derivedDavid.getSpouse());
+		assertNotNull("SPR-2886, autowiring not propagated along child relationships", derivedDavid.getSpouse());
 	}*/
 
 	/**
