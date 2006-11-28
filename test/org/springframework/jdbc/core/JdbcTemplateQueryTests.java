@@ -258,7 +258,7 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		assertEquals("Wow is Integer", 11, ((Integer) map.get("age")).intValue());
 	}
 
-	public void testQueryForObjectIncorrectResultSetSizeBecauseMoreThanOne() throws Exception {
+	public void testQueryForObjectThrowsIncorrectResultSizeForMoreThanOneRow() throws Exception {
 		String sql = "select pass from t_account where first_name='Alef'";
 		
 		mockResultSetMetaData.getColumnCount();

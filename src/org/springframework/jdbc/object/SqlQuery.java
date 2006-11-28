@@ -40,14 +40,14 @@ import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
  * custom execution methods, with meaningful names and typed parameters
  * (definitely a best practice). Each custom query method will invoke one of
  * this class's untyped query methods.
- * 
+ *
  * <p>Like all <code>RdbmsOperation</code> classes that ship with the Spring
  * Framework, <code>SqlQuery</code> instances are threadsafe after their
- * initialization is complete. That is, after they are constructed and
- * configured via their setter methods, they can be used safely from multiple
- * threads.
+ * initialization is complete. That is, after they are constructed and configured
+ * via their setter methods, they can be used safely from multiple threads.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @author Thomas Risberg
  * @author Jean-Pierre Pawlak
  */
@@ -245,8 +245,8 @@ public abstract class SqlQuery extends SqlOperation {
 	 * choose to treat this as an error and throw an exception.
 	 * @see org.springframework.dao.support.DataAccessUtils#singleResult
 	 */
-	public Object findObject(Object[] parameters, Map context) throws DataAccessException {
-		List results = execute(parameters, context);
+	public Object findObject(Object[] params, Map context) throws DataAccessException {
+		List results = execute(params, context);
 		return DataAccessUtils.singleResult(results);
 	}
 
