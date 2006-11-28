@@ -74,6 +74,22 @@ import org.springframework.util.StopWatch;
  * @author Rick Evans
  */
 public class XmlBeanFactoryTests extends TestCase {
+	
+	// autowiring somehow isn't inherited from parent beans, while I guess it should
+	// I haven't tested this for properties other than autowiring 
+	/*public void testSPR2886OverridesWithAutowiring() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
+		
+		TestBean david = (TestBean)xbf.getBean("magicDavid");
+		// the parent bean is autowiring
+		assertNotNull(david.getSpouse());
+		
+		TestBean derivedDavid = (TestBean)xbf.getBean("magicDavidDerived");
+		// this fails while it inherits from the child bean
+		assertNotNull(derivedDavid.getSpouse());
+	}*/
 
 	/**
 	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2368
@@ -980,6 +996,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		// comes from "resource.xml"
 		xbf.getBean("resource2", ResourceTestBean.class);
 	}
+	
 
 	public void testLookupOverrideMethodsWithSetterInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
