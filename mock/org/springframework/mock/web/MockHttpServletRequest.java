@@ -525,8 +525,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public void addHeader(String name, Object value) {
 		Assert.notNull(name, "Header name must not be null");
 		Assert.notNull(value, "Header value must not be null");
-		String canonicalName = name.toLowerCase();
-		Object oldValue = this.headers.get(canonicalName);
+		Object oldValue = this.headers.get(name);
 		if (oldValue instanceof List) {
 			List list = (List) oldValue;
 			addHeaderValue(list, value);
@@ -535,15 +534,15 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			List list = new LinkedList();
 			list.add(oldValue);
 			addHeaderValue(list, value);
-			this.headers.put(canonicalName, list);
+			this.headers.put(name, list);
 		}
 		else if (value instanceof Collection || value.getClass().isArray()) {
 			List list = new LinkedList();
 			addHeaderValue(list, value);
-			this.headers.put(canonicalName, list);
+			this.headers.put(name, list);
 		}
 		else {
-			this.headers.put(canonicalName, value);
+			this.headers.put(name, value);
 		}
 	}
 
@@ -571,7 +570,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public long getDateHeader(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		Object value = this.headers.get(name.toLowerCase());
+		Object value = this.headers.get(name);
 		if (value instanceof Date) {
 			return ((Date) value).getTime();
 		}
@@ -589,7 +588,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public String getHeader(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		Object value = this.headers.get(name.toLowerCase());
+		Object value = this.headers.get(name);
 		if (value instanceof List) {
 			return StringUtils.collectionToCommaDelimitedString((List) value);
 		}
@@ -603,7 +602,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public Enumeration getHeaders(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		Object value = this.headers.get(name.toLowerCase());
+		Object value = this.headers.get(name);
 		if (value instanceof List) {
 			return Collections.enumeration((List) value);
 		}
@@ -623,7 +622,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public int getIntHeader(String name) {
 		Assert.notNull(name, "Header name must not be null");
-		Object value = this.headers.get(name.toLowerCase());
+		Object value = this.headers.get(name);
 		if (value instanceof Number) {
 			return ((Number) value).intValue();
 		}
@@ -743,11 +742,11 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public HttpSession getSession(boolean create) {
-		// reset session if invalidated
+		// Reset session if invalidated.
 		if (this.session instanceof MockHttpSession && ((MockHttpSession) this.session).isInvalid()) {
 			this.session = null;
 		}
-		// create new session if necessary
+		// Create new session if necessary.
 		if (this.session == null && create) {
 			this.session = new MockHttpSession(this.servletContext);
 		}
