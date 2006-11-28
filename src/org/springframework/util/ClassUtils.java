@@ -18,6 +18,7 @@ package org.springframework.util;
 
 import java.beans.Introspector;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -303,6 +304,36 @@ public abstract class ClassUtils {
 		return method.getDeclaringClass().getName() + "." + method.getName();
 	}
 
+
+	/**
+	 * Determine whether the given class has a constructor with the given signature.
+	 * <p>Essentially translates <code>NoSuchMethodException</code> to "false".
+	 * @param clazz	the clazz to analyze
+	 * @param paramTypes the parameter types of the method
+	 * @see java.lang.Class#getMethod
+	 */
+	public static boolean hasConstructor(Class clazz, Class[] paramTypes) {
+		return (getConstructorIfAvailable(clazz, paramTypes) != null);
+	}
+
+	/**
+	 * Determine whether the given class has a constructor with the given signature,
+	 * and return it if available (else return <code>null</code>).
+	 * <p>Essentially translates <code>NoSuchMethodException</code> to <code>null</code>.
+	 * @param clazz	the clazz to analyze
+	 * @param paramTypes the parameter types of the method
+	 * @return the constructor, or <code>null</code> if not found
+	 * @see java.lang.Class#getConstructor
+	 */
+	public static Constructor getConstructorIfAvailable(Class clazz, Class[] paramTypes) {
+		Assert.notNull(clazz, "Class must not be null");
+		try {
+			return clazz.getConstructor(paramTypes);
+		}
+		catch (NoSuchMethodException ex) {
+			return null;
+		}
+	}
 
 	/**
 	 * Determine whether the given class has a method with the given signature.
