@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.quartz;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.logging.Log;
@@ -26,6 +27,7 @@ import org.quartz.JobExecutionException;
 import org.quartz.Scheduler;
 import org.quartz.StatefulJob;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
@@ -62,6 +64,16 @@ import org.springframework.util.MethodInvoker;
  */
 public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethodInvoker
     implements FactoryBean, BeanNameAware, BeanClassLoaderAware, InitializingBean {
+
+	/**
+	 * Determine whether the old Quartz 1.5 JobExecutionException constructor
+	 * with an Exception argument is present. If yes, we'll use it;
+	 * else we'll use Quartz 1.6's constructor with a Throwable argument.
+	 */
+	private static final Constructor oldJobExecutionExceptionConstructor =
+			ClassUtils.getConstructorIfAvailable(JobExecutionException.class,
+					new Class[] {String.class, Exception.class, boolean.class});
+
 
 	private String name;
 
@@ -216,13 +228,25 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 				if (ex.getTargetException() instanceof JobExecutionException) {
 					throw (JobExecutionException) ex.getTargetException();
 				}
-				Exception jobEx = (ex.getTargetException() instanceof Exception) ?
-						(Exception) ex.getTargetException() : ex;
-				throw new JobExecutionException(this.errorMessage, jobEx, false);
+				if (oldJobExecutionExceptionConstructor != null) {
+					Exception jobEx = (ex.getTargetException() instanceof Exception) ?
+							(Exception) ex.getTargetException() : ex;
+					throw (JobExecutionException) BeanUtils.instantiateClass(
+							oldJobExecutionExceptionConstructor, new Object[] {this.errorMessage, jobEx, Boolean.FALSE});
+				}
+				else {
+					throw new JobExecutionException(this.errorMessage, ex.getTargetException());
+				}
 			}
 			catch (Exception ex) {
 				logger.warn(this.errorMessage, ex);
-				throw new JobExecutionException(this.errorMessage, ex, false);
+				if (oldJobExecutionExceptionConstructor != null) {
+					throw (JobExecutionException) BeanUtils.instantiateClass(
+							oldJobExecutionExceptionConstructor, new Object[] {this.errorMessage, ex, Boolean.FALSE});
+				}
+				else {
+					throw new JobExecutionException(this.errorMessage, ex);
+				}
 			}
 		}
 	}
