@@ -28,6 +28,7 @@ import java.util.Map;
 
 import org.easymock.MockControl;
 
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.AbstractJdbcTests;
 
 /**
@@ -257,6 +258,52 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		assertEquals("Wow is Integer", 11, ((Integer) map.get("age")).intValue());
 	}
 
+	public void testQueryForObjectThrowsIncorrectResultSizeForMoreThanOneRow() throws Exception {
+		String sql = "select pass from t_account where first_name='Alef'";
+
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData);
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getString(1);
+		ctrlResultSet.setReturnValue("pass");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(true);
+		mockResultSet.getMetaData();
+		ctrlResultSet.setReturnValue(mockResultSetMetaData);
+		mockResultSetMetaData.getColumnCount();
+		ctrlResultSetMetaData.setReturnValue(1);
+		mockResultSet.getString(1);
+		ctrlResultSet.setReturnValue("pass");
+		mockResultSet.next();
+		ctrlResultSet.setReturnValue(false);
+		mockResultSet.close();
+		ctrlResultSet.setVoidCallable();
+
+		mockStatement.executeQuery(sql);
+		ctrlStatement.setReturnValue(mockResultSet);
+		mockStatement.getWarnings();
+		ctrlStatement.setReturnValue(null);
+		mockStatement.close();
+		ctrlStatement.setVoidCallable();
+
+		mockConnection.createStatement();
+		ctrlConnection.setReturnValue(mockStatement);
+
+		replay();
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+		try {
+			template.queryForObject(sql, String.class);
+			fail("Should have thrown IncorrectResultSizeDataAccessException");
+		}
+		catch (IncorrectResultSizeDataAccessException ex) {
+			// expected
+		}
+	}
 
 	public void testQueryForObjectWithRowMapper() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
