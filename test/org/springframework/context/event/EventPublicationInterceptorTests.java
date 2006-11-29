@@ -35,7 +35,7 @@ import org.springframework.test.AssertThrows;
  * @author Juergen Hoeller
  * @author Rick Evans
  */
-public final class EventPublicationInterceptorTests extends TestCase {
+public class EventPublicationInterceptorTests extends TestCase {
 
 	public void testWithNoApplicationEventClassSupplied() throws Exception {
 		new AssertThrows(IllegalArgumentException.class) {
@@ -95,14 +95,11 @@ public final class EventPublicationInterceptorTests extends TestCase {
 		}
 
 		StaticApplicationContext ctx = new TestContext();
-
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.addPropertyValue("applicationEventClass", TestEvent.class.getName());
 		// should automatically receive applicationEventPublisher reference
 		ctx.registerSingleton("publisher", EventPublicationInterceptor.class, pvs);
-
 		ctx.registerSingleton("otherListener", FactoryBeanTestListener.class);
-
 		ctx.refresh();
 
 		EventPublicationInterceptor interceptor =
