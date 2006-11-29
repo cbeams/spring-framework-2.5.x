@@ -53,6 +53,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import org.springframework.core.CollectionFactory;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -117,6 +118,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/** Cache of unfinished FactoryBean instances: FactoryBean name --> BeanWrapper */
 	private final Map factoryBeanInstanceCache = new HashMap();
+
+	/** Cache of analyzed PropertyDescriptors for dependency checking: PropertyDescriptor -> Boolean */
+	private final Map excludedPropertyDescriptorsCache = CollectionFactory.createIdentityMapIfPossible(16);
 
 
 	/**
@@ -896,9 +900,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see AutowireUtils#isSetterDefinedInInterface
 	 */
 	protected boolean isExcludedFromDependencyCheck(PropertyDescriptor pd) {
-		return (AutowireUtils.isExcludedFromDependencyCheck(pd) ||
-				this.ignoredDependencyTypes.contains(pd.getPropertyType()) ||
-				AutowireUtils.isSetterDefinedInInterface(pd, this.ignoredDependencyInterfaces));
+		synchronized (this.excludedPropertyDescriptorsCache) {
+			Boolean marker = (Boolean) this.excludedPropertyDescriptorsCache.get(pd);
+			if (marker == null) {
+			 	marker = new Boolean(AutowireUtils.isExcludedFromDependencyCheck(pd) ||
+					this.ignoredDependencyTypes.contains(pd.getPropertyType()) ||
+					AutowireUtils.isSetterDefinedInInterface(pd, this.ignoredDependencyInterfaces));
+				this.excludedPropertyDescriptorsCache.put(pd, marker);
+			}
+			return marker.booleanValue();
+		}
 	}
 
 	/**
@@ -954,7 +965,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				PropertyValue pv = pvArray[i];
 				Object resolvedValue =
 						valueResolver.resolveValueIfNecessary("bean property '" + pv.getName() + "'", pv.getValue());
-				deepCopy.addPropertyValue(pvArray[i].getName(), resolvedValue);
+				deepCopy.addPropertyValue(pv.getName(), resolvedValue);
 			}
 
 			// Set our (possibly massaged) deep copy.
