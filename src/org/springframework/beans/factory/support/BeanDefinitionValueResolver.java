@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.SimpleTypeConverter;
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -68,7 +68,7 @@ class BeanDefinitionValueResolver {
 
 	private final BeanDefinition beanDefinition;
 
-	private final SimpleTypeConverter typeConverter = new SimpleTypeConverter();
+	private final TypeConverter typeConverter;
 
 
 	/**
@@ -77,14 +77,15 @@ class BeanDefinitionValueResolver {
 	 * @param beanFactory the BeanFactory to resolve against
 	 * @param beanName the name of the bean that we work on
 	 * @param beanDefinition the BeanDefinition of the bean that we work on
+	 * @param typeConverter the TypeConverter to use for resolving TypedStringValues
 	 */
 	public BeanDefinitionValueResolver(
-			AbstractBeanFactory beanFactory, String beanName, BeanDefinition beanDefinition) {
+			AbstractBeanFactory beanFactory, String beanName, BeanDefinition beanDefinition, TypeConverter typeConverter) {
 
+		this.beanFactory = beanFactory;
 		this.beanName = beanName;
 		this.beanDefinition = beanDefinition;
-		this.beanFactory = beanFactory;
-		beanFactory.registerCustomEditors(this.typeConverter);
+		this.typeConverter = typeConverter;
 	}
 
 	/**

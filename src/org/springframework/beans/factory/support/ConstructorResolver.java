@@ -89,12 +89,12 @@ abstract class ConstructorResolver {
 		ConstructorArgumentValues cargs = mergedBeanDefinition.getConstructorArgumentValues();
 		ConstructorArgumentValues resolvedValues = new ConstructorArgumentValues();
 
-		BeanWrapperImpl bw = new BeanWrapperImpl();
+		BeanWrapper bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
 
 		int minNrOfArgs = 0;
 		if (cargs != null) {
-			minNrOfArgs = resolveConstructorArguments(beanName, mergedBeanDefinition, cargs, resolvedValues);
+			minNrOfArgs = resolveConstructorArguments(beanName, mergedBeanDefinition, bw, cargs, resolvedValues);
 		}
 
 		Constructor[] candidates = mergedBeanDefinition.getBeanClass().getDeclaredConstructors();
@@ -181,6 +181,9 @@ abstract class ConstructorResolver {
 			String beanName, RootBeanDefinition mergedBeanDefinition, Object[] explicitArgs)
 			throws BeansException {
 
+		BeanWrapper bw = new BeanWrapperImpl();
+		this.beanFactory.initBeanWrapper(bw);
+
 		ConstructorArgumentValues cargs = mergedBeanDefinition.getConstructorArgumentValues();
 		ConstructorArgumentValues resolvedValues = null;
 
@@ -189,7 +192,7 @@ abstract class ConstructorResolver {
 			// We don't have arguments passed in programmatically, so we need to resolve the
 			// arguments specified in the constructor arguments held in the bean definition.
 			resolvedValues = new ConstructorArgumentValues();
-			minNrOfArgs = resolveConstructorArguments(beanName, mergedBeanDefinition, cargs, resolvedValues);
+			minNrOfArgs = resolveConstructorArguments(beanName, mergedBeanDefinition, bw, cargs, resolvedValues);
 		}
 		else {
 			minNrOfArgs = explicitArgs.length;
@@ -208,9 +211,6 @@ abstract class ConstructorResolver {
 			// It's a static factory method on the bean class.
 			factoryClass = mergedBeanDefinition.getBeanClass();
 		}
-
-		BeanWrapperImpl bw = new BeanWrapperImpl();
-		this.beanFactory.initBeanWrapper(bw);
 
 		// Try all methods with this name to see if they match the given arguments.
 		Method[] candidates = ReflectionUtils.getAllDeclaredMethods(factoryClass);
@@ -297,11 +297,11 @@ abstract class ConstructorResolver {
 	 * This method is also used for handling invocations of static factory methods.
 	 */
 	private int resolveConstructorArguments(
-			String beanName, RootBeanDefinition mergedBeanDefinition,
+			String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw,
 			ConstructorArgumentValues cargs, ConstructorArgumentValues resolvedValues) {
 
 		BeanDefinitionValueResolver valueResolver =
-				new BeanDefinitionValueResolver(this.beanFactory, beanName, mergedBeanDefinition);
+				new BeanDefinitionValueResolver(this.beanFactory, beanName, mergedBeanDefinition, bw);
 
 		int minNrOfArgs = cargs.getArgumentCount();
 
@@ -339,7 +339,7 @@ abstract class ConstructorResolver {
 	 */
 	private ArgumentsHolder createArgumentArray(
 			String beanName, RootBeanDefinition mergedBeanDefinition, ConstructorArgumentValues resolvedValues,
-			BeanWrapperImpl bw, Class[] paramTypes, Object methodOrCtor)
+			BeanWrapper bw, Class[] paramTypes, Object methodOrCtor)
 			throws UnsatisfiedDependencyException {
 
 		String methodType = (methodOrCtor instanceof Constructor ? "constructor" : "factory method");

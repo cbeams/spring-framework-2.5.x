@@ -31,6 +31,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
@@ -51,6 +52,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.core.CollectionFactory;
@@ -109,6 +111,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 	/** BeanPostProcessors to apply in createBean */
 	private final List beanPostProcessors = new ArrayList();
+
+	/** Indicates whether any InstantiationAwareBeanPostProcessors have been registered */
+	private boolean hasInstantiationAwareBeanPostProcessors;
 
 	/** Indicates whether any DestructionAwareBeanPostProcessors have been registered */
 	private boolean hasDestructionAwareBeanPostProcessors;
@@ -523,7 +528,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	}
 
 	public ClassLoader getBeanClassLoader() {
-		return beanClassLoader;
+		return this.beanClassLoader;
 	}
 
 	public void setCacheBeanMetadata(boolean cacheBeanMetadata) {
@@ -531,7 +536,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	}
 
 	public boolean isCacheBeanMetadata() {
-		return cacheBeanMetadata;
+		return this.cacheBeanMetadata;
 	}
 
 	public void addPropertyEditorRegistrar(PropertyEditorRegistrar registrar) {
@@ -543,7 +548,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * Return the set of PropertyEditorRegistrars.
 	 */
 	public Set getPropertyEditorRegistrars() {
-		return propertyEditorRegistrars;
+		return this.propertyEditorRegistrars;
 	}
 
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
@@ -557,12 +562,15 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * and PropertyEditors as values.
 	 */
 	public Map getCustomEditors() {
-		return customEditors;
+		return this.customEditors;
 	}
 
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
 		Assert.notNull(beanPostProcessor, "BeanPostProcessor must not be null");
 		this.beanPostProcessors.add(beanPostProcessor);
+		if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
+			this.hasInstantiationAwareBeanPostProcessors = true;
+		}
 		if (beanPostProcessor instanceof DestructionAwareBeanPostProcessor) {
 			this.hasDestructionAwareBeanPostProcessors = true;
 		}
@@ -577,7 +585,17 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * to beans created with this factory.
 	 */
 	public List getBeanPostProcessors() {
-		return beanPostProcessors;
+		return this.beanPostProcessors;
+	}
+
+	/**
+	 * Return whether this factory holds a InstantiationAwareBeanPostProcessor
+	 * that will get applied to singleton beans on shutdown.
+	 * @see #addBeanPostProcessor
+	 * @see org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor
+	 */
+	protected boolean hasInstantiationAwareBeanPostProcessors() {
+		return this.hasInstantiationAwareBeanPostProcessors;
 	}
 
 	/**
@@ -793,15 +811,33 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 */
 	protected void registerCustomEditors(PropertyEditorRegistry registry) {
 		registry.registerCustomEditor(String[].class, new StringArrayPropertyEditor());
-		for (Iterator it = getPropertyEditorRegistrars().iterator(); it.hasNext();) {
+		for (Iterator it = this.propertyEditorRegistrars.iterator(); it.hasNext();) {
 			PropertyEditorRegistrar registrar = (PropertyEditorRegistrar) it.next();
 			registrar.registerCustomEditors(registry);
 		}
-		for (Iterator it = getCustomEditors().entrySet().iterator(); it.hasNext();) {
+		for (Iterator it = this.customEditors.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			Class clazz = (Class) entry.getKey();
 			PropertyEditor editor = (PropertyEditor) entry.getValue();
 			registry.registerCustomEditor(clazz, editor);
+		}
+	}
+
+	/**
+	 * Apply the given property values to the given bean.
+	 * @param bw the BeanWrapper that wraps the bean
+	 * @param pv the PropertyValues to apply
+	 */
+	protected void applyPropertyValues(BeanWrapper bw, PropertyValues pv) {
+		// Synchronize if custom editors are registered.
+		// Necessary because PropertyEditors are not thread-safe.
+		if (!this.customEditors.isEmpty()) {
+			synchronized (this.customEditors) {
+				bw.setPropertyValues(pv);
+			}
+		}
+		else {
+			bw.setPropertyValues(pv);
 		}
 	}
 
@@ -822,8 +858,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
 		// Synchronize if custom editors are registered.
 		// Necessary because PropertyEditors are not thread-safe.
-		if (!getCustomEditors().isEmpty()) {
-			synchronized (getCustomEditors()) {
+		if (!this.customEditors.isEmpty()) {
+			synchronized (this.customEditors) {
 				return converter.convertIfNecessary(value, targetType, methodParam);
 			}
 		}
@@ -1135,7 +1171,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 				}
 				// Cache object obtained from FactoryBean if it is a singleton.
 				if (shared && factory.isSingleton()) {
-					synchronized (this.factoryBeanObjectCache) {
+					synchronized (getSingletonMutex()) {
 						object = this.factoryBeanObjectCache.get(beanName);
 						if (object == null) {
 							object = getObjectFromFactoryBean(factory, beanName, mbd);
@@ -1297,9 +1333,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 */
 	protected void removeSingleton(String beanName) {
 		super.removeSingleton(beanName);
-		synchronized (this.factoryBeanObjectCache) {
-			this.factoryBeanObjectCache.remove(beanName);
-		}
+		this.factoryBeanObjectCache.remove(beanName);
 	}
 
 

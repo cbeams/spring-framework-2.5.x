@@ -49,6 +49,7 @@ import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
 import org.springframework.beans.factory.xml.DependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.test.AssertThrows;
+import org.springframework.util.StopWatch;
 
 /**
  * Tests properties population and autowire behavior.
@@ -920,6 +921,52 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		lbf.preInstantiateSingletons();
 	}
 
+	public void testPrototypeCreationIsFastEnough() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class, false);
+		lbf.registerBeanDefinition("test", rbd);
+		StopWatch sw = new StopWatch();
+		sw.start("prototype");
+		for (int i = 0; i < 10000; i++) {
+			lbf.getBean("test");
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 500);
+	}
+
+	public void testPrototypeCreationWithPropertiesIsFastEnough() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class, false);
+		rbd.getPropertyValues().addPropertyValue("name", "juergen");
+		rbd.getPropertyValues().addPropertyValue("age", "99");
+		lbf.registerBeanDefinition("test", rbd);
+		StopWatch sw = new StopWatch();
+		sw.start("prototype");
+		for (int i = 0; i < 10000; i++) {
+			lbf.getBean("test");
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 1000);
+	}
+
+	public void testPrototypeCreationWithDependencyCheckIsFastEnough() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition rbd = new RootBeanDefinition(LifecycleBean.class, false);
+		rbd.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
+		lbf.registerBeanDefinition("test", rbd);
+		lbf.addBeanPostProcessor(new LifecycleBean.PostProcessor());
+		StopWatch sw = new StopWatch();
+		sw.start("prototype");
+		for (int i = 0; i < 10000; i++) {
+			lbf.getBean("test");
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 1500);
+	}
+
 	public void testBeanPostProcessorWithWrappedObjectAndDisposableBean() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDisposableBean.class);
@@ -1042,14 +1089,6 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertEquals(expectedNameFromArgs, tb2.getName());
 	}
 
-	public void testFieldSettingWithInstantiationAwarePostProcessorNoShortCircuit() {
-		testFieldSettingWithInstantiationAwarePostProcessor(false);
-	}
-
-	public void testFieldSettingWithInstantiationAwarePostProcessorWithShortCircuit() {
-		testFieldSettingWithInstantiationAwarePostProcessor(true);
-	}
-
 	public void testScopingBeanToUnregisteredScopeResultsInAnException() throws Exception {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(TestBean.class);
 		AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
@@ -1099,8 +1138,15 @@ public class DefaultListableBeanFactoryTests extends TestCase {
 		assertTrue("Child 'scope' not overriding parent scope (it must).", def.isSingleton());
 	}
 
+	public void testFieldSettingWithInstantiationAwarePostProcessorNoShortCircuit() {
+		doTestFieldSettingWithInstantiationAwarePostProcessor(false);
+	}
 
-	private void testFieldSettingWithInstantiationAwarePostProcessor(final boolean skipPropertyPopulation) {
+	public void testFieldSettingWithInstantiationAwarePostProcessorWithShortCircuit() {
+		doTestFieldSettingWithInstantiationAwarePostProcessor(true);
+	}
+
+	private void doTestFieldSettingWithInstantiationAwarePostProcessor(final boolean skipPropertyPopulation) {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		int ageSetByPropertyValue = 27;

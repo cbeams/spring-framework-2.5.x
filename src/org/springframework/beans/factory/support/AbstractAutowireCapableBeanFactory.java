@@ -374,9 +374,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			errorMessage = "Instantiation of bean failed";
 
 			BeanWrapper instanceWrapper = null;
-			synchronized (this.factoryBeanInstanceCache) {
-				instanceWrapper = (BeanWrapper) this.factoryBeanInstanceCache.remove(beanName);
+			if (mergedBeanDefinition.isSingleton()) {
+				synchronized (getSingletonMutex()) {
+					instanceWrapper = (BeanWrapper) this.factoryBeanInstanceCache.remove(beanName);
+				}
 			}
+
 			if (instanceWrapper == null) {
 				instanceWrapper = createBeanInstance(beanName, mergedBeanDefinition, args);
 			}
@@ -384,7 +387,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 			// Eagerly cache singletons to be able to resolve circular references
 			// even when triggered by lifecycle interfaces like BeanFactoryAware.
-			if (this.allowCircularReferences && isSingletonCurrentlyInCreation(beanName)) {
+			if (mergedBeanDefinition.isSingleton() && this.allowCircularReferences &&
+					isSingletonCurrentlyInCreation(beanName)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Eagerly caching bean '" + beanName +
 							"' to allow for resolving potential circular references");
@@ -505,7 +509,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (mergedBeanDefinition.isSingleton()) {
 			FactoryBean fb = null;
 
-			synchronized (this.factoryBeanInstanceCache) {
+			synchronized (getSingletonMutex()) {
 				BeanWrapper bw = (BeanWrapper) this.factoryBeanInstanceCache.get(beanName);
 				if (bw != null) {
 					fb = (FactoryBean) bw.getWrappedInstance();
@@ -723,20 +727,28 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			pvs = newPvs;
 		}
 
-		PropertyDescriptor[] filteredPds = filterPropertyDescriptorsForDependencyCheck(bw);
+		boolean hasInstAwareBpps = hasInstantiationAwareBeanPostProcessors();
+		boolean needsDepCheck = (mergedBeanDefinition.getDependencyCheck() != RootBeanDefinition.DEPENDENCY_CHECK_NONE);
 
-		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext(); ) {
-			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
-			if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
-				InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) beanProcessor;
-				pvs = ibp.postProcessPropertyValues(pvs, filteredPds, bw.getWrappedInstance(), beanName);
-				if (pvs == null) {
-					return;
+		if (hasInstAwareBpps || needsDepCheck) {
+			PropertyDescriptor[] filteredPds = filterPropertyDescriptorsForDependencyCheck(bw);
+			if (hasInstAwareBpps) {
+				for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext(); ) {
+					BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
+					if (beanProcessor instanceof InstantiationAwareBeanPostProcessor) {
+						InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) beanProcessor;
+						pvs = ibp.postProcessPropertyValues(pvs, filteredPds, bw.getWrappedInstance(), beanName);
+						if (pvs == null) {
+							return;
+						}
+					}
 				}
+			}
+			if (needsDepCheck) {
+				checkDependencies(beanName, mergedBeanDefinition, filteredPds, pvs);
 			}
 		}
 
-		checkDependencies(beanName, mergedBeanDefinition, filteredPds, pvs);
 		applyPropertyValues(beanName, mergedBeanDefinition, bw, pvs);
 	}
 
@@ -904,10 +916,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws UnsatisfiedDependencyException {
 
 		int dependencyCheck = mergedBeanDefinition.getDependencyCheck();
-		if (dependencyCheck == RootBeanDefinition.DEPENDENCY_CHECK_NONE) {
-			return;
-		}
-
 		for (int i = 0; i < pds.length; i++) {
 			if (pds[i].getWriteMethod() != null && !pvs.contains(pds[i].getName())) {
 				boolean isSimple = BeanUtils.isSimpleProperty(pds[i].getPropertyType());
@@ -935,40 +943,29 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw, PropertyValues pvs)
 			throws BeansException {
 
-		if (pvs == null) {
-			return;
-		}
+		if (pvs != null && !pvs.isEmpty()) {
+			BeanDefinitionValueResolver valueResolver =
+					new BeanDefinitionValueResolver(this, beanName, mergedBeanDefinition, bw);
 
-		BeanDefinitionValueResolver valueResolver =
-				new BeanDefinitionValueResolver(this, beanName, mergedBeanDefinition);
-
-		// Create a deep copy, resolving any references for values.
-		MutablePropertyValues deepCopy = new MutablePropertyValues();
-		PropertyValue[] pvArray = pvs.getPropertyValues();
-		for (int i = 0; i < pvArray.length; i++) {
-			PropertyValue pv = pvArray[i];
-			Object resolvedValue =
-					valueResolver.resolveValueIfNecessary("bean property '" + pv.getName() + "'", pv.getValue());
-			deepCopy.addPropertyValue(pvArray[i].getName(), resolvedValue);
-		}
-
-		// Set our (possibly massaged) deep copy.
-		try {
-			// Synchronize if custom editors are registered.
-			// Necessary because PropertyEditors are not thread-safe.
-			if (!getCustomEditors().isEmpty()) {
-				synchronized (this) {
-					bw.setPropertyValues(deepCopy);
-				}
+			// Create a deep copy, resolving any references for values.
+			MutablePropertyValues deepCopy = new MutablePropertyValues();
+			PropertyValue[] pvArray = pvs.getPropertyValues();
+			for (int i = 0; i < pvArray.length; i++) {
+				PropertyValue pv = pvArray[i];
+				Object resolvedValue =
+						valueResolver.resolveValueIfNecessary("bean property '" + pv.getName() + "'", pv.getValue());
+				deepCopy.addPropertyValue(pvArray[i].getName(), resolvedValue);
 			}
-			else {
-				bw.setPropertyValues(deepCopy);
+
+			// Set our (possibly massaged) deep copy.
+			try {
+				applyPropertyValues(bw, deepCopy);
 			}
-		}
-		catch (BeansException ex) {
-			// Improve the message by showing the context.
-			throw new BeanCreationException(
-					mergedBeanDefinition.getResourceDescription(), beanName, "Error setting property values", ex);
+			catch (BeansException ex) {
+				// Improve the message by showing the context.
+				throw new BeanCreationException(
+						mergedBeanDefinition.getResourceDescription(), beanName, "Error setting property values", ex);
+			}
 		}
 	}
 
@@ -1119,9 +1116,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	protected void removeSingleton(String beanName) {
 		super.removeSingleton(beanName);
-		synchronized (this.factoryBeanInstanceCache) {
-			this.factoryBeanInstanceCache.remove(beanName);
-		}
+		this.factoryBeanInstanceCache.remove(beanName);
 	}
 
 

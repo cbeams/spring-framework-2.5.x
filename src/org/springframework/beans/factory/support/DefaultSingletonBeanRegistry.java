@@ -156,9 +156,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 */
 	protected void removeSingleton(String beanName) {
 		Assert.hasText(beanName, "Bean name must not be empty");
-		synchronized (this.singletonCache) {
-			this.singletonCache.remove(beanName);
-		}
+		this.singletonCache.remove(beanName);
 	}
 
 	public boolean containsSingleton(String beanName) {
@@ -294,8 +292,10 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 * @see #destroyBean
 	 */
 	public void destroySingleton(String beanName) {
-		// Remove a registered singleton of the given name, if any.
-		removeSingleton(beanName);
+		synchronized (this.singletonCache) {
+			// Remove a registered singleton of the given name, if any.
+			removeSingleton(beanName);
+		}
 
 		// Destroy the corresponding DisposableBean instance.
 		DisposableBean disposableBean = null;
@@ -335,6 +335,17 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 				logger.error("Destroy method on bean with name '" + beanName + "' threw an exception", ex);
 			}
 		}
+	}
+
+	/**
+	 * Expose the singleton mutex to subclasses.
+	 * <p>Subclasses should synchronize on the given Object if they perform
+	 * any sort of extended singleton creation phase. In particular, subclasses
+	 * should <i>not</i> have their own mutexes involved in singleton creation,
+	 * to avoid the potential for deadlocks in lazy-init situations.
+	 */
+	protected final Object getSingletonMutex() {
+		return this.singletonCache;
 	}
 
 }

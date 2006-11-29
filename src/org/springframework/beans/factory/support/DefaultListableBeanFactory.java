@@ -321,7 +321,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		// Shouldn't usually be necessary, rather just meant for overriding
 		// a context's default beans (e.g. the default StaticMessageSource
 		// in a StaticApplicationContext).
-		removeSingleton(beanName);
+		synchronized (getSingletonMutex()) {
+			removeSingleton(beanName);
+		}
 	}
 
 
