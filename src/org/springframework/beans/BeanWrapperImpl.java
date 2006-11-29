@@ -73,7 +73,7 @@ import org.springframework.util.StringUtils;
  * @see BeanWrapper
  * @see PropertyEditorRegistrySupport
  */
-public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWrapper, TypeConverter {
+public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWrapper {
 
 	/**
 	 * We'll create a lot of these objects, so we don't want a new logger every time.
@@ -826,11 +826,11 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	private static class PropertyTokenHolder {
 
-		private String canonicalName;
+		public String canonicalName;
 
-		private String actualName;
+		public String actualName;
 
-		private String[] keys;
+		public String[] keys;
 	}
 
 }

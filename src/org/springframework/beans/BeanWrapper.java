@@ -50,7 +50,7 @@ import java.beans.PropertyDescriptor;
  * @see org.springframework.validation.BeanPropertyBindingResult
  * @see org.springframework.validation.DataBinder#initBeanPropertyAccess()
  */
-public interface BeanWrapper extends ConfigurablePropertyAccessor {
+public interface BeanWrapper extends ConfigurablePropertyAccessor, TypeConverter {
 
 	/**
 	 * Change the wrapped object. Implementations are required
