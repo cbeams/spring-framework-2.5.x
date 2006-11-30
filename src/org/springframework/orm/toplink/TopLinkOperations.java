@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,15 @@ import oracle.toplink.sessions.ObjectCopyingPolicy;
 import org.springframework.dao.DataAccessException;
 
 /**
- * Interface that specifies a basic set of TopLink operations.
- * Implemented by TopLinkTemplate. Not often used, but a useful option
- * to enhance testability, as it can easily be mocked or stubbed.
+ * Interface that specifies a basic set of TopLink operations,
+ * implemented by {@link TopLinkTemplate}. Not often used, but a useful
+ * option to enhance testability, as it can easily be mocked or stubbed.
  *
- * <p>Provides TopLinkTemplate's data access methods that mirror various
- * TopLink Session/UnitOfWork methods. See the TopLink javadocs for
- * details on those methods.
+ * <p>Defines <code>TopLinkTemplate</code>'s data access methods that
+ * mirror various TopLink {@link oracle.toplink.sessions.Session} /
+ * {@link oracle.toplink.sessions.UnitOfWork} methods. Users are
+ * strongly encouraged to read the TopLink javadocs for details
+ * on the semantics of those methods.
  *
  * @author Juergen Hoeller
  * @since 1.2

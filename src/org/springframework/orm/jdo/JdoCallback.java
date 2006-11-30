@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,9 +20,9 @@ import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 
 /**
- * Callback interface for JDO code. To be used with JdoTemplate's execute
- * method, assumably often as anonymous classes within a method implementation.
- * The typical implementation will call PersistenceManager CRUD to perform
+ * Callback interface for JDO code. To be used with {@link JdoTemplate}'s
+ * execution methods, often as anonymous classes within a method implementation.
+ * A typical implementation will call PersistenceManager CRUD to perform
  * some operations on persistent objects.
  *
  * <p>Note that JDO works on bytecode-modified Java objects, to be able to
@@ -39,14 +39,14 @@ import javax.jdo.PersistenceManager;
  * @author Juergen Hoeller
  * @since 03.06.2003
  * @see JdoTemplate
- * @see org.springframework.orm.hibernate.HibernateCallback
+ * @see JdoTransactionManager
  */
 public interface JdoCallback {
 
 	/**
-	 * Gets called by <code>JdoTemplate.execute</code> with an active PersistenceManager.
-	 * Does not need to care about activating or closing the PersistenceManager,
-	 * or handling transactions.
+	 * Gets called by <code>JdoTemplate.execute</code> with an active JDO
+	 * <code>PersistenceManager</code>. Does not need to care about activating
+	 * or closing the <code>PersistenceManager</code>, or handling transactions.
 	 *
 	 * <p>Note that JDO callback code will not flush any modifications to the
 	 * database if not executed within a transaction. Thus, you need to make
@@ -55,14 +55,14 @@ public interface JdoCallback {
 	 *
 	 * <p>Allows for returning a result object created within the callback,
 	 * i.e. a domain object or a collection of domain objects.
-	 * A thrown RuntimeException is treated as application exception,
-	 * it gets propagated to the caller of the template.
+	 * A thrown custom RuntimeException is treated as an application exception:
+	 * It gets propagated to the caller of the template.
 	 *
 	 * @param pm active PersistenceManager
 	 * @return a result object, or <code>null</code> if none
-	 * @throws JDOException in case of JDO errors
+	 * @throws JDOException if thrown by the JDO API
 	 * @see JdoTemplate#execute
-	 * @see JdoTransactionManager
+	 * @see JdoTemplate#executeFind
 	 */
 	Object doInJdo(PersistenceManager pm) throws JDOException;
 

@@ -38,22 +38,24 @@ import org.springframework.jdbc.support.JdbcAccessor;
 import org.springframework.util.Assert;
 
 /**
- * Helper class that simplifies data access via the SqlMapClient API of iBATIS
- * SQL Maps, and converts checked SQLExceptions into unchecked DataAccessExceptions,
- * following the <code>org.springframework.dao</code> exception hierarchy.
- * Uses the same SQLExceptionTranslator mechanism as JdbcTemplate.
+ * Helper class that simplifies data access via the iBATIS
+ * {@link com.ibatis.sqlmap.client.SqlMapClient} API, converting checked
+ * SQLExceptions into unchecked DataAccessExceptions, following the
+ * <code>org.springframework.dao</code> exception hierarchy.
+ * Uses the same {@link org.springframework.jdbc.support.SQLExceptionTranslator}
+ * mechanism as {@link org.springframework.jdbc.core.JdbcTemplate}.
  *
  * <p>The main method of this class executes a callback that implements a
  * data access action. Furthermore, this class provides numerous convenience
- * methods that mirror SqlMapExecutor's execution methods. See the
- * SqlMapExecutor javadocs for details on those methods.
+ * methods that mirror {@link com.ibatis.sqlmap.client.SqlMapExecutor}'s
+ * execution methods.
  *
  * <p>It is generally recommended to use the convenience methods on this template
  * for plain query/insert/update/delete operations. However, for more complex
  * operations like batch updates, a custom SqlMapClientCallback must be implemented,
  * usually as anonymous inner class. For example:
  *
- * <pre>
+ * <pre class="code">
  * getSqlMapClientTemplate().execute(new SqlMapClientCallback() {
  * 	 public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
  * 		 executor.startBatch();
@@ -65,8 +67,11 @@ import org.springframework.util.Assert;
  * });</pre>
  *
  * The template needs a SqlMapClient to work on, passed in via the "sqlMapClient"
- * property. Can additionally be configured with a DataSource for fetching Connections,
- * although this is not necessary if a DataSource is specified for the SqlMapClient itself.
+ * property. A Spring context typically uses a {@link SqlMapClientFactoryBean}
+ * to build the SqlMapClient. The template an additionally be configured with a
+ * DataSource for fetching Connections, although this is not necessary if a
+ * DataSource is specified for the SqlMapClient itself (typically through
+ * SqlMapClientFactoryBean's "dataSource" property).
  *
  * @author Juergen Hoeller
  * @since 24.02.2004
@@ -76,7 +81,6 @@ import org.springframework.util.Assert;
  * @see #setExceptionTranslator
  * @see SqlMapClientFactoryBean#setDataSource
  * @see com.ibatis.sqlmap.client.SqlMapClient#getDataSource
- * @see com.ibatis.sqlmap.client.SqlMapSession
  * @see com.ibatis.sqlmap.client.SqlMapExecutor
  */
 public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOperations {
@@ -149,7 +153,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 
 
 	/**
-	 * Execute the given data access action on a SqlMapSession.
+	 * Execute the given data access action on a SqlMapExecutor.
 	 * @param action callback object that specifies the data access action
 	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws DataAccessException in case of SQL Maps errors
@@ -205,7 +209,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	}
 
 	/**
-	 * Execute the given data access action on a SqlMapSession,
+	 * Execute the given data access action on a SqlMapExecutor,
 	 * expecting a List result.
 	 * @param action callback object that specifies the data access action
 	 * @return the List result
@@ -216,7 +220,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	}
 
 	/**
-	 * Execute the given data access action on a SqlMapSession,
+	 * Execute the given data access action on a SqlMapExecutor,
 	 * expecting a Map result.
 	 * @param action callback object that specifies the data access action
 	 * @return the Map result

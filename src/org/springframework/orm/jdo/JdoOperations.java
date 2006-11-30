@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,19 @@ import java.util.Map;
 import org.springframework.dao.DataAccessException;
 
 /**
- * Interface that specifies a basic set of JDO operations.
- * Implemented by JdoTemplate. Not often used, but a useful option
- * to enhance testability, as it can easily be mocked or stubbed.
+ * Interface that specifies a basic set of JDO operations,
+ * implemented by {@link JdoTemplate}. Not often used, but a useful
+ * option to enhance testability, as it can easily be mocked or stubbed.
  *
- * <p>Provides JdoTemplate's data access methods that mirror various
- * PersistenceManager methods. See the JDO PersistenceManager javadocs
- * for details on those methods.
+ * <p>Defines <code>JdoTemplate</code>'s data access methods that mirror
+ * various JDO {@link javax.jdo.PersistenceManager} methods. Users are
+ * strongly encouraged to read the JDO <code>PersistenceManager</code>
+ * javadocs for details on the semantics of those methods.
  *
- * <p>Note that lazy loading will just work with an open JDO PersistenceManager,
- * either within a Spring-driven transaction (with JdoTransactionManager or
- * JtaTransactionManager) or within OpenPersistenceManagerInViewFilter/Interceptor.
+ * <p>Note that lazy loading will just work with an open JDO
+ * <code>PersistenceManager</code>, either within a managed transaction or within
+ * {@link org.springframework.orm.jdo.support.OpenPersistenceManagerInViewFilter}/
+ * {@link org.springframework.orm.jdo.support.OpenPersistenceManagerInViewInterceptor}.
  * Furthermore, some operations just make sense within transactions,
  * for example: <code>evict</code>, <code>evictAll</code>, <code>flush</code>.
  *
@@ -47,7 +49,6 @@ import org.springframework.dao.DataAccessException;
  * @see JdoTemplate
  * @see javax.jdo.PersistenceManager
  * @see JdoTransactionManager
- * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see JdoDialect
  * @see org.springframework.orm.jdo.support.OpenPersistenceManagerInViewFilter
  * @see org.springframework.orm.jdo.support.OpenPersistenceManagerInViewInterceptor
@@ -113,7 +114,6 @@ public interface JdoOperations {
 	 * @return the persistent instance
 	 * @throws org.springframework.orm.ObjectRetrievalFailureException if not found
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
-	 * @see javax.jdo.PersistenceManager#newObjectIdInstance(Class, String)
 	 * @see javax.jdo.PersistenceManager#getObjectById(Object, boolean)
 	 * @see javax.jdo.PersistenceManager#getObjectById(Class, Object)
 	 */

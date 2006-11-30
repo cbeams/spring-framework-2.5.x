@@ -22,26 +22,27 @@ import java.util.Map;
 import org.springframework.dao.DataAccessException;
 
 /**
- * Interface that specifies a basic set of JPA operations.
- * Implemented by JpaTemplate. Not often used, but a useful option
- * to enhance testability, as it can easily be mocked or stubbed.
+ * Interface that specifies a basic set of JPA operations,
+ * implemented by {@link JpaTemplate}. Not often used, but a useful
+ * option to enhance testability, as it can easily be mocked or stubbed.
  *
- * <p>Provides JpaTemplate's data access methods that mirror various
- * EntityManager methods. See the JPA EntityManager javadocs for details
- * on those methods.
+ * <p>Defines <code>JpaTemplate</code>'s data access methods that mirror
+ * various {@link javax.persistence.EntityManager} methods. Users are
+ * strongly encouraged to read the JPA <code>EntityManager</code>
+ * javadocs for details on the semantics of those methods.
  *
- * <p>Note that lazy loading will just work with an open JPA EntityManager,
- * either within a Spring-driven transaction (with JpaTransactionManager or
- * JtaTransactionManager) or within OpenEntityManagerInViewFilter/Interceptor.
+ * <p>Note that lazy loading will just work with an open JPA
+ * <code>EntityManager</code>, either within a managed transaction or within
+ * {@link org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter}/
+ * {@link org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor}.
  * Furthermore, some operations just make sense within transactions,
- * for example: <code>flush</code>.
+ * for example: <code>flush</code>, <code>clear</code>.
  *
  * @author Juergen Hoeller
  * @since 2.0
  * @see JpaTemplate
  * @see javax.persistence.EntityManager
  * @see JpaTransactionManager
- * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see JpaDialect
  * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter
  * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor

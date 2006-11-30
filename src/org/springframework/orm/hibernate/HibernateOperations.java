@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,22 +28,27 @@ import net.sf.hibernate.type.Type;
 import org.springframework.dao.DataAccessException;
 
 /**
- * Specifies a basic set of Hibernate operations, implemented by HibernateTemplate.
- * Not often used, but a useful option to enhance testability, as it can
- * easily be mocked or stubbed.
+ * Interface that specifies a basic set of Hibernate operations,
+ * implemented by {@link HibernateTemplate}. Not often used, but a useful
+ * option to enhance testability, as it can easily be mocked or stubbed.
  *
- * <p>Provides HibernateTemplate's data access methods that mirror
- * various Session methods. Users are strongly encouraged to read the
- * Hibernate Session javadocs for details on those methods.
+ * <p>Defines <code>HibernateTemplate</code>'s data access methods that
+ * mirror various {@link org.hibernate.Session} methods. Users are
+ * strongly encouraged to read the Hibernate <code>Session</code> javadocs
+ * for details on the semantics of those methods.
  *
- * <p>Note that operations that return an Iterator (i.e. <code>iterate</code>)
- * are supposed to be used within Spring-driven or JTA-driven transactions
- * (with HibernateTransactionManager, JtaTransactionManager, or EJB CMT).
- * Else, the Iterator won't be able to read results from its ResultSet anymore,
- * as the underlying Hibernate Session will already have been closed.
+ * <p>Note that operations that return an {@link java.util.Iterator} (i.e.
+ * <code>iterate(..)</code>) are supposed to be used within Spring-driven
+ * or JTA-driven transactions (with {@link HibernateTransactionManager},
+ * {@link org.springframework.transaction.jta.JtaTransactionManager},
+ * or EJB CMT). Else, the <code>Iterator</code> won't be able to read
+ * results from its {@link java.sql.ResultSet} anymore, as the underlying
+ * Hibernate <code>Session</code> will already have been closed.
  *
- * <p>Lazy loading will also just work with an open Hibernate Session,
- * either within a transaction or within OpenSessionInViewFilter/Interceptor.
+ * <p>Note that lazy loading will just work with an open Hibernate
+ * <code>Session</code>, either within a transaction or within
+ * {@link org.springframework.orm.hibernate.support.OpenSessionInViewFilter}/
+ * {@link org.springframework.orm.hibernate.support.OpenSessionInViewInterceptor}.
  * Furthermore, some operations just make sense within transactions,
  * for example: <code>contains</code>, <code>evict</code>, <code>lock</code>,
  * <code>flush</code>, <code>clear</code>.
@@ -52,7 +57,6 @@ import org.springframework.dao.DataAccessException;
  * @since 05.02.2004
  * @see HibernateTemplate
  * @see net.sf.hibernate.Session
- * @see #iterate
  * @see HibernateTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.orm.hibernate.support.OpenSessionInViewFilter
