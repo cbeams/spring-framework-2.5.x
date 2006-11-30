@@ -22,6 +22,7 @@ import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.OptimisticLockException;
 import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
@@ -29,12 +30,14 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import org.easymock.MockControl;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityManagerFactoryBeanTests {
@@ -122,8 +125,6 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		emMc.setReturnValue(false);
 		emMc.replay();
 		
-		// finish recording mock calls
-		
 		// This one's for the tx (shared)
 		MockControl sharedEmMc = MockControl.createControl(EntityManager.class);
 		EntityManager sharedEm = (EntityManager) sharedEmMc.getMock();
@@ -166,6 +167,73 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		tmMc.verify();
 	}
 	
+	public void testApplicationManagedEntityManagerWithTransactionAndCommitException() throws Exception {
+		Object testEntity = new Object();
+
+		MockControl tmMc = MockControl.createControl(EntityTransaction.class);
+		EntityTransaction mockTx = (EntityTransaction) tmMc.getMock();
+		mockTx.begin();
+		tmMc.setVoidCallable();
+		mockTx.commit();
+		tmMc.setThrowable(new OptimisticLockException());
+		tmMc.replay();
+
+		MockControl emMc = MockControl.createControl(EntityManager.class);
+		EntityManager mockEm = (EntityManager) emMc.getMock();
+		mockEm.getTransaction();
+		emMc.setReturnValue(mockTx, 3);
+		mockEm.contains(testEntity);
+		emMc.setReturnValue(false);
+		emMc.replay();
+
+		// This one's for the tx (shared)
+		MockControl sharedEmMc = MockControl.createControl(EntityManager.class);
+		EntityManager sharedEm = (EntityManager) sharedEmMc.getMock();
+		sharedEm.getTransaction();
+		sharedEmMc.setReturnValue(new NoOpEntityTransaction(), 3);
+		sharedEm.close();
+		sharedEmMc.setVoidCallable();
+		sharedEmMc.replay();
+		mockEmf.createEntityManager();
+		emfMc.setReturnValue(sharedEm);
+
+		// This is the application-specific one
+		mockEmf.createEntityManager();
+		emfMc.setReturnValue(mockEm);
+		mockEmf.close();
+		emfMc.setVoidCallable();
+		emfMc.replay();
+
+		LocalContainerEntityManagerFactoryBean cefb = parseValidPersistenceUnit();
+
+		JpaTransactionManager jpatm = new JpaTransactionManager();
+		jpatm.setEntityManagerFactory(cefb.getObject());
+
+		TransactionStatus txStatus = jpatm.getTransaction(new DefaultTransactionAttribute());
+
+		EntityManagerFactory emf = cefb.getObject();
+		assertSame("EntityManagerFactory reference must be cached after init", emf, cefb.getObject());
+
+		assertNotSame("EMF must be proxied", mockEmf, emf);
+		EntityManager em = emf.createEntityManager();
+		em.joinTransaction();
+		assertFalse(em.contains(testEntity));
+
+		try {
+			jpatm.commit(txStatus);
+			fail("Should have thrown OptimisticLockingFailureException");
+		}
+		catch (OptimisticLockingFailureException ex) {
+			// expected
+		}
+
+		cefb.destroy();
+
+		emfMc.verify();
+		emMc.verify();
+		tmMc.verify();
+	}
+
 	public void testApplicationManagedEntityManagerWithJtaTransaction() throws Exception {
 		Object testEntity = new Object();
 
@@ -286,7 +354,7 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 	}
 	
 	
-	protected static class DummyContainerPersistenceProvider implements PersistenceProvider {
+	private static class DummyContainerPersistenceProvider implements PersistenceProvider {
 		
 		public EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo pui, Map map) {
 			actualPui = pui;
@@ -300,7 +368,7 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 	}
 
 
-	protected static class NoOpEntityTransaction implements EntityTransaction {
+	private static class NoOpEntityTransaction implements EntityTransaction {
 
 		public void begin() {
 		}

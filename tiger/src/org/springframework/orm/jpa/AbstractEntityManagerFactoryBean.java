@@ -371,8 +371,8 @@ public abstract class AbstractEntityManagerFactoryBean implements
 					if (this.jpaDialect != null && this.jpaDialect.supportsEntityManagerPlusOperations()) {
 						plusOperations = this.jpaDialect.getEntityManagerPlusOperations(rawEntityManager);
 					}
-					retVal = ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager,
-							plusOperations);
+					retVal = ExtendedEntityManagerCreator.createApplicationManagedEntityManager(
+							rawEntityManager, plusOperations, this.jpaDialect);
 				}
 				return retVal;
 			}

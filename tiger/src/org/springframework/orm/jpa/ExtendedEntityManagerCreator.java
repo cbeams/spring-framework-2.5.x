@@ -30,7 +30,8 @@ import javax.persistence.TransactionRequiredException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -59,14 +60,34 @@ public abstract class ExtendedEntityManagerCreator {
 	 * managed by the container.
 	 * @param rawEntityManager raw EntityManager
 	 * @param plusOperations an implementation of the EntityManagerPlusOperations
-	 * interface, if those operations should be exposed (can be <code>null</code>)
+	 * interface, if those operations should be exposed (may be <code>null</code>)
 	 * @return an application-managed EntityManager that can join transactions
 	 * but does not participate in them automatically
 	 */
 	public static EntityManager createApplicationManagedEntityManager(
 			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations) {
 
-		return createProxy(rawEntityManager, plusOperations, false);
+		return createProxy(rawEntityManager, plusOperations, null, false);
+	}
+
+	/**
+	 * Create an EntityManager that can join transactions with the
+	 * <code>joinTransaction()</code> method, but is not automatically
+	 * managed by the container.
+	 * @param rawEntityManager raw EntityManager
+	 * @param plusOperations an implementation of the EntityManagerPlusOperations
+	 * interface, if those operations should be exposed (may be <code>null</code>)
+	 * @param exceptionTranslator the exception translator to use for translating
+	 * JPA commit/rollback exceptions during transaction synchronization
+	 * (may be <code>null</code>)
+	 * @return an application-managed EntityManager that can join transactions
+	 * but does not participate in them automatically
+	 */
+	public static EntityManager createApplicationManagedEntityManager(
+			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations,
+			PersistenceExceptionTranslator exceptionTranslator) {
+
+		return createProxy(rawEntityManager, plusOperations, exceptionTranslator, false);
 	}
 
 	/**
@@ -74,14 +95,33 @@ public abstract class ExtendedEntityManagerCreator {
 	 * operation in a transaction.
 	 * @param rawEntityManager raw EntityManager
 	 * @param plusOperations an implementation of the EntityManagerPlusOperations
-	 * interface, if those operations should be exposed (can be <code>null</code>)
+	 * interface, if those operations should be exposed (may be <code>null</code>)
 	 * @return a container-managed EntityManager that will automatically participate
 	 * in any managed transaction
 	 */
 	public static EntityManager createContainerManagedEntityManager(
 			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations) {
 
-		return createProxy(rawEntityManager, plusOperations, true);
+		return createProxy(rawEntityManager, plusOperations, null, true);
+	}
+
+	/**
+	 * Create an EntityManager that automatically joins transactions on each
+	 * operation in a transaction.
+	 * @param rawEntityManager raw EntityManager
+	 * @param plusOperations an implementation of the EntityManagerPlusOperations
+	 * interface, if those operations should be exposed (may be <code>null</code>)
+	 * @param exceptionTranslator the exception translator to use for translating
+	 * JPA commit/rollback exceptions during transaction synchronization
+	 * (may be <code>null</code>)
+	 * @return a container-managed EntityManager that will automatically participate
+	 * in any managed transaction
+	 */
+	public static EntityManager createContainerManagedEntityManager(
+			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations,
+			PersistenceExceptionTranslator exceptionTranslator) {
+
+		return createProxy(rawEntityManager, plusOperations, exceptionTranslator, true);
 	}
 
 	/**
@@ -124,12 +164,12 @@ public abstract class ExtendedEntityManagerCreator {
 			if (jpaDialect != null && jpaDialect.supportsEntityManagerPlusOperations()) {
 				plusOperations = jpaDialect.getEntityManagerPlusOperations(rawEntityManager);
 			}
-			return createProxy(rawEntityManager, plusOperations, true);
+			return createProxy(rawEntityManager, plusOperations, emfInfo.getJpaDialect(), true);
 		}
 		else {
 			EntityManager rawEntityManager = (!CollectionUtils.isEmpty(properties) ?
 					emf.createEntityManager(properties) : emf.createEntityManager());
-			return createProxy(rawEntityManager, null, true);
+			return createProxy(rawEntityManager, null, null, true);
 		}
 	}
 
@@ -137,13 +177,14 @@ public abstract class ExtendedEntityManagerCreator {
 	 * Actually create the EntityManager proxy.
 	 * @param rawEntityManager raw EntityManager
 	 * @param plusOperations an implementation of the EntityManagerPlusOperations
-	 * interface, if those operations should be exposed (can be <code>null</code>)
+	 * interface, if those operations should be exposed (may be <code>null</code>)
 	 * @param containerManaged whether to follow container-managed EntityManager
 	 * or application-managed EntityManager semantics
 	 * @return the EntityManager proxy
 	 */
 	private static EntityManager createProxy(
-			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations, boolean containerManaged) {
+			EntityManager rawEntityManager, EntityManagerPlusOperations plusOperations,
+			PersistenceExceptionTranslator exceptionTranslator, boolean containerManaged) {
 
 		Assert.notNull(rawEntityManager, "EntityManager must not be null");
 		Class[] ifcs = ClassUtils.getAllInterfaces(rawEntityManager);
@@ -152,7 +193,8 @@ public abstract class ExtendedEntityManagerCreator {
 		}
 		return (EntityManager) Proxy.newProxyInstance(
 				ExtendedEntityManagerCreator.class.getClassLoader(), ifcs,
-				new ExtendedEntityManagerInvocationHandler(rawEntityManager, plusOperations, containerManaged));
+				new ExtendedEntityManagerInvocationHandler(
+						rawEntityManager, plusOperations, exceptionTranslator, containerManaged));
 	}
 
 
@@ -167,15 +209,19 @@ public abstract class ExtendedEntityManagerCreator {
 
 		private final EntityManagerPlusOperations plusOperations;
 
+		private final PersistenceExceptionTranslator exceptionTranslator;
+
 		private final boolean containerManaged;
 
 		private boolean jta;
 
 		private ExtendedEntityManagerInvocationHandler(
-				EntityManager target, EntityManagerPlusOperations plusOperations, boolean containerManaged) {
+				EntityManager target, EntityManagerPlusOperations plusOperations,
+				PersistenceExceptionTranslator exceptionTranslator, boolean containerManaged) {
 
 			this.target = target;
 			this.plusOperations = plusOperations;
+			this.exceptionTranslator = exceptionTranslator;
 			this.containerManaged = containerManaged;
 			this.jta = isJtaEntityManager();
 		}
@@ -293,7 +339,7 @@ public abstract class ExtendedEntityManagerCreator {
 			}
 			EntityManagerHolder emh = new EntityManagerHolder(this.target);
 			ContainerManagedExtendedEntityManagerSynchronization applicationManagedEntityManagerSynchronization =
-					new ContainerManagedExtendedEntityManagerSynchronization(emh);
+					new ContainerManagedExtendedEntityManagerSynchronization(emh, this.exceptionTranslator);
 			TransactionSynchronizationManager.bindResource(this.target,
 					applicationManagedEntityManagerSynchronization);
 			TransactionSynchronizationManager.registerSynchronization(applicationManagedEntityManagerSynchronization);
@@ -310,10 +356,15 @@ public abstract class ExtendedEntityManagerCreator {
 
 		private final EntityManagerHolder entityManagerHolder;
 
+		private final PersistenceExceptionTranslator exceptionTranslator;
+
 		private boolean holderActive = true;
 
-		public ContainerManagedExtendedEntityManagerSynchronization(EntityManagerHolder emHolder) {
+		public ContainerManagedExtendedEntityManagerSynchronization(
+				EntityManagerHolder emHolder, PersistenceExceptionTranslator exceptionTranslator) {
+
 			this.entityManagerHolder = emHolder;
+			this.exceptionTranslator = exceptionTranslator;
 		}
 
 		public int getOrder() {
@@ -338,15 +389,35 @@ public abstract class ExtendedEntityManagerCreator {
 			this.holderActive = false;
 		}
 
-		public void afterCompletion(int status) {
-			this.entityManagerHolder.setSynchronizedWithTransaction(false);
-			if (status != TransactionSynchronization.STATUS_COMMITTED) {
-				this.entityManagerHolder.getEntityManager().getTransaction().rollback();
-			}
-			else {
+		public void afterCommit() {
+			// Trigger commit here to let exceptions propagate to the caller.
+			try {
 				this.entityManagerHolder.getEntityManager().getTransaction().commit();
 			}
+			catch (RuntimeException ex) {
+				throw convertCompletionException(ex);
+			}
+		}
+
+		public void afterCompletion(int status) {
+			this.entityManagerHolder.setSynchronizedWithTransaction(false);
+			if (status != STATUS_COMMITTED) {
+				// Haven't had an afterCommit call: trigger a rollback.
+				try {
+					this.entityManagerHolder.getEntityManager().getTransaction().rollback();
+				}
+				catch (RuntimeException ex) {
+					throw convertCompletionException(ex);
+				}
+			}
 			// Don't close the EntityManager... That's up to the user.
+		}
+
+		private RuntimeException convertCompletionException(RuntimeException ex) {
+			DataAccessException daex = (this.exceptionTranslator != null) ?
+					this.exceptionTranslator.translateExceptionIfPossible(ex) :
+					EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex);
+			return (daex != null ? daex : ex);
 		}
 	}
 
