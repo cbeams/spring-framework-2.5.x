@@ -20,8 +20,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.AbstractMap;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.beans.GenericBean;
+import org.springframework.core.io.Resource;
 
 /**
  * @author Serge Bogatyrjov
@@ -32,8 +36,9 @@ public class GenericCollectionTypeResolverTests extends AbstractGenericsTests {
 	protected void setUp() throws Exception {
 		this.targetClass = Foo.class;
 		this.methods = new String[] {"a", "b", "b2", "b3", "c", "d", "d2", "d3", "e", "e2", "e3"};
-		this.expectedResults = new Class[] {Integer.class, null, null, Set.class, null, Integer.class,
-																				Integer.class, Integer.class, Integer.class, Integer.class, Integer.class};
+		this.expectedResults = new Class[] {
+			Integer.class, null, null, Set.class, null, Integer.class,
+			Integer.class, Integer.class, Integer.class, Integer.class, Integer.class};
 	}
 
 	protected Type getType(Method method) {
@@ -82,6 +87,16 @@ public class GenericCollectionTypeResolverTests extends AbstractGenericsTests {
 
 	public void testE3() throws Exception {
 		executeTest();
+	}
+
+	public void testProgrammaticListIntrospection() throws Exception {
+		Method setter = GenericBean.class.getMethod("setResourceList", List.class);
+		assertEquals(Resource.class,
+				GenericCollectionTypeResolver.getCollectionParameterType(new MethodParameter(setter, 0)));
+
+		Method getter = GenericBean.class.getMethod("getResourceList");
+		assertEquals(Resource.class,
+				GenericCollectionTypeResolver.getCollectionReturnType(getter));
 	}
 
 
