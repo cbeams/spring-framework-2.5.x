@@ -321,12 +321,9 @@
       </opm:class-mapping-descriptor>
    </opm:class-mapping-descriptors>
    <toplink:login xsi:type="toplink:database-login">
-      <toplink:platform-class>oracle.toplink.platform.database.HSQLPlatform</toplink:platform-class>
-      <toplink:user-name>sa</toplink:user-name>
+      <toplink:platform-class>org.springframework.samples.petclinic.toplink.HSQLPlatformWithNativeSequence</toplink:platform-class>
       <toplink:sequencing>
          <toplink:default-sequence xsi:type="toplink:native-sequence"/>
       </toplink:sequencing>
-      <toplink:driver-class>org.hsqldb.jdbcDriver</toplink:driver-class>
-      <toplink:connection-url>jdbc:hsqldb:hsql://localhost:9001</toplink:connection-url>
    </toplink:login>
 </toplink:object-persistence>

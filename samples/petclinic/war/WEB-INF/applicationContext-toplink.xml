@@ -4,7 +4,7 @@
 <!--
   - Application context definition for PetClinic on TopLink.
   -
-  - A full "toplink.jar" and "xmlparserv2.jar" from the TopLink 10.1.3+
+  - A full "toplink.jar" and "xmlparserv2.jar" from the TopLink 10.1.3
   - distribution needs to be added to the "WEB-INF/lib" directory
   - (or to "lib/toplink" before building the "petclinic.war" file).
   -->
@@ -36,15 +36,10 @@
 	</bean>
 	-->
 
-	<!-- TopLink SessionFactory -->
-	<!-- Will only work on TopLink 10.1.3 or higher, due to the use of -->
-	<!-- HSQLPlatformWithNativeSequence and CommonsLoggingSessionLog. -->
+	<!-- TopLink 10.1.3 SessionFactory -->
 	<bean id="sessionFactory" class="org.springframework.orm.toplink.LocalSessionFactoryBean">
 		<property name="configLocation" value="toplink-sessions.xml"/>
 		<property name="dataSource" ref="dataSource"/>
-		<property name="databasePlatform">
-			<bean class="org.springframework.samples.petclinic.toplink.HSQLPlatformWithNativeSequence"/>
-		</property>
 		<property name="sessionLog">
 			<bean class="org.springframework.orm.toplink.support.CommonsLoggingSessionLog"/>
 		</property>
