@@ -16,8 +16,10 @@
 
 package org.springframework.orm.ibatis;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -34,14 +36,17 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.lob.LobHandler;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
- * FactoryBean that creates an iBATIS Database Layer SqlMapClient as singleton
- * in the current bean factory, possibly for use with SqlMapClientTemplate.
+ * FactoryBean that creates an iBATIS {@link com.ibatis.sqlmap.client.SqlMapClient}
+ * as singleton in the current bean factory, possibly for use with Spring's
+ * {@link SqlMapClientTemplate} data access helper.
  *
- * <p>Allows to specify a DataSource at the SqlMapClient level. This is
- * preferable to per-DAO DataSource references, as it allows for lazy loading
- * and avoids repeated DataSource references.
+ * <p>Allows to specify a DataSource at the SqlMapClient level. This is preferable
+ * to per-DAO DataSource references, as it allows for lazy loading and avoids
+ * repeated DataSource references in every DAO.
  *
  * @author Juergen Hoeller
  * @since 24.02.2004
@@ -51,6 +56,19 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * @see SqlMapClientTemplate#setDataSource
  */
 public class SqlMapClientFactoryBean implements FactoryBean, InitializingBean {
+
+	// Determine whether the SqlMapClientBuilder.buildSqlMapClient(InputStream)
+	// method is available, for use in the "buildSqlMapClient" template method.
+	private final static Method buildSqlMapClientWithInputStreamMethod =
+			ClassUtils.getMethodIfAvailable(SqlMapClientBuilder.class, "buildSqlMapClient",
+					new Class[] {InputStream.class});
+
+	// Determine whether the SqlMapClientBuilder.buildSqlMapClient(InputStream, Properties)
+	// method is available, for use in the "buildSqlMapClient" template method.
+	private final static Method buildSqlMapClientWithInputStreamAndPropertiesMethod =
+			ClassUtils.getMethodIfAvailable(SqlMapClientBuilder.class, "buildSqlMapClient",
+					new Class[] {InputStream.class, Properties.class});
+
 
 	private static final ThreadLocal configTimeLobHandlerHolder = new ThreadLocal();
 
@@ -250,11 +268,7 @@ public class SqlMapClientFactoryBean implements FactoryBean, InitializingBean {
 		}
 
 		try {
-			// Build the SqlMapClient.
-			InputStream is = this.configLocation.getInputStream();
-			this.sqlMapClient = (this.sqlMapClientProperties != null) ?
-					SqlMapClientBuilder.buildSqlMapClient(new InputStreamReader(is), this.sqlMapClientProperties) :
-					SqlMapClientBuilder.buildSqlMapClient(new InputStreamReader(is));
+			this.sqlMapClient = buildSqlMapClient(this.configLocation, this.sqlMapClientProperties);
 
 			// Tell the SqlMapClient to use the given DataSource, if any.
 			if (this.dataSource != null) {
@@ -278,8 +292,41 @@ public class SqlMapClientFactoryBean implements FactoryBean, InitializingBean {
 	}
 
 	/**
+	 * Build a SqlMapClient instance based on the given standard configuration.
+	 * <p>The default implementation uses the standard iBATIS {@link SqlMapClientBuilder}
+	 * API to build a SqlMapClient instance based on an InputStream (if possible,
+	 * on iBATIS 2.3 and higher) or on a Reader (on iBATIS up to version 2.2).
+	 * @param configLocation the config file to load from
+	 * @param properties the SqlMapClient properties (if any)
+	 * @return the SqlMapClient instance (never <code>null</code>)
+	 * @throws IOException if loading the config file failed
+	 * @see com.ibatis.sqlmap.client.SqlMapClientBuilder#buildSqlMapClient
+	 */
+	protected SqlMapClient buildSqlMapClient(Resource configLocation, Properties properties) throws IOException {
+		InputStream is = configLocation.getInputStream();
+		if (properties != null) {
+			if (buildSqlMapClientWithInputStreamAndPropertiesMethod != null) {
+				return (SqlMapClient) ReflectionUtils.invokeMethod(
+						buildSqlMapClientWithInputStreamAndPropertiesMethod, null, new Object[] {is, properties});
+			}
+			else {
+				return SqlMapClientBuilder.buildSqlMapClient(new InputStreamReader(is), properties);
+			}
+		}
+		else {
+			if (buildSqlMapClientWithInputStreamMethod != null) {
+				return (SqlMapClient) ReflectionUtils.invokeMethod(
+						buildSqlMapClientWithInputStreamMethod, null, new Object[] {is});
+			}
+			else {
+				return SqlMapClientBuilder.buildSqlMapClient(new InputStreamReader(is));
+			}
+		}
+	}
+
+	/**
 	 * Apply the given iBATIS TransactionConfig to the SqlMapClient.
-	 * <p>Default implementation casts to ExtendedSqlMapClient, retrieves the maximum
+	 * <p>The default implementation casts to ExtendedSqlMapClient, retrieves the maximum
 	 * number of concurrent transactions from the SqlMapExecutorDelegate, and sets
 	 * an iBATIS TransactionManager with the given TransactionConfig.
 	 * @param sqlMapClient the SqlMapClient to apply the TransactionConfig to
