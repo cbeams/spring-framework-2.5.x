@@ -20,43 +20,53 @@ import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
 
+import org.springframework.transaction.annotation.Transactional;
+
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class AnnotationUtilsTests extends TestCase {
 
 	public void testFindMethodAnnotationOnLeaf() throws SecurityException, NoSuchMethodException {
 		Method m = Leaf.class.getMethod("annotatedOnLeaf", (Class[]) null);
-		Order o = AnnotationUtils.findAnnotation(m, Order.class);
-		assertNotNull(o);
+		assertNotNull(m.getAnnotation(Order.class));
+		assertNotNull(AnnotationUtils.getAnnotation(m, Order.class));
+		assertNotNull(AnnotationUtils.findAnnotation(m, Order.class));
 	}
 	
 	public void testFindMethodAnnotationOnRoot() throws SecurityException, NoSuchMethodException {
 		Method m = Leaf.class.getMethod("annotatedOnRoot", (Class[]) null);
-		Order o = AnnotationUtils.findAnnotation(m, Order.class);
-		assertNotNull(o);
+		assertNotNull(m.getAnnotation(Order.class));
+		assertNotNull(AnnotationUtils.getAnnotation(m, Order.class));
+		assertNotNull(AnnotationUtils.findAnnotation(m, Order.class));
 	}
 	
 	public void testFindMethodAnnotationOnRootButOverridden() throws SecurityException, NoSuchMethodException {
 		Method m = Leaf.class.getMethod("overrideWithoutNewAnnotation", (Class[]) null);
-		Order o = AnnotationUtils.findAnnotation(m, Order.class);
-		assertNotNull(o);
+		assertNull(m.getAnnotation(Order.class));
+		assertNull(AnnotationUtils.getAnnotation(m, Order.class));
+		assertNotNull(AnnotationUtils.findAnnotation(m, Order.class));
 	}
 	
 	public void testFindMethodAnnotationNotAnnotated() throws SecurityException, NoSuchMethodException {
 		Method m = Leaf.class.getMethod("notAnnotated", (Class[]) null);
-		Order o = AnnotationUtils.findAnnotation(m, Order.class);
-		assertNull(o);
+		assertNull(AnnotationUtils.findAnnotation(m, Order.class));
 	}
 
 	public void testFindMethodAnnotationOnBridgeMethod() throws Exception {
-		Method m = SimpleFoo.class.getDeclaredMethod("something", Object.class);
+		Method m = SimpleFoo.class.getMethod("something", Object.class);
 		assertTrue(m.isBridge());
-		Order o = AnnotationUtils.findAnnotation(m, Order.class);
+		assertNull(m.getAnnotation(Order.class));
+		assertNull(AnnotationUtils.getAnnotation(m, Order.class));
+		assertNotNull(AnnotationUtils.findAnnotation(m, Order.class));
+		assertNull(m.getAnnotation(Transactional.class));
+		assertNotNull(AnnotationUtils.getAnnotation(m, Transactional.class));
+		assertNotNull(AnnotationUtils.findAnnotation(m, Transactional.class));
 	}
 
 // TODO consider whether we want this to handle annotations on interfaces
-//	public void testFindMethodAnnotationFromInterfaceImplementedByRoot() throws SecurityException, NoSuchMethodException {
+//	public void testFindMethodAnnotationFromInterfaceImplementedByRoot() throws Exception {
 //		Method m = Leaf.class.getMethod("fromInterfaceImplementedByRoot", (Class[]) null);
 //		Order o = AnnotationUtils.findAnnotation(Order.class, m, Leaf.class);
 //		assertNotNull(o);
@@ -99,15 +109,18 @@ public class AnnotationUtilsTests extends TestCase {
 		public void overrideWithoutNewAnnotation() {}
 	}
 
-	public static interface Foo<T> {
+
+	public static abstract class Foo<T> {
+
 		@Order(1)
-		void something(T arg);
+		public abstract void something(T arg);
 	}
 
-	public static class SimpleFoo implements Foo<String> {
 
+	public static class SimpleFoo extends Foo<String> {
+
+		@Transactional
 		public void something(String arg) {
-
 		}
 	}
 
