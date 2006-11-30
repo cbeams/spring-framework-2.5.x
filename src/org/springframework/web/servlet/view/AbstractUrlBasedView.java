@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,6 +31,21 @@ public abstract class AbstractUrlBasedView extends AbstractView implements Initi
 
 
 	/**
+	 * Constructor for use as a bean.
+	 */
+	protected AbstractUrlBasedView() {
+	}
+
+	/**
+	 * Create a new AbstractUrlBasedView with the given URL.
+	 * @param url the URL to forward to
+	 */
+	protected AbstractUrlBasedView(String url) {
+		this.url = url;
+	}
+
+
+	/**
 	 * Set the URL of the resource that this view wraps.
 	 * The URL must be appropriate for the concrete View implementation.
 	 */
@@ -42,7 +57,7 @@ public abstract class AbstractUrlBasedView extends AbstractView implements Initi
 	 * Return the URL of the resource that this view wraps.
 	 */
 	public String getUrl() {
-		return url;
+		return this.url;
 	}
 
 	public void afterPropertiesSet() throws Exception {
