@@ -61,8 +61,13 @@ import org.springframework.web.util.WebUtils;
  */
 public class InternalResourceView extends AbstractUrlBasedView {
 
+	private boolean alwaysInclude = false;
+
+
 	/**
 	 * Constructor for use as a bean.
+	 * @see #setUrl
+	 * @see #setAlwaysInclude
 	 */
 	public InternalResourceView() {
 	}
@@ -70,10 +75,35 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	/**
 	 * Create a new InternalResourceView with the given URL.
 	 * @param url the URL to forward to
+	 * @see #setAlwaysInclude
 	 */
 	public InternalResourceView(String url) {
-		setUrl(url);
+		super(url);
 	}
+
+	/**
+	 * Create a new InternalResourceView with the given URL.
+	 * @param url the URL to forward to
+	 * @param alwaysInclude whether to always include the view rather than forward to it
+	 */
+	public InternalResourceView(String url, boolean alwaysInclude) {
+		super(url);
+		this.alwaysInclude = alwaysInclude;
+	}
+
+
+	/**
+	 * Specify whether to always include the view rather than forward to it.
+	 * <p>Default is "false". Switch this flag on to enforce the use of a
+	 * Servlet include, even if a forward would be possible.
+	 * @see javax.servlet.RequestDispatcher#forward
+	 * @see javax.servlet.RequestDispatcher#include
+	 * @see #useInclude(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+	 */
+	public void setAlwaysInclude(boolean alwaysInclude) {
+		this.alwaysInclude = alwaysInclude;
+	}
+
 
 	/**
 	 * Render the internal resource given the specified model.
@@ -165,7 +195,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	 * @see org.springframework.web.util.WebUtils#isIncludeRequest
 	 */
 	protected boolean useInclude(HttpServletRequest request, HttpServletResponse response) {
-		return (WebUtils.isIncludeRequest(request) || response.isCommitted());
+		return (this.alwaysInclude || WebUtils.isIncludeRequest(request) || response.isCommitted());
 	}
 
 	/**

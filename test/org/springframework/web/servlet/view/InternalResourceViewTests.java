@@ -28,7 +28,6 @@ import org.easymock.MockControl;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockRequestDispatcher;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -57,10 +56,6 @@ public class InternalResourceViewTests extends TestCase {
 		model.put("foo", "bar");
 		model.put("I", obj);
 
-		MockControl wacControl = MockControl.createControl(WebApplicationContext.class);
-		WebApplicationContext wac = (WebApplicationContext) wacControl.getMock();
-		wacControl.replay();
-		
 		String url = "forward-to";
 		
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myservlet/handler.do");
@@ -71,8 +66,7 @@ public class InternalResourceViewTests extends TestCase {
 
 		InternalResourceView view = new InternalResourceView();
 		view.setUrl(url);
-		view.setApplicationContext(wac);
-		
+
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		view.render(model, request, response);
 		assertEquals(url, response.getForwardedUrl());
@@ -88,8 +82,6 @@ public class InternalResourceViewTests extends TestCase {
 		assertEquals("/myservlet", request.getAttribute(WebUtils.FORWARD_SERVLET_PATH_ATTRIBUTE));
 		assertEquals(";mypathinfo", request.getAttribute(WebUtils.FORWARD_PATH_INFO_ATTRIBUTE));
 		assertEquals("?param1=value1", request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE));
-
-		wacControl.verify();
 	}
 
 	public void testForwardWithForwardAttributesPresent() throws Exception {
@@ -97,10 +89,6 @@ public class InternalResourceViewTests extends TestCase {
 		Object obj = new Integer(1);
 		model.put("foo", "bar");
 		model.put("I", obj);
-
-		MockControl wacControl = MockControl.createControl(WebApplicationContext.class);
-		WebApplicationContext wac = (WebApplicationContext) wacControl.getMock();
-		wacControl.replay();
 
 		String url = "forward-to";
 
@@ -118,7 +106,6 @@ public class InternalResourceViewTests extends TestCase {
 
 		InternalResourceView view = new InternalResourceView();
 		view.setUrl(url);
-		view.setApplicationContext(wac);
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		view.render(model, request, response);
@@ -135,8 +122,38 @@ public class InternalResourceViewTests extends TestCase {
 		assertEquals("/MYservlet", request.getAttribute(WebUtils.FORWARD_SERVLET_PATH_ATTRIBUTE));
 		assertEquals(";MYpathinfo", request.getAttribute(WebUtils.FORWARD_PATH_INFO_ATTRIBUTE));
 		assertEquals("?Param1=value1", request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE));
+	}
 
-		wacControl.verify();
+	public void testAlwaysInclude() throws Exception {
+		HashMap model = new HashMap();
+		Object obj = new Integer(1);
+		model.put("foo", "bar");
+		model.put("I", obj);
+
+		String url = "forward-to";
+
+		MockControl reqControl = MockControl.createControl(HttpServletRequest.class);
+		HttpServletRequest request = (HttpServletRequest) reqControl.getMock();
+		Set keys = model.keySet();
+		for (Iterator iter = keys.iterator(); iter.hasNext();) {
+			String key = (String) iter.next();
+			request.setAttribute(key, model.get(key));
+			reqControl.setVoidCallable(1);
+		}
+
+		request.getRequestDispatcher(url);
+		reqControl.setReturnValue(new MockRequestDispatcher(url));
+		reqControl.replay();
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		InternalResourceView v = new InternalResourceView();
+		v.setUrl(url);
+		v.setAlwaysInclude(true);
+
+		// Can now try multiple tests
+		v.render(model, request, response);
+		assertEquals(url, response.getIncludedUrl());
+		reqControl.verify();
 	}
 
 	public void testIncludeOnAttribute() throws Exception {
@@ -144,10 +161,6 @@ public class InternalResourceViewTests extends TestCase {
 		Object obj = new Integer(1);
 		model.put("foo", "bar");
 		model.put("I", obj);
-
-		MockControl wacControl = MockControl.createControl(WebApplicationContext.class);
-		WebApplicationContext wac = (WebApplicationContext) wacControl.getMock();
-		wacControl.replay();
 
 		String url = "forward-to";
 
@@ -169,12 +182,10 @@ public class InternalResourceViewTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		InternalResourceView v = new InternalResourceView();
 		v.setUrl(url);
-		v.setApplicationContext(wac);
 
 		// Can now try multiple tests
 		v.render(model, request, response);
 		assertEquals(url, response.getIncludedUrl());
-		wacControl.verify();
 		reqControl.verify();
 	}
 
@@ -183,10 +194,6 @@ public class InternalResourceViewTests extends TestCase {
 		Object obj = new Integer(1);
 		model.put("foo", "bar");
 		model.put("I", obj);
-
-		MockControl wacControl = MockControl.createControl(WebApplicationContext.class);
-		WebApplicationContext wac = (WebApplicationContext) wacControl.getMock();
-		wacControl.replay();
 
 		String url = "forward-to";
 
@@ -209,12 +216,10 @@ public class InternalResourceViewTests extends TestCase {
 		response.setCommitted(true);
 		InternalResourceView v = new InternalResourceView();
 		v.setUrl(url);
-		v.setApplicationContext(wac);
 
 		// Can now try multiple tests
 		v.render(model, request, response);
 		assertEquals(url, response.getIncludedUrl());
-		wacControl.verify();
 		reqControl.verify();
 	}
 
