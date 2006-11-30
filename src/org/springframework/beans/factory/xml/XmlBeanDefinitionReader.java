@@ -48,14 +48,18 @@ import org.springframework.util.xml.SimpleSaxErrorHandler;
 import org.springframework.util.xml.XmlValidationModeDetector;
 
 /**
- * Bean definition reader for XML bean definitions. Delegates the actual XML
- * document reading to an implementation of the BeanDefinitionDocumentReader interface.
+ * Bean definition reader for XML bean definitions.
+ * Delegates the actual XML document reading to an implementation
+ * of the {@link BeanDefinitionDocumentReader} interface.
  *
- * <p>Typically applied to a DefaultListableBeanFactory or GenericApplicationContext.
+ * <p>Typically applied to a
+ * {@link org.springframework.beans.factory.support.DefaultListableBeanFactory}
+ * or a {@link org.springframework.context.support.GenericApplicationContext}.
  *
  * <p>This class loads a DOM document and applies the BeanDefinitionDocumentReader to it.
  * The document reader will register each bean definition with the given bean factory,
- * relying on the latter's implementation of the BeanDefinitionRegistry interface.
+ * talking to the latter's implementation of the
+ * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry} interface.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -409,22 +413,25 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		catch (BeanDefinitionStoreException ex) {
 			throw ex;
 		}
-		catch (ParserConfigurationException ex) {
-			throw new BeanDefinitionStoreException(
-					"Parser configuration exception parsing XML from " + resource, ex);
-		}
 		catch (SAXParseException ex) {
-			throw new BeanDefinitionStoreException(
+			throw new XmlBeanDefinitionStoreException(resource.getDescription(),
 					"Line " + ex.getLineNumber() + " in XML document from " + resource + " is invalid", ex);
 		}
 		catch (SAXException ex) {
-			throw new BeanDefinitionStoreException("XML document from " + resource + " is invalid", ex);
+			throw new XmlBeanDefinitionStoreException(resource.getDescription(),
+					"XML document from " + resource + " is invalid", ex);
+		}
+		catch (ParserConfigurationException ex) {
+			throw new BeanDefinitionStoreException(resource.getDescription(),
+					"Parser configuration exception parsing XML from " + resource, ex);
 		}
 		catch (IOException ex) {
-			throw new BeanDefinitionStoreException("IOException parsing XML document from " + resource, ex);
+			throw new BeanDefinitionStoreException(resource.getDescription(),
+					"IOException parsing XML document from " + resource, ex);
 		}
 		catch (Throwable ex) {
-			throw new BeanDefinitionStoreException("Unexpected exception parsing XML document from " + resource, ex);
+			throw new BeanDefinitionStoreException(resource.getDescription(),
+					"Unexpected exception parsing XML document from " + resource, ex);
 		}
 	}
 
@@ -447,10 +454,10 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	protected int detectValidationMode(Resource resource) {
 		if (resource.isOpen()) {
 			throw new BeanDefinitionStoreException(
-							"Passed-in Resource [" + resource + "] contains an open stream: " +
-											"cannot determine validation mode automatically. Either pass in a Resource " +
-											"that is able to create fresh streams, or explicitly specify the validationMode " +
-											"on your XmlBeanDefinitionReader instance.");
+					"Passed-in Resource [" + resource + "] contains an open stream: " +
+					"cannot determine validation mode automatically. Either pass in a Resource " +
+					"that is able to create fresh streams, or explicitly specify the validationMode " +
+					"on your XmlBeanDefinitionReader instance.");
 		}
 
 		InputStream inputStream;
@@ -459,9 +466,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 		catch (IOException ex) {
 			throw new BeanDefinitionStoreException(
-							"Unable to determine validation mode for [" + resource + "]: cannot open InputStream. " +
-											"Did you attempt to load directly from a SAX InputSource without specifying the " +
-											"validationMode on your XmlBeanDefinitionReader instance?", ex);
+					"Unable to determine validation mode for [" + resource + "]: cannot open InputStream. " +
+					"Did you attempt to load directly from a SAX InputSource without specifying the " +
+					"validationMode on your XmlBeanDefinitionReader instance?", ex);
 		}
 
 		try {
@@ -469,7 +476,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 		catch (IOException ex) {
 			throw new BeanDefinitionStoreException("Unable to determine validation mode for [" +
-							resource + "]: an error occurred whilst reading from the InputStream.", ex);
+					resource + "]: an error occurred whilst reading from the InputStream.", ex);
 		}
 	}
 
