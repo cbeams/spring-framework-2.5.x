@@ -2865,7 +2865,7 @@ public class FileUploadBean {
     ]]><lineannotation>&lt;!-- this bean with the well known name generates view names for us --&gt;</lineannotation><![CDATA[
     <bean id="viewNameTranslator" class="org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator"/>
 
-    <bean class="x.y.RegistrationControllerController">
+    <bean class="x.y.RegistrationController">
         ]]><lineannotation>&lt;!-- inject dependencies as necessary --&gt;</lineannotation><![CDATA[
     </bean>
     
@@ -2885,7 +2885,7 @@ public class FileUploadBean {
             <classname>DefaultRequestToViewNameTranslator</classname> that will be tasked
             with generating a <emphasis>logical view name</emphasis> from the URL
             of the request. In the case of the above
-            <classname>RegistrationControllerController</classname>, which is being
+            <classname>RegistrationController</classname>, which is being
             used in conjunction with the <classname>ControllerClassNameHandlerMapping</classname>,
             a request URL of <literal>'http://localhost/registration.html'</literal> will
             result in a logical view name of <literal>'registration'</literal> being
