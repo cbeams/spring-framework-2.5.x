@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.9 (30.11.2006)
+Changes in version 1.2.9 (20.12.2006)
 -------------------------------------
 
 General
@@ -37,6 +37,9 @@ Package org.springframework.core
 * refined PathMatchingResourcePatternResolver to ignore classpath roots that cannot be resolved as jar or in file system
 * ResourceArrayPropertyEditor always preserves order of resource entries, even on JDK 1.3 without Commons Collections
 
+Package org.springframework.dao
+* added "singleResult" and "requiredSingleResult" methods to DataAccessUtils, distinct from "uniqueResult"'s contract
+
 Package org.springframework.ejb
 * fixed AbstractSlsbInvokerInterceptor to reobtain createMethod in case of cacheHome="false"/lookupHomeOnStartup="true"
 
@@ -52,6 +55,8 @@ Package org.springframework.jdbc
 * JdbcTemplate uses "PreparedStatement.setObject(index, null)" for null values with unknown SQL type on Informix
 * JdbcTemplate does not check static SQL for bind parameters anymore, to avoid overhead of double parsing
 * JdbcTemplate logs all warnings in case of "ignoreWarnings"=true, not just the first warning in the chain
+* JdbcTemplate's "queryForObject" uses "requiredSingleResult" to never accept more than 1 row in result (as per its c.)
+* SqlQuery's "findObject" explicitly uses "singleResult" to never accept more than 1 row in result (as per its contract)
 
 Package org.springframework.jms
 * SingleConnectionFactory's Connection proxy implements "equals" and "hashCode" based on proxy equality
@@ -68,11 +73,10 @@ Package org.springframework.orm
 * added overloaded query/insert/update/delete operations without parameter object to SqlMapClientOperations/Template
 * LocalPersistenceManagerFactoryBean and JdoTemplate perform full exception translation even for reflective calls
 * removed warning for read-only from JdoTransactionManager, since a vendor dialect may support it
+* Hibernate3 LocalSessionFactoryBean automatically sets JTATransactionFactory if given a "jtaTransactionManager"
+* Hibernate3 LocalSessionFactoryBean only sets connection release mode "on_close" if not given a "jtaTransactionManager"
 * Hibernate3 LocalSessionFactoryBean registers filter definitions before loading any mapping files
 * removed special Session reconnection check for Hibernate 3.1 RC1
-
-Package org.springframework.mock
-* MockHttpServletRequest handles HTTP header names as case-insensitive
 
 Package org.springframework.scheduling
 * Quartz SchedulerFactoryBean uses given "nonTransactionalDataSource" as default DataSource if no "dataSource" specified
