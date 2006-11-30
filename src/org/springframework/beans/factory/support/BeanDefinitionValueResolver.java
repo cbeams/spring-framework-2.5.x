@@ -67,9 +67,9 @@ public class BeanDefinitionValueResolver {
 	public BeanDefinitionValueResolver(
 			AbstractBeanFactory beanFactory, String beanName, BeanDefinition beanDefinition) {
 
+		this.beanFactory = beanFactory;
 		this.beanName = beanName;
 		this.beanDefinition = beanDefinition;
-		this.beanFactory = beanFactory;
 	}
 
 	/**

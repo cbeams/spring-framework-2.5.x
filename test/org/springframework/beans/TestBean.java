@@ -1,9 +1,5 @@
 /*
- *	$Id: TestBean.java,v 1.21 2005-06-19 22:06:47 robharrop Exp $
- */
-
-/*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +33,7 @@ import org.springframework.util.ObjectUtils;
  * Simple test bean used for testing bean factories,
  * AOP framework etc.
  *
- * @author  Rod Johnson
+ * @author Rod Johnson
  * @since 15 April 2001
  */
 public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOther, Comparable {
