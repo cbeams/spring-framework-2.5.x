@@ -19,17 +19,18 @@ package org.springframework.jdbc;
 import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 
 /**
- * Exception thrown when a JDBC update affects an unexpected
- * number of rows. Typically we expect an update to affect a
- * single row, meaning it's an error if it affects multiple rows.
+ * Exception thrown when a JDBC update affects an unexpected number of rows.
+ * Typically we expect an update to affect a single row, meaning it's an
+ * error if it affects multiple rows.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class JdbcUpdateAffectedIncorrectNumberOfRowsException extends IncorrectUpdateSemanticsDataAccessException {
-	
+
 	/** Number of rows that should have been affected */
 	private int expected;
-	
+
 	/** Number of rows that actually were affected */
 	private int actual;
 
@@ -51,18 +52,18 @@ public class JdbcUpdateAffectedIncorrectNumberOfRowsException extends IncorrectU
 	 * Return the number of rows that should have been affected.
 	 */
 	public int getExpectedRowsAffected() {
-		return expected;
+		return this.expected;
 	}
 
 	/**
 	 * Return the number of rows that have actually been affected.
 	 */
 	public int getActualRowsAffected() {
-		return actual;
+		return this.actual;
 	}
 
 	public boolean wasDataUpdated() {
-		return getActualRowsAffected() > 0;
+		return (getActualRowsAffected() > 0);
 	}
 
 }
