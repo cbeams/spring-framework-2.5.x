@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,17 +19,17 @@ package org.springframework.jdbc;
 import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
 
 /**
- * Exception thrown when a JDBC update affects an unexpected
- * number of rows. Typically we expect an update to affect a
- * single row, meaning it's an error if it affects multiple rows.
+ * Exception thrown when a JDBC update affects an unexpected number of rows.
+ * Typically we expect an update to affect a single row, meaning it's an
+ * error if it affects multiple rows.
  *
  * @author Rod Johnson
  */
 public class JdbcUpdateAffectedIncorrectNumberOfRowsException extends IncorrectUpdateSemanticsDataAccessException {
-	
+
 	/** Number of rows that should have been affected */
 	private int expected;
-	
+
 	/** Number of rows that actually were affected */
 	private int actual;
 
@@ -51,14 +51,14 @@ public class JdbcUpdateAffectedIncorrectNumberOfRowsException extends IncorrectU
 	 * Return the number of rows that should have been affected.
 	 */
 	public int getExpectedRowsAffected() {
-		return expected;
+		return this.expected;
 	}
-	
+
 	/**
 	 * Return the number of rows that have actually been affected.
 	 */
 	public int getActualRowsAffected() {
-		return actual;
+		return this.actual;
 	}
 
 	public boolean wasDataUpdated() {
