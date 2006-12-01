@@ -161,17 +161,21 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * Set whether or not we want to ignore SQLWarnings.
-	 * Default is "true".
+	 * <p>Default is "true", swallowing and logging all warnings. Switch this flag
+	 * to "false" to make the JdbcTemplate throw a SQLWarningException instead.
+	 * @see java.sql.SQLWarning
+	 * @see org.springframework.jdbc.SQLWarningException
+	 * @see #handleWarnings
 	 */
 	public void setIgnoreWarnings(boolean ignoreWarnings) {
 		this.ignoreWarnings = ignoreWarnings;
 	}
 
 	/**
-	 * Return whether or not we ignore SQLWarnings. Default is "true".
+	 * Return whether or not we ignore SQLWarnings.
 	 */
 	public boolean isIgnoreWarnings() {
-		return ignoreWarnings;
+		return this.ignoreWarnings;
 	}
 
 	/**
@@ -190,7 +194,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * Return the fetch size specified for this JdbcTemplate.
 	 */
 	public int getFetchSize() {
-		return fetchSize;
+		return this.fetchSize;
 	}
 
 	/**
@@ -210,7 +214,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * Return the maximum number of rows specified for this JdbcTemplate.
 	 */
 	public int getMaxRows() {
-		return maxRows;
+		return this.maxRows;
 	}
 
 
@@ -287,8 +291,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				stmtToUse = this.nativeJdbcExtractor.getNativeStatement(stmt);
 			}
 			Object result = action.doInStatement(stmtToUse);
-			SQLWarning warning = stmt.getWarnings();
-			throwExceptionOnWarningIfNotIgnoringWarnings(warning);
+			handleWarnings(stmt.getWarnings());
 			return result;
 		}
 		catch (SQLException ex) {
@@ -476,8 +479,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				psToUse = this.nativeJdbcExtractor.getNativePreparedStatement(ps);
 			}
 			Object result = action.doInPreparedStatement(psToUse);
-			SQLWarning warning = ps.getWarnings();
-			throwExceptionOnWarningIfNotIgnoringWarnings(warning);
+			handleWarnings(ps.getWarnings());
 			return result;
 		}
 		catch (SQLException ex) {
@@ -820,8 +822,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				csToUse = this.nativeJdbcExtractor.getNativeCallableStatement(cs);
 			}
 			Object result = action.doInCallableStatement(csToUse);
-			SQLWarning warning = cs.getWarnings();
-			throwExceptionOnWarningIfNotIgnoringWarnings(warning);
+			handleWarnings(cs.getWarnings());
 			return result;
 		}
 		catch (SQLException ex) {
@@ -1034,16 +1035,18 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * Throw an SQLWarningException if we're not ignoring warnings.
-	 * @param warning warning from current statement. May be <code>null</code>,
-	 * in which case this method does nothing.
+	 * else log the warnings (at debug level).
+	 * @param warning the warnings object from the current statement.
+	 * May be <code>null</code>, in which case this method does nothing.
+	 * @see org.springframework.jdbc.SQLWarningException
 	 */
-	private void throwExceptionOnWarningIfNotIgnoringWarnings(SQLWarning warning) throws SQLWarningException {
+	protected void handleWarnings(SQLWarning warning) throws SQLWarningException {
 		if (warning != null) {
 			if (isIgnoreWarnings()) {
-				if (logger.isWarnEnabled()) {
+				if (logger.isDebugEnabled()) {
 					SQLWarning warningToLog = warning;
 					while (warningToLog != null) {
-						logger.warn("SQLWarning ignored: SQL state '" + warningToLog.getSQLState() + "', error code '" +
+						logger.debug("SQLWarning ignored: SQL state '" + warningToLog.getSQLState() + "', error code '" +
 								warningToLog.getErrorCode() + "', message [" + warningToLog.getMessage() + "]");
 						warningToLog = warningToLog.getNextWarning();
 					}
