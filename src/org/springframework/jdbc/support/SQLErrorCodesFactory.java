@@ -45,13 +45,13 @@ import org.springframework.util.Assert;
  * @author Thomas Risberg
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see java.sql.DatabaseMetaData#getDatabaseProductName
+ * @see java.sql.DatabaseMetaData#getDatabaseProductName()
  */
 public class SQLErrorCodesFactory {
 
 	/**
 	 * The name of custom SQL error codes file, loading from the root
-	 * of the class path (e.g. in the "WEB-INF/classes" directory).
+	 * of the class path (e.g. from the "/WEB-INF/classes" directory).
 	 */
 	public static final String SQL_ERROR_CODE_OVERRIDE_PATH = "sql-error-codes.xml";
 
@@ -272,7 +272,7 @@ public class SQLErrorCodesFactory {
 			}
 		}
 
-		// Fallback is to return an empty ErrorCodes instance.
+		// Fallback is to return an empty SQLErrorCodes instance.
 		return new SQLErrorCodes();
 	}
 
