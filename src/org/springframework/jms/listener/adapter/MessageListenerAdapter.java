@@ -53,8 +53,7 @@ import org.springframework.util.ObjectUtils;
  * JMS {@link MessageConverter}. By default, a {@link SimpleMessageConverter}
  * {@link org.springframework.jms.support.converter.SimpleMessageConverter102 (102)}
  * will be used. (If you do not want such automatic message conversion taking
- * place then be sure to set the
- * {@link #setMessageConverter(org.springframework.jms.support.converter.MessageConverter) MessageConverter}
+ * place, then be sure to set the {@link #setMessageConverter MessageConverter}
  * to <code>null</code>.)
  *
  * <p>If a target listener method returns a non-null object (typically of a
@@ -72,57 +71,57 @@ import org.springframework.util.ObjectUtils;
  * <p>This class requires a JMS 1.1+ provider, because it builds on the
  * domain-independent API. <b>Use the {@link MessageListenerAdapter102
  * MessageListenerAdapter102} subclass for JMS 1.0.2 providers.</b>
- * 
+ *
  * <p>Find below some examples of method signatures compliant with this
  * adapter class. This first example handles all <code>Message</code> types
  * and gets passed the contents of each <code>Message</code> type as an
- * argument. No <code>Message</code> will be sent back as all of these methods
- * return <code>void</code>.
- * 
- * <pre class="code"> public interface MessageContentsDelegate {
+ * argument. No <code>Message</code> will be sent back as all of these
+ * methods return <code>void</code>.
+ *
+ * <pre class="code">public interface MessageContentsDelegate {
  *    void handleMessage(String text);
  *    void handleMessage(Map map);
  *    void handleMessage(byte[] bytes);
  *    void handleMessage(Serializable obj);
  * }</pre>
- * 
- * <p>This next example handles all <code>Message</code> types and gets
+ *
+ * This next example handles all <code>Message</code> types and gets
  * passed the actual (raw) <code>Message</code> as an argument. Again, no
  * <code>Message</code> will be sent back as all of these methods return
  * <code>void</code>.
- * 
- * <pre class="code"> public interface RawMessageDelegate {
+ *
+ * <pre class="code">public interface RawMessageDelegate {
  *    void handleMessage(TextMessage message);
  *    void handleMessage(MapMessage message);
  *    void handleMessage(BytesMessage message);
  *    void handleMessage(ObjectMessage message);
  * }</pre>
- * 
- * <p>This next example illustrates a <code>Message</code> delegate
+ *
+ * This next example illustrates a <code>Message</code> delegate
  * that just consumes the <code>String</code> contents of
  * {@link javax.jms.TextMessage TextMessages}. Notice also how the
  * name of the <code>Message</code> handling method is different from the
  * {@link #ORIGINAL_DEFAULT_LISTENER_METHOD original} (this will have to
  * be configured in the attandant bean definition). Again, no <code>Message</code>
  * will be sent back as the method returns <code>void</code>.
- * 
- * <pre class="code"> public interface TextMessageContentDelegate {
+ *
+ * <pre class="code">public interface TextMessageContentDelegate {
  *    void onMessage(String text);
  * }</pre>
- * 
- * <p>This final example illustrates a <code>Message</code> delegate
+ *
+ * This final example illustrates a <code>Message</code> delegate
  * that just consumes the <code>String</code> contents of
  * {@link javax.jms.TextMessage TextMessages}. Notice how the return type
- * of this method is <code>String</code>: this will result in the configured
+ * of this method is <code>String</code>: This will result in the configured
  * {@link MessageListenerAdapter} sending a {@link javax.jms.TextMessage} in response.
- * 
- * <pre class="code"> public interface ResponsiveTextMessageContentDelegate {
+ *
+ * <pre class="code">public interface ResponsiveTextMessageContentDelegate {
  *    String handleMessage(String text);
  * }</pre>
- * 
+ *
  * For further examples and discussion please do refer to the Spring
- * reference documentation which describes this class (and it's attendant XML
- * configuration) in detail.
+ * reference documentation which describes this class (and it's attendant
+ * XML configuration) in detail.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -189,7 +188,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	 * Return the target object to delegate message listening to.
 	 */
 	protected Object getDelegate() {
-		return delegate;
+		return this.delegate;
 	}
 
 	/**
@@ -206,7 +205,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	 * Return the name of the default listener method to delegate to.
 	 */
 	protected String getDefaultListenerMethod() {
-		return defaultListenerMethod;
+		return this.defaultListenerMethod;
 	}
 
 	/**
@@ -266,7 +265,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	 * Return the DestinationResolver for this adapter.
 	 */
 	protected DestinationResolver getDestinationResolver() {
-		return destinationResolver;
+		return this.destinationResolver;
 	}
 
 	/**
@@ -288,7 +287,7 @@ public class MessageListenerAdapter implements MessageListener, SessionAwareMess
 	 * methods back to JMS messages.
 	 */
 	protected MessageConverter getMessageConverter() {
-		return messageConverter;
+		return this.messageConverter;
 	}
 
 
