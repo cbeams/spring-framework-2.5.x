@@ -46,7 +46,7 @@ import org.springframework.util.PatternMatchUtils;
  * @author Thomas Risberg
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see java.sql.DatabaseMetaData#getDatabaseProductName
+ * @see java.sql.DatabaseMetaData#getDatabaseProductName()
  */
 public class SQLErrorCodesFactory {
 
@@ -172,7 +172,6 @@ public class SQLErrorCodesFactory {
 				}
 			}
 		}
-
 		if (sec != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("SQL error codes for '" + dbName + "' found");
@@ -210,12 +209,10 @@ public class SQLErrorCodesFactory {
 				}
 				return sec;
 			}
-
 			// We could not find it - got to look it up.
 			try {
 				String dbName = (String)
 						JdbcUtils.extractDatabaseMetaData(dataSource, "getDatabaseProductName");
-
 				if (dbName != null) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Database product name cached for DataSource [" + dataSource +
