@@ -252,33 +252,29 @@ public abstract class JdbcUtils {
 	 * to decide whether the set of SQL statements should be executed through
 	 * the JDBC 2.0 batch mechanism or simply in a traditional one-by-one fashion.
 	 * <p>Logs a warning if the "supportsBatchUpdates" methods throws an exception
-	 * and simply returns false in that case.
+	 * and simply returns <code>false</code> in that case.
 	 * @param con the Connection to check
 	 * @return whether JDBC 2.0 batch updates are supported
-	 * @see java.sql.DatabaseMetaData#supportsBatchUpdates
+	 * @see java.sql.DatabaseMetaData#supportsBatchUpdates()
 	 */
 	public static boolean supportsBatchUpdates(Connection con) {
 		try {
 			DatabaseMetaData dbmd = con.getMetaData();
 			if (dbmd != null) {
 				if (dbmd.supportsBatchUpdates()) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("JDBC driver supports batch updates");
-					}
+					logger.debug("JDBC driver supports batch updates");
 					return true;
 				}
 				else {
-					if (logger.isDebugEnabled()) {
-						logger.debug("JDBC driver does not support batch updates");
-					}
+					logger.debug("JDBC driver does not support batch updates");
 				}
 			}
 		}
 		catch (SQLException ex) {
-			logger.warn("JDBC driver 'supportsBatchUpdates' method threw exception", ex);
+			logger.debug("JDBC driver 'supportsBatchUpdates' method threw exception", ex);
 		}
 		catch (AbstractMethodError err) {
-			logger.warn("JDBC driver does not support JDBC 2.0 'supportsBatchUpdates' method", err);
+			logger.debug("JDBC driver does not support JDBC 2.0 'supportsBatchUpdates' method", err);
 		}
 		return false;
 	}
