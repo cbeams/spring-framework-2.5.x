@@ -663,7 +663,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
 
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		assertTrue(DummyJob.count > 0);
 		assertEquals(DummyJob.count, taskExecutor.count);
 
@@ -690,7 +690,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
 
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		assertTrue(DummyRunnable.count > 0);
 
 		bean.destroy();
@@ -718,7 +718,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
 
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		assertEquals(10, DummyJobBean.param);
 		assertTrue(DummyJobBean.count > 0);
 
@@ -733,6 +733,7 @@ public class QuartzSupportTests extends TestCase {
 		jobDetail.setJobClass(DummyJob.class);
 		jobDetail.setName("myJob");
 		jobDetail.getJobDataMap().put("param", "10");
+		jobDetail.getJobDataMap().put("ignoredParam", "10");
 
 		SimpleTriggerBean trigger = new SimpleTriggerBean();
 		trigger.setName("myTrigger");
@@ -748,9 +749,42 @@ public class QuartzSupportTests extends TestCase {
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
 
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		assertEquals(10, DummyJob.param);
 		assertTrue(DummyJob.count > 0);
+
+		bean.destroy();
+	}
+
+	public void testSchedulerWithSpringBeanJobFactoryAndParamMismatchNotIgnored() throws Exception {
+		DummyJob.param = 0;
+		DummyJob.count = 0;
+
+		JobDetail jobDetail = new JobDetail();
+		jobDetail.setJobClass(DummyJob.class);
+		jobDetail.setName("myJob");
+		jobDetail.getJobDataMap().put("para", "10");
+		jobDetail.getJobDataMap().put("ignoredParam", "10");
+
+		SimpleTriggerBean trigger = new SimpleTriggerBean();
+		trigger.setName("myTrigger");
+		trigger.setJobDetail(jobDetail);
+		trigger.setStartDelay(1);
+		trigger.setRepeatInterval(500);
+		trigger.setRepeatCount(1);
+		trigger.afterPropertiesSet();
+
+		SchedulerFactoryBean bean = new SchedulerFactoryBean();
+		SpringBeanJobFactory jobFactory = new SpringBeanJobFactory();
+		jobFactory.setIgnoredUnknownProperties(new String[] {"ignoredParam"});
+		bean.setJobFactory(jobFactory);
+		bean.setTriggers(new Trigger[] {trigger});
+		bean.setJobDetails(new JobDetail[] {jobDetail});
+		bean.afterPropertiesSet();
+
+		Thread.sleep(500);
+		assertEquals(0, DummyJob.param);
+		assertTrue(DummyJob.count == 0);
 
 		bean.destroy();
 	}
@@ -778,7 +812,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
 
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		assertEquals(10, DummyRunnable.param);
 		assertTrue(DummyRunnable.count > 0);
 
@@ -808,7 +842,7 @@ public class QuartzSupportTests extends TestCase {
 		bean.setJobDetails(new JobDetail[] {jobDetail});
 		bean.afterPropertiesSet();
 
-		Thread.sleep(1000);
+		Thread.sleep(500);
 		assertEquals(10, DummyJobBean.param);
 		assertTrue(DummyJobBean.count > 0);
 

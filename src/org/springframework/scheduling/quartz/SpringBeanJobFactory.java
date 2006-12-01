@@ -40,16 +40,20 @@ import org.springframework.beans.MutablePropertyValues;
  */
 public class SpringBeanJobFactory extends AdaptableJobFactory implements SchedulerContextAware {
 
-	private boolean ignoredUnknownProperties = true;
+	private String[] ignoredUnknownProperties;
 
 	private SchedulerContext schedulerContext;
 
 
 	/**
-	 * Set whether unknown properties (not found in the bean) should be ignored.
-	 * Default is "true".
+	 * Specify the unknown properties (not found in the bean) that should be ignored.
+	 * <p>Default is <code>null</code>, indicating that all unknown properties
+	 * should be ignored. Specify an empty array to throw an exception in case
+	 * of any unknown properties, or a list of property names that should be
+	 * ignored if there is no corresponding property found on the particular
+	 * job class (all other unknown properties will still trigger an exception).
 	 */
-	public void setIgnoredUnknownProperties(boolean ignoredUnknownProperties) {
+	public void setIgnoredUnknownProperties(String[] ignoredUnknownProperties) {
 		this.ignoredUnknownProperties = ignoredUnknownProperties;
 	}
 
@@ -71,7 +75,18 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 			}
 			pvs.addPropertyValues(bundle.getJobDetail().getJobDataMap());
 			pvs.addPropertyValues(bundle.getTrigger().getJobDataMap());
-			bw.setPropertyValues(pvs, this.ignoredUnknownProperties);
+			if (this.ignoredUnknownProperties != null) {
+				for (int i = 0; i < this.ignoredUnknownProperties.length; i++) {
+					String propName = this.ignoredUnknownProperties[i];
+					if (pvs.contains(propName) && !bw.isWritableProperty(propName)) {
+						pvs.removePropertyValue(propName);
+					}
+				}
+				bw.setPropertyValues(pvs);
+			}
+			else {
+				bw.setPropertyValues(pvs, true);
+			}
 		}
 		return bw.getWrappedInstance();
 	}
