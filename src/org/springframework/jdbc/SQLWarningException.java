@@ -46,7 +46,7 @@ public class SQLWarningException extends UncategorizedDataAccessException {
 	/**
 	 * Return the underlying SQLWarning.
 	 */
-	public final SQLWarning SQLWarning() {
+	public SQLWarning SQLWarning() {
 		return (SQLWarning) getCause();
 	}
 
