@@ -7,6 +7,7 @@ Changes in version 1.2.9 (20.12.2006)
 -------------------------------------
 
 General
+* many javadoc refinements and clarifications
 * declared all internal ThreadLocal variables as final (to avoid class reloading issues)
 
 Package org.springframework.aop
@@ -52,6 +53,7 @@ Package org.springframework.jdbc
 * DataSourceUtils uses lower synchronization order for delegating handles (such as from TransactionAwareDataSourceProxy)
 * SingleConnectionDataSource's Connection proxy implements "equals" and "hashCode" based on proxy equality
 * worked around "oracle.sql.DATE" problem on certain Oracle driver versions, extracting it as timestamp when appropriate
+* JdbcTemplate logs SQLWarnings at debug instead of warn level, to avoid repeated warn logs for acceptable conditions
 * JdbcTemplate uses "PreparedStatement.setObject(index, null)" for null values with unknown SQL type on Informix
 * JdbcTemplate does not check static SQL for bind parameters anymore, to avoid overhead of double parsing
 * JdbcTemplate logs all warnings in case of "ignoreWarnings"=true, not just the first warning in the chain
@@ -75,6 +77,7 @@ Package org.springframework.orm
 * removed warning for read-only from JdoTransactionManager, since a vendor dialect may support it
 * Hibernate3 LocalSessionFactoryBean automatically sets JTATransactionFactory if given a "jtaTransactionManager"
 * Hibernate3 LocalSessionFactoryBean only sets connection release mode "on_close" if not given a "jtaTransactionManager"
+* Hibernate3 LocalSessionFactoryBean exposes configured DataSource for schema update (required on Hibernate 3.2.1+)
 * Hibernate3 LocalSessionFactoryBean registers filter definitions before loading any mapping files
 * removed special Session reconnection check for Hibernate 3.1 RC1
 
