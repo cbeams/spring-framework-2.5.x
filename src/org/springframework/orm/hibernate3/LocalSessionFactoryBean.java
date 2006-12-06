@@ -823,7 +823,20 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean {
 	 */
 	protected void afterSessionFactoryCreation() throws Exception {
 		if (this.schemaUpdate) {
-			updateDatabaseSchema();
+			if (this.dataSource != null) {
+				// Make given DataSource available for the schema update,
+				// which unfortunately reinstantiates a ConnectionProvider.
+				configTimeDataSourceHolder.set(this.dataSource);
+			}
+			try {
+				updateDatabaseSchema();
+			}
+			finally {
+				if (this.dataSource != null) {
+					// Reset DataSource holder.
+					configTimeDataSourceHolder.set(null);
+				}
+			}
 		}
 	}
 
