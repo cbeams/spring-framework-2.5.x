@@ -13,11 +13,14 @@ Package org.springframework.beans
 * DefaultSingletonBeanRegistry and subclasses use unified mutex for singleton access, to avoid potential for deadlocks
 * AbstractAutowireCapableBeanFactory caches "isExcludedFromDependencyCheck" results for affected PropertyDescriptors
 * DefaultListableBeanFactory avoids expensive dependency check preparations unless an actual dependency check is needed
+* introduced XmlBeanDefinitionStoreException, with special support for SAXParseException and its location information
+* XML bean "id" and "name" (aliases) are allowed to define the same name (for backwards compatibility with Spring 1.2.8)
 
 Package org.springframework.dao
 * added "singleResult" and "requiredSingleResult" methods to DataAccessUtils, distinct from "uniqueResult"'s contract
 
 Package org.springframework.jdbc
+* JdbcTemplate logs SQLWarnings at debug instead of warn level, to avoid repeated warn logs for acceptable conditions
 * JdbcTemplate's "queryForObject" uses "requiredSingleResult" to never accept more than 1 row in result (as per its c.)
 * SqlQuery's "findObject" explicitly uses "singleResult" to never accept more than 1 row in result (as per its contract)
 
@@ -25,6 +28,7 @@ Package org.springframework.orm
 * SqlMapClientFactoryBean uses SqlMapClientBuilder with InputStream if possible (on iBATIS 2.3, to avoid encoding issue)
 * Hibernate3 LocalSessionFactoryBean automatically sets JTATransactionFactory if given a "jtaTransactionManager"
 * Hibernate3 LocalSessionFactoryBean only sets connection release mode "on_close" if not given a "jtaTransactionManager"
+* Hibernate3 LocalSessionFactoryBean exposes configured DataSource for schema update (required on Hibernate 3.2.1+)
 * HibernateJpaDialect switches FlushMode to MANUAL in case of read-only, and enforces COMMIT or AUTO for read-write tx
 * extended JPA EntityManagers that join a synchronized transaction propagate a commit exception to the (commit) caller
 
@@ -33,6 +37,7 @@ Package org.springframework.samples
 
 Package org.springframework.scheduling
 * fixed MethodInvokingJobDetailFactoryBean to be compatible with Quartz 1.6 as well as Quartz 1.5.2 (again)
+* reworked Quartz SpringBeanJobFactory's "ignoredUnknownProperties" into a String array of unknown properties to ignore
 
 Package org.springframework.scripting
 * fixed JRubyScriptFactory to correctly wrap Java objects that get passed into a JRuby script proxy
