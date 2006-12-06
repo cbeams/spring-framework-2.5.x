@@ -754,6 +754,11 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 			else {
 				this.sessionFactory = sf;
 			}
+
+			// Execute schema update if requested.
+			if (this.schemaUpdate) {
+				updateDatabaseSchema();
+			}
 		}
 
 		finally {
@@ -771,11 +776,6 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 				// Reset LobHandler holder.
 				configTimeLobHandlerHolder.set(null);
 			}
-		}
-
-		// Execute schema update if requested.
-		if (this.schemaUpdate) {
-			updateDatabaseSchema();
 		}
 	}
 
@@ -998,7 +998,7 @@ public class LocalSessionFactoryBean implements FactoryBean, InitializingBean, D
 	 * Allows access to configuration metadata stored there (rarely needed).
 	 */
 	public Configuration getConfiguration() {
-		return configuration;
+		return this.configuration;
 	}
 
 
