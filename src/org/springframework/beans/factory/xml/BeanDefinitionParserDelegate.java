@@ -441,16 +441,15 @@ public class BeanDefinitionParserDelegate {
 		if (StringUtils.hasText(beanName) && this.usedNames.contains(beanName)) {
 			foundName = beanName;
 		}
-		this.usedNames.add(beanName);
-
 		if (foundName == null) {
 			foundName = (String) CollectionUtils.findFirstMatch(this.usedNames, aliases);
 		}
-		this.usedNames.addAll(aliases);
-
 		if (foundName != null) {
 			getReaderContext().error("Bean name '" + foundName + "' is already used in this file.", beanElement);
 		}
+
+		this.usedNames.add(beanName);
+		this.usedNames.addAll(aliases);
 	}
 
 	/**
