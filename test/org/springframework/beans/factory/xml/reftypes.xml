@@ -2,7 +2,7 @@
 
 <bones>
 	
-	<bean id="jenny" class="org.springframework.beans.TestBean">
+	<bean id="jenny" name="jenny" class="org.springframework.beans.TestBean">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 		<property name="spouse"><ref local="david"/></property>
