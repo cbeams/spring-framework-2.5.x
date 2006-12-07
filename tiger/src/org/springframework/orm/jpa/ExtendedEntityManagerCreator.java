@@ -250,7 +250,7 @@ public abstract class ExtendedEntityManagerCreator {
 			}
 			else if (method.getName().equals("hashCode")) {
 				// Use hashCode of EntityManager proxy.
-				return proxy.hashCode();
+				return hashCode();
 			}
 			else if (method.getName().equals("joinTransaction")) {
 				doJoinTransaction(true);
