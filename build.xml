@@ -755,8 +755,8 @@
 			<arg value="-breakiterator"/>
 			<arg value="-J-Xmx128m"/>
 			<arg value="-J-XX:MaxPermSize=128m"/>
-			<arg value="${javadoc.proxyhost}"/>
-			<arg value="${javadoc.proxyport}"/>
+			<arg value="-J-Dhttp.proxyHost=${javadoc.proxyhost}"/>
+			<arg value="-J-Dhttp.proxyPort=${javadoc.proxyport}"/>
 			<doctitle><![CDATA[<h1>Spring Framework API 2.0</h1>]]></doctitle>
 			<bottom><![CDATA[<i>Copyright &copy; 2002-2006 <a href="http://www.springframework.org/" target="_top">The Spring Framework</a>.</i>]]></bottom>
 			<classpath refid="all-libs"/>
