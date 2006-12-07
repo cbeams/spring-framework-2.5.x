@@ -39,7 +39,7 @@ public class ResourceUtilsTests extends TestCase {
 	public void testExtractJarFileURL() throws Exception {
 		assertEquals(new URL("file:myjar.jar"),
 				ResourceUtils.extractJarFileURL(new URL("jar:file:myjar.jar!/mypath")));
-		assertEquals(new URL("file:myjar.jar"),
+		assertEquals(new URL("file:/myjar.jar"),
 				ResourceUtils.extractJarFileURL(new URL(null, "jar:myjar.jar!/mypath", new DummyURLStreamHandler())));
 		assertEquals(new URL("file:myjar.jar"),
 				ResourceUtils.extractJarFileURL(new URL(null, "zip:file:myjar.jar!/mypath", new DummyURLStreamHandler())));
