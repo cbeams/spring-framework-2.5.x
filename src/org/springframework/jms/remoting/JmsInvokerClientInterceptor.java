@@ -180,6 +180,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 			Queue queueToUse = resolveQueue(session);
 			Message requestMessage = createRequestMessage(session, invocation);
 			requestor = new QueueRequestor(session, queueToUse);
+			con.start();
 			Message responseMessage = requestor.request(requestMessage);
 			return extractInvocationResult(responseMessage);
 		}
