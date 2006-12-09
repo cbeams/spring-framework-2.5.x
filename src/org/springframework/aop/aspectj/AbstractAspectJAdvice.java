@@ -32,6 +32,7 @@ import org.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.PrioritizedParameterNameDiscoverer;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -341,21 +342,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	
 	private void bindArgumentsByName(int numArgumentsExpectingToBind) {
 		if (this.argumentNames == null) {
-			// We need to discover them, or if that fails, guess,
-			// and if we can't guess with 100% accuracy, fail.
-			PrioritizedParameterNameDiscoverer discoverer = new PrioritizedParameterNameDiscoverer();
-			discoverer.addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
-			AspectJAdviceParameterNameDiscoverer adviceParameterNameDiscoverer = 
-				new AspectJAdviceParameterNameDiscoverer(this.pointcutExpression.getExpression());
-			adviceParameterNameDiscoverer.setReturningName(this.returningName);
-			adviceParameterNameDiscoverer.setThrowingName(this.throwingName);
-			// last in chain, so if we're called and we fail, that's bad...
-			adviceParameterNameDiscoverer.setRaiseExceptions(true);
-			discoverer.addDiscoverer(adviceParameterNameDiscoverer);
-			
-			this.argumentNames = discoverer.getParameterNames(this.aspectJAdviceMethod);
+			this.argumentNames = createParameterNameDiscoverer().getParameterNames(this.aspectJAdviceMethod);
 		}
-		
 		if (this.argumentNames != null) {
 			// We have been able to determine the arg names.
 			bindExplicitArguments(numArgumentsExpectingToBind);
@@ -365,6 +353,27 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 					"requires " + numArgumentsExpectingToBind + " arguments to be bound by name, but " +
 					"the argument names were not specified and could not be discovered.");
 		}
+	}
+
+	/**
+	 * Create a ParameterNameDiscoverer to be used for argument binding.
+	 * <p>The default implementation creates a {@link PrioritizedParameterNameDiscoverer}
+	 * containing a {@link LocalVariableTableParameterNameDiscoverer} and an
+	 * {@link AspectJAdviceParameterNameDiscoverer}.
+	 */
+	protected ParameterNameDiscoverer createParameterNameDiscoverer() {
+		// We need to discover them, or if that fails, guess,
+		// and if we can't guess with 100% accuracy, fail.
+		PrioritizedParameterNameDiscoverer discoverer = new PrioritizedParameterNameDiscoverer();
+		discoverer.addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
+		AspectJAdviceParameterNameDiscoverer adviceParameterNameDiscoverer =
+				new AspectJAdviceParameterNameDiscoverer(this.pointcutExpression.getExpression());
+		adviceParameterNameDiscoverer.setReturningName(this.returningName);
+		adviceParameterNameDiscoverer.setThrowingName(this.throwingName);
+		// Last in chain, so if we're called and we fail, that's bad...
+		adviceParameterNameDiscoverer.setRaiseExceptions(true);
+		discoverer.addDiscoverer(adviceParameterNameDiscoverer);
+		return discoverer;
 	}
 
 	private void bindExplicitArguments(int numArgumentsLeftToBind) {
