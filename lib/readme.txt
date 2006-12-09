@@ -104,14 +104,18 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's Hibernate 3.x support
 
 * hibernate/hibernate-annotation.jar
-- Hibernate Annotations 3.2.0 (http://www.hibernate.org)
+- Hibernate Annotations 3.2.1 (http://www.hibernate.org)
 - required for building the "tiger" part of the framework
 - required at runtime when using Spring's Hibernate Annotations support
 
 * hibernate/hibernate-entitymanager.jar
-- Hibernate EntityManager 3.2.0 (http://www.hibernate.org)
+- Hibernate EntityManager 3.2.1 (http://www.hibernate.org)
 - required for building the "tiger" part of the framework
 - required at runtime when using Spring's Hibernate-specific JPA support
+
+* hibernate/jboss-archive-browsing.jar
+- JBoss Archive Browsing 5.0.0 alpha
+- required at runtime when using Hibernate EntityManager
 
 * hsqldb/hsqldb.jar
 - HSQLDB 1.8.0.1 (http://hsqldb.sourceforge.net)
@@ -354,8 +358,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's Quartz scheduling support
 
 * serp/serp-1.12.1.jar
-- Serp 1.12.1 (http://http://serp.sourceforge.net)
-- required at runtime when using Spring's OpenJPA support (by OpenJPA)
+- Serp 1.12.1 (http://serp.sourceforge.net)
+- required at runtime when using OpenJPA
 
 * struts/struts.jar
 - Apache Struts 1.2.9 (http://jakarta.apache.org/struts)
