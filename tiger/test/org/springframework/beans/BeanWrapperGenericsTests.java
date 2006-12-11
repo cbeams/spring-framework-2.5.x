@@ -51,6 +51,20 @@ public class BeanWrapperGenericsTests extends TestCase {
 		assertTrue(gb.getIntegerSet().contains(new Integer(5)));
 	}
 
+	public void testGenericSetWithConversionFailure() {
+		GenericBean gb = new GenericBean();
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		Set input = new HashSet();
+		input.add(new TestBean());
+		try {
+			bw.setPropertyValue("integerSet", input);
+			fail("Should have thrown TypeMismatchException");
+		}
+		catch (TypeMismatchException ex) {
+			assertTrue(ex.getMessage().indexOf("java.lang.Integer") != -1);
+		}
+	}
+
 	public void testGenericList() throws MalformedURLException {
 		GenericBean gb = new GenericBean();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
