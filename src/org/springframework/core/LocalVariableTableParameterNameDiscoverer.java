@@ -30,13 +30,17 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
 
+import org.springframework.util.ClassUtils;
+
 /**
  * Implementation of ParameterNameDiscover that uses the LocalVariableTable
- * information in the method attributes to discover parameter names.
- * 
- * Returns <code>null</code> if the class file was compiled without debug information.
- * 
+ * information in the method attributes to discover parameter names. Returns
+ * <code>null</code> if the class file was compiled without debug information.
+ *
+ * <p>Uses ObjectWeb's ASM library for analyzing class files.
+ *
  * @author Adrian Colyer
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class LocalVariableTableParameterNameDiscoverer implements ParameterNameDiscoverer {
@@ -84,7 +88,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			// simply means this method of discovering parameter names won't work.
 			if (logger.isDebugEnabled()) {
 				logger.debug("IOException whilst attempting to read .class file for class [" +
-						ctor.getDeclaringClass().getName() + 
+						ctor.getDeclaringClass().getName() +
 						"] - unable to determine parameter names for constructor",ex);
 			}
 		}
@@ -95,9 +99,9 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	 * Visit the given method and discover its parameter names.
 	 */
 	private ParameterNameDiscoveringVisitor visitMethod(Method method) throws IOException {
-		ClassReader reader = new ClassReader(method.getDeclaringClass().getName());
+		ClassReader classReader = createClassReader(method.getDeclaringClass());
 		FindMethodParamNamesClassVisitor classVisitor = new FindMethodParamNamesClassVisitor(method);
-		reader.accept(classVisitor,false);
+		classReader.accept(classVisitor, false);
 		return classVisitor;
 	}
 
@@ -105,10 +109,17 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	 * Visit the given constructor and discover its parameter names.
 	 */
 	private ParameterNameDiscoveringVisitor visitConstructor(Constructor ctor) throws IOException {
-		ClassReader reader = new ClassReader(ctor.getDeclaringClass().getName());
+		ClassReader classReader = createClassReader(ctor.getDeclaringClass());
 		FindConstructorParamNamesClassVisitor classVisitor = new FindConstructorParamNamesClassVisitor(ctor);
-		reader.accept(classVisitor,false);
+		classReader.accept(classVisitor, false);
 		return classVisitor;
+	}
+
+	/**
+	 * Create a ClassReader for the given class.
+	 */
+	private ClassReader createClassReader(Class clazz) throws IOException {
+		return new ClassReader(clazz.getResourceAsStream(ClassUtils.getClassFileName(clazz)));
 	}
 
 
