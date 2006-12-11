@@ -26,12 +26,12 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 /**
- * {@link DataSource} implementation that delegates all calls to a given
- * target {@link DataSource}
- * 
+ * {@link javax.sql.DataSource} implementation that delegates all calls
+ * to a given target {@link javax.sql.DataSource}
+ *
  * <p>This class is meant to be subclassed, with subclasses overriding only
  * those methods (such as {@link #getConnection()}) that should not simply
- * delegate to the target {@link DataSource}.
+ * delegate to the target DataSource.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -70,7 +70,7 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 	 * Return the target DataSource that this DataSource should delegate to.
 	 */
 	public DataSource getTargetDataSource() {
-		return targetDataSource;
+		return this.targetDataSource;
 	}
 
 	public void afterPropertiesSet() {

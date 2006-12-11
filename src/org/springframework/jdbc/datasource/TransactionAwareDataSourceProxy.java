@@ -39,11 +39,12 @@ import org.springframework.util.Assert;
  *
  * <p><b>Make sure that TransactionAwareDataSourceProxy is the outermost DataSource
  * of a chain of DataSource proxies/adapters.</b> TransactionAwareDataSourceProxy
- * can delegate either directly to the target connection pool or to some intermediate
- * proxy/adapter like LazyConnectionDataSourceProxy or UserCredentialsDataSourceAdapter.
+ * can delegate either directly to the target connection pool or to some
+ * intermediary proxy/adapter like {@link LazyConnectionDataSourceProxy} or
+ * {@link UserCredentialsDataSourceAdapter}.
  *
  * <p>Delegates to DataSourceUtils for automatically participating in thread-bound
- * transactions, for example managed by DataSourceTransactionManager.
+ * transactions, for example managed by {@link DataSourceTransactionManager}.
  * <code>getConnection</code> calls and <code>close</code> calls on returned Connections
  * will behave properly within a transaction, that is, always work on the transactional
  * Connection. If not within a transaction, normal DataSource behavior applies.
@@ -67,8 +68,8 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 1.1
- * @see javax.sql.DataSource#getConnection
- * @see java.sql.Connection#close
+ * @see javax.sql.DataSource#getConnection()
+ * @see java.sql.Connection#close()
  * @see DataSourceUtils#doGetConnection
  * @see DataSourceUtils#doReleaseConnection
  * @see DataSourceUtils#applyTransactionTimeout

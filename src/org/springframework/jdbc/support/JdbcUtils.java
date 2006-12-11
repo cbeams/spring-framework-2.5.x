@@ -126,10 +126,10 @@ public abstract class JdbcUtils {
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
 	 * @return the value object
+	 * @throws SQLException if thrown by the JDBC API
 	 * @see java.sql.Blob
 	 * @see java.sql.Clob
 	 * @see java.sql.Timestamp
-	 * @see oracle.sql.TIMESTAMP
 	 */
 	public static Object getResultSetValue(ResultSet rs, int index) throws SQLException {
 		Object obj = rs.getObject(index);
