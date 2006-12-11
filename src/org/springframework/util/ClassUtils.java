@@ -56,6 +56,9 @@ public abstract class ClassUtils {
 	/** The CGLIB class separator character "$$" */
 	private static final String CGLIB_CLASS_SEPARATOR = "$$";
 
+	/** The ".class" file suffix */
+	private static final String CLASS_FILE_SUFFIX = ".class";
+
 
 	private static final Log logger = LogFactory.getLog(ClassUtils.class);
 
@@ -259,6 +262,19 @@ public abstract class ClassUtils {
 	 */
 	public static String getShortNameAsProperty(Class clazz) {
 		return Introspector.decapitalize(getShortName(clazz));
+	}
+
+	/**
+	 * Determine the name of the class file, relative to the containing
+	 * package: e.g. "String.class"
+	 * @param clazz the class
+	 * @return the file name of the ".class" file
+	 */
+	public static String getClassFileName(Class clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		String className = clazz.getName();
+		int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR);
+		return className.substring(lastDotIndex + 1) + CLASS_FILE_SUFFIX;
 	}
 
 	/**
