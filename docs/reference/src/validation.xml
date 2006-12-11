@@ -474,6 +474,13 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
               </row>
 
               <row>
+                <entry><classname>PatternEditor</classname></entry>
+
+                <entry>Capable of resolving Strings to JDK 1.5
+                <classname>Pattern</classname> objects and vice versa.</entry>
+              </row>
+
+              <row>
                 <entry><classname>PropertiesEditor</classname></entry>
 
                 <entry>Capable of converting Strings (formatted using the

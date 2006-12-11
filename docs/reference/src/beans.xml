@@ -660,7 +660,7 @@ BeanFactory factory = new XmlBeanFactory(is);]]></programlisting>
     private MovieFinder movieFinder;
 
     ]]><lineannotation>// a setter method so that the Spring container can 'inject' a <interfacename>MovieFinder</interfacename></lineannotation><![CDATA[
-    public void setMoveFinder(MovieFinder movieFinder) {
+    public void setMovieFinder(MovieFinder movieFinder) {
         this.movieFinder = movieFinder;
     }
     
@@ -1999,6 +1999,7 @@ public class ReplacementComputeValue implements MethodReplacer {
         String input = (String) args[0];
         ... 
         return ...;
+    }
 }]]></programlisting>
                 <para>The bean definition to deploy the original class and specify the
                 method override would look like this:</para>
@@ -3676,7 +3677,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.]]
     }
 }]]></programlisting>
 
-<programlisting><![CDATA[public class BlackListNotifier implement ApplicationListener {
+<programlisting><![CDATA[public class BlackListNotifier implements ApplicationListener {
 
     private String notificationAddress;
     
