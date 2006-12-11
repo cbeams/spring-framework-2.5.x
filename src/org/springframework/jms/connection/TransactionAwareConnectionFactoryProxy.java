@@ -47,11 +47,12 @@ import org.springframework.util.Assert;
  *
  * <p><b>Make sure that TransactionAwareConnectionFactoryProxy is the outermost
  * ConnectionFactory of a chain of ConnectionFactory proxies/adapters.</b>
- * TransactionAwareConnectionFactoryProxy can delegate either directly to the target
- * factory or to some intermediate adapter like UserCredentialsConnectionFactoryAdapter.
+ * TransactionAwareConnectionFactoryProxy can delegate either directly to the
+ * target factory or to some intermediary adapter like
+ * {@link UserCredentialsConnectionFactoryAdapter}.
  *
  * <p>Delegates to ConnectionFactoryUtils for automatically participating in thread-bound
- * transactions, for example managed by JmsTransactionManager (or by another.
+ * transactions, for example managed by {@link JmsTransactionManager} (or by another.
  * <code>createSession</code> calls and <code>close</code> calls on returned Sessions
  * will behave properly within a transaction, that is, always work on the transactional
  * Session. If not within a transaction, normal ConnectionFactory behavior applies.
@@ -59,7 +60,7 @@ import org.springframework.util.Assert;
  * <p>Note that transactional JMS Sessions will be registered on a per-Connection
  * basis. To share the same JMS Session across a transaction, make sure that you
  * operate on the same JMS Connection handle - either through reusing the handle
- * or through configuring a SingleConnectionFactory underneath.
+ * or through configuring a {@link SingleConnectionFactory} underneath.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -101,7 +102,7 @@ public class TransactionAwareConnectionFactoryProxy
 	 * Return the target ConnectionFactory that this ConnectionFactory should delegate to.
 	 */
 	protected ConnectionFactory getTargetConnectionFactory() {
-		return targetConnectionFactory;
+		return this.targetConnectionFactory;
 	}
 
 	/**
@@ -124,7 +125,7 @@ public class TransactionAwareConnectionFactoryProxy
 	 * with a Spring-managed transaction.
 	 */
 	protected boolean isSynchedLocalTransactionAllowed() {
-		return synchedLocalTransactionAllowed;
+		return this.synchedLocalTransactionAllowed;
 	}
 
 
