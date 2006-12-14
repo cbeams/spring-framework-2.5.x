@@ -16,8 +16,6 @@
 
 package org.springframework.aop.aspectj;
 
-import java.io.Serializable;
-
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Pointcut;
@@ -34,7 +32,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered, Serializable {
+public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 
 	private AbstractAspectJAdvice advice;
 
