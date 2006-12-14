@@ -37,22 +37,23 @@ import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Binder that allows for binding property values to a target object.
+ * Binder that allows for setting property values onto a target object,
+ * including support for validation and binding result analysis.
  * The binding process can be customized through specifying allowed fields,
- * required fields, and custom editors.
+ * required fields, custom editors, etc.
  *
- * <p>Note that there are potential security implications in failing to set
- * an array of allowed fields. In the case of HTTP form POST data for example,
- * malicious clients can attempt to subvert an application by supplying values
- * for fields or properties that do not exist on the form. In some cases this
- * could lead to illegal data being set on command objects <i>or their nested
- * objects</i>. For this reason, it is <b>highly recommended to specify the
- * {@link #setAllowedFields allowedFields} property</b> on the DataBinder.
+ * <p>Note that there are potential security implications in failing to set an array
+ * of allowed fields. In the case of HTTP form POST data for example, malicious clients
+ * can attempt to subvert an application by supplying values for fields or properties
+ * that do not exist on the form. In some cases this could lead to illegal data being
+ * set on command objects <i>or their nested objects</i>. For this reason, it is
+ * <b>highly recommended to specify the {@link #setAllowedFields allowedFields} property</b>
+ * on the DataBinder.
  *
- * <p>The binding results can be examined via the Errors interface,
- * available as BindException instance. Missing field errors and property
- * access exceptions will be converted to FieldErrors, collected in the
- * Errors instance, with the following error codes:
+ * <p>The binding results can be examined via the {@link BindingResult} interface,
+ * extending the {@link Errors} interface: see the {@link #getBindingResult()} method.
+ * Missing fields and property access exceptions will be converted to {@link FieldError FieldErrors},
+ * collected in the Errors instance, using the following error codes:
  *
  * <ul>
  * <li>Missing field error: "required"
@@ -60,20 +61,24 @@ import org.springframework.util.StringUtils;
  * <li>Method invocation error: "methodInvocation"
  * </ul>
  *
- * <p>Custom validation errors can be added afterwards. You will typically
- * want to resolve such error codes into proper user-visible error messages;
- * this can be achieved through resolving each error via a MessageSource.
- * The list of message codes to try can be customized through the
- * MessageCodesResolver strategy. DefaultMessageCodesResolver's javadoc
- * gives details on the default resolution rules.
+ * <p>By default, binding errors get resolved through the {@link BindingErrorProcessor}
+ * strategy, processing for missing fields and property access exceptions: see the
+ * {@link #setBindingErrorProcessor} method. You can override the default strategy
+ * if needed, for example to generate different error codes.
  *
- * <p>By default, binding errors are resolved through the binding error processor
- * for required binding errors and property access exceptions. You can override
- * those if needed, for example to generate different error codes.
+ * <p>Custom validation errors can be added afterwards. You will typically want to resolve
+ * such error codes into proper user-visible error messages; this can be achieved through
+ * resolving each error via a {@link org.springframework.context.MessageSource}, which is
+ * able to resolve an {@link ObjectError}/{@link FieldError} through its
+ * {@link org.springframework.context.MessageSource#getMessage(org.springframework.context.MessageSourceResolvable, java.util.Locale)}
+ * method. The list of message codes can be customized through the {@link MessageCodesResolver}
+ * strategy: see the {@link #setMessageCodesResolver} method. {@link DefaultMessageCodesResolver}'s
+ * javadoc states details on the default resolution rules.
  *
- * <p>This generic data binder can be used in any sort of environment.
- * It is heavily used by Spring's web MVC controllers, via the subclass
- * <code>org.springframework.web.bind.ServletRequestDataBinder</code>.
+ * <p>This generic data binder can be used in any kind of environment.
+ * It is typically used by Spring web MVC controllers, via the web-specific
+ * subclasses {@link org.springframework.web.bind.ServletRequestDataBinder}
+ * and {@link org.springframework.web.portlet.bind.PortletRequestDataBinder}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -257,7 +262,7 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * Return whether to ignore invalid fields.
 	 */
 	public boolean isIgnoreInvalidFields() {
-		return ignoreInvalidFields;
+		return this.ignoreInvalidFields;
 	}
 
 	/**
@@ -281,7 +286,7 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @return array of field names
 	 */
 	public String[] getAllowedFields() {
-		return allowedFields;
+		return this.allowedFields;
 	}
 
 	/**
@@ -305,7 +310,7 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @return array of field names
 	 */
 	public String[] getDisallowedFields() {
-		return disallowedFields;
+		return this.disallowedFields;
 	}
 
 	/**
@@ -331,7 +336,7 @@ public class DataBinder implements PropertyEditorRegistry {
 	 * @return array of field names
 	 */
 	public String[] getRequiredFields() {
-		return requiredFields;
+		return this.requiredFields;
 	}
 
 	/**

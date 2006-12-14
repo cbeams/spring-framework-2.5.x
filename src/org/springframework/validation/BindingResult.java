@@ -21,19 +21,23 @@ import java.util.Map;
 import org.springframework.beans.PropertyEditorRegistry;
 
 /**
- * General interface that represents binding results.
- * Extends the Errors interface for error registration capabilities
- * and adds binding-specific functionality.
+ * General interface that represents binding results. Extends the
+ * {@link Errors interface} for error registration capabilities,
+ * allowing for a {@link Validator} to be applied, and adds
+ * binding-specific analysis and model building.
  *
- * <p>Serves as result holder for DataBinder. Implementations can
- * also be used directly, for example to invoke a Validator on it.
+ * <p>Serves as result holder for a {@link DataBinder}, obtained via
+ * the {@link DataBinder#getBindingResult()} method. BindingResult
+ * implementations can also be used directly, for example to invoke
+ * a {@link Validator} on it (e.g. as part of a unit test).
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see DataBinder#getBindingResult()
+ * @see DataBinder
  * @see Errors
  * @see Validator
  * @see BeanPropertyBindingResult
+ * @see DirectFieldBindingResult
  * @see MapBindingResult
  */
 public interface BindingResult extends Errors {
@@ -46,7 +50,8 @@ public interface BindingResult extends Errors {
 
 
 	/**
-	 * Return the wrapped target object.
+	 * Return the wrapped target object, which may be a bean, an object with
+	 * public fields, a Map - depending on the concrete binding strategy.
 	 */
 	Object getTarget();
 
@@ -57,12 +62,13 @@ public interface BindingResult extends Errors {
 	 * <p>Note that the Map is constructed every time you're calling this method.
 	 * Adding things to the map and then re-calling this method will not work.
 	 * <p>The attributes in the model Map returned by this method are usually
-	 * included in the ModelAndView for a form view that uses Spring's bind tag,
+	 * included in the {@link org.springframework.web.servlet.ModelAndView}
+	 * for a form view that uses Spring's <code>bind</code> tag in a JSP,
 	 * which needs access to the BindingResult instance. Spring's pre-built
 	 * form controllers will do this for you when rendering a form view.
-	 * When building the ModelAndView yourself, you need to include the attributes
-	 * from the model Map returned by this method yourself.
-	 * @see #getObjectName
+	 * When building the ModelAndView instance yourself, you need to include
+	 * the attributes from the model Map returned by this method.
+	 * @see #getObjectName()
 	 * @see #MODEL_KEY_PREFIX
 	 * @see org.springframework.web.servlet.ModelAndView
 	 * @see org.springframework.web.servlet.tags.BindTag
@@ -87,26 +93,24 @@ public interface BindingResult extends Errors {
 
 	/**
 	 * Return the list of fields that were suppressed during the bind process.
-	 * <p>Can be used to determine whether any field values were targetting
+	 * <p>Can be used to determine whether any field values were targeting
 	 * disallowed fields.
 	 * @see DataBinder#setAllowedFields
 	 */
 	String[] getSuppressedFields();
 
 	/**
-	 * Add an ObjectError or FieldError to the errors list.
-	 * <p>Intended to be used by subclasses like DataBinder,
-	 * or by cooperating strategies like a BindingErrorProcessor.
+	 * Add a custom {@link ObjectError} or {@link FieldError} to the errors list.
+	 * <p>Intended to be used by cooperating strategies such as {@link BindingErrorProcessor}.
 	 * @see ObjectError
 	 * @see FieldError
-	 * @see DataBinder
 	 * @see BindingErrorProcessor
 	 */
 	void addError(ObjectError error);
 
 	/**
 	 * Resolve the given error code into message codes for the given field.
-	 * Calls the MessageCodesResolver with appropriate parameters.
+	 * <p>Calls the configured {@link MessageCodesResolver} with appropriate parameters.
 	 * @param errorCode the error code to resolve into message codes
 	 * @param field the field to resolve message codes for
 	 * @return the resolved message codes
