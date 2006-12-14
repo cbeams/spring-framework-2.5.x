@@ -18,7 +18,6 @@ package org.springframework.transaction.jta;
 
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
@@ -57,6 +56,16 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 	 * Create a new SpringJtaSynchronizationAdapter for the given Spring
 	 * TransactionSynchronization and JTA TransactionManager.
 	 * @param springSynchronization the Spring TransactionSynchronization to delegate to
+	 */
+	public SpringJtaSynchronizationAdapter(TransactionSynchronization springSynchronization) {
+		Assert.notNull(springSynchronization, "TransactionSynchronization must not be null");
+		this.springSynchronization = springSynchronization;
+	}
+
+	/**
+	 * Create a new SpringJtaSynchronizationAdapter for the given Spring
+	 * TransactionSynchronization and JTA TransactionManager.
+	 * @param springSynchronization the Spring TransactionSynchronization to delegate to
 	 * @param jtaUserTransaction the JTA UserTransaction to use for rollback-only
 	 * setting in case of an exception thrown in <code>beforeCompletion</code>
 	 * (can be omitted if the JTA provider itself marks the transaction rollback-only
@@ -65,8 +74,7 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 	public SpringJtaSynchronizationAdapter(
 			TransactionSynchronization springSynchronization, UserTransaction jtaUserTransaction) {
 
-		Assert.notNull(springSynchronization, "TransactionSynchronization must not be null");
-		this.springSynchronization = springSynchronization;
+		this(springSynchronization);
 		this.jtaTransaction = jtaUserTransaction;
 	}
 
@@ -82,8 +90,9 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 	public SpringJtaSynchronizationAdapter(
 			TransactionSynchronization springSynchronization, TransactionManager jtaTransactionManager) {
 
-		this(springSynchronization,
-				(jtaTransactionManager != null ? new UserTransactionAdapter(jtaTransactionManager) : null));
+		this(springSynchronization);
+		this.jtaTransaction =
+				(jtaTransactionManager != null ? new UserTransactionAdapter(jtaTransactionManager) : null);
 	}
 
 
@@ -122,7 +131,12 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 			try {
 				this.jtaTransaction.setRollbackOnly();
 			}
-			catch (SystemException ex) {
+			catch (UnsupportedOperationException ex) {
+				// Probably Hibernate's WebSphereExtendedJTATransactionLookup pseudo JTA stuff...
+				logger.debug("JTA transaction handle does not support setRollbackOnly method - " +
+						"relying on JTA provider to mark the transaction as rollback-only based on the exception thrown from beforeCompletion", ex);
+			}
+			catch (Exception ex) {
 				logger.error("Could not set JTA transaction rollback-only", ex);
 			}
 		}
