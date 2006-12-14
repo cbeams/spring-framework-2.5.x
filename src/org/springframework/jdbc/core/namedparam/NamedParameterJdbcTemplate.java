@@ -66,8 +66,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	/**
 	 * Create a new NamedParameterJdbcTemplate for the given {@link DataSource}.
 	 * <p>Creates a classic Spring {@link org.springframework.jdbc.core.JdbcTemplate} and wraps it.
-	 * @param dataSource the JDBC {@link DataSource} to access
-	 * @throws IllegalArgumentException if the given {@link DataSource} is <code>null</code>
+	 * @param dataSource the JDBC DataSource to access
 	 */
 	public NamedParameterJdbcTemplate(DataSource dataSource) {
 		Assert.notNull(dataSource, "The [dataSource] argument cannot be null.");
@@ -75,9 +74,9 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	/**
-	 * Create a new SimpleJdbcTemplate for the given classic Spring {@link org.springframework.jdbc.core.JdbcTemplate}.
-	 * @param classicJdbcTemplate the classic Spring {@link org.springframework.jdbc.core.JdbcTemplate} to wrap
-	 * @throws IllegalArgumentException if the given {@link org.springframework.jdbc.core.JdbcTemplate} is <code>null</code>
+	 * Create a new NamedParameterJdbcTemplate for the given classic
+	 * Spring {@link org.springframework.jdbc.core.JdbcTemplate}.
+	 * @param classicJdbcTemplate the classic Spring JdbcTemplate to wrap
 	 */
 	public NamedParameterJdbcTemplate(JdbcOperations classicJdbcTemplate) {
 		Assert.notNull(classicJdbcTemplate, "The [classicJdbcTemplate] argument cannot be null.");
