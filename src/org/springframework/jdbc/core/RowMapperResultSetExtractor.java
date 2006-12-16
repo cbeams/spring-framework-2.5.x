@@ -19,7 +19,6 @@ package org.springframework.jdbc.core;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.util.Assert;
@@ -87,9 +86,7 @@ public class RowMapperResultSetExtractor implements ResultSetExtractor {
 
 
 	public Object extractData(ResultSet rs) throws SQLException {
-		// Use the more efficient collection if we know how many rows to expect:
-		// ArrayList in case of a known row count, LinkedList if unknown
-		List results = (this.rowsExpected > 0) ? (List) new ArrayList(this.rowsExpected) : (List) new LinkedList();
+		List results = (this.rowsExpected > 0 ? new ArrayList(this.rowsExpected) : new ArrayList());
 		int rowNum = 0;
 		while (rs.next()) {
 			results.add(this.rowMapper.mapRow(rs, rowNum++));
