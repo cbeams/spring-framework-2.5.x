@@ -18,6 +18,7 @@ package org.springframework.beans.support;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 
 import org.springframework.beans.PropertyEditorRegistrar;
@@ -25,8 +26,9 @@ import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
+import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
-import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.JdkVersion;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
@@ -72,13 +74,14 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	public void registerCustomEditors(PropertyEditorRegistry registry) {
 		ResourceEditor baseEditor = new ResourceEditor(this.resourceLoader);
 		registry.registerCustomEditor(Resource.class, baseEditor);
-		registry.registerCustomEditor(URL.class, new URLEditor(baseEditor));
-		registry.registerCustomEditor(File.class, new FileEditor(baseEditor));
 		registry.registerCustomEditor(InputStream.class, new InputStreamEditor(baseEditor));
+		registry.registerCustomEditor(File.class, new FileEditor(baseEditor));
+		registry.registerCustomEditor(URL.class, new URLEditor(baseEditor));
 
-		if (this.resourceLoader instanceof DefaultResourceLoader) {
-			ClassLoader classLoader = ((DefaultResourceLoader) this.resourceLoader).getClassLoader();
-			registry.registerCustomEditor(Class.class, new ClassEditor(classLoader));
+		ClassLoader classLoader = this.resourceLoader.getClassLoader();
+		registry.registerCustomEditor(Class.class, new ClassEditor(classLoader));
+		if (JdkVersion.isAtLeastJava14()) {
+			registry.registerCustomEditor(URI.class, new URIEditor(classLoader));
 		}
 
 		if (this.resourceLoader instanceof ResourcePatternResolver) {
