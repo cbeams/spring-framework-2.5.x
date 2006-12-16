@@ -184,7 +184,7 @@ public abstract class StatementCreatorUtils {
 				}
 			}
 			else if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
-				if (inValue instanceof StringBuffer || inValue instanceof StringWriter) {
+				if (inValue instanceof String || inValue instanceof StringBuffer || inValue instanceof StringWriter) {
 					ps.setString(paramIndex, inValue.toString());
 				}
 				else if ((inValue instanceof java.util.Date) && !(inValue instanceof java.sql.Date ||

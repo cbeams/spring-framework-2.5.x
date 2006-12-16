@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ public class StatementCreatorUtilsTests extends TestCase {
 	}
 
 	public void testSetParameterValueWithStringAndUnknownType() throws SQLException {
-		ps.setObject(1, "test");
+		ps.setString(1, "test");
 		psControl.setVoidCallable(1);
 		psControl.replay();
 		StatementCreatorUtils.setParameterValue(ps, 1, SqlTypeValue.TYPE_UNKNOWN, null, "test");
