@@ -101,7 +101,7 @@ public class StatementCreatorUtilsTests extends TestCase {
 	}
 
 	public void testSetParameterValueWithStringAndUnknownType() throws SQLException {
-		ps.setObject(1, "test");
+		ps.setString(1, "test");
 		psControl.setVoidCallable(1);
 		psControl.replay();
 		StatementCreatorUtils.setParameterValue(ps, 1, SqlTypeValue.TYPE_UNKNOWN, null, "test");

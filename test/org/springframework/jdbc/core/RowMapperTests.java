@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,8 +164,8 @@ public class RowMapperTests extends TestCase {
 
 		con.prepareStatement("some SQL");
 		conControl.setReturnValue(ps, 1);
-		ps.setObject(1, "test1");
-		ps.setObject(2, "test2");
+		ps.setString(1, "test1");
+		ps.setString(2, "test2");
 		psControl.setVoidCallable(1);
 		ps.executeQuery();
 		psControl.setReturnValue(rs, 1);
