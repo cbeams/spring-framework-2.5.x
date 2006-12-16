@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
@@ -49,6 +50,7 @@ import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.LocaleEditor;
 import org.springframework.beans.propertyeditors.PatternEditor;
 import org.springframework.beans.propertyeditors.PropertiesEditor;
+import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.JdkVersion;
@@ -123,6 +125,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 		// Register JDK-1.4-specific editors.
 		if (JdkVersion.isAtLeastJava14()) {
+			this.defaultEditors.put(URI.class, new URIEditor());
 			this.defaultEditors.put(Pattern.class, new PatternEditor());
 		}
 

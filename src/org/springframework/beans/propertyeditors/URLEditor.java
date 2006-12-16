@@ -29,8 +29,13 @@ import org.springframework.util.Assert;
  * instead of using a String property as bridge.
  *
  * <p>Supports Spring-style URL notation: any fully qualified standard URL
- * ("file:", "http:", etc) and Spring's special "classpath:" pseudo-URL.
- * 
+ * ("file:", "http:", etc) and Spring's special "classpath:" pseudo-URL,
+ * as well as Spring's context-specific relative file paths.
+ *
+ * <p>Note: A URL must specify a valid protocol, else it will be rejected
+ * upfront. However, the target resource does not necessarily have to exist
+ * at the time of URL creation; this depends on the specific resource type.
+ *
  * @author Juergen Hoeller
  * @since 15.12.2003
  * @see java.net.URL
@@ -45,16 +50,14 @@ public class URLEditor extends PropertyEditorSupport {
 
 
 	/**
-	 * Create a new URLEditor,
-	 * using the default ResourceEditor underneath.
+	 * Create a new URLEditor, using the default ResourceEditor underneath.
 	 */
 	public URLEditor() {
 		this.resourceEditor = new ResourceEditor();
 	}
 
 	/**
-	 * Create a new URLEditor,
-	 * using the given ResourceEditor underneath.
+	 * Create a new URLEditor, using the given ResourceEditor underneath.
 	 * @param resourceEditor the ResourceEditor to use
 	 */
 	public URLEditor(ResourceEditor resourceEditor) {
@@ -70,8 +73,7 @@ public class URLEditor extends PropertyEditorSupport {
 			setValue(resource != null ? resource.getURL() : null);
 		}
 		catch (IOException ex) {
-			throw new IllegalArgumentException(
-					"Could not retrieve URL for " + resource + ": " + ex.getMessage());
+			throw new IllegalArgumentException("Could not retrieve URL for " + resource + ": " + ex.getMessage());
 		}
 	}
 

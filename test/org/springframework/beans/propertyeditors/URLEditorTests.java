@@ -16,27 +16,55 @@
 
 package org.springframework.beans.propertyeditors;
 
-import junit.framework.TestCase;
-import org.springframework.test.AssertThrows;
-import org.springframework.util.ClassUtils;
-
 import java.beans.PropertyEditor;
 import java.net.URL;
 
+import junit.framework.TestCase;
+
+import org.springframework.test.AssertThrows;
+import org.springframework.util.ClassUtils;
+
 /**
- * Unit tests for the {@link URLEditor} class.
- *
  * @author Rick Evans
  */
 public final class URLEditorTests extends TestCase {
 
-	public void testSunnyDay() throws Exception {
+	public void testStandardURI() throws Exception {
 		PropertyEditor urlEditor = new URLEditor();
-		urlEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) + "/" + ClassUtils.getShortName(getClass()) + ".class");
+		urlEditor.setAsText("mailto:juergen.hoeller@interface21.com");
 		Object value = urlEditor.getValue();
 		assertTrue(value instanceof URL);
 		URL url = (URL) value;
 		assertEquals(url.toExternalForm(), urlEditor.getAsText());
+	}
+
+	public void testStandardURL() throws Exception {
+		PropertyEditor urlEditor = new URLEditor();
+		urlEditor.setAsText("http://www.springframework.org");
+		Object value = urlEditor.getValue();
+		assertTrue(value instanceof URL);
+		URL url = (URL) value;
+		assertEquals(url.toExternalForm(), urlEditor.getAsText());
+	}
+
+	public void testClasspathURL() throws Exception {
+		PropertyEditor urlEditor = new URLEditor();
+		urlEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
+				"/" + ClassUtils.getShortName(getClass()) + ".class");
+		Object value = urlEditor.getValue();
+		assertTrue(value instanceof URL);
+		URL url = (URL) value;
+		assertEquals(url.toExternalForm(), urlEditor.getAsText());
+		assertTrue(!url.getProtocol().startsWith("classpath"));
+	}
+
+	public void testWithNonExistentResource() throws Exception {
+		new AssertThrows(IllegalArgumentException.class) {
+			public void test() throws Exception {
+				PropertyEditor urlEditor = new URLEditor();
+				urlEditor.setAsText("gonna:/freak/in/the/morning/freak/in/the.evening");
+			}
+		}.runTest();
 	}
 
 	public void testSetAsTextWithNull() throws Exception {
@@ -49,15 +77,6 @@ public final class URLEditorTests extends TestCase {
 	public void testGetAsTextReturnsEmptyStringIfValueNotSet() throws Exception {
 		PropertyEditor urlEditor = new URLEditor();
 		assertEquals("", urlEditor.getAsText());
-	}
-
-	public void testWithNonExistentResource() throws Exception {
-		new AssertThrows(IllegalArgumentException.class) {
-			public void test() throws Exception {
-				PropertyEditor urlEditor = new URLEditor();
-				urlEditor.setAsText("gonna:/freak/in/the/morning/freak/in/the.evening");
-			}
-		}.runTest();
 	}
 
 	public void testCtorWithNullResourceEditor() throws Exception {
