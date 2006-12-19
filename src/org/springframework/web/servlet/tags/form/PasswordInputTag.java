@@ -16,11 +16,14 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import javax.servlet.jsp.JspException;
+
 /**
  * Databinding-aware JSP tag for rendering an HTML '<code>input</code>'
  * element with a '<code>type</code>' of '<code>password</code>'.
  *
  * @author Rob Harrop
+ * @author Rick Evans
  * @since 2.0
  */
 public class PasswordInputTag extends InputTag {
@@ -32,4 +35,12 @@ public class PasswordInputTag extends InputTag {
 	protected String getType() {
 		return "password";
 	}
+
+	/**
+	 * The {@link PasswordInputTag} never writes it's value (for security reasons).
+	 */
+	protected void writeValue(TagWriter tagWriter) throws JspException {
+		tagWriter.writeAttribute("value", "");
+	}
+
 }

@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import javax.servlet.jsp.tagext.Tag;
 import java.io.StringWriter;
 
 /**
@@ -23,6 +24,23 @@ import java.io.StringWriter;
  * @since 2.0
  */
 public class PasswordInputTagTests extends InputTagTests {
+
+	/**
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2866
+	 */
+	public void testPasswordValueIsNeverRendered() throws Exception {
+		this.getTag().setPath("name");
+
+		assertEquals(Tag.EVAL_PAGE, this.getTag().doStartTag());
+
+		String output = getWriter().toString();
+
+		assertTagOpened(output);
+		assertTagClosed(output);
+
+		assertContainsAttribute(output, "type", getType());
+		assertContainsAttribute(output, "value", "");
+	}
 
 	protected String getType() {
 		return "password";

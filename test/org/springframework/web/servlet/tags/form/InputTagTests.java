@@ -26,7 +26,7 @@ import java.io.StringWriter;
 
 /**
  * Unit tests for the {@link InputTag} class.
- * 
+ *
  * @author Rob Harrop
  * @author Rick Evans
  * @since 2.0
@@ -41,6 +41,11 @@ public class InputTagTests extends AbstractFormTagTests {
 		// set up tag instance
 		this.tag = createTag(getWriter());
 		this.tag.setPageContext(getPageContext());
+	}
+
+
+	protected final InputTag getTag() {
+		return tag;
 	}
 
 	public void testSimpleBind() throws Exception {
@@ -228,7 +233,7 @@ public class InputTagTests extends AbstractFormTagTests {
 
 	public void testDisabledFalse() throws Exception {
 		this.tag.setDisabled("false");
-	  this.tag.doStartTag();
+		this.tag.doStartTag();
 		String output = getWriter().toString();
 		assertAttributeNotPresent(output, "disabled");
 	}
@@ -251,11 +256,11 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "value", "12.34f");
 	}
 
-	private void assertTagClosed(String output) {
+	protected final void assertTagClosed(String output) {
 		assertTrue("Tag not closed properly", output.endsWith("/>"));
 	}
 
-	private void assertTagOpened(String output) {
+	protected final void assertTagOpened(String output) {
 		assertTrue("Tag not opened properly", output.startsWith("<input "));
 	}
 
