@@ -2555,7 +2555,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <title>Customizing the nature of a bean</title>
         <section id="beans-factory-lifecycle">
             <title>Lifecycle interfaces</title>
-            <para>Spring provides several marker interfaces to change the behavior
+            <para>The Spring Framework provides several marker interfaces to change the behavior
             of your bean in the container; they include
             <interfacename>InitializingBean</interfacename> and
             <interfacename>DisposableBean</interfacename>. Implementing these interfaces will
@@ -2563,12 +2563,13 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
             <methodname>afterPropertiesSet()</methodname> for the former and
             <methodname>destroy()</methodname> for the latter to allow the bean to perform
             certain actions upon initialization and destruction.</para>
-            <para>Internally, Spring uses <interfacename>BeanPostProcessor</interfacename> implementations to
+            <para>Internally, the Spring Framework uses
+            <interfacename>BeanPostProcessor</interfacename> implementations to
             process any marker interfaces it can find and call the appropriate
             methods. If you need custom features or other lifecycle behavior Spring
             doesn't offer out-of-the-box, you can implement a
             <interfacename>BeanPostProcessor</interfacename> yourself. More information about
-            this can be found in <xref linkend="beans-factory-extension" />.</para>
+            this can be found in the section entitled <xref linkend="beans-factory-extension" />.</para>
             <para>All the different lifecycle marker interfaces are described below.
             In one of the appendices, you can find diagram that show how Spring
             manages beans and how those lifecycle features change the nature of your
@@ -2576,8 +2577,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
             <section id="beans-factory-lifecycle-initializingbean">
                 <title>Initialization callbacks</title>
                 <para>Implementing the
-                <literal>org.springframework.beans.factory.InitializingBean</literal>
-                allows a bean to perform initialization work after all necessary
+                <interfacename>org.springframework.beans.factory.InitializingBean</interfacename>
+                interface allows a bean to perform initialization work after all necessary
                 properties on the bean are set by the container. The
                 <interfacename>InitializingBean</interfacename> interface specifies exactly one
                 method:</para>
@@ -2712,14 +2713,27 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
                         method callbacks (and consistency is something that should always be aimed for).
                     </para>
                     <para>
-                        One final word... let's say you want to use this feature, but you have some
-                        existing beans where the underlying classes already have for example initialization
-                        callback methods that are named at variance with the convention. You can
+                        Consider the case where you have some existing beans where the
+                        underlying classes already have initialization callback methods that
+                        are named at variance with the convention. You can
                         <emphasis>always</emphasis> override the default by specifying (in XML that is)
                         the method name using the <literal>'init-method'</literal> and
                         <literal>'destroy-method'</literal> attributes on the <literal>&lt;bean/&gt;</literal>
                         element itself.
                     </para>
+                    <para>Finally, please be aware that the Spring container guarantees that
+                    a configured initialization callback is called immediately after a bean
+                    has been supplied with all of it's dependencies. This means that the
+                    initialization callback will be called on the raw bean reference, which
+                    means that any AOP interceptors or suchlike that will ultimately
+                    be applied to the bean will not yet be in place. A target bean is fully
+                    created <emphasis>first</emphasis>, <emphasis>then</emphasis>
+                    an AOP proxy (for example) with its interceptor chain is applied. Note that,
+                    if the target bean and the proxy are defined separately, your code can even
+                    interact to the raw target bean, bypassing the proxy. Hence, it would be very
+                    inconsistent to apply the interceptors to the init method, since that would couple
+                    the lifecycle of the target bean with its proxy/interceptors, and leave strange
+                    semantics when talking to the raw target bean directly.</para>
                 </section>
                 <section id="beans-factory-shutdown">
                     <title>Shutting down the Spring IoC container gracefully in non-web applications</title>
