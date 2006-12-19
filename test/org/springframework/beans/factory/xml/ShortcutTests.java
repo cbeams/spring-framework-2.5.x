@@ -17,9 +17,11 @@
 package org.springframework.beans.factory.xml;
 
 import junit.framework.TestCase;
+
+import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -33,8 +35,17 @@ public class ShortcutTests extends TestCase {
 
 	public void testSimpleBeanConfigured() throws Exception {
 		loadDefinitions("shortcutTests.xml");
-		TestBean rob = (TestBean) beanFactory.getBean("rob");
-		TestBean sally = (TestBean) beanFactory.getBean("sally");
+		ITestBean rob = (TestBean) beanFactory.getBean("rob");
+		ITestBean sally = (TestBean) beanFactory.getBean("sally");
+		assertEquals("Rob Harrop", rob.getName());
+		assertEquals(24, rob.getAge());
+		assertEquals(rob.getSpouse(), sally);
+	}
+
+	public void testInnerBeanConfigured() throws Exception {
+		loadDefinitions("shortcutTests.xml");
+		TestBean sally = (TestBean) beanFactory.getBean("sally2");
+		ITestBean rob = (TestBean) sally.getSpouse();
 		assertEquals("Rob Harrop", rob.getName());
 		assertEquals(24, rob.getAge());
 		assertEquals(rob.getSpouse(), sally);
@@ -53,4 +64,5 @@ public class ShortcutTests extends TestCase {
 	private void loadDefinitions(String path) {
 		reader.loadBeanDefinitions(new ClassPathResource(path, getClass()));
 	}
+
 }

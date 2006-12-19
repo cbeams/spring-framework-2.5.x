@@ -843,7 +843,11 @@ public class BeanDefinitionParserDelegate {
 			return parseNestedCustomElement(ele, bd);
 		}
 		else if (DomUtils.nodeNameEquals(ele, BEAN_ELEMENT)) {
-			return parseBeanDefinitionElement(ele, bd);
+			BeanDefinitionHolder bdHolder = parseBeanDefinitionElement(ele, bd);
+			if (bdHolder != null) {
+				bdHolder = decorateBeanDefinitionIfRequired(ele, bdHolder);
+			}
+			return bdHolder;
 		}
 		else if (DomUtils.nodeNameEquals(ele, REF_ELEMENT)) {
 			// A generic reference to any name of any bean.
@@ -1151,7 +1155,7 @@ public class BeanDefinitionParserDelegate {
 
 		// Decorate based on custom attributes first.
 		NamedNodeMap attributes = element.getAttributes();
-		for(int i = 0; i < attributes.getLength(); i++) {
+		for (int i = 0; i < attributes.getLength(); i++) {
 			Node node = attributes.item(i);
 			finalDefinition = decorateIfRequired(node, finalDefinition);
 		}
