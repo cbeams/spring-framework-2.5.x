@@ -19,6 +19,8 @@ package org.springframework.instrument.classloading;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.reflect.Method;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -30,23 +32,26 @@ import org.springframework.util.ReflectionUtils;
  * <ul>
  * <li><code>public void addTransformer(java.lang.instrument.ClassFileTransformer)</code>:
  * to register the given ClassFileTransformer for this ClassLoader
- * <li><code>public ClassLoader getThrowawayClassLoader()</code>:
- * to obtain a throwaway class loader for this ClassLoader
- * (optional; ReflectiveLoadTimeWeaver will fall back to a
- * SimpleThrowawayClassLoader if that method isn't available)
+ * <li><code>public ClassLoader getThrowawayClassLoader()</code>: to obtain
+ * a throwaway class loader for this ClassLoader (optional;
+ * ReflectiveLoadTimeWeaver will fall back to a SimpleThrowawayClassLoader if
+ * that method isn't available)
  * </ul>
- *
- * <p>Please note that the above methods <i>must</i> reside in a class
- * that is publicly accessible.
- *
- * <p>The reflective nature of this LoadTimeWeaver is particularly useful
- * when the underlying class loader implementation is loaded in a different
- * class loader (such as the application server's class loader which is
- * not visible to the web application).
- *
- * <p>This is the LoadTimeWeaver to use in combination with Spring's
+ * 
+ * <p>
+ * Please note that the above methods <i>must</i> reside in a class that is
+ * publicly accessible.
+ * 
+ * <p>
+ * The reflective nature of this LoadTimeWeaver is particularly useful when the
+ * underlying class loader implementation is loaded in a different class loader
+ * (such as the application server's class loader which is not visible to the
+ * web application).
+ * 
+ * <p>
+ * This is the LoadTimeWeaver to use in combination with Spring's
  * {@link org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader}.
- *
+ * 
  * @author Costin Leau
  * @author Juergen Hoeller
  * @since 2.0
@@ -61,14 +66,17 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 
 	private static final String GET_THROWAWAY_CLASS_LOADER_METHOD_NAME = "getThrowawayClassLoader";
 
-
-	/** Keep a loose reference - we cannot rely on seeing the implementation class */
+	private static final Log log = LogFactory.getLog(ReflectiveLoadTimeWeaver.class);
+	
+	/**
+	 * Keep a loose reference - we cannot rely on seeing the implementation
+	 * class
+	 */
 	private final ClassLoader classLoader;
 
 	private final Method addTransformerMethod;
 
 	private final Method getThrowawayClassLoaderMethod;
-
 
 	/**
 	 * Create a new ReflectiveLoadTimeWeaver for the current context class
@@ -82,7 +90,8 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 	 * Create a new SimpleLoadTimeWeaver for the given class loader.
 	 * @param classLoader the <code>ClassLoader</code> to delegate to for
 	 * weaving (<i>must</i> support the required weaving methods).
-	 * @throws IllegalArgumentException if the supplied <code>ClassLoader</code> is <code>null</code>
+	 * @throws IllegalArgumentException if the supplied <code>ClassLoader</code>
+	 * is <code>null</code>
 	 * @throws IllegalStateException if the supplied <code>ClassLoader</code>
 	 * does not support the required weaving methods
 	 */
@@ -99,13 +108,14 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 		this.getThrowawayClassLoaderMethod = ClassUtils.getMethodIfAvailable(
 				this.classLoader.getClass(), GET_THROWAWAY_CLASS_LOADER_METHOD_NAME,
 				new Class[0]);
+		if (this.getThrowawayClassLoaderMethod == null)
+				log.warn("the current classloader " + classLoader + " does NOT have a getThrowawayClassLoader method; SimpleThrowawayClassLoader will be used instead"); 
 		// getThrowawayClassLoader method is optional
 	}
 
-
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "Transformer must not be null");
-		ReflectionUtils.invokeMethod(this.addTransformerMethod, this.classLoader, new Object[] {transformer});
+		ReflectionUtils.invokeMethod(this.addTransformerMethod, this.classLoader, new Object[] { transformer });
 	}
 
 	public ClassLoader getInstrumentableClassLoader() {
@@ -114,8 +124,8 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 
 	public ClassLoader getThrowawayClassLoader() {
 		if (this.getThrowawayClassLoaderMethod != null) {
-			return (ClassLoader) ReflectionUtils.invokeMethod(
-					this.getThrowawayClassLoaderMethod, this.classLoader, new Object[0]);
+			return (ClassLoader) ReflectionUtils.invokeMethod(this.getThrowawayClassLoaderMethod, this.classLoader,
+					new Object[0]);
 		}
 		else {
 			return new SimpleThrowawayClassLoader(this.classLoader);
