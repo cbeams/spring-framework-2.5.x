@@ -16,7 +16,6 @@
 	<path id="master-classpath">
 
 		<fileset dir="${spring.root}/lib/j2ee">
-			<include name="jdbc2_0-stdext.jar"/>
 			<include name="servlet-api.jar"/>
 		</fileset>
 		<fileset dir="${spring.root}/lib/jakarta-commons">
