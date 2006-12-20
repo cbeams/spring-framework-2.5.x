@@ -31,6 +31,7 @@ url CDATA #IMPLIED
 <!ATTLIST settings
 classInfoCacheEnabled (true | false) #IMPLIED
 lazyLoadingEnabled (true | false) #IMPLIED
+statementCachingEnabled (true | false) #IMPLIED
 cacheModelsEnabled (true | false) #IMPLIED
 enhancementEnabled (true | false) #IMPLIED
 errorTracingEnabled (true | false) #IMPLIED

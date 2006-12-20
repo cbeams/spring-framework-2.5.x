@@ -39,7 +39,7 @@ typeHandler CDATA #IMPLIED
 resultMap CDATA #IMPLIED
 numericScale CDATA #IMPLIED
 >
-<!ELEMENT resultMap (result+, discriminator?)>
+<!ELEMENT resultMap (result*, discriminator?)>
 <!ATTLIST resultMap
 id CDATA #REQUIRED
 class CDATA #REQUIRED
