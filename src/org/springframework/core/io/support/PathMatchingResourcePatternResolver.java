@@ -200,7 +200,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * Return the ResourceLoader that this pattern resolver works with.
 	 */
 	public ResourceLoader getResourceLoader() {
-		return resourceLoader;
+		return this.resourceLoader;
 	}
 
 	/**
@@ -225,7 +225,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * Return the PathMatcher that this resource pattern resolver uses.
 	 */
 	public PathMatcher getPathMatcher() {
-		return pathMatcher;
+		return this.pathMatcher;
 	}
 
 
@@ -387,7 +387,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			JarURLConnection jarCon = (JarURLConnection) con;
 			jarFile = jarCon.getJarFile();
 			jarFileUrl = jarCon.getJarFileURL().toExternalForm();
-			rootEntryPath = jarCon.getJarEntry().getName();
+			JarEntry jarEntry = jarCon.getJarEntry();
+			rootEntryPath = (jarEntry != null ? jarEntry.getName() : "");
 		}
 		else {
 			// No JarURLConnection -> need to resort to URL file parsing.
@@ -408,7 +409,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for matching resources in jar file [" + jarFileUrl + "]");
 		}
-		if (!rootEntryPath.endsWith("/")) {
+		if (!"".equals(rootEntryPath) && !rootEntryPath.endsWith("/")) {
 			// Root entry path must end with slash to allow for proper matching.
 			// The Sun JRE does not return a slash here, but BEA JRockit does.
 			rootEntryPath = rootEntryPath + "/";
