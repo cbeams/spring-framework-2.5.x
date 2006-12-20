@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.9 (20.12.2006)
+Changes in version 1.2.9 (30.12.2006)
 -------------------------------------
 
 General
@@ -35,7 +35,8 @@ Package org.springframework.context
 Package org.springframework.core
 * fixed SpringVersion to return null if the package is not determinable because of ClassLoader restrictions
 * fixed PathMatchingResourcePatternResolver to prevent eternal recursion in case of invalid prefix with pattern symbols
-* refined PathMatchingResourcePatternResolver to ignore classpath roots that cannot be resolved as jar or in file system
+* PathMatchingResourcePatternResolver ignores classpath roots that cannot be resolved as jar or in file system
+* PathMatchingResourcePatternResolver properly handles jar file roots returned by the ClassLoader (e.g. on Resin)
 * ResourceArrayPropertyEditor always preserves order of resource entries, even on JDK 1.3 without Commons Collections
 
 Package org.springframework.dao
@@ -53,8 +54,10 @@ Package org.springframework.jdbc
 * DataSourceUtils uses lower synchronization order for delegating handles (such as from TransactionAwareDataSourceProxy)
 * SingleConnectionDataSource's Connection proxy implements "equals" and "hashCode" based on proxy equality
 * worked around "oracle.sql.DATE" problem on certain Oracle driver versions, extracting it as timestamp when appropriate
+* RowMapperResultSetExtractor always uses ArrayList, even in case of unknown number of rows expected
 * JdbcTemplate logs SQLWarnings at debug instead of warn level, to avoid repeated warn logs for acceptable conditions
 * JdbcTemplate uses "PreparedStatement.setObject(index, null)" for null values with unknown SQL type on Informix
+* JdbcTemplate by default uses "PreparedStatement.setString" for String values (instead of the general "setObject")
 * JdbcTemplate does not check static SQL for bind parameters anymore, to avoid overhead of double parsing
 * JdbcTemplate logs all warnings in case of "ignoreWarnings"=true, not just the first warning in the chain
 * JdbcTemplate's "queryForObject" uses "requiredSingleResult" to never accept more than 1 row in result (as per its c.)
