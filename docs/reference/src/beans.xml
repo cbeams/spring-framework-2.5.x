@@ -3077,17 +3077,6 @@ x.y.NewsFeed@5329c5: '... that's fit to print!']]></programlisting>
             implementations are preferred above plain <interfacename>BeanFactory</interfacename>
             implementations in the vast majority of Spring-backed applications, especially
             when using <literal>BeanPostProcessors</literal>.</para>
-            <note>
-                <para>You typically don't want to have <literal>BeanPostProcessors</literal>
-                marked as being lazily-initialized. If they are marked as such, then the Spring
-                container will never instantiate them, and thus they won't get a chance
-                to apply their custom logic. If you are using the
-                <literal>'default-lazy-init'</literal> attribute on the declaration of your
-                <literal>&lt;beans/&gt;</literal> element, be sure to mark your various
-                <interfacename>BeanPostProcessor</interfacename> bean definitions with
-                <literal>'lazy-init="false"'</literal>.
-                </para>
-            </note>
             <para>Find below some examples of how to write, register, and use
             <literal>BeanPostProcessors</literal> in the context of an
             <interfacename>ApplicationContext</interfacename>.</para>
