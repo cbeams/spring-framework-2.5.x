@@ -53,6 +53,18 @@ public abstract class StatementCreatorUtils {
 
 	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
 
+	private static boolean charSequenceAvailable;
+
+	static {
+		try {
+			Class.forName("java.lang.CharSequence");
+			charSequenceAvailable = true;
+		}
+		catch (ClassNotFoundException ex) {
+			charSequenceAvailable = false;
+		}
+	}
+
 
 	/**
 	 * Set the value for a parameter. The method used is based on the SQL type
@@ -184,11 +196,10 @@ public abstract class StatementCreatorUtils {
 				}
 			}
 			else if (sqlType == SqlTypeValue.TYPE_UNKNOWN) {
-				if (inValue instanceof String || inValue instanceof StringBuffer || inValue instanceof StringWriter) {
+				if (isStringValue(inValue)) {
 					ps.setString(paramIndex, inValue.toString());
 				}
-				else if ((inValue instanceof java.util.Date) && !(inValue instanceof java.sql.Date ||
-						inValue instanceof java.sql.Time || inValue instanceof java.sql.Timestamp)) {
+				else if (isDateValue(inValue)) {
 					ps.setTimestamp(paramIndex, new java.sql.Timestamp(((java.util.Date) inValue).getTime()));
 				}
 				else if (inValue instanceof Calendar) {
@@ -205,6 +216,29 @@ public abstract class StatementCreatorUtils {
 				ps.setObject(paramIndex, inValue, sqlType);
 			}
 		}
+	}
+
+	/**
+	 * Check whether the given value can be treated as a String value.
+	 */
+	private static boolean isStringValue(Object inValue) {
+		if (charSequenceAvailable) {
+			// Consider any CharSequence (including JDK 1.5's StringBuilder) as String.
+			return (inValue instanceof CharSequence || inValue instanceof StringWriter);
+		}
+		else {
+			// Explicit enumeration of well-known types for JDK 1.3.
+			return (inValue instanceof String || inValue instanceof StringBuffer || inValue instanceof StringWriter);
+		}
+	}
+
+	/**
+	 * Check whether the given value is a <code>java.util.Date</code>
+	 * (but not one of the JDBC-specific subclasses).
+	 */
+	private static boolean isDateValue(Object inValue) {
+		return (inValue instanceof java.util.Date && !(inValue instanceof java.sql.Date ||
+				inValue instanceof java.sql.Time || inValue instanceof java.sql.Timestamp));
 	}
 
 	/**
