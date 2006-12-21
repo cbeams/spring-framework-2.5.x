@@ -105,6 +105,7 @@ public interface SqlMapClientOperations {
 
 	/**
 	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#queryForPaginatedList(String, int)
+	 * @deprecated as of iBATIS 2.3.0
 	 * @throws org.springframework.dao.DataAccessException in case of errors
 	 */
 	PaginatedList queryForPaginatedList(String statementName, int pageSize)
@@ -112,6 +113,7 @@ public interface SqlMapClientOperations {
 
 	/**
 	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#queryForPaginatedList(String, Object, int)
+	 * @deprecated as of iBATIS 2.3.0
 	 * @throws org.springframework.dao.DataAccessException in case of errors
 	 */
 	PaginatedList queryForPaginatedList(String statementName, Object parameterObject, int pageSize)

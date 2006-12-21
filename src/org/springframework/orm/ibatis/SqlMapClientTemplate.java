@@ -305,12 +305,18 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		});
 	}
 
+	/**
+	 * @deprecated as of iBATIS 2.3.0
+	 */
 	public PaginatedList queryForPaginatedList(String statementName, int pageSize)
 			throws DataAccessException {
 
 		return queryForPaginatedList(statementName, null, pageSize);
 	}
 
+	/**
+	 * @deprecated as of iBATIS 2.3.0
+	 */
 	public PaginatedList queryForPaginatedList(
 			final String statementName, final Object parameterObject, final int pageSize)
 			throws DataAccessException {
