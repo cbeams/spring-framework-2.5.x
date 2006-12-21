@@ -48,22 +48,11 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class JdbcTransactionObjectSupport implements SavepointManager, SmartTransactionObject {
 
-	private static final String SAVEPOINT_CLASS_NAME = "java.sql.Savepoint";
-
 	private static final Log logger = LogFactory.getLog(JdbcTransactionObjectSupport.class);
 
-	private static boolean savepointClassAvailable;
-
-	static {
-		if (ClassUtils.isPresent(SAVEPOINT_CLASS_NAME)) {
-			savepointClassAvailable = true;
-			logger.info("JDBC 3.0 Savepoint class is available");
-		}
-		else {
-			savepointClassAvailable = false;
-			logger.info("JDBC 3.0 Savepoint class is not available");
-		}
-	}
+	// Determine whether JDK 1.4's Savepoint interface is available,
+	// indicating that Spring's transaction savepoints are supported.
+	private static boolean savepointClassAvailable = ClassUtils.isPresent("java.sql.Savepoint");
 
 
 	private ConnectionHolder connectionHolder;
