@@ -61,12 +61,10 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class CollectionFactory {
 
-	private static final String COMMONS_COLLECTIONS_CLASS_NAME =
-			"org.apache.commons.collections.map.LinkedMap";
-
 	private static final Log logger = LogFactory.getLog(CollectionFactory.class);
 
-	private static boolean commonsCollections3xAvailable;
+	private static final boolean commonsCollections3Available =
+			ClassUtils.isPresent("org.apache.commons.collections.map.LinkedMap");
 
 
 	static {
@@ -75,11 +73,8 @@ public abstract class CollectionFactory {
 		if (JdkVersion.isAtLeastJava14()) {
 			logger.info("JDK 1.4+ collections available");
 		}
-		if (ClassUtils.isPresent(COMMONS_COLLECTIONS_CLASS_NAME)) {
-			commonsCollections3xAvailable = true;
+		if (commonsCollections3Available) {
 			logger.info("Commons Collections 3.x available");
-		} else {
-			commonsCollections3xAvailable = false;
 		}
 	}
 
@@ -98,7 +93,7 @@ public abstract class CollectionFactory {
 			logger.debug("Creating [java.util.LinkedHashSet]");
 			return Jdk14CollectionFactory.createLinkedHashSet(initialCapacity);
 		}
-		else if (commonsCollections3xAvailable) {
+		else if (commonsCollections3Available) {
 			logger.debug("Creating [org.apache.commons.collections.set.ListOrderedSet]");
 			return CommonsCollectionFactory.createListOrderedSet(initialCapacity);
 		}
@@ -122,7 +117,7 @@ public abstract class CollectionFactory {
 			logger.debug("Creating [java.util.LinkedHashMap]");
 			return Jdk14CollectionFactory.createLinkedHashMap(initialCapacity);
 		}
-		else if (commonsCollections3xAvailable) {
+		else if (commonsCollections3Available) {
 			logger.debug("Creating [org.apache.commons.collections.map.LinkedMap]");
 			return CommonsCollectionFactory.createLinkedMap(initialCapacity);
 		}
@@ -142,7 +137,7 @@ public abstract class CollectionFactory {
 	 * @see org.apache.commons.collections.map.ListOrderedMap
 	 */
 	public static Map createLinkedCaseInsensitiveMapIfPossible(int initialCapacity) {
-		if (commonsCollections3xAvailable) {
+		if (commonsCollections3Available) {
 			logger.debug("Creating [org.apache.commons.collections.map.ListOrderedMap/CaseInsensitiveMap]");
 			return CommonsCollectionFactory.createListOrderedCaseInsensitiveMap(initialCapacity);
 		}
@@ -170,7 +165,7 @@ public abstract class CollectionFactory {
 			logger.debug("Creating [java.util.IdentityHashMap]");
 			return Jdk14CollectionFactory.createIdentityHashMap(initialCapacity);
 		}
-		else if (commonsCollections3xAvailable) {
+		else if (commonsCollections3Available) {
 			logger.debug("Creating [org.apache.commons.collections.map.IdentityMap]");
 			return CommonsCollectionFactory.createIdentityMap(initialCapacity);
 		}
