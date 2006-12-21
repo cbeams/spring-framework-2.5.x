@@ -62,6 +62,9 @@ import org.springframework.web.util.NestedServletException;
 public class HessianServiceExporter extends RemoteExporter
 		implements HttpRequestHandler, InitializingBean {
 
+	private static final boolean hessian2Available = ClassUtils.isPresent("com.caucho.hessian.io.Hessian2Input");
+
+
 	private SerializerFactory serializerFactory = new SerializerFactory();
 
 	private HessianSkeletonInvoker skeletonInvoker;
@@ -115,7 +118,7 @@ public class HessianServiceExporter extends RemoteExporter
 			throw new BeanInitializationException("Hessian skeleton initialization failed", ex);
 		}
 
-		if (ClassUtils.isPresent("com.caucho.hessian.io.Hessian2Input")) {
+		if (hessian2Available) {
 			// Hessian 2 (version 3.0.20+).
 			this.skeletonInvoker = new Hessian2SkeletonInvoker(skeleton, this.serializerFactory);
 		}
