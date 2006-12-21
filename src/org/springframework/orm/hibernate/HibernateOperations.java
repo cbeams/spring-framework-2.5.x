@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -653,7 +653,7 @@ public interface HibernateOperations {
 	 * <p>Returns the results as Iterator. Entities returned are initialized
 	 * on demand. See Hibernate docs for details.
 	 * @param queryString a query expressed in Hibernate's query language
-	 * @return a List containing 0 or more persistent instances
+	 * @return an Iterator containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#iterate(String)
 	 * @see net.sf.hibernate.Session#createQuery
@@ -667,7 +667,7 @@ public interface HibernateOperations {
 	 * on demand. See Hibernate docs for details.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param value the value of the parameter
-	 * @return a List containing 0 or more persistent instances
+	 * @return an Iterator containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#iterate(String, Object, net.sf.hibernate.type.Type)
 	 * @see net.sf.hibernate.Session#createQuery
@@ -682,7 +682,7 @@ public interface HibernateOperations {
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param value the value of the parameter
 	 * @param type Hibernate type of the parameter (or <code>null</code>)
-	 * @return a List containing 0 or more persistent instances
+	 * @return an Iterator containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#iterate(String, Object, net.sf.hibernate.type.Type)
 	 * @see net.sf.hibernate.Session#createQuery
@@ -696,7 +696,7 @@ public interface HibernateOperations {
 	 * on demand. See Hibernate docs for details.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param values the values of the parameters
-	 * @return a List containing 0 or more persistent instances
+	 * @return an Iterator containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
 	 * @see net.sf.hibernate.Session#createQuery
@@ -711,7 +711,7 @@ public interface HibernateOperations {
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param values the values of the parameters
 	 * @param types Hibernate types of the parameters (or <code>null</code>)
-	 * @return a List containing 0 or more persistent instances
+	 * @return an Iterator containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
 	 * @see net.sf.hibernate.Session#createQuery
