@@ -53,11 +53,11 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class StatementCreatorUtils {
 
+	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
+
 	// Determine whether JDK 1.4's CharSequence interface is available,
 	// treating any of its implementations as String value.
 	private static final boolean charSequenceAvailable = ClassUtils.isPresent("java.lang.CharSequence");
-
-	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
 
 
 	/**
@@ -231,7 +231,7 @@ public abstract class StatementCreatorUtils {
 	 * (but not one of the JDBC-specific subclasses).
 	 */
 	private static boolean isDateValue(Object inValue) {
-		return ((inValue instanceof java.util.Date) && !(inValue instanceof java.sql.Date ||
+		return (inValue instanceof java.util.Date && !(inValue instanceof java.sql.Date ||
 				inValue instanceof java.sql.Time || inValue instanceof java.sql.Timestamp));
 	}
 
