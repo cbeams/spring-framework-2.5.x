@@ -158,7 +158,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 
 	/**
-	 * Specify a JMS client id for a shared Connection created and used
+	 * Specify the JMS client id for a shared Connection created and used
 	 * by this messager listener container.
 	 * <p>Note that client ids need to be unique among all active Connections
 	 * of the underlying JMS provider. Furthermore, a client id can only be
@@ -175,7 +175,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * by this messager listener container, if any.
 	 */
 	protected String getClientId() {
-		return clientId;
+		return this.clientId;
 	}
 
 	/**
@@ -194,11 +194,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	}
 
 	/**
-	 * Return the destination to receive messages from.
-	 * @return the destination to receive messages from (will be
-	 * <code>null</code> if the configured destination is not an actual
-	 * {@link Destination} type; c.f. {@link #setDestinationName(String)
-	 * when the destination is a String})
+	 * Return the destination to receive messages from. Will be <code>null</code>
+	 * if the configured destination is not an actual {@link Destination} type;
+	 * c.f. {@link #setDestinationName(String) when the destination is a String}.
 	 */
 	protected Destination getDestination() {
 		return (this.destination instanceof Destination ? (Destination) this.destination : null);
@@ -219,10 +217,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	/**
 	 * Return the name of the destination to receive messages from.
-	 * @return the name of the destination to receive messages from
-	 * (will be <code>null</code> if the configured destination is not a
+	 * Will be <code>null</code> if the configured destination is not a
 	 * {@link String} type; c.f. {@link #setDestination(Destination) when
-	 * it is an actual Destination})
+	 * it is an actual Destination}.
 	 */
 	protected String getDestinationName() {
 		return (this.destination instanceof String ? (String) this.destination : null);
@@ -241,7 +238,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * Return the JMS message selector expression (or <code>null</code> if none).
 	 */
 	protected String getMessageSelector() {
-		return messageSelector;
+		return this.messageSelector;
 	}
 
 
@@ -287,7 +284,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * Return the message listener object to register.
 	 */
 	protected Object getMessageListener() {
-		return messageListener;
+		return this.messageListener;
 	}
 
 	/**
@@ -307,7 +304,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * Return whether to make the subscription durable.
 	 */
 	protected boolean isSubscriptionDurable() {
-		return subscriptionDurable;
+		return this.subscriptionDurable;
 	}
 
 	/**
@@ -330,7 +327,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * Return the name of a durable subscription to create, if any.
 	 */
 	protected String getDurableSubscriptionName() {
-		return durableSubscriptionName;
+		return this.durableSubscriptionName;
 	}
 
 	/**
@@ -367,7 +364,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * registered {@link SessionAwareMessageListener}.
 	 */
 	protected boolean isExposeListenerSession() {
-		return exposeListenerSession;
+		return this.exposeListenerSession;
 	}
 
 	/**
