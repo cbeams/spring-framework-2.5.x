@@ -159,10 +159,10 @@ public class MBeanClientInterceptor implements MethodInterceptor, InitializingBe
 	}
 
 	/**
-	 * Set the <code>ObjectName</code> of the MBean which calls are
-	 * routed to.
+	 * Set the <code>ObjectName</code> of the MBean which calls are routed to,
+	 * as <code>ObjectName</code> instance or as <code>String</code>.
 	 */
-	public void setObjectName(String objectName) throws MalformedObjectNameException {
+	public void setObjectName(Object objectName) throws MalformedObjectNameException {
 		this.objectName = ObjectNameManager.getInstance(objectName);
 	}
 

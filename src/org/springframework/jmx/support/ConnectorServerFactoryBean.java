@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,10 +96,11 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 
 	/**
 	 * Set the <code>ObjectName</code> used to register the <code>JMXConnectorServer</code>
-	 * itself with the <code>MBeanServer</code>.
+	 * itself with the <code>MBeanServer</code>, as <code>ObjectName</code> instance
+	 * or as <code>String</code>.
 	 * @throws MalformedObjectNameException if the <code>ObjectName</code> is malformed
 	 */
-	public void setObjectName(String objectName) throws MalformedObjectNameException {
+	public void setObjectName(Object objectName) throws MalformedObjectNameException {
 		this.objectName = ObjectNameManager.getInstance(objectName);
 	}
 

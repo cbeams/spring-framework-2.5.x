@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,41 +21,50 @@ import java.util.Hashtable;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.springframework.util.ClassUtils;
+
 /**
- * Wraps the creation of <code>ObjectName</code> instances.
+ * Helper class for the creation of {@link javax.management.ObjectName} instances.
  *
- * <p><code>ObjectName</code> instances will be cached if your
- * JMX implementation supports caching for <code>ObjectName</code>s.
+ * <p><code>ObjectName</code> instances will be cached on JMX 1.2,
+ * whereas they will be recreated for each request on JMX 1.0.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 1.2
+ * @see javax.management.ObjectName#getInstance(String)
  */
 public class ObjectNameManager {
 
-	/**
-	 * Flag that indicates whether the <code>ObjectName.getInstance()</code> methods are available.
-	 */
-	private static boolean getInstanceAvailable;
+	// Determine whether the JMX 1.2 <code>ObjectName.getInstance</code> method is available.
+	private static final boolean getInstanceAvailable =
+			ClassUtils.hasMethod(ObjectName.class, "getInstance", new Class[] {String.class});
+
 
 	/**
-	 * Detects whether or not the <code>getInstance</code> method on ObjectName is available
-	 * and sets the <code>getInstanceAvailable</code> flag appropriately.
+	 * Retrieve the <code>ObjectName</code> instance corresponding to the supplied name.
+	 * @param objectName the <code>ObjectName</code> in <code>ObjectName</code> or
+	 * <code>String</code> format
+	 * @return the <code>ObjectName</code> instance
+	 * @throws MalformedObjectNameException in case of an invalid object name specification
+	 * @see ObjectName#ObjectName(String)
+	 * @see ObjectName#getInstance(String)
 	 */
-
-	static {
-		try {
-			ObjectName.class.getMethod("getInstance", new Class[] {String.class});
-			getInstanceAvailable = true;
+	public static ObjectName getInstance(Object objectName) throws MalformedObjectNameException {
+		if (objectName instanceof ObjectName) {
+			return (ObjectName) objectName;
 		}
-		catch (NoSuchMethodException ex) {
-			getInstanceAvailable = false;
+		if (!(objectName instanceof String)) {
+			throw new MalformedObjectNameException("Invalid ObjectName value type: [" +
+					objectName.getClass().getName() + "]. Only ObjectName and String supported.");
 		}
+		return getInstance((String) objectName);
 	}
 
 	/**
 	 * Retrieve the <code>ObjectName</code> instance corresponding to the supplied name.
-	 * @param objectName the <code>ObjectName</code> in <code>String</code> format.
-	 * @return the <code>ObjectName</code> instance.
+	 * @param objectName the <code>ObjectName</code> in <code>String</code> format
+	 * @return the <code>ObjectName</code> instance
 	 * @throws MalformedObjectNameException in case of an invalid object name specification
 	 * @see ObjectName#ObjectName(String)
 	 * @see ObjectName#getInstance(String)
