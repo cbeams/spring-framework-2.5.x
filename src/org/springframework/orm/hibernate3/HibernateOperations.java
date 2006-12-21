@@ -799,7 +799,7 @@ public interface HibernateOperations {
 	 * <p>Returns the results as an {@link Iterator}. Entities returned are
 	 * initialized on demand. See the Hibernate API documentation for details.
 	 * @param queryString a query expressed in Hibernate's query language
-	 * @return the result {@link Iterator}
+	 * @return an {@link Iterator} containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#createQuery
 	 * @see org.hibernate.Query#iterate
@@ -813,7 +813,7 @@ public interface HibernateOperations {
 	 * initialized on demand. See the Hibernate API documentation for details.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param value the value of the parameter
-	 * @return the result {@link Iterator}
+	 * @return an {@link Iterator} containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#createQuery
 	 * @see org.hibernate.Query#iterate
@@ -822,12 +822,12 @@ public interface HibernateOperations {
 
 	/**
 	 * Execute a query for persistent instances, binding a number of
-	 * <code>values</code> to "?" parameters in the query string.
+	 * values to "?" parameters in the query string.
 	 * <p>Returns the results as an {@link Iterator}. Entities returned are
 	 * initialized on demand. See the Hibernate API documentation for details.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param values the values of the parameters
-	 * @return the result {@link Iterator}
+	 * @return an {@link Iterator} containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see org.hibernate.Session#createQuery
 	 * @see org.hibernate.Query#iterate
@@ -855,7 +855,8 @@ public interface HibernateOperations {
 	int bulkUpdate(String queryString) throws DataAccessException;
 
 	/**
-	 * Update/delete all objects according to the given query.
+	 * Update/delete all objects according to the given query, binding one value
+	 * to a "?" parameter in the query string.
 	 * @param queryString an update/delete query expressed in Hibernate's query language
 	 * @param value the value of the parameter
 	 * @return the number of instances updated/deleted
@@ -866,7 +867,8 @@ public interface HibernateOperations {
 	int bulkUpdate(String queryString, Object value) throws DataAccessException;
 
 	/**
-	 * Update/delete all objects according to the given query.
+	 * Update/delete all objects according to the given query, binding a number of
+	 * values to "?" parameters in the query string.
 	 * @param queryString an update/delete query expressed in Hibernate's query language
 	 * @param values the values of the parameters
 	 * @return the number of instances updated/deleted
