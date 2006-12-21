@@ -19,7 +19,6 @@ package org.springframework.orm.ibatis;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -37,7 +36,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * FactoryBean that creates an iBATIS {@link com.ibatis.sqlmap.client.SqlMapClient}
@@ -47,6 +45,10 @@ import org.springframework.util.ReflectionUtils;
  * <p>Allows to specify a DataSource at the SqlMapClient level. This is preferable
  * to per-DAO DataSource references, as it allows for lazy loading and avoids
  * repeated DataSource references in every DAO.
+ *
+ * <p>Note: As of Spring 2.0.2, this class explicitly supports iBATIS 2.3.
+ * Backwards compatibility with iBATIS 2.1 and 2.2 is preserved for the time being,
+ * through corresponding reflective checks.
  *
  * @author Juergen Hoeller
  * @since 24.02.2004
@@ -59,14 +61,14 @@ public class SqlMapClientFactoryBean implements FactoryBean, InitializingBean {
 
 	// Determine whether the SqlMapClientBuilder.buildSqlMapClient(InputStream)
 	// method is available, for use in the "buildSqlMapClient" template method.
-	private final static Method buildSqlMapClientWithInputStreamMethod =
-			ClassUtils.getMethodIfAvailable(SqlMapClientBuilder.class, "buildSqlMapClient",
+	private final static boolean buildSqlMapClientWithInputStreamMethodAvailable =
+			ClassUtils.hasMethod(SqlMapClientBuilder.class, "buildSqlMapClient",
 					new Class[] {InputStream.class});
 
 	// Determine whether the SqlMapClientBuilder.buildSqlMapClient(InputStream, Properties)
 	// method is available, for use in the "buildSqlMapClient" template method.
-	private final static Method buildSqlMapClientWithInputStreamAndPropertiesMethod =
-			ClassUtils.getMethodIfAvailable(SqlMapClientBuilder.class, "buildSqlMapClient",
+	private final static boolean buildSqlMapClientWithInputStreamAndPropertiesMethodAvailable =
+			ClassUtils.hasMethod(SqlMapClientBuilder.class, "buildSqlMapClient",
 					new Class[] {InputStream.class, Properties.class});
 
 
@@ -305,18 +307,16 @@ public class SqlMapClientFactoryBean implements FactoryBean, InitializingBean {
 	protected SqlMapClient buildSqlMapClient(Resource configLocation, Properties properties) throws IOException {
 		InputStream is = configLocation.getInputStream();
 		if (properties != null) {
-			if (buildSqlMapClientWithInputStreamAndPropertiesMethod != null) {
-				return (SqlMapClient) ReflectionUtils.invokeMethod(
-						buildSqlMapClientWithInputStreamAndPropertiesMethod, null, new Object[] {is, properties});
+			if (buildSqlMapClientWithInputStreamAndPropertiesMethodAvailable) {
+				return SqlMapClientBuilder.buildSqlMapClient(is, properties);
 			}
 			else {
 				return SqlMapClientBuilder.buildSqlMapClient(new InputStreamReader(is), properties);
 			}
 		}
 		else {
-			if (buildSqlMapClientWithInputStreamMethod != null) {
-				return (SqlMapClient) ReflectionUtils.invokeMethod(
-						buildSqlMapClientWithInputStreamMethod, null, new Object[] {is});
+			if (buildSqlMapClientWithInputStreamMethodAvailable) {
+				return SqlMapClientBuilder.buildSqlMapClient(is);
 			}
 			else {
 				return SqlMapClientBuilder.buildSqlMapClient(new InputStreamReader(is));
