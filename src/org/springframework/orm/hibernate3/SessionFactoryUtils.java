@@ -1020,7 +1020,13 @@ public abstract class SessionFactoryUtils {
 				try {
 					this.jtaTransactionManager.setRollbackOnly();
 				}
-				catch (SystemException ex2) {
+				catch (UnsupportedOperationException ex2) {
+					// Probably Hibernate's WebSphereExtendedJTATransactionLookup pseudo JTA stuff...
+					logger.debug("JTA transaction handle does not support setRollbackOnly method - " +
+							"relying on JTA provider to mark the transaction as rollback-only based on " +
+							"the exception thrown from beforeCompletion", ex);
+				}
+				catch (Exception ex2) {
 					logger.error("Could not set JTA transaction rollback-only", ex2);
 				}
 			}
