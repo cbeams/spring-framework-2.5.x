@@ -675,7 +675,7 @@ public interface HibernateOperations {
 	 * <p>Returns the results as Iterator. Entities returned are initialized
 	 * on demand. See Hibernate docs for details.
 	 * @param queryString a query expressed in Hibernate's query language
-	 * @return a List containing 0 or more persistent instances
+	 * @return an Iterator containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#iterate(String)
 	 * @see net.sf.hibernate.Session#createQuery
@@ -689,7 +689,7 @@ public interface HibernateOperations {
 	 * on demand. See Hibernate docs for details.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param value the value of the parameter
-	 * @return a List containing 0 or more persistent instances
+	 * @return an Iterator containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#iterate(String, Object, net.sf.hibernate.type.Type)
 	 * @see net.sf.hibernate.Session#createQuery
@@ -704,7 +704,7 @@ public interface HibernateOperations {
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param value the value of the parameter
 	 * @param type Hibernate type of the parameter (or <code>null</code>)
-	 * @return a List containing 0 or more persistent instances
+	 * @return an Iterator containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#iterate(String, Object, net.sf.hibernate.type.Type)
 	 * @see net.sf.hibernate.Session#createQuery
@@ -718,7 +718,7 @@ public interface HibernateOperations {
 	 * on demand. See Hibernate docs for details.
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param values the values of the parameters
-	 * @return a List containing 0 or more persistent instances
+	 * @return an Iterator containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
 	 * @see net.sf.hibernate.Session#createQuery
@@ -733,7 +733,7 @@ public interface HibernateOperations {
 	 * @param queryString a query expressed in Hibernate's query language
 	 * @param values the values of the parameters
 	 * @param types Hibernate types of the parameters (or <code>null</code>)
-	 * @return a List containing 0 or more persistent instances
+	 * @return an Iterator containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see net.sf.hibernate.Session#find(String, Object[], net.sf.hibernate.type.Type[])
 	 * @see net.sf.hibernate.Session#createQuery
