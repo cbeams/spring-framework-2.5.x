@@ -23,16 +23,18 @@ import org.springframework.aop.SpringProxy;
 import org.springframework.util.ClassUtils;
 
 /**
- * Simple {@link AopProxyFactory} implementation either creating a
- * CGLIB proxy or a JDK dynamic proxy.
+ * Simple {@link AopProxyFactory} implementation,
+ * creating either a CGLIB proxy or a JDK dynamic proxy.
  *
  * <p>Creates a CGLIB proxy if one the following is true:
  * <ul>
  * <li>the "optimize" flag is set
  * <li>the "proxyTargetClass" flag is set
- * <li>no interfaces have been specified
- * <li>the CGLIB library classes are present on the classpath
+ * <li>no proxy interfaces have been specified
  * </ul>
+ *
+ * <p>Note that the CGLIB library classes have to be present on
+ * the classpath if an actual CGLIB proxy needs to be created.
  *
  * <p>In general, specify "proxyTargetClass" to enforce a CGLIB proxy,
  * or specify one or more interfaces to use a JDK dynamic proxy.
@@ -48,18 +50,16 @@ import org.springframework.util.ClassUtils;
  */
 public class DefaultAopProxyFactory implements AopProxyFactory {
 
-	private static final String CGLIB_ENHANCER_CLASS_NAME = "net.sf.cglib.proxy.Enhancer";
-
 	private static final Log logger = LogFactory.getLog(DefaultAopProxyFactory.class);
 
-	private static boolean cglibAvailable;
+	private static final boolean cglibAvailable = ClassUtils.isPresent("net.sf.cglib.proxy.Enhancer");
+
 
 	static {
-		// if CGLIB is not available, then we cannot create class-based proxies
-		cglibAvailable = ClassUtils.isPresent(CGLIB_ENHANCER_CLASS_NAME);
 		if (cglibAvailable) {
 			logger.info("CGLIB2 available: proxyTargetClass feature enabled");
-		} else {
+		}
+		else {
 			logger.info("CGLIB2 not available: proxyTargetClass feature disabled");
 		}
 	}
@@ -67,7 +67,7 @@ public class DefaultAopProxyFactory implements AopProxyFactory {
 
 	public AopProxy createAopProxy(AdvisedSupport advisedSupport) throws AopConfigException {
 		if (advisedSupport.isOptimize() || advisedSupport.isProxyTargetClass() ||
-						hasNoUserSuppliedProxyInterfaces(advisedSupport)) {
+				hasNoUserSuppliedProxyInterfaces(advisedSupport)) {
 			if (!cglibAvailable) {
 				throw new AopConfigException(
 						"Cannot proxy target class because CGLIB2 is not available. " +
@@ -81,12 +81,13 @@ public class DefaultAopProxyFactory implements AopProxyFactory {
 	}
 
 	/**
-	 * Returns '<code>true</code>' if the supplied {@link AdvisedSupport} has only the
-	 * {@link org.springframework.aop.SpringProxy} interface specified.
+	 * Determine whether the supplied {@link AdvisedSupport} has only the
+	 * {@link org.springframework.aop.SpringProxy} interface specified
+	 * (or no proxy interfaces specified at all).
 	 */
 	private boolean hasNoUserSuppliedProxyInterfaces(AdvisedSupport advisedSupport) {
 		Class[] interfaces = advisedSupport.getProxiedInterfaces();
-		return interfaces.length == 0 || (interfaces.length == 1 && SpringProxy.class.equals(interfaces[0]));
+		return (interfaces.length == 0 || (interfaces.length == 1 && SpringProxy.class.equals(interfaces[0])));
 	}
 
 
@@ -99,7 +100,6 @@ public class DefaultAopProxyFactory implements AopProxyFactory {
 		private static AopProxy createCglibProxy(AdvisedSupport advisedSupport) {
 			return new Cglib2AopProxy(advisedSupport);
 		}
-
 	}
 
 }
