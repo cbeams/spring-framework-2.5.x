@@ -255,6 +255,15 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	}
 
 	/**
+	 * Specify the transaction name to use for transactional wrapping.
+	 * Default is the bean name of this listener container, if any.
+	 * @see org.springframework.transaction.TransactionDefinition#getName()
+	 */
+	public void setTransactionName(String transactionName) {
+		this.transactionDefinition.setName(transactionName);
+	}
+
+	/**
 	 * Specify the transaction timeout to use for transactional wrapping, in <b>seconds</b>.
 	 * Default is none, using the transaction manager's default timeout.
 	 * @see org.springframework.transaction.TransactionDefinition#getTimeout()
@@ -356,6 +365,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	//-------------------------------------------------------------------------
 
 	public void initialize() {
+		// Adapt default cache level.
 		if (this.transactionManager != null) {
 			if (this.cacheLevel == null) {
 				this.cacheLevel = new Integer(CACHE_NONE);
@@ -365,6 +375,11 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 			if (this.cacheLevel == null) {
 				this.cacheLevel = new Integer(CACHE_CONSUMER);
 			}
+		}
+
+		// Use bean name as default transaction name.
+		if (this.transactionDefinition.getName() == null) {
+			this.transactionDefinition.setName(this.beanName);
 		}
 
 		// Prepare taskExecutor and maxMessagesPerTask.
