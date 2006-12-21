@@ -26,7 +26,8 @@ import org.springframework.util.ClassUtils;
  * Simple {@link AopProxyFactory} implementation,
  * creating either a CGLIB proxy or a JDK dynamic proxy.
  *
- * <p>Creates a CGLIB proxy if one the following is true:
+ * <p>Creates a CGLIB proxy if one the following is true
+ * for a given {@link AdvisedSupport} instance:
  * <ul>
  * <li>the "optimize" flag is set
  * <li>the "proxyTargetClass" flag is set
@@ -34,7 +35,7 @@ import org.springframework.util.ClassUtils;
  * </ul>
  *
  * <p>Note that the CGLIB library classes have to be present on
- * the classpath if an actual CGLIB proxy needs to be created.
+ * the class path if an actual CGLIB proxy needs to be created.
  *
  * <p>In general, specify "proxyTargetClass" to enforce a CGLIB proxy,
  * or specify one or more interfaces to use a JDK dynamic proxy.
