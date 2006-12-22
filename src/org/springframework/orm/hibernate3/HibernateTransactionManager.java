@@ -476,19 +476,20 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			Transaction hibTx = null;
 
 			// Register transaction timeout.
-			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
+			int timeout = determineTimeout(definition);
+			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
 				if (hibernateSetTimeoutAvailable) {
 					// Use Hibernate's own transaction timeout mechanism on Hibernate 3.1
 					// Applies to all statements, also to inserts, updates and deletes!
 					hibTx = session.getTransaction();
-					hibTx.setTimeout(definition.getTimeout());
+					hibTx.setTimeout(timeout);
 					hibTx.begin();
 				}
 				else {
 					// Use Spring query timeouts driven by SessionHolder on Hibernate 3.0
 					// Only applies to Hibernate queries, not to insert/update/delete statements.
 					hibTx = session.beginTransaction();
-					txObject.getSessionHolder().setTimeoutInSeconds(definition.getTimeout());
+					txObject.getSessionHolder().setTimeoutInSeconds(timeout);
 				}
 			}
 			else {
@@ -503,8 +504,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			if (getDataSource() != null) {
 				Connection con = session.connection();
 				ConnectionHolder conHolder = new ConnectionHolder(con);
-				if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-					conHolder.setTimeoutInSeconds(definition.getTimeout());
+				if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+					conHolder.setTimeoutInSeconds(timeout);
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Exposing Hibernate transaction as JDBC transaction [" + con + "]");

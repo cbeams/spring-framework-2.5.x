@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -236,16 +236,18 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 	protected void doJtaBegin(JtaTransactionObject txObject, TransactionDefinition definition)
 			throws NotSupportedException, SystemException {
 
+		int timeout = determineTimeout(definition);
+
 		// Apply transaction name (if any) to WebLogic transaction.
 		if (this.weblogicUserTransactionAvailable && definition.getName() != null) {
 			try {
-				if (definition.getTimeout() > TransactionDefinition.TIMEOUT_DEFAULT) {
+				if (timeout > TransactionDefinition.TIMEOUT_DEFAULT) {
 					/*
 					weblogic.transaction.UserTransaction ut = (weblogic.transaction.UserTransaction) ut;
-					ut.begin(definition.getName(), definition.getTimeout());
+					ut.begin(definition.getName(), timeout);
 					*/
 					this.beginWithNameAndTimeoutMethod.invoke(txObject.getUserTransaction(),
-							new Object[] {definition.getName(), new Integer(definition.getTimeout())});
+							new Object[] {definition.getName(), new Integer(timeout)});
 				}
 				else {
 					/*
@@ -268,7 +270,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 		else {
 			// No WebLogic UserTransaction available or no transaction name specified
 			// -> standard JTA begin call.
-			applyTimeout(txObject, definition.getTimeout());
+			applyTimeout(txObject, timeout);
 			txObject.getUserTransaction().begin();
 		}
 

@@ -650,7 +650,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			throws NotSupportedException, SystemException {
 
 		applyIsolationLevel(txObject, definition.getIsolationLevel());
-		applyTimeout(txObject, definition.getTimeout());
+		int timeout = determineTimeout(definition);
+		applyTimeout(txObject, timeout);
 		txObject.getUserTransaction().begin();
 	}
 

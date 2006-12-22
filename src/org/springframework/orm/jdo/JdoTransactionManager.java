@@ -318,8 +318,9 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 			txObject.setTransactionData(transactionData);
 
 			// Register transaction timeout.
-			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-				txObject.getPersistenceManagerHolder().setTimeoutInSeconds(definition.getTimeout());
+			int timeout = determineTimeout(definition);
+			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+				txObject.getPersistenceManagerHolder().setTimeoutInSeconds(timeout);
 			}
 
 			// Register the JDO PersistenceManager's JDBC Connection for the DataSource, if set.
@@ -327,8 +328,8 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager im
 				ConnectionHandle conHandle = getJdoDialect().getJdbcConnection(pm, definition.isReadOnly());
 				if (conHandle != null) {
 					ConnectionHolder conHolder = new ConnectionHolder(conHandle);
-					if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-						conHolder.setTimeoutInSeconds(definition.getTimeout());
+					if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+						conHolder.setTimeoutInSeconds(timeout);
 					}
 					if (logger.isDebugEnabled()) {
 						logger.debug("Exposing JDO transaction as JDBC transaction [" + conHolder.getConnectionHandle() + "]");

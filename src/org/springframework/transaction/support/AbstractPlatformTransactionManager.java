@@ -118,6 +118,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 	private int transactionSynchronization = SYNCHRONIZATION_ALWAYS;
 
+	private int defaultTimeout = TransactionDefinition.TIMEOUT_DEFAULT;
+
 	private boolean nestedTransactionAllowed = false;
 
 	private boolean globalRollbackOnParticipationFailure = true;
@@ -158,7 +160,32 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * transaction synchronization support.
 	 */
 	public final int getTransactionSynchronization() {
-		return transactionSynchronization;
+		return this.transactionSynchronization;
+	}
+
+	/**
+	 * Specify the default timeout that this transaction manager should apply
+	 * if there is no timeout specified at the transaction level, in seconds.
+	 * <p>Default is the underlying transaction infrastructure's default timeout,
+	 * e.g. typically 30 seconds in case of a JTA provider, indicated by the
+	 * <code>TransactionDefinition.TIMEOUT_DEFAULT</code> value.
+	 * @see org.springframework.transaction.TransactionDefinition#TIMEOUT_DEFAULT
+	 */
+	public final void setDefaultTimeout(int defaultTimeout) {
+		if (defaultTimeout < TransactionDefinition.TIMEOUT_DEFAULT) {
+			throw new InvalidTimeoutException("Invalid default timeout", defaultTimeout);
+		}
+		this.defaultTimeout = defaultTimeout;
+	}
+
+	/**
+	 * Return the default timeout that this transaction manager should apply
+	 * if there is no timeout specified at the transaction level, in seconds.
+	 * <p>Returns <code>TransactionDefinition.TIMEOUT_DEFAULT</code> to indicate
+	 * the underlying transaction infrastructure's default timeout.
+	 */
+	public final int getDefaultTimeout() {
+		return this.defaultTimeout;
 	}
 
 	/**
@@ -174,7 +201,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Return whether nested transactions are allowed.
 	 */
 	public final boolean isNestedTransactionAllowed() {
-		return nestedTransactionAllowed;
+		return this.nestedTransactionAllowed;
 	}
 
 	/**
@@ -219,7 +246,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * after a participating transaction failed.
 	 */
 	public final boolean isGlobalRollbackOnParticipationFailure() {
-		return globalRollbackOnParticipationFailure;
+		return this.globalRollbackOnParticipationFailure;
 	}
 
 	/**
@@ -246,7 +273,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * as rollback-only.
 	 */
 	public final boolean isFailEarlyOnGlobalRollbackOnly() {
-		return failEarlyOnGlobalRollbackOnly;
+		return this.failEarlyOnGlobalRollbackOnly;
 	}
 
 	/**
@@ -267,7 +294,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * <code>doCommit</code> call.
 	 */
 	public final boolean isRollbackOnCommitFailure() {
-		return rollbackOnCommitFailure;
+		return this.rollbackOnCommitFailure;
 	}
 
 
@@ -439,6 +466,22 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		return new DefaultTransactionStatus(
 				transaction, newTransaction, actualNewSynchronization,
 				definition.isReadOnly(), debug, suspendedResources);
+	}
+
+	/**
+	 * Determine the actual timeout to use for the given definition.
+	 * Will fall back to this manager's default timeout if the
+	 * transaction definition doesn't specify a non-default value.
+	 * @param definition the transaction definition
+	 * @return the actual timeout to use
+	 * @see org.springframework.transaction.TransactionDefinition#getTimeout()
+	 * @see #setDefaultTimeout
+	 */
+	protected int determineTimeout(TransactionDefinition definition) {
+		if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
+			return definition.getTimeout();
+		}
+		return this.defaultTimeout;
 	}
 
 

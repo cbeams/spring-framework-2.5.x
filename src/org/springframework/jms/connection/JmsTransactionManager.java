@@ -165,8 +165,9 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager {
 			}
 			txObject.setResourceHolder(new JmsResourceHolder(con, session));
 			txObject.getResourceHolder().setSynchronizedWithTransaction(true);
-			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-				txObject.getResourceHolder().setTimeoutInSeconds(definition.getTimeout());
+			int timeout = determineTimeout(definition);
+			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+				txObject.getResourceHolder().setTimeoutInSeconds(timeout);
 			}
 			TransactionSynchronizationManager.bindResource(
 					getConnectionFactory(), txObject.getResourceHolder());

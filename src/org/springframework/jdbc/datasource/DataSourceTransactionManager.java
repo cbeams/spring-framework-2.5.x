@@ -204,8 +204,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			}
 			txObject.getConnectionHolder().setTransactionActive(true);
 
-			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-				txObject.getConnectionHolder().setTimeoutInSeconds(definition.getTimeout());
+			int timeout = determineTimeout(definition);
+			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+				txObject.getConnectionHolder().setTimeoutInSeconds(timeout);
 			}
 
 			// Bind the session holder to the thread.

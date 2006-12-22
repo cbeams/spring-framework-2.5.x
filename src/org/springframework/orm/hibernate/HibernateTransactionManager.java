@@ -430,15 +430,16 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			txObject.getSessionHolder().setTransaction(session.beginTransaction());
 
 			// Register transaction timeout.
-			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-				txObject.getSessionHolder().setTimeoutInSeconds(definition.getTimeout());
+			int timeout = determineTimeout(definition);
+			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+				txObject.getSessionHolder().setTimeoutInSeconds(timeout);
 			}
 
 			// Register the Hibernate Session's JDBC Connection for the DataSource, if set.
 			if (getDataSource() != null) {
 				ConnectionHolder conHolder = new ConnectionHolder(con);
-				if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-					conHolder.setTimeoutInSeconds(definition.getTimeout());
+				if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+					conHolder.setTimeoutInSeconds(timeout);
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Exposing Hibernate transaction as JDBC transaction [" + con + "]");

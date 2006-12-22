@@ -133,7 +133,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 	 * Return the EntityManagerFactory that this instance should manage transactions for.
 	 */
 	public EntityManagerFactory getEntityManagerFactory() {
-		return entityManagerFactory;
+		return this.entityManagerFactory;
 	}
 
 	/**
@@ -165,7 +165,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 	 * <p>Useful for specifying entries directly, for example via "jpaPropertyMap[myKey]".
 	 */
 	public Map getJpaPropertyMap() {
-		return jpaPropertyMap;
+		return this.jpaPropertyMap;
 	}
 
 	/**
@@ -208,7 +208,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 	 * Return the JDBC DataSource that this instance manages transactions for.
 	 */
 	public DataSource getDataSource() {
-		return dataSource;
+		return this.dataSource;
 	}
 
 	/**
@@ -314,8 +314,9 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 			txObject.setTransactionData(transactionData);
 
 			// Register transaction timeout.
-			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-				txObject.getEntityManagerHolder().setTimeoutInSeconds(definition.getTimeout());
+			int timeout = determineTimeout(definition);
+			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+				txObject.getEntityManagerHolder().setTimeoutInSeconds(timeout);
 			}
 
 			// Register the JPA EntityManager's JDBC Connection for the DataSource, if set.
@@ -323,8 +324,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 				ConnectionHandle conHandle = getJpaDialect().getJdbcConnection(em, definition.isReadOnly());
 				if (conHandle != null) {
 					ConnectionHolder conHolder = new ConnectionHolder(conHandle);
-					if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-						conHolder.setTimeoutInSeconds(definition.getTimeout());
+					if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+						conHolder.setTimeoutInSeconds(timeout);
 					}
 					if (logger.isDebugEnabled()) {
 						logger.debug("Exposing JPA transaction as JDBC transaction [" + conHolder.getConnectionHandle() + "]");

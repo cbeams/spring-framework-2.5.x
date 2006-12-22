@@ -289,8 +289,9 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 			}
 
 			// Register transaction timeout.
-			if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-				txObject.getSessionHolder().setTimeoutInSeconds(definition.getTimeout());
+			int timeout = determineTimeout(definition);
+			if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+				txObject.getSessionHolder().setTimeoutInSeconds(timeout);
 			}
 
 			// Enforce early database transaction for TopLink read-write transaction,
@@ -304,8 +305,8 @@ public class TopLinkTransactionManager extends AbstractPlatformTransactionManage
 				Connection con = getJdbcConnection(session);
 				if (con != null) {
 					ConnectionHolder conHolder = new ConnectionHolder(con);
-					if (definition.getTimeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-						conHolder.setTimeoutInSeconds(definition.getTimeout());
+					if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
+						conHolder.setTimeoutInSeconds(timeout);
 					}
 					if (logger.isDebugEnabled()) {
 						logger.debug("Exposing TopLink transaction as JDBC transaction [" + con + "]");
