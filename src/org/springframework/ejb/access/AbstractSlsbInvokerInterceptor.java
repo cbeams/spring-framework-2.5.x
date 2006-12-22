@@ -179,7 +179,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 			return createMethodToUse.invoke(home, (Object[]) null);
 		}
 		catch (IllegalAccessException ex) {
-			throw new AspectException("Could not access EJB home create() method", ex);
+			throw new AspectException("Could not access EJB home create() method: " + ex);
 		}
 	}
 

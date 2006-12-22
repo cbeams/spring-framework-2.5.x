@@ -131,16 +131,16 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 		// TODO do with regexp
 		return true;
 	}
-	
+
 	public final ClassFilter getClassFilter() {
 		return this;
 	}
 
-	
+
 	//---------------------------------------------------------------------
 	// Serialization support
 	//---------------------------------------------------------------------
-	
+
 	private void readObject(ObjectInputStream ois) throws IOException {
 		// Rely on default serialization, just initialize state after deserialization.
 		try {
@@ -148,9 +148,9 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 		}
 		catch (ClassNotFoundException ex) {
 			throw new AspectException("Failed to deserialize AOP regular expression pointcut: " +
-					"Check that Spring AOP libraries are available on the client side", ex);
+					"Check that the Spring AOP libraries are available on the client side. " + ex);
 		}
-		
+
 		// initialize transient fields
 		this.logger = LogFactory.getLog(getClass());
 
@@ -160,8 +160,8 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 		}
 		catch (Throwable ex) {
 			throw new AspectException("Failed to deserialize AOP regular expression pointcut: " +
-					"Check that the necessary regular expression libraries are available on the client side", ex);
+					"Check that the necessary regular expression libraries are available on the client side. " + ex);
 		}
 	}
-	
+
 }

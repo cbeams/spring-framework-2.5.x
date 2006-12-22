@@ -337,10 +337,9 @@ public class TransactionAspectSupport implements InitializingBean, Serializable 
 			ois.defaultReadObject();
 		}
 		catch (ClassNotFoundException ex) {
-			throw new AspectException("Failed to deserialize Spring AOP transaction aspect:" +
-					"Check that Spring AOP libraries are available on the client side", ex);
+			throw new AspectException("Failed to deserialize Spring AOP transaction aspect: " +
+					"Check that the Spring AOP libraries are available on the client side. " + ex);
 		}
-		
 		// Initialize transient fields
 		this.logger = LogFactory.getLog(getClass());
 	}
