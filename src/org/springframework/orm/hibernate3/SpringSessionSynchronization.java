@@ -204,13 +204,10 @@ class SpringSessionSynchronization extends TransactionSynchronizationAdapter imp
 				SessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, this.sessionFactory);
 			}
 		}
-		if (!this.newSession) {
-			Session session = this.sessionHolder.getSession();
-			if (status != STATUS_COMMITTED) {
-				// Clear all pending inserts/updates/deletes in the Session.
-				// Necessary for pre-bound Sessions, to avoid inconsistent state.
-				session.clear();
-			}
+		if (!this.newSession && status != STATUS_COMMITTED) {
+			// Clear all pending inserts/updates/deletes in the Session.
+			// Necessary for pre-bound Sessions, to avoid inconsistent state.
+			this.sessionHolder.getSession().clear();
 		}
 		if (this.sessionHolder.doesNotHoldNonDefaultSession()) {
 			this.sessionHolder.setSynchronizedWithTransaction(false);
