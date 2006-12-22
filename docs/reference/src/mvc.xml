@@ -37,7 +37,7 @@
         <quote>Gah! Why can't I override this method?</quote> (if indeed you ever do).</para>
         <orderedlist>
             <listitem>
-                <para><ulink url="http://www.objectmentor.com/publications/ocp.pdf">Bob Martin, The Open-Closed Principle (PDF)</ulink></para>
+                <para><ulink url="http://www.objectmentor.com/resources/articles/ocp.pdf">Bob Martin, The Open-Closed Principle (PDF)</ulink></para>
             </listitem>
         </orderedlist>
     </sidebar>
