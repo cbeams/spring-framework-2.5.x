@@ -11,6 +11,8 @@ General
 * declared all internal ThreadLocal variables as final (to avoid class reloading issues)
 
 Package org.springframework.aop
+* reworked JdkDynamicAopProxy's "Method.setAccessible" handling to avoid unnecessary calls
+* Cglib2AopProxy throws AopConfigException instead of AspectException, for better root cause handling
 * HashMapCachingAdvisorChainFactory uses synchronized access to its method cache Map
 * AbstractAutoProxyCreator considers all Advices (not just MethodInterceptors) as infrastructure classes to ignore
 
@@ -44,6 +46,7 @@ Package org.springframework.dao
 
 Package org.springframework.ejb
 * fixed AbstractSlsbInvokerInterceptor to reobtain createMethod in case of cacheHome="false"/lookupHomeOnStartup="true"
+* LocalSlsbInvokerInterceptor throws AspectException with proper exception message in case of EJB CreateException
 
 Package org.springframework.jca
 * SingleConnectionFactory's Connection proxy implements "equals" and "hashCode" based on proxy equality
@@ -57,7 +60,7 @@ Package org.springframework.jdbc
 * RowMapperResultSetExtractor always uses ArrayList, even in case of unknown number of rows expected
 * JdbcTemplate logs SQLWarnings at debug instead of warn level, to avoid repeated warn logs for acceptable conditions
 * JdbcTemplate uses "PreparedStatement.setObject(index, null)" for null values with unknown SQL type on Informix
-* JdbcTemplate by default uses "PreparedStatement.setString" for String values (instead of the general "setObject")
+* JdbcTemplate by default uses "PreparedStatement.setString" for any CharSequence (including String and StringBuilder)
 * JdbcTemplate does not check static SQL for bind parameters anymore, to avoid overhead of double parsing
 * JdbcTemplate logs all warnings in case of "ignoreWarnings"=true, not just the first warning in the chain
 * JdbcTemplate's "queryForObject" uses "requiredSingleResult" to never accept more than 1 row in result (as per its c.)
@@ -82,7 +85,11 @@ Package org.springframework.orm
 * Hibernate3 LocalSessionFactoryBean only sets connection release mode "on_close" if not given a "jtaTransactionManager"
 * Hibernate3 LocalSessionFactoryBean exposes configured DataSource for schema update (required on Hibernate 3.2.1+)
 * Hibernate3 LocalSessionFactoryBean registers filter definitions before loading any mapping files
+* fixed Hibernate JTA transaction synchronization to properly mark a rollback on WebSphereExtendedJTATransactionLookup
 * removed special Session reconnection check for Hibernate 3.1 RC1
+
+Package org.springframework.remoting
+* Burlap/Hessian/Rmi/JndiRmiClientInterceptor consistently throw RemoteProxyFailureException instead of AspectException
 
 Package org.springframework.scheduling
 * Quartz SchedulerFactoryBean uses given "nonTransactionalDataSource" as default DataSource if no "dataSource" specified
