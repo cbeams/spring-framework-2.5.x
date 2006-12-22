@@ -289,7 +289,7 @@ public abstract class AopUtils {
 					method + "] on target [" + target + "]", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new AopInvocationException("Couldn't access method: " + method, ex);
+			throw new AopInvocationException("Couldn't access method [" + method + "]", ex);
 		}
 	}
 
