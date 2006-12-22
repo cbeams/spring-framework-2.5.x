@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -115,12 +115,12 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 * root application context.
 	 */
 	protected String getSessionFactoryBeanName() {
-		return sessionFactoryBeanName;
+		return this.sessionFactoryBeanName;
 	}
 
 	/**
 	 * Set whether to use a single session for each request. Default is "true".
-	 * <p>If set to false, each data access operation or transaction will use
+	 * <p>If set to "false", each data access operation or transaction will use
 	 * its own session (like without Open Session in View). Each of those
 	 * sessions will be registered for deferred close, though, actually
 	 * processed at request completion.
@@ -135,7 +135,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 * Return whether to use a single session for each request.
 	 */
 	protected boolean isSingleSession() {
-		return singleSession;
+		return this.singleSession;
 	}
 
 
@@ -144,7 +144,6 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 
 		SessionFactory sessionFactory = lookupSessionFactory(request);
-		Session session = null;
 		boolean participate = false;
 
 		if (isSingleSession()) {
@@ -155,7 +154,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			}
 			else {
 				logger.debug("Opening single Hibernate Session in OpenSessionInViewFilter");
-				session = getSession(sessionFactory);
+				Session session = getSession(sessionFactory);
 				TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(session));
 			}
 		}
@@ -178,9 +177,10 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			if (!participate) {
 				if (isSingleSession()) {
 					// single session mode
-					TransactionSynchronizationManager.unbindResource(sessionFactory);
+					SessionHolder sessionHolder =
+							(SessionHolder) TransactionSynchronizationManager.unbindResource(sessionFactory);
 					logger.debug("Closing single Hibernate Session in OpenSessionInViewFilter");
-					closeSession(session, sessionFactory);
+					closeSession(sessionHolder.getSession(), sessionFactory);
 				}
 				else {
 					// deferred close mode
@@ -237,10 +237,11 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	/**
 	 * Get a Session for the SessionFactory that this filter uses.
 	 * Note that this just applies in single session mode!
-	 * <p>The default implementation delegates to SessionFactoryUtils'
-	 * getSession method and sets the Session's flushMode to NEVER.
-	 * <p>Can be overridden in subclasses for creating a Session with a custom
-	 * entity interceptor or JDBC exception translator.
+	 * <p>The default implementation delegates to the
+	 * <code>SessionFactoryUtils.getSession</code> method and
+	 * sets the <code>Session</code>'s flush mode to "NEVER".
+	 * <p>Can be overridden in subclasses for creating a Session with a
+	 * custom entity interceptor or JDBC exception translator.
 	 * @param sessionFactory the SessionFactory that this filter uses
 	 * @return the Session to use
 	 * @throws DataAccessResourceFailureException if the Session could not be created

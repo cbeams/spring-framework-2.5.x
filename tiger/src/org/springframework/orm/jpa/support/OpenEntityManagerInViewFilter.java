@@ -82,7 +82,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	 * root application context.
 	 */
 	protected String getEntityManagerFactoryBeanName() {
-		return entityManagerFactoryBeanName;
+		return this.entityManagerFactoryBeanName;
 	}
 
 
@@ -91,7 +91,6 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 
 		EntityManagerFactory emf = lookupEntityManagerFactory(request);
-		EntityManager em = null;
 		boolean participate = false;
 
 		if (TransactionSynchronizationManager.hasResource(emf)) {
@@ -101,7 +100,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 		else {
 			logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewFilter");
 			try {
-				em = createEntityManager(emf);
+				EntityManager em = createEntityManager(emf);
 				TransactionSynchronizationManager.bindResource(emf, new EntityManagerHolder(em));
 			}
 			catch (PersistenceException ex) {
@@ -115,9 +114,10 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 
 		finally {
 			if (!participate) {
-				TransactionSynchronizationManager.unbindResource(emf);
+				EntityManagerHolder emHolder = (EntityManagerHolder)
+						TransactionSynchronizationManager.unbindResource(emf);
 				logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewFilter");
-				em.close();
+				emHolder.getEntityManager().close();
 			}
 		}
 	}

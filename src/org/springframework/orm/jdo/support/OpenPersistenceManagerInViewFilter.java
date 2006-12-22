@@ -80,7 +80,7 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 	 * root application context.
 	 */
 	protected String getPersistenceManagerFactoryBeanName() {
-		return persistenceManagerFactoryBeanName;
+		return this.persistenceManagerFactoryBeanName;
 	}
 
 
@@ -89,7 +89,6 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 
 		PersistenceManagerFactory pmf = lookupPersistenceManagerFactory(request);
-		PersistenceManager pm = null;
 		boolean participate = false;
 
 		if (TransactionSynchronizationManager.hasResource(pmf)) {
@@ -98,7 +97,7 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 		}
 		else {
 			logger.debug("Opening JDO PersistenceManager in OpenPersistenceManagerInViewFilter");
-			pm = PersistenceManagerFactoryUtils.getPersistenceManager(pmf, true);
+			PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(pmf, true);
 			TransactionSynchronizationManager.bindResource(pmf, new PersistenceManagerHolder(pm));
 		}
 
@@ -108,9 +107,10 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 
 		finally {
 			if (!participate) {
-				TransactionSynchronizationManager.unbindResource(pmf);
+				PersistenceManagerHolder pmHolder = (PersistenceManagerHolder)
+						TransactionSynchronizationManager.unbindResource(pmf);
 				logger.debug("Closing JDO PersistenceManager in OpenPersistenceManagerInViewFilter");
-				PersistenceManagerFactoryUtils.releasePersistenceManager(pm, pmf);
+				PersistenceManagerFactoryUtils.releasePersistenceManager(pmHolder.getPersistenceManager(), pmf);
 			}
 		}
 	}
