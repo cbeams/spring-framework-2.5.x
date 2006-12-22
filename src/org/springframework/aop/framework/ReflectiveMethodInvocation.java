@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -39,9 +38,9 @@ import org.springframework.aop.support.AopUtils;
  *
  * <p>It is possible to clone an invocation, to invoke <code>proceed</code> repeatedly
  * (once per clone), using the <code>invocableClone</code> method. It is also possible to
- * add custom attributes to the invocation (since 1.2.6) using the 
+ * add custom attributes to the invocation (since 1.2.6) using the
  * <code>getUserAttributes()</code> method.
- * 
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #invokeJoinpoint
@@ -55,11 +54,11 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	protected final Object target;
 
 	protected final Method method;
-	
+
 	protected Object[] arguments;
-	
+
 	private final Class targetClass;
-	
+
 	/**
 	 * Lazily initialized map of user-specific attributes for this invocation.
 	 */
@@ -70,14 +69,14 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * that need dynamic checks.
 	 */
 	protected final List interceptorsAndDynamicMethodMatchers;
-	
+
 	/**
 	 * Index from 0 of the current interceptor we're invoking.
 	 * -1 until we invoke: then the current interceptor
 	 */
 	private int currentInterceptorIndex = -1;
 
-	
+
 	/**
 	 * Construct a new MethodInvocation with given arguments
 	 * @param interceptorsAndDynamicMethodMatchers interceptors that should be applied,
@@ -170,7 +169,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 			return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
 		}
 	}
-	
+
 	/**
 	 * Invoke the joinpoint using reflection.
 	 * Subclasses can override this to use custom invocation.
@@ -183,13 +182,13 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 
 	/**
-	 * Create a clone of this object. If cloning is done before proceed() is invoked on this
-	 * object, proceed() can be invoked once per clone to invoke the joinpoint (and the rest
-	 * of the advice chain) more than once.
+	 * Create a clone of this object. If cloning is done before <code>proceed()</code>
+	 * is invoked on this object, <code>proceed()</code> can be invoked once per clone
+	 * to invoke the joinpoint (and the rest of the advice chain) more than once.
 	 * <p>This method returns a shallow copy, except for the argument array, which is
 	 * deep-copied to allow for independent modification. We want a shallow copy in this case:
 	 * We want to use the same interceptor-chain and other object references, but we want an
-	 * independent value for the current interceptor index. 
+	 * independent value for the current interceptor index.
 	 * @see java.lang.Object#clone()
 	 * @return an invocable clone of this invocation. proceed() can be called once per clone.
 	 */
@@ -204,7 +203,8 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 			return clone;
 		}
 		catch (CloneNotSupportedException ex) {
-			throw new AspectException("Should be able to clone object of " + getClass(), ex);
+			throw new IllegalStateException(
+					"Should be able to clone object of type [" + getClass() + "]: " + ex);
 		}
 	}
 
