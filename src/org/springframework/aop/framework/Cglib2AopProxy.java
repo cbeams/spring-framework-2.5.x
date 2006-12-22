@@ -36,7 +36,6 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import net.sf.cglib.proxy.NoOp;
 import net.sf.cglib.transform.impl.UndeclaredThrowableStrategy;
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -175,7 +174,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			if (CglibUtils.canSkipConstructorInterception()) {
 				enhancer.setInterceptDuringConstruction(false);
 			}
-			
+
 			Class[] types = new Class[callbacks.length];
 			for (int x = 0; x < types.length; x++) {
 				types[x] = callbacks[x].getClass();
@@ -194,20 +193,20 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 			return proxy;
 		}
 		catch (CodeGenerationException ex) {
-			throw new AspectException("Couldn't generate CGLIB subclass of class '" +
-					this.advised.getTargetSource().getTargetClass() + "': " +
+			throw new AopConfigException("Couldn't generate CGLIB subclass of class [" +
+					this.advised.getTargetSource().getTargetClass() + "]: " +
 					"Common causes of this problem include using a final class or a non-visible class",
 					ex);
 		}
 		catch (IllegalArgumentException ex) {
-			throw new AspectException("Couldn't generate CGLIB subclass of class '" +
-					this.advised.getTargetSource().getTargetClass() + "': " +
+			throw new AopConfigException("Couldn't generate CGLIB subclass of class [" +
+					this.advised.getTargetSource().getTargetClass() + "]: " +
 					"Common causes of this problem include using a final class or a non-visible class",
 					ex);
 		}
 		catch (Exception ex) {
-			// TargetSource.getTarget failed
-			throw new AspectException("Unexpected AOP exception", ex);
+			// TargetSource.getTarget() failed
+			throw new AopConfigException("Unexpected AOP exception", ex);
 		}
 	}
 
@@ -592,7 +591,7 @@ public class Cglib2AopProxy implements AopProxy, Serializable {
 						advised, proxy, method, targetClass);
 				// Check whether we only have one InvokerInterceptor: that is,
 				// no real advice, but just reflective invocation of the target.
-				if (chain.isEmpty()) {
+				if (chain.isEmpty() && Modifier.isPublic(method.getModifiers())) {
 					// We can skip creating a MethodInvocation: just invoke the target directly.
 					// Note that the final invoker must be an InvokerInterceptor, so we know
 					// it does nothing but a reflective operation on the target, and no hot
