@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2006 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,7 @@ package org.springframework.aop.support;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Collections;
@@ -232,13 +233,13 @@ public abstract class AopUtils {
 			return true;
 		}
 	}
-	
+
 	/**
-	 * Convenience method to return the sublist of the candidateAdvisors list
-	 * that are applicable to the given class.
-	 * @param candidateAdvisors advisors to evaluate
-	 * @param clazz target class
-	 * @return sublist of advisors that could apply to an object of the given class
+	 * Determine the sublist of the <code>candidateAdvisors</code> list
+	 * that is applicable to the given class.
+	 * @param candidateAdvisors Advisors to evaluate
+	 * @param clazz the target class
+	 * @return sublist of Advisors that can apply to an object of the given class
 	 */
 	public static List findAdvisorsThatCanApply(List candidateAdvisors, Class clazz) {
 		List eligibleAdvisors = new LinkedList();
@@ -283,7 +284,10 @@ public abstract class AopUtils {
 
 		// Use reflection to invoke the method.
 		try {
-			method.setAccessible(true);
+			if (!Modifier.isPublic(method.getModifiers()) ||
+					!Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+				method.setAccessible(true);
+			}
 			return method.invoke(target, args);
 		}
 		catch (InvocationTargetException ex) {
@@ -293,13 +297,10 @@ public abstract class AopUtils {
 		}
 		catch (IllegalArgumentException ex) {
 			throw new AspectException("AOP configuration seems to be invalid: tried calling method [" +
-					method + "] on target [" + target + "]", ex);
+					method + "] on target [" + target + "]: " + ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new AspectException("Couldn't access method: " + method, ex);
-		}
-		finally {
-			method.setAccessible(false);
+			throw new AspectException("Couldn't access method [" + method + "]: " + ex);
 		}
 	}
 
