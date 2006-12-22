@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.rmi.RemoteException;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -32,6 +31,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jndi.JndiObjectLocator;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
+import org.springframework.remoting.RemoteProxyFailureException;
 import org.springframework.remoting.support.DefaultRemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationFactory;
@@ -345,7 +345,8 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator
 				throw ex.getTargetException();
 			}
 			catch (Throwable ex) {
-				throw new AspectException("Failed to invoke remote service [" + getJndiName() + "]", ex);
+				throw new RemoteProxyFailureException(
+						"Failed to invoke RMI stub for remote service [" + getJndiName() + "]", ex);
 			}
 		}
 		else {

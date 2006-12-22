@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,6 @@ import java.rmi.Naming;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import org.aopalliance.aop.AspectException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -29,6 +28,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
+import org.springframework.remoting.RemoteProxyFailureException;
 import org.springframework.remoting.support.RemoteInvocationBasedAccessor;
 
 /**
@@ -301,7 +301,8 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 				throw ex.getTargetException();
 			}
 			catch (Throwable ex) {
-				throw new AspectException("Failed to invoke remote service [" + getServiceUrl() + "]", ex);
+				throw new RemoteProxyFailureException(
+						"Failed to invoke RMI stub for remote service [" + getServiceUrl() + "]", ex);
 			}
 		}
 		else {
