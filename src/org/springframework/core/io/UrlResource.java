@@ -28,9 +28,9 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Resource implementation for java.net.URL locators.
- * Obviously supports resolution as URL, and also as File
- * in case of the "file:" protocol.
+ * {@link Resource} implementation for <code>java.net.URL</code> locators.
+ * Obviously supports resolution as URL, and also as File in case of
+ * the "file:" protocol.
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
