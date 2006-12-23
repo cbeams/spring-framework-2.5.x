@@ -289,7 +289,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * Return the <code>javax.sql.DataSource</code> that this view uses, if any.
 	 */
 	protected DataSource getJdbcDataSource() {
-		return jdbcDataSource;
+		return this.jdbcDataSource;
 	}
 
 	/**
@@ -307,7 +307,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * Return the JRCompiler instance to use for compiling ".jrxml" report files.
 	 */
 	protected JRCompiler getReportCompiler() {
-		return reportCompiler;
+		return this.reportCompiler;
 	}
 
 
@@ -378,20 +378,34 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Converts the supplied parameter value into the actual type required by the corresponding
-	 * {@link JRExporterParameter}. The default implementation simply converts the Strings '<code>true</code>' and
-	 * '<code>false</code>' into the corresponding <code>Boolean</code>.
+	 * Convert the supplied parameter value into the actual type required by the
+	 * corresponding {@link JRExporterParameter}.
+	 * <p>The default implementation simply converts the String values "true" and
+	 * "false" into corresponding <code>Boolean</code> objects, and tries to convert
+	 * String values that start with a digit into <code>Integer</code> objects
+	 * (simply keeping them as String if number conversion fails).
 	 */
 	protected Object convertParameterValue(JRExporterParameter parameter, Object value) {
-		if ("false".equals(value)) {
-			return Boolean.FALSE;
+		if (value instanceof String) {
+			String str = (String) value;
+			if ("true".equals(str)) {
+				return Boolean.TRUE;
+			}
+			else if ("false".equals(str)) {
+				return Boolean.FALSE;
+			}
+			else if (str.length() > 0 && Character.isDigit(str.charAt(0))) {
+				// Looks like a number... let's try.
+				try {
+					return new Integer(str);
+				}
+				catch (NumberFormatException ex) {
+					// OK, then let's keep it as a String value.
+					return str;
+				}
+			}
 		}
-		else if ("true".equals(value)) {
-			return Boolean.TRUE;
-		}
-		else {
-			return value;
-		}
+		return value;
 	}
 
 	/**
