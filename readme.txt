@@ -1,4 +1,4 @@
-THE SPRING FRAMEWORK, release 2.0.1 (November 2006)
+THE SPRING FRAMEWORK, release 2.0.2 (December 2006)
 ---------------------------------------------------
 http://www.springframework.org
 
@@ -56,9 +56,9 @@ required for building the framework; for the full build including all aspects, A
 J2EE 1.2 (Servlet 2.2, JSP 1.1) is sufficient when not using Spring's JSP tag libraries or the EJB support.
 
 Integration is provided with Log4J 1.2, CGLIB 2.1, Jakarta Commons Attributes 2.1/2.2, AspectJ 5, JMX 1.0/1.2,
-JCA 1.0, Hibernate 2.1/3.0/3.1/3.2, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, JPA 1.0, iBATIS SQL Maps 2.1/2.2,
-Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.5/1.6, EHCache 1.1, JSTL 1.0, Velocity 1.4,
-FreeMarker 2.3, JasperReports 1.2, Struts/Tiles 1.1/1.2, JSF 1.1/1.2, Jakarta Commons FileUpload 1.1, etc.
+JCA 1.0, Hibernate 2.1/3.0/3.1/3.2, TopLink 9.0.4/10.1.3, JDO 1.0/2.0, JPA 1.0, iBATIS SQL Maps 2.1/2.2/2.3,
+Caucho's Hessian & Burlap 2.1/3.0, JAX-RPC 1.1, Quartz 1.5/1.6, EHCache 1.1, JSTL 1.0/1.1, Velocity 1.4,
+FreeMarker 2.3, JasperReports 1.2, Struts/Tiles 1.1/1.2/1.3, JSF 1.1/1.2, Jakarta Commons FileUpload 1.1, etc.
 
 Basic release contents (~10 MB):
 * "dist" contains the Spring distribution jar files, as well as a zip of all Java source files
@@ -99,7 +99,7 @@ and third-party dependencies. Libraries in brackets are optional, i.e. just nece
 
 FULL JAR (dist):
 
-* "spring" (~2510 KB)
+* "spring" (~2520 KB)
 - Convenient jar file combining all standard modules (except for Portlet and Hibernate2 support)
 - Also includes the AOP Alliance interfaces (as a convenience)
 - Note: Does not include contents of mock jar, aspects jar, spring-portlet jar, and spring-hibernate2 jar!
@@ -110,7 +110,7 @@ MODULE JARS (dist/modules):
 - Contents: core utilities
 - Dependencies: Commons Logging, (Log4J)
 
-* "spring-beans" (~365 KB)
+* "spring-beans" (~370 KB)
 - Contents: JavaBeans support, bean container
 - Dependencies: spring-core, (CGLIB)
 
@@ -122,7 +122,7 @@ MODULE JARS (dist/modules):
 - Contents: application context, JNDI support, instrumentation, validation
 - Dependencies: spring-beans, (spring-aop)
 
-* "spring-dao" (~120 KB)
+* "spring-dao" (~125 KB)
 - Contents: DAO support, transaction infrastructure
 - Dependencies: spring-core, (spring-aop, spring-context, JTA API)
 
@@ -130,7 +130,7 @@ MODULE JARS (dist/modules):
 - Contents: JDBC support
 - Dependencies: spring-beans, spring-dao
 
-* "spring-support" (~125 KB)
+* "spring-support" (~130 KB)
 - Contents: UI template support, mail support, scripting, scheduling, caching
 - Dependencies: spring-context, (spring-jdbc, Velocity, FreeMarker, JasperReports, BSH, Groovy, JRuby, Quartz, EHCache)
 
@@ -150,7 +150,7 @@ MODULE JARS (dist/modules):
 - Contents: Struts support
 - Dependencies: spring-web, Struts
 
-* "spring-remoting" (~110 KB)
+* "spring-remoting" (~105 KB)
 - Contents: remoting support, EJB support
 - Dependencies: spring-aop, (spring-context, spring-web, Hessian, Burlap, JAX-RPC, EJB API)
 
