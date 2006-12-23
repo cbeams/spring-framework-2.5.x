@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,6 +37,7 @@ public abstract class VelocityEngineUtils {
 
 	private static final Log logger = LogFactory.getLog(VelocityEngineUtils.class);
 
+
 	/**
 	 * Merge the specified Velocity template with the given model and write
 	 * the result to the given Writer.
@@ -49,8 +50,9 @@ public abstract class VelocityEngineUtils {
 	 * @throws VelocityException if the template wasn't found or rendering failed
 	 */
 	public static void mergeTemplate(
-	    VelocityEngine velocityEngine, String templateLocation, Map model, Writer writer)
-	    throws VelocityException {
+			VelocityEngine velocityEngine, String templateLocation, Map model, Writer writer)
+			throws VelocityException {
+
 		try {
 			VelocityContext velocityContext = new VelocityContext(model);
 			velocityEngine.mergeTemplate(templateLocation, velocityContext, writer);
@@ -63,7 +65,7 @@ public abstract class VelocityEngineUtils {
 		}
 		catch (Exception ex) {
 			logger.error("Why does VelocityEngine throw a generic checked exception, after all?", ex);
-			throw new VelocityException(ex.getMessage());
+			throw new VelocityException(ex.toString());
 		}
 	}
 
@@ -80,8 +82,9 @@ public abstract class VelocityEngineUtils {
 	 * @throws VelocityException if the template wasn't found or rendering failed
 	 */
 	public static void mergeTemplate(
-	    VelocityEngine velocityEngine, String templateLocation, String encoding, Map model, Writer writer)
-	    throws VelocityException {
+			VelocityEngine velocityEngine, String templateLocation, String encoding, Map model, Writer writer)
+			throws VelocityException {
+
 		try {
 			VelocityContext velocityContext = new VelocityContext(model);
 			velocityEngine.mergeTemplate(templateLocation, encoding, velocityContext, writer);
@@ -94,7 +97,7 @@ public abstract class VelocityEngineUtils {
 		}
 		catch (Exception ex) {
 			logger.error("Why does VelocityEngine throw a generic checked exception, after all?", ex);
-			throw new VelocityException(ex.getMessage());
+			throw new VelocityException(ex.toString());
 		}
 	}
 
@@ -112,8 +115,9 @@ public abstract class VelocityEngineUtils {
 	 * @see org.springframework.mail.MailPreparationException
 	 */
 	public static String mergeTemplateIntoString(
-	    VelocityEngine velocityEngine, String templateLocation, Map model)
-	    throws VelocityException {
+			VelocityEngine velocityEngine, String templateLocation, Map model)
+			throws VelocityException {
+
 		StringWriter result = new StringWriter();
 		mergeTemplate(velocityEngine, templateLocation, model, result);
 		return result.toString();
@@ -134,8 +138,9 @@ public abstract class VelocityEngineUtils {
 	 * @see org.springframework.mail.MailPreparationException
 	 */
 	public static String mergeTemplateIntoString(
-	    VelocityEngine velocityEngine, String templateLocation, String encoding, Map model)
-	    throws VelocityException {
+			VelocityEngine velocityEngine, String templateLocation, String encoding, Map model)
+			throws VelocityException {
+
 		StringWriter result = new StringWriter();
 		mergeTemplate(velocityEngine, templateLocation, encoding, model, result);
 		return result.toString();
