@@ -50,8 +50,8 @@ public abstract class VelocityEngineUtils {
 	 * @throws VelocityException if the template wasn't found or rendering failed
 	 */
 	public static void mergeTemplate(
-	    VelocityEngine velocityEngine, String templateLocation, Map model, Writer writer)
-	    throws VelocityException {
+			VelocityEngine velocityEngine, String templateLocation, Map model, Writer writer)
+			throws VelocityException {
 
 		try {
 			VelocityContext velocityContext = new VelocityContext(model);
@@ -82,8 +82,8 @@ public abstract class VelocityEngineUtils {
 	 * @throws VelocityException if the template wasn't found or rendering failed
 	 */
 	public static void mergeTemplate(
-	    VelocityEngine velocityEngine, String templateLocation, String encoding, Map model, Writer writer)
-	    throws VelocityException {
+			VelocityEngine velocityEngine, String templateLocation, String encoding, Map model, Writer writer)
+			throws VelocityException {
 
 		try {
 			VelocityContext velocityContext = new VelocityContext(model);
