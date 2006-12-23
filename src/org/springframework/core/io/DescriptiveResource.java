@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Simple Resource implementation that holds a resource description
+ * Simple {@link Resource} implementation that holds a resource description
  * but does not point to an actually readable resource.
  *
  * <p>To be used as placeholder if a Resource argument is demanded
@@ -50,7 +50,7 @@ public class DescriptiveResource extends AbstractResource {
 	}
 
 	public String getDescription() {
-		return description;
+		return this.description;
 	}
 
 

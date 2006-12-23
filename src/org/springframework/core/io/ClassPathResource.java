@@ -29,9 +29,8 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Resource implementation for class path resources.
- * Uses either the thread context class loader, a given ClassLoader
- * or a given Class for loading resources.
+ * {@link Resource} implementation for class path resources.
+ * Uses either a given ClassLoader or a given Class for loading resources.
  *
  * <p>Supports resolution as <code>java.io.File</code> if the class path
  * resource resides in the file system, but not for resources in a JAR.
@@ -39,7 +38,6 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
- * @see java.lang.Thread#getContextClassLoader()
  * @see java.lang.ClassLoader#getResourceAsStream(String)
  * @see java.lang.Class#getResourceAsStream(String)
  */
@@ -116,7 +114,7 @@ public class ClassPathResource extends AbstractResource {
 	 * Return the path for this resource.
 	 */
 	public final String getPath() {
-		return path;
+		return this.path;
 	}
 
 
