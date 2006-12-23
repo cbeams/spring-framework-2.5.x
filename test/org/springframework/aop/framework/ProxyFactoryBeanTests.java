@@ -54,9 +54,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.SerializationTestUtils;
 
 /**
- * Test cases for AOP FactoryBean, using XML bean factory.
- * Note that this FactoryBean will work in any bean factory implementation.
- *
  * @author Rod Johnson
  * @since 13.03.2003
  */
@@ -652,7 +649,6 @@ public class ProxyFactoryBeanTests extends TestCase {
 		
 		/** Should fire only if it returns null */
 		public boolean matches(Method m, Class targetClass, Object[] args) {//, AttributeRegistry attributeRegistry) {
-			//System.out.println(mi.getMethod().getReturnType());
 			return m.getReturnType() == Void.TYPE;
 		}
 	}
