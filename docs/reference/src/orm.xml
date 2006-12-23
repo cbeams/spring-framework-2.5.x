@@ -2089,6 +2089,23 @@
 
 </bean>]]></programlisting>
         </section>
+        
+        <section id="orm-jpa-resin">
+          <title>Resin setup (3.1.0+)</title>
+
+          <para>Caucho <ulink
+          url="http://www.caucho.com/resin-3.1/">Resin 3.1</ulink>
+          sesies classloader provides native bytecode capabilities which can
+          be used by Spring through <classname>ReflectiveLoadTimeWeaver</classname>:</para>
+
+          <programlisting><![CDATA[<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+
+  <property name="loadTimeWeaver">
+    <bean class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"/>
+  </property>
+
+</bean>]]></programlisting>
+        </section>        
 
         <section id="orm-jpa-loadtimeweaver">
           <title>General <interfacename>LoadTimeWeaver</interfacename></title>
