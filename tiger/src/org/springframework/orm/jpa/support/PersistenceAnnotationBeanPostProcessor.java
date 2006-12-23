@@ -16,6 +16,7 @@
 
 package org.springframework.orm.jpa.support;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -37,12 +39,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import org.springframework.jndi.JndiLocatorSupport;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
@@ -63,38 +67,188 @@ import org.springframework.util.StringUtils;
  * <code>EntityManager</code> reference, where type mismatches might be detected as late
  * as on the first actual invocation.
  *
+ * <p>Note: In the present implementation, PersistenceAnnotationBeanPostProcessor
+ * only supports <code>@PersistenceUnit</code> and <code>@PersistenceContext</code>
+ * with the "unitName" attribute, or no attribute at all (for the default unit).
+ * If those annotations are present with the "name" attribute at the class level,
+ * they will simply be ignored, since those only serve as deployment hint
+ * (as per the Java EE 5 specification).
+ *
+ * <p>This post-processor can either obtain EntityManagerFactory beans defined
+ * in the Spring application context (the default), or obtain EntityManagerFactory
+ * references from JNDI ("persistence unit references"). In the bean case,
+ * the persistence unit name will be matched against the actual deployed unit,
+ * with the bean name used as fallback unit name if no deployed name found.
+ * Typically, Spring's {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean}
+ * will be used for setting up such EntityManagerFactory beans. The post-processor
+ * definition will then look as simple as this:
+ *
+ * <pre class="code">
+ * &lt;bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor"/&gt;</pre>
+ *
+ * In the JNDI case, specify the corresponding JNDI names in this post-processor's
+ * {@link #setPersistenceUnits "persistenceUnits" map}, typically with matching
+ * <code>persistence-unit-ref</code> entries in the Java EE deployment descriptor.
+ * By default, those names are considered as resource references (according to the
+ * Java EE resource-ref convention), located underneath the "java:comp/env/" namespace.
+ * For example:
+ *
+ * <pre class="code">
+ * &lt;bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor"&gt;
+ *   &lt;property name="persistenceUnits"&gt;
+ *     &lt;map/gt;
+ *       &lt;entry key="unit1" value="persistence/unit1"/&gt;
+ *       &lt;entry key="unit2" value="persistence/unit2"/&gt;
+ *     &lt;/map/gt;
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;</pre>
+ *
+ * In this case, the specified persistence units will always be resolved in JNDI
+ * rather than as Spring-defined beans. The entire persistence unit deployment,
+ * including the weaving of persistent classes, is then up to the Java EE server.
+ * Persistence contexts (i.e. EntityManager references) will be built based on
+ * those server-provided EntityManagerFactory references, using Spring's own
+ * transaction synchronization facilities for transactional EntityManager handling
+ * (typically with Spring's <code>@Transactional</code> annotation for demarcation
+ * and {@link org.springframework.transaction.jta.JtaTransactionManager} as backend).
+ *
+ * <p>If you prefer the Java EE server's own EntityManager handling, specify entries
+ * in this post-processor's {@link #setPersistenceContexts "persistenceContexts" map}
+ * (or {@link #setExtendedPersistenceContexts "extendedPersistenceContexts" map},
+ * typically with matching <code>persistence-context-ref</code> entries in the
+ * Java EE deployment descriptor. For example:
+ *
+ * <pre class="code">
+ * &lt;bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor"&gt;
+ *   &lt;property name="persistenceContexts"&gt;
+ *     &lt;map/gt;
+ *       &lt;entry key="unit1" value="persistence/context1"/&gt;
+ *       &lt;entry key="unit2" value="persistence/context2"/&gt;
+ *     &lt;/map/gt;
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;</pre>
+ *
+ * If the application only obtains EntityManager references in the first place,
+ * this is all you need to specify. If you need EntityManagerFactory references
+ * as well, specify entries for both "persistenceUnits" and "persistenceContexts",
+ * pointing to matching JNDI locations.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 2.0
  * @see javax.persistence.PersistenceUnit
  * @see javax.persistence.PersistenceContext
  */
-public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
-		implements BeanFactoryAware {
-	
+public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
+		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware {
+
 	protected final Log logger = LogFactory.getLog(getClass());
+
+	private Map<String, String> persistenceUnits;
+
+	private Map<String, String> persistenceContexts;
+
+	private Map<String, String> extendedPersistenceContexts;
 
 	private ListableBeanFactory beanFactory;
 
 	private Map<Class<?>, List<AnnotatedMember>> classMetadata = new HashMap<Class<?>, List<AnnotatedMember>>();
 
 
-	public void setBeanFactory(BeanFactory beanFactory) {
-		if (!(beanFactory instanceof ListableBeanFactory)) {
-			throw new IllegalArgumentException("ListableBeanFactory required for EntityManagerFactory lookup");
-		}
-		this.beanFactory = (ListableBeanFactory) beanFactory;
+	public PersistenceAnnotationBeanPostProcessor() {
+		setResourceRef(true);
 	}
 
 
-	@Override
-	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {		
+	/**
+	 * Specify the persistence units for EntityManagerFactory lookups,
+	 * as a Map from persistence unit name to persistence unit JNDI name
+	 * (which needs to resolve to an EntityManagerFactory instance).
+	 * <p>JNDI names specified here should refer to <code>persistence-unit-ref</code>
+	 * entries in the Java EE deployment descriptor, matching the target persistence unit.
+	 * <p>This is mainly intended for use in a Java EE 5 environment, with all
+	 * lookup driven by the standard JPA annotations, and all EntityManagerFactory
+	 * references obtained from JNDI. No separate EntityManagerFactory bean
+	 * definitions are necessary in such a scenario.
+	 * <p>If no corresponding "persistenceContexts"/"extendedPersistenceContexts"
+	 * are specified, <code>@PersistenceContext</code> will be resolved to
+	 * EntityManagers built on top of the EntityManagerFactory defined here.
+	 * Note that those will be Spring-managed EntityManagers, which implement
+	 * transaction synchronization based on Spring's facilities.
+	 * If you prefer the Java EE 5 server's own EntityManager handling,
+	 * specify corresponding "persistenceContexts"/"extendedPersistenceContexts".
+	 */
+	public void setPersistenceUnits(Map<String, String> persistenceUnits) {
+		this.persistenceUnits = persistenceUnits;
+	}
+
+	/**
+	 * Specify the <i>transactional</i> persistence contexts for EntityManager lookups,
+	 * as a Map from persistence unit name to persistence context JNDI name
+	 * (which needs to resolve to an EntityManager instance).
+	 * <p>JNDI names specified here should refer to <code>persistence-context-ref</code>
+	 * entries in the Java EE deployment descriptors, matching the target persistence unit
+	 * and being set up with persistence context type <code>Transaction</code>.
+	 * <p>This is mainly intended for use in a Java EE 5 environment, with all
+	 * lookup driven by the standard JPA annotations, and all EntityManager
+	 * references obtained from JNDI. No separate EntityManagerFactory bean
+	 * definitions are necessary in such a scenario, and all EntityManager
+	 * handling is done by the Java EE 5 server itself.
+	 */
+	public void setPersistenceContexts(Map<String, String> persistenceContexts) {
+		this.persistenceContexts = persistenceContexts;
+	}
+
+	/**
+	 * Specify the <i>extended</i> persistence contexts for EntityManager lookups,
+	 * as a Map from persistence unit name to persistence context JNDI name
+	 * (which needs to resolve to an EntityManager instance).
+	 * <p>JNDI names specified here should refer to <code>persistence-context-ref</code>
+	 * entries in the Java EE deployment descriptors, matching the target persistence unit
+	 * and being set up with persistence context type <code>Extended</code>.
+	 * <p>This is mainly intended for use in a Java EE 5 environment, with all
+	 * lookup driven by the standard JPA annotations, and all EntityManager
+	 * references obtained from JNDI. No separate EntityManagerFactory bean
+	 * definitions are necessary in such a scenario, and all EntityManager
+	 * handling is done by the Java EE 5 server itself.
+	 */
+	public void setExtendedPersistenceContexts(Map<String, String> extendedPersistenceContexts) {
+		this.extendedPersistenceContexts = extendedPersistenceContexts;
+	}
+
+	public void setBeanFactory(BeanFactory beanFactory) {
+		if (beanFactory instanceof ListableBeanFactory) {
+			this.beanFactory = (ListableBeanFactory) beanFactory;
+		}
+	}
+
+
+	public Object postProcessBeforeInstantiation(Class beanClass, String beanName) throws BeansException {
+		return null;
+	}
+
+	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
 		List<AnnotatedMember> metadata = findClassMetadata(bean.getClass());
 		for (AnnotatedMember member : metadata) {
 			member.inject(bean);
 		}
 		return true;
 	}
+
+	public PropertyValues postProcessPropertyValues(
+			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
+
+		return pvs;
+	}
+
+	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+		return bean;
+	}
+
+	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+		return bean;
+	}
+
 
 	private List<AnnotatedMember> findClassMetadata(Class<? extends Object> clazz) {
 		synchronized (this.classMetadata) {
@@ -142,21 +296,87 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 
 
 	/**
-	 * Find an EntityManagerFactory with the given name in the current application context.
-	 * @param emfName the name of the EntityManagerFactory
-	 * @return the EntityManagerFactory
-	 * @throws IllegalStateException if there is no such EntityManagerFactory in the context
+	 * Return a specified persistence unit for the given unit name,
+	 * as defined through the "persistenceUnits" map.
+	 * @param unitName the name of the persistence unit
+	 * @return the corresponding EntityManagerFactory,
+	 * or <code>null</code> if none found
+	 * @see #setPersistenceUnits
 	 */
-	protected EntityManagerFactory findEntityManagerFactory(String emfName) throws IllegalStateException {
-		if (StringUtils.hasLength(emfName)) {
-			return findNamedEntityManagerFactory(emfName);
+	protected EntityManagerFactory getPersistenceUnit(String unitName) {
+		if (this.persistenceUnits != null) {
+			String jndiName = this.persistenceUnits.get(unitName != null ? unitName : "");
+			if (jndiName == null && !StringUtils.hasLength(unitName) && this.persistenceUnits.size() == 1) {
+				jndiName = this.persistenceUnits.values().iterator().next();
+			}
+			if (jndiName != null) {
+				try {
+					return (EntityManagerFactory) lookup(jndiName, EntityManagerFactory.class);
+				}
+				catch (NamingException ex) {
+					throw new IllegalStateException("Could not obtain EntityManagerFactory [" + jndiName + "] from JNDI", ex);
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Return a specified persistence context for the given unit name, as defined
+	 * through the "persistenceContexts" (or "extendedPersistenceContexts") map.
+	 * @param unitName the name of the persistence unit
+	 * @param extended whether to obtain an extended persistence context
+	 * @return the corresponding EntityManager, or <code>null</code> if none found
+	 * @see #setPersistenceContexts
+	 * @see #setExtendedPersistenceContexts
+	 */
+	protected EntityManager getPersistenceContext(String unitName, boolean extended) {
+		Map<String, String> contexts = (extended ? this.extendedPersistenceContexts : this.persistenceContexts);
+		if (contexts != null) {
+			String jndiName = contexts.get(unitName != null ? unitName : "");
+			if (jndiName == null && !StringUtils.hasLength(unitName) && contexts.size() == 1) {
+				jndiName = contexts.values().iterator().next();
+			}
+			if (jndiName != null) {
+				try {
+					return (EntityManager) lookup(jndiName, EntityManager.class);
+				}
+				catch (NamingException ex) {
+					throw new IllegalStateException("Could not obtain EntityManager [" + jndiName + "] from JNDI", ex);
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Find an EntityManagerFactory with the given name in the current Spring
+	 * application context, falling back to a single default EntityManagerFactory
+	 * (if any) in case of no unit name specified.
+	 * @param unitName the name of the persistence unit (may be <code>null</code> or empty)
+	 * @return the EntityManagerFactory
+	 * @throws NoSuchBeanDefinitionException if there is no such EntityManagerFactory in the context
+	 */
+	protected EntityManagerFactory findEntityManagerFactory(String unitName) throws NoSuchBeanDefinitionException {
+		if (this.beanFactory == null) {
+			throw new IllegalStateException("ListableBeanFactory required for EntityManagerFactory lookup");
+		}
+		if (StringUtils.hasLength(unitName)) {
+			return findNamedEntityManagerFactory(unitName);
 		}
 		else {
 			return findDefaultEntityManagerFactory();
 		}
 	}
 
-	protected EntityManagerFactory findNamedEntityManagerFactory(String emfName) {
+	/**
+	 * Find an EntityManagerFactory with the given name in the current Spring
+	 * application context.
+	 * @param unitName the name of the persistence unit (never empty)
+	 * @return the EntityManagerFactory
+	 * @throws NoSuchBeanDefinitionException if there is no such EntityManagerFactory in the context
+	 */
+	protected EntityManagerFactory findNamedEntityManagerFactory(String unitName) throws NoSuchBeanDefinitionException {
 		String[] candidateNames =
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.beanFactory, EntityManagerFactory.class);
 		for (String candidateName : candidateNames) {
@@ -168,20 +388,25 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 					nameToCompare = emfi.getPersistenceUnitName();
 				}
 			}
-			if (emfName.equals(nameToCompare)) {
+			if (unitName.equals(nameToCompare)) {
 				return emf;
 			}
 		}
 		throw new NoSuchBeanDefinitionException(EntityManagerFactory.class,
-				"No EntityManagerFactory found for persistence unit name '" + emfName + "'");
+				"No EntityManagerFactory found for persistence unit name '" + unitName + "'");
 	}
 
+	/**
+	 * Find a single default EntityManagerFactory in the Spring application context.
+	 * @return the default EntityManagerFactory
+	 * @throws NoSuchBeanDefinitionException if there is no single EntityManagerFactory in the context
+	 */
 	protected EntityManagerFactory findDefaultEntityManagerFactory() {
 		return (EntityManagerFactory) BeanFactoryUtils.beanOfTypeIncludingAncestors(
 				this.beanFactory, EntityManagerFactory.class);
 	}
 
-	
+
 	/**
 	 * Class representing injection information about an annotated field
 	 * or setter method.
@@ -266,10 +491,10 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 		/**
 		 * Resolve the object against the application context.
 		 */
-		protected Object resolve() {
+		private Object resolve() {
 			// Resolves to EntityManagerFactory or EntityManager.
-			EntityManagerFactory emf = findEntityManagerFactory(this.unitName);
 			if (EntityManagerFactory.class.isAssignableFrom(getMemberType())) {
+				EntityManagerFactory emf = resolveEntityManagerFactory();
 				if (!getMemberType().isInstance(emf)) {
 					throw new IllegalArgumentException("Cannot inject [" + this.member +
 							"] with EntityManagerFactory [" + emf + "]: type mismatch");
@@ -277,31 +502,68 @@ public class PersistenceAnnotationBeanPostProcessor extends InstantiationAwareBe
 				return emf;
 			}
 			else {
-				// We need to inject an EntityManager.
-				EntityManager em = null;
-				if (this.type == PersistenceContextType.TRANSACTION) {
-					// Inject a shared transactional EntityManager proxy.
-					if (emf instanceof EntityManagerFactoryInfo &&
-							!EntityManager.class.equals(((EntityManagerFactoryInfo) emf).getEntityManagerInterface())) {
-						// Create EntityManager based on the info's vendor-specific type
-						// (which might be more specific than the field's type).
-						em = SharedEntityManagerCreator.createSharedEntityManager(emf, this.properties);
-					}
-					else {
-						// Create EntityManager based on the field's type.
-						em = SharedEntityManagerCreator.createSharedEntityManager(emf, this.properties, getMemberType());
-					}
-				}
-				else {
-					// Inject a container-managed extended EntityManager.
-					em = ExtendedEntityManagerCreator.createContainerManagedEntityManager(emf, this.properties);
-				}
+				// OK, so we need an EntityManager...
+				EntityManager em = (this.type == PersistenceContextType.EXTENDED ?
+						resolveExtendedEntityManager() : resolveEntityManager());
 				if (!getMemberType().isInstance(em)) {
 					throw new IllegalArgumentException("Cannot inject [" + this.member +
 							"] with EntityManager [" + em + "]: type mismatch");
 				}
 				return em;
 			}
+		}
+
+		private EntityManagerFactory resolveEntityManagerFactory() {
+			// Obtain EntityManagerFactory from JNDI?
+			EntityManagerFactory emf = getPersistenceUnit(this.unitName);
+			if (emf == null) {
+				// Need to search for EntityManagerFactory beans.
+				emf = findEntityManagerFactory(this.unitName);
+			}
+			return emf;
+		}
+
+		private EntityManager resolveEntityManager() {
+			// Obtain EntityManager reference from JNDI?
+			EntityManager em = getPersistenceContext(this.unitName, false);
+			if (em == null) {
+				// No pre-built EntityManager found -> build one based on factory.
+				// Obtain EntityManagerFactory from JNDI?
+				EntityManagerFactory emf = getPersistenceUnit(this.unitName);
+				if (emf == null) {
+					// Need to search for EntityManagerFactory beans.
+					emf = findEntityManagerFactory(this.unitName);
+				}
+				// Inject a shared transactional EntityManager proxy.
+				if (emf instanceof EntityManagerFactoryInfo &&
+						!EntityManager.class.equals(((EntityManagerFactoryInfo) emf).getEntityManagerInterface())) {
+					// Create EntityManager based on the info's vendor-specific type
+					// (which might be more specific than the field's type).
+					em = SharedEntityManagerCreator.createSharedEntityManager(emf, this.properties);
+				}
+				else {
+					// Create EntityManager based on the field's type.
+					em = SharedEntityManagerCreator.createSharedEntityManager(emf, this.properties, getMemberType());
+				}
+			}
+			return em;
+		}
+
+		private EntityManager resolveExtendedEntityManager() {
+			// Obtain EntityManager reference from JNDI?
+			EntityManager em = getPersistenceContext(this.unitName, true);
+			if (em == null) {
+				// No pre-built EntityManager found -> build one based on factory.
+				// Obtain EntityManagerFactory from JNDI?
+				EntityManagerFactory emf = getPersistenceUnit(this.unitName);
+				if (emf == null) {
+					// Need to search for EntityManagerFactory beans.
+					emf = findEntityManagerFactory(this.unitName);
+				}
+				// Inject a container-managed extended EntityManager.
+				em = ExtendedEntityManagerCreator.createContainerManagedEntityManager(emf, this.properties);
+			}
+			return em;
 		}
 	}
 
