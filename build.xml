@@ -280,7 +280,8 @@
 
 		<jar jarfile="${dist.dir}/modules/spring-beans.jar">
 			<fileset dir="${target.classes.dir}">
-				<include name="META-INF/**"/>
+				<include name="META-INF/*.handlers"/>
+				<include name="META-INF/*.schemas"/>
 				<include name="org/springframework/beans/**"/>
 				<!-- exclude content of spring-aspects.jar -->
 				<exclude name="org/springframework/beans/factory/aspectj/**"/>
