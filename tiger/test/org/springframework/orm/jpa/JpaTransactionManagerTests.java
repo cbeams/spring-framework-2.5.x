@@ -41,6 +41,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * @author Costin Leau
+ * @author Juergen Hoeller
  */
 public class JpaTransactionManagerTests extends TestCase {
 
@@ -108,12 +109,12 @@ public class JpaTransactionManagerTests extends TestCase {
 		final List<String> l = new ArrayList<String>();
 		l.add("test");
 
-		assertTrue("Hasn thread emf", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
 			public Object doInTransaction(TransactionStatus status) {
-				assertTrue("Has no thread em", TransactionSynchronizationManager.hasResource(factory));
+				assertTrue(TransactionSynchronizationManager.hasResource(factory));
 				return template.execute(new JpaCallback() {
 					public Object doInJpa(EntityManager em) {
 						em.flush();
@@ -122,10 +123,10 @@ public class JpaTransactionManagerTests extends TestCase {
 				});
 			}
 		});
-		assertTrue("Correct result list", result == l);
+		assertSame(l, result);
 
-		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		factoryControl.verify();
 		managerControl.verify();
@@ -147,13 +148,13 @@ public class JpaTransactionManagerTests extends TestCase {
 		final List<String> l = new ArrayList<String>();
 		l.add("test");
 
-		assertTrue("Hasn thread emf", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		try {
 			Object result = tt.execute(new TransactionCallback() {
 				public Object doInTransaction(TransactionStatus status) {
-					assertTrue("Has no thread em", TransactionSynchronizationManager.hasResource(factory));
+					assertTrue(TransactionSynchronizationManager.hasResource(factory));
 					return template.execute(new JpaCallback() {
 						public Object doInJpa(EntityManager em) {
 							em.flush();
@@ -162,15 +163,15 @@ public class JpaTransactionManagerTests extends TestCase {
 					});
 				}
 			});
-			assertTrue("Correct result list", result == l);
+			assertSame(l, result);
 		}
 		catch (UnexpectedRollbackException ure) {
 			// it's okay
 			assertTrue(ure.getCause() instanceof RollbackException);
 		}
 
-		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		factoryControl.verify();
 		managerControl.verify();
@@ -189,14 +190,13 @@ public class JpaTransactionManagerTests extends TestCase {
 		final List<String> l = new ArrayList<String>();
 		l.add("test");
 
-		assertTrue("Hasn thread emf", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		try {
 			tt.execute(new TransactionCallback() {
 				public Object doInTransaction(TransactionStatus status) {
-					assertTrue("Has no thread em", TransactionSynchronizationManager.hasResource(factory));
-
+					assertTrue(TransactionSynchronizationManager.hasResource(factory));
 					return template.execute(new JpaCallback() {
 						public Object doInJpa(EntityManager em) {
 							throw new RuntimeException("some exception");
@@ -210,8 +210,8 @@ public class JpaTransactionManagerTests extends TestCase {
 			// okay
 		}
 
-		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		factoryControl.verify();
 		managerControl.verify();
@@ -230,14 +230,13 @@ public class JpaTransactionManagerTests extends TestCase {
 		final List<String> l = new ArrayList<String>();
 		l.add("test");
 
-		assertTrue("Hasn thread emf", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		try {
 			tt.execute(new TransactionCallback() {
 				public Object doInTransaction(TransactionStatus status) {
-					assertTrue("Has no thread em", TransactionSynchronizationManager.hasResource(factory));
-
+					assertTrue(TransactionSynchronizationManager.hasResource(factory));
 					return template.execute(new JpaCallback() {
 						public Object doInJpa(EntityManager em) {
 							throw new RuntimeException("some exception");
@@ -251,8 +250,8 @@ public class JpaTransactionManagerTests extends TestCase {
 			// okay
 		}
 
-		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		factoryControl.verify();
 		managerControl.verify();
@@ -272,12 +271,12 @@ public class JpaTransactionManagerTests extends TestCase {
 		final List<String> l = new ArrayList<String>();
 		l.add("test");
 
-		assertTrue("Hasn thread emf", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallback() {
 			public Object doInTransaction(TransactionStatus status) {
-				assertTrue("Has no thread em", TransactionSynchronizationManager.hasResource(factory));
+				assertTrue(TransactionSynchronizationManager.hasResource(factory));
 
 				Object res = template.execute(new JpaCallback() {
 					public Object doInJpa(EntityManager em) {
@@ -291,8 +290,8 @@ public class JpaTransactionManagerTests extends TestCase {
 			}
 		});
 
-		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		factoryControl.verify();
 		managerControl.verify();
@@ -312,8 +311,8 @@ public class JpaTransactionManagerTests extends TestCase {
 		final List<String> l = new ArrayList<String>();
 		l.add("test");
 
-		assertTrue("Hasn thread emf", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallback() {
 			public Object doInTransaction(TransactionStatus status) {
@@ -323,7 +322,7 @@ public class JpaTransactionManagerTests extends TestCase {
 				tx.commit();
 				txControl.replay();
 
-				assertTrue("Has no thread em", TransactionSynchronizationManager.hasResource(factory));
+				assertTrue(TransactionSynchronizationManager.hasResource(factory));
 
 				return tt.execute(new TransactionCallback() {
 					public Object doInTransaction(TransactionStatus status) {
@@ -339,8 +338,8 @@ public class JpaTransactionManagerTests extends TestCase {
 			}
 		});
 
-		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		factoryControl.verify();
 		managerControl.verify();
@@ -358,8 +357,8 @@ public class JpaTransactionManagerTests extends TestCase {
 		final List<String> l = new ArrayList<String>();
 		l.add("test");
 
-		assertTrue("Hasn thread emf", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		try {
 			tt.execute(new TransactionCallback() {
@@ -372,7 +371,7 @@ public class JpaTransactionManagerTests extends TestCase {
 					tx.rollback();
 					txControl.replay();
 
-					assertTrue("Has no thread em", TransactionSynchronizationManager.hasResource(factory));
+					assertTrue(TransactionSynchronizationManager.hasResource(factory));
 					return tt.execute(new TransactionCallback() {
 						public Object doInTransaction(TransactionStatus status) {
 							return template.execute(new JpaCallback() {
@@ -390,8 +389,8 @@ public class JpaTransactionManagerTests extends TestCase {
 			// okay
 		}
 
-		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		factoryControl.verify();
 		managerControl.verify();
@@ -412,8 +411,8 @@ public class JpaTransactionManagerTests extends TestCase {
 		final List<String> l = new ArrayList<String>();
 		l.add("test");
 
-		assertTrue("Hasn thread emf", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		try {
 			tt.execute(new TransactionCallback() {
@@ -427,7 +426,7 @@ public class JpaTransactionManagerTests extends TestCase {
 					txControl.setThrowable(new RollbackException());
 					txControl.replay();
 
-					assertTrue("Has no thread em", TransactionSynchronizationManager.hasResource(factory));
+					assertTrue(TransactionSynchronizationManager.hasResource(factory));
 
 					return tt.execute(new TransactionCallback() {
 						public Object doInTransaction(TransactionStatus status) {
@@ -452,8 +451,8 @@ public class JpaTransactionManagerTests extends TestCase {
 			assertTrue(ure.getCause() instanceof RollbackException);
 		}
 
-		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		factoryControl.verify();
 		managerControl.verify();
@@ -479,8 +478,8 @@ public class JpaTransactionManagerTests extends TestCase {
 		final List<String> l = new ArrayList<String>();
 		l.add("test");
 
-		assertTrue("Hasn thread emf", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
 			public Object doInTransaction(TransactionStatus status) {
@@ -496,7 +495,7 @@ public class JpaTransactionManagerTests extends TestCase {
 
 				txControl.replay();
 
-				assertTrue("Has no thread em", TransactionSynchronizationManager.hasResource(factory));
+				assertTrue(TransactionSynchronizationManager.hasResource(factory));
 				return tt.execute(new TransactionCallback() {
 					public Object doInTransaction(TransactionStatus status) {
 						return template.execute(new JpaCallback() {
@@ -509,11 +508,10 @@ public class JpaTransactionManagerTests extends TestCase {
 				});
 			}
 		});
+		assertSame(l, result);
 
-		assertSame("different lists", l, result);
-
-		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		factoryControl.verify();
 		managerControl.verify();
@@ -541,9 +539,10 @@ public class JpaTransactionManagerTests extends TestCase {
 		final List<String> l = new ArrayList<String>();
 		l.add("test");
 
-		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
 		TransactionSynchronizationManager.bindResource(factory, new EntityManagerHolder(manager));
-		assertTrue("Has no thread emf", TransactionSynchronizationManager.hasResource(factory));
 
 		try {
 			Object result = tt.execute(new TransactionCallback() {
@@ -568,7 +567,7 @@ public class JpaTransactionManagerTests extends TestCase {
 						}
 					});
 
-					assertTrue("Has no thread em", TransactionSynchronizationManager.hasResource(factory));
+					assertTrue(TransactionSynchronizationManager.hasResource(factory));
 					return tt.execute(new TransactionCallback() {
 						public Object doInTransaction(TransactionStatus status) {
 							return template.execute(new JpaCallback() {
@@ -581,14 +580,14 @@ public class JpaTransactionManagerTests extends TestCase {
 					});
 				}
 			});
-			assertSame("different lists", l, result);
+			assertSame(l, result);
 		}
 		finally {
 			TransactionSynchronizationManager.unbindResource(factory);
 		}
 
-		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		factoryControl.verify();
 		managerControl.verify();
@@ -598,6 +597,7 @@ public class JpaTransactionManagerTests extends TestCase {
 	public void testTransactionCommitWithPropagationSupports() {
 		managerControl.reset();
 		txControl.reset();
+
 		manager.flush();
 		manager.close();
 
@@ -610,16 +610,14 @@ public class JpaTransactionManagerTests extends TestCase {
 
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
 
-		assertTrue("Has thread emf", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
 			public Object doInTransaction(TransactionStatus status) {
-				assertTrue("Has thread emf", !TransactionSynchronizationManager.hasResource(factory));
-				assertTrue("JTA synchronizations is not active",
-						TransactionSynchronizationManager.isSynchronizationActive());
-				assertTrue("Is not new transaction", !status.isNewTransaction());
-
+				assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+				assertTrue(!status.isNewTransaction());
 				return template.execute(new JpaCallback() {
 					public Object doInJpa(EntityManager em) {
 						em.flush();
@@ -628,15 +626,297 @@ public class JpaTransactionManagerTests extends TestCase {
 				});
 			}
 		});
+		assertSame(l, result);
 
-		assertTrue("Correct result list", result == l);
-
-		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 
 		factoryControl.verify();
 		managerControl.verify();
 		txControl.verify();
+	}
+
+	public void testTransactionRollbackWithPropagationSupports() {
+		managerControl.reset();
+		txControl.reset();
+
+		manager.flush();
+		manager.close();
+
+		factoryControl.replay();
+		managerControl.replay();
+		txControl.replay();
+
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
+		tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+				assertTrue(!status.isNewTransaction());
+				template.execute(new JpaCallback() {
+					public Object doInJpa(EntityManager em) {
+						em.flush();
+						return null;
+					}
+				});
+				status.setRollbackOnly();
+				return null;
+			}
+		});
+
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
+		factoryControl.verify();
+		managerControl.verify();
+		txControl.verify();
+	}
+
+	public void testTransactionCommitWithPrebound() {
+		factoryControl.reset();
+		managerControl.reset();
+		txControl.reset();
+
+		managerControl.expectAndReturn(manager.getTransaction(), tx, 4);
+		txControl.expectAndReturn(tx.isActive(), false);
+		tx.begin();
+		txControl.expectAndReturn(tx.getRollbackOnly(), false);
+		tx.commit();
+
+		factoryControl.replay();
+		managerControl.replay();
+		txControl.replay();
+
+		final List<String> l = new ArrayList<String>();
+		l.add("test");
+
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		TransactionSynchronizationManager.bindResource(factory, new EntityManagerHolder(manager));
+
+		try {
+			Object result = tt.execute(new TransactionCallback() {
+				public Object doInTransaction(TransactionStatus status) {
+					assertTrue(TransactionSynchronizationManager.hasResource(factory));
+					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+					return template.execute(new JpaCallback() {
+						public Object doInJpa(EntityManager em) {
+							return l;
+						}
+					});
+				}
+			});
+			assertSame(l, result);
+
+			assertTrue(TransactionSynchronizationManager.hasResource(factory));
+			assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(factory);
+		}
+
+		factoryControl.verify();
+		managerControl.verify();
+		txControl.verify();
+	}
+
+	public void testTransactionRollbackWithPrebound() {
+		factoryControl.reset();
+		managerControl.reset();
+		txControl.reset();
+
+		managerControl.expectAndReturn(manager.getTransaction(), tx, 3);
+		txControl.expectAndReturn(tx.isActive(), false);
+		tx.begin();
+		txControl.expectAndReturn(tx.isActive(), true);
+		tx.rollback();
+		manager.clear();
+
+		factoryControl.replay();
+		managerControl.replay();
+		txControl.replay();
+
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		TransactionSynchronizationManager.bindResource(factory, new EntityManagerHolder(manager));
+
+		try {
+			tt.execute(new TransactionCallback() {
+				public Object doInTransaction(TransactionStatus status) {
+					assertTrue(TransactionSynchronizationManager.hasResource(factory));
+					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+					template.execute(new JpaCallback() {
+						public Object doInJpa(EntityManager em) {
+							return null;
+						}
+					});
+					status.setRollbackOnly();
+					return null;
+				}
+			});
+
+			assertTrue(TransactionSynchronizationManager.hasResource(factory));
+			assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(factory);
+		}
+
+		factoryControl.verify();
+		managerControl.verify();
+		txControl.verify();
+	}
+
+
+	public void testTransactionCommitWithPreboundAndPropagationSupports() {
+		factoryControl.reset();
+		managerControl.reset();
+		txControl.reset();
+
+		managerControl.expectAndReturn(manager.getTransaction(), tx, 1);
+		txControl.expectAndReturn(tx.isActive(), false);
+		manager.joinTransaction();
+		manager.flush();
+
+		factoryControl.replay();
+		managerControl.replay();
+		txControl.replay();
+
+		final List<String> l = new ArrayList<String>();
+		l.add("test");
+
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		TransactionSynchronizationManager.bindResource(factory, new EntityManagerHolder(manager));
+
+		try {
+			Object result = tt.execute(new TransactionCallback() {
+				public Object doInTransaction(TransactionStatus status) {
+					assertTrue(TransactionSynchronizationManager.hasResource(factory));
+					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+					assertTrue(!status.isNewTransaction());
+					return template.execute(new JpaCallback() {
+						public Object doInJpa(EntityManager em) {
+							em.flush();
+							return l;
+						}
+					});
+				}
+			});
+			assertSame(l, result);
+
+			assertTrue(TransactionSynchronizationManager.hasResource(factory));
+			assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(factory);
+		}
+
+		factoryControl.verify();
+		managerControl.verify();
+		txControl.verify();
+	}
+
+	public void testTransactionRollbackWithPreboundAndPropagationSupports() {
+		factoryControl.reset();
+		managerControl.reset();
+		txControl.reset();
+
+		managerControl.expectAndReturn(manager.getTransaction(), tx, 1);
+		txControl.expectAndReturn(tx.isActive(), false);
+		manager.joinTransaction();
+		manager.flush();
+		manager.clear();
+
+		factoryControl.replay();
+		managerControl.replay();
+		txControl.replay();
+
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		TransactionSynchronizationManager.bindResource(factory, new EntityManagerHolder(manager));
+
+		try {
+			tt.execute(new TransactionCallback() {
+				public Object doInTransaction(TransactionStatus status) {
+					assertTrue(TransactionSynchronizationManager.hasResource(factory));
+					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+					assertTrue(!status.isNewTransaction());
+					template.execute(new JpaCallback() {
+						public Object doInJpa(EntityManager em) {
+							em.flush();
+							return null;
+						}
+					});
+					status.setRollbackOnly();
+					return null;
+				}
+			});
+
+			assertTrue(TransactionSynchronizationManager.hasResource(factory));
+			assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+		}
+		finally {
+			TransactionSynchronizationManager.unbindResource(factory);
+		}
+
+		factoryControl.verify();
+		managerControl.verify();
+		txControl.verify();
+	}
+
+	public void testTransactionCommitWithDataSource() throws SQLException {
+		MockControl dsControl = MockControl.createControl(DataSource.class);
+		DataSource ds = (DataSource) dsControl.getMock();
+		transactionManager.setDataSource(ds);
+		
+		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		managerControl.expectAndReturn(manager.getTransaction(), tx);
+		txControl.expectAndReturn(tx.getRollbackOnly(), false);
+		tx.commit();
+		manager.flush();
+		
+		factoryControl.replay();
+		managerControl.replay();
+		txControl.replay();
+		dsControl.replay();
+
+		final List<String> l = new ArrayList<String>();
+		l.add("test");
+
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
+		Object result = tt.execute(new TransactionCallback() {
+			public Object doInTransaction(TransactionStatus status) {
+				assertTrue(TransactionSynchronizationManager.hasResource(factory));
+				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+				return template.execute(new JpaCallback() {
+					public Object doInJpa(EntityManager em) {
+						em.flush();
+						return l;
+					}
+				});
+			}
+		});
+		
+		assertTrue(result == l);
+
+		assertTrue(!TransactionSynchronizationManager.hasResource(factory));
+		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
+		factoryControl.verify();
+		managerControl.verify();
+		txControl.verify();
+		dsControl.verify();
 	}
 
 	public void testInvalidIsolation() {
@@ -664,99 +944,6 @@ public class JpaTransactionManagerTests extends TestCase {
 		factoryControl.verify();
 		managerControl.verify();
 		txControl.verify();
-	}
-
-	public void testTransactionCommitWithPrebound() {
-		factoryControl.reset();
-		managerControl.reset();
-		txControl.reset();
-		
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		txControl.expectAndReturn(tx.isActive(), true);
-		manager.joinTransaction();
-		
-		factoryControl.replay();
-		managerControl.replay();
-		txControl.replay();
-
-		final List<String> l = new ArrayList<String>();
-		l.add("test");
-		try {
-			assertTrue("JTA synchronizations active", !TransactionSynchronizationManager.isSynchronizationActive());
-			TransactionSynchronizationManager.bindResource(factory, new EntityManagerHolder(manager));
-			assertTrue("Has no thread pm", TransactionSynchronizationManager.hasResource(factory));
-
-			Object result = tt.execute(new TransactionCallback() {
-				public Object doInTransaction(TransactionStatus status) {
-					assertTrue("Has no thread pm", TransactionSynchronizationManager.hasResource(factory));
-					return template.execute(new JpaCallback() {
-						public Object doInJpa(EntityManager em) {
-							return l;
-						}
-					});
-				}
-			});
-			assertTrue("Correct result list", result == l);
-
-			assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(factory));
-
-		}
-		finally {
-			TransactionSynchronizationManager.unbindResource(factory);
-		}
-		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
-
-		factoryControl.verify();
-		managerControl.verify();
-		txControl.verify();
-	}
-
-	public void testTransactionCommitWithDataSource() throws SQLException {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) dsControl.getMock();
-		transactionManager.setDataSource(ds);
-		
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		managerControl.expectAndReturn(manager.getTransaction(), tx);
-		txControl.expectAndReturn(tx.getRollbackOnly(), false);
-		tx.commit();
-		manager.flush();
-		
-		factoryControl.replay();
-		managerControl.replay();
-		txControl.replay();
-		dsControl.replay();
-
-		final List<String> l = new ArrayList<String>();
-		l.add("test");
-
-		assertTrue("Has thread emf", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations is active", !TransactionSynchronizationManager.isSynchronizationActive());
-
-		Object result = tt.execute(new TransactionCallback() {
-			public Object doInTransaction(TransactionStatus status) {
-				assertTrue("Has no thread emf", TransactionSynchronizationManager.hasResource(factory));
-				assertTrue("JTA synchronizations is not active",
-						TransactionSynchronizationManager.isSynchronizationActive());
-	
-				return template.execute(new JpaCallback() {
-					public Object doInJpa(EntityManager em) {
-						em.flush();
-						return l;
-					}
-				});
-			}
-		});
-		
-		assertTrue("Correct result list", result == l);
-
-		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(factory));
-		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
-
-		factoryControl.verify();
-		managerControl.verify();
-		txControl.verify();
-		dsControl.verify();
 	}
 
 }

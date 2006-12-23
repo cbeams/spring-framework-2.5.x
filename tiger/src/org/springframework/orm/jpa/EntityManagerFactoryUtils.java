@@ -269,6 +269,11 @@ public abstract class EntityManagerFactoryUtils {
 		}
 
 		public void afterCompletion(int status) {
+			if (!this.newEntityManager && status != STATUS_COMMITTED) {
+				// Clear all pending inserts/updates/deletes in the EntityManager.
+				// Necessary for pre-bound EntityManagers, to avoid inconsistent state.
+				this.entityManagerHolder.getEntityManager().clear();
+			}
 			this.entityManagerHolder.setSynchronizedWithTransaction(false);
 		}
 	}

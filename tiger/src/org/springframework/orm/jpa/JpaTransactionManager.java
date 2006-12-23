@@ -444,6 +444,13 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager im
 		catch (PersistenceException ex) {
 			throw new TransactionSystemException("Could not roll back JPA transaction", ex);
 		}
+		finally {
+			if (!txObject.isNewEntityManagerHolder()) {
+				// Clear all pending inserts/updates/deletes in the EntityManager.
+				// Necessary for pre-bound EntityManagers, to avoid inconsistent state.
+				txObject.getEntityManagerHolder().getEntityManager().clear();
+			}
+		}
 	}
 
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
