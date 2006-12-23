@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,14 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.util.StringUtils;
 
 /**
- * Factory that configures a VelocityEngine. Can be used standalone, but
- * typically you will either use VelocityEngineFactoryBean for preparing a
- * VelocityEngine as bean reference, or VelocityConfigurer for web views.
+ * Factory that configures a VelocityEngine. Can be used standalone,
+ * but typically you will either use {@link VelocityEngineFactoryBean}
+ * for preparing a VelocityEngine as bean reference, or
+ * {@link org.springframework.web.servlet.view.velocity.VelocityConfigurer}
+ * for web views.
  *
  * <p>The optional "configLocation" property sets the location of the Velocity
  * properties file, within the current application. Velocity properties can be
@@ -49,8 +52,8 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
  * to the Spring application context.
  *
  * <p>If "overrideLogging" is true (the default), the VelocityEngine will be
- * configured to log via Commons Logging, i.e. using CommonsLoggingLogSystem
- * as log system.
+ * configured to log via Commons Logging, that is, using the Spring-provided
+ * {@link CommonsLoggingLogSystem} as log system.
  *
  * <p>The simplest way to use this class is to specify a
  * {@link #setResourceLoaderPath(String) "resourceLoaderPath"}; the
@@ -123,12 +126,13 @@ public class VelocityEngineFactory {
 
 	/**
 	 * Set the Velocity resource loader path via a Spring resource location.
+	 * Accepts multiple locations in Velocity's comma-separated path style.
 	 * <p>When populated via a String, standard URLs like "file:" and "classpath:"
 	 * pseudo URLs are supported, as understood by ResourceLoader. Allows for
 	 * relative paths when running in an ApplicationContext.
 	 * <p>Will define a path for the default Velocity resource loader with the name
-	 * "file". If the specified resource cannot be resolved to a java.io.File, a
-	 * generic SpringResourceLoader will be used under the name "spring", without
+	 * "file". If the specified resource cannot be resolved to a <code>java.io.File</code>,
+	 * a generic SpringResourceLoader will be used under the name "spring", without
 	 * modification detection.
 	 * <p>Note that resource caching will be enabled in any case. With the file
 	 * resource loader, the last-modified timestamp will be checked on access to
@@ -166,7 +170,7 @@ public class VelocityEngineFactory {
 	 * Return the Spring ResourceLoader to use for loading Velocity template files.
 	 */
 	protected ResourceLoader getResourceLoader() {
-		return resourceLoader;
+		return this.resourceLoader;
 	}
 
 	/**
@@ -189,7 +193,7 @@ public class VelocityEngineFactory {
 	 * Return whether to prefer file system access for template loading.
 	 */
 	protected boolean isPreferFileSystemAccess() {
-		return preferFileSystemAccess;
+		return this.preferFileSystemAccess;
 	}
 
 	/**
@@ -262,7 +266,7 @@ public class VelocityEngineFactory {
 		}
 		catch (Exception ex) {
 			logger.error("Why does VelocityEngine throw a generic checked exception, after all?", ex);
-			throw new VelocityException(ex.getMessage());
+			throw new VelocityException(ex.toString());
 		}
 
 		return velocityEngine;
@@ -297,19 +301,28 @@ public class VelocityEngineFactory {
 			// Try to load via the file system, fall back to SpringResourceLoader
 			// (for hot detection of template changes, if possible).
 			try {
-				Resource path = getResourceLoader().getResource(resourceLoaderPath);
-				File file = path.getFile();  // will fail if not resolvable in the file system
-				if (logger.isDebugEnabled()) {
-					logger.debug("Resource loader path [" + path + "] resolved to file [" + file.getAbsolutePath() + "]");
+				StringBuffer resolvedPath = new StringBuffer();
+				String[] paths = StringUtils.commaDelimitedListToStringArray(resourceLoaderPath);
+				for (int i = 0; i < paths.length; i++) {
+					String path = paths[i];
+					Resource resource = getResourceLoader().getResource(path);
+					File file = resource.getFile();  // will fail if not resolvable in the file system
+					if (logger.isDebugEnabled()) {
+						logger.debug("Resource loader path [" + path + "] resolved to file [" + file.getAbsolutePath() + "]");
+					}
+					resolvedPath.append(file.getAbsolutePath());
+					if (i < paths.length - 1) {
+						resolvedPath.append(',');
+					}
 				}
 				velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
-				velocityEngine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, file.getAbsolutePath());
 				velocityEngine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_CACHE, "true");
+				velocityEngine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, resolvedPath.toString());
 			}
 			catch (IOException ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Cannot resolve resource loader path [" + resourceLoaderPath +
-							"] to java.io.File: using SpringResourceLoader", ex);
+							"] to [java.io.File]: using SpringResourceLoader", ex);
 				}
 				initSpringResourceLoader(velocityEngine, resourceLoaderPath);
 			}

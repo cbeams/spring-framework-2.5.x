@@ -21,12 +21,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Vector;
 
 import junit.framework.TestCase;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.VelocityException;
 
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -106,6 +108,39 @@ public class VelocityConfigurerTests extends TestCase {
 		assertTrue(vc.createVelocityEngine() instanceof VelocityEngine);
 		VelocityEngine ve = vc.createVelocityEngine();
 		assertEquals(new File("/mydir").getAbsolutePath(), ve.getProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH));
+	}
+
+	public void testVelocityConfigurerWithCsvPath() throws IOException, VelocityException {
+		VelocityConfigurer vc = new VelocityConfigurer();
+		vc.setResourceLoaderPath("file:/mydir,file:/yourdir");
+		vc.afterPropertiesSet();
+		assertTrue(vc.createVelocityEngine() instanceof VelocityEngine);
+		VelocityEngine ve = vc.createVelocityEngine();
+		Vector paths = new Vector();
+		paths.add(new File("/mydir").getAbsolutePath());
+		paths.add(new File("/yourdir").getAbsolutePath());
+		assertEquals(paths, ve.getProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH));
+	}
+
+	public void testVelocityConfigurerWithCsvPathAndNonFileAccess() throws IOException, VelocityException {
+		VelocityConfigurer vc = new VelocityConfigurer();
+		vc.setResourceLoaderPath("file:/mydir,file:/yourdir");
+		vc.setResourceLoader(new ResourceLoader() {
+			public Resource getResource(String location) {
+				if ("file:/yourdir/test".equals(location)) {
+					return new DescriptiveResource("");
+				}
+				return new ByteArrayResource("test".getBytes(), "test");
+			}
+			public ClassLoader getClassLoader() {
+				return getClass().getClassLoader();
+			}
+		});
+		vc.setPreferFileSystemAccess(false);
+		vc.afterPropertiesSet();
+		assertTrue(vc.createVelocityEngine() instanceof VelocityEngine);
+		VelocityEngine ve = vc.createVelocityEngine();
+		assertEquals("test", VelocityEngineUtils.mergeTemplateIntoString(ve, "test", new HashMap()));
 	}
 
 }
