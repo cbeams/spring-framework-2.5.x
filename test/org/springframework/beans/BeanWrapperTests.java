@@ -30,17 +30,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import junit.framework.TestCase;
 import net.sf.hibernate.FlushMode;
 
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
+import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
 /**
@@ -206,7 +208,6 @@ public class BeanWrapperTests extends TestCase {
 		String newTouchy = "valid";
 		try {
 			BeanWrapper bw = new BeanWrapperImpl(t);
-			//System.out.println(bw);
 			MutablePropertyValues pvs = new MutablePropertyValues();
 			pvs.addPropertyValue(new PropertyValue("age", new Integer(newAge)));
 			pvs.addPropertyValue(new PropertyValue("name", newName));
@@ -614,8 +615,6 @@ public class BeanWrapperTests extends TestCase {
 			fail("Should throw exception when everything is valid");
 		}
 		catch (PropertyBatchUpdateException ex) {
-			System.out.println(ex);
-			ex.printStackTrace();
 			assertTrue("Must contain 2 exceptions", ex.getExceptionCount() == 2);
 			// Test validly set property matches
 			assertTrue("Validly set property must stick", t.getName().equals(newName));
@@ -1015,6 +1014,90 @@ public class BeanWrapperTests extends TestCase {
 		assertEquals(2, tb.getArray()[1]);
 	}
 
+	public void testLargeMatchingPrimitiveArray() {
+		PrimitiveArrayBean tb = new PrimitiveArrayBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		int[] input = new int[1024];
+		StopWatch sw = new StopWatch();
+		sw.start("array1");
+		for (int i = 0; i < 1000; i++) {
+			bw.setPropertyValue("array", input);
+		}
+		sw.stop();
+		assertEquals(1024, tb.getArray().length);
+		assertEquals(0, tb.getArray()[0]);
+		long time1 = sw.getLastTaskTimeMillis();
+		assertTrue(sw.getLastTaskTimeMillis() < 100);
+
+		bw.registerCustomEditor(String.class, new StringTrimmerEditor(false));
+		sw.start("array2");
+		for (int i = 0; i < 1000; i++) {
+			bw.setPropertyValue("array", input);
+		}
+		sw.stop();
+		assertTrue(sw.getLastTaskTimeMillis() < 100);
+
+		bw.registerCustomEditor(int.class, "array.somePath", new CustomNumberEditor(Integer.class, false));
+		sw.start("array3");
+		for (int i = 0; i < 1000; i++) {
+			bw.setPropertyValue("array", input);
+		}
+		sw.stop();
+		assertTrue(sw.getLastTaskTimeMillis() < 100);
+
+		bw.registerCustomEditor(int.class, "array[0].somePath", new CustomNumberEditor(Integer.class, false));
+		sw.start("array3");
+		for (int i = 0; i < 1000; i++) {
+			bw.setPropertyValue("array", input);
+		}
+		sw.stop();
+		assertTrue(sw.getLastTaskTimeMillis() < 100);
+
+		bw.registerCustomEditor(int.class, new CustomNumberEditor(Integer.class, false));
+		sw.start("array4");
+		for (int i = 0; i < 100; i++) {
+			bw.setPropertyValue("array", input);
+		}
+		sw.stop();
+		assertEquals(1024, tb.getArray().length);
+		assertEquals(0, tb.getArray()[0]);
+		assertTrue(sw.getLastTaskTimeMillis() > time1);
+	}
+
+	public void testLargeMatchingPrimitiveArrayWithSpecificEditor() {
+		PrimitiveArrayBean tb = new PrimitiveArrayBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		bw.registerCustomEditor(int.class, "array", new PropertyEditorSupport() {
+			public void setValue(Object value) {
+				if (value instanceof Integer) {
+					super.setValue(new Integer(((Integer) value).intValue() + 1));
+				}
+			}
+		});
+		int[] input = new int[1024];
+		bw.setPropertyValue("array", input);
+		assertEquals(1024, tb.getArray().length);
+		assertEquals(1, tb.getArray()[0]);
+		assertEquals(1, tb.getArray()[1]);
+	}
+
+	public void testLargeMatchingPrimitiveArrayWithIndexSpecificEditor() {
+		PrimitiveArrayBean tb = new PrimitiveArrayBean();
+		BeanWrapper bw = new BeanWrapperImpl(tb);
+		bw.registerCustomEditor(int.class, "array[1]", new PropertyEditorSupport() {
+			public void setValue(Object value) {
+				if (value instanceof Integer) {
+					super.setValue(new Integer(((Integer) value).intValue() + 1));
+				}
+			}
+		});
+		int[] input = new int[1024];
+		bw.setPropertyValue("array", input);
+		assertEquals(1024, tb.getArray().length);
+		assertEquals(0, tb.getArray()[0]);
+		assertEquals(1, tb.getArray()[1]);
+	}
+
 	public void testPropertiesInProtectedBaseBean() {
 		DerivedFromProtectedBaseBean bean = new DerivedFromProtectedBaseBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
@@ -1278,26 +1361,24 @@ public class BeanWrapperTests extends TestCase {
 	public void testAlternativesForTypo() {
 		IntelliBean ib = new IntelliBean();
 		BeanWrapper bw = new BeanWrapperImpl(ib);
-
 		try {
 			bw.setPropertyValue("names", "Alef");
-		} catch (NotWritablePropertyException e) {
-			e.printStackTrace();
-			assertNotNull("Possible matches not determined", e.getPossibleMatches());
-			assertEquals("Invalid amount of alternatives", 1, e.getPossibleMatches().length);
+		}
+		catch (NotWritablePropertyException ex) {
+			assertNotNull("Possible matches not determined", ex.getPossibleMatches());
+			assertEquals("Invalid amount of alternatives", 1, ex.getPossibleMatches().length);
 		}
 	}
 
 	public void testAlternativesForTypos() {
 		IntelliBean ib = new IntelliBean();
 		BeanWrapper bw = new BeanWrapperImpl(ib);
-
 		try {
 			bw.setPropertyValue("mystring", "Arjen");
-		} catch (NotWritablePropertyException e) {
-			e.printStackTrace();
-			assertNotNull("Possible matches not determined", e.getPossibleMatches());
-			assertEquals("Invalid amount of alternatives", 3, e.getPossibleMatches().length);
+		}
+		catch (NotWritablePropertyException ex) {
+			assertNotNull("Possible matches not determined", ex.getPossibleMatches());
+			assertEquals("Invalid amount of alternatives", 3, ex.getPossibleMatches().length);
 		}
 	}
 

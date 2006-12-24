@@ -216,6 +216,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		if (this.customEditors == null) {
 			return null;
 		}
+		Class requiredTypeToUse = requiredType;
 		if (propertyPath != null) {
 			// Check property-specific editor first.
 			PropertyEditor editor = getCustomEditor(propertyPath, requiredType);
@@ -231,11 +232,38 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 				return editor;
 			}
 			else if (requiredType == null) {
-				requiredType = getPropertyType(propertyPath);
+				requiredTypeToUse = getPropertyType(propertyPath);
 			}
 		}
 		// No property-specific editor -> check type-specific editor.
-		return getCustomEditor(requiredType);
+		return getCustomEditor(requiredTypeToUse);
+	}
+
+	/**
+	 * Determine whether this registry contains a custom editor
+	 * for the specified array/collection element.
+	 * @param elementType the target type of the element
+	 * @param propertyPath the property path (typically of the array/collection)
+	 * @return whether a matching custom editor has been found
+	 */
+	public boolean hasCustomEditorForElement(Class elementType, String propertyPath) {
+		if (this.customEditors == null) {
+			return false;
+		}
+		for (Iterator it = this.customEditors.entrySet().iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			if (entry.getKey() instanceof String) {
+				String regPath = (String) entry.getKey();
+				if (PropertyAccessorUtils.matchesProperty(regPath, propertyPath)) {
+					CustomEditorHolder editorHolder = (CustomEditorHolder) entry.getValue();
+					if (editorHolder.getPropertyEditor(elementType) != null) {
+						return true;
+					}
+				}
+			}
+		}
+		// No property-specific editor -> check type-specific editor.
+		return this.customEditors.containsKey(elementType);
 	}
 
 	/**
@@ -267,7 +295,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * try custom editor for superclass (which will in any case be able
 	 * to render a value as String via <code>getAsText</code>).
 	 * @return the custom editor, or <code>null</code> if none found for this type
-	 * @see java.beans.PropertyEditor#getAsText
+	 * @see java.beans.PropertyEditor#getAsText()
 	 */
 	private PropertyEditor getCustomEditor(Class requiredType) {
 		if (requiredType == null) {
@@ -361,7 +389,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 	/**
 	 * Add property paths with all variations of stripped keys and/or indexes.
-	 * Invokes itself recursively with nested paths
+	 * Invokes itself recursively with nested paths.
 	 * @param strippedPaths the result list to add to
 	 * @param nestedPath the current nested path
 	 * @param propertyPath the property path to check for keys/indexes to strip
@@ -401,11 +429,11 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		}
 
 		private PropertyEditor getPropertyEditor() {
-			return propertyEditor;
+			return this.propertyEditor;
 		}
 
 		private Class getRegisteredType() {
-			return registeredType;
+			return this.registeredType;
 		}
 
 		private PropertyEditor getPropertyEditor(Class requiredType) {

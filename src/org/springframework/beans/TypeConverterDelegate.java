@@ -286,7 +286,11 @@ class TypeConverterDelegate {
 			return result;
 		}
 		else if (input.getClass().isArray()) {
-			// Convert Collection elements to array elements.
+			// Convert array elements, if necessary.
+			if (componentType.equals(input.getClass().getComponentType()) &&
+					!this.propertyEditorRegistry.hasCustomEditorForElement(componentType, propertyName)) {
+				return input;
+			}
 			int arrayLength = Array.getLength(input);
 			Object result = Array.newInstance(componentType, arrayLength);
 			for (int i = 0; i < arrayLength; i++) {
