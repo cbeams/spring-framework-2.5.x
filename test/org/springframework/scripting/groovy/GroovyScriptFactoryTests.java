@@ -16,11 +16,14 @@
 
 package org.springframework.scripting.groovy;
 
+import groovy.lang.DelegatingMetaClass;
+import groovy.lang.GroovyObject;
+
 import java.io.FileNotFoundException;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
+import org.easymock.MockControl;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.beans.factory.BeanCreationException;
@@ -151,6 +154,9 @@ public class GroovyScriptFactoryTests extends TestCase {
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 		assertNotNull(messenger);
 		assertEquals("Hello World!", messenger.getMessage());
+		
+		// Check can cast to GroovyObject
+		GroovyObject goo = (GroovyObject) messenger;
 	}
 
 	public void testWithTwoClassesDefinedInTheOneGroovyFile_WrongClassFirst() throws Exception {
@@ -282,6 +288,9 @@ public class GroovyScriptFactoryTests extends TestCase {
 
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
+		
+		//System.out.println(((Advised) messenger).toProxyConfigString());
+		
 		assertEquals("Hello World!", messenger.getMessage());
 		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
 	}
@@ -302,4 +311,38 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertEquals(ctx, bean.getApplicationContext());
 	}
     
+	public void testMetaClass() {
+		ApplicationContext ctx =
+			new ClassPathXmlApplicationContext(
+					"org/springframework/scripting/groovy/calculators.xml");
+		Calculator calc = (Calculator) ctx.getBean("delegatingCalculator");
+		try {
+			calc.add(1, 2);
+			fail(); 
+		}
+		catch (IllegalStateException expected) {
+			// This is the exception we threw in the custom metaclass
+			// to show it got invoked
+		}
+	}
+	
+	public static class TestCustomizer implements GroovyObjectCustomizer {
+
+		public void customize(GroovyObject goo) {
+			DelegatingMetaClass dmc = new DelegatingMetaClass(goo.getMetaClass()) {	
+				
+				@Override
+				public Object invokeMethod(Object arg0, String mName, Object[] arg2) {
+					if (mName.indexOf("Missing") != -1) {
+						throw new IllegalStateException("Gotcha");
+					}
+					else return super.invokeMethod(arg0, mName, arg2);
+				}
+				
+			};
+			dmc.initialize();
+			goo.setMetaClass(dmc);
+		}
+	}
+	
 }

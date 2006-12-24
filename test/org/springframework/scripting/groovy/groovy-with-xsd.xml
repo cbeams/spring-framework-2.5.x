@@ -22,7 +22,9 @@ class GroovyCalculator implements Calculator {
 		 </lang:inline-script>
 	</lang:groovy>
 
-	<lang:groovy id="refreshableMessenger" refresh-check-delay="5" script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy">
+	<lang:groovy id="refreshableMessenger" 
+		refresh-check-delay="5" 
+		script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy">
 		<lang:property name="message" value="Hello World!"/>
 	</lang:groovy>
 </beans>

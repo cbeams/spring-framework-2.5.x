@@ -4,5 +4,5 @@ import org.springframework.scripting.Messenger
 
 class GroovyMessenger implements Messenger {
 
-	@Property String message;
+	def String message;
 }

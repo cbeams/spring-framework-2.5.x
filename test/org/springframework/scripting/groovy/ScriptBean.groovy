@@ -14,7 +14,7 @@ class GroovyScriptBean implements ContextScriptBean, ApplicationContextAware {
         this.age = age
     }
 
-    @Property String name
+    def String name
 
-    @Property ApplicationContext applicationContext
+    def ApplicationContext applicationContext
 }

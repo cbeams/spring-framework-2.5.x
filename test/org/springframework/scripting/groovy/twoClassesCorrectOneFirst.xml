@@ -13,12 +13,12 @@
 
 	class GroovyMessenger implements Messenger {
 
-		@Property String message;
+		def String message;
 	}
 				
 	class Bingo {
 
-		@Property String message;
+		def String message;
 	}
 			</value>
 		</constructor-arg>

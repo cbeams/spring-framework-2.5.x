@@ -16,11 +16,12 @@
 
 package org.springframework.scripting.groovy;
 
+import groovy.lang.GroovyClassLoader;
+import groovy.lang.GroovyObject;
+
 import java.io.IOException;
 
-import groovy.lang.GroovyClassLoader;
 import org.codehaus.groovy.control.CompilationFailedException;
-
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
@@ -39,6 +40,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Rod Johnson
  * @since 2.0
  * @see org.springframework.scripting.support.ScriptFactoryPostProcessor
  * @see groovy.lang.GroovyClassLoader
@@ -46,7 +48,8 @@ import org.springframework.util.ClassUtils;
 public class GroovyScriptFactory implements ScriptFactory {
 
 	private final String scriptSourceLocator;
-
+	
+	private final GroovyObjectCustomizer groovyObjectCustomizer;
 
 	/**
 	 * Create a new GroovyScriptFactory for the given script source.
@@ -57,8 +60,26 @@ public class GroovyScriptFactory implements ScriptFactory {
 	 * @throws IllegalArgumentException if the supplied String is empty
 	 */
 	public GroovyScriptFactory(String scriptSourceLocator) {
+		this(scriptSourceLocator, null);
+	}
+
+	/**
+	 * Create a new GroovyScriptFactory for the given script source,
+	 * specifying a strategy interface that can create a custom MetaClass
+	 * to supply missing methods and otherwise change the behavior
+	 * of the object.
+	 * <p>We don't need to specify script interfaces here, since
+	 * a Groovy script defines its Java interfaces itself.
+	 * @param scriptSourceLocator a locator that points to the source of the script.
+	 * Interpreted by the post-processor that actually creates the script.
+	 * @param groovyObjectCustomizer customizer that can set a custom metaclass
+	 * or make other changes to the GroovyObject created by this factory
+	 * @throws IllegalArgumentException if the supplied String is empty
+	 */
+	public GroovyScriptFactory(String scriptSourceLocator, GroovyObjectCustomizer groovyObjectCustomizer) {
 		Assert.hasText(scriptSourceLocator);
 		this.scriptSourceLocator = scriptSourceLocator;
+		this.groovyObjectCustomizer = groovyObjectCustomizer;
 	}
 
 
@@ -93,9 +114,16 @@ public class GroovyScriptFactory implements ScriptFactory {
 
 		ClassLoader cl = ClassUtils.getDefaultClassLoader();
 		GroovyClassLoader groovyClassLoader = new GroovyClassLoader(cl);
+		
 		try {
 			Class clazz = groovyClassLoader.parseClass(actualScriptSource.getScriptAsString());
-			return clazz.newInstance();
+			GroovyObject goo = (GroovyObject) clazz.newInstance();
+			
+			if (this.groovyObjectCustomizer != null) {
+				// Allow metaclass and other customization
+				this.groovyObjectCustomizer.customize(goo);
+			}
+			return goo;
 		}
 		catch (CompilationFailedException ex) {
 			throw new ScriptCompilationException(
