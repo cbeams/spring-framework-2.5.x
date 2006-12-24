@@ -22,8 +22,8 @@ import java.beans.PropertyEditor;
  * Encapsulates methods for registering JavaBeans {@link PropertyEditor PropertyEditors}.
  * This is the central interface that a {@link PropertyEditorRegistrar} operates on.
  *
- * <p>Implemented by {@link BeanWrapper}/{@link BeanWrapperImpl} and 
- * {@link org.springframework.validation.DataBinder}.
+ * <p>Extended by {@link BeanWrapper}; implemented by {@link BeanWrapperImpl}
+ * and  {@link org.springframework.validation.DataBinder}.
  *
  * @author Juergen Hoeller
  * @since 1.2.6
@@ -50,12 +50,12 @@ public interface PropertyEditorRegistry {
 	 * (the {@link PropertyEditor} has to create an array or Collection value) or
 	 * to each element (the <code>PropertyEditor</code> has to create the element type),
 	 * depending on the specified required type.
-	 * <p>Note: only one single registered custom editor per property path
+	 * <p>Note: Only one single registered custom editor per property path
 	 * is supported. In the case of a Collection/array, do not register an editor
 	 * for both the Collection/array and each element on the same property.
 	 * <p>For example, if you wanted to register an editor for "items[n].quantity"
-	 * (for all values n), you would use "items.quality" as the value of the 'propertyPath'
-	 * argument to this method.
+	 * (for all values n), you would use "items.quality" as the value of the
+	 * 'propertyPath' argument to this method.
 	 * @param requiredType type of the property (can be <code>null</code> if a property
 	 * is given but should be specified in any case for consistency checking)
 	 * @param propertyPath path of the property (name or nested path), or
