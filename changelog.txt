@@ -19,6 +19,7 @@ Package org.springframework.beans
 * introduced XmlBeanDefinitionStoreException, with special support for SAXParseException and its location information
 * XML bean "id" and "name" (aliases) are allowed to define the same name (for backwards compatibility with Spring 1.2.8)
 * BeanDefinitionDecorators are applied to inner beans as well (in particular: "p:" namespace works for inner beans now)
+* Added optional GroovyObjectCustomizer constructor arg to GroovyScriptfactory to allow setting a custom MetaClass
 
 Package org.springframework.context
 * AbstractApplicationContext explicitly stops all Lifecycle Beans before destroying them one-by-one (to avoid delays)
