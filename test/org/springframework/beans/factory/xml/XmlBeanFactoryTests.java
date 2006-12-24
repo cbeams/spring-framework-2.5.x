@@ -75,22 +75,6 @@ import org.springframework.util.StopWatch;
  */
 public class XmlBeanFactoryTests extends TestCase {
 	
-	// autowiring somehow isn't inherited from parent beans, while I guess it should
-	// I haven't tested this for properties other than autowiring 
-	/*public void testSPR2886OverridesWithAutowiring() {
-		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
-		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
-		
-		TestBean david = (TestBean)xbf.getBean("magicDavid");
-		// the parent bean is autowiring
-		assertNotNull(david.getSpouse());
-		
-		TestBean derivedDavid = (TestBean)xbf.getBean("magicDavidDerived");
-		// this fails while it inherits from the child bean
-		assertNotNull("SPR-2886, autowiring not propagated along child relationships", derivedDavid.getSpouse());
-	}*/
-
 	/**
 	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2368
 	 */
@@ -316,6 +300,20 @@ public class XmlBeanFactoryTests extends TestCase {
 		assertTrue(inherits2.getAge() == 13);
 		// Shouldn't have changed first instance
 		assertTrue(inherits.getAge() == 1);
+	}
+
+	public void testAutowireModeNotInherited() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.loadBeanDefinitions(new ClassPathResource("overrides.xml", getClass()));
+
+		TestBean david = (TestBean)xbf.getBean("magicDavid");
+		// the parent bean is autowiring
+		assertNotNull(david.getSpouse());
+
+		TestBean derivedDavid = (TestBean)xbf.getBean("magicDavidDerived");
+		// this fails while it inherits from the child bean
+		assertNull("autowiring not propagated along child relationships", derivedDavid.getSpouse());
 	}
 
 	public void testAbstractParentBeans() {
