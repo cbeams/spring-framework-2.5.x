@@ -59,7 +59,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertTagClosed(output);
 
 		assertContainsAttribute(output, "type", getType());
-		assertContainsAttribute(output, "value", "Rob");
+		assertValueAttribute(output, "Rob");
 	}
 
 	public void testSimpleBindWithHtmlEscaping() throws Exception {
@@ -78,7 +78,11 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertTagClosed(output);
 
 		assertContainsAttribute(output, "type", getType());
-		assertContainsAttribute(output, "value", HTML_ESCAPED_NAME);
+		assertValueAttribute(output, HTML_ESCAPED_NAME);
+	}
+
+	protected void assertValueAttribute(String output, String expectedValue) {
+		assertContainsAttribute(output, "value", expectedValue);
 	}
 
 	public void testComplexBind() throws Exception {
@@ -94,7 +98,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "id", "spouse.name");
 		assertContainsAttribute(output, "name", "spouse.name");
 		assertContainsAttribute(output, "type", getType());
-		assertContainsAttribute(output, "value", "Sally");
+		assertValueAttribute(output, "Sally");
 	}
 
 	public void testWithAllAttributes() throws Exception {
@@ -164,7 +168,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "type", getType());
 
 		assertContainsAttribute(output, "id", id);
-		assertContainsAttribute(output, "value", "Rob");
+		assertValueAttribute(output, "Rob");
 		assertContainsAttribute(output, "size", size);
 		assertContainsAttribute(output, "class", cssClass);
 		assertContainsAttribute(output, "style", cssStyle);
@@ -206,7 +210,8 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertTagClosed(output);
 
 		assertContainsAttribute(output, "type", getType());
-		assertContainsAttribute(output, "value", "Sally");
+//		assertContainsAttribute(output, "value", "Sally");
+		assertValueAttribute(output, "Sally");
 	}
 
 	public void testWithErrors() throws Exception {
@@ -227,7 +232,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertTagClosed(output);
 
 		assertContainsAttribute(output, "type", getType());
-		assertContainsAttribute(output, "value", "Rob");
+		assertValueAttribute(output, "Rob");
 		assertContainsAttribute(output, "class", "bad");
 	}
 
@@ -253,8 +258,9 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertTagClosed(output);
 
 		assertContainsAttribute(output, "type", getType());
-		assertContainsAttribute(output, "value", "12.34f");
+		assertValueAttribute(output, "12.34f");
 	}
+
 
 	protected final void assertTagClosed(String output) {
 		assertTrue("Tag not closed properly", output.endsWith("/>"));
@@ -288,6 +294,5 @@ public class InputTagTests extends AbstractFormTagTests {
 	protected String getType() {
 		return "text";
 	}
-
 
 }

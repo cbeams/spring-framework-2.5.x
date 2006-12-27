@@ -39,7 +39,12 @@ public class PasswordInputTagTests extends InputTagTests {
 		assertTagClosed(output);
 
 		assertContainsAttribute(output, "type", getType());
-		assertContainsAttribute(output, "value", "");
+		assertValueAttribute(output, "");
+	}
+
+
+	protected void assertValueAttribute(String output, String expectedValue) {
+		super.assertValueAttribute(output, "");
 	}
 
 	protected String getType() {
