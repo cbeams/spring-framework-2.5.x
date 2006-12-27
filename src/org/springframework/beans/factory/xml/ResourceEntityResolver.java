@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,6 @@ package org.springframework.beans.factory.xml;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 
@@ -29,9 +28,9 @@ import org.springframework.core.io.ResourceLoader;
 
 /**
  * EntityResolver implementation that tries to resolve entity references
- * through a ResourceLoader (usually, relative to the resource base of an
- * ApplicationContext), if applicable. Extends BeansDtdResolver to also
- * provide DTD lookup in the class path.
+ * through a {@link org.springframework.core.io.ResourceLoader} (usually,
+ * relative to the resource base of an ApplicationContext), if applicable.
+ * Extends {@link BeansDtdResolver} to also provide DTD and XSD lookup.
  *
  * <p>Allows to use standard XML entities to include XML snippets into an
  * application context definition, for example to split a large XML file
@@ -52,8 +51,9 @@ public class ResourceEntityResolver extends BeansDtdResolver {
 
 	private final ResourceLoader resourceLoader;
 
+
 	/**
-	 * Creae a ResourceEntityResolver for the specified ResourceLoader
+	 * Create a ResourceEntityResolver for the specified ResourceLoader
 	 * (usually, an ApplicationContext).
 	 * @param resourceLoader the ResourceLoader (or ApplicationContext)
 	 * to load XML entity includes with
@@ -61,6 +61,7 @@ public class ResourceEntityResolver extends BeansDtdResolver {
 	public ResourceEntityResolver(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
+
 
 	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
 		InputSource source = super.resolveEntity(publicId, systemId);
@@ -70,13 +71,17 @@ public class ResourceEntityResolver extends BeansDtdResolver {
 				String decodedSystemId = URLDecoder.decode(systemId);
 				String givenUrl = new URL(decodedSystemId).toString();
 				String systemRootUrl = new File("").toURL().toString();
-				// try relative to resource base if currently in system root
+				// Try relative to resource base if currently in system root.
 				if (givenUrl.startsWith(systemRootUrl)) {
 					resourcePath = givenUrl.substring(systemRootUrl.length());
 				}
 			}
-			catch (MalformedURLException ex) {
-				// no URL -> try relative to resource base
+			catch (Exception ex) {
+				// Typically a MalformedURLException or AccessControlException.
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not resolve XML entity [" + systemId + "] against system root URL", ex);
+				}
+				// No URL (or no resolvable URL) -> try relative to resource base.
 				resourcePath = systemId;
 			}
 			if (resourcePath != null) {
