@@ -18,23 +18,24 @@ package org.springframework.scripting.groovy;
 import groovy.lang.GroovyObject;
 
 /**
- * Strategy used by GroovyScriptFactory to allow custom
- * a MetaClass to be specified for a Groovy bean,
- * or other customization of the created GroovyObject. This is
- * useful to allow the authoring of DSLs, replacing missing
- * methods etc.
- *  
+ * Strategy used by {@link GroovyScriptFactory} to allow the customization of a
+ * created {@link GroovyObject}.
+ *
+ * <p>This is useful to allow the authoring of DSLs, the replacement of missing
+ * methods, and so forth. For example, a custom {@link groovy.lang.MetaClass}
+ * could be specified.
+ *
  * @author Rod Johnson
+ * @see GroovyScriptFactory
  * @since 2.0.2
  */
 public interface GroovyObjectCustomizer {
-	
+
 	/**
-	 * Customize the GroovyObject created by
-	 * GroovyScriptFactory if required. For example,
-	 * this can be used to set a custom metaclass to
+	 * Customize the supplied {@link GroovyObject}.
+	 * <p>For example, this can be used to set a custom metaclass to
 	 * handle missing methods.
-	 * @param goo GroovyObject created by GroovyScriptFactory 
+	 * @param goo the <code>GroovyObject</code>.
 	 */
 	void customize(GroovyObject goo);
 
