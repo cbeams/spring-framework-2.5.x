@@ -30,7 +30,7 @@ import org.springframework.beans.factory.ObjectFactory;
  * <p><code>Scope</code> implementations are expected to be thread-safe.
  * One <code>Scope</code> can be used with multiple bean factories, if desired.
  *
- * <p>An example of a possible underlying storage mechansim would be a session
+ * <p>An example of a possible underlying storage mechanism would be a session
  * API such as the Servlet API's {@link javax.servlet.http.HttpSession} interface.
  *
  * @author Juergen Hoeller
@@ -54,7 +54,7 @@ public interface Scope {
 	 * implementation of this method if the underlying storage mechanism has
 	 * no obvious good candidate for a conversation id.
 	 * @return the conversation id, or <code>null</code> if there is no
-	 * conversation id concept for this scope
+	 * conversation id for this scope
 	 */
 	String getConversationId();
 
@@ -70,8 +70,8 @@ public interface Scope {
 	Object get(String name, ObjectFactory objectFactory);
 
 	/**
-	 * Remove the object with the given name from the underlying scope.
-	 * <p>Returns '<code>null</code>' if no object was found; otherwise
+	 * Remove the object with the given <code>name</code> from the underlying scope.
+	 * <p>Returns <code>null</code> if no object was found; otherwise
 	 * returns the removed <code>Object</code>.
 	 * @param name the name of the object to remove
 	 * @return the removed object, if any
