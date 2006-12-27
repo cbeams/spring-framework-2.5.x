@@ -38,6 +38,7 @@ public abstract class AbstractUrlViewController extends AbstractController {
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
+
 	/**
 	 * Set if URL lookup should always use full path within current servlet
 	 * context. Else, the path within the current servlet mapping is used
@@ -65,7 +66,7 @@ public abstract class AbstractUrlViewController extends AbstractController {
 	}
 
 	/**
-	 * Set the UrlPathHelper to use for resolution of lookup paths.
+	 * Set the UrlPathHelper to use for the resolution of lookup paths.
 	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
 	 * or to share common UrlPathHelper settings across multiple MethodNameResolvers
 	 * and HandlerMappings.
@@ -75,6 +76,13 @@ public abstract class AbstractUrlViewController extends AbstractController {
 		this.urlPathHelper = urlPathHelper;
 	}
 
+	/**
+	 * Return the UrlPathHelper to use for the resolution of lookup paths.
+	 */
+	protected UrlPathHelper getUrlPathHelper() {
+		return this.urlPathHelper;
+	}
+
 
 	/**
 	 * Retrieves the URL path to use for lookup and delegates to
@@ -82,10 +90,10 @@ public abstract class AbstractUrlViewController extends AbstractController {
 	 * @see #getViewNameForRequest
 	 */
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) {
-		String urlPath = this.urlPathHelper.getLookupPathForRequest(request);
+		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		String viewName = getViewNameForRequest(request);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Returning view name '" + viewName + "' for lookup path: " + urlPath);
+			logger.debug("Returning view name '" + viewName + "' for lookup path [" + lookupPath + "]");
 		}
 		return new ModelAndView(viewName);
 	}
