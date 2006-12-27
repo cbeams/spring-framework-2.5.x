@@ -22,12 +22,12 @@ import org.quartz.spi.JobFactory;
 import org.quartz.spi.TriggerFiredBundle;
 
 /**
- * JobFactory implementation that supports Runnables
- * (and potentially further job types) as well as
- * standard Quartz Jobs.
+ * JobFactory implementation that supports {@link java.lang.Runnable}
+ * objects as well as standard Quartz {@link org.quartz.Job} instances.
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see DelegatingJob
  * @see #adaptJob(Object)
  */
 public class AdaptableJobFactory implements JobFactory {
@@ -72,7 +72,7 @@ public class AdaptableJobFactory implements JobFactory {
 		}
 		else {
 			throw new IllegalArgumentException("Unable to execute job class [" + jobObject.getClass().getName() +
-					"]: only [org.quartz.Job] and [java.lang.Runnable] supported");
+					"]: only [org.quartz.Job] and [java.lang.Runnable] supported.");
 		}
 	}
 

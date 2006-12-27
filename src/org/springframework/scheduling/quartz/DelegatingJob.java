@@ -23,7 +23,8 @@ import org.quartz.JobExecutionException;
 import org.springframework.util.Assert;
 
 /**
- * Simple Job adapter that delegates to a given Runnable.
+ * Simple Quartz {@link org.quartz.Job} adapter that delegates to a
+ * given {@link java.lang.Runnable} instance.
  *
  * <p>Typically used in combination with property injection on the
  * Runnable instance, receiving parameters from the Quartz JobDataMap
@@ -52,7 +53,7 @@ public class DelegatingJob implements Job {
 	 * Return the wrapped Runnable implementation.
 	 */
 	public final Runnable getDelegate() {
-		return delegate;
+		return this.delegate;
 	}
 
 

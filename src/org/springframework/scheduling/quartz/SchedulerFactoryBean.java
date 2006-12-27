@@ -98,7 +98,7 @@ import org.springframework.util.CollectionUtils;
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
 public class SchedulerFactoryBean
-    implements FactoryBean, ApplicationContextAware, InitializingBean, Lifecycle, DisposableBean {
+    implements FactoryBean, ApplicationContextAware, InitializingBean, DisposableBean, Lifecycle {
 
 	public static final String PROP_THREAD_COUNT = "org.quartz.threadPool.threadCount";
 
@@ -366,11 +366,13 @@ public class SchedulerFactoryBean
 
 	/**
 	 * Set the Quartz JobFactory to use for this Scheduler.
-	 * <p>Default is Spring's AdaptableJobFactory, which supports Runnables
-	 * as well as standard Quartz Jobs.
-	 * <p>Specify an instance of Spring's SpringBeanJobFactory here (typically
-	 * as an inner bean definition) to automatically populate a job's bean
-	 * properties from the specified job data map and scheduler context.
+	 * <p>Default is Spring's {@link AdaptableJobFactory}, which supports
+	 * {@link java.lang.Runnable} objects as well as standard Quartz
+	 * {@link org.quartz.Job} instances.
+	 * <p>Specify an instance of Spring's {@link SpringBeanJobFactory} here
+	 * (typically as an inner bean definition) to automatically populate a
+	 * job's bean properties from the specified job data map and scheduler
+	 * context.
 	 * @see AdaptableJobFactory
 	 * @see SpringBeanJobFactory
 	 */
@@ -537,6 +539,10 @@ public class SchedulerFactoryBean
 		this.waitForJobsToCompleteOnShutdown = waitForJobsToCompleteOnShutdown;
 	}
 
+
+	//---------------------------------------------------------------------
+	// Implementation of InitializingBean interface
+	//---------------------------------------------------------------------
 
 	public void afterPropertiesSet() throws Exception {
 		if (this.dataSource == null && this.nonTransactionalDataSource != null) {

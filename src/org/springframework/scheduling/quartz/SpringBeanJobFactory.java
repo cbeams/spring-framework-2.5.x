@@ -24,18 +24,18 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.MutablePropertyValues;
 
 /**
- * Subclass of AdaptableBeanFactory that also supports Spring-style
- * dependency injection on bean properties. This is essentially the
- * direct equivalent of Spring's QuartzJobBean in the shape of a
- * Quartz 1.5 JobFactory.
+ * Subclass of {@link AdaptableJobFactory} that also supports Spring-style
+ * dependency injection on bean properties. This is essentially the direct
+ * equivalent of Spring's {@link QuartzJobBean} in the shape of a
+ * Quartz 1.5 {@link org.quartz.spi.JobFactory}.
  *
- * <p>Applies scheduler context, job data map and trigger data map
- * entries as bean property values. If no matching bean property
- * is found, the entry is by default simply ignored. This is
- * analogous to QuartzJobBean's behavior.
+ * <p>Applies scheduler context, job data map and trigger data map entries
+ * as bean property values. If no matching bean property is found, the entry
+ * is by default simply ignored. This is analogous to QuartzJobBean's behavior.
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see SchedulerFactoryBean#setJobFactory
  * @see QuartzJobBean
  */
 public class SpringBeanJobFactory extends AdaptableJobFactory implements SchedulerContextAware {
@@ -94,9 +94,10 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 	/**
 	 * Return whether the given job object is eligible for having
 	 * its bean properties populated.
-	 * <p>The default implementation ignores QuartzJobBeans,
+	 * <p>The default implementation ignores {@link QuartzJobBean} instances,
 	 * which will inject bean properties themselves.
 	 * @param jobObject the job object to introspect
+	 * @see QuartzJobBean
 	 */
 	protected boolean isEligibleForPropertyPopulation(Object jobObject) {
 		return (!(jobObject instanceof QuartzJobBean));
