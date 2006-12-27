@@ -304,7 +304,7 @@
 	   		</itemizedlist>
 			<para>
 				Both of these methods allow you to manage your Actions and 
-				their dependencies in the <emphasis>action-context.xml</emphasis> file. 
+				their dependencies in the <emphasis>action-servlet.xml</emphasis> file.
 				The bridge between the Action in <emphasis>struts-config.xml</emphasis> 
 				and <emphasis>action-servlet.xml</emphasis> is built with the 
 				action-mapping's "path" and the bean's "name". If you have the 
