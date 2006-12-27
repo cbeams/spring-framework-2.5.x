@@ -18,11 +18,7 @@ package org.springframework.scripting.groovy;
 
 import groovy.lang.DelegatingMetaClass;
 import groovy.lang.GroovyObject;
-
-import java.io.FileNotFoundException;
-
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
@@ -37,12 +33,18 @@ import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
+import org.springframework.test.AssertThrows;
+
+import java.io.FileNotFoundException;
 
 /**
+ * Unit tests for the {@link GroovyScriptFactory} class.
+ *
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Rod Johnson
  */
-public class GroovyScriptFactoryTests extends TestCase {
+public final class GroovyScriptFactoryTests extends TestCase {
 
 	public void testStatic() throws Exception {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
@@ -113,7 +115,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		mock.replay();
 		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript);
 		try {
-			factory.getScriptedObject(script, new Class []{});
+			factory.getScriptedObject(script, new Class[]{});
 			fail("Must have thrown a ScriptCompilationException (no public no-arg ctor in scripted class).");
 		}
 		catch (ScriptCompilationException expected) {
@@ -135,7 +137,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		mock.replay();
 		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript);
 		try {
-			factory.getScriptedObject(script, new Class []{});
+			factory.getScriptedObject(script, new Class[]{});
 			fail("Must have thrown a ScriptCompilationException (no oublic no-arg ctor in scripted class).");
 		}
 		catch (ScriptCompilationException expected) {
@@ -154,7 +156,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 		assertNotNull(messenger);
 		assertEquals("Hello World!", messenger.getMessage());
-		
+
 		// Check can cast to GroovyObject
 		GroovyObject goo = (GroovyObject) messenger;
 	}
@@ -271,7 +273,7 @@ public class GroovyScriptFactoryTests extends TestCase {
 	}
 
 	public void testInlineScriptFromGroovyTag() throws Exception {
-	  if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
 		}
 
@@ -288,9 +290,9 @@ public class GroovyScriptFactoryTests extends TestCase {
 
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
-		
+
 		//System.out.println(((Advised) messenger).toProxyConfigString());
-		
+
 		assertEquals("Hello World!", messenger.getMessage());
 		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
 	}
@@ -310,39 +312,36 @@ public class GroovyScriptFactoryTests extends TestCase {
 		assertEquals("The second property ain't bein' injected.", 31, bean.getAge());
 		assertEquals(ctx, bean.getApplicationContext());
 	}
-    
+
 	public void testMetaClass() {
-		ApplicationContext ctx =
-			new ClassPathXmlApplicationContext(
-					"org/springframework/scripting/groovy/calculators.xml");
-		Calculator calc = (Calculator) ctx.getBean("delegatingCalculator");
-		try {
-			calc.add(1, 2);
-			fail(); 
-		}
-		catch (IllegalStateException expected) {
-			// This is the exception we threw in the custom metaclass
-			// to show it got invoked
-		}
+		// expect the exception we threw in the custom metaclass to show it got invoked
+		new AssertThrows(IllegalStateException.class) {
+			public void test() throws Exception {
+				ApplicationContext ctx =
+						new ClassPathXmlApplicationContext(
+								"org/springframework/scripting/groovy/calculators.xml");
+				Calculator calc = (Calculator) ctx.getBean("delegatingCalculator");
+				calc.add(1, 2);
+			}
+		}.runTest();
 	}
-	
-	public static class TestCustomizer implements GroovyObjectCustomizer {
+
+
+	public static final class TestCustomizer implements GroovyObjectCustomizer {
 
 		public void customize(GroovyObject goo) {
-			DelegatingMetaClass dmc = new DelegatingMetaClass(goo.getMetaClass()) {	
-				
-				@Override
+			DelegatingMetaClass dmc = new DelegatingMetaClass(goo.getMetaClass()) {
+
 				public Object invokeMethod(Object arg0, String mName, Object[] arg2) {
 					if (mName.indexOf("Missing") != -1) {
 						throw new IllegalStateException("Gotcha");
-					}
-					else return super.invokeMethod(arg0, mName, arg2);
+					} else return super.invokeMethod(arg0, mName, arg2);
 				}
-				
+
 			};
 			dmc.initialize();
 			goo.setMetaClass(dmc);
 		}
 	}
-	
+
 }
