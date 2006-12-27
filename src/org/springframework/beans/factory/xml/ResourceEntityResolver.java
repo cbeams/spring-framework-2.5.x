@@ -18,7 +18,6 @@ package org.springframework.beans.factory.xml;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 
@@ -30,9 +29,9 @@ import org.springframework.core.io.ResourceLoader;
 
 /**
  * EntityResolver implementation that tries to resolve entity references
- * through a ResourceLoader (usually, relative to the resource base of an
- * ApplicationContext), if applicable. Extends BeansDtdResolver to also
- * provide DTD lookup in the class path.
+ * through a {@link org.springframework.core.io.ResourceLoader} (usually,
+ * relative to the resource base of an ApplicationContext), if applicable.
+ * Extends {@link DelegatingEntityResolver} to also provide DTD and XSD lookup.
  *
  * <p>Allows to use standard XML entities to include XML snippets into an
  * application context definition, for example to split a large XML file
@@ -74,13 +73,17 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 				String decodedSystemId = URLDecoder.decode(systemId);
 				String givenUrl = new URL(decodedSystemId).toString();
 				String systemRootUrl = new File("").toURL().toString();
-				// try relative to resource base if currently in system root
+				// Try relative to resource base if currently in system root.
 				if (givenUrl.startsWith(systemRootUrl)) {
 					resourcePath = givenUrl.substring(systemRootUrl.length());
 				}
 			}
-			catch (MalformedURLException ex) {
-				// no URL -> try relative to resource base
+			catch (Exception ex) {
+				// Typically a MalformedURLException or AccessControlException.
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not resolve XML entity [" + systemId + "] against system root URL", ex);
+				}
+				// No URL (or no resolvable URL) -> try relative to resource base.
 				resourcePath = systemId;
 			}
 			if (resourcePath != null) {
