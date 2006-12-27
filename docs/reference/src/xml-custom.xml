@@ -504,7 +504,7 @@ public class JCacheInitializer {
             targetNamespace="http://www.foo.com/schema/jcache"
             elementFormDefault="qualified">
 
-   <xsd:attribute name="jcache-name" type="xsd:string"/>
+   <xsd:attribute name="cache-name" type="xsd:string"/>
 
 </xsd:schema>
 ]]></programlisting>
@@ -516,7 +516,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 public class JCacheNamespaceHandler extends NamespaceHandlerSupport {
 
    public void init() {
-      super.registerBeanDefinitionDecoratorForAttribute("jcache-name",
+      super.registerBeanDefinitionDecoratorForAttribute("cache-name",
             new JCacheInitializingBeanDefinitionDecorator());
    }
 }
@@ -590,7 +590,7 @@ http\://www.foo.com/schema/jcache/jcache.xsd=com/foo/jcache.xsd]]></programlisti
 				<para>The <ulink url="http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/">XML Schema Part 1: Structures Second Edition</ulink></para>
 			</listitem>
 			<listitem>
-				<para>The <ulink url="http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/">XXML Schema Part 2: Datatypes Second Edition</ulink></para>
+				<para>The <ulink url="http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/">XML Schema Part 2: Datatypes Second Edition</ulink></para>
 			</listitem>
 		</itemizedlist>
 	</section>
