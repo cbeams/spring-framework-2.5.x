@@ -246,7 +246,7 @@
       surrounding object at all, it just needs to provide a Hibernate
       <interfacename>SessionFactory</interfacename>. It can get the latter
       from anywhere, but preferably as bean reference from a Spring
-      application context - via a simple
+      IoC container - via a simple
       <methodname>setSessionFactory(..)</methodname> bean property setter. The
       following snippets show a DAO definition in a Spring container, referencing the
       above defined <interfacename>SessionFactory</interfacename>, and an example
@@ -268,18 +268,39 @@
         this.hibernateTemplate = new HibernateTemplate(sessionFactory);
     }
 
-    public Collection loadProductsByCategory(final String category) throws DataAccessException {
-        return (Collection) this.hibernateTemplate.execute(new HibernateCallback() {
-            public Object doInHibernate(Session session) throws HibernateException {
-                Query query = session.createQuery("from test.Product product where product.category=?");
-                query.setString(0, category);
-                return query.list();
-            }
-        });
+    public Collection loadProductsByCategory(String category) throws DataAccessException {
+    	return this.hibernateTemplate.find("from test.Product product where product.category=?", category);
     }
 }]]></programlisting>
 
-      <para>A callback implementation can effectively be used for any
+	  <para>The <classname>HibernateTemplate</classname> class provides many methods
+	  that mirror the methods exposed on the Hibernate <interfacename>Session</interfacename>
+	  interface, in addition to a number of convenience methods such as the one shown above.
+	  If you need access to the <interfacename>Session</interfacename> to invoke
+	  methods that are not exposed on the <classname>HibernateTemplate</classname>, you
+	  can always drop down to a callback-based approach like so.</para>
+
+      <programlisting><![CDATA[public class ProductDaoImpl implements ProductDao {
+
+    private HibernateTemplate hibernateTemplate;
+
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        this.hibernateTemplate = new HibernateTemplate(sessionFactory);
+    }
+
+    public Collection loadProductsByCategory(final String category) throws DataAccessException {
+        return this.hibernateTemplate.execute(new HibernateCallback() {
+            public Object doInHibernate(Session session) {
+                Criteria criteria = session.createCriteria(Product.class);
+                criteria.add(Expression.eq("category", category));
+                criteria.setMaxResults(6);
+                return criteria.list();
+            }
+        };
+    }
+}]]></programlisting>
+
+	  <para>A callback implementation effectively can be used for any
       Hibernate data access. <classname>HibernateTemplate</classname> will
       ensure that <interfacename>Session</interfacename> instances are
       properly opened and closed, and automatically participate in
@@ -382,8 +403,8 @@
     }
 }]]></programlisting>
 
-      <para>This Hibernate access style is very similar to what you will find
-      in the Hibernate documentation and examples, except for holding the
+      <para>This style is very similar to what you will find in the Hibernate
+	  reference documentation and examples, except for holding the
       <interfacename>SessionFactory</interfacename> in an instance variable.
       We strongly recommend such an instance-based setup over the old-school
       <literal>static</literal> <classname>HibernateUtil</classname> class
@@ -391,14 +412,13 @@
       keep any resources in <literal>static</literal> variables unless
       <emphasis>absolutely</emphasis> necessary.)</para>
 
-      <para>Our DAO above follows the Dependency Injection pattern: it still
-      fits nicely into a Spring application context, just like it would if
-      coded against Spring's <classname>HibernateTemplate</classname>.
-      Concretely, it uses Setter Injection; if desired, it could use
-      Constructor Injection instead. Of course, such a DAO can also be set up
-      in plain Java (for example, in unit tests): simply instantiate it and
-      call <methodname>setSessionFactory(..)</methodname> with the desired factory
-      reference. As a Spring bean definition, it would look as follows:</para>
+      <para>The above DAO follows the Dependency Injection pattern: it fits
+      nicely into a Spring IoC container, just like it would if
+      coded against Spring's <classname>HibernateTemplate</classname>. Of course,
+      such a DAO can also be set up in plain Java (for example, in unit tests):
+	  simply instantiate it and call <methodname>setSessionFactory(..)</methodname>
+	  with the desired factory reference. As a Spring bean definition, it would
+      look as follows:</para>
 
       <programlisting><![CDATA[<beans>
 
