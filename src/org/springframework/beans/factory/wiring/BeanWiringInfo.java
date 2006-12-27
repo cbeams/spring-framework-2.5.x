@@ -57,7 +57,7 @@ public class BeanWiringInfo {
 	 * @throws IllegalArgumentException if the supplied beanName is <code>null</code>, is empty, or consists wholly of whitespace
 	 */
 	public BeanWiringInfo(String beanName) {
-		Assert.hasText(beanName, "Bean name must not be null, empty, or consist wholly of whitespace");
+		Assert.hasText(beanName, "'beanName' must not be empty");
 		this.beanName = beanName;
 	}
 

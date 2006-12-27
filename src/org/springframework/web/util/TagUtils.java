@@ -126,8 +126,8 @@ public abstract class TagUtils {
 	 * @see #hasAncestorOfType(javax.servlet.jsp.tagext.Tag, Class)
 	 */
 	public static void assertHasAncestorOfType(Tag tag, Class ancestorTagClass, String tagName, String ancestorTagName) {
-		Assert.hasText(tagName, "The 'tagName' argument cannot be null or composed wholly of whitespace");
-		Assert.hasText(ancestorTagName, "The 'ancestorTagName' argument cannot be null or composed wholly of whitespace");
+		Assert.hasText(tagName, "'tagName' must not be empty");
+		Assert.hasText(ancestorTagName, "'ancestorTagName' must not be empty");
 		if (!TagUtils.hasAncestorOfType(tag, ancestorTagClass)) {
 			throw new IllegalStateException("The '" + tagName + "' tag can only be used inside a valid '" + ancestorTagName + "' tag.");
 		}

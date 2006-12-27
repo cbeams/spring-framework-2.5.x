@@ -40,7 +40,7 @@ public class RuntimeBeanNameReference implements BeanReference {
 	 * @param beanName name of the target bean
 	 */
 	public RuntimeBeanNameReference(String beanName) {
-		Assert.hasText(beanName, "Bean name must not be empty");
+		Assert.hasText(beanName, "'beanName' must not be empty");
 		this.beanName = beanName;
 	}
 

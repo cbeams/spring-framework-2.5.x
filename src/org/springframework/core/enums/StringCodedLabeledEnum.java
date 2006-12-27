@@ -44,7 +44,7 @@ public class StringCodedLabeledEnum extends AbstractGenericLabeledEnum {
 	 */
 	public StringCodedLabeledEnum(String code, String label) {
 		super(label);
-		Assert.hasText(code, "code is required");
+		Assert.hasText(code, "'code' must not be empty");
 		this.code = code;
 	}
 

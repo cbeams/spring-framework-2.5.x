@@ -87,7 +87,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 * @throws IllegalArgumentException if the supplied parameter value is <code>null</code> or composed wholly of whitespace
 	 */
 	public void setMaxlength(String maxlength) {
-		Assert.hasText(maxlength, "'maxlength' cannot be null or zero length.");
+		Assert.hasText(maxlength, "'maxlength' must not be empty");
 		this.maxlength = maxlength;
 	}
 
@@ -105,7 +105,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 * @throws IllegalArgumentException if the supplied parameter value is <code>null</code> or composed wholly of whitespace
 	 */
 	public void setAlt(String alt) {
-		Assert.hasText(alt, "'alt' cannot be null or zero length.");
+		Assert.hasText(alt, "'alt' must not be empty");
 		this.alt = alt;
 	}
 
@@ -123,7 +123,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 * @throws IllegalArgumentException if the supplied parameter value is <code>null</code> or composed wholly of whitespace 
 	 */
 	public void setOnselect(String onselect) {
-		Assert.hasText(onselect, "'onselect' cannot be null or zero length.");
+		Assert.hasText(onselect, "'onselect' must not be empty");
 		this.onselect = onselect;
 	}
 
@@ -140,7 +140,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 * May be a runtime expression.
 	 */
 	public void setSize(String size) {
-		Assert.hasText(size, "'size' cannot be null or zero length.");
+		Assert.hasText(size, "'size' must not be empty");
 		this.size = size;
 	}
 

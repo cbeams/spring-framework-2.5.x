@@ -117,7 +117,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * <p>May be a runtime expression.
 	 */
 	public void setItemValue(String itemValue) {
-		Assert.hasText(itemValue, "'itemValue' cannot be null or zero length.");
+		Assert.hasText(itemValue, "'itemValue' must not be empty");
 		this.itemValue = itemValue;
 	}
 
@@ -138,7 +138,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * <code>null</code> or consists wholly of whitespace
 	 */
 	public void setItemLabel(String itemLabel) {
-		Assert.hasText(itemLabel, "'itemLabel' cannot be null or zero length.");
+		Assert.hasText(itemLabel, "'itemLabel' must not be empty");
 		this.itemLabel = itemLabel;
 	}
 
@@ -159,7 +159,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * <code>null</code> or consists wholly of whitespace
 	 */
 	public void setSize(String size) {
-		Assert.hasText(size, "'size' cannot be null or zero length.");
+		Assert.hasText(size, "'size' must not be empty");
 		this.size = size;
 	}
 

@@ -65,7 +65,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 * @throws IllegalArgumentException if the supplied path is <code>null</code> or composed wholly of whitespace 
 	 */
 	public void setPath(String path) {
-		Assert.hasText(path, "'path' cannot be null or zero length.");
+		Assert.hasText(path, "'path' must not be empty");
 		this.path = path;
 	}
 

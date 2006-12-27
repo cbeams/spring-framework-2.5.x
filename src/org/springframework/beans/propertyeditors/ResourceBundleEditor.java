@@ -80,7 +80,7 @@ public class ResourceBundleEditor extends PropertyEditorSupport {
 
 
 	public void setAsText(String text) throws IllegalArgumentException {
-		Assert.hasText(text);
+		Assert.hasText(text, "'text' must not be empty");
 		ResourceBundle bundle;
 		String rawBaseName = text.trim();
 		int indexOfBaseNameSeparator = rawBaseName.indexOf(BASE_NAME_SEPARATOR);

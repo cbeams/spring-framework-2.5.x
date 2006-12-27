@@ -76,7 +76,7 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 
 		protected void doParse(Element element, BeanDefinitionBuilder builder) {
 			String path = element.getAttribute("path");
-			Assert.hasText(path, "Attribute 'path' must not be null or zero length");
+			Assert.hasText(path, "Attribute 'path' must not be empty");
 			int dotIndex = path.indexOf(".");
 			if (dotIndex == -1) {
 				throw new IllegalArgumentException("Attribute 'path' must follow pattern 'beanName.propertyName'");

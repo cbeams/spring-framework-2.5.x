@@ -642,8 +642,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	}
 
 	public void registerAlias(String beanName, String alias) throws BeanDefinitionStoreException {
-		Assert.hasText(beanName, "Bean name must not be empty");
-		Assert.hasText(alias, "Alias must not be empty");
+		Assert.hasText(beanName, "'beanName' must not be empty");
+		Assert.hasText(alias, "'alias' must not be empty");
 		if (!alias.equals(beanName)) {
 			// Only actually register the alias if it is not equal to the bean name itself.
 			if (logger.isDebugEnabled()) {

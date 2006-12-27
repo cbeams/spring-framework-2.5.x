@@ -48,7 +48,7 @@ public class DefaultScopedObject implements ScopedObject {
 	 */
 	public DefaultScopedObject(ConfigurableBeanFactory beanFactory, String targetBeanName) {
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
-		Assert.hasText(targetBeanName, "Target bean name must not be null or consist wholly of whitespace");
+		Assert.hasText(targetBeanName, "'targetBeanName' must not be empty");
 		this.beanFactory = beanFactory;
 		this.targetBeanName = targetBeanName;
 	}

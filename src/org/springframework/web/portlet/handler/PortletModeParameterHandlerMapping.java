@@ -107,7 +107,7 @@ public class PortletModeParameterHandlerMapping extends AbstractMapBasedHandlerM
 	 * <p>Default is "action".
 	 */
 	public void setParameterName(String parameterName) {
-		Assert.hasText(parameterName, "parameterName must not be null or empty");
+		Assert.hasText(parameterName, "'parameterName' must not be empty");
 		this.parameterName = parameterName;
 	}
 

@@ -77,7 +77,7 @@ public class GroovyScriptFactory implements ScriptFactory {
 	 * @throws IllegalArgumentException if the supplied String is empty
 	 */
 	public GroovyScriptFactory(String scriptSourceLocator, GroovyObjectCustomizer groovyObjectCustomizer) {
-		Assert.hasText(scriptSourceLocator);
+		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");
 		this.scriptSourceLocator = scriptSourceLocator;
 		this.groovyObjectCustomizer = groovyObjectCustomizer;
 	}

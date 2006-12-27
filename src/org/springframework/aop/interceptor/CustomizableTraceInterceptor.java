@@ -192,7 +192,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * or contains any invalid placeholders
 	 */
 	public void setEnterMessage(String enterMessage) throws IllegalArgumentException {
-		Assert.hasText(enterMessage, "enterMessage cannot be <code>null</code> or zero length");
+		Assert.hasText(enterMessage, "'enterMessage' must not be empty");
 		checkForInvalidPlaceholders(enterMessage);
 		Assert.doesNotContain(enterMessage, PLACEHOLDER_RETURN_VALUE,
 				"enterMessage cannot contain placeholder [" + PLACEHOLDER_RETURN_VALUE + "]");
@@ -218,7 +218,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * or contains any invalid placeholders
 	 */
 	public void setExitMessage(String exitMessage) {
-		Assert.hasText(exitMessage, "exitMessage cannot be <code>null</code> or zero length");
+		Assert.hasText(exitMessage, "'exitMessage' must not be empty");
 		checkForInvalidPlaceholders(exitMessage);
 		Assert.doesNotContain(exitMessage, PLACEHOLDER_EXCEPTION,
 				"exitMessage cannot contain placeholder [" + PLACEHOLDER_EXCEPTION + "]");
@@ -239,7 +239,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * or contains any invalid placeholders
 	 */
 	public void setExceptionMessage(String exceptionMessage) {
-		Assert.hasText(exceptionMessage, "exceptionMessage cannot be <code>null</code> or zero length");
+		Assert.hasText(exceptionMessage, "'exceptionMessage' must not be empty");
 		checkForInvalidPlaceholders(exceptionMessage);
 		Assert.doesNotContain(exceptionMessage, PLACEHOLDER_RETURN_VALUE,
 				"exceptionMessage cannot contain placeholder [" + PLACEHOLDER_RETURN_VALUE + "]");

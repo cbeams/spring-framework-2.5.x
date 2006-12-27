@@ -194,7 +194,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * May be a runtime expression.
 	 */
 	public void setMethod(String method) {
-		Assert.hasText(method, "'method' cannot be null or zero length");
+		Assert.hasText(method, "'method' must not be empty");
 		this.method = method;
 	}
 
@@ -211,7 +211,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * May be a runtime expression.
 	 */
 	public void setEnctype(String enctype) {
-		Assert.hasText(enctype, "'enctype' cannot be null or zero length");
+		Assert.hasText(enctype, "'enctype' must not be empty");
 		this.enctype = enctype;
 	}
 
@@ -228,7 +228,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * May be a runtime expression.
 	 */
 	public void setOnsubmit(String onsubmit) {
-		Assert.hasText(onsubmit, "'onsubmit' cannot be null or zero length");
+		Assert.hasText(onsubmit, "'onsubmit' must not be empty");
 		this.onsubmit = onsubmit;
 	}
 
@@ -245,7 +245,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * May be a runtime expression.
 	 */
 	public void setOnreset(String onreset) {
-		Assert.hasText(onreset, "'onreset' cannot be null or zero length");
+		Assert.hasText(onreset, "'onreset' must not be empty");
 		this.onreset = onreset;
 	}
 

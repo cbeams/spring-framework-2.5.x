@@ -52,7 +52,7 @@ public class StaticScriptSource implements ScriptSource {
 	 * @throws IllegalArgumentException if the supplied <code>script</code> is <code>null</code>
 	 */
 	public void setScript(String script) {
-		Assert.hasText(script, "Script must not be null");
+		Assert.hasText(script, "'script' must not be empty");
 		this.modified = !script.equals(this.script);
 		this.script = script;
 	}

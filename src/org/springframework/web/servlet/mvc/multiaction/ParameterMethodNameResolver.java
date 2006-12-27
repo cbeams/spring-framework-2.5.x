@@ -111,7 +111,7 @@ public class ParameterMethodNameResolver implements MethodNameResolver {
 	 */
 	public void setParamName(String paramName) {
 		if (paramName != null) {
-			Assert.hasText(paramName, "paramName must not be empty");
+			Assert.hasText(paramName, "'paramName' must not be empty");
 		}
 		this.paramName = paramName;
 	}
@@ -151,7 +151,7 @@ public class ParameterMethodNameResolver implements MethodNameResolver {
 	 */
 	public void setDefaultMethodName(String defaultMethodName) {
 		if (defaultMethodName != null) {
-			Assert.hasText(defaultMethodName, "defaultMethodName must not be empty");
+			Assert.hasText(defaultMethodName, "'defaultMethodName' must not be empty");
 		}
 		this.defaultMethodName = defaultMethodName;
 	}

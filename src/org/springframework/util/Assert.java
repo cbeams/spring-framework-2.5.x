@@ -151,7 +151,7 @@ public abstract class Assert {
 	/**
 	 * Assert that a string has valid text content; that is, it must not be <code>null</code>
 	 * and must contain at least one non-whitespace character.
-	 * <pre class="code">Assert.hasText(name, "Name must not be empty");</pre>
+	 * <pre class="code">Assert.hasText(name, "'name' must not be empty");</pre>
 	 * @param text the string to check
 	 * @param message the exception message to use if the assertion fails
 	 * @see StringUtils#hasText
@@ -165,7 +165,7 @@ public abstract class Assert {
 	/**
 	 * Assert that a string has valid text content; that is, it must not be <code>null</code>
 	 * and must contain at least one non-whitespace character.
-	 * <pre class="code">Assert.hasText(name, "Name must not be empty");</pre>
+	 * <pre class="code">Assert.hasText(name, "'name' must not be empty");</pre>
 	 * @param text the string to check
 	 * @see StringUtils#hasText
 	 */

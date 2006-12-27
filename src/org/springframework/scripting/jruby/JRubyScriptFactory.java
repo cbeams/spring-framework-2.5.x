@@ -59,7 +59,7 @@ public class JRubyScriptFactory implements ScriptFactory {
 	 * or if the supplied <code>scriptInterfaces</code> argument array has no elements
 	 */
 	public JRubyScriptFactory(String scriptSourceLocator, Class[] scriptInterfaces) {
-		Assert.hasText(scriptSourceLocator);
+		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");
 		Assert.notEmpty(scriptInterfaces);
 		this.scriptSourceLocator = scriptSourceLocator;
 		this.scriptInterfaces = scriptInterfaces;

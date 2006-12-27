@@ -55,7 +55,7 @@ public class RuntimeBeanReference implements BeanReference {
 	 * a bean in the parent factory
 	 */
 	public RuntimeBeanReference(String beanName, boolean toParent) {
-		Assert.hasText(beanName, "Bean name must not be empty");
+		Assert.hasText(beanName, "'beanName' must not be empty");
 		this.beanName = beanName;
 		this.toParent = toParent;
 	}

@@ -85,7 +85,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
 
 	public void registerSingleton(String beanName, Object sharedBean) throws IllegalStateException {
-		Assert.hasText(beanName, "Bean name must not be empty");
+		Assert.hasText(beanName, "'beanName' must not be empty");
 		Assert.notNull(sharedBean, "Singleton object must not be null");
 		synchronized (this.singletonCache) {
 			Object oldObject = this.singletonCache.get(beanName);
@@ -105,7 +105,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 * @param sharedBean the singleton object
 	 */
 	protected void addSingleton(String beanName, Object sharedBean) {
-		Assert.hasText(beanName, "Bean name must not be empty");
+		Assert.hasText(beanName, "'beanName' must not be empty");
 		synchronized (this.singletonCache) {
 			this.singletonCache.put(beanName, sharedBean);
 		}
@@ -155,12 +155,12 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	 * @param beanName the name of the bean
 	 */
 	protected void removeSingleton(String beanName) {
-		Assert.hasText(beanName, "Bean name must not be empty");
+		Assert.hasText(beanName, "'beanName' must not be empty");
 		this.singletonCache.remove(beanName);
 	}
 
 	public boolean containsSingleton(String beanName) {
-		Assert.hasText(beanName, "Bean name must not be empty");
+		Assert.hasText(beanName, "'beanName' must not be empty");
 		synchronized (this.singletonCache) {
 			return this.singletonCache.containsKey(beanName);
 		}

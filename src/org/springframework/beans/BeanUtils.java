@@ -249,7 +249,7 @@ public abstract class BeanUtils {
 	 * @see #findMethodWithMinimalParameters
 	 */
 	public static Method resolveSignature(String signature, Class clazz) {
-		Assert.hasText(signature, "Signature must not be null or empty");
+		Assert.hasText(signature, "'signature' must not be empty");
 		Assert.notNull(clazz, "Class must not be null");
 
 		int firstParen = signature.indexOf("(");

@@ -89,7 +89,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 	 * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)
 	 */
 	public PluggableSchemaResolver(ClassLoader classLoader, String schemaMappingsLocation) {
-		Assert.hasText(schemaMappingsLocation, "Schema mappings location must not be empty");
+		Assert.hasText(schemaMappingsLocation, "'schemaMappingsLocation' must not be empty");
 		this.classLoader = classLoader;
 		if (logger.isDebugEnabled()) {
 			logger.debug("Loading schema mappings from [" + schemaMappingsLocation + "]");

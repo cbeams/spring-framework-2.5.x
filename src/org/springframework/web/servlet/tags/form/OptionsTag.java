@@ -88,7 +88,7 @@ public class OptionsTag extends AbstractFormTag {
 	 * is <code>null</code> or consists wholly of whitespace
 	 */
 	public void setItemValue(String itemValue) {
-		Assert.hasText(itemValue, "'itemValue' cannot be null or zero length.");
+		Assert.hasText(itemValue, "'itemValue' must not be empty");
 		this.itemValue = itemValue;
 	}
 
@@ -105,7 +105,7 @@ public class OptionsTag extends AbstractFormTag {
 	 * <code>null</code> or consists wholly of whitespace
 	 */
 	public void setItemLabel(String itemLabel) {
-		Assert.hasText(itemLabel, "'itemLabel' cannot be null or zero length.");
+		Assert.hasText(itemLabel, "'itemLabel' must not be empty");
 		this.itemLabel = itemLabel;
 	}
 
