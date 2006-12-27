@@ -20,11 +20,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.web.util.UrlPathHelper;
-import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.util.StringUtils;
-
 import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.HandlerMapping;
 
 /**
  * Simple <code>Controller</code> implementation that transforms the virtual
@@ -52,8 +51,6 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class UrlFilenameViewController extends AbstractUrlViewController {
 
-	private final UrlPathHelper urlPathHelper = new UrlPathHelper();
-
 	private String prefix = "";
 
 	private String suffix = "";
@@ -74,7 +71,7 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	 * Return the prefix to prepend to the request URL filename.
 	 */
 	protected String getPrefix() {
-		return prefix;
+		return this.prefix;
 	}
 
 	/**
@@ -89,7 +86,7 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	 * Return the suffix to append to the request URL filename.
 	 */
 	protected String getSuffix() {
-		return suffix;
+		return this.suffix;
 	}
 
 
@@ -101,22 +98,40 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	 * @see #setSuffix
 	 */
 	protected String getViewNameForRequest(HttpServletRequest request) {
-		String urlPath = extractOperableUrl(request);
-		String viewName = (String) this.viewNameCache.get(urlPath);
-		if (viewName == null) {
-			viewName = extractViewNameFromUrlPath(urlPath);
-			viewName = postProcessViewName(viewName);
-			this.viewNameCache.put(urlPath, viewName);
-		}
-		return viewName;
+		String uri = extractOperableUrl(request);
+		return getViewNameForUrlPath(uri);
 	}
 
+	/**
+	 * Extract a URL path from the given request,
+	 * suitable for view name extraction.
+	 * @param request current HTTP request
+	 * @return the URL to use for view name extraction
+	 */
 	protected String extractOperableUrl(HttpServletRequest request) {
 		String urlPath = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
-		if(!StringUtils.hasText(urlPath)) {
-			urlPath = this.urlPathHelper.getPathWithinApplication(request);
+		if (!StringUtils.hasText(urlPath)) {
+			urlPath = getUrlPathHelper().getLookupPathForRequest(request);
 		}
 		return urlPath;
+	}
+
+	/**
+	 * Returns view name based on the URL filename,
+	 * with prefix/suffix applied when appropriate.
+	 * @param uri the request URI; for example <code>"/index.html"</code>
+	 * @return the extracted URI filename; for example <code>"index"</code>
+	 * @see #extractViewNameFromUrlPath
+	 * @see #postProcessViewName
+	 */
+	protected String getViewNameForUrlPath(String uri) {
+		String viewName = (String) this.viewNameCache.get(uri);
+		if (viewName == null) {
+			viewName = extractViewNameFromUrlPath(uri);
+			viewName = postProcessViewName(viewName);
+			this.viewNameCache.put(uri, viewName);
+		}
+		return viewName;
 	}
 
 	/**
