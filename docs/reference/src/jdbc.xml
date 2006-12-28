@@ -882,11 +882,11 @@ public class UpdateCreditRating extends SqlUpdate {
         compile();
     }
 
-    <lineannotation>/**
+    /**
      * @param id for the Customer to be updated
      * @param rating the new value for credit rating
      * @return number of rows updated
-     */</lineannotation>
+     */
     public int run(int id, int rating) {
         Object[] params =
             new Object[] {
