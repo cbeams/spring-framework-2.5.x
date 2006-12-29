@@ -22,6 +22,7 @@ import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
@@ -29,6 +30,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class RequestScopeTests extends TestCase {
@@ -40,6 +42,7 @@ public class RequestScopeTests extends TestCase {
 		this.beanFactory.registerScope("request", new RequestScope());
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.loadBeanDefinitions(new ClassPathResource("requestScopeTests.xml", getClass()));
+		this.beanFactory.preInstantiateSingletons();
 	}
 
 	public void testGetFromScope() throws Exception {
@@ -51,7 +54,7 @@ public class RequestScopeTests extends TestCase {
 			String name = "requestScopedObject";
 			assertNull(request.getAttribute(name));
 			TestBean bean = (TestBean) this.beanFactory.getBean(name);
-			assertEquals(request.getAttribute(name), bean);
+			assertSame(bean, request.getAttribute(name));
 			assertSame(bean, this.beanFactory.getBean(name));
 		}
 		finally {
@@ -68,11 +71,28 @@ public class RequestScopeTests extends TestCase {
 			String name = "requestScopedDisposableObject";
 			assertNull(request.getAttribute(name));
 			DerivedTestBean bean = (DerivedTestBean) this.beanFactory.getBean(name);
-			assertEquals(request.getAttribute(name), bean);
+			assertSame(bean, request.getAttribute(name));
 			assertSame(bean, this.beanFactory.getBean(name));
 
 			requestAttributes.requestCompleted();
 			assertTrue(bean.wasDestroyed());
+		}
+		finally {
+			RequestContextHolder.setRequestAttributes(null);
+		}
+	}
+
+	public void testGetFromFactoryBeanInScope() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		RequestAttributes requestAttributes = new ServletRequestAttributes(request);
+		RequestContextHolder.setRequestAttributes(requestAttributes);
+
+		try {
+			String name = "requestScopedFactoryBean";
+			assertNull(request.getAttribute(name));
+			TestBean bean = (TestBean) this.beanFactory.getBean(name);
+			assertTrue(request.getAttribute(name) instanceof FactoryBean);
+			assertSame(bean, this.beanFactory.getBean(name));
 		}
 		finally {
 			RequestContextHolder.setRequestAttributes(null);

@@ -7,6 +7,8 @@
 
 	<bean id="requestScopedDisposableObject" class="org.springframework.beans.DerivedTestBean" scope="request"/>
 
+	<bean id="requestScopedFactoryBean" class="org.springframework.beans.factory.DummyFactory" scope="request"/>
+
 	<bean id="requestScopedObjectCircle1" class="org.springframework.beans.TestBean" scope="request">
 		<property name="spouse" ref="requestScopedObjectCircle2"/>
 	</bean>
