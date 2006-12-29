@@ -16,10 +16,13 @@
 
 package org.springframework.scripting.groovy;
 
+import java.io.FileNotFoundException;
+
 import groovy.lang.DelegatingMetaClass;
 import groovy.lang.GroovyObject;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.beans.factory.BeanCreationException;
@@ -35,11 +38,7 @@ import org.springframework.scripting.ScriptSource;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 import org.springframework.test.AssertThrows;
 
-import java.io.FileNotFoundException;
-
 /**
- * Unit tests for the {@link GroovyScriptFactory} class.
- *
  * @author Rob Harrop
  * @author Rick Evans
  * @author Rod Johnson
@@ -331,13 +330,14 @@ public final class GroovyScriptFactoryTests extends TestCase {
 
 		public void customize(GroovyObject goo) {
 			DelegatingMetaClass dmc = new DelegatingMetaClass(goo.getMetaClass()) {
-
 				public Object invokeMethod(Object arg0, String mName, Object[] arg2) {
 					if (mName.indexOf("Missing") != -1) {
 						throw new IllegalStateException("Gotcha");
-					} else return super.invokeMethod(arg0, mName, arg2);
+					}
+					else {
+						return super.invokeMethod(arg0, mName, arg2);
+					}
 				}
-
 			};
 			dmc.initialize();
 			goo.setMetaClass(dmc);
