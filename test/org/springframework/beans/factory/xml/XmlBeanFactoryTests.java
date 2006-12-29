@@ -131,11 +131,16 @@ public class XmlBeanFactoryTests extends TestCase {
 			inputStream.close();
 		}
 
+		// Let's create the outer bean named "innerBean",
+		// to check whether it doesn't create any conflicts
+		// with the actual inner beans named "innerBean".
+		xbf.getBean("innerBean");
+
 		TestBean hasInnerBeans = (TestBean) xbf.getBean("hasInnerBeans");
 		assertEquals(5, hasInnerBeans.getAge());
 		TestBean inner1 = (TestBean) hasInnerBeans.getSpouse();
 		assertNotNull(inner1);
-		assertEquals("innerBean", inner1.getBeanName());
+		assertEquals("innerBean#1", inner1.getBeanName());
 		assertEquals("inner1", inner1.getName());
 		assertEquals(6, inner1.getAge());
 
@@ -145,13 +150,13 @@ public class XmlBeanFactoryTests extends TestCase {
 		DerivedTestBean inner2 = (DerivedTestBean) friends[0];
 		assertEquals("inner2", inner2.getName());
 		assertTrue(inner2.getBeanName().startsWith(DerivedTestBean.class.getName()));
-		assertFalse(xbf.containsBean("innerBean"));
+		assertFalse(xbf.containsBean("innerBean#1"));
 		assertNotNull(inner2);
 		assertEquals(7, inner2.getAge());
 		TestBean innerFactory = (TestBean) friends[1];
 		assertEquals(DummyFactory.SINGLETON_NAME, innerFactory.getName());
 		TestBean inner5 = (TestBean) friends[2];
-		assertEquals("innerBean#1", inner5.getBeanName());
+		assertEquals("innerBean#2", inner5.getBeanName());
 
 		assertNotNull(hasInnerBeans.getSomeMap());
 		assertEquals(2, hasInnerBeans.getSomeMap().size());
@@ -165,7 +170,7 @@ public class XmlBeanFactoryTests extends TestCase {
 		TestBean hasInnerBeansForConstructor = (TestBean) xbf.getBean("hasInnerBeansForConstructor");
 		TestBean innerForConstructor = (TestBean) hasInnerBeansForConstructor.getSpouse();
 		assertNotNull(innerForConstructor);
-		assertEquals("innerBean#2", innerForConstructor.getBeanName());
+		assertEquals("innerBean#3", innerForConstructor.getBeanName());
 		assertEquals("inner1", innerForConstructor.getName());
 		assertEquals(6, innerForConstructor.getAge());
 
@@ -182,6 +187,11 @@ public class XmlBeanFactoryTests extends TestCase {
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
 		reader.loadBeanDefinitions(new ClassPathResource("reftypes.xml", getClass()));
 
+		// Let's create the outer bean named "innerBean",
+		// to check whether it doesn't create any conflicts
+		// with the actual inner beans named "innerBean".
+		xbf.getBean("innerBean");
+
 		TestBean hasInnerBeans = (TestBean) xbf.getBean("hasInnerBeansWithoutDestroy");
 		assertEquals(5, hasInnerBeans.getAge());
 		TestBean inner1 = (TestBean) hasInnerBeans.getSpouse();
@@ -196,13 +206,12 @@ public class XmlBeanFactoryTests extends TestCase {
 		DerivedTestBean inner2 = (DerivedTestBean) friends[0];
 		assertEquals("inner2", inner2.getName());
 		assertTrue(inner2.getBeanName().startsWith(DerivedTestBean.class.getName()));
-		assertFalse(xbf.containsBean("innerBean"));
 		assertNotNull(inner2);
 		assertEquals(7, inner2.getAge());
 		TestBean innerFactory = (TestBean) friends[1];
 		assertEquals(DummyFactory.SINGLETON_NAME, innerFactory.getName());
 		TestBean inner5 = (TestBean) friends[2];
-		assertEquals("innerBean#1", inner5.getBeanName());
+		assertEquals("innerBean", inner5.getBeanName());
 	}
 
 	public void testFailsOnInnerBean() {

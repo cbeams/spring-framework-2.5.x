@@ -38,6 +38,12 @@
 		<property name="spouse" ref="ego"/>
 	</bean>
 
+	<!-- This bean must not conflict with the actual inner beans named "innerBean" -->
+	<bean id="innerBean" class="org.springframework.beans.TestBean" destroy-method="destroy">
+		<constructor-arg><value>outer</value></constructor-arg>
+		<constructor-arg type="int"><value>0</value></constructor-arg>
+	</bean>
+
 	<bean id="hasInnerBeans" class="org.springframework.beans.TestBean">
 		<constructor-arg><value>hasInner</value></constructor-arg>
 		<constructor-arg index="1" type="int"><value>5</value></constructor-arg>
@@ -91,7 +97,7 @@
 		<constructor-arg><value>hasInner</value></constructor-arg>
 		<constructor-arg index="1" type="int"><value>5</value></constructor-arg>
 		<property name="spouse">
-			<bean id="innerBean" class="org.springframework.beans.TestBean">
+			<bean id="innerBean" class="org.springframework.beans.TestBean" scope="prototype">
 				<constructor-arg><value>inner1</value></constructor-arg>
 				<constructor-arg type="int"><value>6</value></constructor-arg>
 			</bean>
@@ -103,7 +109,7 @@
 					<property name="age"><value>7</value></property>
 				</bean>
 				<bean id="innerBeanFactory" class="org.springframework.beans.factory.DummyFactory"/>
-				<bean id="innerBean" class="org.springframework.beans.TestBean">
+				<bean id="innerBean" class="org.springframework.beans.TestBean" scope="prototype">
 					<constructor-arg><value>inner5</value></constructor-arg>
 					<constructor-arg type="int"><value>6</value></constructor-arg>
 				</bean>
