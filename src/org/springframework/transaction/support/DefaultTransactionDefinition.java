@@ -135,7 +135,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	public final int getPropagationBehavior() {
-		return propagationBehavior;
+		return this.propagationBehavior;
 	}
 
 	/**
@@ -169,7 +169,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	public final int getIsolationLevel() {
-		return isolationLevel;
+		return this.isolationLevel;
 	}
 
 	/**
@@ -185,7 +185,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	public final int getTimeout() {
-		return timeout;
+		return this.timeout;
 	}
 
 	/**
@@ -197,7 +197,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	public final boolean isReadOnly() {
-		return readOnly;
+		return this.readOnly;
 	}
 
 	/**
@@ -210,7 +210,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	public final String getName() {
-		return name;
+		return this.name;
 	}
 
 
@@ -231,11 +231,15 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	/**
-	 * Return an identifying description of this transaction definition.
-	 * The format matches the one used by TransactionAttributeEditor,
-	 * to be able to feed toString results into TransactionAttribute properties.
-	 * <p>Has to be overridden in subclasses for correct equals and hashCode
-	 * behavior. Alternatively, equals and hashCode can be overridden themselves.
+	 * Return an identifying description for this transaction definition.
+	 * <p>The format matches the one used by
+	 * {@link org.springframework.transaction.interceptor.TransactionAttributeEditor},
+	 * to be able to feed <code>toString</code> results into bean properties of type
+	 * {@link org.springframework.transaction.interceptor.TransactionAttribute}.
+	 * <p>Has to be overridden in subclasses for correct <code>equals</code>
+	 * and <code>hashCode</code> behavior. Alternatively, {@link #equals}
+	 * and {@link #hashCode} can be overridden themselves.
+	 * @see #getDefinitionDescription()
 	 * @see org.springframework.transaction.interceptor.TransactionAttributeEditor
 	 */
 	public String toString() {
@@ -243,7 +247,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	/**
-	 * Return an identifying description of this transaction definition.
+	 * Return an identifying description for this transaction definition.
 	 * <p>Available to subclasses, for inclusion in their <code>toString()</code> result.
 	 */
 	protected final StringBuffer getDefinitionDescription() {
