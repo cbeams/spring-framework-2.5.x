@@ -59,7 +59,7 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, 
 
 
 	/**
-	 * Creates a new instance of the {@link ScopedProxyFactoryBean} class.
+	 * Create a new ScopedProxyFactoryBean instance.
 	 */
 	public ScopedProxyFactoryBean() {
 		setProxyTargetClass(true);
@@ -88,8 +88,11 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, 
 		pf.setTargetSource(this.scopedTargetSource);
 
 		Class beanType = beanFactory.getType(this.targetBeanName);
-		boolean isPrivate = Modifier.isPrivate(beanType.getModifiers());
-		if (isPrivate || beanType.isInterface() || !isProxyTargetClass()) {
+		if (beanType == null) {
+			throw new IllegalStateException("Cannot create scoped proxy for bean '" + this.targetBeanName +
+					"': Target type could not be determined at the time of proxy creation.");
+		}
+		if (Modifier.isPrivate(beanType.getModifiers()) || beanType.isInterface() || !isProxyTargetClass()) {
 			pf.setInterfaces(ClassUtils.getAllInterfacesForClass(beanType));
 		}
 
