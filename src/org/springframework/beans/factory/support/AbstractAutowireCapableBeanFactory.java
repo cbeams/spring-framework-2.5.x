@@ -510,50 +510,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * it will be fully created to check the type of its exposed object.
 	 */
 	protected Class getTypeForFactoryBean(String beanName, RootBeanDefinition mergedBeanDefinition) {
-		if (mergedBeanDefinition.isSingleton()) {
-			FactoryBean fb = null;
+		FactoryBean fb = (mergedBeanDefinition.isSingleton() ?
+				getSingletonFactoryBeanForTypeCheck(beanName, mergedBeanDefinition) :
+				getNonSingletonFactoryBeanForTypeCheck(beanName, mergedBeanDefinition));
 
-			synchronized (getSingletonMutex()) {
-				BeanWrapper bw = (BeanWrapper) this.factoryBeanInstanceCache.get(beanName);
-				if (bw != null) {
-					fb = (FactoryBean) bw.getWrappedInstance();
-				}
-				else {
-					if (isSingletonCurrentlyInCreation(beanName)) {
-						return null;
-					}
-					Object instance = null;
-					try {
-						// Mark this bean as currently in creation, even if just partially.
-						beforeSingletonCreation(beanName);
-						// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
-						Class beanClass = resolveBeanClass(mergedBeanDefinition, beanName);
-						if (beanClass != null && !mergedBeanDefinition.isSynthetic()) {
-							Object bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
-							if (bean != null) {
-								instance = applyBeanPostProcessorsAfterInitialization(bean, beanName);
-							}
-						}
-						if (instance == null) {
-							bw = createBeanInstance(beanName, mergedBeanDefinition, null);
-							instance = bw.getWrappedInstance();
-						}
-					}
-					finally {
-						// Finished partial creation of this bean.
-						afterSingletonCreation(beanName);
-					}
-					if (!(instance instanceof FactoryBean)) {
-						throw new BeanCreationException(beanName,
-								"Bean instance of type [" + instance.getClass() + "] is not a FactoryBean");
-					}
-					fb = (FactoryBean) instance;
-					if (bw != null) {
-						this.factoryBeanInstanceCache.put(beanName, bw);
-					}
-				}
-			}
-
+		if (fb != null) {
+			// Try to obtain the FactoryBean's object type from this early stage of the instance.
 			try {
 				Class type = fb.getObjectType();
 				if (type != null) {
@@ -564,7 +526,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				// Thrown from the FactoryBean's getObjectType implementation.
 				logger.warn("FactoryBean threw exception from getObjectType, despite the contract saying " +
 						"that it should return null if the type of its object cannot be determined yet", ex);
-				return null;
 			}
 		}
 
@@ -576,6 +537,97 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	//---------------------------------------------------------------------
 	// Implementation methods
 	//---------------------------------------------------------------------
+
+	/**
+	 * Obtain a "shortcut" singleton FactoryBean instance to use for a
+	 * <code>getObjectType()</code> call, without full initialization
+	 * of the FactoryBean.
+	 * @param beanName name of the bean
+	 * @param mbd the bean definition for the bean
+	 * @return the FactoryBean instance, or <code>null</code> to indicate
+	 * that we couldn't obtain a shortcut FactoryBean instance
+	 */
+	private FactoryBean getSingletonFactoryBeanForTypeCheck(String beanName, RootBeanDefinition mbd) {
+		synchronized (getSingletonMutex()) {
+			BeanWrapper bw = (BeanWrapper) this.factoryBeanInstanceCache.get(beanName);
+			if (bw != null) {
+				return (FactoryBean) bw.getWrappedInstance();
+			}
+			if (isSingletonCurrentlyInCreation(beanName)) {
+				return null;
+			}
+			Object instance = null;
+			try {
+				// Mark this bean as currently in creation, even if just partially.
+				beforeSingletonCreation(beanName);
+				// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+				Class beanClass = resolveBeanClass(mbd, beanName);
+				if (beanClass != null && !mbd.isSynthetic()) {
+					Object bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
+					if (bean != null) {
+						instance = applyBeanPostProcessorsAfterInitialization(bean, beanName);
+					}
+				}
+				if (instance == null) {
+					bw = createBeanInstance(beanName, mbd, null);
+					instance = bw.getWrappedInstance();
+				}
+			}
+			finally {
+				// Finished partial creation of this bean.
+				afterSingletonCreation(beanName);
+			}
+			if (!(instance instanceof FactoryBean)) {
+				throw new BeanCreationException(beanName,
+						"Bean instance of type [" + instance.getClass() + "] is not a FactoryBean");
+			}
+			if (bw != null) {
+				this.factoryBeanInstanceCache.put(beanName, bw);
+			}
+			return (FactoryBean) instance;
+		}
+	}
+
+	/**
+	 * Obtain a "shortcut" non-singleton FactoryBean instance to use for a
+	 * <code>getObjectType()</code> call, without full initialization
+	 * of the FactoryBean.
+	 * @param beanName name of the bean
+	 * @param mbd the bean definition for the bean
+	 * @return the FactoryBean instance, or <code>null</code> to indicate
+	 * that we couldn't obtain a shortcut FactoryBean instance
+	 */
+	private FactoryBean getNonSingletonFactoryBeanForTypeCheck(String beanName, RootBeanDefinition mbd) {
+		if (isPrototypeCurrentlyInCreation(beanName)) {
+			return null;
+		}
+		Object instance = null;
+		try {
+			// Mark this bean as currently in creation, even if just partially.
+			beforePrototypeCreation(beanName);
+			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+			Class beanClass = resolveBeanClass(mbd, beanName);
+			if (beanClass != null && !mbd.isSynthetic()) {
+				Object bean = applyBeanPostProcessorsBeforeInstantiation(beanClass, beanName);
+				if (bean != null) {
+					instance = applyBeanPostProcessorsAfterInitialization(bean, beanName);
+				}
+			}
+			if (instance == null) {
+				BeanWrapper bw = createBeanInstance(beanName, mbd, null);
+				instance = bw.getWrappedInstance();
+			}
+		}
+		finally {
+			// Finished partial creation of this bean.
+			afterPrototypeCreation(beanName);
+		}
+		if (!(instance instanceof FactoryBean)) {
+			throw new BeanCreationException(beanName,
+					"Bean instance of type [" + instance.getClass() + "] is not a FactoryBean");
+		}
+		return (FactoryBean) instance;
+	}
 
 	/**
 	 * Apply InstantiationAwareBeanPostProcessors to the specified bean definition
