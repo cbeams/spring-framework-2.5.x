@@ -666,7 +666,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @param beanName the name of the prototype about to be created
 	 * @see #isPrototypeCurrentlyInCreation
 	 */
-	private void beforePrototypeCreation(String beanName) {
+	protected void beforePrototypeCreation(String beanName) {
 		Set beanNames = (Set) this.prototypesCurrentlyInCreation.get();
 		if (beanNames == null) {
 			beanNames = new HashSet();
@@ -681,7 +681,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @param beanName the name of the prototype that has been created
 	 * @see #isPrototypeCurrentlyInCreation
 	 */
-	private void afterPrototypeCreation(String beanName) {
+	protected void afterPrototypeCreation(String beanName) {
 		Set beanNames = (Set) this.prototypesCurrentlyInCreation.get();
 		if (beanNames != null) {
 			beanNames.remove(beanName);
