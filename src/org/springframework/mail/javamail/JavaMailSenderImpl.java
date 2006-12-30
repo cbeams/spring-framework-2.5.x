@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2006 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,9 @@ import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 
 /**
- * Production implementation of the {@link JavaMailSender} interface.
- *
- * <p>Supports both JavaMail {@link MimeMessage MimeMessages} and Spring
- * {@link SimpleMailMessage SimpleMailMessages}, and can also be used as a
+ * Production implementation of the {@link JavaMailSender} interface,
+ * supporting both JavaMail {@link MimeMessage MimeMessages} and Spring
+ * {@link SimpleMailMessage SimpleMailMessages}. Can also be used as a
  * plain {@link org.springframework.mail.MailSender} implementation.
  *
  * <p>Allows for defining all settings locally as bean properties.
@@ -145,11 +144,11 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * Return the JavaMail <code>Session</code>.
 	 */
 	public Session getSession() {
-		return session;
+		return this.session;
 	}
 
 	/**
-	 * Set the mail protocol: default is {@link #DEFAULT_PROTOCOL}.
+	 * Set the mail protocol. Default is "smtp".
 	 */
 	public void setProtocol(String protocol) {
 		this.protocol = protocol;
@@ -159,7 +158,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * Return the mail protocol.
 	 */
 	public String getProtocol() {
-		return protocol;
+		return this.protocol;
 	}
 
 	/**
@@ -173,7 +172,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * Return the mail server host.
 	 */
 	public String getHost() {
-		return host;
+		return this.host;
 	}
 
 	/**
@@ -189,7 +188,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * Return the mail server port.
 	 */
 	public int getPort() {
-		return port;
+		return this.port;
 	}
 
 	/**
@@ -211,7 +210,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * Return the username for the account at the mail host.
 	 */
 	public String getUsername() {
-		return username;
+		return this.username;
 	}
 
 	/**
@@ -233,7 +232,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * Return the password for the account at the mail host.
 	 */
 	public String getPassword() {
-		return password;
+		return this.password;
 	}
 
 	/**
@@ -250,7 +249,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * or <code>null</code> if none.
 	 */
 	public String getDefaultEncoding() {
-		return defaultEncoding;
+		return this.defaultEncoding;
 	}
 
 	/**
@@ -275,7 +274,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * {@link MimeMessage MimeMessages}, or <code>null</code> if none.
 	 */
 	public FileTypeMap getDefaultFileTypeMap() {
-		return defaultFileTypeMap;
+		return this.defaultFileTypeMap;
 	}
 
 
