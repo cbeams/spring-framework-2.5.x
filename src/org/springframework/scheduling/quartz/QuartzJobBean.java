@@ -38,14 +38,21 @@ import org.springframework.beans.MutablePropertyValues;
  * i.e. a method "setMyParam(int)". This will also work for complex
  * types like business objects etc.
  *
+ * <p>Note: The QuartzJobBean class itself only implements the standard
+ * Quartz {@link org.quartz.Job} interface. Let your subclass explicitly
+ * implement the Quartz {@link org.quartz.StatefulJob} interface to
+ * mark your concrete job bean as stateful.
+ *
  * <p>This version of QuartzJobBean requires Quartz 1.5 or higher,
  * due to the support for trigger-specific job data.
  *
- * <p>Note that as of Spring 2.0 and Quartz 1.5, the preferred way to apply
- * dependency injection to Job instances it to specify SpringBeanJobFactory
- * as Quartz JobFactory (typically via SchedulerFactoryBean's "jobFactory"
- * property). This allows to implement dependency-injected Jobs without a
- * dependency on Spring classes.
+ * <p><b>Note that as of Spring 2.0 and Quartz 1.5, the preferred way
+ * to apply dependency injection to Job instances is via a JobFactory:</b>
+ * that is, to specify {@link SpringBeanJobFactory} as Quartz JobFactory
+ * (typically via
+ * {@link SchedulerFactoryBean#setJobFactory} SchedulerFactoryBean's "jobFactory" property}).
+ * This allows to implement dependency-injected Quartz Jobs without
+ * a dependency on Spring base classes.
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
