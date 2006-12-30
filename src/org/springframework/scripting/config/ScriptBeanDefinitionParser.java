@@ -18,9 +18,8 @@ package org.springframework.scripting.config;
 
 import java.util.List;
 
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -32,6 +31,7 @@ import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
+import org.w3c.dom.Element;
 
 /**
  * BeanDefinitionParser implementation for the '<code>&lt;lang:groovy/&gt;</code>',
@@ -48,6 +48,7 @@ import org.springframework.util.xml.DomUtils;
  * '<code>refresh-check-delay</code>' attribute.
  *
  * @author Rob Harrop
+ * @author Rod Johnson
  * @since 2.0
  */
 class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
@@ -65,6 +66,8 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private static final String SCRIPT_INTERFACES_ATTRIBUTE = "script-interfaces";
 
 	private static final String REFRESH_CHECK_DELAY_ATTRIBUTE = "refresh-check-delay";
+	
+	private static final String CUSTOMIZER_REF_ATTRIBUTE = "customizer-ref";
 
 
 	/**
@@ -105,9 +108,16 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 		// Add constructor arguments.
 		ConstructorArgumentValues cav = beanDefinition.getConstructorArgumentValues();
-		cav.addIndexedArgumentValue(0, value);
+		int constructorArgNum = 0;
+		cav.addIndexedArgumentValue(constructorArgNum++, value);
 		if (element.hasAttribute(SCRIPT_INTERFACES_ATTRIBUTE)) {
-			cav.addIndexedArgumentValue(1, element.getAttribute(SCRIPT_INTERFACES_ATTRIBUTE));
+			cav.addIndexedArgumentValue(constructorArgNum++, element.getAttribute(SCRIPT_INTERFACES_ATTRIBUTE));
+		}
+		
+		// This is used for Groovy. It's a bean reference to a customizer bean.
+		if (element.hasAttribute(CUSTOMIZER_REF_ATTRIBUTE)) {
+			String customizerBeanName = element.getAttribute(CUSTOMIZER_REF_ATTRIBUTE);
+			cav.addIndexedArgumentValue(constructorArgNum++, new RuntimeBeanReference(customizerBeanName));
 		}
 
 		// Add any property definitions that need adding.

@@ -312,13 +312,20 @@ public final class GroovyScriptFactoryTests extends TestCase {
 		assertEquals(ctx, bean.getApplicationContext());
 	}
 
-	public void testMetaClass() {
+	public void testMetaClassWithBeans() {
+		testMetaClass("org/springframework/scripting/groovy/calculators.xml");
+	}
+	
+	public void testMetaClassWithXsd() {
+		testMetaClass("org/springframework/scripting/groovy/calculators-with-xsd.xml");
+	}
+	
+	private void testMetaClass(final String xmlFile) {
 		// expect the exception we threw in the custom metaclass to show it got invoked
 		new AssertThrows(IllegalStateException.class) {
 			public void test() throws Exception {
 				ApplicationContext ctx =
-						new ClassPathXmlApplicationContext(
-								"org/springframework/scripting/groovy/calculators.xml");
+						new ClassPathXmlApplicationContext(xmlFile);
 				Calculator calc = (Calculator) ctx.getBean("delegatingCalculator");
 				calc.add(1, 2);
 			}
