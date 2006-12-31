@@ -16,14 +16,16 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Auto proxy creator that identifies beans to proxy via a list of names.
@@ -59,7 +61,11 @@ public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 	 * @see org.springframework.beans.factory.BeanFactory#FACTORY_BEAN_PREFIX
 	 */
 	public void setBeanNames(String[] beanNames) {
-		this.beanNames = Arrays.asList(beanNames);
+		Assert.notEmpty(beanNames, "'beanNames' must not be empty");
+		this.beanNames = new ArrayList(beanNames.length);
+		for (int i = 0; i < beanNames.length; i++) {
+			this.beanNames.add(StringUtils.trimWhitespace(beanNames[i]));
+		}
 	}
 
 

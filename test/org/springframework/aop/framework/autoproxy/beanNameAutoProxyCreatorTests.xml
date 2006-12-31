@@ -22,7 +22,11 @@
 	</bean>
 
 	<bean id="_cglibBeanNameProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
-	  <property name="beanNames"><value>cglib*</value></property>
+	  <property name="beanNames">
+			<value>
+				cglib*
+			</value>
+		</property>
 	  <property name="proxyTargetClass">
 	  	<description>Use the inherited ProxyConfig property to force CGLIB proxying</description>
 	  	<value>true</value>
