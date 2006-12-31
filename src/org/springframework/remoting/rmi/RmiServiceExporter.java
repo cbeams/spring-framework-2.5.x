@@ -238,8 +238,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 		this.exportedObject = getObjectToExport();
 
 		if (logger.isInfoEnabled()) {
-			logger.info("Binding RMI service '" + this.serviceName +
-					"' to registry at port '" + this.registryPort + "'");
+			logger.info("Binding service '" + this.serviceName + "' to RMI registry: " + this.registry);
 		}
 
 		// Export RMI object.
