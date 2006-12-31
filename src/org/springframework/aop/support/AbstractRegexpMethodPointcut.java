@@ -24,6 +24,7 @@ import java.util.Arrays;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Abstract base regular expression pointcut bean. JavaBean properties are:
@@ -65,19 +66,21 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * @see #setPatterns
 	 */
 	public void setPattern(String pattern) {
-		setPatterns(new String[] { pattern });
+		setPatterns(new String[] {pattern});
 	}
 
 	/**
 	 * Set the regular expressions defining methods to match.
 	 * Matching will be the union of all these; if any match,
 	 * the pointcut matches.
-	 * @param patterns regular expressions describing methods to match
 	 */
 	public void setPatterns(String[] patterns) {
-		Assert.notEmpty(patterns, "'patterns' cannot be null or empty.");
-		this.patterns = patterns;
-		initPatternRepresentation(patterns);
+		Assert.notEmpty(patterns, "'patterns' must not be empty");
+		this.patterns = new String[patterns.length];
+		for (int i = 0; i < patterns.length; i++) {
+			this.patterns[i] = StringUtils.trimWhitespace(patterns[i]);
+		}
+		initPatternRepresentation(this.patterns);
 	}
 
 	/**
@@ -93,19 +96,21 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * @see #setExcludedPatterns
 	 */
 	public void setExcludedPattern(String excludedPattern) {
-		setExcludedPatterns(new String[]{excludedPattern});
+		setExcludedPatterns(new String[] {excludedPattern});
 	}
 
 	/**
 	 * Set the regular expressions defining methods to match for exclusion.
 	 * Matching will be the union of all these; if any match,
 	 * the pointcut matches.
-	 * @param excludedPatterns regular expressions describing methods to match for exclusion
 	 */
 	public void setExcludedPatterns(String[] excludedPatterns) {
-		Assert.notEmpty(excludedPatterns, "excludedPatterns must not be empty");
-		this.excludedPatterns = excludedPatterns;
-		initExcludedPatternRepresentation(excludedPatterns);
+		Assert.notEmpty(excludedPatterns, "'excludedPatterns' must not be empty");
+		this.excludedPatterns = new String[excludedPatterns.length];
+		for (int i = 0; i < excludedPatterns.length; i++) {
+			this.excludedPatterns[i] = StringUtils.trimWhitespace(excludedPatterns[i]);
+		}
+		initExcludedPatternRepresentation(this.excludedPatterns);
 	}
 
 	/**

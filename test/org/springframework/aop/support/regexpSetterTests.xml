@@ -13,15 +13,19 @@
 
 	<bean id="settersAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
 		<property name="advice"><ref local="nopInterceptor"/></property>
-		<property name="pattern"><value>.*set.*</value></property>
+		<property name="pattern">
+			<value>
+				.*set.*
+			</value>
+		</property>
 	</bean>
-	
+
 	<bean id="settersAdvised" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>		
 		<property name="target"><ref local="test"/></property>
 		<property name="interceptorNames"><value>settersAdvisor</value></property>		
 	</bean>
-	
+
 	<bean id="serializableSettersAdvised" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="proxyInterfaces"><value>org.springframework.beans.Person</value></property>
 		<property name="target">
@@ -42,7 +46,7 @@
 			</list>
 		</property>
 	</bean>
-	
+
 	<bean id="settersAndAbsquatulateAdvised" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="proxyInterfaces"><value>org.springframework.beans.ITestBean</value></property>		
 		<!-- Force CGLIB so we can cast to TestBean -->
