@@ -41,6 +41,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.core.OrderComparator;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * FactoryBean implementation for use to source AOP proxies from a Spring BeanFactory.
@@ -141,6 +142,9 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * object is initialized.
 	 */
 	private BeanFactory beanFactory;
+
+	/** Whether the advisor chain has already been initialized */
+	private boolean advisorChainInitialized = false;
 
 	/** If this is a singleton, the cached singleton proxy instance */
 	private Object singletonInstance;
@@ -252,6 +256,10 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * @return a fresh AOP proxy reflecting the current state of this factory
 	 */
 	public Object getObject() throws BeansException {
+		if (!this.advisorChainInitialized) {
+			// Not initialized yet - probably a circular reference.
+			return null;
+		}
 		if (isSingleton()) {
 			return getSingletonInstance();
 		}
@@ -279,8 +287,14 @@ public class ProxyFactoryBean extends AdvisedSupport
 	}
 
 
-	private Object getSingletonInstance() {
+	/**
+	 * Return the singleton instance of this class's proxy object,
+	 * lazily creating it if it hasn't been created already.
+	 * @return the shared singleton proxy
+	 */
+	private synchronized Object getSingletonInstance() {
 		if (this.singletonInstance == null) {
+			// Initialize the shared singleton instance.
 			super.setFrozen(this.freezeProxy);
 			this.singletonInstance = getProxy(createAopProxy());
 		}
@@ -289,7 +303,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 
 	/**
 	 * Create a new prototype instance of this class's created proxy object,
-	 * backed by an independent advisedSupport configuration
+	 * backed by an independent AdvisedSupport configuration.
 	 * @return a totally independent proxy, whose advice we may manipulate in isolation
 	 */
 	private synchronized Object newPrototypeInstance() {
@@ -319,7 +333,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 
 	/**
 	 * Return the proxy object to expose.
-	 * <p>Default implementation uses a plain <code>getProxy()</code> call.
+	 * <p>The default implementation uses a <code>getProxy()</code> call.
 	 * Can be overridden to specify a custom class loader.
 	 * @param aopProxy the prepared AopProxy instance to get the proxy from
 	 * @return the proxy object to expose
@@ -336,66 +350,67 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * is added. Interceptors added programmatically through the factory API
 	 * are unaffected by such changes.
 	 */
-	private void createAdvisorChain() throws AopConfigException, BeansException {
-		if (this.interceptorNames == null || this.interceptorNames.length == 0) {
-			return;
-		}
-		
-		// Globals can't be last unless we specified a targetSource using the property... 
-		if (this.interceptorNames[this.interceptorNames.length - 1].endsWith(GLOBAL_SUFFIX) &&
-				this.targetSource == EMPTY_TARGET_SOURCE) {
-			throw new AopConfigException("Target required after globals");
-		}
+	private synchronized void createAdvisorChain() throws AopConfigException, BeansException {
+		if (!ObjectUtils.isEmpty(this.interceptorNames)) {
 
-		// materialize interceptor chain from bean names
-		for (int i = 0; i < this.interceptorNames.length; i++) {
-			String name = this.interceptorNames[i];
-			if (logger.isDebugEnabled()) {
-				logger.debug("Configuring advisor or advice '" + name + "'");
-			}
-
-			if (name.endsWith(GLOBAL_SUFFIX)) {
-				if (!(this.beanFactory instanceof ListableBeanFactory)) {
-					throw new AopConfigException(
-					    "Can only use global advisors or interceptors with a ListableBeanFactory");
-				}
-				addGlobalAdvisor((ListableBeanFactory) this.beanFactory,
-				    name.substring(0, name.length() - GLOBAL_SUFFIX.length()));
-				continue;
-			}
-			else if (i == this.interceptorNames.length - 1 &&
+			// Globals can't be last unless we specified a targetSource using the property...
+			if (this.interceptorNames[this.interceptorNames.length - 1].endsWith(GLOBAL_SUFFIX) &&
 					this.targetName == null && this.targetSource == EMPTY_TARGET_SOURCE) {
-				// The last name in the chain may be an Advisor/Advice or a target/TargetSource.
-				// Unfortunately we don't know; we must look at type of the bean.
-				if (!isNamedBeanAnAdvisorOrAdvice(this.interceptorNames[i])) {
-					// Must be an interceptor.
-					this.targetName = this.interceptorNames[i];
-					if (logger.isDebugEnabled()) {
-						logger.debug("Bean with name '" + this.interceptorNames[i] +
-								"' concluding interceptor chain is not an advisor class: " +
-								"treating it as a target or TargetSource");
+				throw new AopConfigException("Target required after globals");
+			}
+
+			// Materialize interceptor chain from bean names.
+			for (int i = 0; i < this.interceptorNames.length; i++) {
+				String name = this.interceptorNames[i];
+				if (logger.isDebugEnabled()) {
+					logger.debug("Configuring advisor or advice '" + name + "'");
+				}
+
+				if (name.endsWith(GLOBAL_SUFFIX)) {
+					if (!(this.beanFactory instanceof ListableBeanFactory)) {
+						throw new AopConfigException(
+								"Can only use global advisors or interceptors with a ListableBeanFactory");
 					}
+					addGlobalAdvisor((ListableBeanFactory) this.beanFactory,
+							name.substring(0, name.length() - GLOBAL_SUFFIX.length()));
 					continue;
 				}
-				// If it IS an advice, or we can't tell, fall through and treat it as an advice...
+				else if (i == this.interceptorNames.length - 1 &&
+						this.targetName == null && this.targetSource == EMPTY_TARGET_SOURCE) {
+					// The last name in the chain may be an Advisor/Advice or a target/TargetSource.
+					// Unfortunately we don't know; we must look at type of the bean.
+					if (!isNamedBeanAnAdvisorOrAdvice(this.interceptorNames[i])) {
+						// Must be an interceptor.
+						this.targetName = this.interceptorNames[i];
+						if (logger.isDebugEnabled()) {
+							logger.debug("Bean with name '" + this.interceptorNames[i] +
+									"' concluding interceptor chain is not an advisor class: " +
+									"treating it as a target or TargetSource");
+						}
+						continue;
+					}
+					// If it IS an advice, or we can't tell, fall through and treat it as an advice...
+				}
+
+				// If we get here, we need to add a named interceptor.
+				// We must check if it's a singleton or prototype.
+				Object advice = null;
+				if (isSingleton() || this.beanFactory.isSingleton(this.interceptorNames[i])) {
+					// Add the real Advisor/Advice to the chain.
+					advice = this.beanFactory.getBean(this.interceptorNames[i]);
+				}
+				else {
+					// It's a prototype Advice or Advisor: replace with a prototype.
+					// Avoid unnecessary creation of prototype bean just for advisor chain initialization.
+					advice = new PrototypePlaceholderAdvisor(interceptorNames[i]);
+				}
+				addAdvisorOnChainCreation(advice, this.interceptorNames[i]);
 			}
-	
-			// If we get here, we need to add a named interceptor.
-			// We must check if it's a singleton or prototype.
-			Object advice = null;
-			if (isSingleton() || this.beanFactory.isSingleton(this.interceptorNames[i])) {
-				// Add the real Advisor/Advice to the chain.
-				advice = this.beanFactory.getBean(this.interceptorNames[i]);
-			}
-			else {
-				// It's a prototype Advice or Advisor: replace with a prototype.
-				// Avoid unnecessary creation of prototype bean just for advisor chain initialization.
-				advice = new PrototypePlaceholderAdvisor(interceptorNames[i]);
-			}
-			addAdvisorOnChainCreation(advice, this.interceptorNames[i]);
 		}
+
+		this.advisorChainInitialized = true;
 	}
-	
+
 	/**
 	 * Look at bean factory metadata to work out whether this bean name,
 	 * which concludes the interceptorNames list, is an Advisor or Advice,
