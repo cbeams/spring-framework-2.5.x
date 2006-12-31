@@ -23,7 +23,7 @@ import java.util.List;
  * Object to represent a SQL parameter definition.
  *
  * <p>Parameters may be anonymous, in which case "name" is <code>null</code>.
- * However, all parameters must define a SQL type according to <code>java.sql.Types</code>.
+ * However, all parameters must define a SQL type according to {@link java.sql.Types}.
  *
  * @author Rod Johnson
  * @author Thomas Risberg
@@ -31,13 +31,13 @@ import java.util.List;
  */
 public class SqlParameter {
 
-	private String name;
+	private final String name;
 	
 	/** SQL type constant from <code>java.sql.Types</code> */
-	private int sqlType;
+	private final int sqlType;
 
 	/** Used for types that are user-named like: STRUCT, DISTINCT, JAVA_OBJECT, named array types */
-	private String typeName;
+	private final String typeName;
 
 
 	/**
@@ -83,21 +83,21 @@ public class SqlParameter {
 	 * Return the name of the parameter.
 	 */
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	/**
 	 * Return the SQL type of the parameter.
 	 */
 	public int getSqlType() {
-		return sqlType;
+		return this.sqlType;
 	}
 
 	/**
 	 * Return the type name of the parameter, if any.
 	 */
 	public String getTypeName() {
-		return typeName;
+		return this.typeName;
 	}
 
 
