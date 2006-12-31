@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2006 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -49,8 +49,8 @@ import org.springframework.beans.factory.InitializingBean;
  * <p>Note: RMI makes a best-effort attempt to obtain the fully qualified host name.
  * If one cannot be determined, it will fall back and use the IP address. Depending
  * on your network configuration, in some cases it will resolve the IP to the loopback
- * address. Ensuring that RMI will use the host name bound to the correct network
- * interface you should pass the <code>java.rmi.server.hostname</code> property to the
+ * address. To ensure that RMI will use the host name bound to the correct network
+ * interface, you should pass the <code>java.rmi.server.hostname</code> property to the
  * JVM that will export the registry and/or the service using the "-D" JVM argument.
  * For example: <code>-Djava.rmi.server.hostname=myserver.com</code>
  *
@@ -194,9 +194,9 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 
 
 	/**
-	 * Initialize this service exporter.
-	 * <p>Registers the service as RMI object.
-	 * Creates an RMI registry on the specified port if none exists.
+	 * Initialize this service exporter, registering the service as RMI object.
+	 * <p>Creates an RMI registry on the specified port if none exists.
+	 * @throws RemoteException if service registration failed
 	 */
 	public void afterPropertiesSet() throws RemoteException {
 		checkService();
@@ -233,10 +233,8 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 		// Initialize and cache exported object.
 		this.exportedObject = getObjectToExport();
 
-		// Export remote object and bind it to RMI registry.
 		if (logger.isInfoEnabled()) {
-			logger.info("Binding RMI service '" + this.serviceName +
-					"' to registry at port '" + this.registryPort + "'");
+			logger.info("Binding service '" + this.serviceName + "' to RMI registry: " + this.registry);
 		}
 
 		// Export RMI object.
