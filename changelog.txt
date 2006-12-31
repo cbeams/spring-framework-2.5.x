@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.9 (30.12.2006)
+Changes in version 1.2.9 (31.12.2006)
 -------------------------------------
 
 General
@@ -14,6 +14,7 @@ Package org.springframework.aop
 * reworked JdkDynamicAopProxy's "Method.setAccessible" handling to avoid unnecessary calls
 * Cglib2AopProxy throws AopConfigException instead of AspectException, for better root cause handling
 * HashMapCachingAdvisorChainFactory uses synchronized access to its method cache Map
+* ProxyFactoryBean returns null in case of a circular reference, leading to a FactoryBeanNotInitializedException
 * AbstractAutoProxyCreator considers all Advices (not just MethodInterceptors) as infrastructure classes to ignore
 
 Package org.springframework.beans
@@ -29,6 +30,7 @@ Package org.springframework.beans
 * AbstractAutowireCapableBeanFactory creates "depends-on" beans even before "postProcessBeforeInstantiation"
 * fixed method overrides check to accept methods declared on interfaces as well
 * fixed PropertyPlaceholderConfigurer to throw a BeanDefinitionStoreException in case of any circular reference
+* ResourceEntityResolver catches any kind of Exception in system root URL check (in particular AccessControlException)
 * removed default for "abstract"/"singleton" attributes in "spring-beans.dtd", for 2.0-style inheritance for inner beans
 
 Package org.springframework.context
@@ -90,6 +92,7 @@ Package org.springframework.orm
 
 Package org.springframework.remoting
 * Burlap/Hessian/Rmi/JndiRmiClientInterceptor consistently throw RemoteProxyFailureException instead of AspectException
+* RmiServiceExporter logs description of actual registry instead of port (to properly handle passed-in "registry")
 
 Package org.springframework.scheduling
 * Quartz SchedulerFactoryBean uses given "nonTransactionalDataSource" as default DataSource if no "dataSource" specified
