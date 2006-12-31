@@ -26,16 +26,20 @@ import org.springframework.beans.factory.FactoryBean;
 
 /**
  * FactoryBean that retrieves the JTA UserTransaction/TransactionManager for
- * ObjectWeb's <a href="http://jotm.objectweb.org">JOTM</a>. Will retrieve an
- * already active JOTM instance if found (e.g. if running in JOnAS), else create
- * a new local JOTM instance. The same object implements both the UserTransaction
- * and the TransactionManager interface, as returned by this FactoryBean.
+ * ObjectWeb's <a href="http://jotm.objectweb.org">JOTM</a>. Will retrieve
+ * an already active JOTM instance if found (e.g. if running in JOnAS),
+ * else create a new local JOTM instance.
+ *
+ * <p>With JOTM, the same object implements both the
+ * {@link javax.transaction.UserTransaction} and the
+ * {@link javax.transaction.TransactionManager} interface,
+ * as returned by this FactoryBean.
  *
  * <p>A local JOTM instance is well-suited for working in conjunction with
  * ObjectWeb's <a href="http://xapool.experlog.com">XAPool</a>, e.g. with bean
  * definitions like the following:
  *
- * <pre>
+ * <pre class="code">
  * &lt;bean id="jotm" class="org.springframework.transaction.jta.JotmFactoryBean"/&gt;
  *
  * &lt;bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"&gt;
@@ -57,8 +61,15 @@ import org.springframework.beans.factory.FactoryBean;
  *   &lt;property name="maxSize" value="..."/&gt;
  * &lt;/bean&gt;</pre>
  *
- * Uses JOTM's static access method to obtain the JOTM Current object, which
- * implements both the UserTransaction and the TransactionManager interface.
+ * Note that Spring's {@link JtaTransactionManager} will automatically detect
+ * that the passed-in UserTransaction reference also implements the
+ * TransactionManager interface. Hence, it is not necessary to specify a
+ * separate reference for JtaTransactionManager's "transactionManager" property.
+ *
+ * <p>Implementation note: This FactoryBean uses JOTM's static access method
+ * to obtain the JOTM {@link org.objectweb.jotm.Current} object, which
+ * implements both the UserTransaction and the TransactionManager interface,
+ * as mentioned above.
  *
  * @author Juergen Hoeller
  * @since 21.01.2004
@@ -101,7 +112,7 @@ public class JotmFactoryBean implements FactoryBean, DisposableBean {
 	 * <p>Application code should never need to access this.
 	 */
 	public Jotm getJotm() {
-		return jotm;
+		return this.jotm;
 	}
 
 

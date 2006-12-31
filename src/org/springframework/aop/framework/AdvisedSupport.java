@@ -95,16 +95,16 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Set to true when the first AOP proxy has been created, meaning that we
 	 * must track advice changes via onAdviceChange callback.
 	 */
-	private transient boolean isActive;
+	private transient boolean active;
 
 
 	/**
-	 * No arg constructor to allow use as a JavaBean.
+	 * No-arg constructor to allow use as a JavaBean.
 	 */
 	public AdvisedSupport() {
 		initDefaultAdvisorChainFactory();
 	}
-	
+
 	/**
 	 * Create a DefaultProxyConfig with the given parameters.
 	 * @param interfaces the proxied interfaces
@@ -481,7 +481,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Invoked when advice has changed.
 	 */
 	protected final synchronized void adviceChanged() {
-		if (this.isActive) {
+		if (this.active) {
 			for (int i = 0; i < this.listeners.size(); i++) {
 				((AdvisedSupportListener) this.listeners.get(i)).adviceChanged(this);
 			}
@@ -489,7 +489,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	private void activate() {
-		this.isActive = true;
+		this.active = true;
 		for (int i = 0; i < this.listeners.size(); i++) {
 			((AdvisedSupportListener) this.listeners.get(i)).activated(this);
 		}
@@ -500,7 +500,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * create an AOP proxy with this as an argument.
 	 */
 	protected synchronized AopProxy createAopProxy() {
-		if (!this.isActive) {
+		if (!this.active) {
 			activate();
 		}
 		return getAopProxyFactory().createAopProxy(this);
@@ -510,7 +510,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Subclasses can call this to check whether any AOP proxies have been created yet.
 	 */
 	protected final boolean isActive() {
-		return isActive;
+		return this.active;
 	}
 	
 
@@ -544,7 +544,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 */
 	private Object readResolve() {
 		this.logger = LogFactory.getLog(getClass());
-		this.isActive = true;
+		this.active = true;
 		this.listeners = new LinkedList();
 		initDefaultAdvisorChainFactory();
 		return this;

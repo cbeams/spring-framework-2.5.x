@@ -30,17 +30,15 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Proxy factory bean for simplified declarative transaction handling.
- * 
- * <p>This class is a convenient alternative to a standard AOP
- * {@link org.springframework.aop.framework.ProxyFactoryBean} with a separate
- * {@link TransactionInterceptor} definition.
+ * This is a convenient alternative to a standard AOP
+ * {@link org.springframework.aop.framework.ProxyFactoryBean}
+ * with a separate {@link TransactionInterceptor} definition.
  *
  * <p>This class is intended to cover the <i>typical</i> case of declarative
  * transaction demarcation: namely, wrapping a singleton target object with a
  * transactional proxy, proxying all the interfaces that the target implements.
  *
  * <p>There are three main properties that need to be specified:
- *
  * <ul>
  * <li>"transactionManager": the {@link PlatformTransactionManager} implementation to use
  * (for example, a {@link org.springframework.transaction.jta.JtaTransactionManager} instance)
@@ -73,7 +71,8 @@ import org.springframework.transaction.PlatformTransactionManager;
  * deriving concrete child bean definitions for specific target objects.
  * This reduces the per-bean definition effort to a minimum.
  *
- * <pre code="class">&lt;bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+ * <pre code="class">
+ * &lt;bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
  *     abstract="true"&gt;
  *   &lt;property name="transactionManager" ref="transactionManager"/&gt;
  *   &lt;property name="transactionAttributes"&gt;
