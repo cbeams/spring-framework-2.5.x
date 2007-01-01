@@ -428,7 +428,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			Object originalBean = bean;
 			bean = initializeBean(beanName, bean, mergedBeanDefinition);
 
-			if (!this.allowRawInjectionDespiteWrapping && originalBean != bean && hasDependentBean(beanName)) {
+			if (!this.allowRawInjectionDespiteWrapping && originalBean != bean &&
+					mergedBeanDefinition.isSingleton() && hasDependentBean(beanName)) {
 				throw new BeanCurrentlyInCreationException(beanName,
 						"Bean with name '" + beanName + "' has been injected into other beans " +
 						getDependentBeans(beanName) + " in its raw version as part of a circular reference, " +
