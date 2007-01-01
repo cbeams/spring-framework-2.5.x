@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,6 +50,7 @@ import org.apache.commons.logging.LogFactory;
  * interfaces.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public final class ThrowsAdviceInterceptor implements MethodInterceptor {
 	
@@ -106,13 +107,16 @@ public final class ThrowsAdviceInterceptor implements MethodInterceptor {
 	 */
 	private Method getExceptionHandler(Throwable exception) {
 		Class exceptionClass = exception.getClass();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Trying to find handler for exception of type [" + exceptionClass.getName() + "]");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Trying to find handler for exception of type [" + exceptionClass.getName() + "]");
 		}
 		Method handler = (Method) this.exceptionHandlerMap.get(exceptionClass);
 		while (handler == null && !exceptionClass.equals(Throwable.class)) {
 			exceptionClass = exceptionClass.getSuperclass();
 			handler = (Method) this.exceptionHandlerMap.get(exceptionClass);
+		}
+		if (handler != null && logger.isDebugEnabled()) {
+			logger.debug("Found handler for exception of type [" + exceptionClass.getName() + "]: " + handler);
 		}
 		return handler;
 	}

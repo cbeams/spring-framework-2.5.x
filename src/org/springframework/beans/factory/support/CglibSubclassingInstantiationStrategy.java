@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	 */
 	private static class CglibSubclassCreator {
 
-		private static final Log logger = LogFactory.getLog(CglibSubclassingInstantiationStrategy.class);
+		private static final Log logger = LogFactory.getLog(CglibSubclassCreator.class);
 
 		private final RootBeanDefinition beanDefinition;
 
@@ -178,8 +178,8 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			
 			public int accept(Method method) {
 				MethodOverride methodOverride = beanDefinition.getMethodOverrides().getOverride(method);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Override for '" + method.getName() + "' is [" + methodOverride + "]");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Override for '" + method.getName() + "' is [" + methodOverride + "]");
 				}
 				if (methodOverride == null) {
 					return PASSTHROUGH;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -52,9 +49,6 @@ import org.springframework.util.ReflectionUtils;
  * @see AbstractAutowireCapableBeanFactory
  */
 abstract class ConstructorResolver {
-
-	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final AbstractBeanFactory beanFactory;
 
@@ -135,9 +129,9 @@ abstract class ConstructorResolver {
 				}
 			}
 			catch (UnsatisfiedDependencyException ex) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Ignoring constructor [" + constructor + "] of bean '" + beanName +
-							"': " + ex.getMessage());
+				if (this.beanFactory.logger.isTraceEnabled()) {
+					this.beanFactory.logger.trace("Ignoring constructor [" + constructor + "] of bean '" + beanName +
+							"': " + ex);
 				}
 				if (i == candidates.length - 1 && constructorToUse == null) {
 					throw ex;
@@ -156,8 +150,8 @@ abstract class ConstructorResolver {
 		Object beanInstance = this.instantiationStrategy.instantiate(
 				mergedBeanDefinition, beanName, this.beanFactory, constructorToUse, argsToUse);
 		bw.setWrappedInstance(beanInstance);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Bean '" + beanName + "' instantiated via constructor [" + constructorToUse + "]");
+		if (this.beanFactory.logger.isDebugEnabled()) {
+			this.beanFactory.logger.debug("Bean '" + beanName + "' instantiated via constructor [" + constructorToUse + "]");
 		}
 		return bw;
 	}
@@ -236,9 +230,9 @@ abstract class ConstructorResolver {
 								beanName, mergedBeanDefinition, resolvedValues, bw, paramTypes, factoryMethod);
 					}
 					catch (UnsatisfiedDependencyException ex) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Ignoring factory method [" + factoryMethod + "] of bean '" + beanName +
-									"': " + ex.getMessage());
+						if (this.beanFactory.logger.isTraceEnabled()) {
+							this.beanFactory.logger.trace("Ignoring factory method [" + factoryMethod +
+									"] of bean '" + beanName + "': " + ex);
 						}
 						if (i == candidates.length - 1 && factoryMethodToUse == null) {
 							throw ex;
@@ -285,8 +279,9 @@ abstract class ConstructorResolver {
 		}
 
 		bw.setWrappedInstance(beanInstance);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Bean '" + beanName + "' instantiated via factory method '" + factoryMethodToUse + "'");
+		if (this.beanFactory.logger.isDebugEnabled()) {
+			this.beanFactory.logger.debug(
+					"Bean '" + beanName + "' instantiated via factory method '" + factoryMethodToUse + "'");
 		}
 		return bw;
 	}
@@ -401,8 +396,8 @@ abstract class ConstructorResolver {
 				if (mergedBeanDefinition.isSingleton()) {
 					this.beanFactory.registerDependentBean(autowiredBeanName, beanName);
 				}
-				if (logger.isDebugEnabled()) {
-					logger.debug("Autowiring by type from bean name '" + beanName +
+				if (this.beanFactory.logger.isDebugEnabled()) {
+					this.beanFactory.logger.debug("Autowiring by type from bean name '" + beanName +
 							"' via " + methodType + " to bean named '" + autowiredBeanName + "'");
 				}
 			}

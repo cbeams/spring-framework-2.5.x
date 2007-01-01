@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -422,8 +422,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		// Lookup cached sub-BeanWrapper, create new one if not found.
 		BeanWrapperImpl nestedBw = (BeanWrapperImpl) this.nestedBeanWrappers.get(canonicalName);
 		if (nestedBw == null || nestedBw.getWrappedInstance() != propertyValue) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Creating new nested BeanWrapper for property '" + canonicalName + "'");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Creating new nested BeanWrapper for property '" + canonicalName + "'");
 			}
 			nestedBw = newNestedBeanWrapper(propertyValue, this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR);
 			// Inherit all type-specific PropertyEditors.
@@ -432,8 +432,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			this.nestedBeanWrappers.put(canonicalName, nestedBw);
 		}
 		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Using cached nested BeanWrapper for property '" + canonicalName + "'");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Using cached nested BeanWrapper for property '" + canonicalName + "'");
 			}
 		}
 		return nestedBw;
@@ -510,8 +510,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			throw new NotReadablePropertyException(getRootClass(), this.nestedPath + propertyName);
 		}
 		Method readMethod = pd.getReadMethod();
-		if (logger.isDebugEnabled()) {
-			logger.debug("About to invoke read method [" + readMethod + "] on object of class [" +
+		if (logger.isTraceEnabled()) {
+			logger.trace("About to invoke read method [" + readMethod + "] on object of class [" +
 					this.object.getClass().getName() + "]");
 		}
 		try {
@@ -776,16 +776,16 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 							pd.getName() + "' of primitive type [" + pd.getPropertyType() + "]");
 				}
 
-				if (logger.isDebugEnabled()) {
-					logger.debug("About to invoke write method [" + writeMethod + "] on object of class [" +
+				if (logger.isTraceEnabled()) {
+					logger.trace("About to invoke write method [" + writeMethod + "] on object of class [" +
 							this.object.getClass().getName() + "]");
 				}
 				if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
 					writeMethod.setAccessible(true);
 				}
 				writeMethod.invoke(this.object, new Object[] {convertedValue});
-				if (logger.isDebugEnabled()) {
-					logger.debug("Invoked write method [" + writeMethod + "] with value of type [" +
+				if (logger.isTraceEnabled()) {
+					logger.trace("Invoked write method [" + writeMethod + "] with value of type [" +
 							pd.getPropertyType().getName() + "]");
 				}
 			}

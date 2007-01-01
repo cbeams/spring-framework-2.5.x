@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1166,8 +1166,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			if (!BeanFactoryUtils.isFactoryDereference(name)) {
 				// Return bean instance from factory.
 				FactoryBean factory = (FactoryBean) beanInstance;
-				if (logger.isDebugEnabled()) {
-					logger.debug("Bean with name '" + beanName + "' is a factory bean");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Bean with name '" + beanName + "' is a factory bean");
 				}
 				// Cache object obtained from FactoryBean if it is a singleton.
 				if (shared && factory.isSingleton()) {
@@ -1185,8 +1185,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			}
 			else {
 	 			// The user wants the factory itself.
-				if (logger.isDebugEnabled()) {
-					logger.debug("Calling code asked for FactoryBean instance for name '" + beanName + "'");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Calling code asked for FactoryBean instance for name '" + beanName + "'");
 				}
 			}
 		}

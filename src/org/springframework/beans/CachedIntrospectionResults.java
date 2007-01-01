@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,8 +82,8 @@ final class CachedIntrospectionResults {
 			// can throw BeansException
 			results = new CachedIntrospectionResults(beanClass);
 			boolean cacheSafe = isCacheSafe(beanClass);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Class [" + beanClass.getName() + "] is " + (!cacheSafe ? "not " : "") + "cache-safe");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Class [" + beanClass.getName() + "] is " + (!cacheSafe ? "not " : "") + "cache-safe");
 			}
 			if (cacheSafe) {
 				classCache.put(beanClass, results);
@@ -93,8 +93,8 @@ final class CachedIntrospectionResults {
 			}
 		}
 		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Using cached introspection results for class [" + beanClass.getName() + "]");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Using cached introspection results for class [" + beanClass.getName() + "]");
 			}
 		}
 		return results;
@@ -136,8 +136,8 @@ final class CachedIntrospectionResults {
 	 */
 	private CachedIntrospectionResults(Class clazz) throws BeansException {
 		try {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Getting BeanInfo for class [" + clazz.getName() + "]");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Getting BeanInfo for class [" + clazz.getName() + "]");
 			}
 			this.beanInfo = Introspector.getBeanInfo(clazz);
 
@@ -152,8 +152,8 @@ final class CachedIntrospectionResults {
 			}
 			while (classToFlush != null);
 
-			if (logger.isDebugEnabled()) {
-				logger.debug("Caching PropertyDescriptors for class [" + clazz.getName() + "]");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Caching PropertyDescriptors for class [" + clazz.getName() + "]");
 			}
 			this.propertyDescriptorCache = new HashMap();
 
@@ -161,8 +161,8 @@ final class CachedIntrospectionResults {
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
 			for (int i = 0; i < pds.length; i++) {
 				PropertyDescriptor pd = pds[i];
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found bean property '" + pd.getName() + "'" +
+				if (logger.isTraceEnabled()) {
+					logger.trace("Found bean property '" + pd.getName() + "'" +
 							(pd.getPropertyType() != null ?
 							" of type [" + pd.getPropertyType().getName() + "]" : "") +
 							(pd.getPropertyEditorClass() != null ?

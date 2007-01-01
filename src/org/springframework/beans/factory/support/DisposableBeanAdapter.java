@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,8 +83,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable {
 
 	public void destroy() {
 		if (this.beanPostProcessors != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Applying DestructionAwareBeanPostProcessors to bean with name '" + this.beanName + "'");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Applying DestructionAwareBeanPostProcessors to bean with name '" + this.beanName + "'");
 			}
 			for (int i = this.beanPostProcessors.size() - 1; i >= 0; i--) {
 				Object beanProcessor = this.beanPostProcessors.get(i);

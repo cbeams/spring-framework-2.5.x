@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -293,8 +293,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
 			throws BeansException {
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking BeanPostProcessors before initialization of bean '" + beanName + "'");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Invoking BeanPostProcessors before initialization of bean '" + beanName + "'");
 		}
 		Object result = existingBean;
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
@@ -307,8 +307,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
 			throws BeansException {
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking BeanPostProcessors after initialization of bean '" + beanName + "'");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Invoking BeanPostProcessors after initialization of bean '" + beanName + "'");
 		}
 		Object result = existingBean;
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
@@ -644,8 +644,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Object applyBeanPostProcessorsBeforeInstantiation(Class beanClass, String beanName)
 			throws BeansException {
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking BeanPostProcessors before instantiation of bean '" + beanName + "'");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Invoking BeanPostProcessors before instantiation of bean '" + beanName + "'");
 		}
 		for (Iterator it = getBeanPostProcessors().iterator(); it.hasNext();) {
 			BeanPostProcessor beanProcessor = (BeanPostProcessor) it.next();
@@ -836,8 +836,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 			}
 			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Not autowiring property '" + propertyName + "' of bean '" + beanName +
+				if (logger.isTraceEnabled()) {
+					logger.trace("Not autowiring property '" + propertyName + "' of bean '" + beanName +
 							"' by name: no matching bean found");
 				}
 			}
@@ -889,8 +889,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						propertyName + "' of bean '" + beanName + "'. Consider using autowiring by name instead.");
 			}
 			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Not autowiring property '" + propertyName + "' of bean '" + beanName +
+				if (logger.isTraceEnabled()) {
+					logger.trace("Not autowiring property '" + propertyName + "' of bean '" + beanName +
 							"' by type: no matching bean found");
 				}
 			}
@@ -1055,22 +1055,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeansException {
 
 		if (bean instanceof BeanNameAware) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking setBeanName on BeanNameAware bean '" + beanName + "'");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Invoking setBeanName on BeanNameAware bean '" + beanName + "'");
 			}
 			((BeanNameAware) bean).setBeanName(beanName);
 		}
 
 		if (bean instanceof BeanClassLoaderAware) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking setBeanClassLoader on BeanClassLoaderAware bean '" + beanName + "'");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Invoking setBeanClassLoader on BeanClassLoaderAware bean '" + beanName + "'");
 			}
 			((BeanClassLoaderAware) bean).setBeanClassLoader(getBeanClassLoader());
 		}
 
 		if (bean instanceof BeanFactoryAware) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking setBeanFactory on BeanFactoryAware bean '" + beanName + "'");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Invoking setBeanFactory on BeanFactoryAware bean '" + beanName + "'");
 			}
 			((BeanFactoryAware) bean).setBeanFactory(this);
 		}

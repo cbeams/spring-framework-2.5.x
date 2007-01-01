@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -286,8 +286,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		boolean retVal = Advisor.class.isAssignableFrom(beanClass) ||
 				Advice.class.isAssignableFrom(beanClass) ||
 				AbstractAutoProxyCreator.class.isAssignableFrom(beanClass);
-		if (retVal && logger.isDebugEnabled()) {
-			logger.debug("Did not attempt to auto-proxy infrastructure class [" + beanClass.getName() + "]");
+		if (retVal && logger.isTraceEnabled()) {
+			logger.trace("Did not attempt to auto-proxy infrastructure class [" + beanClass.getName() + "]");
 		}
 		return retVal;
 	}
@@ -317,8 +317,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	protected TargetSource getCustomTargetSource(Class beanClass, String beanName) {
 		// We can't create fancy target sources for directly registered singletons.
 		if (this.beanFactory != null && this.beanFactory.containsBean(beanName)) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Checking for custom TargetSource for bean with name '" + beanName + "'");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Checking for custom TargetSource for bean with name '" + beanName + "'");
 			}
 			if (this.customTargetSourceCreators != null) {
 				for (int i = 0; i < this.customTargetSourceCreators.length; i++) {

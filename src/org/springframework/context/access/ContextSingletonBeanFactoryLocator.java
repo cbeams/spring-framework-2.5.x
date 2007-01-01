@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,7 +36,7 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * you are still free to create either BeanFactories or ApplicationContexts. The
  * main reason one would need to use this class is if BeanPostProcessing (or other
  * ApplicationContext specific features are needed in the bean reference definition
- * itself).</p>
+ * itself).
  *
  * <p><strong>Note:</strong> This class uses <strong>classpath*:beanRefContext.xml</strong>
  * as the default name for the bean factory reference definition. It is not possible
@@ -85,8 +85,8 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 		}
 
 		synchronized (instances) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("ContextSingletonBeanFactoryLocator.getInstance(): instances.hashCode=" +
+			if (logger.isTraceEnabled()) {
+				logger.trace("ContextSingletonBeanFactoryLocator.getInstance(): instances.hashCode=" +
 						instances.hashCode() + ", instances=" + instances);
 			}
 			BeanFactoryLocator bfl = (BeanFactoryLocator) instances.get(selector);
@@ -142,9 +142,8 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	 */
 	protected void destroyDefinition(BeanFactory groupDef, String resourceName) throws BeansException {
 		if (groupDef instanceof ConfigurableApplicationContext) {
-			// debugging trace only
-			if (logger.isDebugEnabled()) {
-				logger.debug("ContextSingletonBeanFactoryLocator group with resourceName '" +
+			if (logger.isTraceEnabled()) {
+				logger.trace("ContextSingletonBeanFactoryLocator group with resourceName '" +
 						resourceName + "' being released, as there are no more references");
 			}
 			((ConfigurableApplicationContext) groupDef).close();

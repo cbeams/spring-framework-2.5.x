@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
@@ -59,8 +56,6 @@ class BeanDefinitionValueResolver {
 	public static final String GENERATED_BEAN_NAME_SEPARATOR =
 			BeanDefinitionReaderUtils.GENERATED_BEAN_NAME_SEPARATOR;
 
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final AbstractBeanFactory beanFactory;
 
@@ -186,8 +181,9 @@ class BeanDefinitionValueResolver {
 	private Object resolveInnerBeanDefinition(
 			String argName, String innerBeanName, BeanDefinition innerBd) throws BeansException {
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Resolving inner bean definition '" + innerBeanName + "' of bean '" + this.beanName + "'");
+		if (this.beanFactory.logger.isTraceEnabled()) {
+			this.beanFactory.logger.trace(
+					"Resolving inner bean definition '" + innerBeanName + "' of bean '" + this.beanName + "'");
 		}
 		try {
 			RootBeanDefinition mergedInnerBd =
@@ -231,8 +227,8 @@ class BeanDefinitionValueResolver {
 	 * Resolve a reference to another bean in the factory.
 	 */
 	private Object resolveReference(String argName, RuntimeBeanReference ref) throws BeansException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Resolving reference from property " + argName + " in bean '" +
+		if (this.beanFactory.logger.isTraceEnabled()) {
+			this.beanFactory.logger.trace("Resolving reference from property " + argName + " in bean '" +
 					this.beanName + "' to bean '" + ref.getBeanName() + "'");
 		}
 		try {

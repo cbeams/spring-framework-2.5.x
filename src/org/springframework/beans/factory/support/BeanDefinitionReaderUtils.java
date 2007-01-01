@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,6 +203,18 @@ public class BeanDefinitionReaderUtils {
 		String generatedName = generateBeanName(beanDefinition, beanFactory, false);
 		beanFactory.registerBeanDefinition(generatedName, beanDefinition);
 		return generatedName;
+	}
+
+	/**
+	 * Extract the "raw" bean name from the given (potentially generated) bean name,
+	 * excluding any "#..." suffixes which might have been added for uniqueness.
+	 * @param generatedBeanName the potentially generated bean name
+	 * @return the raw bean name
+	 * @see #GENERATED_BEAN_NAME_SEPARATOR
+	 */
+	public static String getRawBeanName(String generatedBeanName) {
+		int separatorIndex = generatedBeanName.indexOf(GENERATED_BEAN_NAME_SEPARATOR);
+		return (separatorIndex != -1 ? generatedBeanName.substring(0, separatorIndex) : generatedBeanName);
 	}
 
 }

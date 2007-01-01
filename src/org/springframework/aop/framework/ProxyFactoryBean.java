@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -299,7 +299,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 				// Rely on AOP infrastructure to tell us what interfaces to proxy.
 				setInterfaces(ClassUtils.getAllInterfacesForClass(this.targetSource.getTargetClass()));
 			}
-			// Eagerly initialize the shared singleton instance.
+			// Initialize the shared singleton instance.
 			super.setFrozen(this.freezeProxy);
 			this.singletonInstance = getProxy(createAopProxy());
 			// We must listen to superclass advice change events to recache the singleton
@@ -319,8 +319,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 		// an independent instance of the configuration.
 		// In this case, no proxy will have an instance of this object's configuration,
 		// but will have an independent copy.
-		if (logger.isDebugEnabled()) {
-			logger.debug("Creating copy of prototype ProxyFactoryBean config: " + this);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Creating copy of prototype ProxyFactoryBean config: " + this);
 		}
 
 		AdvisedSupport copy = new AdvisedSupport();
@@ -333,8 +333,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 		}
 		copy.setFrozen(this.freezeProxy);
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("Copy has config: " + copy);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Using AdvisedSupport copy: " + copy);
 		}
 		return getProxy(copy.createAopProxy());
 	}
@@ -416,8 +416,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 			// Materialize interceptor chain from bean names.
 			for (int i = 0; i < this.interceptorNames.length; i++) {
 				String name = this.interceptorNames[i];
-				if (logger.isDebugEnabled()) {
-					logger.debug("Configuring advisor or advice '" + name + "'");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Configuring advisor or advice '" + name + "'");
 				}
 
 				if (name.endsWith(GLOBAL_SUFFIX)) {
@@ -522,17 +522,11 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * bean factory
 	 */
 	private void addAdvisorOnChainCreation(Object next, String name) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Adding advisor or TargetSource [" + next + "] with name [" + name + "]");
-		}
-		
 		// We need to convert to an Advisor if necessary so that our source reference
 		// matches what we find from superclass interceptors.
 		Advisor advisor = namedBeanToAdvisor(next);
-		
-		// If it wasn't just updating the TargetSource.
-		if (logger.isDebugEnabled()) {
-			logger.debug("Adding advisor with name [" + name + "]");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Adding advisor with name '" + name + "'");
 		}			
 		addAdvisor((Advisor) advisor);
 	}
@@ -545,8 +539,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 */
 	private TargetSource freshTargetSource() {
 		if (this.targetName == null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Not refreshing target: bean name not specified in interceptorNames");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Not refreshing target: Bean name not specified in 'interceptorNames'.");
 			}
 			return this.targetSource;
 		}
@@ -590,12 +584,12 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 */
 	public void adviceChanged(AdvisedSupport advisedSupport) {
 		if (this.singleton) {
-			logger.info("Advice has changed; recaching singleton instance");
+			logger.debug("Advice has changed; recaching singleton instance");
 			this.singletonInstance = null;
 		}
 	}
-	
-	
+
+
 	/**
 	 * Used in the interceptor chain where we need to replace a bean with a prototype
 	 * on creating a proxy.

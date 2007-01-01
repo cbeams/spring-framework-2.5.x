@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -307,8 +307,8 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 		}
 
 		synchronized (instances) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("SingletonBeanFactoryLocator.getInstance(): instances.hashCode=" +
+			if (logger.isTraceEnabled()) {
+				logger.trace("SingletonBeanFactoryLocator.getInstance(): instances.hashCode=" +
 						instances.hashCode() + ", instances=" + instances);
 			}
 			BeanFactoryLocator bfl = (BeanFactoryLocator) instances.get(selector);
@@ -357,8 +357,8 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 			}
 			else {
 				// This group definition doesn't exist, we need to try to load it.
-				if (logger.isDebugEnabled()) {
-					logger.debug("Factory group with resource name [" + this.resourceName +
+				if (logger.isTraceEnabled()) {
+					logger.trace("Factory group with resource name [" + this.resourceName +
 							"] requested. Creating new instance.");
 				}
 				
@@ -393,7 +393,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 				bean = groupContext.getBean(beanName);
 				if (bean instanceof String) {
 					logger.warn("You're using the deprecated alias-through-String-bean feature, " +
-							"which will be removed as of Spring 2.0. It is recommended to replace this " +
+							"which will be removed as of Spring 2.1. It is recommended to replace this " +
 							"with an <alias> tag (see SingletonBeanFactoryLocator javadoc).");
 					beanName = (String) bean;
 					bean = groupContext.getBean(beanName);
@@ -502,9 +502,8 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	 */
 	protected void destroyDefinition(BeanFactory groupDef, String resourceName) throws BeansException {
 		if (groupDef instanceof ConfigurableBeanFactory) {
-			// debugging trace only
-			if (logger.isDebugEnabled()) {
-				logger.debug("Factory group with resource name '" + resourceName +
+			if (logger.isTraceEnabled()) {
+				logger.trace("Factory group with resource name '" + resourceName +
 						"' being released, as there are no more references to it.");
 			}
 			((ConfigurableBeanFactory) groupDef).destroySingletons();

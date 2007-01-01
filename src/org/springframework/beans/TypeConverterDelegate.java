@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,8 +213,8 @@ class TypeConverterDelegate {
 					convertedValue = enumField.get(null);
 				}
 				catch (Throwable ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Field [" + convertedValue + "] isn't an enum value", ex);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Field [" + convertedValue + "] isn't an enum value", ex);
 					}
 				}
 			}
@@ -253,16 +253,16 @@ class TypeConverterDelegate {
 			// Convert String array to a comma-separated String.
 			// Only applies if no PropertyEditor converted the String array before.
 			// The CSV String will be passed into a PropertyEditor's setAsText method, if any.
-			if (logger.isDebugEnabled()) {
-				logger.debug("Converting String array to comma-delimited String [" + convertedValue + "]");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Converting String array to comma-delimited String [" + convertedValue + "]");
 			}
 			convertedValue = StringUtils.arrayToCommaDelimitedString((String[]) convertedValue);
 		}
 
 		if (pe != null && convertedValue instanceof String) {
 			// Use PropertyEditor's setAsText in case of a String value.
-			if (logger.isDebugEnabled()) {
-				logger.debug("Converting String to [" + requiredType + "] using property editor [" + pe + "]");
+			if (logger.isTraceEnabled()) {
+				logger.trace("Converting String to [" + requiredType + "] using property editor [" + pe + "]");
 			}
 			pe.setValue(oldValue);
 			pe.setAsText((String) convertedValue);

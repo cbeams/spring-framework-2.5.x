@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
@@ -34,15 +31,11 @@ import org.springframework.util.StringUtils;
  *
  * <p>Does not support Method Injection, although it provides hooks for subclasses
  * to override to add Method Injection support, for example by overriding methods.
- * 
+ *
  * @author Rod Johnson
  * @since 1.1
  */
 public class SimpleInstantiationStrategy implements InstantiationStrategy {
-	
-	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
-
 
 	public Object instantiate(
 			RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
@@ -56,7 +49,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 			return instantiateWithMethodInjection(beanDefinition, beanName, owner);
 		}
 	}
-	
+
 	/**
 	 * Subclasses can override this method, which is implemented to throw
 	 * UnsupportedOperationException, if they can instantiate an object with
@@ -81,7 +74,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 			return instantiateWithMethodInjection(beanDefinition, beanName, owner, ctor, args);
 		}
 	}
-	
+
 	/**
 	 * Subclasses can override this method, which is implemented to throw
 	 * UnsupportedOperationException, if they can instantiate an object with
@@ -118,12 +111,9 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					"Cannot access factory method [" + factoryMethod + "]; is it public?");
 		}
 		catch (InvocationTargetException ex) {
-			String msg = "Factory method [" + factoryMethod + "] threw exception";
-			// We want to log this one, as it may be a config error:
-			// the method may match, but may have been given incorrect arguments.
-			logger.warn(msg, ex.getTargetException());
-			throw new BeanDefinitionStoreException(msg, ex.getTargetException());
+			throw new BeanDefinitionStoreException(
+					"Factory method [" + factoryMethod + "] threw exception", ex.getTargetException());
 		}
 	}
-	
+
 }
