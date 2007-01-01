@@ -111,7 +111,7 @@ public final class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		assertSpanTagOpened(output);
 		assertSpanTagClosed(output);
 
-		assertContainsAttribute(output, "name", "name.errors");
+		assertContainsAttribute(output, "id", "name.errors");
 		assertBlockTagContains(output, "Default Message");
 	}
 
@@ -136,7 +136,7 @@ public final class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		assertSpanTagOpened(output);
 		assertSpanTagClosed(output);
 
-		assertContainsAttribute(output, "name", "name.errors");
+		assertContainsAttribute(output, "id", "name.errors");
 		assertBlockTagContains(output, "Default Message");
 	}
 
@@ -160,7 +160,7 @@ public final class ErrorsTagTests extends AbstractHtmlElementTagTests {
 		assertSpanTagOpened(output);
 		assertSpanTagClosed(output);
 
-		assertContainsAttribute(output, "name", "name.errors");
+		assertContainsAttribute(output, "id", "name.errors");
 		assertBlockTagContains(output, "<br/>");
 		assertBlockTagContains(output, "Default Message");
 		assertBlockTagContains(output, "Too Short");

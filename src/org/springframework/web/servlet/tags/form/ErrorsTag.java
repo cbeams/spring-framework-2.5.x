@@ -75,11 +75,21 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	/**
 	 * Gets the value for the HTML '<code>name</code>' attribute.
-	 * <p>Appends '<code>.errors</code>' to the value returned by {@link #getPath()}.
-	 * @return the value for the HTML '<code>name</code>' attribute.
-	 * @see #getPath() 
+	 * <p>Simply returns <code>""</code> (the empty string) because the
+	 * '<code>name</code>' attribute is not a validate attribute for the
+	 * '<code>span</code>' element.
 	 */
 	protected String getName() throws JspException {
+		return "";
+	}
+
+	/**
+	 * Gets the value for the HTML '<code>id</code>' attribute.
+	 * <p>Appends '<code>.errors</code>' to the value returned by {@link #getPath()}.
+	 * @return the value for the HTML '<code>name</code>' attribute.
+	 * @see #getPath()
+	 */
+	protected String autogenerateId() throws JspException {
 		return getPath() + ".errors";
 	}
 
