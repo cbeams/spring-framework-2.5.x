@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -339,9 +339,9 @@ public class AntPathMatcher implements PathMatcher {
 	 * Given a pattern and a full path, returns the non-pattern mapped part. E.g.:
 	 * <ul>
 	 * <li>'<code>/docs/*</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
-	 * <li>'<code>/docs/cvs/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>commit</code>'</li>
+	 * <li>'<code>/docs/cvs/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>commit.html</code>'</li>
 	 * <li>'<code>/docs/**</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
-	 * <li>'<code>/docs/**\/*.html</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
+	 * <li>'<code>/docs/**\/*.html</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit.html</code>'</li>
 	 * </ul>
 	 * <p>Assumes that {@link #match} returns <code>true</code> for '<code>pattern</code>'
 	 * and '<code>path</code>', but does <strong>not</strong> enforce this.
