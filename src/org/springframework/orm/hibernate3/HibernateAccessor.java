@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,8 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
  * Base class for HibernateTemplate and HibernateInterceptor, defining common
  * properties such as SessionFactory and flushing behavior.
  *
- * <p>Not intended to be used directly. See HibernateTemplate and HibernateInterceptor.
+ * <p>Not intended to be used directly.
+ * See {@link HibernateTemplate} and {@link HibernateInterceptor}.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -151,7 +152,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * Hibernate Sessions.
 	 */
 	public SessionFactory getSessionFactory() {
-		return sessionFactory;
+		return this.sessionFactory;
 	}
 
 	/**
@@ -233,8 +234,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 
 	/**
 	 * Set the flush behavior by the name of the respective constant
-	 * in this class, e.g. "FLUSH_AUTO". Default is FLUSH_AUTO.
-	 * Will get applied to any <b>new</b> Session created by this object.
+	 * in this class, e.g. "FLUSH_AUTO". Default is "FLUSH_AUTO".
 	 * @param constantName name of the constant
 	 * @see #setFlushMode
 	 * @see #FLUSH_AUTO
@@ -245,8 +245,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 
 	/**
 	 * Set the flush behavior to one of the constants in this class.
-	 * Default is FLUSH_AUTO. Will get applied to any <b>new</b> Session
-	 * created by this object.
+	 * Default is FLUSH_AUTO.
 	 * @see #setFlushModeName
 	 * @see #FLUSH_AUTO
 	 */
@@ -258,7 +257,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * Return if a flush should be forced after executing the callback code.
 	 */
 	public int getFlushMode() {
-		return flushMode;
+		return this.flushMode;
 	}
 
 	/**
@@ -295,7 +294,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * Return the names of Hibernate filters to be activated, if any.
 	 */
 	public String[] getFilterNames() {
-		return filterNames;
+		return this.filterNames;
 	}
 
 	/**
