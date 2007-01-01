@@ -47,4 +47,14 @@
 		<property name="resultType"><value>org.springframework.beans.TestBean</value></property>
 	</bean>
 
+	<bean id="tbWithInner" class="org.springframework.beans.TestBean">
+		<property name="age" value="10"/>
+		<property name="spouse">
+			<bean name="otb.spouse" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+		</property>
+		<property name="friends">
+			<bean name="otb.spouse" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/>
+		</property>
+  </bean>
+
 </beans>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
@@ -102,7 +103,7 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, B
 	 * Return the target object on which the field is defined.
 	 */
 	public Object getTargetObject() {
-		return targetObject;
+		return this.targetObject;
 	}
 
 	/**
@@ -120,7 +121,7 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, B
 	 * Return the name of the field to be retrieved.
 	 */
 	public String getTargetField() {
-		return targetField;
+		return this.targetField;
 	}
 
 	/**
@@ -141,7 +142,7 @@ public class FieldRetrievingFactoryBean implements FactoryBean, BeanNameAware, B
 	 * This allows for concise bean definitions with just an id/name.
 	 */
 	public void setBeanName(String beanName) {
-		this.beanName = StringUtils.trimAllWhitespace(beanName);
+		this.beanName = StringUtils.trimAllWhitespace(BeanFactoryUtils.originalBeanName(beanName));
 	}
 
 	public void setBeanClassLoader(ClassLoader classLoader) {

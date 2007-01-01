@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,15 @@ public class PropertyPathFactoryBeanTests extends TestCase {
 		assertTrue(result1 != result2);
 		assertTrue(result1 != result3);
 		assertTrue(result2 != result3);
+	}
+
+	public void testPropertyPathFactoryBeanAsInnerBean() {
+		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("propertyPath.xml", getClass()));
+		TestBean spouse = (TestBean) xbf.getBean("otb.spouse");
+		TestBean tbWithInner = (TestBean) xbf.getBean("tbWithInner");
+		assertSame(spouse, tbWithInner.getSpouse());
+		assertTrue(!tbWithInner.getFriends().isEmpty());
+		assertSame(spouse, tbWithInner.getFriends().iterator().next());
 	}
 
 }

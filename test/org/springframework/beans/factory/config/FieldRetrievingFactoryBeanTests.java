@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,11 @@ package org.springframework.beans.factory.config;
 import java.sql.Connection;
 
 import junit.framework.TestCase;
+
+import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Juergen Hoeller
@@ -99,6 +104,14 @@ public class FieldRetrievingFactoryBeanTests extends TestCase {
 		fr.setBeanName("org.springframework.beans.factory.PackageLevelVisibleBean.CONSTANT");
 		fr.afterPropertiesSet();
 		assertEquals("Wuby", fr.getObject());
+	}
+
+	public void testBeanNameSyntaxWithBeanFactory() throws Exception {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("fieldRetrieving.xml", getClass()));
+		TestBean testBean = (TestBean) bf.getBean("testBean");
+		assertEquals(new Integer(Connection.TRANSACTION_SERIALIZABLE), testBean.getSomeIntegerArray()[0]);
+		assertEquals(new Integer(Connection.TRANSACTION_SERIALIZABLE), testBean.getSomeIntegerArray()[1]);
 	}
 
 

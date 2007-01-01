@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.util.ClassUtils;
@@ -41,7 +42,7 @@ public class BeanDefinitionReaderUtils {
 	 * Separator for generated bean names. If a class name or parent name is not
 	 * unique, "#1", "#2" etc will be appended, until the name becomes unique.
 	 */
-	public static final String GENERATED_BEAN_NAME_SEPARATOR = "#";
+	public static final String GENERATED_BEAN_NAME_SEPARATOR = BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR;
 
 
 	/**
@@ -203,18 +204,6 @@ public class BeanDefinitionReaderUtils {
 		String generatedName = generateBeanName(beanDefinition, beanFactory, false);
 		beanFactory.registerBeanDefinition(generatedName, beanDefinition);
 		return generatedName;
-	}
-
-	/**
-	 * Extract the "raw" bean name from the given (potentially generated) bean name,
-	 * excluding any "#..." suffixes which might have been added for uniqueness.
-	 * @param generatedBeanName the potentially generated bean name
-	 * @return the raw bean name
-	 * @see #GENERATED_BEAN_NAME_SEPARATOR
-	 */
-	public static String getRawBeanName(String generatedBeanName) {
-		int separatorIndex = generatedBeanName.indexOf(GENERATED_BEAN_NAME_SEPARATOR);
-		return (separatorIndex != -1 ? generatedBeanName.substring(0, separatorIndex) : generatedBeanName);
 	}
 
 }
