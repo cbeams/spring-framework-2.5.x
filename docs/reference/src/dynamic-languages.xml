@@ -511,11 +511,10 @@ class GroovyMessenger implements Messenger {
 			    <title>The JRuby library dependencies</title>
 			    <para>
 			        The JRuby scripting support in Spring requires the following
-			        additional jars to be on the classpath of your application.
-			        (The specific library versions listed just happen to be the
-			        versions that the Spring team used in the development of the
-			        scripting support; you may well be able to use an earlier or
-			        later version of a specific library.)
+			        libraries to be on the classpath of your application.
+			        (The  versions listed just happen to be the versions that the
+					Spring team used in the development of the JRuby scripting support;
+					you may well be able to use another version of a specific library.)
 			    </para>
 			    <itemizedlist>
                     <listitem>
@@ -525,11 +524,6 @@ class GroovyMessenger implements Messenger {
                         <para><filename>cglib-nodep-2.1_3.jar</filename></para>
                     </listitem>
                 </itemizedlist>
-                <para>
-                    All of these libraries are available in the Spring-with-dependencies
-                    distribution of Spring (in addition to also being freely available
-                    on the web).
-                </para>
 			</sidebar>
 			<para>From the JRuby homepage...</para>
 			<quote>
@@ -539,7 +533,7 @@ class GroovyMessenger implements Messenger {
 			<para>
 			    In keeping with the Spring philosophy of offering choice, Spring's
 			    dynamic language support also supports beans defined in the JRuby
-			    language. The JRuby language is (of course) based on the quite intuitive
+			    language. The JRuby language is based on the quite intuitive
 			    Ruby language, and has support for inline regular expressions, blocks
 			    (closures), and a whole host of other features that do make solutions
 			    for some domain problems a whole lot easier to develop.
@@ -554,7 +548,7 @@ class GroovyMessenger implements Messenger {
 	            of the attribute, and (accordingly) program to interfaces when using
 	            JRuby-backed beans).</para>
 			<para>
-	            Let's look at a fully working example of using a JRuby-based bean. Here is
+	            Let us look at a fully working example of using a JRuby-based bean. Here is
 	            the JRuby implementation of the <interfacename>Messenger</interfacename>
 	            interface that was defined earlier in this chapter (for your convenience it
 	            is repeated below).
@@ -611,7 +605,7 @@ include_class 'org.springframework.scripting.Messenger'
 ]]><lineannotation># instantiate and return a new instance of the <literal>RubyMessenger</literal> class</lineannotation><![CDATA[
 RubyMessenger.new]]></programlisting>
 			<para>
-				If you forget to do this, it's not the end of the world; this will however result in
+				If you forget to do this, it is not the end of the world; this will however result in
 				Spring having to trawl (reflectively) through the type representation of your JRuby class
 				looking for a class to instantiate. In the grand scheme of things this will be so fast
 				that you'll never notice it, but it is something that can be avoided by simply
@@ -644,7 +638,7 @@ RubyMessenger.new]]></programlisting>
 			    <title>The Groovy library dependencies</title>
 			    <para>
 			        The Groovy scripting support in Spring requires the following
-			        additional jars to be on the classpath of your application.
+			        libraries to be on the classpath of your application.
 			    </para>
 			    <itemizedlist>
                     <listitem>
@@ -728,9 +722,75 @@ public class Main {
 	            you should (in the opinion of this author) respect the standard Java
 	            conventions of one (public) class per source file.
 			</para>
-			<para>
-	            That is pretty much it so far as Groovy-based beans go. Groove on!
-			</para>
+			<section id="dynamic-language-beans-groovy-customizer">
+				<title>Customising Groovy objects via a callback</title>
+				<para>
+					The <interfacename>GroovyObjectCustomizer</interfacename>
+					interface is a callback that allows you to hook additional
+					creation logic into the process of creating a Groovy-backed bean.
+					For example, implementations of this interface could invoke
+					any required initialization method(s), or set some default property
+					values, or specify a custom <classname>MetaClass</classname>.
+				</para>
+				<programlisting><![CDATA[public interface GroovyObjectCustomizer {
+
+   void customize(GroovyObject goo);
+}]]></programlisting>
+				<para>
+					The Spring Framework will instantiate an instance of your Groovy-backed
+					bean, and will then pass the created <interfacename>GroovyObject</interfacename>
+					to the specified <interfacename>GroovyObjectCustomizer</interfacename>
+					if one has been defined. You can do whatever you like with the supplied
+					<interfacename>GroovyObject</interfacename> reference: it is expected
+					that the setting of a custom <classname>MetaClass</classname> is what most
+					folks will want to do with this callback, and you can see an example
+					of doing that below.
+				</para>
+				<programlisting><![CDATA[public final class SimpleMethodTracingCustomizer implements GroovyObjectCustomizer {
+
+   public void customize(GroovyObject goo) {
+      DelegatingMetaClass metaClass = new DelegatingMetaClass(goo.getMetaClass()) {
+
+         public Object invokeMethod(Object object, String methodName, Object[] arguments) {
+            System.out.println("Invoking '" + methodName + "'.");
+            return super.invokeMethod(object, methodName, arguments);
+         }
+      };
+      metaClass.initialize();
+      goo.setMetaClass(metaClass);
+   }
+}]]></programlisting>
+				<para>
+					A full discussion of meta-programming in Groovy is beyond the scope of the
+					Spring reference manual. Consult the relevant section of the Groovy
+					reference manual, or do a search online: there are plenty of articles
+					concerning this topic.
+				</para>
+				<para>
+					Actually making use of a <interfacename>GroovyObjectCustomizer</interfacename>
+					is easy if you are using the Spring 2.0 namespace support.
+				</para>
+				<programlisting><lineannotation>&lt;!-- define the <interfacename>GroovyObjectCustomizer</interfacename> just like any other bean --&gt;</lineannotation>
+<![CDATA[<bean id="tracingCustomizer" class="example.SimpleMethodTracingCustomizer" />
+
+   ]]><lineannotation>&lt;!-- ... and plug it into the desired Groovy bean via the '<literal>customizer-ref</literal>' attribute --&gt;</lineannotation><![CDATA[
+   <lang:groovy id="calculator"
+      script-source="classpath:org/springframework/scripting/groovy/Calculator.groovy"
+      customizer-ref="tracingCustomizer" />]]></programlisting>
+				<para>
+					If you are not using the Spring 2.0 namespace support, you can still
+					use the <interfacename>GroovyObjectCustomizer</interfacename> functionality.
+				</para>
+				<programlisting><![CDATA[<bean id="calculator" class="org.springframework.scripting.groovy.GroovyScriptFactory">
+      <constructor-arg value="classpath:org/springframework/scripting/groovy/Calculator.groovy"/>
+      ]]><lineannotation>&lt;!-- define the <interfacename>GroovyObjectCustomizer</interfacename> (as an inner bean) --&gt;</lineannotation><![CDATA[
+      <constructor-arg>
+         <bean id="tracingCustomizer" class="example.SimpleMethodTracingCustomizer" />
+      </constructor-arg>
+</bean>
+
+<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>]]></programlisting>
+			</section>
 		</section>
 		<section id="dynamic-language-beans-bsh">
 			<title>BeanShell beans</title>
@@ -738,7 +798,7 @@ public class Main {
 			    <title>The BeanShell library dependencies</title>
 			    <para>
 			        The BeanShell scripting support in Spring requires the following
-			        additional jars to be on the classpath of your application.
+			        libraries to be on the classpath of your application.
 			    </para>
 			    <itemizedlist>
                     <listitem>
