@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,8 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	 * Set whether the lookup occurs in a J2EE container, i.e. if the prefix
 	 * "java:comp/env/" needs to be added if the JNDI name doesn't already
 	 * contain it. Default is "false".
-	 * <p>Note: Will only get applied if no other scheme like "java:" is given.
+	 * <p>Note: Will only get applied if no other scheme, such as "java:",
+	 * is given.
 	 */
 	public void setResourceRef(boolean resourceRef) {
 		this.resourceRef = resourceRef;
@@ -60,7 +61,7 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	 * Return whether the lookup occurs in a J2EE container.
 	 */
 	public boolean isResourceRef() {
-		return resourceRef;
+		return this.resourceRef;
 	}
 
 
@@ -85,7 +86,7 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	 * @see #setResourceRef
 	 */
 	protected Object lookup(String jndiName, Class requiredType) throws NamingException {
-		Assert.notNull(jndiName, "JNDI name must not be null");
+		Assert.notNull(jndiName, "'jndiName' must not be null");
 		String jndiNameToUse = convertJndiName(jndiName);
 		Object jndiObject = getJndiTemplate().lookup(jndiNameToUse, requiredType);
 		if (logger.isDebugEnabled()) {

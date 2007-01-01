@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,10 @@ import org.apache.commons.logging.LogFactory;
  * remotability, like the granularity of method calls that it offers.
  * Furthermore, it has to have serializable arguments etc.
  *
- * <p>Accessors are supposed to throw Spring's generic RemoteAccessException
- * in case of remote invocation failure, provided that the service interface
- * does not declare java.rmi.RemoteException.
+ * <p>Accessors are supposed to throw Spring's generic
+ * {@link org.springframework.remoting.RemoteAccessException} in case
+ * of remote invocation failure, provided that the service interface
+ * does not declare <code>java.rmi.RemoteException</code>.
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
@@ -61,7 +62,7 @@ public abstract class RemoteAccessor {
 	 * Return the interface of the service to access.
 	 */
 	public Class getServiceInterface() {
-		return serviceInterface;
+		return this.serviceInterface;
 	}
 
 }

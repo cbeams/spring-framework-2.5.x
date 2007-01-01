@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.beans.factory.InitializingBean;
 public abstract class UrlBasedRemoteAccessor extends RemoteAccessor implements InitializingBean {
 
 	private String serviceUrl;
-	
+
 
 	/**
 	 * Set the URL of this remote accessor's target service.
@@ -42,13 +42,13 @@ public abstract class UrlBasedRemoteAccessor extends RemoteAccessor implements I
 	 * Return the URL of this remote accessor's target service.
 	 */
 	public String getServiceUrl() {
-		return serviceUrl;
+		return this.serviceUrl;
 	}
 
 
 	public void afterPropertiesSet() {
 		if (getServiceUrl() == null) {
-			throw new IllegalArgumentException("serviceUrl is required");
+			throw new IllegalArgumentException("Property 'serviceUrl' is required");
 		}
 	}
 

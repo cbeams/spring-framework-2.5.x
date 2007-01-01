@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public class JndiAccessor {
 
 	/**
 	 * Set the JNDI template to use for JNDI lookups.
-	 * You can also specify JNDI environment settings via "jndiEnvironment".
+	 * <p>You can also specify JNDI environment settings via "jndiEnvironment".
 	 * @see #setJndiEnvironment
 	 */
 	public void setJndiTemplate(JndiTemplate jndiTemplate) {
@@ -53,12 +53,12 @@ public class JndiAccessor {
 	 * Return the JNDI template to use for JNDI lookups.
 	 */
 	public JndiTemplate getJndiTemplate() {
-		return jndiTemplate;
+		return this.jndiTemplate;
 	}
 
 	/**
 	 * Set the JNDI environment to use for JNDI lookups.
-	 * Creates a JndiTemplate with the given environment settings.
+	 * <p>Creates a JndiTemplate with the given environment settings.
 	 * @see #setJndiTemplate
 	 */
 	public void setJndiEnvironment(Properties jndiEnvironment) {
