@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -49,6 +51,8 @@ import org.springframework.core.io.ResourceLoader;
  * @see org.springframework.context.ApplicationContext
  */
 public class ResourceEntityResolver extends DelegatingEntityResolver {
+
+	private static final Log logger = LogFactory.getLog(ResourceEntityResolver.class);
 
 	private final ResourceLoader resourceLoader;
 
@@ -87,16 +91,16 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 				resourcePath = systemId;
 			}
 			if (resourcePath != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Trying to locate XML entity [" + systemId + "] as resource [" + resourcePath + "]");
+				if (logger.isTraceEnabled()) {
+					logger.trace("Trying to locate XML entity [" + systemId + "] as resource [" + resourcePath + "]");
 				}
 				Resource resource = this.resourceLoader.getResource(resourcePath);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found XML entity [" + systemId + "] as resource [" + resourcePath + "]");
-				}
 				source = new InputSource(resource.getInputStream());
 				source.setPublicId(publicId);
 				source.setSystemId(systemId);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found XML entity [" + systemId + "]: " + resource);
+				}
 			}
 		}
 		return source;

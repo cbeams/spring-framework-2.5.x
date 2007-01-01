@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 	public static final String DEFAULT_SCHEMA_MAPPINGS_LOCATION = "META-INF/spring.schemas";
 
 
-	private final Log logger = LogFactory.getLog(getClass());
+	private static final Log logger = LogFactory.getLog(PluggableSchemaResolver.class);
 
 	private final ClassLoader classLoader;
 
@@ -109,6 +109,10 @@ public class PluggableSchemaResolver implements EntityResolver {
 
 
 	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
+		if (logger.isTraceEnabled()) {
+			logger.trace("Trying to resolve XML entity with public id [" + publicId +
+					"] and system id [" + systemId + "]");
+		}
 		if (systemId != null) {
 			String resourceLocation = this.schemaMappings.getProperty(systemId);
 			if (resourceLocation != null) {
@@ -116,6 +120,9 @@ public class PluggableSchemaResolver implements EntityResolver {
 				InputSource source = new InputSource(resource.getInputStream());
 				source.setPublicId(publicId);
 				source.setSystemId(systemId);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found XML schema [" + systemId + "] in classpath: " + resourceLocation);
+				}
 				return source;
 			}
 		}

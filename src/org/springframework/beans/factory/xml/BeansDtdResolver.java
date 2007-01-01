@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,8 @@ public class BeansDtdResolver implements EntityResolver {
 
 
 	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Trying to resolve XML entity with public ID [" + publicId +
+		if (logger.isTraceEnabled()) {
+			logger.trace("Trying to resolve XML entity with public ID [" + publicId +
 					"] and system ID [" + systemId + "]");
 		}
 		if (systemId != null && systemId.endsWith(DTD_EXTENSION)) {
@@ -60,8 +60,8 @@ public class BeansDtdResolver implements EntityResolver {
 				int dtdNameStart = systemId.indexOf(DTD_NAMES[i]);
 				if (dtdNameStart > lastPathSeparator) {
 					String dtdFile = systemId.substring(dtdNameStart);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Trying to locate [" + dtdFile + "] in Spring jar");
+					if (logger.isTraceEnabled()) {
+						logger.trace("Trying to locate [" + dtdFile + "] in Spring jar");
 					}
 					try {
 						Resource resource = new ClassPathResource(dtdFile, getClass());
@@ -69,7 +69,7 @@ public class BeansDtdResolver implements EntityResolver {
 						source.setPublicId(publicId);
 						source.setSystemId(systemId);
 						if (logger.isDebugEnabled()) {
-							logger.debug("Found beans DTD [" + systemId + "] in classpath");
+							logger.debug("Found beans DTD [" + systemId + "] in classpath: " + dtdFile);
 						}
 						return source;
 					}

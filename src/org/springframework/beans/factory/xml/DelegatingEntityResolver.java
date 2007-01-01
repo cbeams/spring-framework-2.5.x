@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,10 @@ package org.springframework.beans.factory.xml;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
 import org.springframework.util.Assert;
 
 /**
@@ -44,9 +43,6 @@ public class DelegatingEntityResolver implements EntityResolver {
 	/** Suffix for schema definition files */
 	public static final String XSD_SUFFIX = ".xsd";
 
-
-	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final EntityResolver dtdResolver;
 
@@ -84,22 +80,13 @@ public class DelegatingEntityResolver implements EntityResolver {
 	public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
 		if (systemId != null) {
 			if (systemId.endsWith(DTD_SUFFIX)) {
-				return resolveEntity(publicId, systemId, this.dtdResolver, "DTD");
+				return this.dtdResolver.resolveEntity(publicId, systemId);
 			}
 			else if (systemId.endsWith(XSD_SUFFIX)) {
-				return resolveEntity(publicId, systemId, this.schemaResolver, "XML Schema");
+				return this.schemaResolver.resolveEntity(publicId, systemId);
 			}
 		}
 		return null;
-	}
-
-
-	private InputSource resolveEntity(String publicId, String systemId, EntityResolver resolver, String type) throws SAXException, IOException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Attempting to resolve " + type + " [" + systemId
-					+ "] using [" + resolver.getClass().getName() + "]");
-		}
-		return resolver.resolveEntity(publicId, systemId);
 	}
 
 }
