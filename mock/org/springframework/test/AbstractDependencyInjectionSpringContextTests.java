@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,8 +176,8 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 			populateProtectedVariables();
 		}
 		else if (getAutowireMode() != AUTOWIRE_NO) {
-			this.applicationContext.getBeanFactory().autowireBeanProperties(
-				this, getAutowireMode(), isDependencyCheck());
+			getApplicationContext().getBeanFactory().autowireBeanProperties(
+					this, getAutowireMode(), isDependencyCheck());
 		}
 	}
 
@@ -230,7 +230,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 			Object bean = null;
 			try {
 				Field field = findField(getClass(), varName);
-				bean = this.applicationContext.getBean(varName, field.getType());
+				bean = getApplicationContext().getBean(varName, field.getType());
 				field.setAccessible(true);
 				field.set(this, bean);
 				if (logger.isDebugEnabled()) {
