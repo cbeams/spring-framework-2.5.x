@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,10 @@ import org.springframework.util.StringUtils;
  * <li>7. try "typeMismatch"
  * </ul>
  *
+ * <p>In order to group all codes into a specific category within your resource bundles,
+ * e.g. "validation.typeMismatch.name" instead of the default "typeMismatch.name",
+ * consider specifying a {@link #setPrefix prefix} to be applied.
+ *
  * @author Juergen Hoeller
  * @since 1.0.1
  */
@@ -80,8 +84,31 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	public static final String CODE_SEPARATOR = ".";
 
 
+	private String prefix = "";
+
+
+	/**
+	 * Specify a prefix to be applied to any code built by this resolver.
+	 * <p>Default is none. Specify, for example, "validation." to get
+	 * error codes like "validation.typeMismatch.name".
+	 */
+	public void setPrefix(String prefix) {
+		this.prefix = (prefix != null ? prefix : "");
+	}
+
+	/**
+	 * Return the prefix to be applied to any code built by this resolver.
+	 * <p>Returns an empty String in case of no prefix.
+	 */
+	protected String getPrefix() {
+		return this.prefix;
+	}
+
+
 	public String[] resolveMessageCodes(String errorCode, String objectName) {
-		return new String[] {errorCode + CODE_SEPARATOR + objectName, errorCode};
+		return new String[] {
+				postProcessMessageCode(errorCode + CODE_SEPARATOR + objectName),
+				postProcessMessageCode(errorCode)};
 	}
 
 	/**
@@ -99,7 +126,7 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 		buildFieldList(field, fieldList);
 		for (Iterator it = fieldList.iterator(); it.hasNext();) {
 			String fieldInList = (String) it.next();
-			codeList.add(errorCode + CODE_SEPARATOR + objectName + CODE_SEPARATOR + fieldInList);
+			codeList.add(postProcessMessageCode(errorCode + CODE_SEPARATOR + objectName + CODE_SEPARATOR + fieldInList));
 		}
 		int dotIndex = field.lastIndexOf('.');
 		if (dotIndex != -1) {
@@ -107,12 +134,12 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 		}
 		for (Iterator it = fieldList.iterator(); it.hasNext();) {
 			String fieldInList = (String) it.next();
-			codeList.add(errorCode + CODE_SEPARATOR + fieldInList);
+			codeList.add(postProcessMessageCode(errorCode + CODE_SEPARATOR + fieldInList));
 		}
 		if (fieldType != null) {
-			codeList.add(errorCode + CODE_SEPARATOR + fieldType.getName());
+			codeList.add(postProcessMessageCode(errorCode + CODE_SEPARATOR + fieldType.getName()));
 		}
-		codeList.add(errorCode);
+		codeList.add(postProcessMessageCode(errorCode));
 		return StringUtils.toStringArray(codeList);
 	}
 
@@ -135,6 +162,17 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 				keyIndex = -1;
 			}
 		}
+	}
+
+	/**
+	 * Post-process the given message code, built by this resolver.
+	 * <p>The default implementation applies the specified prefix, if any.
+	 * @param code the message code as built by this resolver
+	 * @return the final message code to be returned
+	 * @see #setPrefix
+	 */
+	protected String postProcessMessageCode(String code) {
+		return getPrefix() + code;
 	}
 
 }

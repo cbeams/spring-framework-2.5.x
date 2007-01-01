@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -624,9 +624,12 @@ public class DataBinderTests extends TestCase {
 	public void testValidatorWithErrors() {
 		TestBean tb = new TestBean();
 		tb.setSpouse(new TestBean());
+
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
+
 		Validator testValidator = new TestBeanValidator();
 		testValidator.validate(tb, errors);
+
 		errors.setNestedPath("spouse.");
 		assertEquals("spouse.", errors.getNestedPath());
 		Validator spouseValidator = new SpouseValidator();
@@ -682,6 +685,77 @@ public class DataBinderTests extends TestCase {
 		assertTrue(errors.hasFieldErrors("spouse.age"));
 		assertEquals(1, errors.getFieldErrorCount("spouse.age"));
 		assertEquals("TOO_YOUNG", errors.getFieldError("spouse.age").getCode());
+		assertEquals("tb", ((FieldError) errors.getFieldErrors("spouse.age").get(0)).getObjectName());
+		assertEquals(new Integer(0), ((FieldError) errors.getFieldErrors("spouse.age").get(0)).getRejectedValue());
+	}
+
+	public void testValidatorWithErrorsAndCodesPrefix() {
+		TestBean tb = new TestBean();
+		tb.setSpouse(new TestBean());
+
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(tb, "tb");
+		DefaultMessageCodesResolver codesResolver = new DefaultMessageCodesResolver();
+		codesResolver.setPrefix("validation.");
+		errors.setMessageCodesResolver(codesResolver);
+
+		Validator testValidator = new TestBeanValidator();
+		testValidator.validate(tb, errors);
+
+		errors.setNestedPath("spouse.");
+		assertEquals("spouse.", errors.getNestedPath());
+		Validator spouseValidator = new SpouseValidator();
+		spouseValidator.validate(tb.getSpouse(), errors);
+
+		errors.setNestedPath("");
+		assertTrue(errors.hasErrors());
+		assertEquals(6, errors.getErrorCount());
+
+		assertEquals(2, errors.getGlobalErrorCount());
+		assertEquals("validation.NAME_TOUCHY_MISMATCH", errors.getGlobalError().getCode());
+		assertEquals("validation.NAME_TOUCHY_MISMATCH", ((ObjectError) errors.getGlobalErrors().get(0)).getCode());
+		assertEquals("validation.NAME_TOUCHY_MISMATCH.tb", ((ObjectError) errors.getGlobalErrors().get(0)).getCodes()[0]);
+		assertEquals("validation.NAME_TOUCHY_MISMATCH", ((ObjectError) errors.getGlobalErrors().get(0)).getCodes()[1]);
+		assertEquals("tb", ((ObjectError) errors.getGlobalErrors().get(0)).getObjectName());
+		assertEquals("validation.GENERAL_ERROR", ((ObjectError) errors.getGlobalErrors().get(1)).getCode());
+		assertEquals("validation.GENERAL_ERROR.tb", ((ObjectError) errors.getGlobalErrors().get(1)).getCodes()[0]);
+		assertEquals("validation.GENERAL_ERROR", ((ObjectError) errors.getGlobalErrors().get(1)).getCodes()[1]);
+		assertEquals("msg", ((ObjectError) errors.getGlobalErrors().get(1)).getDefaultMessage());
+		assertEquals("arg", ((ObjectError) errors.getGlobalErrors().get(1)).getArguments()[0]);
+
+		assertTrue(errors.hasFieldErrors());
+		assertEquals(4, errors.getFieldErrorCount());
+		assertEquals("validation.TOO_YOUNG", errors.getFieldError().getCode());
+		assertEquals("validation.TOO_YOUNG", ((FieldError) errors.getFieldErrors().get(0)).getCode());
+		assertEquals("age", ((FieldError) errors.getFieldErrors().get(0)).getField());
+		assertEquals("validation.AGE_NOT_ODD", ((FieldError) errors.getFieldErrors().get(1)).getCode());
+		assertEquals("age", ((FieldError) errors.getFieldErrors().get(1)).getField());
+		assertEquals("validation.NOT_ROD", ((FieldError) errors.getFieldErrors().get(2)).getCode());
+		assertEquals("name", ((FieldError) errors.getFieldErrors().get(2)).getField());
+		assertEquals("validation.TOO_YOUNG", ((FieldError) errors.getFieldErrors().get(3)).getCode());
+		assertEquals("spouse.age", ((FieldError) errors.getFieldErrors().get(3)).getField());
+
+		assertTrue(errors.hasFieldErrors("age"));
+		assertEquals(2, errors.getFieldErrorCount("age"));
+		assertEquals("validation.TOO_YOUNG", errors.getFieldError("age").getCode());
+		assertEquals("validation.TOO_YOUNG", ((FieldError) errors.getFieldErrors("age").get(0)).getCode());
+		assertEquals("tb", ((FieldError) errors.getFieldErrors("age").get(0)).getObjectName());
+		assertEquals("age", ((FieldError) errors.getFieldErrors("age").get(0)).getField());
+		assertEquals(new Integer(0), ((FieldError) errors.getFieldErrors("age").get(0)).getRejectedValue());
+		assertEquals("validation.AGE_NOT_ODD", ((FieldError) errors.getFieldErrors("age").get(1)).getCode());
+
+		assertTrue(errors.hasFieldErrors("name"));
+		assertEquals(1, errors.getFieldErrorCount("name"));
+		assertEquals("validation.NOT_ROD", errors.getFieldError("name").getCode());
+		assertEquals("validation.NOT_ROD.tb.name", errors.getFieldError("name").getCodes()[0]);
+		assertEquals("validation.NOT_ROD.name", errors.getFieldError("name").getCodes()[1]);
+		assertEquals("validation.NOT_ROD.java.lang.String", errors.getFieldError("name").getCodes()[2]);
+		assertEquals("validation.NOT_ROD", errors.getFieldError("name").getCodes()[3]);
+		assertEquals("name", ((FieldError) errors.getFieldErrors("name").get(0)).getField());
+		assertEquals(null, ((FieldError) errors.getFieldErrors("name").get(0)).getRejectedValue());
+
+		assertTrue(errors.hasFieldErrors("spouse.age"));
+		assertEquals(1, errors.getFieldErrorCount("spouse.age"));
+		assertEquals("validation.TOO_YOUNG", errors.getFieldError("spouse.age").getCode());
 		assertEquals("tb", ((FieldError) errors.getFieldErrors("spouse.age").get(0)).getObjectName());
 		assertEquals(new Integer(0), ((FieldError) errors.getFieldErrors("spouse.age").get(0)).getRejectedValue());
 	}
