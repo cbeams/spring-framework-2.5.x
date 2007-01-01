@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,17 @@ import org.springframework.util.StringUtils;
 
 /**
  * Subclass of AbstractTransactionalSpringContextTests that adds some convenience
- * functionality. Expects a DataSource to be defined in the Spring application context.
+ * functionality for JDBC access. Expects a {@link javax.sql.DataSource} bean
+ * to be defined in the Spring application context.
  *
- * <p>This class exposes a JdbcTemplate and provides an easy way to
- * delete from the database in a new transaction.
+ * <p>This class exposes a {@link org.springframework.jdbc.core.JdbcTemplate}
+ * and provides an easy way to delete from the database in a new transaction.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 1.1.1
+ * @see #setDataSource(javax.sql.DataSource)
+ * @see #getJdbcTemplate()
  */
 public abstract class AbstractTransactionalDataSourceSpringContextTests
     extends AbstractTransactionalSpringContextTests {
@@ -69,12 +73,16 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 
 	/**
 	 * Setter: DataSource is provided by Dependency Injection.
-	 * @param dataSource
 	 */
 	public void setDataSource(DataSource dataSource) {
-		// TODO what if you want to use a JdbcTemplate by preference,
-		// for a native extractor?
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	/**
+	 * Return the JdbcTemplate that this base class manages.
+	 */
+	public final JdbcTemplate getJdbcTemplate() {
+		return this.jdbcTemplate;
 	}
 
 
@@ -112,7 +120,7 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 	 * @return the number of rows in the table
 	 */
 	protected int countRowsInTable(String tableName) {
-		return jdbcTemplate.queryForInt("SELECT COUNT(0) FROM " + tableName);
+		return this.jdbcTemplate.queryForInt("SELECT COUNT(0) FROM " + tableName);
 	}
 	
 	
@@ -135,7 +143,7 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 
 		long startTime = System.currentTimeMillis();
 		List statements = new LinkedList();
-		Resource res = applicationContext.getResource(sqlResourcePath);
+		Resource res = getApplicationContext().getResource(sqlResourcePath);
 		try {
 			LineNumberReader lnr = new LineNumberReader(new InputStreamReader(res.getInputStream()));
 			String currentStatement = lnr.readLine();
@@ -148,7 +156,7 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 			for (Iterator itr = statements.iterator(); itr.hasNext(); ) {
 				String statement = (String) itr.next();
 				try {
-					int rowsAffected = jdbcTemplate.update(statement);
+					int rowsAffected = this.jdbcTemplate.update(statement);
 					if (logger.isDebugEnabled()) {
 						logger.debug(rowsAffected + " rows affected by SQL: " + statement);
 					}
