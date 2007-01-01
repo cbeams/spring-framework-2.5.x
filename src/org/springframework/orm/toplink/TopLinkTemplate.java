@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,8 @@ import org.springframework.util.StringUtils;
  * The latter or code calling the latter only have to deal with business
  * objects, query objects, and <code>org.springframework.dao</code> exceptions.
  *
- * <p>The central method is <code>execute</code>, supporting TopLink code
- * implementing the TopLinkCallback interface. It provides TopLink Session
+ * <p>The central method is <code>execute</code>, supporting TopLink access code
+ * implementing the {@link TopLinkCallback} interface. It provides TopLink Session
  * handling such that neither the TopLinkCallback implementation nor the calling
  * code needs to explicitly care about retrieving/closing TopLink Sessions,
  * or handling Session lifecycle exceptions. For typical single step actions,
@@ -69,7 +69,7 @@ import org.springframework.util.StringUtils;
  * within data access code. Corresponding checks and the actual throwing of such
  * exceptions can often be deferred to after callback execution, though.
  *
- * <p>Note that even if TopLinkTransactionManager is used for transaction
+ * <p>Note that even if {@link TopLinkTransactionManager} is used for transaction
  * demarcation in higher-level services, all those services above the data
  * access layer don't need to be TopLink-aware. Setting such a special
  * PlatformTransactionManager is a configuration issue, without introducing
@@ -77,10 +77,11 @@ import org.springframework.util.StringUtils;
  * configuration (use JtaTransactionManager instead) and TopLink session
  * configuration, neither affecting application code.
  *
- * <p>LocalSessionFactoryBean is the preferred way of obtaining a reference
+ * <p>{@link LocalSessionFactoryBean} is the preferred way of obtaining a reference
  * to a specific TopLink SessionFactory. It will usually be configured to
  * create ClientSessions for a ServerSession held by it, allowing for seamless
- * multi-threaded execution.
+ * multi-threaded execution. The Spring application context will manage its lifecycle,
+ * initializing and shutting down the factory as part of the application.
  *
  * <p>Thanks to Slavik Markovich for implementing the initial TopLink support prototype!
  *

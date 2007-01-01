@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ import org.springframework.dao.support.DataAccessUtils;
  * Base class for JpaTemplate and JpaInterceptor, defining common
  * properties such as EntityManagerFactory and flushing behavior.
  *
- * <p>Not intended to be used directly. See JpaTemplate and JpaInterceptor.
+ * <p>Not intended to be used directly.
+ * See {@link JpaTemplate} and {@link JpaInterceptor}.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -101,7 +102,7 @@ public abstract class JpaAccessor extends EntityManagerFactoryAccessor implement
 	 * Return if this accessor should flush changes to the database eagerly.
 	 */
 	public boolean isFlushEager() {
-		return flushEager;
+		return this.flushEager;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,10 +48,10 @@ import org.springframework.util.ClassUtils;
  * (Using Spring's SharedEntityManagerBean / PersistenceAnnotationBeanPostProcessor,
  * or using a direct JNDI lookup for an EntityManager on a Java EE 5 server.)
  *
- * <p>The central method is of this template is "execute", supporting JPA code
- * implementing the JpaCallback interface. It provides JPA EntityManager handling
- * such that neither the JpaCallback implementation nor the calling code needs
- * to explicitly care about retrieving/closing EntityManagers, or handling
+ * <p>The central method is of this template is "execute", supporting JPA access code
+ * implementing the {@link JpaCallback} interface. It provides JPA EntityManager
+ * handling such that neither the JpaCallback implementation nor the calling code
+ * needs to explicitly care about retrieving/closing EntityManagers, or handling
  * JPA lifecycle exceptions.
  *
  * <p>Can be used within a service implementation via direct instantiation with
@@ -66,12 +66,20 @@ import org.springframework.util.ClassUtils;
  * DataAccessExceptions, the major disadvantage is that it introduces
  * another thin layer on top of the target API.
  *
- * <p>LocalEntityManagerFactoryBean and LocalContainerEntityManagerFactoryBean
- * are the preferred ways of obtaining a reference to an EntityManagerFactory
- * outside of a full Java EE 5 environment. Within a Java EE 5 environment,
- * you will typically work with either an EntityManagerFactory obtained from
- * JNDI or a shared EntityManager proxy obtained from JNDI (via Spring's
- * JndiObjectFactoryBean).
+ * <p>Note that even if {@link JpaTransactionManager} is used for transaction
+ * demarcation in higher-level services, all those services above the data
+ * access layer don't need to be JPA-aware. Setting such a special
+ * PlatformTransactionManager is a configuration issue: For example,
+ * switching to JTA is just a matter of Spring configuration (use
+ * JtaTransactionManager instead) that does not affect application code.
+ *
+ * <p>{@link LocalContainerEntityManagerFactoryBean} is the preferred way of
+ * obtaining a reference to an EntityManagerFactory, at least outside of a full
+ * Java EE 5 environment. The Spring application context will manage its lifecycle,
+ * initializing and shutting down the factory as part of the application.
+ * Within a Java EE 5 environment, you will typically work with a server-managed
+ * EntityManagerFactory that is exposed via JNDI, obtained through Spring's
+ * {@link org.springframework.jndi.JndiObjectFactoryBean}.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -138,7 +146,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	 * code, or rather an EntityManager proxy.
 	 */
 	public boolean isExposeNativeEntityManager() {
-		return exposeNativeEntityManager;
+		return this.exposeNativeEntityManager;
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,8 @@ import org.springframework.util.ReflectionUtils;
  * JDOExceptions into Spring DataAccessExceptions, following the
  * <code>org.springframework.dao</code> exception hierarchy.
  *
- * <p>The central method is <code>execute</code>, supporting JDO code
- * implementing the JdoCallback interface. It provides JDO PersistenceManager
+ * <p>The central method is <code>execute</code>, supporting JDO access code
+ * implementing the {@link JdoCallback} interface. It provides JDO PersistenceManager
  * handling such that neither the JdoCallback implementation nor the calling
  * code needs to explicitly care about retrieving/closing PersistenceManagers,
  * or handling JDO lifecycle exceptions.
@@ -66,7 +66,7 @@ import org.springframework.util.ReflectionUtils;
  * within data access code. Corresponding checks and the actual throwing of such
  * exceptions can often be deferred to after callback execution, though.
  *
- * <p>Note that even if JdoTransactionManager is used for transaction
+ * <p>Note that even if {@link JdoTransactionManager} is used for transaction
  * demarcation in higher-level services, all those services above the data
  * access layer don't need to be JDO-aware. Setting such a special
  * PlatformTransactionManager is a configuration issue, without introducing
@@ -74,12 +74,10 @@ import org.springframework.util.ReflectionUtils;
  * Spring configuration (use JtaTransactionManager instead) and JDO provider
  * configuration, neither affecting application code.
  *
- * <p>LocalPersistenceManagerFactoryBean is the preferred way of obtaining a
- * reference to a specific PersistenceManagerFactory, at least in a non-EJB
- * environment. Registering a PersistenceManagerFactory with JNDI is only
- * advisable when using a JCA Connector, i.e. when the application server
- * cares for initialization. Else, portability is rather limited: Manual
- * JNDI binding isn't supported by some application servers (e.g. Tomcat).
+ * <p>{@link LocalPersistenceManagerFactoryBean} is the preferred way of obtaining
+ * a reference to a specific PersistenceManagerFactory, at least in a non-EJB
+ * environment. The Spring application context will manage its lifecycle,
+ * initializing and shutting down the factory as part of the application.
  *
  * <p>Note that lazy loading will just work with an open JDO PersistenceManager,
  * either within a Spring-driven transaction (with JdoTransactionManager or
