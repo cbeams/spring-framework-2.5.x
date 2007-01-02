@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,14 +100,14 @@ public class BeanCreationException extends FatalBeanException {
 	 * definition came from, if any.
 	 */
 	public String getResourceDescription() {
-		return resourceDescription;
+		return this.resourceDescription;
 	}
 
 	/**
 	 * Return the name of the bean requested, if any.
 	 */
 	public String getBeanName() {
-		return beanName;
+		return this.beanName;
 	}
 
 }
