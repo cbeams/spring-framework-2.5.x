@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,18 +25,23 @@ import org.springframework.core.CollectionFactory;
 import org.springframework.jdbc.support.JdbcUtils;
 
 /**
- * RowMapper implementation that creates a <code>java.util.Map</code>
+ * {@link RowMapper} implementation that creates a <code>java.util.Map</code>
  * for each row, representing all columns as key-value pairs: one
  * entry for each column, with the column name as key.
  *
  * <p>The Map implementation to use and the key to use for each column
  * in the column Map can be customized through overriding
- * <code>createColumnMap</code> and <code>getColumnKey</code>, respectively.
+ * {@link #createColumnMap} and {@link #getColumnKey}, respectively.
+ *
+ * <p><b>Note:</b> By default, ColumnMapRowMapper will try to build a linked Map
+ * with case-insensitive keys, to preserve column order as well as allow any
+ * casing to be used for column names. This requires Commons Collections on the
+ * classpath (which will be autodetected). Else, the fallback is a standard linked
+ * HashMap, which will still preserve column order but requires the application
+ * to specify the column names in the same casing as exposed by the driver.
  *
  * @author Juergen Hoeller
  * @since 1.2
- * @see #createColumnMap
- * @see #getColumnKey
  * @see JdbcTemplate#queryForList(String)
  * @see JdbcTemplate#queryForMap(String)
  */
