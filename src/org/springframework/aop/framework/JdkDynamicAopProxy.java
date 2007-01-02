@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,11 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.util.ClassUtils;
 
 /**
- * InvocationHandler implementation for the Spring AOP framework,
+ * JDK-based {@link AopProxy} implementation for the Spring AOP framework,
  * based on JDK 1.3+ dynamic proxies.
  *
- * <p>Creates a JDK proxy, implementing the interfaces exposed by
- * the proxy. Dynamic proxies <i>cannot</i> be used to proxy methods
+ * <p>Creates a dynamic proxy, implementing the interfaces exposed by
+ * the AopProxy. Dynamic proxies <i>cannot</i> be used to proxy methods
  * defined in classes, rather than interfaces.
  *
  * <p>Objects of this type should be obtained through proxy factories,
@@ -43,10 +43,10 @@ import org.springframework.util.ClassUtils;
  * to Spring's AOP framework and need not be used directly by client code.
  *
  * <p>Proxies created using this class will be thread-safe if the
- * underlying (target) class is threadsafe.
+ * underlying (target) class is thread-safe.
  * 
- * <p>Proxies are serializable so long as all Advisors are serializable
- * (including Advices and Pointcuts) and the TargetSource is serializable.
+ * <p>Proxies are serializable so long as all Advisors (including Advices
+ * and Pointcuts) and the TargetSource are serializable.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -59,7 +59,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 
 	/*
 	 * NOTE: We could avoid the code duplication between this class and the CGLIB
-	 * proxies by refactoring invoke() into a template method. However, this approach
+	 * proxies by refactoring "invoke" into a template method. However, this approach
 	 * adds at least 10% performance overhead versus a copy-paste solution, so we sacrifice
 	 * elegance for performance. (We have a good test suite to ensure that the different
 	 * proxies behave the same :-)
@@ -234,13 +234,6 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 
 
 	/**
-	 * Proxy uses the hash code of the TargetSource.
-	 */
-	public int hashCode() {
-		return this.advised.getTargetSource().hashCode();
-	}
-
-	/**
 	 * Equality means interfaces, advisors and TargetSource are equal.
 	 * @param other may be a dynamic proxy wrapping an instance of this class
 	 * @see java.lang.Object#equals(java.lang.Object)
@@ -271,6 +264,13 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		
 		// If we get here, aopr2 is the other AopProxy.
 		return AopProxyUtils.equalsInProxy(this.advised, aopr2.advised);
+	}
+
+	/**
+	 * Proxy uses the hash code of the TargetSource.
+	 */
+	public int hashCode() {
+		return this.advised.getTargetSource().hashCode();
 	}
 
 }
