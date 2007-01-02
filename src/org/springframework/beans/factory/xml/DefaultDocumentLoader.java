@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,16 @@
 
 package org.springframework.beans.factory.xml;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * The default {@link DocumentLoader} implementation.
@@ -40,6 +39,7 @@ import javax.xml.parsers.ParserConfigurationException;
  * <pre code="class">java -Djavax.xml.parsers.DocumentBuilderFactory=oracle.xml.jaxp.JXDocumentBuilderFactory MyMainClass</pre>
  * 
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class DefaultDocumentLoader implements DocumentLoader {
@@ -55,8 +55,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	private static final String XSD_SCHEMA_LANGUAGE = "http://www.w3.org/2001/XMLSchema";
 
 
-	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
+	private static final Log logger = LogFactory.getLog(DefaultDocumentLoader.class);
 
 
 	/**
@@ -69,7 +68,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 			throws Exception {
 
 		DocumentBuilderFactory factory =
-						createDocumentBuilderFactory(validationMode, namespaceAware);
+				createDocumentBuilderFactory(validationMode, namespaceAware);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Using JAXP provider [" + factory.getClass().getName() + "]");
 		}
@@ -77,14 +76,14 @@ public class DefaultDocumentLoader implements DocumentLoader {
 		return builder.parse(inputSource);
 	}
 
-
 	/**
 	 * Create the {@link DocumentBuilderFactory} instance.
 	 * @param validationMode the type of validation ({@link XmlBeanDefinitionReader#VALIDATION_NONE none}, {@link XmlBeanDefinitionReader#VALIDATION_DTD DTD}, or {@link XmlBeanDefinitionReader#VALIDATION_XSD XSD})
 	 * @param namespaceAware <code>true</code> if the returned factory is to provide support for XML namespaces
+	 * @throws ParserConfigurationException if we failed to build a proper DocumentBuilderFactory
 	 */
 	protected DocumentBuilderFactory createDocumentBuilderFactory(int validationMode, boolean namespaceAware)
-					throws ParserConfigurationException {
+			throws ParserConfigurationException {
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(namespaceAware);
@@ -99,7 +98,7 @@ public class DefaultDocumentLoader implements DocumentLoader {
 					factory.setAttribute(SCHEMA_LANGUAGE_ATTRIBUTE, XSD_SCHEMA_LANGUAGE);
 				}
 				catch (IllegalArgumentException ex) {
-					throw new BeanDefinitionStoreException(
+					throw new ParserConfigurationException(
 							"Unable to validate using XSD: Your JAXP provider [" + factory +
 							"] does not support XML Schema. Are you running on Java 1.4 or below with " +
 							"Apache Crimson? Upgrade to Apache Xerces (or Java 1.5) for full XSD support.");
@@ -124,11 +123,11 @@ public class DefaultDocumentLoader implements DocumentLoader {
 			throws ParserConfigurationException {
 
 		DocumentBuilder docBuilder = factory.newDocumentBuilder();
-		if (errorHandler != null) {
-			docBuilder.setErrorHandler(errorHandler);
-		}
 		if (entityResolver != null) {
 			docBuilder.setEntityResolver(entityResolver);
+		}
+		if (errorHandler != null) {
+			docBuilder.setErrorHandler(errorHandler);
 		}
 		return docBuilder;
 	}
