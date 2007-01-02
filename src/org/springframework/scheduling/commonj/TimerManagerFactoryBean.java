@@ -144,12 +144,13 @@ public class TimerManagerFactoryBean extends JndiLocatorSupport
 			this.timerManager = (TimerManager) lookup(this.timerManagerName, TimerManager.class);
 		}
 
-		// register all ScheduledTimerListeners
 		for (int i = 0; i < this.scheduledTimerListeners.length; i++) {
 			ScheduledTimerListener scheduledTask = this.scheduledTimerListeners[i];
 			Timer timer = null;
-			if (scheduledTask.getPeriod() > 0) {
-				// repeated task execution
+			if (scheduledTask.isOneTimeTask()) {
+				timer = this.timerManager.schedule(scheduledTask.getTimerListener(), scheduledTask.getDelay());
+			}
+			else {
 				if (scheduledTask.isFixedRate()) {
 					timer = this.timerManager.scheduleAtFixedRate(
 							scheduledTask.getTimerListener(), scheduledTask.getDelay(), scheduledTask.getPeriod());
@@ -158,10 +159,6 @@ public class TimerManagerFactoryBean extends JndiLocatorSupport
 					timer = this.timerManager.schedule(
 							scheduledTask.getTimerListener(), scheduledTask.getDelay(), scheduledTask.getPeriod());
 				}
-			}
-			else {
-				// one-time task execution
-				timer = this.timerManager.schedule(scheduledTask.getTimerListener(), scheduledTask.getDelay());
 			}
 			this.timers.add(timer);
 		}
