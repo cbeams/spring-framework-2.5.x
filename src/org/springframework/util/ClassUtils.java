@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -579,8 +581,8 @@ public abstract class ClassUtils {
 	 * @return all interfaces that the given object implements as array
 	 */
 	public static Class[] getAllInterfaces(Object object) {
-		Set interfaces = getAllInterfacesAsSet(object);
-		return (Class[]) interfaces.toArray(new Class[interfaces.size()]);
+		Assert.notNull(object, "Object must not be null");
+		return getAllInterfacesForClass(object.getClass());
 	}
 
 	/**
@@ -591,7 +593,20 @@ public abstract class ClassUtils {
 	 * @return all interfaces that the given object implements as array
 	 */
 	public static Class[] getAllInterfacesForClass(Class clazz) {
-		Set interfaces = getAllInterfacesForClassAsSet(clazz);
+		Assert.notNull(clazz, "Class must not be null");
+		if (clazz.isInterface()) {
+			return new Class[] {clazz};
+		}
+		List interfaces = new ArrayList();
+		while (clazz != null) {
+			for (int i = 0; i < clazz.getInterfaces().length; i++) {
+				Class ifc = clazz.getInterfaces()[i];
+				if (!interfaces.contains(ifc)) {
+					interfaces.add(ifc);
+				}
+			}
+			clazz = clazz.getSuperclass();
+		}
 		return (Class[]) interfaces.toArray(new Class[interfaces.size()]);
 	}
 
