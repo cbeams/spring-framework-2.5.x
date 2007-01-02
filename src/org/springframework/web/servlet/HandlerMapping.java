@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,9 +16,9 @@
 
 package org.springframework.web.servlet;
 
-import org.springframework.core.Conventions;
-
 import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.core.Conventions;
 
 /**
  * Interface to be implemented by objects that define a mapping between
@@ -57,8 +57,9 @@ public interface HandlerMapping {
 	/**
 	 * Name of the {@link HttpServletRequest} attribute that contains the path within the handler mapping.
 	 */
-	public static final String PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE =
-					Conventions.getQualifiedAttributeName(HandlerMapping.class, "pathWithinHandlerMapping");
+	String PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE =
+			Conventions.getQualifiedAttributeName(HandlerMapping.class, "pathWithinHandlerMapping");
+
 
 	/**
 	 * Return a handler and any interceptors for this request. The choice may be made
@@ -67,8 +68,8 @@ public interface HandlerMapping {
 	 * even a tag interface, so that handlers are not constrained in any way.
 	 * For example, a HandlerAdapter could be written to allow another framework's
 	 * handler objects to be used.
-	 * <p>Returns null if no match was found. This is not an error. The
-	 * DispatcherServlet will query all registered HandlerMapping beans to find
+	 * <p>Returns <code>null</code> if no match was found. This is not an error.
+	 * The DispatcherServlet will query all registered HandlerMapping beans to find
 	 * a match, and only decide there is an error if none can find a handler.
 	 * @param request current HTTP request
 	 * @return a HandlerExecutionChain instance containing handler object and

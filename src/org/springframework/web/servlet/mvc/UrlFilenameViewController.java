@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,10 @@ import org.springframework.web.servlet.HandlerMapping;
  * <p>Find below some examples:
  *
  * <ol>
- *		<li><code>"/index" -> "index"</code></li>
- *		<li><code>"/index.html" -> "index"</code></li>
- *		<li><code>"/index.html"</code> + prefix <code>"pre_"</code> and suffix <code>"_suf" -> "pre_index_suf"</code></li>
- * 		<li><code>"/products/view.html" -> "products/view"</code></li>
+ *   <li><code>"/index" -> "index"</code></li>
+ *   <li><code>"/index.html" -> "index"</code></li>
+ *   <li><code>"/index.html"</code> + prefix <code>"pre_"</code> and suffix <code>"_suf" -> "pre_index_suf"</code></li>
+ *   <li><code>"/products/view.html" -> "products/view"</code></li>
  * </ol>
  *
  * <p>Thanks to David Barri for suggesting prefix/suffix support!

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc;
 
 import junit.framework.TestCase;
+
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.util.AntPathMatcher;
@@ -25,8 +26,6 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Unit tests for the {@link UrlFilenameViewController} class.
- *
  * @author Juergen Hoeller
  * @author Rick Evans
  * @since 14.09.2005
@@ -35,20 +34,6 @@ public class UrlFilenameViewControllerTests extends TestCase {
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
-
-	/**
-	 * This is the expected behaviour, and it now has a test to prove it.
-	 *
-	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2789
-	 */
-	public void testNestedPathisUsedAsViewName_InBreakingChangeFromSpring12Line() throws Exception {
-		UrlFilenameViewController ctrl = new UrlFilenameViewController();
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/products/view.html");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		ModelAndView mv = ctrl.handleRequest(request, response);
-		assertEquals("products/view", mv.getViewName());
-		assertTrue(mv.getModel().isEmpty());
-	}
 
 	public void testWithPlainFilename() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
@@ -152,6 +137,18 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		assertEquals("When setSuffix(..) is called with a null argument, the empty string value must be used instead.", "", ctrl.getSuffix());
 	}
 
+	/**
+	 * This is the expected behavior, and it now has a test to prove it.
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2789
+	 */
+	public void testNestedPathisUsedAsViewName_InBreakingChangeFromSpring12Line() throws Exception {
+		UrlFilenameViewController ctrl = new UrlFilenameViewController();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/products/view.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = ctrl.handleRequest(request, response);
+		assertEquals("products/view", mv.getViewName());
+		assertTrue(mv.getModel().isEmpty());
+	}
 
 	private void exposePathInMapping(MockHttpServletRequest request, String mapping) {
 		String pathInMapping = this.pathMatcher.extractPathWithinPattern(mapping, request.getRequestURI());

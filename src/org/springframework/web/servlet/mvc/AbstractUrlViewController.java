@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Abstract base class for Controllers that return a view name based on the URL.
+ * Abstract base class for <code>Controllers</code> that return a view name
+ * based on the request URL.
  *
  * <p>Provides infrastructure for determining view names from URLs and configurable
  * URL lookup. For information on the latter, see <code>alwaysUseFullPath</code>
@@ -86,8 +87,7 @@ public abstract class AbstractUrlViewController extends AbstractController {
 
 	/**
 	 * Retrieves the URL path to use for lookup and delegates to
-	 * <code>getViewNameForRequest</code>.
-	 * @see #getViewNameForRequest
+	 * {@link #getViewNameForRequest}.
 	 */
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) {
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
@@ -100,7 +100,7 @@ public abstract class AbstractUrlViewController extends AbstractController {
 
 	/**
 	 * Return the name of the view to render for this request, based on the
-	 * given lookup path. Called by <code>handleRequestInternal</code>.
+	 * given lookup path. Called by {@link #handleRequestInternal}.
 	 * @param request current HTTP request
 	 * @return a view name for this request (never <code>null</code>)
 	 * @see #handleRequestInternal
