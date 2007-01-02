@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,8 +86,14 @@ public class RequestContext {
 	 */
 	public final static String JSTL_LOCALE_ATTRIBUTE = "javax.servlet.jsp.jstl.fmt.locale";
 
+
+	/** JSTL suffix for request-scoped attributes */
 	protected static final String REQUEST_SCOPE_SUFFIX = ".request";
+
+	/** JSTL suffix for session-scoped attributes */
 	protected static final String SESSION_SCOPE_SUFFIX = ".session";
+
+	/** JSTL suffix for application-scoped attributes */
 	protected static final String APPLICATION_SCOPE_SUFFIX = ".application";
 
 
@@ -288,14 +294,14 @@ public class RequestContext {
 	 * Only intended for cooperating classes in this package.
 	 */
 	protected final HttpServletRequest getRequest() {
-		return request;
+		return this.request;
 	}
 
 	/**
 	 * Return the current WebApplicationContext.
 	 */
 	public final WebApplicationContext getWebApplicationContext() {
-		return webApplicationContext;
+		return this.webApplicationContext;
 	}
 
 	/**
@@ -310,14 +316,14 @@ public class RequestContext {
 	 * Return the current locale.
 	 */
 	public final Locale getLocale() {
-		return locale;
+		return this.locale;
 	}
 
 	/**
 	 * Return the current theme.
 	 */
 	public final Theme getTheme() {
-		return theme;
+		return this.theme;
 	}
 
 
@@ -335,7 +341,7 @@ public class RequestContext {
 	 * Is default HTML escaping active?
 	 */
 	public boolean isDefaultHtmlEscape() {
-		return defaultHtmlEscape;
+		return this.defaultHtmlEscape;
 	}
 
 	/**
@@ -353,7 +359,7 @@ public class RequestContext {
 	 * <p>A default UrlPathHelper is always available.
 	 */
 	public UrlPathHelper getUrlPathHelper() {
-		return urlPathHelper;
+		return this.urlPathHelper;
 	}
 
 
@@ -409,7 +415,7 @@ public class RequestContext {
 
 
 	/**
-	 * Retrieve the message for the given code, using the defaultHtmlEscape setting.
+	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
 	 * @param code code of the message
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
@@ -419,7 +425,7 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the message for the given code, using the defaultHtmlEscape setting.
+	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
 	 * @param code code of the message
 	 * @param args arguments for the message, or <code>null</code> if none
 	 * @param defaultMessage String to return if the lookup fails
@@ -430,7 +436,7 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the message for the given code, using the defaultHtmlEscape setting.
+	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
 	 * @param code code of the message
 	 * @param args arguments for the message as a List, or <code>null</code> if none
 	 * @param defaultMessage String to return if the lookup fails
@@ -454,7 +460,7 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the message for the given code, using the defaultHtmlEscape setting.
+	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
 	 * @param code code of the message
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
@@ -464,7 +470,7 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the message for the given code, using the defaultHtmlEscape setting.
+	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
 	 * @param code code of the message
 	 * @param args arguments for the message, or <code>null</code> if none
 	 * @return the message
@@ -475,7 +481,7 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the message for the given code, using the defaultHtmlEscape setting.
+	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
 	 * @param code code of the message
 	 * @param args arguments for the message as a List, or <code>null</code> if none
 	 * @return the message
@@ -500,7 +506,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the given MessageSourceResolvable (e.g. an ObjectError instance),
-	 * using the defaultHtmlEscape setting.
+	 * using the "defaultHtmlEscape" setting.
 	 * @param resolvable the MessageSourceResolvable
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
@@ -615,7 +621,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the Errors instance for the given bind object,
-	 * using the defaultHtmlEscape setting.
+	 * using the "defaultHtmlEscape" setting.
 	 * @param name name of the bind object
 	 * @return the Errors instance, or <code>null</code> if not found
 	 */
@@ -677,7 +683,7 @@ public class RequestContext {
 
 	/**
 	 * Create a BindStatus for the given bind object,
-	 * using the defaultHtmlEscape setting.
+	 * using the "defaultHtmlEscape" setting.
 	 * @param path the bean and property path for which values and errors
 	 * will be resolved (e.g. "person.age")
 	 * @return the new BindStatus instance
@@ -689,7 +695,7 @@ public class RequestContext {
 
 	/**
 	 * Create a BindStatus for the given bind object,
-	 * using the defaultHtmlEscape setting.
+	 * using the "defaultHtmlEscape" setting.
 	 * @param path the bean and property path for which values and errors
 	 * will be resolved (e.g. "person.age")
 	 * @param htmlEscape create a BindStatus with automatic HTML escaping?

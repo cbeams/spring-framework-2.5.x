@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,20 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
+
 import org.springframework.core.Conventions;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.HtmlUtils;
 
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
-
 /**
  * Data-binding aware JSP tag for rendering an HTML '<code>form</code>' whose
- * inner elements are bound to properties on a
- * {@link #setCommandName command object}.
+ * inner elements are bound to properties on a {@link #setCommandName command object}.
  * 
  * <p>Users should place the command object into the
  * {@link org.springframework.web.servlet.ModelAndView} when populating the
@@ -46,8 +45,8 @@ import javax.servlet.jsp.PageContext;
  * {@link #COMMAND_NAME_VARIABLE_NAME}.
  *
  * @author Rob Harrop
- * @see org.springframework.web.servlet.mvc.SimpleFormController
  * @since 2.0
+ * @see org.springframework.web.servlet.mvc.SimpleFormController
  */
 public class FormTag extends AbstractHtmlElementTag {
 
@@ -55,7 +54,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * The default HTTP method using which form values are sent to the server: "post".
 	 */
 	private static final String DEFAULT_METHOD = "post";
-
 
 	/**
 	 * The default command object name: "command".
@@ -71,8 +69,8 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * The name of the {@link javax.servlet.jsp.PageContext} attribute under which the
 	 * command object name is exposed.
 	 */
-	public static final String COMMAND_NAME_VARIABLE_NAME
-			= Conventions.getQualifiedAttributeName(FormTag.class, COMMAND_NAME_ATTRIBUTE);
+	public static final String COMMAND_NAME_VARIABLE_NAME =
+			Conventions.getQualifiedAttributeName(FormTag.class, COMMAND_NAME_ATTRIBUTE);
 
 	/**
 	 * The name of the '<code>name</code>' attribute.
@@ -147,18 +145,18 @@ public class FormTag extends AbstractHtmlElementTag {
 
 
 	/**
-	 * Sets the name of the command object.
+	 * Set the name of the command object.
 	 * <p>May be a runtime expression.
 	 * @param commandName the name of the command object
 	 * @throws IllegalArgumentException if the supplied name is <code>null</code> 
 	 */
 	public void setCommandName(String commandName) {
-		Assert.notNull(commandName, "'commandName' cannot be null");
+		Assert.notNull(commandName, "'commandName' must not be null");
 		this.commandName = commandName;
 	}
 
 	/**
-	 * Gets the value of the '<code>commandName</code>' attribute.
+	 * Get the value of the '<code>commandName</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	protected String getCommandName() {
@@ -166,7 +164,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Sets the value of the '<code>name</code>' attribute.
+	 * Set the value of the '<code>name</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setName(String name) {
@@ -174,7 +172,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Sets the value of the '<code>action</code>' attribute.
+	 * Set the value of the '<code>action</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setAction(String action) {
@@ -182,7 +180,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Gets the value of the '<code>action</code>' attribute.
+	 * Get the value of the '<code>action</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	protected String getAction() {
@@ -190,7 +188,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Sets the value of the '<code>method</code>' attribute.
+	 * Set the value of the '<code>method</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setMethod(String method) {
@@ -199,7 +197,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Gets the value of the '<code>method</code>' attribute.
+	 * Get the value of the '<code>method</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	protected String getMethod() {
@@ -207,7 +205,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Sets the value of the '<code>enctype</code>' attribute.
+	 * Set the value of the '<code>enctype</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setEnctype(String enctype) {
@@ -216,7 +214,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Gets the value of the '<code>enctype</code>' attribute.
+	 * Get the value of the '<code>enctype</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	protected String getEnctype() {
@@ -224,7 +222,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Sets the value of the '<code>onsubmit</code>' attribute.
+	 * Set the value of the '<code>onsubmit</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOnsubmit(String onsubmit) {
@@ -233,7 +231,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Gets the value of the '<code>onsubmit</code>' attribute.
+	 * Get the value of the '<code>onsubmit</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	protected String getOnsubmit() {
@@ -241,7 +239,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Sets the value of the '<code>onreset</code>' attribute.
+	 * Set the value of the '<code>onreset</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOnreset(String onreset) {
@@ -250,7 +248,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Gets the value of the '<code>onreset</code>' attribute.
+	 * Get the value of the '<code>onreset</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	protected String getOnreset() {
