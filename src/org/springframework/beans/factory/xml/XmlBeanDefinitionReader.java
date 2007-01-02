@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	/**
 	 * Indicates that the validation mode should be detected automatically.
 	 */
-	public static final int VALIDATION_AUTO = 1;
+	public static final int VALIDATION_AUTO = XmlValidationModeDetector.VALIDATION_AUTO;
 
 	/**
 	 * Indicates that DTD validation should be used.
@@ -212,8 +212,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * display in the tool UI.
 	 */
 	public void setProblemReporter(ProblemReporter problemReporter) {
-		Assert.notNull(problemReporter, "'problemReporter' cannot be null.");
-		this.problemReporter = problemReporter;
+		this.problemReporter = (problemReporter != null ? problemReporter : new FailFastProblemReporter());
 	}
 
 	/**
@@ -223,8 +222,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * in the BeanFactory.
 	 */
 	public void setEventListener(ReaderEventListener eventListener) {
-		Assert.notNull(eventListener, "'eventListener' cannot be null.");
-		this.eventListener = eventListener;
+		this.eventListener = (eventListener != null ? eventListener : new EmptyReaderEventListener());
 	}
 
 	/**
@@ -234,8 +232,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * to the bean configuration metadata.
 	 */
 	public void setSourceExtractor(SourceExtractor sourceExtractor) {
-		Assert.notNull(sourceExtractor, "'sourceExtractor' cannot be null.");
-		this.sourceExtractor = sourceExtractor;
+		this.sourceExtractor = (sourceExtractor != null ? sourceExtractor : new NullSourceExtractor());
 	}
 
 	/**
@@ -247,24 +244,21 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Gets the current {@link NamespaceHandlerResolver}. Creates the default implementation
-	 * if necessary.
-	 * @see #createDefaultNamespaceHandlerResolver() 
-	 */
-	public NamespaceHandlerResolver getNamespaceHandlerResolver() {
-		if(this.namespaceHandlerResolver == null) {
-			this.namespaceHandlerResolver = createDefaultNamespaceHandlerResolver();
-		}
-		return this.namespaceHandlerResolver;
-	}
-
-	/**
 	 * Specify the {@link DocumentLoader} to use. The default implementation is
 	 * {@link DefaultDocumentLoader} which loads {@link Document} instances using JAXP.
 	 */
 	public void setDocumentLoader(DocumentLoader documentLoader) {
-		Assert.notNull(documentLoader, "'documentLoader' cannot be null.");
-		this.documentLoader = documentLoader;
+		this.documentLoader = (documentLoader != null ? documentLoader : new DefaultDocumentLoader());
+	}
+
+	/**
+	 * Set a SAX entity resolver to be used for parsing. By default,
+	 * BeansDtdResolver will be used. Can be overridden for custom entity
+	 * resolution, for example relative to some specific base path.
+	 * @see BeansDtdResolver
+	 */
+	public void setEntityResolver(EntityResolver entityResolver) {
+		this.entityResolver = entityResolver;
 	}
 
 	/**
@@ -280,24 +274,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Set a SAX entity resolver to be used for parsing. By default,
-	 * BeansDtdResolver will be used. Can be overridden for custom entity
-	 * resolution, for example relative to some specific base path.
-	 * @see BeansDtdResolver
-	 */
-	public void setEntityResolver(EntityResolver entityResolver) {
-		this.entityResolver = entityResolver;
-	}
-
-
-	/**
-	 * Gets the SAX {@link EntityResolver}.
-	 */
-	public EntityResolver getEntityResolver() {
-		return entityResolver;
-	}
-
-	/**
 	 * Set the XmlBeanDefinitionParser implementation to use,
 	 * responsible for the actual parsing of XML bean definitions.
 	 * @deprecated as of Spring 2.0: superseded by "documentReaderClass"
@@ -306,7 +282,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	public void setParserClass(Class parserClass) {
 		if (this.parserClass == null || !XmlBeanDefinitionParser.class.isAssignableFrom(parserClass)) {
-			throw new IllegalArgumentException("parserClass must be an XmlBeanDefinitionParser");
+			throw new IllegalArgumentException("'parserClass' must be an XmlBeanDefinitionParser");
 		}
 		this.parserClass = parserClass;
 	}
@@ -442,7 +418,17 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * {@link #detectValidationMode detected}.
 	 */
 	private int getValidationModeForResource(Resource resource) {
-		return (this.validationMode != VALIDATION_AUTO ? this.validationMode : detectValidationMode(resource));
+		if (this.validationMode != VALIDATION_AUTO) {
+			return this.validationMode;
+		}
+		int detectedMode = detectValidationMode(resource);
+		if (detectedMode != VALIDATION_AUTO) {
+			return detectedMode;
+		}
+		// Hmm, we didn't get a clear indication... Let's assume XSD,
+		// since apparently no DTD declaration has been found up until
+		// detection stopped (before finding the document's root tag).
+		return VALIDATION_XSD;
 	}
 
 	/**
