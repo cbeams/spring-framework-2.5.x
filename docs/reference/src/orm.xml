@@ -2305,11 +2305,15 @@
 
       <programlisting><![CDATA[public class ProductDaoImpl implements ProductDao {
 
+    private EntityManagerFactory emf;
+
     @PersistenceUnit
-    private EntityManagerFactory entityManagerFactory;
+    public void setEntityManagerFactory(EntityManagerFactory emf) {
+        this.emf = emf;
+    }
 
     public Collection loadProductsByCategory(String category) {
-        EntityManager em = this.entityManagerFactory.getEntityManager();
+        EntityManager em = this.emf.createEntityManager();
         try {
              Query query = em.createQuery("from Product as p where p.category = ?1");
              query.setParameter(1, category);
@@ -2339,20 +2343,17 @@
 
 </beans>]]></programlisting>
 
-      <para>The main issue with such DAOs is that it always gets a new
-      <interfacename>EntityManager</interfacename> from the factory. This can
-      be easily overcome by requesting an
-      <interfacename>EntityManager</interfacename> to be injected instead of
-      the factory:</para>
+      <para>The main issue with such a DAO is that it always creates a new
+      <interfacename>EntityManager</interfacename> via the factory. This can
+      be easily overcome by requesting a transactional
+      <interfacename>EntityManager</interfacename> (also called "shared
+      EntityManager", since it is a shared, thread-safe proxy for the actual
+      transactional EntityManager) to be injected instead of the factory:</para>
 
       <programlisting><![CDATA[public class ProductDaoImpl implements ProductDao {
 
-    private EntityManager em;
-
     @PersistenceContext
-    public void setEntityManager(EntityManager em) {
-        this.em = em;
-    }
+    private EntityManager em;
 
     public Collection loadProductsByCategory(String category) {
        Query query = em.createQuery("from Product as p where p.category = :category");
@@ -2361,7 +2362,20 @@
     }
 }]]></programlisting>
 
-      <sidebar>
+      <para>Note that the <literal>@PersistenceContext</literal> annotation
+      has an optional attribute <literal>type</literal>, which defaults to
+      <literal>PersistenceContextType.TRANSACTION</literal>. This default is
+      what you need to receive a "shared EntityManager" proxy. The alternative,
+      <literal>PersistenceContextType.EXTENDED</literal>, is a completely
+      different affair: This results in a so-called "extended EntityManager",
+      which is <emphasis>not thread-safe</emphasis> and hence must not be used
+      in a concurrently accessed component such as a Spring-managed singleton
+      bean. Extended EntityManagers are only supposed to be used in stateful
+      components that, for example, reside in a session, with the lifecycle
+      of the EntityManager not tied to a current transaction but rather
+      being completely up to the application.</para>
+
+			<sidebar>
         <title>Method and Field level Injection</title>
 
         <para>Annotations that indicate dependency injections (such as

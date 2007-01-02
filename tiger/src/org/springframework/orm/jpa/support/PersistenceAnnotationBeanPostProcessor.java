@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,6 +132,12 @@ import org.springframework.util.StringUtils;
  * this is all you need to specify. If you need EntityManagerFactory references
  * as well, specify entries for both "persistenceUnits" and "persistenceContexts",
  * pointing to matching JNDI locations.
+ *
+ * <p><b>NOTE: In general, do not inject EXTENDED EntityManagers into STATELESS beans,
+ * i.e. do not use <code>@PersistenceContext</code> with type <code>EXTENDED</code> in
+ * Spring beans defined with scope 'singleton' (Spring's default scope).</b>
+ * Extended EntityManagers are <i>not</i> thread-safe, hence they must not be used
+ * in concurrently accessed beans (which Spring-managed singletons usually are).
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -469,11 +475,11 @@ public class PersistenceAnnotationBeanPostProcessor extends JndiLocatorSupport
 		 * Return the type of the member, whether it's a field or a method.
 		 */
 		public Class<?> getMemberType() {
-			if (member instanceof Field) {
+			if (this.member instanceof Field) {
 				return ((Field) member).getType();
 			}
-			else if (member instanceof Method) {
-				Method setter = (Method) member;
+			else if (this.member instanceof Method) {
+				Method setter = (Method) this.member;
 				if (setter.getParameterTypes().length != 1) {
 					throw new IllegalArgumentException(
 							"Supposed setter [" + this.member + "] must have 1 argument, not " +
