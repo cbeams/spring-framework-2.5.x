@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,10 +56,10 @@ public class JmsDestinationAccessor extends JmsAccessor {
 	}
 
 	/**
-	 * Return the DestinationResolver for this accessor.
+	 * Return the DestinationResolver for this accessor (never <code>null</code>).
 	 */
 	public DestinationResolver getDestinationResolver() {
-		return destinationResolver;
+		return this.destinationResolver;
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class JmsDestinationAccessor extends JmsAccessor {
 	 * <p>For JMS 1.0.2 based accessors, this tells the JMS provider which class hierarchy
 	 * to use in the implementation of its operations. For JMS 1.1 based accessors, this
 	 * setting does usually not affect operations. However, for both JMS versions, this
-	 * setting tells what type of destination to create if dynamic destinations are enabled.
+	 * setting tells what type of destination to resolve if dynamic destinations are enabled.
 	 * @param pubSubDomain "true" for the Publish/Subscribe domain ({@link javax.jms.Topic Topics}),
 	 * "false" for the Point-to-Point domain ({@link javax.jms.Queue Queues})
 	 * @see #setDestinationResolver
@@ -82,7 +82,7 @@ public class JmsDestinationAccessor extends JmsAccessor {
 	 * Otherwise, the Point-to-Point domain ({@link javax.jms.Queue Queues}) is used.
 	 */
 	public boolean isPubSubDomain() {
-		return pubSubDomain;
+		return this.pubSubDomain;
 	}
 
 

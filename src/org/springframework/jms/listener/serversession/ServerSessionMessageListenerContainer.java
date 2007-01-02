@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,21 +38,21 @@ import org.springframework.jms.support.JmsUtils;
  * with standard JMS. It allows for dynamic management of JMS Sessions,
  * potentially using a pool of Sessions that receive messages in parallel.
  *
- * <p>Note that the default ServerSessionFactory is a SimpleServerSessionFactory,
+ * <p>Note that the default ServerSessionFactory is a {@link SimpleServerSessionFactory},
  * which will create a new ServerSession for each listener execution.
- * Consider specifying a CommonsPoolServerSessionFactory to reuse JMS Sessions
+ * Consider specifying a {@link CommonsPoolServerSessionFactory} to reuse JMS Sessions
  * and/or to limit the number of concurrent ServerSession executions
  *
- * <p>See the {@link AbstractMessageListenerContainer AbstractMessageListenerContainer}
- * javadoc for details on acknowledge modes and transaction options.
+ * <p>See the {@link AbstractMessageListenerContainer} javadoc for details
+ * on acknowledge modes and transaction options.
  *
- * <p>For a simpler message listener container, in particular if using
+ * <p>For a simpler message listener container, in particular when using
  * a JMS provider without ServerSessionPool support, consider using
- * SimpleMessageListenerContainer.
+ * {@link org.springframework.jms.listener.SimpleMessageListenerContainer}.
  *
  * <p>This class requires a JMS 1.1+ provider, because it builds on the
- * domain-independent API. <b>Use the {@link ServerSessionMessageListenerContainer102
- * ServerSessionMessageListenerContainer102} subclass for JMS 1.0.2 providers.</b>
+ * domain-independent API. <b>Use the {@link ServerSessionMessageListenerContainer102}
+ * subclass for JMS 1.0.2 providers.</b>
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -75,7 +75,7 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 	 * Consider using a CommonsPoolServerSessionFactory to reuse JMS Sessions
 	 * and/or to limit the number of concurrent ServerSession executions.
 	 * @see SimpleServerSessionFactory
-	 * @see org.springframework.jms.listener.serversession.CommonsPoolServerSessionFactory
+	 * @see CommonsPoolServerSessionFactory
 	 */
 	public void setServerSessionFactory(ServerSessionFactory serverSessionFactory) {
 		this.serverSessionFactory =
@@ -86,7 +86,7 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 	 * Return the Spring ServerSessionFactory to use.
 	 */
 	protected ServerSessionFactory getServerSessionFactory() {
-		return serverSessionFactory;
+		return this.serverSessionFactory;
 	}
 
 	/**
@@ -104,7 +104,7 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 	 * Return the maximum number of messages to load into a JMS Session.
 	 */
 	protected int getMaxMessagesPerTask() {
-		return maxMessagesPerTask;
+		return this.maxMessagesPerTask;
 	}
 
 
@@ -163,7 +163,7 @@ public class ServerSessionMessageListenerContainer extends AbstractMessageListen
 	 * Available after initialization.
 	 */
 	protected final ConnectionConsumer getConsumer() {
-		return consumer;
+		return this.consumer;
 	}
 
 	/**

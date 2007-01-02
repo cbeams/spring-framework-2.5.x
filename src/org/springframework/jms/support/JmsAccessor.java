@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import org.springframework.jms.JmsException;
  * Base class for {@link org.springframework.jms.core.JmsTemplate} and other
  * JMS-accessing gateway helpers, defining common properties like the
  * {@link ConnectionFactory}. The subclass
- * {@link org.springframework.jms.support.destination.JmsDestinationAccessor} adds
- * further, destination-related properties.
+ * {@link org.springframework.jms.support.destination.JmsDestinationAccessor}
+ * adds further, destination-related properties.
  *
  * <p>Not intended to be used directly. See {@link org.springframework.jms.core.JmsTemplate}.
  *
@@ -68,7 +68,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * Return the ConnectionFactory to use for obtaining JMS Connections.
 	 */
 	public ConnectionFactory getConnectionFactory() {
-		return connectionFactory;
+		return this.connectionFactory;
 	}
 
 	/**
@@ -103,7 +103,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * @see #setSessionTransacted(boolean)
 	 */
 	public boolean isSessionTransacted() {
-		return sessionTransacted;
+		return this.sessionTransacted;
 	}
 
 	/**
@@ -145,7 +145,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * Return the acknowledgement mode for JMS {@link Session sessions}.
 	 */
 	public int getSessionAcknowledgeMode() {
-		return sessionAcknowledgeMode;
+		return this.sessionAcknowledgeMode;
 	}
 
 	public void afterPropertiesSet() {
