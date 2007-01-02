@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class ScheduledTimerTask {
 
 	private long delay = 0;
 
-	private long period = 0;
+	private long period = -1;
 
 	private boolean fixedRate = false;
 
@@ -148,7 +148,7 @@ public class ScheduledTimerTask {
 	 * Return the TimerTask to schedule.
 	 */
 	public TimerTask getTimerTask() {
-		return timerTask;
+		return this.timerTask;
 	}
 
 	/**
@@ -164,18 +164,23 @@ public class ScheduledTimerTask {
 	 * Return the delay before starting the job for the first time.
 	 */
 	public long getDelay() {
-		return delay;
+		return this.delay;
 	}
 
 	/**
 	 * Set the period between repeated task executions, in milliseconds.
-	 * Default is 0, leading to one-time execution. In case of a positive
+	 * <p>Default is -1, leading to one-time execution. In case of a positive
 	 * value, the task will be executed repeatedly, with the given interval
 	 * inbetween executions.
-	 * <p>Note that the semantics of the period vary between fixed-rate
+	 * <p>Note that the semantics of the period value vary between fixed-rate
 	 * and fixed-delay execution.
+	 * <p><b>Note:</b> A period of 0 (for example as fixed delay) is <i>not</i>
+	 * supported, simply because <code>java.util.Timer</code> itself does not
+	 * support it. Hence a value of 0 will be treated as one-time execution;
+	 * however, that value should never be specified explicitly in the first place!
 	 * @see #setFixedRate
 	 * @see #isOneTimeTask()
+	 * @see java.util.Timer#schedule(TimerTask, long, long)
 	 */
 	public void setPeriod(long period) {
 		this.period = period;
@@ -185,7 +190,16 @@ public class ScheduledTimerTask {
 	 * Return the period between repeated task executions.
 	 */
 	public long getPeriod() {
-		return period;
+		return this.period;
+	}
+
+	/**
+	 * Is this task only ever going to execute once?
+	 * @return <code>true</code> if this task is only ever going to execute once
+	 * @see #getPeriod()
+	 */
+	public boolean isOneTimeTask() {
+		return (this.period <= 0);
 	}
 
 	/**
@@ -203,16 +217,7 @@ public class ScheduledTimerTask {
 	 * Return whether to schedule as fixed-rate execution.
 	 */
 	public boolean isFixedRate() {
-		return fixedRate;
-	}
-
-	/**
-	 * Is this task only ever going to execute once?
-	 * @return <code>true</code> if this task is only ever going to execute once.
-	 * @see #getPeriod()
-	 */
-	public boolean isOneTimeTask() {
-		return (this.period < 1);
+		return this.fixedRate;
 	}
 
 }
