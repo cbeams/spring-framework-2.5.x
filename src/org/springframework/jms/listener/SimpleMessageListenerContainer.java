@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,10 @@ import javax.jms.Topic;
 
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jms.support.JmsUtils;
+import org.springframework.util.Assert;
 
 /**
- * Message listener container that the plain JMS client API's
+ * Message listener container that uses the plain JMS client API's
  * <code>MessageConsumer.setMessageListener()</code> method to
  * create concurrent MessageConsumers for the specified listeners.
  *
@@ -42,19 +43,18 @@ import org.springframework.jms.support.JmsUtils;
  * advantage is its low level of complexity and the minimum requirements
  * on the JMS provider: Not even the ServerSessionPool facility is required.
  *
- * <p>See the {@link AbstractMessageListenerContainer AbstractMessageListenerContainer}
- * javadoc for details on acknowledge modes and transaction options.
+ * <p>See the {@link AbstractMessageListenerContainer} javadoc for details
+ * on acknowledge modes and transaction options.
  *
  * <p>For a different style of MessageListener handling, through looped
  * <code>MessageConsumer.receive()</code> calls that also allow for
  * transactional reception of messages (registering them with XA transactions),
- * see {@link DefaultMessageListenerContainer}. For dynamic adaptation of the active
- * number of Sessions, consider using
+ * see {@link DefaultMessageListenerContainer}. For dynamic adaptation of the
+ * active number of Sessions, consider using
  * {@link org.springframework.jms.listener.serversession.ServerSessionMessageListenerContainer}.
  *
  * <p>This class requires a JMS 1.1+ provider, because it builds on the
- * domain-independent API. <b>Use the
- * {@link SimpleMessageListenerContainer102 SimpleMessageListenerContainer102}
+ * domain-independent API. <b>Use the {@link SimpleMessageListenerContainer102}
  * subclass for JMS 1.0.2 providers.</b>
  *
  * @author Juergen Hoeller
@@ -90,24 +90,44 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 * Return whether to inhibit the delivery of messages published by its own connection.
 	 */
 	protected boolean isPubSubNoLocal() {
-		return pubSubNoLocal;
+		return this.pubSubNoLocal;
 	}
 
 	/**
-	 * Specify the number of concurrent consumers to create.
-	 * Default is 1.
+	 * Specify the number of concurrent consumers to create. Default is 1.
+	 * <p>Raising the number of concurrent consumers is recommendable in order
+	 * to scale the consumption of messages coming in from a queue. However,
+	 * note that any ordering guarantees are lost once multiple consumers are
+	 * registered. In general, stick with 1 consumer for low-volume queues.
+	 * <p><b>Do not raise the number of concurrent consumers for a topic.</b>
+	 * This would lead to concurrent consumption of the same message,
+	 * which is hardly ever desirable.
 	 */
 	public void setConcurrentConsumers(int concurrentConsumers) {
+		Assert.isTrue(concurrentConsumers > 0, "'concurrentConsumers' value must be at least 1 (one)");
 		this.concurrentConsumers = concurrentConsumers;
 	}
 
 	/**
-	 * Set the Spring TaskExecutor to use for executing the listeners.
-	 * Default is none, that is, to run in the JMS provider's own receive thread,
+	 * Set the Spring TaskExecutor to use for executing the listener once
+	 * a message has been received by the provider.
+	 * <p>Default is none, that is, to run in the JMS provider's own receive thread,
 	 * blocking the provider's receive endpoint while executing the listener.
-	 * <p>Specify a TaskExecutor for integration with an existing thread pool,
-	 * executing the listener with a received message in a different thread -
-	 * taken from the thread pool, rather than blocking the JMS provider.
+	 * <p>Specify a TaskExecutor for executing the listener in a different thread,
+	 * rather than blocking the JMS provider, usually integrating with an existing
+	 * thread pool. This allows to keep the number of concurrent consumers low (1)
+	 * while still processing messages concurrently (decoupled from receiving!).
+	 * <p><b>NOTE: Specifying a TaskExecutor for listener execution affects
+	 * acknowledgement semantics.</b> Messages will then always get acknowledged
+	 * before listener execution, with the underlying Session immediately reused
+	 * for receiving the next message. Using this in combination with a transacted
+	 * session or with client acknowledgement will lead to unspecified results!
+	 * <p><b>NOTE: Concurrent listener execution via a TaskExecutor will lead
+	 * to concurrent processing of messages that have been received by the same
+	 * underlying Session.</b> As a consequence, it is not recommended to use
+	 * this setting with a {@link SessionAwareMessageListener}, at least not
+	 * if the latter performs actual work on the given Session. A standard
+	 * {@link javax.jms.MessageListener} will work fine, in general.
 	 * @see #setConcurrentConsumers
 	 * @see org.springframework.core.task.SimpleAsyncTaskExecutor
 	 * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
@@ -121,13 +141,9 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 * Validates this instance's configuration.
 	 */
 	public void afterPropertiesSet() {
-		if (this.concurrentConsumers <= 0) {
-			throw new IllegalArgumentException("concurrentConsumers value must be at least 1 (one)");
-		}
 		if (isSubscriptionDurable() && this.concurrentConsumers != 1) {
 			throw new IllegalArgumentException("Only 1 concurrent consumer supported for durable subscription");
 		}
-
 		super.afterPropertiesSet();
 	}
 

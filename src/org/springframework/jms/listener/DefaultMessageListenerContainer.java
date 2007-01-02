@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,12 +75,12 @@ import org.springframework.util.ClassUtils;
  * "cacheLevel"/"cacheLevelName" property, enforcing caching of the Connection (or
  * also Session and MessageConsumer) even in case of an external transaction manager.
  *
- * <p>See the {@link AbstractMessageListenerContainer AbstractMessageListenerContainer}
- * javadoc for details on acknowledge modes and transaction options.
+ * <p>See the {@link AbstractMessageListenerContainer} javadoc for details
+ * on acknowledge modes and transaction options.
  *
  * <p>This class requires a JMS 1.1+ provider, because it builds on the
- * domain-independent API. <b>Use the {@link DefaultMessageListenerContainer102
- * DefaultMessageListenerContainer102} subclass for JMS 1.0.2 providers.</b>
+ * domain-independent API. <b>Use the {@link DefaultMessageListenerContainer102}
+ * subclass for JMS 1.0.2 providers.</b>
  *
  * <p>For dynamic adaptation of the active number of Sessions, consider using
  * ServerSessionMessageListenerContainer.
@@ -191,7 +191,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * Return whether to inhibit the delivery of messages published by its own connection.
 	 */
 	protected boolean isPubSubNoLocal() {
-		return pubSubNoLocal;
+		return this.pubSubNoLocal;
 	}
 
 	/**
@@ -212,11 +212,17 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	}
 
 	/**
-	 * Specify the number of concurrent consumers to create.
-	 * Default is 1.
+	 * Specify the number of concurrent consumers to create. Default is 1.
+	 * <p>Raising the number of concurrent consumers is recommendable in order
+	 * to scale the consumption of messages coming in from a queue. However,
+	 * note that any ordering guarantees are lost once multiple consumers are
+	 * registered. In general, stick with 1 consumer for low-volume queues.
+	 * <p><b>Do not raise the number of concurrent consumers for a topic.</b>
+	 * This would lead to concurrent consumption of the same message,
+	 * which is hardly ever desirable.
 	 */
 	public void setConcurrentConsumers(int concurrentConsumers) {
-		Assert.isTrue(concurrentConsumers > 0, "concurrentConsumers must be positive");
+		Assert.isTrue(concurrentConsumers > 0, "'concurrentConsumers' value must be at least 1 (one)");
 		this.concurrentConsumers = concurrentConsumers;
 	}
 
@@ -238,7 +244,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * @see org.springframework.scheduling.SchedulingTaskExecutor#prefersShortLivedTasks()
 	 */
 	public void setMaxMessagesPerTask(int maxMessagesPerTask) {
-		Assert.isTrue(maxMessagesPerTask != 0, "maxMessagesPerTask must not be 0");
+		Assert.isTrue(maxMessagesPerTask != 0, "'maxMessagesPerTask' must not be 0");
 		this.maxMessagesPerTask = maxMessagesPerTask;
 	}
 
@@ -349,13 +355,9 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * Validates this instance's configuration.
 	 */
 	public void afterPropertiesSet() {
-		if (this.concurrentConsumers <= 0) {
-			throw new IllegalArgumentException("concurrentConsumers value must be at least 1 (one)");
-		}
 		if (isSubscriptionDurable() && this.concurrentConsumers != 1) {
 			throw new IllegalArgumentException("Only 1 concurrent consumer supported for durable subscription");
 		}
-
 		super.afterPropertiesSet();
 	}
 
