@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.beans.factory.xml;
 import junit.framework.TestCase;
 import org.xml.sax.InputSource;
 
+import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -30,7 +30,7 @@ import org.springframework.core.io.Resource;
  * @author Rick Evans
  * @author Juergen Hoeller
  */
-public final class XmlBeanDefinitionReaderTests extends TestCase {
+public class XmlBeanDefinitionReaderTests extends TestCase {
 
 	public void testSetParserClassSunnyDay() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
@@ -116,4 +116,5 @@ public final class XmlBeanDefinitionReaderTests extends TestCase {
 		TestBean bean = (TestBean) factory.getBean("testBean");
 		assertNotNull(bean);
 	}
+
 }
