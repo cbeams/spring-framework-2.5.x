@@ -387,7 +387,7 @@ BeanFactory factory = (BeanFactory) context;]]></programlisting>
                     <para>In a bean definition itself, you may supply more than one name for
                     the bean, by using a combination of up to one name specified via the
                     <literal>id</literal> attribute, and any number of other names via the
-                    <literal>alias</literal> attribute. All these names can be considered
+                    <literal>name</literal> attribute. All these names can be considered
                     equivalent aliases to the same bean, and are useful for some situations,
                     such as allowing each component used in an application to refer to a
                     common dependency using a bean name that is specific to that component
