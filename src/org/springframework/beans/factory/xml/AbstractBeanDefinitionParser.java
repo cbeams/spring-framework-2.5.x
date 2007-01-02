@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,8 +56,8 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 		if (!parserContext.isNested()) {
 			String id = resolveId(element, definition, parserContext);
 			if (!StringUtils.hasText(id) && !parserContext.isNested()) {
-				throw new IllegalArgumentException(
-						"Id is required for element '" + element.getLocalName() + "' when used as a top-level tag");
+				parserContext.getReaderContext().error(
+						"Id is required for element '" + element.getLocalName() + "' when used as a top-level tag", element);
 			}
 			BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
 			registerBeanDefinition(holder, parserContext.getRegistry());

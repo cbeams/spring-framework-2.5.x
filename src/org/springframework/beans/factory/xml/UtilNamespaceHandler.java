@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.springframework.beans.factory.config.PropertyPathFactoryBean;
 import org.springframework.beans.factory.config.SetFactoryBean;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -74,12 +73,15 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 			return PropertyPathFactoryBean.class;
 		}
 
-		protected void doParse(Element element, BeanDefinitionBuilder builder) {
+		protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 			String path = element.getAttribute("path");
-			Assert.hasText(path, "Attribute 'path' must not be empty");
+			if (!StringUtils.hasText(path)) {
+				parserContext.getReaderContext().error("Attribute 'path' must not be empty", element);
+			}
 			int dotIndex = path.indexOf(".");
 			if (dotIndex == -1) {
-				throw new IllegalArgumentException("Attribute 'path' must follow pattern 'beanName.propertyName'");
+				parserContext.getReaderContext().error(
+						"Attribute 'path' must follow pattern 'beanName.propertyName'", element);
 			}
 			String beanName = path.substring(0, dotIndex);
 			String propertyPath = path.substring(dotIndex + 1);
