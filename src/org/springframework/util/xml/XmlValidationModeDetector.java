@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,36 @@
 
 package org.springframework.util.xml;
 
-import org.springframework.util.StringUtils;
-
 import java.io.BufferedReader;
+import java.io.CharConversionException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Detects whether an XML stream is using DTD- or XSD-based validation.
- * 
+ *
  * @author Rob Harrop
+ * @author Juergen Hoeller
+ * @since 2.0
  */
 public class XmlValidationModeDetector {
 
 	/**
-	 * Indicates that DTD validation should be used.
+	 * Indicates that the validation mode should be auto-guessed, since we cannot find
+	 * a clear indication (probably choked on some special characters, or the like).
+	 */
+	public static final int VALIDATION_AUTO = 1;
+
+	/**
+	 * Indicates that DTD validation should be used (we found a "DOCTYPE" declaration).
 	 */
 	public static final int VALIDATION_DTD = 2;
 
 	/**
-	 * Indicates that XSD validation should be used.
+	 * Indicates that XSD validation should be used (found no "DOCTYPE" declaration).
 	 */
 	public static final int VALIDATION_XSD = 3;
 
@@ -65,8 +74,10 @@ public class XmlValidationModeDetector {
 
 
 	/**
-	 * Detects the validation mode for the XML document in the supplied {@link InputStream}.
+	 * Detect the validation mode for the XML document in the supplied {@link InputStream}.
 	 * Note that the supplied {@link InputStream} is closed by this method before returning.
+	 * @param inputStream the InputStream to parse
+	 * @throws IOException in case of I/O failure
 	 * @see #VALIDATION_DTD
 	 * @see #VALIDATION_XSD
 	 */
@@ -78,20 +89,24 @@ public class XmlValidationModeDetector {
 			String content;
 			while ((content = reader.readLine()) != null) {
 				content = consumeCommentTokens(content);
-				if (inComment || !StringUtils.hasText(content)) {
+				if (this.inComment || !StringUtils.hasText(content)) {
 					continue;
 				}
-
 				if (hasDoctype(content)) {
 					isDtdValidated = true;
 					break;
 				}
-				else if (hasOpeningTag(content)) {
-					// End of meaningful data
+				if (hasOpeningTag(content)) {
+					// End of meaningful data...
 					break;
 				}
 			}
 			return (isDtdValidated ? VALIDATION_DTD : VALIDATION_XSD);
+		}
+		catch (CharConversionException ex) {
+			// Choked on some character encoding...
+			// Leave the decision up to the caller.
+			return VALIDATION_AUTO;
 		}
 		finally {
 			reader.close();
@@ -103,7 +118,7 @@ public class XmlValidationModeDetector {
 	 * Does the content contain the the DTD DOCTYPE declaration?
 	 */
 	private boolean hasDoctype(String content) {
-		return content.indexOf(DOCTYPE) > -1;
+		return (content.indexOf(DOCTYPE) > -1);
 	}
 
 	/**
@@ -112,7 +127,7 @@ public class XmlValidationModeDetector {
 	 * tokens will have consumed for the supplied content before passing the remainder to this method.
 	 */
 	private boolean hasOpeningTag(String content) {
-		if (inComment) {
+		if (this.inComment) {
 			return false;
 		}
 		int openTagIndex = content.indexOf('<');
@@ -129,9 +144,8 @@ public class XmlValidationModeDetector {
 		if (line.indexOf(START_COMMENT) == -1 && line.indexOf(END_COMMENT) == -1) {
 			return line;
 		}
-
 		while ((line = consume(line)) != null) {
-			if (!inComment && !line.trim().startsWith(START_COMMENT)) {
+			if (!this.inComment && !line.trim().startsWith(START_COMMENT)) {
 				return line;
 			}
 		}
@@ -139,19 +153,12 @@ public class XmlValidationModeDetector {
 	}
 
 	/**
-	 * Consume the next comment token, update the {@link #isInComment in comment flag}
+	 * Consume the next comment token, update the "inComment" flag
 	 * and return the remaining content.
 	 */
 	private String consume(String line) {
-		int index = (inComment ? endComment(line) : startComment(line));
+		int index = (this.inComment ? endComment(line) : startComment(line));
 		return (index == -1 ? null : line.substring(index));
-	}
-
-	/**
-	 * Are we currently in a comment tag?
-	 */
-	private boolean isInComment() {
-		return inComment;
 	}
 
 	/**
@@ -160,7 +167,6 @@ public class XmlValidationModeDetector {
 	 */
 	private int startComment(String line) {
 		return commentToken(line, START_COMMENT, true);
-
 	}
 
 	private int endComment(String line) {
@@ -175,7 +181,7 @@ public class XmlValidationModeDetector {
 	private int commentToken(String line, String token, boolean inCommentIfPresent) {
 		int index = line.indexOf(token);
 		if (index > - 1) {
-			inComment = inCommentIfPresent;
+			this.inComment = inCommentIfPresent;
 		}
 		return (index == -1 ? index : index + token.length());
 	}
