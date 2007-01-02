@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,166 +16,242 @@
 
 package org.springframework.ui;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
 import junit.framework.TestCase;
+
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.TestBean;
 import org.springframework.test.AssertThrows;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
-
 /**
- * Unit tests for the ModelMap class.
- *
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
 public final class ModelMapTests extends TestCase {
 
-    public void testNoArgCtorYieldsEmptyModel() throws Exception {
-        assertEquals(0, new ModelMap().size());
-    }
+	public void testNoArgCtorYieldsEmptyModel() throws Exception {
+		assertEquals(0, new ModelMap().size());
+	}
 
-    /* 
-     * SPR-2185 - Null model assertion causes backwards compatibility issue
-     */
-    public void testAddNullObjectWithExplicitKey() throws Exception {
-        ModelMap model = new ModelMap();
-        model.addObject("foo", null);
-        assertTrue(model.containsKey("foo"));
-        assertNull(model.get("foo"));
-    }
+	/*
+	 * SPR-2185 - Null model assertion causes backwards compatibility issue
+	 */
+	public void testAddNullObjectWithExplicitKey() throws Exception {
+		ModelMap model = new ModelMap();
+		model.addObject("foo", null);
+		assertTrue(model.containsKey("foo"));
+		assertNull(model.get("foo"));
+	}
 
-    /* 
-     * SPR-2185 - Null model assertion causes backwards compatibility issue
-     */
-    public void testAddNullObjectViaCtorWithExplicitKey() throws Exception {
-        ModelMap model = new ModelMap("foo", null);
-        assertTrue(model.containsKey("foo"));
-        assertNull(model.get("foo"));
-    }
+	/*
+	 * SPR-2185 - Null model assertion causes backwards compatibility issue
+	 */
+	public void testAddNullObjectViaCtorWithExplicitKey() throws Exception {
+		ModelMap model = new ModelMap("foo", null);
+		assertTrue(model.containsKey("foo"));
+		assertNull(model.get("foo"));
+	}
 
-    public void testNamedObjectCtor() throws Exception {
-        ModelMap model = new ModelMap("foo", "bing");
-        assertEquals(1, model.size());
-        String bing = (String) model.get("foo");
-        assertNotNull(bing);
-        assertEquals("bing", bing);
-    }
+	public void testNamedObjectCtor() throws Exception {
+		ModelMap model = new ModelMap("foo", "bing");
+		assertEquals(1, model.size());
+		String bing = (String) model.get("foo");
+		assertNotNull(bing);
+		assertEquals("bing", bing);
+	}
 
-    public void testUnnamedCtorScalar() throws Exception {
-        ModelMap model = new ModelMap("foo", "bing");
-        assertEquals(1, model.size());
-        String bing = (String) model.get("foo");
-        assertNotNull(bing);
-        assertEquals("bing", bing);
-    }
+	public void testUnnamedCtorScalar() throws Exception {
+		ModelMap model = new ModelMap("foo", "bing");
+		assertEquals(1, model.size());
+		String bing = (String) model.get("foo");
+		assertNotNull(bing);
+		assertEquals("bing", bing);
+	}
 
-    public void testOneArgCtorWithScalar() throws Exception {
-        ModelMap model = new ModelMap("bing");
-        assertEquals(1, model.size());
-        String string = (String) model.get("string");
-        assertNotNull(string);
-        assertEquals("bing", string);
-    }
+	public void testOneArgCtorWithScalar() throws Exception {
+		ModelMap model = new ModelMap("bing");
+		assertEquals(1, model.size());
+		String string = (String) model.get("string");
+		assertNotNull(string);
+		assertEquals("bing", string);
+	}
 
-    public void testOneArgCtorWithNull() throws Exception {
-        new AssertThrows(IllegalArgumentException.class, "Null model arguments added without a name being explicitly supplied are not allowed.") {
-            public void test() throws Exception {
-                new ModelMap(null);
-            }
-        }.runTest();
-    }
+	public void testOneArgCtorWithNull() throws Exception {
+		new AssertThrows(IllegalArgumentException.class, "Null model arguments added without a name being explicitly supplied are not allowed.") {
+			public void test() throws Exception {
+				new ModelMap(null);
+			}
+		}.runTest();
+	}
 
-    public void testOneArgCtorWithCollection() throws Exception {
-        ModelMap model = new ModelMap(new String []{"foo", "boing"});
-        assertEquals(1, model.size());
-        String[] strings = (String[]) model.get("stringList");
-        assertNotNull(strings);
-        assertEquals(2, strings.length);
-        assertEquals("foo", strings[0]);
-        assertEquals("boing", strings[1]);
-    }
+	public void testOneArgCtorWithCollection() throws Exception {
+		ModelMap model = new ModelMap(new String[]{"foo", "boing"});
+		assertEquals(1, model.size());
+		String[] strings = (String[]) model.get("stringList");
+		assertNotNull(strings);
+		assertEquals(2, strings.length);
+		assertEquals("foo", strings[0]);
+		assertEquals("boing", strings[1]);
+	}
 
-    public void testOneArgCtorWithEmptyCollection() throws Exception {
-        ModelMap model = new ModelMap(new HashSet());
-        // must not add if collection is empty...
-        assertEquals(0, model.size());
-    }
+	public void testOneArgCtorWithEmptyCollection() throws Exception {
+		ModelMap model = new ModelMap(new HashSet());
+		// must not add if collection is empty...
+		assertEquals(0, model.size());
+	}
 
-    public void testAddObjectWithNull() throws Exception {
-        new AssertThrows(IllegalArgumentException.class, "Null model arguments added without a name being explicitly supplied are not allowed.") {
-            public void test() throws Exception {
-                ModelMap model = new ModelMap();
-                model.addObject(null);
-            }
-        }.runTest();
-    }
+	public void testAddObjectWithNull() throws Exception {
+		new AssertThrows(IllegalArgumentException.class, "Null model arguments added without a name being explicitly supplied are not allowed.") {
+			public void test() throws Exception {
+				ModelMap model = new ModelMap();
+				model.addObject(null);
+			}
+		}.runTest();
+	}
 
-    public void testAddObjectWithEmptyArray() throws Exception {
-        ModelMap model = new ModelMap(new int[]{});
-        assertEquals(1, model.size());
-        int[] ints = (int[]) model.get("intList");
-        assertNotNull(ints);
-        assertEquals(0, ints.length);
-    }
+	public void testAddObjectWithEmptyArray() throws Exception {
+		ModelMap model = new ModelMap(new int[]{});
+		assertEquals(1, model.size());
+		int[] ints = (int[]) model.get("intList");
+		assertNotNull(ints);
+		assertEquals(0, ints.length);
+	}
 
-    public void testAddAllObjectsWithNullMap() throws Exception {
-        ModelMap model = new ModelMap();
-        model.addAllObjects((Map) null);
-        assertEquals(0, model.size());
-    }
+	public void testAddAllObjectsWithNullMap() throws Exception {
+		ModelMap model = new ModelMap();
+		model.addAllObjects((Map) null);
+		assertEquals(0, model.size());
+	}
 
-    public void testAddAllObjectsWithNullCollection() throws Exception {
-        ModelMap model = new ModelMap();
-        model.addAllObjects((Collection) null);
-        assertEquals(0, model.size());
-    }
+	public void testAddAllObjectsWithNullCollection() throws Exception {
+		ModelMap model = new ModelMap();
+		model.addAllObjects((Collection) null);
+		assertEquals(0, model.size());
+	}
 
-    public void testAddAllObjectsWithSparseArrayList() throws Exception {
-        new AssertThrows(IllegalArgumentException.class, "Null model arguments added without a name being explicitly supplied are not allowed.") {
-            public void test() throws Exception {
-                ModelMap model = new ModelMap();
-                ArrayList list = new ArrayList();
-                list.add("bing");
-                list.add(null);
-                model.addAllObjects(list);
-            }
-        }.runTest();
-    }
+	public void testAddAllObjectsWithSparseArrayList() throws Exception {
+		new AssertThrows(IllegalArgumentException.class, "Null model arguments added without a name being explicitly supplied are not allowed.") {
+			public void test() throws Exception {
+				ModelMap model = new ModelMap();
+				ArrayList list = new ArrayList();
+				list.add("bing");
+				list.add(null);
+				model.addAllObjects(list);
+			}
+		}.runTest();
+	}
 
-    public void testAddMap() throws Exception {
-        Map map = new HashMap();
-        map.put("one", "one-value");
-        map.put("two", "two-value");
+	public void testAddMap() throws Exception {
+		Map map = new HashMap();
+		map.put("one", "one-value");
+		map.put("two", "two-value");
+		ModelMap model = new ModelMap();
+		model.addObject(map);
+		assertEquals(1, model.size());
+		String key = StringUtils.uncapitalize(ClassUtils.getShortName(map.getClass()));
+		assertTrue(model.containsKey(key));
+	}
 
-        ModelMap model = new ModelMap();
-        model.addObject(map);
+	public void testAddObjectNoKeyOfSameTypeOverrides() throws Exception {
+		ModelMap model = new ModelMap();
+		model.addObject("foo");
+		model.addObject("bar");
+		assertEquals(1, model.size());
+		String bar = (String) model.get("string");
+		assertEquals("bar", bar);
+	}
 
-        assertEquals(1, model.size());
-        String key = StringUtils.uncapitalize(ClassUtils.getShortName(map.getClass()));
-        assertTrue(model.containsKey(key));
-    }
+	public void testAddListOfTheSameObjects() throws Exception {
+		List beans = new ArrayList();
+		beans.add(new TestBean("one"));
+		beans.add(new TestBean("two"));
+		beans.add(new TestBean("three"));
+		ModelMap model = new ModelMap();
+		model.addAllObjects(beans);
+		assertEquals(1, model.size());
+	}
 
-    public void testAddObjectNoKeyOfSameTypeOverrides() throws Exception {
-        ModelMap model = new ModelMap();
-        model.addObject("foo");
-        model.addObject("bar");
-        assertEquals(1, model.size());
-        String bar = (String) model.get("string");
-        assertNotNull(bar);
-        assertEquals("bar", bar);
-    }
+	public void testInnerClass() throws Exception {
+		ModelMap map = new ModelMap();
+		SomeInnerClass inner = new SomeInnerClass();
+		map.addObject(inner);
+		assertSame(inner, map.get("someInnerClass"));
+	}
 
-    public void testAddListOfTheSameObjects() throws Exception {
-        List beans = new ArrayList();
-        beans.add(new TestBean("one"));
-        beans.add(new TestBean("two"));
-        beans.add(new TestBean("three"));
+	public void testAopCglibProxy() throws Exception {
+		ModelMap map = new ModelMap();
+		ProxyFactory factory = new ProxyFactory();
+		Date date = new Date();
+		factory.setTarget(date);
+		factory.setProxyTargetClass(true);
+		map.addObject(factory.getProxy());
+		assertTrue(map.containsKey("date"));
+		assertEquals(date, map.get("date"));
+	}
 
-        ModelMap model = new ModelMap();
-        model.addAllObjects(beans);
+	public void testAopJdkProxy() throws Exception {
+		ModelMap map = new ModelMap();
+		ProxyFactory factory = new ProxyFactory();
+		Map target = new HashMap();
+		factory.setTarget(target);
+		factory.addInterface(Map.class);
+		Object proxy = factory.getProxy();
+		map.addObject(proxy);
+		assertSame(proxy, map.get("map"));
+	}
 
-        assertEquals(1, model.size());
-    }
+	public void testAopJdkProxyWithMultipleInterfaces() throws Exception {
+		ModelMap map = new ModelMap();
+		Map target = new HashMap();
+		ProxyFactory factory = new ProxyFactory();
+		factory.setTarget(target);
+		factory.addInterface(Serializable.class);
+		factory.addInterface(Cloneable.class);
+		factory.addInterface(Comparable.class);
+		factory.addInterface(Map.class);
+		Object proxy = factory.getProxy();
+		map.addObject(proxy);
+		assertSame(proxy, map.get("map"));
+	}
+
+	public void testAopJdkProxyWithDetectedInterfaces() throws Exception {
+		ModelMap map = new ModelMap();
+		Map target = new HashMap();
+		ProxyFactory factory = new ProxyFactory(target);
+		Object proxy = factory.getProxy();
+		map.addObject(proxy);
+		assertSame(proxy, map.get("map"));
+	}
+
+	public void testRawJdkProxy() throws Exception {
+		ModelMap map = new ModelMap();
+		Object proxy = Proxy.newProxyInstance(
+				getClass().getClassLoader(),
+				new Class[] {Map.class},
+				new InvocationHandler() {
+					public Object invoke(Object proxy, Method method, Object[] args) {
+						return "proxy";
+					}
+				});
+		map.addObject(proxy);
+		assertSame(proxy, map.get("map"));
+	}
+
+
+	private static class SomeInnerClass {
+	}
 
 }
