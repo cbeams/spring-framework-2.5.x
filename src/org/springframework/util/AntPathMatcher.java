@@ -356,14 +356,12 @@ public class AntPathMatcher implements PathMatcher {
 		int puts = 0;
 		for (int i = 0; i < patternParts.length; i++) {
 			String patternPart = patternParts[i];
-			if (patternPart.indexOf('*') > -1 || patternPart.indexOf('?') > -1) {
-				if (puts != 0) {
+			if ((patternPart.indexOf('*') > -1 || patternPart.indexOf('?') > -1) && pathParts.length >= i + 1) {
+				if (puts > 0) {
 					buffer.append(this.pathSeparator);
 				}
-				if (pathParts.length >= i + 1) {
-					buffer.append(pathParts[i]);
-					puts++;
-				}
+				buffer.append(pathParts[i]);
+				puts++;
 			}
 		}
 

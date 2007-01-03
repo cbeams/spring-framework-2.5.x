@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,10 +171,12 @@ public class PathMatcherTests extends TestCase {
 
 	public void testAntPathMatcherExtractPathWithinPattern() throws Exception {
 		PathMatcher pathMatcher = new AntPathMatcher();
+
 		assertEquals("1", "cvs/commit", pathMatcher.extractPathWithinPattern("/docs/*", "/docs/cvs/commit"));
 		assertEquals("2", "commit.html", pathMatcher.extractPathWithinPattern("/docs/cvs/*.html", "/docs/cvs/commit.html"));
 		assertEquals("3", "cvs/commit", pathMatcher.extractPathWithinPattern("/docs/**", "/docs/cvs/commit"));
 		assertEquals("4", "cvs/commit.html", pathMatcher.extractPathWithinPattern("/docs/**/*.html", "/docs/cvs/commit.html"));
+		assertEquals("5", "commit.html", pathMatcher.extractPathWithinPattern("/docs/**/*.html", "/docs/commit.html"));
 
 		// TODO: what would you assume here - should the ? wildcarded part be in the path?
 		assertEquals("1", "docs/cvs/commit", pathMatcher.extractPathWithinPattern("/d?cs/*", "/docs/cvs/commit"));
