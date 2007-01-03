@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,16 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking up handler for [" + lookupPath + "]");
 		}
-		return lookupHandler(lookupPath, request);
+		Object handler = lookupHandler(lookupPath, request);
+		if (handler == null) {
+			// We need to care for the default handler directly, since we need to
+			// expose the PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE for it as well.
+			handler = getDefaultHandler();
+			if (handler != null) {
+				exposePathWithinMapping(lookupPath, request);
+			}
+		}
+		return handler;
 	}
 
 	/**

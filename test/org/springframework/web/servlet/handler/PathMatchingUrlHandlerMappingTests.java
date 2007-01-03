@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,7 @@ import org.springframework.web.servlet.HandlerMapping;
 
 /**
  * @author Alef Arendsen
+ * @author Juergen Hoeller
  */
 public class PathMatchingUrlHandlerMappingTests extends TestCase {
 
@@ -73,22 +74,25 @@ public class PathMatchingUrlHandlerMappingTests extends TestCase {
 		HandlerExecutionChain hec = hm.getHandler(req);
 		assertTrue("Handler is null", hec != null);
 		assertTrue("Handler is correct bean", hec.getHandler() == bean);
+		assertEquals("pathmatchingTest.html", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
 
 		// no match, no forward slash included
 		req = new MockHttpServletRequest("GET", "welcome.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == defaultBean);
-
+		assertEquals("welcome.html", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
 
 		// testing some ????? behavior
 		req = new MockHttpServletRequest("GET", "/pathmatchingAA.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+		assertEquals("pathmatchingAA.html", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
 
 		// testing some ????? behavior
 		req = new MockHttpServletRequest("GET", "/pathmatchingA.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == defaultBean);
+		assertEquals("/pathmatchingA.html", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
 
 		// testing some ????? behavior
 		req = new MockHttpServletRequest("GET", "/administrator/pathmatching.html");
@@ -231,4 +235,5 @@ public class PathMatchingUrlHandlerMappingTests extends TestCase {
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 		assertEquals("Mapping not exposed", "show.html", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
 	}
+
 }

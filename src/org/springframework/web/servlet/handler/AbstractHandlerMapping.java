@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,11 @@ import org.springframework.web.servlet.HandlerMapping;
 /**
  * Abstract base class for {@link HandlerMapping} implementations.
  * Supports ordering, a default handler, and handler interceptors.
+ *
+ * <p>Note: This base class does <i>not</i> support exposure
+ * of the {@link #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE}.
+ * Support for this attribute is up to concrete subclasses,
+ * typically based on request URL mappings.
  *
  * @author Juergen Hoeller
  * @since 07.04.2003
@@ -75,7 +80,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @return the default handler instance, or <code>null</code> if none
 	 */
 	public final Object getDefaultHandler() {
-		return defaultHandler;
+		return this.defaultHandler;
 	}
 
 	/**

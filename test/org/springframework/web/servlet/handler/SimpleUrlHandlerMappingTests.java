@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,15 +70,18 @@ public class SimpleUrlHandlerMappingTests extends TestCase {
 		wac.refresh();
 		Object bean = wac.getBean("mainController");
 		Object otherBean = wac.getBean("otherController");
+		Object defaultBean = wac.getBean("starController");
 		HandlerMapping hm = (HandlerMapping) wac.getBean(beanName);
 
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/welcome.html");
 		HandlerExecutionChain hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+		assertEquals("/welcome.html", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
 
 		req = new MockHttpServletRequest("GET", "/welcome.x");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == otherBean);
+		assertEquals("welcome.x", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
 
 		req = new MockHttpServletRequest("GET", "/");
 		req.setServletPath("/welcome.html");
@@ -112,6 +115,11 @@ public class SimpleUrlHandlerMappingTests extends TestCase {
 		req.setAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE, "/bookseats.html");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+
+		req = new MockHttpServletRequest("GET", "/somePath");
+		hec = hm.getHandler(req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == defaultBean);
+		assertEquals("/somePath", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
 	}
 
 }
