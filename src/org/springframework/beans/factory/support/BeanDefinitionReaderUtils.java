@@ -127,9 +127,8 @@ public class BeanDefinitionReaderUtils {
 			}
 		}
 		if (!StringUtils.hasText(generatedId)) {
-			throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), "",
-					"Unnamed bean definition specifies neither 'class' nor 'parent' nor 'factory-bean'" +
-					" - can't generate bean name");
+			throw new BeanDefinitionStoreException("Unnamed bean definition specifies neither " +
+					"'class' nor 'parent' nor 'factory-bean' - can't generate bean name");
 		}
 
 		String id = generatedId;

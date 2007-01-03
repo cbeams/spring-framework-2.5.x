@@ -18,6 +18,7 @@ package org.springframework.beans.factory.xml;
 
 import org.w3c.dom.Element;
 
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -54,17 +55,24 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	public final BeanDefinition parse(Element element, ParserContext parserContext) {
 		AbstractBeanDefinition definition = parseInternal(element, parserContext);
 		if (!parserContext.isNested()) {
-			String id = resolveId(element, definition, parserContext);
-			if (!StringUtils.hasText(id) && !parserContext.isNested()) {
-				parserContext.getReaderContext().error(
-						"Id is required for element '" + element.getLocalName() + "' when used as a top-level tag", element);
+			try {
+				String id = resolveId(element, definition, parserContext);
+				if (!StringUtils.hasText(id) && !parserContext.isNested()) {
+					parserContext.getReaderContext().error(
+							"Id is required for element '" + element.getLocalName() + "' when used as a top-level tag", element);
+				}
+				BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
+				registerBeanDefinition(holder, parserContext.getRegistry());
+				if (shouldFireEvents()) {
+					BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
+					postProcessComponentDefinition(componentDefinition);
+					parserContext.registerComponent(componentDefinition);
+				}
 			}
-			BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, id);
-			registerBeanDefinition(holder, parserContext.getRegistry());
-			if (shouldFireEvents()) {
-				BeanComponentDefinition componentDefinition = new BeanComponentDefinition(holder);
-				postProcessComponentDefinition(componentDefinition);
-				parserContext.registerComponent(componentDefinition);
+			catch (BeanDefinitionStoreException ex) {
+				parserContext.getReaderContext().error(
+						"Failed to generate id for unnamed custom bean definition", element, null, ex);
+				return null;
 			}
 		}
 		return definition;
@@ -73,8 +81,11 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	/**
 	 * Resolve the ID for the supplied {@link BeanDefinition}. When using {@link #shouldGenerateId generation},
 	 * a name is generated automatically, otherwise the ID is extracted from the "id" attribute.
+	 * @throws BeanDefinitionStoreException if we failed to generate an id
 	 */
-	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) {
+	protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext)
+			throws BeanDefinitionStoreException {
+
 		if (shouldGenerateId()) {
 			return BeanDefinitionReaderUtils.generateBeanName(
 					definition, parserContext.getRegistry(), parserContext.isNested());

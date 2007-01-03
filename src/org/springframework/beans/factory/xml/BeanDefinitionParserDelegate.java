@@ -33,6 +33,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -256,14 +257,14 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
-	 * Report an error with the given message for the given source element-
+	 * Report an error with the given message for the given source element.
 	 */
 	protected void error(String message, Element source) {
 		this.readerContext.error(message, source, this.parseState.snapshot());
 	}
 
 	/**
-	 * Report an error with the given message for the given source element-
+	 * Report an error with the given message for the given source element.
 	 */
 	protected void error(String message, Element source, Throwable cause) {
 		this.readerContext.error(message, source, this.parseState.snapshot(), cause);
@@ -342,11 +343,17 @@ public class BeanDefinitionParserDelegate {
 		AbstractBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
 		if (beanDefinition != null) {
 			if (!StringUtils.hasText(beanName)) {
-				beanName = BeanDefinitionReaderUtils.generateBeanName(
-						beanDefinition, this.readerContext.getReader().getBeanFactory(), (containingBean != null));
-				if (logger.isDebugEnabled()) {
-					logger.debug("Neither XML 'id' nor 'name' specified - " +
-							"using generated bean name [" + beanName + "]");
+				try {
+					beanName = BeanDefinitionReaderUtils.generateBeanName(
+							beanDefinition, this.readerContext.getReader().getBeanFactory(), (containingBean != null));
+					if (logger.isDebugEnabled()) {
+						logger.debug("Neither XML 'id' nor 'name' specified - " +
+								"using generated bean name [" + beanName + "]");
+					}
+				}
+				catch (BeanDefinitionStoreException ex) {
+					error("Failed to generate bean name for unnamed bean definition", ele, ex);
+					return null;
 				}
 			}
 			String[] aliasesArray = StringUtils.toStringArray(aliases);
@@ -366,7 +373,7 @@ public class BeanDefinitionParserDelegate {
 			foundName = (String) CollectionUtils.findFirstMatch(this.usedNames, aliases);
 		}
 		if (foundName != null) {
-			this.readerContext.error("Bean name '" + foundName + "' is already used in this file.", beanElement);
+			error("Bean name '" + foundName + "' is already used in this file.", beanElement);
 		}
 
 		this.usedNames.add(beanName);
@@ -1065,7 +1072,7 @@ public class BeanDefinitionParserDelegate {
 		String namespaceUri = ele.getNamespaceURI();
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
-			this.readerContext.error("Unable to locate NamespaceHandler for namespace [" + namespaceUri + "]", ele);
+			error("Unable to locate NamespaceHandler for namespace [" + namespaceUri + "]", ele);
 			return null;
 		}
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
