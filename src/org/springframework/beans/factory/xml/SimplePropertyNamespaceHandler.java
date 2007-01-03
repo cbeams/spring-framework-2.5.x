@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package org.springframework.beans.factory.xml;
 
+import org.w3c.dom.Attr;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.Conventions;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 /**
  * Simple <code>NamespaceHandler</code> implementation that maps custom attributes directly through
@@ -46,12 +47,13 @@ public class SimplePropertyNamespaceHandler implements NamespaceHandler {
 
 	private static final String REF_SUFFIX = "-ref";
 
+
 	public void init() {
 	}
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		parserContext.getReaderContext().error("Class '" + getClass().getName()
-						+ "' does not support custom elements.", element);
+		parserContext.getReaderContext().error(
+				"Class [" + getClass().getName() + "] does not support custom elements.", element);
 		return null;
 	}
 
@@ -60,13 +62,11 @@ public class SimplePropertyNamespaceHandler implements NamespaceHandler {
 			Attr attr = (Attr) node;
 			String propertyName = attr.getLocalName();
 			String propertyValue = attr.getValue();
-
 			MutablePropertyValues pvs = definition.getBeanDefinition().getPropertyValues();
 			if (pvs.contains(propertyName)) {
-				parserContext.getReaderContext().error("Property '" + propertyName + "' is already defined using both <property> " +
-								"and inline syntax. Only one approach may be used per property.", attr);
+				parserContext.getReaderContext().error("Property '" + propertyName + "' is already defined using " +
+						"both <property> and inline syntax. Only one approach may be used per property.", attr);
 			}
-
 			if (propertyName.endsWith(REF_SUFFIX)) {
 				propertyName = propertyName.substring(0, propertyName.length() - REF_SUFFIX.length());
 				pvs.addPropertyValue(Conventions.attributeNameToPropertyName(propertyName), new RuntimeBeanReference(propertyValue));
@@ -77,4 +77,5 @@ public class SimplePropertyNamespaceHandler implements NamespaceHandler {
 		}
 		return definition;
 	}
+
 }
