@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,19 @@ package org.springframework.beans.factory.parsing;
  * and warnings reported during bean definition parsing.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  * @see Problem
  */
 public interface ProblemReporter {
+
+	/**
+	 * Called when a fatal error is encountered during the parsing process.
+	 * <p>Implementations must treat the given problem as fatal,
+	 * i.e. they have to eventually raise an exception.
+	 * @param problem the source of the error (never <code>null</code>)
+	 */
+	void fatal(Problem problem);
 
 	/**
 	 * Called when an error is encountered during the parsing process.
