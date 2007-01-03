@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,22 @@ public class ReaderContext {
 		this.sourceExtractor = sourceExtractor;
 	}
 
-
-	public Resource getResource() {
+	public final Resource getResource() {
 		return this.resource;
+	}
+
+
+	public void fatal(String message, Object source) {
+		fatal(message, source, null, null);
+	}
+
+	public void fatal(String message, Object source, ParseState parseState) {
+		fatal(message, source, parseState, null);
+	}
+
+	public void fatal(String message, Object source, ParseState parseState, Throwable cause) {
+		Location location = new Location(getResource(), source);
+		this.problemReporter.fatal(new Problem(message, location, parseState, cause));
 	}
 
 	public void error(String message, Object source) {
@@ -77,6 +90,11 @@ public class ReaderContext {
 		this.problemReporter.warning(new Problem(message, location, parseState, cause));
 	}
 
+
+	public void fireDefaultsRegistered(DefaultsDefinition defaultsDefinition) {
+		this.eventListener.defaultsRegistered(defaultsDefinition);
+	}
+
 	public void fireComponentRegistered(ComponentDefinition componentDefinition) {
 		this.eventListener.componentRegistered(componentDefinition);
 	}
@@ -89,8 +107,9 @@ public class ReaderContext {
 		this.eventListener.importProcessed(new ImportDefinition(importedResource, source));
 	}
 
+
 	public SourceExtractor getSourceExtractor() {
-		return sourceExtractor;
+		return this.sourceExtractor;
 	}
 
 	public Object extractSource(Object sourceCandidate) {

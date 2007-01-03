@@ -16,29 +16,20 @@
 
 package org.springframework.beans.factory.parsing;
 
+import org.springframework.beans.BeanMetadataElement;
+
 /**
- * Empty implementation of the ReaderEventListener interface,
- * providing no-op implementations of all callback methods.
+ * Marker interface for a defaults definition,
+ * extending BeanMetadataElement to inherit source exposure.
+ *
+ * <p>Concrete implementations are typically based on 'document defaults',
+ * for example specified at the root tag level within an XML document.
  *
  * @author Juergen Hoeller
- * @since 2.0
+ * @since 2.0.2
+ * @see org.springframework.beans.factory.xml.DocumentDefaultsDefinition
+ * @see ReaderEventListener#defaultsRegistered(DefaultsDefinition)
  */
-public class EmptyReaderEventListener implements ReaderEventListener {
-
-	public void defaultsRegistered(DefaultsDefinition defaultsDefinition) {
-		// no-op
-	}
-
-	public void componentRegistered(ComponentDefinition componentDefinition) {
-		// no-op
-	}
-
-	public void aliasRegistered(AliasDefinition aliasDefinition) {
-		// no-op
-	}
-
-	public void importProcessed(ImportDefinition importDefinition) {
-		// no-op
-	}
+public interface DefaultsDefinition extends BeanMetadataElement {
 
 }

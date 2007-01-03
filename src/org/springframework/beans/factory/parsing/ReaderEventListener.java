@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,16 @@ import java.util.EventListener;
 public interface ReaderEventListener extends EventListener {
 
 	/**
+	 * Notification that the given defaults has been registered.
+	 * @param defaultsDefinition a descriptor for the defaults
+	 * @see org.springframework.beans.factory.xml.DocumentDefaultsDefinition
+	 */
+	void defaultsRegistered(DefaultsDefinition defaultsDefinition);
+
+	/**
 	 * Notification that the given component has been registered.
 	 * @param componentDefinition a descriptor for the new component
+	 * @see BeanComponentDefinition
 	 */
 	void componentRegistered(ComponentDefinition componentDefinition);
 
