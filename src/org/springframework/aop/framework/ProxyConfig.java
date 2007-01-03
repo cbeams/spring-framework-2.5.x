@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,17 +32,9 @@ import org.apache.commons.logging.LogFactory;
  * interceptor to do so.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class ProxyConfig implements Serializable {
-	
-	/*
-	 * Note that some of the instance variables in this class and AdvisedSupport
-	 * are protected, rather than private, as is usually preferred in Spring
-	 * (following "Expert One-on-One J2EE Design and Development", Chapter 4).
-	 * This allows direct field access in the AopProxy implementations, which
-	 * produces a 10-20% reduction in AOP performance overhead compared with
-	 * method access. - RJ, December 10, 2003.
-	 */
 	
 	/**
 	 * Transient to optimize serialization: AdvisedSupport resets it.
@@ -50,9 +42,9 @@ public class ProxyConfig implements Serializable {
 	protected transient Log logger = LogFactory.getLog(getClass());
 
 	private boolean proxyTargetClass = false;
-	
+
 	private boolean optimize = false;
-	
+
 	private boolean opaque = false;
 
 	/**
@@ -67,11 +59,10 @@ public class ProxyConfig implements Serializable {
 	 * to change advice. Default is not frozen.
 	 */
 	private boolean frozen = false;
-	
-	/** Factory used to create AopProxy instances */
+
 	private transient AopProxyFactory aopProxyFactory = new DefaultAopProxyFactory();
 
-	
+
 	/**
 	 * Set whether to proxy the target class directly as well as any interfaces.
 	 * We can set this to true to force CGLIB proxying. Default is "false".
@@ -118,6 +109,24 @@ public class ProxyConfig implements Serializable {
 	}
 
 	/**
+	 * Set whether proxies created by this configuration should be prevented
+	 * from being cast to {@link Advised} to query proxy status.
+	 * <p>Default is "false", meaning that any AOP proxy can be cast to
+	 * <code>Advised</code>.
+	 */
+	public void setOpaque(boolean opaque) {
+		this.opaque = opaque;
+	}
+
+	/**
+	 * Return whether proxies created by this configuration should be
+	 * prevented from being cast to {@link Advised}.
+	 */
+	public boolean isOpaque() {
+		return this.opaque;
+	}
+
+	/**
 	 * Set whether the proxy should be exposed by the AOP framework as a
 	 * ThreadLocal for retrieval via the AopContext class. This is useful
 	 * if an advised object needs to call another advised method on itself.
@@ -150,15 +159,14 @@ public class ProxyConfig implements Serializable {
 	 * Return whether the config is frozen, and no advice changes can be made.
 	 */
 	public boolean isFrozen() {
-		return frozen;
+		return this.frozen;
 	}
 
 	/**
 	 * Customize the AopProxyFactory, allowing different strategies
 	 * to be dropped in without changing the core framework.
-	 * Default is DefaultAopProxyFactory, using dynamic proxies or CGLIB.
-	 * <p>For example, an AopProxyFactory could return an AopProxy using
-	 * dynamic proxies, CGLIB or code generation strategy.
+	 * <p>Default is {@link DefaultAopProxyFactory}, using dynamic JDK
+	 * proxies or CGLIB proxies based on the requirements.
 	 */
 	public void setAopProxyFactory(AopProxyFactory apf) {
 		this.aopProxyFactory = apf;
@@ -169,23 +177,6 @@ public class ProxyConfig implements Serializable {
 	 */
 	public AopProxyFactory getAopProxyFactory() {
 		return this.aopProxyFactory;
-	}
-
-	/**
-	 * Set whether proxies created by this configuration should be prevented
-	 * from being cast to Advised to query proxy status. Default is "false",
-	 * meaning that any AOP proxy can be cast to Advised.
-	 */
-	public void setOpaque(boolean opaque) {
-		this.opaque = opaque;
-	}
-
-	/**
-	 * Return whether proxies created by this configuration should be
-	 * prevented from being cast to Advised.
-	 */
-	public boolean isOpaque() {
-		return opaque;
 	}
 
 
@@ -204,12 +195,12 @@ public class ProxyConfig implements Serializable {
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("proxyTargetClass=" + this.proxyTargetClass + "; ");
-		sb.append("optimize=" + this.optimize + "; ");
-		sb.append("exposeProxy=" + this.exposeProxy + "; ");
-		sb.append("opaque=" + this.opaque + "; ");
-		sb.append("frozen=" + this.frozen + "; ");
-		sb.append("aopProxyFactory [" + this.aopProxyFactory + "]");
+		sb.append("proxyTargetClass=").append(this.proxyTargetClass).append("; ");
+		sb.append("optimize=").append(this.optimize).append("; ");
+		sb.append("exposeProxy=").append(this.exposeProxy).append("; ");
+		sb.append("opaque=").append(this.opaque).append("; ");
+		sb.append("frozen=").append(this.frozen).append("; ");
+		sb.append("aopProxyFactory [").append(this.aopProxyFactory).append("]");
 		return sb.toString();
 	}
 

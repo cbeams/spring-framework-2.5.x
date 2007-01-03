@@ -42,8 +42,9 @@ import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
 
 /**
- * BeanPostProcessor implementation that wraps a group of beans with AOP proxies
- * that delegate to the given interceptors before invoking the bean itself.
+ * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
+ * that wraps each eligible bean with an AOP proxy, delegating to specified interceptors
+ * before invoking the bean itself.
  *
  * <p>This class distinguishes between "common" interceptors: shared for all proxies it
  * creates, and "specific" interceptors: unique per bean instance. There need not
@@ -53,8 +54,8 @@ import org.springframework.util.ClassUtils;
  * advisors and interceptors: for example, to support stateful mixins.
  * Any advice type is supported for "interceptorNames" entries.
  *
- * <p>Such auto-proxying is particularly useful if there's a large number of beans that need
- * to be wrapped with similar proxies, i.e. delegating to the same interceptors.
+ * <p>Such auto-proxying is particularly useful if there's a large number of beans that
+ * need to be wrapped with similar proxies, i.e. delegating to the same interceptors.
  * Instead of x repetitive proxy definitions for x target beans, you can register
  * one single such post processor with the bean factory to achieve the same effect.
  *
@@ -64,11 +65,12 @@ import org.springframework.util.ClassUtils;
  * instance. The default concrete implementation is BeanNameAutoProxyCreator,
  * identifying the beans to be proxied via a list of bean names.
  *
- * <p>Any number of TargetSourceCreator implementations can be used with any subclass,
- * to create a custom target source - for example, to pool prototype objects.
- * Autoproxying will occur even if there is no advice if a TargetSourceCreator specifies
- * a custom TargetSource. If there are no TargetSourceCreators set, or if none matches,
- * a SingletonTargetSource will be used by default to wrap the bean to be autoproxied.
+ * <p>Any number of {@link TargetSourceCreator} implementations can be used to create
+ * a custom target source - for example, to pool prototype objects. Auto-proxying will
+ * occur even if there is no advice, as long as a TargetSourceCreator specifies a custom
+ * {@link org.springframework.aop.TargetSource}. If there are no TargetSourceCreators set,
+ * or if none matches, a {@link org.springframework.aop.target.SingletonTargetSource}
+ * will be used by default to wrap the target bean instance.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -132,13 +134,14 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	}
 
 	public final int getOrder() {
-	  return order;
+	  return this.order;
 	}
 
 	/**
-	 * Sets whether or not the proxy should be frozen, preventing advice from being added to it
-	 * once it is created. Overridden from the super class to prevent the proxy configuration from
-	 * being frozen before the proxy is created.
+	 * Set whether or not the proxy should be frozen, preventing advice
+	 * from being added to it once it is created.
+	 * <p>Overridden from the super class to prevent the proxy configuration
+	 * from being frozen before the proxy is created.
 	 */
 	public void setFrozen(boolean frozen) {
 		this.freezeProxy = frozen;
@@ -432,12 +435,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	/**
 	 * Return whether the given bean is to be proxied, what additional
 	 * advices (e.g. AOP Alliance interceptors) and advisors to apply.
-	 * <p>The previous name of this method was "getInterceptorAndAdvisorForBean".
-	 * It has been renamed in the course of general terminology clarification
-	 * in Spring 1.1. An AOP Alliance Interceptor is just a special form of
-	 * Advice, so the generic Advice term is preferred now.
-	 * <p>The third parameter, customTargetSource, is new in Spring 1.1;
-	 * add it to existing implementations of this method.
 	 * @param beanClass the class of the bean to advise
 	 * @param beanName the name of the bean
 	 * @param customTargetSource targetSource returned by getTargetSource() method:
