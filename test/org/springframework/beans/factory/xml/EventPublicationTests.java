@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.factory.xml;
 import java.util.List;
 
 import junit.framework.TestCase;
+import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.AliasDefinition;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CollectingReaderEventListener;
 import org.springframework.beans.factory.parsing.ComponentDefinition;
 import org.springframework.beans.factory.parsing.ImportDefinition;
+import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
@@ -43,7 +45,22 @@ public class EventPublicationTests extends TestCase {
 	protected void setUp() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setEventListener(this.eventListener);
+		reader.setSourceExtractor(new PassThroughSourceExtractor());
 		reader.loadBeanDefinitions(new ClassPathResource("beanEvents.xml", getClass()));
+	}
+
+	public void testDefaultsEventReceived() throws Exception {
+		List defaultsList = this.eventListener.getDefaults();
+		assertTrue(!defaultsList.isEmpty());
+		assertTrue(defaultsList.get(0) instanceof DocumentDefaultsDefinition);
+		DocumentDefaultsDefinition defaults = (DocumentDefaultsDefinition) defaultsList.get(0);
+		assertEquals("true", defaults.getLazyInit());
+		assertEquals("constructor", defaults.getAutowire());
+		assertEquals("objects", defaults.getDependencyCheck());
+		assertEquals("myInit", defaults.getInitMethod());
+		assertEquals("myDestroy", defaults.getDestroyMethod());
+		assertEquals("true", defaults.getMerge());
+		assertTrue(defaults.getSource() instanceof Element);
 	}
 
 	public void testBeanEventReceived() throws Exception {
@@ -59,6 +76,7 @@ public class EventPublicationTests extends TestCase {
 		BeanDefinition innerBd1 = componentDefinition1.getInnerBeanDefinitions()[0];
 		assertEquals("ACME",
 				innerBd1.getConstructorArgumentValues().getGenericArgumentValue(String.class).getValue());
+		assertTrue(componentDefinition1.getSource() instanceof Element);
 
 		ComponentDefinition componentDefinition2 = this.eventListener.getComponentDefinition("testBean2");
 		assertTrue(componentDefinition2 instanceof BeanComponentDefinition);
@@ -69,19 +87,26 @@ public class EventPublicationTests extends TestCase {
 		assertEquals(1, componentDefinition2.getInnerBeanDefinitions().length);
 		BeanDefinition innerBd2 = componentDefinition2.getInnerBeanDefinitions()[0];
 		assertEquals("Eva Schallmeiner", innerBd2.getPropertyValues().getPropertyValue("name").getValue());
+		assertTrue(componentDefinition2.getSource() instanceof Element);
 	}
 
 	public void testAliasEventReceived() throws Exception {
 		List aliases = this.eventListener.getAliases("testBean");
 		assertEquals(2, aliases.size());
-		assertEquals("testBeanAlias1", ((AliasDefinition) aliases.get(0)).getAlias());
-		assertEquals("testBeanAlias2", ((AliasDefinition) aliases.get(1)).getAlias());
+		AliasDefinition aliasDefinition1 = (AliasDefinition) aliases.get(0);
+		assertEquals("testBeanAlias1", aliasDefinition1.getAlias());
+		assertTrue(aliasDefinition1.getSource() instanceof Element);
+		AliasDefinition aliasDefinition2 = (AliasDefinition) aliases.get(1);
+		assertEquals("testBeanAlias2", aliasDefinition2.getAlias());
+		assertTrue(aliasDefinition2.getSource() instanceof Element);
 	}
 
 	public void testImportEventReceived() throws Exception {
 		List imports = this.eventListener.getImports();
 		assertEquals(1, imports.size());
-		assertEquals("beanEventsImported.xml", ((ImportDefinition) imports.get(0)).getImportedResource());
+		ImportDefinition importDefinition = (ImportDefinition) imports.get(0);
+		assertEquals("beanEventsImported.xml", importDefinition.getImportedResource());
+		assertTrue(importDefinition.getSource() instanceof Element);
 	}
 
 }

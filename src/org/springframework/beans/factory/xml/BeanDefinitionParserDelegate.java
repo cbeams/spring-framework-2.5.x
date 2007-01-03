@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -220,24 +220,15 @@ public class BeanDefinitionParserDelegate {
 
 	private final XmlReaderContext readerContext;
 
+	private DocumentDefaultsDefinition defaults;
+
 	private ParseState parseState = new ParseState();
-
-	private String defaultLazyInit;
-
-	private String defaultAutowire;
-
-	private String defaultDependencyCheck;
-
-	private String defaultInitMethod;
-
-	private String defaultDestroyMethod;
-
-	private String defaultMerge;
 
 	/**
 	 * Stores all used bean names so we can enforce uniqueness on a per file basis.
 	 */
 	private final Set usedNames = new HashSet();
+
 
 	/**
 	 * Create a new <code>XmlBeanDefinitionParserHelper</code> associated with the
@@ -248,96 +239,11 @@ public class BeanDefinitionParserDelegate {
 		this.readerContext = readerContext;
 	}
 
-
 	/**
 	 * Get the {@link XmlReaderContext} associated with this helper instance.
 	 */
-	public XmlReaderContext getReaderContext() {
+	public final XmlReaderContext getReaderContext() {
 		return this.readerContext;
-	}
-
-	/**
-	 * Set the default lazy-init flag for the document that's currently parsed.
-	 */
-	public final void setDefaultLazyInit(String defaultLazyInit) {
-		this.defaultLazyInit = defaultLazyInit;
-	}
-
-	/**
-	 * Return the default lazy-init flag for the document that's currently parsed.
-	 */
-	public final String getDefaultLazyInit() {
-		return defaultLazyInit;
-	}
-
-	/**
-	 * Set the default autowire setting for the document that's currently parsed.
-	 */
-	public final void setDefaultAutowire(String defaultAutowire) {
-		this.defaultAutowire = defaultAutowire;
-	}
-
-	/**
-	 * Return the default autowire setting for the document that's currently parsed.
-	 */
-	public final String getDefaultAutowire() {
-		return defaultAutowire;
-	}
-
-	/**
-	 * Set the default dependency-check setting for the document that's currently parsed.
-	 */
-	public final void setDefaultDependencyCheck(String defaultDependencyCheck) {
-		this.defaultDependencyCheck = defaultDependencyCheck;
-	}
-
-	/**
-	 * Return the default dependency-check setting for the document that's currently parsed.
-	 */
-	public final String getDefaultDependencyCheck() {
-		return defaultDependencyCheck;
-	}
-
-	/**
-	 * Set the default init-method setting for the document that's currently parsed.
-	 */
-	public final void setDefaultInitMethod(String defaultInitMethod) {
-		this.defaultInitMethod = defaultInitMethod;
-	}
-
-	/**
-	 * Return the default init-method setting for the document that's currently parsed.
-	 */
-	public final String getDefaultInitMethod() {
-		return defaultInitMethod;
-	}
-
-	/**
-	 * Set the default destroy-method setting for the document that's currently parsed.
-	 */
-	public final void setDefaultDestroyMethod(String defaultDestroyMethod) {
-		this.defaultDestroyMethod = defaultDestroyMethod;
-	}
-
-	/**
-	 * Return the default destroy-method setting for the document that's currently parsed.
-	 */
-	public final String getDefaultDestroyMethod() {
-		return defaultDestroyMethod;
-	}
-
-	/**
-	 * Set the default merge setting for the document that's currently parsed.
-	 */
-	public final void setDefaultMerge(String defaultMerge) {
-		this.defaultMerge = defaultMerge;
-	}
-
-	/**
-	 * Return the default merge setting for the document that's currently parsed.
-	 */
-	public final String getDefaultMerge() {
-		return defaultMerge;
 	}
 
 
@@ -346,40 +252,55 @@ public class BeanDefinitionParserDelegate {
 	 * source metadata from the supplied {@link Element}.
 	 */
 	protected Object extractSource(Element ele) {
-		return getReaderContext().extractSource(ele);
+		return this.readerContext.extractSource(ele);
 	}
 
 	/**
 	 * Report an error with the given message for the given source element-
 	 */
 	protected void error(String message, Element source) {
-		getReaderContext().error(message, source, this.parseState.snapshot());
+		this.readerContext.error(message, source, this.parseState.snapshot());
 	}
 
 	/**
 	 * Report an error with the given message for the given source element-
 	 */
 	protected void error(String message, Element source, Throwable cause) {
-		getReaderContext().error(message, source, this.parseState.snapshot(), cause);
+		this.readerContext.error(message, source, this.parseState.snapshot(), cause);
 	}
 
 
 	/**
 	 * Initialize the default lazy-init, autowire, dependency check settings,
 	 * init-method, destroy-method and merge settings.
+	 * @see #getDefaults()
 	 */
 	public void initDefaults(Element root) {
-		setDefaultLazyInit(root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE));
-		setDefaultAutowire(root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE));
-		setDefaultDependencyCheck(root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE));
+		DocumentDefaultsDefinition defaults = new DocumentDefaultsDefinition();
+		defaults.setLazyInit(root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE));
+		defaults.setAutowire(root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE));
+		defaults.setDependencyCheck(root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE));
 		if (root.hasAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE)) {
-			setDefaultInitMethod(root.getAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE));
+			defaults.setInitMethod(root.getAttribute(DEFAULT_INIT_METHOD_ATTRIBUTE));
 		}
 		if (root.hasAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE)) {
-			setDefaultDestroyMethod(root.getAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE));
+			defaults.setDestroyMethod(root.getAttribute(DEFAULT_DESTROY_METHOD_ATTRIBUTE));
 		}
-		setDefaultMerge(root.getAttribute(DEFAULT_MERGE_ATTRIBUTE));
+		defaults.setMerge(root.getAttribute(DEFAULT_MERGE_ATTRIBUTE));
+		defaults.setSource(this.readerContext.extractSource(root));
+
+		this.defaults = defaults;
+		this.readerContext.fireDefaultsRegistered(defaults);
 	}
+
+	/**
+	 * Return the defaults definition object, or <code>null</code> if the
+	 * defaults have been initialized yet.
+	 */
+	public DocumentDefaultsDefinition getDefaults() {
+		return this.defaults;
+	}
+
 
 	/**
 	 * Parses the supplied <code>&lt;bean&gt;</code> element. May return <code>null</code>
@@ -422,7 +343,7 @@ public class BeanDefinitionParserDelegate {
 		if (beanDefinition != null) {
 			if (!StringUtils.hasText(beanName)) {
 				beanName = BeanDefinitionReaderUtils.generateBeanName(
-						beanDefinition, getReaderContext().getReader().getBeanFactory(), (containingBean != null));
+						beanDefinition, this.readerContext.getReader().getBeanFactory(), (containingBean != null));
 				if (logger.isDebugEnabled()) {
 					logger.debug("Neither XML 'id' nor 'name' specified - " +
 							"using generated bean name [" + beanName + "]");
@@ -445,7 +366,7 @@ public class BeanDefinitionParserDelegate {
 			foundName = (String) CollectionUtils.findFirstMatch(this.usedNames, aliases);
 		}
 		if (foundName != null) {
-			getReaderContext().error("Bean name '" + foundName + "' is already used in this file.", beanElement);
+			this.readerContext.error("Bean name '" + foundName + "' is already used in this file.", beanElement);
 		}
 
 		this.usedNames.add(beanName);
@@ -472,7 +393,7 @@ public class BeanDefinitionParserDelegate {
 			this.parseState.push(new BeanEntry(beanName));
 
 			AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
-					parent, className, getReaderContext().getReader().getBeanClassLoader());
+					parent, className, this.readerContext.getReader().getBeanClassLoader());
 
 			if (ele.hasAttribute(SCOPE_ATTRIBUTE)) {
 				// Spring 2.0 "scope" attribute
@@ -497,7 +418,7 @@ public class BeanDefinitionParserDelegate {
 			String lazyInit = ele.getAttribute(LAZY_INIT_ATTRIBUTE);
 			if (DEFAULT_VALUE.equals(lazyInit) && bd.isSingleton()) {
 				// Just apply default to singletons, as lazy-init has no meaning for prototypes.
-				lazyInit = getDefaultLazyInit();
+				lazyInit = this.defaults.getLazyInit();
 			}
 			bd.setLazyInit(TRUE_VALUE.equals(lazyInit));
 
@@ -507,13 +428,13 @@ public class BeanDefinitionParserDelegate {
 
 			String autowire = ele.getAttribute(AUTOWIRE_ATTRIBUTE);
 			if (DEFAULT_VALUE.equals(autowire)) {
-				autowire = getDefaultAutowire();
+				autowire = this.defaults.getAutowire();
 			}
 			bd.setAutowireMode(getAutowireMode(autowire));
 
 			String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
 			if (DEFAULT_VALUE.equals(dependencyCheck)) {
-				dependencyCheck = getDefaultDependencyCheck();
+				dependencyCheck = this.defaults.getDependencyCheck();
 			}
 			bd.setDependencyCheck(getDependencyCheck(dependencyCheck));
 
@@ -536,8 +457,8 @@ public class BeanDefinitionParserDelegate {
 				}
 			}
 			else {
-				if (getDefaultInitMethod() != null) {
-					bd.setInitMethodName(getDefaultInitMethod());
+				if (this.defaults.getInitMethod() != null) {
+					bd.setInitMethodName(this.defaults.getInitMethod());
 					bd.setEnforceInitMethod(false);
 				}
 			}
@@ -549,8 +470,8 @@ public class BeanDefinitionParserDelegate {
 				}
 			}
 			else {
-				if (getDefaultDestroyMethod() != null) {
-					bd.setDestroyMethodName(getDefaultDestroyMethod());
+				if (this.defaults.getDestroyMethod() != null) {
+					bd.setDestroyMethodName(this.defaults.getDestroyMethod());
 					bd.setEnforceDestroyMethod(false);
 				}
 			}
@@ -562,7 +483,7 @@ public class BeanDefinitionParserDelegate {
 			parseConstructorArgElements(ele, bd);
 			parsePropertyElements(ele, bd);
 
-			bd.setResourceDescription(getReaderContext().getResource().getDescription());
+			bd.setResourceDescription(this.readerContext.getResource().getDescription());
 			bd.setSource(extractSource(ele));
 
 			return bd;
@@ -1131,7 +1052,7 @@ public class BeanDefinitionParserDelegate {
 	public boolean parseMergeAttribute(Element collectionElement) {
 		String value = collectionElement.getAttribute(MERGE_ATTRIBUTE);
 		if (DEFAULT_VALUE.equals(value)) {
-			value = getDefaultMerge();
+			value = this.defaults.getMerge();
 		}
 		return TRUE_VALUE.equals(value);
 	}
@@ -1144,10 +1065,10 @@ public class BeanDefinitionParserDelegate {
 		String namespaceUri = ele.getNamespaceURI();
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
-			getReaderContext().error("Unable to locate NamespaceHandler for namespace [" + namespaceUri + "]", ele);
+			this.readerContext.error("Unable to locate NamespaceHandler for namespace [" + namespaceUri + "]", ele);
 			return null;
 		}
-		return handler.parse(ele, new ParserContext(getReaderContext(), this, containingBd));
+		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
 	}
 
 	public BeanDefinitionHolder decorateBeanDefinitionIfRequired(Element element, BeanDefinitionHolder definitionHolder) {
@@ -1175,7 +1096,7 @@ public class BeanDefinitionParserDelegate {
 		String uri = node.getNamespaceURI();
 		if (!isDefaultNamespace(uri)) {
 			NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(uri);
-			finalDefinition = handler.decorate(node, finalDefinition, new ParserContext(getReaderContext(), this));
+			finalDefinition = handler.decorate(node, finalDefinition, new ParserContext(this.readerContext, this));
 		}
 		return finalDefinition;
 	}
@@ -1197,7 +1118,7 @@ public class BeanDefinitionParserDelegate {
 	protected TypedStringValue buildTypedStringValue(String value, String targetTypeName)
 			throws ClassNotFoundException {
 
-		ClassLoader classLoader = getReaderContext().getReader().getBeanClassLoader();
+		ClassLoader classLoader = this.readerContext.getReader().getBeanClassLoader();
 		if (classLoader != null) {
 			Class targetType = ClassUtils.forName(targetTypeName, classLoader);
 			return new TypedStringValue(value, targetType);
