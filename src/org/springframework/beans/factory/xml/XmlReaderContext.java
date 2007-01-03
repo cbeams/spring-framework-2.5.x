@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,12 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.io.Resource;
 
 /**
- * Extension of {@link org.springframework.beans.factory.parsing.ReaderContext} specific to use with an {@link XmlBeanDefinitionReader}.
- * Provides access to the {@link NamespaceHandlerResolver} configured in the
- * {@link XmlBeanDefinitionReader}.
+ * Extension of {@link org.springframework.beans.factory.parsing.ReaderContext},
+ * specific to use with an {@link XmlBeanDefinitionReader}. Provides access to the
+ * {@link NamespaceHandlerResolver} configured in the {@link XmlBeanDefinitionReader}.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class XmlReaderContext extends ReaderContext {
@@ -49,15 +50,15 @@ public class XmlReaderContext extends ReaderContext {
 	}
 
 
-	public XmlBeanDefinitionReader getReader() {
-		return reader;
+	public final XmlBeanDefinitionReader getReader() {
+		return this.reader;
 	}
 
-	public BeanDefinitionRegistry getRegistry() {
-		return getReader().getBeanFactory();
+	public final BeanDefinitionRegistry getRegistry() {
+		return this.reader.getBeanFactory();
 	}
 
-	public NamespaceHandlerResolver getNamespaceHandlerResolver() {
+	public final NamespaceHandlerResolver getNamespaceHandlerResolver() {
 		return this.namespaceHandlerResolver;
 	}
 

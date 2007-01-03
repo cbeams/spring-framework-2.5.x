@@ -118,6 +118,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 */
 	private EntityResolver entityResolver;
 
+	/**
+	 * The {@link XmlBeanDefinitionParser} <code>Class</code> to use for reading.
+	 */
 	private Class parserClass;
 
 	/**
