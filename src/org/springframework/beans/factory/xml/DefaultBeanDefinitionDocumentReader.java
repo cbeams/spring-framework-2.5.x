@@ -158,6 +158,11 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 */
 	protected void importBeanDefinitionResource(Element ele) {
 		String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
+		if (!StringUtils.hasText(location)) {
+			getReaderContext().error("Resource location must not be empty", ele);
+			return;
+		}
+
 		// Resolve system properties: e.g. "${user.dir}"
 		location = SystemPropertyUtils.resolvePlaceholders(location);
 
@@ -191,20 +196,24 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	protected void processAliasRegistration(Element ele) {
 		String name = ele.getAttribute(NAME_ATTRIBUTE);
 		String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
-		Object source = extractSource(ele);
+		boolean valid = true;
 		if (!StringUtils.hasText(name)) {
-			getReaderContext().error("Name must not be empty", source);
+			getReaderContext().error("Name must not be empty", ele);
+			valid = false;
 		}
 		if (!StringUtils.hasText(alias)) {
-			getReaderContext().error("Alias must not be empty", source);
+			getReaderContext().error("Alias must not be empty", ele);
+			valid = false;
 		}
-		try {
-			getReaderContext().getRegistry().registerAlias(name, alias);
+		if (valid) {
+			try {
+				getReaderContext().getRegistry().registerAlias(name, alias);
+			}
+			catch (BeanDefinitionStoreException ex) {
+				getReaderContext().error(ex.getMessage(), ele);
+			}
+			getReaderContext().fireAliasRegistered(name, alias, extractSource(ele));
 		}
-		catch (BeanDefinitionStoreException ex) {
-			getReaderContext().error(ex.getMessage(), ele);
-		}
-		getReaderContext().fireAliasRegistered(name, alias, source);
 	}
 
 	/**
