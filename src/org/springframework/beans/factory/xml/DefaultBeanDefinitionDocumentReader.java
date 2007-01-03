@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.util.SystemPropertyUtils;
 import org.springframework.util.xml.DomUtils;
 
@@ -107,21 +109,9 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * source metadata from the supplied {@link Element}.
 	 */
 	protected Object extractSource(Element ele) {
-		return getReaderContext().extractSource(ele);
+		return this.readerContext.extractSource(ele);
 	}
 
-	/**
-	 * Allow the XML to be extensible by processing any custom element types first,
-	 * before we start to process the bean definitions. This method is a natural
-	 * extension point for any other custom pre-processing of the XML.
-	 * <p>Default implementation is empty. Subclasses can override this method to
-	 * convert custom elements into standard Spring bean definitions, for example.
-	 * Implementors have access to the parser's bean definition reader and the
-	 * underlying XML resource, through the corresponding accessors.
-	 * @see #getReaderContext()
-	 */
-	protected void preProcessXml(Element root) {
-	}
 
 	/**
 	 * Parse the elements at the root level in the document:
@@ -155,20 +145,10 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			importBeanDefinitionResource(ele);
 		}
 		else if (DomUtils.nodeNameEquals(ele, ALIAS_ELEMENT)) {
-			String name = ele.getAttribute(NAME_ATTRIBUTE);
-			String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
-			getReaderContext().getReader().getBeanFactory().registerAlias(name, alias);
-			getReaderContext().fireAliasRegistered(name, alias, extractSource(ele));
+			processAliasRegistration(ele);
 		}
 		else if (DomUtils.nodeNameEquals(ele, BEAN_ELEMENT)) {
-			BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
-			if (bdHolder != null) {
-				bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
-				// Register the final decorated instance.
-				BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getRegistry());
-				// Send registration event.
-				getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));
-			}
+			processBeanDefinition(ele, delegate);
 		}
 	}
 
@@ -206,10 +186,61 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	}
 
 	/**
+	 * Process the given alias element, registering the alias with the registry.
+	 */
+	protected void processAliasRegistration(Element ele) {
+		String name = ele.getAttribute(NAME_ATTRIBUTE);
+		String alias = ele.getAttribute(ALIAS_ATTRIBUTE);
+		Object source = extractSource(ele);
+		if (!StringUtils.hasText(name)) {
+			getReaderContext().error("Name must not be empty", source);
+		}
+		if (!StringUtils.hasText(alias)) {
+			getReaderContext().error("Alias must not be empty", source);
+		}
+		try {
+			getReaderContext().getRegistry().registerAlias(name, alias);
+		}
+		catch (BeanDefinitionStoreException ex) {
+			getReaderContext().error(ex.getMessage(), ele);
+		}
+		getReaderContext().fireAliasRegistered(name, alias, source);
+	}
+
+	/**
+	 * Process the given bean element, parsing the bean definition
+	 * and registering it with the registry.
+	 */
+	protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
+		BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
+		if (bdHolder != null) {
+			bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
+			// Register the final decorated instance.
+			BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getRegistry());
+			// Send registration event.
+			getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));
+		}
+	}
+
+
+	/**
+	 * Allow the XML to be extensible by processing any custom element types first,
+	 * before we start to process the bean definitions. This method is a natural
+	 * extension point for any other custom pre-processing of the XML.
+	 * <p>The default implementation is empty. Subclasses can override this method to
+	 * convert custom elements into standard Spring bean definitions, for example.
+	 * Implementors have access to the parser's bean definition reader and the
+	 * underlying XML resource, through the corresponding accessors.
+	 * @see #getReaderContext()
+	 */
+	protected void preProcessXml(Element root) {
+	}
+
+	/**
 	 * Allow the XML to be extensible by processing any custom element types last,
 	 * after we finished processing the bean definitions. This method is a natural
 	 * extension point for any other custom post-processing of the XML.
-	 * <p>Default implementation is empty. Subclasses can override this method to
+	 * <p>The default implementation is empty. Subclasses can override this method to
 	 * convert custom elements into standard Spring bean definitions, for example.
 	 * Implementors have access to the parser's bean definition reader and the
 	 * underlying XML resource, through the corresponding accessors.
