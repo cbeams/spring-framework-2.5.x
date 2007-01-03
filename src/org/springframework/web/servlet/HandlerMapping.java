@@ -22,26 +22,27 @@ import javax.servlet.http.HttpServletRequest;
  * Interface to be implemented by objects that define a mapping between
  * requests and handler objects.
  *
- * <p>This class can be implemented by application developers, although this
- * is not necessary, as BeanNameUrlHandlerMapping and SimpleUrlHandlerMapping
+ * <p>This class can be implemented by application developers, although this is not
+ * necessary, as {@link org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping}
+ * and {@link org.springframework.web.servlet.handler.SimpleUrlHandlerMapping}
  * are included in the framework. The former is the default if no
  * HandlerMapping bean is registered in the application context.
  *
- * <p>HandlerMapping implementations can support mapped interceptors but do
- * not have to. A handler will always be wrapped in a HandlerExecutionChain
- * instance, optionally accompanied by some HandlerInterceptor instances.
- * The DispatcherServlet will first call each HandlerInterceptor's preHandle
- * method in the given order, finally invoking the handler itself if all
- * preHandle methods have returned "true".
+ * <p>HandlerMapping implementations can support mapped interceptors but do not
+ * have to. A handler will always be wrapped in a {@link HandlerExecutionChain}
+ * instance, optionally accompanied by some {@link HandlerInterceptor} instances.
+ * The DispatcherServlet will first call each HandlerInterceptor's
+ * <code>preHandle</code> method in the given order, finally invoking the handler
+ * itself if all <code>preHandle</code> methods have returned <code>true</code>.
  *
  * <p>The ability to parameterize this mapping is a powerful and unusual
  * capability of this MVC framework. For example, it is possible to write
  * a custom mapping based on session state, cookie state or many other
  * variables. No other MVC framework seems to be equally flexible.
  *
- * <p>Note: Implementations can implement the Ordered interface to be able
- * to specify a sorting order and thus a priority for getting applied by
- * DispatcherServlet. Non-Ordered instances get treated as lowest priority.
+ * <p>Note: Implementations can implement the {@link org.springframework.core.Ordered}
+ * interface to be able to specify a sorting order and thus a priority for getting
+ * applied by DispatcherServlet. Non-Ordered instances get treated as lowest priority.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

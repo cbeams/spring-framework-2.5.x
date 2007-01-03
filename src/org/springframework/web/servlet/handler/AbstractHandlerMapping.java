@@ -66,7 +66,6 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * Set the default handler for this handler mapping.
 	 * This handler will be returned if no specific mapping was found.
 	 * <p>Default is <code>null</code>, indicating no default handler.
-	 * @param defaultHandler default handler instance, or <code>null</code> if none
 	 */
 	public final void setDefaultHandler(Object defaultHandler) {
 		this.defaultHandler = defaultHandler;
@@ -76,8 +75,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Return the default handler for this handler mapping.
-	 * @return the default handler instance, or <code>null</code> if none
+	 * Return the default handler for this handler mapping,
+	 * or <code>null</code> if none.
 	 */
 	public final Object getDefaultHandler() {
 		return this.defaultHandler;

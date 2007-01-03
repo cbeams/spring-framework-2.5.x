@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,6 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	 * Set the default handler for this handler mapping.
 	 * This handler will be returned if no specific mapping was found.
 	 * <p>Default is <code>null</code>, indicating no default handler.
-	 * @param defaultHandler default handler instance, or null if none
 	 */
 	public final void setDefaultHandler(Object defaultHandler) {
 		this.defaultHandler = defaultHandler;
@@ -72,11 +71,11 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	}
 
 	/**
-	 * Return the default handler for this handler mapping.
-	 * @return the default handler instance, or <code>null</code> if none
+	 * Return the default handler for this handler mapping,
+	 * or <code>null</code> if none.
 	 */
 	protected final Object getDefaultHandler() {
-		return defaultHandler;
+		return this.defaultHandler;
 	}
 
 	/**
@@ -94,7 +93,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 	/**
 	 * Specify whether to apply WebRequestInterceptors to the Portlet render phase
-	 * only ("true<", or whether to apply them to the Portlet action phase as well
+	 * only ("true", or whether to apply them to the Portlet action phase as well
 	 * ("false").
 	 * <p>Default is "true", since WebRequestInterceptors are usually built for
 	 * MVC-style handler execution plus rendering process (which is, for example,
