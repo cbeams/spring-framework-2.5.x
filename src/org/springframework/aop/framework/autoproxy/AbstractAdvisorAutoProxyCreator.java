@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,11 @@
 package org.springframework.aop.framework.autoproxy;
 
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.BeanCurrentlyInCreationException;
-import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.OrderComparator;
 
@@ -52,6 +48,22 @@ import org.springframework.core.OrderComparator;
  * @see org.springframework.aop.support.AopUtils
  */
 public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
+
+	private BeanFactoryAdvisorRetrievalHelper advisorRetrievalHelper;
+
+
+	public void setBeanFactory(BeanFactory beanFactory) {
+		super.setBeanFactory(beanFactory);
+		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
+			throw new IllegalStateException("Cannot use AdvisorAutoProxyCreator without a ConfigurableListableBeanFactory");
+		}
+		initBeanFactory((ConfigurableListableBeanFactory) beanFactory);
+	}
+
+	protected void initBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		this.advisorRetrievalHelper = new BeanFactoryAdvisorRetrievalHelperAdapter(beanFactory);
+	}
+
 
 	protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String name, TargetSource targetSource) {
 		List advisors = findEligibleAdvisors(beanClass);
@@ -83,37 +95,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @return list of candidate Advisors
 	 */
 	protected List findCandidateAdvisors() {
-		if (!(getBeanFactory() instanceof ConfigurableListableBeanFactory)) {
-			throw new IllegalStateException("Cannot use AdvisorAutoProxyCreator without a ConfigurableListableBeanFactory");
-		}
-		ConfigurableListableBeanFactory owningFactory = (ConfigurableListableBeanFactory) getBeanFactory();
-
-		// Do not initialize FactoryBeans here: We need to leave all regular beans
-		// uninitialized to let the auto-proxy creator apply to them!
-		String[] adviceNames =
-				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(owningFactory, Advisor.class, true, false);
-		List candidateAdvisors = new LinkedList();
-		for (int i = 0; i < adviceNames.length; i++) {
-			String name = adviceNames[i];
-			if (isEligibleAdvisorBean(name) && !owningFactory.isCurrentlyInCreation(name)) {
-				try {
-					candidateAdvisors.add(owningFactory.getBean(name));
-				}
-				catch (BeanCreationException ex) {
-					if (ex.contains(BeanCurrentlyInCreationException.class)) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Ignoring currently created advisor '" + name + "': " + ex.getMessage());
-						}
-						// Ignore: indicates a reference back to the bean we're trying to advise.
-						// We want to find advisors other than the currently created bean itself.
-					}
-					else {
-						throw ex;
-					}
-				}
-			}
-		}
-		return candidateAdvisors;
+		return this.advisorRetrievalHelper.findAdvisorBeans();
 	}
 
 	/**
@@ -146,6 +128,22 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * applying to a given bean
 	 */
 	protected void extendAdvisors(List candidateAdvisors) {
+	}
+
+
+	/**
+	 * Subclass of BeanFactoryAdvisorRetrievalHelper that delegates to
+	 * surrounding AbstractAdvisorAutoProxyCreator facilities.
+	 */
+	private class BeanFactoryAdvisorRetrievalHelperAdapter extends BeanFactoryAdvisorRetrievalHelper {
+
+		public BeanFactoryAdvisorRetrievalHelperAdapter(ConfigurableListableBeanFactory beanFactory) {
+			super(beanFactory);
+		}
+
+		protected boolean isEligibleBean(String beanName) {
+			return AbstractAdvisorAutoProxyCreator.this.isEligibleAdvisorBean(beanName);
+		}
 	}
 
 }
