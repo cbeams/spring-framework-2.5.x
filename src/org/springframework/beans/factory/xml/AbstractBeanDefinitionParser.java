@@ -70,8 +70,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 				}
 			}
 			catch (BeanDefinitionStoreException ex) {
-				parserContext.getReaderContext().error(
-						"Failed to generate id for unnamed custom bean definition", element, null, ex);
+				parserContext.getReaderContext().error(ex.getMessage(), element);
 				return null;
 			}
 		}

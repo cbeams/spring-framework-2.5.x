@@ -352,7 +352,7 @@ public class BeanDefinitionParserDelegate {
 					}
 				}
 				catch (BeanDefinitionStoreException ex) {
-					error("Failed to generate bean name for unnamed bean definition", ele, ex);
+					error(ex.getMessage(), ele);
 					return null;
 				}
 			}
