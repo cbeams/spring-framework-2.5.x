@@ -18,8 +18,6 @@ package org.springframework.web.servlet;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.core.Conventions;
-
 /**
  * Interface to be implemented by objects that define a mapping between
  * requests and handler objects.
@@ -55,10 +53,15 @@ import org.springframework.core.Conventions;
 public interface HandlerMapping {
 
 	/**
-	 * Name of the {@link HttpServletRequest} attribute that contains the path within the handler mapping.
+	 * Name of the {@link HttpServletRequest} attribute that contains the path
+	 * within the handler mapping, in case of a pattern match, or the full
+	 * relevant URI (typically within the DispatcherServlet's mapping) else.
+	 * <p>Note: This attribute is not required to be supported by all
+	 * HandlerMapping implementations. URL-based HandlerMappings will
+	 * typically support it, but handlers should not necessarily expect
+	 * this request attribute to be present in all scenarios.
 	 */
-	String PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE =
-			Conventions.getQualifiedAttributeName(HandlerMapping.class, "pathWithinHandlerMapping");
+	String PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE = HandlerMapping.class.getName() + ".pathWithinHandlerMapping";
 
 
 	/**
