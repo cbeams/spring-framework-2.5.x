@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -336,7 +336,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * Return the name of the target scope for the bean.
 	 */
 	public String getScope() {
-		return scope;
+		return this.scope;
 	}
 
 	/**
@@ -386,7 +386,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * itself but rather just serving as parent for concrete child bean definitions.
 	 */
 	public boolean isAbstract() {
-		return abstractFlag;
+		return this.abstractFlag;
 	}
 
 	/**
@@ -403,7 +403,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * eagerly instantiated on startup. Only applicable to a singleton bean.
 	 */
 	public boolean isLazyInit() {
-		return lazyInit;
+		return this.lazyInit;
 	}
 
 
@@ -420,7 +420,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * some other bean.
 	 */
 	public boolean isAutowireCandidate() {
-		return autowireCandidate;
+		return this.autowireCandidate;
 	}
 
 	/**
@@ -443,7 +443,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * Return the autowire mode as specified in the bean definition.
 	 */
 	public int getAutowireMode() {
-		return autowireMode;
+		return this.autowireMode;
 	}
 
 	/**
@@ -488,7 +488,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * Return the dependency check code.
 	 */
 	public int getDependencyCheck() {
-		return dependencyCheck;
+		return this.dependencyCheck;
 	}
 
 	/**
@@ -506,7 +506,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * Return the bean names that this bean depends on.
 	 */
 	public String[] getDependsOn() {
-		return dependsOn;
+		return this.dependsOn;
 	}
 
 
@@ -574,7 +574,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * Returns the factory bean name, if any.
 	 */
 	public String getFactoryBeanName() {
-		return factoryBeanName;
+		return this.factoryBeanName;
 	}
 
 	/**
@@ -677,7 +677,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * by the application itself.
 	 */
 	public boolean isSynthetic() {
-		return synthetic;
+		return this.synthetic;
 	}
 
 	/**
@@ -693,7 +693,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * came from.
 	 */
 	public String getResourceDescription() {
-		return resourceDescription;
+		return this.resourceDescription;
 	}
 
 	/**
@@ -705,7 +705,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	}
 
 	public Object getSource() {
-		return source;
+		return this.source;
 	}
 
 	/**
@@ -719,7 +719,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	 * Return the role hint for this <code>BeanDefinition</code>.
 	 */
 	public int getRole() {
-		return role;
+		return this.role;
 	}
 
 
