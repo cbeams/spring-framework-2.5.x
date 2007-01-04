@@ -88,8 +88,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - GlassFish ClassLoader API extract (http://glassfish.dev.java.net)
 - required for building the framework
 
-* groovy/groovy-1.0-RC-02.jar
-- Groovy 1.0 RC-02 (http://groovy.codehaus.org)
+* groovy/groovy-1.0.jar
+- Groovy 1.0 final (http://groovy.codehaus.org)
 - required for building the framework
 - required at runtime when using Spring's Groovy support
 
@@ -305,7 +305,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's JPA support
 
 * jruby/jruby.jar
-- JRuby 0.9.1 (http://jruby.sourceforge.net)
+- JRuby 0.9.2 (http://jruby.codehaus.org)
 - required for building the framework
 - required at runtime when using Spring's JRuby support
 
@@ -328,7 +328,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 
 * openjpa/openjpa-all-0.9.6-incubating.jar
-- OpenJPA 0.9.6 Nov 20 snapshot (http://incubator.apache.org/openjpa)
+- OpenJPA 0.9.6 (http://incubator.apache.org/openjpa)
 - required for building the framework
 - required at runtime when using Spring's JPA support with OpenJPA as provider
 
