@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,12 @@ package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
 
-import org.springframework.util.Assert;
-
 /**
- * Databinding-aware JSP tag for rendering an HTML '<code>input</code>'
+ * Data-binding-aware JSP tag for rendering an HTML '<code>input</code>'
  * element with a '<code>type</code>' of '<code>text</code>'.
  * 
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class InputTag extends AbstractHtmlInputElementTag {
@@ -82,78 +81,67 @@ public class InputTag extends AbstractHtmlInputElementTag {
 
 
 	/**
-	 * Sets the value of the '<code>maxlength</code>' attribute.
+	 * Set the value of the '<code>maxlength</code>' attribute.
 	 * May be a runtime expression.
-	 * @throws IllegalArgumentException if the supplied parameter value is <code>null</code> or composed wholly of whitespace
 	 */
 	public void setMaxlength(String maxlength) {
-		Assert.hasText(maxlength, "'maxlength' must not be empty");
 		this.maxlength = maxlength;
 	}
 
 	/**
-	 * Gets the value of the '<code>maxlength</code>' attribute.
-	 * May be a runtime expression.
+	 * Get the value of the '<code>maxlength</code>' attribute.
 	 */
 	protected String getMaxlength() {
 		return this.maxlength;
 	}
 
 	/**
-	 * Sets the value of the '<code>alt</code>' attribute.
+	 * Set the value of the '<code>alt</code>' attribute.
 	 * May be a runtime expression.
-	 * @throws IllegalArgumentException if the supplied parameter value is <code>null</code> or composed wholly of whitespace
 	 */
 	public void setAlt(String alt) {
-		Assert.hasText(alt, "'alt' must not be empty");
 		this.alt = alt;
 	}
 
 	/**
-	 * Gets the value of the '<code>alt</code>' attribute.
-	 * May be a runtime expression.
+	 * Get the value of the '<code>alt</code>' attribute.
 	 */
 	protected String getAlt() {
 		return this.alt;
 	}
 
 	/**
-	 * Sets the value of the '<code>onselect</code>' attribute.
+	 * Set the value of the '<code>onselect</code>' attribute.
 	 * May be a runtime expression.
-	 * @throws IllegalArgumentException if the supplied parameter value is <code>null</code> or composed wholly of whitespace 
 	 */
 	public void setOnselect(String onselect) {
-		Assert.hasText(onselect, "'onselect' must not be empty");
 		this.onselect = onselect;
 	}
 
 	/**
-	 * Gets the value of the '<code>onselect</code>' attribute.
-	 * May be a runtime expression.
+	 * Get the value of the '<code>onselect</code>' attribute.
 	 */
 	protected String getOnselect() {
 		return this.onselect;
 	}
 
 	/**
-	 * Sets the value of the '<code>size</code>' attribute.
+	 * Set the value of the '<code>size</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setSize(String size) {
-		Assert.hasText(size, "'size' must not be empty");
 		this.size = size;
 	}
 
 	/**
-	 * Gets the value of the '<code>size</code>' attribute.
-	 * May be a runtime expression.
+	 * Get the value of the '<code>size</code>' attribute.
 	 */
 	protected String getSize() {
 		return this.size;
 	}
 
 	/**
-	 * Sets the value of the '<code>readonly</code>' attribute.
+	 * Set the value of the '<code>readonly</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setReadonly(String readonly) {
@@ -161,15 +149,14 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Gets the value of the '<code>readonly</code>' attribute.
-	 * May be a runtime expression.
+	 * Get the value of the '<code>readonly</code>' attribute.
 	 */
 	protected String getReadonly() {
-		return readonly;
+		return this.readonly;
 	}
 
 	/**
-	 * Gets the value of the '<code>type</code>' attribute. Subclasses
+	 * Get the value of the '<code>type</code>' attribute. Subclasses
 	 * can override this to change the type of '<code>input</code>' element
 	 * rendered. Default value is '<code>text</code>'.
 	 */
