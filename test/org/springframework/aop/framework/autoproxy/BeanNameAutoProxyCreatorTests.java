@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.aop.framework.autoproxy;
 
 import java.io.IOException;
 
-import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 import org.springframework.aop.framework.Advised;
@@ -55,8 +54,14 @@ public class BeanNameAutoProxyCreatorTests extends TestCase {
 
 	public void testJdkProxyWithExactNameMatch() {
 		ITestBean tb = (ITestBean) beanFactory.getBean("onlyJdk");
-		jdkAssertions(tb);
+		jdkAssertions(tb, 1);
 		assertEquals("onlyJdk", tb.getName());
+	}
+
+	public void testJdkProxyWithDoubleProxying() {
+		ITestBean tb = (ITestBean) beanFactory.getBean("doubleJdk");
+		jdkAssertions(tb, 2);
+		assertEquals("doubleJdk", tb.getName());
 	}
 
 	public void testJdkIntroduction() {
@@ -97,22 +102,7 @@ public class BeanNameAutoProxyCreatorTests extends TestCase {
 		}
 	}
 
-	/**
-	 * This is a test that reproduces a bug/enhancement
-	 * request, while we decide how to address it.
-	 * This one is scheduled to be addressed in 1.1.2.
-	 */
-	public void testIntroductionOnFactoryBean() {
-		try {
-			BUGtestJdkIntroductionAppliesToCreatedObjectsNotFactoryBean();
-			fail();
-		}
-		catch (AssertionFailedError ex) {
-			System.err.println("****** SPR 337: Autoproxying currently applies to FactoryBeans, not objects they create");
-		}
-	}
-
-	public void BUGtestJdkIntroductionAppliesToCreatedObjectsNotFactoryBean() {
+	public void testJdkIntroductionAppliesToCreatedObjectsNotFactoryBean() {
 		ITestBean tb = (ITestBean) beanFactory.getBean("factory-introductionUsingJdk");
 		NopInterceptor nop = (NopInterceptor) beanFactory.getBean("introductionNopInterceptor");
 		assertEquals("NOP should not have done any work yet", 0, nop.getCount());
@@ -123,7 +113,6 @@ public class BeanNameAutoProxyCreatorTests extends TestCase {
 		assertTrue("Introduction was made", tb instanceof TimeStamped);
 		assertEquals(0, ((TimeStamped) tb).getTimeStamp());
 		assertEquals(3, nop.getCount());		
-		assertEquals("introductionUsingJdk", tb.getName());
 	
 		ITestBean tb2 = (ITestBean) beanFactory.getBean("second-introductionUsingJdk");
 			
@@ -152,7 +141,7 @@ public class BeanNameAutoProxyCreatorTests extends TestCase {
 
 	public void testJdkProxyWithWildcardMatch() {
 		ITestBean tb = (ITestBean) beanFactory.getBean("jdk1");
-		jdkAssertions(tb);
+		jdkAssertions(tb, 1);
 		assertEquals("jdk1", tb.getName());
 	}
 
@@ -167,14 +156,14 @@ public class BeanNameAutoProxyCreatorTests extends TestCase {
 		assertTrue(((Advised)testBean).isFrozen());
 	}
 
-	private void jdkAssertions(ITestBean tb)  {
+	private void jdkAssertions(ITestBean tb, int nopInterceptorCount)  {
 		NopInterceptor nop = (NopInterceptor) beanFactory.getBean("nopInterceptor");
 		assertEquals(0, nop.getCount());
 		assertTrue(AopUtils.isJdkDynamicProxy(tb));
 		int age = 5;
 		tb.setAge(age);
 		assertEquals(age, tb.getAge());
-		assertEquals(2, nop.getCount());
+		assertEquals(2 * nopInterceptorCount, nop.getCount());
 	}
 
 	/**

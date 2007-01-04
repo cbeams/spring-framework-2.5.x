@@ -19,8 +19,10 @@ package org.springframework.aop.framework.autoproxy;
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.aopalliance.aop.Advice;
 
@@ -30,7 +32,6 @@ import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
@@ -105,10 +106,11 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
 	/**
-	 * Indicates whether or not the proxy should be frozen. Overridden from super to prevent the
-	 * configuration from becoming frozen too early.
+	 * Indicates whether or not the proxy should be frozen. Overridden from super
+	 * to prevent the configuration from becoming frozen too early.
 	 */
-	private boolean freezeProxy;
+	private boolean freezeProxy = false;
+
 	/**
 	 * Names of common interceptors. We must use bean name rather than object references
 	 * to handle prototype advisors/interceptors.
@@ -121,6 +123,13 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	private TargetSourceCreator[] customTargetSourceCreators;
 
 	private BeanFactory beanFactory;
+
+	/**
+	 * Set of bean name Strings, referring to all beans that this auto-proxy creator
+	 * created a custom TargetSource for. Used to detect own pre-built proxies (from
+	 * "postProcessBeforeInstantiation") in the "postProcessAfterInitialization" method.
+	 */
+	private final Set targetSourcedBeanNames = Collections.synchronizedSet(new HashSet());
 
 
 	/**
@@ -219,6 +228,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		// The TargetSource will handle target instances in a custom fashion.
 		TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
 		if (targetSource != null) {
+			this.targetSourcedBeanNames.add(beanName);
 			Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);
 			return createProxy(beanClass, beanName, specificInterceptors, targetSource);
 		}
@@ -246,11 +256,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @see #getAdvicesAndAdvisorsForBean
 	 */
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-		if (isInfrastructureClass(bean.getClass(), beanName) || shouldSkip(bean.getClass(), beanName)) {
-			return bean;
-		}
-
-		if (AopUtils.isAopProxy(bean)) {
+		if (this.targetSourcedBeanNames.contains(beanName) ||
+				isInfrastructureClass(bean.getClass(), beanName) || shouldSkip(bean.getClass(), beanName)) {
 			return bean;
 		}
 
@@ -352,10 +359,45 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @param targetSource the TargetSource for the proxy,
 	 * already pre-configured to access the bean
 	 * @return the AOP proxy for the bean
+	 * @see #buildAdvisors
 	 */
 	protected Object createProxy(
 			Class beanClass, String beanName, Object[] specificInterceptors, TargetSource targetSource) {
 
+		ProxyFactory proxyFactory = new ProxyFactory();
+		// Copy our properties (proxyTargetClass etc) inherited from ProxyConfig.
+		proxyFactory.copyFrom(this);
+
+		if (!isProxyTargetClass()) {
+			// Must allow for introductions; can't just set interfaces to
+			// the target's interfaces only.
+			Class[] targetsInterfaces = ClassUtils.getAllInterfacesForClass(beanClass);
+			for (int i = 0; i < targetsInterfaces.length; i++) {
+				proxyFactory.addInterface(targetsInterfaces[i]);
+			}
+		}
+
+		Advisor[] advisors = buildAdvisors(beanName, specificInterceptors);
+		for (int i = 0; i < advisors.length; i++) {
+			proxyFactory.addAdvisor(advisors[i]);
+		}
+
+		proxyFactory.setTargetSource(targetSource);
+		customizeProxyFactory(proxyFactory);
+
+		proxyFactory.setFrozen(this.freezeProxy);
+		return proxyFactory.getProxy();
+	}
+
+	/**
+	 * Determine the advisors for the given bean, including the specific interceptors
+	 * as well as the common interceptor, all adapted to the Advisor interface.
+	 * @param beanName the name of the bean
+	 * @param specificInterceptors the set of interceptors that is
+	 * specific to this bean (may be empty, but not null)
+	 * @return the list of Advisors for the given bean
+	 */
+	protected Advisor[] buildAdvisors(String beanName, Object[] specificInterceptors) {
 		// handle prototypes correctly
 		Advisor[] commonInterceptors = resolveInterceptorNames();
 
@@ -378,28 +420,11 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 					" common interceptors and " + nrOfSpecificInterceptors + " specific interceptors");
 		}
 
-		ProxyFactory proxyFactory = new ProxyFactory();
-		// Copy our properties (proxyTargetClass etc) inherited from ProxyConfig.
-		proxyFactory.copyFrom(this);
-
-		if (!isProxyTargetClass()) {
-			// Must allow for introductions; can't just set interfaces to
-			// the target's interfaces only.
-			Class[] targetsInterfaces = ClassUtils.getAllInterfacesForClass(beanClass);
-			for (int i = 0; i < targetsInterfaces.length; i++) {
-				proxyFactory.addInterface(targetsInterfaces[i]);
-			}
+		Advisor[] advisors = new Advisor[allInterceptors.size()];
+		for (int i = 0; i < allInterceptors.size(); i++) {
+			advisors[i] = this.advisorAdapterRegistry.wrap(allInterceptors.get(i));
 		}
-
-		for (Iterator it = allInterceptors.iterator(); it.hasNext();) {
-			Advisor advisor = this.advisorAdapterRegistry.wrap(it.next());
-			proxyFactory.addAdvisor(advisor);
-		}
-		proxyFactory.setTargetSource(targetSource);
-		customizeProxyFactory(proxyFactory);
-
-		proxyFactory.setFrozen(this.freezeProxy);
-		return proxyFactory.getProxy();
+		return advisors;
 	}
 
 	/**
