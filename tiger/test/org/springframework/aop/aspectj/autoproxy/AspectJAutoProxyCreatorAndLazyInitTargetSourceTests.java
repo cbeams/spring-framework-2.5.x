@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,8 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 /**
  * @author Rod Johnson
  * @author Rob Harrop
- * @since 2.0.1
  */
 public class AspectJAutoProxyCreatorAndLazyInitTargetSourceTests extends AbstractDependencyInjectionSpringContextTests {
-
-	private ITestBean adrian;
 
 	public AspectJAutoProxyCreatorAndLazyInitTargetSourceTests() {
 		setAutowireMode(AUTOWIRE_BY_NAME);
@@ -34,12 +31,11 @@ public class AspectJAutoProxyCreatorAndLazyInitTargetSourceTests extends Abstrac
 
 	@Override
 	protected String[] getConfigLocations() {
-		return new String[]{"org/springframework/aop/aspectj/autoproxy/lazy.xml"};
+		return new String[] {"org/springframework/aop/aspectj/autoproxy/lazy.xml"};
 	}
 
 	public void testAdrian() {
-		adrian = (ITestBean) applicationContext.getBean("adrian");
-
+		ITestBean adrian = (ITestBean) applicationContext.getBean("adrian");
 		assertEquals(0, LazyTestBean.instantiations);
 		assertNotNull(adrian);
 		adrian.getAge();
