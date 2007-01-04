@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.scripting.jruby;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 
 import org.jruby.IRuby;
 import org.jruby.RubyNil;
@@ -29,8 +29,8 @@ import org.jruby.ast.Colon2Node;
 import org.jruby.ast.NewlineNode;
 import org.jruby.ast.Node;
 import org.jruby.exceptions.JumpException;
-import org.jruby.javasupport.JavaUtil;
 import org.jruby.javasupport.JavaEmbedUtils;
+import org.jruby.javasupport.JavaUtil;
 import org.jruby.runtime.builtin.IRubyObject;
 
 import org.springframework.aop.support.AopUtils;
@@ -39,6 +39,8 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Utility methods for handling JRuby-scripted objects.
+ *
+ * <p>Note: As of Spring 2.0.2, this class requires JRuby 0.9.2 or higher.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -57,7 +59,7 @@ public abstract class JRubyScriptUtils {
 	public static Object createJRubyObject(String scriptSource, Class[] interfaces) throws JumpException {
 		IRuby ruby = initializeRuntime();
 
-		Node scriptRootNode = ruby.parse(scriptSource, "");
+		Node scriptRootNode = ruby.parse(scriptSource, "", null);
 		IRubyObject rubyObject = ruby.eval(scriptRootNode);
 
 		if (rubyObject instanceof RubyNil) {
@@ -117,12 +119,11 @@ public abstract class JRubyScriptUtils {
 				}
 			}
 		}
-
 		for (int i = 0; i < children.size(); i++) {
 			Node child = (Node) children.get(i);
 			Node found = findClassNode(child);
 			if (found instanceof ClassNode) {
-				return (ClassNode) child;
+				return (ClassNode) found;
 			}
 		}
 		return null;
@@ -149,7 +150,7 @@ public abstract class JRubyScriptUtils {
 			}
 
 			IRubyObject[] rubyArgs = convertToRuby(args);
-			IRubyObject result = this.rubyObject.callMethod(method.getName(), rubyArgs);
+			IRubyObject result = this.rubyObject.callMethod(this.ruby.getCurrentContext(), method.getName(), rubyArgs);
 			return JavaUtil.convertRubyToJava(result);
 		}
 
