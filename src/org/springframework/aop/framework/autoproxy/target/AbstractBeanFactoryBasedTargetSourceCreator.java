@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,15 +30,17 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
- * Convenient superclass for TargetSourceCreators that require creating
- * multiple instances of a prototype bean.
+ * Convenient superclass for
+ * {@link org.springframework.aop.framework.autoproxy.TargetSourceCreator}
+ * implementations that require creating multiple instances of a prototype bean.
  *
  * <p>Uses an internal BeanFactory to manage the target instances,
  * copying the original bean definition to this internal factory.
  * This is necessary because the original BeanFactory will just
  * contain the proxy instance created through auto-proxying.
  *
- * <p>Requires running in an AbstractBeanFactory.
+ * <p>Requires running in an
+ * {@link org.springframework.beans.factory.support.AbstractBeanFactory}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -69,7 +71,14 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	 * Return the BeanFactory that this TargetSourceCreators runs in.
 	 */
 	protected final BeanFactory getBeanFactory() {
-		return beanFactory;
+		return this.beanFactory;
+	}
+
+	/**
+	 * Destroys the internal BeanFactory on shutdown of the TargetSourceCreator.
+	 */
+	public void destroy() {
+		this.internalBeanFactory.destroySingletons();
 	}
 
 
@@ -101,7 +110,9 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 	/**
 	 * Return whether this TargetSourceCreator is prototype-based.
-	 * The singleton flag of the target bean definition will be set accordingly.
+	 * The "singleton" flag of the target bean definition will be set accordingly.
+	 * <p>Default is "true".
+	 * @see org.springframework.beans.factory.config.BeanDefinition#isSingleton()
 	 */
 	protected boolean isPrototypeBased() {
 		return true;
@@ -120,13 +131,5 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	 */
 	protected abstract AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
 			Class beanClass, String beanName);
-
-
-	/**
-	 * Destroys the internal BeanFactory on shutdown of the TargetSourceCreator.
-	 */
-	public void destroy() {
-		this.internalBeanFactory.destroySingletons();
-	}
 
 }

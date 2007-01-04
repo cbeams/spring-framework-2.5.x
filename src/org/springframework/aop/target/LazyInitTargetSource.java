@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.aop.target;
 import org.springframework.beans.BeansException;
 
 /**
- * {@link org.springframework.aop.TargetSource} that lazily accesses
- * a singleton bean from a {@link org.springframework.beans.factory.BeanFactory}.
+ * {@link org.springframework.aop.TargetSource} that lazily accesses a
+ * singleton bean from a {@link org.springframework.beans.factory.BeanFactory}.
  *
  * <p>Useful when a proxy reference is needed on initialization but
  * the actual target object should not be initialized until first use.
@@ -53,6 +53,7 @@ import org.springframework.beans.BeansException;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 1.1.4
+ * @see org.springframework.beans.factory.BeanFactory#getBean
  * @see #postProcessTargetObject
  */
 public class LazyInitTargetSource extends AbstractBeanFactoryBasedTargetSource {
@@ -69,7 +70,7 @@ public class LazyInitTargetSource extends AbstractBeanFactoryBasedTargetSource {
 	}
 
 	/**
-	 * Sub-classes may override this method to perform additional processing on
+	 * Subclasses may override this method to perform additional processing on
 	 * the target object when it is first loaded.
 	 * @param targetObject the target object that has just been instantiated (and configured)
 	 */
