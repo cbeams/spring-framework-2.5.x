@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.scripting.jruby;
 
 import junit.framework.TestCase;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.context.ApplicationContext;
@@ -28,8 +29,6 @@ import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
 
 /**
- * Unit tests for the JRubyScriptFactory class.
- *
  * @author Rob Harrop
  * @author Rick Evans
  */
@@ -204,6 +203,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertEquals(1, printable.count);
 	}
 
+
 	private static class CountingPrintable implements Printable {
 
 		public int count;
@@ -213,4 +213,5 @@ public class JRubyScriptFactoryTests extends TestCase {
 			return "Hello World!";
 		}
 	}
+
 }
