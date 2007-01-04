@@ -45,6 +45,7 @@ import org.springframework.web.util.HtmlUtils;
  * {@link #COMMAND_NAME_VARIABLE_NAME}.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  * @see org.springframework.web.servlet.mvc.SimpleFormController
  */
@@ -209,7 +210,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * May be a runtime expression.
 	 */
 	public void setEnctype(String enctype) {
-		Assert.hasText(enctype, "'enctype' must not be empty");
 		this.enctype = enctype;
 	}
 
@@ -226,7 +226,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * May be a runtime expression.
 	 */
 	public void setOnsubmit(String onsubmit) {
-		Assert.hasText(onsubmit, "'onsubmit' must not be empty");
 		this.onsubmit = onsubmit;
 	}
 
@@ -243,7 +242,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * May be a runtime expression.
 	 */
 	public void setOnreset(String onreset) {
-		Assert.hasText(onreset, "'onreset' must not be empty");
 		this.onreset = onreset;
 	}
 
