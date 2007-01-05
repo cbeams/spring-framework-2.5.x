@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.util.ObjectUtils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyTag;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
+import org.springframework.util.ObjectUtils;
 
 /**
  * Form tag for displaying errors for a particular field or object.
@@ -37,6 +38,7 @@ import java.util.List;
  * </ol>
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
@@ -55,7 +57,6 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	private String delimiter = "<br/>";
 
-
 	/**
 	 * Stores any value that existed in the 'errors messages' before the tag was started.
 	 */
@@ -63,8 +64,9 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	
 	private boolean errorMessagesWereExposed;
 
+
 	/**
-	 * Sets what delimiter must be used between error messages.
+	 * Set what delimiter must be used between error messages.
 	 * <p>Defaults to an HTML '<code>&lt;br/&gt;</code>' tag.
 	 * @param delimiter said delimeter
 	 */
@@ -74,7 +76,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 
 	/**
-	 * Gets the value for the HTML '<code>name</code>' attribute.
+	 * Get the value for the HTML '<code>name</code>' attribute.
 	 * <p>Simply returns <code>""</code> (the empty string) because the
 	 * '<code>name</code>' attribute is not a validate attribute for the
 	 * '<code>span</code>' element.
@@ -84,13 +86,13 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	/**
-	 * Gets the value for the HTML '<code>id</code>' attribute.
-	 * <p>Appends '<code>.errors</code>' to the value returned by {@link #getPath()}.
-	 * @return the value for the HTML '<code>name</code>' attribute.
+	 * Get the value for the HTML '<code>id</code>' attribute.
+	 * <p>Appends '<code>.errors</code>' to the value returned by {@link #getCompletePath()}.
+	 * @return the value for the HTML '<code>name</code>' attribute
 	 * @see #getPath()
 	 */
 	protected String autogenerateId() throws JspException {
-		return getPath() + ".errors";
+		return getCompletePath() + ".errors";
 	}
 
 	/**
