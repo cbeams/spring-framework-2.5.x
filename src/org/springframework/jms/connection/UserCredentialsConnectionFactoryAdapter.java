@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import javax.jms.QueueConnectionFactory;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -66,7 +67,7 @@ import org.springframework.util.StringUtils;
  * @see #createTopicConnection
  */
 public class UserCredentialsConnectionFactoryAdapter
-		implements ConnectionFactory, QueueConnectionFactory, TopicConnectionFactory {
+		implements ConnectionFactory, QueueConnectionFactory, TopicConnectionFactory, InitializingBean {
 
 	private ConnectionFactory targetConnectionFactory;
 
@@ -81,6 +82,7 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * Set the target ConnectionFactory that this ConnectionFactory should delegate to.
 	 */
 	public void setTargetConnectionFactory(ConnectionFactory targetConnectionFactory) {
+		Assert.notNull(targetConnectionFactory, "'targetConnectionFactory' must not be null");
 		this.targetConnectionFactory = targetConnectionFactory;
 	}
 
@@ -98,6 +100,12 @@ public class UserCredentialsConnectionFactoryAdapter
 	 */
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public void afterPropertiesSet() {
+		if (this.targetConnectionFactory == null) {
+			throw new IllegalArgumentException("'targetConnectionFactory' is required");
+		}
 	}
 
 
@@ -160,7 +168,7 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * @see javax.jms.ConnectionFactory#createConnection()
 	 */
 	protected Connection doCreateConnection(String username, String password) throws JMSException {
-		Assert.state(this.targetConnectionFactory != null, "targetConnectionFactory is required");
+		Assert.state(this.targetConnectionFactory != null, "'targetConnectionFactory' is required");
 		if (StringUtils.hasLength(username)) {
 			return this.targetConnectionFactory.createConnection(username, password);
 		}
@@ -205,9 +213,9 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * @see javax.jms.QueueConnectionFactory#createQueueConnection()
 	 */
 	protected QueueConnection doCreateQueueConnection(String username, String password) throws JMSException {
-		Assert.state(this.targetConnectionFactory != null, "targetConnectionFactory is required");
+		Assert.state(this.targetConnectionFactory != null, "'targetConnectionFactory' is required");
 		if (!(this.targetConnectionFactory instanceof QueueConnectionFactory)) {
-			throw new javax.jms.IllegalStateException("targetConnectionFactory is not a QueueConnectionFactory");
+			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is not a QueueConnectionFactory");
 		}
 		QueueConnectionFactory queueFactory = (QueueConnectionFactory) this.targetConnectionFactory;
 		if (StringUtils.hasLength(username)) {
@@ -254,9 +262,9 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * @see javax.jms.TopicConnectionFactory#createTopicConnection()
 	 */
 	protected TopicConnection doCreateTopicConnection(String username, String password) throws JMSException {
-		Assert.state(this.targetConnectionFactory != null, "targetConnectionFactory is required");
+		Assert.state(this.targetConnectionFactory != null, "'targetConnectionFactory' is required");
 		if (!(this.targetConnectionFactory instanceof TopicConnectionFactory)) {
-			throw new javax.jms.IllegalStateException("targetConnectionFactory is not a TopicConnectionFactory");
+			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is not a TopicConnectionFactory");
 		}
 		TopicConnectionFactory queueFactory = (TopicConnectionFactory) this.targetConnectionFactory;
 		if (StringUtils.hasLength(username)) {

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,14 +21,16 @@ import java.sql.Connection;
 import javax.sql.DataSource;
 
 /**
- * Subinterface of <code>javax.sql.DataSource</code>, to be implemented by
- * special DataSources that return JDBC Connections in an unwrapped fashion.
+ * Extension of the <code>javax.sql.DataSource</code> interface, to be
+ * implemented by special DataSources that return JDBC Connections
+ * in an unwrapped fashion.
  *
- * <p>Classes using this interface can query whether or not the connection
+ * <p>Classes using this interface can query whether or not the Connection
  * should be closed after an operation. Spring's DataSourceUtils and
  * JdbcTemplate classes automatically perform such a check.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see SingleConnectionDataSource#shouldClose
  * @see DataSourceUtils#releaseConnection
  * @see org.springframework.jdbc.core.JdbcTemplate
@@ -36,14 +38,14 @@ import javax.sql.DataSource;
 public interface SmartDataSource extends DataSource {
 		
 	/** 
-	 * Should we close this connection, obtained from this DataSource?
-	 * <p>Code that uses connections from a SmartDataSource should always
+	 * Should we close this Connection, obtained from this DataSource?
+	 * <p>Code that uses Connections from a SmartDataSource should always
 	 * perform a check via this method before invoking <code>close()</code>.
-	 * <p>However, the JdbcTemplate class in the core package should take care of
-	 * closing JDBC connections, freeing application code of this responsibility.
-	 * @param con connection, which should have been obtained
-	 * from this data source, to check closure status of
-	 * @return whether the given connection should be closed
+	 * <p>Note that the JdbcTemplate class in the 'jdbc.core' package takes care of
+	 * releasing JDBC Connections, freeing application code of this responsibility.
+	 * @param con the Connection to check
+	 * @return whether the given Connection should be closed
+	 * @see java.sql.Connection#close()
 	 */
 	boolean shouldClose(Connection con);
 

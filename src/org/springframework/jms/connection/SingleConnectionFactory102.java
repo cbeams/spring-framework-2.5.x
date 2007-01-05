@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,15 +79,15 @@ public class SingleConnectionFactory102 extends SingleConnectionFactory {
 	 * Otherwise, the Point-to-Point domain (Queues) is used.
 	 */
 	public boolean isPubSubDomain() {
-		return pubSubDomain;
+		return this.pubSubDomain;
 	}
 
 
 	/**
-	 * In addition to checking if the connection factory is set, make sure
-	 * that the supplied connection factory is of the appropriate type for
+	 * In addition to checking whether the target ConnectionFactory is set,
+	 * make sure that the supplied factory is of the appropriate type for
 	 * the specified destination type: QueueConnectionFactory for queues,
-	 * and TopicConnectionFactory for topics.
+	 * TopicConnectionFactory for topics.
 	 */
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();

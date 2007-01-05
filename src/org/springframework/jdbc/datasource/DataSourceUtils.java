@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -247,8 +247,8 @@ public abstract class DataSourceUtils {
 	 * Will never close a Connection from a SmartDataSource returning shouldClose=false.
 	 * @param con the Connection to close if necessary
 	 * (if this is <code>null</code>, the call will be ignored)
-	 * @param dataSource the DataSource that the Connection came from
-	 * (can be <code>null</code>)
+	 * @param dataSource the DataSource that the Connection was obtained from
+	 * (may be <code>null</code>)
 	 * @see SmartDataSource#shouldClose
 	 */
 	public static void releaseConnection(Connection con, DataSource dataSource) {
@@ -269,8 +269,8 @@ public abstract class DataSourceUtils {
 	 * <p>Directly accessed by TransactionAwareDataSourceProxy.
 	 * @param con the Connection to close if necessary
 	 * (if this is <code>null</code>, the call will be ignored)
-	 * @param dataSource the DataSource that the Connection came from
-	 * (can be <code>null</code>)
+	 * @param dataSource the DataSource that the Connection was obtained from
+	 * (may be <code>null</code>)
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #releaseConnection
 	 * @see TransactionAwareDataSourceProxy

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
 
 /**
  * {@link javax.sql.DataSource} implementation that delegates all calls
- * to a given target {@link javax.sql.DataSource}
+ * to a given target {@link javax.sql.DataSource}.
  *
  * <p>This class is meant to be subclassed, with subclasses overriding only
  * those methods (such as {@link #getConnection()}) that should not simply
@@ -62,7 +62,7 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 	 * Set the target DataSource that this DataSource should delegate to.
 	 */
 	public final void setTargetDataSource(DataSource targetDataSource) {
-		Assert.notNull(targetDataSource, "targetDataSource must not be null");
+		Assert.notNull(targetDataSource, "'targetDataSource' must not be null");
 		this.targetDataSource = targetDataSource;
 	}
 
@@ -75,7 +75,7 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 
 	public void afterPropertiesSet() {
 		if (getTargetDataSource() == null) {
-			throw new IllegalArgumentException("targetDataSource is required");
+			throw new IllegalArgumentException("'targetDataSource' is required");
 		}
 	}
 
