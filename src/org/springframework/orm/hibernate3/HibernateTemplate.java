@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,8 @@ import org.springframework.util.Assert;
  * (Spring's LocalSessionFactoryBean automatically supports Spring transaction
  * management for the Hibernate3 <code>getCurrentSession()</code> method.)
  *
- * <p>The central method is <code>execute</code>, supporting Hibernate code
- * implementing the HibernateCallback interface. It provides Hibernate Session
+ * <p>The central method is <code>execute</code>, supporting Hibernate access code
+ * implementing the {@link HibernateCallback} interface. It provides Hibernate Session
  * handling such that neither the HibernateCallback implementation nor the calling
  * code needs to explicitly care about retrieving/closing Hibernate Sessions,
  * or handling Session lifecycle exceptions. For typical single step actions,
@@ -75,12 +75,17 @@ import org.springframework.util.Assert;
  * within data access code. Corresponding checks and the actual throwing of such
  * exceptions can often be deferred to after callback execution, though.
  *
- * <p>Note that even if HibernateTransactionManager is used for transaction
+ * <p>Note that even if {@link HibernateTransactionManager} is used for transaction
  * demarcation in higher-level services, all those services above the data
  * access layer don't need to be Hibernate-aware. Setting such a special
  * PlatformTransactionManager is a configuration issue: For example,
  * switching to JTA is just a matter of Spring configuration (use
  * JtaTransactionManager instead) that does not affect application code.
+ *
+ * <p>{@link LocalSessionFactoryBean} is the preferred way of obtaining a reference
+ * to a specific Hibernate SessionFactory, at least in a non-EJB environment.
+ * The Spring application context will manage its lifecycle, initializing and
+ * shutting down the factory as part of the application.
  *
  * <p>Note that operations that return an Iterator (i.e. <code>iterate</code>)
  * are supposed to be used within Spring-driven or JTA-driven transactions
@@ -1077,8 +1082,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 
 	/**
 	 * Check whether write operations are allowed on the given Session.
-	 * <p>Default implementation throws an InvalidDataAccessApiUsageException
-	 * in case of FlushMode.NEVER. Can be overridden in subclasses.
+	 * <p>Default implementation throws an InvalidDataAccessApiUsageException in
+	 * case of <code>FlushMode.NEVER</code>. Can be overridden in subclasses.
 	 * @param session current Hibernate Session
 	 * @throws InvalidDataAccessApiUsageException if write operations are not allowed
 	 * @see #setCheckWriteOperations

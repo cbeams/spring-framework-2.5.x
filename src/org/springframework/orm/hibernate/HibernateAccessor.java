@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,9 +37,10 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 /**
  * Base class for HibernateTemplate and HibernateInterceptor, defining common
- * properties like SessionFactory and flushing behavior.
+ * properties such as SessionFactory and flushing behavior.
  *
- * <p>Not intended to be used directly. See HibernateTemplate and HibernateInterceptor.
+ * <p>Not intended to be used directly.
+ * See {@link HibernateTemplate} and {@link HibernateInterceptor}.
  *
  * @author Juergen Hoeller
  * @since 29.07.2003
@@ -108,8 +109,8 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	/** Constants instance for HibernateAccessor */
 	private static final Constants constants = new Constants(HibernateAccessor.class);
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
-
 
 	private SessionFactory sessionFactory;
 
@@ -139,7 +140,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * Hibernate Sessions.
 	 */
 	public SessionFactory getSessionFactory() {
-		return sessionFactory;
+		return this.sessionFactory;
 	}
 
 	/**
@@ -228,8 +229,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 
 	/**
 	 * Set the flush behavior by the name of the respective constant
-	 * in this class, e.g. "FLUSH_AUTO". Default is FLUSH_AUTO.
-	 * Will get applied to any <b>new</b> Session created by this object.
+	 * in this class, e.g. "FLUSH_AUTO". Default is "FLUSH_AUTO".
 	 * @param constantName name of the constant
 	 * @see #setFlushMode
 	 * @see #FLUSH_AUTO
@@ -240,8 +240,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 
 	/**
 	 * Set the flush behavior to one of the constants in this class.
-	 * Default is FLUSH_AUTO. Will get applied to any <b>new</b> Session
-	 * created by this object.
+	 * Default is FLUSH_AUTO.
 	 * @see #setFlushModeName
 	 * @see #FLUSH_AUTO
 	 */
@@ -253,7 +252,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * Return if a flush should be forced after executing the callback code.
 	 */
 	public int getFlushMode() {
-		return flushMode;
+		return this.flushMode;
 	}
 
 	/**
@@ -340,7 +339,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * <code>org.springframework.dao</code> hierarchy. Will automatically detect
 	 * wrapped SQLExceptions and convert them accordingly.
 	 * <p>The default implementation delegates to SessionFactoryUtils
-	 * and convertJdbcAccessException. Can be overridden in subclasses.
+	 * and {@link #convertJdbcAccessException}. Can be overridden in subclasses.
 	 * @param ex HibernateException that occured
 	 * @return the corresponding DataAccessException instance
 	 * @see #convertJdbcAccessException(net.sf.hibernate.JDBCException)
