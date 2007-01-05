@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,9 +143,6 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 */
 	private BeanFactory beanFactory;
 
-	/** Whether the advisor chain has already been initialized */
-	private boolean advisorChainInitialized = false;
-
 	/** If this is a singleton, the cached singleton proxy instance */
 	private Object singletonInstance;
 
@@ -256,17 +253,13 @@ public class ProxyFactoryBean extends AdvisedSupport
 	 * @return a fresh AOP proxy reflecting the current state of this factory
 	 */
 	public Object getObject() throws BeansException {
-		if (!this.advisorChainInitialized) {
-			// Not initialized yet - probably a circular reference.
-			return null;
-		}
 		if (isSingleton()) {
 			return getSingletonInstance();
 		}
 		else {
 			if (this.targetName == null) {
 				logger.warn("Using non-singleton proxies with singleton targets is often undesirable." +
-								"Enable prototype proxies by setting the 'targetName' property.");
+						"Enable prototype proxies by setting the 'targetName' property.");
 			}
 			return newPrototypeInstance();
 		}
@@ -407,8 +400,6 @@ public class ProxyFactoryBean extends AdvisedSupport
 				addAdvisorOnChainCreation(advice, this.interceptorNames[i]);
 			}
 		}
-
-		this.advisorChainInitialized = true;
 	}
 
 	/**
