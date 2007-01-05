@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
@@ -79,7 +80,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	 * Return the QueueConnectionFactory to use for obtaining JMS QueueConnections.
 	 */
 	protected QueueConnectionFactory getConnectionFactory() {
-		return connectionFactory;
+		return this.connectionFactory;
 	}
 
 	/**
@@ -187,7 +188,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 		finally {
 			JmsUtils.closeQueueRequestor(requestor);
 			JmsUtils.closeSession(session);
-			JmsUtils.closeConnection(con);
+			ConnectionFactoryUtils.releaseConnection(con, getConnectionFactory(), true);
 		}
 	}
 
