@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.servlet.support.BindStatus;
-import org.springframework.web.servlet.tags.NestedPathTag;
+import java.beans.PropertyEditor;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
-import java.beans.PropertyEditor;
+
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.web.servlet.tags.NestedPathTag;
 
 /**
  * Base tag for all data-binding aware JSP form tags.
@@ -35,6 +36,7 @@ import java.beans.PropertyEditor;
  * with the {@link TagWriter}.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
@@ -59,8 +61,9 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	 */
 	private String path;
 
+
 	/**
-	 * Sets the property path from the {@link FormTag#setCommandName command object}.
+	 * Set the property path from the {@link FormTag#setCommandName command object}.
 	 * May be a runtime expression. Required.
 	 * @throws IllegalArgumentException if the supplied path is <code>null</code> or composed wholly of whitespace 
 	 */
@@ -70,18 +73,26 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	}
 
 	/**
-	 * Sets the value of the '<code>id</code>' attribute.
+	 * Get the {@link #evaluate resolved} property path for the
+	 * {@link FormTag#setCommandName command object}.
+	 */
+	protected final String getPath() throws JspException {
+		return (String) evaluate("path", this.path);
+	}
+
+	/**
+	 * Set the value of the '<code>id</code>' attribute.
 	 * <p>Defaults to the value of {@link #getName}; may be a runtime expression.
 	 * <p>Note that the default value may not be valid for certain tags.
 	 * @param id the value of the '<code>id</code>' attribute
 	 */
 	public void setId(String id) {
-		Assert.notNull(id, "'id' cannot be null.");
+		Assert.notNull(id, "'id' must not be null");
 		this.id = id;
 	}
 
 	/**
-	 * Gets the value of the '<code>id</code>' attribute.
+	 * Get the value of the '<code>id</code>' attribute.
 	 * <p>May be a runtime expression.
 	 * @return the value of the '<code>id</code>' attribute
 	 */
@@ -89,13 +100,6 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 		return this.id;
 	}
 
-	/**
-	 * Gets the {@link #evaluate resolved} property path from the
-	 * {@link FormTag#setCommandName command object}.
-	 */
-	protected final String getPath() throws JspException {
-		return (String) evaluate("path", this.path);
-	}
 
 	/**
 	 * Writes the default set of attributes to the supplied {@link TagWriter}.
@@ -126,22 +130,21 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	}
 
 	/**
-	 * Gets the value for the HTML '<code>name</code>' attribute.
+	 * Get the value for the HTML '<code>name</code>' attribute.
 	 * <p>The default implementation simply delegates to
-	 * {@link #getNestedPath} and {@link #getPath()} to use the property
-	 * path as the name. For the most part this is desirable as it links
-	 * with the server-side expectation for databinding. However, some
+	 * {@link #getCompletePath} to use the property path as the name.
+	 * For the most part this is desirable as it links with the
+	 * server-side expectation for databinding. However, some
 	 * subclasses may wish to change the value of the '<code>name</code>'
 	 * attribute without changing the bind path.
 	 * @return the value for the HTML '<code>name</code>' attribute
 	 */
 	protected String getName() throws JspException {
-		String nestedPath = getNestedPath();
-		return (nestedPath == null) ? getPath() : nestedPath + getPath();
+		return getCompletePath();
 	}
 
 	/**
-	 * Gets the bound value.
+	 * Get the bound value.
 	 * @see #getBindStatus()
 	 */
 	protected final Object getBoundValue() throws JspException {
@@ -149,14 +152,14 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	}
 
 	/**
-	 * Gets the {@link PropertyEditor}, if any, in use for value bound to this tag.
+	 * Get the {@link PropertyEditor}, if any, in use for value bound to this tag.
 	 */
 	protected PropertyEditor getPropertyEditor() throws JspException {
 		return getBindStatus().getEditor();
 	}
 
 	/**
-	 * Gets the {@link BindStatus} for this tag.
+	 * Get the {@link BindStatus} for this tag.
 	 */
 	protected BindStatus getBindStatus() throws JspException {
 		if (this.bindStatus == null) {
@@ -170,19 +173,16 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	}
 
 	/**
-	 * Gets the final bind path including the exposed {@link FormTag command name} and
+	 * Get the final bind path including the exposed {@link FormTag command name} and
 	 * any {@link NestedPathTag nested paths}.
 	 */
 	private String getBindPath(String resolvedSubPath) {
-
 		StringBuffer sb = new StringBuffer();
 		sb.append(getCommandName());
-
 		String nestedPath = getNestedPath();
 		if (nestedPath != null) {
 			sb.append('.').append(nestedPath);
 		}
-
 		if (resolvedSubPath != null) {
 			if(sb.charAt(sb.length() - 1) != '.') {
 				sb.append('.');
@@ -193,11 +193,21 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag {
 	}
 
 	/**
-	 * Gets the value of the nested path that may have been exposed by the
+	 * Get the value of the nested path that may have been exposed by the
 	 * {@link NestedPathTag}.
 	 */
 	protected String getNestedPath() {
 		return (String) this.pageContext.getAttribute(NestedPathTag.NESTED_PATH_VARIABLE_NAME, PageContext.REQUEST_SCOPE);
+	}
+
+	/**
+	 * Build the complete path for this tag, including the nested path.
+	 * @see #getNestedPath()
+	 * @see #getPath()
+	 */
+	protected String getCompletePath() throws JspException {
+		String nestedPath = getNestedPath();
+		return (nestedPath != null ? nestedPath + getPath() : getPath());
 	}
 
 	private String getCommandName() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,22 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import javax.servlet.jsp.JspException;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import javax.servlet.jsp.JspException;
 
 /**
  * Databinding-aware JSP tag for rendering an HTML '<code>label</code>' element
  * that defines text that is associated with a single form element.
- * 
+ *
  * <p>The {@link #setFor(String) 'for'} attribute is required.
- * 
- * <p>See the formTags showcase application that ships with the
+ *
+ * <p>See the "formTags" showcase application that ships with the
  * full Spring distribution for an example of this class in action.
- * 
+ *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class LabelTag extends AbstractHtmlElementTag {
@@ -57,8 +58,9 @@ public class LabelTag extends AbstractHtmlElementTag {
 	 */
 	private String forId;
 
+
 	/**
-	 * Sets the value of the '<code>for</code>' attribute.
+	 * Set the value of the '<code>for</code>' attribute.
 	 * <p>Defaults to the value of {@link #getPath}; may be a runtime expression.
 	 * @throws IllegalArgumentException if the supplied value is <code>null</code> 
 	 */
@@ -68,13 +70,13 @@ public class LabelTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Gets the value of the '<code>id</code>' attribute.
+	 * Get the value of the '<code>id</code>' attribute.
 	 * <p>May be a runtime expression.
-	 * @return the value of the '<code>id</code>' attribute
 	 */
 	public String getFor() {
 		return this.forId;
 	}
+
 
 	/**
 	 * Writes the opening '<code>label</code>' tag and forces a block tag so
@@ -97,21 +99,19 @@ public class LabelTag extends AbstractHtmlElementTag {
 	 * @return the value for the HTML '<code>name</code>' attribute
 	 */
 	protected String getName() throws JspException {
-		// this also suppresses the 'id' attribute (which is okay for a <label/>)
+		// This also suppresses the 'id' attribute (which is okay for a <label/>)
 		return "";
 	}
 
 	/**
 	 * Returns the value that must be used for the '<code>for</code>' attribute.
-	 * @return the value that must be used for the '<code>for</code>' attribute
 	 */
 	protected final String resolveFor() throws JspException {
 		if (StringUtils.hasText(this.forId)) {
 			return getDisplayString(evaluate(FOR_ATTRIBUTE, this.forId));
 		}
 		else {
-			String nestedPath = getNestedPath();
-			return (nestedPath == null) ? getPath() : nestedPath + getPath();
+			return getCompletePath();
 		}
 	}
 
@@ -128,8 +128,8 @@ public class LabelTag extends AbstractHtmlElementTag {
 	 * Disposes of the {@link TagWriter} instance.
 	 */
 	public void doFinally() {
-        super.doFinally();
-        this.tagWriter = null;
+		super.doFinally();
+		this.tagWriter = null;
 	}
 
 }
