@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,10 @@ import org.springframework.transaction.TransactionSuspensionNotSupportedExceptio
 import org.springframework.transaction.UnexpectedRollbackException;
 
 /**
- * Abstract base class that allows for easy implementation of concrete
- * platform transaction managers like JtaTransactionManager and
- * DataSourceTransactionManager.
+ * Abstract base class that implements Spring's standard transaction workflow,
+ * serving as basis for concrete platform transaction managers like
+ * {@link org.springframework.transaction.jta.JtaTransactionManager} and
+ * {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}.
  *
  * <p>This base class provides the following workflow handling:
  * <ul>
@@ -54,13 +55,13 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * </ul>
  *
  * <p>Subclasses have to implement specific template methods for specific
- * states of a transaction, for example begin, suspend, resume, commit, rollback.
+ * states of a transaction, e.g.: begin, suspend, resume, commit, rollback.
  * The most important of them are abstract and must be provided by a concrete
  * implementation; for the rest, defaults are provided, so overriding is optional.
  *
  * <p>Transaction synchronization is a generic mechanism for registering callbacks
  * that get invoked at transaction completion time. This is mainly used internally
- * by the data access support classes for JDBC, Hibernate, and JDO when running
+ * by the data access support classes for JDBC, Hibernate, JDO, etc when running
  * within a JTA transaction: They register resources that are opened within the
  * transaction for closing at transaction completion time, allowing e.g. for reuse
  * of the same Hibernate Session within the transaction. The same mechanism can
@@ -80,7 +81,6 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  * @see org.springframework.orm.hibernate.HibernateTransactionManager
- * @see org.springframework.orm.jdo.JdoTransactionManager
  */
 public abstract class AbstractPlatformTransactionManager implements PlatformTransactionManager, Serializable {
 
@@ -344,7 +344,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		    definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
 			Object suspendedResources = suspend(null);
 			if (debugEnabled) {
-				logger.debug("Creating new transaction with name [" + definition.getName() + "]");
+				logger.debug("Creating new transaction with name [" + definition.getName() + "]: " + definition);
 			}
 			doBegin(transaction, definition);
 			boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
