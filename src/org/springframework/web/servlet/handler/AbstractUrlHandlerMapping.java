@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,7 +180,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		if (mappedHandler != null) {
 			throw new ApplicationContextException(
 					"Cannot map handler [" + handler + "] to URL path [" + urlPath +
-					"]: there's already handler [" + mappedHandler + "] mapped");
+					"]: There is already handler [" + mappedHandler + "] mapped.");
 		}
 
 		// Eagerly resolve handler if referencing singleton via name.
