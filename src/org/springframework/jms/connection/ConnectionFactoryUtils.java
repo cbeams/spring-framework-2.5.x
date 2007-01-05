@@ -27,6 +27,9 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 import javax.jms.TopicSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -39,6 +42,43 @@ import org.springframework.util.Assert;
  * @since 2.0
  */
 public abstract class ConnectionFactoryUtils {
+
+	private static final Log logger = LogFactory.getLog(ConnectionFactoryUtils.class);
+
+
+	/**
+	 * Release the given Connection, stopping it (if necessary) and eventually closing it.
+	 * <p>Checks {@link SmartConnectionFactory#shouldStop}, if available.
+	 * This is essentially a more sophisticated version of
+	 * {@link org.springframework.jms.support.JmsUtils#closeConnection}.
+	 * @param con the Connection to release
+	 * (if this is <code>null</code>, the call will be ignored)
+	 * @param cf the ConnectionFactory that the Connection was obtained from
+	 * (may be <code>null</code>)
+	 * @param started whether the Connection might have been started by the application
+	 * @see SmartConnectionFactory#shouldStop
+	 * @see org.springframework.jms.support.JmsUtils#closeConnection
+	 */
+	public static void releaseConnection(Connection con, ConnectionFactory cf, boolean started) {
+		if (con == null) {
+			return;
+		}
+		if (started && cf instanceof SmartConnectionFactory && ((SmartConnectionFactory) cf).shouldStop(con)) {
+			try {
+				con.stop();
+			}
+			catch (Throwable ex) {
+				logger.debug("Could not stop JMS Connection before closing it", ex);
+			}
+		}
+		try {
+			con.close();
+		}
+		catch (Throwable ex) {
+			logger.debug("Could not close JMS Connection", ex);
+		}
+	}
+
 
 	/**
 	 * Obtain a JMS Session that is synchronized with the current transaction, if any.
@@ -149,7 +189,6 @@ public abstract class ConnectionFactoryUtils {
 			}
 		});
 	}
-
 
 	/**
 	 * Obtain a JMS Session that is synchronized with the current transaction, if any.
