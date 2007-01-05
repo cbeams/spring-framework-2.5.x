@@ -255,7 +255,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 		else {
 			if (this.targetName == null) {
 				logger.warn("Using non-singleton proxies with singleton targets is often undesirable." +
-								"Enable prototype proxies by setting the 'targetName' property.");
+						"Enable prototype proxies by setting the 'targetName' property.");
 			}
 			return newPrototypeInstance();
 		}
@@ -263,8 +263,8 @@ public class ProxyFactoryBean extends AdvisedSupport
 
 	/**
 	 * Return the type of the proxy. Will check the singleton instance if
-	 * already created, else fall back to the proxy interface (if a single one),
-	 * the target bean type, or the TargetSource's target class.
+	 * already created, else fall back to the proxy interface (in case of just
+	 * a single one), the target bean type, or the TargetSource's target class.
 	 * @see org.springframework.aop.TargetSource#getTargetClass
 	 */
 	public Class getObjectType() {

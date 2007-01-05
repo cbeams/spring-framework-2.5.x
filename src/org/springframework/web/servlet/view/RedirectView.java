@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,7 +190,7 @@ public class RedirectView extends AbstractUrlBasedView {
 			targetUrl.delete(anchorIndex, targetUrl.length());
 		}
 
-		// If there aren'nt already some parameters, we need a "?".
+		// If there aren't already some parameters, we need a "?".
 		boolean first = (getUrl().indexOf('?') < 0);
 		Iterator entries = queryProperties(model).entrySet().iterator();
 		while (entries.hasNext()) {

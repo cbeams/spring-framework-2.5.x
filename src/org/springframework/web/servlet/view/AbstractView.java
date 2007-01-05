@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,8 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContext;
 
 /**
- * Abstract View superclass. Standard framework View implementations and
- * application-specific custom Views can extend this class to simplify
- * their implementation. Subclasses should be JavaBeans, to allow for
+ * Abstract base class for {@link org.springframework.web.servlet.View}
+ * implementations. Subclasses should be JavaBeans, to allow for
  * convenient configuration as Spring-managed bean instances.
  *
  * <p>Provides support for static attributes, to be made available to the view,
@@ -43,9 +42,8 @@ import org.springframework.web.servlet.support.RequestContext;
  * with the given dynamic attributes (the model that the controller returned)
  * for each render operation.
  *
- * <p>Extends WebApplicationObjectSupport, which will be helpful to some views.
- * Handles static attributes, and merging static with dynamic attributes.
- * Subclasses just need to implement the actual rendering.
+ * <p>Extends {@link WebApplicationObjectSupport}, which will be helpful to
+ * some views. Subclasses just need to implement the actual rendering.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -118,7 +116,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Return the name of the RequestContext attribute, if any.
 	 */
 	public String getRequestContextAttribute() {
-			return requestContextAttribute;
+		return this.requestContextAttribute;
 	}
 
 	/**
@@ -141,7 +139,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 				String name = tok.substring(0, eqIdx);
 				String value = tok.substring(eqIdx + 1);
 
-				// delete first and last characters of value: { and }
+				// Delete first and last characters of value: { and }
 				value = value.substring(1);
 				value = value.substring(0, value.length() - 1);
 
