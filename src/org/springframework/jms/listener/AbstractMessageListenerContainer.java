@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import javax.jms.Topic;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.Lifecycle;
 import org.springframework.jms.JmsException;
+import org.springframework.jms.connection.ConnectionFactoryUtils;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
 import org.springframework.util.Assert;
@@ -423,7 +424,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 		}
 		catch (JMSException ex) {
 			synchronized (this.sharedConnectionMonitor) {
-				JmsUtils.closeConnection(this.sharedConnection);
+				ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), this.autoStartup);
 			}
 			throw convertJmsAccessException(ex);
 		}
@@ -452,7 +453,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	protected final void refreshSharedConnection() throws JMSException {
 		boolean running = isRunning();
 		synchronized (this.sharedConnectionMonitor) {
-			JmsUtils.closeConnection(this.sharedConnection, running);
+			ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), running);
 			Connection con = createConnection();
 			try {
 				prepareSharedConnection(con);
@@ -534,7 +535,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 		}
 		finally {
 			synchronized (this.sharedConnectionMonitor) {
-				JmsUtils.closeConnection(this.sharedConnection, wasRunning);
+				ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), wasRunning);
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
-import javax.jms.Topic;
 
 import org.springframework.jms.JmsException;
 import org.springframework.jms.connection.ConnectionFactoryUtils;
@@ -33,7 +32,6 @@ import org.springframework.jms.connection.JmsResourceHolder;
 import org.springframework.jms.support.JmsUtils;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
-import org.springframework.jms.support.destination.DynamicDestinationResolver;
 import org.springframework.jms.support.destination.JmsDestinationAccessor;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -433,7 +431,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}
 		finally {
 			JmsUtils.closeSession(sessionToClose);
-			JmsUtils.closeConnection(conToClose, startConnection);
+			ConnectionFactoryUtils.releaseConnection(conToClose, getConnectionFactory(), startConnection);
 		}
 	}
 
