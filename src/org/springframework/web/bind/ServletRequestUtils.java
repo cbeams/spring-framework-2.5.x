@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,9 @@ public abstract class ServletRequestUtils {
 	 * @param defaultVal the default value to use as fallback
 	 */
 	public static int getIntParameter(ServletRequest request, String name, int defaultVal) {
+		if (request.getParameter(name) == null) {
+			return defaultVal;
+		}
 		try {
 			return getRequiredIntParameter(request, name);
 		}
@@ -145,6 +148,9 @@ public abstract class ServletRequestUtils {
 	 * @param defaultVal the default value to use as fallback
 	 */
 	public static long getLongParameter(ServletRequest request, String name, long defaultVal) {
+		if (request.getParameter(name) == null) {
+			return defaultVal;
+		}
 		try {
 			return getRequiredLongParameter(request, name);
 		}
@@ -220,6 +226,9 @@ public abstract class ServletRequestUtils {
 	 * @param defaultVal the default value to use as fallback
 	 */
 	public static float getFloatParameter(ServletRequest request, String name, float defaultVal) {
+		if (request.getParameter(name) == null) {
+			return defaultVal;
+		}
 		try {
 			return getRequiredFloatParameter(request, name);
 		}
@@ -295,6 +304,9 @@ public abstract class ServletRequestUtils {
 	 * @param defaultVal the default value to use as fallback
 	 */
 	public static double getDoubleParameter(ServletRequest request, String name, double defaultVal) {
+		if (request.getParameter(name) == null) {
+			return defaultVal;
+		}
 		try {
 			return getRequiredDoubleParameter(request, name);
 		}
@@ -374,6 +386,9 @@ public abstract class ServletRequestUtils {
 	 * @param defaultVal the default value to use as fallback
 	 */
 	public static boolean getBooleanParameter(ServletRequest request, String name, boolean defaultVal) {
+		if (request.getParameter(name) == null) {
+			return defaultVal;
+		}
 		try {
 			return getRequiredBooleanParameter(request, name);
 		}
@@ -456,12 +471,8 @@ public abstract class ServletRequestUtils {
 	 * @param defaultVal the default value to use as fallback
 	 */
 	public static String getStringParameter(ServletRequest request, String name, String defaultVal) {
-		try {
-			return getRequiredStringParameter(request, name);
-		}
-		catch (ServletRequestBindingException ex) {
-			return defaultVal;
-		}
+		String val = request.getParameter(name);
+		return (val != null ? val : defaultVal);
 	}
 
 	/**
@@ -515,7 +526,7 @@ public abstract class ServletRequestUtils {
 			catch (NumberFormatException ex) {
 				throw new ServletRequestBindingException(
 						"Required " + getType() + " parameter '" + name + "' with value of '" +
-						parameter + "' is not a valid number");
+						parameter + "' is not a valid number", ex);
 			}
 		}
 
@@ -523,8 +534,7 @@ public abstract class ServletRequestUtils {
 				throws ServletRequestBindingException {
 
 			if (parameter == null) {
-				throw new ServletRequestBindingException(
-						"Required " + getType() + " parameter '" + name + "' is not present");
+				throw new MissingServletRequestParameterException(name, getType());
 			}
 		}
 

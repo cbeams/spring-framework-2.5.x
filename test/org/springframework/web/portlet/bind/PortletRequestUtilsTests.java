@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.portlet.bind;
 import junit.framework.TestCase;
 
 import org.springframework.mock.web.portlet.MockPortletRequest;
+import org.springframework.util.StopWatch;
 
 /**
  * @author Juergen Hoeller
@@ -359,6 +360,78 @@ public class PortletRequestUtilsTests extends TestCase {
 
 		assertEquals("", PortletRequestUtils.getStringParameter(request, "paramEmpty"));
 		assertEquals("", PortletRequestUtils.getRequiredStringParameter(request, "paramEmpty"));
+	}
+
+	public void testGetIntParameterWithDefaultValueHandlingIsFastEnough() {
+		MockPortletRequest request = new MockPortletRequest();
+		StopWatch sw = new StopWatch();
+		sw.start();
+		for (int i = 0; i < 1000000; i++) {
+			PortletRequestUtils.getIntParameter(request, "nonExistingParam", 0);
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
+	}
+
+	public void testGetLongParameterWithDefaultValueHandlingIsFastEnough() {
+		MockPortletRequest request = new MockPortletRequest();
+		StopWatch sw = new StopWatch();
+		sw.start();
+		for (int i = 0; i < 1000000; i++) {
+			PortletRequestUtils.getLongParameter(request, "nonExistingParam", 0);
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
+	}
+
+	public void testGetFloatParameterWithDefaultValueHandlingIsFastEnough() {
+		MockPortletRequest request = new MockPortletRequest();
+		StopWatch sw = new StopWatch();
+		sw.start();
+		for (int i = 0; i < 1000000; i++) {
+			PortletRequestUtils.getFloatParameter(request, "nonExistingParam", 0f);
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
+	}
+
+	public void testGetDoubleParameterWithDefaultValueHandlingIsFastEnough() {
+		MockPortletRequest request = new MockPortletRequest();
+		StopWatch sw = new StopWatch();
+		sw.start();
+		for (int i = 0; i < 1000000; i++) {
+			PortletRequestUtils.getDoubleParameter(request, "nonExistingParam", 0d);
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
+	}
+
+	public void testGetBooleanParameterWithDefaultValueHandlingIsFastEnough() {
+		MockPortletRequest request = new MockPortletRequest();
+		StopWatch sw = new StopWatch();
+		sw.start();
+		for (int i = 0; i < 1000000; i++) {
+			PortletRequestUtils.getBooleanParameter(request, "nonExistingParam", false);
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
+	}
+
+	public void testGetStringParameterWithDefaultValueHandlingIsFastEnough() {
+		MockPortletRequest request = new MockPortletRequest();
+		StopWatch sw = new StopWatch();
+		sw.start();
+		for (int i = 0; i < 1000000; i++) {
+			PortletRequestUtils.getStringParameter(request, "nonExistingParam", "defaultValue");
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
 	}
 
 }

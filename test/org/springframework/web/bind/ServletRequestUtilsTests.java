@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.bind;
 import junit.framework.TestCase;
 
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.util.StopWatch;
 
 /**
  * @author Juergen Hoeller
@@ -86,7 +87,6 @@ public class ServletRequestUtilsTests extends TestCase {
 		catch (ServletRequestBindingException ex) {
 			// expected
 		}
-
 	}
 
 	public void testLongParameter() throws ServletRequestBindingException {
@@ -369,6 +369,78 @@ public class ServletRequestUtilsTests extends TestCase {
 
 		assertEquals("", ServletRequestUtils.getStringParameter(request, "paramEmpty"));
 		assertEquals("", ServletRequestUtils.getRequiredStringParameter(request, "paramEmpty"));
+	}
+
+	public void testGetIntParameterWithDefaultValueHandlingIsFastEnough() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		StopWatch sw = new StopWatch();
+		sw.start();
+		for (int i = 0; i < 1000000; i++) {
+			ServletRequestUtils.getIntParameter(request, "nonExistingParam", 0);
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
+	}
+
+	public void testGetLongParameterWithDefaultValueHandlingIsFastEnough() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		StopWatch sw = new StopWatch();
+		sw.start();
+		for (int i = 0; i < 1000000; i++) {
+			ServletRequestUtils.getLongParameter(request, "nonExistingParam", 0);
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
+	}
+
+	public void testGetFloatParameterWithDefaultValueHandlingIsFastEnough() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		StopWatch sw = new StopWatch();
+		sw.start();
+		for (int i = 0; i < 1000000; i++) {
+			ServletRequestUtils.getFloatParameter(request, "nonExistingParam", 0f);
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
+	}
+
+	public void testGetDoubleParameterWithDefaultValueHandlingIsFastEnough() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		StopWatch sw = new StopWatch();
+		sw.start();
+		for (int i = 0; i < 1000000; i++) {
+			ServletRequestUtils.getDoubleParameter(request, "nonExistingParam", 0d);
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
+	}
+
+	public void testGetBooleanParameterWithDefaultValueHandlingIsFastEnough() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		StopWatch sw = new StopWatch();
+		sw.start();
+		for (int i = 0; i < 1000000; i++) {
+			ServletRequestUtils.getBooleanParameter(request, "nonExistingParam", false);
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
+	}
+
+	public void testGetStringParameterWithDefaultValueHandlingIsFastEnough() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		StopWatch sw = new StopWatch();
+		sw.start();
+		for (int i = 0; i < 1000000; i++) {
+			ServletRequestUtils.getStringParameter(request, "nonExistingParam", "defaultValue");
+		}
+		sw.stop();
+		System.out.println(sw.getTotalTimeMillis());
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
 	}
 
 }
