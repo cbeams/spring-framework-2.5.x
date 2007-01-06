@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ import net.sf.hibernate.Query;
 import net.sf.hibernate.Session;
 import net.sf.hibernate.SessionFactory;
 import net.sf.hibernate.Transaction;
+import net.sf.hibernate.cache.HashtableCacheProvider;
+import net.sf.hibernate.cfg.Environment;
 import org.easymock.MockControl;
 
 import org.springframework.beans.factory.BeanFactory;
@@ -1250,6 +1252,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
 		lsfb.setDataSource(ds);
+		// Avoid dependency on EHCache (of which the 1.2.4 version requires JDK 1.4)
+		lsfb.getHibernateProperties().setProperty(Environment.CACHE_PROVIDER, HashtableCacheProvider.class.getName());
 		lsfb.afterPropertiesSet();
 		final SessionFactory sf = (SessionFactory) lsfb.getObject();
 
@@ -1292,6 +1296,8 @@ public class HibernateTransactionManagerTests extends TestCase {
 		
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean();
 		lsfb.setDataSource(ds);
+		// Avoid dependency on EHCache (of which the 1.2.4 version requires JDK 1.4)
+		lsfb.getHibernateProperties().setProperty(Environment.CACHE_PROVIDER, HashtableCacheProvider.class.getName());
 		lsfb.afterPropertiesSet();
 		final SessionFactory sf = (SessionFactory) lsfb.getObject();
 
