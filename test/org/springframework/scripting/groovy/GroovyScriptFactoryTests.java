@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -321,6 +321,10 @@ public final class GroovyScriptFactoryTests extends TestCase {
 	}
 	
 	private void testMetaClass(final String xmlFile) {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
 		// expect the exception we threw in the custom metaclass to show it got invoked
 		new AssertThrows(IllegalStateException.class) {
 			public void test() throws Exception {
