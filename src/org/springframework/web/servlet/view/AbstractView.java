@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,9 +32,8 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContext;
 
 /**
- * Abstract View superclass. Standard framework View implementations and
- * application-specific custom Views can extend this class to simplify
- * their implementation. Subclasses should be JavaBeans, to allow for
+ * Abstract base class for {@link org.springframework.web.servlet.View}
+ * implementations. Subclasses should be JavaBeans, to allow for
  * convenient configuration as Spring-managed bean instances.
  *
  * <p>Provides support for static attributes, to be made available to the view,
@@ -42,9 +41,8 @@ import org.springframework.web.servlet.support.RequestContext;
  * with the given dynamic attributes (the model that the controller returned)
  * for each render operation.
  *
- * <p>Extends WebApplicationObjectSupport, which will be helpful to some views.
- * Handles static attributes, and merging static with dynamic attributes.
- * Subclasses just need to implement the actual rendering.
+ * <p>Extends {@link WebApplicationObjectSupport}, which will be helpful to
+ * some views. Subclasses just need to implement the actual rendering.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -117,38 +115,35 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Return the name of the RequestContext attribute, if any.
 	 */
 	public String getRequestContextAttribute() {
-			return requestContextAttribute;
+		return this.requestContextAttribute;
 	}
-    
+
 	/**
 	 * Set static attributes as a CSV string.
 	 * Format is: attname0={value1},attname1={value1}
 	 */
 	public void setAttributesCSV(String propString) throws IllegalArgumentException {
-		if (propString == null) {
-			// leave static attributes unchanged
-			return;
-		}
+		if (propString != null) {
+			StringTokenizer st = new StringTokenizer(propString, ",");
+			while (st.hasMoreTokens()) {
+				String tok = st.nextToken();
+				int eqIdx = tok.indexOf("=");
+				if (eqIdx == -1) {
+					throw new IllegalArgumentException("Expected = in attributes CSV string '" + propString + "'");
+				}
+				if (eqIdx >= tok.length() - 2) {
+					throw new IllegalArgumentException(
+							"At least 2 characters ([]) required in attributes CSV string '" + propString + "'");
+				}
+				String name = tok.substring(0, eqIdx);
+				String value = tok.substring(eqIdx + 1);
 
-		StringTokenizer st = new StringTokenizer(propString, ",");
-		while (st.hasMoreTokens()) {
-			String tok = st.nextToken();
-			int eqIdx = tok.indexOf("=");
-			if (eqIdx == -1) {
-				throw new IllegalArgumentException("Expected = in attributes CSV string '" + propString + "'");
+				// Delete first and last characters of value: { and }
+				value = value.substring(1);
+				value = value.substring(0, value.length() - 1);
+
+				addStaticAttribute(name, value);
 			}
-			if (eqIdx >= tok.length() - 2) {
-				throw new IllegalArgumentException(
-						"At least 2 characters ([]) required in attributes CSV string '" + propString + "'");
-			}
-			String name = tok.substring(0, eqIdx);
-			String value = tok.substring(eqIdx + 1);
-
-			// celete first and last characters of value: { and }
-			value = value.substring(1);
-			value = value.substring(0, value.length() - 1);
-
-			addStaticAttribute(name, value);
 		}
 	}
 
@@ -162,8 +157,8 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * or a "props" element in XML bean definitions.
 	 * @see org.springframework.beans.propertyeditors.PropertiesEditor
 	 */
-	public void setAttributes(Properties props) {
-		setAttributesMap(props);
+	public void setAttributes(Properties attributes) {
+		setAttributesMap(attributes);
 	}
 
 	/**
@@ -177,11 +172,12 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 			Iterator it = attributes.entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry entry = (Map.Entry) it.next();
-				if (!(entry.getKey() instanceof String)) {
+				Object key = entry.getKey();
+				if (!(key instanceof String)) {
 					throw new IllegalArgumentException(
-							"Illegal attribute key [" + entry.getKey() + "]: only Strings allowed");
+							"Invalid attribute key [" + key + "]: only Strings allowed");
 				}
-				addStaticAttribute((String) entry.getKey(), entry.getValue());
+				addStaticAttribute((String) key, entry.getValue());
 			}
 		}
 	}
@@ -200,8 +196,8 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Add static data to this view, exposed in each view.
 	 * <p>Must be invoked before any calls to <code>render</code>.
-	 * @param name name of attribute to expose
-	 * @param value object to expose
+	 * @param name the name of the attribute to expose
+	 * @param value the attribute value to expose
 	 * @see #render
 	 */
 	public void addStaticAttribute(String name, Object value) {
@@ -235,14 +231,14 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 				" and static attributes " + this.staticAttributes);
 		}
 
-		// consolidate static and dynamic model attributes
+		// Consolidate static and dynamic model attributes.
 		Map mergedModel = new HashMap(this.staticAttributes.size() + (model != null ? model.size() : 0));
 		mergedModel.putAll(this.staticAttributes);
 		if (model != null) {
 			mergedModel.putAll(model);
 		}
 
-		// expose RequestContext?
+		// Expose RequestContext?
 		if (this.requestContextAttribute != null) {
 			mergedModel.put(this.requestContextAttribute, createRequestContext(request, mergedModel));
 		}
