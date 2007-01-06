@@ -24,7 +24,10 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
@@ -50,17 +53,66 @@ import org.apache.commons.logging.LogFactory;
  * @since 05 May 2001
  * @see #forClass(Class)
  */
-final class CachedIntrospectionResults {
+public class CachedIntrospectionResults {
 
 	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
+
+	/**
+	 * Set of ClassLoaders that this CachedIntrospectionResults class will always
+	 * accept classes from, even if the classes do not qualify as cache-safe.
+	 */
+	static final Set acceptedClassLoaders = Collections.synchronizedSet(new HashSet());
 
 	/**
 	 * Map keyed by class containing CachedIntrospectionResults.
 	 * Needs to be a WeakHashMap with WeakReferences as values to allow
 	 * for proper garbage collection in case of multiple class loaders.
 	 */
-	private static final Map classCache = Collections.synchronizedMap(new WeakHashMap());
+	static final Map classCache = Collections.synchronizedMap(new WeakHashMap());
 
+
+	/**
+	 * Accept the given ClassLoader as cache-safe, even if its classes would
+	 * not qualify as cache-safe in this CachedIntrospectionResults class.
+	 * <p>This configuration method is only relevant in scenarios where the Spring
+	 * classes reside in a 'common' ClassLoader (e.g. the system ClassLoader)
+	 * whose lifecycle is not coupled to the application. In such a scenario,
+	 * CachedIntrospectionResults would by default not cache any of the application's
+	 * classes, since they would create a leak in the common ClassLoader.
+	 * <p>Any <code>acceptClassLoader</code> call at application startup should
+	 * be paired with a {@link #clearClassLoader} call at application shutdown.
+	 * @param classLoader the ClassLoader to accept
+	 */
+	public static void acceptClassLoader(ClassLoader classLoader) {
+		if (classLoader != null) {
+			acceptedClassLoaders.add(classLoader);
+		}
+	}
+
+	/**
+	 * Clear the introspection cache for the given ClassLoader, removing the
+	 * introspection results for all classes underneath that ClassLoader,
+	 * and deregistering the ClassLoader (and any of its children) from the
+	 * acceptance list.
+	 * @param classLoader the ClassLoader to clear the cache for
+	 */
+	public static void clearClassLoader(ClassLoader classLoader) {
+		if (classLoader == null) {
+			return;
+		}
+		for (Iterator it = classCache.keySet().iterator(); it.hasNext();) {
+			Class beanClass = (Class) it.next();
+			if (isUnderneathClassLoader(beanClass.getClassLoader(), classLoader)) {
+				it.remove();
+			}
+		}
+		for (Iterator it = acceptedClassLoaders.iterator(); it.hasNext();) {
+			ClassLoader registeredLoader = (ClassLoader) it.next();
+			if (isUnderneathClassLoader(registeredLoader, classLoader)) {
+				it.remove();
+			}
+		}
+	}
 
 	/**
 	 * Create CachedIntrospectionResults for the given bean class.
@@ -68,7 +120,7 @@ final class CachedIntrospectionResults {
 	 * so we can live with doing the occasional unnecessary lookup at startup only.
 	 * @param beanClass the bean class to analyze
 	 */
-	public static CachedIntrospectionResults forClass(Class beanClass) throws BeansException {
+	static CachedIntrospectionResults forClass(Class beanClass) throws BeansException {
 		CachedIntrospectionResults results = null;
 		Object value = classCache.get(beanClass);
 		if (value instanceof Reference) {
@@ -81,14 +133,13 @@ final class CachedIntrospectionResults {
 		if (results == null) {
 			// can throw BeansException
 			results = new CachedIntrospectionResults(beanClass);
-			boolean cacheSafe = isCacheSafe(beanClass);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Class [" + beanClass.getName() + "] is " + (!cacheSafe ? "not " : "") + "cache-safe");
-			}
-			if (cacheSafe) {
+			if (isCacheSafe(beanClass) || isClassLoaderAccepted(beanClass.getClassLoader())) {
 				classCache.put(beanClass, results);
 			}
 			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Not strongly caching class [" + beanClass.getName() + "] because it is not cache-safe");
+				}
 				classCache.put(beanClass, new WeakReference(results));
 			}
 		}
@@ -101,23 +152,65 @@ final class CachedIntrospectionResults {
 	}
 
 	/**
+	 * Check whether this CachedIntrospectionResults class is configured
+	 * to accept the given ClassLoader.
+	 * @param classLoader the ClassLoader to check
+	 * @return whether the given ClassLoader is accepted
+	 * @see #acceptClassLoader
+	 */
+	private static boolean isClassLoaderAccepted(ClassLoader classLoader) {
+		for (Iterator it = acceptedClassLoaders.iterator(); it.hasNext();) {
+			ClassLoader registeredLoader = (ClassLoader) it.next();
+			if (isUnderneathClassLoader(classLoader, registeredLoader)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Check whether the given class is cache-safe,
 	 * i.e. whether it is loaded by the same class loader as the
 	 * CachedIntrospectionResults class or a parent of it.
 	 * <p>Many thanks to Guillaume Poirier for pointing out the
 	 * garbage collection issues and for suggesting this solution.
 	 * @param clazz the class to analyze
-	 * @return whether the given class is thread-safe
 	 */
 	private static boolean isCacheSafe(Class clazz) {
-		ClassLoader cur = CachedIntrospectionResults.class.getClassLoader();
 		ClassLoader target = clazz.getClassLoader();
-		if (target == null || cur == target) {
+		if (target == null) {
+			return false;
+		}
+		ClassLoader cur = CachedIntrospectionResults.class.getClassLoader();
+		if (cur == target) {
 			return true;
 		}
 		while (cur != null) {
 			cur = cur.getParent();
 			if (cur == target) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Check whether the given ClassLoader is underneath the given parent,
+	 * that is, whether the parent is within the candidate's hierarchy.
+	 * @param candidate the candidate ClassLoader to check
+	 * @param parent the parent ClassLoader to check for
+	 */
+	private static boolean isUnderneathClassLoader(ClassLoader candidate, ClassLoader parent) {
+		if (candidate == null) {
+			return false;
+		}
+		if (candidate == parent) {
+			return true;
+		}
+		ClassLoader classLoaderToCheck = candidate;
+		while (classLoaderToCheck != null) {
+			classLoaderToCheck = classLoaderToCheck.getParent();
+			if (classLoaderToCheck == parent) {
 				return true;
 			}
 		}
