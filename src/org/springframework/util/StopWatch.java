@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,20 +48,20 @@ public class StopWatch {
 
 	private boolean keepTaskList = true;
 
-	/** Start time of the current task */
-	private long startTimeMillis;
-
 	/** List of TaskInfo objects */
 	private final List taskList = new LinkedList();
 
-	/** Name of the current task */
-	private String currentTaskName;
+	/** Start time of the current task */
+	private long startTimeMillis;
 
 	/** Is the stop watch currently running? */
 	private boolean running;
 
+	/** Name of the current task */
+	private String currentTaskName;
+
 	private TaskInfo lastTaskInfo;
-	
+
 	private int taskCount;
 
 	/** Total running time */
@@ -85,10 +85,10 @@ public class StopWatch {
 	public StopWatch(String id) {
 		this.id = id;
 	}
-	
+
 	/**
 	 * Determine whether the TaskInfo array is built over time. Set this to
-	 * false when using a StopWatch for millions of intervals, or the task
+	 * "false" when using a StopWatch for millions of intervals, or the task
 	 * info structure will consume excessive memory. Default is "true".
 	 */
 	public void setKeepTaskList(boolean keepTaskList) {
@@ -97,25 +97,34 @@ public class StopWatch {
 
 
 	/**
-	 * Start a named task. The results are undefined if <code>stop</code>
+	 * Start an unnamed task. The results are undefined if {@link #stop()}
+	 * or timing methods are called without invoking this method.
+	 * @see #stop()
+	 */
+	public void start() throws IllegalStateException {
+		start("");
+	}
+
+	/**
+	 * Start a named task. The results are undefined if {@link #stop()}
 	 * or timing methods are called without invoking this method.
 	 * @param taskName the name of the task to start
-	 * @see #stop
+	 * @see #stop()
 	 */
 	public void start(String taskName) throws IllegalStateException {
 		if (this.running) {
 			throw new IllegalStateException("Can't start StopWatch: it's already running");
 		}
 		this.startTimeMillis = System.currentTimeMillis();
-		this.currentTaskName = taskName;
 		this.running = true;
+		this.currentTaskName = taskName;
 	}
 
 	/**
 	 * Stop the current task. The results are undefined if timing
 	 * methods are called without invoking at least one pair
-	 * <code>start</code>/<code>stop</code> methods.
-	 * @see #start
+	 * {@link #start()} / {@link #stop()} methods.
+	 * @see #start()
 	 */
 	public void stop() throws IllegalStateException {
 		if (!this.running) {
