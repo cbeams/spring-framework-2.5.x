@@ -1698,7 +1698,6 @@
 		<javac destdir="${sandbox.target.testclasses.dir}" source="1.5" target="1.5" debug="${debug}"
 				deprecation="false" optimize="false" failonerror="true">
 			<src path="${sandbox.test.dir}"/>
-			<src path="${commons.attributes.tempdir.sandbox.test}"/>
 			<classpath refid="all-libs"/>
 			<classpath location="${target.classes.dir}"/>
 			<classpath location="${sandbox.target.classes.dir}"/>
