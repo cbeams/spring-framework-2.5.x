@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,10 +61,7 @@ public abstract class RequestUtils {
 	public static Integer getIntParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 
-		if (request.getParameter(name) == null) {
-			return null;
-		}
-		return new Integer(getRequiredIntParameter(request, name));
+		return ServletRequestUtils.getIntParameter(request, name);
 	}
 
 	/**
@@ -75,12 +72,7 @@ public abstract class RequestUtils {
 	 * @param defaultVal the default value to use as fallback
 	 */
 	public static int getIntParameter(HttpServletRequest request, String name, int defaultVal) {
-		try {
-			return getRequiredIntParameter(request, name);
-		}
-		catch (ServletRequestBindingException ex) {
-			return defaultVal;
-		}
+		return ServletRequestUtils.getIntParameter(request, name, defaultVal);
 	}
 
 	/**
@@ -89,12 +81,7 @@ public abstract class RequestUtils {
 	 * @param name the name of the parameter with multiple possible values
 	 */
 	public static int[] getIntParameters(HttpServletRequest request, String name) {
-		try {
-			return getRequiredIntParameters(request, name);
-		}
-		catch (ServletRequestBindingException ex) {
-			return new int[0];
-		}
+		return ServletRequestUtils.getIntParameters(request, name);
 	}
 
 	/**
@@ -136,10 +123,7 @@ public abstract class RequestUtils {
 	public static Long getLongParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 
-		if (request.getParameter(name) == null) {
-			return null;
-		}
-		return new Long(getRequiredLongParameter(request, name));
+		return ServletRequestUtils.getLongParameter(request, name);
 	}
 
 	/**
@@ -150,12 +134,7 @@ public abstract class RequestUtils {
 	 * @param defaultVal the default value to use as fallback
 	 */
 	public static long getLongParameter(HttpServletRequest request, String name, long defaultVal) {
-		try {
-			return getRequiredLongParameter(request, name);
-		}
-		catch (ServletRequestBindingException ex) {
-			return defaultVal;
-		}
+		return ServletRequestUtils.getLongParameter(request, name, defaultVal);
 	}
 
 	/**
@@ -164,12 +143,7 @@ public abstract class RequestUtils {
 	 * @param name the name of the parameter with multiple possible values
 	 */
 	public static long[] getLongParameters(HttpServletRequest request, String name) {
-		try {
-			return getRequiredLongParameters(request, name);
-		}
-		catch (ServletRequestBindingException ex) {
-			return new long[0];
-		}
+		return ServletRequestUtils.getLongParameters(request, name);
 	}
 
 	/**
@@ -211,10 +185,7 @@ public abstract class RequestUtils {
 	public static Float getFloatParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 
-		if (request.getParameter(name) == null) {
-			return null;
-		}
-		return new Float(getRequiredFloatParameter(request, name));
+		return ServletRequestUtils.getFloatParameter(request, name);
 	}
 
 	/**
@@ -225,12 +196,7 @@ public abstract class RequestUtils {
 	 * @param defaultVal the default value to use as fallback
 	 */
 	public static float getFloatParameter(HttpServletRequest request, String name, float defaultVal) {
-		try {
-			return getRequiredFloatParameter(request, name);
-		}
-		catch (ServletRequestBindingException ex) {
-			return defaultVal;
-		}
+		return ServletRequestUtils.getFloatParameter(request, name, defaultVal);
 	}
 
 	/**
@@ -239,12 +205,7 @@ public abstract class RequestUtils {
 	 * @param name the name of the parameter with multiple possible values
 	 */
 	public static float[] getFloatParameters(HttpServletRequest request, String name) {
-		try {
-			return getRequiredFloatParameters(request, name);
-		}
-		catch (ServletRequestBindingException ex) {
-			return new float[0];
-		}
+		return ServletRequestUtils.getFloatParameters(request, name);
 	}
 
 	/**
@@ -286,10 +247,7 @@ public abstract class RequestUtils {
 	public static Double getDoubleParameter(HttpServletRequest request, String name)
 			throws ServletRequestBindingException {
 
-		if (request.getParameter(name) == null) {
-			return null;
-		}
-		return new Double(getRequiredDoubleParameter(request, name));
+		return ServletRequestUtils.getDoubleParameter(request, name);
 	}
 
 	/**
@@ -300,12 +258,7 @@ public abstract class RequestUtils {
 	 * @param defaultVal the default value to use as fallback
 	 */
 	public static double getDoubleParameter(HttpServletRequest request, String name, double defaultVal) {
-		try {
-			return getRequiredDoubleParameter(request, name);
-		}
-		catch (ServletRequestBindingException ex) {
-			return defaultVal;
-		}
+		return ServletRequestUtils.getDoubleParameter(request, name, defaultVal);
 	}
 
 	/**
@@ -314,12 +267,7 @@ public abstract class RequestUtils {
 	 * @param name the name of the parameter with multiple possible values
 	 */
 	public static double[] getDoubleParameters(HttpServletRequest request, String name) {
-		try {
-			return getRequiredDoubleParameters(request, name);
-		}
-		catch (ServletRequestBindingException ex) {
-			return new double[0];
-		}
+		return ServletRequestUtils.getDoubleParameters(request, name);
 	}
 
 	/**
@@ -379,6 +327,9 @@ public abstract class RequestUtils {
 	 * @param defaultVal the default value to use as fallback
 	 */
 	public static boolean getBooleanParameter(HttpServletRequest request, String name, boolean defaultVal) {
+		if (request.getParameter(name) == null) {
+			return defaultVal;
+		}
 		try {
 			return getRequiredBooleanParameter(request, name);
 		}
@@ -474,6 +425,9 @@ public abstract class RequestUtils {
 	 * @param defaultVal the default value to use as fallback
 	 */
 	public static String getStringParameter(HttpServletRequest request, String name, String defaultVal) {
+		if (request.getParameter(name) == null) {
+			return defaultVal;
+		}
 		try {
 			return getRequiredStringParameter(request, name);
 		}
