@@ -73,8 +73,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - EasyMock 1.2 (JDK 1.3 version) (http://www.easymock.org)
 - required for building and running the framework test suite
 
-* ehcache/ehcache-1.2.3.jar
-- EHCache 1.2.3 (http://ehcache.sourceforge.net)
+* ehcache/ehcache-1.2.4.jar
+- EHCache 1.2.4 (http://ehcache.sourceforge.net)
 - required for building the framework
 - required at runtime when using Spring's EHCache support
 - required for running PetClinic (by Hibernate)
@@ -126,8 +126,8 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required for building the framework
 - required at runtime when using Spring's iBATIS SQL Maps 2.x support
 
-* itext/itext-1.3.jar
-- iText PDF 1.3 (http://www.lowagie.com/itext)
+* itext/itext-1.4.8.jar
+- iText PDF 1.4.8 (http://www.lowagie.com/itext)
 - required for building the framework
 - required at runtime when using Spring's AbstractPdfView
 
@@ -230,7 +230,7 @@ is only necessary if you want to rebuild the Spring jars including the AspectJ a
 - required at runtime when using Spring's CommonsMultipartResolver (by Commons FileUpload)
 
 * jakarta-commons/commons-javaflow.jar
-- Commons JavaFlow 20060411 (taken from JasperReports 1.2.5 distribution)
+- Commons JavaFlow 20060411 (taken from JasperReports 1.2.8 distribution)
 - required at runtime when using Spring's JasperReports support (by JasperReports)
 
 * jakarta-commons/commons-lang.jar
