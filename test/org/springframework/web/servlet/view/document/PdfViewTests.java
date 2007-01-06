@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.view.document;
 
 import java.io.ByteArrayOutputStream;
@@ -39,7 +40,6 @@ public class PdfViewTests extends TestCase {
 
 	public void testPdf() throws Exception {
 		final String text = "this should be in the PDF";
-
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -52,7 +52,6 @@ public class PdfViewTests extends TestCase {
 
 		pdfView.render(new HashMap(), request, response);
 		byte[] pdfContent = response.getContentAsByteArray();
-
 		assertEquals("correct response content type", "application/pdf", response.getContentType());
 		assertEquals("correct response content length", pdfContent.length, response.getContentLength());
 
@@ -65,7 +64,6 @@ public class PdfViewTests extends TestCase {
 		document.add(new Paragraph(text));
 		document.close();
 		byte[] baosContent = baos.toByteArray();
-
 		assertEquals("correct size", pdfContent.length, baosContent.length);
 
 		int diffCount = 0;
@@ -74,7 +72,6 @@ public class PdfViewTests extends TestCase {
 				diffCount++;
 			}
 		}
-
 		assertTrue("difference only in encryption", diffCount < 70);
 	}
 
