@@ -3,15 +3,21 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.2 (5.1.2007)
+Changes in version 2.0.2 (8.1.2007)
 -----------------------------------
 
 General
 * fixed spring-beans.jar to not include "META-INF/aop.xml", "META-INF/spring.tld" and "META-INF/spring-form.tld" anymore
+* leverage the "trace" log level in the Spring core, to make activating the "debug" log level more bearable
 
 Package org.springframework.aop
+* AbstractRegexpMethodPointcut trims whitespace from passed-in "patterns" and "excludedPatterns"
+* fixed AbstractAutoProxyCreator to allow for proxying the same bean with multiple auto proxy creators (again)
+* BeanNameAutoProxyCreator trims whitespace from passed-in "beanNames"
 * ScopedProxyFactoryBean throws IllegalStateException if it couldn't determine the type of the target bean (avoid NPE)
 * "scoped-proxy" tag works for non-singleton FactoryBeans as well, leveraging the BeanFactory's improved type check
+* factored out BeanFactoryAdvisorRetrievalHelper from AbstractAdvisorAutoProxyCreator
+* factored out BeanFactoryAspectJAdvisorsBuilder from AnnotationAwareAspectJAutoProxyCreator
 
 Package org.springframework.beans
 * BeanWrapper interface extends TypeConverter interface, instead of just BeanWrapperImpl implementing TypeConverter
@@ -20,21 +26,33 @@ Package org.springframework.beans
 * BeanWrapperImpl assigns a given array directly if component type matches and no matching custom editors registered
 * added default editor for JDK 1.4's "java.net.URI" class, supporting "classpath:" pseudo URLs as well as general URIs
 * ResourceEditorRegistrar always registers ClassEditor for given ResourceLoader's ClassLoader
+* added "originalBeanName(String)" method to BeanFactoryUtils, allowing to cut off a generated "#..." suffix
+* FieldRetrievingFactoryBean and PropertyPathFactoryBean extract the original bean name for their beanName-based syntax
 * refined currently-in-creation check for lazy-init singletons, to avoid unintended BeanCurrentlyInCreationException
 * DefaultSingletonBeanRegistry and subclasses use unified mutex for singleton access, to avoid potential for deadlocks
 * AbstractBeanFactory caches merged bean definitions with bean definition identity as key (to avoid bean name conflicts)
 * AbstractAutowireCapableBeanFactory caches "isExcludedFromDependencyCheck" results for affected PropertyDescriptors
 * AbstractAutowireCapableBeanFactory provides two-step FactoryBean type check for non-singleton FactoryBeans as well
+* fixed AbstractAutowireCapableBeanFactory to only apply injection-before-wrapping check for singletons
 * DefaultListableBeanFactory avoids expensive dependency check preparations unless an actual dependency check is needed
 * ResourceEntityResolver catches any kind of Exception in system root URL check (in particular AccessControlException)
 * introduced XmlBeanDefinitionStoreException, with special support for SAXParseException and its location information
+* XmlBeanDefinitionReader chooses XSD validation if XmlValidationModeDetector indicates AUTO (= no clear indication)
 * XML bean "id" and "name" (aliases) are allowed to define the same name (for backwards compatibility with Spring 1.2.8)
 * BeanDefinitionDecorators are applied to inner beans as well (in particular: "p:" namespace works for inner beans now)
+* fixed AbstractBeanDefinitionParser and UtilNamespaceHandler to consistently use ProblemReporter instead of exceptions
+* added "fatal" method to ProblemReporter, used by NamespaceHandlerSupport to report a missing parser or decorator
+* added "defaultsRegistered" notification to ReaderEventListener, with DefaultsDefinition marker interface as argument
+* reworked BeanDefinitionParserDelegate to build and hold a DocumentDefaultsDefinition instance, also firing an event
+* BeanDefinitionParserDelegate/AbstractBeanDefinitionParser report bean name generation failure through ProblemReporter
+* DefaultBeanDefinitioDocumentReader reports alias registration failure through ProblemReporter
 
 Package org.springframework.context
 * AbstractApplicationContext explicitly stops all Lifecycle Beans before destroying them one-by-one (to avoid delays)
 
 Package org.springframework.core
+* Conventions (as used by ModelMap) extracts inner class name for inner classes
+* Conventions (as used by ModelMap) extracts primary interface name for JDK proxies
 * LocalVariableTableParameterNameDiscoverer uses current ClassLoader for ASM analysis (not the system ClassLoader)
 * PathMatchingResourcePatternResolver properly handles jar file roots returned by the ClassLoader (e.g. on Resin)
 
@@ -49,6 +67,9 @@ Package org.springframework.jdbc
 * SqlQuery's "findObject" explicitly uses "singleResult" to never accept more than 1 row in result (as per its contract)
 
 Package org.springframework.jms
+* introduced SmartConnectionFactory interface and "ConnectionFactoryUtils.releaseConnection" method
+* introduced DelegatingConnectionFactory, configuring whether a Connection should be stopped before closing it
+* JmsTemplate/DefaultMessageListenerContainer do *not* explicitly stop their Connections by default anymore (see above)
 * added "transactionName" property to DefaultMessageListenerContainer (in particular for WebLogic's tx monitoring)
 * fixed JmsInvokerClientInterceptor to always explicitly start its Connection (not rely on pre-started Connections)
 
@@ -69,6 +90,9 @@ Package org.springframework.orm
 * PersistenceAnnotationBeanPostProcessor allows for specifying JNDI names for persistence units and persistence contexts
 * OpenXxxInViewFilters reobtain thread-bound holder for closing it, to allow for replacing the holder during a request
 
+Package org.springframework.remoting
+* RmiServiceExporter logs description of actual registry instead of port (to properly handle passed-in "registry")
+
 Package org.springframework.samples
 * cleaned up platform/login configuration in PetClinic's TopLink variant
 
@@ -77,12 +101,21 @@ Package org.springframework.scheduling
 * reworked Quartz SpringBeanJobFactory's "ignoredUnknownProperties" into a String array of unknown properties to ignore
 * CommonJ TimerManagerFactoryBean supports Lifecycle interface, suspending/resuming its TimerManager accordingly
 * CommonJ TimerManagerFactoryBean explicitly stops its TimerManager on destroy, not relying on J2EE application shutdown
+* added "shared" flag to CommonJ TimerManagerFactoryBean, to suppress suspend/resume/stop calls in case of a shared TM
 
 Package org.springframework.scripting
-* fixed JRubyScriptFactory to correctly wrap Java objects that get passed into a JRuby script proxy
+* updated Groovy support to Groovy 1.0 final
 * added optional GroovyObjectCustomizer constructor arg to GroovyScriptFactory, to allow for setting a custom MetaClass
+* updated JRuby support to JRuby 0.9.2 (not compatible with previous JRuby versions anymore!)
+* fixed JRubyScriptFactory to correctly wrap Java objects that get passed into a JRuby script proxy
+* fixed JRubyScriptFactory's "findClassNode" to always cast the correct object
+
+Package org.springframework.test
+* added public "getApplicationContext()" method to AbstractSingleSpringContextTests
+* added public "getJdbcTemplate()" method to AbstractTransactionalDataSourceSpringContextTests
 
 Package org.springframework.transaction
+* AbstractPlatformTransactionManager logs full transaction definition when creating a new transaction
 * added "defaultTimeout" property to AbstractPlatformTransactionManager
 
 Package org.springframework.ui
@@ -90,11 +123,21 @@ Package org.springframework.ui
 
 Package org.springframework.util
 * added "hasConstructor" and "getConstructorIfAvailable" methods to ClassUtils
+* ClassUtils's "getAllInterfaces"/"getAllInterfacesForClass" preserves interface definition order in the result array
+* fixed AntPathMatcher's "extractPathWithinPattern" to correctly extract paths that have fewer parts than the pattern
+* XmlValidationModeDetector returns VALIDATION_AUTO if it encounters a CharConversionException
+
+Package org.springframework.validation
+* added "prefix" property and "postProcessMessageCode" template method to DefaultMessageCodesResolver
 
 Package org.springframework.web
+* AbstractUrlHandlerMapping exposes PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE for default handler as well
 * extracted "getViewNameForUrlPath(String)" in UrlFilenameViewController, for full compatibility with Spring 1.2.8
 * added "alwaysInclude" bean property to InternalResourceView, for enforcing the use of an include (never a forward)
 * AbstractJasperReportsView automatically converts exporter parameter Strings that start with a digit into Integers
+* added "getCompletePath()" method to AbstractDataBoundFormElementTag, esposing nested path concatenated with path
+* fixed ErrorsTag to use complete path as id, including the nested path
+* removed unnecessary setter assertions for optional properties in FormTag and InputTag
 
 
 Changes in version 2.0.1 (23.11.2006)
