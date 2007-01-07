@@ -34,14 +34,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Class to cache PropertyDescriptor information for a Java class.
- * Package-visible; not for use by application code.
+ * Internal class to cache JavaBean PropertyDescriptor information for a Java class.
+ * Not intended for direct use by application code.
  *
  * <p>Necessary as <code>Introspector.getBeanInfo()</code> in JDK 1.3 will return a
  * new deep copy of the BeanInfo every time we ask for it. We take the opportunity
  * to cache property descriptors by method name for fast lookup. Furthermore,
  * we do our own caching of descriptors here, rather than rely on the JDK's
- * system-wide BeanInfo cache (to avoid leaks on class loader shutdown).
+ * system-wide BeanInfo cache (to avoid leaks on ClassLoader shutdown).
  *
  * <p>Information is cached statically, so we don't need to create new
  * objects of this class for every JavaBean we manipulate. Hence, this class
@@ -51,6 +51,8 @@ import org.apache.commons.logging.LogFactory;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 05 May 2001
+ * @see #acceptClassLoader(ClassLoader)
+ * @see #clearClassLoader(ClassLoader)
  * @see #forClass(Class)
  */
 public class CachedIntrospectionResults {
