@@ -107,14 +107,14 @@
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
-	
+
 	<xsd:complexType name="customizableScriptType">
 		<xsd:complexContent>
 			<xsd:extension base="simpleScriptType">
 				<xsd:attribute name="customizer-ref">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
-	Reference to GroovyObjectCustomizer or similar customizer bean
+	Reference to a GroovyObjectCustomizer or similar customizer bean.
 						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:attribute>
