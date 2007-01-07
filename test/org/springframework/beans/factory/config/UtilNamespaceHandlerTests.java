@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.config;
 
+import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -47,7 +48,7 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setEventListener(this.listener);
 		reader.loadBeanDefinitions(new ClassPathResource("testUtilNamespace.xml", getClass()));
-		assertEquals(13, this.beanFactory.getBeanDefinitionCount());
+		assertEquals(18, this.beanFactory.getBeanDefinitionCount());
 	}
 
 	public void testLoadProperties() throws Exception {
@@ -145,6 +146,82 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		Map map = bean.getSomeMap();
 		assertEquals(1, map.size());
 		assertEquals(min, map.get("min"));
+	}
+
+	public void testCircularCollections() throws Exception {
+		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionsBean");
+
+		List list = bean.getSomeList();
+		assertEquals(1, list.size());
+		assertEquals(bean, list.get(0));
+
+		Set set = bean.getSomeSet();
+		assertEquals(1, set.size());
+		assertTrue(set.contains(bean));
+
+		Map map = bean.getSomeMap();
+		assertEquals(1, map.size());
+		assertEquals(bean, map.get("foo"));
+	}
+
+	public void testCircularCollectionBeansStartingWithList() throws Exception {
+		this.beanFactory.getBean("circularList");
+		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
+
+		List list = bean.getSomeList();
+		assertTrue(Proxy.isProxyClass(list.getClass()));
+		assertEquals(1, list.size());
+		assertEquals(bean, list.get(0));
+
+		Set set = bean.getSomeSet();
+		assertFalse(Proxy.isProxyClass(set.getClass()));
+		assertEquals(1, set.size());
+		assertTrue(set.contains(bean));
+
+		Map map = bean.getSomeMap();
+		assertFalse(Proxy.isProxyClass(map.getClass()));
+		assertEquals(1, map.size());
+		assertEquals(bean, map.get("foo"));
+	}
+
+	public void testCircularCollectionBeansStartingWithSet() throws Exception {
+		this.beanFactory.getBean("circularSet");
+		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
+
+		List list = bean.getSomeList();
+		assertFalse(Proxy.isProxyClass(list.getClass()));
+		assertEquals(1, list.size());
+		assertEquals(bean, list.get(0));
+
+		Set set = bean.getSomeSet();
+		assertTrue(Proxy.isProxyClass(set.getClass()));
+		assertEquals(1, set.size());
+		assertTrue(set.contains(bean));
+
+		Map map = bean.getSomeMap();
+		assertFalse(Proxy.isProxyClass(map.getClass()));
+		assertEquals(1, map.size());
+		assertEquals(bean, map.get("foo"));
+	}
+
+	public void testCircularCollectionBeansStartingWithMap() throws Exception {
+		this.beanFactory.getBean("circularMap");
+		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
+
+		List list = bean.getSomeList();
+		assertFalse(Proxy.isProxyClass(list.getClass()));
+		assertEquals(1, list.size());
+		assertEquals(bean, list.get(0));
+
+		Set set = bean.getSomeSet();
+		assertFalse(Proxy.isProxyClass(set.getClass()));
+		assertEquals(1, set.size());
+		assertTrue(set.contains(bean));
+
+		Map map = bean.getSomeMap();
+		assertTrue(Proxy.isProxyClass(map.getClass()));
+		assertEquals(1, map.size());
+		assertEquals(bean, map.get("foo"));
 	}
 
 	public void testNestedInConstructor() throws Exception {

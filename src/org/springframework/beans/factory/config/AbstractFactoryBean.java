@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,11 @@
 
 package org.springframework.beans.factory.config;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -25,11 +30,10 @@ import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * Simple template superclass for {@link FactoryBean}
- * implementations that creates a singleton or a prototype object,
- * depending on a flag.
+ * Simple template superclass for {@link FactoryBean} implementations that
+ * creates a singleton or a prototype object, depending on a flag.
  *
- * <p>If the "singleton" flag is <code>true</code>  (the default),
+ * <p>If the "singleton" flag is <code>true</code> (the default),
  * this class will create the object that it creates exactly once
  * on initialization and subsequently return said singleton instance
  * on all calls to the {@link #getObject()} method.
@@ -56,6 +60,8 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 
 	private Object singletonInstance;
 
+	private Object earlySingletonInstance;
+
 
 	/**
 	 * Set if a singleton should be created, or a new object
@@ -66,35 +72,88 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 	}
 
 	public boolean isSingleton() {
-		return singleton;
+		return this.singleton;
 	}
 
+	/**
+	 * Eagerly create the singleton instance, if necessary.
+	 */
 	public void afterPropertiesSet() throws Exception {
-		if (this.singleton) {
+		if (isSingleton()) {
 			this.initialized = true;
 			this.singletonInstance = createInstance();
+			this.earlySingletonInstance = null;
 		}
 	}
 
 
+	/**
+	 * Expose the singleton instance or create a new prototype instance.
+	 * @see #createInstance()
+	 * @see #getEarlySingletonInterfaces()
+	 */
 	public final Object getObject() throws Exception {
-		if (this.singleton) {
-			if (!this.initialized) {
-				throw new FactoryBeanNotInitializedException();
-			}
-			return this.singletonInstance;
+		if (isSingleton()) {
+			return (!this.initialized ? getEarlySingletonInstance() : getSingletonInstance());
 		}
 		else {
 			return createInstance();
 		}
 	}
 
+	/**
+	 * Determine an 'eager singleton' instance, exposed in case of a
+	 * circular reference. Not called in a non-circular scenario.
+	 */
+	private Object getEarlySingletonInstance() throws Exception {
+		Class[] ifcs = getEarlySingletonInterfaces();
+		if (ifcs == null) {
+			throw new FactoryBeanNotInitializedException(
+					getClass().getName() + " does not support circular references");
+		}
+		if (this.earlySingletonInstance == null) {
+			this.earlySingletonInstance = Proxy.newProxyInstance(getClass().getClassLoader(), ifcs,
+				new InvocationHandler() {
+					public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+						try {
+							return method.invoke(getSingletonInstance(), args);
+						}
+						catch (InvocationTargetException ex) {
+							throw ex.getTargetException();
+						}
+					}
+				});
+		}
+		return this.earlySingletonInstance;
+	}
+
+	/**
+	 * Expose the singleton instance, if any.
+	 */
+	private Object getSingletonInstance() {
+		return this.singletonInstance;
+	}
+
+	/**
+	 * Destroy the singleton instance, if any.
+	 * @see #destroyInstance(Object)
+	 */
 	public void destroy() throws Exception {
-		if (this.singleton) {
+		if (isSingleton()) {
 			destroyInstance(this.singletonInstance);
 		}
 	}
 
+
+	/**
+	 * This abstract method declaration shadows the method in the FactoryBean interface.
+	 * This is necessary to make the <code>getEarlySingletonInterfaces</code> implementation
+	 * in this class work on Sun's JDK 1.3 classic VM, which can't find the method
+	 * when executing <code>getEarlySingletonInterfaces</code> else.
+	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
+	 * @see #getEarlySingletonInterfaces()
+	 */
+	public abstract Class getObjectType();
 
 	/**
 	 * Template method that subclasses must override to construct
@@ -106,6 +165,23 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 	 * @see #getObject()
 	 */
 	protected abstract Object createInstance() throws Exception;
+
+	/**
+	 * Return an array of interfaces that a singleton object exposed by this
+	 * FactoryBean is supposed to implement, for use with an 'early singleton
+	 * proxy' that will be exposed in case of a circular reference.
+	 * <p>The default implementation returns this FactoryBean's object type,
+	 * provided that it is an interface, or <code>null</code> else. The latter
+	 * indicates that early singleton access is not supported by this FactoryBean.
+	 * This will lead to a FactoryBeanNotInitializedException getting thrown.
+	 * @return the interfaces to use for 'early singletons',
+	 * or <code>null</code> to indicate a FactoryBeanNotInitializedException
+	 * @see org.springframework.beans.factory.FactoryBeanNotInitializedException
+	 */
+	protected Class[] getEarlySingletonInterfaces() {
+		Class type = getObjectType();
+		return (type != null && type.isInterface() ? new Class[] {type} : null);
+	}
 
 	/**
 	 * Callback for destroying a singleton instance. Subclasses may
