@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.support.RemoteInvocation;
@@ -61,11 +62,13 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * @see java.rmi.server.RMIClassLoader
  */
 public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
-		implements MethodInterceptor, HttpInvokerClientConfiguration {
+		implements MethodInterceptor, HttpInvokerClientConfiguration, BeanClassLoaderAware {
 
 	private String codebaseUrl;
 
-	private HttpInvokerRequestExecutor httpInvokerRequestExecutor = new SimpleHttpInvokerRequestExecutor();
+	private HttpInvokerRequestExecutor httpInvokerRequestExecutor;
+
+	private ClassLoader beanClassLoader;
 
 
 	/**
@@ -88,7 +91,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	 * Return the codebase URL to download classes from if not found locally.
 	 */
 	public String getCodebaseUrl() {
-		return codebaseUrl;
+		return this.codebaseUrl;
 	}
 
 	/**
@@ -107,7 +110,21 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	 * Return the HttpInvokerRequestExecutor used by this remote accessor.
 	 */
 	public HttpInvokerRequestExecutor getHttpInvokerRequestExecutor() {
-		return httpInvokerRequestExecutor;
+		return this.httpInvokerRequestExecutor;
+	}
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
+	public void afterPropertiesSet() {
+		super.afterPropertiesSet();
+
+		if (this.httpInvokerRequestExecutor == null) {
+			SimpleHttpInvokerRequestExecutor executor = new SimpleHttpInvokerRequestExecutor();
+			executor.setBeanClassLoader(this.beanClassLoader);
+			this.httpInvokerRequestExecutor = executor;
+		}
 	}
 
 

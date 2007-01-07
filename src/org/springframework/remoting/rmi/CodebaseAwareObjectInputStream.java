@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,18 +54,36 @@ import org.springframework.util.ClassUtils;
  */
 public class CodebaseAwareObjectInputStream extends ObjectInputStream {
 
+	private final ClassLoader classLoader;
+
 	private final String codebaseUrl;
 
 
 	/**
 	 * Create a new CodebaseAwareObjectInputStream for the given InputStream and codebase.
-	 * @param	in input stream to read from
+	 * @param	in the InputStream to read from
 	 * @param codebaseUrl the codebase URL to load classes from if not found locally
 	 * (can consist of multiple URLs, separated by spaces)
 	 * @see java.io.ObjectInputStream#ObjectInputStream(java.io.InputStream)
 	 */
 	public CodebaseAwareObjectInputStream(InputStream in, String codebaseUrl) throws IOException {
+		this(in, null, codebaseUrl);
+	}
+
+	/**
+	 * Create a new CodebaseAwareObjectInputStream for the given InputStream and codebase.
+	 * @param	in the InputStream to read from
+	 * @param classLoader the ClassLoader to use for loading local classes
+	 * (may be <code>null</code> to indicate RMI's default ClassLoader)
+	 * @param codebaseUrl the codebase URL to load classes from if not found locally
+	 * (can consist of multiple URLs, separated by spaces)
+	 * @see java.io.ObjectInputStream#ObjectInputStream(java.io.InputStream)
+	 */
+	public CodebaseAwareObjectInputStream(
+			InputStream in, ClassLoader classLoader, String codebaseUrl) throws IOException {
+
 		super(in);
+		this.classLoader = classLoader;
 		this.codebaseUrl = codebaseUrl;
 	}
 
@@ -76,7 +94,14 @@ public class CodebaseAwareObjectInputStream extends ObjectInputStream {
 	 */
 	protected Class resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
 		try {
-			return super.resolveClass(classDesc);
+			if (this.classLoader != null) {
+				// Use the specified ClassLoader to resolve local classes.
+				return this.classLoader.loadClass(classDesc.getName());
+			}
+			else {
+				// Let RMI use it's default ClassLoader...
+				return super.resolveClass(classDesc);
+			}
 		}
 		catch (ClassNotFoundException ex) {
 			// Explicitly resolve primitive class name.
@@ -100,21 +125,43 @@ public class CodebaseAwareObjectInputStream extends ObjectInputStream {
 	 * falling back to the specified codebase if not found locally.
 	 */
 	protected Class resolveProxyClass(String[] interfaces) throws IOException, ClassNotFoundException {
-		try {
-			return super.resolveProxyClass(interfaces);
-		}
-		catch (ClassNotFoundException ex) {
-			if (this.codebaseUrl == null) {
-				throw ex;
-			}
-			ClassLoader loader = RMIClassLoader.getClassLoader(this.codebaseUrl);
-			// First resolve the interface names to Class objects, and then
-			// get the proxy class defined in the chosen class loader.
-			Class[] classObjs = new Class[interfaces.length];
+		if (this.classLoader != null) {
+			// Use the specified ClassLoader to resolve local proxy classes.
+			Class[] resolvedInterfaces = new Class[interfaces.length];
 			for (int i = 0; i < interfaces.length; i++) {
-				classObjs[i] = Class.forName(interfaces[i], false, loader);
+				try {
+					resolvedInterfaces[i] = this.classLoader.loadClass(interfaces[i]);
+				}
+				catch (ClassNotFoundException ex) {
+					if (this.codebaseUrl == null) {
+						throw ex;
+					}
+					resolvedInterfaces[i] = RMIClassLoader.loadClass(this.codebaseUrl, interfaces[i]);
+				}
 			}
-			return Proxy.getProxyClass(loader, classObjs);
+			try {
+				return Proxy.getProxyClass(this.classLoader, resolvedInterfaces);
+			}
+			catch (IllegalArgumentException ex) {
+				throw new ClassNotFoundException(null, ex);
+			}
+		}
+		else {
+			// Let RMI use it's default ClassLoader...
+			try {
+				return super.resolveProxyClass(interfaces);
+			}
+			catch (ClassNotFoundException ex) {
+				if (this.codebaseUrl == null) {
+					throw ex;
+				}
+				ClassLoader loader = RMIClassLoader.getClassLoader(this.codebaseUrl);
+				Class[] resolvedInterfaces = new Class[interfaces.length];
+				for (int i = 0; i < interfaces.length; i++) {
+					resolvedInterfaces[i] = loader.loadClass(interfaces[i]);
+				}
+				return Proxy.getProxyClass(loader, resolvedInterfaces);
+			}
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.rmi.RemoteException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.remoting.rmi.CodebaseAwareObjectInputStream;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationResult;
@@ -42,7 +43,8 @@ import org.springframework.util.Assert;
  * @since 1.1
  * @see #doExecuteRequest
  */
-public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerRequestExecutor {
+public abstract class AbstractHttpInvokerRequestExecutor
+		implements HttpInvokerRequestExecutor, BeanClassLoaderAware {
 
 	/**
 	 * Default content type: "application/x-java-serialized-object"
@@ -72,13 +74,15 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 
 	private boolean acceptGzipEncoding = true;
 
+	private ClassLoader beanClassLoader;
+
 
 	/**
 	 * Specify the content type to use for sending HTTP invoker requests.
 	 * <p>Default is "application/x-java-serialized-object".
 	 */
 	public void setContentType(String contentType) {
-		Assert.notNull(contentType, "contentType must not be null");
+		Assert.notNull(contentType, "'contentType' must not be null");
 		this.contentType = contentType;
 	}
 
@@ -86,7 +90,7 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	 * Return the content type to use for sending HTTP invoker requests.
 	 */
 	public String getContentType() {
-		return contentType;
+		return this.contentType;
 	}
 
 	/**
@@ -104,7 +108,18 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	 * send the HTTP "Accept-Encoding" header with "gzip" as value.
 	 */
 	public boolean isAcceptGzipEncoding() {
-		return acceptGzipEncoding;
+		return this.acceptGzipEncoding;
+	}
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
+	/**
+	 * Return the bean ClassLoader that this executor is supposed to use.
+	 */
+	protected ClassLoader getBeanClassLoader() {
+		return this.beanClassLoader;
 	}
 
 
@@ -256,7 +271,7 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	 * @see org.springframework.remoting.rmi.CodebaseAwareObjectInputStream
 	 */
 	protected ObjectInputStream createObjectInputStream(InputStream is, String codebaseUrl) throws IOException {
-		return new CodebaseAwareObjectInputStream(is, codebaseUrl);
+		return new CodebaseAwareObjectInputStream(is, getBeanClassLoader(), codebaseUrl);
 	}
 
 	/**
