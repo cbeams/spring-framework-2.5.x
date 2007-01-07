@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@ package org.springframework.remoting.support;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * Abstract base class for remote service accessors that are based on
- * serialization of RemoteInvocation objects. Provides a "remoteInvocationFactory"
- * property, with a DefaultRemoteInvocationFactory as default.
+ * Abstract base class for remote service accessors that are based on serialization
+ * of {@link RemoteInvocation} objects. Provides a "remoteInvocationFactory" property,
+ * with a {@link DefaultRemoteInvocationFactory} as default.
  *
  * @author Juergen Hoeller
  * @since 1.1
+ * @see #setRemoteInvocationFactory
+ * @see RemoteInvocation
  * @see RemoteInvocationFactory
  * @see DefaultRemoteInvocationFactory
  */
@@ -35,7 +37,7 @@ public abstract class RemoteInvocationBasedAccessor extends UrlBasedRemoteAccess
 
 	/**
 	 * Set the RemoteInvocationFactory to use for this accessor.
-	 * Default is a DefaultRemoteInvocationFactory.
+	 * Default is a {@link DefaultRemoteInvocationFactory}.
 	 * <p>A custom invocation factory can add further context information
 	 * to the invocation, for example user credentials.
 	 */
@@ -48,7 +50,7 @@ public abstract class RemoteInvocationBasedAccessor extends UrlBasedRemoteAccess
 	 * Return the RemoteInvocationFactory used by this accessor.
 	 */
 	public RemoteInvocationFactory getRemoteInvocationFactory() {
-		return remoteInvocationFactory;
+		return this.remoteInvocationFactory;
 	}
 
 	/**
@@ -67,14 +69,14 @@ public abstract class RemoteInvocationBasedAccessor extends UrlBasedRemoteAccess
 	}
 
 	/**
-	 * Recreate the invocation result contained in the given RemoteInvocationResult
-	 * object. The default implementation calls the default recreate method.
+	 * Recreate the invocation result contained in the given RemoteInvocationResult object.
+	 * The default implementation calls the default <code>recreate</code> method.
 	 * <p>Can be overridden in subclass to provide custom recreation, potentially
 	 * processing the returned result object.
 	 * @param result the RemoteInvocationResult to recreate
 	 * @return a return value if the invocation result is a successful return
 	 * @throws Throwable if the invocation result is an exception
-	 * @see org.springframework.remoting.support.RemoteInvocationResult#recreate()
+	 * @see RemoteInvocationResult#recreate()
 	 */
 	protected Object recreateRemoteInvocationResult(RemoteInvocationResult result) throws Throwable {
 		return result.recreate();
