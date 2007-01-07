@@ -321,7 +321,7 @@ class TypeConverterDelegate {
 		Iterator it = null;
 		try {
 			convertedCopy =
-					CollectionFactory.createApproximateCollection(original.getClass(), original.size());
+					CollectionFactory.createApproximateCollection(original, original.size());
 			it = original.iterator();
 		}
 		catch (Throwable ex) {
@@ -360,7 +360,7 @@ class TypeConverterDelegate {
 		Map convertedCopy = null;
 		Iterator it = null;
 		try {
-			convertedCopy = CollectionFactory.createApproximateMap(original.getClass(), original.size());
+			convertedCopy = CollectionFactory.createApproximateMap(original, original.size());
 			it = original.entrySet().iterator();
 		}
 		catch (Throwable ex) {

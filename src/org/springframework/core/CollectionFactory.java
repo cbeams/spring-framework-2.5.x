@@ -39,7 +39,6 @@ import org.apache.commons.collections.set.ListOrderedSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -177,23 +176,22 @@ public abstract class CollectionFactory {
 
 
 	/**
-	 * Create the most approximate collection for the given collection class.
+	 * Create the most approximate collection for the given collection.
 	 * <p>Creates an ArrayList, TreeSet or linked Set for a List, SortedSet
 	 * or Set, respectively.
-	 * @param collectionClass the original collection class
+	 * @param collection the original collection object
 	 * @param initialCapacity the initial capacity
 	 * @return the new collection instance
 	 * @see java.util.ArrayList
 	 * @see java.util.TreeSet
 	 * @see #createLinkedSetIfPossible
 	 */
-	public static Collection createApproximateCollection(Class collectionClass, int initialCapacity) {
-		Assert.notNull(collectionClass, "Collection class must not be null");
-		if (List.class.isAssignableFrom(collectionClass)) {
+	public static Collection createApproximateCollection(Object collection, int initialCapacity) {
+		if (collection instanceof List) {
 			return new ArrayList(initialCapacity);
 		}
-		else if (SortedSet.class.isAssignableFrom(collectionClass)) {
-			return new TreeSet();
+		else if (collection instanceof SortedSet) {
+			return new TreeSet(((SortedSet) collection).comparator());
 		}
 		else {
 			return createLinkedSetIfPossible(initialCapacity);
@@ -201,19 +199,17 @@ public abstract class CollectionFactory {
 	}
 
 	/**
-	 * Create the most approximate map for the given map class.
+	 * Create the most approximate map for the given map.
 	 * <p>Creates a TreeMap or linked Map for a SortedMap or Map, respectively.
-	 * @param mapClass the original map class
+	 * @param map the original map object
 	 * @param initialCapacity the initial capacity
 	 * @return the new collection instance
-	 * @see java.util.ArrayList
-	 * @see java.util.TreeSet
-	 * @see #createLinkedSetIfPossible
+	 * @see java.util.TreeMap
+	 * @see #createLinkedMapIfPossible
 	 */
-	public static Map createApproximateMap(Class mapClass, int initialCapacity) {
-		Assert.notNull(mapClass, "Map class must not be null");
-		if (SortedMap.class.isAssignableFrom(mapClass)) {
-			return new TreeMap();
+	public static Map createApproximateMap(Object map, int initialCapacity) {
+		if (map instanceof SortedMap) {
+			return new TreeMap(((SortedMap) map).comparator());
 		}
 		else {
 			return createLinkedMapIfPossible(initialCapacity);
