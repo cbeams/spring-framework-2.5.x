@@ -271,15 +271,15 @@ public class CachedIntrospectionResults {
 		}
 	}
 
-	public BeanInfo getBeanInfo() {
+	BeanInfo getBeanInfo() {
 		return this.beanInfo;
 	}
 
-	public Class getBeanClass() {
+	Class getBeanClass() {
 		return this.beanInfo.getBeanDescriptor().getBeanClass();
 	}
 
-	public PropertyDescriptor getPropertyDescriptor(String propertyName) {
+	PropertyDescriptor getPropertyDescriptor(String propertyName) {
 		return (PropertyDescriptor) this.propertyDescriptorCache.get(propertyName);
 	}
 
