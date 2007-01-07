@@ -94,7 +94,7 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 	 */
 	public final Object getObject() throws Exception {
 		if (isSingleton()) {
-			return (!this.initialized ? getEarlySingletonInstance() : getSingletonInstance());
+			return (this.initialized ? this.singletonInstance : getEarlySingletonInstance());
 		}
 		else {
 			return createInstance();
@@ -128,9 +128,14 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 	}
 
 	/**
-	 * Expose the singleton instance, if any.
+	 * Expose the singleton instance (for access through the 'early singleton' proxy).
+	 * @return the singleton instance that this FactoryBean holds
+	 * @throws IllegalStateException if the singleton instance is not initialized
 	 */
-	private Object getSingletonInstance() {
+	private Object getSingletonInstance() throws IllegalStateException {
+		if (!this.initialized) {
+			throw new IllegalStateException("Singleton instance not initialized yet");
+		}
 		return this.singletonInstance;
 	}
 
