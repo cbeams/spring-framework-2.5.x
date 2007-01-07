@@ -20,6 +20,7 @@ Package org.springframework.aop
 * factored out BeanFactoryAspectJAdvisorsBuilder from AnnotationAwareAspectJAutoProxyCreator
 
 Package org.springframework.beans
+* CachedIntrospectionResults allows for caching for specific ClassLoaders even if their classes are not cache-safe
 * BeanWrapper interface extends TypeConverter interface, instead of just BeanWrapperImpl implementing TypeConverter
 * BeanWrapperImpl converts nested collection value (e.g. List within Map) to declared generic type, if applicable
 * BeanWrapperImpl's TypeMismatchException mentions the specific element that failed in case of a (generic) collection
@@ -28,6 +29,8 @@ Package org.springframework.beans
 * ResourceEditorRegistrar always registers ClassEditor for given ResourceLoader's ClassLoader
 * added "originalBeanName(String)" method to BeanFactoryUtils, allowing to cut off a generated "#..." suffix
 * FieldRetrievingFactoryBean and PropertyPathFactoryBean extract the original bean name for their beanName-based syntax
+* added support for 'early access singletons' to AbstractFactoryBean, exposing a proxy in case of a circular reference
+* ListFactoryBean, SetFactoryBean and MapFactoryBean support exposure of a proxy in case of a circular reference
 * refined currently-in-creation check for lazy-init singletons, to avoid unintended BeanCurrentlyInCreationException
 * DefaultSingletonBeanRegistry and subclasses use unified mutex for singleton access, to avoid potential for deadlocks
 * AbstractBeanFactory caches merged bean definitions with bean definition identity as key (to avoid bean name conflicts)
@@ -53,6 +56,7 @@ Package org.springframework.context
 Package org.springframework.core
 * Conventions (as used by ModelMap) extracts inner class name for inner classes
 * Conventions (as used by ModelMap) extracts primary interface name for JDK proxies
+* reworked CollectionFactory's "createApproximateCollection/Map" to preserve original Comparator for TreeSet/TreeMap
 * LocalVariableTableParameterNameDiscoverer uses current ClassLoader for ASM analysis (not the system ClassLoader)
 * PathMatchingResourcePatternResolver properly handles jar file roots returned by the ClassLoader (e.g. on Resin)
 
@@ -122,6 +126,7 @@ Package org.springframework.ui
 * VelocityEngineFactory/SpringResourceLoader supports Velocity-style comma-separated paths as "resourceLoaderPath" value
 
 Package org.springframework.util
+* added overloaded no-arg "start()" method to StopWatch
 * added "hasConstructor" and "getConstructorIfAvailable" methods to ClassUtils
 * ClassUtils's "getAllInterfaces"/"getAllInterfacesForClass" preserves interface definition order in the result array
 * fixed AntPathMatcher's "extractPathWithinPattern" to correctly extract paths that have fewer parts than the pattern
@@ -131,6 +136,9 @@ Package org.springframework.validation
 * added "prefix" property and "postProcessMessageCode" template method to DefaultMessageCodesResolver
 
 Package org.springframework.web
+* IntrospectorCleanupListener explicitly exposes the web app ClassLoader as cacheable for CachedIntrospectionResults
+* introduced MissingServlet/PortletRequestParameterException subclasses of Servlet/PortletRequestBindingException
+* reworked the 'default value for missing parameter' check in Servlet/PortletRequestUtils to be as efficient as possible
 * AbstractUrlHandlerMapping exposes PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE for default handler as well
 * extracted "getViewNameForUrlPath(String)" in UrlFilenameViewController, for full compatibility with Spring 1.2.8
 * added "alwaysInclude" bean property to InternalResourceView, for enforcing the use of an include (never a forward)
