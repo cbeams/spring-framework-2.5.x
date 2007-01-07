@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,18 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * Simple template superclass for FactoryBean implementations thats allows
- * for creating a singleton or a prototype, depending on a flag.
+ * Simple template superclass for {@link FactoryBean} implementations that
+ * creates a singleton or a prototype object, depending on a flag.
  *
- * <p>If the "singleton" flag is "true" (the default), this class will create
- * once on initialization and subsequently return the singleton instance.
- * Else, this class will create a new instance each time. Subclasses are
- * responsible for implementing the abstract <code>createInstance</code>
- * template method to actually create the objects to expose.
+ * <p>If the "singleton" flag is <code>true</code> (the default),
+ * this class will create the object that it creates exactly once
+ * on initialization and subsequently return said singleton instance
+ * on all calls to the {@link #getObject()} method.
+ *
+ * <p>Else, this class will create a new instance every time the
+ * {@link #getObject()} method is invoked. Subclasses are responsible
+ * for implementing the abstract {@link #createInstance()} template
+ * method to actually create the object(s) to expose.
  *
  * @author Juergen Hoeller
  * @author Keith Donald
@@ -58,18 +62,18 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 	}
 
 	public boolean isSingleton() {
-		return singleton;
+		return this.singleton;
 	}
 
 	public void afterPropertiesSet() throws Exception {
-		if (this.singleton) {
+		if (isSingleton()) {
 			this.singletonInstance = createInstance();
 		}
 	}
 
 
 	public final Object getObject() throws Exception {
-		if (this.singleton) {
+		if (isSingleton()) {
 			return this.singletonInstance;
 		}
 		else {
@@ -78,7 +82,7 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 	}
 
 	public void destroy() throws Exception {
-		if (this.singleton) {
+		if (isSingleton()) {
 			destroyInstance(this.singletonInstance);
 		}
 	}
@@ -88,7 +92,7 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 	 * Template method that subclasses must override to construct
 	 * the object returned by this factory.
 	 * <p>Invoked on initialization of this FactoryBean in case of
-	 * a singleton; else, on each <code>getObject()</code> call.
+	 * a singleton; else, on each {@link #getObject()} call.
 	 * @return the object returned by this factory
 	 * @throws Exception if an exception occured during object creation
 	 * @see #getObject()
@@ -100,7 +104,7 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 	 * override this to destroy the previously created instance.
 	 * <p>The default implementation is empty.
 	 * @param instance the singleton instance, as returned by
-	 * <code>createInstance()</code>
+	 * {@link #createInstance()}
 	 * @throws Exception in case of shutdown errors
 	 * @see #createInstance()
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.io.InputStream;
 import java.net.URL;
 
 /**
- * Convenience base class for Resource implementations,
+ * Convenience base class for {@link Resource} implementations,
  * pre-implementing typical behavior.
  *
  * <p>The "exists" method will check whether a File or InputStream can
@@ -100,16 +100,20 @@ public abstract class AbstractResource implements Resource {
 	/**
 	 * This abstract method declaration shadows the method in the Resource interface.
 	 * This is necessary to make the <code>toString</code> implementation in this
-	 * class work on Sun's JDK 1.3 classic VM, which can't find the
-	 * <code>getDescription</code> method when executing <code>toString</code> else.
+	 * class work on Sun's JDK 1.3 classic VM, which can't find the method when
+	 * executing <code>toString</code> else. Furthermore, <code>getDescription</code>
+	 * is also called from <code>equals</code> and <code>hashCode</code>
 	 * @see Resource#getDescription()
+	 * @see #toString()
+	 * @see #equals(Object)
+	 * @see #hashCode()
 	 */
 	public abstract String getDescription();
 
 
 	/**
 	 * This implementation returns the description of this resource.
-	 * @see #getDescription
+	 * @see #getDescription()
 	 */
 	public String toString() {
 		return getDescription();
@@ -117,7 +121,7 @@ public abstract class AbstractResource implements Resource {
 
 	/**
 	 * This implementation compares description strings.
-	 * @see #getDescription
+	 * @see #getDescription()
 	 */
 	public boolean equals(Object obj) {
 		return (obj == this ||
@@ -126,7 +130,7 @@ public abstract class AbstractResource implements Resource {
 
 	/**
 	 * This implementation returns the description's hash code.
-	 * @see #getDescription
+	 * @see #getDescription()
 	 */
 	public int hashCode() {
 		return getDescription().hashCode();
