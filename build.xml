@@ -478,7 +478,7 @@
 			<arg value="${javadoc.proxyhost}"/>
 			<arg value="${javadoc.proxyport}"/>
 			<doctitle><![CDATA[<h1>Spring Framework</h1>]]></doctitle>
-			<bottom><![CDATA[<i>Copyright (c) 2002-2006 The Spring Framework Project.</i>]]></bottom>
+			<bottom><![CDATA[<i>Copyright (c) 2002-2007 The Spring Framework Project.</i>]]></bottom>
 			<classpath refid="all-libs"/>
 			<packageset dir="${src.dir}">
 				<include name="org/springframework/**"/>
@@ -540,7 +540,7 @@
 			<arg value="${javadoc.proxyhost}"/>
 			<arg value="${javadoc.proxyport}"/>
 			<doctitle><![CDATA[<h1>Spring Framework</h1>]]></doctitle>
-			<bottom><![CDATA[<i>Copyright (c) 2002-2006 The Spring Framework Project.</i>]]></bottom>
+			<bottom><![CDATA[<i>Copyright (c) 2002-2007 The Spring Framework Project.</i>]]></bottom>
 			<classpath refid="all-libs"/>
 			<packageset dir="${src.dir}">
 				<include name="org/springframework/**"/>
@@ -1311,7 +1311,7 @@
 				additionalparam="-breakiterator" source="1.3" access="package" author="true" version="true" use="true"
 				defaultexcludes="true">
 			<doctitle><![CDATA[<h1>Spring Framework Sandbox</h1>]]></doctitle>
-			<bottom><![CDATA[<i>Copyright (c) 2003-2006 The Spring Framework Project.</i>]]></bottom>
+			<bottom><![CDATA[<i>Copyright (c) 2003-2007 The Spring Framework Project.</i>]]></bottom>
 			<classpath refid="all-libs"/>
 			<classpath location="${target.classes.dir}"/>
 			<packageset dir="${sandbox.src.dir}">
