@@ -18,6 +18,8 @@ Package org.springframework.aop
 * "scoped-proxy" tag works for non-singleton FactoryBeans as well, leveraging the BeanFactory's improved type check
 * factored out BeanFactoryAdvisorRetrievalHelper from AbstractAdvisorAutoProxyCreator
 * factored out BeanFactoryAspectJAdvisorsBuilder from AnnotationAwareAspectJAutoProxyCreator
+* added AbstractBeanFactoryPointcutAdvisor and DefaultBeanFactoryPointcutAdvisor
+* each "aop:advisor" entry lazily initializes its Advice bean, to let all target beans be exposed to all Advisors
 
 Package org.springframework.beans
 * CachedIntrospectionResults allows for caching for specific ClassLoaders even if their classes are not cache-safe
@@ -96,6 +98,7 @@ Package org.springframework.orm
 
 Package org.springframework.remoting
 * RmiServiceExporter logs description of actual registry instead of port (to properly handle passed-in "registry")
+* HttpInvokerClientInterceptor/ProxyFactoryBean uses the ClassLoader of the containing BeanFactory for deserialization
 
 Package org.springframework.samples
 * cleaned up platform/login configuration in PetClinic's TopLink variant
