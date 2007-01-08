@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import net.sf.cglib.proxy.NoOp;
 import net.sf.cglib.transform.impl.UndeclaredThrowableStrategy;
+import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -817,9 +818,9 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 			int result = 27;
 			Advisor[] advisors = this.advised.getAdvisors();
 			for (int i = 0; i < advisors.length; i++) {
-				Advisor advisor = advisors[i];
-				if (advisor.getAdvice() != null) {
-					result = 13 * result + advisor.getAdvice().getClass().hashCode();
+				Advice advice = advisors[i].getAdvice();
+				if (advice != null) {
+					result = 13 * result + advice.getClass().hashCode();
 				}
 			}
 			result = 13 * result  + (this.advised.isFrozen() ? 1 : 0);
@@ -879,10 +880,12 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 	}
 
 	private boolean equalsAdviceClasses(Advisor a, Advisor b) {
-		if (a.getAdvice() == null || b.getAdvice() == null) {
-			return (a.getAdvice() == b.getAdvice());
+		Advice aa = a.getAdvice();
+		Advice ba = b.getAdvice();
+		if (aa == null || ba == null) {
+			return (aa == ba);
 		}
-		return a.getAdvice().getClass().equals(b.getAdvice().getClass());
+		return aa.getClass().equals(ba.getClass());
 	}
 
 	private boolean equalsPointcuts(Advisor a, Advisor b) {

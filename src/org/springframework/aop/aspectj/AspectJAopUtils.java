@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,8 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Created on 15-Feb-2006 by Adrian Colyer
  */
 
 package org.springframework.aop.aspectj;
@@ -28,64 +26,58 @@ import org.springframework.aop.framework.adapter.AfterReturningAdviceInterceptor
 import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptor;
 
 /**
+ * Utility methods for dealing with AspectJ advisors.
+ *
  * @author Adrian Colyer
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public abstract class AspectJAopUtils {
 
 	/**
-	 * Return true if the advisor is a form of after advice.
-	 * TODO: listing all of these implementation types here has a bad
-	 * smell to it...
+	 * Return <code>true</code> if the advisor is a form of before advice.
 	 */
-	public static boolean isAfterAdvice(Advisor anAdvisor) {
-		AspectJPrecedenceInformation precedenceInfo =  
-			getAspectJPrecedenceInformationFor(anAdvisor);
-		if (precedenceInfo != null) {
-			return precedenceInfo.isAfterAdvice();
-		}
-		else {
-			// unpleasant instanceof test... 
-			Advice advice = anAdvisor.getAdvice();
-			if ((advice instanceof AfterReturningAdvice) ||
-			    (advice instanceof ThrowsAdvice) ||
-			    (advice instanceof AfterReturningAdviceInterceptor) ||
-			    (advice instanceof AspectJAfterAdvice) ||
-			    (advice instanceof AspectJAfterReturningAdvice) ||
-			    (advice instanceof AspectJAfterThrowingAdvice) ||
-			    (advice instanceof ThrowsAdviceInterceptor)) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-	}
-	
 	public static boolean isBeforeAdvice(Advisor anAdvisor) {
-		AspectJPrecedenceInformation precedenceInfo =  
-			getAspectJPrecedenceInformationFor(anAdvisor);
+		AspectJPrecedenceInformation precedenceInfo = getAspectJPrecedenceInformationFor(anAdvisor);
 		if (precedenceInfo != null) {
 			return precedenceInfo.isBeforeAdvice();
 		}
-		else {
-			return (anAdvisor.getAdvice() instanceof BeforeAdvice);
-		}
+		return (anAdvisor.getAdvice() instanceof BeforeAdvice);
 	}
-	
+
 	/**
-	 * Returns the AspectJPrecedenceInformation provided by this advisor or its advice.
-	 * If neither the advisor nor the advice have precedence information, will return null.
+	 * Return <code>true</code> if the advisor is a form of after advice.
+	 */
+	public static boolean isAfterAdvice(Advisor anAdvisor) {
+		AspectJPrecedenceInformation precedenceInfo = getAspectJPrecedenceInformationFor(anAdvisor);
+		if (precedenceInfo != null) {
+			return precedenceInfo.isAfterAdvice();
+		}
+		// Fallback: an unpleasant instanceof test...
+		Advice advice = anAdvisor.getAdvice();
+		return (advice instanceof AfterReturningAdvice ||
+				advice instanceof ThrowsAdvice ||
+				advice instanceof AfterReturningAdviceInterceptor ||
+				advice instanceof AspectJAfterAdvice ||
+				advice instanceof AspectJAfterReturningAdvice ||
+				advice instanceof AspectJAfterThrowingAdvice ||
+				advice instanceof ThrowsAdviceInterceptor);
+	}
+
+	/**
+	 * Return the AspectJPrecedenceInformation provided by this advisor or its advice.
+	 * If neither the advisor nor the advice have precedence information, this method
+	 * will return <code>null</code>.
 	 */
 	public static AspectJPrecedenceInformation getAspectJPrecedenceInformationFor(Advisor anAdvisor) {
-		AspectJPrecedenceInformation ret = null;
 		if (anAdvisor instanceof AspectJPrecedenceInformation) {
-			ret = (AspectJPrecedenceInformation) anAdvisor;
+			return (AspectJPrecedenceInformation) anAdvisor;
 		}
-		else if (anAdvisor.getAdvice() instanceof AspectJPrecedenceInformation) {
-			ret = (AspectJPrecedenceInformation) anAdvisor.getAdvice();
+		Advice advice = anAdvisor.getAdvice();
+		if (advice instanceof AspectJPrecedenceInformation) {
+			return (AspectJPrecedenceInformation) advice;
 		}
-		return ret;
+		return null;
 	}
 
 }
