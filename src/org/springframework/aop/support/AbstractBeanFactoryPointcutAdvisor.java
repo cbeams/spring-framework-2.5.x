@@ -41,9 +41,18 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 
 	private BeanFactory beanFactory;
 
+	private Advice advice;
+
+	private final Object adviceMonitor = new Object();
+
 
 	/**
 	 * Specify the name of the advice bean that this advisor should refer to.
+	 * <p>An instance of the specified bean will be obtained on first access
+	 * of this advisor's advice. This advisor will only ever obtain at most one
+	 * single instance of the advice bean, caching the instance for the lifetime
+	 * of the advisor.
+	 * @see #getAdvice()
 	 */
 	public void setAdviceBeanName(String adviceBeanName) {
 		this.adviceBeanName = adviceBeanName;
@@ -62,11 +71,13 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 
 
 	public Advice getAdvice() {
-		if (this.adviceBeanName != null) {
-			Assert.state(this.beanFactory != null, "BeanFactory must be set to resolve 'adviceBeanName'");
-			return (Advice) this.beanFactory.getBean(this.adviceBeanName, Advice.class);
+		synchronized (this.adviceMonitor) {
+			if (this.advice == null && this.adviceBeanName != null) {
+				Assert.state(this.beanFactory != null, "BeanFactory must be set to resolve 'adviceBeanName'");
+				this.advice = (Advice) this.beanFactory.getBean(this.adviceBeanName, Advice.class);
+			}
+			return this.advice;
 		}
-		return null;
 	}
 
 	public String toString() {
