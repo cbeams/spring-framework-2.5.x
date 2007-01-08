@@ -32,10 +32,11 @@ import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.aspectj.AspectJMethodBeforeAdvice;
 import org.springframework.aop.aspectj.AspectJPointcutAdvisor;
 import org.springframework.aop.aspectj.DeclareParentsAdvisor;
-import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.DefaultBeanFactoryPointcutAdvisor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.parsing.ParseState;
@@ -69,7 +70,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String POINTCUT = "pointcut";
 
-	private static final String ADVICE = "advice";
+	private static final String ADVICE_BEAN_NAME = "adviceBeanName";
 
 	private static final String ADVISOR = "advisor";
 
@@ -225,7 +226,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * parse any associated '<code>pointcut</code>' or '<code>pointcut-ref</code>' attributes.
 	 */
 	private AbstractBeanDefinition createAdvisorBeanDefinition(Element advisorElement, ParserContext parserContext) {
-		RootBeanDefinition advisorDefinition = new RootBeanDefinition(DefaultPointcutAdvisor.class);
+		RootBeanDefinition advisorDefinition = new RootBeanDefinition(DefaultBeanFactoryPointcutAdvisor.class);
 		advisorDefinition.setSource(parserContext.extractSource(advisorElement));
 
 		if (advisorElement.hasAttribute(ORDER_PROPERTY)) {
@@ -234,7 +235,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		advisorDefinition.getPropertyValues().addPropertyValue(
-				ADVICE, new RuntimeBeanReference(advisorElement.getAttribute(ADVICE_REF)));
+				ADVICE_BEAN_NAME, new RuntimeBeanNameReference(advisorElement.getAttribute(ADVICE_REF)));
+
 		return advisorDefinition;
 	}
 

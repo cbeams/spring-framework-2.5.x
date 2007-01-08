@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ package org.springframework.aop.config;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.AbstractComponentDefinition;
 import org.springframework.util.Assert;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class AdvisorComponentDefinition extends AbstractComponentDefinition {
@@ -47,8 +47,8 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 	public AdvisorComponentDefinition(
 			String advisorBeanName, BeanDefinition advisorDefinition, BeanDefinition pointcutDefinition) {
 
-		Assert.notNull(advisorBeanName, "Advsor bean name must not be null");
-		Assert.notNull(advisorDefinition, "Advisor definition must not be null");
+		Assert.notNull(advisorBeanName, "'advisorBeanName' must not be null");
+		Assert.notNull(advisorDefinition, "'advisorDefinition' must not be null");
 		this.advisorBeanName = advisorBeanName;
 		this.advisorDefinition = advisorDefinition;
 		unwrapDefinitions(advisorDefinition, pointcutDefinition);
@@ -56,39 +56,33 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 
 
 	private void unwrapDefinitions(BeanDefinition advisorDefinition, BeanDefinition pointcutDefinition) {
-		MutablePropertyValues propertyValues = advisorDefinition.getPropertyValues();
+		MutablePropertyValues pvs = advisorDefinition.getPropertyValues();
+		BeanReference adviceReference = (BeanReference) pvs.getPropertyValue("adviceBeanName").getValue();
 
-		// grab the advice reference
-		RuntimeBeanReference adviceReference = (RuntimeBeanReference) propertyValues.getPropertyValue("advice").getValue();
-
-		if (pointcutDefinition == null) {
-			RuntimeBeanReference pointcutReference =
-					(RuntimeBeanReference) propertyValues.getPropertyValue("pointcut").getValue();
-			this.beanReferences = new BeanReference[] {adviceReference, pointcutReference};
-			this.beanDefinitions = new BeanDefinition[] {this.advisorDefinition};
-			this.description = buildDescription(adviceReference, pointcutReference);
-		}
-		else {
+		if (pointcutDefinition != null) {
 			this.beanReferences = new BeanReference[] {adviceReference};
-			this.beanDefinitions = new BeanDefinition[] {this.advisorDefinition, pointcutDefinition};
+			this.beanDefinitions = new BeanDefinition[] {advisorDefinition, pointcutDefinition};
 			this.description = buildDescription(adviceReference, pointcutDefinition);
 		}
+		else {
+			BeanReference pointcutReference = (BeanReference) pvs.getPropertyValue("pointcut").getValue();
+			this.beanReferences = new BeanReference[] {adviceReference, pointcutReference};
+			this.beanDefinitions = new BeanDefinition[] {advisorDefinition};
+			this.description = buildDescription(adviceReference, pointcutReference);
+		}
 	}
 
-	private String buildDescription(RuntimeBeanReference adviceReference, BeanDefinition pointcutDefinition) {
-		return new StringBuffer("Advisor <advice(ref)='")
-						.append(adviceReference.getBeanName())
-						.append("', pointcut(expression)=[")
-						.append(pointcutDefinition.getPropertyValues().getPropertyValue("expression").getValue())
-						.append("]>").toString();
+	private String buildDescription(BeanReference adviceReference, BeanDefinition pointcutDefinition) {
+		return new StringBuffer("Advisor <advice(ref)='").
+				append(adviceReference.getBeanName()).append("', pointcut(expression)=[").
+				append(pointcutDefinition.getPropertyValues().getPropertyValue("expression").getValue()).
+				append("]>").toString();
 	}
 
-	private String buildDescription(RuntimeBeanReference adviceReference, RuntimeBeanReference pointcutReference) {
-		return new StringBuffer("Advisor <advice(ref)='")
-						.append(adviceReference.getBeanName())
-						.append("', pointcut(ref)='")
-						.append(pointcutReference.getBeanName())
-						.append("'>").toString();
+	private String buildDescription(BeanReference adviceReference, BeanReference pointcutReference) {
+		return new StringBuffer("Advisor <advice(ref)='").
+				append(adviceReference.getBeanName()).append("', pointcut(ref)='").
+				append(pointcutReference.getBeanName()).append("'>").toString();
 	}
 
 
