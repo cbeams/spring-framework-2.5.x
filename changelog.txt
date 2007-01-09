@@ -120,7 +120,6 @@ Package org.springframework.util
 Package org.springframework.validation
 * clarified that "Errors.reject" always registers a global error for the entire target object
 * "Errors.rejectValue" now accepts an empty field name to indicate the current object itself rather than a field of it
-* "Errors.addAllErrors" only accepts Errors instance with same object name
 * added public "getPropertyEditorRegistry()" method to BindException, for re-registering custom editors
 * DataBinder matches all field names using their canonical name (for required and allowed checks)
 * fixed BindUtils to not call "ValidatorUtils.invokeValidator" if no Validator given
