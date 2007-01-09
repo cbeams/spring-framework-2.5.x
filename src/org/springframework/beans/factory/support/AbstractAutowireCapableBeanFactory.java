@@ -1003,7 +1003,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param bw BeanWrapper wrapping the target object
 	 * @param pvs new property values
 	 */
-	private void applyPropertyValues(
+	protected void applyPropertyValues(
 			String beanName, RootBeanDefinition mergedBeanDefinition, BeanWrapper bw, PropertyValues pvs)
 			throws BeansException {
 
