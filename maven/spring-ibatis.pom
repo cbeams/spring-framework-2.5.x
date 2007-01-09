@@ -5,7 +5,7 @@
   <artifactId>spring-ibatis</artifactId>
   <packaging>jar</packaging>
   <name>Spring Framework: iBATIS</name>
-  <version>2.0.1</version>
+  <version>2.0.2</version>
   <description>Spring Framework: iBATIS</description>
   <url>http://www.springframework.org</url>
   <licenses>
@@ -18,7 +18,7 @@
   <scm>
     <connection>scm:cvs:pserver:anonymous:@springframework.cvs.sourceforge.net:/cvsroot/springframework</connection>
     <developerConnection>scm:cvs:ext:username@springframework.cvs.sourceforge.net:/cvsroot/springframework</developerConnection>
-    <tag>2.0.1</tag>
+    <tag>2.0.2</tag>
     <url>http://springframework.cvs.sourceforge.net/springframework/</url>
   </scm>
   <organization>
@@ -35,13 +35,8 @@
 <!-- Not currently in ibiblio maven repository -->
     <dependency>
       <groupId>com.ibatis</groupId>
-      <artifactId>ibatis2-common</artifactId>
-      <version>2.2.0.638</version>
-    </dependency>
-    <dependency>
-      <groupId>com.ibatis</groupId>
-      <artifactId>ibatis2-sqlmap</artifactId>
-      <version>2.2.0.638</version>
+      <artifactId>ibatis2</artifactId>
+      <version>2.3.0.677</version>
     </dependency>
 <!-- Spring Dependencies -->
     <dependency>
