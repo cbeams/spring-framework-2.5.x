@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract implementation of the BindingResult interface and its
- * super-interface Errors. Encapsulates common management of
- * ObjectErrors and FieldErrors.
+ * Abstract implementation of the {@link BindingResult} interface and
+ * its super-interface {@link Errors}. Encapsulates common management of
+ * {@link ObjectError ObjectErrors} and {@link FieldError FieldErrors}.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -78,7 +78,7 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	 * Return the strategy to use for resolving errors into message codes.
 	 */
 	public MessageCodesResolver getMessageCodesResolver() {
-		return messageCodesResolver;
+		return this.messageCodesResolver;
 	}
 
 
@@ -87,7 +87,7 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	//---------------------------------------------------------------------
 
 	public String getObjectName() {
-		return objectName;
+		return this.objectName;
 	}
 
 	public void setNestedPath(String nestedPath) {
@@ -96,7 +96,7 @@ public abstract class AbstractBindingResult implements BindingResult, Serializab
 	}
 
 	public String getNestedPath() {
-		return nestedPath;
+		return this.nestedPath;
 	}
 
 	public void pushNestedPath(String subPath) {
