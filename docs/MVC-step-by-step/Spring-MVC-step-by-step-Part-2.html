@@ -201,7 +201,7 @@ and it will also support internationalization.</p>
     </tr>
     <tr>
       <td bgcolor="#ffffcc" valign="top" width="100%">
-      <pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br>&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd"&gt;<br><br>&lt;!--<br>  - Application context definition for "springapp" DispatcherServlet.<br>  --&gt;<br><br>&lt;beans&gt;<br>    &lt;bean id="springappController" class="SpringappController"/&gt;<br><br>    &lt;bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"&gt;<br>        &lt;property name="mappings"&gt;<br>            &lt;props&gt;<br>                &lt;prop key="/hello.htm"&gt;springappController&lt;/prop&gt;<br>            &lt;/props&gt;<br>        &lt;/property&gt;<br>    &lt;/bean&gt;<br><br><font
+      <pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br>&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd"&gt;<br><br>&lt;!--<br>  - Application context definition for "springapp" DispatcherServlet.<br>  --&gt;<br><br>&lt;beans&gt;<br>    &lt;bean id="springappController" class="SpringappController"/&gt;<br><br>    &lt;bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"&gt;<br>        &lt;property name="mappings"&gt;<br>            &lt;props&gt;<br>                &lt;prop key="/hello.htm"&gt;springappController&lt;/prop&gt;<br>            &lt;/props&gt;<br>        &lt;/property&gt;<br>    &lt;/bean&gt;<br><br><font
  color="#800000">    &lt;bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"&gt;</font>
 <font color="#800000">        &lt;property name="viewClass"&gt;&lt;value&gt;org.springframework.web.servlet.view.JstlView&lt;/value&gt;&lt;/property&gt;</font>
 <font color="#800000">        &lt;property name="prefix"&gt;&lt;value&gt;/WEB-INF/jsp/&lt;/value&gt;&lt;/property&gt;</font>
@@ -405,7 +405,7 @@ next step.</p>
     </tr>
     <tr>
       <td bgcolor="#ffffcc" valign="top" width="929">
-      <pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br>&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans_2_0.dtd"&gt;<br><br>&lt;!--<br>  - Application context definition for "springapp" DispatcherServlet.<br>  --&gt;<br><br><br>&lt;beans&gt;<br>    &lt;bean id="springappController" class="web.SpringappController"<font
+      <pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br>&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd"&gt;<br><br>&lt;!--<br>  - Application context definition for "springapp" DispatcherServlet.<br>  --&gt;<br><br><br>&lt;beans&gt;<br>    &lt;bean id="springappController" class="web.SpringappController"<font
  color="#800000">&gt;</font>
 <font color="#800000">        &lt;property name="productManager"&gt;</font>
 <font color="#800000">            &lt;ref bean="prodMan"/&gt;</font>
