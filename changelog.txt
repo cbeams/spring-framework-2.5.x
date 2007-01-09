@@ -3,6 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
+Changes in version 2.0.3 (19.2.2007)
+------------------------------------
+
+Package org.springframework.beans
+* turned visibility of AbstractAutowireCapableBeanFactory's "applyPropertyValues" method from private to protected
+
+
 Changes in version 2.0.2 (8.1.2007)
 -----------------------------------
 
