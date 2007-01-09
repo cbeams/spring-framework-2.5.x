@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,10 +48,13 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see #getModel
- * @see DataBinder#getErrors
+ * @see #getModel()
+ * @see DataBinder#getErrors()
  */
 public class BindException extends Exception implements Errors {
+
+	/** Use serialVersionUID from Spring 1.2.8 for interoperability */
+	private static final long serialVersionUID = -5555744933646811432L;;
 
 	/**
 	 * Prefix for the name of the Errors instance in a model,
@@ -92,11 +95,11 @@ public class BindException extends Exception implements Errors {
 	 * Return the wrapped target object.
 	 */
 	public Object getTarget() {
-		return target;
+		return this.target;
 	}
 
 	public String getObjectName() {
-		return objectName;
+		return this.objectName;
 	}
 
 	/**
@@ -114,7 +117,7 @@ public class BindException extends Exception implements Errors {
 	 * Return the underlying BeanWrapper as PropertyEditorRegistry.
 	 * @see #getBeanWrapper()
 	 */
-	public final PropertyEditorRegistry getPropertyEditorRegistry() {
+	public PropertyEditorRegistry getPropertyEditorRegistry() {
 		return getBeanWrapper();
 	}
 
@@ -131,7 +134,7 @@ public class BindException extends Exception implements Errors {
 	 * Return the strategy to use for resolving errors into message codes.
 	 */
 	public MessageCodesResolver getMessageCodesResolver() {
-		return messageCodesResolver;
+		return this.messageCodesResolver;
 	}
 
 
@@ -141,7 +144,7 @@ public class BindException extends Exception implements Errors {
 	}
 
 	public String getNestedPath() {
-		return nestedPath;
+		return this.nestedPath;
 	}
 
 	public void pushNestedPath(String subPath) {
@@ -265,9 +268,6 @@ public class BindException extends Exception implements Errors {
 	}
 
 	public void addAllErrors(Errors errors) {
-		if (!errors.getObjectName().equals(getObjectName())) {
-			throw new IllegalArgumentException("Errors object needs to have same object name");
-		}
 		this.errors.addAll(errors.getAllErrors());
 	}
 
