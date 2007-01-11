@@ -599,8 +599,7 @@ public class ExecuteAnUpdate {
 				signature is the way it is).  An example that works on Oracle and may work on other
 				platforms is:
 			</para>
-			<programlisting><![CDATA[
-final String INSERT_SQL = "insert into my_test (name) values(?)";
+			<programlisting><![CDATA[final String INSERT_SQL = "insert into my_test (name) values(?)";
 final String name = "Rob";
 
 KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -615,8 +614,7 @@ jdbcTemplate.update(
     },
     keyHolder);
 
-// keyHolder.getKey() now contains the generated key
-]]></programlisting>
+]]><lineannotation>// keyHolder.getKey() now contains the generated key</lineannotation></programlisting>
 		</section>
 	</section>
 	<section id="jdbc-connections">
