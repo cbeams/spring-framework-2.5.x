@@ -26,6 +26,8 @@ import java.util.Set;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.weaver.tools.PointcutParser;
+import org.aspectj.weaver.tools.PointcutPrimitive;
 
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.util.StringUtils;
@@ -127,11 +129,13 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	private static final int STEP_RETURNING_BINDING = 4;
 	private static final int STEP_PRIMITIVE_ARGS_BINDING = 5;
 	private static final int STEP_THIS_TARGET_ARGS_BINDING = 6;
-	private static final int STEP_FINISHED = 7;
+    private static final int STEP_REFERERCE_PCUT_BINDING = 7;
+    private static final int STEP_FINISHED = 8;
 	
 	private static final Set singleValuedAnnotationPcds = new HashSet();
+    private static final Set nonReferencePointcutTokens = new HashSet();
 
-	private static Class annotationClass;
+    private static Class annotationClass;
 	
 	static {
 		singleValuedAnnotationPcds.add("@this");
@@ -140,7 +144,19 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		singleValuedAnnotationPcds.add("@withincode");
 		singleValuedAnnotationPcds.add("@annotation");
 
-		try {
+        Set pointcutPrimitives = PointcutParser.getAllSupportedPointcutPrimitives();
+        for (Iterator iterator = pointcutPrimitives.iterator(); iterator.hasNext();) {
+            PointcutPrimitive primitive = (PointcutPrimitive) iterator.next();
+            nonReferencePointcutTokens.add(primitive.getName());
+        }
+        nonReferencePointcutTokens.add("&&");
+        nonReferencePointcutTokens.add("!");
+        nonReferencePointcutTokens.add("||");
+        nonReferencePointcutTokens.add("and");
+        nonReferencePointcutTokens.add("or");
+        nonReferencePointcutTokens.add("not");
+
+        try {
 			annotationClass = Class.forName(ANNOTATION_CLASS_NAME);
 		}
 		catch (ClassNotFoundException ex) {
@@ -257,7 +273,10 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 					case STEP_THIS_TARGET_ARGS_BINDING:
 						maybeBindThisOrTargetOrArgsFromPointcutExpression();
 						break;
-					default:
+                    case STEP_REFERERCE_PCUT_BINDING:
+                        maybeBindReferencePointcutParameter();
+                        break;
+                    default:
 						throw new IllegalStateException("Unknown algorithmic step: " + (this.algorithmicStep -1));
 				}
 			}
@@ -455,7 +474,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 * If the token starts meets Java identifier conventions, it's in. 
 	 */
 	private String maybeExtractVariableName(String candidateToken) {
-		if (candidateToken == null) {
+		if (candidateToken == null || candidateToken.equals("")) {
 			return null;
 		}
 		
@@ -544,7 +563,67 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		// else varNames.size must be 0 and we have nothing to bind.
 	}
 
-	/*
+    private void maybeBindReferencePointcutParameter() {
+        if (this.numberOfRemainingUnboundArguments > 1) {
+			throw new AmbiguousBindingException("Still " + this.numberOfRemainingUnboundArguments
+					+ " unbound args at reference pointcut binding stage, with no way to determine between them");
+		}
+
+        List varNames = new ArrayList();
+        String[] tokens = StringUtils.tokenizeToStringArray(this.pointcutExpression," ");
+        for (int i = 0; i < tokens.length; i++) {
+            String toMatch = tokens[i];
+            if (toMatch.startsWith("!")) {
+                toMatch = toMatch.substring(1);
+            }
+            int firstParenIndex = toMatch.indexOf("(");
+            if (firstParenIndex != -1) {
+                toMatch = toMatch.substring(0,firstParenIndex);
+            } else {
+                if (tokens.length < i+2) {
+                    // no "(" and nothing following
+                    continue;
+                }
+                else {
+                    String nextToken = tokens[i+1];
+                    if (nextToken.charAt(0) != '(') {
+                       // next token is not "(" either, can't be a pc...
+                        continue;
+                    }
+                }
+
+            }
+
+            // eat the body
+            PointcutBody body = getPointcutBody(tokens,i);
+            i += body.numTokensConsumed;
+
+            if (!nonReferencePointcutTokens.contains(toMatch)) {
+                // then it could be a reference pointcut
+                String varName = maybeExtractVariableName(body.text);
+                if (varName != null) {
+                    varNames.add(varName);
+                }
+            }
+        }
+
+        if (varNames.size() > 1) {
+            throw new AmbiguousBindingException("Found " + varNames.size() +
+                    " candidate reference pointcut variables but only one unbound argument slot");
+        } else if (varNames.size() == 1) {
+            for (int j = 0; j < this.parameterNameBindings.length; j++) {
+                if (isUnbound(j)) {
+                    bindParameterName(j,(String)varNames.get(0));
+                    break;
+                }
+            }
+        }
+        // else varNames.size must be 0 and we have nothing to bind.
+
+    }
+
+
+    /*
 	 * We've found the start of a binding pointcut at the given index into 
 	 * the token array. Now we need to extract the pointcut body and return
 	 * it.
@@ -566,7 +645,8 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 			int currentIndex = startIndex + numTokensConsumed;
 			while( currentIndex < tokens.length) {
 				if (tokens[currentIndex].equals("(")) {
-					continue;
+                    currentIndex++;
+                    continue;
 				}
 				
 				if (tokens[currentIndex].endsWith(")")) {
@@ -614,9 +694,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 			if (varNames.size() > 1) {
 				throw new AmbiguousBindingException("Found " + varNames.size() + 
 						" candidate variable names but only one candidate binding slot when matching primitive args");
-			} else if (varNames.size() == 0) {
-				throw new IllegalArgumentException("Unable to find args match for unbound primitive argument");
-			} else {
+			} else if (varNames.size() == 1) {
 				// 1 primitive arg, and one candidate...
 				for (int i = 0; i < this.argumentTypes.length; i++) {
 					if (isUnbound(i) && this.argumentTypes[i].isPrimitive()) {
