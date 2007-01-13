@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,25 +36,32 @@ import org.springframework.util.Assert;
 
 /**
  * Bean post-processor that automatically applies persistence exception
- * translation to any bean that carries the Repository annotation.
+ * translation to any bean that carries the
+ * {@link org.springframework.stereotype.Repository} annotation,
+ * adding a corresponding {@link PersistenceExceptionTranslationAdvisor}
+ * to the exposed proxy (either an existing AOP proxy or a newly generated
+ * proxy that implements all of the target's interfaces).
  *
- * <p>Translates native resource exceptions to Spring's DataAccessException hierarchy.
- * Autodetects beans that implement the PersistenceExceptionTranslator interface,
- * which are subsequently asked to translate candidate exceptions.
+ * <p>Translates native resource exceptions to Spring's
+ * {@link org.springframework.dao.DataAccessException} hierarchy.
+ * Autodetects beans that implement the
+ * {@link org.springframework.dao.support.PersistenceExceptionTranslator}
+ * interface, which are subsequently asked to translate candidate exceptions.
  *
  * <p>All of Spring's applicable resource factories implement the
- * PersistenceExceptionTranslator interface out of the box. As a consequence,
- * all that is usually needed to enable automatic exception translation is
- * marking all affected beans (such as DAOs) with the Repository annotation,
- * along with defining this post-processor as bean in the application context.
+ * <code>PersistenceExceptionTranslator</code> interface out of the box.
+ * As a consequence, all that is usually needed to enable automatic exception
+ * translation is marking all affected beans (such as DAOs) with the
+ * <code>Repository</code> annotation, along with defining this post-processor
+ * as bean in the application context.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 2.0
+ * @see PersistenceExceptionTranslationAdvisor
  * @see org.springframework.stereotype.Repository
  * @see org.springframework.dao.DataAccessException
- * @see PersistenceExceptionTranslator
- * @see PersistenceExceptionTranslationAdvisor
+ * @see org.springframework.dao.support.PersistenceExceptionTranslator
  */
 public class PersistenceExceptionTranslationPostProcessor implements BeanPostProcessor, BeanFactoryAware, Ordered {
 
@@ -72,7 +79,7 @@ public class PersistenceExceptionTranslationPostProcessor implements BeanPostPro
 	 * @param repositoryAnnotationType the desired annotation type
 	 */
 	public void setRepositoryAnnotationType(Class<? extends Annotation> repositoryAnnotationType) {
-		Assert.notNull(repositoryAnnotationType, "requiredAnnotationType must not be null");
+		Assert.notNull(repositoryAnnotationType, "'requiredAnnotationType' must not be null");
 		this.repositoryAnnotationType = repositoryAnnotationType;
 	}
 
@@ -109,15 +116,8 @@ public class PersistenceExceptionTranslationPostProcessor implements BeanPostPro
 	}
 
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-		Class<?> targetClass;
-		if (bean instanceof Advised) {
-			Advised advised = (Advised) bean;
-			targetClass = advised.getTargetSource().getTargetClass();
-		}
-		else {
-			targetClass = bean.getClass();
-		}
-		
+		Class<?> targetClass =
+				(bean instanceof Advised ? ((Advised) bean).getTargetSource().getTargetClass() : bean.getClass());
 		if (targetClass == null) {
 			// Can't do much here
 			return bean;
@@ -125,14 +125,13 @@ public class PersistenceExceptionTranslationPostProcessor implements BeanPostPro
 		
 		if (AopUtils.canApply(this.persistenceExceptionTranslationAdvisor, targetClass)) {
 			if (bean instanceof Advised) {
-				Advised advised = (Advised) bean;
-				advised.addAdvisor(this.persistenceExceptionTranslationAdvisor);
+				((Advised) bean).addAdvisor(this.persistenceExceptionTranslationAdvisor);
 				return bean;
 			}
 			else {
 				ProxyFactory pf = new ProxyFactory(bean);
 				pf.addAdvisor(this.persistenceExceptionTranslationAdvisor);
-				return pf.getProxy();
+				return pf.getProxy(targetClass.getClassLoader());
 			}
 		}
 		else {
