@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,8 +75,8 @@ import org.springframework.core.Constants;
  * defined as placeholder values as well (for example in a default properties file).
  *
  * <p>Property values can be converted after reading them in, through overriding
- * the <code>convertPropertyValue</code> method. For example, encrypted values
- * can be detected and decrypted accordingly before processing them.
+ * the {@link #convertPropertyValue} method. For example, encrypted values can
+ * be detected and decrypted accordingly before processing them.
  *
  * @author Juergen Hoeller
  * @since 02.10.2003
@@ -284,8 +284,8 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 					// previously resolved placeholder value.
 					propVal = parseStringValue(propVal, props, visitedPlaceholders);
 					buf.replace(startIndex, endIndex + this.placeholderSuffix.length(), propVal);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Resolved placeholder '" + placeholder + "' to value [" + propVal + "]");
+					if (logger.isTraceEnabled()) {
+						logger.trace("Resolved placeholder '" + placeholder + "'");
 					}
 					startIndex = buf.toString().indexOf(this.placeholderPrefix, startIndex + propVal.length());
 				}
@@ -338,7 +338,7 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 
 	/**
 	 * Resolve the given placeholder using the given properties.
-	 * Default implementation simply checks for a corresponding property key.
+	 * The default implementation simply checks for a corresponding property key.
 	 * <p>Subclasses can override this for customized placeholder-to-key mappings
 	 * or custom resolution strategies, possibly just using the given properties
 	 * as fallback.
