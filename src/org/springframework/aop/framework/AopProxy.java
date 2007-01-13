@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,12 @@
 package org.springframework.aop.framework;
 
 /**
- * Strategy interface for a configured proxy,
- * allowing for creation of proxy objects.
+ * Strategy interface for a configured proxy, allowing for creation of proxy objects.
  *
- * <p>Out-of-the-box implementations are available
- * for JDK dynamic proxies and CGLIB.
+ * <p>Out-of-the-box implementations are available for dynamic proxies and for CGLIB.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @see JdkDynamicAopProxy
  * @see Cglib2AopProxy
  */
@@ -31,7 +30,7 @@ public interface AopProxy {
 
 	/**
 	 * Create a new proxy object.
-	 * <p>Uses the most optimal default class loader (if necessary for proxy creation):
+	 * <p>Uses the AopProxy's default class loader (if necessary for proxy creation):
 	 * usually, the thread context class loader.
 	 * @see java.lang.Thread#getContextClassLoader()
 	 */
@@ -42,7 +41,7 @@ public interface AopProxy {
 	 * <p>Uses the given class loader (if necessary for proxy creation).
 	 * <code>null</code> will simply be passed down and thus lead to the low-level
 	 * proxy facility's default, which is usually different from the default chosen
-	 * by the AopProxy implementation's <code>getProxy</code> method.
+	 * by the AopProxy implementation's {@link #getProxy()} method.
 	 * @param classLoader the class loader to create the proxy with
 	 * (or <code>null</code> for the low-level proxy facility's default)
 	 */
