@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
+
+	<bean id="adder" class="org.springframework.scripting.jruby.JRubyScriptFactory">
+		<constructor-arg>
+			<value>inline:
+require 'java'
+
+include_class 'org.springframework.scripting.jruby.PrimitiveAdder'
+
+class RubyPrimitiveAdder &lt; PrimitiveAdder
+
+	def addInts(x, y)
+		x + y
+	end
+
+	def addShorts(x, y)
+		x + y
+	end
+
+	def addLongs(x, y)
+		x + y
+	end
+
+	def addFloats(x, y)
+		x + y
+	end
+
+	def addDoubles(x, y)
+		x + y
+	end
+
+	def resultIsPositive(x, y)
+		(x + y) &gt; 0
+	end
+
+end
+			</value>
+		</constructor-arg>
+		<constructor-arg value="org.springframework.scripting.jruby.PrimitiveAdder"/>
+	</bean>
+</beans>

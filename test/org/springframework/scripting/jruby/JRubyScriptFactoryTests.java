@@ -203,6 +203,20 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertEquals(1, printable.count);
 	}
 
+	public void testWithPrimitiveArgsInReturnTypeAndParameters() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContextForPrimitives.xml", getClass());
+		PrimitiveAdder adder = (PrimitiveAdder) ctx.getBean("adder");
+		assertEquals(2, adder.addInts(1, 1));
+		assertEquals(4, adder.addShorts((short) 1, (short) 3));
+		assertEquals(5, adder.addLongs(2L, 3L));
+		assertEquals(5, new Float(adder.addFloats(2.0F, 3.1F)).intValue());
+		assertEquals(5, new Double(adder.addDoubles(2.0, 3.1)).intValue());
+		assertFalse(adder.resultIsPositive(-200, 1));
+	}
+
 
 	private static class CountingPrintable implements Printable {
 

@@ -151,7 +151,7 @@ public abstract class JRubyScriptUtils {
 
 			IRubyObject[] rubyArgs = convertToRuby(args);
 			IRubyObject result = this.rubyObject.callMethod(this.ruby.getCurrentContext(), method.getName(), rubyArgs);
-			return JavaUtil.convertRubyToJava(result);
+			return JavaUtil.convertRubyToJava(result, method.getReturnType());
 		}
 
 		private IRubyObject[] convertToRuby(Object[] javaArgs) {
