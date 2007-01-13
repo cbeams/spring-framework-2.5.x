@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,15 +52,15 @@ import org.springframework.util.Assert;
  * <p>You can either pass in a JMS Connection directly, or let this
  * factory lazily create a Connection via a given target ConnectionFactory.
  * In the latter case, this factory just works with JMS 1.1; use
- * SingleConnectionFactory102 for JMS 1.0.2.
+ * {@link SingleConnectionFactory102} for JMS 1.0.2.
  *
  * @author Mark Pollack
  * @author Juergen Hoeller
  * @since 1.1
  * @see #createConnection()
  * @see javax.jms.Connection#close()
- * @see org.springframework.jms.core.JmsTemplate
  * @see SingleConnectionFactory102
+ * @see org.springframework.jms.core.JmsTemplate
  */
 public class SingleConnectionFactory
 		implements ConnectionFactory, QueueConnectionFactory, TopicConnectionFactory, ExceptionListener,
@@ -129,7 +129,7 @@ public class SingleConnectionFactory
 	 * create a single Connection, if any.
 	 */
 	public ConnectionFactory getTargetConnectionFactory() {
-		return targetConnectionFactory;
+		return this.targetConnectionFactory;
 	}
 
 	/**
@@ -150,7 +150,7 @@ public class SingleConnectionFactory
 	 * by this ConnectionFactory, if any.
 	 */
 	protected String getClientId() {
-		return clientId;
+		return this.clientId;
 	}
 
 	/**
@@ -167,7 +167,7 @@ public class SingleConnectionFactory
 	 * with with the single Connection created by this factory, if any.
 	 */
 	protected ExceptionListener getExceptionListener() {
-		return exceptionListener;
+		return this.exceptionListener;
 	}
 
 	/**
@@ -190,7 +190,7 @@ public class SingleConnectionFactory
 	 * a JMSException is reported by the underlying Connection.
 	 */
 	protected boolean isReconnectOnException() {
-		return reconnectOnException;
+		return this.reconnectOnException;
 	}
 
 	/**
@@ -367,7 +367,7 @@ public class SingleConnectionFactory
 			classes.add(TopicConnection.class);
 		}
 		return (Connection) Proxy.newProxyInstance(
-				Connection.class.getClassLoader(),
+				getClass().getClassLoader(),
 				(Class[]) classes.toArray(new Class[classes.size()]),
 				new SharedConnectionInvocationHandler(target));
 	}
