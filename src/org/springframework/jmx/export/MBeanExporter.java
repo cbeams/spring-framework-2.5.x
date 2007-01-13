@@ -61,24 +61,25 @@ import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.MBeanRegistrationSupport;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Effects the exporting of any <i>Spring-managed bean</i> to a JMX
- * <code>MBeanServer</code>, without the need to define any JMX-specific
- * information in the bean classes.
+ * JMX exporter that allows for exposing any <i>Spring-managed bean</i>
+ * to a JMX <code>MBeanServer</code>, without the need to define any
+ * JMX-specific information in the bean classes.
  *
- * <p>If the bean implements one of the JMX management interfaces then
- * <code>MBeanExporter</code> can simply register the MBean with the server
+ * <p>If the bean implements one of the JMX management interfaces,
+ * then MBeanExporter can simply register the MBean with the server
  * automatically, through its autodetection process.
  *
- * <p>If the bean does not implement one of the JMX management interfaces then
- * <code>MBeanExporter</code> will create the management information using the
+ * <p>If the bean does not implement one of the JMX management interfaces,
+ * then MBeanExporter will create the management information using the
  * supplied {@link MBeanInfoAssembler} implementation.
  *
- * <p>A list of {@link MBeanExporterListener MBeanExporterListeners} can
- * be registered via the
+ * <p>A list of {@link MBeanExporterListener MBeanExporterListeners}
+ * can be registered via the
  * {@link #setListeners(MBeanExporterListener[]) listeners} property,
  * allowing application code to be notified of MBean registration and
  * unregistration events.
@@ -163,7 +164,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	private ObjectNamingStrategy namingStrategy = new KeyNamingStrategy();
 
 	/** Stores the ClassLoader to use for generating lazy-init proxies */
-	private ClassLoader beanClassLoader;
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/** Stores the BeanFactory for use in autodetection process */
 	private ListableBeanFactory beanFactory;

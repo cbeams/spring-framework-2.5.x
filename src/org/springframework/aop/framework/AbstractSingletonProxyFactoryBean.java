@@ -51,7 +51,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 	/** Default is global AdvisorAdapterRegistry */
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
-	private ClassLoader beanClassLoader;
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private Object proxy;
 

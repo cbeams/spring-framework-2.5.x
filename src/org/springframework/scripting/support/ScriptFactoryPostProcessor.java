@@ -147,7 +147,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 	private long defaultRefreshCheckDelay = -1;
 
-	private ClassLoader beanClassLoader;
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private AbstractBeanFactory beanFactory;
 

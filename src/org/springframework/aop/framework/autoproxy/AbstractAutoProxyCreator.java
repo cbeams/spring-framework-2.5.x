@@ -123,7 +123,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	private TargetSourceCreator[] customTargetSourceCreators;
 
-	private ClassLoader beanClassLoader;
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private BeanFactory beanFactory;
 
