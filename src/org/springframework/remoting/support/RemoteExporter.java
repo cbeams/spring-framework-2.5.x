@@ -36,9 +36,7 @@ import org.springframework.util.ClassUtils;
  */
 public abstract class RemoteExporter implements BeanClassLoaderAware {
 
-	/**
-	 * Logger, available to subclasses.
-	 */
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Object service;
@@ -67,11 +65,11 @@ public abstract class RemoteExporter implements BeanClassLoaderAware {
 
 	/**
 	 * Set the interface of the service to export.
-	 * The interface must be suitable for the particular service and remoting tool.
+	 * The interface must be suitable for the particular service and remoting strategy.
 	 */
 	public void setServiceInterface(Class serviceInterface) {
 		if (serviceInterface != null && !serviceInterface.isInterface()) {
-			throw new IllegalArgumentException("serviceInterface must be an interface");
+			throw new IllegalArgumentException("'serviceInterface' must be an interface");
 		}
 		this.serviceInterface = serviceInterface;
 	}
@@ -116,7 +114,7 @@ public abstract class RemoteExporter implements BeanClassLoaderAware {
 	 */
 	protected void checkService() throws IllegalArgumentException {
 		if (this.service == null) {
-			throw new IllegalArgumentException("service is required");
+			throw new IllegalArgumentException("'service' is required");
 		}
 	}
 
@@ -143,7 +141,7 @@ public abstract class RemoteExporter implements BeanClassLoaderAware {
 	 * service interface.
 	 * <p>Used to export a proxy that does not expose any internals but just
 	 * a specific interface intended for remote access. Furthermore, a
-	 * RemoteInvocationTraceInterceptor gets registered (by default).
+	 * {@link RemoteInvocationTraceInterceptor} will be registered (by default).
 	 * @return the proxy
 	 * @see #setServiceInterface
 	 * @see #setRegisterTraceInterceptor
