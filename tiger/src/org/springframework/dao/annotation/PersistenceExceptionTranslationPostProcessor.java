@@ -24,6 +24,7 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -33,6 +34,7 @@ import org.springframework.dao.support.ChainedPersistenceExceptionTranslator;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Bean post-processor that automatically applies persistence exception
@@ -63,9 +65,12 @@ import org.springframework.util.Assert;
  * @see org.springframework.dao.DataAccessException
  * @see org.springframework.dao.support.PersistenceExceptionTranslator
  */
-public class PersistenceExceptionTranslationPostProcessor implements BeanPostProcessor, BeanFactoryAware, Ordered {
+public class PersistenceExceptionTranslationPostProcessor
+		implements BeanPostProcessor, BeanClassLoaderAware, BeanFactoryAware, Ordered {
 
 	private Class<? extends Annotation> repositoryAnnotationType = Repository.class;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private PersistenceExceptionTranslationAdvisor persistenceExceptionTranslationAdvisor;
 
@@ -81,6 +86,10 @@ public class PersistenceExceptionTranslationPostProcessor implements BeanPostPro
 	public void setRepositoryAnnotationType(Class<? extends Annotation> repositoryAnnotationType) {
 		Assert.notNull(repositoryAnnotationType, "'requiredAnnotationType' must not be null");
 		this.repositoryAnnotationType = repositoryAnnotationType;
+	}
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -131,7 +140,7 @@ public class PersistenceExceptionTranslationPostProcessor implements BeanPostPro
 			else {
 				ProxyFactory pf = new ProxyFactory(bean);
 				pf.addAdvisor(this.persistenceExceptionTranslationAdvisor);
-				return pf.getProxy(targetClass.getClassLoader());
+				return pf.getProxy(this.beanClassLoader);
 			}
 		}
 		else {

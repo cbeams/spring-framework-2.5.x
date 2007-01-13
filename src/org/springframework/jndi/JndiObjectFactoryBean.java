@@ -19,7 +19,9 @@ package org.springframework.jndi;
 import javax.naming.NamingException;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.util.ClassUtils;
 
 /**
  * FactoryBean that looks up a JNDI object. Exposes the object found in JNDI
@@ -55,7 +57,7 @@ import org.springframework.beans.factory.FactoryBean;
  * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
  * @see org.springframework.jdbc.datasource.DriverManagerDataSource
  */
-public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryBean {
+public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryBean, BeanClassLoaderAware {
 
 	private Class proxyInterface;
 
@@ -64,6 +66,8 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	private boolean cache = true;
 
 	private Object defaultObject;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private Object jndiObject;
 
@@ -119,6 +123,10 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	 */
 	public void setDefaultObject(Object defaultObject) {
 		this.defaultObject = defaultObject;
+	}
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
 	}
 
 
@@ -228,7 +236,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 			ProxyFactory proxyFactory = new ProxyFactory();
 			proxyFactory.addInterface(jof.proxyInterface);
 			proxyFactory.setTargetSource(targetSource);
-			return proxyFactory.getProxy(jof.proxyInterface.getClassLoader());
+			return proxyFactory.getProxy(jof.beanClassLoader);
 		}
 	}
 

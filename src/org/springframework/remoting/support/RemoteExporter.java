@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -33,7 +34,7 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 26.12.2003
  */
-public abstract class RemoteExporter {
+public abstract class RemoteExporter implements BeanClassLoaderAware {
 
 	/**
 	 * Logger, available to subclasses.
@@ -45,6 +46,8 @@ public abstract class RemoteExporter {
 	private Class serviceInterface;
 
 	private boolean registerTraceInterceptor = true;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 
 	/**
@@ -102,6 +105,10 @@ public abstract class RemoteExporter {
 		return this.registerTraceInterceptor;
 	}
 
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
 
 	/**
 	 * Check whether the service reference has been set.
@@ -151,7 +158,7 @@ public abstract class RemoteExporter {
 			proxyFactory.addAdvice(new RemoteInvocationTraceInterceptor(getExporterName()));
 		}
 		proxyFactory.setTarget(getService());
-		return proxyFactory.getProxy(getServiceInterface().getClassLoader());
+		return proxyFactory.getProxy(this.beanClassLoader);
 	}
 
 	/**
