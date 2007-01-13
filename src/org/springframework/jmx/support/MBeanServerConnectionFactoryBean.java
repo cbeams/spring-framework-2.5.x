@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,11 @@ import javax.management.remote.JMXServiceURL;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.AbstractLazyCreationTargetSource;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.ClassUtils;
 
 /**
  * <code>FactoryBean</code> implementation that creates an <code>MBeanServerConnection</code>
@@ -44,13 +46,16 @@ import org.springframework.beans.factory.InitializingBean;
  * @see MBeanServerFactoryBean
  * @see ConnectorServerFactoryBean
  */
-public class MBeanServerConnectionFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
+public class MBeanServerConnectionFactoryBean
+		implements FactoryBean, BeanClassLoaderAware, InitializingBean, DisposableBean {
 
 	private JMXServiceURL serviceUrl;
 
 	private Map environment;
 
 	private boolean connectOnStartup = true;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private JMXConnector connector;
 
@@ -91,6 +96,10 @@ public class MBeanServerConnectionFactoryBean implements FactoryBean, Initializi
 		this.connectOnStartup = connectOnStartup;
 	}
 
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
 
 	/**
 	 * Creates a <code>JMXConnector</code> for the given settings
@@ -125,10 +134,10 @@ public class MBeanServerConnectionFactoryBean implements FactoryBean, Initializi
 		this.connectorTargetSource = new JMXConnectorLazyInitTargetSource();
 		TargetSource connectionTargetSource = new MBeanServerConnectionLazyInitTargetSource();
 
-		this.connector =
-				(JMXConnector) ProxyFactory.getProxy(JMXConnector.class, this.connectorTargetSource);
-		this.connection =
-				(MBeanServerConnection) ProxyFactory.getProxy(MBeanServerConnection.class, connectionTargetSource);
+		this.connector = (JMXConnector)
+				new ProxyFactory(JMXConnector.class, this.connectorTargetSource).getProxy(this.beanClassLoader);
+		this.connection = (MBeanServerConnection)
+				new ProxyFactory(MBeanServerConnection.class, connectionTargetSource).getProxy(this.beanClassLoader);
 	}
 
 
@@ -156,8 +165,8 @@ public class MBeanServerConnectionFactoryBean implements FactoryBean, Initializi
 
 
 	/**
-	 * Lazily creates a <code>JMXConnector</code> using the configured service URL and
-	 * environment properties
+	 * Lazily creates a <code>JMXConnector</code> using the configured service URL
+	 * and environment properties.
 	 * @see MBeanServerConnectionFactoryBean#setServiceUrl(String)
 	 * @see MBeanServerConnectionFactoryBean#setEnvironment(java.util.Properties)
 	 */
@@ -168,7 +177,7 @@ public class MBeanServerConnectionFactoryBean implements FactoryBean, Initializi
 		}
 
 		public Class getTargetClass() {
-			return (connector != null ? connector.getClass() : JMXConnector.class);
+			return JMXConnector.class;
 		}
 	}
 
@@ -183,7 +192,7 @@ public class MBeanServerConnectionFactoryBean implements FactoryBean, Initializi
 		}
 
 		public Class getTargetClass() {
-			return getObjectType();
+			return MBeanServerConnection.class;
 		}
 	}
 
