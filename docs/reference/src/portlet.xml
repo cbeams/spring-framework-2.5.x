@@ -1048,6 +1048,16 @@ public class SampleController extends AbstractController {
 		multipart attribute in your request will be treated like any other 
 		attribute.</para>
 
+		<note>
+			<para>Any configured <interfacename>PortletMultipartResolver</interfacename>
+			bean <emphasis>must</emphasis> have the following id (or name):
+			"<literal>portletMultipartResolver</literal>". If you have defined your
+			<interfacename>PortletMultipartResolver</interfacename> with any other name,
+			then the <classname>DispatcherPortlet</classname> will <emphasis>not</emphasis>
+			find your <interfacename>PortletMultipartResolver</interfacename>, and
+			consequently no multipart support will be in effect.</para>
+		</note>
+
 		<section id="portlet-multipart-resolver">
 
 			<title>Using the <interfacename>PortletMultipartResolver</interfacename></title>
