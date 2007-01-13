@@ -61,7 +61,6 @@ import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.MBeanRegistrationSupport;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -136,7 +135,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	/** Constants instance for this class */
 	private static final Constants constants = new Constants(MBeanExporter.class);
 
-	/** The beans to be exposed as JMX managed resources */
+	/** The beans to be exposed as JMX managed resources, with JMX names as keys */
 	private Map beans;
 
 	/** The autodetect mode to use for this MBeanExporter */
@@ -148,7 +147,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	/** Indicates whether Spring should expose the managed resource ClassLoader in the MBean */
 	private boolean exposeManagedResourceClassLoader = false;
 
-	/** A list of bean names that should be excluded from autodetection */
+	/** A set of bean names that should be excluded from autodetection */
 	private Set excludedBeans;
 
 	/** The MBeanExporterListeners registered with this exporter. */
@@ -164,7 +163,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	private ObjectNamingStrategy namingStrategy = new KeyNamingStrategy();
 
 	/** Stores the ClassLoader to use for generating lazy-init proxies */
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+	private ClassLoader beanClassLoader;
 
 	/** Stores the BeanFactory for use in autodetection process */
 	private ListableBeanFactory beanFactory;
