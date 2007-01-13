@@ -38,7 +38,7 @@ import org.springframework.util.ClassUtils;
  * using dynamic class download with standard RMI! (See the RMI documentation
  * for details.)
  *
- * <p>Even if residing in the RMI package, this class is <i>not</i> used for
+ * <p>Despite residing in the RMI package, this class is <i>not</i> used for
  * RmiClientInterceptor, which uses the standard RMI infrastructure instead
  * and thus is only able to rely on RMI's standard dynamic class download via
  * "java.rmi.server.codebase". CodebaseAwareObjectInputStream is used by
@@ -96,7 +96,7 @@ public class CodebaseAwareObjectInputStream extends ObjectInputStream {
 		try {
 			if (this.classLoader != null) {
 				// Use the specified ClassLoader to resolve local classes.
-				return this.classLoader.loadClass(classDesc.getName());
+				return Class.forName(classDesc.getName(), false, this.classLoader);
 			}
 			else {
 				// Let RMI use it's default ClassLoader...
@@ -130,7 +130,7 @@ public class CodebaseAwareObjectInputStream extends ObjectInputStream {
 			Class[] resolvedInterfaces = new Class[interfaces.length];
 			for (int i = 0; i < interfaces.length; i++) {
 				try {
-					resolvedInterfaces[i] = this.classLoader.loadClass(interfaces[i]);
+					resolvedInterfaces[i] = Class.forName(interfaces[i], false, this.classLoader);
 				}
 				catch (ClassNotFoundException ex) {
 					if (this.codebaseUrl == null) {

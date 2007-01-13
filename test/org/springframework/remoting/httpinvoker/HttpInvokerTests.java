@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -37,6 +38,7 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.remoting.RemoteAccessException;
@@ -52,6 +54,14 @@ import org.springframework.remoting.support.RemoteInvocationResult;
 public class HttpInvokerTests extends TestCase {
 
 	public void testHttpInvokerProxyFactoryBeanAndServiceExporter() throws Throwable {
+		doTestHttpInvokerProxyFactoryBeanAndServiceExporter(false);
+	}
+
+	public void testHttpInvokerProxyFactoryBeanAndServiceExporterWithExplicitClassLoader() throws Throwable {
+		doTestHttpInvokerProxyFactoryBeanAndServiceExporter(true);
+	}
+
+	private void doTestHttpInvokerProxyFactoryBeanAndServiceExporter(boolean explicitClassLoader) throws Throwable {
 		TestBean target = new TestBean("myname", 99);
 
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter();
@@ -75,6 +85,9 @@ public class HttpInvokerTests extends TestCase {
 						new ByteArrayInputStream(response.getContentAsByteArray()), config.getCodebaseUrl());
 			}
 		});
+		if (explicitClassLoader) {
+			((BeanClassLoaderAware) pfb.getHttpInvokerRequestExecutor()).setBeanClassLoader(getClass().getClassLoader());
+		}
 
 		pfb.afterPropertiesSet();
 		ITestBean proxy = (ITestBean) pfb.getObject();
@@ -82,6 +95,8 @@ public class HttpInvokerTests extends TestCase {
 		assertEquals(99, proxy.getAge());
 		proxy.setAge(50);
 		assertEquals(50, proxy.getAge());
+		proxy.setStringArray(new String[] {"str1", "str2"});
+		assertTrue(Arrays.equals(new String[] {"str1", "str2"}, proxy.getStringArray()));
 
 		try {
 			proxy.exceptional(new IllegalStateException());
