@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
@@ -37,7 +38,7 @@ import org.springframework.util.ClassUtils;
  * @since 2.0
  */
 public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
-		implements FactoryBean, InitializingBean {
+		implements FactoryBean, BeanClassLoaderAware, InitializingBean {
 
 	private Object target;
 
@@ -49,6 +50,8 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 
 	/** Default is global AdvisorAdapterRegistry */
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
+
+	private ClassLoader beanClassLoader;
 
 	private Object proxy;
 
@@ -110,6 +113,10 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		this.advisorAdapterRegistry = advisorAdapterRegistry;
 	}
 
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
 
 	public void afterPropertiesSet() {
 		if (this.target == null) {
@@ -169,15 +176,15 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 
 	/**
 	 * Return the proxy object to expose.
-	 * <p>Default implementation uses a plain <code>getProxy()</code> call.
-	 * Can be overridden to specify a custom class loader.
+	 * <p>The default implementation uses a <code>getProxy</code> call with
+	 * the factory's bean class loader. Can be overridden to specify a
+	 * custom class loader.
 	 * @param aopProxy the prepared AopProxy instance to get the proxy from
 	 * @return the proxy object to expose
-	 * @see org.springframework.aop.framework.AopProxy#getProxy()
-	 * @see org.springframework.aop.framework.AopProxy#getProxy(ClassLoader)
+	 * @see AopProxy#getProxy(ClassLoader)
 	 */
 	protected Object getProxy(AopProxy aopProxy) {
-		return aopProxy.getProxy();
+		return aopProxy.getProxy(this.beanClassLoader);
 	}
 
 

@@ -35,6 +35,7 @@ import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -83,7 +84,7 @@ import org.springframework.util.ClassUtils;
  * @see DefaultAdvisorAutoProxyCreator
  */
 public abstract class AbstractAutoProxyCreator extends ProxyConfig
-		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware, Ordered {
+		implements InstantiationAwareBeanPostProcessor, BeanClassLoaderAware, BeanFactoryAware, Ordered {
 
 	/**
 	 * Convenience constant for subclasses: Return value for "do not proxy".
@@ -121,6 +122,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	private boolean applyCommonInterceptorsFirst = true;
 
 	private TargetSourceCreator[] customTargetSourceCreators;
+
+	private ClassLoader beanClassLoader;
 
 	private BeanFactory beanFactory;
 
@@ -203,6 +206,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 */
 	public void setApplyCommonInterceptorsFirst(boolean applyCommonInterceptorsFirst) {
 		this.applyCommonInterceptorsFirst = applyCommonInterceptorsFirst;
+	}
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
@@ -371,9 +378,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		if (!isProxyTargetClass()) {
 			// Must allow for introductions; can't just set interfaces to
 			// the target's interfaces only.
-			Class[] targetsInterfaces = ClassUtils.getAllInterfacesForClass(beanClass);
-			for (int i = 0; i < targetsInterfaces.length; i++) {
-				proxyFactory.addInterface(targetsInterfaces[i]);
+			Class[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass);
+			for (int i = 0; i < targetInterfaces.length; i++) {
+				proxyFactory.addInterface(targetInterfaces[i]);
 			}
 		}
 
@@ -386,7 +393,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		customizeProxyFactory(proxyFactory);
 
 		proxyFactory.setFrozen(this.freezeProxy);
-		return proxyFactory.getProxy();
+		return proxyFactory.getProxy(this.beanClassLoader);
 	}
 
 	/**
@@ -398,7 +405,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @return the list of Advisors for the given bean
 	 */
 	protected Advisor[] buildAdvisors(String beanName, Object[] specificInterceptors) {
-		// handle prototypes correctly
+		// Handle prototypes correctly...
 		Advisor[] commonInterceptors = resolveInterceptorNames();
 
 		List allInterceptors = new ArrayList();
