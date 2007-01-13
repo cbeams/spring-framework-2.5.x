@@ -696,7 +696,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 	 * @see #doRescheduleTask
 	 */
 	protected final boolean rescheduleTaskIfNecessary(Object task) {
-		Assert.notNull(task, "Task object must bot be null");
+		Assert.notNull(task, "Task object must not be null");
 		synchronized (this.lifecycleMonitor) {
 			if (this.running) {
 				doRescheduleTask(task);
@@ -714,9 +714,9 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 
 	/**
 	 * Reschedule the given task object immediately.
-	 * To be implemented by subclasses if they ever call
+	 * <p>To be implemented by subclasses if they ever call
 	 * <code>rescheduleTaskIfNecessary</code>.
-	 * <p>This implementation throws an UnsupportedOperationException.
+	 * This implementation throws an UnsupportedOperationException.
 	 * @param task the task object to reschedule
 	 * @see #rescheduleTaskIfNecessary
 	 */
