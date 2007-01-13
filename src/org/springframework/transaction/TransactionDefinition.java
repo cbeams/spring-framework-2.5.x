@@ -240,8 +240,7 @@ public interface TransactionDefinition {
 	 * <p>This just serves as a hint for the actual transaction subsystem;
 	 * it will <i>not necessarily</i> cause failure of write access attempts.
 	 * A transaction manager that cannot interpret the read-only hint will
-	 * <i>not</i> throw an exception when given asked for a read-only
-	 * transaction.
+	 * <i>not</i> throw an exception when asked for a read-only transaction.
 	 * @return <code>true</code> if the transaction is to be optimized as read-only 
 	 * @see org.springframework.transaction.support.TransactionSynchronization#beforeCommit(boolean)
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isCurrentTransactionReadOnly()

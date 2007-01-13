@@ -30,23 +30,27 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Superclass for transactional aspects, such as the AOP Alliance-compatible
- * TransactionInterceptor, or an AspectJ aspect. This enables the underlying
- * Spring transaction infrastructure to be used easily to implement an aspect
- * for any aspect system.
+ * <code>TransactionInterceptor</code>, or an AspectJ aspect.
+ *
+ * <p>This enables the underlying Spring transaction infrastructure to be used
+ * easily to implement an aspect for any aspect system.
  *
  * <p>Subclasses are responsible for calling methods in this class in the
  * correct order.
  *
- * <p>If no transaction name has been specified in the TransactionAttribute,
- * the exposed name will be the fully-qualified class name + "." + method name
+ * <p>If no transaction name has been specified in the
+ * <code>TransactionAttribute</code>, the exposed name will be the
+ * <code>fully-qualified class name + "." + method name</code>
  * (by default).
  *
- * <p>Uses the <b>Strategy</b> design pattern. A PlatformTransactionManager
- * implementation will perform the actual transaction management, and a
- * TransactionAttributeSource is used for determining transaction definitions.
+ * <p>Uses the <b>Strategy</b> design pattern. A
+ * <code>PlatformTransactionManager</code> implementation will perform the
+ * actual transaction management, and a <code>TransactionAttributeSource</code>
+ * is used for determining transaction definitions.
  *
- * <p>A transaction aspect is serializable if its PlatformTransactionManager
- * and TransactionAttributeSource are serializable.
+ * <p>A transaction aspect is serializable if it's
+ * <code>PlatformTransactionManager</code> and
+ * <code>TransactionAttributeSource</code> are serializable.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

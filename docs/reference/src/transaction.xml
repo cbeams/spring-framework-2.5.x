@@ -989,7 +989,14 @@ Exception in thread "main" java.lang.UnsupportedOperationException
                     </tgroup>
                 </table>
             </para>
-        </section>
+			<para>At the time of writing it is not possible to have explicit control over the
+			name of a transaction, where 'name' means the transaction name that will be shown
+			in a transaction monitor, if applicable (for example, WebLogic's transaction
+			monitor), and in logging output. For declarative transactions, the transaction
+			name is always the fully-qualified class name + "." + method name of the
+			transactionally-advised class. For example
+			<literal>'com.foo.BusinessService.handlePayment'</literal>.</para>
+		</section>
 
         <section id="transaction-declarative-annotations">
             <title>Using <interfacename>@Transactional</interfacename></title>
@@ -1237,6 +1244,14 @@ public class DefaultFooService implements FooService {
                         </tgroup>
                     </table>
                 </para>
+				<para>At the time of writing it is not possible to have explicit
+				control over the name of a transaction, where 'name' means the
+				transaction name that will be shown in a transaction monitor, if
+				applicable (for example, WebLogic's transaction monitor), and in
+				logging output. For declarative transactions, the transaction
+				name is always the fully-qualified class name + "." + method name
+				of the transactionally-advised class. For example
+				<literal>'com.foo.BusinessService.handlePayment'</literal>.</para>
             </section>
         </section>
         <section id="transaction-declarative-applying-more-than-just-tx-advice">
@@ -1534,6 +1549,7 @@ AnnotationTransactionAspect.aspectOf().setTransactionManager (txManager); ]]></p
             <interfacename>TransactionStatus</interfacename> objects you can
             initiate transactions, rollback and commit.</para>
            <programlisting><![CDATA[DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+def.setTransactionName("SomeTxName"); ]]><lineannotation>// explicitly setting the transaction name is something that can only be done programmatically</lineannotation><![CDATA[
 def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
 TransactionStatus status = txManager.getTransaction(def);
@@ -1554,7 +1570,9 @@ txManager.commit(status);]]></programlisting>
         have a web application that require transactions only for certain update
         operations, you may not want to set up transactional proxies using Spring
         or any other technology. In this case, using the <classname>TransactionTemplate</classname>
-        <emphasis>may</emphasis> be a good approach.</para>
+        <emphasis>may</emphasis> be a good approach. Being able to set the transaction name
+		explicitly is also something that can only be done using the programmatic
+		approach to transaction management.</para>
         <para>On the other hand, if your application has numerous transactional
         operations, declarative transaction management is usually worthwhile. It
         keeps transaction management out of business logic, and is not difficult
