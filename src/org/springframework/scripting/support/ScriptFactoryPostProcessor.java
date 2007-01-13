@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -123,7 +124,7 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  */
 public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
-		implements BeanFactoryAware, ResourceLoaderAware, DisposableBean {
+		implements BeanClassLoaderAware, BeanFactoryAware, ResourceLoaderAware, DisposableBean {
 
 	/**
 	 * The {@link org.springframework.core.io.Resource}-style prefix that denotes
@@ -146,6 +147,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 	private long defaultRefreshCheckDelay = -1;
 
+	private ClassLoader beanClassLoader;
+
 	private AbstractBeanFactory beanFactory;
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
@@ -163,6 +166,10 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 */
 	public void setDefaultRefreshCheckDelay(long defaultRefreshCheckDelay) {
 		this.defaultRefreshCheckDelay = defaultRefreshCheckDelay;
+	}
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
@@ -356,7 +363,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		introduction.suppressInterface(TargetSource.class);
 		proxyFactory.addAdvice(introduction);
 
-		return proxyFactory.getProxy();
+		return proxyFactory.getProxy(this.beanClassLoader);
 	}
 
 
