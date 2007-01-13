@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,26 +32,28 @@ import org.springframework.util.ClassUtils;
 /**
  * Convenient proxy factory bean for scoped objects.
  * 
- * <p>Proxies created using this factory bean are thread-safe singletons,
- * and may be injected, with transparent scoping behavior.
+ * <p>Proxies created using this factory bean are thread-safe singletons
+ * and may be injected into shared objects, with transparent scoping behavior.
  *
- * <p>Proxies returned by this class implement the {@link ScopedObject}
- * interface. This presently allows removing corresponding object from
- * the scope, seamlessly creating a new instance in the scope on next
- * access.
+ * <p>Proxies returned by this class implement the {@link ScopedObject} interface.
+ * This presently allows for removing the corresponding object from the scope,
+ * seamlessly creating a new instance in the scope on next access.
  * 
  * <p>Please note that the proxies created by this factory are
- * <i>class-based</i> proxies.
+ * <i>class-based</i> proxies by default. This can be customized
+ * through switching the "proxyTargetClass" property to "false".
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 2.0
+ * @see #setProxyTargetClass
  */
 public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, BeanFactoryAware {
 
 	/** The TargetSource that manages scoping */
 	private final PrototypeTargetSource scopedTargetSource = new PrototypeTargetSource();
 
+	/** The name of the target bean */
 	private String targetBeanName;
 
 	/** The cached singleton proxy */
@@ -67,8 +69,7 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, 
 
 
 	/**
-	 * Sets the name of the bean that is to be scoped.
-	 * @param targetBeanName the name of the bean that is to be scoped.
+	 * Set the name of the bean that is to be scoped.
 	 */
 	public void setTargetBeanName(String targetBeanName) {
 		this.targetBeanName = targetBeanName;
@@ -92,7 +93,7 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, 
 			throw new IllegalStateException("Cannot create scoped proxy for bean '" + this.targetBeanName +
 					"': Target type could not be determined at the time of proxy creation.");
 		}
-		if (Modifier.isPrivate(beanType.getModifiers()) || beanType.isInterface() || !isProxyTargetClass()) {
+		if (!isProxyTargetClass() || beanType.isInterface() || Modifier.isPrivate(beanType.getModifiers())) {
 			pf.setInterfaces(ClassUtils.getAllInterfacesForClass(beanType));
 		}
 
@@ -100,7 +101,7 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, 
 		ScopedObject scopedObject = new DefaultScopedObject(cbf, this.scopedTargetSource.getTargetBeanName());
 		pf.addAdvice(new DelegatingIntroductionInterceptor(scopedObject));
 
-		this.proxy = pf.getProxy();
+		this.proxy = pf.getProxy(cbf.getBeanClassLoader());
 	}
 
 
