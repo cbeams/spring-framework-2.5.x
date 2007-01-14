@@ -3,11 +3,50 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 2.0.3 (19.2.2007)
-------------------------------------
+Changes in version 2.0.3 (5.2.2007)
+-----------------------------------
+
+Package org.springframework.aop
+* added overloaded ProxyFactory constructors for single-interceptor and TargetSource-only proxies
+* AbstractSingletonProxyFactoryBean and AbstractAutoProxyCreator use the bean ClassLoader for generating proxies
+* ScopedProxyFactoryBean uses the BeanFactory's bean ClassLoader for generating scoped proxies
+* AspectJAdviceParameterNameDiscoverer properly considers reference pointcuts as potential source of parameter binding
 
 Package org.springframework.beans
+* PropertyPlaceholderConfigurer does not log resolved (potentially decrypted) placeholder values at debug level anymore
 * turned visibility of AbstractAutowireCapableBeanFactory's "applyPropertyValues" method from private to protected
+
+Package org.springframework.dao
+* PersistenceExceptionTranslationPostProcessor uses the bean ClassLoader for generating translation proxies
+
+Package org.springframework.ejb
+* AbstractEnterpriseBean uses the EJB instance as WeakReferenceMonitor handle, instead of a BeanFactoryReference proxy
+
+Package org.springframework.jms
+* added dynamic scaling up/down to DefaultMessageListenerContainer, configured through "maxConcurrentConsumers" property
+
+Package org.springframework.jmx
+* MBeanExporter and MBeanServerConnectionFactoryBean use the bean ClassLoader for generating lazy-init proxies
+
+Package org.springframework.jndi
+* JndiObjectFactoryBean uses the bean ClassLoader for generating lazy-init proxies
+
+Package org.springframework.mock
+* added "clearAttributes()" method to MockHttpServletRequest and MockHttpSession
+
+Package org.springframework.remoting
+* all remoting ProxyFactoryBeans use the bean ClassLoader for generating service proxies
+* RemoteExporter uses the bean ClassLoader for generating service proxies
+* CodebaseAwareObjectInputStream uses "Class.forName", to be able to resolve array classes with any ClassLoader
+
+Package org.springframework.scripting
+* Bsh/JRuby/GroovyScriptFactory uses the bean ClassLoader for generating script objects
+* BshScriptUtils and BshScriptFactory support BeanShell scripts that declare an actual class or instance
+* JRubyScriptUtils passes the declared return type to JRuby, for proper conversion of number types
+* ScriptFactoryPostProcessor uses the bean ClassLoader for generating refreshable script proxies
+
+Package org.springframework.web
+* RequestContextListener works correctly even in case of the "requestDestroyed" callback coming from a different thread
 
 
 Changes in version 2.0.2 (8.1.2007)
