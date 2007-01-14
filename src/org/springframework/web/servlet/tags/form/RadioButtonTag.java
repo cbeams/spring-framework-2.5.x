@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
-
-import org.springframework.util.ObjectUtils;
 
 /**
  * Databinding-aware JSP tag for rendering an HTML '<code>input</code>'
@@ -42,7 +40,7 @@ public class RadioButtonTag extends AbstractHtmlInputElementTag {
 
 
 	/**
-	 * Sets the value of the '<code>value</code>' attribute.
+	 * Set the value of the '<code>value</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setValue(Object value) {
@@ -50,7 +48,7 @@ public class RadioButtonTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Gets the value of the '<code>value</code>' attribute.
+	 * Get the value of the '<code>value</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	protected Object getValue() {
@@ -81,8 +79,7 @@ public class RadioButtonTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Returns a unique ID for the bound name within the current PageContext.
-	 * @see TagIdGenerator#nextId
+	 * Return a unique ID for the bound name within the current PageContext.
 	 */
 	protected String autogenerateId() throws JspException {
 		return TagIdGenerator.nextId(getName(), this.pageContext);

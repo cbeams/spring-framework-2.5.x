@@ -946,11 +946,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * are defined by an ignored dependency interface.
 	 * @param pd the PropertyDescriptor of the bean property
 	 * @return whether the bean property is excluded
-	 * @see AutowireUtils#isExcludedFromDependencyCheck(java.beans.PropertyDescriptor)
 	 * @see #ignoreDependencyType(Class)
 	 * @see #ignoreDependencyInterface(Class)
-	 * @see AutowireUtils#isExcludedFromDependencyCheck
-	 * @see AutowireUtils#isSetterDefinedInInterface
 	 */
 	protected boolean isExcludedFromDependencyCheck(PropertyDescriptor pd) {
 		synchronized (this.excludedPropertyDescriptorsCache) {

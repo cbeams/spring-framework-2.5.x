@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,16 +54,16 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 
 
 	/**
-	 * Sets the value of the '<code>value</code>' attribute.
+	 * Set the value of the '<code>value</code>' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setValue(Object value) {
-		Assert.notNull(value, "'value' cannot be null.");
+		Assert.notNull(value, "'value' must not be null");
 		this.value = value;
 	}
 
 	/**
-	 * Gets the value of the '<code>value</code>' attribute.
+	 * Get the value of the '<code>value</code>' attribute.
 	 * May be a runtime expression.                                              
 	 */
 	protected Object getValue() {
@@ -72,7 +72,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 
 
 	/**
-	 * Writes the '<code>input(checkbox)</code>' to the supplied {@link TagWriter}
+	 * Writes the '<code>input(checkbox)</code>' to the supplied {@link TagWriter},
 	 * marking it as 'checked' if appropriate.
 	 */
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
@@ -81,8 +81,8 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 		tagWriter.writeAttribute("type", "checkbox");
 
 		Object boundValue = getBoundValue();
-
 		Class valueType = getBindStatus().getValueType();
+
 		if (Boolean.class.equals(valueType) || boolean.class.equals(valueType)) {
 			// the concrete type may not be a Boolean - can be String
 			if (boundValue instanceof String) {
@@ -91,8 +91,8 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 			Boolean booleanValue = (boundValue != null ? (Boolean) boundValue : Boolean.FALSE);
 			renderFromBoolean(booleanValue, tagWriter);
 		}
-		else {
 
+		else {
 			Object value = getValue();
 			if (value == null) {
 				throw new IllegalArgumentException("Attribute 'value' is required when binding to non-boolean values");
@@ -126,7 +126,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Renders the '<code>input(checkbox)</code>' with the supplied value, marking the
+	 * Render the '<code>input(checkbox)</code>' with the supplied value, marking the
 	 * '<code>input</code>' element as 'checked' if the supplied value matches the
 	 * bound value.
 	 */
@@ -139,7 +139,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Renders the '<code>input(checkbox)</code>' with the supplied value, marking
+	 * Render the '<code>input(checkbox)</code>' with the supplied value, marking
 	 * the '<code>input</code>' element as 'checked' if the supplied value is
 	 * present in the bound Collection value.
 	 */
@@ -152,7 +152,7 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Renders the '<code>input(checkbox)</code>' with the supplied value, marking
+	 * Render the '<code>input(checkbox)</code>' with the supplied value, marking
 	 * the '<code>input</code>' element as 'checked' if the supplied Boolean is
 	 * <code>true</code>.
 	 */
@@ -164,10 +164,10 @@ public class CheckboxTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Returns a unique ID for the bound name within the current PageContext.
-	 * @see TagIdGenerator#nextId
+	 * Return a unique ID for the bound name within the current PageContext.
 	 */
 	protected String autogenerateId() throws JspException {
 		return TagIdGenerator.nextId(getName(), this.pageContext);
 	}
+
 }

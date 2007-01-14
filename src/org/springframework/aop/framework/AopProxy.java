@@ -23,8 +23,6 @@ package org.springframework.aop.framework;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see JdkDynamicAopProxy
- * @see Cglib2AopProxy
  */
 public interface AopProxy {
 

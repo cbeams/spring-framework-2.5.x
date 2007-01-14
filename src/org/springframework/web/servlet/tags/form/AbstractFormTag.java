@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.beans.PropertyEditor;
+
 import javax.servlet.jsp.JspException;
 
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.tags.HtmlEscapingAwareTag;
 import org.springframework.web.util.ExpressionEvaluationUtils;
-
-import java.beans.PropertyEditor;
 
 /**
  * Base class for all JSP form tags. Provides utility methods for
@@ -93,7 +93,6 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	/**
 	 * Gets the display value of the supplied <code>Object</code>, HTML escaped
 	 * as required. This version is <strong>not</strong> {@link PropertyEditor}-aware.
-	 * @see ValueFormatter
 	 */
 	protected String getDisplayString(Object value) {
 		return this.valueFormatter.getDisplayString(value, isHtmlEscape());
@@ -104,7 +103,6 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * as required. If the supplied value is not a {@link String} and the supplied
 	 * {@link PropertyEditor} is not null then the {@link PropertyEditor} is used
 	 * to obtain the display value.
-	 * @see ValueFormatter
 	 */
 	protected String getDisplayString(Object value, PropertyEditor propertyEditor) {
 		return this.valueFormatter.getDisplayString(value, propertyEditor, isHtmlEscape());

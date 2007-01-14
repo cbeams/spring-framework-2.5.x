@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import org.springframework.web.servlet.support.BindStatus;
 /**
  * Databinding-aware JSP tag that renders an HTML '<code>select</code>'
  * element.
- * 
+ *
  * <p>Inner '<code>option</code>' tags can be rendered using one of the
- * approaches supported by the {@link OptionWriter} class.
+ * approaches supported by the OptionWriter class.
  *
  * <p>Also supports the use of nested {@link OptionTag OptionTags} or
  * (typically one) nested {@link OptionsTag}.
@@ -38,7 +38,6 @@ import org.springframework.web.servlet.support.BindStatus;
  * @author Rob Harrop
  * @since 2.0
  * @see OptionTag
- * @see OptionWriter
  */
 public class SelectTag extends AbstractHtmlInputElementTag {
 
@@ -88,29 +87,28 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 
 
 	/**
-	 * Sets the {@link Collection}, {@link Map} or array of objects used to
+	 * Set the {@link Collection}, {@link Map} or array of objects used to
 	 * generate the inner '<code>option</code>' tags.
 	 * <p>Required when wishing to render '<code>option</code>' tags from
 	 * an array, {@link Collection} or {@link Map}.
 	 * <p>Typically a runtime expression.
 	 * @param items the items that comprise the options of this selection
-	 * @throws IllegalArgumentException if the supplied <code>items</code> instance is <code>null</code> 
 	 */
 	public void setItems(Object items) {
-		Assert.notNull(items, "'items' cannot be null.");
+		Assert.notNull(items, "'items' must not be null");
 		this.items = items;
 	}
 
 	/**
-	 * Gets the value of the '<code>items</code>' attribute.
+	 * Get the value of the '<code>items</code>' attribute.
 	 * <p>May be a runtime expression.
 	 */
 	protected Object getItems() {
-		return items;
+		return this.items;
 	}
 
 	/**
-	 * Sets the name of the property mapped to the '<code>value</code>'
+	 * Set the name of the property mapped to the '<code>value</code>'
 	 * attribute of the '<code>option</code>' tag.
 	 * <p>Required when wishing to render '<code>option</code>' tags from
 	 * an array or {@link Collection}.
@@ -122,20 +120,17 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Gets the value of the '<code>itemValue</code>' attribute.
+	 * Get the value of the '<code>itemValue</code>' attribute.
 	 * <p>May be a runtime expression.
 	 */
 	protected String getItemValue() {
-		return itemValue;
+		return this.itemValue;
 	}
 
 	/**
-	 * Sets the name of the property mapped to the label (inner text) of the
+	 * Set the name of the property mapped to the label (inner text) of the
 	 * '<code>option</code>' tag.
 	 * <p>May be a runtime expression.
-	 * @param itemLabel said label
-	 * @throws IllegalArgumentException if the supplied <code>itemLabel</code> is
-	 * <code>null</code> or consists wholly of whitespace
 	 */
 	public void setItemLabel(String itemLabel) {
 		Assert.hasText(itemLabel, "'itemLabel' must not be empty");
@@ -143,20 +138,18 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Gets the value of the '<code>itemLabel</code>' attribute.
+	 * Get the value of the '<code>itemLabel</code>' attribute.
 	 * <p>May be a runtime expression.
 	 */
 	protected String getItemLabel() {
-		return itemLabel;
+		return this.itemLabel;
 	}
 
 	/**
-	 * Sets the value of the HTML '<code>size</code>' attribute rendered
+	 * Set the value of the HTML '<code>size</code>' attribute rendered
 	 * on the final '<code>select</code>' element.
 	 * <p>May be a runtime expression.
 	 * @param size the desired value of the '<code>size</code>' attribute
-	 * @throws IllegalArgumentException if the supplied <code>size</code> is
-	 * <code>null</code> or consists wholly of whitespace
 	 */
 	public void setSize(String size) {
 		Assert.hasText(size, "'size' must not be empty");
@@ -164,15 +157,15 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Gets the value of the '<code>size</code>' attribute.
+	 * Get the value of the '<code>size</code>' attribute.
 	 * <p>May be a runtime expression.
 	 */
 	protected String getSize() {
-		return size;
+		return this.size;
 	}
 
 	/**
-	 * Sets the value of the HTML '<code>multiple</code>' attribute rendered
+	 * Set the value of the HTML '<code>multiple</code>' attribute rendered
 	 * on the final '<code>select</code>' element.
 	 * <p>May be a runtime expression.
 	 */
@@ -181,12 +174,12 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Gets the value of the HTML '<code>multiple</code>' attribute rendered
+	 * Get the value of the HTML '<code>multiple</code>' attribute rendered
 	 * on the final '<code>select</code>' element.
 	 * <p>May be a runtime expression.
 	 */
 	protected Object getMultiple() {
-		return multiple;
+		return this.multiple;
 	}
 
 
@@ -285,9 +278,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	 * and {@link Map Maps}.
 	 */
 	private static boolean typeRequiresMultiple(Class type) {
-		return (type.isArray()
-				|| Collection.class.isAssignableFrom(type)
-				|| Map.class.isAssignableFrom(type));
+		return (type.isArray() || Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type));
 	}
 
 	/**
