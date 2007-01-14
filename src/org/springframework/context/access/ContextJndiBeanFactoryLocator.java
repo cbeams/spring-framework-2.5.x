@@ -31,8 +31,9 @@ import org.springframework.util.StringUtils;
  * BeanFactoryLocator implementation that creates the BeanFactory from one or
  * more classpath locations specified in a JNDI environment variable.
  *
- * <p>This default implementation creates a ClassPathXmlApplicationContext.
- * Subclasses may override <code>createBeanFactory</code> for custom instantiation.
+ * <p>This default implementation creates a
+ * {@link org.springframework.context.support.ClassPathXmlApplicationContext}.
+ * Subclasses may override {@link #createBeanFactory} for custom instantiation.
  *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller

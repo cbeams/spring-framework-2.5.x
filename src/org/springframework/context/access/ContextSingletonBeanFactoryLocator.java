@@ -34,7 +34,7 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * SingletonBeanFactoryLocator's BeanFactory. For almost all usage scenarios, this
  * will not make a difference, since within that ApplicationContext or BeanFactory
  * you are still free to create either BeanFactories or ApplicationContexts. The
- * main reason one would need to use this class is if BeanPostProcessing (or other
+ * main reason one would need to use this class is if bean post-processing (or other
  * ApplicationContext specific features are needed in the bean reference definition
  * itself).
  *
@@ -43,6 +43,7 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * nor legal to share definitions with SingletonBeanFactoryLocator at the same time.
  * 
  * @author Colin Sampaleanu
+ * @author Juergen Hoeller
  * @see org.springframework.context.access.DefaultLocatorFactory
  */
 public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLocator {
@@ -56,8 +57,8 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	/**
 	 * Returns an instance which uses the default "classpath*:beanRefContext.xml", as
 	 * the name of the definition file(s). All resources returned by the current
-	 * thread's context classloader's getResources() method with this name will be
-	 * combined to create a definition, which is just a BeanFactory.
+	 * thread's context class loader's <code>getResources</code> method with this
+	 * name will be combined to create a definition, which is just a BeanFactory.
 	 */
 	public static BeanFactoryLocator getInstance() throws BeansException {
 		return getInstance(BEANS_REFS_XML_NAME);
@@ -109,21 +110,21 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	}
 
 	/**
-	 * Constructor which uses the the specified name as the name of the
-	 * definition file(s). All resources returned by the definition classloader's
-	 * getResources() method with this name will be combined to create a definition.
+	 * Constructor which uses the the specified name as the name of the definition file(s).
+	 * All resources returned by the definition ClassLoader's <code>getResources</code>
+	 * method with this name will be combined to create a definition.
 	 */
 	protected ContextSingletonBeanFactoryLocator(String resourceName) {
 		super(resourceName);
 	}
-	
+
 	/**
 	 * Overrides default method to create definition object as an ApplicationContext
 	 * instead of the default BeanFactory. This does not affect what can actually
 	 * be loaded by that definition.
 	 */
 	protected BeanFactory createDefinition(String resourceName, String factoryKey) throws BeansException {
-		return new ClassPathXmlApplicationContext(new String[] { resourceName }, false);
+		return new ClassPathXmlApplicationContext(new String[] {resourceName}, false);
 	}
 
 	/**
@@ -136,9 +137,9 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 			((ConfigurableApplicationContext) groupDef).refresh();
 		}
 	}
-	
+
 	/**
-	 * Overrides default method to work with ApplicationContext
+	 * Overrides default method to work with an ApplicationContext.
 	 */
 	protected void destroyDefinition(BeanFactory groupDef, String resourceName) throws BeansException {
 		if (groupDef instanceof ConfigurableApplicationContext) {

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2006 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,7 @@ import org.springframework.beans.factory.BeanFactory;
 /**
  * Used to track a reference to a {@link BeanFactory} obtained through
  * a {@link BeanFactoryLocator}.
- * 
+ *
  * <p>It is safe to call {@link #release()} multiple times, but
  * {@link #getFactory()} must not be called after calling release.
  *
@@ -33,16 +33,14 @@ import org.springframework.beans.factory.BeanFactory;
 public interface BeanFactoryReference {
 
 	/**
-	 * Returns the {@link BeanFactory} instance held by this reference.
-	 *
-	 * @throws IllegalStateException if invoked after release() has been called
+	 * Return the {@link BeanFactory} instance held by this reference.
+	 * @throws IllegalStateException if invoked after <code>release()</code> has been called
 	 */
 	BeanFactory getFactory();
 
 	/**
-	 * Indicates that the {@link BeanFactory} instance referred to by this object is
-	 * not needed any longer by the client code which obtained the
-	 * {@link BeanFactoryReference}.
+	 * Indicate that the {@link BeanFactory} instance referred to by this object is not
+	 * needed any longer by the client code which obtained the {@link BeanFactoryReference}.
 	 * <p>Depending on the actual implementation of {@link BeanFactoryLocator}, and
 	 * the actual type of <code>BeanFactory</code>, this may possibly not actually
 	 * do anything; alternately in the case of a 'closeable' <code>BeanFactory</code>
@@ -51,11 +49,10 @@ public interface BeanFactoryReference {
 	 * <p>In an EJB usage scenario this would normally be called from
 	 * <code>ejbRemove()</code> and <code>ejbPassivate()</code>.
 	 * <p>This is safe to call multiple times.
-	 *
 	 * @throws FatalBeanException if the <code>BeanFactory</code> cannot be released
 	 * @see BeanFactoryLocator
 	 * @see org.springframework.context.access.ContextBeanFactoryReference
-	 * @see org.springframework.context.ConfigurableApplicationContext#close
+	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 */
 	void release() throws FatalBeanException;
 

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2006 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,10 +20,10 @@ import org.springframework.beans.BeansException;
 
 /**
  * Defines a contract for the lookup, use, and release of a
- * {@link org.springframework.beans.factory.BeanFactory}, or
- * <code>BeanFactory</code> subclass such as
+ * {@link org.springframework.beans.factory.BeanFactory},
+ * or a <code>BeanFactory</code> subclass such as an
  * {@link org.springframework.context.ApplicationContext}.
- * 
+ *
  * <p>Where this interface is implemented as a singleton class such as
  * {@link SingletonBeanFactoryLocator}, the Spring team <strong>strongly</strong>
  * suggests that it be used sparingly and with caution. By far the vast majority
@@ -39,7 +39,7 @@ import org.springframework.beans.BeansException;
  * proxy, which then uses an implementation of this class to get a
  * <code>BeanFactory</code> from which it gets the real object, to which it
  * delegates, then proper Dependency Injection has been achieved.
- * 
+ *
  * <p>As another example, in a complex J2EE app with multiple layers, with each
  * layer having its own <code>ApplicationContext</code> definition (in a
  * hierarchy), a class like <code>SingletonBeanFactoryLocator</code> may be used
@@ -58,9 +58,8 @@ public interface BeanFactoryLocator {
 	 * specified by the <code>factoryKey</code> parameter.
 	 * <p>The definition is possibly loaded/created as needed.
 	 * @param factoryKey a resource name specifying which <code>BeanFactory</code> the
-	 *                   <code>BeanFactoryLocator</code> must return for usage.
-	 *                   The actual meaning of the resource name is specific to the
-	 *                   actual implementation of <code>BeanFactoryLocator</code>.
+	 * <code>BeanFactoryLocator</code> must return for usage. The actual meaning of the
+	 * resource name is specific to the implementation of <code>BeanFactoryLocator</code>.
 	 * @return the <code>BeanFactory</code> instance, wrapped as a {@link BeanFactoryReference} object
 	 * @throws BeansException if there is an error loading or accessing the <code>BeanFactory</code>
 	 */

@@ -36,9 +36,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
- * <p>Keyed-singleton implementation of BeanFactoryLocator, which leverages existing
- * Spring constructs. This is normally accessed through DefaultLocatorFactory,
- * but may also be used directly.</p>
+ * <p>Keyed-singleton implementation of BeanFactoryLocator, which accesses shared
+ * Spring factory instances.</p>
  *
  * <p>Please see the warning in BeanFactoryLocator's javadoc about appropriate usage
  * of singleton style BeanFactoryLocator implementations. It is the opinion of the 
@@ -264,6 +263,8 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * </pre>
  *   
  * @author Colin Sampaleanu
+ * @author Juergen Hoeller
+ * @see org.springframework.context.access.ContextSingletonBeanFactoryLocator
  * @see org.springframework.context.access.DefaultLocatorFactory
  */
 public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
