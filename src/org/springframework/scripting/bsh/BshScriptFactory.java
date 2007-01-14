@@ -34,14 +34,14 @@ import org.springframework.util.ClassUtils;
  * <p>Typically used in combination with a
  * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor};
  * see the latter's
- * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor Javadoc}
+ * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor javadoc}
  * for a configuration example.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 2.0
- * @see org.springframework.scripting.support.ScriptFactoryPostProcessor
  * @see BshScriptUtils
+ * @see org.springframework.scripting.support.ScriptFactoryPostProcessor
  */
 public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
@@ -54,6 +54,8 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
 	/**
 	 * Create a new BshScriptFactory for the given script source.
+	 * <p>With this <code>BshScriptFactory</code> variant, the script needs to
+	 * declare a full class or return an actual instance of the scripted object.
 	 * @param scriptSourceLocator a locator that points to the source of the script.
 	 * Interpreted by the post-processor that actually creates the script.
 	 */
@@ -63,10 +65,14 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
 	/**
 	 * Create a new BshScriptFactory for the given script source.
+	 * <p>The script may either be a simple script that needs a corresponding proxy
+	 * generated (implementing the specified interfaces), or declare a full class
+	 * or return an actual instance of the scripted object (in which case the
+	 * specified interfaces, if any, need to be implemented by that class/instance).
 	 * @param scriptSourceLocator a locator that points to the source of the script.
 	 * Interpreted by the post-processor that actually creates the script.
 	 * @param scriptInterfaces the Java interfaces that the scripted object
-	 * is supposed to implement
+	 * is supposed to implement (may be <code>null</code>)
 	 */
 	public BshScriptFactory(String scriptSourceLocator, Class[] scriptInterfaces) {
 		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");

@@ -36,15 +36,15 @@ import org.springframework.util.ClassUtils;
  * <p>Typically used in combination with a
  * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor};
  * see the latter's
- * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor Javadoc}
+ * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor javadoc}
  * for a configuration example.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Rod Johnson
  * @since 2.0
- * @see org.springframework.scripting.support.ScriptFactoryPostProcessor
  * @see groovy.lang.GroovyClassLoader
+ * @see org.springframework.scripting.support.ScriptFactoryPostProcessor
  */
 public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
@@ -61,7 +61,6 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 	 * a Groovy script defines its Java interfaces itself.
 	 * @param scriptSourceLocator a locator that points to the source of the script.
 	 * Interpreted by the post-processor that actually creates the script.
-	 * @throws IllegalArgumentException if the supplied String is empty
 	 */
 	public GroovyScriptFactory(String scriptSourceLocator) {
 		this(scriptSourceLocator, null);
@@ -70,8 +69,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 	/**
 	 * Create a new GroovyScriptFactory for the given script source,
 	 * specifying a strategy interface that can create a custom MetaClass
-	 * to supply missing methods and otherwise change the behavior
-	 * of the object.
+	 * to supply missing methods and otherwise change the behavior of the object.
 	 * <p>We don't need to specify script interfaces here, since
 	 * a Groovy script defines its Java interfaces itself.
 	 * @param scriptSourceLocator a locator that points to the source of the script.
@@ -79,7 +77,6 @@ public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware 
 	 * @param groovyObjectCustomizer customizer that can set a custom metaclass
 	 * or make other changes to the GroovyObject created by this factory
 	 * (may be <code>null</code>)
-	 * @throws IllegalArgumentException if the supplied String is empty
 	 */
 	public GroovyScriptFactory(String scriptSourceLocator, GroovyObjectCustomizer groovyObjectCustomizer) {
 		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");

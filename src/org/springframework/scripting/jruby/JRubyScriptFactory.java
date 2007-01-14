@@ -34,14 +34,14 @@ import org.springframework.util.ClassUtils;
  * <p>Typically used in combination with a
  * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor};
  * see the latter's
- * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor Javadoc}
+ * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor javadoc}
  * for a configuration example.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 2.0
- * @see org.springframework.scripting.support.ScriptFactoryPostProcessor
  * @see JRubyScriptUtils
+ * @see org.springframework.scripting.support.ScriptFactoryPostProcessor
  */
 public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
@@ -58,13 +58,10 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * Interpreted by the post-processor that actually creates the script.
 	 * @param scriptInterfaces the Java interfaces that the scripted object
 	 * is supposed to implement
-	 * @throws IllegalArgumentException if either of the supplied arguments is <code>null</code>;
-	 * or the supplied <code>scriptSourceLocator</code> argument is composed wholly of whitespace;
-	 * or if the supplied <code>scriptInterfaces</code> argument array has no elements
 	 */
 	public JRubyScriptFactory(String scriptSourceLocator, Class[] scriptInterfaces) {
 		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");
-		Assert.notEmpty(scriptInterfaces);
+		Assert.notEmpty(scriptInterfaces, "'scriptInterfaces' must not be empty");
 		this.scriptSourceLocator = scriptSourceLocator;
 		this.scriptInterfaces = scriptInterfaces;
 	}
