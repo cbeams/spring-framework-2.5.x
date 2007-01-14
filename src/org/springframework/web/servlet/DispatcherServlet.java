@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -869,13 +869,12 @@ public class DispatcherServlet extends FrameworkServlet {
 				cleanupMultipart(processedRequest);
 			}
 
-			// Reset thread-bound RequestAttributes.
-			requestAttributes.requestCompleted();
+			// Reset thread-bound context.
 			RequestContextHolder.setRequestAttributes(previousRequestAttributes, this.threadContextInheritable);
-
-			// Reset thread-bound LocaleContext.
 			LocaleContextHolder.setLocaleContext(previousLocaleContext, this.threadContextInheritable);
 
+			// Clear request attributes.
+			requestAttributes.requestCompleted();
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cleared thread-bound request context: " + request);
 			}
