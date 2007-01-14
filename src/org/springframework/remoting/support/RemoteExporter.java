@@ -114,7 +114,7 @@ public abstract class RemoteExporter implements BeanClassLoaderAware {
 	 */
 	protected void checkService() throws IllegalArgumentException {
 		if (this.service == null) {
-			throw new IllegalArgumentException("'service' is required");
+			throw new IllegalArgumentException("Property 'service' is required");
 		}
 	}
 
@@ -126,11 +126,11 @@ public abstract class RemoteExporter implements BeanClassLoaderAware {
 	 */
 	protected void checkServiceInterface() throws IllegalArgumentException {
 		if (this.serviceInterface == null) {
-			throw new IllegalArgumentException("serviceInterface is required");
+			throw new IllegalArgumentException("Property 'serviceInterface' is required");
 		}
 		if (!this.serviceInterface.isInstance(this.service)) {
 			throw new IllegalArgumentException(
-					"serviceInterface [" + this.serviceInterface.getName() +
+					"Service interface [" + this.serviceInterface.getName() +
 					"] needs to be implemented by service [" + this.service +
 					"] of class [" + this.service.getClass().getName() + "]");
 		}

@@ -53,7 +53,7 @@ public abstract class RemoteAccessor {
 	 */
 	public void setServiceInterface(Class serviceInterface) {
 		if (serviceInterface != null && !serviceInterface.isInterface()) {
-			throw new IllegalArgumentException("serviceInterface must be an interface");
+			throw new IllegalArgumentException("'serviceInterface' must be an interface");
 		}
 		this.serviceInterface = serviceInterface;
 	}
