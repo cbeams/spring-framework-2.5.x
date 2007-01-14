@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,13 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletResponse}
- * interface.
+ * interface. Supports the Servlet 2.4 API level.
  *
  * <p>Used for testing the web framework; also useful for testing
  * application controllers.
  *
- * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rod Johnson
  * @since 1.0.2
  */
 public class MockHttpServletResponse implements HttpServletResponse {
@@ -121,7 +121,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * Return whether {@link #getOutputStream()} access is allowed.
 	 */
 	public boolean isOutputStreamAccessAllowed() {
-		return outputStreamAccessAllowed;
+		return this.outputStreamAccessAllowed;
 	}
 
 	/**
@@ -136,7 +136,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * Return whether {@link #getOutputStream()} access is allowed.
 	 */
 	public boolean isWriterAccessAllowed() {
-		return writerAccessAllowed;
+		return this.writerAccessAllowed;
 	}
 
 	public void setCharacterEncoding(String characterEncoding) {
@@ -144,7 +144,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public String getCharacterEncoding() {
-		return characterEncoding;
+		return this.characterEncoding;
 	}
 
 	public ServletOutputStream getOutputStream() {
@@ -182,7 +182,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public int getContentLength() {
-		return contentLength;
+		return this.contentLength;
 	}
 
 	public void setContentType(String contentType) {
@@ -197,7 +197,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public String getContentType() {
-		return contentType;
+		return this.contentType;
 	}
 
 	public void setBufferSize(int bufferSize) {
@@ -205,7 +205,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public int getBufferSize() {
-		return bufferSize;
+		return this.bufferSize;
 	}
 
 	public void flushBuffer() {
@@ -235,7 +235,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public boolean isCommitted() {
-		return committed;
+		return this.committed;
 	}
 
 	public void reset() {
@@ -255,7 +255,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public Locale getLocale() {
-		return locale;
+		return this.locale;
 	}
 
 
@@ -359,7 +359,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public String getRedirectedUrl() {
-		return redirectedUrl;
+		return this.redirectedUrl;
 	}
 
 	public void setDateHeader(String name, long value) {
@@ -419,11 +419,11 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public int getStatus() {
-		return status;
+		return this.status;
 	}
 
 	public String getErrorMessage() {
-		return errorMessage;
+		return this.errorMessage;
 	}
 
 
@@ -436,7 +436,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public String getForwardedUrl() {
-		return forwardedUrl;
+		return this.forwardedUrl;
 	}
 
 	public void setIncludedUrl(String includedUrl) {
@@ -444,7 +444,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	public String getIncludedUrl() {
-		return includedUrl;
+		return this.includedUrl;
 	}
 
 }
