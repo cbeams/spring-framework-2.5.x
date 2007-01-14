@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,30 +24,32 @@ import org.apache.commons.logging.LogFactory;
 
 /** 
  * Convenient superclass for MDBs.
- * Doesn't require JMS, as EJB 2.1 MDBs are no longer
- * JMS-specific: see the AbstractJmsMessageDrivenBean subclass.
+ * Doesn't require JMS, as EJB 2.1 MDBs are no longer JMS-specific;
+ * see the {@link AbstractJmsMessageDrivenBean} subclass.
  *
  * <p>This class ensures that subclasses have access to the
  * MessageDrivenContext provided by the EJB container, and implement
- * a no argument ejbCreate() method as required by the EJB specification.
- * This ejbCreate() method loads a BeanFactory, before invoking the
- * onEjbCreate() method, which should contain subclass-specific
- * initialization.
+ * a no-arg <code>ejbCreate()</code> method as required by the EJB
+ * specification. This <code>ejbCreate()</code> method loads a BeanFactory,
+ * before invoking the <code>onEjbCreate()</code> method, which is
+ * supposed to contain subclass-specific initialization.
  *
  * <p>NB: We cannot use final methods to implement EJB API methods,
- * as this violates the EJB specification. However, there should
- * be no need to override the setMessageDrivenContext() or
- * ejbCreate() methods.
+ * as this violates the EJB specification. However, there should be
+ * no need to override the <code>setMessageDrivenContext</code> or
+ * <code>ejbCreate()</code> methods.
  *
  * @author Rod Johnson
  */
 public abstract class AbstractMessageDrivenBean extends AbstractEnterpriseBean
     implements MessageDrivenBean {
 	
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private MessageDrivenContext	messageDrivenContext;
-	
+	private MessageDrivenContext messageDrivenContext;
+
+
 	/**
 	 * Required lifecycle method. Sets the MessageDriven context.
 	 * @param messageDrivenContext MessageDrivenContext
@@ -55,13 +57,13 @@ public abstract class AbstractMessageDrivenBean extends AbstractEnterpriseBean
 	public void setMessageDrivenContext(MessageDrivenContext messageDrivenContext) {
 		this.messageDrivenContext = messageDrivenContext;
 	}
-	
+
 	/**
 	 * Convenience method for subclasses to use.
 	 * @return the MessageDrivenContext passed to this EJB by the EJB container
 	 */
 	protected final MessageDrivenContext getMessageDrivenContext() {
-		return messageDrivenContext;
+		return this.messageDrivenContext;
 	}
 
 	/**
@@ -76,13 +78,13 @@ public abstract class AbstractMessageDrivenBean extends AbstractEnterpriseBean
 		loadBeanFactory();
 		onEjbCreate();
 	}
-	
+
 	/**
-	 * Subclasses must implement this method to do any initialization
-	 * they would otherwise have done in an ejbCreate() method. In contrast
-	 * to ejbCreate, the BeanFactory will have been loaded here.
+	 * Subclasses must implement this method to do any initialization they would
+	 * otherwise have done in an <code>ejbCreate()</code> method. In contrast
+	 * to <code>ejbCreate()</code>, the BeanFactory will have been loaded here.
 	 * <p>The same restrictions apply to the work of this method as
-	 * to an ejbCreate() method.
+	 * to an <code>ejbCreate()</code> method.
 	 */
 	protected abstract void onEjbCreate();
 

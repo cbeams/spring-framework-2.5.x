@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@ import javax.ejb.SessionContext;
  * Interface to be implemented by Session Beans that want
  * to expose important state to cooperating classes.
  *
- * <p>Implemented by Spring's AbstractSessionBean class and hence
- * by all of Spring's specific Session Bean support classes.
+ * <p>Implemented by Spring's AbstractSessionBean class and hence by
+ * all of Spring's specific Session Bean support classes, such as
+ * {@link AbstractStatelessSessionBean} and {@link AbstractStatefulSessionBean}.
  *
  * @author Juergen Hoeller
  * @since 1.2

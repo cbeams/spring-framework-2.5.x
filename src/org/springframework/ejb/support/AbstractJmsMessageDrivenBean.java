@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,16 +19,14 @@ package org.springframework.ejb.support;
 import javax.jms.MessageListener;
 
 /** 
- * Convenient superclass for JMS MDBs.
- * Requires subclasses to implement the JMS interface MessageListener.
+ * Convenient superclass for JMS MDBs. Requires subclasses to implement
+ * the JMS interface <code>javax.jms.MessageListener</code>.
  *
  * @author Rod Johnson
  */
-public abstract class AbstractJmsMessageDrivenBean 
-	extends AbstractMessageDrivenBean
-	implements MessageListener {
-	
-	// Empty: the purpose of this class is to ensure
-	// that subclasses implement javax.jms.MessageListener
-	
+public abstract class AbstractJmsMessageDrivenBean extends AbstractMessageDrivenBean implements MessageListener {
+
+	// Empty: The purpose of this class is to ensure
+	// that subclasses implement <code>javax.jms.MessageListener</code>.
+
 } 
