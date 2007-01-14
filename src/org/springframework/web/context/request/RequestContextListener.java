@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,19 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 /**
- * Listener for Servlet 2.4+ containers. Exposes the request to the current thread,
- * through both LocaleContextHolder and RequestContextHolder.
- * To be registered as listener in <code>web.xml</code>.
+ * Servlet 2.4+ listener that exposes the request to the current thread,
+ * through both {@link org.springframework.context.i18n.LocaleContextHolder} and
+ * {@link RequestContextHolder}. To be registered as listener in <code>web.xml</code>.
  *
- * <p>Alternatively, Spring's RequestContextFilter and Spring's DispatcherServlet
- * also expose the same request context to the current thread.
+ * <p>Alternatively, Spring's {@link org.springframework.web.filter.RequestContextFilter}
+ * and Spring's {@link org.springframework.web.servlet.DispatcherServlet} also expose
+ * the same request context to the current thread.
  *
- * @author Steven Devijver
+ * <p>This listener is mainly for use with third-party servlets, e.g. the JSF FacesServlet.
+ * Within Spring's own web support, DispatcherServlet's processing is perfectly sufficient.
+ *
  * @author Juergen Hoeller
+ * @author Steven Devijver
  * @since 2.0
  * @see javax.servlet.ServletRequestListener
  * @see org.springframework.context.i18n.LocaleContextHolder
@@ -43,6 +47,9 @@ import org.springframework.context.i18n.LocaleContextHolder;
  * @see org.springframework.web.servlet.DispatcherServlet
  */
 public class RequestContextListener implements ServletRequestListener {
+
+	private static final String REQUEST_ATTRIBUTES_ATTRIBUTE =
+			RequestContextListener.class.getName() + ".REQUEST_ATTRIBUTES";
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -54,21 +61,33 @@ public class RequestContextListener implements ServletRequestListener {
 					"Request is not an HttpServletRequest: " + requestEvent.getServletRequest());
 		}
 		HttpServletRequest request = (HttpServletRequest) requestEvent.getServletRequest();
+		ServletRequestAttributes attributes = new ServletRequestAttributes(request);
+		request.setAttribute(REQUEST_ATTRIBUTES_ATTRIBUTE, attributes);
 		LocaleContextHolder.setLocale(request.getLocale());
-		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+		RequestContextHolder.setRequestAttributes(attributes);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Bound request context to thread: " + request);
 		}
 	}
 
 	public void requestDestroyed(ServletRequestEvent requestEvent) {
-		ServletRequestAttributes requestAttributes =
+		ServletRequestAttributes attributes =
+				(ServletRequestAttributes) requestEvent.getServletRequest().getAttribute(REQUEST_ATTRIBUTES_ATTRIBUTE);
+		ServletRequestAttributes threadAttributes =
 				(ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-		requestAttributes.requestCompleted();
-		RequestContextHolder.setRequestAttributes(null);
-		LocaleContextHolder.setLocale(null);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Cleared thread-bound request context: " + requestEvent.getServletRequest());
+		if (threadAttributes != null) {
+			// We're assumably within the original request thread...
+			if (attributes == null) {
+				attributes = threadAttributes;
+			}
+			RequestContextHolder.setRequestAttributes(null);
+			LocaleContextHolder.setLocale(null);
+		}
+		if (attributes != null) {
+			attributes.requestCompleted();
+			if (logger.isDebugEnabled()) {
+				logger.debug("Cleared thread-bound request context: " + requestEvent.getServletRequest());
+			}
 		}
 	}
 
