@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,13 +47,13 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest}
- * interface.
+ * interface. Supports the Servlet 2.4 API level.
  *
  * <p>Used for testing the web framework; also useful for testing
  * application controllers.
  *
- * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rod Johnson
  * @author Rick Evans
  * @since 1.0.2
  */
@@ -241,10 +241,18 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Mark this request as completed.
+	 * Mark this request as completed, keeping its state.
 	 */
 	public void close() {
 		this.active = false;
+	}
+
+	/**
+	 * Invalidate this request, clearing its state.
+	 */
+	public void invalidate() {
+		close();
+		clearAttributes();
 	}
 
 	/**
@@ -273,7 +281,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getCharacterEncoding() {
-		return characterEncoding;
+		return this.characterEncoding;
 	}
 
 	public void setCharacterEncoding(String characterEncoding) {
@@ -293,7 +301,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getContentType() {
-		return contentType;
+		return this.contentType;
 	}
 
 	public ServletInputStream getInputStream() {
@@ -384,7 +392,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getProtocol() {
-		return protocol;
+		return this.protocol;
 	}
 
 	public void setScheme(String scheme) {
@@ -392,7 +400,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getScheme() {
-		return scheme;
+		return this.scheme;
 	}
 
 	public void setServerName(String serverName) {
@@ -400,7 +408,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getServerName() {
-		return serverName;
+		return this.serverName;
 	}
 
 	public void setServerPort(int serverPort) {
@@ -408,7 +416,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public int getServerPort() {
-		return serverPort;
+		return this.serverPort;
 	}
 
 	public BufferedReader getReader() throws UnsupportedEncodingException {
@@ -428,7 +436,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getRemoteAddr() {
-		return remoteAddr;
+		return this.remoteAddr;
 	}
 
 	public void setRemoteHost(String remoteHost) {
@@ -436,7 +444,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getRemoteHost() {
-		return remoteHost;
+		return this.remoteHost;
 	}
 
 	public void setAttribute(String name, Object value) {
@@ -454,6 +462,13 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		checkActive();
 		Assert.notNull(name, "Attribute name must not be null");
 		this.attributes.remove(name);
+	}
+
+	/**
+	 * Clear all of this request's attributes.
+	 */
+	public void clearAttributes() {
+		this.attributes.clear();
 	}
 
 	/**
@@ -477,7 +492,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public boolean isSecure() {
-		return secure;
+		return this.secure;
 	}
 
 	public RequestDispatcher getRequestDispatcher(String path) {
@@ -493,7 +508,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public int getRemotePort() {
-		return remotePort;
+		return this.remotePort;
 	}
 
 	public void setLocalName(String localName) {
@@ -501,7 +516,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getLocalName() {
-		return localName;
+		return this.localName;
 	}
 
 	public void setLocalAddr(String localAddr) {
@@ -509,7 +524,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getLocalAddr() {
-		return localAddr;
+		return this.localAddr;
 	}
 
 	public void setLocalPort(int localPort) {
@@ -517,7 +532,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public int getLocalPort() {
-		return localPort;
+		return this.localPort;
 	}
 
 
@@ -530,7 +545,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getAuthType() {
-		return authType;
+		return this.authType;
 	}
 
 	public void setCookies(Cookie[] cookies) {
@@ -538,7 +553,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public Cookie[] getCookies() {
-		return cookies;
+		return this.cookies;
 	}
 
 	/**
@@ -630,7 +645,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getMethod() {
-		return method;
+		return this.method;
 	}
 
 	public void setPathInfo(String pathInfo) {
@@ -638,7 +653,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getPathInfo() {
-		return pathInfo;
+		return this.pathInfo;
 	}
 
 	public String getPathTranslated() {
@@ -650,7 +665,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getContextPath() {
-		return contextPath;
+		return this.contextPath;
 	}
 
 	public void setQueryString(String queryString) {
@@ -658,7 +673,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getQueryString() {
-		return queryString;
+		return this.queryString;
 	}
 
 	public void setRemoteUser(String remoteUser) {
@@ -666,7 +681,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getRemoteUser() {
-		return remoteUser;
+		return this.remoteUser;
 	}
 
 	/**
@@ -690,7 +705,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public Principal getUserPrincipal() {
-		return userPrincipal;
+		return this.userPrincipal;
 	}
 
 	public String getRequestedSessionId() {
@@ -703,7 +718,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getRequestURI() {
-		return requestURI;
+		return this.requestURI;
 	}
 
 	public StringBuffer getRequestURL() {
@@ -718,7 +733,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getServletPath() {
-		return servletPath;
+		return this.servletPath;
 	}
 
 	public void setSession(HttpSession session) {

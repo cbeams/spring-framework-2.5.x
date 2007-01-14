@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,13 @@ import org.springframework.util.Assert;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpSession} interface.
+ * Supports the Servlet 2.4 API level.
  *
  * <p>Used for testing the web framework; also useful for testing
  * application controllers.
  *
- * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Rod Johnson
  * @since 1.0.2
  */
 public class MockHttpSession implements HttpSession {
@@ -81,11 +82,11 @@ public class MockHttpSession implements HttpSession {
 
 
 	public long getCreationTime() {
-		return creationTime;
+		return this.creationTime;
 	}
 
 	public String getId() {
-		return id;
+		return this.id;
 	}
 
 	public void access() {
@@ -94,19 +95,19 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	public long getLastAccessedTime() {
-		return lastAccessedTime;
+		return this.lastAccessedTime;
 	}
 
 	public ServletContext getServletContext() {
-		return servletContext;
+		return this.servletContext;
 	}
 
 	public void setMaxInactiveInterval(int interval) {
-		maxInactiveInterval = interval;
+		this.maxInactiveInterval = interval;
 	}
 
 	public int getMaxInactiveInterval() {
-		return maxInactiveInterval;
+		return this.maxInactiveInterval;
 	}
 
 	public HttpSessionContext getSessionContext() {
@@ -159,8 +160,10 @@ public class MockHttpSession implements HttpSession {
 		removeAttribute(name);
 	}
 
-	public void invalidate() {
-		this.invalid = true;
+	/**
+	 * Clear all of this session's attributes.
+	 */
+	public void clearAttributes() {
 		for (Iterator it = this.attributes.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			String name = (String) entry.getKey();
@@ -172,8 +175,13 @@ public class MockHttpSession implements HttpSession {
 		}
 	}
 
+	public void invalidate() {
+		this.invalid = true;
+		clearAttributes();
+	}
+
 	public boolean isInvalid() {
-		return invalid;
+		return this.invalid;
 	}
 
 	public void setNew(boolean value) {
@@ -181,7 +189,7 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	public boolean isNew() {
-		return isNew;
+		return this.isNew;
 	}
 
 }
