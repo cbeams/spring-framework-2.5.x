@@ -97,7 +97,7 @@
 	<xsd:complexType name="dynamicScriptType">
 		<xsd:complexContent>
 			<xsd:extension base="simpleScriptType">
-				<xsd:attribute name="script-interfaces" use="required">
+				<xsd:attribute name="script-interfaces">
 					<xsd:annotation>
 						<xsd:documentation source="java:java.lang.Class"><![CDATA[
 	The Java interfaces that the dynamic language-backed object is to expose; comma-delimited.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,6 @@ import org.springframework.scripting.support.ScriptFactoryPostProcessor;
  */
 public class BshScriptFactoryTests extends TestCase {
 
-	private static final String BSH_SCRIPT_SOURCE_LOCATOR = "inline:String bingo;";
-
-
 	public void testStatic() throws Exception {
 		ApplicationContext ctx =
 				new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshContext.xml");
@@ -66,6 +63,24 @@ public class BshScriptFactoryTests extends TestCase {
 
 		messenger.setMessage(null);
 		assertNull(messenger.getMessage());
+	}
+
+	public void testStaticWithScriptImplementingInterface() throws Exception {
+		ApplicationContext ctx =
+				new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshContext.xml");
+		Messenger messenger = (Messenger) ctx.getBean("messengerImpl");
+
+		String desiredMessage = "Hello World!";
+		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
+	}
+
+	public void testStaticWithScriptReturningInstance() throws Exception {
+		ApplicationContext ctx =
+				new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshContext.xml");
+		Messenger messenger = (Messenger) ctx.getBean("messengerInstance");
+
+		String desiredMessage = "Hello World!";
+		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
 	}
 
 	public void testNonStatic() throws Exception {
@@ -92,8 +107,8 @@ public class BshScriptFactoryTests extends TestCase {
 			new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshBrokenContext.xml");
 			fail("Must throw exception for broken script file");
 		}
-		catch (NestedRuntimeException e) {
-			assertTrue(e.contains(ScriptCompilationException.class));
+		catch (NestedRuntimeException ex) {
+			assertTrue(ex.contains(ScriptCompilationException.class));
 		}
 	}
 
@@ -144,24 +159,6 @@ public class BshScriptFactoryTests extends TestCase {
 		}
 	}
 
-	public void testCtorWithNullScriptInterfacesArray() throws Exception {
-		try {
-			new BshScriptFactory(BSH_SCRIPT_SOURCE_LOCATOR, null);
-			fail("Must have thrown exception by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
-	}
-
-	public void testCtorWithEmptyScriptInterfacesArray() throws Exception {
-		try {
-			new BshScriptFactory(BSH_SCRIPT_SOURCE_LOCATOR, new Class[]{});
-			fail("Must have thrown exception by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
-	}
-
 	public void testResourceScriptFromTag() throws Exception {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
@@ -171,6 +168,12 @@ public class BshScriptFactoryTests extends TestCase {
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 		assertEquals("Hello World!", messenger.getMessage());
 		assertFalse(messenger instanceof Refreshable);
+
+		Messenger messengerImpl = (Messenger) ctx.getBean("messengerImpl");
+		assertEquals("Hello World!", messengerImpl.getMessage());
+
+		Messenger messengerInstance = (Messenger) ctx.getBean("messengerInstance");
+		assertEquals("Hello World!", messengerInstance.getMessage());
 	}
 
 	public void testInlineScriptFromTag() throws Exception {

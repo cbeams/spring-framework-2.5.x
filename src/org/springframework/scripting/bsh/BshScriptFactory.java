@@ -56,15 +56,20 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * Create a new BshScriptFactory for the given script source.
 	 * @param scriptSourceLocator a locator that points to the source of the script.
 	 * Interpreted by the post-processor that actually creates the script.
+	 */
+	public BshScriptFactory(String scriptSourceLocator) {
+		this(scriptSourceLocator, null);
+	}
+
+	/**
+	 * Create a new BshScriptFactory for the given script source.
+	 * @param scriptSourceLocator a locator that points to the source of the script.
+	 * Interpreted by the post-processor that actually creates the script.
 	 * @param scriptInterfaces the Java interfaces that the scripted object
 	 * is supposed to implement
-	 * @throws IllegalArgumentException if either of the supplied arguments is <code>null</code>;
-	 * or the supplied <code>scriptSourceLocator</code> argument is composed wholly of whitespace;
-	 * or if the supplied <code>scriptInterfaces</code> argument array has no elements
 	 */
 	public BshScriptFactory(String scriptSourceLocator, Class[] scriptInterfaces) {
 		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");
-		Assert.notEmpty(scriptInterfaces);
 		this.scriptSourceLocator = scriptSourceLocator;
 		this.scriptInterfaces = scriptInterfaces;
 	}

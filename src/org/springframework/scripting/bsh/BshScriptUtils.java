@@ -39,36 +39,111 @@ import org.springframework.util.ClassUtils;
 public abstract class BshScriptUtils {
 
 	/**
-	 * Create a new BeanShell-scripted object from the given script source,
-	 * using the default ClassLoader.
+	 * Create a new BeanShell-scripted object from the given script source.
+	 * <p>With this <code>createBshObject</code> variant, the script needs to
+	 * declare a full class or return an actual instance of the scripted object.
 	 * @param scriptSource the script source text
-	 * @param interfaces the interfaces that the scripted Java object
-	 * is supposed to implement
 	 * @return the scripted Java object
 	 * @throws EvalError in case of BeanShell parsing failure
 	 */
-	public static Object createBshObject(String scriptSource, Class[] interfaces) throws EvalError {
-		return createBshObject(scriptSource, interfaces, ClassUtils.getDefaultClassLoader());
+	public static Object createBshObject(String scriptSource) throws EvalError {
+		return createBshObject(scriptSource, null, null);
+	}
+
+	/**
+	 * Create a new BeanShell-scripted object from the given script source,
+	 * using the default ClassLoader.
+	 * <p>The script may either be a simple script that needs a corresponding proxy
+	 * generated (implementing the specified interfaces), or declare a full class
+	 * or return an actual instance of the scripted object (in which case the
+	 * specified interfaces, if any, need to be implemented by that class/instance).
+	 * @param scriptSource the script source text
+	 * @param scriptInterfaces the interfaces that the scripted Java object is
+	 * supposed to implement (may be <code>null</code> or empty if the script itself
+	 * declares a full class or returns an actual instance of the scripted object)
+	 * @return the scripted Java object
+	 * @throws EvalError in case of BeanShell parsing failure
+	 * @see #createBshObject(String, Class[], ClassLoader)
+	 */
+	public static Object createBshObject(String scriptSource, Class[] scriptInterfaces) throws EvalError {
+		return createBshObject(scriptSource, scriptInterfaces, ClassUtils.getDefaultClassLoader());
 	}
 
 	/**
 	 * Create a new BeanShell-scripted object from the given script source.
+	 * <p>The script may either be a simple script that needs a corresponding proxy
+	 * generated (implementing the specified interfaces), or declare a full class
+	 * or return an actual instance of the scripted object (in which case the
+	 * specified interfaces, if any, need to be implemented by that class/instance).
 	 * @param scriptSource the script source text
-	 * @param interfaces the interfaces that the scripted Java object
-	 * is supposed to implement
+	 * @param scriptInterfaces the interfaces that the scripted Java object is
+	 * supposed to implement (may be <code>null</code> or empty if the script itself
+	 * declares a full class or returns an actual instance of the scripted object)
 	 * @param classLoader the ClassLoader to create the script proxy with
 	 * @return the scripted Java object
 	 * @throws EvalError in case of BeanShell parsing failure
 	 */
-	public static Object createBshObject(String scriptSource, Class[] interfaces, ClassLoader classLoader)
+	public static Object createBshObject(String scriptSource, Class[] scriptInterfaces, ClassLoader classLoader)
 			throws EvalError {
 
 		Assert.hasText(scriptSource, "Script source must not be empty");
-		Assert.notEmpty(interfaces, "At least one script interface is required");
 		Interpreter interpreter = new Interpreter();
-		interpreter.eval(scriptSource);
-		XThis xt = (XThis) interpreter.eval("return this");
-		return Proxy.newProxyInstance(classLoader, interfaces, new BshObjectInvocationHandler(xt));
+		Object result = interpreter.eval(scriptSource);
+		if (result != null) {
+			// Script returned result: Let's assume it's a full script class or an instance of the script.
+			if (result instanceof Class) {
+				try {
+					result = ((Class) result).newInstance();
+				}
+				catch (Throwable ex) {
+					throw new IllegalStateException("Could not instantiate script class: " + result);
+				}
+			}
+			if (scriptInterfaces != null) {
+				for (int i = 0; i < scriptInterfaces.length; i++) {
+					Class scriptInterface = scriptInterfaces[i];
+					if (!isCompatibleWithInterface(result, scriptInterface)) {
+						throw new IllegalStateException("BeanShell script returned result object [" + result +
+								"] which does not implement script interface [" + scriptInterface.getName() + "]");
+					}
+				}
+			}
+			return result;
+		}
+		else {
+			// Simple BeanShell script: Let's create a proxy for it, implementing the given interfaces.
+			Assert.notEmpty(scriptInterfaces,
+					"Given script requires a script proxy: At least one script interface is required.");
+			XThis xt = (XThis) interpreter.eval("return this");
+			return Proxy.newProxyInstance(classLoader, scriptInterfaces, new BshObjectInvocationHandler(xt));
+		}
+	}
+
+	/**
+	 * Check whether the given script object is compatible with the specified interface.
+	 * <p>In case of a CGLIB-generated config interface, we'll accept the object if it
+	 * has at least a method of the same name for each config method in the interface.
+	 * @param obj the script object, as returned by the BeanShell interpreter
+	 * @param ifc the interface to check (may be a CGLIB-generated config interface)
+	 * @return <code>true</code> if the object is considered as compatible
+	 */
+	private static boolean isCompatibleWithInterface(Object obj, Class ifc) {
+		if (ifc.isInstance(obj)) {
+			// A direct implementation...
+			return true;
+		}
+		if (ifc.getName().indexOf("$$") != -1) {
+			// A CGLIB-generated interface...
+			Method[] ifcMethods = ifc.getMethods();
+			for (int i = 0; i < ifcMethods.length; i++) {
+				Method ifcMethod = ifcMethods[i];
+				if (!ClassUtils.hasAtLeastOneMethodWithName(obj.getClass(), ifcMethod.getName())) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 
 
