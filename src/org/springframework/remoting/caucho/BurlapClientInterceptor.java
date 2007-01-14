@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,10 +42,10 @@ import org.springframework.util.Assert;
  * For information on Burlap, see the
  * <a href="http://www.caucho.com/burlap">Burlap website</a>
  *
- * <p>Note: Burlap services accessed with this proxy factory do not
- * have to be exported via BurlapServiceExporter, as there isn't
- * any special handling involved. Therefore, you can also access
- * services that are exported via Caucho's BurlapServlet.
+ * <p>Note: There is no requirement for services accessed with this proxy factory
+ * to have been exported using Spring's {@link BurlapServiceExporter}, as there is
+ * no special handling involved. As a consequence, you can also access services that
+ * have been exported using Caucho's {@link com.caucho.burlap.server.BurlapServlet}.
  *
  * @author Juergen Hoeller
  * @since 29.09.2003
@@ -56,6 +56,7 @@ import org.springframework.util.Assert;
  * @see BurlapServiceExporter
  * @see BurlapProxyFactoryBean
  * @see com.caucho.burlap.client.BurlapProxyFactory
+ * @see com.caucho.burlap.server.BurlapServlet
  */
 public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor {
 
@@ -77,8 +78,8 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 	/**
 	 * Set the username that this factory should use to access the remote service.
 	 * Default is none.
-	 * <p>The username will be sent by Hessian via HTTP Basic Authentication.
-	 * @see com.caucho.hessian.client.HessianProxyFactory#setUser
+	 * <p>The username will be sent by Burlap via HTTP Basic Authentication.
+	 * @see com.caucho.burlap.client.BurlapProxyFactory#setUser
 	 */
 	public void setUsername(String username) {
 		this.proxyFactory.setUser(username);
@@ -87,8 +88,8 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 	/**
 	 * Set the password that this factory should use to access the remote service.
 	 * Default is none.
-	 * <p>The password will be sent by Hessian via HTTP Basic Authentication.
-	 * @see com.caucho.hessian.client.HessianProxyFactory#setPassword
+	 * <p>The password will be sent by Burlap via HTTP Basic Authentication.
+	 * @see com.caucho.burlap.client.BurlapProxyFactory#setPassword
 	 */
 	public void setPassword(String password) {
 		this.proxyFactory.setPassword(password);
@@ -97,7 +98,7 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 	/**
 	 * Set whether overloaded methods should be enabled for remote invocations.
 	 * Default is "false".
-	 * @see com.caucho.hessian.client.HessianProxyFactory#setOverloadEnabled
+	 * @see com.caucho.burlap.client.BurlapProxyFactory#setOverloadEnabled
 	 */
 	public void setOverloadEnabled(boolean overloadEnabled) {
 		this.proxyFactory.setOverloadEnabled(overloadEnabled);
@@ -130,7 +131,7 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 	 * @see com.caucho.burlap.client.BurlapProxyFactory#create
 	 */
 	protected Object createBurlapProxy(BurlapProxyFactory proxyFactory) throws MalformedURLException {
-		Assert.notNull(getServiceInterface(), "serviceInterface is required");
+		Assert.notNull(getServiceInterface(), "Property 'serviceInterface' is required");
 		return proxyFactory.create(getServiceInterface(), getServiceUrl());
 	}
 

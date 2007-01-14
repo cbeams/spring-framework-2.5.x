@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,10 +43,10 @@ import org.springframework.util.Assert;
  * For information on Hessian, see the
  * <a href="http://www.caucho.com/hessian">Hessian website</a>
  *
- * <p>Note: Hessian services accessed with this proxy factory do not
- * have to be exported via HessianServiceExporter, as there isn't
- * any special handling involved. Therefore, you can also access
- * services that are exported via Caucho's HessianServlet.
+ * <p>Note: There is no requirement for services accessed with this proxy factory
+ * to have been exported using Spring's {@link HessianServiceExporter}, as there is
+ * no special handling involved. As a consequence, you can also access services that
+ * have been exported using Caucho's {@link com.caucho.hessian.server.HessianServlet}.
  *
  * @author Juergen Hoeller
  * @since 29.09.2003
@@ -57,6 +57,7 @@ import org.springframework.util.Assert;
  * @see HessianServiceExporter
  * @see HessianProxyFactoryBean
  * @see com.caucho.hessian.client.HessianProxyFactory
+ * @see com.caucho.hessian.server.HessianServlet
  */
 public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor {
 
@@ -148,7 +149,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 	 * @see com.caucho.hessian.client.HessianProxyFactory#create
 	 */
 	protected Object createHessianProxy(HessianProxyFactory proxyFactory) throws MalformedURLException {
-		Assert.notNull(getServiceInterface(), "serviceInterface is required");
+		Assert.notNull(getServiceInterface(), "'serviceInterface' is required");
 		return proxyFactory.create(getServiceInterface(), getServiceUrl());
 	}
 
