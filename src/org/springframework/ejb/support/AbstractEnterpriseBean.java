@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,6 @@ package org.springframework.ejb.support;
 
 import javax.ejb.EnterpriseBean;
 
-import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
@@ -114,32 +113,24 @@ abstract class AbstractEnterpriseBean implements EnterpriseBean {
 			this.beanFactoryLocatorKey = BEAN_FACTORY_PATH_ENVIRONMENT_KEY;
 		}
 
-		BeanFactoryReference targetBeanFactoryRef =
-				this.beanFactoryLocator.useBeanFactory(this.beanFactoryLocatorKey);
+		this.beanFactoryReference = this.beanFactoryLocator.useBeanFactory(this.beanFactoryLocatorKey);
 
-		// Create handle to target object this handle will be returned to the client.
-		ProxyFactory pf = new ProxyFactory();
-		pf.addInterface(BeanFactoryReference.class);
-		pf.setTarget(targetBeanFactoryRef);
-		this.beanFactoryReference = (BeanFactoryReference) pf.getProxy();
-
-		// We can not rely on the container to call ejbRemove() (it's skipped in
+		// We cannot rely on the container to call ejbRemove() (it's skipped in
 		// the case of system exceptions), so ensure the the bean factory
 		// reference is eventually released.
-		WeakReferenceMonitor.monitor(this.beanFactoryReference,
-				new BeanFactoryReferenceReleaseListener(targetBeanFactoryRef));
+		WeakReferenceMonitor.monitor(this, new BeanFactoryReferenceReleaseListener(this.beanFactoryReference));
 	}
 
 	/**
-	 * Unload the Spring BeanFactory instance. The default ejbRemove method
-	 * invokes this method, but subclasses which override ejbRemove must invoke
-	 * this method themselves.
+	 * Unload the Spring BeanFactory instance. The default {@link #ejbRemove()}
+	 * method invokes this method, but subclasses which override <code>ejbRemove</code>
+	 * must invoke this method themselves.
 	 * <p>Package-visible as it shouldn't be called directly by user-created
 	 * subclasses.
 	 */
 	void unloadBeanFactory() throws FatalBeanException {
-		// We will not ever get here if the container skips calling ejbRemove, but the
-		// WeakReferenceMonitor will still clean up (later) in that case.
+		// We will not ever get here if the container skips calling ejbRemove(),
+		// but the WeakReferenceMonitor will still clean up (later) in that case.
 		if (this.beanFactoryReference != null) {
 			this.beanFactoryReference.release();
 			this.beanFactoryReference = null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,9 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Track references to arbitrary objects using proxy and weak references. To
  * monitor a handle, one should call {@link #monitor(Object, ReleaseListener)},
- * with the given handle object usually being a proxy and the release listener
- * performing cleanup of the target object.
+ * with the given handle object usually being a holder that uses the target
+ * object underneath, and the release listener performing cleanup of the
+ * target object once the handle is not strongly referenced anymore.
  *
  * <p>When a given handle becomes weakly reachable, the specified listener
  * will be called by a background thread. This thread will only be started
@@ -163,7 +164,6 @@ public class WeakReferenceMonitor {
 		 * i.e. once there are no monitored strong references to the handle anymore.
 		 */
 		void released();
-
 	}
 
 }
