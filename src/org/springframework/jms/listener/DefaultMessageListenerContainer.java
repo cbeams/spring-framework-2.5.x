@@ -16,6 +16,10 @@
 
 package org.springframework.jms.listener;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -153,10 +157,6 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 	private TaskExecutor taskExecutor;
 
-	private int concurrentConsumers = 1;
-
-	private int maxMessagesPerTask = Integer.MIN_VALUE;
-
 	private PlatformTransactionManager transactionManager;
 
 	private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
@@ -167,15 +167,25 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 	private Integer cacheLevel;
 
+	private int concurrentConsumers = 1;
+
+	private int maxConcurrentConsumers = 1;
+
+	private int maxMessagesPerTask = Integer.MIN_VALUE;
+
+	private int idleTaskExecutionLimit = 1;
+
 	private String beanName;
 
-	private Object currentRecoveryMarker = new Object();
-
-	private final Object recoveryMonitor = new Object();
+	private final Set scheduledInvokers = new HashSet();
 
 	private int activeInvokerCount = 0;
 
 	private final Object activeInvokerMonitor = new Object();
+
+	private Object currentRecoveryMarker = new Object();
+
+	private final Object recoveryMonitor = new Object();
 
 
 	/**
@@ -209,43 +219,6 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 */
 	public void setTaskExecutor(TaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
-	}
-
-	/**
-	 * Specify the number of concurrent consumers to create. Default is 1.
-	 * <p>Raising the number of concurrent consumers is recommendable in order
-	 * to scale the consumption of messages coming in from a queue. However,
-	 * note that any ordering guarantees are lost once multiple consumers are
-	 * registered. In general, stick with 1 consumer for low-volume queues.
-	 * <p><b>Do not raise the number of concurrent consumers for a topic.</b>
-	 * This would lead to concurrent consumption of the same message,
-	 * which is hardly ever desirable.
-	 */
-	public void setConcurrentConsumers(int concurrentConsumers) {
-		Assert.isTrue(concurrentConsumers > 0, "'concurrentConsumers' value must be at least 1 (one)");
-		this.concurrentConsumers = concurrentConsumers;
-	}
-
-	/**
-	 * Set the maximum number of messages to process in one task.
-	 * More concretely, this limits the number of message reception attempts,
-	 * which includes receive iterations that did not actually pick up a
-	 * message until they hit their timeout (see "receiveTimeout" property).
-	 * <p>Default is unlimited (-1) in case of a standard TaskExecutor,
-	 * and 1 in case of a SchedulingTaskExecutor that indicates a preference for
-	 * short-lived tasks. Specify a number of 10 to 100 messages to balance
-	 * between extremely long-lived and extremely short-lived tasks here.
-	 * <p>Long-lived tasks avoid frequent thread context switches through
-	 * sticking with the same thread all the way through, while short-lived
-	 * tasks allow thread pools to control the scheduling. Hence, thread
-	 * pools will usually prefer short-lived tasks.
-	 * @see #setTaskExecutor
-	 * @see #setReceiveTimeout
-	 * @see org.springframework.scheduling.SchedulingTaskExecutor#prefersShortLivedTasks()
-	 */
-	public void setMaxMessagesPerTask(int maxMessagesPerTask) {
-		Assert.isTrue(maxMessagesPerTask != 0, "'maxMessagesPerTask' must not be 0");
-		this.maxMessagesPerTask = maxMessagesPerTask;
 	}
 
 	/**
@@ -346,17 +319,170 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		return (this.cacheLevel != null ? this.cacheLevel.intValue() : CACHE_NONE);
 	}
 
+
+	/**
+	 * Specify the number of concurrent consumers to create. Default is 1.
+	 * <p>Specifying a higher value for this setting will increase the standard
+	 * level of scheduled concurrent consumers at runtime: This is effectively
+	 * the minimum number of concurrent consumers which will be scheduled
+	 * at any given time. This is a static setting; for dynamic scaling,
+	 * consider specifying the "maxConcurrentConsumers" setting instead.
+	 * <p>Raising the number of concurrent consumers is recommendable in order
+	 * to scale the consumption of messages coming in from a queue. However,
+	 * note that any ordering guarantees are lost once multiple consumers are
+	 * registered. In general, stick with 1 consumer for low-volume queues.
+	 * <p><b>Do not raise the number of concurrent consumers for a topic.</b>
+	 * This would lead to concurrent consumption of the same message,
+	 * which is hardly ever desirable.
+	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
+	 * @see #setMaxConcurrentConsumers
+	 */
+	public void setConcurrentConsumers(int concurrentConsumers) {
+		Assert.isTrue(concurrentConsumers > 0, "'concurrentConsumers' value must be at least 1 (one)");
+		synchronized (this.activeInvokerMonitor) {
+			this.concurrentConsumers = concurrentConsumers;
+			if (this.maxConcurrentConsumers < concurrentConsumers) {
+				this.maxConcurrentConsumers = concurrentConsumers;
+			}
+		}
+	}
+
+	/**
+	 * Return the "concurrentConsumer" setting.
+	 * <p>This returns the currently configured "concurrentConsumers" value;
+	 * the number of currently scheduled/active consumers might differ.
+	 * @see #getScheduledConsumerCount()
+	 * @see #getActiveConsumerCount()
+	 */
+	public final int getConcurrentConsumers() {
+		synchronized (this.activeInvokerMonitor) {
+			return this.concurrentConsumers;
+		}
+	}
+
+	/**
+	 * Specify the maximum number of concurrent consumers to create. Default is 1.
+	 * <p>If this setting is higher than "concurrentConsumers", the listener container
+	 * will dynamically schedule new consumers at runtime, provided that enough
+	 * incoming messages are encountered. Once the load goes down again, the consumers
+	 * will be reduced to the standard level ("concurrentConsumers") again.
+	 * <p>Raising the number of concurrent consumers is recommendable in order
+	 * to scale the consumption of messages coming in from a queue. However,
+	 * note that any ordering guarantees are lost once multiple consumers are
+	 * registered. In general, stick with 1 consumer for low-volume queues.
+	 * <p><b>Do not raise the number of concurrent consumers for a topic.</b>
+	 * This would lead to concurrent consumption of the same message,
+	 * which is hardly ever desirable.
+	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
+	 * @see #setConcurrentConsumers
+	 */
+	public void setMaxConcurrentConsumers(int maxConcurrentConsumers) {
+		Assert.isTrue(maxConcurrentConsumers > 0, "'maxConcurrentConsumers' value must be at least 1 (one)");
+		synchronized (this.activeInvokerMonitor) {
+			this.maxConcurrentConsumers =
+					(maxConcurrentConsumers > this.concurrentConsumers ? maxConcurrentConsumers : this.concurrentConsumers);
+		}
+	}
+
+	/**
+	 * Return the "maxConcurrentConsumer" setting.
+	 * <p>This returns the currently configured "maxConcurrentConsumers" value;
+	 * the number of currently scheduled/active consumers might differ.
+	 * @see #getScheduledConsumerCount()
+	 * @see #getActiveConsumerCount()
+	 */
+	public final int getMaxConcurrentConsumers() {
+		synchronized (this.activeInvokerMonitor) {
+			return this.maxConcurrentConsumers;
+		}
+	}
+
+	/**
+	 * Specify the maximum number of messages to process in one task.
+	 * More concretely, this limits the number of message reception attempts per
+	 * task, which includes receive iterations that did not actually pick up a
+	 * message until they hit their timeout (see "receiveTimeout" property).
+	 * <p>Default is unlimited (-1) in case of a standard TaskExecutor,
+	 * and 1 in case of a SchedulingTaskExecutor that indicates a preference for
+	 * short-lived tasks. Specify a number of 10 to 100 messages to balance
+	 * between extremely long-lived and extremely short-lived tasks here.
+	 * <p>Long-lived tasks avoid frequent thread context switches through
+	 * sticking with the same thread all the way through, while short-lived
+	 * tasks allow thread pools to control the scheduling. Hence, thread
+	 * pools will usually prefer short-lived tasks.
+	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
+	 * @see #setTaskExecutor
+	 * @see #setReceiveTimeout
+	 * @see org.springframework.scheduling.SchedulingTaskExecutor#prefersShortLivedTasks()
+	 */
+	public void setMaxMessagesPerTask(int maxMessagesPerTask) {
+		Assert.isTrue(maxMessagesPerTask != 0, "'maxMessagesPerTask' must not be 0");
+		synchronized (this.activeInvokerMonitor) {
+			this.maxMessagesPerTask = maxMessagesPerTask;
+		}
+	}
+
+	/**
+	 * Return the maximum number of messages to process in one task.
+	 */
+	public int getMaxMessagesPerTask() {
+		synchronized (this.activeInvokerMonitor) {
+			return this.maxMessagesPerTask;
+		}
+	}
+
+	/**
+	 * Specify the limit for idle executions of a receive task, not having
+	 * received any message within its execution. If this limit is reached,
+	 * the task will shut down and leave receiving to other executing tasks
+	 * (in case of dynamic scheduling; see the "maxConcurrentConsumers" setting).
+	 * Default is 1.
+	 * <p>Within each task execution, a number of message reception attempts
+	 * (according to the "maxMessagesPerTask" setting) will each wait for an incoming
+	 * message (according to the "receiveTimeout" setting). If all of those receive
+	 * attempts in a given task return without a message, the task is considered
+	 * idle with respect to received messages. Such a task may still be rescheduled;
+	 * however, once it reached the specified "idleTaskExecutionLimit", it will
+	 * shut down (in case of dynamic scaling).
+	 * <p>Raise this limit if you encounter too frequent scaling up and down.
+	 * With this limit being higher, an idle consumer will be kept around longer,
+	 * avoiding the restart of a consumer once a new load of messages comes in.
+	 * Alternatively, specify a higher "maxMessagePerTask" and/or "receiveTimeout" value,
+	 * which will also lead to idle consumers being kept around for a longer time
+	 * (while also increasing the average execution time of each scheduled task).
+	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
+	 * @see #setMaxMessagesPerTask
+	 * @see #setReceiveTimeout
+	 */
+	public void setIdleTaskExecutionLimit(int idleTaskExecutionLimit) {
+		Assert.isTrue(idleTaskExecutionLimit > 0, "'idleTaskExecutionLimit' must be 1 or higher");
+		synchronized (this.activeInvokerMonitor) {
+			this.idleTaskExecutionLimit = idleTaskExecutionLimit;
+		}
+	}
+
+	/**
+	 * Return the limit for idle executions of a receive task.
+	 */
+	public int getIdleTaskExecutionLimit() {
+		synchronized (this.activeInvokerMonitor) {
+			return this.idleTaskExecutionLimit;
+		}
+	}
+
+
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
-
 
 	/**
 	 * Validates this instance's configuration.
 	 */
 	public void afterPropertiesSet() {
-		if (isSubscriptionDurable() && this.concurrentConsumers != 1) {
-			throw new IllegalArgumentException("Only 1 concurrent consumer supported for durable subscription");
+		synchronized (this.activeInvokerMonitor) {
+			if (isSubscriptionDurable() && this.concurrentConsumers != 1) {
+				throw new IllegalArgumentException("Only 1 concurrent consumer supported for durable subscription");
+			}
 		}
 		super.afterPropertiesSet();
 	}
@@ -385,16 +511,18 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		}
 
 		// Prepare taskExecutor and maxMessagesPerTask.
-		if (this.taskExecutor == null) {
-			this.taskExecutor = createDefaultTaskExecutor();
-		}
-		else if (this.taskExecutor instanceof SchedulingTaskExecutor &&
-				((SchedulingTaskExecutor) this.taskExecutor).prefersShortLivedTasks() &&
-				this.maxMessagesPerTask == Integer.MIN_VALUE) {
-			// TaskExecutor indicated a preference for short-lived tasks. According to
-			// setMaxMessagesPerTask javadoc, we'll use 1 message per task in this case
-			// unless the user specified a custom value.
-			this.maxMessagesPerTask = 1;
+		synchronized (this.activeInvokerMonitor) {
+			if (this.taskExecutor == null) {
+				this.taskExecutor = createDefaultTaskExecutor();
+			}
+			else if (this.taskExecutor instanceof SchedulingTaskExecutor &&
+					((SchedulingTaskExecutor) this.taskExecutor).prefersShortLivedTasks() &&
+					this.maxMessagesPerTask == Integer.MIN_VALUE) {
+				// TaskExecutor indicated a preference for short-lived tasks. According to
+				// setMaxMessagesPerTask javadoc, we'll use 1 message per task in this case
+				// unless the user specified a custom value.
+				this.maxMessagesPerTask = 1;
+			}
 		}
 
 		// Proceed with actual listener initialization.
@@ -425,20 +553,113 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * Creates the specified number of concurrent consumers,
 	 * in the form of a JMS Session plus associated MessageConsumer
 	 * running in a separate thread.
+	 * @see #scheduleNewInvoker
 	 * @see #setTaskExecutor
 	 */
 	protected void registerListener() throws JMSException {
-		for (int i = 0; i < this.concurrentConsumers; i++) {
-			this.taskExecutor.execute(new AsyncMessageListenerInvoker());
+		synchronized (this.activeInvokerMonitor) {
+			for (int i = 0; i < this.concurrentConsumers; i++) {
+				scheduleNewInvoker();
+			}
 		}
 	}
 
 	/**
-	 * Executes the given task via this listener container's TaskExecutor.
+	 * Re-executes the given task via this listener container's TaskExecutor.
 	 * @see #setTaskExecutor
 	 */
 	protected void doRescheduleTask(Object task) {
 		this.taskExecutor.execute((Runnable) task);
+	}
+
+	/**
+	 * Schedule a new invoker, increasing the total number of scheduled
+	 * invokers for this listener container, but only if the specified
+	 * "maxConcurrentConsumers" limit has not been reached yet, and only
+	 * if this listener container does not currently have idle invokers
+	 * that are waiting for new messages already.
+	 * <p>Called once a message has been received, to scale up while
+	 * processing the message in the invoker that originally received it.
+	 * @see #setTaskExecutor
+	 * @see #getMaxConcurrentConsumers()
+	 */
+	protected void scheduleNewInvokerIfAppropriate() {
+		synchronized (this.activeInvokerMonitor) {
+			if (this.scheduledInvokers.size() < this.maxConcurrentConsumers && !hasIdleInvokers()) {
+				scheduleNewInvoker();
+				if (logger.isDebugEnabled()) {
+					logger.debug("Raised scheduled invoker count: " + scheduledInvokers.size());
+				}
+			}
+		}
+	}
+
+	/**
+	 * Schedule a new invoker, increasing the total number of scheduled
+	 * invokers for this listener container.
+	 */
+	private void scheduleNewInvoker() {
+		AsyncMessageListenerInvoker invoker = new AsyncMessageListenerInvoker();
+		this.taskExecutor.execute(invoker);
+		this.scheduledInvokers.add(invoker);
+		this.activeInvokerMonitor.notifyAll();
+	}
+
+	/**
+	 * Determine whether this listener container currently has any
+	 * idle instances among its scheduled invokers.
+	 */
+	private boolean hasIdleInvokers() {
+		for (Iterator it = this.scheduledInvokers.iterator(); it.hasNext();) {
+			AsyncMessageListenerInvoker invoker = (AsyncMessageListenerInvoker) it.next();
+			if (invoker.isIdle()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Determine whether the current invoker should be rescheduled,
+	 * given that it might not have received a message in a while.
+	 * @param idleTaskExecutionCount the number of idle executions
+	 * that this invoker task has already accumulated (in a row)
+	 */
+	private boolean shouldRescheduleInvoker(int idleTaskExecutionCount) {
+		synchronized (this.activeInvokerMonitor) {
+			boolean idle = (idleTaskExecutionCount >= this.idleTaskExecutionLimit);
+			return (this.scheduledInvokers.size() <= (idle ? this.concurrentConsumers : this.maxConcurrentConsumers));
+		}
+	}
+
+	/**
+	 * Return the number of currently scheduled consumers.
+	 * <p>This number will always be inbetween "concurrentConsumers" and
+	 * "maxConcurrentConsumers", but might be higher than "activeConsumerCount"
+	 * (in case of some consumers being scheduled but not executed at the moment).
+	 * @see #getConcurrentConsumers()
+	 * @see #getMaxConcurrentConsumers()
+	 * @see #getActiveConsumerCount()
+	 */
+	public final int getScheduledConsumerCount() {
+		synchronized (this.activeInvokerMonitor) {
+			return this.scheduledInvokers.size();
+		}
+	}
+
+	/**
+	 * Return the number of currently active consumers.
+	 * <p>This number will always be inbetween "concurrentConsumers" and
+	 * "maxConcurrentConsumers", but might be lower than "scheduledConsumerCount".
+	 * (in case of some consumers being scheduled but not executed at the moment).
+	 * @see #getConcurrentConsumers()
+	 * @see #getMaxConcurrentConsumers()
+	 * @see #getActiveConsumerCount()
+	 */
+	public final int getActiveConsumerCount() {
+		synchronized (this.activeInvokerMonitor) {
+			return this.activeInvokerCount;
+		}
 	}
 
 
@@ -466,12 +687,13 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * @throws JMSException if thrown by JMS methods
 	 * @see #doReceiveAndExecute
 	 */
-	protected void receiveAndExecute(Session session, MessageConsumer consumer) throws JMSException {
+	protected boolean receiveAndExecute(Session session, MessageConsumer consumer) throws JMSException {
 		if (this.transactionManager != null) {
 			// Execute receive within transaction.
 			TransactionStatus status = this.transactionManager.getTransaction(this.transactionDefinition);
+			boolean messageReceived = true;
 			try {
-				doReceiveAndExecute(session, consumer, status);
+				messageReceived = doReceiveAndExecute(session, consumer, status);
 			}
 			catch (JMSException ex) {
 				rollbackOnException(status, ex);
@@ -486,11 +708,12 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 				throw err;
 			}
 			this.transactionManager.commit(status);
+			return messageReceived;
 		}
 
 		else {
 			// Execute receive outside of transaction.
-			doReceiveAndExecute(session, consumer, null);
+			return doReceiveAndExecute(session, consumer, null);
 		}
 	}
 
@@ -503,7 +726,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * @throws JMSException if thrown by JMS methods
 	 * @see #doExecuteListener(javax.jms.Session, javax.jms.Message)
 	 */
-	protected void doReceiveAndExecute(Session session, MessageConsumer consumer, TransactionStatus status)
+	protected boolean doReceiveAndExecute(Session session, MessageConsumer consumer, TransactionStatus status)
 			throws JMSException {
 
 		Connection conToClose = null;
@@ -542,6 +765,7 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 							consumerToUse + "] of " + (transactional ? "transactional " : "") + "session [" +
 							sessionToUse + "]");
 				}
+				scheduleNewInvokerIfAppropriate();
 				try {
 					doExecuteListener(sessionToUse, message);
 				}
@@ -554,6 +778,14 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 					}
 					handleListenerException(ex);
 				}
+				return true;
+			}
+			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Consumer [" + consumerToUse + "] of " + (transactional ? "transactional " : "") +
+							"session [" + sessionToUse + "] did not receive a message");
+				}
+				return false;
 			}
 		}
 		finally {
@@ -738,6 +970,10 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 		}
 	}
 
+	/**
+	 * Sleep according to the specified recovery interval.
+	 * Called inbetween recovery attempts.
+	 */
 	protected void sleepInbetweenRecoveryAttempts() {
 		if (this.recoveryInterval > 0) {
 			try {
@@ -844,24 +1080,29 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 		private boolean lastMessageSucceeded;
 
+		private int idleTaskExecutionCount = 0;
+
+		private volatile boolean idle = true;
+
 		public void run() {
 			synchronized (activeInvokerMonitor) {
 				activeInvokerCount++;
 				activeInvokerMonitor.notifyAll();
 			}
+			boolean messageReceived = false;
 			try {
 				if (maxMessagesPerTask < 0) {
 					while (isActive()) {
 						waitWhileNotRunning();
 						if (isActive()) {
-							invokeListener();
+							messageReceived = invokeListener();
 						}
 					}
 				}
 				else {
 					int messageCount = 0;
 					while (isRunning() && messageCount < maxMessagesPerTask) {
-						invokeListener();
+						messageReceived = (invokeListener() || messageReceived);
 						messageCount++;
 					}
 				}
@@ -893,16 +1134,31 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 				activeInvokerCount--;
 				activeInvokerMonitor.notifyAll();
 			}
-			if (!rescheduleTaskIfNecessary(this)) {
+			if (!messageReceived) {
+				this.idleTaskExecutionCount++;
+			}
+			else {
+				this.idleTaskExecutionCount = 0;
+			}
+			if (!shouldRescheduleInvoker(this.idleTaskExecutionCount) || !rescheduleTaskIfNecessary(this)) {
 				// We're shutting down completely.
+				synchronized (activeInvokerMonitor) {
+					scheduledInvokers.remove(this);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Lowered scheduled invoker count: " + scheduledInvokers.size());
+					}
+					activeInvokerMonitor.notifyAll();
+				}
 				clearResources();
 			}
 		}
 
-		private void invokeListener() throws JMSException {
+		private boolean invokeListener() throws JMSException {
 			initResourcesIfNecessary();
-			receiveAndExecute(this.session, this.consumer);
+			boolean messageReceived = receiveAndExecute(this.session, this.consumer);
 			this.lastMessageSucceeded = true;
+			this.idle = !messageReceived;
+			return messageReceived;
 		}
 
 		private void initResourcesIfNecessary() throws JMSException {
@@ -935,6 +1191,10 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 
 		public boolean isLongLived() {
 			return (maxMessagesPerTask < 0);
+		}
+
+		public boolean isIdle() {
+			return this.idle;
 		}
 	}
 
