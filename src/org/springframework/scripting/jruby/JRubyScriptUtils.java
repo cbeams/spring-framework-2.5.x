@@ -49,7 +49,8 @@ import org.springframework.util.ClassUtils;
 public abstract class JRubyScriptUtils {
 
 	/**
-	 * Create a new JRuby-scripted object from the given script source.
+	 * Create a new JRuby-scripted object from the given script source,
+	 * using the default ClassLoader.
 	 * @param scriptSource the script source text
 	 * @param interfaces the interfaces that the scripted Java object
 	 * is supposed to implement
@@ -57,6 +58,21 @@ public abstract class JRubyScriptUtils {
 	 * @throws JumpException in case of JRuby parsing failure
 	 */
 	public static Object createJRubyObject(String scriptSource, Class[] interfaces) throws JumpException {
+		return createJRubyObject(scriptSource, interfaces, ClassUtils.getDefaultClassLoader());
+	}
+
+	/**
+	 * Create a new JRuby-scripted object from the given script source.
+	 * @param scriptSource the script source text
+	 * @param interfaces the interfaces that the scripted Java object
+	 * is supposed to implement
+	 * @param classLoader the ClassLoader to create the script proxy with
+	 * @return the scripted Java object
+	 * @throws JumpException in case of JRuby parsing failure
+	 */
+	public static Object createJRubyObject(String scriptSource, Class[] interfaces, ClassLoader classLoader)
+			throws JumpException {
+
 		IRuby ruby = initializeRuntime();
 
 		Node scriptRootNode = ruby.parse(scriptSource, "", null);
@@ -71,8 +87,7 @@ public abstract class JRubyScriptUtils {
 			throw new ScriptCompilationException("Compilation of JRuby script returned '" + rubyObject + "'");
 		}
 
-		return Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(),
-						interfaces, new RubyObjectInvocationHandler(rubyObject, ruby));
+		return Proxy.newProxyInstance(classLoader, interfaces, new RubyObjectInvocationHandler(rubyObject, ruby));
 	}
 
 	/**

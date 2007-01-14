@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,12 @@ import java.io.IOException;
 
 import org.jruby.exceptions.JumpException;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.springframework.scripting.ScriptFactory} implementation
@@ -41,11 +43,13 @@ import org.springframework.util.Assert;
  * @see org.springframework.scripting.support.ScriptFactoryPostProcessor
  * @see JRubyScriptUtils
  */
-public class JRubyScriptFactory implements ScriptFactory {
+public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
 	private final String scriptSourceLocator;
 
 	private final Class[] scriptInterfaces;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 
 	/**
@@ -63,6 +67,10 @@ public class JRubyScriptFactory implements ScriptFactory {
 		Assert.notEmpty(scriptInterfaces);
 		this.scriptSourceLocator = scriptSourceLocator;
 		this.scriptInterfaces = scriptInterfaces;
+	}
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
 	}
 
 
@@ -84,12 +92,13 @@ public class JRubyScriptFactory implements ScriptFactory {
 
 	/**
 	 * Load and parse the JRuby script via JRubyScriptUtils.
-	 * @see JRubyScriptUtils#createJRubyObject(String, Class[])
+	 * @see JRubyScriptUtils#createJRubyObject(String, Class[], ClassLoader)
 	 */
 	public Object getScriptedObject(ScriptSource actualScriptSource, Class[] actualInterfaces)
 			throws IOException, ScriptCompilationException {
 		try {
-			return JRubyScriptUtils.createJRubyObject(actualScriptSource.getScriptAsString(), actualInterfaces);
+			return JRubyScriptUtils.createJRubyObject(
+					actualScriptSource.getScriptAsString(), actualInterfaces, this.beanClassLoader);
 		}
 		catch (JumpException ex) {
 			throw new ScriptCompilationException("Could not compile JRuby script: " + actualScriptSource, ex);

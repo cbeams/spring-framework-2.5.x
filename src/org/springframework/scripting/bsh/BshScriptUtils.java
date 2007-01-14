@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,8 @@ import org.springframework.util.ClassUtils;
 public abstract class BshScriptUtils {
 
 	/**
-	 * Create a new BeanShell-scripted object from the given script source.
+	 * Create a new BeanShell-scripted object from the given script source,
+	 * using the default ClassLoader.
 	 * @param scriptSource the script source text
 	 * @param interfaces the interfaces that the scripted Java object
 	 * is supposed to implement
@@ -47,13 +48,27 @@ public abstract class BshScriptUtils {
 	 * @throws EvalError in case of BeanShell parsing failure
 	 */
 	public static Object createBshObject(String scriptSource, Class[] interfaces) throws EvalError {
+		return createBshObject(scriptSource, interfaces, ClassUtils.getDefaultClassLoader());
+	}
+
+	/**
+	 * Create a new BeanShell-scripted object from the given script source.
+	 * @param scriptSource the script source text
+	 * @param interfaces the interfaces that the scripted Java object
+	 * is supposed to implement
+	 * @param classLoader the ClassLoader to create the script proxy with
+	 * @return the scripted Java object
+	 * @throws EvalError in case of BeanShell parsing failure
+	 */
+	public static Object createBshObject(String scriptSource, Class[] interfaces, ClassLoader classLoader)
+			throws EvalError {
+
 		Assert.hasText(scriptSource, "Script source must not be empty");
 		Assert.notEmpty(interfaces, "At least one script interface is required");
 		Interpreter interpreter = new Interpreter();
 		interpreter.eval(scriptSource);
 		XThis xt = (XThis) interpreter.eval("return this");
-		return Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(),
-				interfaces, new BshObjectInvocationHandler(xt));
+		return Proxy.newProxyInstance(classLoader, interfaces, new BshObjectInvocationHandler(xt));
 	}
 
 

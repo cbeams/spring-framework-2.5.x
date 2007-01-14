@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package org.springframework.scripting.groovy;
 
-import groovy.lang.GroovyClassLoader;
-import groovy.lang.GroovyObject;
-
 import java.io.IOException;
 
+import groovy.lang.GroovyClassLoader;
+import groovy.lang.GroovyObject;
 import org.codehaus.groovy.control.CompilationFailedException;
+
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
@@ -45,11 +46,14 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.scripting.support.ScriptFactoryPostProcessor
  * @see groovy.lang.GroovyClassLoader
  */
-public class GroovyScriptFactory implements ScriptFactory {
+public class GroovyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
 	private final String scriptSourceLocator;
 	
 	private final GroovyObjectCustomizer groovyObjectCustomizer;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+
 
 	/**
 	 * Create a new GroovyScriptFactory for the given script source.
@@ -74,12 +78,17 @@ public class GroovyScriptFactory implements ScriptFactory {
 	 * Interpreted by the post-processor that actually creates the script.
 	 * @param groovyObjectCustomizer customizer that can set a custom metaclass
 	 * or make other changes to the GroovyObject created by this factory
+	 * (may be <code>null</code>)
 	 * @throws IllegalArgumentException if the supplied String is empty
 	 */
 	public GroovyScriptFactory(String scriptSourceLocator, GroovyObjectCustomizer groovyObjectCustomizer) {
 		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");
 		this.scriptSourceLocator = scriptSourceLocator;
 		this.groovyObjectCustomizer = groovyObjectCustomizer;
+	}
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
 	}
 
 
@@ -112,9 +121,7 @@ public class GroovyScriptFactory implements ScriptFactory {
 	public Object getScriptedObject(ScriptSource actualScriptSource, Class[] actualInterfaces)
 			throws IOException, ScriptCompilationException {
 
-		ClassLoader cl = ClassUtils.getDefaultClassLoader();
-		GroovyClassLoader groovyClassLoader = new GroovyClassLoader(cl);
-		
+		GroovyClassLoader groovyClassLoader = new GroovyClassLoader(this.beanClassLoader);
 		try {
 			Class clazz = groovyClassLoader.parseClass(actualScriptSource.getScriptAsString());
 			GroovyObject goo = (GroovyObject) clazz.newInstance();
