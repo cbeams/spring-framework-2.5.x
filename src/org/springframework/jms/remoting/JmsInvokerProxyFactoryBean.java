@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,13 @@
 package org.springframework.jms.remoting;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.util.ClassUtils;
 
 /**
- * Factory bean for JMS proxies.
- * 
- * <p>Behaves like the proxied service when used as a bean reference,
- * exposing the specified {@link #setServiceInterface(Class) service interface}.
+ * FactoryBean for JMS proxies. Exposes the proxied service for use
+ * as a bean reference, using the specified service interface.
  *
  * <p>For configuration details, see the
  * {@link JmsInvokerClientInterceptor} javadoc.
@@ -32,12 +32,16 @@ import org.springframework.beans.factory.FactoryBean;
  * @since 2.0
  * @see #setConnectionFactory
  * @see #setQueueName
+ * @see #setServiceInterface
  * @see org.springframework.jms.remoting.JmsInvokerClientInterceptor
  * @see org.springframework.jms.remoting.JmsInvokerServiceExporter
  */
-public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor implements FactoryBean {
+public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor
+		implements FactoryBean, BeanClassLoaderAware {
 
 	private Class serviceInterface;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private Object serviceProxy;
 
@@ -51,17 +55,21 @@ public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor impl
 	 */
 	public void setServiceInterface(Class serviceInterface) {
 		if (serviceInterface == null || !serviceInterface.isInterface()) {
-			throw new IllegalArgumentException("serviceInterface must be an interface");
+			throw new IllegalArgumentException("'serviceInterface' must be an interface");
 		}
 		this.serviceInterface = serviceInterface;
+	}
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
 	}
 
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		if (this.serviceInterface == null) {
-			throw new IllegalArgumentException("serviceInterface is required");
+			throw new IllegalArgumentException("Property 'serviceInterface' is required");
 		}
-		this.serviceProxy = ProxyFactory.getProxy(this.serviceInterface, this);
+		this.serviceProxy = new ProxyFactory(this.serviceInterface, this).getProxy(this.beanClassLoader);
 	}
 
 
@@ -70,7 +78,7 @@ public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor impl
 	}
 
 	public Class getObjectType() {
-		return (this.serviceProxy != null) ? this.serviceProxy.getClass() : this.serviceInterface;
+		return this.serviceInterface;
 	}
 
 	public boolean isSingleton() {

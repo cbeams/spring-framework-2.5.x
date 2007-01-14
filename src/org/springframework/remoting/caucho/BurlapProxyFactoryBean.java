@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,20 @@
 package org.springframework.remoting.caucho;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.util.ClassUtils;
 
 /**
- * Factory bean for Burlap proxies. Behaves like the proxied service when
- * used as bean reference, exposing the specified service interface.
+ * FactoryBean for Burlap proxies. Exposes the proxied service for
+ * use as a bean reference, using the specified service interface.
  *
  * <p>Burlap is a slim, XML-based RPC protocol.
  * For information on Burlap, see the
  * <a href="http://www.caucho.com/burlap">Burlap website</a>
  *
  * <p>The service URL must be an HTTP URL exposing a Burlap service.
- * For details, see BurlapClientInterceptor docs.
+ * For details, see the {@link BurlapClientInterceptor} javadoc.
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
@@ -40,14 +42,21 @@ import org.springframework.beans.factory.FactoryBean;
  * @see org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean
  * @see org.springframework.remoting.rmi.RmiProxyFactoryBean
  */
-public class BurlapProxyFactoryBean extends BurlapClientInterceptor implements FactoryBean {
+public class BurlapProxyFactoryBean extends BurlapClientInterceptor
+		implements FactoryBean, BeanClassLoaderAware {
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private Object serviceProxy;
 
 
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
-		this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(), this);
+		this.serviceProxy = new ProxyFactory(getServiceInterface(), this).getProxy(this.beanClassLoader);
 	}
 	
 

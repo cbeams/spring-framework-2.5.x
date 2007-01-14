@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,14 @@
 package org.springframework.remoting.rmi;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.util.ClassUtils;
 
 /**
- * Factory bean for RMI proxies, supporting both conventional RMI services and
- * RMI invokers. Behaves like the proxied service when used as bean reference,
- * exposing the specified service interface. Proxies will throw Spring's unchecked
+ * FactoryBean for RMI proxies, supporting both conventional RMI services and
+ * RMI invokers. Exposes the proxied service for use as a bean reference,
+ * using the specified service interface. Proxies will throw Spring's unchecked
  * RemoteAccessException on remote invocation failure instead of RMI's RemoteException.
  *
  * <p>The service URL must be a valid RMI URL like "rmi://localhost:1099/myservice".
@@ -57,17 +59,23 @@ import org.springframework.beans.factory.FactoryBean;
  * @see org.springframework.remoting.caucho.BurlapProxyFactoryBean
  * @see org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean
  */
-public class RmiProxyFactoryBean extends RmiClientInterceptor implements FactoryBean {
+public class RmiProxyFactoryBean extends RmiClientInterceptor implements FactoryBean, BeanClassLoaderAware {
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private Object serviceProxy;
 
 
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		if (getServiceInterface() == null) {
-			throw new IllegalArgumentException("serviceInterface is required");
+			throw new IllegalArgumentException("Property 'serviceInterface' is required");
 		}
-		this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(), this);
+		this.serviceProxy = new ProxyFactory(getServiceInterface(), this).getProxy(this.beanClassLoader);
 	}
 
 

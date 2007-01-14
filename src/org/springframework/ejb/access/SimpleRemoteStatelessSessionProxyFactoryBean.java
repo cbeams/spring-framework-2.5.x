@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ package org.springframework.ejb.access;
 import javax.naming.NamingException;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.util.ClassUtils;
 
 /**
  * <p>Convenient factory for remote SLSB proxies.
@@ -55,17 +57,12 @@ import org.springframework.beans.factory.FactoryBean;
  * @see AbstractRemoteSlsbInvokerInterceptor#setRefreshHomeOnConnectFailure
  */
 public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSlsbInvokerInterceptor
-    implements FactoryBean {
-	
-	/*
-	 * Instead of a separate subclass for each type of SLSBInvoker, we could have added
-	 * this functionality to AbstractSlsbInvokerInterceptor. However, the avoiding of
-	 * code duplication would be outweighed by the confusion this would produce over the
-	 * purpose of AbstractSlsbInvokerInterceptor.
-	 */
-	
+    implements FactoryBean, BeanClassLoaderAware {
+
 	/** The business interface of the EJB we're proxying */
 	private Class businessInterface;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	/** EJBObject */
 	private Object proxy;
@@ -89,7 +86,11 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 	 * Return the business interface of the EJB we're proxying.
 	 */
 	public Class getBusinessInterface() {
-		return businessInterface;
+		return this.businessInterface;
+	}
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
 	}
 
 	public void afterPropertiesSet() throws NamingException {
@@ -97,7 +98,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 		if (this.businessInterface == null) {
 			throw new IllegalArgumentException("businessInterface is required");
 		}
-		this.proxy = ProxyFactory.getProxy(this.businessInterface, this);
+		this.proxy = new ProxyFactory(this.businessInterface, this).getProxy(this.beanClassLoader);
 	}
 
 
@@ -106,7 +107,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 	}
 
 	public Class getObjectType() {
-		return (this.proxy != null) ? this.proxy.getClass() : this.businessInterface;
+		return this.businessInterface;
 	}
 
 	public boolean isSingleton() {

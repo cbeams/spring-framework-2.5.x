@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
- * Factory bean for HTTP invoker proxies. Behaves like the proxied service when
- * used as bean reference, exposing the specified service interface.
+ * FactoryBean for HTTP invoker proxies. Exposes the proxied service for
+ * use as a bean reference, using the specified service interface.
  *
  * <p>The service URL must be an HTTP URL exposing an HTTP invoker service.
  * Optionally, a codebase URL can be specified for on-demand dynamic code download
@@ -56,9 +56,9 @@ public class HttpInvokerProxyFactoryBean extends HttpInvokerClientInterceptor
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		if (getServiceInterface() == null) {
-			throw new IllegalArgumentException("serviceInterface is required");
+			throw new IllegalArgumentException("Property 'serviceInterface' is required");
 		}
-		this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(), this);
+		this.serviceProxy = new ProxyFactory(getServiceInterface(), this).getProxy(getBeanClassLoader());
 	}
 
 

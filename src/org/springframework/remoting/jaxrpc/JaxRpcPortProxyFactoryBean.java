@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@ package org.springframework.remoting.jaxrpc;
 import javax.xml.rpc.ServiceException;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.util.ClassUtils;
 
 /**
  * FactoryBean for a specific port of a JAX-RPC service.
  * Exposes a proxy for the port, to be used for bean references.
- * Inherits configuration properties from JaxRpcPortClientInterceptor.
+ * Inherits configuration properties from {@link JaxRpcPortClientInterceptor}.
  *
  * <p>This factory is typically used with an RMI service interface. Alternatively,
  * this factory can also proxy a JAX-RPC service with a matching non-RMI business
@@ -44,10 +46,17 @@ import org.springframework.beans.factory.FactoryBean;
  * @see #setPortInterface
  * @see LocalJaxRpcServiceFactoryBean
  */
-public class JaxRpcPortProxyFactoryBean extends JaxRpcPortClientInterceptor implements FactoryBean {
+public class JaxRpcPortProxyFactoryBean extends JaxRpcPortClientInterceptor
+		implements FactoryBean, BeanClassLoaderAware {
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private Object serviceProxy;
 
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
 
 	public void afterPropertiesSet() throws ServiceException {
 		if (getServiceInterface() == null) {
@@ -57,11 +66,11 @@ public class JaxRpcPortProxyFactoryBean extends JaxRpcPortClientInterceptor impl
 				setServiceInterface(getPortInterface());
 			}
 			else {
-				throw new IllegalArgumentException("serviceInterface is required");
+				throw new IllegalArgumentException("Property 'serviceInterface' is required");
 			}
 		}
 		super.afterPropertiesSet();
-		this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(), this);
+		this.serviceProxy = new ProxyFactory(getServiceInterface(), this).getProxy(this.beanClassLoader);
 	}
 
 

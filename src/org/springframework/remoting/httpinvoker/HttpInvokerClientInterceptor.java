@@ -29,6 +29,7 @@ import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationBasedAccessor;
 import org.springframework.remoting.support.RemoteInvocationResult;
+import org.springframework.util.ClassUtils;
 
 /**
  * Interceptor for accessing an HTTP invoker service.
@@ -68,7 +69,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 
 	private HttpInvokerRequestExecutor httpInvokerRequestExecutor;
 
-	private ClassLoader beanClassLoader;
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 
 	/**
@@ -115,6 +116,14 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
+	}
+
+	/**
+	 * Return the ClassLoader that this accessor operates in,
+	 * to be used for deserializing and for generating proxies.
+	 */
+	protected final ClassLoader getBeanClassLoader() {
+		return this.beanClassLoader;
 	}
 
 	public void afterPropertiesSet() {

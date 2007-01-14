@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,20 @@
 package org.springframework.remoting.caucho;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.util.ClassUtils;
 
 /**
- * Factory bean for Hessian proxies. Behaves like the proxied service when
- * used as bean reference, exposing the specified service interface.
+ * FactoryBean for Hessian proxies. Exposes the proxied service for
+ * use as a bean reference, using the specified service interface.
  *
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
  * <a href="http://www.caucho.com/hessian">Hessian website</a>
  *
  * <p>The service URL must be an HTTP URL exposing a Hessian service.
- * For details, see HessianClientInterceptor docs.
+ * For details, see the {@link HessianClientInterceptor} javadoc.
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
@@ -40,16 +42,23 @@ import org.springframework.beans.factory.FactoryBean;
  * @see org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean
  * @see org.springframework.remoting.rmi.RmiProxyFactoryBean
  */
-public class HessianProxyFactoryBean extends HessianClientInterceptor implements FactoryBean {
+public class HessianProxyFactoryBean extends HessianClientInterceptor
+		implements FactoryBean, BeanClassLoaderAware {
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private Object serviceProxy;
 
 
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
-		this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(), this);
+		this.serviceProxy = new ProxyFactory(getServiceInterface(), this).getProxy(this.beanClassLoader);
 	}
-	
+
 
 	public Object getObject() {
 		return this.serviceProxy;
@@ -58,7 +67,7 @@ public class HessianProxyFactoryBean extends HessianClientInterceptor implements
 	public Class getObjectType() {
 		return getServiceInterface();
 	}
-	
+
 	public boolean isSingleton() {
 		return true;
 	}

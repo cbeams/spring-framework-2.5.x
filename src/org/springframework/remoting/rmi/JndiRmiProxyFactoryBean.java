@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2006 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,14 +19,16 @@ package org.springframework.remoting.rmi;
 import javax.naming.NamingException;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.util.ClassUtils;
 
 /**
  * Factory bean for RMI proxies from JNDI.
  * 
  * <p>Typically used for RMI-IIOP (CORBA), but can also be used for EJB home objects
  * (for example, a Stateful Session Bean home). In contrast to a plain JNDI lookup,
- * this accessor also performs narrowing through PortableRemoteObject.
+ * this accessor also performs narrowing through {@link javax.rmi.PortableRemoteObject}.
  *
  * <p>With conventional RMI services, this invoker is typically used with the RMI
  * service interface. Alternatively, this invoker can also proxy a remote RMI service
@@ -35,8 +37,8 @@ import org.springframework.beans.factory.FactoryBean;
  * RemoteExceptions thrown by the RMI stub will automatically get converted to
  * Spring's unchecked RemoteAccessException.
  *
- * <p>The JNDI environment can be specified as jndiEnvironment property,
- * or be configured in a jndi.properties file or as system properties.
+ * <p>The JNDI environment can be specified as "jndiEnvironment" property,
+ * or be configured in a <code>jndi.properties</code> file or as system properties.
  * For example:
  *
  * <pre class="code">&lt;property name="jndiEnvironment"&gt;
@@ -59,17 +61,23 @@ import org.springframework.beans.factory.FactoryBean;
  * @see java.rmi.Remote
  * @see javax.rmi.PortableRemoteObject#narrow
  */
-public class JndiRmiProxyFactoryBean extends JndiRmiClientInterceptor implements FactoryBean {
+public class JndiRmiProxyFactoryBean extends JndiRmiClientInterceptor implements FactoryBean, BeanClassLoaderAware {
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private Object serviceProxy;
 
 
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
 	public void afterPropertiesSet() throws NamingException {
 		super.afterPropertiesSet();
 		if (getServiceInterface() == null) {
-			throw new IllegalArgumentException("serviceInterface is required");
+			throw new IllegalArgumentException("Property 'serviceInterface' is required");
 		}
-		this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(),  this);
+		this.serviceProxy = new ProxyFactory(getServiceInterface(), this).getProxy(this.beanClassLoader);
 	}
 
 

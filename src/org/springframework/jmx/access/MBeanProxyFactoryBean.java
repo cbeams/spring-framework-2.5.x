@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,16 @@
 package org.springframework.jmx.access;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.MBeanServerNotFoundException;
+import org.springframework.util.ClassUtils;
 
 /**
  * Creates a proxy to a managed resource running either locally or remotely.
- * The <code>proxyInterface</code> property defines the interface that the
- * generated proxy should implement. This interface should define methods and
+ * The "proxyInterface" property defines the interface that the generated
+ * proxy is supposed to implement. This interface should define methods and
  * properties that correspond to operations and attributes in the management
  * interface of the resource you wish to proxy.
  *
@@ -46,9 +48,12 @@ import org.springframework.jmx.MBeanServerNotFoundException;
  * @see MBeanClientInterceptor
  * @see InvalidInvocationException
  */
-public class MBeanProxyFactoryBean extends MBeanClientInterceptor implements FactoryBean, InitializingBean {
+public class MBeanProxyFactoryBean extends MBeanClientInterceptor
+		implements FactoryBean, BeanClassLoaderAware, InitializingBean {
 
 	private Class proxyInterface;
+
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private Object mbeanProxy;
 
@@ -64,6 +69,10 @@ public class MBeanProxyFactoryBean extends MBeanClientInterceptor implements Fac
 		this.proxyInterface = managementInterface;
 	}
 
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
+
 	/**
 	 * Checks that the <code>proxyInterface</code> has been specified and then
 	 * generates the proxy for the target MBean.
@@ -72,9 +81,9 @@ public class MBeanProxyFactoryBean extends MBeanClientInterceptor implements Fac
 		super.afterPropertiesSet();
 
 		if (this.proxyInterface == null) {
-			throw new IllegalArgumentException("proxyInterface is required");
+			throw new IllegalArgumentException("Property 'proxyInterface' is required");
 		}
-		this.mbeanProxy = ProxyFactory.getProxy(this.proxyInterface, this);
+		this.mbeanProxy = new ProxyFactory(this.proxyInterface, this).getProxy(this.beanClassLoader);
 	}
 
 
