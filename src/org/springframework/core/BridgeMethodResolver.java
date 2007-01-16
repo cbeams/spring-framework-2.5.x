@@ -268,6 +268,9 @@ public abstract class BridgeMethodResolver {
 			if (actualTypeArgument instanceof Class) {
 				typeVariableMap.put(typeVariables[i].getName(), (Class) actualTypeArgument);
 			}
+			else if (actualTypeArgument instanceof ParameterizedType) {
+				typeVariableMap.put(typeVariables[i].getName(), ((ParameterizedType)actualTypeArgument).getRawType());
+			}
 			else if (actualTypeArgument instanceof TypeVariable) {
 				// We have a type that is parameterized at instantiation time
 				// the nearest match on the bridge method will be the bounded type.

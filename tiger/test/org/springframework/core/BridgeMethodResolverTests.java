@@ -200,8 +200,20 @@ public class BridgeMethodResolverTests extends TestCase {
 	public void testSPR2763() throws Exception {
 		Method bridgedMethod = AbstractDao.class.getDeclaredMethod("save", Object.class);
 		assertFalse(bridgedMethod.isBridge());
-		
+
 		Method bridgeMethod = UserDaoImpl.class.getDeclaredMethod("save", User.class);
+		assertTrue(bridgeMethod.isBridge());
+
+		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
+	}
+
+	public void testSPR3041() throws Exception {
+		Method bridgedMethod = BusinessDao.class.getDeclaredMethod("save", Business.class);
+		assertNotNull(bridgedMethod);
+		assertFalse(bridgedMethod.isBridge());
+
+		Method bridgeMethod = BusinessDao.class.getDeclaredMethod("save", Object.class);
+		assertNotNull(bridgeMethod);
 		assertTrue(bridgeMethod.isBridge());
 
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));
@@ -892,4 +904,20 @@ public class BridgeMethodResolverTests extends TestCase {
 
 		}
 	}
+
+	public class Business<T> {
+
+	}
+
+	public class BusinessGenericDao<T, PK extends Serializable> {
+
+		public void save(T object) {
+			// Do nothing;
+		}
+	}
+
+	public class BusinessDao extends BusinessGenericDao<Business<?>, Long> {
+    public void save(Business<?> business) {
+    }
+}
 }
