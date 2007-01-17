@@ -19,6 +19,9 @@ Package org.springframework.beans
 Package org.springframework.dao
 * PersistenceExceptionTranslationPostProcessor uses the bean ClassLoader for generating translation proxies
 
+Package org.springframework.core
+* fixed BridgeMethodResolver's "populateTypeMapFromParameterizedType" to properly handle nested generics
+
 Package org.springframework.ejb
 * AbstractEnterpriseBean uses the EJB instance as WeakReferenceMonitor handle, instead of a BeanFactoryReference proxy
 
@@ -44,6 +47,13 @@ Package org.springframework.scripting
 * BshScriptUtils and BshScriptFactory support BeanShell scripts that declare an actual class or instance
 * JRubyScriptUtils passes the declared return type to JRuby, for proper conversion of number types
 * ScriptFactoryPostProcessor uses the bean ClassLoader for generating refreshable script proxies
+
+Package org.springframework.transaction
+* AbstractPlatformTransactionManager exposes "actualTransactionActive" flag for a newly synchronized existing tx as well
+* turned various AbstractPlatformTransactionManager methods from private to protected, for reuse in specific subclasses
+
+Package org.springframework.util
+* ResourceUtils's "extractJarFileURL" only prepends a slash in front of a file path if it doesn't already have a slash
 
 Package org.springframework.web
 * RequestContextListener works correctly even in case of the "requestDestroyed" callback coming from a different thread
