@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,13 @@ import java.net.URLDecoder;
  *
  * <p>Consider using Spring's Resource abstraction in the core package
  * for handling all kinds of file resources in a uniform manner.
- * ResourceLoader's <code>getLocation</code> can resolve any location to a
- * Resource object, which in turn allows to get a <code>java.io.File</code>
- * in the file system through its <code>getFile</code> method.
+ * {@link org.springframework.core.io.ResourceLoader}'s <code>getResource</code>
+ * method can resolve any location to a {@link org.springframework.core.io.Resource}
+ * object, which in turn allows to obtain a <code>java.io.File</code> in the
+ * file system through its <code>getFile()</code> method.
  *
- * <p>The main reason for these utility methods for resource location
- * handling is to support Log4jConfigurer, which must be able to resolve
+ * <p>The main reason for these utility methods for resource location handling
+ * is to support {@link Log4jConfigurer}, which must be able to resolve
  * resource locations <i>before the logging system has been initialized</i>.
  * Spring' Resource abstraction in the core package, on the other hand,
  * already expects the logging system to be available.
@@ -227,7 +228,10 @@ public abstract class ResourceUtils {
 			catch (MalformedURLException ex) {
 				// Probably no protocol in original jar URL, like "jar:C:/mypath/myjar.jar".
 				// This usually indicates that the jar file resides in the file system.
-				return new URL(FILE_URL_PREFIX + "/" + jarFile);
+				if (!jarFile.startsWith("/")) {
+					jarFile = "/" + jarFile;
+				}
+				return new URL(FILE_URL_PREFIX + jarFile);
 			}
 		}
 		else {
