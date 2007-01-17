@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,10 +19,10 @@ package org.springframework.transaction;
 import junit.framework.TestCase;
 
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * @author Juergen Hoeller
@@ -138,19 +138,25 @@ public class TransactionSupportTests extends TestCase {
 	public void testTransactionTemplate() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate(tm);
-		try {
-			template.execute(new TransactionCallbackWithoutResult() {
-				protected void doInTransactionWithoutResult(TransactionStatus status) {
-				}
-			});
-			assertTrue("triggered begin", tm.begin);
-			assertTrue("triggered commit", tm.commit);
-			assertTrue("no rollback", !tm.rollback);
-			assertTrue("no rollbackOnly", !tm.rollbackOnly);
-		}
-		catch (RuntimeException ex) {
-			fail("Should not have thrown RuntimeException");
-		}
+		template.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+			}
+		});
+		assertTrue("triggered begin", tm.begin);
+		assertTrue("triggered commit", tm.commit);
+		assertTrue("no rollback", !tm.rollback);
+		assertTrue("no rollbackOnly", !tm.rollbackOnly);
+	}
+
+	public void testTransactionTemplateWithCallbackPreference() {
+		MockCallbackPreferringTransactionManager ptm = new MockCallbackPreferringTransactionManager();
+		TransactionTemplate template = new TransactionTemplate(ptm);
+		template.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+			}
+		});
+		assertSame(template, ptm.getDefinition());
+		assertFalse(ptm.getStatus().isRollbackOnly());
 	}
 
 	public void testTransactionTemplateWithException() {

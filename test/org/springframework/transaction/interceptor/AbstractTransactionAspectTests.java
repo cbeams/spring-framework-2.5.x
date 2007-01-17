@@ -24,6 +24,7 @@ import org.easymock.MockControl;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.transaction.MockCallbackPreferringTransactionManager;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -115,6 +116,29 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		checkTransactionStatus(false);
 
 		ptmControl.verify();
+	}
+
+	/**
+	 * Check that a transaction is created and committed using
+	 * CallbackPreferringPlatformTransactionManager.
+	 */
+	public void testTransactionShouldSucceedWithCallbackPreference() throws Exception {
+		TransactionAttribute txatt = new DefaultTransactionAttribute();
+
+		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
+		tas.register(getNameMethod, txatt);
+
+		MockCallbackPreferringTransactionManager ptm = new MockCallbackPreferringTransactionManager();
+
+		TestBean tb = new TestBean();
+		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
+
+		checkTransactionStatus(false);
+		itb.getName();
+		checkTransactionStatus(false);
+
+		assertSame(txatt, ptm.getDefinition());
+		assertFalse(ptm.getStatus().isRollbackOnly());
 	}
 
 	/**
