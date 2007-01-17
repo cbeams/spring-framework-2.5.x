@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,12 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionUsageException;
 
 /**
- * Abstract base implementation of the TransactionStatus interface.
+ * Abstract base implementation of the
+ * {@link org.springframework.transaction.TransactionStatus} interface.
  *
- * <p>Pre-implements the handling of local rollback-only and completed flags,
- * and delegation to an underlying SavepointManager. Also offers the option
- * of a holding a savepoint within the transaction.
+ * <p>Pre-implements the handling of local rollback-only and completed flags, and
+ * delegation to an underlying {@link org.springframework.transaction.SavepointManager}.
+ * Also offers the option of a holding a savepoint within the transaction.
  *
  * <p>Does not assume any specific internal transaction handling, such as an
  * underlying transaction object, and no transaction synchronization mechanism.
@@ -96,7 +97,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	}
 
 	public boolean isCompleted() {
-		return completed;
+		return this.completed;
 	}
 
 
@@ -116,7 +117,7 @@ public abstract class AbstractTransactionStatus implements TransactionStatus {
 	 * Get the savepoint for this transaction, if any.
 	 */
 	protected Object getSavepoint() {
-		return savepoint;
+		return this.savepoint;
 	}
 
 	public boolean hasSavepoint() {
