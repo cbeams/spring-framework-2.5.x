@@ -396,9 +396,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		boolean actualNewSynchronization = newSynchronization &&
 				!TransactionSynchronizationManager.isSynchronizationActive();
 		if (actualNewSynchronization) {
-			if (newTransaction) {
-				TransactionSynchronizationManager.setActualTransactionActive(true);
-			}
+			TransactionSynchronizationManager.setActualTransactionActive(transaction != null);
 			TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
 			TransactionSynchronizationManager.setCurrentTransactionName(definition.getName());
 			TransactionSynchronizationManager.initSynchronization();
@@ -811,9 +809,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			TransactionSynchronizationManager.clearSynchronization();
 			TransactionSynchronizationManager.setCurrentTransactionName(null);
 			TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
-			if (status.isNewTransaction()) {
-				TransactionSynchronizationManager.setActualTransactionActive(false);
-			}
+			TransactionSynchronizationManager.setActualTransactionActive(false);
 		}
 		if (status.isNewTransaction()) {
 			doCleanupAfterCompletion(status.getTransaction());
@@ -1098,19 +1094,19 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		}
 
 		public Object getSuspendedResources() {
-			return suspendedResources;
+			return this.suspendedResources;
 		}
 
 		public List getSuspendedSynchronizations() {
-			return suspendedSynchronizations;
+			return this.suspendedSynchronizations;
 		}
 
 		public String getName() {
-			return name;
+			return this.name;
 		}
 
 		public boolean isReadOnly() {
-			return readOnly;
+			return this.readOnly;
 		}
 	}
 
