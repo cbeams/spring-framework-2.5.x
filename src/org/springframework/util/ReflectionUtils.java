@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Arrays;
 
 /**
  * Simple utility class for handling reflection exceptions.
@@ -37,12 +37,11 @@ import java.util.Arrays;
 public abstract class ReflectionUtils {
 
 	/**
-	 * Handle the given reflection exception.
-	 * Should only be called if no checked exception is expected to
-	 * be thrown by the target method.
-	 * <p>Throws the underlying RuntimeException or Error in case
-	 * of an InvocationTargetException with such a root cause. Throws
-	 * an IllegalStateException with an appropriate message else.
+	 * Handle the given reflection exception. Should only be called if
+	 * no checked exception is expected to be thrown by the target method.
+	 * <p>Throws the underlying RuntimeException or Error in case of an
+	 * InvocationTargetException with such a root cause. Throws an
+	 * IllegalStateException with an appropriate message else.
 	 * @param ex the reflection exception to handle
 	 */
 	public static void handleReflectionException(Exception ex) {
@@ -60,11 +59,10 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Handle the given invocation target exception.
-	 * Should only be called if no checked exception is expected to
-	 * be thrown by the target method.
-	 * <p>Throws the underlying RuntimeException or Error in case
-	 * of such a root cause. Throws an IllegalStateException else.
+	 * Handle the given invocation target exception. Should only be called if
+	 * no checked exception is expected to be thrown by the target method.
+	 * <p>Throws the underlying RuntimeException or Error in case of such
+	 * a root cause. Throws an IllegalStateException else.
 	 * @param ex the invocation target exception to handle
 	 */
 	public static void handleInvocationTargetException(InvocationTargetException ex) {
@@ -80,9 +78,9 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Attempt to find a {@link Method} on the supplied type with the supplied name and
-	 * parameter types. Searches all superclasses up to <code>Object</code>. Returns
-	 * '<code>null</code>' if no {@link Method} can be found.
+	 * Attempt to find a {@link Method} on the supplied type with the supplied name
+	 * and parameter types. Searches all superclasses up to <code>Object</code>.
+	 * Returns <code>null</code> if no {@link Method} can be found.
 	 */
 	public static Method findMethod(Class type, String name, Class[] paramTypes) {
 		Assert.notNull(type, "'type' cannot be null.");
@@ -102,8 +100,10 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Invoke the specified {@link Method} against the supplied target object with no arguments
-	 * The target object can be <code>null</code> when invoking a static {@link Method}.
+	 * Invoke the specified {@link Method} against the supplied target object
+	 * with no arguments. The target object can be <code>null</code> when
+	 * invoking a static {@link Method}.
+	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
 	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
 	 */
 	public static Object invokeMethod(Method method, Object target) {
@@ -111,9 +111,10 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Invoke the specified {@link Method} against the supplied target object with the supplied arguments
-	 * The target object can be null when invoking a static {@link Method}.
-	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
+	 * Invoke the specified {@link Method} against the supplied target object
+	 * with the supplied arguments. The target object can be <code>null</code>
+	 * when invoking a static {@link Method}.
+	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
 	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
 	 */
 	public static Object invokeMethod(Method method, Object target, Object[] args) {
@@ -157,22 +158,23 @@ public abstract class ReflectionUtils {
 
 
 	/**
-	 * Perform the given callback operation on all matching methods of the given class
-	 * and superclasses.
+	 * Perform the given callback operation on all matching methods of the
+	 * given class and superclasses.
 	 * <p>The same named method occurring on subclass and superclass will
-	 * appear twice, unless excluded by the MethodFilter
+	 * appear twice, unless excluded by a {@link MethodFilter}.
 	 * @param targetClass class to start looking at
 	 * @param mc the callback to invoke for each method
+	 * @see #doWithMethods(Class, MethodCallback, MethodFilter)
 	 */
 	public static void doWithMethods(Class targetClass, MethodCallback mc) throws IllegalArgumentException {
 		doWithMethods(targetClass, mc, null);
 	}
 
 	/**
-	 * Perform the given callback operation on all matching methods of the given class
-	 * and superclasses.
+	 * Perform the given callback operation on all matching methods of the
+	 * given class and superclasses.
 	 * <p>The same named method occurring on subclass and superclass will
-	 * appear twice, unless excluded by the MethodFilter
+	 * appear twice, unless excluded by the specified {@link MethodFilter}.
 	 * @param targetClass class to start looking at
 	 * @param mc the callback to invoke for each method
 	 * @param mf the filter that determines the methods to apply the callback to
@@ -257,10 +259,10 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Given the source object and the destination, which must be the same class or a subclass,
-	 * copy all fields, including inherited fields. Designed to work on objects with public
-	 * no-arg constructors.
-	 * @throws IllegalArgumentException if arguments are incompatible or either is <code>null</code>
+	 * Given the source object and the destination, which must be the same class
+	 * or a subclass, copy all fields, including inherited fields. Designed to
+	 * work on objects with public no-arg constructors.
+	 * @throws IllegalArgumentException if the arguments are incompatible
 	 */
 	public static void shallowCopyFieldState(final Object src, final Object dest) throws IllegalArgumentException {
 		if (src == null) {
@@ -284,13 +286,13 @@ public abstract class ReflectionUtils {
 
 
 	/**
-	 * Action to take on each method
+	 * Action to take on each method.
 	 */
 	public static interface MethodCallback {
 
 		/**
 		 * Perform an operation using the given method.
-		 * @param method method which will have been made accessible before this invocation
+		 * @param method the method which will have been made accessible before this invocation
 		 */
 		void doWith(Method method) throws IllegalArgumentException, IllegalAccessException;
 	}
@@ -302,7 +304,7 @@ public abstract class ReflectionUtils {
 	public static interface MethodFilter {
 
 		/**
-		 * Return whether the given method matches.
+		 * Determine whether the given method matches.
 		 * @param method the method to check
 		 */
 		boolean matches(Method method);
@@ -316,7 +318,7 @@ public abstract class ReflectionUtils {
 
 		/**
 		 * Perform an operation using the given field.
-		 * @param field field which will have been made accessible before this invocation
+		 * @param field the field which will have been made accessible before this invocation
 		 */
 		void doWith(Field field) throws IllegalArgumentException, IllegalAccessException;
 	}
@@ -328,7 +330,7 @@ public abstract class ReflectionUtils {
 	public static interface FieldFilter {
 
 		/**
-		 * Return whether the given field matches.
+		 * Determine whether the given field matches.
 		 * @param field the field to check
 		 */
 		boolean matches(Field field);
@@ -336,7 +338,7 @@ public abstract class ReflectionUtils {
 
 
 	/**
-	 * FieldFilter that matches all non-static, non-final fields.
+	 * Pre-built FieldFilter that matches all non-static, non-final fields.
 	 */
 	public static FieldFilter COPYABLE_FIELDS = new FieldFilter() {
 		public boolean matches(Field field) {
