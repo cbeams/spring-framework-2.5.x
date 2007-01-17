@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,51 +28,49 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.OrderComparator;
+import org.springframework.util.Assert;
 
 /**
  * Central helper that manages resources and transaction synchronizations per thread.
  * To be used by resource management code but not by typical application code.
  *
- * <p>Supports one resource per key without overwriting, i.e. a resource needs
+ * <p>Supports one resource per key without overwriting, that is, a resource needs
  * to be removed before a new one can be set for the same key.
  * Supports a list of transaction synchronizations if synchronization is active.
  *
  * <p>Resource management code should check for thread-bound resources, e.g. JDBC
  * Connections or Hibernate Sessions, via <code>getResource</code>. Such code is
- * normally not supposed to bind resources to threads, as this is the responsiblity
+ * normally not supposed to bind resources to threads, as this is the responsibility
  * of transaction managers. A further option is to lazily bind on first use if
  * transaction synchronization is active, for performing transactions that span
  * an arbitrary number of resources.
  *
  * <p>Transaction synchronization must be activated and deactivated by a transaction
- * manager via <code>initSynchronization</code> and <code>clearSynchronization</code>.
- * This is automatically supported by AbstractPlatformTransactionManager, and thus
- * by all standard Spring transaction managers, like DataSourceTransactionManager
- * and JtaTransactionManager.
+ * manager via {@link #initSynchronization()} and {@link #clearSynchronization()}.
+ * This is automatically supported by {@link AbstractPlatformTransactionManager},
+ * and thus by all standard Spring transaction managers, such as
+ * {@link org.springframework.transaction.jta.JtaTransactionManager} and
+ * {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}.
  *
  * <p>Resource management code should only register synchronizations when this
- * manager is active, which can be checked via <code>isSynchronizationActive</code>;
+ * manager is active, which can be checked via {@link #isSynchronizationActive};
  * it should perform immediate resource cleanup else. If transaction synchronization
  * isn't active, there is either no current transaction, or the transaction manager
- * doesn't support transaction synchronizations.
+ * doesn't support transaction synchronization.
  *
- * <p>Synchronization is for example used to always return the same resources like
- * JDBC Connections or Hibernate Sessions within a JTA transaction, for any given
- * DataSource or SessionFactory. In the Hibernate case, the afterCompletion Session
- * close calls allow for proper transactional JVM-level caching even without a
- * custom TransactionManagerLookup in Hibernate configuration.
+ * <p>Synchronization is for example used to always return the same resources
+ * within a JTA transaction, e.g. a JDBC Connection or a Hibernate Session for
+ * any given DataSource or SessionFactory, respectively.
  *
  * @author Juergen Hoeller
  * @since 02.06.2003
  * @see #isSynchronizationActive
  * @see #registerSynchronization
  * @see TransactionSynchronization
- * @see AbstractPlatformTransactionManager
- * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
+ * @see AbstractPlatformTransactionManager#setTransactionSynchronization
  * @see org.springframework.transaction.jta.JtaTransactionManager
+ * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
- * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession
- * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#getPersistenceManager
  */
 public abstract class TransactionSynchronizationManager {
 
@@ -99,7 +97,7 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Return all resources that are bound to the current thread.
 	 * <p>Mainly for debugging purposes. Resource managers should always invoke
-	 * hasResource for a specific resource key that they are interested in.
+	 * <code>hasResource</code> for a specific resource key that they are interested in.
 	 * @return Map with resource keys and resource objects,
 	 * or empty Map if currently none bound
 	 * @see #hasResource
@@ -218,14 +216,17 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Register a new transaction synchronization for the current thread.
 	 * Typically called by resource management code.
-	 * <p>Note that synchronizations can implemented the Ordered interface.
+	 * <p>Note that synchronizations can implement the
+	 * {@link org.springframework.core.Ordered} interface.
 	 * They will be executed in an order according to their order value (if any).
-	 * @throws IllegalStateException if synchronization is not active
+	 * @param synchronization the synchronization object to register
+	 * @throws IllegalStateException if transaction synchronization is not active
 	 * @see org.springframework.core.Ordered
 	 */
 	public static void registerSynchronization(TransactionSynchronization synchronization)
 	    throws IllegalStateException {
 
+		Assert.notNull(synchronization, "TransactionSynchronization must not be null");
 		if (!isSynchronizationActive()) {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
@@ -255,7 +256,7 @@ public abstract class TransactionSynchronizationManager {
 
 	/**
 	 * Deactivate transaction synchronization for the current thread.
-	 * Called by transaction manager on transaction cleanup.
+	 * Called by the transaction manager on transaction cleanup.
 	 * @throws IllegalStateException if synchronization is not active
 	 */
 	public static void clearSynchronization() throws IllegalStateException {
@@ -273,7 +274,7 @@ public abstract class TransactionSynchronizationManager {
 
 	/**
 	 * Expose the name of the current transaction, if any.
-	 * Called by transaction manager on transaction begin and on cleanup.
+	 * Called by the transaction manager on transaction begin and on cleanup.
 	 * @param name the name of the transaction, or <code>null</code> to reset it
 	 */
 	public static void setCurrentTransactionName(String name) {
@@ -291,9 +292,9 @@ public abstract class TransactionSynchronizationManager {
 
 	/**
 	 * Expose a read-only flag for the current transaction.
-	 * Called by transaction manager on transaction begin and on cleanup.
-	 * @param readOnly true to mark the current transaction as read-only;
-	 * false to reset such a read-only marker
+	 * Called by the transaction manager on transaction begin and on cleanup.
+	 * @param readOnly <code>true</code> to mark the current transaction
+	 * as read-only; <code>false</code> to reset such a read-only marker
 	 * @see org.springframework.transaction.TransactionDefinition#isReadOnly
 	 */
 	public static void setCurrentTransactionReadOnly(boolean readOnly) {
@@ -308,7 +309,7 @@ public abstract class TransactionSynchronizationManager {
 	 * as argument for the <code>beforeCommit</code> callback, to be able
 	 * to suppress change detection on commit. The present method is meant
 	 * to be used for earlier read-only checks, for example to set the
-	 * flush mode of a Hibernate Session to FlushMode.NEVER upfront.
+	 * flush mode of a Hibernate Session to "FlushMode.NEVER" upfront.
 	 * @see TransactionSynchronization#beforeCommit(boolean)
 	 * @see org.hibernate.Session#flush
 	 * @see org.hibernate.Session#setFlushMode
@@ -320,9 +321,9 @@ public abstract class TransactionSynchronizationManager {
 
 	/**
 	 * Expose whether there currently is an actual transaction active.
-	 * Called by transaction manager on transaction begin and on cleanup.
-	 * @param active true to mark the current thread as being associated
-	 * with an actual transaction; false to reset that marker
+	 * Called by the transaction manager on transaction begin and on cleanup.
+	 * @param active <code>true</code> to mark the current thread as being associated
+	 * with an actual transaction; <code>false</code> to reset that marker
 	 */
 	public static void setActualTransactionActive(boolean active) {
 		actualTransactionActive.set(active ? Boolean.TRUE : null);
