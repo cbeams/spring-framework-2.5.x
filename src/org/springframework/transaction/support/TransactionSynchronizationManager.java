@@ -372,4 +372,22 @@ public abstract class TransactionSynchronizationManager {
 		return (actualTransactionActive.get() != null);
 	}
 
+
+	/**
+	 * Clear the entire transaction synchronization state for the current thread:
+	 * registered synchronizations as well as the various transaction characteristics.
+	 * @see #clearSynchronization()
+	 * @see #setCurrentTransactionName
+	 * @see #setCurrentTransactionReadOnly
+	 * @see #setCurrentTransactionIsolationLevel
+	 * @see #setActualTransactionActive
+	 */
+	public static void clear() {
+		clearSynchronization();
+		setCurrentTransactionName(null);
+		setCurrentTransactionReadOnly(false);
+		setCurrentTransactionIsolationLevel(null);
+		setActualTransactionActive(false);
+	}
+
 }

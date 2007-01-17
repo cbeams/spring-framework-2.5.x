@@ -354,7 +354,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		else {
 			// Create "empty" transaction: no actual transaction, but potentially synchronization.
 			boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
-			return newTransactionStatus(definition, null, false, newSynchronization, debugEnabled, null);
+			return newTransactionStatus(definition, null, true, newSynchronization, debugEnabled, null);
 		}
 	}
 
@@ -443,7 +443,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 	/**
 	 * Create a new TransactionStatus for the given arguments,
-	 * initializing transaction synchronization if appropriate.
+	 * initializing transaction synchronization as appropriate.
 	 */
 	protected DefaultTransactionStatus newTransactionStatus(
 			TransactionDefinition definition, Object transaction, boolean newTransaction,
@@ -452,13 +452,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		boolean actualNewSynchronization = newSynchronization &&
 				!TransactionSynchronizationManager.isSynchronizationActive();
 		if (actualNewSynchronization) {
-			if (newTransaction) {
-				TransactionSynchronizationManager.setActualTransactionActive(true);
-			}
-			if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-				TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(
-						new Integer(definition.getIsolationLevel()));
-			}
+			TransactionSynchronizationManager.setActualTransactionActive(transaction != null);
+			TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(
+					(definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) ?
+							new Integer(definition.getIsolationLevel()) : null);
 			TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
 			TransactionSynchronizationManager.setCurrentTransactionName(definition.getName());
 			TransactionSynchronizationManager.initSynchronization();
@@ -495,7 +492,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see #doSuspend
 	 * @see #resume
 	 */
-	private SuspendedResourcesHolder suspend(Object transaction) throws TransactionException {
+	protected final SuspendedResourcesHolder suspend(Object transaction) throws TransactionException {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			List suspendedSynchronizations = doSuspendSynchronization();
 			try {
@@ -540,17 +537,17 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @see #doResume
 	 * @see #suspend
 	 */
-	private void resume(Object transaction, SuspendedResourcesHolder resourcesHolder) throws TransactionException {
-		Object suspendedResources = resourcesHolder.getSuspendedResources();
+	protected final void resume(Object transaction, SuspendedResourcesHolder resourcesHolder) throws TransactionException {
+		Object suspendedResources = resourcesHolder.suspendedResources;
 		if (suspendedResources != null) {
 			doResume(transaction, suspendedResources);
 		}
-		List suspendedSynchronizations = resourcesHolder.getSuspendedSynchronizations();
+		List suspendedSynchronizations = resourcesHolder.suspendedSynchronizations;
 		if (suspendedSynchronizations != null) {
 			TransactionSynchronizationManager.setActualTransactionActive(suspendedResources != null);
-			TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(resourcesHolder.getIsolationLevel());
-			TransactionSynchronizationManager.setCurrentTransactionReadOnly(resourcesHolder.isReadOnly());
-			TransactionSynchronizationManager.setCurrentTransactionName(resourcesHolder.getName());
+			TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(resourcesHolder.isolationLevel);
+			TransactionSynchronizationManager.setCurrentTransactionReadOnly(resourcesHolder.readOnly);
+			TransactionSynchronizationManager.setCurrentTransactionName(resourcesHolder.name);
 			doResumeSynchronization(suspendedSynchronizations);
 		}
 	}
@@ -813,7 +810,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Trigger <code>beforeCommit</code> callbacks.
 	 * @param status object representing the transaction
 	 */
-	private void triggerBeforeCommit(DefaultTransactionStatus status) {
+	protected final void triggerBeforeCommit(DefaultTransactionStatus status) {
 		if (status.isNewSynchronization()) {
 			if (status.isDebug()) {
 				logger.debug("Triggering beforeCommit synchronization");
@@ -826,7 +823,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Trigger <code>beforeCompletion</code> callbacks.
 	 * @param status object representing the transaction
 	 */
-	private void triggerBeforeCompletion(DefaultTransactionStatus status) {
+	protected final void triggerBeforeCompletion(DefaultTransactionStatus status) {
 		if (status.isNewSynchronization()) {
 			if (status.isDebug()) {
 				logger.debug("Triggering beforeCompletion synchronization");
@@ -899,11 +896,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	private void cleanupAfterCompletion(DefaultTransactionStatus status) {
 		status.setCompleted();
 		if (status.isNewSynchronization()) {
-			TransactionSynchronizationManager.clearSynchronization();
-			TransactionSynchronizationManager.setCurrentTransactionName(null);
-			TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
-			TransactionSynchronizationManager.setCurrentTransactionIsolationLevel(null);
-			TransactionSynchronizationManager.setActualTransactionActive(false);
+			TransactionSynchronizationManager.clear();
 		}
 		if (status.isNewTransaction()) {
 			doCleanupAfterCompletion(status.getTransaction());
@@ -1139,7 +1132,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * <p>Called after <code>doCommit</code> and <code>doRollback</code> execution,
 	 * on any outcome. The default implementation does nothing.
 	 * <p>Should not throw any exceptions but just issue warnings on errors.
-	 * @param transaction transaction object returned by doGetTransaction
+	 * @param transaction transaction object returned by <code>doGetTransaction</code>
 	 */
 	protected void doCleanupAfterCompletion(Object transaction) {
 	}
@@ -1162,47 +1155,22 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * Holder for suspended resources.
 	 * Used internally by <code>suspend</code> and <code>resume</code>.
 	 */
-	private static class SuspendedResourcesHolder {
+	protected static class SuspendedResourcesHolder {
 
 		private final Object suspendedResources;
-
 		private final List suspendedSynchronizations;
-
 		private final String name;
-
 		private final boolean readOnly;
-
 		private final Integer isolationLevel;
 
-		public SuspendedResourcesHolder(
+		private SuspendedResourcesHolder(
 				Object suspendedResources, List suspendedSynchronizations,
 				String name, boolean readOnly, Integer isolationLevel) {
-
 			this.suspendedResources = suspendedResources;
 			this.suspendedSynchronizations = suspendedSynchronizations;
 			this.name = name;
 			this.readOnly = readOnly;
 			this.isolationLevel = isolationLevel;
-		}
-
-		public Object getSuspendedResources() {
-			return suspendedResources;
-		}
-
-		public List getSuspendedSynchronizations() {
-			return suspendedSynchronizations;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public boolean isReadOnly() {
-			return readOnly;
-		}
-
-		public Integer getIsolationLevel() {
-			return isolationLevel;
 		}
 	}
 
