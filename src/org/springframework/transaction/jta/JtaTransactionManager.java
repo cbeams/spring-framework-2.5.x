@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,12 +52,14 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronization;
 
 /**
- * PlatformTransactionManager implementation for JTA, i.e. J2EE container transactions.
- * Can also work with a locally configured JTA implementation.
+ * {@link org.springframework.transaction.PlatformTransactionManager} implementation
+ * for JTA, delegating to a backend JTA provider. This is typically used to delegate
+ * to a J2EE server's transaction coordinator, but may also be configured with a
+ * local JTA provider which is embedded within the application.
  *
  * <p>This transaction manager is appropriate for handling distributed transactions,
- * i.e. transactions that span multiple resources, and for managing transactions
- * on a J2EE Connector (e.g. a persistence toolkit registered as JCA Connector).
+ * i.e. transactions that span multiple resources, and for controlling transactions on
+ * application server resources (e.g. JDBC DataSources available in JNDI) in general.
  * For a single JDBC DataSource, DataSourceTransactionManager is perfectly sufficient,
  * and for accessing a single resource with Hibernate (including transactional cache),
  * HibernateTransactionManager is appropriate, for example.
@@ -68,20 +70,6 @@ import org.springframework.transaction.support.TransactionSynchronization;
  * all perform such registration, allowing for reuse of the same Hibernate Session etc
  * within the transaction. Standard JTA does not even guarantee that for Connections
  * from a transactional JDBC DataSource: Spring's synchronization solves those issues.
- *
- * <p>Synchronization is also leveraged for transactional cache handling with Hibernate.
- * Therefore, as long as JtaTransactionManager drives the JTA transactions, there is
- * no need to configure Hibernate's JTATransaction strategy or a container-specific
- * Hibernate TransactionManagerLookup. However, certain JTA implementations are
- * restrictive in terms of what JDBC calls they allow after transaction completion,
- * complaining even on close calls: In that case, it is indeed necessary to configure a
- * Hibernate TransactionManagerLookup, potentially via Spring's LocalSessionFactoryBean.
- *
- * <p>If JtaTransactionManager participates in an existing JTA transaction, e.g. from
- * EJB CMT, synchronization will be triggered on finishing the nested transaction,
- * before passing transaction control back to the J2EE container. In this case, a
- * container-specific Hibernate TransactionManagerLookup is the only way to achieve
- * exact afterCompletion callbacks for transactional cache handling with Hibernate.
  *
  * <p><b>For typical JTA transactions (REQUIRED, SUPPORTS, MANDATORY, NEVER), a plain
  * JtaTransactionManager definition is all you need, completely portable across all
@@ -112,16 +100,17 @@ import org.springframework.transaction.support.TransactionSynchronization;
  * by default). Consequently, JtaTransactionManager will support transaction suspension
  * out-of-the-box on many J2EE servers.
  *
- * <p>A JNDI lookup can also be factored out into a corresponding JndiObjectFactoryBean,
- * passed into JtaTransactionManager's "transactionManager" property. Such a bean
- * definition can then be reused by other objects, for example Spring's
- * LocalSessionFactoryBean for Hibernate (see below).
+ * <p>A JNDI lookup can also be factored out into a corresponding
+ * {@link org.springframework.jndi.JndiObjectFactoryBean}, passed into
+ * JtaTransactionManager's "transactionManager" property. Such a bean definition
+ * can then be reused by other objects, for example Spring's LocalSessionFactoryBean
+ * for Hibernate.
  *
  * <p>For IBM WebSphere and standalone JOTM, static accessor methods are required to
  * obtain the JTA TransactionManager: Therefore, WebSphere and JOTM have their own
  * FactoryBean implementations, to be wired with the "transactionManager" property.
- * In case of JotmFactoryBean, the same JTA object implements UserTransaction too:
- * Therefore, passing the object to the "userTransaction" property is sufficient.
+ * In case of {@link JotmFactoryBean}, the same JTA object implements UserTransaction
+ * too: Therefore, passing the object to the "userTransaction" property is sufficient.
  *
  * <p>It is also possible to specify a JTA TransactionManager only, either through
  * the corresponding constructor or through the "transactionManager" property.
@@ -134,22 +123,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
  * issues with compatibility, despite the TransactionManager interface being part of JTA.</b>
  * The only currently known problem is resuming a transaction on WebLogic, which by default
  * fails if the suspended transaction was marked rollback-only; for other usages, it works
- * properly. Use Spring's WebLogicJtaTransactionManager to enforce a resume in any case.
- *
- * <p>The JTA TransactionManager can also be used to register custom synchronizations
- * with the JTA transaction itself instead of Spring's transaction manager. This is
- * particularly useful for closing resources with strict JTA implementations such as
- * Weblogic's or WebSphere's that do not allow any access to resources after transaction
- * completion, not even for cleanup. For example, Hibernate access is affected by this
- * issue, as outlined above in the discussion of transaction synchronization.
- *
- * <p>Spring's LocalSessionFactoryBean for Hibernate supports plugging a given
- * JTA TransactionManager into Hibernate's TransactionManagerLookup mechanism,
- * for Hibernate-driven cache synchronization and proper cleanup without warnings.
- * The same JTA TransactionManager configuration as above can be used in this case
- * (with a JndiObjectFactoryBean for a JNDI lookup, or one of the FactoryBeans),
- * avoiding double configuration. Alternatively, specify corresponding Hibernate
- * properties (see Hibernate docs for details).
+ * properly. Use Spring's {@link WebLogicJtaTransactionManager} to address this issue.
  *
  * <p><b>This standard JtaTransactionManager supports timeouts but not per-transaction
  * isolation levels.</b> Custom subclasses can override <code>doJtaBegin</code> for
@@ -158,14 +132,14 @@ import org.springframework.transaction.support.TransactionSynchronization;
  * for specific J2EE transaction coordinators can also expose transaction names
  * for monitoring; with standard JTA, transaction names will be ignored.
  *
- * <p><b>Consider using WebLogicJtaTransactionManager on BEA WebLogic, which supports
- * the full power of Spring's transaction definitions on WebLogic's transaction
+ * <p><b>Consider using {@link WebLogicJtaTransactionManager} on BEA WebLogic, which
+ * supports the full power of Spring transaction definitions on WebLogic's transaction
  * coordinator</b>, <i>beyond standard JTA</i>: transaction names, per-transaction
  * isolation levels, and proper resuming of transactions in all cases.
  * WebLogicJtaTransactionManager automatically adapts to WebLogic 7.0 or 8.1+.
  *
- * <p>This class is serializable. Active synchronizations do not survive serialization,
- * though.
+ * <p>This class is serializable. However, active synchronizations do not survive
+ * serialization.
  *
  * @author Juergen Hoeller
  * @since 24.03.2003
@@ -271,17 +245,14 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * A default one is used if not set.
 	 */
 	public void setJndiTemplate(JndiTemplate jndiTemplate) {
-		if (jndiTemplate == null) {
-			throw new IllegalArgumentException("jndiTemplate must not be null");
-		}
-		this.jndiTemplate = jndiTemplate;
+		this.jndiTemplate = (jndiTemplate != null ? jndiTemplate : new JndiTemplate());
 	}
 
 	/**
 	 * Return the JndiTemplate used for JNDI lookups.
 	 */
 	public JndiTemplate getJndiTemplate() {
-		return jndiTemplate;
+		return this.jndiTemplate;
 	}
 
 	/**
@@ -303,7 +274,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Set the JTA UserTransaction to use as direct reference.
-	 * Typically just used for local JTA setups; in a J2EE environment,
+	 * <p>Typically just used for local JTA setups; in a J2EE environment,
 	 * the UserTransaction will always be fetched from JNDI.
 	 * @see #setUserTransactionName
 	 */
@@ -315,7 +286,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * Return the JTA UserTransaction that this transaction manager uses.
 	 */
 	public UserTransaction getUserTransaction() {
-		return userTransaction;
+		return this.userTransaction;
 	}
 
 	/**
@@ -361,7 +332,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * Return the JTA TransactionManager that this transaction manager uses.
 	 */
 	public TransactionManager getTransactionManager() {
-		return transactionManager;
+		return this.transactionManager;
 	}
 
 	/**
@@ -470,9 +441,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			if (logger.isDebugEnabled()) {
 				logger.debug("Retrieving JTA UserTransaction from JNDI location [" + userTransactionName + "]");
 			}
-			UserTransaction ut = (UserTransaction)
-					getJndiTemplate().lookup(userTransactionName, UserTransaction.class);
-			return ut;
+			return (UserTransaction) getJndiTemplate().lookup(userTransactionName, UserTransaction.class);
 		}
 		catch (NamingException ex) {
 			throw new TransactionSystemException(
@@ -496,9 +465,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			if (logger.isDebugEnabled()) {
 				logger.debug("Retrieving JTA TransactionManager from JNDI location [" + transactionManagerName + "]");
 			}
-			TransactionManager tm = (TransactionManager)
-					getJndiTemplate().lookup(transactionManagerName, TransactionManager.class);
-			return tm;
+			return (TransactionManager) getJndiTemplate().lookup(transactionManagerName, TransactionManager.class);
 		}
 		catch (NamingException ex) {
 			throw new TransactionSystemException(
@@ -509,7 +476,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Allows subclasses to retrieve the JTA UserTransaction in a vendor-specific manner.
 	 * Only called if no "userTransaction" or "userTransactionName" specified.
-	 * <p>Default implementation simply returns null.
+	 * <p>The default implementation simply returns <code>null</code>.
 	 * @return the JTA UserTransaction handle to use, or <code>null</code> if none found
 	 * @throws TransactionSystemException in case of errors
 	 * @see #setUserTransaction
@@ -522,7 +489,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Allows subclasses to retrieve the JTA TransactionManager in a vendor-specific manner.
 	 * Only called if no "transactionManager" or "transactionManagerName" specified.
-	 * <p>Default implementation simply returns null.
+	 * <p>The default implementation simply returns <code>null</code>.
 	 * @return the JTA TransactionManager handle to use, or <code>null</code> if none found
 	 * @throws TransactionSystemException in case of errors
 	 * @see #setTransactionManager
