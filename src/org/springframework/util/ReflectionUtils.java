@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,11 @@ import java.util.Arrays;
 public abstract class ReflectionUtils {
 
 	/**
-	 * Handle the given reflection exception.
-	 * Should only be called if no checked exception is expected to
-	 * be thrown by the target method.
-	 * <p>Throws the underlying RuntimeException or Error in case
-	 * of an InvocationTargetException with such a root cause. Throws
-	 * an IllegalStateException with an appropriate message else.
+	 * Handle the given reflection exception. Should only be called if
+	 * no checked exception is expected to be thrown by the target method.
+	 * <p>Throws the underlying RuntimeException or Error in case of an
+	 * InvocationTargetException with such a root cause. Throws an
+	 * IllegalStateException with an appropriate message else.
 	 * @param ex the reflection exception to handle
 	 */
 	public static void handleReflectionException(Exception ex) {
@@ -56,9 +55,8 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Handle the given invocation target exception.
-	 * Should only be called if no checked exception is expected to
-	 * be thrown by the target method.
+	 * Handle the given invocation target exception. Should only be called if
+	 * no checked exception is expected to be thrown by the target method.
 	 * <p>Throws the underlying RuntimeException or Error in case
 	 * of such a root cause. Throws an IllegalStateException else.
 	 * @param ex the invocation target exception to handle
@@ -76,16 +74,16 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Attempt to find a {@link Method} on the supplied type with the supplied name and
-	 * parameter types. Searches all superclasses up to <code>Object</code>. Returns
-	 * '<code>null</code>' if no {@link Method} can be found.
+	 * Attempt to find a {@link Method} on the supplied type with the supplied name
+	 * and parameter types. Searches all superclasses up to <code>Object</code>.
+	 * Returns <code>null</code> if no {@link Method} can be found.
 	 */
 	public static Method findMethod(Class type, String name, Class[] paramTypes) {
 		Assert.notNull(type, "'type' cannot be null.");
 		Assert.notNull(name, "'name' cannot be null.");
 		Class searchType = type;
 		while(!Object.class.equals(searchType) && searchType != null) {
-			Method[] methods = (type.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
+			Method[] methods = (searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
 			for (int i = 0; i < methods.length; i++) {
 				Method method = methods[i];
 				if(name.equals(method.getName()) && Arrays.equals(paramTypes, method.getParameterTypes())) {
@@ -98,8 +96,10 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Invoke the specified {@link Method} against the supplied target object with no arguments
-	 * The target object can be <code>null</code> when invoking a static {@link Method}.
+	 * Invoke the specified {@link Method} against the supplied target object
+	 * with no arguments. The target object can be <code>null</code> when
+	 * invoking a static {@link Method}.
+	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
 	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
 	 */
 	public static Object invokeMethod(Method method, Object target) {
@@ -107,9 +107,10 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
-	 * Invoke the specified {@link Method} against the supplied target object with the supplied arguments
-	 * The target object can be null when invoking a static {@link Method}.
-	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
+	 * Invoke the specified {@link Method} against the supplied target object
+	 * with the supplied arguments. The target object can be <code>null</code>
+	 * when invoking a static {@link Method}.
+	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
 	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
 	 */
 	public static Object invokeMethod(Method method, Object target, Object[] args) {
