@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,34 +46,31 @@ import org.springframework.util.Assert;
  * an arbitrary number of resources.
  *
  * <p>Transaction synchronization must be activated and deactivated by a transaction
- * manager via <code>initSynchronization</code> and <code>clearSynchronization</code>.
- * This is automatically supported by AbstractPlatformTransactionManager, and thus
- * by all standard Spring transaction managers, like DataSourceTransactionManager
- * and JtaTransactionManager.
+ * manager via {@link #initSynchronization()} and {@link #clearSynchronization()}.
+ * This is automatically supported by {@link AbstractPlatformTransactionManager},
+ * and thus by all standard Spring transaction managers, such as
+ * {@link org.springframework.transaction.jta.JtaTransactionManager} and
+ * {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}.
  *
  * <p>Resource management code should only register synchronizations when this
- * manager is active, which can be checked via <code>isSynchronizationActive</code>;
+ * manager is active, which can be checked via {@link #isSynchronizationActive};
  * it should perform immediate resource cleanup else. If transaction synchronization
  * isn't active, there is either no current transaction, or the transaction manager
- * doesn't support transaction synchronizations.
+ * doesn't support transaction synchronization.
  *
- * <p>Synchronization is for example used to always return the same resources like
- * JDBC Connections or Hibernate Sessions within a JTA transaction, for any given
- * DataSource or SessionFactory. In the Hibernate case, the afterCompletion Session
- * close calls allow for proper transactional JVM-level caching even without a
- * custom TransactionManagerLookup in Hibernate configuration.
+ * <p>Synchronization is for example used to always return the same resources
+ * within a JTA transaction, e.g. a JDBC Connection or a Hibernate Session for
+ * any given DataSource or SessionFactory, respectively.
  *
  * @author Juergen Hoeller
  * @since 02.06.2003
  * @see #isSynchronizationActive
  * @see #registerSynchronization
  * @see TransactionSynchronization
- * @see AbstractPlatformTransactionManager
- * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
+ * @see AbstractPlatformTransactionManager#setTransactionSynchronization
  * @see org.springframework.transaction.jta.JtaTransactionManager
+ * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  * @see org.springframework.jdbc.datasource.DataSourceUtils#getConnection
- * @see org.springframework.orm.hibernate.SessionFactoryUtils#getSession
- * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#getPersistenceManager
  */
 public abstract class TransactionSynchronizationManager {
 
@@ -352,8 +349,8 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Expose whether there currently is an actual transaction active.
 	 * Called by the transaction manager on transaction begin and on cleanup.
-	 * @param active true to mark the current thread as being associated
-	 * with an actual transaction; false to reset that marker
+	 * @param active <code>true</code> to mark the current thread as being associated
+	 * with an actual transaction; <code>false</code> to reset that marker
 	 */
 	public static void setActualTransactionActive(boolean active) {
 		actualTransactionActive.set(active ? Boolean.TRUE : null);
