@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,21 @@ import org.springframework.transaction.NestedTransactionNotSupportedException;
 import org.springframework.transaction.SavepointManager;
 
 /**
- * Default implementation of the TransactionStatus interface,
- * used by AbstractPlatformTransactionManager. Based on the concept
+ * Default implementation of the {@link org.springframework.transaction.TransactionStatus}
+ * interface, used by {@link AbstractPlatformTransactionManager}. Based on the concept
  * of an underlying "transaction object".
  *
- * <p>Holds all status information that AbstractPlatformTransactionManager
- * needs internally, including a generic transaction object determined by
- * the concrete transaction manager implementation.
+ * <p>Holds all status information that {@link AbstractPlatformTransactionManager}
+ * needs internally, including a generic transaction object determined by the
+ * concrete transaction manager implementation.
  *
  * <p>Supports delegating savepoint-related methods to a transaction object
- * that implements the SavepointManager interface.
+ * that implements the {@link SavepointManager} interface.
  *
  * <p><b>NOTE:</b> This is <i>not</i> intended to be used for other
  * PlatformTransactionManager implementations, in particular not for
- * mock transaction managers. Use SimpleTransactionStatus or a mock
- * for the plain TransactionStatus interface instead.
+ * mock transaction managers. Use {@link SimpleTransactionStatus} or
+ * a mock for the plain TransactionStatus interface instead.
  *
  * @author Juergen Hoeller
  * @since 19.01.2004
@@ -78,7 +78,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 */
 	public DefaultTransactionStatus(
 	    Object transaction, boolean newTransaction, boolean newSynchronization,
-	    boolean readOnly, boolean debug, Object suspendedResources) {
+			boolean readOnly, boolean debug, Object suspendedResources) {
 
 		this.transaction = transaction;
 		this.newTransaction = newTransaction;
@@ -92,7 +92,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 * Return the underlying transaction object.
 	 */
 	public Object getTransaction() {
-		return transaction;
+		return this.transaction;
 	}
 
 	/**
@@ -111,14 +111,14 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 * for this transaction.
 	 */
 	public boolean isNewSynchronization() {
-		return newSynchronization;
+		return this.newSynchronization;
 	}
 
 	/**
 	 * Return if this transaction is defined as read-only transaction.
 	 */
 	public boolean isReadOnly() {
-		return readOnly;
+		return this.readOnly;
 	}
 
 	/**
@@ -127,7 +127,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 * calls to logger.isDebug(). Not really intended for client code.
 	 */
 	public boolean isDebug() {
-		return debug;
+		return this.debug;
 	}
 
 	/**
@@ -135,7 +135,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 * if any.
 	 */
 	public Object getSuspendedResources() {
-		return suspendedResources;
+		return this.suspendedResources;
 	}
 
 
