@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,16 +29,17 @@ package org.springframework.transaction;
  *
  * @author Juergen Hoeller
  * @since 27.03.2003
- * @see PlatformTransactionManager
+ * @see #setRollbackOnly()
+ * @see PlatformTransactionManager#getTransaction
  * @see org.springframework.transaction.support.TransactionCallback#doInTransaction
- * @see org.springframework.transaction.interceptor.TransactionInterceptor#currentTransactionStatus
- * @see #setRollbackOnly
+ * @see org.springframework.transaction.interceptor.TransactionInterceptor#currentTransactionStatus()
  */
 public interface TransactionStatus extends SavepointManager {
 
 	/**
-	 * Return whether the present transaction is new
-	 * (else participating in an existing transaction).
+	 * Return whether the present transaction is new (else participating
+	 * in an existing transaction, or potentially not running in an
+	 * actual transaction in the first place).
 	 */
 	boolean isNewTransaction();
 
@@ -46,7 +47,7 @@ public interface TransactionStatus extends SavepointManager {
 	 * Return whether this transaction internally carries a savepoint,
 	 * that is, has been created as nested transaction based on a savepoint.
 	 * <p>This method is mainly here for diagnostic purposes, alongside
-	 * <code>isNewTransaction</code>. For programmatic handling of custom
+	 * {@link #isNewTransaction()}. For programmatic handling of custom
 	 * savepoints, use SavepointManager's operations.
 	 * @see #isNewTransaction()
 	 * @see #createSavepoint
@@ -59,7 +60,9 @@ public interface TransactionStatus extends SavepointManager {
 	 * Set the transaction rollback-only. This instructs the transaction manager
 	 * that the only possible outcome of the transaction may be a rollback, as
 	 * alternative to throwing an exception which would in turn trigger a rollback.
-	 * <p>For transactions managed by TransactionTemplate or TransactionInterceptor,
+	 * <p>This is mainly intended for transactions managed by
+	 * {@link org.springframework.transaction.support.TransactionTemplate} or
+	 * {@link org.springframework.transaction.interceptor.TransactionInterceptor},
 	 * where the actual commit/rollback decision is made by the container.
 	 * @see org.springframework.transaction.support.TransactionCallback#doInTransaction
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#rollbackOn
@@ -75,6 +78,8 @@ public interface TransactionStatus extends SavepointManager {
 	/**
 	 * Return whether this transaction is completed, that is,
 	 * whether it has already been committed or rolled back.
+	 * @see PlatformTransactionManager#commit
+	 * @see PlatformTransactionManager#rollback
 	 */
 	boolean isCompleted();
 
