@@ -379,8 +379,7 @@ public class ServletRequestUtilsTests extends TestCase {
 			ServletRequestUtils.getIntParameter(request, "nonExistingParam", 0);
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
 	public void testGetLongParameterWithDefaultValueHandlingIsFastEnough() {
@@ -391,8 +390,7 @@ public class ServletRequestUtilsTests extends TestCase {
 			ServletRequestUtils.getLongParameter(request, "nonExistingParam", 0);
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
 	public void testGetFloatParameterWithDefaultValueHandlingIsFastEnough() {
@@ -403,8 +401,7 @@ public class ServletRequestUtilsTests extends TestCase {
 			ServletRequestUtils.getFloatParameter(request, "nonExistingParam", 0f);
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
 	public void testGetDoubleParameterWithDefaultValueHandlingIsFastEnough() {
@@ -415,8 +412,7 @@ public class ServletRequestUtilsTests extends TestCase {
 			ServletRequestUtils.getDoubleParameter(request, "nonExistingParam", 0d);
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
 	public void testGetBooleanParameterWithDefaultValueHandlingIsFastEnough() {
@@ -427,8 +423,7 @@ public class ServletRequestUtilsTests extends TestCase {
 			ServletRequestUtils.getBooleanParameter(request, "nonExistingParam", false);
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
 	public void testGetStringParameterWithDefaultValueHandlingIsFastEnough() {
@@ -439,8 +434,7 @@ public class ServletRequestUtilsTests extends TestCase {
 			ServletRequestUtils.getStringParameter(request, "nonExistingParam", "defaultValue");
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 100);
+		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
 	}
 
 }
