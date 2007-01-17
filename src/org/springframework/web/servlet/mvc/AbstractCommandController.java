@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,16 @@ import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * <p>Abstract base class for custom command controllers. Autopopulates a
- * command bean from the request. For command validation, a validator
- * (property inherited from BaseCommandController) can be used.</p>
+ * Abstract base class for custom command controllers.
  *
- * <p>This command controller should preferrable not be used to handle form
- * submission, because functionality for forms is more offered in more
- * detail by the {@link org.springframework.web.servlet.mvc.AbstractFormController
- * AbstractFormController} and its corresponding implementations.</p>
+ * <p>Autopopulates a command bean from the request. For command validation,
+ * a validator (property inherited from {@link BaseCommandController}) can be
+ * used.
+ *
+ * <p>In most cases this command controller should not be used to handle form
+ * submission, because functionality for forms is offered in more detail by the
+ * {@link org.springframework.web.servlet.mvc.AbstractFormController} and its
+ * corresponding implementations.
  *
  * <p><b><a name="config">Exposed configuration properties</a>
  * (<a href="BaseCommandController.html#config">and those defined by superclass</a>):</b><br>
