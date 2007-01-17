@@ -51,8 +51,10 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronization;
 
 /**
- * PlatformTransactionManager implementation for JTA, that is, typically J2EE
- * container transactions. Can also work with a locally configured JTA provider.
+ * {@link org.springframework.transaction.PlatformTransactionManager} implementation
+ * for JTA, delegating to a backend JTA provider. This is typically used to delegate
+ * to a J2EE server's transaction coordinator, but may also be configured with a
+ * local JTA provider which is embedded within the application.
  *
  * <p>This transaction manager is appropriate for handling distributed transactions,
  * i.e. transactions that span multiple resources, and for controlling transactions on

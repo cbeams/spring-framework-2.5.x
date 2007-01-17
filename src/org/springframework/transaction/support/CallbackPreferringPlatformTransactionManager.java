@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
 /**
- * Extension of the PlatformTransactionManager interface,
- * exposing a method for executing a given callback within a transaction.
+ * Extension of the {@link org.springframework.transaction.PlatformTransactionManager}
+ * interface, exposing a method for executing a given callback within a transaction.
  *
  * <p>Implementors of this interface automatically express a preference for
  * callbacks over programmatic <code>getTransaction</code>, <code>commit</code>
@@ -30,8 +30,14 @@ import org.springframework.transaction.TransactionException;
  * transaction manager implements this interface to choose to prepare a
  * callback instead of explicit transaction demarcation control.
  *
+ * <p>Spring's {@link TransactionTemplate} and
+ * {@link org.springframework.transaction.interceptor.TransactionInterceptor}
+ * detect and use this PlatformTransactionManager variant automatically.
+ *
  * @author Juergen Hoeller
  * @since 2.0
+ * @see org.springframework.transaction.support.TransactionTemplate
+ * @see org.springframework.transaction.interceptor.TransactionInterceptor
  */
 public interface CallbackPreferringPlatformTransactionManager extends PlatformTransactionManager {
 
@@ -48,6 +54,6 @@ public interface CallbackPreferringPlatformTransactionManager extends PlatformTr
 	 * @throws RuntimeException if thrown by the TransactionCallback
 	 */
 	Object execute(TransactionDefinition definition, TransactionCallback callback)
-			throws TransactionException, RuntimeException;
+			throws TransactionException;
 
 }
