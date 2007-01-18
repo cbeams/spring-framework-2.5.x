@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,6 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.dom4j.Attribute;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
-import org.springframework.beans.TestBean;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.web.servlet.support.BindStatus;
-
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.Tag;
 import java.beans.PropertyEditor;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -35,9 +23,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.Tag;
+
+import org.dom4j.Attribute;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+
+import org.springframework.beans.TestBean;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.web.servlet.support.BindStatus;
+
 /**
- * Unit tests for the {@link SelectTag} class.
- * 
  * @author Rob Harrop
  */
 public final class SelectTagTests extends AbstractFormTagTests {
@@ -107,12 +107,12 @@ public final class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItemValue("isoCode");
 		try {
 			this.tag.doStartTag();
-			fail("Must not be able to use a non-Collection typed value as the value of 'items'.");
+			fail("Must not be able to use a non-Collection typed value as the value of 'items'");
 		}
 		catch (JspException expected) {
 			String message = expected.getMessage();
-			assertTrue(message.indexOf("'items'") > -1);
-			assertTrue(message.indexOf("'org.springframework.beans.TestBean'") > -1);
+			assertTrue(message.indexOf("items") > -1);
+			assertTrue(message.indexOf("org.springframework.beans.TestBean") > -1);
 		}
 	}
 

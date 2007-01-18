@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,14 +72,18 @@ final class OptionWriter {
 
 	/**
 	 * Creates a new <code>OptionWriter</code> for the supplied <code>objectSource</code>.
-	 * @param optionSource the source of the '<code>options</code>'. Cannot be '<code>null</code>'.
-	 * @param bindStatus the {@link BindStatus} for the bound value. Cannot be '<code>null</code>'.
-	 * @param valueProperty the name of the property used to render '<code>option</code>' '<code>values</code>'. Optional.
-	 * @param labelProperty the name of the property used to render '<code>option</code>' labels. Optional.
+	 * @param optionSource the source of the <code>options</code> (never <code>null</code>)
+	 * @param bindStatus the {@link BindStatus} for the bound value (never <code>null</code>)
+	 * @param valueProperty the name of the property used to render <code>option</code> values
+	 * (optional)
+	 * @param labelProperty the name of the property used to render <code>option</code> labels
+	 * (optional)
 	 */
-	public OptionWriter(Object optionSource, BindStatus bindStatus, String valueProperty, String labelProperty, boolean htmlEscape) {
-		Assert.notNull(optionSource, "'optionSource' cannot be null.");
-		Assert.notNull(bindStatus, "'bindStatus' cannot be null.");
+	public OptionWriter(
+			Object optionSource, BindStatus bindStatus, String valueProperty, String labelProperty, boolean htmlEscape) {
+
+		Assert.notNull(optionSource, "'optionSource' must not be null");
+		Assert.notNull(bindStatus, "'bindStatus' must not be null");
 		this.optionSource = optionSource;
 		this.bindStatus = bindStatus;
 		this.valueProperty = valueProperty;
@@ -102,8 +106,8 @@ final class OptionWriter {
 			renderFromMap(tagWriter);
 		}
 		else {
-			throw new JspException("Type '" + this.optionSource.getClass().getName()
-							+ "' is not valid for property 'items'.");
+			throw new JspException(
+					"Type [" + this.optionSource.getClass().getName() + "] is not valid for option items");
 		}
 	}
 
@@ -121,7 +125,7 @@ final class OptionWriter {
 	 * @see #renderOption
 	 */
 	private void renderFromMap(TagWriter tagWriter) throws JspException {
-		Map optionMap = (Map)this.optionSource;
+		Map optionMap = (Map) this.optionSource;
 		for (Iterator iterator = optionMap.entrySet().iterator(); iterator.hasNext();) {
 			Map.Entry entry = (Map.Entry) iterator.next();
 			renderOption(tagWriter, entry, entry.getKey().toString(), entry.getValue().toString());
@@ -133,7 +137,7 @@ final class OptionWriter {
 	 * @see #doRenderFromCollection(java.util.Collection, TagWriter)
 	 */
 	private void renderFromCollection(TagWriter tagWriter) throws JspException {
-		doRenderFromCollection((Collection)this.optionSource, tagWriter);
+		doRenderFromCollection((Collection) this.optionSource, tagWriter);
 	}
 
 	/**
@@ -143,15 +147,11 @@ final class OptionWriter {
 	 * {@link #labelProperty} property is used when rendering the label.
 	 */
 	private void doRenderFromCollection(Collection optionCollection, TagWriter tagWriter) throws JspException {
-		for (Iterator iterator = optionCollection.iterator(); iterator.hasNext();) {
-			Object item = iterator.next();
+		for (Iterator it = optionCollection.iterator(); it.hasNext();) {
+			Object item = it.next();
 			BeanWrapper wrapper = new BeanWrapperImpl(item);
-
-			Object value = (this.valueProperty == null ? item :
-							wrapper.getPropertyValue(this.valueProperty));
-			Object label = (this.labelProperty == null ? item :
-							wrapper.getPropertyValue(this.labelProperty));
-
+			Object value = (this.valueProperty != null ? wrapper.getPropertyValue(this.valueProperty) : item);
+			Object label = (this.labelProperty != null ? wrapper.getPropertyValue(this.labelProperty) : item);
 			renderOption(tagWriter, item, value, label);
 		}
 	}
@@ -177,7 +177,7 @@ final class OptionWriter {
 	}
 
 	/**
-	 * Returns '<code>true</code>' if the supplied values matched the selected value.
+	 * Determine whether the supplied values matched the selected value.
 	 * Delegates to {@link SelectedValueComparator#isSelected}.
 	 */
 	private boolean isSelected(Object resolvedValue) {
@@ -185,8 +185,8 @@ final class OptionWriter {
 	}
 
 	/**
-	 * Gets the display value of the supplied <code>Object</code>, HTML escaped
-	 * as required.
+	 * Determines the display value of the supplied <code>Object</code>,
+	 * HTML-escaped as required.
 	 * @see ValueFormatter
 	 */
 	private String getDisplayString(Object value) {
