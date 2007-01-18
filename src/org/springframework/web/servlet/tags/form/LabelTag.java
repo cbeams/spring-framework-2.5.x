@@ -65,7 +65,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	 * @throws IllegalArgumentException if the supplied value is <code>null</code> 
 	 */
 	public void setFor(String forId) {
-		Assert.notNull(forId, "'forId' cannot be null.");
+		Assert.notNull(forId, "'forId' must not be null");
 		this.forId = forId;
 	}
 

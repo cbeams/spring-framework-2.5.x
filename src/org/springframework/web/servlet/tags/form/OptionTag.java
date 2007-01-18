@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 
 	/**
-	 * Sets the 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
+	 * Set the 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
 	 * <p>May be a runtime expression.
 	 */
 	public void setValue(Object value) {
@@ -100,7 +100,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	/**
-	 * Gets the 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
+	 * Get the 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
 	 * <p>May be a runtime expression.
 	 */
 	protected Object getValue() {
@@ -108,7 +108,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 	
 	/**
-	 * Sets the value of the '<code>disabled</code>' attribute.
+	 * Set the value of the '<code>disabled</code>' attribute.
 	 * <p>May be a runtime expression.
 	 * @param disabled the value of the '<code>disabled</code>' attribute
 	 */
@@ -117,7 +117,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	/**
-	 * Gets the value of the '<code>disabled</code>' attribute.
+	 * Get the value of the '<code>disabled</code>' attribute.
 	 * <p>May be a runtime expression.
 	 * @return the value of the '<code>disabled</code>' attribute
 	 */
@@ -134,17 +134,17 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	/**
-	 * Sets the text body of the rendered HTML <code>&lt;option&gt;</code> tag.
+	 * Set the text body of the rendered HTML <code>&lt;option&gt;</code> tag.
 	 * <p>May be a runtime expression.
 	 * @throws IllegalArgumentException if the supplied <code>label</code> is <code>null</code> 
 	 */
 	public void setLabel(String label) {
-		Assert.notNull(label, "'label' cannot be null.");
+		Assert.notNull(label, "'label' must not be null");
 		this.label = label;
 	}
 
 	/**
-	 * Gets the text body of the rendered HTML <code>&lt;option&gt;</code> tag.
+	 * Get the text body of the rendered HTML <code>&lt;option&gt;</code> tag.
 	 * <p>May be a runtime expression.
 	 */
 	protected String getLabel() {
