@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class OptionsTag extends AbstractFormTag {
 
 
 	/**
-	 * Sets the {@link java.util.Collection}, {@link java.util.Map} or array
+	 * Set the {@link java.util.Collection}, {@link java.util.Map} or array
 	 * of objects used to generate the inner '<code>option</code>' tags.
 	 * <p>Required when wishing to render '<code>option</code>' tags from an
 	 * array, {@link java.util.Collection} or {@link java.util.Map}.
@@ -64,12 +64,11 @@ public class OptionsTag extends AbstractFormTag {
 	 * @throws IllegalArgumentException if the supplied <code>items</code> instance is <code>null</code> 
 	 */
 	public void setItems(Object items) {
-		Assert.notNull(items, "'items' cannot be null.");
 		this.items = items;
 	}
 
 	/**
-	 * Gets the {@link java.util.Collection}, {@link java.util.Map} or array
+	 * Get the {@link java.util.Collection}, {@link java.util.Map} or array
 	 * of objects used to generate the inner '<code>option</code>' tags.
 	 * <p>Typically a runtime expression.
 	 */
@@ -78,14 +77,11 @@ public class OptionsTag extends AbstractFormTag {
 	}
 
 	/**
-	 * Sets the name of the property mapped to the '<code>value</code>'
+	 * Set the name of the property mapped to the '<code>value</code>'
 	 * attribute of the '<code>option</code>' tag.
 	 * <p>Required when wishing to render '<code>option</code>' tags from
 	 * an array or {@link java.util.Collection}.
 	 * <p>May be a runtime expression.
-	 * @param itemValue said item value
-	 * @throws IllegalArgumentException if the supplied <code>itemValue</code>
-	 * is <code>null</code> or consists wholly of whitespace
 	 */
 	public void setItemValue(String itemValue) {
 		Assert.hasText(itemValue, "'itemValue' must not be empty");
@@ -97,12 +93,9 @@ public class OptionsTag extends AbstractFormTag {
 	}
 
 	/**
-	 * Sets the name of the property mapped to the label (inner text) of the
+	 * Set the name of the property mapped to the label (inner text) of the
 	 * '<code>option</code>' tag.
 	 * <p>May be a runtime expression.
-	 * @param itemLabel said label
-	 * @throws IllegalArgumentException if the supplied <code>itemLabel</code> is
-	 * <code>null</code> or consists wholly of whitespace
 	 */
 	public void setItemLabel(String itemLabel) {
 		Assert.hasText(itemLabel, "'itemLabel' must not be empty");
@@ -110,7 +103,7 @@ public class OptionsTag extends AbstractFormTag {
 	}
 
 	/**
-	 * Gets the name of the property mapped to the label (inner text) of the
+	 * Get the name of the property mapped to the label (inner text) of the
 	 * '<code>option</code>' tag.
 	 * <p>May be a runtime expression.
 	 */
@@ -124,16 +117,19 @@ public class OptionsTag extends AbstractFormTag {
 		Object items = getItems();
 		Object itemsObject = (items instanceof String ? evaluate("items", (String) items) : items);
 
-		String itemValue = getItemValue();
-		String itemLabel = getItemLabel();
+		if (itemsObject != null) {
+			String itemValue = getItemValue();
+			String itemLabel = getItemLabel();
 
-		String valueProperty = (itemValue == null ? null :
-						ObjectUtils.getDisplayString(evaluate("itemValue", itemValue)));
-		String labelProperty = (itemLabel == null ? null :
-						ObjectUtils.getDisplayString(evaluate("itemLabel", itemLabel)));
+			String valueProperty =
+					(itemValue != null ? ObjectUtils.getDisplayString(evaluate("itemValue", itemValue)) : null);
+			String labelProperty =
+					(itemLabel != null ? ObjectUtils.getDisplayString(evaluate("itemLabel", itemLabel)) : null);
 
-		OptionWriter optionWriter = new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
-		optionWriter.writeOptions(tagWriter);
+			OptionWriter optionWriter =
+					new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
+			optionWriter.writeOptions(tagWriter);
+		}
 
 		return EVAL_PAGE;
 	}
