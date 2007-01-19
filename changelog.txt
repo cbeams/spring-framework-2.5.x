@@ -13,6 +13,9 @@ Package org.springframework.aop
 * AspectJAdviceParameterNameDiscoverer properly considers reference pointcuts as potential source of parameter binding
 
 Package org.springframework.beans
+* added "getTypeConverter()" method to ConfigurableBeanFactory interface
+* MethodInvokingFactoryBean obtains the TypeConverter from the BeanFactory that it runs in
+* List/Set/MapFactoryBean convert elements to the generic type expressed in a superclass/interface of the target class
 * PropertyPlaceholderConfigurer does not log resolved (potentially decrypted) placeholder values at debug level anymore
 * turned visibility of AbstractAutowireCapableBeanFactory's "applyPropertyValues" method from private to protected
 
@@ -40,6 +43,9 @@ Package org.springframework.mock
 Package org.springframework.remoting
 * all remoting ProxyFactoryBeans use the bean ClassLoader for generating service proxies
 * RemoteExporter uses the bean ClassLoader for generating service proxies
+* added public "getHost()" and "getPort()" accessors to RmiRegistryFactoryBean
+* added "alwaysCreate" flag to RmiRegistryFactoryBean, for avoiding the overhead of locating an existing registry
+* added "alwaysCreateRegistry" flag to RmiServiceExporter, for avoiding the overhead of locating an existing registry
 * CodebaseAwareObjectInputStream uses "Class.forName", to be able to resolve array classes with any ClassLoader
 
 Package org.springframework.scripting
@@ -50,6 +56,7 @@ Package org.springframework.scripting
 
 Package org.springframework.transaction
 * AbstractPlatformTransactionManager exposes "actualTransactionActive" flag for a newly synchronized existing tx as well
+* AbstractPlatformTransactionManager marks an existing transaction as rollback-only even in case of a commit exception
 * turned various AbstractPlatformTransactionManager methods from private to protected, for reuse in specific subclasses
 
 Package org.springframework.util
@@ -57,6 +64,7 @@ Package org.springframework.util
 
 Package org.springframework.web
 * RequestContextListener works correctly even in case of the "requestDestroyed" callback coming from a different thread
+* OptionsTag accepts no or empty items specified, simply not rendering any option tags in such a case
 
 
 Changes in version 2.0.2 (8.1.2007)
