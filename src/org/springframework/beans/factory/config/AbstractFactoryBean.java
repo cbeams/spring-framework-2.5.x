@@ -24,6 +24,10 @@ import java.lang.reflect.Proxy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.SimpleTypeConverter;
+import org.springframework.beans.TypeConverter;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
@@ -49,12 +53,15 @@ import org.springframework.beans.factory.InitializingBean;
  * @see #setSingleton(boolean)
  * @see #createInstance()
  */
-public abstract class AbstractFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
+public abstract class AbstractFactoryBean
+		implements FactoryBean, BeanFactoryAware, InitializingBean, DisposableBean {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private boolean singleton = true;
+
+	private ConfigurableBeanFactory beanFactory;
 
 	private boolean initialized = false;
 
@@ -73,6 +80,29 @@ public abstract class AbstractFactoryBean implements FactoryBean, InitializingBe
 
 	public boolean isSingleton() {
 		return this.singleton;
+	}
+
+	public void setBeanFactory(BeanFactory beanFactory) {
+		if (beanFactory instanceof ConfigurableBeanFactory) {
+			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+		}
+	}
+
+	/**
+	 * Obtain a bean type converter from the BeanFactory that this bean
+	 * runs in. This is typically a fresh instance for each call,
+	 * since TypeConverters are usually <i>not</i> thread-safe.
+	 * <p>Falls back to a SimpleTypeConverter when not running in a BeanFactory.
+	 * @see ConfigurableBeanFactory#getTypeConverter()
+	 * @see org.springframework.beans.SimpleTypeConverter
+	 */
+	protected TypeConverter getBeanTypeConverter() {
+		if (this.beanFactory != null) {
+			return this.beanFactory.getTypeConverter();
+		}
+		else {
+			return new SimpleTypeConverter();
+		}
 	}
 
 	/**

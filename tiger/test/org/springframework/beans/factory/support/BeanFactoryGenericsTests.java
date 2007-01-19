@@ -17,9 +17,11 @@
 package org.springframework.beans.factory.support;
 
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -424,6 +426,40 @@ public class BeanFactoryGenericsTests extends TestCase {
 
 		assertTrue(gb.getCollectionMap().get(new Integer(1)) instanceof HashSet);
 		assertTrue(gb.getCollectionMap().get(new Integer(2)) instanceof ArrayList);
+	}
+
+	public void testGenericListBean() throws Exception {
+		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
+		List list = (List) bf.getBean("list");
+		assertEquals(1, list.size());
+		assertEquals(new URL("http://localhost:8080"), list.get(0));
+	}
+
+	public void testGenericSetBean() throws Exception {
+		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
+		Set set = (Set) bf.getBean("set");
+		assertEquals(1, set.size());
+		assertEquals(new URL("http://localhost:8080"), set.iterator().next());
+	}
+
+	public void testGenericMapBean() throws Exception {
+		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
+		Map map = (Map) bf.getBean("map");
+		assertEquals(1, map.size());
+		assertEquals(new Integer(10), map.keySet().iterator().next());
+		assertEquals(new URL("http://localhost:8080"), map.values().iterator().next());
+	}
+
+
+	public static class NamedUrlList extends LinkedList<URL> {
+	}
+
+
+	public static class NamedUrlSet extends HashSet<URL> {
+	}
+
+
+	public static class NamedUrlMap extends HashMap<Integer, URL> {
 	}
 
 }

@@ -17,9 +17,13 @@
 package org.springframework.beans.factory.config;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.TypeConverter;
+import org.springframework.core.GenericCollectionTypeResolver;
+import org.springframework.core.JdkVersion;
 
 /**
  * Simple factory for shared List instances. Allows for central setup
@@ -34,7 +38,7 @@ public class ListFactoryBean extends AbstractFactoryBean {
 
 	private List sourceList;
 
-	private Class targetListClass = ArrayList.class;
+	private Class targetListClass;
 
 
 	/**
@@ -67,10 +71,28 @@ public class ListFactoryBean extends AbstractFactoryBean {
 
 	protected Object createInstance() {
 		if (this.sourceList == null) {
-			throw new IllegalArgumentException("sourceList is required");
+			throw new IllegalArgumentException("'sourceList' is required");
 		}
-		List result = (List) BeanUtils.instantiateClass(this.targetListClass);
-		result.addAll(this.sourceList);
+		List result = null;
+		if (this.targetListClass != null) {
+			result = (List) BeanUtils.instantiateClass(this.targetListClass);
+		}
+		else {
+			result = new ArrayList(this.sourceList.size());
+		}
+		Class valueType = null;
+		if (this.targetListClass != null && JdkVersion.isAtLeastJava15()) {
+			valueType = GenericCollectionTypeResolver.getCollectionType(this.targetListClass);
+		}
+		if (valueType != null) {
+			TypeConverter converter = getBeanTypeConverter();
+			for (Iterator it = this.sourceList.iterator(); it.hasNext();) {
+				result.add(converter.convertIfNecessary(it.next(), valueType));
+			}
+		}
+		else {
+			result.addAll(this.sourceList);
+		}
 		return result;
 	}
 

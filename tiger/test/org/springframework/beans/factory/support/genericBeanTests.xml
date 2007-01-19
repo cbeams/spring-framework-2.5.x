@@ -14,4 +14,23 @@
 		</property>
 	</bean>
 
+	<bean id="list" class="org.springframework.beans.factory.config.ListFactoryBean">
+		<property name="sourceList" value="http://localhost:8080"/>
+		<property name="targetListClass" value="org.springframework.beans.factory.support.BeanFactoryGenericsTests$NamedUrlList"/>
+	</bean>
+
+	<bean id="set" class="org.springframework.beans.factory.config.SetFactoryBean">
+		<property name="sourceSet" value="http://localhost:8080"/>
+		<property name="targetSetClass" value="org.springframework.beans.factory.support.BeanFactoryGenericsTests$NamedUrlSet"/>
+	</bean>
+
+	<bean id="map" class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map>
+				<entry key="10" value="http://localhost:8080"/>
+			</map>
+		</property>
+		<property name="targetMapClass" value="org.springframework.beans.factory.support.BeanFactoryGenericsTests$NamedUrlMap"/>
+	</bean>
+
 </beans>

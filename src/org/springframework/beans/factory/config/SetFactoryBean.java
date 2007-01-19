@@ -16,17 +16,21 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.Iterator;
 import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.TypeConverter;
 import org.springframework.core.CollectionFactory;
+import org.springframework.core.GenericCollectionTypeResolver;
+import org.springframework.core.JdkVersion;
 
 /**
  * Simple factory for shared Set instances. Allows for central setup
  * of Sets via the "set" element in XML bean definitions.
  *
  * @author Juergen Hoeller
- * @since 21.01.2003
+ * @since 09.12.2003
  * @see ListFactoryBean
  * @see MapFactoryBean
  */
@@ -69,7 +73,7 @@ public class SetFactoryBean extends AbstractFactoryBean {
 
 	protected Object createInstance() {
 		if (this.sourceSet == null) {
-			throw new IllegalArgumentException("sourceSet is required");
+			throw new IllegalArgumentException("'sourceSet' is required");
 		}
 		Set result = null;
 		if (this.targetSetClass != null) {
@@ -78,7 +82,19 @@ public class SetFactoryBean extends AbstractFactoryBean {
 		else {
 			result = CollectionFactory.createLinkedSetIfPossible(this.sourceSet.size());
 		}
-		result.addAll(this.sourceSet);
+		Class valueType = null;
+		if (this.targetSetClass != null && JdkVersion.isAtLeastJava15()) {
+			valueType = GenericCollectionTypeResolver.getCollectionType(this.targetSetClass);
+		}
+		if (valueType != null) {
+			TypeConverter converter = getBeanTypeConverter();
+			for (Iterator it = this.sourceSet.iterator(); it.hasNext();) {
+				result.add(converter.convertIfNecessary(it.next(), valueType));
+			}
+		}
+		else {
+			result.addAll(this.sourceSet);
+		}
 		return result;
 	}
 

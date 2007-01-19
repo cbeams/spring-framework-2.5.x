@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,36 @@ import org.springframework.util.Assert;
  * @see JdkVersion
  */
 public abstract class GenericCollectionTypeResolver {
+
+	/**
+	 * Determine the generic element type of the given Collection class
+	 * (if it declares one through a generic superclass or generic interface).
+	 * @param collectionClass the collection class to introspect
+	 * @return the generic type, or <code>null</code> if none
+	 */
+	public static Class getCollectionType(Class collectionClass) {
+		return extractTypeFromClass(collectionClass, Collection.class, 0);
+	}
+
+	/**
+	 * Determine the generic key type of the given Map class
+	 * (if it declares one through a generic superclass or generic interface).
+	 * @param mapClass the map class to introspect
+	 * @return the generic type, or <code>null</code> if none
+	 */
+	public static Class getMapKeyType(Class mapClass) {
+		return extractTypeFromClass(mapClass, Map.class, 0);
+	}
+
+	/**
+	 * Determine the generic value type of the given Map class
+	 * (if it declares one through a generic superclass or generic interface).
+	 * @param mapClass the map class to introspect
+	 * @return the generic type, or <code>null</code> if none
+	 */
+	public static Class getMapValueType(Class mapClass) {
+		return extractTypeFromClass(mapClass, Map.class, 1);
+	}
 
 	/**
 	 * Determine the generic element type of the given Collection parameter.
@@ -176,6 +206,7 @@ public abstract class GenericCollectionTypeResolver {
 	/**
 	 * Extract the generic type from the given Type object.
 	 * @param type the Type to check
+	 * @param source the source collection/map Class that we check
 	 * @param typeIndex the index of the actual type argument
 	 * @param nestingLevel the nesting level of the target type
 	 * @return the generic type as Class, or <code>null</code> if none
@@ -259,6 +290,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * @return the generic type as Class, or <code>null</code> if none
 	 */
 	private static Class extractTypeFromClass(Class clazz, Class source, int typeIndex) {
+		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.getSuperclass() != null && source.isAssignableFrom(clazz.getSuperclass())) {
 			return extractType(clazz.getGenericSuperclass(), source, typeIndex, 1);
 		}
