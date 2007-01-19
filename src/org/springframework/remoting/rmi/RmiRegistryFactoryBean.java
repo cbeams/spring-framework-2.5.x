@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,24 +31,25 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * FactoryBean that locates an RMI Registry and exposes it for bean references.
- * Can also create a local RMI registry on the fly if none exists.
+ * FactoryBean that locates a {@link java.rmi.registry.Registry} and
+ * exposes it for bean references. Can also create a local RMI registry
+ * on the fly if none exists already.
  *
  * <p>Can be used to set up and pass around the actual Registry object to
  * applications objects that need to work with RMI. One example for such an
- * object that needs to work with RMI is Spring's RmiServiceExporter, which
- * either works with a passed-in Registry reference or falls back to the
- * registry as specified by its local properties and defaults.
+ * object that needs to work with RMI is Spring's {@link RmiServiceExporter},
+ * which either works with a passed-in Registry reference or falls back to
+ * the registry as specified by its local properties and defaults.
  *
  * <p>Also useful to enforce creation of a local RMI registry at a given port,
  * for example for a JMX connector. If used in conjunction with
- * ConnectorServerFactoryBean, it is recommended that one mark the connector
- * definition (ConnectorServerFactoryBean) as "depends-on" the registry
- * definition (RmiRegistryFactoryBean), to guarantee starting up the registry
- * first.
+ * {@link org.springframework.jmx.support.ConnectorServerFactoryBean},
+ * it is recommended to mark the connector definition (ConnectorServerFactoryBean)
+ * as "depends-on" the registry definition (RmiRegistryFactoryBean),
+ * to guarantee starting up the registry first.
  *
  * <p>Note: The implementation of this class mirrors the corresponding logic
- * in RmiServiceExporter, and also offers the same customization hooks.
+ * in {@link RmiServiceExporter}, and also offers the same customization hooks.
  * RmiServiceExporter implements its own registry lookup as a convenience:
  * It is very common to simply rely on the registry defaults.
  *
@@ -77,7 +78,7 @@ public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean, Di
 
 
 	/**
-	 * Set the port of the registry for the exported RMI service,
+	 * Set the host of the registry for the exported RMI service,
 	 * i.e. <code>rmi://HOST:port/name</code>
 	 * <p>Default is localhost.
 	 */
@@ -86,12 +87,26 @@ public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean, Di
 	}
 
 	/**
+	 * Return the host of the registry for the exported RMI service.
+	 */
+	public String getHost() {
+		return this.host;
+	}
+
+	/**
 	 * Set the port of the registry for the exported RMI service,
 	 * i.e. <code>rmi://host:PORT/name</code>
-	 * <p>Default is Registry.REGISTRY_PORT (1099).
+	 * <p>Default is <code>Registry.REGISTRY_PORT</code> (1099).
 	 */
 	public void setPort(int port) {
 		this.port = port;
+	}
+
+	/**
+	 * Return the port of the registry for the exported RMI service.
+	 */
+	public int getPort() {
+		return this.port;
 	}
 
 	/**
