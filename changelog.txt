@@ -3,8 +3,8 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springframework.org
 
 
-Changes in version 1.2.9 (9.1.2007)
------------------------------------
+Changes in version 1.2.9 (22.1.2007)
+------------------------------------
 
 General
 * many javadoc refinements and clarifications
@@ -92,6 +92,7 @@ Package org.springframework.orm
 Package org.springframework.remoting
 * Burlap/Hessian/Rmi/JndiRmiClientInterceptor consistently throw RemoteProxyFailureException instead of AspectException
 * RmiServiceExporter logs description of actual registry instead of port (to properly handle passed-in "registry")
+* added public "getHost()" and "getPort()" accessors to RmiRegistryFactoryBean
 
 Package org.springframework.scheduling
 * Quartz SchedulerFactoryBean uses given "nonTransactionalDataSource" as default DataSource if no "dataSource" specified
@@ -105,8 +106,10 @@ Package org.springframework.test
 
 Package org.springframework.transaction
 * active transaction synchronization gets suspended when going from SUPPORTS/NOT_SUPPORTED into REQUIRED/REQUIRES_NEW
+* AbstractPlatformTransactionManager marks an existing transaction as rollback-only even in case of a commit exception
 * AbstractPlatformTransactionManager properly resumes all synchronizations even after suspend or inner begin failure
 * AbstractPlatformTransactionManager logs full transaction definition when creating a new transaction
+* AbstractPlatformTransactionManager exposes "actualTransactionActive" flag for a newly synchronized existing tx as well
 * TransactionAttributeEditor does not accept transaction attributes with invalid whitespace anymore
 * added "timeout" attribute to Transactional annotation, allowing to specify a timeout in seconds within the annotation
 * JtaTransactionManager explicitly only calls "UserTransaction.setRollbackOnly()" if the transaction is still active
