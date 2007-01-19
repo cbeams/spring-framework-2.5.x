@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ package org.springframework.validation;
  * logic as first-class citizens in their own right.
  * 
  * <p>Find below a simple but complete <code>Validator</code>
- * implementation, that validates that the various {@link String}
- * properties (fields) of a <code>UserLogin</code> instance are not
- * empty (that is they are not <code>null</code> and do not consist
+ * implementation, which validates that the various {@link String}
+ * properties of a <code>UserLogin</code> instance are not empty
+ * (that is they are not <code>null</code> and do not consist
  * wholly of whitespace), and that any password that is present is
  * at least <code>'MINIMUM_PASSWORD_LENGTH'</code> characters in length.
  * 
@@ -67,12 +67,10 @@ public interface Validator {
 	/**
 	 * Can this {@link Validator} {@link #validate(Object, Errors) validate}
 	 * instances of the supplied <code>clazz</code>?
-	 * <p>This method is <i>'typically'</i> implemented like so:
+	 * <p>This method is <i>typically</i> implemented like so:
 	 * <pre class="code">return Foo.class.isAssignableFrom(clazz);</pre>
 	 * (Where <code>Foo</code> is the class (or superclass) of the actual
-	 * object instance that is to be {@link #validate(Object, Errors) validated}).)
-	 * <p>However, implementations can (of course) choose to implement
-	 * this method in any manner they please.
+	 * object instance that is to be {@link #validate(Object, Errors) validated}.)
 	 * @param clazz the {@link Class} that this {@link Validator} is
 	 * being asked if it can {@link #validate(Object, Errors) validate}
 	 * @return <code>true</code> if this {@link Validator} can indeed
