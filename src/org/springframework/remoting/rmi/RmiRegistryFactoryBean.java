@@ -74,6 +74,8 @@ public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean, Di
 
 	private Registry registry;
 
+	private boolean alwaysCreate = false;
+
 	private boolean created = false;
 
 
@@ -135,6 +137,17 @@ public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean, Di
 		this.serverSocketFactory = serverSocketFactory;
 	}
 
+	/**
+	 * Set whether to always create the registry in-process,
+	 * not attempting to locate an existing registry at the specified port.
+	 * <p>Default is "false". Switch this flag to "true" in order to avoid
+	 * the overhead of locating an existing registry when you always
+	 * intend to create a new registry in any case.
+	 */
+	public void setAlwaysCreate(boolean alwaysCreate) {
+		this.alwaysCreate = alwaysCreate;
+	}
+
 
 	public void afterPropertiesSet() throws Exception {
 		// Check socket factories for registry.
@@ -194,6 +207,11 @@ public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean, Di
 			throws RemoteException {
 
 		if (clientSocketFactory != null) {
+			if (this.alwaysCreate) {
+				logger.info("Creating new RMI registry");
+				this.created = true;
+				return LocateRegistry.createRegistry(registryPort, clientSocketFactory, serverSocketFactory);
+			}
 			if (logger.isInfoEnabled()) {
 				logger.info("Looking for RMI registry at port '" + registryPort + "', using custom socket factory");
 			}
@@ -205,7 +223,7 @@ public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean, Di
 			}
 			catch (RemoteException ex) {
 				logger.debug("RMI registry access threw exception", ex);
-				logger.warn("Could not detect RMI registry - creating new one");
+				logger.info("Could not detect RMI registry - creating new one");
 				// Assume no registry found -> create new one.
 				this.created = true;
 				return LocateRegistry.createRegistry(registryPort, clientSocketFactory, serverSocketFactory);
@@ -224,6 +242,11 @@ public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean, Di
 	 * @throws RemoteException if the registry couldn't be located or created
 	 */
 	protected Registry getRegistry(int registryPort) throws RemoteException {
+		if (this.alwaysCreate) {
+			logger.info("Creating new RMI registry");
+			this.created = true;
+			return LocateRegistry.createRegistry(registryPort);
+		}
 		if (logger.isInfoEnabled()) {
 			logger.info("Looking for RMI registry at port '" + registryPort + "'");
 		}
