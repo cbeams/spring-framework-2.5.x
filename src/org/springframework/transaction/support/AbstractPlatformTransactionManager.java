@@ -691,9 +691,15 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		try {
 			if (status.isNewTransaction()) {
 				if (status.isDebug()) {
-					logger.debug("Initiating transaction rollback on commit exception", ex);
+					logger.debug("Initiating transaction rollback after commit exception", ex);
 				}
 				doRollback(status);
+			}
+			else if (status.hasTransaction() && isGlobalRollbackOnParticipationFailure()) {
+				if (status.isDebug()) {
+					logger.debug("Marking existing transaction as rollback-only after commit exception", ex);
+				}
+				doSetRollbackOnly(status);
 			}
 		}
 		catch (RuntimeException rbex) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import javax.transaction.UserTransaction;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -345,6 +346,46 @@ public class JtaTransactionManagerTests extends TestCase {
 			// expected
 		}
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
+
+		utControl.verify();
+		synchControl.verify();
+	}
+
+	public void testJtaTransactionManagerWithExistingTransactionAndCommitException() throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		ut.setRollbackOnly();
+		utControl.setVoidCallable(1);
+		utControl.replay();
+
+		MockControl synchControl = MockControl.createControl(TransactionSynchronization.class);
+		final TransactionSynchronization synch = (TransactionSynchronization) synchControl.getMock();
+		synch.beforeCommit(false);
+		synchControl.setThrowable(new OptimisticLockingFailureException(""));
+		synch.beforeCompletion();
+		synchControl.setVoidCallable(1);
+		synch.afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
+		synchControl.setVoidCallable(1);
+		synchControl.replay();
+
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		try {
+			tt.execute(new TransactionCallbackWithoutResult() {
+				protected void doInTransactionWithoutResult(TransactionStatus status) {
+					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+					TransactionSynchronizationManager.registerSynchronization(synch);
+				}
+			});
+			fail("Should have thrown OptimisticLockingFailureException");
+		}
+		catch (OptimisticLockingFailureException ex) {
+			// expected
+		}
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 
 		utControl.verify();
 		synchControl.verify();
