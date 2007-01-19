@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,8 @@ import org.springframework.util.ClassUtils;
  * <p>As of Spring 2.0, the recommended usage is to use custom
  * {@link PropertyEditorRegistrar} implementations that in turn register
  * any desired editors on a given
- * {@link org.springframework.beans.PropertyEditorRegistry registry}. Each
- * <code>PropertyEditorRegistrar</code> can register any number of custom
- * editors.
+ * {@link org.springframework.beans.PropertyEditorRegistry registry}.
+ * Each PropertyEditorRegistrar can register any number of custom editors.
  *
  * <pre class="code">
  * &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
@@ -73,10 +72,9 @@ import org.springframework.util.ClassUtils;
  * <p><b>NOTE:</b> Custom property editors registered with this configurer do
  * <i>not</i> apply to data binding. Custom editors for data binding need to
  * be registered on the {@link org.springframework.validation.DataBinder}:
- * Use a common base class or delegate to common
- * <code>PropertyEditorRegistrar</code> code to reuse editor registration
- * there.
- * 
+ * Use a common base class or delegate to common PropertyEditorRegistrar
+ * implementations to reuse editor registration there.
+ *
  * @author Juergen Hoeller
  * @since 27.02.2004
  * @see java.beans.PropertyEditor
@@ -103,7 +101,7 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 	}
 
 	public int getOrder() {
-	  return order;
+	  return this.order;
 	}
 
 	/**
@@ -157,7 +155,7 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 				}
 				else {
 					throw new IllegalArgumentException(
-							"Invalid key [" + key + "] for custom editor: needs to be Class or String");
+							"Invalid key [" + key + "] for custom editor: needs to be Class or String.");
 				}
 				Object value = entry.getValue();
 				if (!(value instanceof PropertyEditor)) {
