@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,10 +194,11 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * to invoke the joinpoint (and the rest of the advice chain) more than once.
 	 * <p>This method returns a shallow copy, except for the argument array, which is
 	 * deep-copied to allow for independent modification. We want a shallow copy in this case:
-	 * We want to use the same interceptor-chain and other object references, but we want an
+	 * We want to use the same interceptor chain and other object references, but we want an
 	 * independent value for the current interceptor index.
 	 * @see java.lang.Object#clone()
-	 * @return an invocable clone of this invocation. proceed() can be called once per clone.
+	 * @return an invocable clone of this invocation.
+	 * <code>proceed()</code> can be called once per clone.
 	 */
 	public MethodInvocation invocableClone() {
 		try {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	}
 
 	public Object proceed() throws Throwable {
-		return ((ReflectiveMethodInvocation)methodInvocation).invocableClone().proceed();
+		return ((ReflectiveMethodInvocation) this.methodInvocation).invocableClone().proceed();
 	}
 
 	public Object proceed(Object[] args) throws Throwable {
@@ -101,7 +101,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	 * Returns the Spring AOP target. May be <code>null</code> if there is no target.
 	 */
 	public Object getTarget() {
-		return methodInvocation.getThis();
+		return this.methodInvocation.getThis();
 	}
 
 	public Object[] getArgs() {
@@ -179,7 +179,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 
 		public String[] getParameterNames() {
 			// TODO consider allowing use of ParameterNameDiscoverer, or tying into
-			// parameter names exposed for argument binding
+			// parameter names exposed for argument binding...
 			throw new UnsupportedOperationException("Parameter names cannot be determined unless compiled by AspectJ compiler");
 		}
 
