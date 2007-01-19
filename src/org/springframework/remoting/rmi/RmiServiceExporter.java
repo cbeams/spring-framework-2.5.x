@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	}
 
 	/**
-	 * Set the port of the registry for the exported RMI service,
+	 * Set the host of the registry for the exported RMI service,
 	 * i.e. <code>rmi://HOST:port/name</code>
 	 * <p>Default is localhost.
 	 */
@@ -311,7 +311,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 			}
 			catch (RemoteException ex) {
 				logger.debug("RMI registry access threw exception", ex);
-				logger.warn("Could not detect RMI registry - creating new one");
+				logger.info("Could not detect RMI registry - creating new one");
 				// Assume no registry found -> create new one.
 				return LocateRegistry.createRegistry(registryPort, clientSocketFactory, serverSocketFactory);
 			}
@@ -340,7 +340,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 		}
 		catch (RemoteException ex) {
 			logger.debug("RMI registry access threw exception", ex);
-			logger.warn("Could not detect RMI registry - creating new one");
+			logger.info("Could not detect RMI registry - creating new one");
 			// Assume no registry found -> create new one.
 			return LocateRegistry.createRegistry(registryPort);
 		}
