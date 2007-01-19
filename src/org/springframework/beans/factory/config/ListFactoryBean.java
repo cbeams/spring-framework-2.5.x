@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,7 +34,7 @@ public class ListFactoryBean extends AbstractFactoryBean {
 
 	private List sourceList;
 
-	private Class targetListClass = ArrayList.class;
+	private Class targetListClass;
 
 
 	/**
@@ -52,10 +52,10 @@ public class ListFactoryBean extends AbstractFactoryBean {
 	 */
 	public void setTargetListClass(Class targetListClass) {
 		if (targetListClass == null) {
-			throw new IllegalArgumentException("targetListClass must not be null");
+			throw new IllegalArgumentException("'targetListClass' must not be null");
 		}
 		if (!List.class.isAssignableFrom(targetListClass)) {
-			throw new IllegalArgumentException("targetListClass must implement [java.util.List]");
+			throw new IllegalArgumentException("'targetListClass' must implement [java.util.List]");
 		}
 		this.targetListClass = targetListClass;
 	}
@@ -67,9 +67,15 @@ public class ListFactoryBean extends AbstractFactoryBean {
 
 	protected Object createInstance() {
 		if (this.sourceList == null) {
-			throw new IllegalArgumentException("sourceList is required");
+			throw new IllegalArgumentException("'sourceList' is required");
 		}
-		List result = (List) BeanUtils.instantiateClass(this.targetListClass);
+		List result = null;
+		if (this.targetListClass != null) {
+			result = (List) BeanUtils.instantiateClass(this.targetListClass);
+		}
+		else {
+			result = new ArrayList(this.sourceList.size());
+		}
 		result.addAll(this.sourceList);
 		return result;
 	}
