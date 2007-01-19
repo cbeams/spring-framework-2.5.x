@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,8 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 
 	private RMIServerSocketFactory registryServerSocketFactory;
 
+	private boolean alwaysCreateRegistry = false;
+
 	private Remote exportedObject;
 
 
@@ -148,7 +150,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	}
 
 	/**
-	 * Set the port of the registry for the exported RMI service,
+	 * Set the host of the registry for the exported RMI service,
 	 * i.e. <code>rmi://HOST:port/name</code>
 	 * <p>Default is localhost.
 	 */
@@ -190,6 +192,17 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	 */
 	public void setRegistryServerSocketFactory(RMIServerSocketFactory registryServerSocketFactory) {
 		this.registryServerSocketFactory = registryServerSocketFactory;
+	}
+
+	/**
+	 * Set whether to always create the registry in-process,
+	 * not attempting to locate an existing registry at the specified port.
+	 * <p>Default is "false". Switch this flag to "true" in order to avoid
+	 * the overhead of locating an existing registry when you always
+	 * intend to create a new registry in any case.
+	 */
+	public void setAlwaysCreateRegistry(boolean alwaysCreateRegistry) {
+		this.alwaysCreateRegistry = alwaysCreateRegistry;
 	}
 
 
@@ -304,6 +317,10 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 			throws RemoteException {
 
 		if (clientSocketFactory != null) {
+			if (this.alwaysCreateRegistry) {
+				logger.info("Creating new RMI registry");
+				return LocateRegistry.createRegistry(registryPort, clientSocketFactory, serverSocketFactory);
+			}
 			if (logger.isInfoEnabled()) {
 				logger.info("Looking for RMI registry at port '" + registryPort + "', using custom socket factory");
 			}
@@ -315,7 +332,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 			}
 			catch (RemoteException ex) {
 				logger.debug("RMI registry access threw exception", ex);
-				logger.warn("Could not detect RMI registry - creating new one");
+				logger.info("Could not detect RMI registry - creating new one");
 				// Assume no registry found -> create new one.
 				return LocateRegistry.createRegistry(registryPort, clientSocketFactory, serverSocketFactory);
 			}
@@ -333,6 +350,10 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	 * @throws RemoteException if the registry couldn't be located or created
 	 */
 	protected Registry getRegistry(int registryPort) throws RemoteException {
+		if (this.alwaysCreateRegistry) {
+			logger.info("Creating new RMI registry");
+			return LocateRegistry.createRegistry(registryPort);
+		}
 		if (logger.isInfoEnabled()) {
 			logger.info("Looking for RMI registry at port '" + registryPort + "'");
 		}
@@ -344,7 +365,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 		}
 		catch (RemoteException ex) {
 			logger.debug("RMI registry access threw exception", ex);
-			logger.warn("Could not detect RMI registry - creating new one");
+			logger.info("Could not detect RMI registry - creating new one");
 			// Assume no registry found -> create new one.
 			return LocateRegistry.createRegistry(registryPort);
 		}
