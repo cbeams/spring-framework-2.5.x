@@ -258,7 +258,7 @@ public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean, Di
 		}
 		catch (RemoteException ex) {
 			logger.debug("RMI registry access threw exception", ex);
-			logger.warn("Could not detect RMI registry - creating new one");
+			logger.info("Could not detect RMI registry - creating new one");
 			// Assume no registry found -> create new one.
 			this.created = true;
 			return LocateRegistry.createRegistry(registryPort);
