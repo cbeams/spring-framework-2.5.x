@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,22 @@ package org.springframework.beans.factory.config;
 import java.beans.PropertyEditor;
 
 import org.springframework.beans.PropertyEditorRegistrar;
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 
 /**
- * Configuration interface to be implemented by most bean factories.
- * Provides facilities to configure a bean factory, in addition to the bean
- * factory client methods in the BeanFactory interface.
+ * Configuration interface to be implemented by most bean factories. Provides
+ * facilities to configure a bean factory, in addition to the bean factory
+ * client methods in the {@link org.springframework.beans.factory.BeanFactory}
+ * interface.
  *
- * <p>This subinterface of BeanFactory is not meant to be used in normal
- * application code: Stick to BeanFactory or ListableBeanFactory for typical
- * use cases. This interface is just meant to allow for framework-internal
- * plug'n'play even when needing access to bean factory configuration methods.
+ * <p>This bean factory interface is not meant to be used in normal application
+ * code: Stick to {@link org.springframework.beans.factory.BeanFactory} or
+ * {@link org.springframework.beans.factory.ListableBeanFactory} for typical
+ * needs. This extended interface is just meant to allow for framework-internal
+ * plug'n'play and for special access to bean factory configuration methods.
  *
  * @author Juergen Hoeller
  * @since 03.11.2003
@@ -122,6 +125,12 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @see #addPropertyEditorRegistrar
 	 */
 	void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor);
+
+	/**
+	 * Obtain a type converter as used by this BeanFactory. This is typically a fresh
+	 * instance for each call, since TypeConverters are usually <i>not</i> thread-safe.
+	 */
+	TypeConverter getTypeConverter();
 
 	/**
 	 * Add a new BeanPostProcessor that will get applied to beans created

@@ -32,6 +32,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
@@ -563,6 +564,12 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 */
 	public Map getCustomEditors() {
 		return this.customEditors;
+	}
+
+	public TypeConverter getTypeConverter() {
+		SimpleTypeConverter typeConverter = new SimpleTypeConverter();
+		registerCustomEditors(typeConverter);
+		return typeConverter;
 	}
 
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
