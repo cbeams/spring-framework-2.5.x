@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,10 @@ package org.springframework.beans.factory.config;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.InitializingBean;
@@ -29,18 +32,18 @@ import org.springframework.util.ClassUtils;
 /**
  * FactoryBean which returns a value which is the result of a static or instance
  * method invocation. For most use cases it is better to just use the container's 
- * built-in factory-method support for the same purpose, since that is smarter at
+ * built-in factory method support for the same purpose, since that is smarter at
  * converting arguments. This factory bean is still useful though when you need to
  * call a method which doesn't return any value (for example, a static class method
  * to force some sort of initialization to happen). This use case is not supported
- * by factory-methods, since a return value is needed to become the bean.</p.
+ * by factory methods, since a return value is needed to obtain the bean instance.
  *
  * <p>Note that as it is expected to be used mostly for accessing factory methods,
  * this factory by default operates in a <b>singleton</b> fashion. The first request
  * to {@link #getObject} by the owning bean factory will cause a method invocation,
  * whose return value will be cached for subsequent requests. An internal
  * {@link #setSingleton singleton} property may be set to "false", to cause this
- * factory to invoke the target method each time it is asked for an object.</p>
+ * factory to invoke the target method each time it is asked for an object.
  *
  * <p>A static target method may be specified by setting the
  * {@link #setTargetMethod targetMethod} property to a String representing the static
@@ -49,13 +52,13 @@ import org.springframework.util.ClassUtils;
  * specified, by setting the {@link #setTargetObject targetObject} property as the target
  * object, and the {@link #setTargetMethod targetMethod} property as the name of the
  * method to call on that target object. Arguments for the method invocation may be
- * specified by setting the {@link #setArguments arguments} property.</p>
+ * specified by setting the {@link #setArguments arguments} property.
  *
  * <p>This class depends on {@link #afterPropertiesSet()} being called once
- * all properties have been set, as per the InitializingBean contract.</p>
+ * all properties have been set, as per the InitializingBean contract.
  * 
  * <p>An example (in an XML based bean factory definition) of a bean definition
- * which uses this class to call a static factory method:</p>
+ * which uses this class to call a static factory method:
  *
  * <pre class="code">
  * &lt;bean id="myObject" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
@@ -86,11 +89,13 @@ import org.springframework.util.ClassUtils;
  * @since 21.11.2003
  */
 public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
-		implements FactoryBean, BeanClassLoaderAware, InitializingBean {
+		implements FactoryBean, BeanClassLoaderAware, BeanFactoryAware, InitializingBean {
 
 	private boolean singleton = true;
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+
+	private ConfigurableBeanFactory beanFactory;
 
 	private boolean initialized = false;
 
@@ -106,12 +111,36 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 		this.singleton = singleton;
 	}
 
+	public boolean isSingleton() {
+		return this.singleton;
+	}
+
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
 	protected Class resolveClassName(String className) throws ClassNotFoundException {
 		return ClassUtils.forName(className, this.beanClassLoader);
+	}
+
+	public void setBeanFactory(BeanFactory beanFactory) {
+		if (beanFactory instanceof ConfigurableBeanFactory) {
+			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+		}
+	}
+
+	/**
+	 * Obtain the TypeConverter from the BeanFactory that this bean runs in,
+	 * if possible.
+	 * @see ConfigurableBeanFactory#getTypeConverter()
+	 */
+	protected TypeConverter getDefaultTypeConverter() {
+		if (this.beanFactory != null) {
+			return this.beanFactory.getTypeConverter();
+		}
+		else {
+			return super.getDefaultTypeConverter();
+		}
 	}
 
 
@@ -166,17 +195,13 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 	 * Return the type of object that this FactoryBean creates,
 	 * or <code>null</code> if not known in advance.
 	 */
-    public Class getObjectType() {
+	public Class getObjectType() {
 		Method preparedMethod = getPreparedMethod();
 		if (preparedMethod == null) {
 			// Not fully initialized yet -> return null to indicate "not known yet".
 			return null;
 		}
 		return preparedMethod.getReturnType();
-	}
-
-	public boolean isSingleton() {
-		return singleton;
 	}
 
 }
