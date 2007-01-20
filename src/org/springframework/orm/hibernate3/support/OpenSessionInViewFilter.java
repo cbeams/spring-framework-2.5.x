@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,8 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
 	private boolean singleSession = true;
 
+	private FlushMode flushMode = FlushMode.NEVER;
+
 
 	/**
 	 * Set the bean name of the SessionFactory to fetch from Spring's
@@ -136,6 +138,14 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 */
 	protected boolean isSingleSession() {
 		return this.singleSession;
+	}
+
+	public void setFlushMode(FlushMode flushMode) {
+		this.flushMode = flushMode;
+	}
+
+	protected FlushMode getFlushMode() {
+		return this.flushMode;
 	}
 
 
@@ -234,7 +244,10 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 */
 	protected Session getSession(SessionFactory sessionFactory) throws DataAccessResourceFailureException {
 		Session session = SessionFactoryUtils.getSession(sessionFactory, true);
-		session.setFlushMode(FlushMode.NEVER);
+		FlushMode flushMode = getFlushMode();
+		if (flushMode != null) {
+			session.setFlushMode(flushMode);
+		}
 		return session;
 	}
 

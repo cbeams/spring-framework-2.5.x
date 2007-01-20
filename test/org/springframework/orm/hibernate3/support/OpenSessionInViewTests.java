@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -331,7 +331,7 @@ public class OpenSessionInViewTests extends TestCase {
 		sf2Control.setReturnValue(session2, 1);
 		session2.getSessionFactory();
 		session2Control.setReturnValue(sf);
-		session2.setFlushMode(FlushMode.NEVER);
+		session2.setFlushMode(FlushMode.AUTO);
 		session2Control.setVoidCallable(1);
 		session2.close();
 		session2Control.setReturnValue(null, 1);
@@ -351,6 +351,7 @@ public class OpenSessionInViewTests extends TestCase {
 		MockFilterConfig filterConfig = new MockFilterConfig(wac.getServletContext(), "filter");
 		MockFilterConfig filterConfig2 = new MockFilterConfig(wac.getServletContext(), "filter2");
 		filterConfig2.addInitParameter("sessionFactoryBeanName", "mySessionFactory");
+		filterConfig2.addInitParameter("flushMode", "AUTO");
 
 		final OpenSessionInViewFilter filter = new OpenSessionInViewFilter();
 		filter.init(filterConfig);
