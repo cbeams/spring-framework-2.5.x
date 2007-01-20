@@ -141,20 +141,6 @@
                     <xsl:attribute name="cols">
                         <xsl:text>3</xsl:text>
                     </xsl:attribute>
-                    <xsl:element name="spanspec">
-                        <xsl:attribute name="spanname">
-                            <xsl:text>description.span</xsl:text>
-                        </xsl:attribute>
-                        <xsl:attribute name="namest">
-                            <xsl:text>Attribute</xsl:text>
-                        </xsl:attribute>
-                        <xsl:attribute name="nameend">
-                            <xsl:text>Runtime.Expression</xsl:text>
-                        </xsl:attribute>
-                        <xsl:attribute name="align">
-                            <xsl:text>left</xsl:text>
-                        </xsl:attribute>
-                    </xsl:element>
                     <xsl:element name="colspec">
                         <xsl:attribute name="align">
                             <xsl:text>center</xsl:text>
@@ -179,6 +165,14 @@
                             <xsl:text>Runtime.Expression</xsl:text>
                         </xsl:attribute>
                     </xsl:element>
+                    <xsl:element name="colspec">
+                        <xsl:attribute name="align">
+                            <xsl:text>left</xsl:text>
+                        </xsl:attribute>
+                        <xsl:attribute name="colname">
+                            <xsl:text>Description</xsl:text>
+                        </xsl:attribute>
+                    </xsl:element>
 
                     <xsl:element name="thead">
                         <xsl:element name="row">
@@ -199,6 +193,12 @@
                                     <xsl:text>center</xsl:text>
                                 </xsl:attribute>
                                 <xsl:text>Runtime Expression?</xsl:text>
+                            </xsl:element>
+                            <xsl:element name="entry">
+                                <xsl:attribute name="align">
+                                    <xsl:text>left</xsl:text>
+                                </xsl:attribute>
+                                <xsl:text>Description</xsl:text>
                             </xsl:element>
                         </xsl:element>
 
@@ -230,25 +230,7 @@
                     <xsl:value-of select="rtexprvalue"/>
                 </xsl:element>
             </xsl:element>
-        </xsl:element>
-        <xsl:element name="row">
             <xsl:element name="entry">
-                <xsl:attribute name="spanname">
-                    <xsl:text>description.span</xsl:text>
-                </xsl:attribute>
-                <xsl:element name="para">
-                    <xsl:value-of select="description"/>
-                </xsl:element>
-            </xsl:element>
-        </xsl:element>
-    </xsl:template>
-
-    <xsl:template match="attribute/description">
-        <xsl:element name="row">
-            <xsl:element name="entry">
-                <xsl:attribute name="spanname">
-                    <xsl:text>description.span</xsl:text>
-                </xsl:attribute>
                 <xsl:element name="para">
                     <xsl:value-of select="description"/>
                 </xsl:element>
