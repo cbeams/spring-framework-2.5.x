@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +60,7 @@ import org.springframework.beans.BeansException;
  * in any parent factory.
  *
  * <p>Bean factory implementations should support the standard bean lifecycle interfaces
- * as far as possible. The maximum set of initialization methods and their standard
- * order is:<br>
+ * as far as possible. The full set of initialization methods and their standard order is:<br>
  * 1. BeanNameAware's <code>setBeanName</code><br>
  * 2. BeanFactoryAware's <code>setBeanFactory</code><br>
  * 3. ResourceLoaderAware's <code>setResourceLoader</code>
@@ -105,10 +104,10 @@ import org.springframework.beans.BeansException;
 public interface BeanFactory {
 
 	/**
-	 * Used to dereference a FactoryBean and distinguish it from beans
-	 * <i>created</i> by the FactoryBean. For example, if the bean named
-	 * <code>myEjb</code> is a FactoryBean, getting <code>&myEjb</code> will
-	 * return the factory, not the instance returned by the factory.
+	 * Used to dereference a {@link FactoryBean} instance and distinguish it from
+	 * beans <i>created</i> by the FactoryBean. For example, if the bean named
+	 * <code>myJndiObject</code> is a FactoryBean, getting <code>&myJndiObject</code>
+	 * will return the factory, not the instance returned by the factory.
 	 */
 	String FACTORY_BEAN_PREFIX = "&";
 
@@ -130,8 +129,8 @@ public interface BeanFactory {
 
 	/**
 	 * Return an instance (possibly shared or independent) of the given bean name.
-	 * <p>Behaves the same as getBean(String), but provides a measure of type safety by
-	 * throwing a Spring BeansException if the bean is not of the required type.
+	 * <p>Behaves the same as {@link #getBean(String)}, but provides a measure of type
+	 * safety by throwing a BeansException if the bean is not of the required type.
 	 * This means that ClassCastException can't be thrown on casting the result correctly,
 	 * as can happen with <code>getBean(String)</code>.
 	 * @param name the name of the bean to return
@@ -147,7 +146,7 @@ public interface BeanFactory {
 	Object getBean(String name, Class requiredType) throws BeansException;
 
 	/**
-	 * Does this bean factory contain a bean definition with the given name?
+	 * Does this bean factory contain a bean with the given name?
 	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the name of the bean to query
 	 * @return whether a bean with the given name is defined
@@ -173,7 +172,7 @@ public interface BeanFactory {
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @since 1.1.2
 	 * @see #getBean
-	 * @see FactoryBean#getObjectType
+	 * @see FactoryBean#getObjectType()
 	 */
 	Class getType(String name) throws NoSuchBeanDefinitionException;
 
