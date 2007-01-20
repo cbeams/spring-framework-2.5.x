@@ -454,6 +454,7 @@ public abstract class AbstractMessageListenerContainer extends JmsDestinationAcc
 		boolean running = isRunning();
 		synchronized (this.sharedConnectionMonitor) {
 			ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), running);
+			this.sharedConnection = null;
 			Connection con = createConnection();
 			try {
 				prepareSharedConnection(con);
