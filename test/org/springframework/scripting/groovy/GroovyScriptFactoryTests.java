@@ -43,7 +43,7 @@ import org.springframework.test.AssertThrows;
  * @author Rick Evans
  * @author Rod Johnson
  */
-public final class GroovyScriptFactoryTests extends TestCase {
+public class GroovyScriptFactoryTests extends TestCase {
 
 	public void testStatic() throws Exception {
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
@@ -96,8 +96,8 @@ public final class GroovyScriptFactoryTests extends TestCase {
 			new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyBrokenContext.xml");
 			fail("Should throw exception for broken script file");
 		}
-		catch (NestedRuntimeException e) {
-			assertTrue(e.contains(ScriptCompilationException.class));
+		catch (NestedRuntimeException ex) {
+			assertTrue("Wrong root cause: " + ex, ex.contains(ScriptCompilationException.class));
 		}
 	}
 
@@ -289,8 +289,6 @@ public final class GroovyScriptFactoryTests extends TestCase {
 
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
-
-		//System.out.println(((Advised) messenger).toProxyConfigString());
 
 		assertEquals("Hello World!", messenger.getMessage());
 		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
