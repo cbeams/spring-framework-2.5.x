@@ -106,10 +106,10 @@ import org.springframework.beans.BeansException;
 public interface BeanFactory {
 
 	/**
-	 * Used to dereference a FactoryBean and distinguish it from beans
-	 * <i>created</i> by the FactoryBean. For example, if the bean named
-	 * <code>myEjb</code> is a FactoryBean, getting <code>&myEjb</code> will
-	 * return the factory, not the instance returned by the factory.
+	 * Used to dereference a {@link FactoryBean} instance and distinguish it from
+	 * beans <i>created</i> by the FactoryBean. For example, if the bean named
+	 * <code>myJndiObject</code> is a FactoryBean, getting <code>&myJndiObject</code>
+	 * will return the factory, not the instance returned by the factory.
 	 */
 	String FACTORY_BEAN_PREFIX = "&";
 
