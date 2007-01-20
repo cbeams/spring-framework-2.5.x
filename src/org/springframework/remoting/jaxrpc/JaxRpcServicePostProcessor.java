@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,16 @@ import javax.xml.rpc.Service;
 
 /**
  * Callback interface for post-processing a JAX-RPC Service.
- * Implementations can be registered with LocalJaxRpcServiceFactory
- * or one of its subclasses: LocalJaxRpcServiceFactoryBean,
- * JaxRpcPortClientInterceptor, JaxRpcPortProxyFactoryBean.
+ *
+ * <p>Implementations can be registered with {@link LocalJaxRpcServiceFactory}
+ * or one of its subclasses: {@link LocalJaxRpcServiceFactoryBean},
+ * {@link JaxRpcPortClientInterceptor}, or {@link JaxRpcPortProxyFactoryBean}.
  *
  * <p>Useful, for example, to register custom type mappings. See the
- * AxisBeanMappingServicePostProcessor class that registers Axis-specific
- * bean mappings for specified bean classes. This is defined for the
- * domain objects in the JPetStore same application, for example.
+ * {@link org.springframework.remoting.jaxrpc.support.AxisBeanMappingServicePostProcessor}
+ * class that registers Axis-specific bean mappings for specified bean classes.
+ * This is defined for the domain objects in the JPetStore same application,
+ * for example.
  *
  * @author Juergen Hoeller
  * @since 1.1.4
@@ -35,14 +37,13 @@ import javax.xml.rpc.Service;
  * @see LocalJaxRpcServiceFactoryBean#setServicePostProcessors
  * @see JaxRpcPortClientInterceptor#setServicePostProcessors
  * @see JaxRpcPortProxyFactoryBean#setServicePostProcessors
- * @see org.springframework.remoting.jaxrpc.support.AxisBeanMappingServicePostProcessor
  * @see javax.xml.rpc.Service#getTypeMappingRegistry
  */
 public interface JaxRpcServicePostProcessor {
 
 	/**
-	 * Post-process the given JAX-RPC Service.
-	 * @param service the current JAX-RPC Service
+	 * Post-process the given JAX-RPC {@link Service}.
+	 * @param service the current JAX-RPC <code>Service</code>
 	 * (can be cast to an implementation-specific class if necessary)
 	 */
 	void postProcessJaxRpcService(Service service);

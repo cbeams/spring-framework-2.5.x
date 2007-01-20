@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,16 @@ import org.springframework.remoting.jaxrpc.JaxRpcServicePostProcessor;
 import org.springframework.util.ClassUtils;
 
 /**
- * Axis-specific JaxRpcServicePostProcessor that registers bean mappings for
- * domain objects that follow the JavaBean pattern. The same mappings are
- * usually also registered at the server in Axis' "server-config.wsdd" file.
+ * Axis-specific {@link JaxRpcServicePostProcessor} that registers bean
+ * mappings for domain objects that follow the JavaBean pattern.
  *
- * <p>To be registered as a service post-processor on a LocalJaxRpcServiceFactoryBean
- * or JaxRpcPortProxyFactoryBean, carrying appropriate configuration.
+ * <p>The same mappings are usually also registered at the server in
+ * Axis' "server-config.wsdd" file.
+ *
+ * <p>To be registered as a service post-processor on a
+ * {@link org.springframework.remoting.jaxrpc.LocalJaxRpcServiceFactoryBean} or
+ * {@link org.springframework.remoting.jaxrpc.JaxRpcPortProxyFactoryBean},
+ * carrying appropriate configuration.
  *
  * <p>Note: Without such explicit bean mappings, a complex type like a
  * domain object cannot be transferred via SOAP.
@@ -130,7 +134,7 @@ public class AxisBeanMappingServicePostProcessor implements JaxRpcServicePostPro
 
 	/**
 	 * Register the specified bean mappings on the given Service's
-	 * TypeMappingRegistry.
+	 * {@link TypeMappingRegistry}.
 	 * @see javax.xml.rpc.Service#getTypeMappingRegistry()
 	 * @see #setBeanMappings
 	 * @see #registerBeanMappings(javax.xml.rpc.encoding.TypeMapping)
@@ -151,7 +155,7 @@ public class AxisBeanMappingServicePostProcessor implements JaxRpcServicePostPro
 
 	/**
 	 * Perform the actual bean mapping registration.
-	 * @param mapping the JAX-RPC TypeMapping to operate on
+	 * @param mapping the JAX-RPC {@link TypeMapping} to operate on
 	 * @see #setBeanMappings
 	 * @see #registerBeanMapping(javax.xml.rpc.encoding.TypeMapping, Class, String)
 	 */
@@ -175,9 +179,9 @@ public class AxisBeanMappingServicePostProcessor implements JaxRpcServicePostPro
 
 	/**
 	 * Register a bean mapping for the given Java type and WSDL type name.
-	 * @param mapping the JAX-RPC TypeMapping to operate on
+	 * @param mapping the JAX-RPC {@link TypeMapping} to operate on
 	 * @param javaType the Java type
-	 * @param wsdlTypeName the WSDL type name (as String)
+	 * @param wsdlTypeName the WSDL type name (as a {@link String})
 	 */
 	protected void registerBeanMapping(TypeMapping mapping, Class javaType, String wsdlTypeName) {
 		registerBeanMapping(mapping, javaType, getTypeQName(wsdlTypeName));
@@ -185,9 +189,9 @@ public class AxisBeanMappingServicePostProcessor implements JaxRpcServicePostPro
 
 	/**
 	 * Register a bean mapping for the given Java type and WSDL type.
-	 * @param mapping the JAX-RPC TypeMapping to operate on
+	 * @param mapping the JAX-RPC {@link TypeMapping} to operate on
 	 * @param javaType the Java type
-	 * @param wsdlType the WSDL type (as XML QName)
+	 * @param wsdlType the WSDL type (as XML {@link QName})
 	 */
 	protected void registerBeanMapping(TypeMapping mapping, Class javaType, QName wsdlType) {
 		mapping.register(javaType, wsdlType,
@@ -196,9 +200,8 @@ public class AxisBeanMappingServicePostProcessor implements JaxRpcServicePostPro
 	}
 
 	/**
-	 * Return a QName for the given name, relative to the namespace URI
-	 * of this post-processor, if given.
-	 * @see #setTypeNamespaceUri
+	 * Return a {@link QName} for the given name, relative to the
+	 * {@link #setTypeNamespaceUri namespace URI} of this post-processor, if given.
 	 */
 	protected final QName getTypeQName(String name) {
 		return (this.typeNamespaceUri != null ? new QName(this.typeNamespaceUri, name) : new QName(name));
