@@ -889,13 +889,8 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 	}
 
 	private boolean equalsPointcuts(Advisor a, Advisor b) {
-		if (a instanceof PointcutAdvisor && b instanceof PointcutAdvisor) {
-			return ObjectUtils.nullSafeEquals(((PointcutAdvisor) a).getPointcut(), ((PointcutAdvisor) b).getPointcut());
-		}
-		else {
-			// Can't sensibly make any other assumptions here.
-			return false;
-		}
+		return (a instanceof PointcutAdvisor && b instanceof PointcutAdvisor &&
+				ObjectUtils.nullSafeEquals(((PointcutAdvisor) a).getPointcut(), ((PointcutAdvisor) b).getPointcut()));
 	}
 
 }
