@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,8 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
 	private boolean singleSession = true;
 
+	private FlushMode flushMode = FlushMode.NEVER;
+
 
 	/**
 	 * Set the bean name of the SessionFactory to fetch from Spring's
@@ -115,12 +117,12 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 * root application context.
 	 */
 	protected String getSessionFactoryBeanName() {
-		return sessionFactoryBeanName;
+		return this.sessionFactoryBeanName;
 	}
 
 	/**
 	 * Set whether to use a single session for each request. Default is "true".
-	 * <p>If set to false, each data access operation or transaction will use
+	 * <p>If set to "false", each data access operation or transaction will use
 	 * its own session (like without Open Session in View). Each of those
 	 * sessions will be registered for deferred close, though, actually
 	 * processed at request completion.
@@ -135,7 +137,27 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 * Return whether to use a single session for each request.
 	 */
 	protected boolean isSingleSession() {
-		return singleSession;
+		return this.singleSession;
+	}
+
+	/**
+	 * Specify the Hibernate flush mode to use for a single session managed
+	 * by this filter. Supported values are all {@link org.hibernate.FlushMode}
+	 * constants, which can simply be specified as String value: e.g. "AUTO".
+	 * <p>Default is "NEVER", not allowing any flushes outside of a transaction.
+	 * @see org.hibernate.FlushMode#AUTO
+	 * @see org.hibernate.FlushMode#NEVER
+	 */
+	public void setFlushMode(FlushMode flushMode) {
+		this.flushMode = flushMode;
+	}
+
+	/**
+	 * Return the Hibernate flush mode to use for a single session managed
+	 * by this filter.
+	 */
+	protected FlushMode getFlushMode() {
+		return this.flushMode;
 	}
 
 
@@ -221,10 +243,11 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	/**
 	 * Get a Session for the SessionFactory that this filter uses.
 	 * Note that this just applies in single session mode!
-	 * <p>The default implementation delegates to SessionFactoryUtils'
-	 * getSession method and sets the Session's flushMode to NEVER.
-	 * <p>Can be overridden in subclasses for creating a Session with a custom
-	 * entity interceptor or JDBC exception translator.
+	 * <p>The default implementation delegates to the
+	 * <code>SessionFactoryUtils.getSession</code> method and
+	 * sets the <code>Session</code>'s flush mode to "NEVER".
+	 * <p>Can be overridden in subclasses for creating a Session with a
+	 * custom entity interceptor or JDBC exception translator.
 	 * @param sessionFactory the SessionFactory that this filter uses
 	 * @return the Session to use
 	 * @throws DataAccessResourceFailureException if the Session could not be created
@@ -233,7 +256,10 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 */
 	protected Session getSession(SessionFactory sessionFactory) throws DataAccessResourceFailureException {
 		Session session = SessionFactoryUtils.getSession(sessionFactory, true);
-		session.setFlushMode(FlushMode.NEVER);
+		FlushMode flushMode = getFlushMode();
+		if (flushMode != null) {
+			session.setFlushMode(flushMode);
+		}
 		return session;
 	}
 
