@@ -628,6 +628,13 @@
 			<rtexprvalue>true</rtexprvalue>
 			<description>HTML Optional Attribute</description>
 		</attribute>
+
+		<attribute>
+			<name>showPassword</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Is the password value to be shown? Defaults to false.</description>
+		</attribute>
 	</tag>
 
 	<!-- <form:hidden/> -->

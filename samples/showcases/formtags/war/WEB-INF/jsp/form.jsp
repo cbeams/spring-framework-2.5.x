@@ -107,7 +107,7 @@
 
            <div>
 			   <form:label path="password">Password:</form:label>
-               <form:password path="password" />
+			   <form:password path="password" showPassword="true" />
            </div>
 
            <div>
@@ -198,7 +198,7 @@
 
    &lt;div&gt;
 	   &lt;form:label path="password"&gt;Password:&lt;/form:label&gt;
-	   &lt;form:password path="password" /&gt;
+	   &lt;form:password path="password" showPassword="true" /&gt;
    &lt;/div&gt;
 
    &lt;div&gt;

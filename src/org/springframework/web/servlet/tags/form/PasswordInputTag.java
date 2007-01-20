@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,27 @@ import javax.servlet.jsp.JspException;
  */
 public class PasswordInputTag extends InputTag {
 
+	private boolean showPassword = false;
+
+
 	/**
-	 * Returns '<code>password</code>' causing the rendered HTML '<code>input</code>'
+	 * Is the password value to be rendered?
+	 * @return <code>true</code> if the password value to be rendered.
+	 */
+	public boolean isShowPassword() {
+		return this.showPassword;
+	}
+
+	/**
+	 * Is the password value to be rendered?
+	 * @param showPassword <code>true</code> if the password value is to be rendered.
+	 */
+	public void setShowPassword(boolean showPassword) {
+		this.showPassword = showPassword;
+	}
+
+	/**
+	 * Return '<code>password</code>' causing the rendered HTML '<code>input</code>'
 	 * element to have a '<code>type</code>' of '<code>password</code>'.
 	 */
 	protected String getType() {
@@ -37,10 +56,15 @@ public class PasswordInputTag extends InputTag {
 	}
 
 	/**
-	 * The {@link PasswordInputTag} never writes it's value (for security reasons).
+	 * The {@link PasswordInputTag} only writes it's value if the
+	 * {@link #setShowPassword(boolean) 'showPassword'} property value is
+	 * {@link Boolean#TRUE true}.
 	 */
 	protected void writeValue(TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", "");
+		if (this.showPassword) {
+			super.writeValue(tagWriter);
+		} else {
+			tagWriter.writeAttribute("value", "");
+		}
 	}
-
 }

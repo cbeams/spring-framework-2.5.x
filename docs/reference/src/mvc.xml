@@ -2249,7 +2249,7 @@ public class FileUploadBean {
             <td>Subscribe to newsletter?:</td>
             ]]><lineannotation>&lt;%-- Approach 1: Property is of type <classname>java.lang.Boolean</classname> --%&gt;</lineannotation><![CDATA[
             <td><form:checkbox path="preferences.receiveNewsletter"/></td>
-            <td></td>
+            <td>&nbsp;</td>
         </tr>
 
         <tr>
@@ -2261,7 +2261,7 @@ public class FileUploadBean {
                 Defence Against the Dark Arts: <form:checkbox path="preferences.interests"
                     value="Defence Against the Dark Arts"/>
             </td>
-            <td></td>
+            <td>&nbsp;</td>
         </tr>
         <tr>
             <td>Favourite Word:</td>
@@ -2269,7 +2269,7 @@ public class FileUploadBean {
                 ]]><lineannotation>&lt;%-- Approach 3: Property is of type <classname>java.lang.Object</classname> --%&gt;</lineannotation><![CDATA[
                 Magic: <form:checkbox path="preferences.favouriteWord" value="Magic"/>
             </td>
-            <td></td>
+            <td>&nbsp;</td>
         </tr>
     </table>
 </form:form>]]></programlisting>
@@ -2307,7 +2307,7 @@ public class FileUploadBean {
             value="Defence Against the Dark Arts"/>
         <input type="hidden" value="1" name="_preferences.interests"/>
     </td>
-    <td></td>
+    <td>&nbsp;</td>
 </tr>]]></programlisting>
 
     <para>What you might not expect to see is the additional hidden field after each checkbox.
@@ -2330,18 +2330,27 @@ public class FileUploadBean {
     <td>Sex:</td>
     <td>Male: <form:radiobutton path="sex" value="M"/> <br/>
         Female: <form:radiobutton path="sex" value="F"/> </td>
-    <td></td>
+    <td>&nbsp;</td>
 </tr>]]></programlisting>
   </section>
 
   <section id="mvc-formtaglib-passwordtag">
     <title>The <literal>password</literal> tag</title>
     <para>This tag renders an HTML 'input' tag with type 'password' using the bound value.</para>
-
     <programlisting><![CDATA[<tr>
     <td>Password:</td>
     <td>
         <form:password path="password" />
+    </td>
+</tr>]]></programlisting>
+	  <para>Please note that by default, the password value is <emphasis>not</emphasis>
+	  shown. If you do want the password value to be shown, then set the value of
+	  the <literal>'showPassword'</literal> attribute to true, like so.
+	  </para>
+	  <programlisting><![CDATA[<tr>
+    <td>Password:</td>
+    <td>
+        <form:password path="password" value="^76525bvHGq" showPassword="true" />
     </td>
 </tr>]]></programlisting>
   </section>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,52 @@ import java.io.StringWriter;
 
 /**
  * @author Rob Harrop
+ * @author Rick Evans
  * @since 2.0
  */
-public class PasswordInputTagTests extends InputTagTests {
+public final class PasswordInputTagTests extends InputTagTests {
 
-	/**
+	/*
 	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2866
 	 */
-	public void testPasswordValueIsNeverRendered() throws Exception {
+	public void testPasswordValueIsNotRenderedByDefault() throws Exception {
 		this.getTag().setPath("name");
+
+		assertEquals(Tag.EVAL_PAGE, this.getTag().doStartTag());
+
+		String output = getWriter().toString();
+
+		assertTagOpened(output);
+		assertTagClosed(output);
+
+		assertContainsAttribute(output, "type", getType());
+		assertValueAttribute(output, "");
+	}
+
+	/*
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2866
+	 */
+	public void testPasswordValueIsRenderedIfShowPasswordAttributeIsSetToTrue() throws Exception {
+		this.getTag().setPath("name");
+		this.getPasswordTag().setShowPassword(true);
+
+		assertEquals(Tag.EVAL_PAGE, this.getTag().doStartTag());
+
+		String output = getWriter().toString();
+
+		assertTagOpened(output);
+		assertTagClosed(output);
+
+		assertContainsAttribute(output, "type", getType());
+		assertValueAttribute(output, "Rob");
+	}
+
+	/*
+	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2866
+	 */
+	public void testPasswordValueIsNotRenderedIfShowPasswordAttributeIsSetToFalse() throws Exception {
+		this.getTag().setPath("name");
+		this.getPasswordTag().setShowPassword(false);
 
 		assertEquals(Tag.EVAL_PAGE, this.getTag().doStartTag());
 
@@ -44,7 +81,11 @@ public class PasswordInputTagTests extends InputTagTests {
 
 
 	protected void assertValueAttribute(String output, String expectedValue) {
-		super.assertValueAttribute(output, "");
+		if (this.getPasswordTag().isShowPassword()) {
+			super.assertValueAttribute(output, expectedValue);
+		} else {
+			super.assertValueAttribute(output, "");
+		}
 	}
 
 	protected String getType() {
@@ -57,5 +98,9 @@ public class PasswordInputTagTests extends InputTagTests {
 				return new TagWriter(writer);
 			}
 		};
+	}
+
+	private PasswordInputTag getPasswordTag() {
+		return (PasswordInputTag) this.getTag();
 	}
 }

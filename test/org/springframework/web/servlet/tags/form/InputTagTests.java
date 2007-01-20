@@ -38,7 +38,6 @@ public class InputTagTests extends AbstractFormTagTests {
 	private TestBean rob;
 
 	protected void onSetUp() {
-		// set up tag instance
 		this.tag = createTag(getWriter());
 		this.tag.setPageContext(getPageContext());
 	}
@@ -210,7 +209,6 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertTagClosed(output);
 
 		assertContainsAttribute(output, "type", getType());
-//		assertContainsAttribute(output, "value", "Sally");
 		assertValueAttribute(output, "Sally");
 	}
 
@@ -273,14 +271,14 @@ public class InputTagTests extends AbstractFormTagTests {
 	protected TestBean createTestBean() {
 		// set up test data
 		this.rob = new TestBean();
-		rob.setName("Rob");
-		rob.setMyFloat(new Float(12.34));
+		this.rob.setName("Rob");
+		this.rob.setMyFloat(new Float(12.34));
 
 		TestBean sally = new TestBean();
 		sally.setName("Sally");
-		rob.setSpouse(sally);
+		this.rob.setSpouse(sally);
 
-		return rob;
+		return this.rob;
 	}
 
 	protected InputTag createTag(final StringWriter writer) {
