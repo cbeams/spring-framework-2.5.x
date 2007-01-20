@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,6 +141,7 @@ public class FreeMarkerMacroTests extends TestCase {
 		Map model = new HashMap();
 		model.put("command", tb);
 		model.put("springMacroRequestContext", rc);
+		model.put("msgArgs", new Object[] {"World"});
 		model.put("nameOptionMap", names);
 
 		FreeMarkerView view = new FreeMarkerView();
@@ -163,6 +164,8 @@ public class FreeMarkerMacroTests extends TestCase {
 			if (tokens[i].equals("AGE")) assertEquals("99", tokens[i + 1]);
 			if (tokens[i].equals("MESSAGE")) assertEquals("Howdy Mundo", tokens[i + 1]);
 			if (tokens[i].equals("DEFAULTMESSAGE")) assertEquals("hi planet", tokens[i + 1]);
+			if (tokens[i].equals("MESSAGEARGS")) assertEquals("Howdy[World]", tokens[i + 1]);
+			if (tokens[i].equals("MESSAGEARGSWITHDEFAULTMESSAGE")) assertEquals("Hi", tokens[i + 1]);
 			if (tokens[i].equals("URL")) assertEquals("/springtest/aftercontext.html", tokens[i + 1]);
 			if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\"", tokens[i + 1]);
 			if (tokens[i].equals("FORM2")) assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" class=\"myCssClass\"", tokens[i + 1]);

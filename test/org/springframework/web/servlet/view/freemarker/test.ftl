@@ -1,5 +1,5 @@
 <#--
-   test template for FreeMarker macro test class
+test template for FreeMarker macro test class
 -->
 <#import "spring.ftl" as spring />
 
@@ -14,6 +14,12 @@ MESSAGE
 
 DEFAULTMESSAGE
 <@spring.messageText "no.such.code", "hi"/> <@spring.messageText "no.such.code", "planet"/>
+
+MESSAGEARGS
+<@spring.messageArgs "hello", msgArgs/>
+
+MESSAGEARGSWITHDEFAULTMESSAGE
+<@spring.messageArgsText "no.such.code", msgArgs, "Hi"/>
 
 URL
 <@spring.url "/aftercontext.html"/>

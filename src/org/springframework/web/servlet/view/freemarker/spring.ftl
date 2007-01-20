@@ -36,6 +36,21 @@
 <#macro messageText code, text>${springMacroRequestContext.getMessage(code, text)}</#macro>
 
 <#--
+ * messageArgs
+ *
+ * Macro to translate a message code with arguments into a message.
+ -->
+<#macro messageArgs code, args>${springMacroRequestContext.getMessage(code, args)}</#macro>
+
+<#--
+ * messageArgsText
+ *
+ * Macro to translate a message code with arguments into a message,
+ * using the given default text if no message found.
+ -->
+<#macro messageArgsText code, args, text>${springMacroRequestContext.getMessage(code, args, text)}</#macro>
+
+<#--
  * url
  *
  * Takes a relative URL and makes it absolute from the server root by
