@@ -35,6 +35,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
  * a specific element.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  * @see #registerBeanDefinitionParser(String, BeanDefinitionParser)
  * @see #registerBeanDefinitionDecorator(String, BeanDefinitionDecorator)
@@ -82,10 +83,26 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	}
 
 	/**
+	 * Locate the {@link BeanDefinitionParser} from the register implementations using
+	 * the local name of the supplied {@link Element}.
+	 * @deprecated as of Spring 2.0.2; there should be no need to call this directly.
+	 */
+	protected final BeanDefinitionParser findParserForElement(Element element) {
+		BeanDefinitionParser parser = (BeanDefinitionParser) this.parsers.get(element.getLocalName());
+		if (parser == null) {
+			throw new IllegalStateException(
+					"Cannot locate BeanDefinitionParser for element [" + element.getLocalName() + "]");
+		}
+		return parser;
+	}
+
+	/**
 	 * Decorates the supplied {@link Node} by delegating to the {@link BeanDefinitionDecorator} that
 	 * is registered to handle that {@link Node}.
 	 */
-	public final BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
+	public final BeanDefinitionHolder decorate(
+			Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
+
 		return findDecoratorForNode(node, parserContext).decorate(node, definition, parserContext);
 	}
 
@@ -109,6 +126,31 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 		if (decorator == null) {
 			parserContext.getReaderContext().fatal("Cannot locate BeanDefinitionDecorator for " +
 					(node instanceof Element ? "element" : "attribute") + " [" + node.getLocalName() + "]", node);
+		}
+		return decorator;
+	}
+
+	/**
+	 * Locate the {@link BeanDefinitionParser} from the register implementations using
+	 * the local name of the supplied {@link Node}. Supports both {@link Element Elements}
+	 * and {@link Attr Attrs}.
+	 * @deprecated as of Spring 2.0.2; there should be no need to call this directly.
+	 */
+	protected final BeanDefinitionDecorator findDecoratorForNode(Node node) {
+		BeanDefinitionDecorator decorator = null;
+		if (node instanceof Element) {
+			decorator = (BeanDefinitionDecorator) this.decorators.get(node.getLocalName());
+		}
+		else if (node instanceof Attr) {
+			decorator = (BeanDefinitionDecorator) this.attributeDecorators.get(node.getLocalName());
+		}
+		else {
+			throw new IllegalStateException(
+					"Cannot decorate based on Nodes of type [" + node.getClass().getName() + "]");
+		}
+		if (decorator == null) {
+			throw new IllegalStateException("Cannot locate BeanDefinitionDecorator for " +
+					(node instanceof Element ? "element" : "attribute") + " [" + node.getLocalName() + "]");
 		}
 		return decorator;
 	}
@@ -137,7 +179,9 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * handle the specified attribute. The attribute name is the local (non-namespace qualified)
 	 * name.
 	 */
-	protected final void registerBeanDefinitionDecoratorForAttribute(String attributeName, BeanDefinitionDecorator decorator) {
+	protected final void registerBeanDefinitionDecoratorForAttribute(
+			String attributeName, BeanDefinitionDecorator decorator) {
+
 		this.attributeDecorators.put(attributeName, decorator);
 	}
 
