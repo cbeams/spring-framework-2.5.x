@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,26 +20,22 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.scripting.bsh.BshScriptFactory;
 import org.springframework.scripting.groovy.GroovyScriptFactory;
 import org.springframework.scripting.jruby.JRubyScriptFactory;
-import org.springframework.util.ClassUtils;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class LangNamespaceHandler extends NamespaceHandlerSupport {
 
 	public void init() {
-		if (ClassUtils.isPresent("groovy.lang.GroovyObject")) {
-			registerBeanDefinitionParser("groovy", new ScriptBeanDefinitionParser(GroovyScriptFactory.class));
-		}
+		registerScriptBeanDefinitionParser("groovy", GroovyScriptFactory.class);
+		registerScriptBeanDefinitionParser("jruby", JRubyScriptFactory.class);
+		registerScriptBeanDefinitionParser("bsh", BshScriptFactory.class);
+	}
 
-		if (ClassUtils.isPresent("org.jruby.IRuby")) {
-			registerBeanDefinitionParser("jruby", new ScriptBeanDefinitionParser(JRubyScriptFactory.class));
-		}
-
-		if (ClassUtils.isPresent("bsh.Interpreter")) {
-			registerBeanDefinitionParser("bsh", new ScriptBeanDefinitionParser(BshScriptFactory.class));
-		}
+	private void registerScriptBeanDefinitionParser(String key, Class scriptFactoryClass) {
+		registerBeanDefinitionParser(key, new ScriptBeanDefinitionParser(scriptFactoryClass));
 	}
 
 }
