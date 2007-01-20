@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,11 +51,12 @@ import org.springframework.web.util.NestedServletException;
  * Simple base implementation of <code>javax.servlet.Filter</code> that treats
  * its config parameters as bean properties. Unknown parameters are ignored.
  *
- * A very handy superclass for any type of filter. Type conversion is automatic.
- * It is also possible for subclasses to specify required properties.
+ * <p>A very handy superclass for any type of filter. Type conversion of
+ * config parameters is automatic. It is also possible for subclasses to
+ * specify required properties.
  *
  * <p>This filter leaves actual filtering to subclasses, which have to
- * implement Filter's <code>doFilter</code> method.
+ * implement the {@link javax.servlet.Filter#doFilter} method.
  *
  * <p>This filter superclass has no dependency on a Spring application context.
  * Filters usually don't load their own context but rather access beans from
@@ -184,6 +185,7 @@ public abstract class GenericFilterBean implements
 	 * @param filterConfig the configuration for this filter
 	 * @throws BeanInitializationException wrapping a ServletException
 	 * thrown by the <code>init</code> method
+	 * @deprecated as of Spring 2.0; to be removed in Spring 2.1
 	 * @see #init(javax.servlet.FilterConfig)
 	 */
 	public final void setFilterConfig(FilterConfig filterConfig) {
@@ -191,7 +193,7 @@ public abstract class GenericFilterBean implements
 			init(filterConfig);
 		}
 		catch (ServletException ex) {
-			throw new BeanInitializationException("Couldn't initialize filter bean", ex);
+			throw new BeanInitializationException("Could not initialize filter bean", ex);
 		}
 	}
 
