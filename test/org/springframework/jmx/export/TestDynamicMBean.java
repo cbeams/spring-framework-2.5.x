@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,16 @@ package org.springframework.jmx.export;
 
 import javax.management.Attribute;
 import javax.management.AttributeList;
-import javax.management.AttributeNotFoundException;
 import javax.management.DynamicMBean;
-import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanConstructorInfo;
-import javax.management.MBeanException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanNotificationInfo;
 import javax.management.MBeanOperationInfo;
-import javax.management.ReflectionException;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class TestDynamicMBean implements DynamicMBean {
 
@@ -40,48 +37,37 @@ public class TestDynamicMBean implements DynamicMBean {
 		}
 	}
 
-	public Object getAttribute(String attribute)
-			throws AttributeNotFoundException, MBeanException, ReflectionException {
-
-		if ("name".equals(attribute)) {
+	public Object getAttribute(String attribute) {
+		if ("Name".equals(attribute)) {
 			return "Rob Harrop";
 		}
-		else {
-			return null;
-		}
-	}
-
-	public void setAttribute(Attribute arg0) throws AttributeNotFoundException,
-			InvalidAttributeValueException, MBeanException, ReflectionException {
-	}
-
-	public AttributeList getAttributes(String[] arg0) {
 		return null;
 	}
 
-	public AttributeList setAttributes(AttributeList arg0) {
+	public void setAttribute(Attribute attribute) {
+	}
+
+	public AttributeList getAttributes(String[] attributes) {
 		return null;
 	}
 
-	public Object invoke(String arg0, Object[] arg1, String[] arg2)
-			throws MBeanException, ReflectionException {
+	public AttributeList setAttributes(AttributeList attributes) {
+		return null;
+	}
+
+	public Object invoke(String actionName, Object[] params, String[] signature) {
 		return null;
 	}
 
 	public MBeanInfo getMBeanInfo() {
-		MBeanAttributeInfo attr =
-				new MBeanAttributeInfo("name", "java.lang.String", "", true, false, false);
-
-		MBeanInfo inf = new MBeanInfo(
+		MBeanAttributeInfo attr = new MBeanAttributeInfo("name", "java.lang.String", "", true, false, false);
+		return new MBeanInfo(
 				TestDynamicMBean.class.getName(), "",
 				new MBeanAttributeInfo[]{attr},
 				new MBeanConstructorInfo[0],
 				new MBeanOperationInfo[0],
 				new MBeanNotificationInfo[0]);
-
-		return inf;
 	}
-
 
 	public boolean equals(Object obj) {
 		return (obj instanceof TestDynamicMBean);

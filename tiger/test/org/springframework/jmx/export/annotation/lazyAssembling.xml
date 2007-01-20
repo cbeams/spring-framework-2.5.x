@@ -6,17 +6,18 @@
 	<bean id="jmxAdapter" class="org.springframework.jmx.export.MBeanExporter">
 		<property name="autodetect" value="true"/>
 		<property name="assembler" ref="metadataAssembler"/>
-		<property name="namingStrategy" ref="metadataNamingStrategy"/>
 		<property name="server" ref="server"/>
 	</bean>
 
-	<bean id="testBean" class="org.springframework.jmx.export.annotation.AnnotationTestBean" lazy-init="true">
+	<bean name="bean:name=testBean4" class="org.springframework.jmx.export.annotation.AnnotationTestBean" lazy-init="true">
 		<property name="name" value="TEST"/>
 		<property name="age" value="100"/>
 	</bean>
 
-	<bean id="metadataNamingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
-		<property name="attributeSource" ref="attributeSource"/>
+	<bean name="spring:mbean=true" class="org.springframework.jmx.export.TestDynamicMBean" lazy-init="true"/>
+
+	<bean name="spring:mbean=another" class="org.springframework.jmx.export.MBeanExporterTests$Person" lazy-init="true">
+		<property name="name" value="Juergen Hoeller"/>
 	</bean>
 
 	<bean id="metadataAssembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">

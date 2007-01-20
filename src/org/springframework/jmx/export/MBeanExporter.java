@@ -480,8 +480,8 @@ public class MBeanExporter extends MBeanRegistrationSupport
 			}
 
 			// Allow the assembler a chance to vote for bean inclusion.
-			if (isAutodetectModeEnabled(AUTODETECT_ASSEMBLER)
-					&& this.assembler instanceof AutodetectCapableMBeanInfoAssembler) {
+			if (isAutodetectModeEnabled(AUTODETECT_ASSEMBLER) &&
+					this.assembler instanceof AutodetectCapableMBeanInfoAssembler) {
 				autodetectBeans((AutodetectCapableMBeanInfoAssembler) this.assembler);
 			}
 		}
@@ -546,9 +546,8 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * @return the <code>ObjectName</code> under which the resource was registered
 	 * @throws MBeanExportException if the export failed
 	 * @see #setBeans
+	 * @see #registerBeanInstance
 	 * @see #registerLazyInit
-	 * @see #registerMBean
-	 * @see #registerSimpleBean
 	 */
 	protected ObjectName registerBeanNameOrInstance(Object mapValue, String beanKey) throws MBeanExportException {
 		try {
@@ -559,17 +558,9 @@ public class MBeanExporter extends MBeanRegistrationSupport
 				}
 				String beanName = (String) mapValue;
 				if (isBeanDefinitionLazyInit(this.beanFactory, beanName)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Found bean name for lazy init bean with key [" + beanKey +
-								"]. Registering bean with lazy init support.");
-					}
 					return registerLazyInit(beanName, beanKey);
 				}
 				else {
-					if (logger.isDebugEnabled()) {
-						logger.debug("String value under key [" + beanKey + "] points to a bean that was not " +
-								"registered for lazy initialization. Registering bean normally with JMX server.");
-					}
 					Object bean = this.beanFactory.getBean(beanName);
 					return registerBeanInstance(bean, beanKey);
 				}
@@ -581,7 +572,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		}
 		catch (JMException ex) {
 			throw new UnableToRegisterMBeanException(
-					"Unable to register MBean [" + mapValue + "] with key [" + beanKey + "]", ex);
+					"Unable to register MBean [" + mapValue + "] with key '" + beanKey + "'", ex);
 		}
 	}
 
@@ -594,53 +585,23 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * with the <code>MBeanServer</code>
 	 */
 	private ObjectName registerBeanInstance(Object bean, String beanKey) throws JMException {
+		ObjectName objectName = getObjectName(bean, beanKey);
 		if (JmxUtils.isMBean(bean.getClass())) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Located MBean under key [" + beanKey + "]: registering with JMX server");
+				logger.debug("Located MBean '" + beanKey + "': registering with JMX server as MBean [" +
+						objectName + "]");
 			}
-			return registerMBean(bean, beanKey);
+			doRegister(bean, objectName);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Located simple bean under key [" + beanKey + "]: registering with JMX server");
+				logger.debug("Located simple bean '" + beanKey + "': registering with JMX server as MBean [" +
+						objectName + "]");
 			}
-			return registerSimpleBean(bean, beanKey);
+			ModelMBean mbean = createAndConfigureMBean(bean, beanKey);
+			doRegister(mbean, objectName);
+			injectNotificationPublisherIfNecessary(bean, mbean, objectName);
 		}
-	}
-
-	/**
-	 * Registers an existing MBean with the <code>MBeanServer</code>.
-	 * @param mbean the bean instance to register
-	 * @param beanKey the key associated with this bean in the beans map
-	 * @return the <code>ObjectName</code> under which the bean was registered
-	 * with the <code>MBeanServer</code>
-	 */
-	private ObjectName registerMBean(Object mbean, String beanKey) throws JMException {
-		ObjectName objectName = getObjectName(mbean, beanKey);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Registering MBean [" + objectName + "]");
-		}
-		doRegister(mbean, objectName);
-		return objectName;
-	}
-
-	/**
-	 * Registers a plain bean as MBean with the <code>MBeanServer</code>.
-	 * The management interface for the bean is created by the configured
-	 * <code>MBeanInfoAssembler</code>.
-	 * @param bean the bean instance to register
-	 * @param beanKey the key associated with this bean in the beans map
-	 * @return the <code>ObjectName</code> under which the bean was registered
-	 * with the <code>MBeanServer</code>
-	 */
-	private ObjectName registerSimpleBean(Object bean, String beanKey) throws JMException {
-		ObjectName objectName = getObjectName(bean, beanKey);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Registering and assembling MBean [" + objectName + "]");
-		}
-		ModelMBean mbean = createAndConfigureMBean(bean, beanKey);
-		doRegister(mbean, objectName);
-		injectNotificationPublisherIfNecessary(bean, mbean, objectName);
 		return objectName;
 	}
 
@@ -653,27 +614,46 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * with the <code>MBeanServer</code>
 	 */
 	private ObjectName registerLazyInit(String beanName, String beanKey) throws JMException {
-		NotificationPublisherAwareLazyTargetSource targetSource = new NotificationPublisherAwareLazyTargetSource();
-		targetSource.setTargetBeanName(beanName);
-		targetSource.setBeanFactory(this.beanFactory);
-
 		ProxyFactory proxyFactory = new ProxyFactory();
-		proxyFactory.setTargetSource(targetSource);
 		proxyFactory.setProxyTargetClass(true);
 		proxyFactory.setFrozen(true);
 
-		Object proxy = proxyFactory.getProxy(this.beanClassLoader);
-		ObjectName objectName = getObjectName(proxy, beanKey);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Registering lazy-init MBean [" + objectName + "]");
+		if (JmxUtils.isMBean(this.beanFactory.getType(beanName))) {
+			// A straight MBean... Let's create a simple lazy-init CGLIB proxy for it.
+			LazyInitTargetSource targetSource = new LazyInitTargetSource();
+			targetSource.setTargetBeanName(beanName);
+			targetSource.setBeanFactory(this.beanFactory);
+			proxyFactory.setTargetSource(targetSource);
+
+			Object proxy = proxyFactory.getProxy(this.beanClassLoader);
+			ObjectName objectName = getObjectName(proxy, beanKey);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Located MBean '" + beanKey + "': registering with JMX server as lazy-init MBean [" +
+						objectName + "]");
+			}
+			doRegister(proxy, objectName);
+			return objectName;
 		}
 
-		ModelMBean mbean = createAndConfigureMBean(proxy, beanKey);
-		targetSource.setModelMBean(mbean);
-		targetSource.setObjectName(objectName);
+		else {
+			// A simple bean... Let's create a lazy-init ModelMBean proxy with notification support.
+			NotificationPublisherAwareLazyTargetSource targetSource = new NotificationPublisherAwareLazyTargetSource();
+			targetSource.setTargetBeanName(beanName);
+			targetSource.setBeanFactory(this.beanFactory);
+			proxyFactory.setTargetSource(targetSource);
 
-		doRegister(mbean, objectName);
-		return objectName;
+			Object proxy = proxyFactory.getProxy(this.beanClassLoader);
+			ObjectName objectName = getObjectName(proxy, beanKey);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Located simple bean '" + beanKey + "': registering with JMX server as lazy-init MBean [" +
+						objectName + "]");
+			}
+			ModelMBean mbean = createAndConfigureMBean(proxy, beanKey);
+			targetSource.setModelMBean(mbean);
+			targetSource.setObjectName(objectName);
+			doRegister(mbean, objectName);
+			return objectName;
+		}
 	}
 
 	/**
@@ -714,7 +694,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		}
 		catch (Exception ex) {
 			throw new MBeanExportException("Could not create ModelMBean for managed resource [" +
-					managedResource + "] with key [" + beanKey + "]", ex);
+					managedResource + "] with key '" + beanKey + "'", ex);
 		}
 	}
 
@@ -736,11 +716,10 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 */
 	private ModelMBeanInfo getMBeanInfo(Object managedBean, String beanKey) throws JMException {
 		ModelMBeanInfo info = this.assembler.getMBeanInfo(managedBean, beanKey);
-		if (logger.isWarnEnabled()
-				&& ObjectUtils.isEmpty(info.getAttributes())
-				&& ObjectUtils.isEmpty(info.getOperations())) {
-			logger.warn("Bean with key [" + beanKey +
-					"] has been registed as an MBean but has no exposed attributes or operations");
+		if (logger.isWarnEnabled() && ObjectUtils.isEmpty(info.getAttributes()) &&
+				ObjectUtils.isEmpty(info.getOperations())) {
+			logger.warn("Bean with key '" + beanKey +
+					"' has been registered as an MBean but has no exposed attributes or operations");
 		}
 		return info;
 	}
