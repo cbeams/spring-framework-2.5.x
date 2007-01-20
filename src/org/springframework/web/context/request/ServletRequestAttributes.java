@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,13 +51,13 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	public static final String DESTRUCTION_CALLBACK_NAME_PREFIX =
 			ServletRequestAttributes.class.getName() + ".DESTRUCTION_CALLBACK.";
 
-	/**
-	 * We'll create a lot of these objects, so we don't want a new logger every time.
-	 */
+	// We'll create a lot of these objects, so we don't want a new logger every time.
 	private static final Log logger = LogFactory.getLog(ServletRequestAttributes.class);
 
+	// Determine whether Servlet 2.3's HttpSessionBindingListener interface is available.
 	private final static boolean bindingListenerAvailable =
-			ClassUtils.isPresent("javax.servlet.http.HttpSessionBindingListener");
+			ClassUtils.isPresent(
+					"javax.servlet.http.HttpSessionBindingListener", ServletRequestAttributes.class.getClassLoader());
 
 
 	private final HttpServletRequest request;

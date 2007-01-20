@@ -51,7 +51,8 @@ public class DefaultAopProxyFactory implements AopProxyFactory {
 
 	private static final Log logger = LogFactory.getLog(DefaultAopProxyFactory.class);
 
-	private static final boolean cglibAvailable = ClassUtils.isPresent("net.sf.cglib.proxy.Enhancer");
+	private static final boolean cglibAvailable =
+			ClassUtils.isPresent("net.sf.cglib.proxy.Enhancer", DefaultAopProxyFactory.class.getClassLoader());
 
 
 	static {

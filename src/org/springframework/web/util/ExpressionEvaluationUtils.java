@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,9 +94,10 @@ public abstract class ExpressionEvaluationUtils {
 
 
 	static {
-		if (ClassUtils.isPresent(JSP_20_CLASS_NAME)) {
+		ClassLoader cl = ExpressionEvaluationUtils.class.getClassLoader();
+		if (ClassUtils.isPresent(JSP_20_CLASS_NAME, cl)) {
 			logger.info("Found JSP 2.0 ExpressionEvaluator");
-			if (ClassUtils.isPresent(JAKARTA_JSTL_CLASS_NAME)) {
+			if (ClassUtils.isPresent(JAKARTA_JSTL_CLASS_NAME, cl)) {
 				logger.info("Found Jakarta JSTL ExpressionEvaluatorManager");
 				helper = new Jsp20ExpressionEvaluationHelper(new JakartaExpressionEvaluationHelper());
 			}
@@ -104,7 +105,7 @@ public abstract class ExpressionEvaluationUtils {
 				helper = new Jsp20ExpressionEvaluationHelper(new NoExpressionEvaluationHelper());
 			}
 		}
-		else if (ClassUtils.isPresent(JAKARTA_JSTL_CLASS_NAME)) {
+		else if (ClassUtils.isPresent(JAKARTA_JSTL_CLASS_NAME, cl)) {
 			logger.info("Found Jakarta JSTL ExpressionEvaluatorManager");
 			helper = new JakartaExpressionEvaluationHelper();
 		}

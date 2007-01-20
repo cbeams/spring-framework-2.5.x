@@ -120,13 +120,26 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Return whether the {@link Class} identified by the supplied name is present
+	 * Determine whether the {@link Class} identified by the supplied name is present
 	 * and can be loaded. Will return <code>false</code> if either the class or
 	 * one of its dependencies is not present or cannot be loaded.
+	 * @param className the name of the class to check
 	 */
 	public static boolean isPresent(String className) {
+		return isPresent(className, getDefaultClassLoader());
+	}
+
+	/**
+	 * Determine whether the {@link Class} identified by the supplied name is present
+	 * and can be loaded. Will return <code>false</code> if either the class or
+	 * one of its dependencies is not present or cannot be loaded.
+	 * @param className the name of the class to check
+	 * @param classLoader the class loader to use
+	 * (may be <code>null</code>, which indicates the default class loader)
+	 */
+	public static boolean isPresent(String className, ClassLoader classLoader) {
 		try {
-			forName(className);
+			forName(className, classLoader);
 			return true;
 		}
 		catch (Throwable ex) {

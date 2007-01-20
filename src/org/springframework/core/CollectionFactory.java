@@ -63,7 +63,8 @@ public abstract class CollectionFactory {
 	private static final Log logger = LogFactory.getLog(CollectionFactory.class);
 
 	private static final boolean commonsCollections3Available =
-			ClassUtils.isPresent("org.apache.commons.collections.map.LinkedMap");
+			ClassUtils.isPresent(
+					"org.apache.commons.collections.map.LinkedMap", CollectionFactory.class.getClassLoader());
 
 
 	static {

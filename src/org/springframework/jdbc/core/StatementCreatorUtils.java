@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,8 @@ public abstract class StatementCreatorUtils {
 
 	// Determine whether JDK 1.4's CharSequence interface is available,
 	// treating any of its implementations as String value.
-	private static final boolean charSequenceAvailable = ClassUtils.isPresent("java.lang.CharSequence");
+	private static final boolean charSequenceAvailable =
+			ClassUtils.isPresent("java.lang.CharSequence", StatementCreatorUtils.class.getClassLoader());
 
 
 	/**
