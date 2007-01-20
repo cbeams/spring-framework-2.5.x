@@ -17,7 +17,6 @@
 package org.springframework.scripting.jruby;
 
 import junit.framework.TestCase;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
 import org.springframework.context.ApplicationContext;
@@ -100,7 +99,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 		}
 
 		try {
-			new JRubyScriptFactory(null, new Class[] {Messenger.class});
+			new JRubyScriptFactory(null, new Class[]{Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -113,7 +112,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 		}
 
 		try {
-			new JRubyScriptFactory("", new Class[] {Messenger.class});
+			new JRubyScriptFactory("", new Class[]{Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -126,7 +125,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 		}
 
 		try {
-			new JRubyScriptFactory("\n   ", new Class[] {Messenger.class});
+			new JRubyScriptFactory("\n   ", new Class[]{Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -152,7 +151,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 		}
 
 		try {
-			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR, new Class[] {});
+			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR, new Class[]{});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -171,7 +170,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 	}
 
 	public void testInlineScriptFromTag() throws Exception {
-	  if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
 		}
 
@@ -215,10 +214,47 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertEquals(5, new Float(adder.addFloats(2.0F, 3.1F)).intValue());
 		assertEquals(5, new Double(adder.addDoubles(2.0, 3.1)).intValue());
 		assertFalse(adder.resultIsPositive(-200, 1));
+		assertEquals("ri", adder.concatenate('r', 'i'));
+		assertEquals('c', adder.echo('c'));
+	}
+
+	public void testWithWrapperArgsInReturnTypeAndParameters() throws Exception {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContextForWrappers.xml", getClass());
+		WrapperAdder adder = (WrapperAdder) ctx.getBean("adder");
+		assertEquals(new Integer(2), adder.addInts(new Integer(1), new Integer(1)));
+		assertEquals(Integer.class, adder.addInts(new Integer(1), new Integer(1)).getClass());
+		assertEquals(new Short((short) 4), adder.addShorts(new Short((short) 1), new Short((short) 3)));
+		assertEquals(Short.class, adder.addShorts(new Short((short) 1), new Short((short) 3)).getClass());
+		assertEquals(new Long(5L), adder.addLongs(new Long(2L), new Long(3L)));
+		assertEquals(Long.class, adder.addLongs(new Long(2L), new Long(3L)).getClass());
+		assertEquals(5, adder.addFloats(new Float(2.0F), new Float(3.1F)).intValue());
+		assertEquals(Float.class, adder.addFloats(new Float(2.0F), new Float(3.1F)).getClass());
+		assertEquals(5, new Double(adder.addDoubles(new Double(2.0), new Double(3.1)).intValue()).intValue());
+		assertEquals(Double.class, adder.addDoubles(new Double(2.0), new Double(3.1)).getClass());
+		assertFalse(adder.resultIsPositive(new Integer(-200), new Integer(1)).booleanValue());
+		assertEquals(Boolean.class, adder.resultIsPositive(new Integer(-200), new Integer(1)).getClass());
+		assertEquals("ri", adder.concatenate(new Character('r'), new Character('i')));
+		assertEquals(String.class, adder.concatenate(new Character('r'), new Character('i')).getClass());
+		assertEquals(new Character('c'), adder.echo(new Character('c')));
+		assertEquals(Character.class, adder.echo(new Character('c')).getClass());
+		Integer[] numbers = new Integer[]{new Integer(1), new Integer(2), new Integer(3), new Integer(4), new Integer(5)};
+		assertEquals("12345", adder.concatArrayOfIntegerWrappers(numbers));
+		assertEquals(String.class, adder.concatArrayOfIntegerWrappers(numbers).getClass());
+
+		// arrays as return values are not converted correctly
+//		Short[] shorts = adder.populate(new Short((short) 1), new Short((short) 2));
+//		assertEquals(2, shorts.length);
+//		assertNotNull(shorts[0]);
+//		assertEquals(new Short((short) 1), shorts[0]);
+//		assertNotNull(shorts[1]);
+//		assertEquals(new Short((short) 2), shorts[1]);
 	}
 
 
-	private static class CountingPrintable implements Printable {
+	private static final class CountingPrintable implements Printable {
 
 		public int count;
 

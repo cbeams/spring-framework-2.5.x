@@ -66,6 +66,7 @@ public class JRubyScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 		this.scriptInterfaces = scriptInterfaces;
 	}
 
+
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}

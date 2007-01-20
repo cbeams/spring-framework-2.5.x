@@ -18,4 +18,8 @@ public interface PrimitiveAdder {
 	double addDoubles(double x, double y);
 
 	boolean resultIsPositive(int x, int y);
+
+	String concatenate(char c, char d);
+
+	char echo(char c);
 }

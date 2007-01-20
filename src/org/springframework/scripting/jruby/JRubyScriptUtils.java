@@ -16,12 +16,6 @@
 
 package org.springframework.scripting.jruby;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.Collections;
-import java.util.List;
-
 import org.jruby.IRuby;
 import org.jruby.RubyNil;
 import org.jruby.ast.ClassNode;
@@ -29,33 +23,41 @@ import org.jruby.ast.Colon2Node;
 import org.jruby.ast.NewlineNode;
 import org.jruby.ast.Node;
 import org.jruby.exceptions.JumpException;
+import org.jruby.exceptions.RaiseException;
 import org.jruby.javasupport.JavaEmbedUtils;
-import org.jruby.javasupport.JavaUtil;
 import org.jruby.runtime.builtin.IRubyObject;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.util.ClassUtils;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Utility methods for handling JRuby-scripted objects.
- *
+ * <p/>
  * <p>Note: As of Spring 2.0.2, this class requires JRuby 0.9.2 or higher.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Rick Evans
  * @since 2.0
  */
 public abstract class JRubyScriptUtils {
 
 	/**
 	 * Create a new JRuby-scripted object from the given script source,
-	 * using the default ClassLoader.
+	 * using the default {@link ClassLoader}.
+	 *
 	 * @param scriptSource the script source text
-	 * @param interfaces the interfaces that the scripted Java object
-	 * is supposed to implement
+	 * @param interfaces   the interfaces that the scripted Java object
+	 *                     is to implement
 	 * @return the scripted Java object
 	 * @throws JumpException in case of JRuby parsing failure
+	 * @see ClassUtils#getDefaultClassLoader()
 	 */
 	public static Object createJRubyObject(String scriptSource, Class[] interfaces) throws JumpException {
 		return createJRubyObject(scriptSource, interfaces, ClassUtils.getDefaultClassLoader());
@@ -63,10 +65,11 @@ public abstract class JRubyScriptUtils {
 
 	/**
 	 * Create a new JRuby-scripted object from the given script source.
+	 *
 	 * @param scriptSource the script source text
-	 * @param interfaces the interfaces that the scripted Java object
-	 * is supposed to implement
-	 * @param classLoader the ClassLoader to create the script proxy with
+	 * @param interfaces   the interfaces that the scripted Java object
+	 *                     is to implement
+	 * @param classLoader  the {@link ClassLoader} to create the script proxy with
 	 * @return the scripted Java object
 	 * @throws JumpException in case of JRuby parsing failure
 	 */
@@ -84,7 +87,7 @@ public abstract class JRubyScriptUtils {
 		}
 		// still null?
 		if (rubyObject instanceof RubyNil) {
-			throw new ScriptCompilationException("Compilation of JRuby script returned '" + rubyObject + "'");
+			throw new ScriptCompilationException("Compilation of JRuby script returned '" + rubyObject + "'.");
 		}
 
 		return Proxy.newProxyInstance(classLoader, interfaces, new RubyObjectInvocationHandler(rubyObject, ruby));
@@ -99,22 +102,25 @@ public abstract class JRubyScriptUtils {
 
 
 	/**
-	 * Given the root {@link Node} in a JRuby AST will locate the name of the class defined
-	 * by that AST.
-	 * @throws IllegalArgumentException if no class is defined by the supplied AST.
+	 * Given the root {@link Node} in a JRuby AST will locate the name of the
+	 * class defined by that AST.
+	 *
+	 * @throws IllegalArgumentException if no class is defined by the supplied AST
 	 */
 	private static String findClassName(Node rootNode) {
 		ClassNode classNode = findClassNode(rootNode);
 		if (classNode == null) {
-			throw new IllegalArgumentException("Unable to determine class name for root node '" + rootNode + "'");
+			throw new IllegalArgumentException("Unable to determine class name for root node '" + rootNode + "'.");
 		}
 		Colon2Node node = (Colon2Node) classNode.getCPath();
 		return node.getName();
 	}
 
 	/**
-	 * Finds the first {@link ClassNode} under the supplied {@link Node}. Returns
-	 * '<code>null</code>' if no {@link ClassNode} is found.
+	 * Find the first {@link ClassNode} under the supplied {@link Node}.
+	 *
+	 * @return the found <code>ClassNode</code>, or <code>null</code>
+	 *         if no {@link ClassNode} is found.
 	 */
 	private static ClassNode findClassNode(Node node) {
 		if (node instanceof ClassNode) {
@@ -125,8 +131,7 @@ public abstract class JRubyScriptUtils {
 			Node child = (Node) children.get(i);
 			if (child instanceof ClassNode) {
 				return (ClassNode) child;
-			}
-			else if (child instanceof NewlineNode) {
+			} else if (child instanceof NewlineNode) {
 				NewlineNode nn = (NewlineNode) child;
 				Node found = findClassNode(nn.getNextNode());
 				if (found instanceof ClassNode) {
@@ -154,31 +159,39 @@ public abstract class JRubyScriptUtils {
 
 		private final IRuby ruby;
 
+
 		public RubyObjectInvocationHandler(IRubyObject rubyObject, IRuby ruby) {
 			this.rubyObject = rubyObject;
 			this.ruby = ruby;
 		}
+
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (AopUtils.isToStringMethod(method)) {
 				return "JRuby object [" + this.rubyObject + "]";
 			}
 
-			IRubyObject[] rubyArgs = convertToRuby(args);
-			IRubyObject result = this.rubyObject.callMethod(this.ruby.getCurrentContext(), method.getName(), rubyArgs);
-			return JavaUtil.convertRubyToJava(result, method.getReturnType());
+			try {
+				IRubyObject[] rubyArgs = convertToRuby(args);
+				IRubyObject rubyResult = this.rubyObject.callMethod(this.ruby.getCurrentContext(), method.getName(), rubyArgs);
+				return JavaEmbedUtils.rubyToJava(this.ruby, rubyResult, method.getReturnType());
+			} catch (RaiseException ex) {
+				throw new JRubyException(ex);
+			}
 		}
+
 
 		private IRubyObject[] convertToRuby(Object[] javaArgs) {
 			if (javaArgs == null || javaArgs.length == 0) {
 				return new IRubyObject[0];
 			}
 			IRubyObject[] rubyArgs = new IRubyObject[javaArgs.length];
-			for (int i = 0; i < javaArgs.length; i++) {
+			for (int i = 0; i < javaArgs.length; ++i) {
 				rubyArgs[i] = JavaEmbedUtils.javaToRuby(this.ruby, javaArgs[i]);
 			}
 			return rubyArgs;
 		}
 	}
+
 
 }

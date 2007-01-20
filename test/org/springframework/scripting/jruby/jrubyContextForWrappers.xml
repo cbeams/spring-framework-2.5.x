@@ -10,9 +10,9 @@
 			<value><![CDATA[inline:
 require 'java'
 
-include_class 'org.springframework.scripting.jruby.PrimitiveAdder'
+include_class 'org.springframework.scripting.jruby.WrapperAdder'
 
-class RubyPrimitiveAdder < PrimitiveAdder
+class RubyWrapperAdder < WrapperAdder
 
 	def addInts(x, y)
 		x + y
@@ -46,9 +46,20 @@ class RubyPrimitiveAdder < PrimitiveAdder
 		c
 	end
 
+	def concatArrayOfIntegerWrappers(numbers)
+		buffer = ""
+        numbers.each do |number|
+        	buffer << number.to_s
+        end
+        return buffer
+	end
+
+	def populate(x, y)
+		[x, y]
+	end
 end
 			]]></value>
 		</constructor-arg>
-		<constructor-arg value="org.springframework.scripting.jruby.PrimitiveAdder"/>
+		<constructor-arg value="org.springframework.scripting.jruby.WrapperAdder"/>
 	</bean>
 </beans>
