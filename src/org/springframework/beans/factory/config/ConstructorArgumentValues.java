@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.BeanMetadataElement;
+import org.springframework.beans.Mergeable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -72,7 +73,7 @@ public class ConstructorArgumentValues {
 			for (Iterator it = other.indexedArgumentValues.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
 				ValueHolder valueHolder = (ValueHolder) entry.getValue();
-				this.indexedArgumentValues.put(entry.getKey(), valueHolder.copy());
+				addOrMergeIndexedArgumentValue(entry.getKey(), valueHolder.copy());
 			}
 			for (Iterator it = other.genericArgumentValues.iterator(); it.hasNext();) {
 				ValueHolder valueHolder = (ValueHolder) it.next();
@@ -90,8 +91,7 @@ public class ConstructorArgumentValues {
 	 * @param value the argument value
 	 */
 	public void addIndexedArgumentValue(int index, Object value) {
-		Assert.isTrue(index >= 0, "Index must not be negative");
-		this.indexedArgumentValues.put(new Integer(index), new ValueHolder(value));
+		addIndexedArgumentValue(index, new ValueHolder(value));
 	}
 
 	/**
@@ -101,19 +101,36 @@ public class ConstructorArgumentValues {
 	 * @param type the type of the constructor argument
 	 */
 	public void addIndexedArgumentValue(int index, Object value, String type) {
-		Assert.isTrue(index >= 0, "Index must not be negative");
-		this.indexedArgumentValues.put(new Integer(index), new ValueHolder(value, type));
+		addIndexedArgumentValue(index, new ValueHolder(value, type));
 	}
 
 	/**
 	 * Add argument value for the given index in the constructor argument list.
 	 * @param index the index in the constructor argument list
-	 * @param valueHolder the argument value in the form of a ValueHolder
+	 * @param newValue the argument value in the form of a ValueHolder
 	 */
-	public void addIndexedArgumentValue(int index, ValueHolder valueHolder) {
+	public void addIndexedArgumentValue(int index, ValueHolder newValue) {
 		Assert.isTrue(index >= 0, "Index must not be negative");
-		Assert.notNull(valueHolder, "ValueHolder must not be null");
-		this.indexedArgumentValues.put(new Integer(index), valueHolder);
+		Assert.notNull(newValue, "ValueHolder must not be null");
+		addOrMergeIndexedArgumentValue(new Integer(index), newValue);
+	}
+
+	/**
+	 * Add argument value for the given index in the constructor argument list,
+	 * merging the new value (typically a collection) with the current value
+	 * if demanded: see {@link org.springframework.beans.Mergeable}.
+	 * @param key the index in the constructor argument list
+	 * @param newValue the argument value in the form of a ValueHolder
+	 */
+	private void addOrMergeIndexedArgumentValue(Object key, ValueHolder newValue) {
+		ValueHolder currentValue = (ValueHolder) this.indexedArgumentValues.get(key);
+		if (currentValue != null && newValue.getValue() instanceof Mergeable) {
+			Mergeable mergeable = (Mergeable) newValue.getValue();
+			if (mergeable.isMergeEnabled()) {
+				newValue.setValue(mergeable.merge(currentValue.getValue()));
+			}
+		}
+		this.indexedArgumentValues.put(key, newValue);
 	}
 
 	/**
@@ -170,15 +187,15 @@ public class ConstructorArgumentValues {
 	 * Add generic argument value to be matched by type.
 	 * <p>Note: A single generic argument value will just be used once,
 	 * rather than matched multiple times (as of Spring 1.1).
-	 * @param valueHolder the argument value in the form of a ValueHolder
+	 * @param newValue the argument value in the form of a ValueHolder
 	 * <p>Note: Identical ValueHolder instances will only be registered once,
 	 * to allow for merging and re-merging of argument value definitions. Distinct
 	 * ValueHolder instances carrying the same content are of course allowed.
 	 */
-	public void addGenericArgumentValue(ValueHolder valueHolder) {
-		Assert.notNull(valueHolder, "ValueHolder must not be null");
-		if (!this.genericArgumentValues.contains(valueHolder)) {
-			this.genericArgumentValues.add(valueHolder);
+	public void addGenericArgumentValue(ValueHolder newValue) {
+		Assert.notNull(newValue, "ValueHolder must not be null");
+		if (!this.genericArgumentValues.contains(newValue)) {
+			this.genericArgumentValues.add(newValue);
 		}
 	}
 
@@ -388,7 +405,7 @@ public class ConstructorArgumentValues {
 		 * Return the value for the constructor argument.
 		 */
 		public Object getValue() {
-			return value;
+			return this.value;
 		}
 
 		/**
@@ -405,7 +422,7 @@ public class ConstructorArgumentValues {
 		 * Return the type of the constructor argument.
 		 */
 		public String getType() {
-			return type;
+			return this.type;
 		}
 
 		/**
@@ -417,7 +434,7 @@ public class ConstructorArgumentValues {
 		}
 
 		public Object getSource() {
-			return source;
+			return this.source;
 		}
 
 		/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,7 @@
 
 package org.springframework.beans;
 
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.util.ObjectUtils;
-
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -31,12 +27,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.io.IOException;
+
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.util.ObjectUtils;
 
 /**
- * Simple test bean used for testing bean factories, AOP framework etc.
+ * Simple test bean used for testing bean factories, the AOP framework etc.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 15 April 2001
  */
 public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOther, Comparable {
@@ -116,6 +117,22 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	public TestBean(ITestBean spouse, Properties someProperties) {
 		this.spouse = spouse;
+		this.someProperties = someProperties;
+	}
+
+	public TestBean(List someList) {
+		this.someList = someList;
+	}
+
+	public TestBean(Set someSet) {
+		this.someSet = someSet;
+	}
+
+	public TestBean(Map someMap) {
+		this.someMap = someMap;
+	}
+
+	public TestBean(Properties someProperties) {
 		this.someProperties = someProperties;
 	}
 
