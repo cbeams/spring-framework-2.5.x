@@ -186,6 +186,11 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 * against system environment variables. Note that it is generally recommended
 	 * to pass external values in as JVM system properties: This can easily be
 	 * achieved in a startup script, even for existing environment variables.
+	 * <p><b>NOTE:</b> Access to environment variables does not work on the
+	 * Sun VM 1.4, where the corresponding {@link System#getenv} support was
+	 * disabled - before it eventually got re-enabled for the Sun VM 1.5.
+	 * Please upgrade to 1.5 (or higher) if you intend to rely on the
+	 * environment variable support.
 	 * @see #setSystemPropertiesMode
 	 * @see java.lang.System#getProperty(String)
 	 * @see java.lang.System#getenv(String)
