@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,15 @@ import org.springframework.transaction.annotation.AnnotationTransactionAttribute
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
 
 /**
- * Java 5 specific subclass of AbstractTransactionalDataSourceSpringContextTests,
- * exposing a SimpleJdbcTemplate and obeying annotations for transaction control.
+ * Java 5 specific subclass of
+ * {@link AbstractTransactionalDataSourceSpringContextTests}, exposing a
+ * {@link SimpleJdbcTemplate} and obeying annotations for transaction control.
  *
- * <p>Test methods can be annotated with the regular Spring Transactional annotation
+ * <p>For example, test methods can be annotated with the regular Spring
+ * {@link org.springframework.transaction.annotation.Transactional} annotation
  * (for example, to force execution in a read-only transaction) or with the
- * NotTransactional annotation to prevent any transaction being created at all.
+ * {@link NotTransactional} annotation to prevent any transaction being created
+ * at all.
  *
  * @author Rod Johnson
  * @since 2.0
