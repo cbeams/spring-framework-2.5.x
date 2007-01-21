@@ -9,15 +9,18 @@
 		principle. IoC underpins a lot of the functionality provided by Spring, so it is
 		important to understand.</para>
         <sidebar>
-			<title>Which interface?</title>
-            <para>Users are sometimes unsure whether a <interfacename>BeanFactory</interfacename>
-            or an <interfacename>ApplicationContext</interfacename> is best suited for use
-            in a particular situation. Normally when building most applications in a
-            J2EE-environment, <emphasis>the best option is to use the</emphasis>
-            <interfacename>ApplicationContext</interfacename>, since it offers
-            all the features of the <interfacename>BeanFactory</interfacename>, while also
-            allowing a more declarative approach to the use of some functionality, which is
-            generally desirable.</para>
+			<!--<title>Which interface?</title>-->
+			<title><interfacename>BeanFactory</interfacename> or <interfacename>ApplicationContext</interfacename>?</title>
+			<para>Users are sometimes unsure whether a
+			<interfacename>BeanFactory</interfacename> or an
+			<interfacename>ApplicationContext</interfacename> is best suited for use
+			in a particular situation. A <interfacename>BeanFactory</interfacename>
+			pretty much just instantiates and configures beans. An
+			<interfacename>ApplicationContext</interfacename> also does that,
+			<emphasis>and</emphasis> it provides the supporting infrastructure to
+			enable <emphasis>lots</emphasis> of enterprise-specific features such
+			as transactions and AOP.</para>
+			<para><emphasis>In short, favor the use of an <interfacename>ApplicationContext</interfacename>.</emphasis></para>
         </sidebar>
 		<para>The <literal>org.springframework.beans</literal> and
         <literal>org.springframework.context</literal> packages provide the basis
