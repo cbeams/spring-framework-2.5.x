@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -378,6 +378,9 @@ public class RmiSupportTests extends TestCase {
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
 			protected Remote lookupStub() {
 				return new RmiInvocationHandler() {
+					public String getTargetInterfaceName() {
+						return null;
+					}
 					public Object invoke(RemoteInvocation invocation) throws RemoteException {
 						throw new RemoteException();
 					}

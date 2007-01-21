@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,15 +35,22 @@ import org.springframework.remoting.support.RemoteInvocation;
 public interface RmiInvocationHandler extends Remote {
 
 	/**
+	 * Return the name of the target interface that this invoker operates on.
+	 * @return the name of the target interface, or <code>null</code> if none
+	 * @see RmiServiceExporter#getServiceInterface()
+	 */
+	public String getTargetInterfaceName() throws RemoteException;
+
+	/**
 	 * Apply the given invocation to the target object.
-	 * Called by RmiClientInterceptor.
+	 * <p>Called by
+	 * {@link RmiClientInterceptor#doInvoke(org.aopalliance.intercept.MethodInvocation, RmiInvocationHandler)}.
 	 * @param invocation object that encapsulates invocation parameters
 	 * @return the object returned from the invoked method, if any
 	 * @throws RemoteException in case of communication errors
 	 * @throws NoSuchMethodException if the method name could not be resolved
 	 * @throws IllegalAccessException if the method could not be accessed
 	 * @throws InvocationTargetException if the method invocation resulted in an exception
-	 * @see RmiClientInterceptor
 	 */
 	public Object invoke(RemoteInvocation invocation)
 	    throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException;
