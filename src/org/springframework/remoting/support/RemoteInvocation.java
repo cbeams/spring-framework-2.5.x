@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,10 @@ import org.aopalliance.intercept.MethodInvocation;
  * @see RemoteInvocationResult
  * @see RemoteInvocationFactory
  * @see RemoteInvocationExecutor
+ * @see org.springframework.remoting.rmi.RmiProxyFactoryBean
+ * @see org.springframework.remoting.rmi.RmiServiceExporter
+ * @see org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean
+ * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
  */
 public class RemoteInvocation implements Serializable {
 
@@ -87,7 +91,7 @@ public class RemoteInvocation implements Serializable {
 	}
 
 	public String getMethodName() {
-		return methodName;
+		return this.methodName;
 	}
 
 	public void setParameterTypes(Class[] parameterTypes) {
@@ -95,7 +99,7 @@ public class RemoteInvocation implements Serializable {
 	}
 
 	public Class[] getParameterTypes() {
-		return parameterTypes;
+		return this.parameterTypes;
 	}
 
 	public void setArguments(Object[] arguments) {
@@ -103,7 +107,7 @@ public class RemoteInvocation implements Serializable {
 	}
 
 	public Object[] getArguments() {
-		return arguments;
+		return this.arguments;
 	}
 
 
@@ -160,7 +164,7 @@ public class RemoteInvocation implements Serializable {
 	 * @see #getAttribute
 	 */
 	public Map getAttributes() {
-		return attributes;
+		return this.attributes;
 	}
 
 
