@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,8 +75,8 @@ import org.springframework.core.Constants;
  * defined as placeholder values as well (for example in a default properties file).
  *
  * <p>Property values can be converted after reading them in, through overriding
- * the <code>convertPropertyValue</code> method. For example, encrypted values
- * can be detected and decrypted accordingly before processing them.
+ * the {@link #convertPropertyValue} method. For example, encrypted values can
+ * be detected and decrypted accordingly before processing them.
  *
  * @author Juergen Hoeller
  * @since 02.10.2003
@@ -186,6 +186,11 @@ public class PropertyPlaceholderConfigurer extends PropertyResourceConfigurer
 	 * as system environment variables as well. However, it is recommended to
 	 * pass external values in as JVM system properties: This can easily be
 	 * achieved in a startup script, even for existing environment variables.
+	 * <p><b>NOTE:</b> Access to environment variables does not work on the
+	 * Sun VM 1.4, where the corresponding {@link System#getenv} support was
+	 * disabled - before it eventually got re-enabled for the Sun VM 1.5.
+	 * Please upgrade to 1.5 (or higher) if you intend to rely on the
+	 * environment variable support.
 	 * @see #setSystemPropertiesMode
 	 * @see java.lang.System#getProperty(String)
 	 * @see java.lang.System#getenv(String)
