@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,21 +21,21 @@ import java.util.List;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
-import org.springframework.util.Assert;
 
 /**
- * Tag subclass used to hold managed List elements, which may
- * include runtime bean references.
+ * Tag collection class used to hold managed List elements, which may
+ * include runtime bean references (to be resolved into bean objects).
  *
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 27.05.2003
  */
 public class ManagedList extends ArrayList implements Mergeable, BeanMetadataElement {
 
-	private boolean mergeEnabled;
-
 	private Object source;
+
+	private boolean mergeEnabled;
 
 
 	public ManagedList() {
@@ -46,14 +46,6 @@ public class ManagedList extends ArrayList implements Mergeable, BeanMetadataEle
 	}
 
 
-	public void setMergeEnabled(boolean mergeEnabled) {
-		this.mergeEnabled = mergeEnabled;
-	}
-
-	public boolean isMergeEnabled() {
-		return mergeEnabled;
-	}
-
 	/**
 	 * Set the configuration source <code>Object</code> for this metadata element.
 	 * <p>The exact type of the object will depend on the configuration mechanism used.
@@ -63,21 +55,35 @@ public class ManagedList extends ArrayList implements Mergeable, BeanMetadataEle
 	}
 
 	public Object getSource() {
-		return source;
+		return this.source;
 	}
 
-	public synchronized Object merge(Object parent) {
+	/**
+	 * Set whether merging should be enabled for this collection,
+	 * in case of a 'parent' collection value being present.
+	 */
+	public void setMergeEnabled(boolean mergeEnabled) {
+		this.mergeEnabled = mergeEnabled;
+	}
+
+	public boolean isMergeEnabled() {
+		return this.mergeEnabled;
+	}
+
+	public Object merge(Object parent) {
 		if (!this.mergeEnabled) {
-			throw new IllegalStateException("Cannot merge when the mergeEnabled property is false");
+			throw new IllegalStateException("Not allowed to merge when the 'mergeEnabled' property is set to 'false'");
 		}
-		Assert.notNull(parent);
-		if (parent instanceof List) {
-			List temp = new ManagedList();
-			temp.addAll((List) parent);
-			temp.addAll(this);
-			return temp;
+		if (parent == null) {
+			return this;
 		}
-		throw new IllegalArgumentException("Cannot merge object with object of type [" + parent.getClass() + "]");
+		if (!(parent instanceof List)) {
+			throw new IllegalArgumentException("Cannot merge with object of type [" + parent.getClass() + "]");
+		}
+		List merged = new ManagedList();
+		merged.addAll((List) parent);
+		merged.addAll(this);
+		return merged;
 	}
 
 }

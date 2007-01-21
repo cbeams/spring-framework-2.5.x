@@ -1,21 +1,36 @@
-package org.springframework.beans.factory.support;
+/*
+ * Copyright 2002-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import junit.framework.TestCase;
+package org.springframework.beans.factory.support;
 
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 /**
- * Unit tests for the ManagedProperties class.
- *
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
-public final class ManagedPropertiesTests extends TestCase {
+public class ManagedPropertiesTests extends TestCase {
 
 	public void testMergeSunnyDay() {
-		final ManagedProperties parent = new ManagedProperties();
+		ManagedProperties parent = new ManagedProperties();
 		parent.setProperty("one", "one");
 		parent.setProperty("two", "two");
-		final ManagedProperties child = new ManagedProperties();
+		ManagedProperties child = new ManagedProperties();
 		child.setProperty("three", "three");
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
@@ -23,18 +38,13 @@ public final class ManagedPropertiesTests extends TestCase {
 	}
 
 	public void testMergeWithNullParent() {
-		final ManagedProperties map = new ManagedProperties();
-		map.setMergeEnabled(true);
-		try {
-			map.merge(null);
-			fail("Must have failed by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		ManagedProperties child = new ManagedProperties();
+		child.setMergeEnabled(true);
+		assertSame(child, child.merge(null));
 	}
 
 	public void testMergeWithNonCompatibleParentType() {
-		final ManagedProperties map = new ManagedProperties();
+		ManagedProperties map = new ManagedProperties();
 		map.setMergeEnabled(true);
 		try {
 			map.merge("hello");
@@ -55,20 +65,20 @@ public final class ManagedPropertiesTests extends TestCase {
 	}
 
 	public void testMergeEmptyChild() {
-		final ManagedProperties parent = new ManagedProperties();
+		ManagedProperties parent = new ManagedProperties();
 		parent.setProperty("one", "one");
 		parent.setProperty("two", "two");
-		final ManagedProperties child = new ManagedProperties();
+		ManagedProperties child = new ManagedProperties();
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
 		assertEquals("merge() obviously did not work.", 2, mergedMap.size());
 	}
 
 	public void testMergeChildValuesOverrideTheParents() {
-		final ManagedProperties parent = new ManagedProperties();
+		ManagedProperties parent = new ManagedProperties();
 		parent.setProperty("one", "one");
 		parent.setProperty("two", "two");
-		final ManagedProperties child = new ManagedProperties();
+		ManagedProperties child = new ManagedProperties();
 		child.setProperty("one", "fork");
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);

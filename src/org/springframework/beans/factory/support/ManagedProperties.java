@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,29 +20,21 @@ import java.util.Properties;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.Mergeable;
-import org.springframework.util.Assert;
 
 /**
- * Represents a Spring-managed {@link Properties} instance that supports
- * merging of parent/child definitions.
+ * Tag class which represents a Spring-managed {@link Properties} instance
+ * that supports merging of parent/child definitions.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class ManagedProperties extends Properties implements Mergeable, BeanMetadataElement {
 
-	private boolean mergeEnabled;
-
 	private Object source;
 
+	private boolean mergeEnabled;
 
-	public void setMergeEnabled(boolean mergeEnabled) {
-		this.mergeEnabled = mergeEnabled;
-	}
-
-	public boolean isMergeEnabled() {
-		return mergeEnabled;
-	}
 
 	/**
 	 * Set the configuration source <code>Object</code> for this metadata element.
@@ -53,22 +45,36 @@ public class ManagedProperties extends Properties implements Mergeable, BeanMeta
 	}
 
 	public Object getSource() {
-		return source;
+		return this.source;
+	}
+
+	/**
+	 * Set whether merging should be enabled for this collection,
+	 * in case of a 'parent' collection value being present.
+	 */
+	public void setMergeEnabled(boolean mergeEnabled) {
+		this.mergeEnabled = mergeEnabled;
+	}
+
+	public boolean isMergeEnabled() {
+		return this.mergeEnabled;
 	}
 
 
-	public synchronized Object merge(Object parent) {
+	public Object merge(Object parent) {
 		if (!this.mergeEnabled) {
-			throw new IllegalStateException("Cannot merge when the mergeEnabled property is false");
+			throw new IllegalStateException("Not allowed to merge when the 'mergeEnabled' property is set to 'false'");
 		}
-		Assert.notNull(parent);
-		if (parent instanceof Properties) {
-			Properties temp = new ManagedProperties();
-			temp.putAll((Properties) parent);
-			temp.putAll(this);
-			return temp;
+		if (parent == null) {
+			return this;
 		}
-		throw new IllegalArgumentException("Cannot merge object with object of type [" + parent.getClass() + "]");
+		if (!(parent instanceof Properties)) {
+			throw new IllegalArgumentException("Cannot merge with object of type [" + parent.getClass() + "]");
+		}
+		Properties merged = new ManagedProperties();
+		merged.putAll((Properties) parent);
+		merged.putAll(this);
+		return merged;
 	}
 
 }

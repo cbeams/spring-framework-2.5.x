@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2006 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,16 +16,15 @@
 
 package org.springframework.beans.factory.support;
 
-import junit.framework.TestCase;
-
 import java.util.List;
 
+import junit.framework.TestCase;
+
 /**
- * Unit tests for the ManagedList class.
- *
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
-public final class ManagedListTests extends TestCase {
+public class ManagedListTests extends TestCase {
 
 	public void testMergeSunnyDay() {
 		ManagedList parent = new ManagedList();
@@ -42,12 +41,7 @@ public final class ManagedListTests extends TestCase {
 		ManagedList child = new ManagedList();
 		child.add("one");
 		child.setMergeEnabled(true);
-		try {
-			child.merge(null);
-			fail("Must have failed by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertSame(child, child.merge(null));
 	}
 
 	public void testMergeNotAllowedWhenMergeNotEnabled() {

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2006 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,22 +16,21 @@
 
 package org.springframework.beans.factory.support;
 
-import junit.framework.TestCase;
-
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 /**
- * Unit tests for the ManagedMap class.
- *
  * @author Rick Evans
+ * @author Juergen Hoeller
  */
-public final class ManagedMapTests extends TestCase {
+public class ManagedMapTests extends TestCase {
 
 	public void testMergeSunnyDay() {
-		final ManagedMap parent = new ManagedMap();
+		ManagedMap parent = new ManagedMap();
 		parent.put("one", "one");
 		parent.put("two", "two");
-		final ManagedMap child = new ManagedMap();
+		ManagedMap child = new ManagedMap();
 		child.put("three", "three");
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
@@ -39,18 +38,13 @@ public final class ManagedMapTests extends TestCase {
 	}
 
 	public void testMergeWithNullParent() {
-		final ManagedMap map = new ManagedMap();
-		map.setMergeEnabled(true);
-		try {
-			map.merge(null);
-			fail("Must have failed by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		ManagedMap child = new ManagedMap();
+		child.setMergeEnabled(true);
+		assertSame(child, child.merge(null));
 	}
 
 	public void testMergeWithNonCompatibleParentType() {
-		final ManagedMap map = new ManagedMap();
+		ManagedMap map = new ManagedMap();
 		map.setMergeEnabled(true);
 		try {
 			map.merge("hello");
@@ -71,20 +65,20 @@ public final class ManagedMapTests extends TestCase {
 	}
 
 	public void testMergeEmptyChild() {
-		final ManagedMap parent = new ManagedMap();
+		ManagedMap parent = new ManagedMap();
 		parent.put("one", "one");
 		parent.put("two", "two");
-		final ManagedMap child = new ManagedMap();
+		ManagedMap child = new ManagedMap();
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
 		assertEquals("merge() obviously did not work.", 2, mergedMap.size());
 	}
 
 	public void testMergeChildValuesOverrideTheParents() {
-		final ManagedMap parent = new ManagedMap();
+		ManagedMap parent = new ManagedMap();
 		parent.put("one", "one");
 		parent.put("two", "two");
-		final ManagedMap child = new ManagedMap();
+		ManagedMap child = new ManagedMap();
 		child.put("one", "fork");
 		child.setMergeEnabled(true);
 		Map mergedMap = (Map) child.merge(parent);
