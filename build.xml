@@ -1611,6 +1611,7 @@
 				<include name="samples/jpetstore/**"/>
 				<include name="samples/petclinic/**"/>
 				<include name="samples/showcases/**"/>
+				<include name="samples/petportal/**"/>
 			</zipfileset>
 		</zip>
 
