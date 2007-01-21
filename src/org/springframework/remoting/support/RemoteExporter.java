@@ -59,7 +59,7 @@ public abstract class RemoteExporter implements BeanClassLoaderAware {
 	/**
 	 * Return the service to export.
 	 */
-	protected Object getService() {
+	public Object getService() {
 		return this.service;
 	}
 
@@ -77,7 +77,7 @@ public abstract class RemoteExporter implements BeanClassLoaderAware {
 	/**
 	 * Return the interface of the service to export.
 	 */
-	protected Class getServiceInterface() {
+	public Class getServiceInterface() {
 		return this.serviceInterface;
 	}
 
