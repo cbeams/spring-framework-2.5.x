@@ -199,7 +199,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * to enable autodetection.
 	 * @see #setAssembler
 	 * @see AutodetectCapableMBeanInfoAssembler
-	 * @see org.springframework.jmx.support.JmxUtils#isMBean
+	 * @see #isMBean
 	 * @deprecated in favor of {@link #setAutodetectModeName(String)}
 	 */
 	public void setAutodetect(boolean autodetect) {
@@ -421,7 +421,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		Assert.notNull(managedResource, "Managed resource must not be null");
 		Assert.notNull(objectName, "ObjectName must not be null");
 		Object mbean = null;
-		if (JmxUtils.isMBean(managedResource.getClass())) {
+		if (isMBean(managedResource.getClass())) {
 			mbean = managedResource;
 		}
 		else {
@@ -586,7 +586,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 */
 	private ObjectName registerBeanInstance(Object bean, String beanKey) throws JMException {
 		ObjectName objectName = getObjectName(bean, beanKey);
-		if (JmxUtils.isMBean(bean.getClass())) {
+		if (isMBean(bean.getClass())) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Located MBean '" + beanKey + "': registering with JMX server as MBean [" +
 						objectName + "]");
@@ -618,7 +618,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		proxyFactory.setProxyTargetClass(true);
 		proxyFactory.setFrozen(true);
 
-		if (JmxUtils.isMBean(this.beanFactory.getType(beanName))) {
+		if (isMBean(this.beanFactory.getType(beanName))) {
 			// A straight MBean... Let's create a simple lazy-init CGLIB proxy for it.
 			LazyInitTargetSource targetSource = new LazyInitTargetSource();
 			targetSource.setTargetBeanName(beanName);
@@ -674,6 +674,20 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		else {
 			return this.namingStrategy.getObjectName(bean, beanKey);
 		}
+	}
+
+	/**
+	 * Determine whether the given bean class qualifies as an MBean as-is.
+	 * <p>The default implementation delegates to {@link JmxUtils#isMBean},
+	 * which checks for {@link javax.management.DynamicMBean} classes as well
+	 * as classes with corresponding "*MBean" interface (Standard MBeans).
+	 * This can be overridden in subclasses, for example to check for
+	 * JDK 1.6 MXBeans as well.
+	 * @param beanClass the bean class to analyze
+	 * @see org.springframework.jmx.support.JmxUtils#isMBean(Class)
+	 */
+	protected boolean isMBean(Class beanClass) {
+		return JmxUtils.isMBean(beanClass);
 	}
 
 	/**
@@ -760,7 +774,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	private void autodetectMBeans() {
 		autodetect(new AutodetectCallback() {
 			public boolean include(Class beanClass, String beanName) {
-				return JmxUtils.isMBean(beanClass);
+				return isMBean(beanClass);
 			}
 		});
 	}

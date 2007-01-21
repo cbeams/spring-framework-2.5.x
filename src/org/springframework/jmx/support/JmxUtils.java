@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,18 +49,18 @@ import org.springframework.util.StringUtils;
  */
 public abstract class JmxUtils {
 
-	private static final Log logger = LogFactory.getLog(JmxUtils.class);
+	/**
+	 * The key used when extending an existing {@link ObjectName} with the
+	 * identity hash code of its corresponding managed resource.
+	 */
+	public static final String IDENTITY_OBJECT_NAME_KEY = "identity";
 
 	/**
 	 * Suffix used to identify an MBean interface
 	 */
 	private static final String MBEAN_SUFFIX = "MBean";
 
-	/**
-	 * The key used when extending an existing {@link ObjectName} with the
-	 * identity hash code of its corresponding managed resource.
-	 */
-	public static final String IDENTITY_OBJECT_NAME_KEY = "identity";
+	private static final Log logger = LogFactory.getLog(JmxUtils.class);
 
 
 	/**
@@ -167,8 +167,12 @@ public abstract class JmxUtils {
 	}
 
 	/**
-	 * Check whether the supplied <code>Class</code> is a valid MBean resource.
-	 * @param beanClass the class of the bean to test
+	 * Determine whether the given bean class qualifies as an MBean as-is.
+	 * <p>This implementation checks for {@link javax.management.DynamicMBean}
+	 * classes as well as classes with corresponding "*MBean" interface
+	 * (Standard MBeans).
+	 * @param beanClass the bean class to analyze
+	 * @see org.springframework.jmx.export.MBeanExporter#isMBean(Class)
 	 */
 	public static boolean isMBean(Class beanClass) {
 		if (beanClass == null) {
