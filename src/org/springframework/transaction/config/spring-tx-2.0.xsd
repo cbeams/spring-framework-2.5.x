@@ -101,6 +101,14 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="order" type="xsd:int">
+				<xsd:annotation>
+					<xsd:documentation source="java:org.springframework.core.Ordered"><![CDATA[
+	Controls the ordering of the execution of the transaction advisor
+	when multiple advice executes at a specific joinpoint.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 

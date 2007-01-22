@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,16 @@
 package org.springframework.transaction.config;
 
 import junit.framework.TestCase;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+
 import org.springframework.aop.support.AopUtils;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * @author Rob Harrop
- * @since 2.0
+ * @author Juergen Hoeller
  */
 public class AnnotationDrivenTests extends TestCase {
 
@@ -30,5 +34,16 @@ public class AnnotationDrivenTests extends TestCase {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("annotationDrivenProxyTargetClassTests.xml", getClass());
 		TransactionalService service = (TransactionalService) context.getBean("service");
 		assertTrue(AopUtils.isCglibProxy(service));
+		service.setBeanName("someName");
 	}
+
+
+	public static class TransactionCheckingInterceptor implements MethodInterceptor {
+
+		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+			assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
+			return methodInvocation.proceed();
+		}
+	}
+
 }
