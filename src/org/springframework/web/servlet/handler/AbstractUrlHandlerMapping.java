@@ -57,6 +57,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
+	private Object rootHandler;
+
 	private boolean lazyInitHandlers = false;
 
 	private final Map handlerMap = new HashMap();
@@ -109,6 +111,15 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	}
 
 	/**
+	 * Set the root handler for this handler mapping, that is,
+	 * the handler to be registered for the root path ("/").
+	 * <p>Default is <code>null</code>, indicating no root handler.
+	 */
+	public void setRootHandler(Object rootHandler) {
+		this.rootHandler = rootHandler;
+	}
+
+	/**
 	 * Set whether to lazily initialize handlers. Only applicable to
 	 * singleton handlers, as prototypes are always lazily initialized.
 	 * Default is "false", as eager initialization allows for more efficiency
@@ -137,7 +148,12 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		if (handler == null) {
 			// We need to care for the default handler directly, since we need to
 			// expose the PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE for it as well.
-			handler = getDefaultHandler();
+			if ("/".equals(lookupPath)) {
+				handler = this.rootHandler;
+			}
+			if (handler == null) {
+				handler = getDefaultHandler();
+			}
 			if (handler != null) {
 				exposePathWithinMapping(lookupPath, request);
 			}
@@ -159,25 +175,24 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @see org.springframework.util.AntPathMatcher
 	 */
 	protected Object lookupHandler(String urlPath, HttpServletRequest request) {
-		// direct match?
+		// Direct match?
 		Object handler = this.handlerMap.get(urlPath);
-		if (handler == null) {
-			// pattern match?
-			String bestPathMatch = null;
-			for (Iterator it = this.handlerMap.keySet().iterator(); it.hasNext();) {
-				String registeredPath = (String) it.next();
-				if (this.pathMatcher.match(registeredPath, urlPath) &&
-						(bestPathMatch == null || bestPathMatch.length() <= registeredPath.length())) {
-					bestPathMatch = registeredPath;
-				}
-			}
-			if (bestPathMatch != null) {
-				handler = this.handlerMap.get(bestPathMatch);
-				exposePathWithinMapping(this.pathMatcher.extractPathWithinPattern(bestPathMatch, urlPath), request);
+		if (handler != null) {
+			exposePathWithinMapping(urlPath, request);
+			return handler;
+		}
+		// Pattern match?
+		String bestPathMatch = null;
+		for (Iterator it = this.handlerMap.keySet().iterator(); it.hasNext();) {
+			String registeredPath = (String) it.next();
+			if (this.pathMatcher.match(registeredPath, urlPath) &&
+					(bestPathMatch == null || bestPathMatch.length() <= registeredPath.length())) {
+				bestPathMatch = registeredPath;
 			}
 		}
-		else {
-			exposePathWithinMapping(urlPath, request);
+		if (bestPathMatch != null) {
+			handler = this.handlerMap.get(bestPathMatch);
+			exposePathWithinMapping(this.pathMatcher.extractPathWithinPattern(bestPathMatch, urlPath), request);
 		}
 		return handler;
 	}
@@ -234,7 +249,16 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			}
 		}
 
-		if (urlPath.equals("/*")) {
+		if (urlPath.equals("/")) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Root mapping to handler [" + handler + "]");
+			}
+			this.rootHandler = handler;
+		}
+		else if (urlPath.equals("/*")) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Default mapping to handler [" + handler + "]");
+			}
 			setDefaultHandler(handler);
 		}
 		else {

@@ -59,7 +59,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	public final int getOrder() {
-	  return order;
+	  return this.order;
 	}
 
 	/**
@@ -69,9 +69,6 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	public final void setDefaultHandler(Object defaultHandler) {
 		this.defaultHandler = defaultHandler;
-		if (logger.isInfoEnabled()) {
-			logger.info("Default mapping to handler [" + this.defaultHandler + "]");
-		}
 	}
 
 	/**

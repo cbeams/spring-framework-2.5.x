@@ -5,6 +5,7 @@
 
 	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
 		<property name="defaultHandler"><ref local="starController"/></property>
+		<property name="rootHandler"><ref local="mainController"/></property>
 		<property name="urlMap">
 			<map>
 				<entry key="/welcome*"><ref local="otherController"/></entry>
@@ -20,6 +21,7 @@
 
 	<bean id="urlMappingWithProps" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
 		<property name="defaultHandler"><ref local="starController"/></property>
+		<property name="rootHandler"><ref local="mainController"/></property>
 		<property name="mappings"><ref local="propsForUrlMapping2"/></property>
 	</bean>
 
