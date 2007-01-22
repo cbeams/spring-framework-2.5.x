@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,13 @@ import org.springframework.util.Assert;
 /**
  * Mock implementation of the {@link javax.servlet.FilterConfig} interface.
  *
- * <p>Used for testing the web framework; typically not necessary for
- * testing application controllers.
+ * <p>Used for testing the web framework; also usefol for testing
+ * custom {@link javax.servlet.Filter} implementations.
  *
  * @author Juergen Hoeller
  * @since 1.0.2
+ * @see MockFilterChain
+ * @see PassThroughFilterChain
  */
 public class MockFilterConfig implements FilterConfig {
 

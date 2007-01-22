@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.PassThroughFilterChain;
 import org.springframework.orm.hibernate.HibernateAccessor;
 import org.springframework.orm.hibernate.HibernateTransactionManager;
 import org.springframework.orm.hibernate.SessionFactoryUtils;
@@ -372,12 +373,7 @@ public class OpenSessionInViewTests extends TestCase {
 			}
 		};
 
-		FilterChain filterChain3 = new FilterChain() {
-			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
-				filter2.doFilter(servletRequest, servletResponse, filterChain2);
-			}
-		};
+		FilterChain filterChain3 = new PassThroughFilterChain(filter2, filterChain2);
 
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 		assertFalse(TransactionSynchronizationManager.hasResource(sf2));
@@ -562,12 +558,7 @@ public class OpenSessionInViewTests extends TestCase {
 			}
 		};
 
-		FilterChain filterChain3 = new FilterChain() {
-			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
-				filter2.doFilter(servletRequest, servletResponse, filterChain2);
-			}
-		};
+		FilterChain filterChain3 = new PassThroughFilterChain(filter2, filterChain2);
 
 		filter2.doFilter(request, response, filterChain3);
 		assertNotNull(request.getAttribute("invoked"));

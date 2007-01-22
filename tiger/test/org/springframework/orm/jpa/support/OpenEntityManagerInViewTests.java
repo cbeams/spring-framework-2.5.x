@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.PassThroughFilterChain;
 import org.springframework.orm.jpa.JpaTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
@@ -41,6 +42,7 @@ import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapt
 
 /**
  * @author Costin Leau
+ * @author Juergen Hoeller
  */
 public class OpenEntityManagerInViewTests extends TestCase {
 
@@ -184,12 +186,7 @@ public class OpenEntityManagerInViewTests extends TestCase {
 			}
 		};
 
-		FilterChain filterChain3 = new FilterChain() {
-			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
-				filter2.doFilter(servletRequest, servletResponse, filterChain2);
-			}
-		};
+		FilterChain filterChain3 = new PassThroughFilterChain(filter2, filterChain2);
 
 		assertFalse(TransactionSynchronizationManager.hasResource(factory));
 		assertFalse(TransactionSynchronizationManager.hasResource(factory2));

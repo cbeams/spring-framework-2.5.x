@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.PassThroughFilterChain;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -236,12 +237,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 			}
 		};
 
-		FilterChain filterChain2 = new FilterChain() {
-			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
-				filter.doFilter(servletRequest, servletResponse, filterChain);
-			}
-		};
+		FilterChain filterChain2 = new PassThroughFilterChain(filter, filterChain);
 
 		MockHttpServletRequest originalRequest = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -281,7 +277,7 @@ public class CommonsMultipartResolverTests extends TestCase {
 		MultipartFilter filter = new MultipartFilter() {
 			private boolean invoked = false;
 			protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-																			FilterChain filterChain) throws ServletException, IOException {
+					FilterChain filterChain) throws ServletException, IOException {
 				super.doFilterInternal(request, response, filterChain);
 				if (invoked) {
 					throw new ServletException("Should not have been invoked twice");

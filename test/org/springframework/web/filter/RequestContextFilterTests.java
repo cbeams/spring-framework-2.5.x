@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
 
 /**
@@ -69,14 +68,13 @@ public class RequestContextFilterTests extends TestCase {
 				}
 			}
 		};
-		
+
 		DummyFilterChain fc = new DummyFilterChain();
-		
 		MockFilterConfig mfc = new MockFilterConfig(new MockServletContext(), "foo");
-		
+
 		RequestContextFilter rbf = new RequestContextFilter();
-		rbf.setFilterConfig(mfc);
-		
+		rbf.init(mfc);
+
 		try {
 			rbf.doFilter(req, resp, fc);
 			if (sex != null) {

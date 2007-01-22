@@ -38,6 +38,7 @@ import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.PassThroughFilterChain;
 import org.springframework.orm.hibernate3.HibernateAccessor;
 import org.springframework.orm.hibernate3.HibernateTransactionManager;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
@@ -373,12 +374,7 @@ public class OpenSessionInViewTests extends TestCase {
 			}
 		};
 
-		FilterChain filterChain3 = new FilterChain() {
-			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
-				filter2.doFilter(servletRequest, servletResponse, filterChain2);
-			}
-		};
+		FilterChain filterChain3 = new PassThroughFilterChain(filter2, filterChain2);
 
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 		assertFalse(TransactionSynchronizationManager.hasResource(sf2));
@@ -561,13 +557,7 @@ public class OpenSessionInViewTests extends TestCase {
 			}
 		};
 
-		FilterChain filterChain3 = new FilterChain() {
-			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
-
-				filter2.doFilter(servletRequest, servletResponse, filterChain2);
-			}
-		};
+		FilterChain filterChain3 = new PassThroughFilterChain(filter2, filterChain2);
 
 		filter2.doFilter(request, response, filterChain3);
 		assertNotNull(request.getAttribute("invoked"));
