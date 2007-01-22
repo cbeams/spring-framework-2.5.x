@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -519,7 +519,6 @@ public class PropertyResourceConfigurerTests extends TestCase {
 	}
 
 	public void testPreferencesPlaceholderConfigurer() {
-		// ignore for JDK < 1.4
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
 		}
@@ -549,7 +548,6 @@ public class PropertyResourceConfigurerTests extends TestCase {
 	}
 
 	public void testPreferencesPlaceholderConfigurerWithCustomTreePaths() {
-		// ignore for JDK < 1.4
 		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
 			return;
 		}
@@ -578,6 +576,37 @@ public class PropertyResourceConfigurerTests extends TestCase {
 		Preferences.userRoot().node("myUserPath").remove("myTouchy");
 		Preferences.systemRoot().node("mySystemPath").remove("myTouchy");
 		Preferences.systemRoot().node("mySystemPath").remove("myName");
+	}
+
+	public void testPreferencesPlaceholderConfigurerWithPathInPlaceholder() {
+		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_14) {
+			return;
+		}
+
+		StaticApplicationContext ac = new StaticApplicationContext();
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.addPropertyValue("name", "${mypath/myName}");
+		pvs.addPropertyValue("age", "${myAge}");
+		pvs.addPropertyValue("touchy", "${myotherpath/myTouchy}");
+		ac.registerSingleton("tb", TestBean.class, pvs);
+		pvs = new MutablePropertyValues();
+		Properties props = new Properties();
+		props.put("myAge", "99");
+		pvs.addPropertyValue("properties", props);
+		pvs.addPropertyValue("systemTreePath", "mySystemPath");
+		pvs.addPropertyValue("userTreePath", "myUserPath");
+		ac.registerSingleton("configurer", PreferencesPlaceholderConfigurer.class, pvs);
+		Preferences.systemRoot().node("mySystemPath").node("mypath").put("myName", "myNameValue");
+		Preferences.systemRoot().node("mySystemPath/myotherpath").put("myTouchy", "myTouchyValue");
+		Preferences.userRoot().node("myUserPath/myotherpath").put("myTouchy", "myOtherTouchyValue");
+		ac.refresh();
+		TestBean tb = (TestBean) ac.getBean("tb");
+		assertEquals("myNameValue", tb.getName());
+		assertEquals(99, tb.getAge());
+		assertEquals("myOtherTouchyValue", tb.getTouchy());
+		Preferences.userRoot().node("myUserPath/myotherpath").remove("myTouchy");
+		Preferences.systemRoot().node("mySystemPath/myotherpath").remove("myTouchy");
+		Preferences.systemRoot().node("mySystemPath/mypath").remove("myName");
 	}
 
 
