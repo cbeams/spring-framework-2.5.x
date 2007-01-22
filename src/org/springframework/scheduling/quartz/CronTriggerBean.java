@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,18 +30,23 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
 
 /**
- * Convenience subclass of Quartz' CronTrigger class that eases
- * bean-style usage.
+ * Convenience subclass of Quartz's {@link org.quartz.CronTrigger}
+ * class, making bean-style usage easier.
  *
- * <p>CronTrigger itself is already a JavaBean but lacks sensible
- * defaults. This class uses the Spring bean name as job name, the
- * Quartz default group ("DEFAULT") as job group, the current time
- * as start time, and the default timezone if not specified.
+ * <p>CronTrigger itself is already a JavaBean but lacks sensible defaults.
+ * This class uses the Spring bean name as job name, the Quartz default group
+ * ("DEFAULT") as job group, the current time as start time, and indefinite
+ * repetition, if not specified.
  *
- * <p>This class will also register the trigger with the job name
- * and group of a given JobDetail. This allows SchedulerFactoryBean
- * to automatically register a trigger for the respective JobDetail,
+ * <p>This class will also register the trigger with the job name and group of
+ * a given {@link org.quartz.JobDetail}. This allows {@link SchedulerFactoryBean}
+ * to automatically register a trigger for the corresponding JobDetail,
  * instead of registering the JobDetail separately.
+ *
+ * <p><b>NOTE:</b> This convenience subclass does not work with trigger
+ * persistence in Quartz 1.6, due to a change in Quartz's trigger handling.
+ * Use Quartz 1.5 if you rely on trigger persistence based on this class,
+ * or the standard Quartz {@link org.quartz.CronTrigger} class instead.
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
@@ -53,6 +58,7 @@ import org.springframework.core.Constants;
  * @see #setJobDetail
  * @see SchedulerFactoryBean#setTriggers
  * @see SchedulerFactoryBean#setJobDetails
+ * @see SimpleTriggerBean
  */
 public class CronTriggerBean extends CronTrigger
     implements JobDetailAwareTrigger, BeanNameAware, InitializingBean {
@@ -78,8 +84,8 @@ public class CronTriggerBean extends CronTrigger
 
 	/**
 	 * Set the misfire instruction via the name of the corresponding
-	 * constant in the SimpleTrigger class. Default is
-	 * MISFIRE_INSTRUCTION_SMART_POLICY.
+	 * constant in the {@link org.quartz.CronTrigger} class.
+	 * Default is <code>MISFIRE_INSTRUCTION_SMART_POLICY</code>.
 	 * @see org.quartz.CronTrigger#MISFIRE_INSTRUCTION_FIRE_ONCE_NOW
 	 * @see org.quartz.CronTrigger#MISFIRE_INSTRUCTION_DO_NOTHING
 	 * @see org.quartz.Trigger#MISFIRE_INSTRUCTION_SMART_POLICY
@@ -115,7 +121,7 @@ public class CronTriggerBean extends CronTrigger
 	}
 
 	public JobDetail getJobDetail() {
-		return jobDetail;
+		return this.jobDetail;
 	}
 
 	public void setBeanName(String beanName) {
