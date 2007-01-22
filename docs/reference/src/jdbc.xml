@@ -4,10 +4,9 @@
 	<section id="jdbc-introduction">
 		<title>Introduction</title>
 		<para>
-			The value-add provided by Spring's JDBC abstraction framework is perhaps
-			best shown by the following list (note that only the italicized lines
-			need to be coded by an application developer when using Spring's JDBC
-			abstraction framework):
+			The value-add provided by the Spring Framework's JDBC abstraction
+			framework is perhaps best shown by the following list (note that only
+			the italicized lines need to be coded by an application developer):
 		</para>
 		<orderedlist numeration="arabic">
 			<listitem>
@@ -39,15 +38,16 @@
 			</listitem>
 		</orderedlist>
 		<para>
-			Spring takes care of all the grungy, low-level details that can make
-			JDBC such a tedious API to develop against.
+			The Spring Framework takes care of all the grungy, low-level details
+			that can make JDBC such a tedious API to develop with.
 		</para>
 		<section id="jdbc-packages">
 			<title>The package hierarchy</title>
 			<para>
-				The JDBC abstraction framework provided by Spring consists of four
-				different packages <literal>core</literal>, <literal>dataSource</literal>,
-				<literal>object</literal>, and <literal>support</literal>.
+				The Spring Framework's JDBC abstraction framework consists of four
+				different packages, namely <literal>core</literal>,
+				<literal>dataSource</literal>, <literal>object</literal>, and
+				<literal>support</literal>.
 			</para>
 			<para>
 				The <literal>org.springframework.jdbc.core</literal> package
@@ -304,7 +304,7 @@ public Actor findActor(long id) {
     
         public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
             Actor actor = new Actor();
-            actor.setId(rs.getLong(Long.valueOf(rs.getLong("id"))));
+            actor.setId(rs.getLong("id"));
             actor.setFirstName(rs.getString("first_name"));
             actor.setLastName(rs.getString("last_name"));
             return actor;
@@ -1076,8 +1076,8 @@ public final class GenreMapper implements RowMapper {
     }
 }]]></programlisting>
 			<para>
-				If one needs to pass parameters to a stored procedure (i.e. the
-				stored procedure has been declared as having one or more input
+				If one needs to pass parameters to a stored procedure (that is
+				the stored procedure has been declared as having one or more input
 				parameters in its definition in the RDBMS), one would code a
 				strongly typed <literal>execute(..)</literal> method which would delegate
 				to the superclass' (untyped) <literal>execute(Map parameters)</literal>
@@ -1097,7 +1097,7 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
 
     public TitlesAfterDateStoredProcedure(DataSource dataSource) {
         super(dataSource, SPROC_NAME);
-        declaraParameter(new SqlParameter(CUTOFF_DATE_PARAM, Types.DATE);
+        declareParameter(new SqlParameter(CUTOFF_DATE_PARAM, Types.DATE);
         declareParameter(new SqlOutParameter("titles", OracleTypes.CURSOR, new TitleMapper()));
         compile();
     }
