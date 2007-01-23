@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,16 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.util.Assert;
 
 /**
- * Convenient superclass for configurers that can perform Dependency Injection on
- * objects (however they may be created). Typically subclassed by AspectJ aspects.
+ * Convenient superclass for configurers that can perform Dependency Injection
+ * on objects (however they may be created).
+ *
+ * <p>Typically subclassed by AspectJ aspects.
 
  * <p>Subclasses may also need a metadata resolution strategy, in the
  * {@link BeanWiringInfoResolver} interface. The default implementation looks
  * for a bean with the same name as the fully-qualified class name. (This is
- * the default name of the bean in a Spring XML file if the id attribute is
- * not used.)
+ * the default name of the bean in a Spring XML file if the '<code>id</code>'
+ * attribute is not used.)
 
  * @author Rob Harrop
  * @author Rod Johnson
@@ -53,19 +55,23 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 
 
 	/**
-	 * Set the BeanWiringInfoResolver to use. Default behavior will be to look
-	 * for a bean with the same name as the class.
+	 * Set the <code>BeanWiringInfoResolver</code> to use.
+	 * <p>Default behavior will be to look for a bean with the same name as the
+	 * class.
 	 * <p>As an alternative, consider using annotation-driven bean wiring.
+	 * @param beanWiringInfoResolver the <code>BeanWiringInfoResolver</code> to use.
 	 * @see ClassNameBeanWiringInfoResolver
 	 * @see org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver
 	 */
 	public void setBeanWiringInfoResolver(BeanWiringInfoResolver beanWiringInfoResolver) {
-		Assert.notNull(beanWiringInfoResolver, "beanWiringInfoResolver is required");
+		Assert.notNull(beanWiringInfoResolver, "'beanWiringInfoResolver' cannot be null.");
 		this.beanWiringInfoResolver = beanWiringInfoResolver;
 	}
 
 	/**
-	 * DI the Spring application context in which this aspect should configure beans.
+	 * Set the {@link BeanFactory} in which this aspect must configure beans.
+	 * @throws IllegalArgumentException if the supplied <code>beanFactory</code> is
+	 * not an {@link AutowireCapableBeanFactory}.
 	 */
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof AutowireCapableBeanFactory)) {
@@ -76,8 +82,8 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 	}
 
 	/**
-	 * If no BeanWiringInfoResolver was set by the user, we use a 
-	 * ClassInfoBeanWiringInfoResolver as the default.
+	 * If no {@link #setBeanWiringInfoResolver BeanWiringInfoResolver} was
+	 * provided, use a {@link ClassNameBeanWiringInfoResolver} as the default.
 	 */
 	public void afterPropertiesSet() throws Exception {
 		if (this.beanWiringInfoResolver == null) {
@@ -86,8 +92,8 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 	}
 	
 	/**
-	 * Release references to BeanFactory and BeanWiringInfoResolver when
-	 * application context is destroyed
+	 * Release references to the {@link BeanFactory} and
+	 * {@link BeanWiringInfoResolver} when the container is destroyed.
 	 */
 	public void destroy() {
 		this.beanFactory = null;
@@ -96,11 +102,11 @@ public abstract class BeanConfigurerSupport implements BeanFactoryAware, Initial
 
 
 	/**
-	 * Configure the bean instance using the given bean name.
-	 * Subclasses can override this to provide custom configuration logic.
-	 * <p>Typically called by an aspect, for all bean instances matched
-	 * by a pointcut.
-	 * @param beanInstance the bean instance to configure (must <b>not</b> be <code>null</code>
+	 * Configure the bean instance.
+	 * <p>Subclasses can override this to provide custom configuration logic.
+	 * Typically called by an aspect, for all bean instances matched by a
+	 * pointcut.
+	 * @param beanInstance the bean instance to configure (must <b>not</b> be <code>null</code>)
 	 */
 	protected void configureBean(Object beanInstance) {
 		if (this.beanWiringInfoResolver == null) {
