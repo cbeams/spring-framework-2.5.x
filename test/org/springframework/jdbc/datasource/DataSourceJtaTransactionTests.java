@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -668,6 +668,78 @@ public class DataSourceJtaTransactionTests extends TestCase {
 			dsControl.verify();
 			utControl.verify();
 		}
+	}
+
+	public void testJtaTransactionWithIsolationLevelDataSourceAdapter() throws Exception {
+		MockControl utControl = MockControl.createControl(UserTransaction.class);
+		UserTransaction ut = (UserTransaction) utControl.getMock();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		ut.begin();
+		utControl.setVoidCallable(1);
+		ut.commit();
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+		ut.getStatus();
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+		ut.begin();
+		utControl.setVoidCallable(1);
+		ut.commit();
+		utControl.setVoidCallable(1);
+		utControl.replay();
+
+		MockControl ds1Control = MockControl.createControl(DataSource.class);
+		final DataSource ds1 = (DataSource) ds1Control.getMock();
+		MockControl con1Control = MockControl.createControl(Connection.class);
+		final Connection con1 = (Connection) con1Control.getMock();
+		ds1.getConnection();
+		ds1Control.setReturnValue(con1, 1);
+		con1.close();
+		con1Control.setVoidCallable(1);
+		ds1.getConnection();
+		ds1Control.setReturnValue(con1, 1);
+		con1.setReadOnly(true);
+		con1Control.setVoidCallable(1);
+		con1.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+		con1Control.setVoidCallable(1);
+		con1.close();
+		con1Control.setVoidCallable(1);
+		con1Control.replay();
+		ds1Control.replay();
+
+		final IsolationLevelDataSourceAdapter dsToUse = new IsolationLevelDataSourceAdapter();
+		dsToUse.setTargetDataSource(ds1);
+		dsToUse.afterPropertiesSet();
+
+		JtaTransactionManager ptm = new JtaTransactionManager(ut);
+		ptm.setAllowCustomIsolationLevels(true);
+
+		TransactionTemplate tt = new TransactionTemplate(ptm);
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+				Connection c = DataSourceUtils.getConnection(dsToUse);
+				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
+				assertSame(con1, c);
+				DataSourceUtils.releaseConnection(c, dsToUse);
+			}
+		});
+
+		tt.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
+		tt.setReadOnly(true);
+		tt.execute(new TransactionCallbackWithoutResult() {
+			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+				Connection c = DataSourceUtils.getConnection(dsToUse);
+				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
+				assertSame(con1, c);
+				DataSourceUtils.releaseConnection(c, dsToUse);
+			}
+		});
+
+		ds1Control.verify();
+		con1Control.verify();
+		utControl.verify();
 	}
 
 	public void testJtaTransactionWithIsolationLevelDataSourceRouter() throws Exception {
