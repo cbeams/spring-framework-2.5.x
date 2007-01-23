@@ -28,8 +28,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * An adapter for a target {@link javax.sql.DataSource}, applying the current
  * Spring transaction's isolation level (and potentially specified user credentials)
  * to every <code>getConnection</code> call. Also applies the read-only flag,
- * if specified. All other methods simply delegate to the corresponding methods
- * of the target DataSource.
+ * if specified.
  *
  * <p>Can be used to proxy a target JNDI DataSource that does not have the
  * desired isolation level (and user credentials) configured. Client code
@@ -126,13 +125,13 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	 */
 	protected Connection doGetConnection(String username, String password) throws SQLException {
 		Connection con = super.doGetConnection(username, password);
-		Integer isolationLevelToUse = getCurrentIsolationLevel();
-		if (isolationLevelToUse != null) {
-			con.setTransactionIsolation(isolationLevelToUse.intValue());
-		}
 		Boolean readOnlyToUse = getCurrentReadOnlyFlag();
 		if (readOnlyToUse != null) {
 			con.setReadOnly(readOnlyToUse.booleanValue());
+		}
+		Integer isolationLevelToUse = getCurrentIsolationLevel();
+		if (isolationLevelToUse != null) {
+			con.setTransactionIsolation(isolationLevelToUse.intValue());
 		}
 		return con;
 	}
