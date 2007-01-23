@@ -25,7 +25,6 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -35,12 +34,11 @@ import org.springframework.util.StringUtils;
  * isolation level and/or current user credentials to every Connection obtained
  * from it.
  *
- * <p>Uses IBM extended API to get a JDBC Connection with a specific isolation
+ * <p>Uses IBM-specific API to get a JDBC Connection with a specific isolation
  * level (and read-only flag) from a WebSphere DataSource
- * (<a href="http://publib.boulder.ibm.com/infocenter/wasinfo/v5r1//topic/com.ibm.websphere.base.doc/info/aes/ae/rdat_extiapi.html">
- * IBM code example</a>).
+ * (<a href="http://publib.boulder.ibm.com/infocenter/wasinfo/v5r1//topic/com.ibm.websphere.base.doc/info/aes/ae/rdat_extiapi.html">IBM code example</a>).
  * Supports the transaction-specific isolation level exposed by
- * {@link TransactionSynchronizationManager#getCurrentTransactionIsolationLevel()}.
+ * {@link org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionIsolationLevel()}.
  * It's also possible to specify a default isolation level, to be applied when the
  * current Spring-managed transaction does not define a specific isolation level.
  *
@@ -55,6 +53,9 @@ import org.springframework.util.StringUtils;
  *     &lt;/bean&gt;
  *   &lt;/property&gt;
  * &lt;/bean&gt;</pre>
+ *
+ * Thanks to Ricardo Olivieri for submitting the original implementation
+ * of this approach!
  *
  * @author Juergen Hoeller
  * @author <a href="mailto:lari.hotari@sagire.fi">Lari Hotari</a>
@@ -122,14 +123,21 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	}
 
 
+	/**
+	 * Builds a WebSphere JDBCConnectionSpec object for the current settings
+	 * and calls <code>WSDataSource.getConnection(JDBCConnectionSpec)</code>.
+	 * @see #createConnectionSpec
+	 * @see com.ibm.websphere.rsadapter.WSDataSource#getConnection(com.ibm.websphere.rsadapter.JDBCConnectionSpec)
+	 */
 	protected Connection doGetConnection(String username, String password) throws SQLException {
 		// Create JDBCConnectionSpec using current isolation level value and read-only flag.
 		Object connSpec = createConnectionSpec(
 				getCurrentIsolationLevel(), getCurrentReadOnlyFlag(), username, password);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Creating WebSphere JDBC Connection: " + connSpec);
+			logger.debug("Obtaining JDBC Connection from WebSphere DataSource [" +
+					getTargetDataSource() + "], using ConnectionSpec [" + connSpec + "]");
 		}
-		// Create Connection by invoking WSDataSource.getConnection(JDBCConnectionSpec)
+		// Create Connection through invoking WSDataSource.getConnection(JDBCConnectionSpec)
 		return (Connection) ReflectionUtils.invokeMethod(
 				this.wsDataSourceGetConnectionMethod, getTargetDataSource(), new Object[] {connSpec});
 	}
@@ -138,10 +146,8 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	 * Create a WebSphere <code>JDBCConnectionSpec</code> object for the given charateristics.
 	 * <p>The default implementation uses reflection to apply the given settings.
 	 * Can be overridden in subclasses to customize the JDBCConnectionSpec object
-	 * (<a href="http://publib.boulder.ibm.com/infocenter/wasinfo/v6r0/topic/com.ibm.websphere.javadoc.doc/public_html/api/com/ibm/websphere/rsadapter/JDBCConnectionSpec.html">
-	 * JDBCConnectionSpec javadoc</a>;
-	 * <a href="http://www.ibm.com/developerworks/websphere/library/techarticles/0404_tang/0404_tang.html">
-	 * IBM developerWorks article</a>).
+	 * (<a href="http://publib.boulder.ibm.com/infocenter/wasinfo/v6r0/topic/com.ibm.websphere.javadoc.doc/public_html/api/com/ibm/websphere/rsadapter/JDBCConnectionSpec.html">JDBCConnectionSpec javadoc</a>;
+	 * <a href="http://www.ibm.com/developerworks/websphere/library/techarticles/0404_tang/0404_tang.html">IBM developerWorks article</a>).
 	 * @param isolationLevel the isolation level to apply (or <code>null</code> if none)
 	 * @param readOnlyFlag the read-only flag to apply (or <code>null</code> if none)
 	 * @param username the username to apply (<code>null</code> or empty indicates the default)
@@ -159,7 +165,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 		if (readOnlyFlag != null) {
 			ReflectionUtils.invokeMethod(this.setReadOnlyMethod, connSpec, new Object[] {readOnlyFlag});
 		}
-		// If the "userName" is empty, we'll simply let the target DataSource
+		// If the username is empty, we'll simply let the target DataSource
 		// use its default credentials.
 		if (StringUtils.hasLength(username)) {
 			ReflectionUtils.invokeMethod(this.setUserNameMethod, connSpec, new Object[] {username});
