@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-core</artifactId>
+	<packaging>jar</packaging>
+	<name>Spring Framework: Core</name>
+	<version>1.2.9</version>
+	<description>Spring Framework: Core</description>
+	<url>http://www.springframework.org</url>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<scm>
+		<connection>scm:cvs:pserver:anonymous:@springframework.cvs.sourceforge.net:/cvsroot/springframework</connection>
+		<developerConnection>scm:cvs:ext:username@springframework.cvs.sourceforge.net:/cvsroot/springframework</developerConnection>
+		<tag>1.2.9</tag>
+		<url>http://springframework.cvs.sourceforge.net/springframework/</url>
+	</scm>
+	<organization>
+		<name>Spring Framework</name>
+		<url>http://www.springframework.org/</url>
+	</organization>
+<!-- External Dependencies -->
+	<dependencies>
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.1</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.14</version>
+			<optional>true</optional>
+		</dependency>
+<!-- Spring Dependencies -->
+	</dependencies>
+</project>
