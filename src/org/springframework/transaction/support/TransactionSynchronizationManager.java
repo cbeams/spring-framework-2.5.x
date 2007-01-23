@@ -280,6 +280,7 @@ public abstract class TransactionSynchronizationManager {
 	 * Expose the name of the current transaction, if any.
 	 * Called by the transaction manager on transaction begin and on cleanup.
 	 * @param name the name of the transaction, or <code>null</code> to reset it
+	 * @see org.springframework.transaction.TransactionDefinition#getName()
 	 */
 	public static void setCurrentTransactionName(String name) {
 		currentTransactionName.set(name);
@@ -289,6 +290,7 @@ public abstract class TransactionSynchronizationManager {
 	 * Return the name of the current transaction, or <code>null</code> if none set.
 	 * To be called by resource management code for optimizations per use case,
 	 * for example to optimize fetch strategies for specific named transactions.
+	 * @see org.springframework.transaction.TransactionDefinition#getName()
 	 */
 	public static String getCurrentTransactionName() {
 		return (String) currentTransactionName.get();
@@ -299,7 +301,7 @@ public abstract class TransactionSynchronizationManager {
 	 * Called by the transaction manager on transaction begin and on cleanup.
 	 * @param readOnly <code>true</code> to mark the current transaction
 	 * as read-only; <code>false</code> to reset such a read-only marker
-	 * @see org.springframework.transaction.TransactionDefinition#isReadOnly
+	 * @see org.springframework.transaction.TransactionDefinition#isReadOnly()
 	 */
 	public static void setCurrentTransactionReadOnly(boolean readOnly) {
 		currentTransactionReadOnly.set(readOnly ? Boolean.TRUE : null);
@@ -314,6 +316,7 @@ public abstract class TransactionSynchronizationManager {
 	 * to suppress change detection on commit. The present method is meant
 	 * to be used for earlier read-only checks, for example to set the
 	 * flush mode of a Hibernate Session to "FlushMode.NEVER" upfront.
+	 * @see org.springframework.transaction.TransactionDefinition#isReadOnly()
 	 * @see TransactionSynchronization#beforeCommit(boolean)
 	 * @see org.hibernate.Session#flush
 	 * @see org.hibernate.Session#setFlushMode
@@ -326,9 +329,18 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Expose an isolation level for the current transaction.
 	 * Called by the transaction manager on transaction begin and on cleanup.
-	 * @param isolationLevel the isolation level to expose, according
-	 * to the TransactionDefinition / JDBC Connection constants,
-	 * or <code>null</code> to reset it
+	 * @param isolationLevel the isolation level to expose, according to the
+	 * JDBC Connection constants (equivalent to the corresponding Spring
+	 * TransactionDefinition constants), or <code>null</code> to reset it
+	 * @see java.sql.Connection#TRANSACTION_READ_UNCOMMITTED
+	 * @see java.sql.Connection#TRANSACTION_READ_COMMITTED
+	 * @see java.sql.Connection#TRANSACTION_REPEATABLE_READ
+	 * @see java.sql.Connection#TRANSACTION_SERIALIZABLE
+	 * @see org.springframework.transaction.TransactionDefinition#ISOLATION_READ_UNCOMMITTED
+	 * @see org.springframework.transaction.TransactionDefinition#ISOLATION_READ_COMMITTED
+	 * @see org.springframework.transaction.TransactionDefinition#ISOLATION_REPEATABLE_READ
+	 * @see org.springframework.transaction.TransactionDefinition#ISOLATION_SERIALIZABLE
+	 * @see org.springframework.transaction.TransactionDefinition#getIsolationLevel()
 	 */
 	public static void setCurrentTransactionIsolationLevel(Integer isolationLevel) {
 		currentTransactionIsolationLevel.set(isolationLevel);
@@ -338,10 +350,18 @@ public abstract class TransactionSynchronizationManager {
 	 * Return the isolation level for the current transaction, if any.
 	 * To be called by resource management code when preparing a newly
 	 * created resource (for example, a JDBC Connection).
-	 * @see TransactionSynchronization#beforeCommit(boolean)
-	 * @see org.hibernate.Session#flush
-	 * @see org.hibernate.Session#setFlushMode
-	 * @see org.hibernate.FlushMode#NEVER
+	 * @return the currently exposed isolation level, according to the
+	 * JDBC Connection constants (equivalent to the corresponding Spring
+	 * TransactionDefinition constants), or <code>null</code> if none
+	 * @see java.sql.Connection#TRANSACTION_READ_UNCOMMITTED
+	 * @see java.sql.Connection#TRANSACTION_READ_COMMITTED
+	 * @see java.sql.Connection#TRANSACTION_REPEATABLE_READ
+	 * @see java.sql.Connection#TRANSACTION_SERIALIZABLE
+	 * @see org.springframework.transaction.TransactionDefinition#ISOLATION_READ_UNCOMMITTED
+	 * @see org.springframework.transaction.TransactionDefinition#ISOLATION_READ_COMMITTED
+	 * @see org.springframework.transaction.TransactionDefinition#ISOLATION_REPEATABLE_READ
+	 * @see org.springframework.transaction.TransactionDefinition#ISOLATION_SERIALIZABLE
+	 * @see org.springframework.transaction.TransactionDefinition#getIsolationLevel()
 	 */
 	public static Integer getCurrentTransactionIsolationLevel() {
 		return (Integer) currentTransactionIsolationLevel.get();
