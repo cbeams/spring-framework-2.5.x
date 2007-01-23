@@ -100,8 +100,6 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final String PROXY_TARGET_CLASS = "proxy-target-class";
 
-	private static final String TRUE = "true";
-
 	private static final String RETURNING = "returning";
 
 	private static final String RETURNING_PROPERTY = "returningName";
@@ -166,7 +164,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 */
 	private void configureAutoProxyCreator(ParserContext parserContext, Element element) {
 		AopNamespaceUtils.registerAspectJAutoProxyCreatorIfNecessary(parserContext, element);
-		boolean proxyTargetClass = TRUE.equals(element.getAttribute(PROXY_TARGET_CLASS));
+		boolean proxyTargetClass = Boolean.valueOf(element.getAttribute(PROXY_TARGET_CLASS)).booleanValue();
 		if (proxyTargetClass) {
 			AopNamespaceUtils.forceAutoProxyCreatorToUseClassProxying(parserContext.getRegistry());
 		}
