@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,15 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * An adapter for a target DataSource, applying the given user credentials to
- * every standard <code>getConnection()</code> call, that is, implicitly
+ * An adapter for a target {@link javax.sql.DataSource}, applying the specified
+ * user credentials to every standard <code>getConnection()</code> call, implicitly
  * invoking <code>getConnection(username, password)</code> on the target.
  * All other methods simply delegate to the corresponding methods of the
  * target DataSource.
  *
  * <p>Can be used to proxy a target JNDI DataSource that does not have user
- * credentials configured. Client code can work with the DataSource without
- * passing in username and password on every <code>getConnection()</code> call.
+ * credentials configured. Client code can work with this DataSource as usual,
+ * using the standard <code>getConnection()</code> call.
  *
  * <p>In the following example, client code can simply transparently work with
  * the preconfigured "myDataSource", implicitly accessing "myTargetDataSource"
@@ -67,16 +67,24 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 
 
 	/**
-	 * Set the username that this adapter should use for retrieving Connections.
-	 * Default is no specific user.
+	 * Set the default username that this adapter should use for retrieving Connections.
+	 * <p>Default is no specific user. Note that an explicitly specified username
+	 * will always override any username/password specified at the DataSource level.
+	 * @see #setPassword
+	 * @see #setCredentialsForCurrentThread(String, String)
+	 * @see #getConnection(String, String)
 	 */
 	public void setUsername(String username) {
 		this.username = username;
 	}
 
 	/**
-	 * Set the password that this adapter should use for retrieving Connections.
-	 * Default is no specific password.
+	 * Set the default user's password that this adapter should use for retrieving Connections.
+	 * <p>Default is no specific password. Note that an explicitly specified username
+	 * will always override any username/password specified at the DataSource level.
+	 * @see #setUsername
+	 * @see #setCredentialsForCurrentThread(String, String)
+	 * @see #getConnection(String, String)
 	 */
 	public void setPassword(String password) {
 		this.password = password;
@@ -111,9 +119,10 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	 * Determine whether there are currently thread-bound credentials,
 	 * using them if available, falling back to the statically specified
 	 * username and password (i.e. values of the bean properties) else.
-	 * @see #doGetConnection
+	 * <p>Delegates to {@link #doGetConnection(String, String)} with the
+	 * determined credentials as parameters.
 	 */
-	public final Connection getConnection() throws SQLException {
+	public Connection getConnection() throws SQLException {
 		String[] threadCredentials = (String[]) this.threadBoundCredentials.get();
 		if (threadCredentials != null) {
 			return doGetConnection(threadCredentials[0], threadCredentials[1]);
@@ -121,6 +130,14 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 		else {
 			return doGetConnection(this.username, this.password);
 		}
+	}
+
+	/**
+	 * Simply delegates to {@link #doGetConnection(String, String)},
+	 * keeping the given user credentials as-is.
+	 */
+	public Connection getConnection(String username, String password) throws SQLException {
+		return doGetConnection(username, password);
 	}
 
 	/**
@@ -135,7 +152,7 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	 * @see javax.sql.DataSource#getConnection()
 	 */
 	protected Connection doGetConnection(String username, String password) throws SQLException {
-		Assert.state(getTargetDataSource() != null, "targetDataSource is required");
+		Assert.state(getTargetDataSource() != null, "'targetDataSource' is required");
 		if (StringUtils.hasLength(username)) {
 			return getTargetDataSource().getConnection(username, password);
 		}
