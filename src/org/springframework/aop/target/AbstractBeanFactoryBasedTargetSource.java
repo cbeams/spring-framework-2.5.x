@@ -69,9 +69,10 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 
 
 	/**
-	 * Set the name of the target bean in the factory. This bean should be a
-	 * prototype, or the same instance will always be obtained from the
-	 * factory, resulting in the same behavior as the SingletonTargetSource.
+	 * Set the name of the target bean in the factory.
+	 * <p>The target bean should not be a singleton, else the same instance will
+	 * always be obtained from the factory, resulting in the same behavior as
+	 * provided by {@link SingletonTargetSource}.
 	 * @param targetBeanName name of the target bean in the BeanFactory
 	 * that owns this interceptor
 	 * @see SingletonTargetSource
@@ -103,7 +104,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	 */
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (this.targetBeanName == null) {
-			throw new IllegalStateException("targetBeanName is required");
+			throw new IllegalStateException("'targetBeanName' is required");
 		}
 		this.beanFactory = beanFactory;
 	}
@@ -112,7 +113,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	 * Return the owning BeanFactory.
 	 */
 	public BeanFactory getBeanFactory() {
-		return beanFactory;
+		return this.beanFactory;
 	}
 
 
@@ -135,7 +136,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	}
 
 	public void releaseTarget(Object target) throws Exception {
-		// do nothing
+		// Nothing to do here.
 	}
 
 
