@@ -26,6 +26,7 @@ import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
 /**
  * Alternative to an object pool. This TargetSource uses a threading model in which
@@ -100,12 +101,14 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 		synchronized (this.targetSet) {
 			for (Iterator it = this.targetSet.iterator(); it.hasNext(); ) {
 				Object target = it.next();
-				if (target instanceof DisposableBean) {
+				if (getBeanFactory() instanceof ConfigurableBeanFactory) {
+					((ConfigurableBeanFactory) getBeanFactory()).destroyBean(getTargetBeanName(), target);
+				}
+				else if (target instanceof DisposableBean) {
 					try {
 						((DisposableBean) target).destroy();
 					}
-					catch (Exception ex) {
-						// do nothing
+					catch (Throwable ex) {
 						if (logger.isWarnEnabled()) {
 							logger.warn("Thread-bound target of class [" + target.getClass() +
 									"] threw exception from destroy() method", ex);
@@ -115,17 +118,17 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 			}
 			this.targetSet.clear();
 		}
-		// Clear ThreadLocal.
+		// Clear ThreadLocal, just in case.
 		this.targetInThread.set(null);
 	}
 
 
 	public int getInvocationCount() {
-		return invocationCount;
+		return this.invocationCount;
 	}
 
 	public int getHitCount() {
-		return hitCount;
+		return this.hitCount;
 	}
 
 	public int getObjectCount() {
