@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.aop.support.AopUtils;
 
 /**
  * Base <code>MethodInterceptor</code> implementation for tracing.
@@ -132,7 +132,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 			Object target = invocation.getThis();
 			Class logCategoryClass = target.getClass();
 			if (this.hideProxyClassNames) {
-				logCategoryClass = AopProxyUtils.getTargetClass(target);
+				logCategoryClass = AopUtils.getTargetClass(target);
 			}
 			return LogFactory.getLog(logCategoryClass);
 		}

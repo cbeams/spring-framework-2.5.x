@@ -38,21 +38,21 @@ public abstract class AopProxyUtils {
 
 	/**
 	 * Return the target class of the given bean instance.
-	 * <p>Returns the target class for an AOP proxy and the plain bean class else.
-	 * @param proxy the instance to check (might be an AOP proxy)
-	 * @return the target class
-	 * @see org.springframework.aop.framework.Advised#getTargetSource
-	 * @see org.springframework.aop.TargetSource#getTargetClass
+	 * <p>Returns the target class for an AOP proxy and the plain class else.
+	 * @param candidate the instance to check (might be an AOP proxy)
+	 * @return the target class (or the plain class of the given object as fallback)
+	 * @deprecated as of Spring 2.0.3, in favor of <code>AopUtils.getTargetClass</code>
+	 * @see org.springframework.aop.support.AopUtils#getTargetClass(Object)
 	 */
-	public static Class getTargetClass(Object proxy) {
-		Assert.notNull(proxy, "Proxy object must not be null");
-		if (AopUtils.isCglibProxy(proxy)) {
-			return proxy.getClass().getSuperclass();
+	public static Class getTargetClass(Object candidate) {
+		Assert.notNull(candidate, "Candidate object must not be null");
+		if (AopUtils.isCglibProxy(candidate)) {
+			return candidate.getClass().getSuperclass();
 		}
-		if (proxy instanceof Advised) {
-			return ((Advised) proxy).getTargetSource().getTargetClass();
+		if (candidate instanceof Advised) {
+			return ((Advised) candidate).getTargetSource().getTargetClass();
 		}
-		return proxy.getClass();
+		return candidate.getClass();
 	}
 
 	/**

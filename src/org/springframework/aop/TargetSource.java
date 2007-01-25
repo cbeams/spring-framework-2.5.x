@@ -1,5 +1,5 @@
 /*<
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ package org.springframework.aop;
  *
  * @author Rod Johnson
  */
-public interface TargetSource {
+public interface TargetSource extends TargetClassAware {
 
 	/**
 	 * Return the type of targets returned by this {@link TargetSource}.
@@ -40,7 +40,7 @@ public interface TargetSource {
 	 * @return the type of targets returned by this {@link TargetSource}
 	 */
 	Class getTargetClass();
-	
+
 	/**
 	 * Will all calls to {@link #getTarget()} return the same object?
 	 * <p>In that case, there will be no need to invoke
@@ -50,7 +50,7 @@ public interface TargetSource {
 	 * @see #getTarget
 	 */
 	boolean isStatic();
-	
+
 	/**
 	 * Return a target instance. Invoked immediately before the
 	 * AOP framework calls the "target" of an AOP method invocation.
@@ -58,7 +58,7 @@ public interface TargetSource {
 	 * @throws Exception if the target object can't be resolved
 	 */
 	Object getTarget() throws Exception;
-	
+
 	/**
 	 * Release the given target object obtained from the
 	 * {@link #getTarget()} method.

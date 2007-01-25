@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import javax.management.modelmbean.ModelMBeanInfoSupport;
 import javax.management.modelmbean.ModelMBeanNotificationInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
-import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.jmx.support.JmxUtils;
 
@@ -95,7 +94,7 @@ public abstract class AbstractMBeanInfoAssembler implements MBeanInfoAssembler {
 	 * @see org.springframework.aop.framework.AopProxyUtils#getTargetClass
 	 */
 	protected Class getTargetClass(Object managedBean) {
-		return AopProxyUtils.getTargetClass(managedBean);
+		return AopUtils.getTargetClass(managedBean);
 	}
 
 	/**

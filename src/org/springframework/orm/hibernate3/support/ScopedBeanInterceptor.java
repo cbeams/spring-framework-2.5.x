@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,15 @@ package org.springframework.orm.hibernate3.support;
 
 import org.hibernate.EmptyInterceptor;
 
-import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.scope.ScopedObject;
+import org.springframework.aop.support.AopUtils;
 
 /**
- * Hibernate 3 interceptor used for getting the proper entity name for scoped
+ * Hibernate3 interceptor used for getting the proper entity name for scoped
  * beans. As scoped bean classes are proxies generated at runtime, they are
  * unrecognized by the persisting framework. Using this interceptor, the
- * original scoped bean class is retrieved end exposed to Hibernate for persisting.
+ * original scoped bean class is retrieved end exposed to Hibernate for
+ * persisting.
  *
  * <p>Usage example:
  *
@@ -47,7 +48,7 @@ public class ScopedBeanInterceptor extends EmptyInterceptor {
 		if (entity instanceof ScopedObject) {
 			// Determine underlying object's type.
 			Object targetObject = ((ScopedObject) entity).getTargetObject();
-			return AopProxyUtils.getTargetClass(targetObject).getName();
+			return AopUtils.getTargetClass(targetObject).getName();
 		}
 
 		// Any other object: delegate to the default implementation.
