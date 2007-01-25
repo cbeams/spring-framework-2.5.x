@@ -178,7 +178,7 @@
 <beans>
 
     ]]><lineannotation>&lt;!-- this bean will be injected into the <classname>HibernateTitleDaoTests</classname> class --&gt;</lineannotation><![CDATA[
-    <bean id="titleDao" class="com/foo/dao/hibernate/HibernateTitleDao">
+    <bean id="titleDao" class="com.foo.dao.hibernate.HibernateTitleDao">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
     
@@ -448,7 +448,7 @@ public void testProcessRepeatedly() {
 
    protected String[] getConfigLocations() {
       return new String[] { 
-         '/org/springframework/samples/petclinic/hibernate/applicationContext-hibernate.xml' 
+         "/org/springframework/samples/petclinic/hibernate/applicationContext-hibernate.xml" 
       };
    }
 }]]></programlisting>
