@@ -106,7 +106,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 
 	public Object getProxy(ClassLoader classLoader) {
 		if (logger.isDebugEnabled()) {
-			Class targetClass = this.advised.getTargetSource().getTargetClass();
+			Class targetClass = this.advised.getTargetClass();
 			logger.debug("Creating JDK dynamic proxy" +
 					(targetClass != null ? " for [" + targetClass.getName() + "]" : ""));
 		}
@@ -166,8 +166,9 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 				// This class implements the hashCode() method itself.
 				return new Integer(hashCode());
 			}
-			if (Advised.class == method.getDeclaringClass()) {
-				// service invocations on ProxyConfig with the proxy config
+			if (!this.advised.opaque && method.getDeclaringClass().isInterface() &&
+					method.getDeclaringClass().isAssignableFrom(Advised.class)) {
+				// Service invocations on ProxyConfig with the proxy config...
 				return AopUtils.invokeJoinpointUsingReflection(this.advised, method, args);
 			}
 

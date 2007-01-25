@@ -36,28 +36,21 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ProxyConfig implements Serializable {
 	
-	/**
-	 * Transient to optimize serialization: AdvisedSupport resets it.
-	 */
+	/** use serialVersionUID from Spring 1.2 for interoperability */
+	private static final long serialVersionUID = -8409359707199703185L;;
+
+
+	/** Transient to optimize serialization: AdvisedSupport resets it */
 	protected transient Log logger = LogFactory.getLog(getClass());
 
 	private boolean proxyTargetClass = false;
 
 	private boolean optimize = false;
 
-	private boolean opaque = false;
+	protected boolean opaque = false;
 
-	/**
-	 * Should proxies obtained from this configuration expose
-	 * the AOP proxy for the AopContext class to retrieve for targets?
-	 * The default is false, as enabling this property may impair performance.
-	 */
 	protected boolean exposeProxy = false;
 
-	/**
-	 * Is this config frozen: that is, should it be impossible
-	 * to change advice. Default is not frozen.
-	 */
 	private boolean frozen = false;
 
 	private transient AopProxyFactory aopProxyFactory = new DefaultAopProxyFactory();
@@ -112,7 +105,7 @@ public class ProxyConfig implements Serializable {
 	 * Set whether proxies created by this configuration should be prevented
 	 * from being cast to {@link Advised} to query proxy status.
 	 * <p>Default is "false", meaning that any AOP proxy can be cast to
-	 * <code>Advised</code>.
+	 * {@link Advised}.
 	 */
 	public void setOpaque(boolean opaque) {
 		this.opaque = opaque;

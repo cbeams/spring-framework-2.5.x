@@ -44,30 +44,28 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * FactoryBean implementation for use to source AOP proxies from a Spring BeanFactory.
+ * {@link org.springframework.beans.factory.FactoryBean} implementation that builds an
+ * AOP proxy based on beans in Spring {@link org.springframework.beans.factory.BeanFactory}.
  *
- * <p>Interceptors and Advisors are identified by a list of bean names in the current
- * bean factory. These beans should be of type Interceptor or Advisor. The last entry
- * in the list can be the name of any bean in the factory. If it's neither an
- * Interceptor nor an Advisor, a new SingletonTargetSource is added to wrap it. If it is
- * a TargetSource, it is used as this proxy factory's TargetSource. It is normally preferred
- * to use the "targetSource" property to set the TargetSource. It is not possible to use
- * both the targetSource property and an interceptor name: this is treated as a
- * configuration error.
+ * <p>{@link org.aopalliance.intercept.MethodInterceptor MethodInterceptors} and
+ * {@link org.springframework.aop.Advisor Advisors} are identified by a list of bean
+ * names in the current bean factory, specified through the "interceptorNames" property.
+ * The last entry in the list can be the name of a target bean or a
+ * {@link org.springframework.aop.TargetSource}; however, it is normally preferable
+ * to use the "targetName"/"target"/"targetSource" properties instead.
  *
  * <p>Global interceptors and advisors can be added at the factory level. The specified
  * ones are expanded in an interceptor list where an "xxx*" entry is included in the
  * list, matching the given prefix with the bean names (e.g. "global*" would match
  * both "globalBean1" and "globalBean2", "*" all defined interceptors). The matching
- * interceptors get applied according to their returned order value, if they
- * implement the Ordered interface. An interceptor name list may not conclude
- * with a global "xxx*" pattern, as global interceptors cannot invoke targets.
+ * interceptors get applied according to their returned order value, if they implement
+ * the {@link org.springframework.core.Ordered} interface.
  *
- * <p>Creates a J2SE proxy when proxy interfaces are given, a CGLIB proxy for the
+ * <p>Creates a JDK proxy when proxy interfaces are given, and a CGLIB proxy for the
  * actual target class if not. Note that the latter will only work if the target class
  * does not have final methods, as a dynamic subclass will be created at runtime.
  *
- * <p>It's possible to cast a proxy obtained from this factory to <code>Advised</code>,
+ * <p>It's possible to cast a proxy obtained from this factory to {@link Advised},
  * or to obtain the ProxyFactoryBean reference and programmatically manipulate it.
  * This won't work for existing prototype references, which are independent. However,
  * it will work for prototypes subsequently obtained from the factory. Changes to
@@ -82,12 +80,12 @@ import org.springframework.util.ObjectUtils;
  * @see #setInterceptorNames
  * @see #setProxyInterfaces
  * @see org.aopalliance.intercept.MethodInterceptor
- * @see org.springframework.aop.framework.Advised
- * @see org.springframework.aop.target.SingletonTargetSource
+ * @see org.springframework.aop.Advisor
+ * @see Advised
  */
 public class ProxyFactoryBean extends AdvisedSupport
     implements FactoryBean, BeanClassLoaderAware, BeanFactoryAware, AdvisedSupportListener {
-	
+
 	/*
 	 * Implementation notes. There are two cases of usage of this class:
 	 * usage as a singleton, when only one object will be created, and usage as a
@@ -278,7 +276,7 @@ public class ProxyFactoryBean extends AdvisedSupport
 			return this.beanFactory.getType(this.targetName);
 		}
 		else {
-			return getTargetSource().getTargetClass();
+			return getTargetClass();
 		}
 	}
 

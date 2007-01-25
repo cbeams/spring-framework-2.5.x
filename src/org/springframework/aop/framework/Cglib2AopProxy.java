@@ -117,7 +117,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 		}
 		//DK - is this check really necessary?
 		//should this 'config.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE' be enough?
-		if (config.getTargetSource().getTargetClass() == null) {
+		if (config.getTargetClass() == null) {
 			throw new AopConfigException("Either an interface or a target is required for proxy creation");
 		}
 		this.advised = config;
@@ -147,14 +147,14 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 
 	public Object getProxy(ClassLoader classLoader) {
 		if (logger.isDebugEnabled()) {
-			Class targetClass = this.advised.getTargetSource().getTargetClass();
+			Class targetClass = this.advised.getTargetClass();
 			logger.debug("Creating CGLIB2 proxy" +
 					(targetClass != null ? " for [" + targetClass.getName() + "]" : ""));
 		}
 
 		Enhancer enhancer = createEnhancer();
 		try {
-			Class rootClass = this.advised.getTargetSource().getTargetClass();
+			Class rootClass = this.advised.getTargetClass();
 
 			// Create proxy in specific ClassLoader, if given.
 			if (classLoader != null) {
@@ -204,13 +204,13 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 		}
 		catch (CodeGenerationException ex) {
 			throw new AopConfigException("Couldn't generate CGLIB subclass of class [" +
-					this.advised.getTargetSource().getTargetClass() + "]: " +
+					this.advised.getTargetClass() + "]: " +
 					"Common causes of this problem include using a final class or a non-visible class",
 					ex);
 		}
 		catch (IllegalArgumentException ex) {
 			throw new AopConfigException("Couldn't generate CGLIB subclass of class [" +
-					this.advised.getTargetSource().getTargetClass() + "]: " +
+					this.advised.getTargetClass() + "]: " +
 					"Common causes of this problem include using a final class or a non-visible class",
 					ex);
 		}
@@ -312,7 +312,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 				List chain = this.advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(
 						this.advised, null, methods[x], rootClass);
 				fixedCallbacks[x] = new FixedChainStaticTargetInterceptor(
-						chain, this.advised.getTargetSource().getTarget(), this.advised.getTargetSource().getTargetClass());
+						chain, this.advised.getTargetSource().getTarget(), this.advised.getTargetClass());
 				this.fixedInterceptorMap.put(methods[x].toString(), new Integer(x));
 			}
 
@@ -727,10 +727,11 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 		 */
 		public int accept(Method method) {
 			if (method.getDeclaringClass() == Object.class && method.getName().equals("finalize")) {
-				logger.debug("Object.finalize () method found - using NO_OVERRIDE");
+				logger.debug("Found finalize() method - using NO_OVERRIDE");
 				return NO_OVERRIDE;
 			}
-			if (method.getDeclaringClass() == Advised.class) {
+			if (!this.advised.opaque && method.getDeclaringClass().isInterface() &&
+					method.getDeclaringClass().isAssignableFrom(Advised.class)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Method " + method + " is declared on Advised - using DISPATCH_ADVISED");
 				}
@@ -741,7 +742,7 @@ final class Cglib2AopProxy implements AopProxy, Serializable {
 				logger.debug("Found equals() method - using INVOKE_EQUALS");
 				return INVOKE_EQUALS;
 			}
-			Class targetClass = this.advised.getTargetSource().getTargetClass();
+			Class targetClass = this.advised.getTargetClass();
 			// Proxy is not yet available, but that shouldn't matter
 			List chain = this.advised.getAdvisorChainFactory().getInterceptorsAndDynamicInterceptionAdvice(
 					this.advised, null, method, targetClass);
