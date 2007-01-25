@@ -5,19 +5,19 @@
   <section id="orm-introduction">
     <title>Introduction</title>
 
-    <para>Spring provides integration with <emphasis>Hibernate, JDO, Oracle
-    TopLink, iBATIS SQL Maps</emphasis> and <emphasis>JPA</emphasis>: in terms
-    of resource management, DAO implementation support, and transaction
+    <para>The Spring Framework provides integration with <emphasis>Hibernate,
+	JDO, Oracle TopLink, iBATIS SQL Maps</emphasis> and <emphasis>JPA</emphasis>:
+	in terms of resource management, DAO implementation support, and transaction
     strategies. For example for Hibernate, there is first-class support with
     lots of IoC convenience features, addressing many typical Hibernate
-    integration issues. All of these support packages for O/R mappers comply
-    with Spring's generic transaction and DAO exception hierarchies. There are
-    usually two integration styles: either using Spring's DAO 'templates' or
-    coding DAOs against plain Hibernate/JDO/TopLink/etc APIs. In both cases,
+    integration issues. All of these support packages for O/R (Object Relational)
+	mappers comply with Spring's generic transaction and DAO exception hierarchies.
+	There are usually two integration styles: either using Spring's DAO 'templates'
+	or coding DAOs against plain Hibernate/JDO/TopLink/etc APIs. In both cases,
     DAOs can be configured through Dependency Injection and participate in
     Spring's resource and transaction management.</para>
 
-    <para>Spring's adds significant support when using the O/R mapping layer
+    <para>Spring adds significant support when using the O/R mapping layer
     of your choice to create data access applications. First of all, you
     should know that once you started using Spring's support for O/R mapping,
     you don't have to go all the way. No matter to what extent, you're invited
@@ -29,7 +29,8 @@
     terms of ease of configuration and deployment; as such, most examples in
     this section show configuration inside a Spring container.</para>
 
-    <para>Some of the benefits of using Spring to create your ORM DAOs include:</para>
+    <para>Some of the benefits of using the Spring Framework to create your
+	ORM DAOs include:</para>
 
     <itemizedlist>
       <listitem>
@@ -502,7 +503,7 @@
         this.transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 
                 public void doInTransactionWithoutResult(TransactionStatus status) {
-                    List productsToChange = productDAO.loadProductsByCategory(category);
+                    List productsToChange = this.productDao.loadProductsByCategory(category);
                     ]]><lineannotation>// do the price increase...</lineannotation><![CDATA[
                 }
             }
@@ -557,7 +558,7 @@
     ]]><lineannotation>// notice the absence of transaction demarcation code in this method</lineannotation><![CDATA[
     ]]><lineannotation>// Spring's declarative transaction infrastructure will be demarcating transactions on your behalf </lineannotation><![CDATA[
     public void increasePriceOfAllProductsInCategory(final String category) {
-        List productsToChange = this.productDAO.loadProductsByCategory(category);
+        List productsToChange = this.productDao.loadProductsByCategory(category);
         ]]><lineannotation>// ...</lineannotation><![CDATA[
     }
 }]]></programlisting>
