@@ -356,8 +356,9 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	}
 
 	/**
-	 * Return whether this a <b>Singleton</b>, with a single, shared instance
+	 * Return whether this a <b>Singleton</b>, with a single shared instance
 	 * returned from all calls.
+	 * @see #SCOPE_SINGLETON
 	 */
 	public boolean isSingleton() {
 		return (SCOPE_SINGLETON.equals(this.scope));
@@ -366,6 +367,7 @@ public abstract class AbstractBeanDefinition extends AttributeAccessorSupport im
 	/**
 	 * Return whether this a <b>Prototype</b>, with an independent instance
 	 * returned for each call.
+	 * @see #SCOPE_PROTOTYPE
 	 */
 	public boolean isPrototype() {
 		return (SCOPE_PROTOTYPE.equals(this.scope));

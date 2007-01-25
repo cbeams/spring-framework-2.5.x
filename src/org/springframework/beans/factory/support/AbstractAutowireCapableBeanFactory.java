@@ -59,9 +59,9 @@ import org.springframework.util.StringUtils;
 
 /**
  * Abstract BeanFactory superclass that implements default bean creation,
- * with the full capabilities specified by the RootBeanDefinition class.
- * Implements the AutowireCapableBeanFactory interface in addition to
- * AbstractBeanFactory's <code>createBean</code> method.
+ * with the full capabilities specified by the {@link RootBeanDefinition} class.
+ * Implements the {@link org.springframework.beans.factory.config.AutowireCapableBeanFactory}
+ * interface in addition to AbstractBeanFactory's {@link #createBean} method.
  *
  * <p>Provides bean creation (with constructor resolution), property population,
  * wiring (including autowiring), and initialization. Handles runtime bean
@@ -69,15 +69,16 @@ import org.springframework.util.StringUtils;
  * Supports autowiring constructors, properties by name, and properties by type.
  *
  * <p>The main template method to be implemented by subclasses is
- * <code>findMatchingBeans</code>, used for autowiring by type. In case of
+ * {@link #findAutowireCandidates}, used for autowiring by type. In case of
  * a factory which is capable of searching its bean definitions, matching
  * beans will typically be implemented through such a search. For other
  * factory styles, simplified matching algorithms can be implemented.
  *
  * <p>Note that this class does <i>not</i> assume or implement bean definition
- * registry capabilities. See DefaultListableBeanFactory for an implementation
- * of the ListableBeanFactory and BeanDefinitionRegistry interfaces, which
- * represent the API (or SPI) view of such a factory.
+ * registry capabilities. See {@link DefaultListableBeanFactory} for an implementation
+ * of the {@link org.springframework.beans.factory.ListableBeanFactory} and
+ * {@link BeanDefinitionRegistry} interfaces, which represent the API and SPI
+ * view of such a factory, respectively.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -1168,7 +1169,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * object obtained from FactoryBeans (for example, to auto-proxy them).
 	 * @see #applyBeanPostProcessorsAfterInitialization
 	 */
-	protected Object postProcessObjectFromFactoryBean(Object object, String beanName) {
+	protected Object postProcessObjectFromFactoryBean(Object object, String beanName) throws BeansException {
 		return applyBeanPostProcessorsAfterInitialization(object, beanName);
 	}
 
