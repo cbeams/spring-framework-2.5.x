@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,17 @@ import junit.framework.TestCase;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.XmlWebApplicationContext;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  */
 public class AopNamespaceHandlerScopeTests extends TestCase {
 
@@ -50,12 +50,17 @@ public class AopNamespaceHandlerScopeTests extends TestCase {
 
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(oldRequest));
 
-		ITestBean scoped = getTestBean("requestScoped");
+		ITestBean scoped = (ITestBean) this.context.getBean("requestScoped");
+		assertTrue("Should be AOP proxy", AopUtils.isAopProxy(scoped));
+		assertTrue("Should be target class proxy", scoped instanceof TestBean);
+
+		ITestBean testBean = (ITestBean) this.context.getBean("testBean");
+		assertTrue("Should be AOP proxy", AopUtils.isAopProxy(testBean));
+		assertFalse("Regular bean should be JDK proxy", testBean instanceof TestBean);
 
 		String rob = "Rob Harrop";
 		String bram = "Bram Smeets";
 
-		assertTrue("Should be AOP proxy", AopUtils.isAopProxy(scoped));
 		assertEquals(rob, scoped.getName());
 		scoped.setName(bram);
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(newRequest));
@@ -74,12 +79,17 @@ public class AopNamespaceHandlerScopeTests extends TestCase {
 		request.setSession(oldSession);
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 
-		ITestBean scoped = getTestBean("sessionScoped");
+		ITestBean scoped = (ITestBean) this.context.getBean("sessionScoped");
+		assertTrue("Should be AOP proxy", AopUtils.isAopProxy(scoped));
+		assertFalse("Should not be target class proxy", scoped instanceof TestBean);
+
+		ITestBean testBean = (ITestBean) this.context.getBean("testBean");
+		assertTrue("Should be AOP proxy", AopUtils.isAopProxy(testBean));
+		assertFalse("Regular bean should be JDK proxy", testBean instanceof TestBean);
 
 		String rob = "Rob Harrop";
 		String bram = "Bram Smeets";
 
-		assertTrue("Should be AOP proxy", AopUtils.isAopProxy(scoped));
 		assertEquals(rob, scoped.getName());
 		scoped.setName(bram);
 		request.setSession(newSession);
@@ -88,10 +98,6 @@ public class AopNamespaceHandlerScopeTests extends TestCase {
 		assertEquals(bram, scoped.getName());
 
 		assertTrue("Should have advisors", ((Advised) scoped).getAdvisors().length > 0);
-	}
-
-	private ITestBean getTestBean(String name) {
-		return (ITestBean) this.context.getBean(name);
 	}
 
 }

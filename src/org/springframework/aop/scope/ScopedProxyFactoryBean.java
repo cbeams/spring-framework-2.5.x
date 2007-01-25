@@ -18,6 +18,7 @@ package org.springframework.aop.scope;
 
 import java.lang.reflect.Modifier;
 
+import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
@@ -100,6 +101,10 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, 
 		// Add an introduction that implements only the methods on ScopedObject.
 		ScopedObject scopedObject = new DefaultScopedObject(cbf, this.scopedTargetSource.getTargetBeanName());
 		pf.addAdvice(new DelegatingIntroductionInterceptor(scopedObject));
+
+		// Add the AopInfrastructureBean marker to indicate that the scoped proxy
+		// itself is not subject to auto-proxying! Only its target bean is.
+		pf.addInterface(AopInfrastructureBean.class);
 
 		this.proxy = pf.getProxy(cbf.getBeanClassLoader());
 	}

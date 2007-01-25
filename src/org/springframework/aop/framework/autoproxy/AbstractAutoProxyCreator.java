@@ -28,6 +28,7 @@ import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
@@ -39,6 +40,7 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
@@ -84,7 +86,8 @@ import org.springframework.util.ClassUtils;
  * @see DefaultAdvisorAutoProxyCreator
  */
 public abstract class AbstractAutoProxyCreator extends ProxyConfig
-		implements InstantiationAwareBeanPostProcessor, BeanClassLoaderAware, BeanFactoryAware, Ordered {
+		implements InstantiationAwareBeanPostProcessor, BeanClassLoaderAware, BeanFactoryAware,
+		Ordered, AopInfrastructureBean {
 
 	/**
 	 * Convenience constant for subclasses: Return value for "do not proxy".
@@ -302,7 +305,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	protected boolean isInfrastructureClass(Class beanClass) {
 		boolean retVal = Advisor.class.isAssignableFrom(beanClass) ||
 				Advice.class.isAssignableFrom(beanClass) ||
-				AbstractAutoProxyCreator.class.isAssignableFrom(beanClass);
+				AopInfrastructureBean.class.isAssignableFrom(beanClass);
 		if (retVal && logger.isTraceEnabled()) {
 			logger.trace("Did not attempt to auto-proxy infrastructure class [" + beanClass.getName() + "]");
 		}
@@ -375,7 +378,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		// Copy our properties (proxyTargetClass etc) inherited from ProxyConfig.
 		proxyFactory.copyFrom(this);
 
-		if (!isProxyTargetClass()) {
+		if (!shouldProxyTargetClass(beanClass, beanName)) {
 			// Must allow for introductions; can't just set interfaces to
 			// the target's interfaces only.
 			Class[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass);
@@ -394,6 +397,23 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 		proxyFactory.setFrozen(this.freezeProxy);
 		return proxyFactory.getProxy(this.beanClassLoader);
+	}
+
+	/**
+	 * Determine whether the given bean should be proxied with its target
+	 * class rather than its interfaces. Checks the
+	 * {@link #setProxyTargetClass "proxyTargetClass" setting} as well as the
+	 * {@link AutoProxyUtils#PRESERVE_TARGET_CLASS_ATTRIBUTE "preserveTargetClass" attribute}
+	 * of the corresponding bean definition.
+	 * @param beanClass the class of the bean
+	 * @param beanName the name of the bean
+	 * @return whether the given bean should be proxied with its target class
+	 * @see AutoProxyUtils#shouldProxyTargetClass
+	 */
+	protected boolean shouldProxyTargetClass(Class beanClass, String beanName) {
+		return (isProxyTargetClass() ||
+				(this.beanFactory instanceof ConfigurableListableBeanFactory &&
+						AutoProxyUtils.shouldProxyTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName)));
 	}
 
 	/**

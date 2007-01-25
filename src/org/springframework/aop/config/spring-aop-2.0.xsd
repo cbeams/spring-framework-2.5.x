@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <xsd:schema xmlns="http://www.springframework.org/schema/aop"
-			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-			xmlns:beans="http://www.springframework.org/schema/beans"
-			xmlns:tool="http://www.springframework.org/schema/tool"
-			targetNamespace="http://www.springframework.org/schema/aop"
-			elementFormDefault="qualified"
-			attributeFormDefault="unqualified">
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		xmlns:beans="http://www.springframework.org/schema/beans"
+		xmlns:tool="http://www.springframework.org/schema/tool"
+		targetNamespace="http://www.springframework.org/schema/aop"
+		elementFormDefault="qualified"
+		attributeFormDefault="unqualified">
 
 	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
 	<xsd:import namespace="http://www.springframework.org/schema/tool"/>
-	
+
 	<xsd:annotation>
 		<xsd:documentation><![CDATA[
 	Defines the configuration elements used in the Spring Framework's
@@ -74,18 +74,25 @@
 	</xsd:element>
 
 	<xsd:element name="scoped-proxy">
-		<xsd:annotation>
-			<xsd:documentation source="java:org.springframework.aop.scope.ScopedProxyFactoryBean"><![CDATA[
-	Marks a bean definition as being a scoped proxy.
-	
-	A bean marked as such will be exposed via a proxy, with the 'real'
-	bean instance being retrieved from some other source (such as a
-	HttpSession) as and when required.
-			]]></xsd:documentation>
-		</xsd:annotation>
-		<xsd:simpleType>
-			<xsd:restriction base="xsd:string"/>
-		</xsd:simpleType>
+		<xsd:complexType>
+			<xsd:annotation>
+				<xsd:documentation source="java:org.springframework.aop.scope.ScopedProxyFactoryBean"><![CDATA[
+		Marks a bean definition as being a scoped proxy.
+
+		A bean marked as such will be exposed via a proxy, with the 'real'
+		bean instance being retrieved from some other source (such as a
+		HttpSession) as and when required.
+				]]></xsd:documentation>
+			</xsd:annotation>
+			<xsd:attribute name="proxy-target-class" type="xsd:boolean" default="true">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Are class-based (CGLIB) proxies to be created? This is the default; in order to
+	switch to standard Java interface-based proxies, turn this flag to "false".
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="aspectj-autoproxy">
@@ -252,7 +259,7 @@
 				<xsd:documentation source="java:org.springframework.aop.aspectj.TypePatternClassFilter"><![CDATA[
 	The AspectJ type expression that defines what types (classes) the
 	introduction is restricted to.
-	 
+
 	An example would be 'org.springframework.beans.ITestBean+'.
 				]]></xsd:documentation>
 			</xsd:annotation>
