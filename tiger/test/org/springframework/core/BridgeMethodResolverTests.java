@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,10 @@
 
 package org.springframework.core;
 
-import junit.framework.TestCase;
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -34,16 +29,32 @@ import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
+import junit.framework.TestCase;
+
+import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
+import org.springframework.transaction.annotation.Transactional;
+
 /**
  * @author Rob Harrop
- * @since 2.0
+ * @author Juergen Hoeller
  */
 public class BridgeMethodResolverTests extends TestCase {
 
 	public void testFindBridgedMethod() throws Exception {
 		Method unbridged = MyFoo.class.getDeclaredMethod("someMethod", String.class, Object.class);
 		Method bridged = MyFoo.class.getDeclaredMethod("someMethod", Serializable.class, Object.class);
-		Method other = MyFoo.class.getDeclaredMethod("someMethod", Integer.class, Object.class);
+		assertFalse(unbridged.isBridge());
+		assertTrue(bridged.isBridge());
+
+		assertEquals("Unbridged method not returned directly", unbridged, BridgeMethodResolver.findBridgedMethod(unbridged));
+		assertEquals("Incorrect bridged method returned", unbridged, BridgeMethodResolver.findBridgedMethod(bridged));
+	}
+
+	public void testFindBridgedMethodInHierarchy() throws Exception {
+		Method unbridged = DateAdder.class.getMethod("add", Date.class);
+		Method bridged = DateAdder.class.getMethod("add", Object.class);
 		assertFalse(unbridged.isBridge());
 		assertTrue(bridged.isBridge());
 
@@ -56,6 +67,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		Method bridged = MyBar.class.getDeclaredMethod("someMethod", String.class, Object.class);
 		Method other = MyBar.class.getDeclaredMethod("someMethod", Integer.class, Object.class);
 		Method bridge = MyBar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
+
 		assertTrue("Should be bridge method", BridgeMethodResolver.isBridgeMethodFor(bridge, bridged, typeParameterMap));
 		assertFalse("Should not be bridge method", BridgeMethodResolver.isBridgeMethodFor(bridge, other, typeParameterMap));
 	}
@@ -63,8 +75,10 @@ public class BridgeMethodResolverTests extends TestCase {
 	public void testCreateTypeVariableMap() throws Exception {
 		Map<String, Class> typeVariableMap = BridgeMethodResolver.createTypeVariableMap(MyBar.class);
 		assertEquals(String.class, typeVariableMap.get("T"));
+
 		typeVariableMap = BridgeMethodResolver.createTypeVariableMap(MyFoo.class);
 		assertEquals(String.class, typeVariableMap.get("T"));
+
 		typeVariableMap = BridgeMethodResolver.createTypeVariableMap(ExtendsEnclosing.ExtendsEnclosed.ExtendsReallyDeepNow.class);
 		assertEquals(Long.class, typeVariableMap.get("R"));
 		assertEquals(Integer.class, typeVariableMap.get("S"));
@@ -229,6 +243,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		return null;
 	}
 
+
 	public static interface Foo<T extends Serializable> {
 
 		void someMethod(T theArg, Object otherArg);
@@ -268,6 +283,26 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 
 		public void someMethod(Integer theArg, Object otherArg) {
+		}
+	}
+
+
+	public interface Adder<T> {
+
+		void add(T item);
+	}
+
+
+	public abstract class AbstractDateAdder implements Adder<Date> {
+
+		public abstract void add(Date date);
+	}
+
+
+	public class DateAdder extends AbstractDateAdder {
+
+		@Override
+		public void add(Date date) {
 		}
 	}
 
@@ -695,6 +730,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 	}
 
+
 	//-----------------------------
 	// SPR-2454 Test Classes
 	//-----------------------------
@@ -825,6 +861,7 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 	}
 
+
 	//-------------------
 	// SPR-2603 classes
 	//-------------------
@@ -834,31 +871,32 @@ public class BridgeMethodResolverTests extends TestCase {
 		void foo(E e);
 	}
 
+
 	public class MyHomer<T extends Bounded<T>, L extends T> implements Homer<L> {
 
 		public void foo(L t) {
 			throw new UnsupportedOperationException();
 		}
-
 	}
 
-	public class YourHomer<T extends AbstractBounded<T>, L extends T> extends
-					MyHomer<T, L> {
+
+	public class YourHomer<T extends AbstractBounded<T>, L extends T> extends MyHomer<T, L> {
 
 		public void foo(L t) {
 			throw new UnsupportedOperationException();
 		}
-
 	}
+
 
 	public interface GenericDao<T> {
 
 		public void saveOrUpdate(T t);
 	}
 
-	public interface ConvenienceGenericDao<T> extends GenericDao<T> {
 
+	public interface ConvenienceGenericDao<T> extends GenericDao<T> {
 	}
+
 
 	public class GenericSqlMapDao<T extends Serializable> implements ConvenienceGenericDao<T> {
 
@@ -867,20 +905,21 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 	}
 
+
 	public class GenericSqlMapIntegerDao<T extends Integer> extends GenericSqlMapDao<T> {
 
 		public void saveOrUpdate(T t) {
-
 		}
 	}
 
-	public class Permission {
 
+	public class Permission {
 	}
+
 
 	public class User {
-
 	}
+
 
 	public interface UserDao {
 
@@ -891,23 +930,24 @@ public class BridgeMethodResolverTests extends TestCase {
 		void save(Permission perm);
 	}
 
+
 	public abstract class AbstractDao<T> {
 
 		public void save(T t) {
-
 		}
 	}
+
 
 	public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 
 		public void save(Permission perm) {
-
 		}
 	}
 
-	public class Business<T> {
 
+	public class Business<T> {
 	}
+
 
 	public class BusinessGenericDao<T, PK extends Serializable> {
 
@@ -916,8 +956,10 @@ public class BridgeMethodResolverTests extends TestCase {
 		}
 	}
 
+
 	public class BusinessDao extends BusinessGenericDao<Business<?>, Long> {
+
     public void save(Business<?> business) {
     }
-}
+	}
 }

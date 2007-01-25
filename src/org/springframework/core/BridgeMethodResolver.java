@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.util.ReflectionUtils;
  * before calling this class, if a fallback for JDK 1.3/1.4 is desirable.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  * @see JdkVersion
  */
@@ -94,6 +95,12 @@ public abstract class BridgeMethodResolver {
 		return result;
 	}
 
+	/**
+	 * Search for the bridged method in the given candidates.
+	 * @param candidateMethods the List of candidate Methods
+	 * @param bridgeMethod the bridge method
+	 * @return the bridged method, or <code>null</code> if none found
+	 */
 	private static Method searchCandidates(List candidateMethods, Method bridgeMethod) {
 		Map typeParameterMap = createTypeVariableMap(bridgeMethod.getDeclaringClass());
 		for (int i = 0; i < candidateMethods.size(); i++) {
@@ -189,7 +196,7 @@ public abstract class BridgeMethodResolver {
 	 * otherwise <code>null</code> is returned.
 	 */
 	private static Method searchForMatch(Class type, Method bridgeMethod) {
-			return ReflectionUtils.findMethod(type, bridgeMethod.getName(), bridgeMethod.getParameterTypes());
+		return ReflectionUtils.findMethod(type, bridgeMethod.getName(), bridgeMethod.getParameterTypes());
 	}
 
 	/**
@@ -200,6 +207,9 @@ public abstract class BridgeMethodResolver {
 	static Map createTypeVariableMap(Class cls) {
 		Map typeVariableMap = new HashMap();
 
+		// interfaces
+		extractTypeVariablesFromGenericInterfaces(cls.getGenericInterfaces(), typeVariableMap);
+
 		// super class
 		Type genericType = cls.getGenericSuperclass();
 		Class type = cls.getSuperclass();
@@ -208,6 +218,7 @@ public abstract class BridgeMethodResolver {
 				ParameterizedType pt1 = (ParameterizedType) genericType;
 				populateTypeMapFromParameterizedType(typeVariableMap, pt1);
 			}
+			extractTypeVariablesFromGenericInterfaces(type.getGenericInterfaces(), typeVariableMap);
 			genericType = type.getGenericSuperclass();
 			type = type.getSuperclass();
 		}
@@ -223,10 +234,6 @@ public abstract class BridgeMethodResolver {
 			type = type.getEnclosingClass();
 		}
 
-		// interfaces
-		Type[] genericInterfaces = cls.getGenericInterfaces();
-		extractTypeVariablesFromGenericInterfaces(genericInterfaces, typeVariableMap);
-
 		return typeVariableMap;
 	}
 
@@ -236,7 +243,8 @@ public abstract class BridgeMethodResolver {
 			if (genericInterface instanceof ParameterizedType) {
 				ParameterizedType pt = (ParameterizedType) genericInterface;
 				populateTypeMapFromParameterizedType(typeVariableMap, pt);
-			} else if (genericInterface instanceof Class) {
+			}
+			else if (genericInterface instanceof Class) {
 				extractTypeVariablesFromGenericInterfaces(((Class)genericInterface).getGenericInterfaces(), typeVariableMap);
 			}
 		}
@@ -255,8 +263,7 @@ public abstract class BridgeMethodResolver {
 	 *
 	 * public class FooImpl implements Foo<String, Integer> {
 	 *  ..
-	 * }
-	 * </pre>
+	 * }</pre>
 	 * For '<code>FooImpl</code>' the following mappings would be added to the {@link Map}:
 	 * {S=java.lang.String, T=java.lang.Integer}.
 	 */
