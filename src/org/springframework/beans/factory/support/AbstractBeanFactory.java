@@ -1232,7 +1232,13 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 		}
 
 		if (object != null && (mbd == null || !mbd.isSynthetic())) {
-			object = postProcessObjectFromFactoryBean(object, beanName);
+			try {
+				object = postProcessObjectFromFactoryBean(object, beanName);
+			}
+			catch (Throwable ex) {
+				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+						"Post-processing of the FactoryBean's object failed", ex);
+			}
 		}
 
 		return object;
@@ -1246,8 +1252,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 * @param object the object obtained from the FactoryBean.
 	 * @param beanName the name of the bean
 	 * @return the object to expose
+	 * @throws BeansException if any post-processing failed
 	 */
-	protected Object postProcessObjectFromFactoryBean(Object object, String beanName) {
+	protected Object postProcessObjectFromFactoryBean(Object object, String beanName) throws BeansException {
 		return object;
 	}
 
