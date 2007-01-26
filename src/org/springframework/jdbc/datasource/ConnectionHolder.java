@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.springframework.util.Assert;
 
 /**
  * Connection holder, wrapping a JDBC Connection.
- * DataSourceTransactionManager binds instances of this class
- * to the thread, for a given DataSource.
+ * {@link DataSourceTransactionManager} binds instances of this class
+ * to the thread, for a specific DataSource.
  *
  * <p>Inherits rollback-only support for nested JDBC transactions
  * and reference count functionality from the base class.
@@ -64,12 +64,27 @@ public class ConnectionHolder extends ResourceHolderSupport {
 
 	/**
 	 * Create a new ConnectionHolder for the given JDBC Connection,
-	 * wrapping it with a SimpleConnectionHandle.
+	 * wrapping it with a {@link SimpleConnectionHandle},
+	 * assuming that there is no ongoing transaction.
 	 * @param connection the JDBC Connection to hold
 	 * @see SimpleConnectionHandle
+	 * @see #ConnectionHolder(java.sql.Connection, boolean)
 	 */
 	public ConnectionHolder(Connection connection) {
 		this.connectionHandle = new SimpleConnectionHandle(connection);
+	}
+
+	/**
+	 * Create a new ConnectionHolder for the given JDBC Connection,
+	 * wrapping it with a {@link SimpleConnectionHandle}.
+	 * @param connection the JDBC Connection to hold
+	 * @param transactionActive whether the given Connection is involved
+	 * in an ongoing transaction
+	 * @see SimpleConnectionHandle
+	 */
+	public ConnectionHolder(Connection connection, boolean transactionActive) {
+		this(connection);
+		this.transactionActive = transactionActive;
 	}
 
 
