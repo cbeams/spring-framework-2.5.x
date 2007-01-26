@@ -13,44 +13,76 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.aop.aspectj.annotation;
 
-import junit.framework.TestCase;
-import org.springframework.test.AssertThrows;
-import org.springframework.beans.TestBean;
-import org.springframework.beans.ITestBean;
-import org.springframework.aop.aspectj.AspectJAdviceParameterNameDiscoverer;
+package org.springframework.aop.aspectj.annotation;
 
 import java.lang.reflect.Method;
 
+import junit.framework.TestCase;
+
+import org.springframework.aop.aspectj.AspectJAdviceParameterNameDiscoverer;
+import org.springframework.beans.ITestBean;
+import org.springframework.beans.TestBean;
+import org.springframework.test.AssertThrows;
+import org.springframework.transaction.annotation.Transactional;
+
 /**
  * @author Adrian Colyer
- * @since 2.0.3
+ * @author Juergen Hoeller
  */
 public class ArgumentBindingTests extends TestCase {
 
-    public void testBindingInPointcutUsedByAdvice() {
-        TestBean tb = new TestBean();
-        AspectJProxyFactory proxyFactory = new AspectJProxyFactory(tb);
-        proxyFactory.addAspect(NamedPointcutWithArgs.class);
-        final ITestBean proxiedTestBean = (ITestBean) proxyFactory.getProxy();
-        new AssertThrows(IllegalArgumentException.class) {
+	public void testBindingInPointcutUsedByAdvice() {
+		TestBean tb = new TestBean();
+		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(tb);
+		proxyFactory.addAspect(NamedPointcutWithArgs.class);
+		final ITestBean proxiedTestBean = (ITestBean) proxyFactory.getProxy();
+		new AssertThrows(IllegalArgumentException.class) {
 			public void test() throws Exception {
-                proxiedTestBean.setName("Supercalifragalisticexpialidocious");
-            }
+				proxiedTestBean.setName("Supercalifragalisticexpialidocious");
+			}
 		}.runTest();
 	}
 
-    public void testParameterNameDiscoverWithReferencePcut() throws NoSuchMethodException {
-        AspectJAdviceParameterNameDiscoverer discoverer =
-                new AspectJAdviceParameterNameDiscoverer("somepc(formal) && set(* *)");
-        discoverer.setRaiseExceptions(true);
-        Method methodUsedForParameterTypeDiscovery =
-                getClass().getMethod("methodWithOneParam",String.class);
-        String[] pnames = discoverer.getParameterNames(methodUsedForParameterTypeDiscovery);
-        assertEquals("one parameter name",1,pnames.length);
-        assertEquals("formal",pnames[0]);
-    }
+	public void testAnnotationArgumentNameBinding() {
+		TransactionalBean tb = new TransactionalBean();
+		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(tb);
+		proxyFactory.addAspect(PointcutWithAnnotationArgument.class);
+		final ITransactionalBean proxiedTestBean = (ITransactionalBean) proxyFactory.getProxy();
+		new AssertThrows(IllegalStateException.class) {
+			public void test() throws Exception {
+				proxiedTestBean.doInTransaction();
+			}
+		}.runTest();
+	}
 
-    public void methodWithOneParam(String aParam) {}
+	public void testParameterNameDiscoverWithReferencePointcut() throws Exception {
+		AspectJAdviceParameterNameDiscoverer discoverer =
+				new AspectJAdviceParameterNameDiscoverer("somepc(formal) && set(* *)");
+		discoverer.setRaiseExceptions(true);
+		Method methodUsedForParameterTypeDiscovery =
+				getClass().getMethod("methodWithOneParam", String.class);
+		String[] pnames = discoverer.getParameterNames(methodUsedForParameterTypeDiscovery);
+		assertEquals("one parameter name", 1, pnames.length);
+		assertEquals("formal", pnames[0]);
+	}
+
+	public void methodWithOneParam(String aParam) {
+	}
+
+
+	public interface ITransactionalBean {
+
+		@Transactional
+		void doInTransaction();
+	}
+
+
+	public static class TransactionalBean implements ITransactionalBean {
+
+		@Transactional
+		public void doInTransaction() {
+		}
+	}
+
 }
