@@ -6,39 +6,77 @@ http://www.springframework.org
 Changes in version 2.0.3 (5.2.2007)
 -----------------------------------
 
+General
+* all checks for library presence are explicitly performed with Spring's own ClassLoader (not the application's)
+
 Package org.springframework.aop
+* introduced TargetClassAware interface, extended by Advised, and corresponding "AopUtils.getTargetClass" method
 * added overloaded ProxyFactory constructors for single-interceptor and TargetSource-only proxies
 * AbstractSingletonProxyFactoryBean and AbstractAutoProxyCreator use the bean ClassLoader for generating proxies
-* ScopedProxyFactoryBean uses the BeanFactory's bean ClassLoader for generating scoped proxies
+* reworked AdvisorAdapter and AdvisorAdapterRegistry to expose a MethodInterceptor right away
+* added "forClass" factory method to EmptyTargetSource, allowing to indicate a specific target class
 * AspectJAdviceParameterNameDiscoverer properly considers reference pointcuts as potential source of parameter binding
+* PrototypeAspectInstanceFactory enforces that the target bean is a prototype; it does not accept scoped objects
+* PrototypeTargetSource enforces that the target bean is a prototype; it does not accept scoped objects
+* PrototypeTargetSource destroys bean instances on release (honors DisposableBean and/or destroy-method)
+* ThreadLocalTargetSource destroys bean instances via ConfigurableBeanFactory's "destroyBean" (if possible)
+* added SimpleBeanTargetSource, performing a fresh getBean lookup on every request, for any kind of bean
+* ScopedProxyFactoryBean uses the BeanFactory's bean ClassLoader for generating scoped proxies
+* auto-proxying ignores objects exposed by ScopedProxyFactoryBeans; only their target beans are eligible
+* added "proxy-target-class" attribute to "scoped-proxy" XML tag, allowing to turn target class proxying off
+* reworked "scoped-proxy" XML tag to enforce a target class proxy selectively, for its specific target bean
 
 Package org.springframework.beans
 * added "getTypeConverter()" method to ConfigurableBeanFactory interface
 * MethodInvokingFactoryBean obtains the TypeConverter from the BeanFactory that it runs in
 * List/Set/MapFactoryBean convert elements to the generic type expressed in a superclass/interface of the target class
 * PropertyPlaceholderConfigurer does not log resolved (potentially decrypted) placeholder values at debug level anymore
+* PreferencesPlaceholderConfigurer resolves paths in placeholders ("myPath/myPlaceholderKey") as preference nodes
+* added "isPrototype(beanName)" method to BeanFactory interface, explicitly checking for an independent instance
+* added extended SmartFactoryBean interface, including an "isPrototype()" method that checks for an independent instance
+* AbstractBeanFactory throws BeanCreationException will full context info if "postProcessObjectFromFactoryBean" fails
 * turned visibility of AbstractAutowireCapableBeanFactory's "applyPropertyValues" method from private to protected
+* added deprecated "findXxx" signatures back to NamespaceHandlerSupport, for full compatibility with Spring 2.0 final
+* indexed constructor arguments support collection merging (driven by merge="true", analogous to property values)
+* collection merging accepts a null parent value as well, simply using the child collection as-is in this case
+
+Package org.springframework.context
+* AbstractRefreshableApplicationContext allows BeanFactory access during the destruction phase of a "refresh()" call
 
 Package org.springframework.dao
 * PersistenceExceptionTranslationPostProcessor uses the bean ClassLoader for generating translation proxies
 
 Package org.springframework.core
 * fixed BridgeMethodResolver's "populateTypeMapFromParameterizedType" to properly handle nested generics
+* fixed BridgeMethodResolver to properly detect a generic interface even in a class hierarchy
 
 Package org.springframework.ejb
 * AbstractEnterpriseBean uses the EJB instance as WeakReferenceMonitor handle, instead of a BeanFactoryReference proxy
 
+Package org.springframework.jdbc
+* added overloaded ConnectionHolder constructor with a given Connection plus "transactionActive" flag as arguments
+* UserCredentialDataSourceAdapter delegates "getConnection(String, String)" to "doGetConnection", for unified handling
+* introduced IsolationLevelDataSourceAdapter, preparing Connections with isolation level (transaction's or fixed)
+* introduced WebSphereDataSourceAdapter, obtaining Connections through WebSphere's JDBCConnectionSpec facility
+
 Package org.springframework.jms
+* AbstractMessageListenerContainer's "refreshSharedConnection" properly resets shared Connection in refresh failure case
 * added dynamic scaling up/down to DefaultMessageListenerContainer, configured through "maxConcurrentConsumers" property
 
 Package org.springframework.jmx
 * MBeanExporter and MBeanServerConnectionFactoryBean use the bean ClassLoader for generating lazy-init proxies
+* MBeanExporter supports lazy-init standard MBeans analogously to lazy-init Spring beans with ModelMBean wrapping
+* factored out protected "isMBean(Class") method in MBeanExporter, to allow for extending the default MBean check
 
 Package org.springframework.jndi
 * JndiObjectFactoryBean uses the bean ClassLoader for generating lazy-init proxies
 
 Package org.springframework.mock
 * added "clearAttributes()" method to MockHttpServletRequest and MockHttpSession
+* introduced MockFilterChain (recording the call) and PassThroughFilterChain (passing the call on to a Filter/Servlet)
+
+Package org.springframework.orm
+* added "flushMode" init parameter to Hibernate3 OpenSessionInViewFilter (supporting "AUTO" etc as value)
 
 Package org.springframework.remoting
 * all remoting ProxyFactoryBeans use the bean ClassLoader for generating service proxies
@@ -47,24 +85,30 @@ Package org.springframework.remoting
 * added "alwaysCreate" flag to RmiRegistryFactoryBean, for avoiding the overhead of locating an existing registry
 * added "alwaysCreateRegistry" flag to RmiServiceExporter, for avoiding the overhead of locating an existing registry
 * CodebaseAwareObjectInputStream uses "Class.forName", to be able to resolve array classes with any ClassLoader
+* added "getTargetInterfaceName()" method to RmiInvocationHandler, for client-side introspection
 
 Package org.springframework.scripting
 * Bsh/JRuby/GroovyScriptFactory uses the bean ClassLoader for generating script objects
 * BshScriptUtils and BshScriptFactory support BeanShell scripts that declare an actual class or instance
 * JRubyScriptUtils passes the declared return type to JRuby, for proper conversion of number types
 * ScriptFactoryPostProcessor uses the bean ClassLoader for generating refreshable script proxies
+* LangNamespaceHandler always registers all BeanDefinitionParsers, failing with NoClassDefFoundError for actual script
 
 Package org.springframework.transaction
 * AbstractPlatformTransactionManager exposes "actualTransactionActive" flag for a newly synchronized existing tx as well
 * AbstractPlatformTransactionManager marks an existing transaction as rollback-only even in case of a commit exception
 * turned various AbstractPlatformTransactionManager methods from private to protected, for reuse in specific subclasses
+* JtaTransactionManager does not fail if default UserTransaction lookup fails: falls back on TransactionManager instead
+* added "order" attribute to "tx:annotation-driven" tag, determining the order of the tx advisor in the advice chain
 
 Package org.springframework.util
 * ResourceUtils's "extractJarFileURL" only prepends a slash in front of a file path if it doesn't already have a slash
 
 Package org.springframework.web
 * RequestContextListener works correctly even in case of the "requestDestroyed" callback coming from a different thread
+* added "rootHandler" bean property to AbstractUrlHandlerMapping, kicking in for the "/" path
 * OptionsTag accepts no or empty items specified, simply not rendering any option tags in such a case
+* added "messageArgs" and "messageArgsText" macros to the "spring.ftl" FreeMarker macro template
 
 
 Changes in version 2.0.2 (8.1.2007)
