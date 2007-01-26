@@ -49,6 +49,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager} implementation
@@ -179,7 +180,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	private transient UserTransaction userTransaction;
 
-	private String userTransactionName = DEFAULT_USER_TRANSACTION_NAME;
+	private String userTransactionName;
+
+	private boolean autodetectUserTransaction = true;
 
 	private boolean cacheUserTransaction = true;
 
@@ -211,8 +214,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	public JtaTransactionManager(UserTransaction userTransaction) {
 		this();
+		Assert.notNull(userTransaction, "UserTransaction must not be null");
 		this.userTransaction = userTransaction;
-		afterPropertiesSet();
 	}
 
 	/**
@@ -222,9 +225,10 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	public JtaTransactionManager(UserTransaction userTransaction, TransactionManager transactionManager) {
 		this();
+		Assert.notNull(userTransaction, "UserTransaction must not be null");
+		Assert.notNull(transactionManager, "TransactionManager must not be null");
 		this.userTransaction = userTransaction;
 		this.transactionManager = transactionManager;
-		afterPropertiesSet();
 	}
 
 	/**
@@ -233,11 +237,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	public JtaTransactionManager(TransactionManager transactionManager) {
 		this();
-		// Do not attempt UserTransaction lookup: use given TransactionManager
-		// to get a UserTransaction handle.
-		this.userTransactionName = null;
+		Assert.notNull(transactionManager, "TransactionManager must not be null");
 		this.transactionManager = transactionManager;
-		afterPropertiesSet();
+		this.userTransaction = buildUserTransaction(transactionManager);
 	}
 
 
@@ -281,6 +283,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * <p>Typically just used for local JTA setups; in a J2EE environment,
 	 * the UserTransaction will always be fetched from JNDI.
 	 * @see #setUserTransactionName
+	 * @see #setAutodetectUserTransaction
 	 */
 	public void setUserTransaction(UserTransaction userTransaction) {
 		this.userTransaction = userTransaction;
@@ -295,12 +298,28 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Set the JNDI name of the JTA UserTransaction.
-	 * The J2EE default "java:comp/UserTransaction" is used if not set.
+	 * <p>Note that the UserTransaction will be autodetected at the J2EE default
+	 * location "java:comp/UserTransaction" if not specified explicitly.
 	 * @see #DEFAULT_USER_TRANSACTION_NAME
 	 * @see #setUserTransaction
+	 * @see #setAutodetectUserTransaction
 	 */
 	public void setUserTransactionName(String userTransactionName) {
 		this.userTransactionName = userTransactionName;
+	}
+
+	/**
+	 * Set whether to autodetect the JTA UserTransaction at its default
+	 * JNDI location "java:comp/UserTransaction", as specified by J2EE.
+	 * Will proceed without UserTransaction if none found.
+	 * <p>Default is "true", autodetecting the UserTransaction unless
+	 * it has been specified explicitly. Turn this flag off to allow for
+	 * JtaTransactionManager operating against the TransactionManager only,
+	 * despite a default UserTransaction being available.
+	 * @see #DEFAULT_USER_TRANSACTION_NAME
+	 */
+	public void setAutodetectUserTransaction(boolean autodetectUserTransaction) {
+		this.autodetectUserTransaction = autodetectUserTransaction;
 	}
 
 	/**
@@ -313,6 +332,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * for every transaction. This is only necessary for application servers
 	 * that return a new UserTransaction for every transaction, keeping state
 	 * tied to the UserTransaction object itself rather than the current thread.
+	 * @see #setUserTransactionName
 	 */
 	public void setCacheUserTransaction(boolean cacheUserTransaction) {
 		this.cacheUserTransaction = cacheUserTransaction;
@@ -324,7 +344,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * <p>A TransactionManager is necessary for suspending and resuming transactions,
 	 * as this not supported by the UserTransaction interface.
 	 * <p>Note that the TransactionManager will be autodetected if the JTA
-	 * UserTransaction object implements the JTA TransactionManager interface too.
+	 * UserTransaction object implements the JTA TransactionManager interface too,
+	 * as well as autodetected at various well-known fallback JNDI locations.
 	 * @see #setTransactionManagerName
 	 * @see #setAutodetectTransactionManager
 	 */
@@ -344,8 +365,10 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * <p>A TransactionManager is necessary for suspending and resuming transactions,
 	 * as this not supported by the UserTransaction interface.
 	 * <p>Note that the TransactionManager will be autodetected if the JTA
-	 * UserTransaction object implements the JTA TransactionManager interface too.
+	 * UserTransaction object implements the JTA TransactionManager interface too,
+	 * as well as autodetected at various well-known fallback JNDI locations.
 	 * @see #setTransactionManager
+	 * @see #setAutodetectTransactionManager
 	 */
 	public void setTransactionManagerName(String transactionManagerName) {
 		this.transactionManagerName = transactionManagerName;
@@ -357,7 +380,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * TransactionManager is "java:comp/UserTransaction", same as for the UserTransaction).
 	 * Also checks the fallback JNDI locations "java:comp/TransactionManager" and
 	 * "java:/TransactionManager". Will proceed without TransactionManager if none found.
-	 * <p>Default is "true". Can be turned off to deliberately ignore an available
+	 * <p>Default is "true", autodetecting the TransactionManager unless it has been
+	 * specified explicitly. Can be turned off to deliberately ignore an available
 	 * TransactionManager, for example when there are known issues with suspend/resume
 	 * and any attempt to use REQUIRES_NEW or NOT_SUPPORTED should fail fast.
 	 * @see #FALLBACK_TRANSACTION_MANAGER_NAMES
@@ -379,7 +403,19 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 
+	/**
+	 * Initialize the UserTransaction as well as the TransactionManager handle.
+	 * @see #initUserTransactionAndTransactionManager()
+	 */
 	public void afterPropertiesSet() throws TransactionSystemException {
+		initUserTransactionAndTransactionManager();
+	}
+
+	/**
+	 * Initialize the UserTransaction as well as the TransactionManager handle.
+	 * @throws TransactionSystemException if initialization failed
+	 */
+	protected void initUserTransactionAndTransactionManager() throws TransactionSystemException {
 		// Fetch JTA UserTransaction from JNDI, if necessary.
 		if (this.userTransaction == null) {
 			if (this.userTransactionName != null) {
@@ -400,6 +436,11 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 
+		// Autodetect UserTransaction at its default JNDI location.
+		if (this.userTransaction == null && this.autodetectUserTransaction) {
+			this.userTransaction = findUserTransaction();
+		}
+
 		// Autodetect UserTransaction object that implements TransactionManager,
 		// and check fallback JNDI locations else.
 		if (this.transactionManager == null && this.autodetectTransactionManager) {
@@ -408,12 +449,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 		// If only JTA TransactionManager specified, create UserTransaction handle for it.
 		if (this.userTransaction == null && this.transactionManager != null) {
-			if (this.transactionManager instanceof UserTransaction) {
-				this.userTransaction = (UserTransaction) this.transactionManager;
-			}
-			else {
-				this.userTransaction = new UserTransactionAdapter(this.transactionManager);
-			}
+			this.userTransaction = buildUserTransaction(this.transactionManager);
 		}
 
 		// We at least need the JTA UserTransaction.
@@ -425,7 +461,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		else {
 			throw new IllegalStateException(
 					"Either 'userTransaction' or 'userTransactionName' or 'transactionManager' " +
-					"or 'transactionManagerName' must be set");
+					"or 'transactionManagerName' must be specified");
 		}
 
 		// For transaction suspension, the JTA TransactionManager is necessary too.
@@ -516,6 +552,29 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	/**
+	 * Find the JTA UserTransaction through a default JNDI lookup:
+	 * "java:comp/UserTransaction".
+	 * @return the JTA UserTransaction reference, or <code>null</code> if not found
+	 * @see #DEFAULT_USER_TRANSACTION_NAME
+	 */
+	protected UserTransaction findUserTransaction() {
+		String jndiName = DEFAULT_USER_TRANSACTION_NAME;
+		try {
+			UserTransaction ut = (UserTransaction) getJndiTemplate().lookup(jndiName, UserTransaction.class);
+			if (logger.isDebugEnabled()) {
+				logger.debug("JTA UserTransaction found at default JNDI location [" + jndiName + "]");
+			}
+			return ut;
+		}
+		catch (NamingException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("No JTA UserTransaction found at default JNDI location [" + jndiName + "]", ex);
+			}
+			return null;
+		}
+	}
+
+	/**
 	 * Find the JTA TransactionManager through autodetection: checking whether the
 	 * UserTransaction object implements the TransactionManager, and checking the
 	 * fallback JNDI locations.
@@ -535,13 +594,13 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		for (int i = 0; i < FALLBACK_TRANSACTION_MANAGER_NAMES.length; i++) {
 			String jndiName = FALLBACK_TRANSACTION_MANAGER_NAMES[i];
 			try {
-				TransactionManager tm = lookupTransactionManager(jndiName);
+				TransactionManager tm = (TransactionManager) getJndiTemplate().lookup(jndiName, TransactionManager.class);
 				if (logger.isDebugEnabled()) {
 					logger.debug("JTA TransactionManager found at fallback JNDI location [" + jndiName + "]");
 				}
 				return tm;
 			}
-			catch (TransactionSystemException ex) {
+			catch (NamingException ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("No JTA TransactionManager found at fallback JNDI location [" + jndiName + "]", ex);
 				}
@@ -550,6 +609,20 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 		// OK, so no JTA TransactionManager is available...
 		return null;
+	}
+
+	/**
+	 * Build a UserTransaction handle based on the given TransactionManager.
+	 * @param transactionManager the TransactionManager
+	 * @return a corresponding UserTransaction handle
+	 */
+	protected UserTransaction buildUserTransaction(TransactionManager transactionManager) {
+		if (transactionManager instanceof UserTransaction) {
+			return (UserTransaction) transactionManager;
+		}
+		else {
+			return new UserTransactionAdapter(transactionManager);
+		}
 	}
 
 
@@ -565,8 +638,9 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	protected Object doGetTransaction() {
 		UserTransaction ut = getUserTransaction();
-		if (!this.cacheUserTransaction && this.userTransactionName != null) {
-			ut = lookupUserTransaction(this.userTransactionName);
+		if (!this.cacheUserTransaction) {
+			ut = lookupUserTransaction(
+					this.userTransactionName != null ? this.userTransactionName : DEFAULT_USER_TRANSACTION_NAME);
 		}
 		return doGetJtaTransaction(ut);
 	}
@@ -887,12 +961,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		this.jndiTemplate = new JndiTemplate();
 
 		// Perform lookup for JTA UserTransaction and TransactionManager.
-		if (this.userTransactionName != null) {
-			this.userTransaction = lookupUserTransaction(this.userTransactionName);
-		}
-		if (this.transactionManagerName != null) {
-			this.transactionManager = lookupTransactionManager(this.transactionManagerName);
-		}
+		initUserTransactionAndTransactionManager();
 	}
 
 }

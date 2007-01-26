@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.easymock.MockControl;
 
 import org.springframework.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.transaction.jta.JtaTransactionManager;
+import org.springframework.transaction.jta.UserTransactionAdapter;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -36,46 +37,75 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class JndiJtaTransactionManagerTests extends TestCase {
 
 	public void testJtaTransactionManagerWithDefaultJndiLookups1() throws Exception {
-		doTestJtaTransactionManagerWithDefaultJndiLookups("java:comp/TransactionManager", true);
+		doTestJtaTransactionManagerWithDefaultJndiLookups("java:comp/TransactionManager", true, true);
 	}
 
 	public void testJtaTransactionManagerWithDefaultJndiLookups2() throws Exception {
-		doTestJtaTransactionManagerWithDefaultJndiLookups("java:/TransactionManager", true);
+		doTestJtaTransactionManagerWithDefaultJndiLookups("java:/TransactionManager", true, true);
 	}
 
-	public void testJtaTransactionManagerWithDefaultJndiLookupsAndToTmFound() throws Exception {
-		doTestJtaTransactionManagerWithDefaultJndiLookups("java:/tm", false);
+	public void testJtaTransactionManagerWithDefaultJndiLookupsAndNoTmFound() throws Exception {
+		doTestJtaTransactionManagerWithDefaultJndiLookups("java:/tm", false, true);
 	}
 
-	private void doTestJtaTransactionManagerWithDefaultJndiLookups(String tmName, boolean tmFound) throws Exception {
+	public void testJtaTransactionManagerWithDefaultJndiLookupsAndNoUtFound() throws Exception {
+		doTestJtaTransactionManagerWithDefaultJndiLookups("java:/TransactionManager", true, false);
+	}
+
+	private void doTestJtaTransactionManagerWithDefaultJndiLookups(String tmName, boolean tmFound, boolean defaultUt)
+			throws Exception {
+
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();
-		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
-		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
-		ut.begin();
-		utControl.setVoidCallable(1);
-		ut.commit();
-		utControl.setVoidCallable(1);
+		if (defaultUt) {
+			ut.getStatus();
+			utControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+			ut.getStatus();
+			utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+			ut.begin();
+			utControl.setVoidCallable(1);
+			ut.commit();
+			utControl.setVoidCallable(1);
+		}
 		utControl.replay();
 
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
+		if (!defaultUt) {
+			tm.getStatus();
+			tmControl.setReturnValue(Status.STATUS_NO_TRANSACTION, 1);
+			tm.getStatus();
+			tmControl.setReturnValue(Status.STATUS_ACTIVE, 1);
+			tm.begin();
+			tmControl.setVoidCallable(1);
+			tm.commit();
+			tmControl.setVoidCallable(1);
+		}
+		tmControl.replay();
 
 		JtaTransactionManager ptm = new JtaTransactionManager();
 		ExpectedLookupTemplate jndiTemplate = new ExpectedLookupTemplate();
-		jndiTemplate.addObject("java:comp/UserTransaction", ut);
+		if (defaultUt) {
+			jndiTemplate.addObject("java:comp/UserTransaction", ut);
+		}
 		jndiTemplate.addObject(tmName, tm);
 		ptm.setJndiTemplate(jndiTemplate);
 		ptm.afterPropertiesSet();
 
-		assertEquals(ut, ptm.getUserTransaction());
 		if (tmFound) {
 			assertEquals(tm, ptm.getTransactionManager());
 		}
 		else {
 			assertNull(ptm.getTransactionManager());
+		}
+
+		if (defaultUt) {
+			assertEquals(ut, ptm.getUserTransaction());
+		}
+		else {
+			assertTrue(ptm.getUserTransaction() instanceof UserTransactionAdapter);
+			UserTransactionAdapter uta = (UserTransactionAdapter) ptm.getUserTransaction();
+			assertEquals(tm, uta.getTransactionManager());
 		}
 
 		TransactionTemplate tt = new TransactionTemplate(ptm);
@@ -92,6 +122,7 @@ public class JndiJtaTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
 		utControl.verify();
+		tmControl.verify();
 	}
 
 	public void testJtaTransactionManagerWithCustomJndiLookups() throws Exception {
