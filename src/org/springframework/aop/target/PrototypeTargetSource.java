@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,32 @@ package org.springframework.aop.target;
 import org.springframework.beans.BeansException;
 
 /**
- * TargetSource that creates a new instance of the target bean for each request.
- * Can only be used in a bean factory.
+ * TargetSource that creates a new instance of the target bean for each
+ * request, destroying each instance on release (after each request).
+ * Obtains bean instances from its containing
+ * {@link org.springframework.beans.factory.BeanFactory}.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
+ * @see #setBeanFactory
+ * @see #setTargetBeanName
  */
-public final class PrototypeTargetSource extends AbstractPrototypeBasedTargetSource {
+public class PrototypeTargetSource extends AbstractPrototypeBasedTargetSource {
 
+	/**
+	 * Obtain a new prototype instance for every call.
+	 * @see #newPrototypeInstance()
+	 */
 	public Object getTarget() throws BeansException {
 		return newPrototypeInstance();
+	}
+
+	/**
+	 * Destroy the given independent instance.
+	 * @see #destroyPrototypeInstance
+	 */
+	public void releaseTarget(Object target) {
+		destroyPrototypeInstance(target);
 	}
 
 	public String toString() {
