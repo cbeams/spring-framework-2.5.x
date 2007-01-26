@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,23 @@
 package org.springframework.beans.factory;
 
 /**
- * Interface to be implemented by objects used within a BeanFactory
- * that are themselves factories. If a bean implements this interface,
- * it is used as a factory, not directly as a bean.
+ * Interface to be implemented by objects used within a {@link BeanFactory}
+ * which are themselves factories. If a bean implements this interface,
+ * it is used as a factory for an object to expose, not directly as a bean
+ * instance that will be exposed itself.
  *
- * <p><b>NB: A bean that implements this interface cannot be used
- * as a normal bean.</b> A FactoryBean is defined in a bean style,
- * but the object exposed for bean references is always the object
- * that it creates.
+ * <p><b>NB: A bean that implements this interface cannot be used as a
+ * normal bean.</b> A FactoryBean is defined in a bean style, but the
+ * object exposed for bean references is always the object that it creates.
  *
  * <p>FactoryBeans can support singletons and prototypes, and can
  * either create objects lazily on demand or eagerly on startup.
  *
- * <p>This interface is heavily used within the framework, for
+ * <p>This interface is heavily used within the framework itself, for
  * example for the AOP {@link org.springframework.aop.framework.ProxyFactoryBean}
- * or {@link org.springframework.jndi.JndiObjectFactoryBean}.
- * It can be used for application components, but this is not common
- * outside of infrastructure code.
+ * or the {@link org.springframework.jndi.JndiObjectFactoryBean}.
+ * It can be used for application components as well; however,
+ * this is not common outside of infrastructure code.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -64,8 +64,8 @@ public interface FactoryBean {
 	Object getObject() throws Exception;
 
 	/**
-	 * Return the type of object that this FactoryBean creates, or <code>null</code>
-	 * if not known in advance.
+	 * Return the type of object that this FactoryBean creates,
+	 * or <code>null</code> if not known in advance.
 	 * <p>This allows one to check for specific types of beans without
 	 * instantiating objects, for example on autowiring.
 	 * <p>In the case of implementations that are creating a singleton object,
@@ -85,8 +85,8 @@ public interface FactoryBean {
 	Class getObjectType();
 
 	/**
-	 * Is the bean managed by this factory a singleton or a prototype?
-	 * That is, will <code>getObject()</code> always return the same object
+	 * Is the object managed by this factory a singleton? That is,
+	 * will {@link #getObject()} always return the same object
 	 * (a reference that can be cached)?
 	 * <p><b>NOTE:</b> If a FactoryBean indicates to hold a singleton object,
 	 * the object returned from <code>getObject()</code> might get cached
@@ -95,8 +95,17 @@ public interface FactoryBean {
 	 * <p>The singleton status of the FactoryBean itself will generally
 	 * be provided by the owning BeanFactory; usually, it has to be
 	 * defined as singleton there.
-	 * @return if this bean is a singleton
+	 * <p><b>NOTE:</b> This method returning <code>false</code> does not
+	 * necessarily indicate that returned objects are independent instances.
+	 * An implementation of the extended {@link SmartFactoryBean} interface
+	 * may explicitly indicate independent instances through its
+	 * {@link SmartFactoryBean#isPrototype()} method. Plain {@link FactoryBean}
+	 * implementations which do not implement this extended interface are
+	 * simply assumed to always return independent instances if the
+	 * <code>isSingleton()</code> implementation returns <code>false</code>.
+	 * @return if the exposed object is a singleton
 	 * @see #getObject()
+	 * @see SmartFactoryBean#isPrototype()
 	 */
 	boolean isSingleton();
 

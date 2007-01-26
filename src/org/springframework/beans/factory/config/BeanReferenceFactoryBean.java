@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.SmartFactoryBean;
 
 /**
  * FactoryBean that exposes an arbitrary target bean under a different name.
@@ -35,15 +35,15 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  *
  * <p>A special capability of this FactoryBean is enabled through its configuration
  * as bean definition: The "targetBeanName" can be substituted through a placeholder,
- * in combination with Spring's PropertyPlaceholderConfigurer. Thanks to Marcus
- * Bristav for pointing this out!
+ * in combination with Spring's {@link PropertyPlaceholderConfigurer}.
+ * Thanks to Marcus Bristav for pointing this out!
  *
  * @author Juergen Hoeller
  * @since 1.2
  * @see #setTargetBeanName
  * @see PropertyPlaceholderConfigurer
  */
-public class BeanReferenceFactoryBean implements FactoryBean, BeanFactoryAware {
+public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAware {
 
 	private String targetBeanName;
 
@@ -65,7 +65,7 @@ public class BeanReferenceFactoryBean implements FactoryBean, BeanFactoryAware {
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 		if (this.targetBeanName == null) {
-			throw new IllegalArgumentException("targetBeanName is required");
+			throw new IllegalArgumentException("'targetBeanName' is required");
 		}
 		if (!this.beanFactory.containsBean(this.targetBeanName)) {
 			throw new NoSuchBeanDefinitionException(this.targetBeanName, this.beanFactory.toString());
@@ -86,6 +86,10 @@ public class BeanReferenceFactoryBean implements FactoryBean, BeanFactoryAware {
 
 	public boolean isSingleton() {
 		return this.beanFactory.isSingleton(this.targetBeanName);
+	}
+
+	public boolean isPrototype() {
+		return this.beanFactory.isPrototype(this.targetBeanName);
 	}
 
 }

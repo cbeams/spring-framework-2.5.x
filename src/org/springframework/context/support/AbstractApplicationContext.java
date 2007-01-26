@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,26 +64,32 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.Assert;
 
 /**
- * Abstract implementation of the ApplicationContext interface.
- * Doesn't mandate the type of storage used for configuration, but implements
- * common context functionality. Uses the Template Method design pattern,
+ * Abstract implementation of the {@link org.springframework.context.ApplicationContext}
+ * interface. Doesn't mandate the type of storage used for configuration; simply
+ * implements common context functionality. Uses the Template Method design pattern,
  * requiring concrete subclasses to implement abstract methods.
  *
- * <p>In contrast to a plain BeanFactory, an ApplicationContext is supposed to
- * detect special beans defined in its internal bean factory: Therefore, this
- * class automatically registers BeanFactoryPostProcessors, BeanPostProcessors
- * and ApplicationListeners that are defined as beans in the context.
+ * <p>In contrast to a plain BeanFactory, an ApplicationContext is supposed
+ * to detect special beans defined in its internal bean factory:
+ * Therefore, this class automatically registers
+ * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor BeanFactoryPostProcessors},
+ * {@link org.springframework.beans.factory.config.BeanPostProcessor BeanPostProcessors}
+ * and {@link org.springframework.context.ApplicationListener ApplicationListeners}
+ * which are defined as beans in the context.
  *
- * <p>A MessageSource may also be supplied as a bean in the context, with
- * the name "messageSource"; else, message resolution is delegated to the
- * parent context. Furthermore, a multicaster for application events can
- * be supplied as "applicationEventMulticaster" bean in the context; else,
- * a SimpleApplicationEventMulticaster is used.
+ * <p>A {@link org.springframework.context.MessageSource} may also be supplied
+ * as a bean in the context, with the name "messageSource"; else, message
+ * resolution is delegated to the parent context. Furthermore, a multicaster
+ * for application events can be supplied as "applicationEventMulticaster" bean
+ * of type {@link org.springframework.context.event.ApplicationEventMulticaster}
+ * in the context; else, a default multicaster of type
+ * {@link org.springframework.context.event.SimpleApplicationEventMulticaster} will be used.
  *
- * <p>Implements resource loading through extending DefaultResourceLoader.
- * Consequently, treats non-URL resource paths as class path resources
+ * <p>Implements resource loading through extending
+ * {@link org.springframework.core.io.DefaultResourceLoader}.
+ * Consequently treats non-URL resource paths as class path resources
  * (supporting full class path resource names that include the package path,
- * e.g. "mypackage/myresource.dat"), unless the <code>getResourceByPath</code>
+ * e.g. "mypackage/myresource.dat"), unless the {@link #getResourceByPath}
  * method is overwritten in a subclass.
  *
  * @author Rod Johnson
@@ -652,6 +658,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
 		return getBeanFactory().isSingleton(name);
+	}
+
+	public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
+		return getBeanFactory().isPrototype(name);
 	}
 
 	public boolean isTypeMatch(String name, Class targetType) throws NoSuchBeanDefinitionException {

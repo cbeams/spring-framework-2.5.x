@@ -49,6 +49,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -63,33 +64,33 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract superclass for BeanFactory implementations, implementing the
- * ConfigurableBeanFactory SPI interface. Does <i>not</i> assume a listable
- * bean factory: can therefore also be used as base class for bean factory
- * implementations which fetch bean definitions from a variety of backend
- * resources (where bean definition access is an expensive operation).
+ * Abstract base class for {@link org.springframework.beans.factory.BeanFactory}
+ * implementations, providing the full capabilities of the
+ * {@link org.springframework.beans.factory.config.ConfigurableBeanFactory} SPI.
+ * Does <i>not</i> assume a listable bean factory: can therefore also be used
+ * as base class for bean factory implementations which obtain bean definitions
+ * from some backend resource (where bean definition access is an expensive operation).
  *
- * <p>This class provides singleton/prototype determination, singleton cache,
- * aliases, FactoryBean handling, bean definition merging for child bean definitions,
- * and bean destruction (DisposableBean interface, custom destroy methods).
- * Furthermore, it can manage a bean factory hierarchy, through implementing the
- * HierarchicalBeanFactory interface (superinterface of ConfigurableBeanFactory).
+ * <p>This class provides a singleton cache (through its base class
+ * {@link org.springframework.beans.factory.support.DefaultSingletonBeanRegistry},
+ * singleton/prototype determination, {@link org.springframework.beans.factory.FactoryBean}
+ * handling, aliases, bean definition merging for child bean definitions,
+ * and bean destruction ({@link org.springframework.beans.factory.DisposableBean}
+ * interface, custom destroy methods). Furthermore, it can manage a bean factory
+ * hierarchy (delegating to the parent in case of an unknown bean), through implementing
+ * the {@link org.springframework.beans.factory.HierarchicalBeanFactory} interface.
  *
  * <p>The main template methods to be implemented by subclasses are
- * <code>getBeanDefinition</code> and <code>createBean</code>, retrieving a
- * bean definition for a given bean name or creating a bean instance for a
- * given bean definition. Default implementations for those can be found in
- * DefaultListableBeanFactory or AbstractAutowireCapableBeanFactory, respectively.
+ * {@link #getBeanDefinition} and {@link #createBean}, retrieving a bean definition
+ * for a given bean name and creating a bean instance for a given bean definition,
+ * respectively. Default implementations of those operations can be found in
+ * {@link DefaultListableBeanFactory} and {@link AbstractAutowireCapableBeanFactory}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 15 April 2001
  * @see #getBeanDefinition
  * @see #createBean
- * @see org.springframework.beans.factory.HierarchicalBeanFactory
- * @see org.springframework.beans.factory.DisposableBean
- * @see RootBeanDefinition
- * @see ChildBeanDefinition
  * @see AbstractAutowireCapableBeanFactory#createBean
  * @see DefaultListableBeanFactory#getBeanDefinition
  */
@@ -350,18 +351,40 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 			}
 
 			RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
-			boolean singleton = bd.isSingleton();
 
 			// In case of FactoryBean, return singleton status of created object if not a dereference.
-			if (singleton && !BeanFactoryUtils.isFactoryDereference(name)) {
+			if (bd.isSingleton() && !BeanFactoryUtils.isFactoryDereference(name)) {
 				if (isBeanClassMatch(beanName, bd, FactoryBean.class)) {
 					FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
-					singleton = factoryBean.isSingleton();
+					return factoryBean.isSingleton();
 				}
 			}
 
-			return singleton;
+			return bd.isSingleton();
 		}
+	}
+
+	public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
+		String beanName = transformedBeanName(name);
+
+		BeanFactory parentBeanFactory = getParentBeanFactory();
+		if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
+			// No bean definition found in this factory -> delegate to parent.
+			return parentBeanFactory.isPrototype(originalBeanName(name));
+		}
+
+		RootBeanDefinition bd = getMergedBeanDefinition(beanName, false);
+
+		// In case of FactoryBean, return singleton status of created object if not a dereference.
+		if (bd.isSingleton() && !BeanFactoryUtils.isFactoryDereference(name)) {
+			if (isBeanClassMatch(beanName, bd, FactoryBean.class)) {
+				FactoryBean factoryBean = (FactoryBean) getBean(FACTORY_BEAN_PREFIX + beanName);
+				return ((factoryBean instanceof SmartFactoryBean && ((SmartFactoryBean) factoryBean).isPrototype()) ||
+						!factoryBean.isSingleton());
+			}
+		}
+
+		return bd.isPrototype();
 	}
 
 	public boolean isTypeMatch(String name, Class targetType) throws NoSuchBeanDefinitionException {
