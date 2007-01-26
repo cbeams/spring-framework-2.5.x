@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,19 @@ import org.springframework.aop.TargetSource;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of the TargetSource interface that holds a given object.
- * This is the default implementation of TargetSource used by the AOP framework.
- * There is no need to create objects of this class in application code.
+ * Implementation of the {@link org.springframework.aop.TargetSource} interface
+ * that holds a given object. This is the default implementation of the TargetSource
+ * interface, as used by the Spring AOP framework. There is usually no need to
+ * create objects of this class in application code.
  *
  * <p>This class is serializable. However, the actual serializability of a
  * SingletonTargetSource will depend on whether the target is serializable.
  *
  * @author Rod Johnson
- * @see org.springframework.aop.framework.AdvisedSupport#setTarget
+ * @author Juergen Hoeller
+ * @see org.springframework.aop.framework.AdvisedSupport#setTarget(Object)
  */
-public final class SingletonTargetSource implements TargetSource, Serializable {
+public class SingletonTargetSource implements TargetSource, Serializable {
 
 	/** Target cached and invoked using reflection */	
 	private final Object target;
@@ -43,7 +45,7 @@ public final class SingletonTargetSource implements TargetSource, Serializable {
 	 * @param target the target object
 	 */
 	public SingletonTargetSource(Object target) {
-		Assert.notNull(target, "Target is required");
+		Assert.notNull(target, "Target object must not be null");
 		this.target = target;
 	}
 

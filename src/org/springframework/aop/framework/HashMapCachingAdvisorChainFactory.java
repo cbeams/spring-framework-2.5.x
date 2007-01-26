@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import java.util.Map;
 import org.springframework.core.CollectionFactory;
 
 /**
- * AdvisorChainFactory implementation that caches by method.
+ * {@link AdvisorChainFactory} implementation that caches by method.
  *
  <p>Uses IdentityHashMap on JDK 1.4+ or Commons Collections 3.x IdentityMap
- * * (if available), which skip expensive <code>Method.hashCode()</code> calls.
+ * (if available), which skip expensive <code>Method.hashCode()</code> calls.
  * Falls back to standard HashMap on plain JDK 1.3.
  *
  * @author Rod Johnson
@@ -34,7 +34,7 @@ import org.springframework.core.CollectionFactory;
  * @see org.springframework.core.CollectionFactory#createIdentityMapIfPossible
  * @see java.lang.reflect.Method#hashCode()
  */
-public final class HashMapCachingAdvisorChainFactory implements AdvisorChainFactory {
+public class HashMapCachingAdvisorChainFactory implements AdvisorChainFactory {
 
 	/** Cache with Method key and List value */
 	private final Map methodCache = CollectionFactory.createIdentityMapIfPossible(32);
