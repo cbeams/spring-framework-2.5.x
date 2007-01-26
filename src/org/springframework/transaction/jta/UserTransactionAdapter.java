@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,9 @@ import javax.transaction.UserTransaction;
 import org.springframework.util.Assert;
 
 /**
- * Adapter for a JTA UserTransaction handle, taking a JTA TransactionManager
- * reference and creating a JTA UserTransaction handle for it.
+ * Adapter for a JTA UserTransaction handle, taking a JTA
+ * {@link javax.transaction.TransactionManager} reference and creating
+ * a JTA {@link javax.transaction.UserTransaction} handle for it.
  *
  * <p>The JTA UserTransaction interface is an exact subset of the JTA
  * TransactionManager interface. Unfortunately, it does not serve as
@@ -36,8 +37,8 @@ import org.springframework.util.Assert;
  * adapter such as this class to be used when intending to talk to
  * a TransactionManager handle through the UserTransaction interface.
  *
- * <p>Used internally by Spring's JtaTransactionManager for certain scenarios.
- * Not intended for direct use in application code.
+ * <p>Used internally by Spring's {@link JtaTransactionManager} for certain
+ * scenarios. Not intended for direct use in application code.
  *
  * @author Juergen Hoeller
  * @since 1.1.5
@@ -48,19 +49,19 @@ public class UserTransactionAdapter implements UserTransaction {
 
 
 	/**
-	 * Create a new UserTransactionAdapter.
-	 * @param transactionManager the JTA TransactionManager
+	 * Create a new UserTransactionAdapter for the given TransactionManager.
+	 * @param transactionManager the JTA TransactionManager to wrap
 	 */
 	public UserTransactionAdapter(TransactionManager transactionManager) {
-		Assert.notNull(transactionManager, "TransactionManager is required");
+		Assert.notNull(transactionManager, "TransactionManager must not be null");
 		this.transactionManager = transactionManager;
 	}
 
 	/**
 	 * Return the JTA TransactionManager that this adapter delegates to.
 	 */
-	public TransactionManager getTransactionManager() {
-		return transactionManager;
+	public final TransactionManager getTransactionManager() {
+		return this.transactionManager;
 	}
 
 
@@ -71,6 +72,7 @@ public class UserTransactionAdapter implements UserTransaction {
 	public void commit()
 			throws RollbackException, HeuristicMixedException, HeuristicRollbackException,
 			SecurityException, IllegalStateException, SystemException {
+
 		this.transactionManager.commit();
 	}
 
