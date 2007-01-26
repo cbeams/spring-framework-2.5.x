@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,29 +17,26 @@
 package org.springframework.aop.framework.adapter;
 
 import org.aopalliance.aop.Advice;
-import org.aopalliance.intercept.Interceptor;
+import org.aopalliance.intercept.MethodInterceptor;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
 
 /**
+ * Adapter to enable {@link org.springframework.aop.MethodBeforeAdvice}
+ * to be used in the Spring AOP framework.
+ *
  * @author Rod Johnson
  */
-class BeforeAdviceAdapter implements AdvisorAdapter {
+class MethodBeforeAdviceAdapter implements AdvisorAdapter {
 
-	/**
-	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#supportsAdvice
-	 */
 	public boolean supportsAdvice(Advice advice) {
-		return advice instanceof MethodBeforeAdvice;
+		return (advice instanceof MethodBeforeAdvice);
 	}
 
-	/**
-	 * @see org.springframework.aop.framework.adapter.AdvisorAdapter#getInterceptor
-	 */
-	public Interceptor getInterceptor(Advisor advisor) {
+	public MethodInterceptor getInterceptor(Advisor advisor) {
 		MethodBeforeAdvice advice = (MethodBeforeAdvice) advisor.getAdvice();
-		return new MethodBeforeAdviceInterceptor(advice) ;
+		return new MethodBeforeAdviceInterceptor(advice);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,14 +84,14 @@ public abstract class AdvisorChainFactoryUtils {
 				// Add it conditionally.
 				PointcutAdvisor pointcutAdvisor = (PointcutAdvisor) advisor;
 				if (pointcutAdvisor.getPointcut().getClassFilter().matches(targetClass)) {
-					Interceptor[] interceptors = registry.getInterceptors(advisor);
+					MethodInterceptor[] interceptors = registry.getInterceptors(advisor);
 					MethodMatcher mm = pointcutAdvisor.getPointcut().getMethodMatcher();
 					if (methodMatches(mm, method, targetClass, hasIntroductions)) {
 						if (mm.isRuntime()) {
 							// Creating a new object instance in the getInterceptors() method
 							// isn't a problem as we normally cache created chains.
 							for (int j = 0; j < interceptors.length; j++) {
-								interceptorList.add(new InterceptorAndDynamicMethodMatcher((MethodInterceptor) interceptors[j], mm));
+								interceptorList.add(new InterceptorAndDynamicMethodMatcher(interceptors[j], mm));
 							}
 						}
 						else {

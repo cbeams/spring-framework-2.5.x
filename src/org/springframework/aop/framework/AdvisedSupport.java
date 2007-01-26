@@ -22,8 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.aopalliance.aop.Advice;
-import org.aopalliance.intercept.Interceptor;
-import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.Advisor;
@@ -254,10 +252,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Cannot add introductions this way unless the advice implements IntroductionInfo.
 	 */
 	public void addAdvice(int pos, Advice advice) throws AopConfigException {
-		if (advice instanceof Interceptor && !(advice instanceof MethodInterceptor)) {
-			throw new AopConfigException(getClass().getName() + " only handles AOP Alliance MethodInterceptors");
-		}
-		
 		if (advice instanceof IntroductionInfo) {
 			// We don't need an IntroductionAdvisor for this kind of introduction:
 			// it's fully self-describing
@@ -461,12 +455,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Count advices of the given class
-	 * @param interceptorClass class of the interceptor to check
+	 * Count advices of the given class.
+	 * @param adviceClass the advice class to check
 	 * @return the count of the interceptors of this class or subclasses
 	 */
-	public final int countAdvicesOfType(Class interceptorClass) {
-		Assert.notNull(interceptorClass, "Interceptor class must not be null");
+	public final int countAdvicesOfType(Class adviceClass) {
+		Assert.notNull(adviceClass, "Advice class must not be null");
 		if (this.advisors.size() == 0) {
 			return 0;
 		}
@@ -474,7 +468,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		for (int i = 0; i < this.advisors.size(); i++) {
 			Advisor advisor = (Advisor) this.advisors.get(i);
 			if (advisor.getAdvice() != null &&
-					interceptorClass.isAssignableFrom(advisor.getAdvice().getClass())) {
+					adviceClass.isAssignableFrom(advisor.getAdvice().getClass())) {
 				count++;
 			}
 		}

@@ -18,7 +18,6 @@ package org.springframework.aop.framework;
 
 import junit.framework.TestCase;
 import org.aopalliance.aop.Advice;
-import org.aopalliance.intercept.Interceptor;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.interceptor.DebugInterceptor;
@@ -204,22 +203,6 @@ public class ProxyFactoryTests extends TestCase {
 		assertTrue(ts.getTimeStamp() == t);
 		// Shouldn't fail;
 		 ((IOther) ts).absquatulate();
-	}
-	
-	public void testCanOnlyAddMethodInterceptors() {
-		ProxyFactory factory = new ProxyFactory(new TestBean());
-		factory.addAdvice(0, new NopInterceptor());
-		try {
-			factory.addAdvice(0, new Interceptor() {
-			});
-			fail("Should only be able to add MethodInterceptors");
-		}
-		catch (AopConfigException ex) {
-		}
-		
-		// Check we can still use it
-		IOther other = (IOther) factory.getProxy();
-		other.absquatulate();
 	}
 	
 	public void testInterceptorInclusionMethods() {

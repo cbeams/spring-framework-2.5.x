@@ -17,7 +17,7 @@
 package org.springframework.aop.framework.adapter;
 
 import org.aopalliance.aop.Advice;
-import org.aopalliance.intercept.Interceptor;
+import org.aopalliance.intercept.MethodInterceptor;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
@@ -34,7 +34,7 @@ class AfterReturningAdviceAdapter implements AdvisorAdapter {
 		return (advice instanceof AfterReturningAdvice);
 	}
 
-	public Interceptor getInterceptor(Advisor advisor) {
+	public MethodInterceptor getInterceptor(Advisor advisor) {
 		AfterReturningAdvice advice = (AfterReturningAdvice) advisor.getAdvice();
 		return new AfterReturningAdviceInterceptor(advice);
 	}
