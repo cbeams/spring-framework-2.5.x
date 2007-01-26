@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,9 +25,10 @@ import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Base class for JdbcTemplate and other JDBC-accessing DAO helpers,
- * defining common properties like DataSource and exception translator.
+ * defining common properties such as DataSource and exception translator.
  *
- * <p>Not intended to be used directly. See JdbcTemplate.
+ * <p>Not intended to be used directly.
+ * See {@link org.springframework.jdbc.core.JdbcTemplate}.
  *
  * @author Juergen Hoeller
  * @since 28.11.2003
@@ -35,12 +36,11 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public abstract class JdbcAccessor implements InitializingBean {
 
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Used to obtain connections throughout the lifecycle of this object */
 	private DataSource dataSource;
 
-	/** Helper to translate SQL exceptions to DataAccessExceptions */
 	private SQLExceptionTranslator exceptionTranslator;
 
 	private boolean lazyInit = true;
@@ -57,7 +57,7 @@ public abstract class JdbcAccessor implements InitializingBean {
 	 * Return the DataSource used by this template.
 	 */
 	public DataSource getDataSource() {
-		return dataSource;
+		return this.dataSource;
 	}
 
 	/**
@@ -74,9 +74,9 @@ public abstract class JdbcAccessor implements InitializingBean {
 
 	/**
 	 * Set the exception translator for this instance.
-	 * <p>If no custom translator is provided, a default SQLErrorCodeSQLExceptionTranslator
-	 * is used which examines the SQLException's vendor-specific error code.
-	 * @param exceptionTranslator exception translator
+	 * <p>If no custom translator is provided, a default
+	 * {@link SQLErrorCodeSQLExceptionTranslator} is used
+	 * which examines the SQLException's vendor-specific error code.
 	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
 	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
 	 */
@@ -86,8 +86,9 @@ public abstract class JdbcAccessor implements InitializingBean {
 
 	/**
 	 * Return the exception translator for this instance.
-	 * <p>Creates a default SQLErrorCodeSQLExceptionTranslator for the specified
-	 * DataSource if none set.
+	 * <p>Creates a default {@link SQLErrorCodeSQLExceptionTranslator}
+	 * for the specified DataSource if none set.
+	 * @see #getDataSource()
 	 */
 	public SQLExceptionTranslator getExceptionTranslator() {
 		if (this.exceptionTranslator == null) {
@@ -106,9 +107,9 @@ public abstract class JdbcAccessor implements InitializingBean {
 	 * Set whether to lazily initialize the SQLExceptionTranslator for this accessor,
 	 * on first encounter of a SQLException. Default is "true"; can be switched to
 	 * "false" for initialization on startup.
-	 * <p>Early initialization only applies if <code>afterPropertiesSet</code> is called.
-	 * @see #getExceptionTranslator
-	 * @see #afterPropertiesSet
+	 * <p>Early initialization just applies if <code>afterPropertiesSet()</code> is called.
+	 * @see #getExceptionTranslator()
+	 * @see #afterPropertiesSet()
 	 */
 	public void setLazyInit(boolean lazyInit) {
 		this.lazyInit = lazyInit;
@@ -116,13 +117,14 @@ public abstract class JdbcAccessor implements InitializingBean {
 
 	/**
 	 * Return whether to lazily initialize the SQLExceptionTranslator for this accessor.
+	 * @see #getExceptionTranslator()
 	 */
 	public boolean isLazyInit() {
-		return lazyInit;
+		return this.lazyInit;
 	}
 
 	/**
-	 * Eagerly initialize the exception translator,
+	 * Eagerly initialize the exception translator, if demanded,
 	 * creating a default one for the specified DataSource if none set.
 	 */
 	public void afterPropertiesSet() {
