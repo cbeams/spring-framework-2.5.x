@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,9 @@ public class ClassPathXmlApplicationContextTests extends TestCase {
 		assertTrue(ctx.containsBean("logicOne"));
 		assertTrue(ctx.containsBean("logicTwo"));
 		Service service = (Service) ctx.getBean("service");
+		ctx.refresh();
+		assertTrue(service.isProperlyDestroyed());
+		service = (Service) ctx.getBean("service");
 		ctx.close();
 		assertTrue(service.isProperlyDestroyed());
 	}

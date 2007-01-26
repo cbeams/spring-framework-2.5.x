@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,31 +25,33 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 
 /**
- * Base class for ApplicationContext implementations that are supposed to support
- * multiple refreshs, creating a new internal bean factory instance every time.
- * Typically (but not necessarily), such a context will be driven by a set of
- * config locations to load bean definitions from.
+ * Base class for {@link org.springframework.context.ApplicationContext}
+ * implementations which are supposed to support multiple refreshs,
+ * creating a new internal bean factory instance every time.
+ * Typically (but not necessarily), such a context will be driven by
+ * a set of config locations to load bean definitions from.
  *
- * <p>The only method to be implemented by subclasses is <code>loadBeanDefinitions</code>,
+ * <p>The only method to be implemented by subclasses is {@link #loadBeanDefinitions},
  * which gets invoked on each refresh. A concrete implementation is supposed to load
- * bean definitions into the given DefaultListableBeanFactory, typically delegating
- * to one or more specific bean definition readers.
+ * bean definitions into the given
+ * {@link org.springframework.beans.factory.support.DefaultListableBeanFactory},
+ * typically delegating to one or more specific bean definition readers.
  *
  * <p><b>Note that there is a similar base class for WebApplicationContexts.</b>
- * AbstractRefreshableWebApplicationContext provides the same subclassing strategy,
- * but additionally pre-implements all context functionality for web environments.
- * There is also a pre-defined way to receive config locations for a web context.
+ * {@link org.springframework.web.context.support.AbstractRefreshableWebApplicationContext}
+ * provides the same subclassing strategy, but additionally pre-implements
+ * all context functionality for web environments. There is also a
+ * pre-defined way to receive config locations for a web context.
  *
- * <p>Concrete standalone subclasses of this base class, reading in a specific bean
- * definition format, are ClassPathXmlApplicationContext and FileSystemXmlApplicationContext,
- * which both derive from the common AbstractXmlApplicationContext base class.
+ * <p>Concrete standalone subclasses of this base class, reading in a
+ * specific bean definition format, are {@link ClassPathXmlApplicationContext}
+ * and {@link FileSystemXmlApplicationContext}, which both derive from the
+ * common {@link AbstractXmlApplicationContext} base class.
  *
  * @author Juergen Hoeller
  * @since 1.1.3
  * @see #loadBeanDefinitions
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
- * @see org.springframework.beans.factory.support.PropertiesBeanDefinitionReader
- * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
  * @see org.springframework.web.context.support.AbstractRefreshableWebApplicationContext
  * @see AbstractXmlApplicationContext
  * @see ClassPathXmlApplicationContext
@@ -81,9 +83,13 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 
 	protected final void refreshBeanFactory() throws BeansException {
 		// Shut down previous bean factory, if any.
+		ConfigurableListableBeanFactory oldBeanFactory = null;
 		synchronized (this.beanFactoryMonitor) {
-			if (this.beanFactory != null) {
-				this.beanFactory.destroySingletons();
+			oldBeanFactory = this.beanFactory;
+		}
+		if (oldBeanFactory != null) {
+			oldBeanFactory.destroySingletons();
+			synchronized (this.beanFactoryMonitor) {
 				this.beanFactory = null;
 			}
 		}
