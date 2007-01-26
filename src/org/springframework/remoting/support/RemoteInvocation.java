@@ -86,26 +86,44 @@ public class RemoteInvocation implements Serializable {
 	}
 
 
+	/**
+	 * Set the name of the target method.
+	 */
 	public void setMethodName(String methodName) {
 		this.methodName = methodName;
 	}
 
+	/**
+	 * Return the name of the target method.
+	 */
 	public String getMethodName() {
 		return this.methodName;
 	}
 
+	/**
+	 * Set the parameter types of the target method.
+	 */
 	public void setParameterTypes(Class[] parameterTypes) {
 		this.parameterTypes = parameterTypes;
 	}
 
+	/**
+	 * Return the parameter types of the target method.
+	 */
 	public Class[] getParameterTypes() {
 		return this.parameterTypes;
 	}
 
+	/**
+	 * Set the arguments for the target method call.
+	 */
 	public void setArguments(Object[] arguments) {
 		this.arguments = arguments;
 	}
 
+	/**
+	 * Return the arguments for the target method call.
+	 */
 	public Object[] getArguments() {
 		return this.arguments;
 	}
@@ -120,13 +138,14 @@ public class RemoteInvocation implements Serializable {
 	 * Map, to minimize serialization size.
 	 * @param key the attribute key
 	 * @param value the attribute value
+	 * @throws IllegalStateException if the key is already bound
 	 */
-	public void addAttribute(String key, Serializable value) {
+	public void addAttribute(String key, Serializable value) throws IllegalStateException {
 		if (this.attributes == null) {
 			this.attributes = new HashMap();
 		}
 		if (this.attributes.containsKey(key)) {
-			throw new IllegalStateException("Already an attribute with key '" + key + "' defined");
+			throw new IllegalStateException("There is already an attribute with key '" + key + "' bound");
 		}
 		this.attributes.put(key, value);
 	}
@@ -146,8 +165,8 @@ public class RemoteInvocation implements Serializable {
 	}
 
 	/**
-	 * Set the attributes Map. Only here for special needs:
-	 * Preferably, use addAttribute and getAttribute.
+	 * Set the attributes Map. Only here for special purposes:
+	 * Preferably, use {@link #addAttribute} and {@link #getAttribute}.
 	 * @param attributes the attributes Map
 	 * @see #addAttribute
 	 * @see #getAttribute
@@ -158,7 +177,7 @@ public class RemoteInvocation implements Serializable {
 
 	/**
 	 * Return the attributes Map. Mainly here for debugging purposes:
-	 * Preferably, use addAttribute and getAttribute.
+	 * Preferably, use {@link #addAttribute} and {@link #getAttribute}.
 	 * @return the attributes Map, or <code>null</code> if none created
 	 * @see #addAttribute
 	 * @see #getAttribute

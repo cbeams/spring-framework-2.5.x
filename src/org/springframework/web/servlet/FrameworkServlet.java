@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,25 +37,29 @@ import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Base servlet for servlets within the web framework. Allows integration
- * with an application context, in a JavaBean-based overall solution.
+ * Base servlet for Spring's web framework. Offers integration with
+ * a Spring application context, in a JavaBean-based overall solution.
  *
  * <p>This class offers the following functionality:
  * <ul>
- * <li>Uses a WebApplicationContext to access a BeanFactory. The servlet's
- * configuration is determined by beans in the servlet's namespace.
+ * <li>Manages a {@link org.springframework.web.context.WebApplicationContext}
+ * instance per servlet. The servlet's configuration is determined by beans
+ * in the servlet's namespace.
  * <li>Publishes events on request processing, whether or not a request is
  * successfully handled.
  * </ul>
  *
- * <p>Subclasses must implement doService() to handle requests. Because this extends
- * HttpServletBean rather than HttpServlet directly, bean properties are mapped
- * onto it. Subclasses can override initFrameworkServlet() for custom initialization.
+ * <p>Subclasses must implement {@link #doService} to handle requests. Because this extends
+ * {@link HttpServletBean} rather than HttpServlet directly, bean properties are
+ * automatically mapped onto it. Subclasses can override {@link #initFrameworkServlet()}
+ * for custom initialization.
  *
- * <p>Regards a "contextClass" parameter at the servlet init-param level,
- * falling back to the default context class (XmlWebApplicationContext) if not found.
- * With the default FrameworkServlet, a context class needs to implement
- * ConfigurableWebApplicationContext.
+ * <p>Detects a "contextClass" parameter at the servlet init-param level,
+ * falling back to the default context class,
+ * {@link org.springframework.web.context.support.XmlWebApplicationContext},
+ * if not found. Note that, with the default FrameworkServlet,
+ * a custom context class needs to implement the
+ * {@link org.springframework.web.context.ConfigurableWebApplicationContext} interface.
  *
  * <p>Passes a "contextConfigLocation" servlet init-param to the context instance,
  * parsing it into potentially multiple file paths which can be separated by any
@@ -64,9 +68,9 @@ import org.springframework.web.util.WebUtils;
  * default location from the namespace of the servlet.
  *
  * <p>Note: In case of multiple config locations, later bean definitions will
- * override ones defined in earlier loaded files, at least when using one of
- * Spring's default ApplicationContext implementations. This can be leveraged
- * to deliberately override certain bean definitions via an extra XML file.
+ * override ones defined in earlier loaded files, at least when using Spring's
+ * default ApplicationContext implementation. This can be leveraged to
+ * deliberately override certain bean definitions via an extra XML file.
  *
  * <p>The default namespace is "'servlet-name'-servlet", e.g. "test-servlet" for a
  * servlet-name "test" (leading to a "/WEB-INF/test-servlet.xml" default location
@@ -123,9 +127,12 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 
 	/**
-	 * Set a custom context class. This class must be of type WebApplicationContext;
-	 * when using the default FrameworkServlet implementation, the context class
-	 * must also implement ConfigurableWebApplicationContext.
+	 * Set a custom context class. This class must be of type
+	 * {@link org.springframework.web.context.WebApplicationContext}.
+	 * <p>When using the default FrameworkServlet implementation,
+	 * the context class must also implement the
+	 * {@link org.springframework.web.context.ConfigurableWebApplicationContext}
+	 * interface.
 	 * @see #createWebApplicationContext
 	 */
 	public void setContextClass(Class contextClass) {
@@ -136,7 +143,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * Return the custom context class.
 	 */
 	public Class getContextClass() {
-		return contextClass;
+		return this.contextClass;
 	}
 
 	/**
@@ -168,7 +175,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * Return the explicit context config location, if any.
 	 */
 	public String getContextConfigLocation() {
-		return contextConfigLocation;
+		return this.contextConfigLocation;
 	}
 
 	/**
@@ -185,7 +192,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * Return whether to publish this servlet's context as a ServletContext attribute.
 	 */
 	public boolean isPublishContext() {
-		return publishContext;
+		return this.publishContext;
 	}
 
 	/**
@@ -199,16 +206,16 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Return whether this servlet should publish a ServletRequestHandledEvent at the end
-	 * of each request.
+	 * Return whether this servlet should publish a ServletRequestHandledEvent
+	 * at the end of each request.
 	 */
 	public boolean isPublishEvents() {
-		return publishEvents;
+		return this.publishEvents;
 	}
 
 
 	/**
-	 * Overridden method of HttpServletBean, invoked after any bean properties
+	 * Overridden method of {@link HttpServletBean}, invoked after any bean properties
 	 * have been set. Creates this servlet's WebApplicationContext.
 	 */
 	protected final void initServletBean() throws ServletException, BeansException {
@@ -239,10 +246,9 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/**
 	 * Initialize and publish the WebApplicationContext for this servlet.
-	 * Delegates to createWebApplicationContext for actual creation.
-	 * Can be overridden in subclasses.
+	 * <p>Delegates to {@link #createWebApplicationContext} for actual creation
+	 * of the context. Can be overridden in subclasses.
 	 * @throws BeansException if the context couldn't be initialized
-	 * @see #createWebApplicationContext
 	 */
 	protected WebApplicationContext initWebApplicationContext() throws BeansException {
 		getServletContext().log(
@@ -270,13 +276,14 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/**
 	 * Instantiate the WebApplicationContext for this servlet, either a default
-	 * XmlWebApplicationContext or a custom context class if set. This implementation
-	 * expects custom contexts to implement ConfigurableWebApplicationContext.
-	 * Can be overridden in subclasses.
+	 * {@link org.springframework.web.context.support.XmlWebApplicationContext}
+	 * or a {@link #setContextClass custom context class}, if set.
+	 * <p>This implementation expects custom contexts to implement the
+	 * {@link org.springframework.web.context.ConfigurableWebApplicationContext}
+	 * interface. Can be overridden in subclasses.
 	 * @param parent the parent ApplicationContext to use, or <code>null</code> if none
 	 * @return the WebApplicationContext for this servlet
 	 * @throws BeansException if the context couldn't be initialized
-	 * @see #setContextClass
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
 	protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
@@ -311,7 +318,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/**
 	 * Return the ServletContext attribute name for this servlet's WebApplicationContext.
-	 * Default implementation returns SERVLET_CONTEXT_PREFIX + servlet name.
+	 * <p>The default implementation returns
+	 * <code>SERVLET_CONTEXT_PREFIX + servlet name</code>.
 	 * @see #SERVLET_CONTEXT_PREFIX
 	 * @see #getServletName
 	 */
@@ -323,7 +331,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * Return this servlet's WebApplicationContext.
 	 */
 	public final WebApplicationContext getWebApplicationContext() {
-		return webApplicationContext;
+		return this.webApplicationContext;
 	}
 
 	/**
@@ -339,8 +347,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/**
 	 * Delegate GET requests to processRequest/doService.
-	 * <p>Will also be invoked by HttpServlet's default implementation of doHead,
-	 * with a NoBodyResponse that just captures the content length.
+	 * <p>Will also be invoked by HttpServlet's default implementation of <code>doHead</code>,
+	 * with a <code>NoBodyResponse</code> that just captures the content length.
 	 * @see #doService
 	 * @see #doHead
 	 */
@@ -351,7 +359,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Delegate POST requests to processRequest/doService.
+	 * Delegate POST requests to {@link #processRequest}.
 	 * @see #doService
 	 */
 	protected final void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -361,7 +369,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Delegate PUT requests to processRequest/doService.
+	 * Delegate PUT requests to {@link #processRequest}.
 	 * @see #doService
 	 */
 	protected final void doPut(HttpServletRequest request, HttpServletResponse response)
@@ -371,7 +379,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Delegate DELETE requests to processRequest/doService.
+	 * Delegate DELETE requests to {@link #processRequest}.
 	 * @see #doService
 	 */
 	protected final void doDelete(HttpServletRequest request, HttpServletResponse response)
@@ -382,9 +390,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/**
 	 * Process this request, publishing an event regardless of the outcome.
-	 * The actually event handling is performed by the abstract
-	 * <code>doService()</code> template method.
-	 * @see #doService
+	 * <p>The actual event handling is performed by the abstract
+	 * {@link #doService} template method.
 	 */
 	protected final void processRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -460,7 +467,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/**
 	 * Close the WebApplicationContext of this servlet.
-	 * @see org.springframework.context.ConfigurableApplicationContext#close
+	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 */
 	public void destroy() {
 		getServletContext().log(
