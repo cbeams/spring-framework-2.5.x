@@ -26,7 +26,6 @@ import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
 /**
  * Alternative to an object pool. This TargetSource uses a threading model in which
@@ -49,7 +48,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @see ThreadLocalTargetSourceStats
  * @see org.springframework.beans.factory.DisposableBean#destroy()
  */
-public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
+public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 		implements ThreadLocalTargetSourceStats, DisposableBean {
 	
 	/**
@@ -95,26 +94,13 @@ public final class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetS
 	
 	/**
 	 * Dispose of targets if necessary; clear ThreadLocal.
+	 * @see #destroyPrototypeInstance
 	 */
 	public void destroy() {
 		logger.debug("Destroying ThreadLocalTargetSource bindings");
 		synchronized (this.targetSet) {
 			for (Iterator it = this.targetSet.iterator(); it.hasNext(); ) {
-				Object target = it.next();
-				if (getBeanFactory() instanceof ConfigurableBeanFactory) {
-					((ConfigurableBeanFactory) getBeanFactory()).destroyBean(getTargetBeanName(), target);
-				}
-				else if (target instanceof DisposableBean) {
-					try {
-						((DisposableBean) target).destroy();
-					}
-					catch (Throwable ex) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Thread-bound target of class [" + target.getClass() +
-									"] threw exception from destroy() method", ex);
-						}
-					}
-				}
+				destroyPrototypeInstance(it.next());
 			}
 			this.targetSet.clear();
 		}

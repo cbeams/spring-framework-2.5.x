@@ -21,8 +21,6 @@ import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.Constants;
 
 /**
@@ -47,6 +45,7 @@ import org.springframework.core.Constants;
  *
  * @author Rod Johnson
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @see GenericObjectPool
  * @see #createObjectPool()
  * @see #setMaxSize
@@ -275,12 +274,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	}
 
 	public void destroyObject(Object obj) throws Exception {
-		if (getBeanFactory() instanceof ConfigurableBeanFactory) {
-			((ConfigurableBeanFactory) getBeanFactory()).destroyBean(getTargetBeanName(), obj);
-		}
-		else if (obj instanceof DisposableBean) {
-			((DisposableBean) obj).destroy();
-		}
+		destroyPrototypeInstance(obj);
 	}
 
 	public boolean validateObject(Object obj) {
