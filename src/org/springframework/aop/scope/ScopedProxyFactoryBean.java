@@ -22,7 +22,7 @@ import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
-import org.springframework.aop.target.PrototypeTargetSource;
+import org.springframework.aop.target.SimpleBeanTargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
@@ -52,7 +52,7 @@ import org.springframework.util.ClassUtils;
 public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean, BeanFactoryAware {
 
 	/** The TargetSource that manages scoping */
-	private final PrototypeTargetSource scopedTargetSource = new PrototypeTargetSource();
+	private final SimpleBeanTargetSource scopedTargetSource = new SimpleBeanTargetSource();
 
 	/** The name of the target bean */
 	private String targetBeanName;
