@@ -46,48 +46,68 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Message listener container that uses plain JMS client API, specifically
+ * Message listener container variant that uses plain JMS client API, specifically
  * a loop of <code>MessageConsumer.receive()</code> calls that also allow for
  * transactional reception of messages (registering them with XA transactions).
  * Designed to work in a native JMS environment as well as in a J2EE environment,
  * with only minimal differences in configuration.
  *
- * <p>This is a simple but nevertheless powerful form of a message listener container.
- * It creates a fixed number of JMS Sessions to invoke the listener, not allowing
- * for dynamic adaptation to runtime demands. Like SimpleMessageListenerContainer,
- * its main advantage is its low level of complexity and the minimum requirements
- * on the JMS provider: Not even the ServerSessionPool facility is required.
+ * <p>This is a simple but nevertheless powerful form of message listener container.
+ * On startup, it obtains a fixed number of JMS Sessions to invoke the listener,
+ * and optionally allows for dynamic adaptation at runtime (up until a maximum number).
+ * Like {@link SimpleMessageListenerContainer}, its main advantage is its low level
+ * of runtime complexity, in particular the minimal requirements on the JMS provider:
+ * Not even the JMS ServerSessionPool facility is required. Beyond that, it is
+ * fully self-recovering in case of the broker being temporarily unavailable,
+ * and allows for stops/restarts as well as runtime changes to its configuration.
  *
- * <p>Actual MessageListener execution happens in separate threads that are
- * created through Spring's TaskExecutor abstraction. By default, the appropriate
- * number of threads are created on startup, according to the "concurrentConsumers"
+ * <p>Actual MessageListener execution happens in asynchronous work units which are
+ * created through Spring's {@link org.springframework.core.task.TaskExecutor}
+ * abstraction. By default, the specified number of invoker tasks will be created
+ * on startup, according to the {@link #setConcurrentConsumers "concurrentConsumers"}
  * setting. Specify an alternative TaskExecutor to integrate with an existing
- * thread pool facility, for example. With a native JMS setup, each of those
- * listener threads is gonna use a cached JMS Session and MessageConsumer
- * (only refreshed in case of failure), using the JMS provider's resources
- * as efficiently as possible.
+ * thread pool facility (such as a J2EE server's), for example using a
+ * {@link org.springframework.scheduling.commonj.WorkManagerTaskExecutor CommonJ WorkManager}.
+ * With a native JMS setup, each of those listener threads is going to use a
+ * cached JMS Session and MessageConsumer (only refreshed in case of failure),
+ * using the JMS provider's resources as efficiently as possible.
  *
  * <p>Message reception and listener execution can automatically be wrapped
- * in transactions through passing a Spring PlatformTransactionManager into the
- * "transactionManager" property. This will usually be a JtaTransactionManager
- * in a J2EE enviroment, in combination with a JTA-aware JMS ConnectionFactory
- * that this message listener container fetches its Connections from (check
- * your J2EE server's documentation). Note that this listener container will
- * automatically reobtain all JMS handles for each transaction in case of an
- * external transaction manager specified, for compatibility with all J2EE servers
- * (in particular JBoss). This non-caching behavior can be overridden through the
- * "cacheLevel"/"cacheLevelName" property, enforcing caching of the Connection (or
- * also Session and MessageConsumer) even in case of an external transaction manager.
+ * in transactions through passing a Spring
+ * {@link org.springframework.transaction.PlatformTransactionManager} into the
+ * {@link #setTransactionManager "transactionManager"} property. This will usually
+ * be a {@link org.springframework.transaction.jta.JtaTransactionManager} in a
+ * J2EE enviroment, in combination with a JTA-aware JMS ConnectionFactory obtained
+ * from JNDI (check your J2EE server's documentation). Note that this listener
+ * container will automatically reobtain all JMS handles for each transaction
+ * in case of an external transaction manager specified, for compatibility with
+ * all J2EE servers (in particular JBoss). This non-caching behavior can be
+ * overridden through the {@link #setCacheLevel "cacheLevel"} /
+ * {@link #setCacheLevelName "cacheLevelName"} property, enforcing caching
+ * of the Connection (or also Session and MessageConsumer) even in case of
+ * an external transaction manager being involved.
+ *
+ * <p>Dynamic scaling of the number of concurrent invokers can be activated
+ * through specifying a {@link #setMaxConcurrentConsumers "maxConcurrentConsumers"}
+ * value that is higher than the {@link #setConcurrentConsumers "concurrentConsumers"}
+ * value. Since the latter's default is 1, you can also simply specify a
+ * "maxConcurrentConsumers" of e.g. 5, which will lead to dynamic scaling up to
+ * 5 concurrent consumers in case of increasing message load, as well as dynamic
+ * shrinking back to the standard number of consumers once the load decreases.
+ * Consider adapting the {@link #setIdleTaskExecutionLimit "idleTaskExecutionLimit"}
+ * setting to control the lifespan of each new task, to avoid frequent scaling up
+ * and down, in particular if the ConnectionFactory does not pool JMS Sessions
+ * and/or the TaskExecutor does not pool threads (check your configuration!).
+ * Note that dynamic scaling only really makes sense for a queue in the first
+ * place; for a topic, you will typically stick with the default number of 1
+ * consumer, else you'd receive the same message multiple times on the same node.
  *
  * <p>See the {@link AbstractMessageListenerContainer} javadoc for details
- * on acknowledge modes and transaction options.
+ * on acknowledge modes and native transaction options.
  *
  * <p>This class requires a JMS 1.1+ provider, because it builds on the
  * domain-independent API. <b>Use the {@link DefaultMessageListenerContainer102}
  * subclass for JMS 1.0.2 providers.</b>
- *
- * <p>For dynamic adaptation of the active number of Sessions, consider using
- * ServerSessionMessageListenerContainer.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -103,7 +123,7 @@ import org.springframework.util.ClassUtils;
 public class DefaultMessageListenerContainer extends AbstractMessageListenerContainer implements BeanNameAware {
 
 	/**
-	 * Default thread name prefix: "SimpleAsyncTaskExecutor-".
+	 * Default thread name prefix: "DefaultMessageListenerContainer-".
 	 */
 	public static final String DEFAULT_THREAD_NAME_PREFIX =
 			ClassUtils.getShortName(DefaultMessageListenerContainer.class) + "-";
@@ -364,8 +384,8 @@ public class DefaultMessageListenerContainer extends AbstractMessageListenerCont
 	 * Specify the maximum number of concurrent consumers to create. Default is 1.
 	 * <p>If this setting is higher than "concurrentConsumers", the listener container
 	 * will dynamically schedule new consumers at runtime, provided that enough
-	 * incoming messages are encountered. Once the load goes down again, the consumers
-	 * will be reduced to the standard level ("concurrentConsumers") again.
+	 * incoming messages are encountered. Once the load goes down again, the number of
+	 * consumers will be reduced to the standard level ("concurrentConsumers") again.
 	 * <p>Raising the number of concurrent consumers is recommendable in order
 	 * to scale the consumption of messages coming in from a queue. However,
 	 * note that any ordering guarantees are lost once multiple consumers are
