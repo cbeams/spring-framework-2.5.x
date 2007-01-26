@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,35 +22,33 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.AfterReturningAdvice;
+import org.springframework.util.Assert;
 
 /**
- * Interceptor to wrap a MethodAfterReturningAdvice. In future we may also offer
- * a more efficient alternative solution in cases where there is no interception
- * advice and therefore no need to create a MethodInvocation object.
- *
- * <p>Used internally by the AOP framework: Application developers should not need
+ * Interceptor to wrap am {@link org.springframework.aop.AfterReturningAdvice}.
+ * Used internally by the AOP framework; application developers should not need
  * to use this class directly.
- * 
- * <p>You can also use this class to wrap Spring AfterReturningAdvice implementations
- * for use in other AOP frameworks supporting the AOP Alliance interfaces.
  *
  * @author Rod Johnson
  */
-public final class AfterReturningAdviceInterceptor implements MethodInterceptor, Serializable {
-	
+public class AfterReturningAdviceInterceptor implements MethodInterceptor, Serializable {
+
 	private final AfterReturningAdvice advice;
-	
+
+
+	/**
+	 * Create a new AfterReturningAdviceInterceptor for the given advice.
+	 * @param advice the AfterReturningAdvice to wrap
+	 */
 	public AfterReturningAdviceInterceptor(AfterReturningAdvice advice) {
+		Assert.notNull(advice, "Advice must not be null");
 		this.advice = advice;
 	}
 
-	/**
-	 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
-	 */
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		Object retVal = mi.proceed();
 		this.advice.afterReturning(retVal, mi.getMethod(), mi.getArguments(), mi.getThis());
 		return retVal;
 	}
-	
+
 }

@@ -26,36 +26,34 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.util.Assert;
+
 /**
  * Interceptor to wrap an after-throwing advice.
  *
  * <p>The signatures on handler methods on the <code>ThrowsAdvice</code>
  * implementation method argument must be of the form:<br>
- * 
+ *
  * <code>void afterThrowing([Method, args, target], ThrowableSubclass);</code>
- * 
+ *
  * <p>Only the last argument is required.
- * 
+ *
  * <p>Some examples of valid methods would be:
- * 
+ *
  * <pre class="code">public void afterThrowing(Exception ex)</pre>
  * <pre class="code">public void afterThrowing(RemoteException)</pre>
  * <pre class="code">public void afterThrowing(Method method, Object[] args, Object target, Exception ex)</pre>
  * <pre class="code">public void afterThrowing(Method method, Object[] args, Object target, ServletException ex)</pre>
  *
  * <p>This is a framework class that need not be used directly by Spring users.
- * 
- * <p>You can, however, use this class to wrap Spring <code>ThrowsAdvice</code>
- * implementations for use in other AOP frameworks supporting the AOP Alliance
- * interfaces.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public final class ThrowsAdviceInterceptor implements MethodInterceptor {
-	
+public class ThrowsAdviceInterceptor implements MethodInterceptor {
+
 	private static final String AFTER_THROWING = "afterThrowing";
-	
+
 	private static final Log logger = LogFactory.getLog(ThrowsAdviceInterceptor.class);
 
 
@@ -68,10 +66,11 @@ public final class ThrowsAdviceInterceptor implements MethodInterceptor {
 	/**
 	 * Create a new ThrowsAdviceInterceptor for the given ThrowsAdvice.
 	 * @param throwsAdvice the advice object that defines the exception
-	 * handler methods (usually a ThrowsAdvice implementation)
-	 * @see org.springframework.aop.ThrowsAdvice
+	 * handler methods (usually a {@link org.springframework.aop.ThrowsAdvice}
+	 * implementation)
 	 */
 	public ThrowsAdviceInterceptor(Object throwsAdvice) {
+		Assert.notNull(throwsAdvice, "Advice must not be null");
 		this.throwsAdvice = throwsAdvice;
 
 		Method[] methods = throwsAdvice.getClass().getMethods();
@@ -121,9 +120,6 @@ public final class ThrowsAdviceInterceptor implements MethodInterceptor {
 		return handler;
 	}
 
-	/**
-	 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
-	 */
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		try {
 			return mi.proceed();
@@ -143,7 +139,7 @@ public final class ThrowsAdviceInterceptor implements MethodInterceptor {
 			handlerArgs = new Object[] { ex };
 		}
 		else {
-			handlerArgs = new Object[] { mi.getMethod(), mi.getArguments(), mi.getThis(), ex };
+			handlerArgs = new Object[] {mi.getMethod(), mi.getArguments(), mi.getThis(), ex};
 		}
 		try {
 			method.invoke(this.throwsAdvice, handlerArgs);
