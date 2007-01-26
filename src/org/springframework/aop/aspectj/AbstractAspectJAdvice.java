@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,7 +179,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 	/**
 	 * Set by creator of this advice object if the argument names are known.
-	 * This could be for example because they have been explicitly specified in XML,
+	 * <p>This could be for example because they have been explicitly specified in XML,
 	 * or in an advice annotation.
 	 * @param argNames comma delimited list of arg names
 	 */
@@ -194,8 +194,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			this.argumentNames[i] = StringUtils.trimWhitespace(args[i]);
 			if (!isVariableName(this.argumentNames[i])) {
 				throw new IllegalArgumentException(
-						"argumentNames property of AbstractAspectJAdvice " + 
-						"contains an argument name '" +
+						"'argumentNames' property of AbstractAspectJAdvice contains an argument name '" +
 						this.argumentNames[i] + "' that is not a valid Java identifier");
 			}
 		}		

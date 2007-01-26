@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -232,43 +231,41 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 		public AspectJAnnotation(A aspectjAnnotation) {
 			this.annotation = aspectjAnnotation;
-			for(Class c : annotationTypes.keySet()) {
-				if (c.isInstance(this.annotation)) {
-					this.annotationType = annotationTypes.get(c);
+			for (Class type : annotationTypes.keySet()) {
+				if (type.isInstance(this.annotation)) {
+					this.annotationType = annotationTypes.get(type);
 					break;
 				}
 			}
 			if (this.annotationType == null) {
-				throw new IllegalStateException("unknown annotation type: " + this.annotation.toString());
+				throw new IllegalStateException("Unknown annotation type: " + this.annotation.toString());
 			}
 
 			// We know these methods exist with the same name on each object,
-			// but need to invoke them reflectively as there isn't a common interfaces
+			// but need to invoke them reflectively as there isn't a common interface.
 			try {
 				this.expression = resolveExpression();
-				this.argNames = (String) annotation.getClass().getMethod("argNames", (Class[]) null).
-					invoke(this.annotation);
+				this.argNames = (String)
+						this.annotation.getClass().getMethod("argNames", (Class[]) null).invoke(this.annotation);
 			}
 			catch (Exception ex) {
 				throw new IllegalArgumentException(aspectjAnnotation + " cannot be an AspectJ annotation", ex);
 			}
 		}
 
-		private String resolveExpression() throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		private String resolveExpression() throws Exception {
 			String expression = null;
 			for (int i = 0; i < EXPRESSION_PROPERTIES.length; i++) {
 				String methodName = EXPRESSION_PROPERTIES[i];
 				Method method;
 				try {
-					method = annotation.getClass().getDeclaredMethod(methodName);
+					method = this.annotation.getClass().getDeclaredMethod(methodName);
 				}
 				catch (NoSuchMethodException ex) {
 					method = null;
 				}
-
 				if (method != null) {
 					String candidate = (String) method.invoke(this.annotation);
-
 					if (StringUtils.hasText(candidate)) {
 						expression = candidate;
 					}
@@ -299,27 +296,29 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	}
 
 
+	/**
+	 * ParameterNameDiscoverer implementation that analyzes the arg names
+	 * specified at the AspectJ annotation level.
+	 */
 	private static class AspectJAnnotationParameterNameDiscoverer implements ParameterNameDiscoverer {
 
-		public String[] getParameterNames(Method m) {
-			if (m.getParameterTypes().length == 0) {
+		public String[] getParameterNames(Method method) {
+			if (method.getParameterTypes().length == 0) {
 				return new String[0];
 			}
-			
-			AspectJAnnotation annotation = findAspectJAnnotationOnMethod(m);
+			AspectJAnnotation annotation = findAspectJAnnotationOnMethod(method);
 			if (annotation == null) {
 				return null;
 			}
-			
-			StringTokenizer strTok = new StringTokenizer(annotation.getArgNames(),",");
+			StringTokenizer strTok = new StringTokenizer(annotation.getArgNames(), ",");
 			if (strTok.countTokens() > 0) {
-				String[] ret = new String[strTok.countTokens()];
-				for (int i = 0; i < ret.length; i++) {
-					ret[i] = strTok.nextToken();
+				String[] names = new String[strTok.countTokens()];
+				for (int i = 0; i < names.length; i++) {
+					names[i] = strTok.nextToken();
 				}
-				
-				return ret;
-			} else { 
+				return names;
+			}
+			else {
 				return null; 				
 			}
 		}

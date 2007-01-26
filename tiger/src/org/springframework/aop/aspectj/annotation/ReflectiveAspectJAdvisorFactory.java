@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,7 +152,6 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		AspectJAnnotation<?> aspectJAnnotation =
 				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAspectJAdviceMethod);
 		if (aspectJAnnotation == null) {
-			//throw new IllegalStateException("Class " + aif.getAspectMetadata().getAspectClass() + " must be an aspect");
 			return null;
 		}
 
@@ -160,7 +159,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		// Check that it's an AspectJ-annotated class
 		if (!isAspect(candidateAspectClass)) {
 			throw new AopConfigException("Advice must be declared inside an aspect type: " +
-					"Offending method '" + candidateAspectJAdviceMethod + "' in class [" + candidateAspectClass.getName() + "]");
+					"Offending method '" + candidateAspectJAdviceMethod + "' in class [" +
+					candidateAspectClass.getName() + "]");
 		}
 
 		logger.debug("Found AspectJ method " + candidateAspectJAdviceMethod);
@@ -197,7 +197,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 				}
 				return null;
 			default:
-				throw new UnsupportedOperationException("Unsupported advice type on method " + candidateAspectJAdviceMethod);
+				throw new UnsupportedOperationException(
+						"Unsupported advice type on method " + candidateAspectJAdviceMethod);
 		}
 
 		// Now to configure the advice...
@@ -219,8 +220,8 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	private String[] getArgumentNames(Method forMethod) {
 		String[] argNames = this.parameterNameDiscoverer.getParameterNames(forMethod);
 		if (argNames != null) {
-			if (forMethod.getParameterTypes().length == (argNames.length + 1)) {
-				// may need to add implicit join point arg name
+			if (forMethod.getParameterTypes().length == argNames.length + 1) {
+				// May need to add implicit join point arg name...
 				Class firstArgType = forMethod.getParameterTypes()[0];
 				if (firstArgType == JoinPoint.class ||
 						firstArgType == ProceedingJoinPoint.class ||
@@ -235,13 +236,14 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		return argNames;
 	}
 
-	private AspectJExpressionPointcut getPointcut(Method candidateAspectJAdviceMethod, Class<?> candidateAspectClass) {
+	private AspectJExpressionPointcut getPointcut(Method candidateAdviceMethod, Class<?> candidateAspectClass) {
 		AspectJAnnotation<?> aspectJAnnotation =
-				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAspectJAdviceMethod);
+				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAdviceMethod);
 		if (aspectJAnnotation == null) {
 			return null;
 		}
-		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut(candidateAspectClass, new String[0], new Class[0]);
+		AspectJExpressionPointcut ajexp =
+				new AspectJExpressionPointcut(candidateAspectClass, new String[0], new Class[0]);
 		ajexp.setExpression(aspectJAnnotation.getPointcutExpression());
 		return ajexp;
 	}

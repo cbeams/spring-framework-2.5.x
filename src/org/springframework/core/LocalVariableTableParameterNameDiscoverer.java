@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,18 +55,15 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			if (visitor.foundTargetMember()) {
 				return visitor.getParameterNames();
 			} 
-			else {
-				return null;
-			}
 		} 
 		catch (IOException ex) {
 			// We couldn't load the class file, which is not fatal as it
 			// simply means this method of discovering parameter names won't work.
 			if (logger.isDebugEnabled()) {
-				logger.debug("IOException whilst attempting to read .class file for class [" +
+				logger.debug("IOException whilst attempting to read '.class' file for class [" +
 						method.getDeclaringClass().getName() +
-						"] - unable to determine parameter names for method " +
-						method.getName(),ex);
+						"] - unable to determine parameter names for method: " + method,
+						ex);
 			}
 		}
 		return null;
@@ -79,17 +76,15 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			if (visitor.foundTargetMember()) {
 				return visitor.getParameterNames();
 			} 
-			else {
-				return null;
-			}
-		} 
+		}
 		catch (IOException ex) {
 			// We couldn't load the class file, which is not fatal as it
 			// simply means this method of discovering parameter names won't work.
 			if (logger.isDebugEnabled()) {
-				logger.debug("IOException whilst attempting to read .class file for class [" +
+				logger.debug("IOException whilst attempting to read '.class' file for class [" +
 						ctor.getDeclaringClass().getName() +
-						"] - unable to determine parameter names for constructor",ex);
+						"] - unable to determine parameter names for constructor: " + ctor,
+						ex);
 			}
 		}
 		return null;
@@ -100,7 +95,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	 */
 	private ParameterNameDiscoveringVisitor visitMethod(Method method) throws IOException {
 		ClassReader classReader = createClassReader(method.getDeclaringClass());
-		FindMethodParamNamesClassVisitor classVisitor = new FindMethodParamNamesClassVisitor(method);
+		FindMethodParameterNamesClassVisitor classVisitor = new FindMethodParameterNamesClassVisitor(method);
 		classReader.accept(classVisitor, false);
 		return classVisitor;
 	}
@@ -110,7 +105,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	 */
 	private ParameterNameDiscoveringVisitor visitConstructor(Constructor ctor) throws IOException {
 		ClassReader classReader = createClassReader(ctor.getDeclaringClass());
-		FindConstructorParamNamesClassVisitor classVisitor = new FindConstructorParamNamesClassVisitor(ctor);
+		FindConstructorParameterNamesClassVisitor classVisitor = new FindConstructorParameterNamesClassVisitor(ctor);
 		classReader.accept(classVisitor, false);
 		return classVisitor;
 	}
@@ -182,18 +177,18 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	}
 
 
-	private static class FindMethodParamNamesClassVisitor extends ParameterNameDiscoveringVisitor {
+	private static class FindMethodParameterNamesClassVisitor extends ParameterNameDiscoveringVisitor {
 		
-		public FindMethodParamNamesClassVisitor(Method method) {
+		public FindMethodParameterNamesClassVisitor(Method method) {
 			super(method.getName(),method.getParameterTypes().length);
 			setDescriptorToMatch(Type.getMethodDescriptor(method));
 		}
 	}
 
 
-	private static class FindConstructorParamNamesClassVisitor extends ParameterNameDiscoveringVisitor {
+	private static class FindConstructorParameterNamesClassVisitor extends ParameterNameDiscoveringVisitor {
 		
-		public FindConstructorParamNamesClassVisitor(Constructor cons) {
+		public FindConstructorParameterNamesClassVisitor(Constructor cons) {
 			super("<init>",cons.getParameterTypes().length);
 			Type[] pTypes = new Type[cons.getParameterTypes().length];
 			for (int i = 0; i < pTypes.length; i++) {
@@ -205,6 +200,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 
 
 	private static class LocalVariableTableVisitor extends EmptyVisitor {
+
 		private boolean isStatic;
 		
 		private ParameterNameDiscoveringVisitor memberVisitor;

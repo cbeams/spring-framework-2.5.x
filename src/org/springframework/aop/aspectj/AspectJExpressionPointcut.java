@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,7 +143,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	private void checkReadyToMatch() {
 		if (getExpression() == null) {
-			throw new IllegalStateException("Must set property [expression] before attempting to match.");
+			throw new IllegalStateException("Must set property 'expression' before attempting to match");
 		}
 		if (this.pointcutExpression == null) {
 			buildPointcutExpression();
@@ -158,7 +158,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 		this.pointcutExpression =
 			this.pointcutParser.parsePointcutExpression(
-					replaceBooleanOperators(getExpression()), pointcutDeclarationScope, pointcutParameters);
+					replaceBooleanOperators(getExpression()), this.pointcutDeclarationScope, pointcutParameters);
 	}
 
 	/**
