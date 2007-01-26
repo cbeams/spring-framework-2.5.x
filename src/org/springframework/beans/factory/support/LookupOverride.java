@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Method;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -26,6 +27,7 @@ import org.springframework.util.ObjectUtils;
  * <p>Methods eligible for lookup override must not have arguments.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 1.1
  */
 public class LookupOverride extends MethodOverride {
@@ -35,22 +37,22 @@ public class LookupOverride extends MethodOverride {
 
 	/**
 	 * Construct a new LookupOverride.
-	 * @param methodName the name of the method to override. This
-	 * method must have no arguments.
+	 * @param methodName the name of the method to override.
+	 * This method must have no arguments.
 	 * @param beanName name of the bean in the current BeanFactory
-	 * or ApplicationContext that the overriden method should return
+	 * that the overriden method should return
 	 */
 	public LookupOverride(String methodName, String beanName) {
 		super(methodName);
+		Assert.notNull(beanName, "Bean name must not be null");
 		this.beanName = beanName;
 	}
 
 	/**
-	 * Return the name of the bean that should be returned
-	 * by this method.
+	 * Return the name of the bean that should be returned by this method.
 	 */
 	public String getBeanName() {
-		return beanName;
+		return this.beanName;
 	}
 
 
@@ -63,17 +65,16 @@ public class LookupOverride extends MethodOverride {
 
 
 	public String toString() {
-		return "LookupOverride for method '" + getMethodName() + "'; will return bean '" + beanName + "'";
+		return "LookupOverride for method '" + getMethodName() + "'; will return bean '" + this.beanName + "'";
 	}
 
-	public boolean equals(Object o) {
-		if(!super.equals(o)) {
-			return false;
-		}
-		return ObjectUtils.nullSafeEquals(this.beanName, ((LookupOverride)o).beanName);
+	public boolean equals(Object other) {
+		return (other instanceof LookupOverride && super.equals(other) &&
+				ObjectUtils.nullSafeEquals(this.beanName, ((LookupOverride) other).beanName));
 	}
 
 	public int hashCode() {
-		return 29 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.beanName);
+		return (29 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.beanName));
 	}
+
 }

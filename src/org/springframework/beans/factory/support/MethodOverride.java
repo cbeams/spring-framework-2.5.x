@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Method;
 
 import org.springframework.beans.BeanMetadataElement;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -46,6 +47,7 @@ public abstract class MethodOverride implements BeanMetadataElement {
 	 * @param methodName the name of the method to override
 	 */
 	protected MethodOverride(String methodName) {
+		Assert.notNull(methodName, "Method name must not be null");
 		this.methodName = methodName;
 	}
 
@@ -53,13 +55,13 @@ public abstract class MethodOverride implements BeanMetadataElement {
 	 * Return the name of the method to be overridden.
 	 */
 	public String getMethodName() {
-		return methodName;
+		return this.methodName;
 	}
 
 	/**
 	 * Set whether the overridden method has to be considered as overloaded
 	 * (that is, whether arg type matching has to happen).
-	 * Default is "true"; can be switched to false to optimize runtime performance.
+	 * <p>Default is "true"; can be switched to "false" to optimize runtime performance.
 	 */
 	protected void setOverloaded(boolean overloaded) {
 		this.overloaded = overloaded;
@@ -70,7 +72,7 @@ public abstract class MethodOverride implements BeanMetadataElement {
 	 * (that is, whether arg type matching has to happen).
 	 */
 	protected boolean isOverloaded() {
-		return overloaded;
+		return this.overloaded;
 	}
 
 	/**
@@ -82,7 +84,7 @@ public abstract class MethodOverride implements BeanMetadataElement {
 	}
 
 	public Object getSource() {
-		return source;
+		return this.source;
 	}
 
 
@@ -96,25 +98,24 @@ public abstract class MethodOverride implements BeanMetadataElement {
 	public abstract boolean matches(Method method);
 
 
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		MethodOverride that = (MethodOverride) o;
-
-		if (overloaded != that.overloaded) return false;
-		if (!ObjectUtils.nullSafeEquals(this.methodName, that.methodName)) return false;
-		if (!ObjectUtils.nullSafeEquals(this.source, that.source)) return false;
-
-		return true;
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof MethodOverride)) {
+			return false;
+		}
+		MethodOverride that = (MethodOverride) other;
+		return (ObjectUtils.nullSafeEquals(this.methodName, that.methodName) &&
+				this.overloaded == that.overloaded &&
+				ObjectUtils.nullSafeEquals(this.source, that.source));
 	}
 
 	public int hashCode() {
-		int result;
-		result = ObjectUtils.nullSafeHashCode(this.methodName);
-		result = ObjectUtils.nullSafeHashCode(this.source);
-		result = 29 * result + (overloaded ? 1 : 0);
-		return result;
+		int hashCode = ObjectUtils.nullSafeHashCode(this.methodName);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.source);
+		hashCode = 29 * hashCode + (this.overloaded ? 1 : 0);
+		return hashCode;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package org.springframework.beans.factory.support;
 
-import org.springframework.util.ObjectUtils;
-
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Extension of MethodOverride that represents an arbitrary
@@ -30,6 +31,7 @@ import java.util.List;
  * parameters and return types.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 1.1
  */
 public class ReplaceOverride extends MethodOverride {
@@ -49,6 +51,7 @@ public class ReplaceOverride extends MethodOverride {
 	 */
 	public ReplaceOverride(String methodName, String methodReplacerBeanName) {
 		super(methodName);
+		Assert.notNull(methodName, "Method replacer bean name must not be null");
 		this.methodReplacerBeanName = methodReplacerBeanName;
 	}
 
@@ -56,16 +59,16 @@ public class ReplaceOverride extends MethodOverride {
 	 * Return the name of the bean implementing MethodReplacer.
 	 */
 	public String getMethodReplacerBeanName() {
-		return methodReplacerBeanName;
+		return this.methodReplacerBeanName;
 	}
 
 	/**
 	 * Add a fragment of a class string, like "Exception"
-	 * or "java.lang.Exc", to identify a parameter type
-	 * @param s substring of class FQN
+	 * or "java.lang.Exc", to identify a parameter type.
+	 * @param identifier a substring of the fully qualified class name
 	 */
-	public void addTypeIdentifier(String s) {
-		this.typeIdentifiers.add(s);
+	public void addTypeIdentifier(String identifier) {
+		this.typeIdentifiers.add(identifier);
 	}
 
 
@@ -95,28 +98,26 @@ public class ReplaceOverride extends MethodOverride {
 		return true;			
 	}
 
-	public boolean equals(Object o) {
-		if (!super.equals(o)) {
-			return false;
-		}
-
-		ReplaceOverride that = (ReplaceOverride) o;
-		if (!ObjectUtils.nullSafeEquals(this.methodReplacerBeanName, that.methodReplacerBeanName)) return false;
-		if (!ObjectUtils.nullSafeEquals(this.typeIdentifiers, that.typeIdentifiers)) return false;
-
-		return true;
-	}
-
-	public int hashCode() {
-		int result = super.hashCode();
-		result = 29 * result + ObjectUtils.nullSafeHashCode(this.methodReplacerBeanName);
-		result = 29 * result + ObjectUtils.nullSafeHashCode(this.typeIdentifiers);
-		return result;
-	}
 
 	public String toString() {
 		return "Replace override for method '" + getMethodName() + "; will call bean '" +
 				this.methodReplacerBeanName + "'";
+	}
+
+	public boolean equals(Object other) {
+		if (!(other instanceof ReplaceOverride) || !super.equals(other)) {
+			return false;
+		}
+		ReplaceOverride that = (ReplaceOverride) other;
+		return (ObjectUtils.nullSafeEquals(this.methodReplacerBeanName, that.methodReplacerBeanName) &&
+				ObjectUtils.nullSafeEquals(this.typeIdentifiers, that.typeIdentifiers));
+	}
+
+	public int hashCode() {
+		int hashCode = super.hashCode();
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.methodReplacerBeanName);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.typeIdentifiers);
+		return hashCode;
 	}
 
 }
