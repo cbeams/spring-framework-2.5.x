@@ -232,7 +232,7 @@ public class SimpleObject {
 </bean>
 
 <bean id="accountService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
-	<property name="serviceUrl" value="http://remotehost:8080/AccountService"/>
+	<property name="serviceUrl" value="http://remotehost:8080/remoting/AccountService"/>
 	<property name="serviceInterface" value="example.AccountService"/>
 </bean>]]></programlisting>
 		</section>
@@ -316,7 +316,7 @@ public class SimpleObject {
 			translate your calls to HTTP POST requests to the URL pointing to the exported
 			service.</para>
             <programlisting><![CDATA[<bean id="httpInvokerProxy" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
-  <property name="serviceUrl" value="http://remotehost:8080/AccountService"/>
+  <property name="serviceUrl" value="http://remotehost:8080/remoting/AccountService"/>
   <property name="serviceInterface" value="example.AccountService"/>
 </bean>
 ]]></programlisting>
