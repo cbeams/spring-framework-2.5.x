@@ -13,26 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.aspectj.annotation;
 
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.ProceedingJoinPoint;
 
 /**
  * @author Adrian Colyer
- * @since 2.0.3
  */
 @Aspect
 public class NamedPointcutWithArgs {
 
-    @Pointcut("execution(* *(..)) && args(s,..)")
-    public void pointcutWithArgs(String s) {}
+	@Pointcut("execution(* *(..)) && args(s,..)")
+	public void pointcutWithArgs(String s) {}
 
-    @Around("pointcutWithArgs(aString)")
-    public Object doAround(ProceedingJoinPoint pjp, String aString) throws Throwable {
-        System.out.println("got '" + aString + "' at '" + pjp + "'");
-        throw new IllegalArgumentException(aString);
-    }
+	@Around("pointcutWithArgs(aString)")
+	public Object doAround(ProceedingJoinPoint pjp, String aString) throws Throwable {
+		System.out.println("got '" + aString + "' at '" + pjp + "'");
+		throw new IllegalArgumentException(aString);
+	}
+
 }
