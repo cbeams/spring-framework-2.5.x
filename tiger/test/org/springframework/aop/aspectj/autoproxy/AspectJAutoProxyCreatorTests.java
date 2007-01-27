@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,19 +61,19 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 
 	public void testAspectsAndAdvisorAreApplied() {
 		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(
-						"/org/springframework/aop/aspectj/autoproxy/aspectsPlusAdvisor.xml");
+				"/org/springframework/aop/aspectj/autoproxy/aspectsPlusAdvisor.xml");
 		ITestBean shouldBeWeaved = (ITestBean) ac.getBean("adrian");
 		testAspectsAndAdvisorAreApplied(ac, shouldBeWeaved);
 	}
 
 	public void testAspectsAndAdvisorAreAppliedEvenIfComingFromParentFactory() {
 		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(
-						"/org/springframework/aop/aspectj/autoproxy/aspectsPlusAdvisor.xml");
+				"/org/springframework/aop/aspectj/autoproxy/aspectsPlusAdvisor.xml");
 		GenericApplicationContext childAc = new GenericApplicationContext(ac);
 		// Create a child factory with a bean that should be weaved                                              
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, true);
 		bd.getPropertyValues().addPropertyValue(new PropertyValue("name", "Adrian")).
-						addPropertyValue(new PropertyValue("age", new Integer(34)));
+				addPropertyValue(new PropertyValue("age", new Integer(34)));
 		childAc.registerBeanDefinition("adrian2", bd);
 		// Register the advisor auto proxy creator with subclass
 		childAc.registerBeanDefinition(AnnotationAwareAspectJAutoProxyCreator.class.getName(), new RootBeanDefinition(AnnotationAwareAspectJAutoProxyCreator.class));
@@ -103,7 +103,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 
 	public void testPerThisAspect() {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
-						"/org/springframework/aop/aspectj/autoproxy/perthis.xml");
+				"/org/springframework/aop/aspectj/autoproxy/perthis.xml");
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
 		assertTrue(AopUtils.isAopProxy(adrian1));
@@ -123,7 +123,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 
 	public void testPerTargetAspect() throws SecurityException, NoSuchMethodException {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
-						"/org/springframework/aop/aspectj/autoproxy/pertarget.xml");
+				"/org/springframework/aop/aspectj/autoproxy/pertarget.xml");
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
 		assertTrue(AopUtils.isAopProxy(adrian1));
@@ -157,7 +157,6 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals(3, adrian1.getAge());
 	}
 
-
 	public void testTwoAdviceAspectSingleton() {
 		testTwoAdviceAspectWith("twoAdviceAspect.xml");
 	}
@@ -169,6 +168,7 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 	private void testTwoAdviceAspectWith(String location) {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
 				"/org/springframework/aop/aspectj/autoproxy/" + location);
+
 		boolean aspectSingleton = bf.isSingleton(AbstractAspectJAdvisorFactoryTests.TwoAdviceAspect.class.getName());
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
@@ -228,11 +228,11 @@ public class AspectJAutoProxyCreatorTests extends TestCase {
 		assertEquals(68, adrian.getAge());
 	}
 
-	public void testSPR2584() throws Exception {
+	public void testRetryAspect() throws Exception {
 		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(
-				"/org/springframework/aop/aspectj/autoproxy/testSPR2584.xml");
+				"/org/springframework/aop/aspectj/autoproxy/retryAspect.xml");
 		UnreliableBean bean = (UnreliableBean) bf.getBean("unreliableBean");
-		RetryAspect aspect = (RetryAspect)bf.getBean("retryAspect");
+		RetryAspect aspect = (RetryAspect) bf.getBean("retryAspect");
 		int attempts = bean.unreliable();
 		assertEquals(2, attempts);
 		assertEquals(2, aspect.getBeginCalls());
