@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.aspectj.lang.annotation.Pointcut;
 
 /**
  * @author Rob Harrop
- * @since 2.0
+ * @author Juergen Hoeller
  */
 @Aspect
 public class RetryAspect {
@@ -33,6 +33,7 @@ public class RetryAspect {
 	private int commitCalls;
 
 	private int rollbackCalls;
+
 
 	@Pointcut("execution(public * UnreliableBean.*(..))")
 	public void execOfPublicMethod() {
@@ -45,51 +46,37 @@ public class RetryAspect {
 	public Object retry(ProceedingJoinPoint jp) throws Throwable {
 		boolean retry = true;
 		Object o = null;
-
 		while (retry) {
 			try {
 				retry = false;
-				o = jp.proceed();
+				this.beginCalls++;
+				try {
+					o = jp.proceed();
+					this.commitCalls++;
+				}
+				catch (RetryableException e) {
+					this.rollbackCalls++;
+					throw e;
+				}
 			}
 			catch (RetryableException re) {
 				retry = true;
 			}
 		}
-
-		return o;
-	}
-
-	/**
-	 * Just simulating TransactionInterceptor, could be anything else
-	 */
-	@Around("execOfPublicMethod()")
-	public Object transaction(ProceedingJoinPoint jp) throws Throwable {
-		Object o = null;
-
-		this.beginCalls++;
-		try {
-			o = jp.proceed();
-			this.commitCalls++;
-		}
-		catch (RetryableException e) {
-			this.rollbackCalls++;
-			throw e;
-		}
-
 		return o;
 	}
 
 
 	public int getBeginCalls() {
-		return beginCalls;
+		return this.beginCalls;
 	}
 
 	public int getCommitCalls() {
-		return commitCalls;
+		return this.commitCalls;
 	}
 
 	public int getRollbackCalls() {
-		return rollbackCalls;
+		return this.rollbackCalls;
 	}
 
 }
