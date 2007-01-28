@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,6 +111,9 @@ public class DispatcherServletTests extends TestCase {
 				(FrameworkServlet.SERVLET_CONTEXT_PREFIX + "complex").equals(complexDispatcherServlet.getServletContextAttributeName()));
 		assertTrue("Context not published",
 				getServletContext().getAttribute(FrameworkServlet.SERVLET_CONTEXT_PREFIX + "complex") == null);
+
+		simpleDispatcherServlet.destroy();
+		complexDispatcherServlet.destroy();
 	}
 
 	public void testInvalidRequest() throws Exception {
