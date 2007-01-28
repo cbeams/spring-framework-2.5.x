@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,8 +24,9 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 
 /**
- * ApplicationContext that allows concrete registration of beans and
- * messages in code, rather than from external configuration sources.
+ * {@link org.springframework.context.ApplicationContext} implementation
+ * which supports programmatic registration of beans and messages,
+ * rather than reading bean definitions from external configuration sources.
  * Mainly useful for testing.
  *
  * @author Rod Johnson
@@ -61,7 +62,7 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	public StaticApplicationContext(ApplicationContext parent) throws BeansException {
 		super(parent);
 
-		// initialize and register StaticMessageSource
+		// Initialize and register a StaticMessageSource.
 		this.staticMessageSource = new StaticMessageSource();
 		getBeanFactory().registerSingleton(MESSAGE_SOURCE_BEAN_NAME, this.staticMessageSource);
 	}
@@ -72,7 +73,7 @@ public class StaticApplicationContext extends GenericApplicationContext {
 	 * @see #addMessage
 	 */
 	public StaticMessageSource getStaticMessageSource() {
-		return staticMessageSource;
+		return this.staticMessageSource;
 	}
 
 

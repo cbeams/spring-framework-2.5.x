@@ -527,7 +527,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	//---------------------------------------------------------------------
 
 	public BeanFactory getParentBeanFactory() {
-		return parentBeanFactory;
+		return this.parentBeanFactory;
 	}
 
 	public boolean containsLocalBean(String name) {
@@ -728,10 +728,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	 */
 	protected final boolean isPrototypeCurrentlyInCreation(String beanName) {
 		Set beanNames = (Set) this.prototypesCurrentlyInCreation.get();
-		if (beanNames != null) {
-			return beanNames.contains(beanName);
-		}
-		return false;
+		return (beanNames != null ? beanNames.contains(beanName) : false);
 	}
 
 	public boolean isCurrentlyInCreation(String beanName) {
@@ -1366,7 +1363,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 	}
 
 	/**
-	 * Overridden to clear FactoryBean object cache as well.
+	 * Overridden to clear the FactoryBean object cache as well.
 	 */
 	protected void removeSingleton(String beanName) {
 		super.removeSingleton(beanName);
