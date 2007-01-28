@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.context.support;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.support.AbstractRefreshableApplicationContext;
 import org.springframework.core.io.Resource;
@@ -27,8 +26,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.util.SystemPropertyUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ServletConfigAware;
@@ -37,46 +34,48 @@ import org.springframework.web.context.request.RequestScope;
 import org.springframework.web.context.request.SessionScope;
 
 /**
- * AbstractRefreshableApplicationContext subclass that implements the
- * ConfigurableWebApplicationContext interface for web environments.
- * Pre-implements a "configLocation" property, to be populated through the
- * ConfigurableWebApplicationContext interface on web application startup.
+ * {@link org.springframework.context.support.AbstractRefreshableApplicationContext}
+ * subclass which implements the
+ * {@link org.springframework.web.context.ConfigurableWebApplicationContext}
+ * interface for web environments. Provides a "configLocations" property,
+ * to be populated through the ConfigurableWebApplicationContext interface
+ * on web application startup.
  *
  * <p>This class is as easy to subclass as AbstractRefreshableApplicationContext:
- * All you need to implements is the <code>loadBeanDefinitions</code> method;
+ * All you need to implements is the {@link #loadBeanDefinitions} method;
  * see the superclass javadoc for details. Note that implementations are supposed
  * to load bean definitions from the files specified by the locations returned
- * by the <code>getConfigLocations</code> method.
+ * by the {@link #getConfigLocations} method.
  *
  * <p>Interprets resource paths as servlet context resources, i.e. as paths beneath
  * the web application root. Absolute paths, e.g. for files outside the web app root,
- * can be accessed via "file:" URLs, as implemented by AbstractApplicationContext.
+ * can be accessed via "file:" URLs, as implemented by
+ * {@link org.springframework.core.io.DefaultResourceLoader}.
  *
- * <p>In addition to the special beans detected by AbstractApplicationContext,
- * this class detects a ThemeSource bean in the context, with the name "themeSource".
+ * <p>In addition to the special beans detected by
+ * {@link org.springframework.context.support.AbstractApplicationContext},
+ * this class detects a bean of type {@link org.springframework.ui.context.ThemeSource}
+ * in the context, under the special bean name "themeSource".
  *
  * <p><b>This is the web context to be subclassed for a different bean definition format.</b>
  * Such a context implementation can be specified as "contextClass" context-param
- * for ContextLoader or "contextClass" init-param for FrameworkServlet, replacing
- * the default XmlWebApplicationContext. It would automatically receive the
- * "contextConfigLocation" context-param or init-param, respectively.
+ * for {@link org.springframework.web.context.ContextLoader} or as "contextClass"
+ * init-param for {@link org.springframework.web.servlet.FrameworkServlet},
+ * replacing the default {@link XmlWebApplicationContext}. It will then automatically
+ * receive the "contextConfigLocation" context-param or init-param, respectively.
  *
  * <p>Note that WebApplicationContext implementations are generally supposed
  * to configure themselves based on the configuration received through the
- * ConfigurableWebApplicationContext interface. In contrast, a standalone
+ * {@link ConfigurableWebApplicationContext} interface. In contrast, a standalone
  * application context might allow for configuration in custom startup code
- * (for example, GenericApplicationContext).
+ * (for example, {@link org.springframework.context.support.GenericApplicationContext}).
  *
  * @author Juergen Hoeller
  * @since 1.1.3
  * @see #loadBeanDefinitions
- * @see #getConfigLocations
  * @see org.springframework.web.context.ConfigurableWebApplicationContext#setConfigLocations
- * @see ServletContextResourcePatternResolver
- * @see org.springframework.context.support.AbstractApplicationContext
  * @see org.springframework.ui.context.ThemeSource
  * @see XmlWebApplicationContext
- * @see org.springframework.context.support.GenericApplicationContext
  */
 public abstract class AbstractRefreshableWebApplicationContext extends AbstractRefreshableApplicationContext
 		implements ConfigurableWebApplicationContext, ThemeSource {
@@ -118,7 +117,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	}
 
 	public ServletConfig getServletConfig() {
-		return servletConfig;
+		return this.servletConfig;
 	}
 
 	public void setNamespace(String namespace) {
@@ -128,7 +127,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 		}
 	}
 
-	protected String getNamespace() {
+	public String getNamespace() {
 		return this.namespace;
 	}
 
@@ -139,36 +138,23 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 		}
 	}
 
-	protected String[] getConfigLocations() {
-		return this.configLocations;
-	}
-
-
-	/**
-	 * Sets a default config location if no explicit config location specified.
-	 * @see #getDefaultConfigLocations
-	 * @see #setConfigLocations
-	 */
-	public void refresh() throws BeansException {
-		if (ObjectUtils.isEmpty(getConfigLocations())) {
-			setConfigLocations(getDefaultConfigLocations());
-		}
-		super.refresh();
+	public String[] getConfigLocations() {
+		return (this.configLocations != null ? this.configLocations : getDefaultConfigLocations());
 	}
 
 	/**
 	 * Return the default config locations to use, for the case where no explicit
 	 * config locations have been specified.
-	 * <p>Default implementation returns null, requiring explicit config locations.
+	 * <p>Default implementation returns <code>null</code>, requiring explicit config locations.
 	 * @see #setConfigLocations
 	 */
 	protected String[] getDefaultConfigLocations() {
 		return null;
 	}
 
+
 	/**
-	 * Register ServletContextAwareProcessor.
-	 * @see ServletContextAwareProcessor
+	 * Register request/session scopes, a {@link ServletContextAwareProcessor}, etc.
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.registerScope(SCOPE_REQUEST, new RequestScope());
@@ -216,19 +202,6 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 
 	public Theme getTheme(String themeName) {
 		return this.themeSource.getTheme(themeName);
-	}
-
-
-	/**
-	 * Return diagnostic information.
-	 */
-	public String toString() {
-		StringBuffer sb = new StringBuffer(super.toString());
-		sb.append("; ");
-		sb.append("config locations [");
-		sb.append(StringUtils.arrayToCommaDelimitedString(this.configLocations));
-		sb.append("]");
-		return sb.toString();
 	}
 
 }

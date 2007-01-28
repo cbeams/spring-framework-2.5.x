@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,10 +24,11 @@ import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Interface to be implemented by configurable portlet application contexts.
- * Expected by FrameworkPortlet.
- * 
- * <p>Note: The setters of this interface need to be called before an invocation
- * of the refresh method inherited from ConfigurableApplicationContext.
+ * Supported by {@link org.springframework.web.portlet.FrameworkPortlet}.
+ *
+ * <p>Note: The setters of this interface need to be called before an
+ * invocation of the {@link #refresh} method inherited from
+ * {@link org.springframework.context.ConfigurableApplicationContext}.
  * They do not cause an initialization of the context on their own.
  *
  * @author Juergen Hoeller
@@ -59,10 +60,20 @@ public interface ConfigurablePortletApplicationContext
 	void setPortletContext(PortletContext portletContext);
 
 	/**
+	 * Return the standard Portlet API PortletContext for this application.
+	 */
+	PortletContext getPortletContext();
+
+	/**
 	 * Set the PortletConfig for this portlet application context.
 	 * @see #refresh()
 	 */
 	void setPortletConfig(PortletConfig portletConfig);
+
+	/**
+	 * Return the PortletConfig for this portlet application context, if any.
+	 */
+	PortletConfig getPortletConfig();
 
 	/**
 	 * Set the namespace for this portlet application context,
@@ -71,10 +82,21 @@ public interface ConfigurablePortletApplicationContext
 	void setNamespace(String namespace);
 
 	/**
+	 * Return the namespace for this web application context, if any.
+	 */
+	String getNamespace();
+
+	/**
 	 * Set the config locations for this portlet application context.
 	 * If not set, the implementation is supposed to use a default for the
 	 * given namespace.
 	 */
 	void setConfigLocations(String[] configLocations);
+
+	/**
+	 * Return the config locations for this web application context,
+	 * or <code>null</code> if none specified.
+	 */
+	String[] getConfigLocations();
 
 }

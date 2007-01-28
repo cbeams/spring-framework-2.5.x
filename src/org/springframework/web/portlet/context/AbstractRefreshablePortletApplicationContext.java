@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,12 @@ import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
 import javax.servlet.ServletContext;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.AbstractRefreshableApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestScope;
@@ -34,48 +33,40 @@ import org.springframework.web.context.request.SessionScope;
 import org.springframework.web.context.support.ServletContextAwareProcessor;
 
 /**
- * AbstractRefreshableApplicationContext subclass that implements the
- * ConfigurablePortletApplicationContext interface for portlet environments.
- * Pre-implements a "configLocation" property, to be populated through the
- * ConfigurablePortletApplicationContext interface on portlet application startup.
+ * {@link org.springframework.context.support.AbstractRefreshableApplicationContext}
+ * subclass which implements the {@link ConfigurablePortletApplicationContext}
+ * interface for portlet environments. Provides a "configLocations" property,
+ * to be populated through the ConfigurablePortletApplicationContext interface
+ * on portlet application startup.
  *
  * <p>This class is as easy to subclass as AbstractRefreshableApplicationContext:
- * All you need to implement is the <code>loadBeanDefinitions</code> method;
+ * All you need to implements is the {@link #loadBeanDefinitions} method;
  * see the superclass javadoc for details. Note that implementations are supposed
  * to load bean definitions from the files specified by the locations returned
- * by the <code>getConfigLocations</code> method.
+ * by the {@link #getConfigLocations} method.
  *
- * <p>Interprets resource paths as portlet context resources, i.e. as paths beneath
+ * <p>Interprets resource paths as servlet context resources, i.e. as paths beneath
  * the web application root. Absolute paths, e.g. for files outside the web app root,
- * can be accessed via "file:" URLs, as implemented by AbstractApplicationContext.
- *
- * <p>In addition to the special beans detected by AbstractApplicationContext,
- * this class detects a ThemeSource bean in the context, with the name
- * "themeSource".
+ * can be accessed via "file:" URLs, as implemented by
+ * {@link org.springframework.core.io.DefaultResourceLoader}.
  *
  * <p><b>This is the portlet context to be subclassed for a different bean definition format.</b>
- * Such a context implementation can be specified as "contextClass" context-param
- * for ContextLoader or "contextClass" init-param for FrameworkPortlet, replacing
- * the default XmlPortletApplicationContext. It would automatically receive the
- * "contextConfigLocation" context-param or init-param, respectively.
+ * Such a context implementation can be specified as "contextClass" init-param
+ * for FrameworkPortlet, replacing the default {@link XmlPortletApplicationContext}.
+ * It will then automatically receive the "contextConfigLocation" init-param.
  *
- * <p>Note that PortletApplicationContext implementations are generally supposed
+ * <p>Note that Portlet-based context implementations are generally supposed
  * to configure themselves based on the configuration received through the
- * ConfigurablePortletApplicationContext interface. In contrast, a standalone
+ * {@link ConfigurablePortletApplicationContext} interface. In contrast, a standalone
  * application context might allow for configuration in custom startup code
- * (for example, GenericApplicationContext).
+ * (for example, {@link org.springframework.context.support.GenericApplicationContext}).
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
  * @since 2.0
  * @see #loadBeanDefinitions
- * @see #getConfigLocations
  * @see org.springframework.web.portlet.context.ConfigurablePortletApplicationContext#setConfigLocations
- * @see PortletContextResourcePatternResolver
- * @see org.springframework.context.support.AbstractApplicationContext
- * @see org.springframework.ui.context.ThemeSource
  * @see XmlPortletApplicationContext
- * @see org.springframework.context.support.GenericApplicationContext
  */
 public abstract class AbstractRefreshablePortletApplicationContext extends AbstractRefreshableApplicationContext
 		implements WebApplicationContext, ConfigurablePortletApplicationContext {
@@ -108,7 +99,7 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 	}
 
 	public ServletContext getServletContext() {
-		return servletContext;
+		return this.servletContext;
 	}
 
 	public void setPortletContext(PortletContext portletContext) {
@@ -127,7 +118,7 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 	}
 
 	public PortletConfig getPortletConfig() {
-		return portletConfig;
+		return this.portletConfig;
 	}
 
 	public void setNamespace(String namespace) {
@@ -137,7 +128,7 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 		}
 	}
 
-	protected String getNamespace() {
+	public String getNamespace() {
 		return this.namespace;
 	}
 
@@ -145,21 +136,8 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 		this.configLocations = configLocations;
 	}
 
-	protected String[] getConfigLocations() {
-		return this.configLocations;
-	}
-
-
-	/**
-	 * Sets a default config location if no explicit config location specified.
-	 * @see #getDefaultConfigLocations
-	 * @see #setConfigLocations
-	 */
-	public void refresh() throws BeansException {
-		if (this.configLocations == null || this.configLocations.length == 0) {
-			setConfigLocations(getDefaultConfigLocations());
-		}
-		super.refresh();
+	public String[] getConfigLocations() {
+		return (!ObjectUtils.isEmpty(this.configLocations) ? this.configLocations : getDefaultConfigLocations());
 	}
 
 	/**
@@ -172,9 +150,9 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 		return null;
 	}
 
+
 	/**
-	 * Register PortletContextAwareProcessor.
-	 * @see PortletContextAwareProcessor
+	 * Register request/session scopes, a {@link PortletContextAwareProcessor}, etc.
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.registerScope(SCOPE_REQUEST, new RequestScope());
@@ -202,19 +180,6 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 	 */
 	protected ResourcePatternResolver getResourcePatternResolver() {
 		return new PortletContextResourcePatternResolver(this);
-	}
-
-
-	/**
-	 * Return diagnostic information.
-	 */
-	public String toString() {
-		StringBuffer sb = new StringBuffer(super.toString());
-		sb.append("; ");
-		sb.append("config locations [");
-		sb.append(StringUtils.arrayToCommaDelimitedString(this.configLocations));
-		sb.append("]");
-		return sb.toString();
 	}
 
 }

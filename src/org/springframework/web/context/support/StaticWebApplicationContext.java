@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,19 +33,22 @@ import org.springframework.web.context.request.RequestScope;
 import org.springframework.web.context.request.SessionScope;
 
 /**
- * Static WebApplicationContext implementation for testing.
- * Not for use in production applications.
+ * Static {@link org.springframework.web.context.WebApplicationContext}
+ * implementation for testing. Not intended for use in production applications.
  *
- * <p>Implements the ConfigurableWebApplicationContext interface to allow for
- * direct replacement of an XmlWebApplicationContext, despite not actually
- * supporting loading from a context config location.
+ * <p>Implements the {@link org.springframework.web.context.ConfigurableWebApplicationContext}
+ * interface to allow for direct replacement of an {@link XmlWebApplicationContext},
+ * despite not actually supporting external configuration files.
  *
- * <p>Interprets resource paths as servlet context resources, that is, as paths beneath
- * the web application root. Absolute paths, for example for files outside the web app root,
- * can be accessed via "file:" URLs, as implemented by AbstractApplicationContext.
+ * <p>Interprets resource paths as servlet context resources, i.e. as paths beneath
+ * the web application root. Absolute paths, e.g. for files outside the web app root,
+ * can be accessed via "file:" URLs, as implemented by
+ * {@link org.springframework.core.io.DefaultResourceLoader}.
  *
- * <p>In addition to the special beans detected by AbstractApplicationContext,
- * this class detects a ThemeSource bean in the context, with the name "themeSource".
+ * <p>In addition to the special beans detected by
+ * {@link org.springframework.context.support.AbstractApplicationContext},
+ * this class detects a bean of type {@link org.springframework.ui.context.ThemeSource}
+ * in the context, under the special bean name "themeSource".
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -86,7 +89,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	}
 
 	public ServletConfig getServletConfig() {
-		return servletConfig;
+		return this.servletConfig;
 	}
 
 	public void setNamespace(String namespace) {
@@ -96,7 +99,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 		}
 	}
 
-	protected String getNamespace() {
+	public String getNamespace() {
 		return this.namespace;
 	}
 
@@ -105,13 +108,16 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	 * @throws UnsupportedOperationException <b>always</b>
 	 */
 	public void setConfigLocations(String[] configLocations) {
-		throw new UnsupportedOperationException("StaticWebApplicationContext does not support configLocations");
+		throw new UnsupportedOperationException("StaticWebApplicationContext does not support config locations");
+	}
+
+	public String[] getConfigLocations() {
+		return null;
 	}
 
 
 	/**
-	 * Register ServletContextAwareProcessor.
-	 * @see ServletContextAwareProcessor
+	 * Register request/session scopes, a {@link ServletContextAwareProcessor}, etc.
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.registerScope(SCOPE_REQUEST, new RequestScope());

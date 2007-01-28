@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,18 @@ import org.springframework.web.context.request.RequestScope;
 import org.springframework.web.context.request.SessionScope;
 
 /**
- * Static ApplicationContext for Portlet environments. This implementation is intended
- * for testing, not for use in production applications.
+ * Static Portlet-based ApplicationContext implementation for testing.
+ * Not intended for use in production applications.
  *
- * <p>Interprets resource paths as portlet context resources, that is, as paths beneath
- * the portlet application root. Absolute paths, for example for files outside the portlet
- * app root, can be accessed via "file:" URLs, as implemented by AbstractApplicationContext.
+ * <p>Implements the
+ * {@link org.springframework.web.portlet.context.ConfigurablePortletApplicationContext}
+ * interface to allow for direct replacement of an {@link XmlPortletApplicationContext},
+ * despite not actually supporting external configuration files.
+ *
+ * <p>Interprets resource paths as portlet context resources, that is, as paths
+ * beneath the portlet application root. Absolute paths, for example for files
+ * outside the portlet app root, can be accessed via "file:" URLs, as implemented
+ * by {@link org.springframework.core.io.DefaultResourceLoader}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -66,7 +72,7 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 	}
 
 	public ServletContext getServletContext() {
-		return servletContext;
+		return this.servletContext;
 	}
 
 	public void setPortletContext(PortletContext portletContext) {
@@ -74,7 +80,7 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 	}
 
 	public PortletContext getPortletContext() {
-		return portletContext;
+		return this.portletContext;
 	}
 
 	public void setPortletConfig(PortletConfig portletConfig) {
@@ -85,7 +91,7 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 	}
 
 	public PortletConfig getPortletConfig() {
-		return portletConfig;
+		return this.portletConfig;
 	}
 
 	public void setNamespace(String namespace) {
@@ -95,18 +101,21 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 		}
 	}
 
-	protected String getNamespace() {
+	public String getNamespace() {
 		return this.namespace;
 	}
 
 	public void setConfigLocations(String[] configLocations) {
-		throw new UnsupportedOperationException("StaticPortletApplicationContext does not support configLocations");
+		throw new UnsupportedOperationException("StaticPortletApplicationContext does not support config locations");
+	}
+
+	public String[] getConfigLocations() {
+		return null;
 	}
 
 
 	/**
-	 * Register PortletContextAwareProcessor.
-	 * @see PortletContextAwareProcessor
+	 * Register request/session scopes, a {@link PortletContextAwareProcessor}, etc.
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.registerScope(SCOPE_REQUEST, new RequestScope());
