@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Bean definition for beans who inherit settings from their parent.
+ * Bean definition for beans which inherit settings from their parent.
  *
  * <p>Will use the bean class of the parent if none specified, but can
  * also override it. In the latter case, the child bean class must be
@@ -118,18 +118,28 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 		setBeanClassName(beanClassName);
 	}
 
+	/**
+	 * Create a new ChildBeanDefinition as deep copy of the given
+	 * bean definition.
+	 * @param original the original bean definition to copy from
+	 */
+	public ChildBeanDefinition(ChildBeanDefinition original) {
+		super(original);
+		this.parentName = original.getParentName();
+	}
+
 
 	/**
 	 * Return the name of the parent definition of this bean definition.
 	 */
 	public String getParentName() {
-		return parentName;
+		return this.parentName;
 	}
 
 	public void validate() throws BeanDefinitionValidationException {
 		super.validate();
 		if (this.parentName == null) {
-			throw new BeanDefinitionValidationException("parentName must be set in ChildBeanDefinition");
+			throw new BeanDefinitionValidationException("'parentName' must be set in ChildBeanDefinition");
 		}
 	}
 
