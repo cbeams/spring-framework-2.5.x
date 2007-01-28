@@ -298,12 +298,11 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	private ShadowMatch getShadowMatch(Method method) {
-		synchronized (shadowMapCache) {
-			ShadowMatch shadowMatch = (ShadowMatch) shadowMapCache.get(method);
-
+		synchronized (this.shadowMapCache) {
+			ShadowMatch shadowMatch = (ShadowMatch) this.shadowMapCache.get(method);
 			if (shadowMatch == null) {
 				shadowMatch = this.pointcutExpression.matchesMethodExecution(method);
-				shadowMapCache.put(method, shadowMatch);
+				this.shadowMapCache.put(method, shadowMatch);
 			}
 			return shadowMatch;
 		}
