@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -428,8 +428,44 @@ public abstract class ObjectUtils {
 
 
 	//---------------------------------------------------------------------
-	// Convenience methods for content-based toString output
+	// Convenience methods for toString output
 	//---------------------------------------------------------------------
+
+	/**
+	 * Return a String representation of an object's overall identity.
+	 * @param obj the object (may be <code>null</code>)
+	 * @return the object's identity as String representation,
+	 * or <code>null</code> if the object was <code>null</code>
+	 */
+	public static String identityToString(Object obj) {
+		if (obj == null) {
+			return EMPTY_STRING;
+		}
+		return obj.getClass().getName() + "@" + getIdentityHexString(obj);
+	}
+
+	/**
+	 * Return a hex String form of an object's identity hash code.
+	 * @param obj the object
+	 * @return the object's identity code in hex notation
+	 */
+	public static String getIdentityHexString(Object obj) {
+		return Integer.toHexString(System.identityHashCode(obj));
+	}
+
+	/**
+	 * Return a content-based String representation if <code>obj</code> is
+	 * not <code>null</code>; otherwise returns an empty <code>String</code>.
+	 * <p>Differs from <code>nullSafeToString</code> in that it returns an
+	 * empty String rather than "null" for a <code>null</code> value.
+	 * @see #nullSafeToString(Object)
+	 */
+	public static String getDisplayString(Object obj) {
+		if (obj == null) {
+			return EMPTY_STRING;
+		}
+		return nullSafeToString(obj);
+	}
 
 	/**
 	 * Return a String representation of the specified Object.
@@ -755,42 +791,6 @@ public abstract class ObjectUtils {
 		}
 		buffer.append(ARRAY_END);
 		return buffer.toString();
-	}
-
-	/**
-	 * Return a String representation of an object's overall identity.
-	 * @param obj the object (may be <code>null</code>)
-	 * @return the object's identity as String representation,
-	 * or <code>null</code> if the object was <code>null</code>
-	 */
-	public static String identityToString(Object obj) {
-		if (obj == null) {
-			return EMPTY_STRING;
-		}
-		return obj.getClass().getName() + "@" + getIdentityHexString(obj);
-	}
-
-	/**
-	 * Return a hex String form of an object's identity hash code.
-	 * @param obj the object
-	 * @return the object's identity code in hex notation
-	 */
-	public static String getIdentityHexString(Object obj) {
-		return Integer.toHexString(System.identityHashCode(obj));
-	}
-
-	/**
-	 * Return a content-based String representation if <code>obj</code> is
-	 * not <code>null</code>; otherwise returns an empty <code>String</code>.
-	 * <p>Differs from <code>nullSafeToString</code> in that it returns an
-	 * empty String rather than "null" for a <code>null</code> value.
-	 * @see #nullSafeToString(Object)
-	 */
-	public static String getDisplayString(Object obj) {
-		if (obj == null) {
-			return EMPTY_STRING;
-		}
-		return nullSafeToString(obj);
 	}
 
 }
