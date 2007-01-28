@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,14 @@ import org.springframework.core.AttributeAccessor;
  * constructor argument values, and further information supplied by
  * concrete implementations.
  *
- * <p>This is just a minimal interface: The main intention is to allow
- * BeanFactoryPostProcessors (like PropertyPlaceholderConfigurer) to
- * access and modify property values.
+ * <p>This is just a minimal interface: The main intention is to allow a
+ * {@link BeanFactoryPostProcessor} such as {@link PropertyPlaceholderConfigurer}
+ * to introspect and modify property values and other bean metadata.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @since 19.03.2004
  * @see ConfigurableListableBeanFactory#getBeanDefinition
- * @see BeanFactoryPostProcessor
- * @see PropertyPlaceholderConfigurer
  * @see org.springframework.beans.factory.support.RootBeanDefinition
  * @see org.springframework.beans.factory.support.ChildBeanDefinition
  */

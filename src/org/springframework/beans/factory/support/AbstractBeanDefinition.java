@@ -30,11 +30,14 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Base class for bean definition objects, factoring out common
- * properties of RootBeanDefinition and ChildBeanDefinition.
+ * Base class for concrete, full-fledged
+ * {@link org.springframework.beans.factory.config.BeanDefinition} classes,
+ * factoring out common properties of {@link RootBeanDefinition} and
+ * {@link ChildBeanDefinition}.
  *
  * <p>The autowire constants match the ones defined in the
- * AutowireCapableBeanFactory interface.
+ * {@link org.springframework.beans.factory.config.AutowireCapableBeanFactory}
+ * interface.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
