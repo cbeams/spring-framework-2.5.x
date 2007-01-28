@@ -62,6 +62,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Abstract implementation of the {@link org.springframework.context.ApplicationContext}
@@ -144,10 +145,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private final List beanFactoryPostProcessors = new ArrayList();
 
 	/** Display name */
-	private String displayName = getClass().getName() + ";hashCode=" + hashCode();
+	private String displayName = ObjectUtils.identityToString(this);
 
 	/** System time in milliseconds when this context started */
-	private long startupTime;
+	private long startupDate;
 
 	/** Flag that indicates whether this context is currently active */
 	private boolean active = false;
@@ -221,14 +222,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Return a friendly name for this context.
 	 */
 	public String getDisplayName() {
-		return displayName;
+		return this.displayName;
 	}
 
 	/**
 	 * Return the timestamp (ms) when this context was first loaded.
 	 */
 	public long getStartupDate() {
-		return startupTime;
+		return this.startupDate;
 	}
 
 	/**
@@ -242,7 +243,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void publishEvent(ApplicationEvent event) {
 		Assert.notNull(event, "Event must not be null");
 		if (logger.isDebugEnabled()) {
-			logger.debug("Publishing event in context [" + getDisplayName() + "]: " + event);
+			logger.debug("Publishing event in context [" + ObjectUtils.identityToString(this) + "]: " + event);
 		}
 		getApplicationEventMulticaster().multicastEvent(event);
 		if (this.parent != null) {
@@ -288,7 +289,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	public void refresh() throws BeansException, IllegalStateException {
 		synchronized (this.startupShutdownMonitor) {
-			this.startupTime = System.currentTimeMillis();
+			this.startupDate = System.currentTimeMillis();
+
+			if (logger.isInfoEnabled()) {
+				logger.info("Refreshing " + this);
+			}
 
 			synchronized (this.activeMonitor) {
 				this.active = true;
@@ -297,6 +302,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			// Tell subclass to refresh the internal bean factory.
 			refreshBeanFactory();
 			ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+
+			if (logger.isInfoEnabled()) {
+				logger.info("Bean factory for application context [" + ObjectUtils.identityToString(this) +
+						"]: " + ObjectUtils.identityToString(beanFactory));
+			}
 
 			// Tell the internal bean factory to use the context's class loader.
 			beanFactory.setBeanClassLoader(getClassLoader());
@@ -320,13 +330,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				factoryProcessor.postProcessBeanFactory(beanFactory);
 			}
 
-			if (logger.isInfoEnabled()) {
-				if (getBeanDefinitionCount() == 0) {
-					logger.info("No beans defined in application context [" + getDisplayName() + "]");
-				}
-				else {
-					logger.info(getBeanDefinitionCount() + " beans defined in application context [" + getDisplayName() + "]");
-				}
+			if (logger.isDebugEnabled()) {
+				logger.debug(getBeanDefinitionCount() + " beans defined in " + this);
 			}
 
 			try {
@@ -466,8 +471,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 					hms.setParentMessageSource(getInternalParentMessageSource());
 				}
 			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Using MessageSource [" + this.messageSource + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using MessageSource [" + this.messageSource + "]");
 			}
 		}
 		else {
@@ -475,8 +480,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			DelegatingMessageSource dms = new DelegatingMessageSource();
 			dms.setParentMessageSource(getInternalParentMessageSource());
 			this.messageSource = dms;
-			if (logger.isInfoEnabled()) {
-				logger.info("Unable to locate MessageSource with name '" + MESSAGE_SOURCE_BEAN_NAME +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Unable to locate MessageSource with name '" + MESSAGE_SOURCE_BEAN_NAME +
 						"': using default [" + this.messageSource + "]");
 			}
 		}
@@ -491,14 +496,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		if (containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
 			this.applicationEventMulticaster = (ApplicationEventMulticaster)
 					getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
 			}
 		}
 		else {
 			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster();
-			if (logger.isInfoEnabled()) {
-				logger.info("Unable to locate ApplicationEventMulticaster with name '" +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Unable to locate ApplicationEventMulticaster with name '" +
 						APPLICATION_EVENT_MULTICASTER_BEAN_NAME +
 						"': using default [" + this.applicationEventMulticaster + "]");
 			}
@@ -602,7 +607,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected void doClose() {
 		if (isActive()) {
 			if (logger.isInfoEnabled()) {
-				logger.info("Closing application context [" + getDisplayName() + "]");
+				logger.info("Closing " + this);
 			}
 			try {
 				// Publish shutdown event.
@@ -871,15 +876,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Return information about this context.
 	 */
 	public String toString() {
-		StringBuffer sb = new StringBuffer(getClass().getName());
-		sb.append(": ");
-		sb.append("display name [").append(this.displayName).append("]; ");
-		sb.append("startup date [").append(new Date(this.startupTime)).append("]; ");
-		if (this.parent == null) {
+		StringBuffer sb = new StringBuffer(ObjectUtils.identityToString(this));
+		sb.append(": display name [").append(getDisplayName());
+		sb.append("]; startup date [").append(new Date(getStartupDate()));
+		sb.append("]; ");
+		ApplicationContext parent = getParent();
+		if (parent == null) {
 			sb.append("root of context hierarchy");
 		}
 		else {
-			sb.append("child of [").append(this.parent).append(']');
+			sb.append("parent: ").append(ObjectUtils.identityToString(parent));
 		}
 		return sb.toString();
 	}

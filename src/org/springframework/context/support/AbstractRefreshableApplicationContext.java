@@ -98,12 +98,8 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		try {
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
 			loadBeanDefinitions(beanFactory);
-
 			synchronized (this.beanFactoryMonitor) {
 				this.beanFactory = beanFactory;
-			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Bean factory for application context [" + getDisplayName() + "]: " + beanFactory);
 			}
 		}
 		catch (IOException ex) {

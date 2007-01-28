@@ -405,15 +405,15 @@ public class DispatcherServlet extends FrameworkServlet {
 		try {
 			this.multipartResolver = (MultipartResolver)
 					getWebApplicationContext().getBean(MULTIPART_RESOLVER_BEAN_NAME, MultipartResolver.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("Using MultipartResolver [" + this.multipartResolver + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using MultipartResolver [" + this.multipartResolver + "]");
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Default is no multipart resolver.
 			this.multipartResolver = null;
-			if (logger.isInfoEnabled()) {
-				logger.info("Unable to locate MultipartResolver with name '"	+ MULTIPART_RESOLVER_BEAN_NAME +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Unable to locate MultipartResolver with name '"	+ MULTIPART_RESOLVER_BEAN_NAME +
 						"': no multipart request handling provided");
 			}
 		}
@@ -428,15 +428,15 @@ public class DispatcherServlet extends FrameworkServlet {
 		try {
 			this.localeResolver = (LocaleResolver)
 					getWebApplicationContext().getBean(LOCALE_RESOLVER_BEAN_NAME, LocaleResolver.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("Using LocaleResolver [" + this.localeResolver + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using LocaleResolver [" + this.localeResolver + "]");
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// We need to use the default.
 			this.localeResolver = (LocaleResolver) getDefaultStrategy(LocaleResolver.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("Unable to locate LocaleResolver with name '" + LOCALE_RESOLVER_BEAN_NAME +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Unable to locate LocaleResolver with name '" + LOCALE_RESOLVER_BEAN_NAME +
 						"': using default [" + this.localeResolver + "]");
 			}
 		}
@@ -451,15 +451,15 @@ public class DispatcherServlet extends FrameworkServlet {
 		try {
 			this.themeResolver = (ThemeResolver)
 					getWebApplicationContext().getBean(THEME_RESOLVER_BEAN_NAME, ThemeResolver.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("Using ThemeResolver [" + this.themeResolver + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using ThemeResolver [" + this.themeResolver + "]");
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// We need to use the default.
 			this.themeResolver = (ThemeResolver) getDefaultStrategy(ThemeResolver.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("Unable to locate ThemeResolver with name '" + THEME_RESOLVER_BEAN_NAME +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Unable to locate ThemeResolver with name '" + THEME_RESOLVER_BEAN_NAME +
 						"': using default [" + this.themeResolver + "]");
 			}
 		}
@@ -496,8 +496,8 @@ public class DispatcherServlet extends FrameworkServlet {
 		// a default HandlerMapping if no other mappings are found.
 		if (this.handlerMappings == null) {
 			this.handlerMappings = getDefaultStrategies(HandlerMapping.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("No HandlerMappings found in servlet '" + getServletName() + "': using default");
+			if (logger.isDebugEnabled()) {
+				logger.debug("No HandlerMappings found in servlet '" + getServletName() + "': using default");
 			}
 		}
 	}
@@ -533,8 +533,8 @@ public class DispatcherServlet extends FrameworkServlet {
 		// default HandlerAdapters if no other adapters are found.
 		if (this.handlerAdapters == null) {
 			this.handlerAdapters = getDefaultStrategies(HandlerAdapter.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("No HandlerAdapters found in servlet '" + getServletName() + "': using default");
+			if (logger.isDebugEnabled()) {
+				logger.debug("No HandlerAdapters found in servlet '" + getServletName() + "': using default");
 			}
 		}
 	}
@@ -575,16 +575,16 @@ public class DispatcherServlet extends FrameworkServlet {
 		try {
 			this.viewNameTranslator = (RequestToViewNameTranslator) getWebApplicationContext().getBean(
 					REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME, RequestToViewNameTranslator.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("Using RequestToViewNameTranslator [" + this.viewNameTranslator + "]");
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using RequestToViewNameTranslator [" + this.viewNameTranslator + "]");
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// We need to use the default.
 			this.viewNameTranslator =
 					(RequestToViewNameTranslator) getDefaultStrategy(RequestToViewNameTranslator.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("Unable to locate RequestToViewNameTranslator with name '" +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Unable to locate RequestToViewNameTranslator with name '" +
 						REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME +
 						"': using default [" + this.viewNameTranslator + "]");
 			}
@@ -622,8 +622,8 @@ public class DispatcherServlet extends FrameworkServlet {
 		// a default ViewResolver if no other resolvers are found.
 		if (this.viewResolvers == null) {
 			this.viewResolvers = getDefaultStrategies(ViewResolver.class);
-			if (logger.isInfoEnabled()) {
-				logger.info("No ViewResolvers found in servlet '" + getServletName() + "': using default");
+			if (logger.isDebugEnabled()) {
+				logger.debug("No ViewResolvers found in servlet '" + getServletName() + "': using default");
 			}
 		}
 	}

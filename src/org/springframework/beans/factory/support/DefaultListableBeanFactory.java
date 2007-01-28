@@ -36,11 +36,14 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.CollectionFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of the ListableBeanFactory and BeanDefinitionRegistry
- * interfaces: a full-fledged bean factory based on bean definitions.
+ * Default implementation of the
+ * {@link org.springframework.beans.factory.ListableBeanFactory} and
+ * {@link BeanDefinitionRegistry} interfaces: a full-fledged bean factory
+ * based on bean definition objects.
  *
  * <p>Typical usage is registering all bean definitions first (possibly read
  * from a bean definition file), before accessing beans. Bean definition lookup
@@ -48,11 +51,14 @@ import org.springframework.util.StringUtils;
  *
  * <p>Can be used as a standalone bean factory, or as a superclass for custom
  * bean factories. Note that readers for specific bean definition formats are
- * typically implemented separately rather than as bean factory subclasses.
+ * typically implemented separately rather than as bean factory subclasses:
+ * see for example {@link PropertiesBeanDefinitionReader} and
+ * {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader}.
  *
- * <p>For an alternative implementation of the ListableBeanFactory interface,
- * have a look at StaticListableBeanFactory, which manages existing bean
- * instances rather than creating new ones based on bean definitions.
+ * <p>For an alternative implementation of the
+ * {@link org.springframework.beans.factory.ListableBeanFactory} interface,
+ * have a look at {@link StaticListableBeanFactory}, which manages existing
+ * bean instances rather than creating new ones based on bean definitions.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -258,7 +264,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	public void preInstantiateSingletons() throws BeansException {
 		if (logger.isInfoEnabled()) {
-			logger.info("Pre-instantiating singletons in factory [" + this + "]");
+			logger.info("Pre-instantiating singletons in " + this);
 		}
 		for (Iterator it = this.beanDefinitionNames.iterator(); it.hasNext();) {
 			String beanName = (String) it.next();
@@ -286,7 +292,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			throws BeanDefinitionStoreException {
 
 		Assert.hasText(beanName, "'beanName' must not be empty");
-		Assert.notNull(beanDefinition, "Bean definition must not be null");
+		Assert.notNull(beanDefinition, "BeanDefinition must not be null");
 
 		if (beanDefinition instanceof AbstractBeanDefinition) {
 			try {
@@ -357,15 +363,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer(getClass().getName());
-		sb.append(" defining beans [");
-		sb.append(StringUtils.arrayToDelimitedString(getBeanDefinitionNames(), ","));
-		sb.append("]; ");
-		if (getParentBeanFactory() == null) {
-			sb.append("root of BeanFactory hierarchy");
+		StringBuffer sb = new StringBuffer(ObjectUtils.identityToString(this));
+		sb.append(": defining beans {");
+		sb.append(StringUtils.arrayToCommaDelimitedString(getBeanDefinitionNames()));
+		sb.append("}; ");
+		BeanFactory parent = getParentBeanFactory();
+		if (parent == null) {
+			sb.append("root of factory hierarchy");
 		}
 		else {
-			sb.append("parent: " + getParentBeanFactory());
+			sb.append("parent: " + ObjectUtils.identityToString(parent));
 		}
 		return sb.toString();
 	}

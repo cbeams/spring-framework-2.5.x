@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResourceLoader;
 
 /**
- * Simple extension of <code>javax.servlet.http.HttpServlet</code> that treats
+ * Simple extension of {@link javax.servlet.http.HttpServlet} which treats
  * its config parameters as bean properties.
  *
  * <p>A very handy superclass for any type of servlet. Type conversion is automatic.
@@ -51,7 +51,7 @@ import org.springframework.web.context.support.ServletContextResourceLoader;
  * behavior of HttpServlet (<code>doGet</code>, <code>doPost</code>, etc).
  *
  * <p>This servlet superclass has no dependency on a Spring application context,
- * in contrast to the FrameworkServlet class which loads its own context.
+ * in contrast to the {@link FrameworkServlet} class which loads its own context.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -62,7 +62,7 @@ import org.springframework.web.context.support.ServletContextResourceLoader;
  * @see FrameworkServlet
  */
 public abstract class HttpServletBean extends HttpServlet {
-	
+
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -93,8 +93,8 @@ public abstract class HttpServletBean extends HttpServlet {
 	 * properties are missing), or if subclass initialization fails.
 	 */
 	public final void init() throws ServletException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Initializing servlet '" + getServletName() + "'");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Initializing servlet '" + getServletName() + "'");
 		}
 
 		// Set bean properties from init parameters.
@@ -114,11 +114,11 @@ public abstract class HttpServletBean extends HttpServlet {
 		// Let subclasses do whatever initialization they like.
 		initServletBean();
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Servlet '" + getServletName() + "' configured successfully");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Servlet '" + getServletName() + "' configured successfully");
 		}
 	}
-	
+
 	/**
 	 * Initialize the BeanWrapper for this HttpServletBean,
 	 * possibly with custom editors.

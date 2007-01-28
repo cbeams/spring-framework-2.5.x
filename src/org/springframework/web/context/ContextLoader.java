@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 
 /**
  * Performs the actual initialization work for the root application context.
- * Called by ContextLoaderListener and ContextLoaderServlet.
+ * Called by {@link ContextLoaderListener} and {@link ContextLoaderServlet}.
  * 
  * <p>Looks for a "contextClass" parameter at the web.xml context-param level
  * to specify the context class type, falling back to the default of
@@ -169,11 +169,11 @@ public class ContextLoader {
 					"check whether you have multiple ContextLoader* definitions in your web.xml!");
 		}
 
-		long startTime = System.currentTimeMillis();
+		servletContext.log("Initializing Spring root WebApplicationContext");
 		if (logger.isInfoEnabled()) {
 			logger.info("Root WebApplicationContext: initialization started");
 		}
-		servletContext.log("Loading Spring root WebApplicationContext");
+		long startTime = System.currentTimeMillis();
 
 		try {
 			// Determine parent for root web application context, if any.
@@ -185,13 +185,8 @@ public class ContextLoader {
 			servletContext.setAttribute(
 					WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);
 
-			if (logger.isInfoEnabled()) {
-				logger.info("Using context class [" + this.context.getClass().getName() +
-						"] for root WebApplicationContext");
-			}
 			if (logger.isDebugEnabled()) {
-				logger.debug("Published root WebApplicationContext [" + this.context +
-						"] as ServletContext attribute with name [" +
+				logger.debug("Published root WebApplicationContext as ServletContext attribute with name [" +
 						WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE + "]");
 			}
 			if (logger.isInfoEnabled()) {
@@ -230,7 +225,7 @@ public class ContextLoader {
 		Class contextClass = determineContextClass(servletContext);
 		if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
 			throw new ApplicationContextException("Custom context class [" + contextClass.getName() +
-					"] is not of type ConfigurableWebApplicationContext");
+					"] is not of type [" + ConfigurableWebApplicationContext.class.getName() + "]");
 		}
 
 		ConfigurableWebApplicationContext wac =
@@ -304,18 +299,15 @@ public class ContextLoader {
 			throws BeansException {
 
 		ApplicationContext parentContext = null;
-
 		String locatorFactorySelector = servletContext.getInitParameter(LOCATOR_FACTORY_SELECTOR_PARAM);
 		String parentContextKey = servletContext.getInitParameter(LOCATOR_FACTORY_KEY_PARAM);
 
 		if (locatorFactorySelector != null) {
 			BeanFactoryLocator locator = ContextSingletonBeanFactoryLocator.getInstance(locatorFactorySelector);
-
-			if (logger.isInfoEnabled()) {
-				logger.info("Getting parent context definition: using parent context key of '" +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Getting parent context definition: using parent context key of '" +
 						parentContextKey + "' with BeanFactoryLocator");
 			}
-
 			this.parentContextRef = locator.useBeanFactory(parentContextKey);
 			parentContext = (ApplicationContext) this.parentContextRef.getFactory();
 		}

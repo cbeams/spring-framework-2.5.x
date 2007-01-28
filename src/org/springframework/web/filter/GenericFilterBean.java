@@ -48,7 +48,7 @@ import org.springframework.web.context.support.ServletContextResourceLoader;
 import org.springframework.web.util.NestedServletException;
 
 /**
- * Simple base implementation of <code>javax.servlet.Filter</code> that treats
+ * Simple base implementation of {@link javax.servlet.Filter} which treats
  * its config parameters as bean properties. Unknown parameters are ignored.
  *
  * <p>A very handy superclass for any type of filter. Type conversion of
@@ -149,8 +149,8 @@ public abstract class GenericFilterBean implements
 	 */
 	public final void init(FilterConfig filterConfig) throws ServletException {
 		Assert.notNull(filterConfig, "FilterConfig must not be null");
-		if (logger.isInfoEnabled()) {
-			logger.info("Initializing filter '" + filterConfig.getFilterName() + "'");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Initializing filter '" + filterConfig.getFilterName() + "'");
 		}
 
 		this.filterConfig = filterConfig;
@@ -174,8 +174,8 @@ public abstract class GenericFilterBean implements
 		// Let subclasses do whatever initialization they like.
 		initFilterBean();
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Filter '" + filterConfig.getFilterName() + "' configured successfully");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Filter '" + filterConfig.getFilterName() + "' configured successfully");
 		}
 	}
 

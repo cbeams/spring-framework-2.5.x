@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,23 +36,28 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Generic registry for shared bean instances. Allows for registering singleton
- * instances that should be shared for all callers of the registry,
- * to be obtained via bean name.
+ * Generic registry for shared bean instances, implementing the
+ * {@link org.springframework.beans.factory.config.SingletonBeanRegistry}.
+ * Allows for registering singleton instances that should be shared
+ * for all callers of the registry, to be obtained via bean name.
  *
- * <p>Also supports registering DisposableBean instances (which might or
- * might not correspond to registered singletons), to be destroyed on
- * shutdown of the registry. Dependencies between beans can be registered
- * to enforce an appropriate shutdown order.
+ * <p>Also supports registration of
+ * {@link org.springframework.beans.factory.DisposableBean} instances,
+ * (which might or might not correspond to registered singletons),
+ * to be destroyed on shutdown of the registry. Dependencies between
+ * beans can be registered to enforce an appropriate shutdown order.
  *
- * <p>This class mainly serves as base class for BeanFactory implementations,
- * factoring out the common management of singleton bean instances. Some
- * of its methods can also be found on the ConfigurableBeanFactory interface.
+ * <p>This class mainly serves as base class for
+ * {@link org.springframework.beans.factory.BeanFactory} implementations,
+ * factoring out the common management of singleton bean instances. Note that
+ * the {@link org.springframework.beans.factory.config.ConfigurableBeanFactory}
+ * interface extends the {@link SingletonBeanRegistry} interface.
  *
  * <p>Note that this class assumes neither a bean definition concept
  * nor a specific creation process for bean instances, in contrast to
- * AbstractBeanFactory and DefaultListableBeanFactory (which inherit from it).
- * Can alternatively also be used as a nested helper to delegate to.
+ * {@link AbstractBeanFactory} and {@link DefaultListableBeanFactory}
+ * (which inherit from it). Can alternatively also be used as a nested
+ * helper to delegate to.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -60,8 +65,6 @@ import org.springframework.util.StringUtils;
  * @see #registerDisposableBean
  * @see org.springframework.beans.factory.DisposableBean
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory
- * @see AbstractBeanFactory
- * @see DefaultListableBeanFactory
  */
 public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
@@ -268,7 +271,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
 	public void destroySingletons() {
 		if (logger.isInfoEnabled()) {
-			logger.info("Destroying singletons in {" + this + "}");
+			logger.info("Destroying singletons in " + this);
 		}
 		synchronized (this.singletonCache) {
 			this.singletonsCurrentlyInDestruction = true;

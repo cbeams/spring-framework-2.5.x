@@ -219,10 +219,11 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * have been set. Creates this servlet's WebApplicationContext.
 	 */
 	protected final void initServletBean() throws ServletException, BeansException {
-		long startTime = System.currentTimeMillis();
+		getServletContext().log("Initializing Spring FrameworkServlet '" + getServletName() + "'");
 		if (logger.isInfoEnabled()) {
 			logger.info("FrameworkServlet '" + getServletName() + "': initialization started");
 		}
+		long startTime = System.currentTimeMillis();
 
 		try {
 			this.webApplicationContext = initWebApplicationContext();
@@ -249,17 +250,12 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * <p>Delegates to {@link #createWebApplicationContext} for actual creation
 	 * of the context. Can be overridden in subclasses.
 	 * @throws BeansException if the context couldn't be initialized
+	 * @see #setContextClass
+	 * @see #setContextConfigLocation
 	 */
 	protected WebApplicationContext initWebApplicationContext() throws BeansException {
-		getServletContext().log(
-				"Loading WebApplicationContext for Spring FrameworkServlet '" + getServletName() + "'");
-
 		WebApplicationContext parent = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
 		WebApplicationContext wac = createWebApplicationContext(parent);
-		if (logger.isInfoEnabled()) {
-			logger.info("Using context class [" + wac.getClass().getName() + "] for servlet '" +
-					getServletName() + "'");
-		}
 
 		if (isPublishContext()) {
 			// Publish the context as a servlet context attribute.
@@ -471,7 +467,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 */
 	public void destroy() {
 		getServletContext().log(
-				"Closing WebApplicationContext of Spring FrameworkServlet '" + getServletName() + "'");
+				"Destroying Spring FrameworkServlet '" + getServletName() + "'");
 		if (this.webApplicationContext instanceof ConfigurableApplicationContext) {
 			((ConfigurableApplicationContext) this.webApplicationContext).close();
 		}
