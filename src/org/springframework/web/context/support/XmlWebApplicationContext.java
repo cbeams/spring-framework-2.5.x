@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,25 +24,30 @@ import org.springframework.beans.factory.xml.ResourceEntityResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 
 /**
- * WebApplicationContext implementation that takes configuration from an XML document,
- * understood by an XmlBeanDefinitionReader. This is essentially the equivalent of
- * AbstractXmlApplicationContext and its subclasses for a web environment.
+ * {@link org.springframework.web.context.WebApplicationContext} implementation
+ * which takes its configuration from XML documents, understood by an
+ * {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader}.
+ * This is essentially the equivalent of
+ * {@link org.springframework.context.support.AbstractXmlApplicationContext}
+ * for a web environment.
  *
  * <p>By default, the configuration will be taken from "/WEB-INF/applicationContext.xml"
  * for the root context, and "/WEB-INF/test-servlet.xml" for a context with the namespace
  * "test-servlet" (like for a DispatcherServlet instance with the servlet-name "test").
  *
  * <p>The config location defaults can be overridden via the "contextConfigLocation"
- * context param of ContextLoader and servlet param of FrameworkServlet. Config locations
+ * context-param of {@link org.springframework.web.context.ContextLoader} and servlet
+ * init-param of {@link org.springframework.web.servlet.FrameworkServlet}. Config locations
  * can either denote concrete files like "/WEB-INF/context.xml" or Ant-style patterns
- * like "/WEB-INF/*-context.xml" (see PathMatcher javadoc for pattern details).
+ * like "/WEB-INF/*-context.xml" (see {@link org.springframework.util.PathMatcher}
+ * javadoc for pattern details).
  *
  * <p>Note: In case of multiple config locations, later bean definitions will
  * override ones defined in earlier loaded files. This can be leveraged to
  * deliberately override certain bean definitions via an extra XML file.
  *
  * <p><b>For a WebApplicationContext that reads in a different bean definition format,
- * create an analogous subclass of AbstractRefreshableWebApplicationContext.</b>
+ * create an analogous subclass of {@link AbstractRefreshableWebApplicationContext}.</b>
  * Such a context implementation can be specified as "contextClass" context-param
  * for ContextLoader or "contextClass" init-param for FrameworkServlet.
  *
@@ -50,13 +55,9 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
  * @author Juergen Hoeller
  * @see #setNamespace
  * @see #setConfigLocations
- * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
- * @see org.springframework.context.support.AbstractXmlApplicationContext
  * @see org.springframework.web.context.ContextLoader#initWebApplicationContext
- * @see org.springframework.web.context.ContextLoader#CONTEXT_CLASS_PARAM
  * @see org.springframework.web.servlet.FrameworkServlet#initWebApplicationContext
- * @see org.springframework.web.servlet.FrameworkServlet#setContextClass
  */
 public class XmlWebApplicationContext extends AbstractRefreshableWebApplicationContext {
 
