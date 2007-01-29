@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
 /**
  * ClassLoader decorator that shadows an enclosing ClassLoader, applying
  * registered transformers to all affected classes.
- * 
+ *
  * @author Rob Harrop
  * @author Rod Johnson
  * @author Costin Leau
@@ -47,8 +47,9 @@ import org.springframework.util.StringUtils;
 public class ShadowingClassLoader extends ClassLoader {
 
 	/** Packages that are excluded by default */
-	public static final String[] DEFAULT_EXCLUDED_PACKAGES = new String[] { "java.", "javax.", "sun.", "org.w3c.",
-			"org.xml.", "org.dom4j.", "org.aspectj.", "org.apache.xerces.", "org.apache.commons.logging." };
+	public static final String[] DEFAULT_EXCLUDED_PACKAGES = new String[] {"java.", "javax.", "sun.", "com.sun.",
+			"org.w3c.", "org.xml.", "org.dom4j.", "org.aspectj.", "org.apache.xerces.", "org.apache.commons.logging."};
+
 
 	/** Optional excluded packages */
 	public final List<String> optionalExcludedPackages = new ArrayList<String>();
@@ -58,6 +59,7 @@ public class ShadowingClassLoader extends ClassLoader {
 	private final List<ClassFileTransformer> classFileTransformers = new LinkedList<ClassFileTransformer>();
 
 	private final Map<String, Class> classCache = new HashMap<String, Class>();
+
 
 	/**
 	 * Create a new ShadowingClassLoader, decorating the given ClassLoader.
@@ -87,6 +89,7 @@ public class ShadowingClassLoader extends ClassLoader {
 		Assert.notNull(other, "Other ClassLoader must not be null");
 		this.classFileTransformers.addAll(other.classFileTransformers);
 	}
+
 
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		if (shouldShadow(name)) {
@@ -120,11 +123,11 @@ public class ShadowingClassLoader extends ClassLoader {
 				return true;
 			}
 		}
-
 		// optional exclude packages
-		for (String pkg : optionalExcludedPackages) {
-			if (className.startsWith(pkg))
+		for (String pkg : this.optionalExcludedPackages) {
+			if (className.startsWith(pkg)) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -184,10 +187,9 @@ public class ShadowingClassLoader extends ClassLoader {
 
 	/**
 	 * Get the list of optional package names that can be excluded from shadowing.
-	 * 
-	 * @return list of packages
 	 */
 	public List<String> getOptionalExcludedPackages() {
-		return optionalExcludedPackages;
+		return this.optionalExcludedPackages;
 	}
+
 }
