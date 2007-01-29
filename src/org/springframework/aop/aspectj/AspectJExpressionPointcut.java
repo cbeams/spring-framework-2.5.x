@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.weaver.tools.JoinPointMatch;
 import org.aspectj.weaver.tools.PointcutExpression;
 import org.aspectj.weaver.tools.PointcutParameter;
@@ -32,7 +33,7 @@ import org.aspectj.weaver.tools.ShadowMatch;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.IntroductionAwareMethodMatcher;
 import org.springframework.aop.MethodMatcher;
-import org.springframework.aop.framework.ReflectiveMethodInvocation;
+import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AbstractExpressionPointcut;
 import org.springframework.util.ObjectUtils;
@@ -50,6 +51,7 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Adrian Colyer
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class AspectJExpressionPointcut extends AbstractExpressionPointcut
@@ -264,37 +266,41 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 		// Bind Spring AOP proxy to AspectJ "this" and Spring AOP target to AspectJ target,
 		// consistent with return of MethodInvocationProceedingJoinPoint
-		ReflectiveMethodInvocation invocation;
+		ProxyMethodInvocation pmi;
 		Object targetObject;
 		Object thisObject;
 		try {
-			invocation = (ReflectiveMethodInvocation) ExposeInvocationInterceptor.currentInvocation();
-			targetObject = invocation.getThis();
-			thisObject = invocation.getProxy();
+			MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
+			if (!(mi instanceof ProxyMethodInvocation)) {
+				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
+			}
+			pmi = (ProxyMethodInvocation) mi;
+			targetObject = pmi.getThis();
+			thisObject = pmi.getProxy();
 		}
 		catch (IllegalStateException ex) {
 			// No current invocation
 			// TODO do we want to allow this?
 			targetObject = null;
 			thisObject = null;
-			invocation = null;
+			pmi = null;
 		}
 
 		JoinPointMatch joinPointMatch = shadowMatch.matchesJoinPoint(thisObject, targetObject, args);
-		if (joinPointMatch.matches() && invocation != null) {
-			bindParameters(invocation, joinPointMatch);
+		if (joinPointMatch.matches() && pmi != null) {
+			bindParameters(pmi, joinPointMatch);
 		}
 		return joinPointMatch.matches();
 	}
 
-	private void bindParameters(ReflectiveMethodInvocation invocation, JoinPointMatch jpm) {
+	private void bindParameters(ProxyMethodInvocation invocation, JoinPointMatch jpm) {
 		// Note: Can't use JoinPointMatch.getClass().getName() as the key, since
 		// Spring AOP does all the matching at a join point, and then all the invocations
 		// under this scenario, if we just use JoinPointMatch as the key, then
 		// 'last man wins' which is not what we want at all.
 		// Using the expression is guaranteed to be safe, since 2 identical expressions
 		// are guaranteed to bind in exactly the same way.
-		invocation.setUserAttribute(getExpression(),jpm);
+		invocation.setUserAttribute(getExpression(), jpm);
 	}
 
 	private ShadowMatch getShadowMatch(Method method) {

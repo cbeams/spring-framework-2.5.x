@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,14 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.weaver.tools.JoinPointMatch;
 
-import org.springframework.aop.framework.ReflectiveMethodInvocation;
+import org.springframework.aop.ProxyMethodInvocation;
 
 /**
  * Spring AOP around advice (MethodInterceptor) that wraps
  * an AspectJ advice method. Exposes ProceedingJoinPoint.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class AspectJAroundAdvice extends AbstractAspectJAdvice implements MethodInterceptor {
@@ -50,9 +51,12 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 
 
 	public Object invoke(MethodInvocation mi) throws Throwable {
-		ReflectiveMethodInvocation invocation = (ReflectiveMethodInvocation) mi;
-		ProceedingJoinPoint pjp = lazyGetProceedingJoinPoint(invocation);
-		JoinPointMatch jpm = getJoinPointMatch(invocation);
+		if (!(mi instanceof ProxyMethodInvocation)) {
+			throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
+		}
+		ProxyMethodInvocation pmi = (ProxyMethodInvocation) mi;
+		ProceedingJoinPoint pjp = lazyGetProceedingJoinPoint(pmi);
+		JoinPointMatch jpm = getJoinPointMatch(pmi);
 		return invokeAdviceMethod(pjp, jpm, null, null);
 	}
 
@@ -63,7 +67,7 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 	 * which we'll use for attribute binding
 	 * @return the ProceedingJoinPoint to make available to advice methods
 	 */
-	protected ProceedingJoinPoint lazyGetProceedingJoinPoint(ReflectiveMethodInvocation rmi) {
+	protected ProceedingJoinPoint lazyGetProceedingJoinPoint(ProxyMethodInvocation rmi) {
 		return new MethodInvocationProceedingJoinPoint(rmi);
 	}
 

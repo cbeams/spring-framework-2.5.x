@@ -22,13 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.aopalliance.aop.Advice;
+import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.weaver.tools.JoinPointMatch;
 import org.aspectj.weaver.tools.PointcutParameter;
 
-import org.springframework.aop.framework.AopConfigException;
-import org.springframework.aop.framework.ReflectiveMethodInvocation;
+import org.springframework.aop.AopInvocationException;
+import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
@@ -63,11 +64,15 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * Spring AOP invocation.
 	 */
 	public static JoinPoint currentJoinPoint() {
-		ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) ExposeInvocationInterceptor.currentInvocation();
-		JoinPoint jp = (JoinPoint) rmi.getUserAttribute(JOIN_POINT_KEY);
+		MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
+		if (!(mi instanceof ProxyMethodInvocation)) {
+			throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
+		}
+		ProxyMethodInvocation pmi = (ProxyMethodInvocation) mi;
+		JoinPoint jp = (JoinPoint) pmi.getUserAttribute(JOIN_POINT_KEY);
 		if (jp == null) {
-			jp = new MethodInvocationProceedingJoinPoint(rmi);
-			rmi.setUserAttribute(JOIN_POINT_KEY, jp);
+			jp = new MethodInvocationProceedingJoinPoint(pmi);
+			pmi.setUserAttribute(JOIN_POINT_KEY, jp);
 		}
 		return jp;
 	}
@@ -518,17 +523,20 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 	// Get the current join point match at the join point we are being dispatched on.
 	protected JoinPointMatch getJoinPointMatch() {
-		ReflectiveMethodInvocation rmi = (ReflectiveMethodInvocation) ExposeInvocationInterceptor.currentInvocation();
-		return getJoinPointMatch(rmi);
+		MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
+		if (!(mi instanceof ProxyMethodInvocation)) {
+			throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
+		}
+		return getJoinPointMatch((ProxyMethodInvocation) mi);
 	}
 
-	// Note - can't use JoinPointMatch.getClass().getName() as the key, since
+	// Note: We can't use JoinPointMatch.getClass().getName() as the key, since
 	// Spring AOP does all the matching at a join point, and then all the invocations.
 	// Under this scenario, if we just use JoinPointMatch as the key, then
 	// 'last man wins' which is not what we want at all.
 	// Using the expression is guaranteed to be safe, since 2 identical expressions
 	// are guaranteed to bind in exactly the same way.
-	protected JoinPointMatch getJoinPointMatch(ReflectiveMethodInvocation rmi) {
+	protected JoinPointMatch getJoinPointMatch(ProxyMethodInvocation rmi) {
 		JoinPointMatch jpm = (JoinPointMatch) rmi.getUserAttribute(this.pointcutExpression.getExpression());
 		return jpm;		
 	}
@@ -555,14 +563,14 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		if (this.aspectJAdviceMethod.getParameterTypes().length == 0) {
 			actualArgs = null;
 		}
-		
 		try {
 			// TODO AopUtils.invokeJoinpointUsingReflection
 			return this.aspectJAdviceMethod.invoke(this.aspectInstanceFactory.getAspectInstance(), actualArgs);
 		}
 		catch (IllegalArgumentException ex) {
-			throw new AopConfigException("Mismatch on arguments to advice method [" + this.aspectJAdviceMethod + "]; " +
-					"pointcut expression = [" + this.pointcutExpression.getPointcutExpression() + "]", ex);
+			throw new AopInvocationException("Mismatch on arguments to advice method [" +
+					this.aspectJAdviceMethod + "]; pointcut expression [" +
+					this.pointcutExpression.getPointcutExpression() + "]", ex);
 		}
 		catch (InvocationTargetException ex) {
 			throw ex.getTargetException();
@@ -571,8 +579,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 
 	public String toString() {
-		return getClass().getName() + ": adviceMethod=" + this.aspectJAdviceMethod + "; " +
-				"aspectName='" + this.aspectName + "'";
+		return getClass().getName() + ": advice method [" + this.aspectJAdviceMethod + "]; " +
+				"aspect name '" + this.aspectName + "'";
 	}
 
 }

@@ -18,7 +18,6 @@ package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
 
-import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
@@ -26,7 +25,8 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.aspectj.runtime.internal.AroundClosure;
 
-import org.springframework.aop.framework.ReflectiveMethodInvocation;
+import org.springframework.aop.ProxyMethodInvocation;
+import org.springframework.util.Assert;
 
 /**
  * Implementation of AspectJ ProceedingJoinPoint interface
@@ -42,11 +42,12 @@ import org.springframework.aop.framework.ReflectiveMethodInvocation;
  * <p>Of course there is no such distinction between target and proxy in AspectJ.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint, JoinPoint.StaticPart {
 	
-	private final MethodInvocation methodInvocation;
+	private final ProxyMethodInvocation methodInvocation;
 
 	private Object[] defensiveCopyOfArgs;
 
@@ -57,7 +58,13 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	private SourceLocation sourceLocation;
 
 
-	public MethodInvocationProceedingJoinPoint(MethodInvocation methodInvocation) {
+	/**
+	 * Create a new MethodInvocationProceedingJoinPoint, wrapping the given
+	 * Spring ProxyMethodInvocation object.
+	 * @param methodInvocation the Spring ProxyMethodInvocation object
+	 */
+	public MethodInvocationProceedingJoinPoint(ProxyMethodInvocation methodInvocation) {
+		Assert.notNull(methodInvocation, "MethodInvocation must not be null");
 		this.methodInvocation = methodInvocation;
 	}
 
@@ -66,7 +73,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	}
 
 	public Object proceed() throws Throwable {
-		return ((ReflectiveMethodInvocation) this.methodInvocation).invocableClone().proceed();
+		return this.methodInvocation.invocableClone().proceed();
 	}
 
 	public Object proceed(Object[] args) throws Throwable {
@@ -77,24 +84,11 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		return this.methodInvocation.proceed();
 	}
 
-	public String toShortString() {
-		return "execution(" + this.methodInvocation.getMethod().getName() + ")";
-	}
-
-	public String toLongString() {
-		return getClass().getName() + ": execution: [" + this.methodInvocation + "]";
-	}
-	
-	
-	public String toString() {
-		return getClass().getName() + ": " + toShortString();
-	}
-
 	/**
 	 * Returns the Spring AOP proxy. Cannot be <code>null</code>.
 	 */
 	public Object getThis() {
-		return ((ReflectiveMethodInvocation) this.methodInvocation).getProxy();
+		return this.methodInvocation.getProxy();
 	}
 
 	/**
@@ -135,7 +129,20 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		return this;
 	}
 	
-	
+
+	public String toShortString() {
+		return "execution(" + this.methodInvocation.getMethod().getName() + ")";
+	}
+
+	public String toLongString() {
+		return getClass().getName() + ": execution: [" + this.methodInvocation + "]";
+	}
+
+	public String toString() {
+		return getClass().getName() + ": " + toShortString();
+	}
+
+
 	/**
 	 * Lazily initialized MethodSignature.
 	 */
@@ -180,7 +187,8 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		public String[] getParameterNames() {
 			// TODO consider allowing use of ParameterNameDiscoverer, or tying into
 			// parameter names exposed for argument binding...
-			throw new UnsupportedOperationException("Parameter names cannot be determined unless compiled by AspectJ compiler");
+			throw new UnsupportedOperationException(
+					"Parameter names cannot be determined unless compiled by AspectJ compiler");
 		}
 
 		public Class[] getExceptionTypes() {

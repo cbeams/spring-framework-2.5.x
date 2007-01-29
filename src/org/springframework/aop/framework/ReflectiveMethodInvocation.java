@@ -18,7 +18,6 @@ package org.springframework.aop.framework;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,22 +29,27 @@ import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.aop.support.AopUtils;
 
 /**
- * Spring's implementation of AOP Alliance MethodInvocation interface.
+ * Spring's implementation of the AOP Alliance
+ * {@link org.aopalliance.intercept.MethodInvocation} interface,
+ * implementing the extended
+ * {@link org.springframework.aop.ProxyMethodInvocation} interface.
  *
  * <p>Invokes the target object using reflection. Subclasses can override the
- * invokeJoinpoint() method to change this behavior, so this is also a useful
- * base class for more specialized MethodInvocation implementations.
+ * {@link #invokeJoinpoint()} method to change this behavior, so this is also
+ * a useful base class for more specialized MethodInvocation implementations.
  *
- * <p>It is possible to clone an invocation, to invoke <code>proceed</code> repeatedly
- * (once per clone), using the <code>invocableClone</code> method. It is also possible to
- * add custom attributes to the invocation (since 1.2.6) using the
- * <code>getUserAttributes()</code> method.
+ * <p>It is possible to clone an invocation, to invoke {@link #proceed()}
+ * repeatedly (once per clone), using the {@link #invocableClone()} method.
+ * It is also possible to attach custom attributes to the invocation,
+ * using the {@link #setUserAttribute} / {@link #getUserAttribute} methods.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #invokeJoinpoint
  * @see #proceed
  * @see #invocableClone
+ * @see #setUserAttribute
+ * @see #getUserAttribute
  */
 public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Cloneable {
 
@@ -72,13 +76,18 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 	/**
 	 * Index from 0 of the current interceptor we're invoking.
-	 * -1 until we invoke: then the current interceptor
+	 * -1 until we invoke: then the current interceptor.
 	 */
 	private int currentInterceptorIndex = -1;
 
 
 	/**
-	 * Construct a new MethodInvocation with given arguments
+	 * Construct a new ReflectiveMethodInvocation with the given arguments.
+	 * @param proxy the proxy object that the invocation was made on
+	 * @param target the target object to invoke
+	 * @param method the method to invoke
+	 * @param arguments the arguments to invoke the method with
+	 * @param targetClass the target class, for MethodMatcher invocations
 	 * @param interceptorsAndDynamicMethodMatchers interceptors that should be applied,
 	 * along with any InterceptorAndDynamicMethodMatchers that need evaluation at runtime.
 	 * MethodMatchers included in this struct must already have been found to have matched
@@ -98,9 +107,6 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	}
 
 
-	/**
-	 * Return the proxy that this interception was made through.
-	 */
 	public final Object getProxy() {
 		return this.proxy;
 	}
@@ -126,27 +132,6 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		return (this.arguments != null ? this.arguments : new Object[0]);
 	}
 
-	/**
-	 * Return user attributes associated with this invocation.
-	 * This map is initialized lazily and is not used in the AOP framework itself.
-	 * This method provides an invocation-bound alternative to a ThreadLocal.
-	 * @return any user attributes associated with this invocation
-	 * (never <code>null</code>)
-	 */
-	public Map getUserAttributes() {
-		if (this.userAttributes == null) {
-			this.userAttributes = new HashMap();
-		}
-		return this.userAttributes;
-	}
-
-	public void setUserAttribute(String name, Object value) {
-		getUserAttributes().put(name, value);
-	}
-
-	public Object getUserAttribute(String name) {
-		return getUserAttributes().get(name);
-	}
 
 	public Object proceed() throws Throwable {
 		//	We start with an index of -1 and increment early.
@@ -189,21 +174,16 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 
 	/**
-	 * Create a clone of this object. If cloning is done before <code>proceed()</code>
-	 * is invoked on this object, <code>proceed()</code> can be invoked once per clone
-	 * to invoke the joinpoint (and the rest of the advice chain) more than once.
-	 * <p>This method returns a shallow copy, except for the argument array, which is
-	 * deep-copied to allow for independent modification. We want a shallow copy in this case:
-	 * We want to use the same interceptor chain and other object references, but we want an
-	 * independent value for the current interceptor index.
+	 * This implementation returns a shallow copy, except for the argument array,
+	 * which is deep-copied to allow for independent modification. We want a shallow
+	 * copy in this case: We want to use the same interceptor chain and other object
+	 * references, but we want an independent value for the current interceptor index.
 	 * @see java.lang.Object#clone()
-	 * @return an invocable clone of this invocation.
-	 * <code>proceed()</code> can be called once per clone.
 	 */
 	public MethodInvocation invocableClone() {
 		try {
 			ReflectiveMethodInvocation clone = (ReflectiveMethodInvocation) clone();
-			// deep copy of arguments
+			// Build deep copy of argument array.
 			if (this.arguments != null) {
 				clone.arguments = new Object[this.arguments.length];
 				System.arraycopy(this.arguments, 0, clone.arguments, 0, this.arguments.length);
@@ -216,13 +196,44 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		}
 	}
 
+
+	public void setUserAttribute(String key, Object value) {
+		if (value != null) {
+			if (this.userAttributes == null) {
+				this.userAttributes = new HashMap();
+			}
+			this.userAttributes.put(key, value);
+		}
+		else {
+			if (this.userAttributes != null) {
+				this.userAttributes.remove(key);
+			}
+		}
+	}
+
+	public Object getUserAttribute(String key) {
+		return (this.userAttributes != null ? this.userAttributes.get(key) : null);
+	}
+
+	/**
+	 * Return user attributes associated with this invocation.
+	 * This method provides an invocation-bound alternative to a ThreadLocal.
+	 * <p>This map is initialized lazily and is not used in the AOP framework itself.
+	 * @return any user attributes associated with this invocation
+	 * (never <code>null</code>)
+	 */
+	public Map getUserAttributes() {
+		if (this.userAttributes == null) {
+			this.userAttributes = new HashMap();
+		}
+		return this.userAttributes;
+	}
+
+
 	public String toString() {
 		// Don't do toString on target, it may be proxied.
-		// toString on args may also fail.
-		StringBuffer sb = new StringBuffer("invocation: method '");
-		sb.append(this.method.getName()).append("', ").append("arguments ");
-		sb.append(this.arguments != null ? Arrays.asList(this.arguments).toString() : "[]");
-		sb.append("; ");
+		StringBuffer sb = new StringBuffer("ReflectiveMethodInvocation: ");
+		sb.append(this.method).append("; ");
 		if (this.target == null) {
 			sb.append("target is null");
 		}
