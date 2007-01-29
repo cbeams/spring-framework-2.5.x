@@ -46,15 +46,18 @@ public class JpaTemplateClinic extends JpaDaoSupport implements Clinic {
 	}
 
 	public void storeOwner(Owner owner) throws DataAccessException {
-		getJpaTemplate().merge(owner);
+		// consider using merge with returning the persistent object here
+		getJpaTemplate().persist(owner);
 	}
 
 	public void storePet(Pet pet) throws DataAccessException {
-		getJpaTemplate().merge(pet);
+		// consider using merge with returning the persistent object here
+		getJpaTemplate().persist(pet);
 	}
 	
 
 	public void storeVisit(Visit visit) throws DataAccessException {
-		getJpaTemplate().merge(visit);
+		// consider using merge with returning the persistent object here
+		getJpaTemplate().persist(visit);
 	}
 }
