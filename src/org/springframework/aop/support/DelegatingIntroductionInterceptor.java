@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
  * <p>An instance of this class is serializable if the delegate is.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 16.11.2003
  * @see #suppressInterface
  * @see DelegatePerTargetObjectIntroductionInterceptor
@@ -105,7 +106,7 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 			
 			// Massage return value if possible: if the delegate returned itself,
 			// we really want to return the proxy.
-			if (retVal == delegate && (mi instanceof ProxyMethodInvocation)) {
+			if (retVal == this.delegate && mi instanceof ProxyMethodInvocation) {
 				retVal = ((ProxyMethodInvocation) mi).getProxy();
 			}
 			return retVal;
