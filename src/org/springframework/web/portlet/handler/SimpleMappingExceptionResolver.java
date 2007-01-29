@@ -167,22 +167,14 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 			return null;
 		}
 
+		// Log exception, both at debug log level and at warn level, if desired.
 		if (logger.isDebugEnabled()) {
 			logger.debug("Resolving exception from handler [" + handler + "]: " + ex);
 		}
 		logException(ex, request);
 
-		// Check for specific exception mappings.
-		String viewName = null;
-		if (this.exceptionMappings != null) {
-			viewName = findMatchingViewName(this.exceptionMappings, ex);
-		}
-		// Return default error view else, if defined.
-		if (viewName == null && this.defaultErrorView != null) {
-			viewName = this.defaultErrorView;
-		}
-
 		// Expose ModelAndView for chosen error view.
+		String viewName = determineViewName(ex, request);
 		if (viewName != null) {
 			return getModelAndView(viewName, ex, request);
 		}
@@ -220,6 +212,31 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 		return "Handler execution resulted in exception";
 	}
 
+
+	/**
+	 * Determine the view name for the given exception, searching the
+	 * {@link #setExceptionMappings "exceptionMappings"}, using the
+	 * {@link #setDefaultErrorView "defaultErrorView"} as fallback.
+	 * @param ex the exception that got thrown during handler execution
+	 * @param request current portlet request (useful for obtaining metadata)
+	 * @return the resolved view name, or <code>null</code> if none found
+	 */
+	protected String determineViewName(Exception ex, RenderRequest request) {
+		String viewName = null;
+		// Check for specific exception mappings.
+		if (this.exceptionMappings != null) {
+			viewName = findMatchingViewName(this.exceptionMappings, ex);
+		}
+		// Return default error view else, if defined.
+		if (viewName == null && this.defaultErrorView != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Resolving to default view '" + this.defaultErrorView +
+						"' for exception of type [" + ex.getClass().getName() + "]");
+			}
+			viewName = this.defaultErrorView;
+		}
+		return viewName;
+	}
 
 	/**
 	 * Find a matching view name in the given exception mappings

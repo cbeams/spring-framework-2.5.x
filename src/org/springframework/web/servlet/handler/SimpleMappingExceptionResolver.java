@@ -172,33 +172,18 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 			return null;
 		}
 
+		// Log exception, both at debug log level and at warn level, if desired.
 		if (logger.isDebugEnabled()) {
 			logger.debug("Resolving exception from handler [" + handler + "]: " + ex);
 		}
 		logException(ex, request);
 
-		// Check for specific exception mappings.
-		String viewName = null;
-		if (this.exceptionMappings != null) {
-			viewName = findMatchingViewName(this.exceptionMappings, ex);
-		}
-		// Return default error view else, if defined.
-		if (viewName == null && this.defaultErrorView != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Resolving to default view '" + this.defaultErrorView +
-						"' for exception of type [" + ex.getClass().getName() + "]");
-			}
-			viewName = this.defaultErrorView;
-		}
-
 		// Expose ModelAndView for chosen error view.
+		String viewName = determineViewName(ex, request);
 		if (viewName != null) {
 			// Apply HTTP status code for error views, if specified.
 			// Only apply it if we're processing a top-level request.
 			Integer statusCode = determineStatusCode(request, viewName);
-			if (statusCode == null) {
-				statusCode = this.defaultStatusCode;
-			}
 			if (statusCode != null) {
 				applyStatusCodeIfPossible(request, response, statusCode.intValue());
 			}
@@ -238,6 +223,31 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 		return "Handler execution resulted in exception";
 	}
 
+
+	/**
+	 * Determine the view name for the given exception, searching the
+	 * {@link #setExceptionMappings "exceptionMappings"}, using the
+	 * {@link #setDefaultErrorView "defaultErrorView"} as fallback.
+	 * @param ex the exception that got thrown during handler execution
+	 * @param request current HTTP request (useful for obtaining metadata)
+	 * @return the resolved view name, or <code>null</code> if none found
+	 */
+	protected String determineViewName(Exception ex, HttpServletRequest request) {
+		String viewName = null;
+		// Check for specific exception mappings.
+		if (this.exceptionMappings != null) {
+			viewName = findMatchingViewName(this.exceptionMappings, ex);
+		}
+		// Return default error view else, if defined.
+		if (viewName == null && this.defaultErrorView != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Resolving to default view '" + this.defaultErrorView +
+						"' for exception of type [" + ex.getClass().getName() + "]");
+			}
+			viewName = this.defaultErrorView;
+		}
+		return viewName;
+	}
 
 	/**
 	 * Find a matching view name in the given exception mappings
@@ -292,18 +302,19 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 
 	/**
 	 * Determine the HTTP status code to apply for the given error view.
-	 * <p>The default implementation always returns <code>null</code>.
-	 * Override this in a custom subclass to determine a specific status code,
-	 * or specify a {@link #setDefaultStatusCode "defaultStatusCode"} to apply
-	 * a common status code for all error views.
+	 * <p>The default implementation always returns the specified
+	 * {@link #setDefaultStatusCode "defaultStatusCode"}, as a common
+	 * status code for all error views. Override this in a custom subclass
+	 * to determine a specific status code for the given view.
 	 * @param request current HTTP request
 	 * @param viewName the name of the error view
-	 * @return the HTTP status code to use, or <code>null</code> for the default
+	 * @return the HTTP status code to use, or <code>null</code> for the
+	 * servlet container's default (200 in case of a standard error view)
 	 * @see #setDefaultStatusCode
 	 * @see #applyStatusCodeIfPossible
 	 */
 	protected Integer determineStatusCode(HttpServletRequest request, String viewName) {
-		return null;
+		return this.defaultStatusCode;
 	}
 
 	/**
@@ -319,7 +330,7 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	protected void applyStatusCodeIfPossible(HttpServletRequest request, HttpServletResponse response, int statusCode) {
 		if (!WebUtils.isIncludeRequest(request)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Applying HTTP status code '" + this.defaultStatusCode + "'");
+				logger.debug("Applying HTTP status code " + statusCode);
 			}
 			response.setStatus(statusCode);
 		}
