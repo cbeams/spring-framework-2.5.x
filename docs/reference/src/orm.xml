@@ -2074,6 +2074,14 @@
           different JPA implementations since the JPA transformers are applied
           only at classloader level and thus, are isolated from each
           other.</para>
+
+			<note>
+              <para>If TopLink is being used a JPA provider under Tomcat,
+              please place the toplink-essentials jar under
+              <emphasis>$CATALINA_HOME</emphasis>/shared/lib folder instead of
+              your war.</para>
+            </note>
+          
         </section>
 
         <section id="orm-jpa-oc4j">
@@ -2501,7 +2509,7 @@ public class ProductDaoImpl implements ProductDao {
     <interfacename>DataSource</interfacename>, provided that the registered
     <interfacename>JpaDialect</interfacename> supports retrieval of the
     underlying JDBC <interfacename>Connection</interfacename>. Out of the box,
-    Spring provides dialects for the Toplink and Hibernate JPA
+    Spring provides dialects for the Toplink, Hibernate and OpenJPA JPA
     implementations. See the next section for details on the
     <interfacename>JpaDialect</interfacename> mechanism.</para>
   </section>
