@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,17 +48,20 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	 * The default name of the exception attribute: "exception".
 	 */
 	public static final String DEFAULT_EXCEPTION_ATTRIBUTE = "exception";
-	
 
+
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
+	private Set mappedHandlers;
+
+	private Log warnLogger;
+
 	private Properties exceptionMappings;
 
 	private String defaultErrorView;
-
-	private Set mappedHandlers;
 
 	private Integer defaultStatusCode;
 
@@ -70,7 +73,35 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	}
 
 	public int getOrder() {
-	  return order;
+	  return this.order;
+	}
+
+	/**
+	 * Specify the set of handlers that this exception resolver should map.
+	 * The exception mappings and the default error view will only apply
+	 * to the specified handlers.
+	 * <p>If no handlers set, both the exception mappings and the default error
+	 * view will apply to all handlers. This means that a specified default
+	 * error view will be used as fallback for all exceptions; any further
+	 * HandlerExceptionResolvers in the chain will be ignored in this case.
+	 */
+	public void setMappedHandlers(Set mappedHandlers) {
+		this.mappedHandlers = mappedHandlers;
+	}
+
+	/**
+	 * Set the log category for warn logging. The name will be passed to the
+	 * underlying logger implementation through Commons Logging, getting
+	 * interpreted as log category according to the logger's configuration.
+	 * <p>Default is no warn logging. Specify this setting to activate
+	 * warn logging into a specific category. Alternatively, override
+	 * the {@link #logException} method for custom logging.
+	 * @see org.apache.commons.logging.LogFactory#getLog(String)
+	 * @see org.apache.log4j.Logger#getLogger(String)
+	 * @see java.util.logging.Logger#getLogger(String)
+	 */
+	public void setWarnLogCategory(String loggerName) {
+		this.warnLogger = LogFactory.getLog(loggerName);
 	}
 
 	/**
@@ -102,22 +133,6 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	 */
 	public void setDefaultErrorView(String defaultErrorView) {
 		this.defaultErrorView = defaultErrorView;
-		if (logger.isInfoEnabled()) {
-			logger.info("Default error view is '" + this.defaultErrorView + "'");
-		}
-	}
-
-	/**
-	 * Specify the set of handlers that this exception resolver should map.
-	 * The exception mappings and the default error view will only apply
-	 * to the specified handlers.
-	 * <p>If no handlers set, both the exception mappings and the default error
-	 * view will apply to all handlers. This means that a specified default
-	 * error view will be used as fallback for all exceptions; any further
-	 * HandlerExceptionResolvers in the chain will be ignored in this case.
-	 */
-	public void setMappedHandlers(Set mappedHandlers) {
-		this.mappedHandlers = mappedHandlers;
 	}
 
 	/**
@@ -157,29 +172,70 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 			return null;
 		}
 
-		String viewName = null;
+		if (logger.isDebugEnabled()) {
+			logger.debug("Resolving exception from handler [" + handler + "]: " + ex);
+		}
+		logException(ex, request);
 
 		// Check for specific exception mappings.
+		String viewName = null;
 		if (this.exceptionMappings != null) {
 			viewName = findMatchingViewName(this.exceptionMappings, ex);
 		}
-
 		// Return default error view else, if defined.
 		if (viewName == null && this.defaultErrorView != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Resolving to default view '" + this.defaultErrorView +
+						"' for exception of type [" + ex.getClass().getName() + "]");
+			}
 			viewName = this.defaultErrorView;
 		}
 
+		// Expose ModelAndView for chosen error view.
 		if (viewName != null) {
 			// Apply HTTP status code for error views, if specified.
 			// Only apply it if we're processing a top-level request.
-			if (this.defaultStatusCode != null && !WebUtils.isIncludeRequest(request)) {
-				response.setStatus(this.defaultStatusCode.intValue());
+			Integer statusCode = determineStatusCode(request, viewName);
+			if (statusCode == null) {
+				statusCode = this.defaultStatusCode;
+			}
+			if (statusCode != null) {
+				applyStatusCodeIfPossible(request, response, statusCode.intValue());
 			}
 			return getModelAndView(viewName, ex, request);
 		}
 		else {
 			return null;
 		}
+	}
+
+
+	/**
+	 * Log the given exception at warn level, provided that warn logging has been
+	 * activated through the {@link #setWarnLogCategory "warnLogCategory"} property.
+	 * <p>Calls {@link #buildLogMessage} in order to determine the concrete message
+	 * to log. Always passes the full exception to the logger.
+	 * @param ex the exception that got thrown during handler execution
+	 * @param request current HTTP request (useful for obtaining metadata)
+	 * @see #setWarnLogCategory
+	 * @see #buildLogMessage
+	 * @see org.apache.commons.logging.Log#warn(Object, Throwable)
+	 */
+	protected void logException(Exception ex, HttpServletRequest request) {
+		if (this.warnLogger != null && this.warnLogger.isWarnEnabled()) {
+			this.warnLogger.warn(buildLogMessage(ex, request), ex);
+		}
+	}
+
+	/**
+	 * Build a log message for the given exception, occured during processing
+	 * the given request.
+	 * @param ex the exception that got thrown during handler execution
+	 * @param request current HTTP request (useful for obtaining metadata)
+	 * @return the log message to use
+	 */
+	protected String buildLogMessage(Exception ex, HttpServletRequest request) {
+		return "Handler execution resulted in exception";
 	}
 
 
@@ -192,24 +248,30 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	 */
 	protected String findMatchingViewName(Properties exceptionMappings, Exception ex) {
 		String viewName = null;
+		String dominantMapping = null;
 		int deepest = Integer.MAX_VALUE;
 		for (Enumeration names = exceptionMappings.propertyNames(); names.hasMoreElements();) {
 			String exceptionMapping = (String) names.nextElement();
 			int depth = getDepth(exceptionMapping, ex);
 			if (depth >= 0 && depth < deepest) {
 				deepest = depth;
+				dominantMapping = exceptionMapping;
 				viewName = exceptionMappings.getProperty(exceptionMapping);
 			}
+		}
+		if (viewName != null && logger.isDebugEnabled()) {
+			logger.debug("Resolving to view '" + viewName + "' for exception of type [" + ex.getClass().getName() +
+					"], based on exception mapping [" + dominantMapping + "]");
 		}
 		return viewName;
 	}
 
 	/**
 	 * Return the depth to the superclass matching.
-	 * 0 means ex matches exactly. Returns -1 if there's no match.
+	 * <p>0 means ex matches exactly. Returns -1 if there's no match.
 	 * Otherwise, returns depth. Lowest depth wins.
-	 * <p>Follows the same algorithm as RollbackRuleAttribute.
-	 * @see org.springframework.transaction.interceptor.RollbackRuleAttribute
+	 * <p>Follows the same algorithm as
+	 * {@link org.springframework.transaction.interceptor.RollbackRuleAttribute}.
 	 */
 	protected int getDepth(String exceptionMapping, Exception ex) {
 		return getDepth(exceptionMapping, ex.getClass(), 0);
@@ -227,6 +289,41 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 		return getDepth(exceptionMapping, exceptionClass.getSuperclass(), depth + 1);
 	}
 
+
+	/**
+	 * Determine the HTTP status code to apply for the given error view.
+	 * <p>The default implementation always returns <code>null</code>.
+	 * Override this in a custom subclass to determine a specific status code,
+	 * or specify a {@link #setDefaultStatusCode "defaultStatusCode"} to apply
+	 * a common status code for all error views.
+	 * @param request current HTTP request
+	 * @param viewName the name of the error view
+	 * @return the HTTP status code to use, or <code>null</code> for the default
+	 * @see #setDefaultStatusCode
+	 * @see #applyStatusCodeIfPossible
+	 */
+	protected Integer determineStatusCode(HttpServletRequest request, String viewName) {
+		return null;
+	}
+
+	/**
+	 * Apply the specified HTTP status code to the given response, if possible
+	 * (that is, if not executing within an include request).
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param statusCode the status code to apply
+	 * @see #determineStatusCode
+	 * @see #setDefaultStatusCode
+	 * @see javax.servlet.http.HttpServletResponse#setStatus
+	 */
+	protected void applyStatusCodeIfPossible(HttpServletRequest request, HttpServletResponse response, int statusCode) {
+		if (!WebUtils.isIncludeRequest(request)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Applying HTTP status code '" + this.defaultStatusCode + "'");
+			}
+			response.setStatus(statusCode);
+		}
+	}
 
 	/**
 	 * Return a ModelAndView for the given request, view name and exception.
@@ -253,6 +350,9 @@ public class SimpleMappingExceptionResolver implements HandlerExceptionResolver,
 	protected ModelAndView getModelAndView(String viewName, Exception ex) {
 		ModelAndView mv = new ModelAndView(viewName);
 		if (this.exceptionAttribute != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Exposing Exception as model attribute '" + this.exceptionAttribute + "'");
+			}
 			mv.addObject(this.exceptionAttribute, ex);
 		}
 		return mv;

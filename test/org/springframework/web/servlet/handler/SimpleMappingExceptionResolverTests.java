@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +109,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 	public void testSimpleExceptionMapping() {
 		Properties props = new Properties();
 		props.setProperty("Exception", "error");
+		exceptionResolver.setWarnLogCategory("HANDLER_EXCEPTION");
 		exceptionResolver.setExceptionMappings(props);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
 		assertEquals("error", mav.getViewName());
@@ -135,6 +136,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 	public void testMissingExceptionInMapping() {
 		Properties props = new Properties();
 		props.setProperty("SomeFooThrowable", "error");
+		exceptionResolver.setWarnLogCategory("HANDLER_EXCEPTION");
 		exceptionResolver.setExceptionMappings(props);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
 		assertNull(mav);
