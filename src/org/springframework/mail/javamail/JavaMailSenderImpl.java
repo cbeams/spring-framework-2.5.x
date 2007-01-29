@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.springframework.mail.MailParseException;
 import org.springframework.mail.MailPreparationException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.util.Assert;
 
 /**
  * Production implementation of the {@link JavaMailSender} interface,
@@ -50,25 +51,24 @@ import org.springframework.mail.SimpleMailMessage;
  * plain {@link org.springframework.mail.MailSender} implementation.
  *
  * <p>Allows for defining all settings locally as bean properties.
- * Alternatively, a pre-configured JavaMail <code>Session</code> can be
+ * Alternatively, a pre-configured JavaMail {@link javax.mail.Session} can be
  * specified, possibly pulled from an application server's JNDI environment.
  *
  * <p>Non-default properties in this object will always override the settings
- * in the JavaMail <code>Session</code>. Note that if overriding all values
- * locally, there is no added value in setting a pre-configured <code>Session</code>.
+ * in the JavaMail <code>Session</code>. Note that if overriding all values locally,
+ * there is no added value in setting a pre-configured <code>Session</code>.
  *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @since 10.09.2003
  * @see javax.mail.internet.MimeMessage
- * @see org.springframework.mail.SimpleMailMessage
- * @see org.springframework.mail.MailSender
+ * @see javax.mail.Session
+ * @see #setSession
  * @see #setJavaMailProperties
  * @see #setHost
  * @see #setPort
  * @see #setUsername
  * @see #setPassword
- * @see #setSession
  */
 public class JavaMailSenderImpl implements JavaMailSender {
 
@@ -104,7 +104,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	/**
 	 * Create a new instance of the <code>JavaMailSenderImpl</code> class.
-	 * <p>Initializes the {@link #setDefaultFileTypeMap 'defaultFileTypeMap'}
+	 * <p>Initializes the {@link #setDefaultFileTypeMap "defaultFileTypeMap"}
 	 * property with a default {@link ConfigurableMimeFileTypeMap}.
 	 */
 	public JavaMailSenderImpl() {
@@ -130,13 +130,10 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * completely configured via this instance's properties.
 	 * <p>If using a pre-configured <code>Session</code>, non-default properties
 	 * in this instance will override the settings in the <code>Session</code>.
-	 * @throws IllegalArgumentException if the supplied <code>session</code> is null
 	 * @see #setJavaMailProperties
 	 */
 	public void setSession(Session session) {
-		if (session == null) {
-			throw new IllegalArgumentException("Cannot work with a null Session");
-		}
+		Assert.notNull(session, "Session must not be null");
 		this.session = session;
 	}
 
@@ -163,6 +160,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	/**
 	 * Set the mail server host, typically an SMTP host.
+	 * <p>Default is the default host of the underlying JavaMail Session.
 	 */
 	public void setHost(String host) {
 		this.host = host;
@@ -306,13 +304,12 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	//---------------------------------------------------------------------
 
 	/**
-	 * This implementation creates a SmartMimeMessage, holding the specified default
-	 * encoding and default FileTypeMap. This special defaults-carrying message will
-	 * be autodetected by MimeMessageHelper, which will use the carried encoding
-	 * and FileTypeMap unless explicitly overridden.
+	 * This implementation creates a {@link SmartMimeMessage}, holding the specified
+	 * default encoding and default FileTypeMap. This special defaults-carrying
+	 * message will be autodetected by {@link MimeMessageHelper}, which will use
+	 * the carried encoding and FileTypeMap unless explicitly overridden.
 	 * @see #setDefaultEncoding
 	 * @see #setDefaultFileTypeMap
-	 * @see MimeMessageHelper
 	 */
 	public MimeMessage createMimeMessage() {
 		return new SmartMimeMessage(getSession(), getDefaultEncoding(), getDefaultFileTypeMap());
@@ -412,10 +409,11 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	/**
-	 * Get a Transport object for the given JavaMail Session.
-	 * Can be overridden in subclasses, e.g. to return a mock Transport object.
-	 * @see javax.mail.Session#getTransport
-	 * @see #getProtocol
+	 * Obtain a Transport object from the given JavaMail Session,
+	 * using the configured protocol.
+	 * <p>Can be overridden in subclasses, e.g. to return a mock Transport object.
+	 * @see javax.mail.Session#getTransport(String)
+	 * @see #getProtocol()
 	 */
 	protected Transport getTransport(Session session) throws NoSuchProviderException {
 		return session.getTransport(getProtocol());
