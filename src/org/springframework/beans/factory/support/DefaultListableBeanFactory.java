@@ -47,7 +47,8 @@ import org.springframework.util.StringUtils;
  *
  * <p>Typical usage is registering all bean definitions first (possibly read
  * from a bean definition file), before accessing beans. Bean definition lookup
- * is therefore an inexpensive operation in a local bean definition table.
+ * is therefore an inexpensive operation in a local bean definition table,
+ * operating on pre-built bean definition metadata objects.
  *
  * <p>Can be used as a standalone bean factory, or as a superclass for custom
  * bean factories. Note that readers for specific bean definition formats are
@@ -309,7 +310,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (!this.allowBeanDefinitionOverriding) {
 				throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
 						"Cannot register bean definition [" + beanDefinition + "] for bean '" + beanName +
-						"': there's already [" + oldBeanDefinition + "] bound");
+						"': There is already [" + oldBeanDefinition + "] bound.");
 			}
 			else {
 				if (logger.isInfoEnabled()) {
@@ -323,10 +324,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		this.beanDefinitionMap.put(beanName, beanDefinition);
 
-		// Remove corresponding bean from singleton cache, if any.
-		// Shouldn't usually be necessary, rather just meant for overriding
-		// a context's default beans (e.g. the default StaticMessageSource
-		// in a StaticApplicationContext).
+		// Remove corresponding bean from singleton cache, if any. Shouldn't usually
+		// be necessary, rather just meant for overriding a context's default beans
+		// (e.g. the default StaticMessageSource in a StaticApplicationContext).
 		synchronized (getSingletonMutex()) {
 			removeSingleton(beanName);
 		}
@@ -341,7 +341,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		BeanDefinition bd = (BeanDefinition) this.beanDefinitionMap.get(beanName);
 		if (bd == null) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("No bean named '" + beanName + "' found in " + toString());
+				logger.trace("No bean named '" + beanName + "' found in " + this);
 			}
 			throw new NoSuchBeanDefinitionException(beanName);
 		}
@@ -364,9 +364,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer(ObjectUtils.identityToString(this));
-		sb.append(": defining beans {");
+		sb.append(": defining beans [");
 		sb.append(StringUtils.arrayToCommaDelimitedString(getBeanDefinitionNames()));
-		sb.append("}; ");
+		sb.append("]; ");
 		BeanFactory parent = getParentBeanFactory();
 		if (parent == null) {
 			sb.append("root of factory hierarchy");
