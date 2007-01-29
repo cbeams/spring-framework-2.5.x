@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,15 @@ import org.springframework.jndi.JndiTemplate;
  * Service exporter which binds RMI services to JNDI.
  * Typically used for RMI-IIOP (CORBA).
  *
- * <p>Exports services via the <code>PortableRemoteObject</code> class.
+ * <p>Exports services via the {@link javax.rmi.PortableRemoteObject} class.
  * You need to run "rmic" with the "-iiop" option to generate corresponding
  * stubs and skeletons for each exported service.
  *
- * <p>Also supports exposing any non-RMI service via RMI invokers, to be accessed via
- * JndiRmiClientInterceptor/JndiRmiProxyFactoryBean's automatic detection of such invokers.
+ * <p>Also supports exposing any non-RMI service via RMI invokers, to be accessed
+ * via {@link JndiRmiClientInterceptor} / {@link JndiRmiProxyFactoryBean}'s
+ * automatic detection of such invokers.
  *
- * <p>With an RMI invoker, RMI communication works on the RmiInvocationHandler
+ * <p>With an RMI invoker, RMI communication works on the {@link RmiInvocationHandler}
  * level, needing only one stub for any service. Service interfaces do not have to
  * extend <code>java.rmi.Remote</code> or throw <code>java.rmi.RemoteException</code>
  * on all methods, but in and out parameters have to be serializable.
@@ -111,20 +112,27 @@ public class JndiRmiServiceExporter extends RmiBasedExporter implements Initiali
 	 */
 	public void prepare() throws NamingException, RemoteException {
 		if (this.jndiName == null) {
-			throw new IllegalArgumentException("jndiName is required");
+			throw new IllegalArgumentException("Property 'jndiName' is required");
 		}
 
 		// Initialize and cache exported object.
 		this.exportedObject = getObjectToExport();
+		PortableRemoteObject.exportObject(this.exportedObject);
 
+		rebind();
+	}
+
+	/**
+	 * Rebind the specified service to JNDI, for recovering in case
+	 * of the target registry having been restarted.
+	 * @throws NamingException if service binding failed
+	 */
+	public void rebind() throws NamingException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Binding RMI service to JNDI location [" + this.jndiName + "]");
 		}
-
-		PortableRemoteObject.exportObject(this.exportedObject);
 		this.jndiTemplate.rebind(this.jndiName, this.exportedObject);
 	}
-
 
 	/**
 	 * Unbind the RMI service from JNDI on bean factory shutdown.
