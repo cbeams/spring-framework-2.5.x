@@ -30,12 +30,13 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * RMI exporter that exposes the specified service as RMI object with the specified
- * name. Such services can be accessed via plain RMI or via RmiProxyFactoryBean.
+ * RMI exporter that exposes the specified service as RMI object with the specified name.
+ * Such services can be accessed via plain RMI or via {@link RmiProxyFactoryBean}.
  * Also supports exposing any non-RMI service via RMI invokers, to be accessed via
- * RmiClientInterceptor/RmiProxyFactoryBean's automatic detection of such invokers.
+ * {@link RmiClientInterceptor} / {@link RmiProxyFactoryBean}'s automatic detection
+ * of such invokers.
  *
- * <p>With an RMI invoker, RMI communication works on the RmiInvocationHandler
+ * <p>With an RMI invoker, RMI communication works on the {@link RmiInvocationHandler}
  * level, needing only one stub for any service. Service interfaces do not have to
  * extend <code>java.rmi.Remote</code> or throw <code>java.rmi.RemoteException</code>
  * on all methods, but in and out parameters have to be serializable.
@@ -219,7 +220,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 		checkService();
 
 		if (this.serviceName == null) {
-			throw new IllegalArgumentException("serviceName is required");
+			throw new IllegalArgumentException("Property 'serviceName' is required");
 		}
 
 		// Check socket factories for exported object.
