@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2007 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,19 +18,16 @@ package org.springframework.aop;
 
 import java.lang.reflect.Method;
 
-import org.aopalliance.aop.Advice;
-
 /**
  * After returning advice is invoked only on normal method return, not if an
  * exception is thrown. Such advice can see the return value, but cannot change it.
  *
+ * @author Rod Johnson
  * @see MethodBeforeAdvice
  * @see ThrowsAdvice
- * 
- * @author Rod Johnson
  */
-public interface AfterReturningAdvice extends Advice {
-	
+public interface AfterReturningAdvice extends AfterAdvice {
+
 	/**
 	 * Callback after a given method successfully returned.
 	 * @param returnValue the value returned by the method, if any

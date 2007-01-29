@@ -19,14 +19,13 @@ package org.springframework.aop;
 import org.aopalliance.aop.Advice;
 
 /**
- * Common marker interface for before advice, such as {@link MethodBeforeAdvice}.
+ * Common marker interface for after advice,
+ * such as {@link AfterReturningAdvice} and {@link ThrowsAdvice}.
  *
- * <p>Spring supports only method before advice. Although this is unlikely to change,
- * this API is designed to allow field advice in future if desired.
- *
- * @author Rod Johnson
- * @see AfterAdvice
+ * @author Juergen Hoeller
+ * @since 2.0.3
+ * @see BeforeAdvice
  */
-public interface BeforeAdvice extends Advice {
+public interface AfterAdvice extends Advice {
 
 }

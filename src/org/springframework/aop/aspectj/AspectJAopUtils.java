@@ -19,11 +19,8 @@ package org.springframework.aop.aspectj;
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Advisor;
-import org.springframework.aop.AfterReturningAdvice;
+import org.springframework.aop.AfterAdvice;
 import org.springframework.aop.BeforeAdvice;
-import org.springframework.aop.ThrowsAdvice;
-import org.springframework.aop.framework.adapter.AfterReturningAdviceInterceptor;
-import org.springframework.aop.framework.adapter.ThrowsAdviceInterceptor;
 
 /**
  * Utility methods for dealing with AspectJ advisors.
@@ -53,15 +50,7 @@ public abstract class AspectJAopUtils {
 		if (precedenceInfo != null) {
 			return precedenceInfo.isAfterAdvice();
 		}
-		// Fallback: an unpleasant instanceof test...
-		Advice advice = anAdvisor.getAdvice();
-		return (advice instanceof AfterReturningAdvice ||
-				advice instanceof ThrowsAdvice ||
-				advice instanceof AfterReturningAdviceInterceptor ||
-				advice instanceof AspectJAfterAdvice ||
-				advice instanceof AspectJAfterReturningAdvice ||
-				advice instanceof AspectJAfterThrowingAdvice ||
-				advice instanceof ThrowsAdviceInterceptor);
+		return (anAdvisor.getAdvice() instanceof AfterAdvice);
 	}
 
 	/**
