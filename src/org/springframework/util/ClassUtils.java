@@ -22,6 +22,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -588,6 +589,45 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Build a String that consists of the names of the classes/interfaces
+	 * in the given array.
+	 * <p>Basically like <code>AbstractCollection.toString()</code>, but stripping
+	 * the "class "/"interface " prefix before every class name.
+	 * @param classes a Collection of Class objects (may be <code>null</code>)
+	 * @return a String of form "[com.foo.Bar, com.foo.Baz]"
+	 * @see java.util.AbstractCollection#toString()
+	 */
+	public static String classNamesToString(Class[] classes) {
+		return classNamesToString(Arrays.asList(classes));
+	}
+
+	/**
+	 * Build a String that consists of the names of the classes/interfaces
+	 * in the given collection.
+	 * <p>Basically like <code>AbstractCollection.toString()</code>, but stripping
+	 * the "class "/"interface " prefix before every class name.
+	 * @param classes a Collection of Class objects (may be <code>null</code>)
+	 * @return a String of form "[com.foo.Bar, com.foo.Baz]"
+	 * @see java.util.AbstractCollection#toString()
+	 */
+	public static String classNamesToString(Collection classes) {
+		if (CollectionUtils.isEmpty(classes)) {
+			return "[]";
+		}
+		StringBuffer sb = new StringBuffer("[");
+		for (Iterator it = classes.iterator(); it.hasNext(); ) {
+			Class clazz = (Class) it.next();
+			sb.append(clazz.getName());
+			if (it.hasNext()) {
+				sb.append(", ");
+			}
+		}
+		sb.append("]");
+		return sb.toString();
+	}
+
+
+	/**
 	 * Return all interfaces that the given object implements as array,
 	 * including ones implemented by superclasses.
 	 * @param object the object to analyse for interfaces
@@ -655,31 +695,6 @@ public abstract class ClassUtils {
 			clazz = clazz.getSuperclass();
 		}
 		return interfaces;
-	}
-
-	/**
-	 * Build a String that consists of the names of the classes/interfaces
-	 * in the given collection.
-	 * <p>Basically like <code>AbstractCollection.toString()</code>, but stripping
-	 * the "class "/"interface " prefix before every class name.
-	 * @param classes a Collection of Class objects (may be <code>null</code>)
-	 * @return a String of form "[com.foo.Bar, com.foo.Baz]"
-	 * @see java.util.AbstractCollection#toString()
-	 */
-	public static String classNamesToString(Collection classes) {
-		if (CollectionUtils.isEmpty(classes)) {
-			return "[]";
-		}
-		StringBuffer sb = new StringBuffer("[");
-		for (Iterator it = classes.iterator(); it.hasNext(); ) {
-			Class clazz = (Class) it.next();
-			sb.append(clazz.getName());
-			if (it.hasNext()) {
-				sb.append(", ");
-			}
-		}
-		sb.append("]");
-		return sb.toString();
 	}
 
 }

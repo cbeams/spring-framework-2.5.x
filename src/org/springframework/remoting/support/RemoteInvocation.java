@@ -19,11 +19,12 @@ package org.springframework.remoting.support;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.aopalliance.intercept.MethodInvocation;
+
+import org.springframework.util.ClassUtils;
 
 /**
  * Encapsulates a remote invocation, providing core method invocation properties
@@ -204,9 +205,10 @@ public class RemoteInvocation implements Serializable {
 		return method.invoke(targetObject, this.arguments);
 	}
 
+
 	public String toString() {
-		return getClass().getName() + ": methodName '" + this.methodName + "'; parameterTypes " +
-				Arrays.asList(this.parameterTypes);
+		return "RemoteInvocation: method name '" + this.methodName + "'; parameter types " +
+				ClassUtils.classNamesToString(this.parameterTypes);
 	}
 
 }
