@@ -56,15 +56,18 @@ public class EntityManagerClinic implements Clinic {
 	}
 
 	public void storeOwner(Owner owner) throws DataAccessException {
-		em.merge(owner);
+		// consider using merge with returning the persistent object here
+		em.persist(owner);
 	}
 
 	public void storePet(Pet pet) throws DataAccessException {
-		em.merge(pet);
+		// consider using merge with returning the persistent object here
+		em.persist(pet);
 	}
 
 	public void storeVisit(Visit visit) throws DataAccessException {
-		em.merge(visit);
+		// consider using merge with returning the persistent object here
+		em.persist(visit);
 	}
 
 }
