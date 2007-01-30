@@ -397,7 +397,6 @@ class GroovyMessenger implements Messenger {
 		            inline script feature crystal clear:
 		        </para>
 				<programlisting><![CDATA[<lang:groovy id="messenger">
-    <lang:property name="message" value="I Can Do The Frug" />
     <lang:inline-script>
 package org.springframework.scripting.groovy;
 
@@ -408,6 +407,7 @@ class GroovyMessenger implements Messenger {
     @Property String message;
 }
     </lang:inline-script>
+    <lang:property name="message" value="I Can Do The Frug" />
 </lang:groovy>]]></programlisting>
 				<para>
 					If we put to one side the issues surrounding whether it is good practice
