@@ -41,11 +41,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * {@link org.springframework.transaction.PlatformTransactionManager} implementation
  * for a single JDO {@link javax.jdo.PersistenceManagerFactory}. Binds a JDO
  * PersistenceManager from the specified factory to the thread, potentially allowing
- * for one threaded PersistenceManager per factory. {@link PersistenceManagerFactoryUtils}
- * and {@link JdoTemplate} are aware of thread-bound persistence managers and
- * participate in such transactions automatically. Using either of those (or going
- * through a {@link TransactionAwarePersistenceManagerFactoryProxy} is required for
- * JDO access code supporting this transaction management mechanism.
+ * for one thread-bound PersistenceManager per factory.
+ * {@link PersistenceManagerFactoryUtils} and {@link JdoTemplate} are aware of
+ * thread-bound persistence managers and participate in such transactions automatically.
+ * Using either of those (or going through a {@link TransactionAwarePersistenceManagerFactoryProxy}
+ * is required for JDO access code supporting this transaction management mechanism.
  *
  * <p>This transaction manager is appropriate for applications that use a single
  * JDO PersistenceManagerFactory for transactional data access. JTA (usually through
