@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,27 @@
 package org.springframework.jee;
 
 import junit.framework.TestCase;
+
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean;
 import org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean;
 import org.springframework.jndi.JndiObjectFactoryBean;
 
 /**
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public class JeeNamespaceHandlerTests extends TestCase {
 
-	private XmlBeanFactory beanFactory;
+	private ConfigurableListableBeanFactory beanFactory;
 
 	protected void setUp() throws Exception {
-		this.beanFactory = new XmlBeanFactory(new ClassPathResource("jeeNamespaceHandlerTests.xml", getClass()));
+		this.beanFactory =
+				new ClassPathXmlApplicationContext("jeeNamespaceHandlerTests.xml", getClass()).getBeanFactory();
 	}
 
 	public void testSimpleDefinition() throws Exception {
@@ -97,6 +100,8 @@ public class JeeNamespaceHandlerTests extends TestCase {
 	}
 
 	private void assertPropertyValue(RootBeanDefinition beanDefinition, String propertyName, Object expectedValue) {
-		assertEquals("Property [" + propertyName + "] incorrect.", expectedValue, beanDefinition.getPropertyValues().getPropertyValue(propertyName).getValue());
+		assertEquals("Property '" + propertyName + "' incorrect",
+				expectedValue, beanDefinition.getPropertyValues().getPropertyValue(propertyName).getValue());
 	}
+
 }
